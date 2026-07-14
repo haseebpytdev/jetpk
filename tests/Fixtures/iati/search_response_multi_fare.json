@@ -1,0 +1,120 @@
+{
+  "result": {
+    "departure_flights": [
+      {
+        "provider_key": "dep-multi",
+        "legs": [
+          {
+            "flight_number": "EK623",
+            "departure_info": {
+              "airport_code": "LHE",
+              "date": "2026-07-18T08:00:00",
+              "terminal": "T1"
+            },
+            "arrival_info": {
+              "airport_code": "DXB",
+              "date": "2026-07-18T11:30:00",
+              "terminal": "T3"
+            },
+            "airline_info": {
+              "carrier_code": "EK",
+              "carrier_name": "Emirates",
+              "operating_airline_code": "EK"
+            },
+            "duration": 210,
+            "aircraft_type": "77W",
+            "baggages": [{"amount": "30", "unit": "kg"}],
+            "cabin_baggages": [{"amount": "7", "unit": "kg"}]
+          }
+        ],
+        "fares": [
+          {
+            "fare_key": "dep-fare-saver",
+            "fare_info": {
+              "class_codes": ["Y"],
+              "fare_basis_codes": ["YLOWPK"],
+              "cabin_types": ["ECONOMY"],
+              "fare_detail": {
+                "currency_code": "USD",
+                "price_info": {
+                  "total_fare": 320.0,
+                  "base_fare": 250.0,
+                  "tax": 70.0
+                },
+                "pax_fares": [
+                  {
+                    "pax_type": "ADULT",
+                    "number_of_pax": 1,
+                    "price_info": {
+                      "total_fare": 320.0,
+                      "base_fare": 250.0,
+                      "tax": 70.0
+                    },
+                    "currency_code": "USD"
+                  }
+                ]
+              }
+            },
+            "change_rules": [
+              {
+                "type": "REFUND",
+                "before_departure_status": "NOT_PERMITTED"
+              },
+              {
+                "type": "CHANGE",
+                "before_departure_status": "CHARGEABLE"
+              }
+            ],
+            "default_offer": {
+              "brand_name": "Economy Saver",
+              "brand_code": "ECOSAVER"
+            }
+          },
+          {
+            "fare_key": "dep-fare-flex",
+            "fare_info": {
+              "class_codes": ["Y"],
+              "fare_basis_codes": ["YFLXPK"],
+              "cabin_types": ["ECONOMY"],
+              "fare_detail": {
+                "currency_code": "USD",
+                "price_info": {
+                  "total_fare": 410.0,
+                  "base_fare": 330.0,
+                  "tax": 80.0
+                },
+                "pax_fares": [
+                  {
+                    "pax_type": "ADULT",
+                    "number_of_pax": 1,
+                    "price_info": {
+                      "total_fare": 410.0,
+                      "base_fare": 330.0,
+                      "tax": 80.0
+                    },
+                    "currency_code": "USD"
+                  }
+                ]
+              }
+            },
+            "change_rules": [
+              {
+                "type": "REFUND",
+                "before_departure_status": "PERMITTED"
+              },
+              {
+                "type": "CHANGE",
+                "before_departure_status": "PERMITTED"
+              }
+            ],
+            "default_offer": {
+              "brand_name": "Economy Flex",
+              "brand_code": "ECOFLEX"
+            }
+          }
+        ]
+      }
+    ],
+    "return_flights": []
+  }
+}

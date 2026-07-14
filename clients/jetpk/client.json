@@ -1,0 +1,11 @@
+{
+    "client_name": "JetPakistan",
+    "client_slug": "jetpk",
+    "domain": "jetpakistan.com",
+    "environment": "production",
+    "active_theme": "jetpakistan",
+    "active_public_asset_profile": "jetpk-assets",
+    "default_locale": "en",
+    "timezone": "Asia/Karachi",
+    "currency": "PKR"
+}

@@ -1,0 +1,1619 @@
+/**
+ * OTA operational console compact polish (Admin + Staff).
+ * Scoped to .ota-admin-console / .ota-ops-console on dashboard layout body.
+ * Loaded when $isOpsConsole ($dashArea is admin or staff).
+ * Phases: ADB-POLISH-1/2/3 + OPS-DASH-POLISH-3-ADMIN-STAFF-SHARED
+ */
+
+.ota-admin-console {
+  --ota-admin-font-base: 12px;
+  --ota-admin-font-page-title: 1.25rem;
+  --ota-admin-font-section: 0.8125rem;
+  --ota-admin-color-text: #0f172a;
+  --ota-admin-color-muted: #64748b;
+  --ota-admin-color-border: #e2e8f0;
+  --ota-admin-space-card: 14px;
+  --ota-admin-row-height: 40px;
+  --ota-admin-btn-height: 33px;
+  --ota-admin-badge-height: 20px;
+  --ota-admin-icon-size: 17px;
+  --ota-admin-radius: 10px;
+}
+
+/* Base typography */
+.ota-admin-console {
+  font-size: var(--ota-admin-font-base);
+  line-height: 1.45;
+  color: var(--ota-admin-color-text);
+}
+
+.ota-admin-console .text-muted,
+.ota-admin-console small,
+.ota-admin-console .text-secondary {
+  color: var(--ota-admin-color-muted) !important;
+  font-size: 0.9167em;
+}
+
+.ota-admin-console h1,
+.ota-admin-console h2,
+.ota-admin-console h3,
+.ota-admin-console h4,
+.ota-admin-console .h1,
+.ota-admin-console .h2,
+.ota-admin-console .h3,
+.ota-admin-console .h4 {
+  color: var(--ota-admin-color-text);
+}
+
+/* Shell — page body & containers */
+.ota-admin-console .page-body > .container-xl {
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
+}
+
+.ota-admin-console .page-header {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.ota-admin-console .page-header .page-title,
+.ota-admin-console .ota-admin-page-head .page-title {
+  font-size: var(--ota-admin-font-page-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-bottom: 0.15rem;
+}
+
+.ota-admin-console .ota-dash-overview-head .page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.ota-admin-console .ota-dash-overview-subtitle {
+  font-size: var(--ota-admin-font-base);
+  color: var(--ota-admin-color-muted);
+}
+
+.ota-admin-console .ota-dash-section-title,
+.ota-admin-console .ota-monthly-overview-head {
+  font-size: var(--ota-admin-font-section);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* Topbar */
+.ota-admin-console .page-wrapper > header.navbar .container-xl {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.ota-admin-console .page-wrapper > header.navbar .nav-link.small {
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .page-wrapper > header.navbar .btn-sm {
+  min-height: var(--ota-admin-btn-height);
+}
+
+/* Ops onboarding banner */
+.ota-admin-console .ops-admin-banner {
+  padding-top: 0.45rem !important;
+  padding-bottom: 0.45rem !important;
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .ops-admin-banner .ti {
+  font-size: var(--ota-admin-icon-size);
+}
+
+/* Buttons */
+.ota-admin-console .page .btn {
+  font-size: var(--ota-admin-font-base);
+  min-height: var(--ota-admin-btn-height);
+  padding: 0.35rem 0.75rem;
+  line-height: 1.25;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.ota-admin-console .page .btn-sm {
+  min-height: 31px;
+  padding: 0.25rem 0.6rem;
+  font-size: 11px;
+}
+
+.ota-admin-console .page .btn .ti {
+  font-size: var(--ota-admin-icon-size);
+  line-height: 1;
+}
+
+/* Cards */
+.ota-admin-console .page .card {
+  border-color: var(--ota-admin-color-border);
+  border-radius: var(--ota-admin-radius);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.ota-admin-console .page .card-header {
+  padding: var(--ota-admin-space-card) calc(var(--ota-admin-space-card) + 2px);
+  border-bottom-color: var(--ota-admin-color-border);
+  background: #fff;
+}
+
+.ota-admin-console .page .card-body {
+  padding: var(--ota-admin-space-card) calc(var(--ota-admin-space-card) + 2px);
+}
+
+.ota-admin-console .page .card-title {
+  font-size: var(--ota-admin-font-section);
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.ota-admin-console .page .card-subtitle {
+  font-size: var(--ota-admin-font-base);
+  color: var(--ota-admin-color-muted);
+}
+
+.ota-admin-console .ota-admin-welcome-body {
+  padding: var(--ota-admin-space-card) calc(var(--ota-admin-space-card) + 4px) !important;
+}
+
+.ota-admin-console .ota-admin-welcome-title {
+  font-size: var(--ota-admin-font-section);
+}
+
+.ota-admin-console .ota-recent-card-head {
+  padding: var(--ota-admin-space-card) calc(var(--ota-admin-space-card) + 2px) !important;
+}
+
+.ota-admin-console .ota-recent-head-title {
+  font-size: var(--ota-admin-font-section);
+}
+
+.ota-admin-console .ota-recent-head-sub {
+  font-size: var(--ota-admin-font-base);
+}
+
+/* Tables */
+.ota-admin-console .page .table {
+  font-size: var(--ota-admin-font-base);
+  margin-bottom: 0;
+}
+
+.ota-admin-console .page .table > :not(caption) > * > * {
+  padding: 0.45rem 0.65rem;
+  vertical-align: middle;
+  border-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console .page .table tbody tr {
+  min-height: var(--ota-admin-row-height);
+}
+
+.ota-admin-console .page .ota-admin-table thead th {
+  font-size: 10px;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  letter-spacing: 0.05em;
+  color: var(--ota-admin-color-muted);
+  border-bottom-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console .page .table-responsive {
+  border-color: var(--ota-admin-color-border);
+}
+
+/* Badges & status chips */
+.ota-admin-console .page .badge {
+  font-size: 10px;
+  font-weight: 600;
+  min-height: var(--ota-admin-badge-height);
+  padding: 0.15rem 0.45rem;
+  line-height: 1.2;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ota-admin-console .ota-bstat,
+.ota-admin-console .ota-supplier-status {
+  min-height: var(--ota-admin-badge-height);
+  padding: 0.12rem 0.5rem;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 999px;
+  border-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console .ota-bstat--confirmed {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+.ota-admin-console .ota-bstat--pending {
+  background: #fefce8;
+  color: #854d0e;
+  border-color: #fde68a;
+}
+
+.ota-admin-console .ota-bstat--ticketed {
+  background: #ecfdf5;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.ota-admin-console .ota-bstat--cancelled {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.ota-admin-console .ota-bstat--muted,
+.ota-admin-console .ota-supplier-status--unknown,
+.ota-admin-console .ota-supplier-status--not-configured {
+  background: #f8fafc;
+  color: var(--ota-admin-color-muted);
+}
+
+.ota-admin-console .ota-supplier-status--pending {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.ota-admin-console .ota-supplier-status--live,
+.ota-admin-console .ota-supplier-status--connected {
+  background: #ecfdf5;
+  color: #14532d;
+  border-color: #bbf7d0;
+}
+
+.ota-admin-console .ota-supplier-status--configured {
+  background: #f0f9ff;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.ota-admin-console .ota-dash-status-badge {
+  min-height: var(--ota-admin-badge-height);
+  padding: 0.12rem 0.5rem;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+.ota-admin-console .ota-dash-notice__badge {
+  font-size: 10px;
+  padding: 0.15rem 0.5rem;
+  min-height: var(--ota-admin-badge-height);
+}
+
+/* Forms & filters */
+.ota-admin-console .page .form-control,
+.ota-admin-console .page .form-select {
+  font-size: var(--ota-admin-font-base);
+  min-height: 33px;
+  padding: 0.35rem 0.65rem;
+  border-color: var(--ota-admin-color-border);
+  border-radius: 8px;
+}
+
+.ota-admin-console .page .form-label {
+  font-size: var(--ota-admin-font-base);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: var(--ota-admin-color-text);
+}
+
+.ota-admin-console .page .form-text,
+.ota-admin-console .page .form-hint {
+  font-size: 11px;
+  color: var(--ota-admin-color-muted);
+}
+
+.ota-admin-console .page-header .row,
+.ota-admin-console .page .card-header .row {
+  row-gap: 0.5rem;
+}
+
+/* Icons */
+.ota-admin-console .page .ti {
+  font-size: var(--ota-admin-icon-size);
+  vertical-align: -0.125em;
+}
+
+.ota-admin-console .ota-sidebar-refined .nav-link .ti {
+  font-size: var(--ota-admin-icon-size);
+}
+
+/* KPI cards */
+.ota-admin-console .ota-kpi-card {
+  border-color: var(--ota-admin-color-border);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.ota-admin-console .ota-kpi-card .text-secondary {
+  font-size: 10px;
+}
+
+.ota-admin-console .ota-kpi-card .h2 {
+  font-size: 1.35rem;
+}
+
+/* Dashboard action cards — softer tones, same grid */
+.ota-admin-console .ota-dash-action-grid {
+  gap: 0.6rem;
+}
+
+.ota-admin-console .ota-dash-action-card {
+  padding: 0.75rem 0.8rem;
+  min-height: 8.5rem;
+  border-color: var(--ota-admin-color-border);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.ota-admin-console .ota-dash-action-card:hover {
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+.ota-admin-console .ota-dash-action-card--priority {
+  border-left-color: rgba(245, 158, 11, 0.65);
+}
+
+.ota-admin-console .ota-dash-action-card--hot {
+  border-color: rgba(253, 224, 71, 0.55);
+  border-left-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+}
+
+.ota-admin-console .ota-dash-action-card__icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.95rem;
+  border-radius: 8px;
+}
+
+.ota-admin-console .ota-dash-action-card--amber .ota-dash-action-card__icon { background: rgba(245, 158, 11, 0.1); color: #b45309; }
+.ota-admin-console .ota-dash-action-card--violet .ota-dash-action-card__icon { background: rgba(139, 92, 246, 0.1); color: #6d28d9; }
+.ota-admin-console .ota-dash-action-card--emerald .ota-dash-action-card__icon { background: rgba(16, 185, 129, 0.1); color: #047857; }
+.ota-admin-console .ota-dash-action-card--blue .ota-dash-action-card__icon { background: rgba(37, 99, 235, 0.1); color: #1d4ed8; }
+.ota-admin-console .ota-dash-action-card--rose .ota-dash-action-card__icon { background: rgba(244, 63, 94, 0.1); color: #be123c; }
+.ota-admin-console .ota-dash-action-card--teal .ota-dash-action-card__icon { background: rgba(20, 184, 166, 0.1); color: #0f766e; }
+.ota-admin-console .ota-dash-action-card--danger .ota-dash-action-card__icon { background: rgba(239, 68, 68, 0.1); color: #b91c1c; }
+.ota-admin-console .ota-dash-action-card--muted .ota-dash-action-card__icon { background: rgba(100, 116, 139, 0.1); color: #475569; }
+
+.ota-admin-console .ota-dash-action-card__count {
+  font-size: 1.25rem;
+}
+
+.ota-admin-console .ota-dash-action-card__label {
+  font-size: var(--ota-admin-font-section);
+}
+
+.ota-admin-console .ota-dash-action-card__helper {
+  font-size: 11px;
+  color: var(--ota-admin-color-muted);
+}
+
+.ota-admin-console .ota-dash-notice {
+  padding: 0.5rem 0.85rem;
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .ota-dash-panel .card-header {
+  padding: var(--ota-admin-space-card) calc(var(--ota-admin-space-card) + 2px);
+}
+
+/* Quick action cards */
+.ota-admin-console .ota-admin-quick .ota-quick-icon {
+  width: 2.15rem;
+  height: 2.15rem;
+  font-size: 1.05rem;
+}
+
+.ota-admin-console .ota-admin-quick a:hover .ota-quick-action-card {
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+/* Access control pages (admin-scoped) */
+.ota-admin-console .ota-access-header-card {
+  border-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console .ota-access-meta {
+  font-size: var(--ota-admin-font-base);
+  color: var(--ota-admin-color-muted);
+}
+
+/* ============================================================
+   Phase 2 — reusable compact primitives
+   ============================================================ */
+
+.ota-admin-console .ota-admin-page-header .page-pretitle {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ota-admin-color-muted);
+}
+
+.ota-admin-console .ota-admin-page-header .text-secondary {
+  font-size: var(--ota-admin-font-base);
+  margin-top: 0.15rem !important;
+}
+
+.ota-admin-console .ota-admin-section-title,
+.ota-admin-console .ota-admin-section-title.h3,
+.ota-admin-console .ota-admin-section-title.h4 {
+  font-size: var(--ota-admin-font-section);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ota-admin-color-text);
+  margin-bottom: 0.45rem;
+}
+
+.ota-admin-console .ota-admin-muted {
+  color: var(--ota-admin-color-muted);
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .ota-admin-filter-bar {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--ota-admin-color-border);
+}
+
+.ota-admin-console .ota-admin-filter-bar .form-label {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--ota-admin-color-muted);
+  margin-bottom: 0.25rem;
+}
+
+.ota-admin-console .ota-admin-filter-bar details > summary {
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .ota-admin-queue-tabs,
+.ota-admin-console .bookings-queue-tabs,
+.ota-admin-console .agents-queue-tabs,
+.ota-admin-console .users-type-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.ota-admin-console .ota-admin-queue-tab,
+.ota-admin-console .bookings-queue-tab,
+.ota-admin-console .agents-queue-tab,
+.ota-admin-console .users-type-tab {
+  border: 1px solid var(--ota-admin-color-border);
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  text-decoration: none;
+  background: #fff;
+  white-space: nowrap;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.ota-admin-console .ota-admin-queue-tab:hover,
+.ota-admin-console .bookings-queue-tab:hover,
+.ota-admin-console .agents-queue-tab:hover,
+.ota-admin-console .users-type-tab:hover {
+  background: #eef5ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.ota-admin-console .ota-admin-queue-tab.is-active,
+.ota-admin-console .bookings-queue-tab.is-active,
+.ota-admin-console .agents-queue-tab.is-active,
+.ota-admin-console .users-type-tab.is-active {
+  background: #e0edff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.ota-admin-console .ota-admin-table thead th,
+.ota-admin-console .ota-admin-table.table thead th {
+  font-size: 10px;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ota-admin-color-muted);
+  border-bottom-color: var(--ota-admin-color-border);
+  font-weight: 700;
+}
+
+.ota-admin-console .ota-admin-table tbody td,
+.ota-admin-console .ota-admin-table.table tbody td {
+  padding: 0.4rem 0.6rem;
+  vertical-align: middle;
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .ota-admin-table tbody tr {
+  min-height: var(--ota-admin-row-height);
+}
+
+.ota-admin-console .ota-admin-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.ota-admin-console .ota-admin-action-group .btn {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.ota-admin-console .ota-admin-kpi-card .card,
+.ota-admin-console .ota-admin-kpi-card.card {
+  border: 1px solid var(--ota-admin-color-border);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ota-admin-console .ota-admin-kpi-card .h2,
+.ota-admin-console .ota-admin-kpi-card .h4 {
+  font-size: 1.25rem;
+  margin-bottom: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ota-admin-console .bookings-kpi-link,
+.ota-admin-console .agents-kpi-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  height: 100%;
+}
+
+.ota-admin-console .bookings-kpi-link:hover .card,
+.ota-admin-console .agents-kpi-link:hover .card {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+}
+
+.ota-admin-console .bookings-kpi-link.is-active .card,
+.ota-admin-console .agents-kpi-link.is-active .card {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+  background: #f8fbff;
+}
+
+.ota-admin-console .ota-admin-detail-grid,
+.ota-admin-console .overview-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.75rem;
+}
+
+.ota-admin-console .ota-admin-compact-card,
+.ota-admin-console .preview-block {
+  border: 1px solid var(--ota-admin-color-border);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  margin-bottom: 0.45rem;
+  background: #fff;
+}
+
+.ota-admin-console .ota-admin-kv-row,
+.ota-admin-console .preview-kv,
+.ota-admin-console .overview-kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--ota-admin-font-base);
+  padding: 0.1rem 0;
+}
+
+.ota-admin-console .overview-kv {
+  border-bottom: 1px dashed var(--ota-admin-color-border);
+  padding-bottom: 0.18rem;
+}
+
+.ota-admin-console .overview-kv:last-child {
+  border-bottom: 0;
+}
+
+.ota-admin-console .overview-kv .label,
+.ota-admin-console .passenger-kv .label {
+  color: var(--ota-admin-color-muted);
+  font-weight: 600;
+}
+
+.ota-admin-console .overview-kv .value,
+.ota-admin-console .passenger-kv .value {
+  color: var(--ota-admin-color-text);
+  font-weight: 700;
+  text-align: right;
+}
+
+.ota-admin-console .preview-kv strong {
+  color: var(--ota-admin-color-text);
+}
+
+.ota-admin-console .ota-admin-status {
+  min-height: var(--ota-admin-badge-height);
+  padding: 0.12rem 0.5rem;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Soft badge palette (centralized) */
+.ota-admin-console .badge-soft-success {
+  background: #dcfce7;
+  color: #166534 !important;
+  border: 1px solid #bbf7d0;
+}
+
+.ota-admin-console .badge-soft-warning {
+  background: #fef3c7;
+  color: #92400e !important;
+  border: 1px solid #fde68a;
+}
+
+.ota-admin-console .badge-soft-danger {
+  background: #fee2e2;
+  color: #991b1b !important;
+  border: 1px solid #fecaca;
+}
+
+.ota-admin-console .badge-soft-neutral {
+  background: #e5e7eb;
+  color: #374151 !important;
+  border: 1px solid #d1d5db;
+}
+
+.ota-admin-console .badge-soft-info {
+  background: #dbeafe;
+  color: #1e40af !important;
+  border: 1px solid #bfdbfe;
+}
+
+.ota-admin-console .badge-soft-purple {
+  background: #ede9fe;
+  color: #5b21b6 !important;
+  border: 1px solid #ddd6fe;
+}
+
+.ota-admin-console .page .badge {
+  border: 1px solid transparent;
+}
+
+/* ============================================================
+   Phase 2 — Bookings list
+   ============================================================ */
+
+.ota-admin-console [data-bookings-page] {
+  max-width: 1540px;
+  margin: 0 auto;
+}
+
+.ota-admin-console .bookings-kpi .card {
+  border: 1px solid var(--ota-admin-color-border);
+}
+
+.ota-admin-console .bookings-kpi .h2 {
+  font-size: 1.25rem;
+}
+
+.ota-admin-console .bookings-filters {
+  padding: 0.75rem 0.85rem !important;
+}
+
+.ota-admin-console .bookings-table-wrap {
+  border-radius: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--ota-admin-color-border);
+}
+
+.ota-admin-console .bookings-cards {
+  padding: 0.55rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ota-admin-console .booking-queue-card {
+  border: 1px solid var(--ota-admin-color-border);
+  border-radius: var(--ota-admin-radius);
+  padding: 0.55rem 0.65rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  background: #fff;
+}
+
+.ota-admin-console .booking-queue-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+}
+
+.ota-admin-console .booking-queue-card.is-active {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+  background: #f8fbff;
+}
+
+.ota-admin-console .booking-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.15rem;
+}
+
+.ota-admin-console .booking-card-ref {
+  font-weight: 700;
+  color: var(--ota-admin-color-text);
+  text-decoration: none;
+}
+
+.ota-admin-console .bookings-empty-state {
+  border: 1px dashed var(--ota-admin-color-border);
+  border-radius: var(--ota-admin-radius);
+  text-align: center;
+  color: var(--ota-admin-color-muted);
+  background: #f8fafc;
+}
+
+.ota-admin-console .bookings-meta {
+  font-size: 11px;
+  color: var(--ota-admin-color-muted);
+  margin-top: 0.1rem;
+  line-height: 1.35;
+}
+
+.ota-admin-console .ota-admin-group-tile-card__meta {
+  margin-bottom: 0.5rem;
+}
+
+.ota-admin-console .booking-card-passenger {
+  font-size: var(--ota-admin-font-base);
+  font-weight: 600;
+}
+
+.ota-admin-console .booking-card-trip,
+.ota-admin-console .booking-card-meta,
+.ota-admin-console .booking-card-statusline {
+  font-size: 11px;
+}
+
+.ota-admin-console .booking-card-actions {
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.ota-admin-console .bookings-empty-state {
+  padding: 1rem 0.65rem;
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .bookings-preview {
+  position: sticky;
+  top: 16px;
+}
+
+.ota-admin-console .bookings-preview .card {
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
+}
+
+.ota-admin-console .bookings-preview h4,
+.ota-admin-console .bookings-preview .ota-admin-section-title {
+  font-size: var(--ota-admin-font-section);
+  margin-bottom: 0.45rem;
+}
+
+.ota-admin-console .preview-trip-line {
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .preview-actions {
+  gap: 0.35rem;
+}
+
+.ota-admin-console .fare-line {
+  font-size: var(--ota-admin-font-base);
+  padding: 0.25rem 0;
+}
+
+.ota-admin-console .fare-line:last-child {
+  font-size: var(--ota-admin-font-section);
+  padding-top: 0.35rem;
+}
+
+@media (max-width: 1024px) {
+  .ota-admin-console .bookings-preview {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .ota-admin-console .bookings-cards {
+    padding: 0.45rem;
+  }
+
+  .ota-admin-console .booking-card-actions .btn {
+    flex: 1 1 calc(50% - 0.25rem);
+    text-align: center;
+  }
+
+  .ota-admin-console .preview-actions .btn {
+    flex: 1 1 100%;
+  }
+}
+
+/* ============================================================
+   Phase 2 — Booking detail (admin overrides only; staff unchanged)
+   ============================================================ */
+
+.ota-admin-console .booking-detail .card {
+  border-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console .booking-detail h3 {
+  font-size: var(--ota-admin-font-section);
+}
+
+.ota-admin-console .booking-command-header {
+  box-shadow: 0 4px 16px rgba(30, 64, 175, 0.06);
+}
+
+.ota-admin-console .booking-command-ref {
+  font-size: var(--ota-admin-font-section);
+}
+
+.ota-admin-console .booking-command-pill {
+  font-size: 10px;
+  padding: 0.15rem 0.45rem;
+  min-height: var(--ota-admin-badge-height);
+}
+
+.ota-admin-console .booking-command-meta,
+.ota-admin-console .booking-command-amounts {
+  font-size: var(--ota-admin-font-base);
+  margin-top: 0.2rem;
+}
+
+.ota-admin-console .booking-quick-actions {
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.ota-admin-console .booking-quick-action {
+  padding: 0.4rem;
+}
+
+.ota-admin-console .booking-quick-action-reason {
+  font-size: 10px;
+  margin-top: 0.25rem;
+}
+
+.ota-admin-console .booking-tabs-wrap {
+  margin-bottom: 0.65rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.ota-admin-console .booking-tabs-wrap .nav-link {
+  font-size: 11px;
+  padding: 0.3rem 0.6rem;
+}
+
+.ota-admin-console .passenger-item {
+  padding: 0.55rem 0.65rem;
+  margin-bottom: 0.45rem;
+  border-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console .passenger-name {
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .passenger-kv {
+  font-size: 11px;
+}
+
+.ota-admin-console .timeline-entry {
+  padding-left: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.ota-admin-console .audit-row {
+  font-size: 11px;
+  padding: 0.25rem 0;
+}
+
+.ota-admin-console .lifecycle-track {
+  gap: 0.25rem;
+  margin-top: 0.45rem;
+}
+
+.ota-admin-console .lifecycle-step {
+  font-size: 10px;
+  padding: 0.2rem 0.15rem;
+}
+
+@media (max-width: 767px) {
+  .ota-admin-console .booking-detail .overview-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ota-admin-console .booking-detail .lifecycle-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ota-admin-console .booking-detail .passenger-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Phase 2 — Reports
+   ============================================================ */
+
+.ota-admin-console .reports-shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem 1.25rem !important;
+}
+
+.ota-admin-console .reports-toolbar {
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem !important;
+  box-shadow: 0 4px 16px rgba(15, 35, 65, 0.04);
+}
+
+.ota-admin-console .reports-toolbar-row {
+  padding: 0.35rem 0 !important;
+}
+
+.ota-admin-console .reports-toolbar-section-label {
+  font-size: 10px;
+  margin-bottom: 0.35rem;
+}
+
+.ota-admin-console .reports-presets {
+  gap: 0.4rem;
+}
+
+.ota-admin-console .reports-presets .btn {
+  font-size: 11px;
+  padding: 0.3rem 0.6rem;
+  min-height: var(--ota-admin-btn-height);
+}
+
+.ota-admin-console .reports-toolbar .form-control,
+.ota-admin-console .reports-toolbar .form-select {
+  min-height: 33px !important;
+  border-radius: 8px;
+}
+
+.ota-admin-console .reports-toolbar-actions .btn {
+  min-height: var(--ota-admin-btn-height) !important;
+  border-radius: 8px;
+}
+
+.ota-admin-console .ota-rep-tabs {
+  margin-bottom: 0.65rem;
+  gap: 4px;
+}
+
+.ota-admin-console .ota-rep-tabs .nav-link {
+  font-size: 11px;
+  padding: 0.4rem 0.65rem !important;
+  border-radius: 8px 8px 0 0;
+}
+
+.ota-admin-console .ota-rep-card,
+.ota-admin-console .reports-chart-card,
+.ota-admin-console .reports-table-card {
+  border-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console .ota-rep-card .card-header,
+.ota-admin-console .reports-chart-card .card-header,
+.ota-admin-console .reports-table-card .card-header {
+  padding: var(--ota-admin-space-card) calc(var(--ota-admin-space-card) + 2px);
+}
+
+.ota-admin-console .ota-rep-card .card-body,
+.ota-admin-console .reports-chart-card .card-body,
+.ota-admin-console .reports-table-card .card-body {
+  padding: var(--ota-admin-space-card);
+}
+
+.ota-admin-console .reports-kpi-grid .h2,
+.ota-admin-console .reports-kpi-grid .h3 {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .ota-admin-console .reports-shell {
+    padding: 0.65rem 0.75rem 1rem !important;
+  }
+}
+
+/* ============================================================
+   Phase 2 — Agents page
+   ============================================================ */
+
+.ota-admin-console [data-agents-page] {
+  max-width: 1540px;
+  margin: 0 auto;
+}
+
+.ota-admin-console .agents-kpi .card-body {
+  padding: 0.65rem 0.75rem !important;
+}
+
+.ota-admin-console .agents-kpi .h2 {
+  font-size: 1.25rem;
+}
+
+.ota-admin-console .agents-filters {
+  padding: 0.75rem 0.85rem !important;
+}
+
+/* ============================================================
+   Phase 2 — Group ticketing
+   ============================================================ */
+
+.ota-admin-console .ota-admin-group-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.ota-admin-console .ota-admin-group-tile-card {
+  border: 1px solid var(--ota-admin-color-border);
+  border-radius: var(--ota-admin-radius);
+  overflow: hidden;
+  background: var(--tblr-card-bg, #fff);
+}
+
+.ota-admin-console .ota-admin-group-tile-card.is-hidden {
+  opacity: 0.65;
+}
+
+.ota-admin-console .ota-admin-group-tile-card__preview {
+  aspect-ratio: 6 / 5;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ota-admin-console .ota-admin-group-tile-card__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ota-admin-console .ota-admin-group-tile-card__placeholder {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.5rem;
+}
+
+.ota-admin-console .ota-admin-group-tile-card__body {
+  padding: 0.65rem 0.75rem;
+}
+
+.ota-admin-console .ota-admin-group-tile-card__title {
+  font-size: var(--ota-admin-font-section);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.ota-admin-console .ota-admin-group-tile-card__meta {
+  font-size: 11px;
+  color: var(--ota-admin-color-muted);
+}
+
+/* ============================================================
+   Phase 2 — Supplier diagnostics & API settings
+   ============================================================ */
+
+.ota-admin-console .ota-diag-toolbar {
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.ota-admin-console .ota-diag-card {
+  border-color: var(--ota-admin-color-border);
+  border-radius: var(--ota-admin-radius);
+}
+
+.ota-admin-console .ota-diag-table thead th {
+  padding: 0.45rem 0.6rem !important;
+  font-size: 10px;
+}
+
+.ota-admin-console .ota-diag-table tbody td {
+  padding: 0.45rem 0.6rem !important;
+  font-size: var(--ota-admin-font-base);
+}
+
+.ota-admin-console .ota-diag-chip {
+  font-size: 10px;
+  padding: 0.12rem 0.4rem;
+  min-height: var(--ota-admin-badge-height);
+}
+
+.ota-admin-console .ota-supplier-connection-card .card-body {
+  padding: var(--ota-admin-space-card);
+}
+
+.ota-admin-console .ota-supplier-connection-card .small {
+  font-size: 11px;
+}
+
+.ota-admin-console .ota-supplier-connection-card--inactive .card-body {
+  opacity: 0.88;
+}
+
+.ota-admin-console .ota-supplier-enable-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.5rem;
+}
+
+.ota-admin-console .ota-supplier-enable-switch .form-check-input {
+  margin-top: 0;
+  cursor: pointer;
+}
+
+.ota-admin-console .ota-supplier-enable-switch .form-check-label {
+  color: var(--tblr-secondary, #62748e);
+  font-weight: 600;
+}
+
+.ota-admin-console .ota-supplier-enable-form {
+  margin: 0;
+}
+
+.ota-admin-console .ota-report-section-title {
+  font-size: var(--ota-admin-font-section) !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.ota-admin-console .ota-page-content-wide .alert {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--ota-admin-font-base);
+  margin-bottom: 0.65rem;
+}
+
+/* ============================================================
+   Phase 3 — OTA-ADMIN-ADB-POLISH-3-VISUAL-QA-AND-MICRO-FIXES
+   ============================================================ */
+
+/* Rem-based muted copy from dashboard layout (html 16px root) */
+.ota-admin-console .text-muted,
+.ota-admin-console .text-secondary,
+.ota-admin-console small,
+.ota-admin-console .small {
+  font-size: 11px !important;
+  color: var(--ota-admin-color-muted) !important;
+  line-height: 1.4;
+}
+
+.ota-admin-console .card-subtitle,
+.ota-admin-console .form-text,
+.ota-admin-console .form-hint {
+  font-size: 11px !important;
+  color: var(--ota-admin-color-muted) !important;
+}
+
+/* Tabler headline drift (.h5 page headers, KPI numerals) */
+.ota-admin-console .h5,
+.ota-admin-console h3.h5,
+.ota-admin-console .ota-recent-head-title {
+  font-size: var(--ota-admin-font-section) !important;
+  font-weight: 600 !important;
+  line-height: 1.35;
+}
+
+.ota-admin-console .page-title,
+.ota-admin-console .page-header .page-title {
+  font-size: var(--ota-admin-font-page-title) !important;
+  line-height: 1.3;
+}
+
+.ota-admin-console .page .h2:not(.ota-kpi-card .h2) {
+  font-size: 1.25rem;
+}
+
+/* Tabler badge normalization (bg-*-lt families) */
+.ota-admin-console .page .badge,
+.ota-admin-console .page .badge[class*="bg-"] {
+  font-size: 10px;
+  font-weight: 600;
+  min-height: var(--ota-admin-badge-height);
+  padding: 0.12rem 0.45rem;
+  line-height: 1.2;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  border: 1px solid transparent;
+}
+
+.ota-admin-console .badge.bg-azure-lt,
+.ota-admin-console .badge.bg-blue-lt,
+.ota-admin-console .badge.bg-info-lt {
+  background: #dbeafe !important;
+  color: #1e40af !important;
+  border-color: #bfdbfe !important;
+}
+
+.ota-admin-console .badge.bg-green-lt,
+.ota-admin-console .badge.bg-success-lt,
+.ota-admin-console .badge.bg-teal-lt {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border-color: #bbf7d0 !important;
+}
+
+.ota-admin-console .badge.bg-yellow-lt,
+.ota-admin-console .badge.bg-warning-lt,
+.ota-admin-console .badge.bg-orange-lt {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+
+.ota-admin-console .badge.bg-red-lt,
+.ota-admin-console .badge.bg-danger-lt {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
+}
+
+.ota-admin-console .badge.bg-purple-lt,
+.ota-admin-console .badge.bg-violet-lt {
+  background: #ede9fe !important;
+  color: #5b21b6 !important;
+  border-color: #ddd6fe !important;
+}
+
+.ota-admin-console .badge.bg-secondary-lt,
+.ota-admin-console .badge.bg-secondary {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.ota-admin-console .badge.bg-azure:not(.bg-azure-lt),
+.ota-admin-console .badge.bg-blue:not(.bg-blue-lt) {
+  background: #dbeafe !important;
+  color: #1e40af !important;
+  border-color: #bfdbfe !important;
+}
+
+/* Booking detail pipeline chips */
+.ota-admin-console .booking-pipeline-jump {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  min-height: var(--ota-admin-badge-height) !important;
+  padding: 0.12rem 0.45rem !important;
+  line-height: 1.2 !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Compact empty states inside admin tables (support, reports, lists) */
+.ota-admin-console table .ota-empty-state,
+.ota-admin-console .ota-admin-table .ota-empty-state {
+  padding: 0.85rem 0.75rem 0.75rem;
+  gap: 0.25rem;
+}
+
+.ota-admin-console table .ota-empty-state-icon,
+.ota-admin-console .ota-admin-table .ota-empty-state-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1.05rem;
+  border-radius: 10px;
+  margin-bottom: 0.15rem;
+}
+
+.ota-admin-console table .ota-empty-state-title,
+.ota-admin-console .ota-admin-table .ota-empty-state-title {
+  font-size: var(--ota-admin-font-base);
+  font-weight: 600;
+}
+
+.ota-admin-console table .ota-empty-state-help,
+.ota-admin-console .ota-admin-table .ota-empty-state-help {
+  font-size: 11px;
+  max-width: 28rem;
+}
+
+/* Support tickets — subject column density */
+.ota-admin-console .admin-support-tickets-table tbody td:nth-child(2) {
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ota-admin-console .admin-support-tickets-table tbody td {
+  line-height: 1.35;
+}
+
+.ota-admin-console .admin-support-tickets-table .ota-bstat {
+  vertical-align: middle;
+}
+
+/* Reports tables — override page inline padding for compact rows */
+.ota-admin-console .ota-rep-table thead th {
+  padding: 0.35rem 0.6rem !important;
+  font-size: 10px !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ota-admin-color-muted) !important;
+  border-bottom-color: var(--ota-admin-color-border) !important;
+  white-space: nowrap;
+}
+
+.ota-admin-console .ota-rep-table tbody td {
+  padding: 0.4rem 0.6rem !important;
+  font-size: var(--ota-admin-font-base) !important;
+  line-height: 1.35;
+  vertical-align: middle;
+  border-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console .ota-rep-table tbody tr {
+  min-height: var(--ota-admin-row-height);
+}
+
+/* Softer primary/danger buttons (less aggressive Tabler defaults) */
+.ota-admin-console .page .btn-primary {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.ota-admin-console .page .btn-primary:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.ota-admin-console .page .btn-outline-danger {
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.ota-admin-console .page .btn-outline-danger:hover {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.ota-admin-console .page .btn-success {
+  background: #059669;
+  border-color: #059669;
+}
+
+/* Admin-wide responsive polish */
+@media (max-width: 1024px) {
+  .ota-admin-console .page .table-responsive,
+  .ota-admin-console .bookings-table-wrap,
+  .ota-admin-console .ota-r-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .ota-admin-console .page-header .row,
+  .ota-admin-console .page .card-header .row,
+  .ota-admin-console .ota-admin-action-group,
+  .ota-admin-console .reports-toolbar-actions,
+  .ota-admin-console .preview-actions,
+  .ota-admin-console .booking-quick-actions {
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+  }
+
+  .ota-admin-console .ota-admin-detail-grid,
+  .ota-admin-console .overview-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1366px) {
+  .ota-admin-console .bookings-preview {
+    position: static;
+  }
+
+  .ota-admin-console .ota-admin-group-tiles-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+/* ============================================================
+   Phase 4 — OPS-DASH-POLISH-3 shared Admin/Staff operational console
+   ============================================================ */
+
+/* Alias: staff shares the same body classes; ota-ops-console marks operational shell */
+.ota-ops-console {
+  /* Token host — rules live under .ota-admin-console selectors */
+}
+
+/* Staff support tickets — parity with admin-support-tickets-table */
+.ota-admin-console .staff-support-tickets-table tbody td:nth-child(2) {
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ota-admin-console .staff-support-tickets-table tbody td {
+  line-height: 1.35;
+}
+
+.ota-admin-console .staff-support-tickets-table .ota-bstat {
+  vertical-align: middle;
+}
+
+/* Staff bookings queue chips — align with admin queue tab density */
+.ota-admin-console [data-testid="staff-bookings-queues"] .btn-sm {
+  min-height: var(--ota-admin-btn-height);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+
+.ota-admin-console [data-testid="staff-bookings-queues"] .btn-outline-secondary {
+  border-color: var(--ota-admin-color-border);
+  color: #475569;
+}
+
+.ota-admin-console [data-testid="staff-bookings-queues"] .btn-outline-secondary:hover {
+  background: #eef5ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* Staff dashboard KPI row uses shared kpi-stat component */
+.ota-admin-console [data-testid="staff-dashboard-kpis"] .card {
+  border-color: var(--ota-admin-color-border);
+}
+
+.ota-admin-console [data-testid="staff-dashboard-kpis"] .h2,
+.ota-admin-console [data-testid="staff-dashboard-kpis"] .h4 {
+  font-size: 1.25rem;
+}
+
+/* Booking detail — compact single-column layout (OTA-ADMIN-UX-FUNCTIONAL-1) */
+.ota-admin-console .ota-booking-detail {
+  max-width: 100%;
+}
+
+.ota-admin-console .ota-booking-detail .overview-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.9rem;
+}
+
+.ota-admin-console .ota-booking-detail .overview-kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.86rem;
+  border-bottom: 1px dashed var(--ota-admin-color-border);
+  padding-bottom: 0.22rem;
+  align-items: flex-start;
+}
+
+.ota-admin-console .ota-booking-detail .overview-kv .label {
+  color: var(--ota-admin-color-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.ota-admin-console .ota-booking-detail .overview-kv .value {
+  color: var(--ota-admin-color-text);
+  font-weight: 600;
+  text-align: right;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.ota-admin-console .booking-tabs-wrap {
+  margin-bottom: 0.75rem;
+}
+
+.ota-admin-console .booking-tabs-wrap .nav-link {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  min-height: var(--ota-admin-btn-height);
+}
+
+.ota-admin-console .ota-booking-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  align-items: stretch;
+}
+
+.ota-admin-console .ota-booking-action-row .booking-quick-action {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.ota-admin-console .ota-assign-staff-inline .input-group {
+  width: 100%;
+}
+
+.ota-admin-console .ota-admin-advanced-collapse {
+  border: 1px solid var(--ota-admin-color-border);
+  border-radius: var(--ota-admin-radius);
+  padding: 0.65rem 0.85rem;
+  background: #f8fafc;
+}
+
+.ota-admin-console .ota-admin-advanced-collapse__summary {
+  cursor: pointer;
+  font-size: var(--ota-admin-font-section);
+  font-weight: 600;
+  color: var(--ota-admin-color-text);
+  list-style: none;
+}
+
+.ota-admin-console .ota-admin-advanced-collapse__summary::-webkit-details-marker {
+  display: none;
+}
+
+.ota-admin-console .ota-admin-advanced-collapse__body {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--ota-admin-color-border);
+}
+
+.ota-admin-console #supplier-pnr-panel .btn {
+  min-height: var(--ota-admin-btn-height);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 767px) {
+  .ota-admin-console .ota-booking-detail .overview-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ota-admin-console .ota-booking-action-row {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,141 @@
+﻿# Environment and secrets
+.env
+.env.*
+!.env.example
+auth.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa
+id_rsa.pub
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Laravel runtime and generated content
+/storage/*.key
+/storage/app/private/
+/storage/app/audits/
+/storage/app/email-previews/
+/storage/app/staging/
+/storage/app/testing/
+/storage/app/public/*
+!/storage/app/public/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+!/storage/framework/cache/data/
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/framework/testing/
+/storage/logs/*
+!/storage/logs/.gitignore
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# Runtime public storage
+/public/storage
+
+# Local databases and exports
+*.sqlite
+*.sqlite3
+database.sqlite
+*.sql
+*.dump
+*.bak
+*.backup
+
+# Generated documents and customer files
+invoice-*.pdf
+payment_receipt-*.pdf
+refund_note-*.pdf
+booking_confirmation-*.pdf
+cancellation_confirmation-*.pdf
+ticket_itinerary-*.pdf
+test-*.pdf
+
+# Generated testing output
+.phpunit.result.cache
+/.phpunit.cache/
+/playwright-report/
+/test-results/
+/coverage/
+junit.xml
+phpunit-latest.xml
+support-junit.xml
+
+# Editor and machine files
+.idea/
+.vscode/
+.cursor/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary and archive files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.orig
+*.rej
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# Deployment and backup material
+deploy/
+deployment/
+backups/
+
+# Full third-party source/reference repositories
+/templates-source/
+
+# Generated Playwright evidence
+/tests/playwright/artifacts/
+/tests/playwright/**/html-report/
+/tests/playwright/**/screenshots/
+/tests/playwright/**/traces/
+/tests/playwright/**/videos/
+
+# Historical deployment and sprint evidence
+/storage/app/deployment/
+/storage/app/ota-sprint-*/
+/storage/app/local-before-live-sync-*/
+/storage/app/sabre-createbooking-style-compare-*.json
+/storage/app/test-output.txt
+
+/OTA-Project-Summary.md
+
+# Generated Playwright evidence
+/tests/playwright/artifacts/
+/tests/playwright/**/html-report/
+/tests/playwright/**/screenshots/
+/tests/playwright/**/traces/
+/tests/playwright/**/videos/
+
+# Historical deployment and sprint evidence
+/storage/app/deployment/
+/storage/app/ota-sprint-*/
+/storage/app/local-before-live-sync-*/
+/storage/app/sabre-createbooking-style-compare-*.json
+/storage/app/test-output.txt
+
+# Obsolete local project summary
+/OTA-Project-Summary.md
+
+# Extracted theme and temporary supplier reference copies
+/storage/app/jetpk-theme-extract/
+/docs/providers/*-temp/
+
+# Generated application diagnostics and previews
+/storage/app/diagnostics/
+/storage/app/playwright/
+/storage/app/previews/

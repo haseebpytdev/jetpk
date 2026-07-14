@@ -1,0 +1,4 @@
+Name,IATA,ICAO,Callsign,Country,Active
+Emirates,ek,UAE,EMIRATES,United Arab Emirates,Y
+British Airways,BA,BAW,SPEEDBIRD,United Kingdom,Y
+Inactive Carrier,ic,ICC,INACTIVE,Narnia,N

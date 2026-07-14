@@ -1,0 +1,38 @@
+{
+  "segments": [
+    {
+      "origin": "LHE",
+      "destination": "DXB",
+      "departure_date": "2026-08-01",
+      "departure_time": "02:30",
+      "arrival_date": "2026-08-01",
+      "arrival_time": "05:00",
+      "marketing_carrier": "EK",
+      "operating_carrier": "EK",
+      "flight_number": "623",
+      "booking_class": "Y",
+      "rph": "1"
+    },
+    {
+      "origin": "DXB",
+      "destination": "IST",
+      "departure_date": "2026-08-10",
+      "departure_time": "08:15",
+      "arrival_date": "2026-08-10",
+      "arrival_time": "12:30",
+      "marketing_carrier": "TK",
+      "operating_carrier": "TK",
+      "flight_number": "761",
+      "booking_class": "Y",
+      "rph": "2"
+    }
+  ],
+  "passengers": {
+    "adults": 1,
+    "children": 0,
+    "infants": 0
+  },
+  "currency": "USD",
+  "total_fare": 450.0,
+  "trip_type": "multi_city"
+}

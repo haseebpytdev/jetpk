@@ -1,0 +1,79 @@
+{
+  "result": {
+    "departure_flights": [
+      {
+        "provider_key": "dep-branded-bag",
+        "legs": [
+          {
+            "flight_number": "FZ327",
+            "departure_info": {
+              "airport_code": "LHE",
+              "date": "2026-07-31T08:00:00"
+            },
+            "arrival_info": {
+              "airport_code": "DXB",
+              "date": "2026-07-31T11:30:00"
+            },
+            "airline_info": {
+              "carrier_code": "FZ",
+              "carrier_name": "Flynas"
+            },
+            "duration": 210,
+            "baggages": [
+              {"amount": "0", "unit": "KILO"},
+              {"amount": "20", "unit": "KILO"},
+              {"amount": "30", "unit": "KILO"}
+            ],
+            "cabin_baggages": [
+              {"amount": "1", "unit": "PIECE"},
+              {"amount": "1", "unit": "PIECE"},
+              {"amount": "1", "unit": "PIECE"}
+            ]
+          }
+        ],
+        "fares": [
+          {
+            "fare_key": "dep-fare-1",
+            "fare_info": {
+              "class_codes": ["Y"],
+              "fare_basis_codes": ["YLOW1"],
+              "cabin_types": ["ECONOMY"],
+              "fare_detail": {
+                "currency_code": "PKR",
+                "price_info": {"total_fare": 80294.0, "base_fare": 70000.0, "tax": 10294.0}
+              }
+            },
+            "default_offer": {"brand_name": "Basic", "brand_code": "BASIC"}
+          },
+          {
+            "fare_key": "dep-fare-2",
+            "fare_info": {
+              "class_codes": ["Y"],
+              "fare_basis_codes": ["YLOW2"],
+              "cabin_types": ["ECONOMY"],
+              "fare_detail": {
+                "currency_code": "PKR",
+                "price_info": {"total_fare": 85158.0, "base_fare": 74000.0, "tax": 11158.0}
+              }
+            },
+            "default_offer": {"brand_name": "Standard", "brand_code": "STD"}
+          },
+          {
+            "fare_key": "dep-fare-3",
+            "fare_info": {
+              "class_codes": ["Y"],
+              "fare_basis_codes": ["YLOW3"],
+              "cabin_types": ["ECONOMY"],
+              "fare_detail": {
+                "currency_code": "PKR",
+                "price_info": {"total_fare": 90098.0, "base_fare": 78000.0, "tax": 12098.0}
+              }
+            },
+            "default_offer": {"brand_name": "Flex", "brand_code": "FLEX"}
+          }
+        ]
+      }
+    ],
+    "return_flights": []
+  }
+}

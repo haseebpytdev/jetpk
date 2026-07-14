@@ -1,0 +1,11 @@
+{
+    "client_name": "REPLACE_CLIENT_NAME",
+    "client_slug": "replace-client-slug",
+    "domain": "replace.example.com",
+    "environment": "production",
+    "active_theme": "v1-classic",
+    "active_public_asset_profile": "replace-client-slug",
+    "default_locale": "en",
+    "timezone": "Asia/Karachi",
+    "currency": "PKR"
+}

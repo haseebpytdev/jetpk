@@ -1,0 +1,11 @@
+{
+    "client_name": "Demo Travel Agency",
+    "client_slug": "client-demo",
+    "domain": "demo.example.com",
+    "environment": "staging",
+    "active_theme": "v1-classic",
+    "active_public_asset_profile": "client-demo",
+    "default_locale": "en",
+    "timezone": "Asia/Karachi",
+    "currency": "PKR"
+}

@@ -1,0 +1,391 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Console\Commands\SabreControlledPnrFinalReadinessCommand;
+use App\Enums\BookingStatus;
+use App\Models\Booking;
+use App\Support\Bookings\SabreCertifiedRouteSelector;
+use App\Support\Bookings\SabreControlledFinalPnrRetryAllowanceGate;
+use App\Support\Bookings\SabreControlledFreshPnrContextApply;
+use App\Support\Bookings\SabreControlledPnrRetryAfterAirpriceVcFixAllowanceGate;
+use App\Support\Bookings\SabreControlledPnrRetryAfterAirpriceVcSchemaFixAllowanceGate;
+use App\Support\Bookings\SabreControlledPnrRetryAllowanceGate;
+use App\Support\Bookings\SabreControlledStrongRevalidationLinkageApply;
+use App\Support\Sabre\SabrePassengerRecordsApplicationResultDigest;
+use Database\Seeders\OtaFoundationSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
+use Tests\Support\Bookings\ControlledPnrContextTestFixtures;
+use Tests\TestCase;
+
+class SabreControlledPnrFinalReadinessCommandTest extends TestCase
+{
+    use ControlledPnrContextTestFixtures;
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(OtaFoundationSeeder::class);
+        config([
+            'app.env' => 'testing',
+            'ota.controlled_final_pnr_freshness.max_minutes' => 15,
+            'suppliers.sabre.booking_enabled' => true,
+            'suppliers.sabre.cpnr_connecting_same_carrier_gds_enabled' => true,
+            'suppliers.sabre.ticketing_enabled' => false,
+            'suppliers.sabre.public_auto_pnr_enabled' => false,
+            'suppliers.sabre.verified_multiseg_auto_pnr_enabled' => false,
+            'suppliers.sabre.cancel_enabled' => false,
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function bfmStrongCandidateSnapshot(): array
+    {
+        return [
+            'supplier_provider' => 'sabre',
+            'supplier_offer_id' => 'offer-f9p-qr-bfm',
+            'validating_carrier' => 'QR',
+            'brand_code' => 'ECONVENIEN',
+            'fare_family_code' => 'ECONVENIEN',
+            'origin' => 'LHE',
+            'destination' => 'JED',
+            'fare_breakdown' => [
+                'supplier_total' => 88415.63,
+                'currency' => 'USD',
+                'passenger_counts' => ['adults' => 1],
+            ],
+            'segments' => [
+                [
+                    'origin' => 'LHE',
+                    'destination' => 'DOH',
+                    'departure_at' => '2026-07-23T03:10:00',
+                    'arrival_at' => '2026-07-23T06:40:00',
+                    'carrier' => 'QR',
+                    'flight_number' => '621',
+                    'booking_class' => 'O',
+                    'fare_basis_code' => 'OJPKP1RI',
+                ],
+                [
+                    'origin' => 'DOH',
+                    'destination' => 'JED',
+                    'departure_at' => '2026-07-23T07:40:00',
+                    'arrival_at' => '2026-07-23T10:10:00',
+                    'carrier' => 'QR',
+                    'flight_number' => '1190',
+                    'booking_class' => 'O',
+                    'fare_basis_code' => 'OJPKP1RI',
+                ],
+            ],
+            'raw_payload' => [
+                'sabre_shop_context' => [
+                    'distribution_channel' => 'GDS',
+                    'shop_endpoint_path' => '/v4/offers/shop',
+                    'itinerary_ref' => '2',
+                    'pricing_information_index' => 0,
+                    'validating_carrier' => 'QR',
+                    'fare_basis_codes' => ['OJPKP1RI', 'OJPKP1RI'],
+                    'booking_classes_by_segment' => ['O', 'O'],
+                    'fare_component_refs' => [7, 8],
+                    'leg_refs' => [7, 8],
+                    'schedule_refs' => [7, 8],
+                ],
+                'sabre_shop_identifiers' => [
+                    'itinerary_id' => '2',
+                    'pricing_information_index' => 0,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $metaOverrides
+     */
+    protected function postF9oBooking(array $metaOverrides = [], int $minutesAgo = 20): Booking
+    {
+        $snapshot = $this->bfmStrongCandidateSnapshot();
+        $revalidatedAt = now()->subMinutes($minutesAgo)->toIso8601String();
+
+        $digest = [
+            'status' => 'incomplete_no_locator',
+            'application_status' => 'Incomplete',
+            'has_record_locator' => false,
+            'error_count' => 1,
+            'warning_count' => 1,
+            'errors' => [
+                ['type' => 'error', 'code' => 'ERR.SP.PROVIDER_ERROR', 'message' => 'Unable to perform air booking step'],
+            ],
+            'warnings' => [
+                ['type' => 'warning', 'code' => 'WARN.SWS.HOST.ERROR_IN_RESPONSE', 'message' => 'EnhancedAirBookRQ: *NO FARES/RBD/CARRIER'],
+            ],
+            'messages' => [],
+            'source' => 'passenger_records_create',
+            'recorded_at' => now()->toIso8601String(),
+        ];
+
+        return $this->booking53Style(array_merge([
+            'search_criteria' => [
+                'trip_type' => 'one_way',
+                'origin' => 'LHE',
+                'destination' => 'JED',
+                'depart_date' => '2026-07-23',
+                'adults' => 1,
+            ],
+            'normalized_offer_snapshot' => $snapshot,
+            'validated_offer_snapshot' => $snapshot,
+            'flight_offer_snapshot' => $snapshot,
+            'revalidation_status' => 'success',
+            'last_revalidated_at' => $revalidatedAt,
+            'selected_offer_created_at' => $revalidatedAt,
+            'offer_refresh_status' => 'refreshed',
+            'sabre_booking_context' => [
+                'ready_for_booking_payload' => true,
+                'has_revalidation_linkage' => true,
+                'strong_bfm_revalidation_linkage_applied' => true,
+                'validating_carrier' => 'QR',
+                'brand_code' => 'ECONVENIEN',
+            ],
+            'certified_route_selection' => [
+                'category' => SabreCertifiedRouteSelector::CATEGORY_ONE_WAY_CONNECTING_SAME_CARRIER_GDS,
+                'route_status' => SabreCertifiedRouteSelector::STATUS_CONTROLLED_CERTIFIED,
+                'endpoint_path' => SabreCertifiedRouteSelector::ENDPOINT_PASSENGER_RECORDS_V24_CREATE,
+                'payload_style' => 'iati_like_cpnr_v2_4_gds',
+            ],
+            SabrePassengerRecordsApplicationResultDigest::META_DIGEST_KEY => $digest,
+            SabreControlledFreshPnrContextApply::META_KEY => [
+                'applied' => true,
+                'applied_at' => $revalidatedAt,
+                'applied_by' => 'controlled_command',
+            ],
+            SabreControlledStrongRevalidationLinkageApply::META_KEY => [
+                'applied' => true,
+                'applied_at' => $revalidatedAt,
+                'applied_by' => 'controlled_command',
+                'segment_count_match' => true,
+                'rbd_match' => true,
+                'fare_basis_match' => true,
+                'brand_match' => true,
+                'validating_carrier_match' => true,
+            ],
+            SabreControlledPnrRetryAllowanceGate::META_KEY => ['used' => true],
+            SabreControlledPnrRetryAfterAirpriceVcFixAllowanceGate::META_KEY => ['used' => true],
+            SabreControlledPnrRetryAfterAirpriceVcSchemaFixAllowanceGate::META_KEY => ['used' => true],
+        ], $this->approvalMetaForBooking(), $metaOverrides));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function decodeJsonOutput(): array
+    {
+        $decoded = json_decode(trim(Artisan::output()), true);
+        $this->assertIsArray($decoded);
+
+        return $decoded;
+    }
+
+    public function test_production_requires_exact_readonly_confirm(): void
+    {
+        config(['app.env' => 'production']);
+        $booking = $this->postF9oBooking();
+
+        $exit = Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+        ]);
+
+        $this->assertSame(1, $exit);
+        $this->assertStringContainsString(
+            SabreControlledPnrFinalReadinessCommand::PRODUCTION_READONLY_CONFIRM_PHRASE,
+            Artisan::output()
+        );
+    }
+
+    public function test_reports_strong_linkage_ready_after_f9o_marker(): void
+    {
+        $booking = $this->postF9oBooking([], 20);
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertTrue($decoded['controlled_fresh_context_apply_present']);
+        $this->assertTrue($decoded['controlled_strong_revalidation_linkage_apply_present']);
+        $this->assertTrue($decoded['strong_revalidation_linkage_ready']);
+        $this->assertFalse($decoded['weak_revalidation_risk']);
+        $this->assertFalse($decoded['pnr_create_attempted']);
+        $this->assertFalse($decoded['live_supplier_call_attempted']);
+    }
+
+    public function test_blocks_when_freshness_older_than_threshold(): void
+    {
+        $booking = $this->postF9oBooking([], 20);
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertFalse($decoded['final_freshness_ready']);
+        $this->assertContains('final_refresh_required', $decoded['final_freshness_blockers']);
+        $this->assertFalse($decoded['final_pnr_retry_ready']);
+        $this->assertContains('final_refresh_required', $decoded['final_pnr_retry_blockers']);
+    }
+
+    public function test_passes_freshness_when_last_revalidated_inside_threshold(): void
+    {
+        $booking = $this->postF9oBooking([], 5);
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertTrue($decoded['final_freshness_ready']);
+        $this->assertSame([], $decoded['final_freshness_blockers']);
+    }
+
+    public function test_blocks_when_pnr_present(): void
+    {
+        $booking = $this->postF9oBooking([], 5);
+        $booking->forceFill(['pnr' => 'ABC123'])->save();
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertTrue($decoded['pnr_present']);
+        $this->assertFalse($decoded['final_pnr_retry_ready']);
+        $this->assertContains('existing_pnr_present', $decoded['final_pnr_retry_blockers']);
+    }
+
+    public function test_blocks_when_supplier_reference_present(): void
+    {
+        $booking = $this->postF9oBooking([], 5);
+        $booking->forceFill(['supplier_reference' => 'SUP-REF-1'])->save();
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertContains('existing_supplier_reference_present', $decoded['final_pnr_retry_blockers']);
+    }
+
+    public function test_blocks_when_ticketed(): void
+    {
+        $booking = $this->postF9oBooking([], 5);
+        $booking->forceFill(['status' => BookingStatus::Ticketed])->save();
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertContains('ticketed_booking_blocked', $decoded['final_pnr_retry_blockers']);
+    }
+
+    public function test_blocks_when_cancelled(): void
+    {
+        $booking = $this->postF9oBooking([], 5);
+        $booking->forceFill(['status' => BookingStatus::Cancelled])->save();
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertContains('cancelled_booking_blocked', $decoded['final_pnr_retry_blockers']);
+    }
+
+    public function test_blocks_when_strong_linkage_apply_missing(): void
+    {
+        $booking = $this->postF9oBooking([
+            SabreControlledStrongRevalidationLinkageApply::META_KEY => null,
+        ], 5);
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertFalse($decoded['controlled_strong_revalidation_linkage_apply_present']);
+        $this->assertContains('strong_linkage_apply_missing', $decoded['final_pnr_retry_blockers']);
+    }
+
+    public function test_outputs_new_explicit_retry_approval_required_without_creating_allowance(): void
+    {
+        $booking = $this->postF9oBooking([], 5);
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertTrue($decoded['new_explicit_retry_approval_required']);
+        $this->assertTrue($decoded['existing_retry_allowances_consumed']);
+        $this->assertTrue($decoded['final_pnr_retry_ready']);
+        $this->assertFalse($decoded['controlled_final_pnr_retry_allowance_present']);
+        $this->assertFalse($decoded['controlled_final_pnr_retry_allowance_valid']);
+
+        $meta = $booking->fresh()->meta;
+        $this->assertSame(['used' => true], $meta[SabreControlledPnrRetryAllowanceGate::META_KEY]);
+    }
+
+    public function test_stale_booking_recommends_fresh_context_apply(): void
+    {
+        $booking = $this->postF9oBooking([], 53);
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertStringContainsString('controlled fresh-context apply', strtolower($decoded['recommended_next_action']));
+    }
+
+    public function test_blocks_after_f9q_final_retry_host_failure(): void
+    {
+        $booking = $this->postF9oBooking([
+            SabreControlledFinalPnrRetryAllowanceGate::META_KEY => [
+                'allowed' => true,
+                'used' => true,
+                'create_attempted' => true,
+                'used_for' => SabreControlledFinalPnrRetryAllowanceGate::USED_FOR,
+            ],
+        ], 5);
+
+        Artisan::call('sabre:controlled-pnr-final-readiness', [
+            '--booking' => (string) $booking->id,
+            '--json' => true,
+        ]);
+
+        $decoded = $this->decodeJsonOutput();
+        $this->assertFalse($decoded['final_pnr_retry_ready']);
+        $this->assertFalse($decoded['new_explicit_retry_approval_required']);
+        $this->assertTrue($decoded['controlled_final_pnr_retry_allowance_used']);
+        $this->assertTrue($decoded['final_controlled_create_attempted']);
+        $this->assertTrue($decoded['final_controlled_create_failed']);
+        $this->assertTrue($decoded['post_final_retry_host_failure']);
+        $this->assertSame('NO_FARES_RBD_CARRIER', $decoded['post_final_retry_host_failure_code']);
+        $this->assertTrue($decoded['no_safe_retry_without_remediation']);
+        $this->assertContains('final_retry_allowance_used', $decoded['final_pnr_retry_blockers']);
+        $this->assertContains('post_final_retry_host_failure', $decoded['final_pnr_retry_blockers']);
+        $this->assertContains('no_safe_retry_without_remediation', $decoded['final_pnr_retry_blockers']);
+        $this->assertStringContainsString('Staff review', $decoded['recommended_next_action']);
+    }
+}

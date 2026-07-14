@@ -1,0 +1,80 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="http://www.iata.org/IATA/2015/00/2020.1/IATA_SeatAvailabilityRQ">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <IATA_SeatAvailabilityRQ>
+         <MessageDoc>
+            <Name>NDC GATEWAY</Name>
+            <RefVersionNumber>20.1</RefVersionNumber>
+         </MessageDoc>
+         <Party>
+            <Sender>
+               <TravelAgency>
+                  <AgencyID>HITIT</AgencyID>
+                  <ContactInfo>
+                     <EmailAddress>
+                        <EmailAddressText>sample@hititcs.com</EmailAddressText>
+                     </EmailAddress>
+                  </ContactInfo>
+                  <Name>NDC GATEWAY</Name>
+               </TravelAgency>
+            </Sender>
+         </Party>
+         <Request>
+            <CoreRequest>
+               <Order>
+                  <BookingRef>
+                     <BookingEntity>
+                        <Carrier>
+                           <AirlineDesigCode>GP</AirlineDesigCode>
+                           <Name>HITIT ADMIN</Name>
+                        </Carrier>
+                     </BookingEntity>
+                     <BookingID>800EDK</BookingID>
+                  </BookingRef>
+                  <OrderID>ORDER-SeatAvailability</OrderID>
+                  <OwnerCode>GP</OwnerCode>
+               </Order>
+            </CoreRequest>
+            <OriginDest>
+               <DestCode>ISB</DestCode>
+               <OriginCode>KHI</OriginCode>
+               <PaxJourney>
+                  <PaxSegment>
+                     <Arrival>
+                        <AircraftScheduledDateTime>2025-08-11T14:55:00+05:00</AircraftScheduledDateTime>
+                        <IATA_LocationCode>ISB</IATA_LocationCode>
+                        <StationName>Islamabad International Airpor</StationName>
+                     </Arrival>
+                     <Dep>
+                        <AircraftScheduledDateTime>2025-08-11T13:00:00+05:00</AircraftScheduledDateTime>
+                        <IATA_LocationCode>KHI</IATA_LocationCode>
+                        <StationName>Jinnah Intl</StationName>
+                     </Dep>
+                     <Duration>PT1H55M</Duration>
+                     <MarketingCarrierInfo>
+                        <CarrierDesigCode>PK</CarrierDesigCode>
+                        <MarketingCarrierFlightNumberText>368</MarketingCarrierFlightNumberText>
+                     </MarketingCarrierInfo>
+                     <OperatingCarrierInfo>
+                        <CarrierDesigCode>PK</CarrierDesigCode>
+                        <OperatingCarrierFlightNumberText>368</OperatingCarrierFlightNumberText>
+                     </OperatingCarrierInfo>
+                     <PaxSegmentID>PK368-11Aug-KHIISB-NDE3ODM4MQ</PaxSegmentID>
+                  </PaxSegment>
+               </PaxJourney>
+            </OriginDest>
+            <ResponseParameters>
+               <CurParameter>
+                  <RequestedCurCode>PKR</RequestedCurCode>
+               </CurParameter>
+               <Device>
+                  <DeviceOwnerTypeCode>SL</DeviceOwnerTypeCode>
+               </Device>
+               <LangUsage>
+                  <LangCode>EN</LangCode>
+               </LangUsage>
+            </ResponseParameters>
+         </Request>
+      </IATA_SeatAvailabilityRQ>
+   </soapenv:Body>
+</soapenv:Envelope>

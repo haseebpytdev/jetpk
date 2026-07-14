@@ -1,0 +1,66 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "JED", "time": "08:00" },
+        "arrival": { "airport": "DXB", "time": "10:15" },
+        "elapsedTime": 135,
+        "carrier": { "marketing": "EK", "marketingFlightNumber": "615" }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "LHE", "time": "18:00" },
+        "arrival": { "airport": "JED", "time": "21:30" },
+        "elapsedTime": 210,
+        "carrier": { "marketing": "EK", "marketingFlightNumber": "624" }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 990,
+        "schedules": [{ "ref": 1 }, { "ref": 2 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-chronology-misorders-lhe-jed-dxb-needs-reverse",
+            "legs": [{ "ref": 1 }],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "validatingCarrierCode": "EK",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 23898,
+                    "baseFareAmount": 19000,
+                    "totalTaxAmount": 4898
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "refundable": true,
+                        "fareComponents": [
+                          {
+                            "segments": [
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

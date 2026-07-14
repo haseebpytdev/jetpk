@@ -1,0 +1,10 @@
+{
+  "result": {
+    "order_id": "order-123",
+    "status": "OPTION",
+    "option_info": {
+      "pnr": "abc123",
+      "last_ticketing_date": "2026-07-10"
+    }
+  }
+}

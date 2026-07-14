@@ -1,0 +1,11 @@
+{
+    "sabre": false,
+    "al_haider_group_ticketing": false,
+    "accounting": false,
+    "hotels": false,
+    "visa": false,
+    "payment_gateway": true,
+    "dev_cp": false,
+    "staff_panel": true,
+    "admin_panel": true
+}

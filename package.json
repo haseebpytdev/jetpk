@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.schemastore.org/package.json",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "e2e:desktop": "playwright test test/e2e/ota-walkthrough.spec.ts --project=desktop-chrome --headed --reporter=html",
+    "e2e:mobile": "playwright test test/e2e/ota-walkthrough.spec.ts --project=mobile-chrome --headed --reporter=html",
+    "e2e:ui-qa": "playwright test test/e2e/ui-visual-qa.spec.ts --project=desktop-chrome",
+    "e2e:ui": "playwright test test/e2e/ota-walkthrough.spec.ts --ui",
+    "e2e:record": "playwright codegen http://127.0.0.1:8000",
+    "ui:audit:responsive": "playwright test -c playwright.responsive.config.ts",
+    "ui:audit:responsive:headed": "playwright test -c playwright.responsive.config.ts --headed",
+    "ui:audit:responsive:agent": "playwright test -c playwright.responsive.agent.config.ts",
+    "ui:audit:responsive:agent:chromium": "playwright test -c playwright.responsive.agent.config.ts --project=chromium",
+    "ui:audit:responsive:chromium": "playwright test -c playwright.responsive.config.ts --project=chromium",
+    "ui:audit:responsive:report": "playwright show-report",
+    "ui:test:public-search-dropdown:chromium": "playwright test -c playwright.public-dropdown.config.ts --project=chromium",
+    "ui:test:public-critical:chromium": "playwright test -c playwright.public-critical.config.ts --project=chromium",
+    "ui:test:agent-critical:chromium": "playwright test -c playwright.agent-critical.config.ts --project=chromium",
+    "ui:test:ota-critical:chromium": "playwright test -c playwright.ota-critical.config.ts --project=chromium",
+    "audit:jetpk-live:chromium": "playwright test -c playwright.jetpk-live.config.ts --project=chromium",
+    "test:jetpk-dashboard-9h-b": "playwright test -c playwright.jetpk-9h-b.config.ts",
+    "test:jetpk-dashboard-9h-b:live": "playwright test -c playwright.jetpk-9h-b-live.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@tailwindcss/forms": "^0.5.2",
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/imagesloaded": "^4.1.7",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "alpinejs": "^3.4.2",
+    "autoprefixer": "^10.4.2",
+    "concurrently": "^9.0.1",
+    "laravel-vite-plugin": "^3.0.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.1.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.0"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "imagesloaded": "^5.0.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-icons": "^5.6.0"
+  }
+}

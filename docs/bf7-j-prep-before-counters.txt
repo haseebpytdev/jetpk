@@ -1,0 +1,25 @@
+BF7-J-PREP baseline counters snapshot
+Generated: 2026-06-16 (local dev validation)
+Environment: local (APP_ENV=local)
+
+=== LOCAL DEV (reference only — production ops must run §4a on server) ===
+bookings=1
+supplier_booking_attempts=0
+create_pnr_attempts=0
+supplier_bookings=0
+booking_tickets=0
+
+=== PRODUCTION (run on server SSH — paste results below) ===
+# php artisan tinker --execute="
+# echo 'bookings='.\App\Models\Booking::count().PHP_EOL;
+# echo 'supplier_booking_attempts='.\App\Models\SupplierBookingAttempt::count().PHP_EOL;
+# echo 'create_pnr_attempts='.\App\Models\SupplierBookingAttempt::where('action','create_pnr')->count().PHP_EOL;
+# echo 'supplier_bookings='.\App\Models\SupplierBooking::count().PHP_EOL;
+# echo 'booking_tickets='.\App\Models\BookingTicket::count().PHP_EOL;
+# "
+
+bookings=
+supplier_booking_attempts=
+create_pnr_attempts=
+supplier_bookings=
+booking_tickets=

@@ -1,0 +1,59 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "id": 10,
+        "departure": { "airport": "IST", "time": "18:00" },
+        "arrival": { "airport": "DOH", "time": "22:30" },
+        "elapsedTime": 270,
+        "carrier": { "marketing": "QR", "marketingFlightNumber": "200" }
+      },
+      {
+        "id": 5,
+        "departure": { "airport": "LHE", "time": "10:00" },
+        "arrival": { "airport": "IST", "time": "14:00" },
+        "elapsedTime": 240,
+        "carrier": { "marketing": "TK", "marketingFlightNumber": "100" }
+      }
+    ],
+    "legDescs": [
+      {
+        "id": 1,
+        "ref": 1,
+        "elapsedTime": 510,
+        "schedules": [{ "ref": 99999 }, { "ref": 88888 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-unresolved-schedule-refs-with-explicit-ids",
+            "legs": [{ "ref": 1 }],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "validatingCarrierCode": "TK",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 200000,
+                    "baseFareAmount": 170000,
+                    "totalTaxAmount": 30000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": true
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

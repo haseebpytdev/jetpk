@@ -1,0 +1,63 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "LHE", "time": "2026-08-01T08:00:00" },
+        "arrival": { "airport": "KHI", "time": "2026-08-01T09:30:00" },
+        "elapsedTime": 90,
+        "carrier": { "marketing": "PK", "marketingFlightNumber": "301" }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "LHE", "time": "2026-08-01T12:00:00" },
+        "arrival": { "airport": "MEL", "time": "2026-08-02T06:00:00" },
+        "elapsedTime": 1080,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "631" }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 90,
+        "schedules": [{ "ref": 1 }]
+      },
+      {
+        "ref": 2,
+        "elapsedTime": 1080,
+        "schedules": [{ "ref": 2 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-rt-ambiguous-two-outbound-starts",
+            "legs": [{ "ref": 2 }, { "ref": 1 }],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "validatingCarrierCode": "SQ",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 200000,
+                    "baseFareAmount": 170000,
+                    "totalTaxAmount": 30000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": true
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

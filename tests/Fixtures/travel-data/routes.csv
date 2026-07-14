@@ -1,0 +1,4 @@
+Airline,Airline ID,Source Airport,Source Airport ID,Destination Airport,Destination Airport ID,Codeshare,Stops,Equipment
+BA,1355,LHR,507,JFK,3797,,0,744
+EK,2183,DXB,2188,LHR,507,,0,77W
+QF,1356,MEL,2000,LHR,507,,0,744

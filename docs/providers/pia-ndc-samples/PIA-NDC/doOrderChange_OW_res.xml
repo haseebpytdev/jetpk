@@ -1,0 +1,364 @@
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+   <S:Body>
+      <ns3:IATA_OrderViewRS xmlns="http://www.iata.org/IATA/2015/00/2020.1/IATA_AirShoppingRQ" xmlns:ns10="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderReshopRS" xmlns:ns11="http://www.iata.org/IATA/2015/00/2020.1/IATA_AirlineProfileRQ" xmlns:ns12="http://www.iata.org/IATA/2015/00/2020.1/IATA_AirlineProfileRS" xmlns:ns13="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderCreateRQ" xmlns:ns14="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderRetrieveRQ" xmlns:ns15="http://www.iata.org/IATA/2015/00/2020.1/IATA_OfferPriceRQ" xmlns:ns16="http://www.iata.org/IATA/2015/00/2020.1/IATA_OfferPriceRS" xmlns:ns17="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderRulesRQ" xmlns:ns18="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderRulesRS" xmlns:ns2="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderChangeRQ" xmlns:ns3="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderViewRS" xmlns:ns4="http://www.iata.org/IATA/2015/00/2020.1/IATA_ServiceListRQ" xmlns:ns5="http://www.iata.org/IATA/2015/00/2020.1/IATA_ServiceListRS" xmlns:ns6="http://www.iata.org/IATA/2015/00/2020.1/IATA_SeatAvailabilityRQ" xmlns:ns7="http://www.iata.org/IATA/2015/00/2020.1/IATA_SeatAvailabilityRS" xmlns:ns8="http://www.iata.org/IATA/2015/00/2020.1/IATA_AirShoppingRS" xmlns:ns9="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderReshopRQ">
+         <ns3:Response>
+            <ns3:DataLists>
+               <ns3:BaggageAllowanceList>
+                  <ns3:BaggageAllowance>
+                     <ns3:BaggageAllowanceID>BAG--20-KG</ns3:BaggageAllowanceID>
+                     <ns3:PieceAllowance>
+                        <ns3:ApplicablePartyText>Party</ns3:ApplicablePartyText>
+                        <ns3:PieceWeightAllowance>
+                           <ns3:MaximumWeightMeasure UnitCode="KG">20</ns3:MaximumWeightMeasure>
+                        </ns3:PieceWeightAllowance>
+                        <ns3:TotalQty>0</ns3:TotalQty>
+                     </ns3:PieceAllowance>
+                     <ns3:TypeCode>Checked</ns3:TypeCode>
+                  </ns3:BaggageAllowance>
+               </ns3:BaggageAllowanceList>
+               <ns3:OriginDestList>
+                  <ns3:OriginDest>
+                     <ns3:DestCode>ISB</ns3:DestCode>
+                     <ns3:OriginCode>KHI</ns3:OriginCode>
+                     <ns3:OriginDestID>OD-KHIISB</ns3:OriginDestID>
+                     <ns3:PaxJourneyRefID>KHI-ISB-J1</ns3:PaxJourneyRefID>
+                  </ns3:OriginDest>
+               </ns3:OriginDestList>
+               <ns3:PaxJourneyList>
+                  <ns3:PaxJourney>
+                     <ns3:PaxJourneyID>KHI-ISB-J1</ns3:PaxJourneyID>
+                     <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                  </ns3:PaxJourney>
+               </ns3:PaxJourneyList>
+               <ns3:PaxList>
+                  <ns3:Pax>
+                     <ns3:Birthdate>1990-04-01</ns3:Birthdate>
+                     <ns3:Individual>
+                        <ns3:GenderCode>F</ns3:GenderCode>
+                        <ns3:GivenName>MARYAM</ns3:GivenName>
+                        <ns3:IndividualID>IND-1</ns3:IndividualID>
+                        <ns3:Surname>SHAHBAZINIA</ns3:Surname>
+                        <ns3:TitleName>MS</ns3:TitleName>
+                     </ns3:Individual>
+                     <ns3:PaxID>ADTPax-402952395</ns3:PaxID>
+                     <ns3:PTC>ADT</ns3:PTC>
+                  </ns3:Pax>
+               </ns3:PaxList>
+               <ns3:PaxSegmentList>
+                  <ns3:PaxSegment>
+                     <ns3:Arrival>
+                        <ns3:AircraftScheduledDateTime>2025-06-12T14:55:00+05:00</ns3:AircraftScheduledDateTime>
+                        <ns3:IATA_LocationCode>ISB</ns3:IATA_LocationCode>
+                        <ns3:StationName>Islamabad International Airpor</ns3:StationName>
+                     </ns3:Arrival>
+                     <ns3:Dep>
+                        <ns3:AircraftScheduledDateTime>2025-06-12T13:00:00+05:00</ns3:AircraftScheduledDateTime>
+                        <ns3:IATA_LocationCode>KHI</ns3:IATA_LocationCode>
+                        <ns3:StationName>Jinnah Intl</ns3:StationName>
+                     </ns3:Dep>
+                     <ns3:Duration>PT1H55M</ns3:Duration>
+                     <ns3:MarketingCarrierInfo>
+                        <ns3:CarrierDesigCode>PK</ns3:CarrierDesigCode>
+                        <ns3:MarketingCarrierFlightNumberText>368</ns3:MarketingCarrierFlightNumberText>
+                     </ns3:MarketingCarrierInfo>
+                     <ns3:OperatingCarrierInfo>
+                        <ns3:CarrierDesigCode>PK</ns3:CarrierDesigCode>
+                        <ns3:OperatingCarrierFlightNumberText>368</ns3:OperatingCarrierFlightNumberText>
+                        <ns3:StatusCode>HK</ns3:StatusCode>
+                     </ns3:OperatingCarrierInfo>
+                     <ns3:PaxSegmentID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentID>
+                  </ns3:PaxSegment>
+               </ns3:PaxSegmentList>
+               <ns3:ServiceDefinitionList>
+                  <ns3:ServiceDefinition>
+                     <ns3:Desc>
+                        <ns3:DescText>CTCB 44 0125 4699065</ns3:DescText>
+                     </ns3:Desc>
+                     <ns3:Name>OTHER</ns3:Name>
+                     <ns3:ServiceCode>OSI</ns3:ServiceCode>
+                     <ns3:ServiceDefinitionID>ServiceDef-1</ns3:ServiceDefinitionID>
+                  </ns3:ServiceDefinition>
+                  <ns3:ServiceDefinition>
+                     <ns3:Desc>
+                        <ns3:DescText>CTCE SUPPORT@BILLIAN.CO.UK</ns3:DescText>
+                     </ns3:Desc>
+                     <ns3:Name>OTHER</ns3:Name>
+                     <ns3:ServiceCode>OSI</ns3:ServiceCode>
+                     <ns3:ServiceDefinitionID>ServiceDef-2</ns3:ServiceDefinitionID>
+                  </ns3:ServiceDefinition>
+                  <ns3:ServiceDefinition>
+                     <ns3:Desc>
+                        <ns3:DescText>44 0125 4699065</ns3:DescText>
+                     </ns3:Desc>
+                     <ns3:Name>OTH</ns3:Name>
+                     <ns3:ServiceCode>CTCM</ns3:ServiceCode>
+                     <ns3:ServiceDefinitionID>ServiceDef-CTCM-44 0125 4699065</ns3:ServiceDefinitionID>
+                  </ns3:ServiceDefinition>
+                  <ns3:ServiceDefinition>
+                     <ns3:Desc>
+                        <ns3:DescText>SUPPORT@BILLIAN.CO.UK</ns3:DescText>
+                     </ns3:Desc>
+                     <ns3:Name>OTH</ns3:Name>
+                     <ns3:ServiceCode>CTCE</ns3:ServiceCode>
+                     <ns3:ServiceDefinitionID>ServiceDef-CTCE-SUPPORT@BILLIAN.CO.UK</ns3:ServiceDefinitionID>
+                  </ns3:ServiceDefinition>
+                  <ns3:ServiceDefinition>
+                     <ns3:Desc>
+                        <ns3:DescText>2142417439141C1</ns3:DescText>
+                     </ns3:Desc>
+                     <ns3:Name>OTH</ns3:Name>
+                     <ns3:ServiceCode>TKNE</ns3:ServiceCode>
+                     <ns3:ServiceDefinitionID>ServiceDef-TKNE-2142417439141C1</ns3:ServiceDefinitionID>
+                  </ns3:ServiceDefinition>
+               </ns3:ServiceDefinitionList>
+            </ns3:DataLists>
+            <ns3:Order>
+               <ns3:CreationDateTime>2025-05-27T15:07:16+05:00</ns3:CreationDateTime>
+               <ns3:OrderID>7UU0J0</ns3:OrderID>
+               <ns3:OrderItem>
+                  <ns3:FareDetail>
+                     <ns3:FareCalculationInfo>
+                        <ns3:PricingCodeText>CENTRAL</ns3:PricingCodeText>
+                     </ns3:FareCalculationInfo>
+                     <ns3:FareComponent>
+                        <ns3:CabinType>
+                           <ns3:CabinTypeCode>Y</ns3:CabinTypeCode>
+                           <ns3:CabinTypeName>ECONOMY</ns3:CabinTypeName>
+                        </ns3:CabinType>
+                        <ns3:FareBasisCityPairText>KHIISBPK</ns3:FareBasisCityPairText>
+                        <ns3:FareBasisCode>LOW1NET/NET</ns3:FareBasisCode>
+                        <ns3:FareTypeCode>ECO</ns3:FareTypeCode>
+                        <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                        <ns3:RBD>
+                           <ns3:RBD_Code>L</ns3:RBD_Code>
+                        </ns3:RBD>
+                     </ns3:FareComponent>
+                     <ns3:FarePriceType>
+                        <ns3:FarePriceTypeCode>LOW1NET/NET</ns3:FarePriceTypeCode>
+                        <ns3:Price>
+                           <ns3:BaseAmount CurCode="PKR">20960.00</ns3:BaseAmount>
+                           <ns3:Discount>
+                              <ns3:DiscountAmount CurCode="">0.00</ns3:DiscountAmount>
+                           </ns3:Discount>
+                           <ns3:EquivAmount CurCode="PKR">20960.00</ns3:EquivAmount>
+                           <ns3:Fee>
+                              <ns3:Amount CurCode="">0.00</ns3:Amount>
+                           </ns3:Fee>
+                           <ns3:MaskedInd>false</ns3:MaskedInd>
+                           <ns3:Surcharge>
+                              <ns3:TotalAmount CurCode="PKR">500.00</ns3:TotalAmount>
+                           </ns3:Surcharge>
+                           <ns3:TaxSummary>
+                              <ns3:Tax>
+                                 <ns3:Amount CurCode="PKR">20.00</ns3:Amount>
+                                 <ns3:RefundInd>false</ns3:RefundInd>
+                                 <ns3:TaxCode>YI</ns3:TaxCode>
+                              </ns3:Tax>
+                              <ns3:Tax>
+                                 <ns3:Amount CurCode="PKR">100.00</ns3:Amount>
+                                 <ns3:RefundInd>false</ns3:RefundInd>
+                                 <ns3:TaxCode>XZ</ns3:TaxCode>
+                              </ns3:Tax>
+                              <ns3:Tax>
+                                 <ns3:Amount CurCode="PKR">1500.00</ns3:Amount>
+                                 <ns3:RefundInd>false</ns3:RefundInd>
+                                 <ns3:TaxCode>PK</ns3:TaxCode>
+                              </ns3:Tax>
+                              <ns3:Tax>
+                                 <ns3:Amount CurCode="PKR">50.00</ns3:Amount>
+                                 <ns3:RefundInd>false</ns3:RefundInd>
+                                 <ns3:TaxCode>N9</ns3:TaxCode>
+                              </ns3:Tax>
+                              <ns3:Tax>
+                                 <ns3:Amount CurCode="PKR">500.00</ns3:Amount>
+                                 <ns3:RefundInd>false</ns3:RefundInd>
+                                 <ns3:TaxCode>SP</ns3:TaxCode>
+                              </ns3:Tax>
+                              <ns3:TotalTaxAmount CurCode="PKR">2170.00</ns3:TotalTaxAmount>
+                           </ns3:TaxSummary>
+                           <ns3:TotalAmount CurCode="PKR">23630.00</ns3:TotalAmount>
+                        </ns3:Price>
+                     </ns3:FarePriceType>
+                     <ns3:PaxRefID>ADTPax-402952395</ns3:PaxRefID>
+                  </ns3:FareDetail>
+                  <ns3:OrderItemID>OrderItem-1</ns3:OrderItemID>
+                  <ns3:OwnerCode>PK</ns3:OwnerCode>
+                  <ns3:Price>
+                     <ns3:BaseAmount CurCode="PKR">20960.00</ns3:BaseAmount>
+                     <ns3:Discount>
+                        <ns3:DiscountAmount CurCode="">0.00</ns3:DiscountAmount>
+                     </ns3:Discount>
+                     <ns3:EquivAmount CurCode="PKR">20960.00</ns3:EquivAmount>
+                     <ns3:Fee>
+                        <ns3:Amount CurCode="">0.00</ns3:Amount>
+                     </ns3:Fee>
+                     <ns3:MaskedInd>false</ns3:MaskedInd>
+                     <ns3:Surcharge>
+                        <ns3:TotalAmount CurCode="PKR">500.00</ns3:TotalAmount>
+                     </ns3:Surcharge>
+                     <ns3:TaxSummary>
+                        <ns3:Tax>
+                           <ns3:Amount CurCode="PKR">20.00</ns3:Amount>
+                           <ns3:RefundInd>false</ns3:RefundInd>
+                           <ns3:TaxCode>YI</ns3:TaxCode>
+                        </ns3:Tax>
+                        <ns3:Tax>
+                           <ns3:Amount CurCode="PKR">100.00</ns3:Amount>
+                           <ns3:RefundInd>false</ns3:RefundInd>
+                           <ns3:TaxCode>XZ</ns3:TaxCode>
+                        </ns3:Tax>
+                        <ns3:Tax>
+                           <ns3:Amount CurCode="PKR">1500.00</ns3:Amount>
+                           <ns3:RefundInd>false</ns3:RefundInd>
+                           <ns3:TaxCode>PK</ns3:TaxCode>
+                        </ns3:Tax>
+                        <ns3:Tax>
+                           <ns3:Amount CurCode="PKR">50.00</ns3:Amount>
+                           <ns3:RefundInd>false</ns3:RefundInd>
+                           <ns3:TaxCode>N9</ns3:TaxCode>
+                        </ns3:Tax>
+                        <ns3:Tax>
+                           <ns3:Amount CurCode="PKR">500.00</ns3:Amount>
+                           <ns3:RefundInd>false</ns3:RefundInd>
+                           <ns3:TaxCode>SP</ns3:TaxCode>
+                        </ns3:Tax>
+                        <ns3:TotalTaxAmount CurCode="PKR">2170.00</ns3:TotalTaxAmount>
+                     </ns3:TaxSummary>
+                     <ns3:TotalAmount CurCode="PKR">23630.00</ns3:TotalAmount>
+                  </ns3:Price>
+                  <ns3:Service>
+                     <ns3:PaxRefID>ADTPax-402952395</ns3:PaxRefID>
+                     <ns3:ServiceAssociations>
+                        <ns3:PaxSegmentRef>
+                           <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                        </ns3:PaxSegmentRef>
+                     </ns3:ServiceAssociations>
+                     <ns3:ServiceID>FlightService-ADTPax-402952395-1</ns3:ServiceID>
+                     <ns3:StatusCode>HK</ns3:StatusCode>
+                  </ns3:Service>
+                  <ns3:Service>
+                     <ns3:PaxRefID>ADTPax-402952395</ns3:PaxRefID>
+                     <ns3:ServiceAssociations>
+                        <ns3:ServiceDefinitionRef>
+                           <ns3:ServiceDefinitionFlightAssociations>
+                              <ns3:PaxSegmentRef>
+                                 <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                              </ns3:PaxSegmentRef>
+                           </ns3:ServiceDefinitionFlightAssociations>
+                           <ns3:ServiceDefinitionRefID>ServiceDef-CTCM-44 0125 4699065</ns3:ServiceDefinitionRefID>
+                        </ns3:ServiceDefinitionRef>
+                     </ns3:ServiceAssociations>
+                     <ns3:ServiceID>ADTPax-402952395-1-199740674</ns3:ServiceID>
+                     <ns3:StatusCode>HK</ns3:StatusCode>
+                  </ns3:Service>
+                  <ns3:Service>
+                     <ns3:PaxRefID>ADTPax-402952395</ns3:PaxRefID>
+                     <ns3:ServiceAssociations>
+                        <ns3:ServiceDefinitionRef>
+                           <ns3:ServiceDefinitionFlightAssociations>
+                              <ns3:PaxSegmentRef>
+                                 <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                              </ns3:PaxSegmentRef>
+                           </ns3:ServiceDefinitionFlightAssociations>
+                           <ns3:ServiceDefinitionRefID>ServiceDef-CTCE-SUPPORT@BILLIAN.CO.UK</ns3:ServiceDefinitionRefID>
+                        </ns3:ServiceDefinitionRef>
+                     </ns3:ServiceAssociations>
+                     <ns3:ServiceID>ADTPax-402952395-2-199740675</ns3:ServiceID>
+                     <ns3:StatusCode>HK</ns3:StatusCode>
+                  </ns3:Service>
+                  <ns3:Service>
+                     <ns3:PaxRefID>ADTPax-402952395</ns3:PaxRefID>
+                     <ns3:ServiceAssociations>
+                        <ns3:ServiceDefinitionRef>
+                           <ns3:ServiceDefinitionFlightAssociations>
+                              <ns3:PaxSegmentRef>
+                                 <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                              </ns3:PaxSegmentRef>
+                           </ns3:ServiceDefinitionFlightAssociations>
+                           <ns3:ServiceDefinitionRefID>ServiceDef-TKNE-2142417439141C1</ns3:ServiceDefinitionRefID>
+                        </ns3:ServiceDefinitionRef>
+                     </ns3:ServiceAssociations>
+                     <ns3:ServiceID>ADTPax-402952395-3-199740712</ns3:ServiceID>
+                     <ns3:StatusCode>HK</ns3:StatusCode>
+                  </ns3:Service>
+                  <ns3:StatusCode>ENTITLED</ns3:StatusCode>
+               </ns3:OrderItem>
+               <ns3:OwnerCode>PK</ns3:OwnerCode>
+               <ns3:OwnerTypeCode>ORA</ns3:OwnerTypeCode>
+               <ns3:StatusCode>OPENED</ns3:StatusCode>
+               <ns3:TotalPrice>
+                  <ns3:BaseAmount CurCode="PKR">20960.00</ns3:BaseAmount>
+                  <ns3:Discount>
+                     <ns3:DiscountAmount CurCode="">0.00</ns3:DiscountAmount>
+                  </ns3:Discount>
+                  <ns3:Fee>
+                     <ns3:Amount CurCode="">0.00</ns3:Amount>
+                  </ns3:Fee>
+                  <ns3:Surcharge>
+                     <ns3:TotalAmount CurCode="PKR">500.00</ns3:TotalAmount>
+                  </ns3:Surcharge>
+                  <ns3:TaxSummary>
+                     <ns3:TotalTaxAmount CurCode="PKR">2170.00</ns3:TotalTaxAmount>
+                  </ns3:TaxSummary>
+                  <ns3:TotalAmount CurCode="PKR">23630.00</ns3:TotalAmount>
+               </ns3:TotalPrice>
+            </ns3:Order>
+            <ns3:TicketDocInfo>
+               <ns3:BookingRef>
+                  <ns3:BookingEntity>
+                     <ns3:Carrier>
+                        <ns3:AirlineDesigCode>PK</ns3:AirlineDesigCode>
+                        <ns3:Name>Hitit Admin</ns3:Name>
+                     </ns3:Carrier>
+                  </ns3:BookingEntity>
+                  <ns3:BookingID>7UU0J0</ns3:BookingID>
+               </ns3:BookingRef>
+               <ns3:PaxRefID>ADTPax-402952395</ns3:PaxRefID>
+               <ns3:PaymentInfoRefID>MCO_INV67028778_ADC</ns3:PaymentInfoRefID>
+               <ns3:Ticket>
+                  <ns3:ConnectedDocNumber>2142417439141</ns3:ConnectedDocNumber>
+                  <ns3:Coupon>
+                     <ns3:BaggageAllowanceRefID>BAG--20-KG</ns3:BaggageAllowanceRefID>
+                     <ns3:CouponNumber>1</ns3:CouponNumber>
+                     <ns3:CouponSeqNumber>1</ns3:CouponSeqNumber>
+                     <ns3:CouponStatusCode>O</ns3:CouponStatusCode>
+                     <ns3:CurrentCouponFlightInfo>
+                        <ns3:CheckedInAirlineInfo>
+                           <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                        </ns3:CheckedInAirlineInfo>
+                        <ns3:CurrentAirlineInfo>
+                           <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                        </ns3:CurrentAirlineInfo>
+                        <ns3:FlownAirlineInfo>
+                           <ns3:PaxSegmentRefID>PK368-12Jun-KHIISB-NDE3MjEwNg</ns3:PaxSegmentRefID>
+                        </ns3:FlownAirlineInfo>
+                     </ns3:CurrentCouponFlightInfo>
+                     <ns3:ProductCharacteristic>
+                        <ns3:KeyText>LEG_STATUS</ns3:KeyText>
+                        <ns3:ValueText>RZ</ns3:ValueText>
+                     </ns3:ProductCharacteristic>
+                  </ns3:Coupon>
+                  <ns3:ExchReissueInd>false</ns3:ExchReissueInd>
+                  <ns3:ReportingTypeCode>Airline</ns3:ReportingTypeCode>
+                  <ns3:TicketNumber>2142417439141</ns3:TicketNumber>
+               </ns3:Ticket>
+            </ns3:TicketDocInfo>
+         </ns3:Response>
+         <ns3:PayloadAttributes>
+            <ns3:EchoTokenText>55fcca0d-bd4a-4f59-92c4-f70ea589c848</ns3:EchoTokenText>
+         </ns3:PayloadAttributes>
+         <ns3:PaymentFunctions>
+            <ns3:PaymentProcessingSummary>
+               <ns3:Amount CurCode="PKR">23630.00</ns3:Amount>
+               <ns3:OrderAssociation>
+                  <ns3:OrderItemRefID>OrderItem-1</ns3:OrderItemRefID>
+                  <ns3:OrderRefID>7UU0J0</ns3:OrderRefID>
+               </ns3:OrderAssociation>
+               <ns3:PaymentID>MCO_INV67028778_ADC</ns3:PaymentID>
+               <ns3:PaymentStatusCode>CLOSED</ns3:PaymentStatusCode>
+               <ns3:TypeCode>INV</ns3:TypeCode>
+            </ns3:PaymentProcessingSummary>
+         </ns3:PaymentFunctions>
+      </ns3:IATA_OrderViewRS>
+   </S:Body>
+</S:Envelope>

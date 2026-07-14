@@ -1,0 +1,25 @@
+{
+  "result": {
+    "fare_detail_key": "fare-detail-multi-match",
+    "offers": [
+      {
+        "offer_key": "offer-alt-1",
+        "fare_key": "other-fare-key-1",
+        "total_price": 90000,
+        "currency": "PKR"
+      },
+      {
+        "offer_key": "offer-selected",
+        "fare_key": "dep-match-key",
+        "total_price": 80294,
+        "currency": "PKR"
+      },
+      {
+        "offer_key": "offer-alt-2",
+        "fare_key": "other-fare-key-2",
+        "total_price": 120000,
+        "currency": "PKR"
+      }
+    ]
+  }
+}
