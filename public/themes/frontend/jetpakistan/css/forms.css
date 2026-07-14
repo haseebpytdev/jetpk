@@ -39,6 +39,11 @@
 .jp-btn--primary:focus:not(:focus-visible){box-shadow:var(--shadow-brand)}
 .jp-btn--secondary{background:var(--surface);color:var(--text);border-color:var(--line-strong)}
 .jp-btn--block{width:100%}
+.jp-btn[disabled],.jp-btn[aria-disabled="true"]{cursor:not-allowed;opacity:.72}
+.jp-btn--loading{position:relative;pointer-events:none}
+.jp-btn--loading::after{content:"";width:1em;height:1em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:jp-login-spin .75s linear infinite}
+@keyframes jp-login-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.jp-btn--loading::after{animation:none;border-right-color:currentColor;opacity:.65}}
 .jp-alert{border:1px solid var(--line);border-radius:var(--r-input);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-4);background:var(--surface-2);color:var(--text-2)}
 .jp-alert--danger{border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.12);color:#FCA5A5}
 .jp-alert--warning{border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.12);color:var(--warn)}

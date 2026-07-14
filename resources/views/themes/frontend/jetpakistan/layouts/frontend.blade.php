@@ -1,6 +1,6 @@
 @php
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpAssetVersion = 48;
+    $jpAssetVersion = 49;
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
     $pageTitle = trim($__env->yieldContent('title'));

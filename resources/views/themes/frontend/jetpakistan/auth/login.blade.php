@@ -21,18 +21,53 @@
 
     <x-jp.google-sign-in verb="Continue with Google" mode="login" />
 
-    <form method="POST" action="{{ client_url('/login') }}" class="jp-form jp-auth-form">
+    <div
+        class="jp-alert jp-alert--danger"
+        data-jp-login-alert
+        role="alert"
+        aria-live="polite"
+        tabindex="-1"
+        hidden
+    ></div>
+
+    <form
+        method="POST"
+        action="{{ client_url('/login') }}"
+        class="jp-form jp-auth-form"
+        data-jp-login-form
+        aria-busy="false"
+    >
         @csrf
         @if (current_client_slug())
             <input type="hidden" name="client_slug" value="{{ current_client_slug() }}">
         @endif
 
-        <x-jp.form-group label="Email or username" for="login" :error="$errors->first('login') ?: $errors->first('email')">
-            <input id="login" class="jp-input @if($errors->has('login') || $errors->has('email')) jp-input--invalid @endif" type="text" name="login" value="{{ old('login', old('email')) }}" required autofocus autocomplete="username">
+        <x-jp.form-group label="Email or username" for="login" data-jp-field-group="login">
+            <input
+                id="login"
+                class="jp-input @if($errors->has('login') || $errors->has('email')) jp-input--invalid @endif"
+                type="text"
+                name="login"
+                value="{{ old('login', old('email')) }}"
+                required
+                autofocus
+                autocomplete="username"
+                @if($errors->has('login') || $errors->has('email')) aria-invalid="true" @endif
+            >
+            <p class="jp-field-error" data-jp-field-error @if(! $errors->has('login') && ! $errors->has('email')) hidden @endif>{{ $errors->first('login') ?: $errors->first('email') }}</p>
         </x-jp.form-group>
 
-        <x-jp.form-group label="Password" for="password" :error="$errors->first('password')">
-            <input id="password" class="jp-input @if($errors->has('password')) jp-input--invalid @endif" type="password" name="password" required autocomplete="current-password">
+        <x-jp.form-group label="Password" for="password" data-jp-field-group="password">
+            <input
+                id="password"
+                class="jp-input @if($errors->has('password')) jp-input--invalid @endif"
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                @if($errors->has('password')) aria-invalid="true" @endif
+            >
+            <p class="jp-field-error" data-jp-field-error @if(! $errors->has('password')) hidden @endif>{{ $errors->first('password') }}</p>
         </x-jp.form-group>
 
         <div class="jp-auth-row">
@@ -45,7 +80,7 @@
             @endif
         </div>
 
-        <x-jp.button type="submit" variant="primary" block>Log in</x-jp.button>
+        <x-jp.button type="submit" variant="primary" block data-jp-loading-label="Logging in…">Log in</x-jp.button>
     </form>
 
     <nav class="jp-auth-links" aria-label="Account options">
@@ -53,4 +88,8 @@
         <a href="{{ client_route('agent.register') }}">Register as travel agent</a>
         <a href="{{ client_route('home') }}">Back to home</a>
     </nav>
+@endpush
+
+@push('scripts')
+    <script src="{{ rtrim(client_theme()->frontendThemeUrl(), '/') }}/js/login.js?v={{ 49 }}" defer></script>
 @endpush

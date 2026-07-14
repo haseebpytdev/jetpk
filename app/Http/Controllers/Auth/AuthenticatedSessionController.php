@@ -15,11 +15,13 @@ use App\Services\Security\SecurityEventLogger;
 use App\Support\Auth\ClientLoginOtpGate;
 use App\Support\Auth\CheckoutReturnIntent;
 use App\Support\Ui\MobileViewPreference;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -47,7 +49,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): RedirectResponse|JsonResponse
     {
         $this->primeClientSlugFromRequest($request);
 
@@ -57,9 +59,22 @@ class AuthenticatedSessionController extends Controller
             try {
                 $this->loginOtpService->initiate($request, $user, $request->boolean('remember'));
             } catch (LoginOtpDeliveryException $e) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => $e->getMessage(),
+                        'errors' => ['login' => [$e->getMessage()]],
+                    ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+
                 return back()
                     ->withInput($request->only('login', 'email', 'remember'))
                     ->withErrors(['login' => $e->getMessage()]);
+            }
+
+            $otpRedirect = $this->clientRedirectResolver->pathForRoute('login.otp');
+
+            if ($request->expectsJson()) {
+                return $this->jsonLoginSuccess($otpRedirect, requiresOtp: true);
             }
 
             return $this->clientRedirectResolver
@@ -69,7 +84,15 @@ class AuthenticatedSessionController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
 
-        return $this->completeAuthenticatedLogin($request, $user, $request->boolean('remember'));
+        $redirect = $this->completeAuthenticatedLogin($request, $user, $request->boolean('remember'));
+
+        if ($request->expectsJson()) {
+            return $this->jsonLoginSuccess(
+                $this->safeLoginRedirectPath($redirect->getTargetUrl()),
+            );
+        }
+
+        return $redirect;
     }
 
     public function completeAuthenticatedLogin(Request $request, User $user, bool $remember): RedirectResponse
@@ -183,5 +206,27 @@ class AuthenticatedSessionController extends Controller
         return preg_match('#^/verify-email/[^/]+/[^/]+$#', $path) === 1
             ? $intended
             : null;
+    }
+
+    private function jsonLoginSuccess(string $redirectPath, bool $requiresOtp = false): JsonResponse
+    {
+        $payload = [
+            'ok' => true,
+            'redirect' => $this->safeLoginRedirectPath($redirectPath),
+        ];
+
+        if ($requiresOtp) {
+            $payload['requires_otp'] = true;
+        }
+
+        return response()->json($payload);
+    }
+
+    private function safeLoginRedirectPath(string $url): string
+    {
+        return $this->mobileViewPreference->safeRedirectUrl(
+            $url,
+            $this->clientRedirectResolver->pathForRoute('dashboard'),
+        );
     }
 }
