@@ -35,9 +35,14 @@
     <div class="jp-portal-alert jp-portal-alert--info">{{ session('status') }}</div>
 @endif
 
+<x-dashboard.breadcrumbs :items="[
+    ['label' => 'Dashboard', 'href' => client_route('agent.dashboard')],
+    ['label' => 'My bookings', 'href' => client_route('agent.bookings.index')],
+    ['label' => $booking->display_reference],
+]" />
+
 <div class="jp-portal-page-head">
     <div>
-        <p class="jp-portal-backlink"><a href="{{ client_route('agent.bookings.index') }}">← My bookings</a></p>
         <h1>{{ $booking->display_reference }}</h1>
         <p>Trip details, payment, and documents.</p>
     </div>
@@ -45,7 +50,7 @@
 
 <x-bookings.detail-summary-card :booking="$booking" :payment-label="$paymentOp['label']" :shell="$shell" />
 
-<div class="jp-portal-grid jp-portal-grid--2" style="margin-top:var(--sp-5)">
+<div class="jp-portal-grid jp-portal-grid--2" data-testid="agent-booking-detail-layout" style="margin-top:var(--sp-5)">
     <div>
         <x-bookings.detail-timeline :timeline="$timeline" :shell="$shell" />
         <x-bookings.detail-itinerary :itinerary="$itinerary" test-id-prefix="agent" :shell="$shell" />

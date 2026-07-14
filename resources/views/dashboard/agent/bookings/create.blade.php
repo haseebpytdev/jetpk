@@ -6,6 +6,12 @@
 @section('account_subtitle', 'Search real-time fares using the main booking flow. This booking will be linked to your agency.')
 
 @section('account_content')
+    <x-dashboard.breadcrumbs :items="[
+        ['label' => 'Dashboard', 'href' => client_route('agent.dashboard')],
+        ['label' => 'My bookings', 'href' => client_route('agent.bookings.index')],
+        ['label' => 'New booking'],
+    ]" />
+
     @if (session('agent_booking_mode_notice'))
         <div class="alert alert-info border small mb-3" role="status" data-testid="agent-booking-mode-notice">
             {{ session('agent_booking_mode_notice') }}

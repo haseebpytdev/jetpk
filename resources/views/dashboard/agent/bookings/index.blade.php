@@ -12,6 +12,11 @@
 @endsection
 
 @section('account_content')
+    <x-dashboard.breadcrumbs :items="[
+        ['label' => 'Dashboard', 'href' => client_route('agent.dashboard')],
+        ['label' => 'My bookings'],
+    ]" />
+
     @php
         $canCreateBookings = auth()->user()?->hasAgentPermission(\App\Support\Agents\AgentPermission::BookingsCreate) ?? false;
         $canUploadPayments = auth()->user()?->hasAgentPermission(\App\Support\Agents\AgentPermission::PaymentsUpload) ?? false;

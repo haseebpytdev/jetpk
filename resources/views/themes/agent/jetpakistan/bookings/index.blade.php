@@ -5,6 +5,11 @@
 @section('content')
 @include('themes.frontend.jetpakistan.components.portal.flash')
 
+<x-dashboard.breadcrumbs :items="[
+    ['label' => 'Dashboard', 'href' => client_route('agent.dashboard')],
+    ['label' => 'My bookings'],
+]" />
+
 <div class="jp-portal-page-head">
     <div>
         <h1>My bookings</h1>
@@ -25,7 +30,7 @@
     ];
 @endphp
 
-<div class="jp-portal-tabs">
+<div class="jp-portal-tabs" data-testid="agent-bookings-filters">
     @foreach ($filters as $key => $label)
         <a href="{{ client_route('agent.bookings.index', ['filter' => $key]) }}" @class(['is-active' => ($filter ?? 'all') === $key])>{{ $label }}</a>
     @endforeach

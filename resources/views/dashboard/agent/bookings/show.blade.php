@@ -36,6 +36,12 @@
 @endsection
 
 @section('account_content')
+    <x-dashboard.breadcrumbs :items="[
+        ['label' => 'Dashboard', 'href' => client_route('agent.dashboard')],
+        ['label' => 'My bookings', 'href' => client_route('agent.bookings.index')],
+        ['label' => $booking->display_reference],
+    ]" />
+
     @if (session('status') === 'booking-request-created')
         <div class="ota-account-alert ota-account-alert--success">Booking request submitted. Our team will review fare and proceed with supplier booking.</div>
     @elseif (session('status'))

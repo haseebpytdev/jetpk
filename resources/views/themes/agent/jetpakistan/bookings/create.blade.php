@@ -9,6 +9,12 @@
     <div class="jp-portal-alert jp-portal-alert--info">{{ session('agent_booking_mode_notice') }}</div>
 @endif
 
+<x-dashboard.breadcrumbs :items="[
+    ['label' => 'Dashboard', 'href' => client_route('agent.dashboard')],
+    ['label' => 'My bookings', 'href' => client_route('agent.bookings.index')],
+    ['label' => 'New booking'],
+]" />
+
 <div class="jp-portal-page-head">
     <div>
         <h1>Create flight booking</h1>

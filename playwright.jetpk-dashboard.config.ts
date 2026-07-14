@@ -6,7 +6,7 @@ const authDir = 'storage/app/playwright/jetpk-9h-b/auth';
 export default defineConfig({
   testDir: 'tests/playwright/jetpk-dashboard',
   outputDir: 'tests/playwright/artifacts/jetpk-dashboard/results',
-  globalSetup: './tests/playwright/jetpk-9h-b/global-setup.ts',
+  globalSetup: './tests/playwright/jetpk-dashboard/global-setup.ts',
   timeout: 120_000,
   expect: { timeout: 20_000 },
   fullyParallel: false,
@@ -44,6 +44,22 @@ export default defineConfig({
       name: 'customer-dashboard',
       testMatch: /customer-dashboard\.spec\.ts/,
       use: { storageState: `${authDir}/customer.json` },
+    },
+    {
+      name: 'customer-detail-support',
+      testMatch: /customer-detail-support\.spec\.ts/,
+      use: { storageState: `${authDir}/customer.json` },
+    },
+    {
+      name: 'agent-bookings',
+      testMatch: /agent-bookings\.spec\.ts/,
+      use: { storageState: `${authDir}/agent.json` },
+    },
+    {
+      name: 'agent-bookings-staff',
+      testMatch: /agent-bookings\.spec\.ts/,
+      grep: /agent staff/,
+      use: { storageState: `${authDir}/agent-staff.json` },
     },
   ],
 });
