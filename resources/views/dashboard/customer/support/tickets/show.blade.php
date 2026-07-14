@@ -10,6 +10,12 @@
 @endsection
 
 @section('account_content')
+    <x-dashboard.breadcrumbs :items="[
+        ['label' => 'Dashboard', 'href' => client_route('customer.dashboard')],
+        ['label' => 'Support tickets', 'href' => client_route('customer.support.tickets.index')],
+        ['label' => '#'.$ticket->id],
+    ]" />
+
     @if (session('status'))
         <div class="ota-account-alert ota-account-alert--success">{{ session('status') }}</div>
     @endif

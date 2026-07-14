@@ -10,6 +10,12 @@
 @endsection
 
 @section('account_content')
+    <x-dashboard.breadcrumbs :items="[
+        ['label' => 'Dashboard', 'href' => client_route('customer.dashboard')],
+        ['label' => 'Support tickets', 'href' => client_route('customer.support.tickets.index')],
+        ['label' => 'New ticket'],
+    ]" />
+
     <div class="ota-account-card ota-account-form-card">
         <div class="ota-account-card__body">
             <form method="post" action="{{ route('customer.support.tickets.store') }}" data-testid="customer-support-ticket-form">

@@ -32,9 +32,14 @@
     <div class="jp-portal-alert jp-portal-alert--info">{{ session('status') }}</div>
 @endif
 
+<x-dashboard.breadcrumbs :items="[
+    ['label' => 'Dashboard', 'href' => client_route('customer.dashboard')],
+    ['label' => 'My bookings', 'href' => client_route('customer.bookings.index')],
+    ['label' => $booking->display_reference],
+]" />
+
 <div class="jp-portal-page-head">
     <div>
-        <p class="jp-portal-backlink"><a href="{{ client_route('customer.bookings.index') }}">← My bookings</a></p>
         <h1>{{ $booking->display_reference }}</h1>
         <p>Trip details and documents.</p>
     </div>

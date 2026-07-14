@@ -1,7 +1,7 @@
 @php
     $portalVariant = $portalVariant ?? 'agent';
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpPortalAssetVersion = 40;
+    $jpPortalAssetVersion = 41;
     $jpFavicon = client_branding()->faviconUrl();
     $jpBrandName = client_branding()->companyName();
     $pageTitle = trim($__env->yieldContent('title'));

@@ -30,6 +30,12 @@
 @section('account_subtitle', 'Trip details and documents')
 
 @section('account_content')
+    <x-dashboard.breadcrumbs :items="[
+        ['label' => 'Dashboard', 'href' => client_route('customer.dashboard')],
+        ['label' => 'My bookings', 'href' => client_route('customer.bookings.index')],
+        ['label' => $booking->display_reference],
+    ]" />
+
     @if (session('status') === 'payment-proof-submitted')
         <div class="ota-account-alert ota-account-alert--success">Payment proof submitted. Our team will verify it shortly.</div>
     @elseif (session('status'))

@@ -90,6 +90,16 @@
 .jp-portal-backlink{margin:0 0 var(--sp-2);font-size:var(--fs-14)}
 .jp-portal-backlink a{color:var(--gold-deep);text-decoration:none}
 .jp-portal-backlink a:hover{text-decoration:underline}
+.jp-portal .ota-dashboard-breadcrumbs{margin:0 0 var(--sp-4)}
+.jp-portal .ota-dashboard-breadcrumbs__list{
+  display:flex;flex-wrap:wrap;align-items:center;gap:4px;
+  margin:0;padding:0;list-style:none;font-size:var(--fs-13);
+}
+.jp-portal .ota-dashboard-breadcrumbs__item{display:inline-flex;align-items:center;gap:4px}
+.jp-portal .ota-dashboard-breadcrumbs__sep{color:var(--muted)}
+.jp-portal .ota-dashboard-breadcrumbs__link{color:var(--muted);text-decoration:none}
+.jp-portal .ota-dashboard-breadcrumbs__link:hover{color:var(--gold-deep);text-decoration:underline}
+.jp-portal .ota-dashboard-breadcrumbs__current{color:var(--text);font-weight:600}
 .jp-portal-stat-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   gap:var(--sp-3);margin-bottom:var(--sp-5);
