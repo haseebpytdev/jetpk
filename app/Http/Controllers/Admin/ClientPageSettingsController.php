@@ -203,7 +203,7 @@ class ClientPageSettingsController extends Controller
         $profile = $this->requireProfile();
 
         try {
-            $this->assetService->store(
+            $asset = $this->assetService->store(
                 $profile,
                 $pageKey,
                 $validated['asset_key'],
@@ -222,9 +222,16 @@ class ClientPageSettingsController extends Controller
                 ->withErrors(['file' => 'Upload failed. Please try again.']);
         }
 
-        return redirect()
+        $warning = is_array($asset->meta_json) ? ($asset->meta_json['hero_lcp_warning'] ?? null) : null;
+        $redirect = redirect()
             ->to($mediaEditUrl)
             ->with('status', 'Asset uploaded.');
+
+        if (is_string($warning) && $warning !== '') {
+            $redirect->with('warning', $warning);
+        }
+
+        return $redirect;
     }
 
     public function destroyAsset(string $pageKey, ClientPageAsset $asset): RedirectResponse

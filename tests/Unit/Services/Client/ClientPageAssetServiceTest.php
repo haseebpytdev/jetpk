@@ -44,6 +44,32 @@ class ClientPageAssetServiceTest extends TestCase
         $this->assertStringContainsString('/storage/', $asset->public_url);
     }
 
+    public function test_store_hero_background_triggers_validated_lcp_manifest(): void
+    {
+        $profile = $this->makeProfile([
+            'slug' => 'jetpk',
+            'asset_profile' => 'jetpk-assets',
+        ]);
+
+        $file = new UploadedFile(
+            $this->gradientJpegPath(),
+            'hero-dashboard.jpg',
+            'image/jpeg',
+            null,
+            true,
+        );
+        $service = app(ClientPageAssetService::class);
+
+        $asset = $service->store($profile, 'home', 'hero_background', $file);
+
+        $this->assertSame('hero_background', $asset->asset_key);
+        $manifest = $asset->meta_json['hero_lcp'] ?? null;
+        $this->assertIsArray($manifest);
+        $this->assertArrayHasKey('fingerprint', $manifest);
+        $this->assertArrayHasKey('variants', $manifest);
+        $this->assertArrayHasKey('desktop', $manifest['variants']);
+    }
+
     public function test_store_rejects_unreadable_upload(): void
     {
         $profile = $this->makeProfile();
@@ -87,5 +113,30 @@ class ClientPageAssetServiceTest extends TestCase
         }
 
         return $profile;
+    }
+
+    private function gradientJpegPath(): string
+    {
+        $dir = storage_path('app/testing/hero-fixtures');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $path = $dir.'/service-gradient.jpg';
+        if (is_file($path)) {
+            return $path;
+        }
+
+        $img = imagecreatetruecolor(1200, 600);
+        for ($x = 0; $x < 1200; $x++) {
+            for ($y = 0; $y < 600; $y++) {
+                $color = imagecolorallocate($img, ($x + 25) % 255, ($y * 2) % 255, 130);
+                imagesetpixel($img, $x, $y, $color);
+            }
+        }
+        imagejpeg($img, $path, 90);
+        imagedestroy($img);
+
+        return $path;
     }
 }

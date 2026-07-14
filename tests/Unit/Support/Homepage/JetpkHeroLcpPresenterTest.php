@@ -2,12 +2,14 @@
 
 namespace Tests\Unit\Support\Homepage;
 
+use App\Enums\ClientPageSettingStatus;
 use App\Models\ClientPageAsset;
 use App\Models\ClientPageSetting;
-use App\Enums\ClientPageSettingStatus;
+use App\Services\Homepage\JetpkHeroImageOptimizer;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Homepage\JetpkHeroLcpPresenter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\Support\JetpkHomepageFixture;
 use Tests\TestCase;
 
@@ -20,44 +22,85 @@ class JetpkHeroLcpPresenterTest extends TestCase
     {
         parent::setUp();
         config(['client_route_parity.enabled' => false]);
+        Storage::fake('public');
         $this->seedJetpkAirports();
         $this->seedJetpkAgency();
     }
 
-    public function test_presenter_returns_responsive_sources_for_lcp_directory(): void
+    public function test_presenter_uses_current_asset_manifest_only(): void
     {
-        $heroUrl = asset('client-assets/jetpk-assets/pages/home/hero_background-20260710115655.jpg');
-        if (! is_file(public_path('client-assets/jetpk-assets/pages/home/lcp/hero-desktop.webp'))) {
-            $this->markTestSkipped('LCP variants not generated on disk.');
-        }
-
-        $presented = app(JetpkHeroLcpPresenter::class)->present($heroUrl);
-
-        $this->assertNotNull($presented);
-        $this->assertTrue($presented['has_responsive_variants']);
-        $this->assertSame(1200, $presented['width']);
-        $this->assertSame(600, $presented['height']);
-        $this->assertStringContainsString('hero-desktop.avif', $presented['preload_url']);
-        $this->assertNotSame('', $presented['alt']);
-    }
-
-    public function test_jetpk_homepage_renders_semantic_hero_picture_with_priority_hints(): void
-    {
-        if (! is_file(public_path('client-assets/jetpk-assets/pages/home/lcp/hero-desktop.webp'))) {
-            $this->markTestSkipped('LCP variants not generated on disk.');
-        }
-
         $profile = $this->makeJetpkProfile();
-        $heroPath = 'client-assets/jetpk-assets/pages/home/hero_background-20260710115655.jpg';
+        $source = $this->photographicSource();
+        $this->assertFileExists($source);
+        $relative = 'client-assets/jetpk-assets/pages/home/hero_background-test.jpg';
+        Storage::disk('public')->put($relative, (string) file_get_contents($source));
+        $this->assertTrue(Storage::disk('public')->exists($relative));
+        $heroUrl = '/storage/'.$relative;
+
+        $optimizer = app(JetpkHeroImageOptimizer::class);
+        $result = $optimizer->optimize(Storage::disk('public')->path($relative), 'jetpk-assets', 'home', $relative);
+        if (! $result['activated']) {
+            $this->fail((string) ($result['warning'] ?? 'optimizer did not activate'));
+        }
 
         ClientPageAsset::query()->create([
             'client_profile_id' => $profile->id,
             'page_key' => ClientPageKeys::HOME,
             'asset_key' => 'hero_background',
             'disk' => 'public',
-            'path' => $heroPath,
-            'public_url' => asset($heroPath),
-            'alt_text' => 'JetPakistan flights',
+            'path' => $relative,
+            'public_url' => $heroUrl,
+            'meta_json' => ['hero_lcp' => $result['manifest']],
+        ]);
+
+        $presented = app(JetpkHeroLcpPresenter::class)->present($heroUrl, $result['manifest']);
+
+        $this->assertNotNull($presented);
+        $this->assertTrue($presented['has_responsive_variants']);
+        $this->assertStringContainsString('/lcp/'.$result['fingerprint'].'/', $presented['sources'][0]['srcset']);
+    }
+
+    public function test_presenter_ignores_stale_manifest_for_different_source(): void
+    {
+        $profile = $this->makeJetpkProfile();
+        $relative = 'client-assets/jetpk-assets/pages/home/hero_background-current.jpg';
+        Storage::disk('public')->put($relative, file_get_contents($this->photographicSource()));
+        $heroUrl = Storage::disk('public')->url($relative);
+
+        $staleManifest = [
+            'fingerprint' => 'deadbeefdeadbeef',
+            'source_path' => 'client-assets/jetpk-assets/pages/home/old-hero.jpg',
+            'variants' => ['desktop' => ['webp' => ['url' => 'http://example.test/old.webp', 'path' => 'missing']]],
+        ];
+
+        $presented = app(JetpkHeroLcpPresenter::class)->present($heroUrl, $staleManifest);
+
+        $this->assertNotNull($presented);
+        $this->assertFalse($presented['has_responsive_variants']);
+        $this->assertSame($heroUrl, $presented['fallback_url']);
+    }
+
+    public function test_jetpk_homepage_renders_semantic_hero_picture_with_priority_hints(): void
+    {
+        $profile = $this->makeJetpkProfile();
+        $relative = 'client-assets/jetpk-assets/pages/home/hero_background-page.jpg';
+        Storage::disk('public')->put($relative, file_get_contents($this->photographicSource()));
+
+        $result = app(JetpkHeroImageOptimizer::class)->optimize(
+            Storage::disk('public')->path($relative),
+            'jetpk-assets',
+            'home',
+        );
+        $this->assertTrue($result['activated']);
+
+        ClientPageAsset::query()->create([
+            'client_profile_id' => $profile->id,
+            'page_key' => ClientPageKeys::HOME,
+            'asset_key' => 'hero_background',
+            'disk' => 'public',
+            'path' => $relative,
+            'public_url' => Storage::disk('public')->url($relative),
+            'meta_json' => ['hero_lcp' => $result['manifest']],
         ]);
 
         ClientPageSetting::query()->create([
@@ -68,7 +111,11 @@ class JetpkHeroLcpPresenterTest extends TestCase
             'published_at' => now(),
         ]);
 
-        $response = $this->get(route('client.preview.home', ['clientSlug' => 'jetpk']));
+        $homeRoute = \Illuminate\Support\Facades\Route::has('client.preview.home')
+            ? 'client.preview.home'
+            : 'client.parity.home.alias';
+
+        $response = $this->get(route($homeRoute, ['clientSlug' => 'jetpk']));
         if ($response->isRedirect()) {
             $response = $this->followRedirects($response);
         }
@@ -80,11 +127,42 @@ class JetpkHeroLcpPresenterTest extends TestCase
         $this->assertStringContainsString('class="hero-img"', $html);
         $this->assertStringContainsString('fetchpriority="high"', $html);
         $this->assertStringContainsString('loading="eager"', $html);
-        $this->assertStringContainsString('width="1200"', $html);
-        $this->assertStringContainsString('height="600"', $html);
         $this->assertStringContainsString('rel="preload"', $html);
         $this->assertStringContainsString('jp-loader done', $html);
-        $this->assertStringNotContainsString('--jp-hero-bg-image', $html);
         $this->assertStringContainsString('name="trip_type"', $html);
+    }
+
+    private function photographicSource(): string
+    {
+        $reference = 'c:/Users/khadi/Downloads/jetpakistan.png';
+        if (is_file($reference)) {
+            $dir = storage_path('app/testing/hero-fixtures');
+            if (! is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            $target = $dir.'/presenter-source.jpg';
+            $png = imagecreatefrompng($reference);
+            imagejpeg($png, $target, 90);
+            imagedestroy($png);
+
+            return $target;
+        }
+
+        $dir = storage_path('app/testing/hero-fixtures');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        $path = $dir.'/presenter-gradient.jpg';
+        $img = imagecreatetruecolor(900, 500);
+        for ($x = 0; $x < 900; $x++) {
+            for ($y = 0; $y < 500; $y++) {
+                $color = imagecolorallocate($img, ($x + 15) % 255, ($y * 2) % 255, 110);
+                imagesetpixel($img, $x, $y, $color);
+            }
+        }
+        imagejpeg($img, $path, 90);
+        imagedestroy($img);
+
+        return $path;
     }
 }

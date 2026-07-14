@@ -8,7 +8,14 @@
     $defaults = $jpHome->defaults();
 
     $jpHeroBg = $jpHome->assetUrl('hero_background') ?? client_branding()->heroImageUrl();
-    $jpHeroLcp = $jpHeroBg ? app(JetpkHeroLcpPresenter::class)->present($jpHeroBg) : null;
+    $jpHeroManifest = null;
+    if ($jpHeroBg && function_exists('current_client_profile')) {
+        $jpProfile = current_client_profile();
+        if ($jpProfile !== null) {
+            $jpHeroManifest = app(JetpkHeroLcpPresenter::class)->manifestForHeroUrl($jpHeroBg, $jpProfile->id);
+        }
+    }
+    $jpHeroLcp = $jpHeroBg ? app(JetpkHeroLcpPresenter::class)->present($jpHeroBg, $jpHeroManifest) : null;
     $heroEyebrow = $jpHome->field('hero.eyebrow', data_get($defaults, 'hero.eyebrow', ''));
     $heroHeadline = $jpHome->field('hero.headline', data_get($defaults, 'hero.headline', ''));
     $heroHighlight = $jpHome->field('hero.headline_highlight', data_get($defaults, 'hero.headline_highlight', ''));
@@ -18,14 +25,16 @@
 @endphp
 @if ($jpHeroLcp)
   @push('head')
-    <link
-      rel="preload"
-      as="image"
-      href="{{ $jpHeroLcp['preload_url'] }}"
-      @if (! empty($jpHeroLcp['preload_type'])) type="{{ $jpHeroLcp['preload_type'] }}" @endif
-      media="{{ $jpHeroLcp['preload_media'] }}"
-      fetchpriority="high"
-    >
+    @foreach ($jpHeroLcp['preloads'] as $preload)
+      <link
+        rel="preload"
+        as="image"
+        href="{{ $preload['href'] }}"
+        @if (! empty($preload['type'])) type="{{ $preload['type'] }}" @endif
+        media="{{ $preload['media'] }}"
+        @if ($loop->first) fetchpriority="high" @endif
+      >
+    @endforeach
   @endpush
 @endif
 <section class="hero @if($jpHeroLcp) hero--has-image @endif" id="top">

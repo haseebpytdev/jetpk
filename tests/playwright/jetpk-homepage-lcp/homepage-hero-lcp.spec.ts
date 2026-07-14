@@ -54,6 +54,40 @@ test.describe('homepage hero LCP', () => {
         await expect(heroImg).toHaveAttribute('width', /.+/);
         await expect(heroImg).toHaveAttribute('height', /.+/);
 
+        const natural = await heroImg.evaluate((img: HTMLImageElement) => ({
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+        }));
+        expect(natural.width).toBeGreaterThan(100);
+        expect(natural.height).toBeGreaterThan(80);
+
+        const luminance = await heroImg.evaluate(async (img: HTMLImageElement) => {
+          if (!img.complete || img.naturalWidth < 1) {
+            await new Promise<void>((resolve) => {
+              img.addEventListener('load', () => resolve(), { once: true });
+            });
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = 32;
+          canvas.height = 32;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return { average: 0, variance: 0 };
+          ctx.drawImage(img, 0, 0, 32, 32);
+          const data = ctx.getImageData(0, 0, 32, 32).data;
+          const samples: number[] = [];
+          for (let i = 0; i < data.length; i += 16) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            samples.push((0.2126 * r) + (0.7152 * g) + (0.0722 * b));
+          }
+          const average = samples.reduce((sum, v) => sum + v, 0) / samples.length;
+          const variance = samples.reduce((sum, v) => sum + ((v - average) ** 2), 0) / samples.length;
+          return { average, variance };
+        });
+        expect(luminance.average).toBeGreaterThan(12);
+        expect(luminance.variance).toBeGreaterThan(40);
+
         const box = await heroImg.boundingBox();
         expect(box?.width ?? 0).toBeGreaterThan(100);
         expect(box?.height ?? 0).toBeGreaterThan(80);

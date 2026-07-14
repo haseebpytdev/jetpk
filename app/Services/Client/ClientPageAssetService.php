@@ -4,6 +4,8 @@ namespace App\Services\Client;
 
 use App\Models\ClientPageAsset;
 use App\Models\ClientProfile;
+use App\Services\Homepage\JetpkHeroImageOptimizer;
+use App\Support\Client\ClientPageKeys;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +20,11 @@ final class ClientPageAssetService
 {
     /** @var list<string> */
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'svg'];
+
+    public function __construct(
+        private readonly JetpkHeroImageOptimizer $heroImageOptimizer,
+        private readonly ClientPageAssetPublicationService $publicationService,
+    ) {}
 
     public function store(
         ClientProfile $profile,
@@ -92,6 +99,8 @@ final class ClientPageAssetService
             if ($previousPath !== null && $previousPath !== '' && $previousPath !== $relativePath) {
                 $this->deleteStoredFile($previousPath, (string) ($existing?->disk ?: 'public'));
             }
+
+            $asset = $this->finalizeHeroOptimization($asset, $profile, $pageKey, $assetKey, $existing);
 
             return $asset;
         } catch (\Throwable $e) {
@@ -205,5 +214,57 @@ final class ClientPageAssetService
             'image/svg+xml' => 'svg',
             default => 'bin',
         };
+    }
+
+    private function finalizeHeroOptimization(
+        ClientPageAsset $asset,
+        ClientProfile $profile,
+        string $pageKey,
+        string $assetKey,
+        ?ClientPageAsset $existing,
+    ): ClientPageAsset {
+        if ($pageKey !== ClientPageKeys::HOME || $assetKey !== 'hero_background') {
+            $this->publicationService->publishPublicDiskRelativePath((string) $asset->path);
+
+            return $asset;
+        }
+
+        $profileSlug = trim((string) $profile->asset_profile) !== ''
+            ? trim((string) $profile->asset_profile)
+            : trim((string) $profile->slug);
+
+        $absoluteSource = $this->absolutePathFor($asset);
+        if ($absoluteSource === null) {
+            return $asset;
+        }
+
+        $previousFingerprint = is_array($existing?->meta_json['hero_lcp'] ?? null)
+            ? (string) ($existing->meta_json['hero_lcp']['fingerprint'] ?? '')
+            : '';
+
+        $result = $this->heroImageOptimizer->optimize($absoluteSource, $profileSlug, $pageKey, (string) $asset->path);
+        $meta = is_array($asset->meta_json) ? $asset->meta_json : [];
+
+        if ($result['activated'] && is_array($result['manifest'])) {
+            if ($previousFingerprint !== '' && $previousFingerprint !== $result['fingerprint']) {
+                $this->heroImageOptimizer->deleteVariantDirectory($profileSlug, $pageKey, $previousFingerprint);
+            }
+
+            $meta['hero_lcp'] = $result['manifest'];
+            unset($meta['hero_lcp_warning']);
+        } else {
+            $meta['hero_lcp_warning'] = $result['warning'] ?? 'Hero optimization did not activate responsive variants.';
+            if (is_array($existing?->meta_json['hero_lcp'] ?? null)) {
+                $meta['hero_lcp'] = $existing->meta_json['hero_lcp'];
+            } else {
+                unset($meta['hero_lcp']);
+            }
+        }
+
+        $asset->update(['meta_json' => $meta]);
+        $this->publicationService->publishPublicDiskRelativePath((string) $asset->path);
+        $this->publicationService->publishManyPublicDiskRelativePaths($result['published_paths']);
+
+        return $asset->fresh() ?? $asset;
     }
 }

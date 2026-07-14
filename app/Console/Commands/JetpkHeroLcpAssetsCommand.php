@@ -2,168 +2,158 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ClientPageAsset;
+use App\Models\ClientProfile;
+use App\Services\Client\ClientPageAssetPublicationService;
+use App\Services\Client\ClientPageAssetService;
+use App\Services\Homepage\JetpkHeroImageOptimizer;
+use App\Support\Client\ClientPageKeys;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
 /**
- * Generates responsive AVIF/WebP/JPEG hero variants for homepage LCP.
+ * Regenerates validated responsive hero variants for the current CMS hero source.
  */
 class JetpkHeroLcpAssetsCommand extends Command
 {
     protected $signature = 'jetpk:hero-lcp-assets
-        {--source= : Absolute or public-relative path to the source hero JPEG}
-        {--profile=jetpk-assets : Client asset profile slug}';
+        {--source= : Absolute path to an original hero upload (never an existing lcp derivative)}
+        {--profile= : Client asset profile slug}
+        {--dry-run : Inspect the resolved source and exit without writing variants}';
 
-    protected $description = 'Generate responsive AVIF/WebP/JPEG homepage hero LCP variants';
+    protected $description = 'Generate validated responsive hero variants for the current CMS hero';
 
-  /** @var array<string, int> */
-    private const TARGET_WIDTHS = [
-        'desktop' => 1200,
-        'tablet' => 1024,
-        'mobile' => 768,
-    ];
-
-    public function handle(): int
-    {
-        $source = $this->resolveSourcePath();
-        if ($source === null) {
-            $this->error('Could not locate a source hero image. Pass --source= or upload hero_background to pages/home.');
+    public function handle(
+        JetpkHeroImageOptimizer $optimizer,
+        ClientPageAssetService $assetService,
+        ClientPageAssetPublicationService $publicationService,
+    ): int {
+        $resolved = $this->resolveSource($assetService);
+        if ($resolved === null) {
+            $this->error('Could not resolve a CMS hero source. Upload hero_background or pass --source= to an original file.');
 
             return self::FAILURE;
         }
 
-        if (! extension_loaded('gd')) {
-            $this->error('GD extension is required to generate hero LCP variants.');
+        ['path' => $source, 'profile_slug' => $profileSlug, 'asset' => $asset] = $resolved;
+
+        if ($this->isDerivativePath($source)) {
+            $this->error('Refusing to optimize an existing lcp derivative. Provide the original CMS upload path.');
 
             return self::FAILURE;
         }
 
-        $size = @getimagesize($source);
-        if (! is_array($size)) {
-            $this->error('Source file is not a readable image: '.$source);
+        $fingerprint = substr(hash_file('sha256', $source), 0, 16);
+        $this->line('Source: '.$source);
+        $this->line('Fingerprint: '.$fingerprint);
+        $this->line('Profile: '.$profileSlug);
+
+        if ((bool) $this->option('dry-run')) {
+            return self::SUCCESS;
+        }
+
+        $existingFingerprint = is_array($asset?->meta_json['hero_lcp'] ?? null)
+            ? (string) ($asset->meta_json['hero_lcp']['fingerprint'] ?? '')
+            : '';
+
+        $result = $optimizer->optimize($source, $profileSlug, ClientPageKeys::HOME, $asset?->path);
+        foreach ($result['validation'] as $row) {
+            $status = ($row['valid'] ?? false) ? 'PASS' : 'FAIL';
+            $this->line(sprintf(
+                '%s %s/%s %s',
+                $status,
+                $row['breakpoint'] ?? '-',
+                $row['format'] ?? '-',
+                $row['reason'] ?? '',
+            ));
+        }
+
+        if (! $result['activated'] || ! is_array($result['manifest'])) {
+            $this->error($result['warning'] ?? 'Hero optimization failed.');
 
             return self::FAILURE;
         }
 
-        $profile = trim((string) $this->option('profile'));
-        $outputDir = public_path('client-assets/'.$profile.'/pages/home/lcp');
-        File::ensureDirectoryExists($outputDir);
-
-        $beforeBytes = (int) filesize($source);
-        $rows = [];
-
-        foreach (self::TARGET_WIDTHS as $label => $targetWidth) {
-            $targetHeight = (int) max(1, round($size[1] * ($targetWidth / $size[0])));
-
-            foreach (['jpg' => 82, 'webp' => 82, 'avif' => 60] as $format => $quality) {
-                $dest = $outputDir.'/hero-'.$label.'.'.$format;
-                $this->writeVariant($source, $dest, $targetWidth, $targetHeight, $format, $quality);
-                $rows[] = [
-                    $label,
-                    $format,
-                    $targetWidth.'x'.$targetHeight,
-                    $this->formatBytes((int) filesize($dest)),
-                ];
-            }
+        if ($existingFingerprint !== '' && $existingFingerprint !== $result['fingerprint']) {
+            $optimizer->deleteVariantDirectory($profileSlug, ClientPageKeys::HOME, $existingFingerprint);
         }
 
-        $this->table(['Breakpoint', 'Format', 'Dimensions', 'Bytes'], $rows);
-        $this->line('Source: '.$source.' ('.$this->formatBytes($beforeBytes).', '.$size[0].'x'.$size[1].')');
-        $this->line('Output: '.$outputDir);
+        if ($asset instanceof ClientPageAsset) {
+            $meta = is_array($asset->meta_json) ? $asset->meta_json : [];
+            $meta['hero_lcp'] = $result['manifest'];
+            unset($meta['hero_lcp_warning']);
+            $asset->update(['meta_json' => $meta]);
+        }
+
+        $publicationService->publishManyPublicDiskRelativePaths($result['published_paths']);
+        $this->quarantineLegacyFlatVariants($profileSlug);
+        $this->info('Validated hero variants generated and published.');
 
         return self::SUCCESS;
     }
 
-    private function resolveSourcePath(): ?string
+    /**
+     * @return array{path: string, profile_slug: string, asset: ?ClientPageAsset}|null
+     */
+    private function resolveSource(ClientPageAssetService $assetService): ?array
     {
         $explicit = trim((string) $this->option('source'));
         if ($explicit !== '') {
-            if (is_file($explicit)) {
-                return $explicit;
+            $path = is_file($explicit) ? $explicit : public_path(ltrim($explicit, '/'));
+            if (! is_file($path)) {
+                return null;
             }
 
-            $publicCandidate = public_path(ltrim($explicit, '/'));
-            if (is_file($publicCandidate)) {
-                return $publicCandidate;
-            }
+            return [
+                'path' => $path,
+                'profile_slug' => trim((string) $this->option('profile')) ?: 'jetpk-assets',
+                'asset' => null,
+            ];
         }
 
-        $profile = trim((string) $this->option('profile'));
-        $homeDir = public_path('client-assets/'.$profile.'/pages/home');
-        if (! is_dir($homeDir)) {
+        $asset = ClientPageAsset::query()
+            ->where('page_key', ClientPageKeys::HOME)
+            ->where('asset_key', 'hero_background')
+            ->latest('id')
+            ->first();
+
+        if ($asset === null) {
             return null;
         }
 
-        $matches = glob($homeDir.'/hero_background*.jpg') ?: [];
-        if ($matches === []) {
-            $matches = glob($homeDir.'/hero_background*.jpeg') ?: [];
-        }
-
-        if ($matches === []) {
+        $absolute = $assetService->absolutePathFor($asset);
+        if ($absolute === null) {
             return null;
         }
 
-        usort($matches, static fn (string $a, string $b): int => filemtime($b) <=> filemtime($a));
+        $profile = ClientProfile::query()->find($asset->client_profile_id);
+        $profileSlug = trim((string) ($profile?->asset_profile ?: $profile?->slug ?: $this->option('profile')));
 
-        return $matches[0];
+        return [
+            'path' => $absolute,
+            'profile_slug' => $profileSlug !== '' ? $profileSlug : 'jetpk-assets',
+            'asset' => $asset,
+        ];
     }
 
-    private function writeVariant(
-        string $source,
-        string $dest,
-        int $targetWidth,
-        int $targetHeight,
-        string $format,
-        int $quality,
-    ): void {
-        $image = $this->loadImage($source);
-        if ($image === null) {
-            throw new \RuntimeException('Unable to load source image.');
+    private function isDerivativePath(string $path): bool
+    {
+        $normalized = str_replace('\\', '/', $path);
+
+        return str_contains($normalized, '/pages/home/lcp/');
+    }
+
+    private function quarantineLegacyFlatVariants(string $profileSlug): void
+    {
+        $legacyDir = public_path('client-assets/'.$profileSlug.'/pages/home/lcp');
+        if (! is_dir($legacyDir)) {
+            return;
         }
 
-        $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
-        imagecopyresampled(
-            $canvas,
-            $image,
-            0,
-            0,
-            0,
-            0,
-            $targetWidth,
-            $targetHeight,
-            imagesx($image),
-            imagesy($image),
-        );
-
-        match ($format) {
-            'jpg' => imagejpeg($canvas, $dest, $quality),
-            'webp' => imagewebp($canvas, $dest, $quality),
-            'avif' => imageavif($canvas, $dest, $quality),
-            default => throw new \InvalidArgumentException('Unsupported format: '.$format),
-        };
-
-        imagedestroy($image);
-        imagedestroy($canvas);
-    }
-
-    private function loadImage(string $source): ?\GdImage
-    {
-        $type = (int) (@getimagesize($source)[2] ?? 0);
-
-        return match ($type) {
-            IMAGETYPE_JPEG => @imagecreatefromjpeg($source) ?: null,
-            IMAGETYPE_PNG => @imagecreatefrompng($source) ?: null,
-            IMAGETYPE_WEBP => @imagecreatefromwebp($source) ?: null,
-            default => null,
-        };
-    }
-
-    private function formatBytes(int $bytes): string
-    {
-        if ($bytes < 1024) {
-            return $bytes.' B';
+        foreach (glob($legacyDir.'/hero-*.{avif,webp,jpg,jpeg}', GLOB_BRACE) ?: [] as $legacyFile) {
+            if (is_file($legacyFile)) {
+                @unlink($legacyFile);
+            }
         }
-
-        return number_format($bytes / 1024, 1).' KB';
     }
 }
