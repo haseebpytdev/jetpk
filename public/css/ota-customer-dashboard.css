@@ -1,0 +1,146 @@
+/**
+ * Customer dashboard home — Phase 2 (customer.dashboard desktop redesign)
+ * JETPK-DASHBOARD-UI-FOUNDATION · baseline 6fbfae4
+ *
+ * Scoped to .ota-customer-dashboard inside the customer-account portal shell.
+ * Uses the portal ota-account-* vocabulary + design-system tokens. Every colour is a
+ * CSS variable so JetPakistan branding (var(--brand-*) from branding.json) applies.
+ * Phase-1 tokens (--font-size-*, --shadow-*) are used with fallbacks so this file works
+ * whether or not ota-dashboard-foundation.css is present.
+ *
+ * CACHE-BUST: linked via ui_asset(); bump ?v= on edit.
+ */
+
+.ota-customer-dashboard {
+  display: grid;
+  gap: var(--space-6, 24px);
+}
+
+/* Pending-payment banner --------------------------------------------------- */
+.ota-customer-dashboard__alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2, 8px);
+  padding: 12px 16px;
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 30%, var(--color-border, #dbe3ee));
+  border-inline-start: 3px solid var(--brand-primary);
+  border-radius: var(--radius-md, 12px);
+  background: color-mix(in srgb, var(--brand-primary) 6%, var(--color-surface, #fff));
+}
+.ota-customer-dashboard__alert-main { min-width: 0; }
+.ota-customer-dashboard__alert-title { margin: 0; font-weight: 700; color: var(--color-text, #0f172a); font-size: var(--font-size-body, 0.875rem); }
+.ota-customer-dashboard__alert-text { margin: 2px 0 0; color: var(--color-muted, #64748b); font-size: var(--font-size-sm, 0.8125rem); }
+
+/* KPI stats ---------------------------------------------------------------- */
+.ota-customer-dashboard__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-4, 16px);
+}
+.ota-customer-dashboard__stat {
+  padding: var(--space-4, 16px);
+  border: 1px solid var(--color-border, #dbe3ee);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface, #fff);
+}
+.ota-customer-dashboard__stat-label {
+  margin: 0;
+  font-size: var(--font-size-caption, 0.75rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted, #64748b);
+}
+.ota-customer-dashboard__stat-value {
+  margin: 6px 0 0;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  font-weight: 700;
+  color: var(--color-text, #0f172a);
+}
+.ota-customer-dashboard__stat--accent { border-top: 2px solid var(--brand-primary); }
+.ota-customer-dashboard__stat--amber { border-top: 2px solid color-mix(in srgb, #f59e0b 80%, var(--brand-primary)); }
+.ota-customer-dashboard__stat--emerald { border-top: 2px solid color-mix(in srgb, #10b981 80%, var(--brand-primary)); }
+.ota-customer-dashboard__stat--violet { border-top: 2px solid color-mix(in srgb, #8b5cf6 80%, var(--brand-primary)); }
+
+/* Two-column body (main + highlight aside) --------------------------------- */
+.ota-customer-dashboard__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-6, 24px);
+  align-items: start;
+}
+@media (max-width: 767.98px) {
+  .ota-customer-dashboard__grid { grid-template-columns: 1fr; }
+}
+
+.ota-customer-dashboard__section-title {
+  margin: 0 0 var(--space-2, 8px);
+  font-size: var(--font-size-h3, 1rem);
+  font-weight: 700;
+  color: var(--color-text, #0f172a);
+}
+
+/* Upcoming / featured highlight -------------------------------------------- */
+.ota-customer-dashboard__highlight {
+  padding: var(--space-4, 16px);
+  border: 1px solid var(--color-border, #dbe3ee);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface, #fff);
+}
+.ota-customer-dashboard__highlight-eyebrow {
+  margin: 0 0 6px;
+  font-size: var(--font-size-caption, 0.75rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--brand-primary);
+  font-weight: 600;
+}
+.ota-customer-dashboard__highlight-ref { font-weight: 700; font-size: 1.05rem; color: var(--color-text, #0f172a); }
+.ota-customer-dashboard__highlight-route { margin: 4px 0 0; color: var(--color-text, #0f172a); font-size: var(--font-size-body, 0.875rem); }
+.ota-customer-dashboard__highlight-meta { margin: 2px 0 12px; color: var(--color-muted, #64748b); font-size: var(--font-size-sm, 0.8125rem); }
+.ota-customer-dashboard__highlight-foot { margin-top: 10px; font-size: var(--font-size-sm, 0.8125rem); color: var(--color-muted, #64748b); }
+
+/* Quick actions ------------------------------------------------------------ */
+.ota-customer-dashboard__quick {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--space-2, 8px);
+}
+.ota-customer-dashboard__quick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--color-border, #dbe3ee);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #0f172a);
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ota-customer-dashboard__quick-card:hover {
+  border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--color-border, #dbe3ee));
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+.ota-customer-dashboard__quick-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm, 8px);
+  background: color-mix(in srgb, var(--brand-primary) 10%, transparent);
+  color: var(--brand-primary);
+}
+.ota-customer-dashboard__quick-icon .ti { font-size: 18px; }
+.ota-customer-dashboard__quick-label { font-weight: 600; font-size: var(--font-size-sm, 0.8125rem); }
+
+/* Recent bookings table (reuses ota-account-table styling) ----------------- */
+.ota-customer-dashboard__recent .ota-account-table { margin-bottom: 0; }
+.ota-customer-dashboard__recent-foot {
+  margin-top: var(--space-2, 8px);
+  font-size: var(--font-size-sm, 0.8125rem);
+}

@@ -103,6 +103,7 @@
 .jp-portal-stat__l{margin-top:var(--sp-2);font-size:var(--fs-12);color:var(--muted)}
 .jp-portal-stat--amber .jp-portal-stat__v{color:var(--warn)}
 .jp-portal-stat--teal .jp-portal-stat__v{color:var(--gold-deep)}
+.jp-portal-stat--violet .jp-portal-stat__v{color:var(--violet,#7c3aed)}
 .jp-portal-quick{
   display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-5);
 }
@@ -198,6 +199,17 @@
 }
 .jp-portal-alert--info{background:var(--gold-soft);border-color:rgba(11,165,173,.2);color:var(--text)}
 .jp-portal-alert--warn{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3);color:var(--text)}
+.jp-portal-alert--row{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-3);
+}
+.jp-portal-alert--row .jp-portal-alert__text{margin:var(--sp-1) 0 0;font-size:var(--fs-13);color:var(--muted)}
+.jp-portal-dashboard__meta{margin:0 0 var(--sp-4);font-size:var(--fs-13);color:var(--muted)}
+.jp-portal-dashboard__meta a{color:var(--gold-deep);text-decoration:none}
+.jp-portal-dashboard__meta a:hover{text-decoration:underline}
+.jp-portal-highlight .jp-portal-highlight__ref{
+  font-family:var(--font-mono);font-size:var(--fs-16);font-weight:600;color:var(--gold-deep);margin:0 0 var(--sp-2);
+}
+.jp-portal-pagination{padding:var(--sp-4)}
 .jp-portal-support{
   margin-top:var(--sp-5);padding:var(--sp-5);border-radius:var(--r-feat);
   background:linear-gradient(135deg,var(--hero-1),var(--hero-2));
