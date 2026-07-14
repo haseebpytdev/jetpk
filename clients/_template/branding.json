@@ -1,0 +1,12 @@
+{
+    "logo_path": "logo/logo.svg",
+    "favicon_path": "favicon/favicon.ico",
+    "primary_color": "#0c4a6e",
+    "secondary_color": "#0ea5e9",
+    "accent_color": "#f59e0b",
+    "company_name": "REPLACE_CLIENT_NAME",
+    "phone": "+92 300 0000000",
+    "email": "support@replace.example.com",
+    "address": "Office address, City",
+    "footer_text": "We help you plan and book flights with dedicated support."
+}

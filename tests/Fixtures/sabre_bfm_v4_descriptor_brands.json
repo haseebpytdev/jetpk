@@ -1,0 +1,120 @@
+{
+    "groupedItineraryResponse": {
+        "version": "6",
+        "scheduleDescs": [
+            {
+                "ref": 1,
+                "departure": {
+                    "airport": "LHE",
+                    "time": "2026-08-15T02:00:00"
+                },
+                "arrival": {
+                    "airport": "DXB",
+                    "time": "2026-08-15T05:00:00"
+                },
+                "elapsedTime": 180,
+                "carrier": {
+                    "marketing": "EK",
+                    "marketingFlightNumber": "601"
+                }
+            }
+        ],
+        "legDescs": [
+            {
+                "ref": 1,
+                "elapsedTime": 180,
+                "schedules": [
+                    {
+                        "ref": 1
+                    }
+                ]
+            }
+        ],
+        "fareComponentDescs": [
+            {
+                "ref": 1,
+                "brand": {
+                    "brandName": "ECO SAVER",
+                    "code": "ECOSAVER"
+                }
+            },
+            {
+                "ref": 2,
+                "brand": {
+                    "brandName": "ECO FLEX",
+                    "code": "ECOFLEX"
+                }
+            }
+        ],
+        "brandFeatureDescs": [
+            {
+                "id": 10,
+                "commercialName": "Seat selection"
+            }
+        ],
+        "itineraryGroups": [
+            {
+                "itineraries": [
+                    {
+                        "id": "bf4-descriptor-itin",
+                        "legs": [
+                            {
+                                "ref": 1
+                            }
+                        ],
+                        "pricingInformation": [
+                            {
+                                "fare": {
+                                    "validatingCarrierCode": "EK",
+                                    "totalFare": {
+                                        "currency": "USD",
+                                        "totalPrice": 50000,
+                                        "baseFareAmount": 40000,
+                                        "totalTaxAmount": 10000
+                                    },
+                                    "passengerInfoList": [
+                                        {
+                                            "passengerInfo": {
+                                                "passengerType": "ADT",
+                                                "nonRefundable": false,
+                                                "fareComponents": [
+                                                    {
+                                                        "ref": 1
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "fare": {
+                                    "validatingCarrierCode": "EK",
+                                    "totalFare": {
+                                        "currency": "USD",
+                                        "totalPrice": 65000,
+                                        "baseFareAmount": 52000,
+                                        "totalTaxAmount": 13000
+                                    },
+                                    "passengerInfoList": [
+                                        {
+                                            "passengerInfo": {
+                                                "passengerType": "ADT",
+                                                "nonRefundable": false,
+                                                "fareComponents": [
+                                                    {
+                                                        "ref": 2
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

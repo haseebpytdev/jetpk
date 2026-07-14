@@ -1,0 +1,28 @@
+{
+    "offers_count": 1,
+    "offers": [
+        {
+            "offer_id": "pia-ndc-abc123def456",
+            "fare_breakdown": {
+                "supplier_total": 44510.0,
+                "currency": "PKR"
+            },
+            "raw_payload": {
+                "provider_context": {
+                    "provider": "pia_ndc",
+                    "shopping_response_ref_id": "b00fe7be-88f0-4de3-b455-28b5aa20f767",
+                    "offer_ref_id": "raw-offer-id-from-hitit",
+                    "offer_item_ref_id": "OfferItem-13",
+                    "pax_ref_id": "ADTPax-1",
+                    "owner_code": "PK",
+                    "offer_item_refs": [
+                        {
+                            "offer_item_ref_id": "OfferItem-13",
+                            "pax_ref_id": "ADTPax-1"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

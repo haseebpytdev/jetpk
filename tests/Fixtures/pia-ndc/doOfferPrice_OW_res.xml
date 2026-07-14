@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+   <S:Body>
+      <ns16:IATA_OfferPriceRS xmlns:ns16="http://www.iata.org/IATA/2015/00/2020.1/IATA_OfferPriceRS">
+         <ns16:Response>
+            <ns16:PricedOffer>
+               <ns16:Offer>
+                  <ns16:OfferID>MGJiNDJmY2Q4MjhjMGNjZGU2NDFkNTI0M2NhYzJiMzZiOWY3ODg0MzhlNDg4NTA3OThkZGJkNTZhMjUyZjM1NDA1MmEyYzEzMDZkMmE3ZGVjNDUxZTE1Y2M1NGExMWIwMmYyYzc4ZmI0Yjc5YTlhNWQ3NTQ2MmJjOWQ4YTRhNGExYjNiNmI3ODQ5NWRiNjZhOGM2YzZlNmEzMzg2NWYwNzZlMTdmYmM0ZmY4MzgzNmIwNzk0ODA3NzYwMWViNzMyNTFmYjlhMGM1MGU4NTA5ODcyOTlmNTUwMmExMmY5PkxPVzE+RUNPPktIST5JU0I+MjAyNS0wNS0yOCAxNjowMDowMD4yMDI1LTA1LTI4IDE3OjU1OjAwPlBLPjMwOD5MPjk+RUNPTk9NWT4zMjA+UzBoSlNWTkNNekE0Pi0xPjJjYWU0Y2JiLTAyZWItNGM0Ny04ZWRmLWJmMzZhNzcwNmQwYSMyPk9ORV9XQVk+S0hJPklTQj4tMT4=-</ns16:OfferID>
+                  <ns16:OwnerCode>PK</ns16:OwnerCode>
+                  <ns16:TotalPrice>
+                     <ns16:BaseAmount CurCode="PKR">38410.00</ns16:BaseAmount>
+                     <ns16:TaxSummary>
+                        <ns16:TotalTaxAmount CurCode="PKR">6100.00</ns16:TotalTaxAmount>
+                     </ns16:TaxSummary>
+                     <ns16:TotalAmount CurCode="PKR">44510.00</ns16:TotalAmount>
+                  </ns16:TotalPrice>
+                  <ns16:OfferItem>
+                     <ns16:OfferItemID>OfferItem-13</ns16:OfferItemID>
+                     <ns16:MandatoryInd>true</ns16:MandatoryInd>
+                     <ns16:Price>
+                        <ns16:BaseAmount CurCode="PKR">38410.00</ns16:BaseAmount>
+                        <ns16:TaxSummary>
+                           <ns16:TotalTaxAmount CurCode="PKR">6100.00</ns16:TotalTaxAmount>
+                        </ns16:TaxSummary>
+                        <ns16:TotalAmount CurCode="PKR">44510.00</ns16:TotalAmount>
+                     </ns16:Price>
+                     <ns16:Service>
+                        <ns16:PaxRefID>ADTPax-1</ns16:PaxRefID>
+                     </ns16:Service>
+                     <ns16:FareDetail>
+                        <ns16:FareComponent>
+                           <ns16:FareBasisCode>LOW1</ns16:FareBasisCode>
+                           <ns16:FareTypeCode>ECO</ns16:FareTypeCode>
+                           <ns16:RBD_Code>L</ns16:RBD_Code>
+                           <ns16:CabinType>
+                              <ns16:CabinTypeName>ECONOMY</ns16:CabinTypeName>
+                           </ns16:CabinType>
+                        </ns16:FareComponent>
+                     </ns16:FareDetail>
+                     <ns16:PaymentTimeLimitDateTime>2025-05-28T18:00:00</ns16:PaymentTimeLimitDateTime>
+                  </ns16:OfferItem>
+               </ns16:Offer>
+            </ns16:PricedOffer>
+            <ns16:ShoppingResponse>
+               <ns16:ShoppingResponseRefID>b00fe7be-88f0-4de3-b455-28b5aa20f767</ns16:ShoppingResponseRefID>
+            </ns16:ShoppingResponse>
+         </ns16:Response>
+      </ns16:IATA_OfferPriceRS>
+   </S:Body>
+</S:Envelope>

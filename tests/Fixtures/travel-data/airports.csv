@@ -1,0 +1,4 @@
+Name,City,Country,IATA,ICAO,Latitude,Longitude,Altitude,Timezone,DST,Timezone
+Heathrow Airport,London,United Kingdom,LHR,EGLL,51.4706,-0.461941,83,0,E,Europe/London
+John F Kennedy International Airport,New York,United States,jfk,KJFK,40.6413,-73.7781,13,-5,A,America/New_York
+Melbourne Airport,Melbourne,Australia,MEL,YMML,-37.6733,144.843,434,10,A,Australia/Melbourne

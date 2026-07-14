@@ -1,0 +1,7 @@
+/**
+ * White-label overrides for the public OTA (TourNest Blade shell).
+ * Keep vendor theme files under public/vendor/tournest only.
+ */
+:root {
+    --ota-brand: #0b5fff;
+}

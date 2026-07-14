@@ -1,0 +1,14 @@
+{
+    "hosting_panel": "hostinger",
+    "ssh_host": "demo.example.com",
+    "ssh_port": 22,
+    "ssh_user": "demo_user",
+    "auth_type": "password",
+    "app_path": "/home/demo_user/domains/demo.example.com/laravel",
+    "public_html_path": "/home/demo_user/domains/demo.example.com/public_html",
+    "public_assets_path": "/home/demo_user/domains/demo.example.com/public_html/client-assets/client-demo",
+    "backup_path": "/home/demo_user/backups/client-demo",
+    "deploy_strategy": "sftp_single_file",
+    "last_deployed_at": null,
+    "last_deployed_by": null
+}

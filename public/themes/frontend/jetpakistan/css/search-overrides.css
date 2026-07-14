@@ -1,0 +1,420 @@
+
+/* ============================================================
+   JetPakistan token overrides for Master operational search
+   ============================================================ */
+
+/* Z-index stack (from ota-public.css — required because JP shell skips ota-public.css) */
+:root {
+  --ota-fixed-header-height: var(--header-h, 72px);
+  --ota-z-header: 1100;
+  --ota-z-dropdown: 2000;
+  --ota-z-autocomplete: 2500;
+  --ota-z-date-popover: 5000;
+  --ota-z-date-sheet: 5000;
+  --ota-z-modal-backdrop: 6000;
+  --ota-z-modal: 6010;
+  --ota-z-toast: 7000;
+}
+
+/* Homepage sections must not paint over search overlays */
+.jp-site-main > section:not(.hero) {
+  position: relative;
+  z-index: 1;
+}
+
+.jp-master-search .ota-hero-search{margin:0;padding:0;background:transparent;border:0;box-shadow:none;position:relative;z-index:50}
+.jp-master-search .ota-hero-search-card{background:var(--glass);backdrop-filter:blur(18px) saturate(150%);border:1px solid var(--glass-bd);border-radius:var(--r-feat);box-shadow:var(--shadow-lg);padding:var(--sp-5);overflow:visible}
+/* Single outer border — inner controls stay borderless */
+.jp-master-search .ota-hero-search-field{
+  position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-input);
+  padding:11px 14px;min-height:48px;box-shadow:none;transition:border-color var(--t) var(--ease),box-shadow var(--t) var(--ease);
+}
+.jp-master-search .ota-hero-search-field:hover{border-color:var(--line-strong)}
+.jp-master-search .ota-hero-search-field:focus-within{border-color:var(--brand);box-shadow:var(--ring)}
+.jp-master-search .ota-hero-search-input{background:transparent;border:0;border-radius:0;min-height:auto;padding:0;margin-top:2px;box-shadow:none}
+.jp-master-search .ota-hero-search-input input,
+.jp-master-search .ota-hero-search-input select,
+.jp-master-search .ota-hero-search-input .form-control,
+.jp-master-search .ota-hero-search-control,
+.jp-master-search .ota-hero-search-control--select,
+.jp-master-search .ota-hero-search-control--date,
+.jp-master-search .ota-hero-search-date-trigger,
+.jp-master-search .ota-hero-search-pax__trigger{
+  border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;
+  color:var(--text);font-weight:600;-webkit-appearance:none;appearance:none;
+}
+.jp-master-search .ota-hero-search-control:focus,
+.jp-master-search .ota-hero-search-date-trigger:focus,
+.jp-master-search .ota-hero-search-pax__trigger:focus{outline:0!important;box-shadow:none!important}
+.jp-master-search .ota-hero-search-field--submit{border:0;background:transparent;padding:0;box-shadow:none;min-height:auto}
+.jp-master-search .ota-hero-search-field--submit:focus-within{border:0;box-shadow:none}
+.jp-master-search .ota-hero-search-field--submit .ota-hero-search-submit{
+  width:100%;min-height:48px;border:0!important;outline:0!important;box-shadow:var(--shadow-brand)!important;
+}
+.jp-master-search .ota-hero-search-toolbar{border-bottom-color:var(--line)}
+.jp-master-search .ota-hero-search-mode,.jp-master-search .ota-hero-search-direct{color:var(--text-2)}
+.jp-master-search .ota-hero-search-input,.jp-master-search .ota-hero-search-date-trigger{background:var(--surface);border-color:var(--line);color:var(--text)}
+.jp-master-search .ota-hero-search-control,.jp-master-search .ota-hero-search-control--select{color:var(--text)}
+.jp-master-search .ota-hero-search-label{color:var(--muted)}
+.jp-master-search .ota-hero-search-swap{background:var(--surface);border-color:var(--line);color:var(--gold)}
+.jp-master-search .ota-hero-search-submit{background:linear-gradient(180deg,var(--brand-bright),var(--brand));color:var(--brand-ink);box-shadow:var(--shadow-brand);border:0}
+.jp-master-search .ota-hero-search-product-tab{color:var(--text-2);border-color:var(--line)}
+.jp-master-search .ota-hero-search-product-tab.is-active{color:var(--text);background:var(--surface-2);border-color:var(--brand)}
+.jp-master-search .ota-airport-suggest{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-lg);z-index:var(--ota-z-autocomplete)}
+.jp-master-search .ota-airport-item{color:var(--text);border-color:var(--line)}
+.jp-master-search .ota-airport-item:hover,.jp-master-search .ota-airport-item.is-active{background:var(--surface-2)}
+.jp-master-search .ota-hero-search-pax__panel{background:var(--card);border-color:var(--line);color:var(--text);z-index:var(--ota-z-dropdown)}
+.ota-date-modal__dialog{background:var(--card);border-color:var(--line);color:var(--text)}
+.ota-return-range-picker__day{color:var(--text)}
+.ota-return-range-picker__day--start,.ota-return-range-picker__day--end{background:var(--brand);color:var(--brand-ink)}
+.ota-hero-search-validate-modal{background:var(--card);color:var(--text);border:1px solid var(--line)}
+.ota-hero-search-validate-modal__title{color:var(--text)}
+.ota-hero-search-validate-modal__message{color:#FCA5A5}
+.ota-hero-search-validate-modal__btn{background:linear-gradient(180deg,var(--brand-bright),var(--brand));color:var(--brand-ink)}
+
+@media (max-width: 680px) {
+  .jp-master-search .ota-hero-search-card{padding:var(--sp-4)}
+  .jp-master-search .ota-hero-search-toolbar{gap:var(--sp-2)}
+}
+
+/* Flight results — modify search matches homepage .field cards (single outer shell) */
+.jp-flights-results .ota-results-widget-wide {
+  width: 100%;
+  max-width: none;
+  margin-bottom: var(--sp-5);
+}
+
+.jp-flights-results .ota-results-widget-wide .ota-hero-search,
+.jp-flights-results .ota-results-widget-wide #ota-results-flight-search {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.jp-flights-results .ota-results-widget-wide .ota-hero-search-card {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  background: var(--glass);
+  backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid var(--glass-bd);
+  border-radius: var(--r-feat);
+  box-shadow: var(--shadow-lg);
+  padding: var(--sp-5);
+  overflow: visible;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-toolbar {
+  border-bottom: 0;
+  margin-bottom: var(--sp-4);
+  padding-bottom: 0;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-mode,
+.jp-flights-results .jp-master-search .ota-hero-search-direct {
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-pax__panel,
+.jp-flights-results .jp-master-search .ota-airport-suggest {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--ota-z-autocomplete, 2500);
+}
+
+.jp-flights-results .jp-master-search .ota-airport-item:hover,
+.jp-flights-results .jp-master-search .ota-airport-item.is-active {
+  background: var(--surface-2);
+}
+
+/* Trip-type segmented controls — match homepage .seg */
+.jp-flights-results .ota-hero-search-toolbar__modes {
+  display: inline-flex;
+  position: relative;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 4px;
+  gap: 2px;
+}
+
+.jp-flights-results .ota-hero-search-mode {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.jp-flights-results .ota-hero-search-mode input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.jp-flights-results .ota-hero-search-mode span {
+  display: block;
+  padding: 7px 16px;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--muted);
+  border-radius: var(--r-pill);
+  transition: color var(--t) var(--ease);
+  cursor: pointer;
+}
+
+.jp-flights-results .ota-hero-search-mode:has(input:checked) span {
+  color: var(--brand-ink);
+  background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+  box-shadow: var(--shadow-brand);
+}
+
+/* Field cards — one outer border, no nested input borders */
+.jp-flights-results .jp-master-search .ota-hero-search-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  padding: 11px 14px;
+  min-height: 48px;
+  box-shadow: none;
+  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-field:hover {
+  border-color: var(--line-strong);
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-field:focus-within {
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-input,
+.jp-flights-results .jp-master-search .ota-hero-search-date-trigger,
+.jp-flights-results .jp-master-search .ota-hero-search-pax__trigger {
+  min-height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-input .form-control,
+.jp-flights-results .jp-master-search .ota-hero-search-input input,
+.jp-flights-results .jp-master-search .ota-hero-search-input select,
+.jp-flights-results .jp-master-search .ota-hero-search-control,
+.jp-flights-results .jp-master-search .ota-hero-search-control--select,
+.jp-flights-results .jp-master-search .ota-hero-search-control--date,
+.jp-flights-results .jp-master-search .ota-hero-search-date-trigger {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: var(--text);
+  font-weight: 600;
+  font-size: var(--fs-16);
+  line-height: 1.35;
+  padding: 0;
+  min-height: auto;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-input > i {
+  color: var(--brand);
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-field--swap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-swap {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--gold);
+  box-shadow: var(--shadow-sm);
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-dates {
+  align-self: stretch;
+  min-width: 0;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-date-trigger {
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-date-trigger__label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--fs-16);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-field--pax {
+  align-self: stretch;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-pax__trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+  font-size: var(--fs-15);
+  line-height: 1.35;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-pax__value {
+  color: var(--text);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-field--submit {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-self: stretch;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  min-height: 48px;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-field--submit:focus-within {
+  border: 0;
+  box-shadow: none;
+}
+
+.jp-flights-results .jp-master-search .ota-hero-search-field--submit .ota-hero-search-submit {
+  width: 100%;
+  min-height: 48px;
+  border: 0 !important;
+  box-shadow: var(--shadow-brand) !important;
+  outline: 0;
+  background: linear-gradient(180deg, var(--brand-bright), var(--brand));
+  color: var(--brand-ink);
+  border-radius: var(--r-pill);
+  font-weight: 700;
+  white-space: nowrap;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Desktop one-row modify search */
+@media (min-width: 1100px) {
+  .jp-flights-results .jp-master-search .ota-hero-search-row[data-hero-search-row="simple"] {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1.15fr)
+      auto
+      minmax(0, 1.15fr)
+      minmax(0, 1fr)
+      minmax(0, 1.1fr)
+      minmax(0, auto);
+    gap: var(--sp-3);
+    align-items: stretch;
+  }
+
+  .jp-flights-results .jp-master-search .ota-hero-search-field--swap {
+    align-self: center;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1099.98px) {
+  .jp-flights-results .jp-master-search .ota-hero-search-row[data-hero-search-row="simple"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: var(--sp-3);
+    align-items: stretch;
+  }
+
+  .jp-flights-results .jp-master-search .ota-hero-search-dates,
+  .jp-flights-results .jp-master-search .ota-hero-search-field--pax,
+  .jp-flights-results .jp-master-search .ota-hero-search-field--submit {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 899.98px) {
+  .jp-flights-results .jp-master-search .ota-hero-search-row[data-hero-search-row="simple"] {
+    grid-template-columns: 1fr;
+    gap: var(--sp-3);
+  }
+
+  .jp-flights-results .jp-master-search .ota-hero-search-field--swap {
+    justify-self: start;
+    margin: -4px 0;
+  }
+
+  .jp-flights-results .jp-master-search .ota-hero-search-field--submit .ota-hero-search-submit {
+    width: 100%;
+  }
+}
+
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-field {
+  background: var(--surface);
+  border-color: var(--line-strong);
+}
+
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-control,
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-control--select,
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-date-trigger,
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-date-trigger__label,
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-pax__trigger,
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-pax__value {
+  color: var(--text);
+}
+
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-control::placeholder,
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-date-trigger::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+html[data-theme="night"] .jp-flights-results .jp-master-search .ota-hero-search-label {
+  color: var(--text-2);
+}

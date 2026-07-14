@@ -1,0 +1,1260 @@
+/* JetPakistan flight result cards — reference layout (card-only scope) */
+
+.jp-flights-results .jp-flight-card.ota-result-pro-card {
+  background: #fff;
+  border: 1px solid #e7ecf3;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(15, 27, 45, 0.05), 0 6px 16px rgba(15, 27, 45, 0.07);
+  margin-bottom: 14px;
+  overflow: visible;
+  max-width: 100%;
+  min-width: 0;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.jp-flights-results .jp-flight-card.ota-result-pro-card:hover {
+  border-color: #dbe3ee;
+  box-shadow: 0 6px 20px rgba(15, 27, 45, 0.1);
+}
+
+.jp-flights-results .jp-flight-card.ota-result-pro-card.is-fare-options-open {
+  border-color: color-mix(in srgb, var(--gold) 35%, #e7ecf3);
+  box-shadow: 0 10px 28px rgba(15, 27, 45, 0.12);
+}
+
+.jp-flights-results .jp-flight-card__shell {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  gap: 0 !important;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* —— Main row: airline | route | price —— */
+.jp-flights-results .jp-flight-card__main {
+  display: grid;
+  grid-template-columns: minmax(0, clamp(132px, 14vw, 200px)) minmax(0, 1fr) minmax(0, clamp(148px, 15vw, 210px));
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 18px);
+  padding: 16px 18px 14px;
+  min-width: 0;
+}
+
+.jp-flights-results .jp-flight-card__main--stacked {
+  align-items: start;
+}
+
+.jp-flights-results .jp-flight-card__route-wrap {
+  min-width: 0;
+}
+
+/* Airline block */
+.jp-flights-results .jp-airline {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.jp-flights-results .jp-airline__logo,
+.jp-flights-results .jp-airline__mark {
+  flex: none;
+  width: clamp(46px, 4.2vw, 72px) !important;
+  height: clamp(46px, 4.2vw, 72px) !important;
+  border-radius: 12px;
+  padding: 8px !important;
+  background: #f6f9fc;
+  border: 1px solid #e7ecf3;
+}
+
+.jp-flights-results .jp-airline__logo img,
+.jp-flights-results .jp-airline__mark img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.jp-flights-results .jp-airline__meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.jp-flights-results .jp-airline__name .ota-airline-name,
+.jp-flights-results .jp-airline__name .ota-result-carrier-face__names {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.jp-flights-results .jp-airline__sub {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Route row */
+.jp-flights-results .jp-flight-card__route--single {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.jp-flights-results .jp-flight-card__leg {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.jp-flights-results .jp-flight-card__leg--arr {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.jp-flights-results .jp-flight-card__time-row {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.jp-flights-results .jp-next-day-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.jp-flights-results .jp-flight-card__time {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.05;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.jp-flights-results .jp-flight-card__code {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+}
+
+.jp-flights-results .jp-flight-card__place {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* Timeline */
+.jp-flights-results .jp-route-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  min-width: 96px;
+}
+
+.jp-flights-results .jp-route-line__dur {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.jp-flights-results .jp-route-line__track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 120px;
+  padding: 8px 0;
+}
+
+.jp-flights-results .jp-route-line__dash {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  margin: 0 4px;
+  background: repeating-linear-gradient(90deg, #c9d4e0 0 6px, transparent 6px 11px);
+  border-radius: 2px;
+}
+
+.jp-flights-results .jp-route-line__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex: none;
+}
+
+.jp-flights-results .jp-route-line__pip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--brand);
+  transform: translate(-50%, -50%);
+}
+
+.jp-flights-results .jp-route-line__plane {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.jp-flights-results .jp-route-line__plane::before {
+  content: "✈";
+  color: var(--brand);
+}
+
+.jp-flights-results .jp-route-line__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.jp-flights-results .jp-route-line__label {
+  font-size: 11px;
+  font-weight: 600;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: default;
+}
+
+.jp-flights-results .jp-route-line__label--direct {
+  color: var(--gold-deep);
+}
+
+.jp-flights-results .jp-route-line__label--stops {
+  color: var(--brand);
+  cursor: pointer;
+}
+
+.jp-flights-results .jp-route-line__via {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.jp-flights-results .jp-layover-popover {
+  z-index: 20;
+}
+
+/* Stacked routes (RT / multi) */
+.jp-flights-results .jp-flight-card__routes {
+  display: grid;
+  gap: 12px;
+}
+
+.jp-flights-results .jp-flight-card__mini {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.jp-flights-results .jp-flight-card__mini + .jp-flight-card__mini {
+  padding-top: 12px;
+  border-top: 1px dashed var(--line-soft);
+}
+
+.jp-flights-results .jp-flight-card__mini-label {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-flights-results .jp-flight-card__route--mini {
+  display: grid;
+  grid-template-columns: auto minmax(100px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Price column — CTA only */
+.jp-flights-results .jp-flight-card__price-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  text-align: right;
+  gap: 0;
+  min-width: 0;
+}
+
+.jp-flights-results .jp-flight-card__price-col .jp-stop-badge,
+.jp-flights-results .jp-flight-card__price-stack,
+.jp-flights-results .jp-flight-card__price-amount,
+.jp-flights-results .jp-flight-card__price-per {
+  display: none !important;
+}
+
+.jp-flights-results .jp-fare-action {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.jp-flights-results .jp-fare-action__btn {
+  width: clamp(132px, 14vw, 176px);
+  max-width: 100%;
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.jp-flights-results .jp-fare-action__btn.btn-primary,
+.jp-flights-results .jp-fare-action__btn.ota-select-primary {
+  background: var(--jp-gradient-primary) !important;
+  color: var(--jp-color-primary-contrast, var(--brand-ink)) !important;
+  border: 1px solid var(--jp-primary-border, transparent) !important;
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand)) !important;
+}
+
+/* Footer — flush with card bottom */
+.jp-flights-results .jp-flight-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 10px 18px;
+  border-top: 1px dashed #e7ecf3;
+  background: linear-gradient(0deg, #f6f9fc, #fff 90%);
+  border-radius: 0 0 18px 18px;
+}
+
+.jp-flights-results .jp-flight-card__tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.jp-flights-results .jp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  background: #f6f9fc;
+  border: 1px solid #e7ecf3;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+}
+
+.jp-flights-results .jp-chip--ok {
+  color: var(--gold-deep);
+  background: var(--gold-soft);
+  border-color: color-mix(in srgb, var(--gold) 30%, #e7ecf3);
+}
+
+.jp-flights-results .jp-flight-card__trip-label,
+.jp-flights-results .jp-flight-card .flight-card-source-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.jp-flights-results .jp-flight-card__links {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.jp-flights-results .jp-flight-card__details-btn,
+.jp-flights-results .jp-flight-card .ota-flight-details-trigger {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--gold-deep);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.jp-flights-results .jp-flight-card__details-btn:hover,
+.jp-flights-results .jp-flight-card .ota-flight-details-trigger:hover {
+  color: var(--gold);
+}
+
+.jp-flights-results .jp-flight-card__fare-toggle,
+.jp-flights-results .jp-flight-card__fare-caret {
+  display: none !important;
+}
+
+/* Branded fare tray */
+.jp-flights-results .jp-flight-card .jp-fare-tray.ota-branded-fares-panel {
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+  background: transparent;
+}
+
+.jp-flights-results .jp-flight-card.is-fare-options-open .jp-fare-tray.ota-branded-fares-panel {
+  padding: 0 18px 16px;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-tray .ota-branded-fares-panel__body {
+  background: #f6f9fc;
+  border: 1px solid #e7ecf3;
+  border-radius: 0 0 16px 16px;
+  padding: 14px 16px 16px;
+  margin-top: -1px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.jp-flights-results .jp-fare-tray__head,
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__heading {
+  margin: 0 0 11px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid {
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid--grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: min(100%, 22rem);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Branded fare carousel (4+ cards) */
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel__viewport {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid--slider {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  width: max-content;
+  min-width: 100%;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid--slider .ota-branded-fare-card {
+  flex: 0 0 clamp(220px, 31%, 280px);
+  width: clamp(220px, 31%, 280px);
+  min-width: clamp(220px, 31%, 280px);
+  max-width: clamp(220px, 31%, 280px);
+  scroll-snap-align: start;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel__nav {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  align-self: center;
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel__nav:hover {
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel__nav:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel__nav:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel__nav:disabled,
+.jp-flights-results .jp-flight-card .ota-branded-fares-carousel__nav[aria-disabled="true"] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel[data-slider-active="false"] .ota-branded-fares-carousel__nav {
+  display: none;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-card.ota-branded-fare-card {
+  min-width: 0;
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid #e7ecf3;
+  border-radius: 13px;
+  padding: 13px 14px 12px;
+  box-shadow: 0 1px 2px rgba(15, 27, 45, 0.05);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__badge--flex {
+  background: color-mix(in srgb, var(--brand) 14%, #fff);
+  color: var(--brand);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: var(--r-pill);
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-card__list.ota-branded-fare-card__matrix,
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__matrix {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1 1 auto;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-feature.ota-branded-fare-card__row {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-feature.ota-branded-fare-card__row::before,
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__matrix li::before {
+  display: none !important;
+  content: none !important;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-feature__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+  flex: none;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-feature__icon svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-feature__label,
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__row-label {
+  color: var(--text-2);
+  font-weight: 500;
+  min-width: 0;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-feature__value,
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__row-value {
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  flex: none;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-feature__value--ok {
+  color: var(--ok, #0d7a4f);
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-feature__value--muted {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__row-icon {
+  display: none !important;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__row-value.is-long-policy {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-card.ota-branded-fare-card.is-selected {
+  border-color: color-mix(in srgb, var(--gold) 45%, #e7ecf3);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 25%, transparent);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__badge--cheapest {
+  background: var(--gold-soft);
+  color: var(--gold-deep);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: var(--r-pill);
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: auto;
+  padding-top: 11px;
+  border-top: 1px solid #eef2f7;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__price {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__details {
+  appearance: none;
+  border: 1px solid #e7ecf3;
+  background: #fff;
+  color: var(--text-2);
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.jp-flights-results .jp-flight-card .jp-fare-card__cta,
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__cta {
+  min-height: 34px;
+  min-width: clamp(108px, 11vw, 132px);
+  padding: 8px 12px !important;
+  border-radius: 9px !important;
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+  background: var(--jp-gradient-primary) !important;
+  color: var(--jp-color-primary-contrast, var(--brand-ink)) !important;
+  border: 1px solid var(--jp-primary-border, transparent) !important;
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand)) !important;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: auto;
+  flex: 1 1 auto;
+}
+
+.jp-flights-results .ota-branded-fares-panel__toggle.ota-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Neutralize legacy compact card layout inside reference shell */
+.jp-flights-results .jp-flight-card .jp-flight-card__top,
+.jp-flights-results .jp-flight-card .jp-flight-card__bottom {
+  display: none !important;
+}
+
+/* JetPK branded fare details modal (scoped; does not affect shared OTA modal) */
+.jp-fare-modal[hidden] {
+  display: none !important;
+}
+
+.jp-fare-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.jp-fare-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 20, 34, 0.48);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.jp-fare-modal.is-open .jp-fare-modal__backdrop {
+  opacity: 1;
+}
+
+.jp-fare-modal__dialog {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(86vh, 720px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(15, 27, 45, 0.18);
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.jp-fare-modal.is-open .jp-fare-modal__dialog {
+  opacity: 1;
+  transform: none;
+}
+
+.jp-fare-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px 15px;
+  border-bottom: 1px solid #e7ecf3;
+}
+
+.jp-fare-modal__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--text);
+}
+
+.jp-fare-modal__subtitle {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.jp-fare-modal__close {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.jp-fare-modal__close:hover {
+  background: #f6f9fc;
+  color: var(--text);
+}
+
+.jp-fare-modal__close svg {
+  width: 16px;
+  height: 16px;
+}
+
+.jp-fare-modal__body {
+  padding: 18px 20px;
+  overflow-y: auto;
+}
+
+.jp-fare-modal__footer {
+  padding: 14px 20px 16px;
+  border-top: 1px solid #e7ecf3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: #f6f9fc;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.jp-fare-modal__tabs {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 16px;
+  background: #f6f9fc;
+  border: 1px solid #e7ecf3;
+  border-radius: 999px;
+  width: 100%;
+}
+
+.jp-fare-modal__tab {
+  flex: 1;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.jp-fare-modal__tab[aria-selected="true"],
+.jp-fare-modal__tab.is-active {
+  color: var(--text);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 27, 45, 0.06);
+}
+
+.jp-fare-modal__panel[hidden] {
+  display: none !important;
+}
+
+.jp-fare-modal__route {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.jp-fare-modal__route svg {
+  width: 15px;
+  height: 15px;
+  color: var(--brand);
+}
+
+.jp-fare-modal__kv {
+  display: grid;
+  gap: 10px;
+}
+
+.jp-fare-modal__kv-row,
+.jp-fare-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 13px;
+  border: 1px solid #e7ecf3;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.jp-fare-modal__kv-k {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.jp-fare-modal__kv-icon svg {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+}
+
+.jp-fare-modal__kv-v {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.jp-fare-modal__kv-v--ok {
+  color: #0d7a4f;
+}
+
+.jp-fare-modal__kv-v--off,
+.jp-fare-modal__kv-v--muted {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.jp-fare-modal__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.jp-fare-modal__table thead th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: left;
+  padding: 0 10px 9px;
+  border-bottom: 1px solid #e7ecf3;
+}
+
+.jp-fare-modal__table thead th:not(:first-child) {
+  text-align: right;
+}
+
+.jp-fare-modal__table tbody td {
+  padding: 11px 10px;
+  color: var(--text-2);
+  border-bottom: 1px solid #eef2f7;
+}
+
+.jp-fare-modal__table tbody td:not(:first-child) {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.jp-fare-modal__table tbody td:last-child {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.jp-fare-modal__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.jp-fare-modal__table-extra td {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.jp-fare-modal__total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.jp-fare-modal__total-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-fare-modal__total-amount {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.jp-fare-modal__foot-actions {
+  display: flex;
+  gap: 9px;
+}
+
+.jp-fare-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1;
+  padding: 10px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 0;
+}
+
+.jp-fare-modal__btn--ghost {
+  background: #fff;
+  color: var(--text-2);
+  border: 1px solid #e7ecf3;
+}
+
+.jp-fare-modal__btn--primary {
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+  border: 1px solid var(--jp-primary-border, transparent);
+}
+.jp-fare-modal__btn--primary:hover {
+  background: var(--jp-gradient-primary-hover, var(--jp-gradient-primary));
+}
+
+body.jp-fare-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .jp-fare-modal {
+    padding: 0;
+    place-items: end center;
+  }
+
+  .jp-fare-modal__dialog {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .jp-fare-modal__tab {
+    font-size: 11.5px;
+    padding: 8px 6px;
+  }
+}
+
+@media (max-width: 900px) {
+  .jp-flights-results .jp-flight-card__main {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .jp-flights-results .jp-flight-card__price-col {
+    align-items: stretch;
+    text-align: left;
+    border-top: 1px dashed #e7ecf3;
+    padding-top: 12px;
+  }
+
+  .jp-flights-results .jp-flight-card__route--single,
+  .jp-flights-results .jp-flight-card__route--mini {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .jp-flights-results .jp-flight-card__leg--arr {
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid--grid,
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="1"],
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="2"],
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="3"] {
+    grid-template-columns: 1fr;
+    max-width: none;
+  }
+
+  .jp-flights-results .jp-flight-card .jp-fare-card.ota-branded-fare-card {
+    min-width: 0;
+  }
+
+  .jp-flights-results .jp-flight-card .jp-fare-feature__value {
+    white-space: normal;
+    max-width: 46%;
+  }
+
+  .jp-flights-results .jp-fare-action__btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .jp-flights-results .jp-flight-card__shell {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .jp-flights-results .jp-flight-card__main {
+    padding: 14px;
+  }
+
+  .jp-flights-results .jp-flight-card__foot {
+    padding: 10px 14px;
+  }
+
+  .jp-flights-results .jp-flight-card .jp-fare-tray.ota-branded-fares-panel {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+/* JETPK-RESPONSIVE-RESULTS-8A — card width stability at 1280px effective desktop / Windows 150% scaling */
+body.jp-flights-results {
+  overflow-x: clip;
+}
+
+.jp-flights-results [data-results-root],
+.jp-flights-results [data-results-list],
+.jp-flights-results .jp-flight-card.ota-result-pro-card,
+.jp-flights-results .jp-flight-card .jp-fare-tray.ota-branded-fares-panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid--grid,
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="3"],
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="4"],
+.jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="5"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 1320px) {
+  .jp-flights-results .jp-flight-card__main {
+    grid-template-columns: minmax(0, clamp(120px, 13vw, 176px)) minmax(0, 1fr) minmax(0, clamp(132px, 14vw, 188px));
+    gap: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid--grid,
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="3"],
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="4"],
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="5"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid--grid,
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="2"],
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="3"],
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="4"],
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="5"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .jp-flights-results .jp-flight-card .ota-branded-fares-panel__grid[data-fare-count="1"] {
+    max-width: 100%;
+  }
+}
+
+.jp-flights-results .jp-fare-action__btn:focus:not(:focus-visible),
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__cta:focus:not(:focus-visible),
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__details:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.jp-flights-results .jp-fare-action__btn:focus-visible,
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__cta:focus-visible,
+.jp-flights-results .jp-flight-card .ota-branded-fare-card__details:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}

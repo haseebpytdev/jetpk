@@ -1,0 +1,11 @@
+{
+  "slices": [
+    {"origin": "LHE", "destination": "KHI", "departure_date": "2026-08-20"},
+    {"origin": "ISB", "destination": "DXB", "departure_date": "2026-08-25"},
+    {"origin": "DXB", "destination": "LHE", "departure_date": "2026-09-02"}
+  ],
+  "adult_count": 1,
+  "child_count": 0,
+  "infant_count": 0,
+  "cabin": "Y"
+}

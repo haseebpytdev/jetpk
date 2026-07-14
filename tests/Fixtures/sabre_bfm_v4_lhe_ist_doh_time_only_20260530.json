@@ -1,0 +1,74 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "LHE", "time": "02:30:00" },
+        "arrival": { "airport": "IST", "time": "06:30:00" },
+        "elapsedTime": 240,
+        "carrier": {
+          "marketing": "TK",
+          "marketingAirlineName": "Turkish Airlines",
+          "marketingFlightNumber": "711"
+        }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "IST", "time": "10:00:00" },
+        "arrival": { "airport": "DOH", "time": "02:00:00", "dateAdjustment": 1 },
+        "elapsedTime": 960,
+        "carrier": {
+          "marketing": "QR",
+          "marketingFlightNumber": "239"
+        }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 1410,
+        "schedules": [{ "ref": 1 }, { "ref": 2 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-lhe-ist-doh-timeonly",
+            "legs": [{ "ref": 1 }],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "validatingCarrierCode": "TK",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 220000,
+                    "baseFareAmount": 180000,
+                    "totalTaxAmount": 40000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": true,
+                        "fareComponents": [
+                          {
+                            "segments": [
+                              {
+                                "segment": {}
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

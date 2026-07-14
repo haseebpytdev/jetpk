@@ -1,0 +1,70 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "LHE", "time": "2026-09-10T08:00:00" },
+        "arrival": { "airport": "JED", "time": "2026-09-10T12:00:00" },
+        "elapsedTime": 240,
+        "carrier": { "marketing": "SV", "marketingFlightNumber": "739" }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "JED", "time": "2026-09-10T14:00:00" },
+        "arrival": { "airport": "DXB", "time": "2026-09-10T18:00:00" },
+        "elapsedTime": 120,
+        "carrier": { "marketing": "SV", "marketingFlightNumber": "568" }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 360,
+        "schedules": [{ "ref": 1 }, { "ref": 2 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-sv-connect-2",
+            "ref": "itin-sv-connect-2-ref",
+            "legs": [{ "ref": 1 }],
+            "pricingInformation": [
+              {
+                "ref": "pi-sv-2seg-ref",
+                "offer": { "id": "offer-sv-2seg-id", "ref": "offer-sv-2seg-ref" },
+                "fare": {
+                  "validatingCarrierCode": "SV",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 120000,
+                    "baseFareAmount": 90000,
+                    "totalTaxAmount": 30000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "passengerType": "ADT",
+                        "nonRefundable": false,
+                        "fareComponents": [
+                          {
+                            "segments": [
+                              { "segment": { "bookingCode": "Q", "cabinCode": "Y", "fareBasisCode": "QCLASS01" } },
+                              { "segment": { "bookingCode": "Q", "cabinCode": "Y", "fareBasisCode": "QCLASS02" } }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

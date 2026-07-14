@@ -1,0 +1,34 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderReshopRQ">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <IATA_OrderReshopRQ>
+           <Party>
+            <Sender>
+               <TravelAgency>
+                  <AgencyID>SELENS</AgencyID>
+                  <Name>NDC GATEWAY</Name>
+               </TravelAgency>
+            </Sender>
+         </Party>
+         <Request>
+            <OrderRefID>7UU0JB</OrderRefID>
+            <ReshopParameters>
+               <CurParameter>
+                  <RequestedCurCode>PKR</RequestedCurCode>
+               </CurParameter>
+               <Device>
+                  <DeviceOwnerTypeCode>SL</DeviceOwnerTypeCode>
+               </Device>
+               <LangUsage>
+                  <LangCode>EN</LangCode>
+               </LangUsage>
+            </ReshopParameters>
+            <UpdateOrder>
+               <CancelOrder>
+                  <OrderRefID>7UU0JB</OrderRefID>
+               </CancelOrder>
+            </UpdateOrder>
+         </Request>
+      </IATA_OrderReshopRQ>
+   </soapenv:Body>
+</soapenv:Envelope>

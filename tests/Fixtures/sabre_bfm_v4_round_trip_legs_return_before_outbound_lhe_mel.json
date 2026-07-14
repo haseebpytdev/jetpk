@@ -1,0 +1,87 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "LHE", "time": "2026-08-01T02:00:00" },
+        "arrival": { "airport": "SIN", "time": "2026-08-01T10:00:00" },
+        "elapsedTime": 480,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "631" }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "SIN", "time": "2026-08-01T12:00:00" },
+        "arrival": { "airport": "MEL", "time": "2026-08-02T01:00:00" },
+        "elapsedTime": 780,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "237" }
+      },
+      {
+        "ref": 3,
+        "departure": { "airport": "MEL", "time": "2026-08-15T10:00:00" },
+        "arrival": { "airport": "SIN", "time": "2026-08-15T18:00:00" },
+        "elapsedTime": 480,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "238" }
+      },
+      {
+        "ref": 4,
+        "departure": { "airport": "SIN", "time": "2026-08-15T20:00:00" },
+        "arrival": { "airport": "LHE", "time": "2026-08-16T02:00:00" },
+        "elapsedTime": 420,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "632" }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 1260,
+        "schedules": [{ "ref": 1 }, { "ref": 2 }]
+      },
+      {
+        "ref": 2,
+        "elapsedTime": 900,
+        "schedules": [{ "ref": 3 }, { "ref": 4 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-rt-lhe-mel-legs-return-first",
+            "legs": [{ "ref": 2 }, { "ref": 1 }],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "validatingCarrierCode": "SQ",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 420000,
+                    "baseFareAmount": 350000,
+                    "totalTaxAmount": 70000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": false,
+                        "fareComponents": [
+                          {
+                            "segments": [
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

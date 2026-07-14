@@ -1,0 +1,84 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": {
+          "airport": "LHE",
+          "time": "2026-08-15T02:15:00"
+        },
+        "arrival": {
+          "airport": "DXB",
+          "time": "2026-08-15T05:00:00"
+        },
+        "elapsedTime": 165,
+        "carrier": {
+          "marketing": "EK",
+          "marketingFlightNumber": "615"
+        }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 165,
+        "schedules": [
+          {
+            "ref": 1
+          }
+        ]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-bfm-v4-1",
+            "source": "BFM",
+            "pricingSource": "SHS",
+            "legs": [
+              {
+                "ref": 1
+              }
+            ],
+            "pricingInformation": [
+              {
+                "offerItemId": "offer-item-test-1",
+                "fareReference": "FR-REF-1",
+                "fare": {
+                  "validatingCarrierCode": "EK",
+                  "totalFare": {
+                    "currency": "USD",
+                    "totalPrice": 450.5,
+                    "baseFareAmount": 380,
+                    "totalTaxAmount": 70.5
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": true,
+                        "fareComponents": [
+                          {
+                            "segments": [
+                              {
+                                "segment": {
+                                  "cabinCode": "Y",
+                                  "fareBasisCode": "YOWBFM1"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

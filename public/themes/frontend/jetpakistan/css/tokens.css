@@ -1,0 +1,201 @@
+/* ============================================================
+   JETPAKISTAN · DESIGN TOKENS
+   Fluid clamp scale — reference width 1440px (W1=1280, W2=1920)
+   ============================================================ */
+:root{
+  /* —— Fluid font sizes (ref px @1440) —— */
+  /* --jp-fs-xs: 10→12→12 | old 10.5px | labels, scroll cue */
+  --jp-fs-xs:clamp(10px,calc(0.5625rem + 0.15625vw),12px);
+  /* --jp-fs-sm: 12→14→14 | old 12–13px | chips, badges, mono */
+  --jp-fs-sm:clamp(12px,calc(0.6875rem + 0.15625vw),14px);
+  /* --jp-fs-body: 15→16→17 | old 16px | body, inputs */
+  --jp-fs-body:clamp(15px,calc(0.8125rem + 0.15625vw),17px);
+  /* --jp-fs-md: 17→18→19 | old 18px | card titles, codes */
+  --jp-fs-md:clamp(17px,calc(0.9375rem + 0.15625vw),19px);
+  /* --jp-fs-lg: 19→20→21 | old 20px | logo, prices */
+  --jp-fs-lg:clamp(19px,calc(1.0625rem + 0.15625vw),21px);
+  /* --jp-fs-xl: 23→24→25 | old 24px | fare codes, gcard h3 */
+  --jp-fs-xl:clamp(23px,calc(1.3125rem + 0.15625vw),25px);
+  /* --jp-fs-h3: 17→18→19 | old 18px | trust/bene h3 */
+  --jp-fs-h3:clamp(17px,calc(0.9375rem + 0.15625vw),19px);
+  /* --jp-fs-h2: 28→42→42 | old 42px | section headings */
+  --jp-fs-h2:clamp(28px,calc(1.5rem + 1.09375vw),42px);
+  /* --jp-fs-h1: 58→74→74 | old 74px | hero display */
+  --jp-fs-h1:clamp(58px,calc(2.875rem + 2.34375vw),74px);
+  /* --jp-fs-hero: alias h1 */
+  --jp-fs-hero:var(--jp-fs-h1);
+  /* --jp-fs-sub: 15→17→19 | old 17px avg hero sub */
+  --jp-fs-sub:clamp(15px,calc(0.875rem + 0.15625vw),19px);
+
+  /* —— Line heights —— */
+  --jp-lh-tight:1.02;
+  --jp-lh-heading:1.05;
+  --jp-lh-body:1.55;
+
+  /* —— Fluid spacing (ref px @1440) —— */
+  /* --jp-space-2xs: 3→4→4 | old 4px */
+  --jp-space-2xs:clamp(3px,calc(0.1875rem + 0.078125vw),4px);
+  /* --jp-space-xs: 7→8→9 | old 8px */
+  --jp-space-xs:clamp(7px,calc(0.4375rem + 0.078125vw),9px);
+  /* --jp-space-sm: 11→12→13 | old 12px */
+  --jp-space-sm:clamp(11px,calc(0.6875rem + 0.078125vw),13px);
+  /* --jp-space-md: 15→16→17 | old 16px */
+  --jp-space-md:clamp(15px,calc(0.875rem + 0.078125vw),17px);
+  /* --jp-space-lg: 19→20→21 | old 20px */
+  --jp-space-lg:clamp(19px,calc(1.1875rem + 0.078125vw),21px);
+  /* --jp-space-xl: 23→24→25 | old 24px */
+  --jp-space-xl:clamp(23px,calc(1.4375rem + 0.078125vw),25px);
+  /* --jp-space-2xl: 31→32→33 | old 32px */
+  --jp-space-2xl:clamp(31px,calc(1.9375rem + 0.078125vw),33px);
+  /* --jp-space-3xl: 39→40→41 | old 40px */
+  --jp-space-3xl:clamp(39px,calc(2.4375rem + 0.078125vw),41px);
+  /* --jp-space-4xl: 47→48→49 | old 48px */
+  --jp-space-4xl:clamp(47px,calc(2.9375rem + 0.078125vw),49px);
+  /* --jp-space-5xl: 63→64→65 | old 64px */
+  --jp-space-5xl:clamp(63px,calc(3.9375rem + 0.078125vw),65px);
+  /* --jp-space-6xl: 95→96→97 | old 96px section pad */
+  --jp-space-6xl:clamp(60px,calc(5.5rem + 0.625vw),97px);
+
+  /* —— Fluid radius (ref px @1440) —— */
+  /* --jp-radius-sm: 9→10→11 | old 10px */
+  --jp-radius-sm:clamp(9px,calc(0.5625rem + 0.078125vw),11px);
+  /* --jp-radius-md: 13→14→15 | old 14px input */
+  --jp-radius-md:clamp(13px,calc(0.8125rem + 0.078125vw),15px);
+  /* --jp-radius-lg: 19→20→21 | old 20px card */
+  --jp-radius-lg:clamp(19px,calc(1.1875rem + 0.078125vw),21px);
+  /* --jp-radius-xl: 25→26→27 | old 26px feat */
+  --jp-radius-xl:clamp(25px,calc(1.5625rem + 0.078125vw),27px);
+  --jp-radius-pill:9999px;
+
+  /* —— Component sizing (ref px @1440) —— */
+  /* --jp-nav-height: 68→72→76 | old 72px */
+  --jp-nav-height:clamp(68px,calc(4rem + 0.3125vw),76px);
+  /* --jp-button-height: 42→44→46 | old 44px */
+  --jp-button-height:clamp(42px,calc(2.625rem + 0.15625vw),46px);
+  /* --jp-input-height: 44→48→50 | old 48px search btn */
+  --jp-input-height:clamp(44px,calc(2.875rem + 0.15625vw),50px);
+  /* Canonical search-shell control tokens (Home + Results share) */
+  --jp-search-control-height:var(--jp-input-height);
+  --jp-search-control-radius:var(--r-input);
+  --jp-search-control-bg:var(--surface);
+  --jp-search-control-border:var(--line);
+  --jp-search-field-padding-y:var(--jp-space-sm);
+  --jp-search-field-padding-x:var(--jp-space-md);
+  --jp-search-control-icon-size:var(--jp-icon-md);
+  --jp-search-label-size:var(--jp-fs-xs);
+  --jp-search-value-size:var(--jp-fs-body);
+  --jp-search-control-inner-min-height:clamp(26px,calc(1.625rem + 0.078125vw),30px);
+  --jp-search-btn-padding-y:var(--jp-space-md);
+  --jp-search-btn-padding-x:var(--jp-space-2xl);
+  /* --jp-icon-sm: 13→14→15 | old 14px */
+  --jp-icon-sm:clamp(13px,calc(0.8125rem + 0.078125vw),15px);
+  /* --jp-icon-md: 15→16→17 | old 16px */
+  --jp-icon-md:clamp(15px,calc(0.9375rem + 0.078125vw),17px);
+  /* --jp-icon-lg: 17→18→19 | old 18px */
+  --jp-icon-lg:clamp(17px,calc(1.0625rem + 0.15625vw),19px);
+  /* --jp-logo-mark: 32→34→36 | old 34px */
+  --jp-logo-mark:clamp(32px,calc(2rem + 0.15625vw),36px);
+  /* --jp-toggle-w: 54→58→62 | old 58px */
+  --jp-toggle-w:clamp(54px,calc(3.375rem + 0.15625vw),62px);
+  /* --jp-toggle-h: 28→30→32 | old 30px */
+  --jp-toggle-h:clamp(28px,calc(1.75rem + 0.078125vw),32px);
+  /* --jp-toggle-knob: 22→24→26 | old 24px */
+  --jp-toggle-knob:clamp(22px,calc(1.375rem + 0.078125vw),26px);
+  /* --jp-swap-size: 38→40→42 | old 40px */
+  --jp-swap-size:clamp(38px,calc(2.375rem + 0.078125vw),42px);
+  /* --jp-check-box: 18→20→22 | old 20px */
+  --jp-check-box:clamp(18px,calc(1.125rem + 0.078125vw),22px);
+  /* --jp-card-pad: 23→24→25 | old 24px */
+  --jp-card-pad:clamp(23px,calc(1.4375rem + 0.078125vw),25px);
+  /* --jp-section-pad-y: 95→96→97 | old 96px */
+  --jp-section-pad-y:var(--jp-space-6xl);
+  /* --jp-container-pad-x: 23→24→25 | old 24px */
+  --jp-container-pad-x:var(--jp-space-xl);
+  /* --jp-maxw: 1160→1200→1240 | old 1200px */
+  --jp-maxw:clamp(1160px,calc(71.25rem + 1.5625vw),1240px);
+
+  /* —— Legacy aliases (fluid) —— */
+  --sp-1:var(--jp-space-2xs);--sp-2:var(--jp-space-xs);--sp-3:var(--jp-space-sm);
+  --sp-4:var(--jp-space-md);--sp-5:var(--jp-space-lg);--sp-6:var(--jp-space-xl);
+  --sp-7:var(--jp-space-2xl);--sp-8:var(--jp-space-3xl);--sp-9:var(--jp-space-4xl);
+  --sp-10:var(--jp-space-5xl);--sp-12:var(--jp-space-6xl);
+  --r-input:var(--jp-radius-md);--r-card:var(--jp-radius-lg);--r-feat:var(--jp-radius-xl);--r-pill:var(--jp-radius-pill);
+  --fs-12:var(--jp-fs-sm);--fs-13:var(--jp-fs-sm);--fs-14:var(--jp-fs-sm);--fs-15:clamp(14px,calc(0.8125rem + 0.078125vw),16px);
+  --fs-16:var(--jp-fs-body);--fs-18:var(--jp-fs-md);--fs-20:var(--jp-fs-lg);
+  --fs-24:var(--jp-fs-xl);--fs-30:clamp(28px,calc(1.625rem + 0.46875vw),32px);
+  --fs-42:var(--jp-fs-h2);
+  --fs-display:var(--jp-fs-hero);--fs-section:var(--jp-fs-h2);
+  --maxw:var(--jp-maxw);--header-h:var(--jp-nav-height);
+
+  --font-display:'Space Grotesk','Inter',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --ease:cubic-bezier(.4,0,.2,1);--ease-out:cubic-bezier(.16,1,.3,1);
+  --t-fast:150ms;--t:240ms;--t-slow:340ms;
+
+  /* —— JetPakistan night theme (default) —— */
+  --jp-primary:#63B32E;--jp-primary-hover:#4F9423;--jp-primary-active:#3F7820;
+  --jp-primary-soft:#1A2E12;--jp-primary-border:#3D6B28;
+  --jp-accent:#32BDD1;--jp-accent-hover:#53CDE0;--jp-accent-soft:#102B34;
+  --jp-success:#7BD23F;--jp-success-hover:#91E553;
+  --jp-warning:#FBBF24;--jp-danger:#DC2626;--jp-info:#38BDF8;
+  --jp-page-bg:#070F18;--jp-surface:#0A1420;--jp-surface-muted:#0E1B28;
+  --jp-text:#F1F6F9;--jp-text-muted:#91A7B5;--jp-border:#1C3445;
+  --jp-focus-color:var(--jp-primary);
+  --jp-focus-offset:2px;
+  --jp-focus-ring:0 0 0 3px color-mix(in srgb,var(--jp-primary) 35%,transparent);
+  --jp-disabled-bg:#0E1B28;--jp-disabled-text:#62788A;
+
+  --bg:var(--jp-page-bg);--bg-2:var(--jp-surface-muted);--surface:var(--jp-surface);--surface-2:var(--jp-surface-muted);--card:var(--jp-surface);
+  --line:var(--jp-border);--line-soft:#1A2D3E;--line-strong:#2E4A62;
+  --text:var(--jp-text);--text-2:var(--jp-text-muted);--muted:var(--jp-text-muted);
+  --brand:var(--jp-primary);--brand-bright:var(--jp-primary-hover);--brand-ink:#FFFFFF;--brand-soft:rgba(99,179,46,.14);
+  --gold:var(--jp-accent);--gold-deep:var(--jp-accent-hover);--gold-soft:rgba(50,189,209,.12);
+  --jp-color-primary:var(--jp-primary);--jp-color-primary-hover:var(--jp-primary-hover);--jp-color-primary-active:var(--jp-primary-active);
+  --jp-color-primary-contrast:var(--brand-ink);--jp-color-primary-soft:var(--jp-primary-soft);--jp-color-primary-soft-border:var(--jp-primary-border);
+  --jp-color-accent:var(--jp-accent);--jp-color-accent-hover:var(--jp-accent-hover);--jp-color-accent-soft:var(--jp-accent-soft);
+  --jp-color-focus:var(--jp-accent);--jp-color-surface:var(--jp-surface);--jp-color-surface-subtle:var(--jp-surface-muted);
+  --jp-color-text:var(--jp-text);--jp-color-text-muted:var(--jp-text-muted);--jp-color-border:var(--jp-border);
+  --jp-gradient-primary:linear-gradient(135deg,#73C23E,#63B32E);
+  --jp-gradient-primary-hover:linear-gradient(135deg,#63B32E,#4F9423);
+  --jp-button-shadow:0 1px 2px rgba(99,179,46,.12),0 1px 3px rgba(99,179,46,.08);
+  --jp-button-shadow-hover:0 4px 12px rgba(99,179,46,.18);
+  --blue:#38BDF8;--warn:var(--jp-warning);--purple:#A78BFA;
+  --glass:rgba(15,30,44,.6);--glass-bd:rgba(120,170,200,.16);
+  --hero-1:#06101A;--hero-2:#0A1726;
+  --hero-glow:radial-gradient(60% 80% at 80% 6%,rgba(50,189,209,.18),transparent 55%),radial-gradient(95% 75% at 50% 102%,rgba(99,179,46,.14),transparent 60%),radial-gradient(80% 100% at 15% 0%,rgba(56,189,248,.12),transparent 62%);
+  --shadow-sm:0 1px 2px rgba(2,8,14,.5);--shadow-md:0 12px 30px -12px rgba(2,8,14,.6);--shadow-lg:0 36px 80px -30px rgba(2,8,14,.78);--shadow-brand:0 16px 44px -16px rgba(99,179,46,.35);
+  --ring:var(--jp-focus-ring);--notch:var(--card);
+}
+
+html[data-theme="day"]{
+  --jp-primary:#63B32E;--jp-primary-hover:#4F9423;--jp-primary-active:#3F7820;
+  --jp-primary-soft:#EEF6E8;--jp-primary-border:#C5DEB3;
+  --jp-accent:#19A7A6;--jp-accent-hover:#138C8C;--jp-accent-soft:#E5F7F7;
+  --jp-success:#63B32E;--jp-success-hover:#4F9423;
+  --jp-page-bg:#EDF3F7;--jp-surface:#FFFFFF;--jp-surface-muted:#F6FAFC;
+  --jp-text:#0B1D2A;--jp-text-muted:#62788A;--jp-border:#D7E2E9;
+  --jp-focus-color:var(--jp-primary);
+  --jp-focus-offset:2px;
+  --jp-focus-ring:0 0 0 3px color-mix(in srgb,var(--jp-primary) 22%,transparent);
+  --jp-disabled-bg:#F6FAFC;--jp-disabled-text:#91A7B5;
+
+  --bg:var(--jp-page-bg);--bg-2:var(--jp-surface-muted);--surface:var(--jp-surface);--surface-2:var(--jp-surface-muted);--card:var(--jp-surface);
+  --line:var(--jp-border);--line-soft:#E8F0F5;--line-strong:#C4D4E0;
+  --text:var(--jp-text);--text-2:var(--jp-text-muted);--muted:var(--jp-text-muted);
+  --brand:var(--jp-primary);--brand-bright:var(--jp-primary-hover);--brand-ink:#FFFFFF;--brand-soft:rgba(99,179,46,.10);
+  --gold:var(--jp-accent);--gold-deep:var(--jp-accent-hover);--gold-soft:rgba(25,167,166,.10);
+  --jp-color-primary:var(--jp-primary);--jp-color-primary-hover:var(--jp-primary-hover);--jp-color-primary-active:var(--jp-primary-active);
+  --jp-color-primary-contrast:var(--brand-ink);--jp-color-primary-soft:var(--jp-primary-soft);--jp-color-primary-soft-border:var(--jp-primary-border);
+  --jp-color-accent:var(--jp-accent);--jp-color-accent-hover:var(--jp-accent-hover);--jp-color-accent-soft:var(--jp-accent-soft);
+  --jp-gradient-primary:linear-gradient(135deg,#73C23E,#63B32E);
+  --jp-gradient-primary-hover:linear-gradient(135deg,#63B32E,#4F9423);
+  --jp-button-shadow:0 1px 2px rgba(99,179,46,.12),0 1px 3px rgba(99,179,46,.08);
+  --jp-button-shadow-hover:0 4px 12px rgba(99,179,46,.18);
+  --blue:#0C8FD6;--warn:#D69E2E;--purple:#7C5CE0;
+  --glass:rgba(255,255,255,.74);--glass-bd:rgba(20,50,75,.10);
+  --hero-1:#DCE9F1;--hero-2:#EDF3F7;
+  --hero-glow:radial-gradient(60% 80% at 80% 6%,rgba(25,167,166,.12),transparent 55%),radial-gradient(95% 75% at 50% 102%,rgba(99,179,46,.10),transparent 60%),radial-gradient(80% 100% at 15% 0%,rgba(12,143,214,.10),transparent 62%);
+  --shadow-sm:0 1px 2px rgba(20,45,65,.06);--shadow-md:0 14px 34px -16px rgba(20,50,75,.18);--shadow-lg:0 40px 80px -34px rgba(20,50,75,.24);--shadow-brand:0 18px 44px -18px rgba(99,179,46,.28);
+  --ring:var(--jp-focus-ring);--notch:var(--bg);
+}

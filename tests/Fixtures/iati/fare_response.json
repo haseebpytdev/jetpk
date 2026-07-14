@@ -1,0 +1,21 @@
+{
+  "result": {
+    "fare_detail_key": "fare-detail-key-xyz",
+    "offers": [
+      {
+        "offer_key": "offer-key-1",
+        "total_price": 355.0,
+        "base_price": 285.0,
+        "tax": 70.0,
+        "currency": "USD",
+        "can_book": true
+      }
+    ],
+    "change_rules": [
+      {
+        "type": "CHANGE",
+        "before_departure_status": "PERMITTED"
+      }
+    ]
+  }
+}

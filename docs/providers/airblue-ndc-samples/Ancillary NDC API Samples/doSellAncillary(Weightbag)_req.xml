@@ -1,0 +1,41 @@
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+   <S:Body>
+      <IATA_OrderChangeRQ xsi:schemaLocation="xmldsig-core-schema.xsd" xmlns="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderChangeRQ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         <Party>
+            <Sender>
+               <TravelAgency>
+                  <AgencyID>SELENS</AgencyID>
+                  <Name>NDC GATEWAY</Name>
+               </TravelAgency>
+            </Sender>
+         </Party>
+         <PayloadAttributes>
+            <PrimaryLangID>EN</PrimaryLangID>
+         </PayloadAttributes>
+         <Request>
+           <Order>
+               <OrderID>800EDS</OrderID>
+               <OwnerCode>PK</OwnerCode>
+            </Order>
+            <OrderChangeParameters>
+               <CurParameter>
+                  <CurCode>PKR</CurCode>
+               </CurParameter>
+            </OrderChangeParameters>
+             <PaymentFunctions>
+               <PaymentProcessingDetails>
+                <Amount CurCode="PKR">500.0</Amount>
+                  <PaymentMethod>
+                     <AccountableDoc>
+                        <DocType>MCO</DocType>
+                        <TicketID>4000012043</TicketID>
+                     </AccountableDoc>
+                  </PaymentMethod>
+                  <PaymentRefID>PaymentInfo1</PaymentRefID>
+                  <TypeCode>MCO</TypeCode>
+               </PaymentProcessingDetails>
+            </PaymentFunctions>
+         </Request>
+      </IATA_OrderChangeRQ>
+   </S:Body>
+</S:Envelope>

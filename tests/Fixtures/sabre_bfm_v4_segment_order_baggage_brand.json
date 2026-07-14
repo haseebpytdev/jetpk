@@ -1,0 +1,82 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "baggageAllowanceDescs": [
+      {
+        "ref": 1,
+        "description1": "CHECKED UP TO 25 KG",
+        "description2": "CABIN UP TO 7 KG"
+      }
+    ],
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "LHE", "time": "2026-09-01T03:00:00" },
+        "arrival": { "airport": "KHI", "time": "2026-09-01T04:30:00" },
+        "elapsedTime": 90,
+        "carrier": { "marketing": "PK", "marketingFlightNumber": "301" }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "KHI", "time": "2026-09-01T08:00:00" },
+        "arrival": { "airport": "DXB", "time": "2026-09-01T10:15:00" },
+        "elapsedTime": 135,
+        "carrier": { "marketing": "EK", "marketingFlightNumber": "601" }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 315,
+        "schedules": [{ "ref": 1 }, { "ref": 2 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-order-bag-brand",
+            "legs": [{ "ref": 1 }],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "validatingCarrierCode": "EK",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 95000,
+                    "baseFareAmount": 80000,
+                    "totalTaxAmount": 15000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": true,
+                        "baggageInformation": [
+                          {
+                            "type": "CHECKED",
+                            "allowance": { "ref": 1 }
+                          }
+                        ],
+                        "fareComponents": [
+                          {
+                            "brandCode": "MAIN",
+                            "name": "Economy Main",
+                            "segments": [
+                              {
+                                "segment": { "cabinCode": "Y" }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

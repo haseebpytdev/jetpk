@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+   <S:Body>
+      <ns16:IATA_OfferPriceRS xmlns:ns16="http://www.iata.org/IATA/2015/00/2020.1/IATA_OfferPriceRS">
+         <ns16:Error>
+            <ns16:Code>OFFER_EXPIRED</ns16:Code>
+            <ns16:DescText>Selected offer is no longer available.</ns16:DescText>
+            <ns16:TypeCode>E</ns16:TypeCode>
+         </ns16:Error>
+      </ns16:IATA_OfferPriceRS>
+   </S:Body>
+</S:Envelope>

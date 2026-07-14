@@ -1,0 +1,53 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-JWaIzQal.css",
+    "name": "dashboard",
+    "names": [
+      "app.css",
+      "frontend.css",
+      "dashboard.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/dashboard.css": {
+    "file": "assets/app-JWaIzQal.css",
+    "name": "dashboard",
+    "names": [
+      "app.css",
+      "frontend.css",
+      "dashboard.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/frontend.css": {
+    "file": "assets/app-JWaIzQal.css",
+    "name": "dashboard",
+    "names": [
+      "app.css",
+      "frontend.css",
+      "dashboard.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-CceWk04C.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/dashboard.js": {
+    "file": "assets/dashboard-ChoB4TAV.js",
+    "name": "dashboard",
+    "src": "resources/js/dashboard.js",
+    "isEntry": true
+  },
+  "resources/js/frontend.js": {
+    "file": "assets/frontend-BunbzPd3.js",
+    "name": "frontend",
+    "src": "resources/js/frontend.js",
+    "isEntry": true
+  }
+}

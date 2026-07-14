@@ -1,0 +1,2224 @@
+/* JetPakistan public booking/checkout — scoped compatibility over Master markup */
+
+.jp-site-main .ota-book-wrap,
+.jp-site-main .ota-checkout-page {
+  padding-top: var(--sp-4);
+  padding-bottom: var(--sp-10);
+  color: var(--text);
+}
+
+.jp-site-main .ota-container,
+.jp-site-main .ota-container-wide {
+  width: min(var(--maxw), calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.jp-site-main .ota-checkout-page-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--text);
+  margin: 0 0 var(--sp-4);
+}
+
+.jp-site-main .ota-checkout-grid,
+.jp-site-main .ota-booking-layout {
+  display: grid;
+  gap: var(--sp-5);
+}
+
+@media (min-width: 992px) {
+  .jp-site-main .ota-checkout-grid,
+  .jp-site-main .ota-booking-layout {
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.75fr);
+    align-items: start;
+  }
+}
+
+.jp-site-main .ota-checkout-access-card,
+.jp-site-main .ota-checkout-card,
+.jp-site-main .ota-passenger-card,
+.jp-site-main .ota-checkout-summary-card,
+.jp-site-main .ota-booking-progress,
+.jp-site-main .ota-payment-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-md);
+  color: var(--text);
+}
+
+.jp-site-main .ota-checkout-access-card,
+.jp-site-main .ota-checkout-card,
+.jp-site-main .ota-passenger-card {
+  padding: var(--sp-5);
+  margin-bottom: var(--sp-4);
+}
+
+.jp-site-main .ota-checkout-section-title,
+.jp-site-main .ota-pax-section__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  color: var(--text);
+  margin: 0 0 var(--sp-3);
+}
+
+.jp-site-main .ota-label,
+.jp-site-main .control-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-site-main .ota-form-group input,
+.jp-site-main .ota-form-group select,
+.jp-site-main .ota-form-group textarea,
+.jp-site-main .form-control {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px 13px;
+  font: inherit;
+}
+
+.jp-site-main .ota-form-group input:focus,
+.jp-site-main .ota-form-group select:focus,
+.jp-site-main .form-control:focus {
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+  outline: 0;
+}
+
+.jp-site-main .ota-btn-primary,
+.jp-site-main .ota-checkout-btn-primary,
+.jp-site-main .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 20px;
+  border-radius: var(--r-pill);
+  border: 0;
+  font-weight: 700;
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+  border: 1px solid var(--jp-primary-border, transparent);
+  text-decoration: none;
+}
+
+.jp-site-main .ota-btn-secondary,
+.jp-site-main .ota-checkout-btn-secondary,
+.jp-site-main .btn-default {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.jp-site-main .ota-checkout-summary-card {
+  padding: var(--sp-5);
+  position: sticky;
+  top: calc(var(--header-h) + 12px);
+}
+
+.jp-site-main .ota-booking-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-5);
+}
+
+.jp-site-main .ota-booking-progress__step {
+  color: var(--muted);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+
+.jp-site-main .ota-booking-progress__step.is-active,
+.jp-site-main .ota-booking-progress__step.is-complete {
+  color: var(--gold);
+}
+
+.jp-site-main .ota-checkout-social-pill {
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.jp-site-main .alert {
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-2);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.jp-site-main .ota-checkout-form-errors {
+  color: #FCA5A5;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+/* Hide Master/Parwaaz brand leakage on JetPK booking shells */
+.jp-site-main .ota-checkout-brand img[alt*="Parwaaz"],
+.jp-site-main .ota-checkout-brand img[alt*="YD"],
+.jp-site-main .ota-booking-header img[alt*="Parwaaz"],
+.jp-site-main .ota-confirmation-hero .ota-brand-mark--master {
+  display: none !important;
+}
+
+.jp-site-main .ota-confirmation-page,
+.jp-site-main .ota-booking-confirmation {
+  color: var(--text);
+}
+
+.jp-site-main .ota-confirmation-page .ota-section-title,
+.jp-site-main .ota-booking-confirmation h1,
+.jp-site-main .ota-booking-confirmation h2 {
+  font-family: var(--font-display);
+  color: var(--text);
+}
+
+.jp-site-main .ota-timeline-step,
+.jp-site-main .ota-booking-status-pill {
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-2);
+}
+
+.jp-site-main .ota-timeline-step.is-active,
+.jp-site-main .ota-booking-status-pill.is-success {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+  background: var(--brand-soft);
+  color: var(--text);
+}
+
+/* JetPK checkout progress bar */
+.jp-checkout-progress {
+  margin: 0 0 var(--sp-5);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-card);
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+}
+
+.jp-checkout-progress__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-checkout-progress__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  color: var(--muted);
+  font-size: var(--fs-12);
+  font-weight: 600;
+}
+
+.jp-checkout-progress__marker {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  flex: none;
+}
+
+.jp-checkout-progress__label {
+  white-space: nowrap;
+}
+
+.jp-checkout-progress__item.is-active {
+  color: var(--text);
+}
+
+.jp-checkout-progress__item.is-active .jp-checkout-progress__marker {
+  border-color: color-mix(in srgb, var(--brand) 50%, var(--line));
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.jp-checkout-progress__item.is-complete {
+  color: var(--text-2);
+}
+
+.jp-checkout-progress__item.is-complete .jp-checkout-progress__marker {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  color: var(--gold-deep);
+}
+
+@media (max-width: 720px) {
+  .jp-checkout-progress__label {
+    white-space: normal;
+    max-width: 7rem;
+    line-height: 1.25;
+  }
+}
+
+/* JetPK payment method cards */
+.jp-site-main .jp-checkout-method-card {
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.jp-site-main .jp-checkout-method-card:has(.ota-method-card__input:checked) {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+  background: var(--brand-soft);
+}
+
+.jp-site-main .jp-checkout-method-unavailable {
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-input);
+  border: 1px dashed var(--line-strong);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.jp-site-main .jp-checkout-method-unavailable__title {
+  margin: 0 0 4px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.jp-site-main .jp-checkout-method-unavailable__hint {
+  margin: 0;
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+
+/* ============================================================
+   JetPK checkout page shell (8I) — premium 2-column layout
+   ============================================================ */
+.jp-page--checkout {
+  padding-top: calc(var(--header-h) + var(--sp-4));
+  padding-bottom: var(--sp-10);
+}
+
+.jp-page--checkout .jp-page-wrap {
+  width: min(1220px, calc(100% - var(--sp-8)));
+  margin: 0 auto;
+}
+
+.jp-page--checkout .jp-checkout-progress--pill {
+  margin: 0 0 var(--sp-5);
+}
+
+.jp-page--checkout .jp-checkout-progress__track {
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+}
+
+.jp-page--checkout .jp-checkout-progress__list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-page--checkout .jp-checkout-progress__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  text-align: center;
+}
+
+.jp-page--checkout .jp-checkout-progress__marker {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  flex: none;
+}
+
+.jp-page--checkout .jp-checkout-progress__label {
+  line-height: 1.25;
+}
+
+.jp-page--checkout .jp-checkout-progress__item.is-active {
+  color: var(--text);
+  background: var(--brand-soft);
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
+}
+
+.jp-page--checkout .jp-checkout-progress__item.is-active .jp-checkout-progress__marker {
+  border-color: color-mix(in srgb, var(--brand) 50%, var(--line));
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+}
+
+.jp-page--checkout .jp-checkout-progress__item.is-complete {
+  color: var(--text-2);
+}
+
+.jp-page--checkout .jp-checkout-progress__item.is-complete .jp-checkout-progress__marker {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  color: var(--gold-deep);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-book-wrap,
+.jp-page--checkout .jp-checkout-body .ota-checkout-page {
+  padding: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-container,
+.jp-page--checkout .jp-checkout-body .ota-container-wide {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-page-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--sp-4);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-grid,
+.jp-page--checkout .jp-checkout-body .ota-booking-layout {
+  display: grid;
+  gap: var(--sp-5);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .jp-page--checkout .jp-checkout-body .ota-checkout-grid,
+  .jp-page--checkout .jp-checkout-body .ota-booking-layout {
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.72fr);
+  }
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-main,
+.jp-page--checkout .jp-checkout-body .ota-checkout-aside {
+  min-width: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card,
+.jp-page--checkout .jp-checkout-body .ota-checkout-card,
+.jp-page--checkout .jp-checkout-body .ota-passenger-card,
+.jp-page--checkout .jp-checkout-body .ota-checkout-summary-card,
+.jp-page--checkout .jp-checkout-body .ota-payment-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-md);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card,
+.jp-page--checkout .jp-checkout-body .ota-checkout-card,
+.jp-page--checkout .jp-checkout-body .ota-passenger-card {
+  padding: var(--sp-5);
+  margin-bottom: var(--sp-4);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-section-title,
+.jp-page--checkout .jp-checkout-body .ota-pax-section__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  margin: 0 0 var(--sp-4);
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-pax-section {
+  margin-bottom: var(--sp-4);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-pax-grid--identity {
+  display: grid;
+  gap: var(--sp-3);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.jp-page--checkout .jp-checkout-body .ota-pax-field--title { grid-column: span 3; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--fname { grid-column: span 4; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--lname { grid-column: span 5; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--dob,
+.jp-page--checkout .jp-checkout-body .ota-pax-field--gender,
+.jp-page--checkout .jp-checkout-body .ota-pax-field--nationality { grid-column: span 4; }
+
+@media (max-width: 720px) {
+  .jp-page--checkout .jp-checkout-progress__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .jp-page--checkout .jp-checkout-progress__item {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--title,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--fname,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--lname,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--dob,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--gender,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--nationality {
+    grid-column: span 12;
+  }
+}
+
+.jp-page--checkout .jp-checkout-body .ota-form-group {
+  margin-bottom: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-form-group input,
+.jp-page--checkout .jp-checkout-body .ota-form-group select,
+.jp-page--checkout .jp-checkout-body .ota-form-group textarea,
+.jp-page--checkout .jp-checkout-body .form-control,
+.jp-page--checkout .jp-checkout-body .ota-input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px 14px;
+  font: inherit;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-form-group input:focus,
+.jp-page--checkout .jp-checkout-body .ota-form-group select:focus,
+.jp-page--checkout .jp-checkout-body .form-control:focus,
+.jp-page--checkout .jp-checkout-body .ota-input:focus {
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+  outline: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-label,
+.jp-page--checkout .jp-checkout-body .control-label {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-summary-card {
+  padding: var(--sp-5);
+  position: sticky;
+  top: calc(var(--header-h) + var(--sp-4));
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__route,
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__times {
+  font-family: var(--font-display);
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-sidebar-block {
+  padding: var(--sp-4) 0;
+  border-top: 1px solid var(--line);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-sidebar-block:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-sidebar-block__title {
+  font-size: var(--fs-13);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-fare-notice,
+.jp-page--checkout .jp-checkout-body .ota-checkout-selected-fare-notice {
+  margin-top: var(--sp-3);
+  padding: var(--sp-3);
+  border-radius: var(--r-input);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface));
+  color: var(--text-2);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-wa {
+  margin-top: var(--sp-4);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-btn-primary,
+.jp-page--checkout .jp-checkout-body .ota-checkout-btn-primary,
+.jp-page--checkout .jp-checkout-body .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 24px;
+  border-radius: var(--r-pill);
+  border: 0;
+  font-weight: 700;
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+  border: 1px solid var(--jp-primary-border, transparent);
+  text-decoration: none;
+  width: 100%;
+  max-width: 100%;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-form-actions {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--line);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__guest-title {
+  font-family: var(--font-display);
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card__summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card__badge {
+  margin-left: var(--sp-2);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: var(--fs-11);
+  font-weight: 700;
+}
+
+.jp-site-main.jp-flights-results + .footer,
+.jp-page--checkout + .footer {
+  margin-top: var(--sp-6);
+}
+
+.jp-page--checkout .jp-checkout-body .alert {
+  border-radius: var(--r-input);
+  margin-bottom: var(--sp-4);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-pay-note {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-13);
+  color: var(--muted);
+}
+
+/* ============================================================
+   JetPK checkout visual polish (8K) — premium layout parity
+   ============================================================ */
+.jp-page--checkout {
+  background: linear-gradient(180deg, var(--hero-1) 0%, var(--bg) 220px);
+}
+
+.jp-page--checkout .jp-checkout-progress--pill {
+  max-width: 100%;
+}
+
+.jp-page--checkout .jp-checkout-progress__track {
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-progress__item {
+  padding: var(--sp-2) var(--sp-2);
+  font-size: var(--fs-11);
+}
+
+.jp-page--checkout .jp-checkout-progress__item.is-active {
+  box-shadow: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-page-head {
+  margin-bottom: var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-page-head--flush {
+  padding: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-page-title {
+  margin-bottom: var(--sp-3);
+  line-height: 1.2;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-fare-session-countdown,
+.jp-page--checkout .jp-checkout-body [data-fare-session-countdown] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface));
+  color: var(--text-2);
+  font-size: var(--fs-12);
+  font-weight: 600;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card--signed-in {
+  padding: var(--sp-4);
+  background: var(--brand-soft);
+  border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__guest {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: var(--sp-4);
+  background: linear-gradient(135deg, var(--brand-soft) 0%, var(--surface) 100%);
+  border-right: 1px solid var(--line);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__guest-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-input);
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  font-size: var(--fs-16);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__guest-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__guest-title {
+  font-size: var(--fs-15);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__guest-sub {
+  font-size: var(--fs-12);
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__default-pill {
+  display: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__divider {
+  display: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__account {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__account-label {
+  margin: 0;
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-access-card__account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-btn-secondary {
+  min-height: 40px;
+  padding: 8px 16px;
+  font-size: var(--fs-13);
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-social-pill {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: var(--fs-12);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-travellers-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-travellers-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: var(--fs-12);
+  font-weight: 700;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card {
+  margin-bottom: var(--sp-3);
+  padding: 0;
+  overflow: hidden;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  cursor: pointer;
+  list-style: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card__summary::-webkit-details-marker {
+  display: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-15);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card__index {
+  display: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card__chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+  flex: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card[open] .ota-passenger-card__chevron {
+  transform: rotate(-135deg);
+  margin-top: 4px;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-passenger-card__body {
+  padding: 0 var(--sp-5) var(--sp-5);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-pax-grid {
+  display: grid;
+  gap: var(--sp-3);
+  align-items: start;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-pax-grid--passport {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.jp-page--checkout .jp-checkout-body .ota-pax-field--passport-no { grid-column: span 4; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--passport-country { grid-column: span 4; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--passport-expiry { grid-column: span 2; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--passport-issue { grid-column: span 2; }
+
+.jp-page--checkout .jp-checkout-body .ota-pax-grid--contact {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.jp-page--checkout .jp-checkout-body .ota-pax-field--contact-name { grid-column: span 6; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--email { grid-column: span 6; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--phone { grid-column: span 6; }
+.jp-page--checkout .jp-checkout-body .ota-pax-field--contact-country { grid-column: span 6; }
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-phone-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 0.45fr) minmax(0, 1fr);
+  gap: var(--sp-2);
+  align-items: stretch;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-country-code-select {
+  min-width: 0;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-account-panel {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--line);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-account-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  cursor: pointer;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-account-fields {
+  margin-top: var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-submit-bar,
+.jp-page--checkout .jp-checkout-body .ota-booking-actions {
+  margin-top: var(--sp-5);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-btn-primary-lg,
+.jp-page--checkout .jp-checkout-body .ota-checkout-submit-bar .btn-primary,
+.jp-page--checkout .jp-checkout-body .ota-booking-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 24px;
+  border: 0;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-15);
+  font-weight: 700;
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+  border: 1px solid var(--jp-primary-border, transparent);
+  cursor: pointer;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-aside-title {
+  margin: 0 0 var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary {
+  padding: var(--sp-5);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__pill {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-10);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__route {
+  margin: 0 0 var(--sp-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__legs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg {
+  padding: var(--sp-3);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg__label {
+  font-size: var(--fs-11);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg__meta {
+  font-size: var(--fs-11);
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg__route {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg__times {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--sp-2);
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg__times span:last-child {
+  text-align: right;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg__dash {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-leg__dates {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__carrier {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: var(--r-input);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 4px;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__airline {
+  font-size: var(--fs-14);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__flight-no {
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__tags {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__tags li {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-tag {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-10);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-tag--ok {
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  color: var(--gold-deep);
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line));
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-trip-summary__fare {
+  display: grid;
+  gap: var(--sp-2);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-wa {
+  margin-top: var(--sp-4);
+  padding: var(--sp-5);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-wa .ota-checkout-card__text {
+  margin: 0 0 var(--sp-4);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.jp-page--checkout .jp-checkout-body .ota-btn-wa,
+.jp-page--checkout .jp-checkout-body .ota-checkout-wa .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, #25d366 40%, var(--line));
+  background: color-mix(in srgb, #25d366 12%, var(--surface));
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-wa-phone {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+  text-align: center;
+}
+
+.jp-page--checkout .jp-checkout-body .ota-checkout-wa-phone:empty {
+  display: none;
+}
+
+.jp-page--checkout + .footer .foot-top {
+  padding-top: var(--sp-6);
+  padding-bottom: var(--sp-6);
+}
+
+.jp-page--checkout + .footer .foot-bot {
+  padding-top: var(--sp-4);
+}
+
+@media (max-width: 1023px) {
+  .jp-page--checkout .jp-checkout-body .ota-checkout-access-card__guest {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--passport-no,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--passport-country,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--passport-expiry,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--passport-issue,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--contact-name,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--email,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--phone,
+  .jp-page--checkout .jp-checkout-body .ota-pax-field--contact-country {
+    grid-column: span 12;
+  }
+
+  .jp-page--checkout .jp-checkout-body .ota-checkout-summary-card {
+    position: static;
+  }
+}
+
+/* ============================================================
+   JetPK checkout deep UI closure (8L)
+   ============================================================ */
+
+/* —— Passenger: create-account password panel —— */
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-account-fields:not(.is-open) {
+  display: none !important;
+  max-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-account-fields.is-open {
+  display: block;
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--line);
+}
+
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-account-fields .ota-pax-grid--contact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-account-fields .ota-pax-field {
+  grid-column: auto;
+  min-width: 0;
+}
+
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-account-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  cursor: pointer;
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-account-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin-top: 2px;
+  flex: none;
+  accent-color: var(--brand);
+}
+
+/* —— Passenger: contact phone row —— */
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-phone-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.38fr) minmax(0, 1fr);
+  gap: var(--sp-2);
+  align-items: stretch;
+}
+
+@media (max-width: 640px) {
+  .jp-page--checkout .jp-checkout-body--passengers .ota-checkout-phone-row {
+    grid-template-columns: minmax(84px, 0.42fr) minmax(0, 1fr);
+  }
+
+  .jp-page--checkout .jp-checkout-body--passengers .ota-checkout-account-fields .ota-pax-grid--contact {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* —— Passenger sidebar: fare family key/value grid —— */
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-selected-fare-family__dl,
+.jp-kv-grid {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+}
+
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-selected-fare-family,
+.jp-fare-family-panel {
+  margin-top: var(--sp-3);
+  padding: var(--sp-4);
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-selected-fare-family__heading,
+.jp-fare-family-panel__name {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-14);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-selected-fare-family__price,
+.jp-fare-family-panel__price {
+  margin: 0 0 var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-kv-grid__row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.42fr) minmax(0, 1fr);
+  gap: var(--sp-2) var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+  margin: 0;
+}
+
+.jp-kv-grid__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.jp-kv-grid__row dt {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-kv-grid__row dd {
+  margin: 0;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+  word-break: break-word;
+}
+
+.jp-fare-family-panel__note,
+.jp-page--checkout .jp-checkout-body--passengers .ota-checkout-selected-fare-family__note {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-input);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface));
+  font-size: var(--fs-12);
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* —— Shared JetPK checkout shell (review + confirm) —— */
+.jp-checkout-shell {
+  width: 100%;
+}
+
+.jp-checkout-head {
+  margin-bottom: var(--sp-4);
+}
+
+.jp-checkout-head__title {
+  margin: 0 0 var(--sp-2);
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.jp-checkout-head__lead {
+  margin: 0;
+  font-size: var(--fs-14);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 42rem;
+}
+
+.jp-checkout-grid {
+  display: grid;
+  gap: var(--sp-5);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .jp-checkout-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.72fr);
+  }
+}
+
+.jp-checkout-grid__main,
+.jp-checkout-grid__aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+
+.jp-checkout-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-md);
+  padding: var(--sp-5);
+}
+
+.jp-checkout-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.jp-checkout-card__title {
+  margin: 0 0 var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-checkout-card__head .jp-checkout-card__title {
+  margin-bottom: 0;
+}
+
+.jp-checkout-card__lead {
+  margin: 0 0 var(--sp-4);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.jp-checkout-card__note,
+.jp-checkout-card__muted {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-12);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.jp-checkout-pill {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-10);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+}
+
+.jp-trip-route {
+  margin: 0 0 var(--sp-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.jp-trip-legs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+.jp-trip-leg {
+  padding: var(--sp-3);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.jp-trip-leg__meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.jp-trip-leg__label {
+  font-size: var(--fs-11);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-trip-leg__meta {
+  font-size: var(--fs-11);
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+}
+
+.jp-trip-leg__route {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.jp-trip-leg__times {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--sp-2);
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-trip-leg__times span:last-child {
+  text-align: right;
+}
+
+.jp-trip-leg__dash {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.jp-trip-leg__dates {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.jp-trip-airline {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.jp-trip-airline__logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: var(--r-input);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 4px;
+}
+
+.jp-trip-airline__name {
+  margin: 0;
+  font-size: var(--fs-14);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-trip-airline__flight {
+  margin: 0;
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.jp-trip-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  list-style: none;
+  margin: 0 0 var(--sp-3);
+  padding: 0;
+}
+
+.jp-trip-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+
+.jp-trip-chip__badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-10);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.jp-trip-chip__badge--ok {
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  color: var(--gold-deep);
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line));
+}
+
+.jp-checkout-fare-notice {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-input);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface));
+  font-size: var(--fs-12);
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* —— Passenger / contact summary —— */
+.jp-passenger-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+.jp-passenger-block {
+  padding: var(--sp-4);
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.jp-passenger-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.jp-passenger-block__index {
+  font-size: var(--fs-13);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-passenger-block__type {
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.jp-passenger-block__badge {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: var(--fs-10);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.jp-contact-block__title {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+/* —— Fare breakdown in JetPK cards —— */
+.jp-checkout-card .ota-fare-dl {
+  margin: 0;
+}
+
+.jp-checkout-card .ota-fare-dl__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.jp-checkout-card .ota-fare-dl__row:last-child {
+  border-bottom: 0;
+}
+
+.jp-checkout-card .ota-fare-dl__row dt {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-checkout-card .ota-fare-dl__row dd {
+  margin: 0;
+  font-size: var(--fs-14);
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+}
+
+.jp-checkout-card .ota-fare-dl__row--total dd {
+  font-size: var(--fs-18);
+  color: var(--brand);
+}
+
+/* —— Payment method cards —— */
+.jp-checkout-card--payment .ota-review-method-list,
+[data-jp-payment-options] .ota-review-method-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: 0;
+}
+
+.jp-checkout-card--payment .ota-method-card,
+[data-jp-payment-options] .ota-method-card {
+  display: block;
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+}
+
+.jp-checkout-card--payment .ota-method-card__input,
+[data-jp-payment-options] .ota-method-card__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.jp-checkout-card--payment .ota-method-card__body,
+[data-jp-payment-options] .ota-method-card__body {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  padding: var(--sp-4) var(--sp-4) var(--sp-4) calc(var(--sp-4) + 28px);
+  background: var(--surface);
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.jp-checkout-card--payment .ota-method-card__body::before,
+[data-jp-payment-options] .ota-method-card__body::before {
+  content: '';
+  position: absolute;
+  left: var(--sp-4);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.jp-checkout-card--payment .ota-method-card__input:checked + .ota-method-card__body,
+.jp-checkout-card--payment .ota-method-card.is-selected .ota-method-card__body,
+[data-jp-payment-options] .ota-method-card__input:checked + .ota-method-card__body,
+[data-jp-payment-options] .ota-method-card.is-selected .ota-method-card__body {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+  background: var(--brand-soft);
+  box-shadow: var(--ring);
+}
+
+.jp-checkout-card--payment .ota-method-card__input:checked + .ota-method-card__body::before,
+[data-jp-payment-options] .ota-method-card__input:checked + .ota-method-card__body::before {
+  border-color: var(--brand);
+  background: radial-gradient(circle, var(--brand) 0%, var(--brand) 42%, var(--card) 46%, var(--card) 100%);
+}
+
+.jp-checkout-card--payment .ota-method-card:focus-within .ota-method-card__body,
+[data-jp-payment-options] .ota-method-card:focus-within .ota-method-card__body {
+  box-shadow: var(--ring);
+  outline: 0;
+}
+
+.jp-checkout-card--payment .ota-method-card__title,
+[data-jp-payment-options] .ota-method-card__title {
+  display: block;
+  font-weight: 700;
+  font-size: var(--fs-14);
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.jp-checkout-card--payment .ota-method-card__hint,
+[data-jp-payment-options] .ota-method-card__hint {
+  display: block;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-12);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* —— Review total + CTA —— */
+.jp-checkout-total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin: var(--sp-4) 0;
+  padding: var(--sp-4);
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.jp-checkout-total__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-checkout-total__value {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-checkout-total__value--inline {
+  margin: var(--sp-3) 0 var(--sp-1);
+}
+
+.jp-checkout-total__approx {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--muted);
+  margin-right: var(--sp-1);
+}
+
+.jp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 48px;
+  padding: 12px 24px;
+  border-radius: var(--r-pill);
+  border: 0;
+  font-size: var(--fs-15);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.jp-btn--primary {
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+  border: 1px solid var(--jp-primary-border, transparent);
+}
+
+.jp-btn--primary:hover {
+  transform: translateY(-1px);
+}
+
+.jp-btn--ghost {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.jp-btn--wa {
+  border: 1px solid color-mix(in srgb, #25d366 40%, var(--line));
+  background: color-mix(in srgb, #25d366 12%, var(--surface));
+  color: var(--text);
+}
+
+.jp-btn--block {
+  width: 100%;
+}
+
+.jp-btn--sm {
+  min-height: 40px;
+  padding: 8px 16px;
+  font-size: var(--fs-13);
+}
+
+.jp-checkout-disclaimer {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-12);
+  text-align: center;
+  color: var(--muted);
+}
+
+/* —— Alerts —— */
+.jp-alert {
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.jp-alert--success {
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
+  background: var(--brand-soft);
+}
+
+.jp-alert--warning {
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+  background: color-mix(in srgb, var(--gold) 12%, var(--surface));
+}
+
+.jp-alert--danger {
+  border-color: rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.1);
+  color: #FCA5A5;
+}
+
+.jp-alert--info {
+  border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+  background: var(--brand-soft);
+}
+
+.jp-alert__actions {
+  margin-top: var(--sp-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+/* —— Confirmation hero —— */
+.jp-confirm-hero {
+  text-align: center;
+  max-width: 44rem;
+  margin: 0 auto var(--sp-5);
+  padding: var(--sp-6) var(--sp-5);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-md);
+}
+
+.jp-confirm-hero__icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto var(--sp-4);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--brand-soft);
+  border: 2px solid color-mix(in srgb, var(--brand) 45%, var(--line));
+  color: var(--brand);
+  font-size: var(--fs-24);
+}
+
+.jp-confirm-hero__title {
+  margin: 0 0 var(--sp-2);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.8vw, 1.9rem);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.jp-confirm-hero__lead {
+  margin: 0 0 var(--sp-4);
+  font-size: var(--fs-14);
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.jp-confirm-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+.jp-confirm-ref {
+  text-align: left;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.jp-confirm-ref__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--sp-1);
+}
+
+.jp-confirm-ref__value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: clamp(1.2rem, 3vw, 1.75rem);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.jp-confirm-ref__hint {
+  display: block;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-11);
+  color: var(--muted);
+}
+
+.jp-status-pill {
+  display: inline-flex;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-11);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+}
+
+.jp-status-pill--pending {
+  color: var(--gold-deep);
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--gold) 35%, var(--line));
+}
+
+.jp-status-pill--review {
+  color: var(--brand);
+  background: var(--brand-soft);
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
+}
+
+.jp-status-pill--confirmed {
+  color: var(--brand);
+  background: var(--brand-soft);
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+}
+
+.jp-kv-grid--hero {
+  max-width: 28rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.jp-confirm-hero__note {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-12);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* —— Confirmation steps + actions —— */
+.jp-steps-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.jp-steps-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+
+.jp-steps-list__num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: var(--fs-12);
+  font-weight: 700;
+}
+
+.jp-steps-list__text {
+  font-size: var(--fs-13);
+  line-height: 1.45;
+  color: var(--text-2);
+  padding-top: 4px;
+}
+
+.jp-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.jp-confirm-actions--stack {
+  flex-direction: column;
+}
+
+.jp-payment-cta {
+  margin-top: var(--sp-4);
+  padding: var(--sp-4);
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.jp-payment-cta__title {
+  margin: 0 0 var(--sp-2);
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* —— Modal —— */
+.jp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+}
+
+.jp-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.jp-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-lg);
+}
+
+.jp-modal__title {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+
+.jp-modal__text,
+.jp-modal__meta {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+
+.jp-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+body.jp-offer-refresh-modal-open {
+  overflow: hidden;
+}
+
+/* —— Support card (passenger) —— */
+.jp-support-phone {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-2);
+}
+
+/* —— Fare session countdown in JetPK shell —— */
+.jp-checkout-body .ota-fare-session-countdown,
+.jp-checkout-body [data-fare-session-countdown] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface));
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+@media (max-width: 1023px) {
+  .jp-checkout-grid__aside .jp-checkout-card--fare {
+    order: -1;
+  }
+}
+

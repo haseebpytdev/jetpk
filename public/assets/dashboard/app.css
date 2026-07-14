@@ -1,0 +1,7 @@
+/**
+ * White-label overrides for Tabler-backed dashboards.
+ * Keep Tabler distribution under public/vendor/tabler only.
+ */
+:root {
+    --ota-brand: #206bc4;
+}

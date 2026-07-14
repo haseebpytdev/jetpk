@@ -1,0 +1,108 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "LHE", "time": "2026-08-01T02:00:00" },
+        "arrival": { "airport": "CMB", "time": "2026-08-01T06:00:00" },
+        "elapsedTime": 240,
+        "carrier": { "marketing": "UL", "marketingFlightNumber": "191" }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "CMB", "time": "2026-08-01T08:00:00" },
+        "arrival": { "airport": "SIN", "time": "2026-08-01T12:00:00" },
+        "elapsedTime": 240,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "469" }
+      },
+      {
+        "ref": 3,
+        "departure": { "airport": "SIN", "time": "2026-08-01T14:00:00" },
+        "arrival": { "airport": "MEL", "time": "2026-08-02T01:00:00" },
+        "elapsedTime": 660,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "237" }
+      },
+      {
+        "ref": 4,
+        "departure": { "airport": "MEL", "time": "2026-08-15T10:00:00" },
+        "arrival": { "airport": "CMB", "time": "2026-08-15T18:00:00" },
+        "elapsedTime": 480,
+        "carrier": { "marketing": "UL", "marketingFlightNumber": "192" }
+      },
+      {
+        "ref": 5,
+        "departure": { "airport": "CMB", "time": "2026-08-15T20:00:00" },
+        "arrival": { "airport": "LHE", "time": "2026-08-16T02:00:00" },
+        "elapsedTime": 420,
+        "carrier": { "marketing": "UL", "marketingFlightNumber": "193" }
+      },
+      {
+        "ref": 6,
+        "departure": { "airport": "DXB", "time": "2026-08-10T12:00:00" },
+        "arrival": { "airport": "DOH", "time": "2026-08-10T12:45:00" },
+        "elapsedTime": 45,
+        "carrier": { "marketing": "QR", "marketingFlightNumber": "1001" }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 1140,
+        "schedules": [{ "ref": 1 }, { "ref": 2 }, { "ref": 3 }]
+      },
+      {
+        "ref": 2,
+        "elapsedTime": 900,
+        "schedules": [{ "ref": 4 }, { "ref": 5 }]
+      },
+      {
+        "ref": 3,
+        "elapsedTime": 45,
+        "schedules": [{ "ref": 6 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-rt-whole-itinerary-unused-edge",
+            "legs": [{ "ref": 2 }, { "ref": 1 }, { "ref": 3 }],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "validatingCarrierCode": "SQ",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 470000,
+                    "baseFareAmount": 400000,
+                    "totalTaxAmount": 70000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": false,
+                        "fareComponents": [
+                          {
+                            "segments": [
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

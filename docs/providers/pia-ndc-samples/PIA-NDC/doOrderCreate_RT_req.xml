@@ -1,0 +1,71 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderCreateRQ">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <IATA_OrderCreateRQ>
+         <Party>
+            <Sender>
+              <TravelAgency>
+                <AgencyID>SELENS</AgencyID>
+                  <Name>HITIT NDC GATEWAY</Name>
+               </TravelAgency>
+
+            </Sender>
+         </Party>
+         <PayloadAttributes>
+            <PrimaryLangID>EN</PrimaryLangID>
+         </PayloadAttributes>
+ <Request>
+           <CreateOrder>
+               <SelectedOffer>
+                  <OfferRefID>MGZiMjdlOTg4NmRlMDg5ZGU2NDQ4NDc2M2FhYzJiNjRlOWY3ODgxOWQzNDhkNDA3Yzk4OWJiMDRhMjVkZjAwNzU1MjgyZDEwMDZkMGE3ZGVjNDUxZTE1Y2M1NGExMWIwMmQyNDc4ZjI0Yjc5YTlmMWQwMDIzN2VkOTU4MDFmMWI0MTNkMzAyZjFhMGVlZTNhODczYjZiMzY2Mjg2MGQwNjNiMWNmYjk2YWQ4MTg1M2IwODk4ODM3OTM2NGViNTQ4OTk5ZGMyYjA0YmIxYjZkNGVkZDBhOGQ3ZTBkNjBkPlZPVzE+RUNPPktIST5JU0I+MjAyNS0wNS0yOCAxMzowMDowMD4yMDI1LTA1LTI4IDE0OjU1OjAwPlBLPjcwNzA+Vj45PkVDT05PTVk+NzczPlMwaEpTVk5DTnpBM01BPi0xPjZlMDAwMWYyLTVjN2QtNDFkNy1iOGQ3LTMyNWRhODRjZmYxYiMwPlJPVU5EX1RSSVA+S0hJPklTQj4tMT4=-|MGZiMjdlOTg4NmRlMDg5ZGU2NDQ4NDc2M2FhYzJiNjRlOWY3ODgxOWQzNDhkNDA3Yzk4OWJiMDRhMjVkZjAwNzU1MjgyZDEwMDZkN2E3ZGVjNDUxZTE1Y2M1NGExMWIwMmQyNDc4ZmE0Yjc5YTlmMGQyNTM2MWJkYzQ4MzRmNGQxNTYwNjI3ZDFmMGJiMzY4ZGI2ZTY5NjIzOGQyNWUwNzZjMTZhYTkzZjg4NDgyNjI1Njk1ZDY3OTY0MTliNmQ5YjBjYWEzOTc4NmRiM2NiODZlNGE2YWE3YWRlZWNiPktPVzE+RUNPPklTQj5LSEk+MjAyNS0wNS0zMSAxMDowMDowMD4yMDI1LTA1LTMxIDExOjU1OjAwPlBLPjMwMT5LPjY+RUNPTk9NWT4zMTk+U1ZOQ1MwaEpNekF4Pi0xPjZlMDAwMWYyLTVjN2QtNDFkNy1iOGQ3LTMyNWRhODRjZmYxYiM3PlJPVU5EX1RSSVA+SVNCPktIST4tMT4=-</OfferRefID>
+                  <OwnerCode>VF</OwnerCode>
+                  <SelectedOfferItem>
+                     <OfferItemRefID>OfferItem-1</OfferItemRefID>
+                     <PaxRefID>ADTPax-1</PaxRefID>
+                  </SelectedOfferItem>
+                  <ShoppingResponseRefID>6d66b0f0-e706-453f-8b82-23c222349d4a</ShoppingResponseRefID>
+               </SelectedOffer>
+      
+
+                
+            </CreateOrder>
+            <DataLists>
+               <ContactInfoList>
+                  <ContactInfo>
+                     <ContactInfoID>Contact-1</ContactInfoID>
+                     <EmailAddress>
+                        <EmailAddressText>support@billian.co.uk</EmailAddressText>
+                     </EmailAddress>
+                     <Phone>
+                        <AreaCodeNumber>0125</AreaCodeNumber>
+                        <CountryDialingCode>44</CountryDialingCode>
+                        <PhoneNumber>4699065</PhoneNumber>
+                     </Phone>
+                  </ContactInfo>
+               </ContactInfoList>
+               <PaxList>
+                  <Pax>
+                     <Birthdate>1990-04-01</Birthdate>
+                     <ContactInfoRefID>Contact-1</ContactInfoRefID>
+                     <Individual>
+                           <GenderCode>F</GenderCode>
+                <GivenName>MARYAM</GivenName>
+                           <IndividualID>IND-ADT1</IndividualID>
+                  <Surname>SHAHBAZINIA</Surname>
+                <TitleName>MS</TitleName>
+              </Individual>
+                     <PaxID>PAX-ADT1</PaxID>
+                     <PTC>ADT</PTC>
+                  </Pax>
+               </PaxList>
+            </DataLists>
+            <OrderCreateParameters>
+               <CurParameter>
+                  <CurCode>PKR</CurCode>
+               </CurParameter>
+            </OrderCreateParameters>
+         </Request>
+
+    </IATA_OrderCreateRQ>
+   </soapenv:Body>
+</soapenv:Envelope>

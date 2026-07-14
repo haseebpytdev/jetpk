@@ -1,0 +1,9 @@
+ident,type,name,latitude_deg,longitude_deg,elevation_ft,continent,iso_country,iso_region,municipality,scheduled_service,gps_code,iata_code,local_code,home_link,wikipedia_link,keywords
+OPLA,large_airport,Allama Iqbal International Airport,31.521601,74.403603,712,AS,PK,PK-PB,Lahore,yes,OPLA,LHE,,,,
+OMDB,large_airport,Dubai International Airport,25.252799,55.364399,62,AS,AE,AE-DU,Dubai,yes,OMDB,DXB,,,,
+EGLL,large_airport,London Heathrow Airport,51.4706,-0.461941,83,EU,GB,GB-ENG,London,yes,EGLL,LHR,,,,
+EGKK,large_airport,London Gatwick Airport,51.148102,-0.190278,202,EU,GB,GB-ENG,London,yes,EGKK,LGW,,,,
+EGSS,closed,London Stansted Closed Test,51.885,0.235,348,EU,GB,GB-ENG,London,no,EGSS,STN,,,,
+ZZZZ,heliport,No IATA Heliport,0,0,0,OC,ZZ,ZZ-ZZ,Nowhere,no,ZZZZ,,,,,
+XXXX,small_airport,Unscheduled Small Field,10,10,10,AS,PK,PK-PB,Remote,no,XXXX,XXX,,,,
+OPFA,small_airport,Faisalabad International Airport,31.365,72.994797,591,AS,PK,PK-PB,Faisalabad,yes,OPFA,LYP,,,,
