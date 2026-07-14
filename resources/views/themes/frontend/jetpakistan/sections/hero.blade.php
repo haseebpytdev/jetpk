@@ -1,12 +1,14 @@
 @php
     use App\Support\Client\ClientPageKeys;
     use App\Support\Client\JetpkHomepageSectionData;
+    use App\Support\Homepage\JetpkHeroLcpPresenter;
 
   /** @var JetpkHomepageSectionData $jpHome */
     $jpHome = app(JetpkHomepageSectionData::class);
     $defaults = $jpHome->defaults();
 
     $jpHeroBg = $jpHome->assetUrl('hero_background') ?? client_branding()->heroImageUrl();
+    $jpHeroLcp = $jpHeroBg ? app(JetpkHeroLcpPresenter::class)->present($jpHeroBg) : null;
     $heroEyebrow = $jpHome->field('hero.eyebrow', data_get($defaults, 'hero.eyebrow', ''));
     $heroHeadline = $jpHome->field('hero.headline', data_get($defaults, 'hero.headline', ''));
     $heroHighlight = $jpHome->field('hero.headline_highlight', data_get($defaults, 'hero.headline_highlight', ''));
@@ -14,8 +16,39 @@
     $trustChips = $jpHome->field('trust_chips', data_get($defaults, 'trust_chips', []));
     $searchVisible = $jpHome->field('hero.search_visible', data_get($defaults, 'hero.search_visible', '1'));
 @endphp
-<section class="hero @if($jpHeroBg) hero--has-image @endif" id="top" @if($jpHeroBg) style="--jp-hero-bg-image: url('{{ e($jpHeroBg) }}')" @endif>
-  @unless ($jpHeroBg)
+@if ($jpHeroLcp)
+  @push('head')
+    <link
+      rel="preload"
+      as="image"
+      href="{{ $jpHeroLcp['preload_url'] }}"
+      @if (! empty($jpHeroLcp['preload_type'])) type="{{ $jpHeroLcp['preload_type'] }}" @endif
+      media="{{ $jpHeroLcp['preload_media'] }}"
+      fetchpriority="high"
+    >
+  @endpush
+@endif
+<section class="hero @if($jpHeroLcp) hero--has-image @endif" id="top">
+  @if ($jpHeroLcp)
+    <div class="hero-media" aria-hidden="true">
+      <picture>
+        @foreach ($jpHeroLcp['sources'] as $source)
+          <source type="{{ $source['type'] }}" media="{{ $source['media'] }}" srcset="{{ $source['srcset'] }}">
+        @endforeach
+        <img
+          class="hero-img"
+          src="{{ $jpHeroLcp['fallback_url'] }}"
+          alt="{{ $jpHeroLcp['alt'] }}"
+          width="{{ $jpHeroLcp['width'] }}"
+          height="{{ $jpHeroLcp['height'] }}"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        >
+      </picture>
+    </div>
+    <div class="hero-readability" aria-hidden="true"></div>
+  @else
     <div class="hero-glow"></div>
     <div class="hero-scene" aria-hidden="true">
       <svg class="topo" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"><circle cx="300" cy="120" r="40"/><circle cx="300" cy="120" r="80"/><circle cx="300" cy="120" r="120"/><circle cx="300" cy="120" r="160"/><circle cx="300" cy="120" r="200"/><circle cx="300" cy="120" r="240"/></svg>
@@ -36,9 +69,7 @@
       </div>
     </div>
     <x-jp.flight-arc />
-  @else
-    <div class="hero-readability" aria-hidden="true"></div>
-  @endunless
+  @endif
 
   <div class="wrap hero-inner">
     @if ($heroEyebrow !== '')

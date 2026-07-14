@@ -1,19 +1,23 @@
-// JetPakistan — theme toggle, sticky header, mobile drawer, fast loader
+// JetPakistan — theme toggle, sticky header, mobile drawer, SSR-safe loader
 (function () {
   var loader = document.getElementById('jpLoader');
   if (loader) {
-    var hidden = false;
+    var hidden = loader.classList.contains('done');
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var ssrLoader = loader.getAttribute('data-jp-loader') === 'ssr';
 
     function hideLoader() {
       if (hidden) return;
       hidden = true;
+      loader.classList.remove('jp-loader--active');
       loader.classList.add('done');
     }
 
-    if (reduced) {
+    if (reduced || ssrLoader) {
       hideLoader();
     } else {
+      loader.classList.add('jp-loader--active');
+      loader.classList.remove('done');
       requestAnimationFrame(function () {
         requestAnimationFrame(hideLoader);
       });
@@ -23,7 +27,7 @@
         hideLoader();
       }
       window.addEventListener('load', hideLoader, { once: true });
-      window.setTimeout(hideLoader, 1200);
+      window.setTimeout(hideLoader, 450);
     }
   }
 

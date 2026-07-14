@@ -239,14 +239,21 @@ html[data-theme="day"] .toggle .ico-sun{display:block}
 .hero.hero--has-image{
   background:
     linear-gradient(180deg, rgba(7,15,24,.28) 0%, rgba(7,15,24,.12) 38%, transparent 72%),
-    linear-gradient(180deg, transparent 0%, transparent 82%, var(--bg) 100%),
-    var(--jp-hero-bg-image) center/cover no-repeat;
+    linear-gradient(180deg, transparent 0%, transparent 82%, var(--bg) 100%);
 }
 html[data-theme="day"] .hero.hero--has-image{
   background:
     linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.16) 32%, transparent 68%),
-    linear-gradient(180deg, transparent 0%, transparent 86%, var(--bg) 100%),
-    var(--jp-hero-bg-image) center/cover no-repeat;
+    linear-gradient(180deg, transparent 0%, transparent 86%, var(--bg) 100%);
+}
+.hero-media{
+  position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+}
+.hero-media picture,.hero-media .hero-img{
+  display:block;width:100%;height:100%;
+}
+.hero-media .hero-img{
+  object-fit:cover;object-position:center;
 }
 .hero.hero--has-image .hero-readability{
   position:absolute;inset:0;pointer-events:none;z-index:1;
@@ -592,8 +599,9 @@ html[data-theme="day"] .skel::after{background:linear-gradient(90deg,transparent
 .stagger.in>*:nth-child(5){transition-delay:.28s}
 .stagger.in>*:nth-child(6){transition-delay:.34s}
 
-/* hero load sequence */
-.hseq{opacity:0;transform:translateY(16px);animation:rise .7s var(--ease-out) forwards}
+/* hero load sequence — keep copy visible when JS is disabled */
+.hseq{opacity:1;transform:none}
+.js .hseq{opacity:0;transform:translateY(16px);animation:rise .7s var(--ease-out) forwards}
 .hseq-1{animation-delay:.05s}.hseq-2{animation-delay:.18s}.hseq-3{animation-delay:.30s}
 .hseq-4{animation-delay:.44s}.hseq-5{animation-delay:.60s}.hseq-6{animation-delay:.76s}
 @keyframes rise{to{opacity:1;transform:none}}
@@ -659,7 +667,8 @@ html[data-theme="day"] .skel::after{background:linear-gradient(90deg,transparent
 
 /* ===================== STRATOSPHERE: loader, 3D scene, prints, tilt ===================== */
 /* Animated loader */
-.jp-loader{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:var(--bg);transition:opacity .28s var(--ease),visibility .28s var(--ease)}
+.jp-loader{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:var(--bg);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s var(--ease),visibility .28s var(--ease)}
+.jp-loader.jp-loader--active{opacity:1;visibility:visible;pointer-events:auto}
 .jp-loader.done{opacity:0;visibility:hidden;pointer-events:none}
 .jp-loader-inner{display:flex;flex-direction:column;align-items:center;gap:22px}
 .loader-orbit{position:relative;width:120px;height:120px;display:grid;place-items:center}

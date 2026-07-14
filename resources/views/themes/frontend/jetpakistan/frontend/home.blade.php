@@ -5,7 +5,7 @@
 @section('jp_body_class', 'jp-home')
 
 @push('styles')
-@php $jpSearchAssetVersion = 34; @endphp
+@php $jpSearchAssetVersion = 35; @endphp
 <link rel="stylesheet" href="{{ rtrim(client_theme()->frontendThemeUrl(), '/') }}/css/jp-search.css?v={{ $jpSearchAssetVersion }}">
 @endpush
 
@@ -22,7 +22,7 @@
 @endsection
 
 @push('theme-scripts')
-@php $jpSearchAssetVersion = 34; @endphp
+@php $jpSearchAssetVersion = 35; @endphp
 @php $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/'); @endphp
 <script src="{{ $jpThemeBase }}/js/reveal.js?v={{ $jpSearchAssetVersion }}" defer></script>
 <script src="{{ $jpThemeBase }}/js/effects.js?v={{ $jpSearchAssetVersion }}" defer></script>

@@ -17,7 +17,7 @@ final class ClientPageMediaConsumption
                 'page_key' => ClientPageKeys::HOME,
                 'asset_key' => 'hero_background',
                 'blade' => 'themes/frontend/jetpakistan/sections/hero.blade.php',
-                'element' => '--jp-hero-bg-image',
+                'element' => 'picture.hero-media img',
                 'collection' => 'Homepage',
                 'owner' => 'Page Settings',
                 'status' => 'used',

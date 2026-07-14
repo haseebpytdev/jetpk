@@ -34,5 +34,7 @@ return [
 
     'support_cta_storage_prefix' => 'jetpk/homepage/support-cta',
 
+    'hero_lcp_subdirectory' => 'lcp',
+
     'refresh_lock_seconds' => 900,
 ];

@@ -1,6 +1,6 @@
 @php
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpAssetVersion = 47;
+    $jpAssetVersion = 48;
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
     $pageTitle = trim($__env->yieldContent('title'));
@@ -14,6 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{{ $documentTitle }}</title>
+@stack('head')
 @if($jpFavicon)
 <link rel="icon" href="{{ $jpFavicon }}" sizes="any">
 <link rel="shortcut icon" href="{{ $jpFavicon }}" type="image/x-icon">
@@ -34,7 +35,9 @@
 <link rel="stylesheet" href="{{ $jpThemeBase }}/css/tokens.css?v={{ $jpAssetVersion }}">
 <link rel="stylesheet" href="{{ $jpThemeBase }}/css/theme.css?v={{ $jpAssetVersion }}">
 <link rel="stylesheet" href="{{ $jpThemeBase }}/css/forms.css?v={{ $jpAssetVersion }}">
+@if (! request()->routeIs('home'))
 <link rel="stylesheet" href="{{ $jpThemeBase }}/css/booking.css?v={{ $jpAssetVersion }}">
+@endif
 @if (! empty($jpApprovedPaletteCss ?? []))
 <style>
 :root {
@@ -78,7 +81,7 @@ html[data-theme="day"] {
 @stack('styles')
 </head>
 <body @class([$jpBodyClass])>
-<div class="jp-loader" id="jpLoader" aria-hidden="true">
+<div class="jp-loader done" id="jpLoader" aria-hidden="true" data-jp-loader="ssr">
   <div class="jp-loader-inner">
     <div class="loader-orbit">
       <span class="orbit-ring"></span>
@@ -103,6 +106,7 @@ html[data-theme="day"] {
 @stack('modals')
 
 <script src="{{ $jpThemeBase }}/js/theme.js?v={{ $jpAssetVersion }}" defer></script>
+<script>document.documentElement.classList.add('js');</script>
 @stack('theme-scripts')
 @stack('scripts')
 </body>
