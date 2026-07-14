@@ -3,7 +3,7 @@
 
 @php
     $jpBrandName = client_branding()->companyName();
-    $jpAssetVersion = 40;
+    $jpAssetVersion = 43;
     $jpSearchAssetVersion = 34;
 @endphp
 

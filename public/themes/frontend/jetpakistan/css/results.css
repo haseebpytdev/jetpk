@@ -28,8 +28,14 @@
   width: 100%;
 }
 @media (min-width: 992px) {
-  .jp-flights-results .jp-site-main .col-md-3 { flex: 0 0 25%; max-width: 25%; }
-  .jp-flights-results .jp-site-main .col-md-9 { flex: 0 0 75%; max-width: 75%; }
+  .jp-flights-results .jp-site-main .col-md-3:not(.ota-results-filters) {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+  .jp-flights-results .jp-site-main .col-md-9:not([data-results-root]) {
+    flex: 0 0 75%;
+    max-width: 75%;
+  }
 }
 .jp-flights-results .jp-site-main .btn:not(.btn-search):not(.btn-ghost) {
   display: inline-block;
@@ -61,7 +67,7 @@
 .jp-flights-results .jp-site-main .btn-link { border: 0; background: transparent; color: var(--gold); }
 .jp-flights-results .jp-site-main .btn-sm { padding: 6px 10px; font-size: 12px; }
 .jp-flights-results .jp-site-main .btn-block { display: block; width: 100%; }
-.jp-flights-results .jp-site-main .form-control {
+.jp-flights-results .jp-site-main .form-control:not(.jp-filter-control):not(.jp-filter-select) {
   display: block;
   width: 100%;
   min-height: 40px;
@@ -71,8 +77,8 @@
   background: var(--surface);
   color: var(--text);
 }
-.jp-flights-results .jp-site-main .control-label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
-.jp-flights-results .jp-site-main .form-group { margin-bottom: var(--sp-4); }
+.jp-flights-results .jp-site-main .control-label:not(.jp-filter-label) { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.jp-flights-results .jp-site-main .form-group:not(.jp-filter-field) { margin-bottom: var(--sp-4); }
 .jp-flights-results .jp-site-main .badge {
   display: inline-block;
   min-width: 18px;
@@ -142,6 +148,7 @@
   margin-top: 0;
 }
 
+.jp-flights-results .jp-filter-panel,
 .jp-flights-results .ota-filter-card {
   position: sticky;
   top: calc(var(--header-h) + var(--sp-4));
@@ -183,7 +190,47 @@
   white-space: nowrap;
 }
 
-.jp-flights-results .container { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--sp-5); width: 100%; }
+.jp-flights-results .container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--sp-6);
+}
+
+/* Results page sections share header .wrap boundaries */
+.jp-flights-results .ota-results-pro-head .container,
+.jp-flights-results .ota-results-pro-body.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--sp-6);
+}
+
+.jp-flights-results .ota-results-pro-body.ota-results-pro-body--wide {
+  width: 100%;
+  max-width: var(--maxw);
+}
+
+@media (max-width: 1400px) {
+  .jp-flights-results .ota-results-pro-body.container.ota-results-pro-body--wide {
+    width: 100%;
+    max-width: var(--maxw);
+  }
+}
+
+@media (max-width: 1199px) {
+  .jp-flights-results .ota-results-pro-body.container.ota-results-pro-body--wide {
+    width: 100%;
+    max-width: var(--maxw);
+  }
+}
+
+@media (max-width: 767px) {
+  .jp-flights-results .ota-results-pro-body.container.ota-results-pro-body--wide {
+    width: 100%;
+    max-width: var(--maxw);
+  }
+}
 
 /* Results page — placement only (canonical search visuals from theme.css + jp-search.css) */
 .jp-flights-results .jp-results-search-placement {
@@ -203,24 +250,7 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* Filters */
-.jp-flights-results .ota-filter-card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow-md);
-  color: var(--text);
-}
-.jp-flights-results .ota-filter-title,
-.jp-flights-results .ota-filter-section-title { color: var(--text); font-family: var(--font-display); }
-.jp-flights-results .ota-filter-card .form-control,
-.jp-flights-results .ota-filter-card select,
-.jp-flights-results .jp-filter-select {
-  background: var(--surface);
-  border-color: var(--line);
-  color: var(--text);
-  border-radius: var(--r-input);
-}
+/* Filters — backdrop only; panel layout/sticky above; visuals in forms.css */
 .jp-flights-results .ota-filter-backdrop { background: rgba(0,0,0,.55); }
 
 /* Alerts */
@@ -713,15 +743,18 @@
 }
 
 @media (max-width: 991px) {
-  .jp-flights-results .ota-filter-card {
+  .jp-flights-results .ota-filter-card,
+  .jp-flights-results .jp-filter-panel {
     position: fixed;
     inset: auto 0 0 0;
     top: 12%;
     display: none;
     max-height: 88vh;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     z-index: 90;
     border-radius: var(--r-card) var(--r-card) 0 0;
+    max-width: 100vw;
   }
   .jp-flights-results .ota-filter-close-btn {
     display: inline-block;
@@ -830,51 +863,48 @@
   .jp-flights-results .ota-result-col-mid { order: 3; }
 }
 
-/* —— Layout width + filter/results grid —— */
-.jp-flights-results .ota-results-pro-head .container,
-.jp-flights-results .ota-results-pro-body.container {
-  width: min(1360px, calc(100% - 32px));
-  max-width: 1360px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: var(--sp-4);
-  padding-right: var(--sp-4);
-}
-
+/* —— Layout width + filter/results grid (inside canonical --maxw container) —— */
 @media (min-width: 992px) {
-  .jp-flights-results .ota-results-pro-body--wide > .row {
+  .jp-flights-results .jp-site-main .ota-results-pro-body--wide > .row {
     display: grid;
-    grid-template-columns: minmax(248px, 272px) minmax(0, 1fr);
-    gap: var(--sp-6);
+    grid-template-columns: minmax(250px, 280px) minmax(0, 1fr);
+    gap: var(--sp-5);
     margin-left: 0;
     margin-right: 0;
+    width: 100%;
   }
-  .jp-flights-results .ota-results-pro-body--wide > .row::before,
-  .jp-flights-results .ota-results-pro-body--wide > .row::after {
+  .jp-flights-results .jp-site-main .ota-results-pro-body--wide > .row::before,
+  .jp-flights-results .jp-site-main .ota-results-pro-body--wide > .row::after {
     display: none;
     content: none;
   }
-  .jp-flights-results .ota-results-filters[data-filter-panel] {
+  .jp-flights-results .jp-site-main .ota-results-filters[data-filter-panel] {
     grid-column: 1;
     width: auto;
     max-width: none;
     flex: none;
     padding: 0;
   }
-  .jp-flights-results [data-results-root] {
+  .jp-flights-results .jp-site-main [data-results-root] {
     grid-column: 2;
     min-width: 0;
-    width: auto;
+    width: 100%;
     max-width: none;
     flex: none;
     padding: 0;
   }
-  .jp-flights-results .col-md-3,
-  .jp-flights-results .col-md-9 {
+  .jp-flights-results .jp-site-main .ota-results-pro-body--wide > .row > .col-md-3,
+  .jp-flights-results .jp-site-main .ota-results-pro-body--wide > .row > .col-md-9 {
     flex: none;
+    width: 100%;
     max-width: none;
+    min-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .jp-flights-results .jp-site-main .ota-results-pro-body--wide > .row > .ota-results-filters {
     width: auto;
-    padding: 0;
+    max-width: none;
   }
   .jp-flights-results .ota-results-mobile-bar {
     display: none !important;
@@ -886,42 +916,35 @@
   }
 }
 
+.jp-flights-results [data-results-root] {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+.jp-flights-results [data-results-root] [data-results-list],
+.jp-flights-results [data-results-root] .ota-date-price-strip,
+.jp-flights-results [data-results-root] .jp-result-card.ota-result-pro-card,
+.jp-flights-results [data-results-root] .ota-result-card-v3 {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 @media (min-width: 1200px) {
-  .jp-flights-results .ota-results-pro-head .container,
-  .jp-flights-results .ota-results-pro-body.container {
-    width: min(1400px, calc(100% - 32px));
-    max-width: 1400px;
-  }
   .jp-flights-results .ota-result-card-v3 .ota-result-card-main {
     grid-template-columns: minmax(96px, 1fr) minmax(0, 2.8fr) minmax(140px, 1.05fr);
     gap: var(--sp-4) var(--sp-6);
   }
 }
 
-/* Filter panel polish */
+/* Filter panel layout — JetPK visuals owned by forms.css (.jp-filter-panel) */
 .jp-flights-results .ota-filter-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
-  margin-bottom: var(--sp-3);
-}
-.jp-flights-results .ota-filter-section {
-  border: 1px solid var(--line-soft);
-  border-radius: var(--r-input);
-  background: var(--surface);
-  padding: 0 var(--sp-3);
-  margin-bottom: var(--sp-3);
-}
-.jp-flights-results .ota-filter-section > summary {
-  color: var(--text);
-  font-weight: 600;
-  font-size: var(--fs-13);
-  padding: var(--sp-3) 0;
-  cursor: pointer;
-}
-.jp-flights-results .ota-filter-section .form-group:last-child {
-  margin-bottom: var(--sp-3);
 }
 .jp-flights-results .ota-filter-backdrop {
   display: none;
@@ -1777,15 +1800,15 @@ body.jp-flights-results .ota-fare-breakdown-modal__footer {
 }
 
 /* JETPK-RESPONSIVE-RESULTS-8A — results column + filter grid width stability */
-.jp-flights-results .ota-results-pro-body--wide > .row,
-.jp-flights-results [data-results-root],
-.jp-flights-results [data-results-list] {
+.jp-flights-results .jp-site-main .ota-results-pro-body--wide > .row,
+.jp-flights-results .jp-site-main [data-results-root],
+.jp-flights-results .jp-site-main [data-results-list] {
   min-width: 0;
-  max-width: 100%;
+  max-width: none;
 }
 
 @media (min-width: 992px) and (max-width: 1320px) {
-  .jp-flights-results .ota-results-pro-body--wide > .row {
+  .jp-flights-results .jp-site-main .ota-results-pro-body--wide > .row {
     grid-template-columns: minmax(220px, 248px) minmax(0, 1fr);
     gap: var(--sp-4);
   }

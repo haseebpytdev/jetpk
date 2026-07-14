@@ -756,7 +756,7 @@
   .jp-flights-results .ota-refine-benefits { grid-template-columns: 1fr; }
 }
 
-.ota-filter-card {
+.ota-filter-card:not(.jp-filter-panel) {
   background: var(--ota-card);
   border: 1px solid var(--ota-border);
   border-radius: var(--ota-radius);
@@ -765,7 +765,7 @@
   position: sticky;
   top: var(--ota-nav-sticky-top);
 }
-.ota-filter-card h4 {
+.ota-filter-card:not(.jp-filter-panel) h4 {
   margin: 0 0 1rem;
   font-size: 0.85rem;
   font-weight: 800;
@@ -926,7 +926,7 @@
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
-.ota-filter-title {
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-title {
   margin: 0;
   font-size: 0.85rem;
   font-weight: 800;
@@ -934,17 +934,17 @@
   letter-spacing: 0.06em;
   color: var(--ota-navy);
 }
-.ota-filter-section {
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section {
   border: 1px solid var(--ota-border);
   border-radius: var(--ota-radius-sm);
   padding: 0 0.85rem;
   margin-bottom: 0.65rem;
   background: var(--surface-2);
 }
-.ota-filter-section:last-of-type {
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section:last-of-type {
   margin-bottom: 1rem;
 }
-.ota-filter-section > summary {
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section > summary {
   list-style: none;
   cursor: pointer;
   padding: 0.65rem 0;
@@ -952,10 +952,10 @@
   font-weight: 700;
   color: var(--ota-navy);
 }
-.ota-filter-section > summary::-webkit-details-marker {
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section > summary::-webkit-details-marker {
   display: none;
 }
-.ota-filter-section > summary::after {
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section > summary::after {
   content: "";
   float: right;
   width: 0;
@@ -965,27 +965,36 @@
   border-right: 5px solid transparent;
   border-top: 6px solid var(--ota-muted);
 }
-.ota-filter-section[open] > summary::after {
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section[open] > summary::after {
   transform: rotate(180deg);
 }
-.ota-filter-section .form-group:last-child {
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section .form-group:last-child {
   margin-bottom: 0.85rem;
 }
-.jp-flights-results .ota-filter-section .checkbox {
+.jp-flights-results .ota-filter-card:not(.jp-filter-panel) .ota-filter-section .checkbox {
   margin-top: 0.4rem;
   margin-bottom: 0.45rem;
 }
-.jp-flights-results .ota-filter-section .checkbox label,
-.jp-flights-results .jp-filter-check-row label{
-  display:flex;align-items:center;gap:var(--jp-space-sm);
-  font-family:var(--font-body);font-size:var(--fs-14);font-weight:600;
-  color:var(--text);line-height:1.25;cursor:pointer;padding-left:0;
+.jp-flights-results .ota-filter-card:not(.jp-filter-panel) .ota-filter-section .checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+  cursor: pointer;
+  padding-left: 0;
 }
-.jp-flights-results .ota-filter-section .checkbox input[type="checkbox"],
-.jp-flights-results .jp-filter-check{
-  position:static;margin:0!important;margin-left:0!important;
-  width:var(--jp-check-box);height:var(--jp-check-box);flex:0 0 var(--jp-check-box);
-  accent-color:var(--brand);cursor:pointer;
+.jp-flights-results .ota-filter-card:not(.jp-filter-panel) .ota-filter-section .checkbox input[type="checkbox"] {
+  position: static;
+  margin: 0 !important;
+  margin-left: 0 !important;
+  width: var(--jp-check-box);
+  height: var(--jp-check-box);
+  flex: 0 0 var(--jp-check-box);
+  accent-color: var(--brand);
+  cursor: pointer;
 }
 .ota-filter-actions {
   margin-top: 0.5rem;

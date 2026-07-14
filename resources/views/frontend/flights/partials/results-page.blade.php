@@ -14,7 +14,7 @@
     @include('partials.agent-booking-mode-banner')
     <div class="ota-results-pro">
         <header class="ota-results-pro-head" aria-labelledby="ota-results-heading">
-            <div class="container">
+            <div class="container jp-flights-results__container">
                 <div class="ota-results-pro-head-grid">
                     <div class="ota-results-pro-head-main">
                         <p class="ota-results-pro-kicker"><i class="fa fa-plane" aria-hidden="true"></i> Flight results</p>
@@ -27,7 +27,7 @@
                 </div>
             </div>
         </header>
-        <div class="container ota-results-pro-body ota-results-pro-body--pullup ota-results-pro-body--wide">
+        <div class="container ota-results-pro-body ota-results-pro-body--pullup ota-results-pro-body--wide jp-flights-results__container">
             @if(current_client_slug() === 'jetpk')
                 <div class="jp-results-search-placement">
                     @include('themes.frontend.jetpakistan.components.search.home-flights-search', [

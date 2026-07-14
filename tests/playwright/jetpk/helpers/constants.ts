@@ -1,5 +1,5 @@
-﻿export const LIVE_BASE_URL =
-  (process.env.JETPK_LIVE_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? 'https://jetpakistan.pk').replace(
+export const LIVE_BASE_URL =
+  (process.env.JETPK_LIVE_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? 'https://ota.haseebasif.com').replace(
     /\/$/,
     '',
   );
@@ -114,4 +114,3 @@ export function returnResultsUrl(): string {
   });
   return `${CLIENT_PREFIX}/flights/results?${q.toString()}`;
 }
-

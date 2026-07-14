@@ -38,6 +38,7 @@ const FILTER_SELECT_PROPS = [
   'fontWeight',
   'height',
   'minHeight',
+  'paddingRight',
   'borderRadius',
   'borderTopWidth',
   'backgroundColor',
@@ -152,6 +153,8 @@ test.describe('JetPK header + filter + highlight parity', () => {
 
     expect(selectStyles!.fontFamily.toLowerCase()).toContain('inter');
     expect(selectStyles!.appearance).toBe('none');
+    expect(parseFloat(selectStyles!.height)).toBeGreaterThanOrEqual(42);
+    expect(parseFloat(selectStyles!.paddingRight || '0')).toBeGreaterThan(24);
     expect(isBlueish(selectStyles!.boxShadow)).toBe(false);
     expect(isBlueish(selectStyles!.outline)).toBe(false);
 

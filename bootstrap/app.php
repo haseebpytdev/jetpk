@@ -45,6 +45,7 @@ use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
@@ -288,6 +289,10 @@ return Application::configure(basePath: dirname(__DIR__))
                         default => 'Something went wrong on our side.',
                     },
                 ], $e->getStatusCode());
+            }
+
+            if ($e instanceof ValidationException) {
+                return null;
             }
 
             if (! $request->expectsJson()) {
