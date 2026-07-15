@@ -50,3 +50,16 @@ clients/*/secrets.json
 clients/*/private-key*
 clients/*/*.pem
 clients/*/*.key
+
+# Deployment backups
+*.zip
+*.tgz
+*.tar.gz
+
+# Playwright artifacts
+tests/playwright/artifacts/
+playwright-report/
+
+# Generated archives
+*_backup/
+backup/
