@@ -34,6 +34,10 @@
 <link rel="stylesheet" href="{{ $jpThemeBase }}/css/theme.css?v={{ $jpPortalAssetVersion }}">
 <link rel="stylesheet" href="{{ $jpThemeBase }}/css/forms.css?v={{ $jpPortalAssetVersion }}">
 <link rel="stylesheet" href="{{ $jpThemeBase }}/css/portal.css?v={{ $jpPortalAssetVersion }}">
+{{-- Shared dashboard foundation: tokens + :focus-visible system + breadcrumbs/denied/table chrome.
+     Required because JetPK portal pages render legacy dashboard/* views (wallet, deposits, staff,
+     support, travelers, ...) that use shared <x-dashboard.*> components. --}}
+<link rel="stylesheet" href="{{ ui_asset('css/ota-dashboard-foundation.css') }}">
 @php
     $jpBrandRuntimeCss = [];
     $jpBrandRuntimeCssDay = [];
