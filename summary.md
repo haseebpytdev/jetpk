@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-07-15 (JETPK-FLIGHT-UX-ENHANCEMENT-PHASE1B-SEARCH-FILTERS)
+**Last updated:** 2026-07-15 (JETPK-MOBILE-APP-THEME MA-0–MA-6 integration)
 
 ---
 
@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-07-15 | JETPK-MOBILE-APP-THEME MA-0–MA-6 | **Mobile app theme integration:** `mobile` area in `client_view_paths` / `client_themes`; `OTA_MOBILE_APP_THEME` toggle (`default-mobile` \| `jetpakistan-app`); `RuntimeViewResolver::resolvedMobileTheme()` independent of desktop theme; theme shells under `themes/mobile/{default-mobile,jetpakistan-app}/layouts/mobile-app`; `public/themes/mobile/jetpakistan-app/css/app.css` (`$jpMobileAssetVersion=5`); 50 mobile views wired via `client_layout('mobile-app','mobile')`. Docs: `JETPK_MOBILE_INTEGRATION_AUDIT.md`, `JETPK_MOBILE_ROUTE_MATRIX.md`, MA-6 QA reports. No supplier/booking/payment changes. |
 | 2026-07-15 | JETPK-HOMEPAGE-LCP-LAYOUT-REGRESSION-FIX | **Hero layout:** LCP `<picture>` kept; `picture` + `.hero-img` absolutely positioned inside `.hero-media` so intrinsic `width`/`height` no longer expand hero section height (restores content-sized hero + below-fold positions). `object-fit:cover` / `object-position:center` unchanged. Assets `theme.css` `?v=50`. |
 | 2026-07-15 | JETPK-FLIGHT-UX-ENHANCEMENT-PHASE1B-SEARCH-FILTERS | **Search filters:** `PublicFlightSearchRequest` maps `stops=direct` → `direct_only`, `include_nearby=1` → `nearby_airports`; **`FlightSearchRequestData`** adds `direct_only` + `return_origin`; **`AirportProximityService`** (haversine, same-country, config `ota-flights.nearby_departure_airports`); **`DirectFlightsOfferFilter`** post-normalization `stops=0`; **`FlightSearchService`** expands nearby departure origins only (RT return leg uses requested origin); supplier request hints: Sabre `DirectFlightsOnly`, Duffel `max_connections=0`, AirBlue OTA travel prefs. No booking/checkout/schema changes. Tests: **`DirectFlightsOfferFilterTest`**, **`AirportProximityServiceTest`**, **`PublicFlightSearchRequestFiltersTest`**, **`FlightSearchRequestDataFiltersTest`**. |
 | 2026-07-14 | JETPK-PUBLIC-UX-01B-CMS-HERO-AUTO-OPTIMIZATION-REPAIR | **CMS hero auto-optimization:** shared **`JetpkHeroImageOptimizer`** + **`JetpkHeroImagePixelValidator`** (pixel variance / black / size gates); fingerprinted variants `pages/home/lcp/{hash}/hero-{breakpoint}.{jpg,webp,avif?}`; manifest in `client_page_assets.meta_json.hero_lcp`; upload-time integration in **`ClientPageAssetService`** + **`ClientPageAssetPublicationService`** mirror; **`JetpkHeroLcpPresenter`** binds manifest to current `source_path` only; **`jetpk:hero-lcp-assets`** uses CMS source / `--dry-run`; invalid flat `lcp/hero-*` quarantined. Tests: validator (3), optimizer (3), presenter (rewritten), **`ClientPageAssetServiceTest`** upload manifest, Playwright canvas luminance (8). |

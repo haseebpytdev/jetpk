@@ -1,4 +1,4 @@
-@extends('layouts.mobile-app')
+@extends(client_layout('mobile-app', 'mobile'))
 
 @section('title', 'My account')
 

@@ -12,6 +12,22 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | MA-1: mobile app skin toggle (INDEPENDENT of the desktop theme)
+    |--------------------------------------------------------------------------
+    |
+    | null / '' / 'default-mobile' = today's shared mobile shell (no visual change).
+    | 'jetpakistan-app'            = JetPakistan compact app-style shell (MA-2+).
+    |
+    | Deliberately NOT derived from active_admin_theme/active_frontend_theme, so the app skin
+    | can be switched on or off without touching the desktop theme. Unknown values fall back to
+    | 'default-mobile'. Reversible instantly via env; no schema change.
+    |
+    */
+
+    'app_theme' => env('OTA_MOBILE_APP_THEME', 'default-mobile'),
+
     'cookie_name' => 'ota_view_mode',
 
     'cookie_minutes' => 525600,
