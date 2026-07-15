@@ -32,7 +32,6 @@ return [
         'radius_days' => 3,
         'cache_ttl_seconds' => 900,
     ],
-<<<<<<< HEAD
     'nearby_departure_airports' => [
         'enabled' => env('OTA_NEARBY_DEPARTURE_AIRPORTS_ENABLED', true),
         'max_radius_km' => (float) env('OTA_NEARBY_DEPARTURE_AIRPORTS_RADIUS_KM', 350),
@@ -40,6 +39,4 @@ return [
         'same_country_only' => filter_var(env('OTA_NEARBY_DEPARTURE_AIRPORTS_SAME_COUNTRY', true), FILTER_VALIDATE_BOOLEAN),
         'cache_ttl_seconds' => (int) env('OTA_NEARBY_DEPARTURE_AIRPORTS_CACHE_TTL', 3600),
     ],
-=======
->>>>>>> jetpk/main
 ];
