@@ -1,0 +1,1395 @@
+/* JetPakistan search — layout polish, autocomplete, pax, dates, multi-city */
+
+:root {
+  --jp-z-autocomplete: 2500;
+  --jp-z-pax: 2400;
+  --jp-z-calendar: 2700;
+}
+
+.search {
+  pointer-events: auto;
+  isolation: isolate;
+  overflow: visible;
+}
+
+/* —— Desktop one-line search row (Return / One-way) —— */
+@media (min-width: 1200px) {
+  .jp-flight-form.is-round-trip [data-jp-simple-fields] .jp-search-row {
+    grid-template-columns:
+      minmax(0, 1.1fr)
+      auto
+      minmax(0, 1.1fr)
+      minmax(0, 0.95fr)
+      minmax(0, 1fr);
+    align-items: end;
+  }
+
+  .jp-flight-form.is-one-way [data-jp-simple-fields] .jp-search-row {
+    grid-template-columns:
+      minmax(0, 1.15fr)
+      auto
+      minmax(0, 1.15fr)
+      minmax(0, 0.95fr)
+      minmax(0, 1fr);
+    align-items: end;
+  }
+
+  .jp-flight-form:not(.is-multi-city) .jp-search-action-row {
+    display: flex;
+  }
+
+  .jp-flight-form:not(.is-multi-city) .jp-submit-slot-action:empty {
+    display: none;
+  }
+
+  .jp-submit-slot-row:empty {
+    display: none;
+  }
+
+  .jp-flight-form:not(.is-multi-city) .jp-submit-slot-action {
+    min-width: clamp(118px, 10vw, 148px);
+  }
+
+  .jp-flight-form:not(.is-multi-city) .jp-submit-slot-action .jp-submit-field {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+
+  .jp-flight-form:not(.is-multi-city) .jp-submit-slot-action .btn-search {
+    width: 100%;
+    min-height: var(--jp-input-height);
+    white-space: nowrap;
+    padding-left: var(--jp-space-lg);
+    padding-right: var(--jp-space-lg);
+  }
+
+  .jp-field-sr-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .jp-flight-form.is-round-trip [data-jp-simple-fields] .jp-search-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .jp-flight-form.is-one-way [data-jp-simple-fields] .jp-search-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.jp-search-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+  padding-top: 0;
+}
+
+.jp-search-action-row[hidden] {
+  display: none !important;
+}
+
+.jp-search-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  align-items: center;
+}
+
+.jp-submit-slot-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+html.jp-date-modal-open {
+  overflow: hidden;
+}
+
+.jp-date-cal-head {
+  display: grid;
+  gap: var(--jp-space-2xs);
+  min-width: 0;
+}
+
+.jp-date-cal-range {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.jp-date-calendar.is-range {
+  width: min(680px, calc(100vw - var(--jp-space-2xl)));
+}
+
+.jp-date-calendar.is-range .jp-date-cal-month__head:not(:has(.jp-date-cal-nav)) {
+  justify-content: center;
+}
+
+@media (max-width: 899px) {
+  .jp-flight-form .jp-search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .jp-search-action-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .jp-submit-slot-action {
+    margin-left: 0;
+    justify-content: stretch;
+  }
+
+  .jp-submit-slot-action .btn-search {
+    width: 100%;
+  }
+}
+
+.jp-airport-field {
+  position: relative;
+  min-width: 0;
+  overflow: visible;
+}
+
+.search .field.jp-airport-field .jp-field-value-row {
+  display: flex;
+  align-items: center;
+  gap: var(--jp-space-xs);
+  flex-wrap: nowrap;
+  min-width: 0;
+  min-height: var(--jp-search-control-inner-min-height);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.search .field.jp-airport-field .jp-airport-display {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  line-height: 1.35;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.jp-airport-display,
+.jp-select-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  outline: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.jp-date-trigger {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  outline: 0;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  min-height: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.jp-date-field .jp-field-value-row {
+  align-items: center;
+  min-height: var(--jp-search-control-inner-min-height);
+}
+
+.jp-date-display {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+.jp-date-display.is-placeholder {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--fs-14);
+}
+
+.jp-date-display:not(.is-placeholder) {
+  font-family: var(--font-mono);
+  font-size: var(--fs-16);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.jp-pax-trigger {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  font: inherit;
+  color: inherit;
+  outline: 0;
+}
+
+.jp-pax-field .jp-field-value-row {
+  align-items: center;
+  min-height: var(--jp-search-control-inner-min-height);
+  flex-wrap: nowrap;
+}
+
+.jp-pax-summary {
+  display: block;
+  min-width: 0;
+  flex: 1;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.jp-pax-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + var(--jp-space-xs));
+  z-index: var(--jp-z-pax);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-lg);
+  padding: var(--sp-3);
+  min-width: clamp(260px, calc(16.25rem + 1.25vw), 290px);
+}
+
+.jp-pax-panel.is-flip-above {
+  top: auto;
+  bottom: calc(100% + var(--jp-space-xs));
+}
+
+.jp-pax-panel.is-open {
+  right: auto;
+}
+
+.jp-pax-field {
+  position: relative;
+  min-width: 0;
+  overflow: visible;
+}
+
+.jp-pax-field.has-pax-error .jp-pax-trigger {
+  color: var(--danger, #c0392b);
+}
+
+.jp-pax-inline-error {
+  margin: var(--jp-space-xs) 0 0;
+  font-size: var(--fs-12);
+  line-height: 1.35;
+  color: var(--danger, #c0392b);
+  font-weight: 600;
+}
+
+.jp-pax-inline-error[hidden] {
+  display: none !important;
+}
+
+.jp-pax-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--jp-space-xs) 0;
+  min-height: clamp(34px, calc(2.125rem + 0.078125vw), 38px);
+}
+
+.jp-pax-row + .jp-pax-row {
+  border-top: 1px solid var(--line-soft);
+}
+
+.jp-pax-row-label {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.jp-pax-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jp-space-xs);
+  flex: none;
+}
+
+.jp-pax-step {
+  width: clamp(26px, calc(1.625rem + 0.078125vw), 30px);
+  height: clamp(26px, calc(1.625rem + 0.078125vw), 30px);
+  border-radius: var(--jp-radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-16);
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.jp-pax-step:hover:not(:disabled),
+.jp-pax-step:focus-visible:not(:disabled) {
+  border-color: var(--brand);
+  color: var(--brand);
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.jp-pax-step:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.jp-date-range-field .jp-date-display:not(.is-placeholder) {
+  font-family: var(--font-mono);
+  font-size: var(--fs-15);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Inner controls — outer .field card owns border/focus */
+.search .field .jp-airport-display,
+.search .field .jp-date-trigger,
+.search .field .jp-select-input,
+.search .field .jp-pax-trigger,
+.jp-groups-form .field .jp-select-input,
+.jp-groups-form .field .jp-date-trigger {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search .field .jp-airport-display:focus,
+.search .field .jp-date-trigger:focus,
+.search .field .jp-select-input:focus,
+.jp-groups-form .field .jp-select-input:focus,
+.jp-groups-form .field .jp-date-trigger:focus {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.search .field:focus-within,
+.jp-groups-form .field:focus-within {
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+}
+
+.jp-pax-count {
+  min-width: 20px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--fs-14);
+}
+
+.jp-pax-cabin {
+  min-width: 0;
+  width: auto;
+  max-width: clamp(150px, calc(9.375rem + 0.625vw), 170px);
+  padding: var(--jp-space-xs) var(--jp-space-xs);
+  border-radius: var(--r-input);
+  border: 1px solid var(--line) !important;
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.jp-pax-hint {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-12);
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.jp-chrome-slot {
+  min-width: 0;
+  overflow: visible;
+  position: relative;
+}
+
+.jp-submit-slot-row,
+.jp-submit-slot-multi {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.jp-flight-chrome {
+  display: none;
+}
+
+.jp-multi-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px dashed var(--line);
+}
+
+.jp-pax-slot-multi {
+  flex: 1 1 220px;
+  max-width: min(360px, 100%);
+  min-width: 0;
+}
+
+.jp-submit-slot-multi .jp-submit-field {
+  flex: 0 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.jp-submit-slot-multi .btn-search {
+  width: auto;
+  white-space: nowrap;
+  min-height: var(--jp-input-height);
+  padding-left: var(--jp-space-xl);
+  padding-right: var(--jp-space-xl);
+}
+
+@media (min-width: 900px) {
+  .jp-flight-form.is-multi-city .jp-search-bottom {
+    display: none;
+  }
+}
+
+.jp-airport-suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + var(--jp-space-2xs));
+  z-index: var(--jp-z-autocomplete);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-lg);
+  max-height: clamp(260px, calc(16.25rem + 1.25vw), 290px);
+  overflow: auto;
+}
+
+.jp-airport-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--jp-space-2xs);
+  width: 100%;
+  padding: var(--jp-space-sm) var(--jp-space-sm);
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.jp-airport-item:last-child {
+  border-bottom: 0;
+}
+
+.jp-airport-item:hover,
+.jp-airport-item.is-active {
+  background: var(--surface-2);
+}
+
+.jp-airport-item-main {
+  font-weight: 600;
+  font-size: var(--fs-14);
+}
+
+.jp-airport-item-sub {
+  font-size: clamp(9px, calc(0.5625rem + 0.0625vw), 10px);
+  color: var(--muted);
+  line-height: 1.2;
+  width: 100%;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jp-airport-loading,
+.jp-airport-empty,
+.jp-airport-error {
+  padding: var(--jp-space-sm);
+  font-size: var(--fs-14);
+  color: var(--muted);
+}
+
+.jp-airport-error {
+  color: #FCA5A5;
+}
+
+/* —— JetPK calendar overlay —— */
+.jp-date-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--jp-z-calendar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-5);
+}
+
+.jp-date-overlay[hidden] {
+  display: none !important;
+}
+
+.jp-date-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(2, 8, 14, 0.62);
+  cursor: pointer;
+}
+
+html[data-theme="day"] .jp-date-overlay__backdrop {
+  background: rgba(11, 26, 38, 0.38);
+}
+
+.jp-date-calendar {
+  position: relative;
+  z-index: 1;
+  width: min(340px, calc(100vw - var(--jp-space-2xl)));
+  max-height: min(90vh, clamp(500px, calc(31.25rem + 1.25vw), 540px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-lg);
+  padding: var(--sp-4);
+  animation: jp-cal-in 0.18s var(--ease-out);
+}
+
+@keyframes jp-cal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.jp-date-calendar__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.jp-date-cal-hint {
+  margin: 0;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
+.jp-date-cal-close {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.jp-date-cal-close:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.jp-date-calendar__months {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.jp-date-calendar__months.is-dual {
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+}
+
+.jp-pax-panel.is-open {
+  z-index: var(--jp-z-pax);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-lg);
+  padding: var(--sp-3);
+}
+
+.jp-date-cal-month__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.jp-date-cal-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-16);
+  color: var(--text);
+}
+
+.jp-date-cal-nav {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.jp-date-cal-nav:hover,
+.jp-date-cal-nav:focus-visible {
+  border-color: var(--gold);
+  color: var(--gold);
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.jp-date-calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+
+.jp-date-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.jp-date-cal-day {
+  min-height: 38px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.jp-date-cal-day:hover:not(:disabled) {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.jp-date-cal-day:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.jp-date-cal-day.is-start,
+.jp-date-cal-day.is-end,
+.jp-date-cal-day.is-same {
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+}
+
+.jp-date-cal-day.is-in-range {
+  background: var(--gold-soft);
+  color: var(--text);
+  border-radius: 6px;
+}
+
+.jp-date-cal-day.is-start.is-in-range {
+  border-radius: 10px 6px 6px 10px;
+}
+
+.jp-date-cal-day.is-end.is-in-range {
+  border-radius: 6px 10px 10px 6px;
+}
+
+.jp-date-cal-day--blank {
+  background: transparent;
+  pointer-events: none;
+  min-height: 0;
+}
+
+.jp-multi-wrap {
+  margin-top: var(--sp-4);
+}
+
+.jp-multi-segment {
+  padding: var(--sp-4) 0;
+  border-top: 1px dashed var(--line);
+}
+
+.jp-multi-segment:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.jp-multi-segment-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+
+.jp-multi-segment-badge {
+  font-size: var(--fs-12);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.jp-multi-remove {
+  font-size: var(--fs-12);
+  color: var(--muted);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.jp-multi-fields-row {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.jp-multi-actions {
+  margin-top: var(--sp-3);
+}
+
+.jp-groups-form .jp-group-fields {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.jp-groups-form .field {
+  min-height: clamp(68px, calc(4.25rem + 0.3125vw), 76px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.jp-groups-form .field .jp-field-value-row {
+  min-height: clamp(26px, calc(1.625rem + 0.078125vw), 30px);
+  align-items: center;
+}
+
+.jp-groups-form select.jp-select-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  flex: 1;
+  min-width: 0;
+  padding-right: 22px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  background-size: 12px 12px;
+  font-family: var(--font-body);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.jp-groups-form select.jp-select-input option {
+  color: var(--text);
+  background: var(--card);
+}
+
+.jp-groups-form .jp-date-field .jp-date-display.is-placeholder {
+  font-size: var(--fs-14);
+}
+
+.jp-groups-form .search-bottom {
+  margin-top: var(--sp-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.jp-groups-form .search-bottom .btn-ghost {
+  min-height: var(--jp-input-height);
+  padding: var(--jp-space-sm) var(--jp-space-lg);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text-2);
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-groups-form .search-bottom .btn-search {
+  min-height: var(--jp-input-height);
+  margin-left: auto;
+}
+
+.jp-group-search-page {
+  padding-top: calc(var(--header-h) + var(--sp-8));
+}
+
+.jp-group-search-page .jp-group-search-card {
+  margin-top: 0;
+  margin-bottom: var(--sp-6);
+}
+
+.jp-group-search-page .jp-groups-form .jp-group-fields {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.jp-group-search-page [data-jp-panel="groups"] {
+  display: block !important;
+}
+
+/* Page-context group search — full container width */
+.jp-group-search-page .jp-page-wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+
+.jp-group-search-card--page {
+  width: 100%;
+  max-width: none;
+  margin-top: 0;
+  margin-bottom: var(--sp-6);
+}
+
+.jp-group-search-page .jp-groups-form .jp-group-fields {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (min-width: 1200px) {
+  .jp-group-search-page .jp-page-wrap {
+    width: min(1360px, calc(100% - 32px));
+    max-width: 1360px;
+  }
+}
+
+/* Filter + results layout */
+.jp-group-search-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  gap: var(--sp-6);
+  align-items: start;
+}
+
+.jp-group-filter-panel {
+  position: sticky;
+  top: calc(var(--header-h) + 12px);
+}
+
+.jp-group-filter-form .jp-form-group {
+  margin-bottom: 0;
+}
+
+.jp-group-filter-form .jp-select,
+.jp-group-filter-form .jp-input {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.jp-group-filter-form .jp-select.is-placeholder,
+.jp-group-filter-form .jp-select option[value=""] {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.jp-group-filter-form .jp-input::placeholder {
+  color: var(--muted);
+  font-weight: 500;
+  opacity: 1;
+}
+
+.jp-group-search-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--muted);
+  letter-spacing: .04em;
+  margin: 0 0 var(--sp-4);
+}
+
+.jp-group-results-list {
+  display: grid;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.jp-group-results-list.is-loading {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Group result rows — ported from Master, JetPK scoped */
+.jp-group-search-page .ota-group-result-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.9fr) minmax(220px, 2fr) minmax(120px, 1fr) minmax(110px, 0.9fr) minmax(120px, auto);
+  grid-template-rows: auto auto;
+  gap: 0.35rem 0.85rem;
+  align-items: center;
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.jp-group-search-page .ota-group-result-row__brand {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  text-align: center;
+  min-width: 0;
+}
+
+.jp-group-search-page .ota-group-result-row__logo.ota-airline-logo {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.jp-group-search-page .ota-group-result-row__airline-name {
+  font-size: var(--fs-13);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.jp-group-search-page .ota-group-result-row__route {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.jp-group-search-page .ota-group-result-row__route-line {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.jp-group-search-page .ota-group-result-row__route-endpoint {
+  flex-shrink: 0;
+}
+
+.jp-group-search-page .ota-group-result-row__route-icon {
+  flex-shrink: 0;
+  color: var(--gold);
+}
+
+.jp-group-search-page .ota-group-result-row__baggage-line,
+.jp-group-search-page .ota-group-result-row__sector-line,
+.jp-group-search-page .ota-group-result-row__meal {
+  margin: 0;
+  font-size: var(--fs-12);
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.jp-group-search-page .ota-group-result-row__date {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.jp-group-search-page .ota-group-result-row__date-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jp-group-search-page .ota-group-result-row__date-value {
+  font-weight: 700;
+  color: var(--text);
+  font-size: var(--fs-14);
+}
+
+.jp-group-search-page .ota-group-result-row__sector-line {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.jp-group-search-page .ota-group-result-row__price {
+  grid-column: 4;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.jp-group-search-page .ota-group-result-row__price strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: 800;
+  color: var(--text);
+}
+
+.jp-group-search-page .ota-group-result-row__price span {
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.jp-group-search-page .ota-group-result-row__seats {
+  grid-column: 4;
+  grid-row: 2;
+}
+
+.jp-group-search-page .ota-group-result-row__cta {
+  grid-column: 5;
+  grid-row: 1 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-group-search-page .ota-group-result-row__cta .ota-btn-primary,
+.jp-group-search-page .ota-group-result-row__cta .jp-btn {
+  white-space: nowrap;
+}
+
+.jp-groups-form select.jp-select-input.is-placeholder {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.jp-groups-form select.jp-select-input option {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.jp-groups-form select.jp-select-input option[value=""] {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+@media (max-width: 1199px) {
+  .jp-group-search-layout {
+    grid-template-columns: 1fr;
+  }
+  .jp-group-filter-panel {
+    position: static;
+  }
+  .jp-group-search-page .jp-groups-form .jp-group-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .jp-group-search-page .ota-group-result-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+  .jp-group-search-page .ota-group-result-row__brand {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+  .jp-group-search-page .ota-group-result-row__route {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .jp-group-search-page .ota-group-result-row__date,
+  .jp-group-search-page .ota-group-result-row__price {
+    grid-column: span 1;
+    grid-row: auto;
+  }
+  .jp-group-search-page .ota-group-result-row__seats,
+  .jp-group-search-page .ota-group-result-row__sector-line {
+    grid-column: span 1;
+  }
+  .jp-group-search-page .ota-group-result-row__cta {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    justify-content: stretch;
+  }
+  .jp-group-search-page .ota-group-result-row__cta .ota-btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 680px) {
+  .jp-group-search-page .jp-groups-form .jp-group-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jp-search-errors {
+  margin: var(--sp-2) 0 0 var(--sp-5);
+}
+
+.jp-search-submit-text {
+  display: inline;
+}
+
+@media (max-width: 1199px) {
+  .jp-multi-fields-row,
+  .jp-groups-form .jp-group-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .jp-groups-form .search-bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .jp-groups-form .search-bottom .btn-search {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .jp-groups-form .search-bottom .btn-ghost {
+    width: 100%;
+  }
+
+  .jp-pax-panel.is-open {
+    left: var(--sp-4) !important;
+    right: var(--sp-4) !important;
+    width: auto !important;
+    bottom: var(--sp-4);
+    top: auto !important;
+    max-height: 70vh;
+    overflow: auto;
+  }
+
+  .jp-date-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .jp-date-calendar {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: var(--r-card) var(--r-card) 0 0;
+    border-bottom: 0;
+  }
+
+  .jp-date-calendar__months.is-dual {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .jp-multi-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .jp-pax-slot-multi {
+    max-width: none;
+  }
+
+  .jp-submit-slot-multi {
+    justify-content: stretch;
+  }
+
+  .jp-submit-slot-multi .btn-search {
+    width: 100%;
+  }
+}
+
+/* Canonical trip-type pill — brand green on Home + Results (not --gold / jp-accent teal) */
+.search .seg.trip .pill-ind {
+  background: linear-gradient(180deg, var(--brand-bright), var(--brand));
+}
+
+/* Inner value rows — immune to Results Bootstrap `.row` grid subset */
+.search .field .jp-field-value-row,
+.jp-groups-form .field .jp-field-value-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--jp-space-xs);
+  min-height: var(--jp-search-control-inner-min-height);
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* JETPK-RESPONSIVE-RESULTS-8A / 8C — search focus rings + airport shell clarity */
+.search .btn-search,
+.search .jp-search-submit {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.search .btn-search:focus,
+.search .jp-search-submit:focus {
+  outline: none;
+}
+
+.search .btn-search:focus:not(:focus-visible),
+.search .jp-search-submit:focus:not(:focus-visible),
+.search .swap:focus:not(:focus-visible),
+.search .btn-search:active,
+.search .jp-search-submit:active {
+  outline: none !important;
+  box-shadow: var(--shadow-brand) !important;
+  border-color: transparent;
+}
+
+.search .btn-search:focus-visible,
+.search .jp-search-submit:focus-visible,
+.search .swap:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--r-pill);
+}
+
+/* Results page — context only (disable hero reveal animation) */
+.jp-flights-results .jp-results-search-placement .search {
+  margin: 0 0 var(--sp-5);
+}
+
+.jp-flights-results .jp-results-search-placement .search.hseq {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+.search .field.jp-airport-field:focus-within {
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+}
+
+.search .btn-search,
+.search .jp-search-submit,
+.jp-group-search-page .ota-group-result-row__cta .ota-btn-primary {
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  border: 1px solid var(--jp-primary-border, transparent);
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+}
+.search .btn-search:hover,
+.search .jp-search-submit:hover,
+.jp-group-search-page .ota-group-result-row__cta .ota-btn-primary:hover {
+  background: var(--jp-gradient-primary-hover, var(--jp-gradient-primary));
+  box-shadow: var(--jp-button-shadow-hover, var(--shadow-brand));
+}
+.search .btn-search:focus-visible,
+.search .jp-search-submit:focus-visible {
+  box-shadow: var(--jp-focus-ring);
+}
+.search .btn-search:disabled,
+.search .jp-search-submit:disabled {
+  background: var(--jp-disabled-bg);
+  color: var(--jp-disabled-text);
+  box-shadow: none;
+}

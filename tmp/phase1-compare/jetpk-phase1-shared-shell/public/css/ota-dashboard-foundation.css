@@ -1,0 +1,397 @@
+/**
+ * OTA Dashboard Foundation — Phase 1 (shared authenticated shell + design-system consolidation)
+ * JETPK-DASHBOARD-UI-FOUNDATION · baseline 6fbfae4
+ *
+ * PURPOSE
+ *   Extends (does NOT replace) the existing ota-dashboard-* / ota-design-system.css system.
+ *   - Adds the token layer that Phase 0 flagged as missing (typography scale, elevation,
+ *     focus ring, z-index) WITHOUT redefining existing brand/color/radius/space tokens.
+ *   - Defines the canonical shell CHROME shared by Customer, Agent, Internal Staff and
+ *     Platform Admin (topbar, breadcrumbs, page-header, mobile drawer, permission-denied,
+ *     loading/skeleton, responsive-table).
+ *   - Ships a tokenised :focus-visible system that REPLACES the hardcoded cyan glow
+ *     (rgba(14,165,233,.2)) and outline:none patterns found in the baseline auth CSS.
+ *
+ * COLOR RULE: every colour below resolves from a CSS variable so JetPakistan branding
+ *   (injected into :root from branding.json via BrandDisplayResolver::cssVariables()) and
+ *   any other tenant theme continue to apply. No hex brand colours here.
+ *
+ * LOAD ORDER: after ota-design-system.css (so tokens exist) and after the shell base
+ *   (ota-public.css / ota-admin-console.css). Structural .ota-dashboard-shell(__grid),
+ *   .ota-dashboard-sidebar and .ota-account-header remain owned by the existing sheets;
+ *   this file only ADDS element classes under the same block namespace.
+ *
+ * CACHE-BUST: linked via ui_asset(); if linked with an explicit ?v=, bump it on every edit
+ *   (see PHASE1-ASSET-VERSION-MANIFEST.md).
+ */
+
+/* ------------------------------------------------------------------ *
+ * 1. Supplemental design tokens (merge with existing :root — additive)
+ * ------------------------------------------------------------------ */
+:root {
+  /* Typography scale (was missing — stops ad-hoc oversized headings) */
+  --font-size-caption: 0.75rem;   /* 12px */
+  --font-size-sm: 0.8125rem;      /* 13px */
+  --font-size-body: 0.875rem;     /* 14px */
+  --font-size-h3: 1rem;           /* 16px */
+  --font-size-h2: 1.125rem;       /* 18px */
+  --font-size-h1: 1.25rem;        /* 20px */
+  --line-height-tight: 1.25;
+  --line-height-body: 1.5;
+
+  /* Elevation (restrained — brief forbids heavy shadows) */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+
+  /* Focus ring — single tokenised ring used via :focus-visible everywhere */
+  --focus-ring-color: color-mix(in srgb, var(--brand-primary) 45%, transparent);
+  --focus-ring: 0 0 0 3px var(--focus-ring-color);
+
+  /* Z-index scale — prevents overlap bugs at small viewports */
+  --z-dashboard-sticky: 20;
+  --z-dashboard-drawer: 60;
+  --z-dashboard-drawer-overlay: 55;
+  --z-dashboard-dropdown: 70;
+  --z-dashboard-toast: 90;
+
+  /* Foundation-local surfaces (fall back to design-system tokens) */
+  --dash-surface: var(--color-surface, #fff);
+  --dash-border: var(--color-border, #dbe3ee);
+  --dash-muted: var(--color-muted, #64748b);
+  --dash-text: var(--color-text, #0f172a);
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. Focus system — accessible, tokenised, no cyan glow, no outline:none
+ *    Scoped to the dashboard shell + foundation components so it does not
+ *    fight page-level styles elsewhere.
+ * ------------------------------------------------------------------ */
+.ota-dashboard-shell :where(a, button, input, select, textarea, [tabindex]):focus-visible,
+.ota-dashboard-foundation :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid transparent;   /* keeps a visible outline in forced-colors mode */
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm, 8px);
+}
+
+/* Remove focus ring only for pointer focus, keep it for keyboard (progressive) */
+.ota-dashboard-shell :where(a, button):focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. Shell chrome additions (topbar, main scroll region)
+ * ------------------------------------------------------------------ */
+.ota-dashboard-topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-dashboard-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  min-height: 52px;
+  padding: 0 var(--space-4, 16px);
+  background: var(--dash-surface);
+  border-bottom: 1px solid var(--dash-border);
+}
+
+.ota-dashboard-topbar__menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--dash-border);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--dash-surface);
+  color: var(--dash-text);
+  cursor: pointer;
+}
+/* Hamburger only on small screens; sidebar is persistent on ≥ lg */
+@media (min-width: 992px) {
+  .ota-dashboard-topbar__menu { display: none; }
+}
+
+.ota-dashboard-topbar__spacer { flex: 1 1 auto; min-width: 0; }
+
+.ota-dashboard-topbar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+.ota-dashboard-topbar__icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--dash-border);
+  border-radius: 999px;
+  background: var(--dash-surface);
+  color: var(--dash-text);
+  cursor: pointer;
+}
+.ota-dashboard-topbar__icon-btn .ti { font-size: 18px; }
+
+.ota-dashboard-topbar__badge {
+  position: absolute;
+  top: -2px;
+  inset-inline-end: -2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------------ *
+ * 4. Page header + breadcrumbs (extends the inline ota-account-header)
+ * ------------------------------------------------------------------ */
+.ota-dashboard-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2, 8px);
+  margin-bottom: var(--space-4, 16px);
+}
+.ota-dashboard-page-header__main { min-width: 0; }
+.ota-dashboard-page-header__pretitle {
+  margin: 0 0 2px;
+  font-size: var(--font-size-caption);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dash-muted);
+}
+.ota-dashboard-page-header__title {
+  margin: 0;
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-tight);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--dash-text);
+}
+.ota-dashboard-page-header__subtitle {
+  margin: 4px 0 0;
+  font-size: var(--font-size-body);
+  color: var(--dash-muted);
+}
+.ota-dashboard-page-header__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+  flex-shrink: 0;
+}
+
+.ota-dashboard-breadcrumbs { margin: 0 0 var(--space-2, 8px); }
+.ota-dashboard-breadcrumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-caption);
+  color: var(--dash-muted);
+}
+.ota-dashboard-breadcrumbs__item { display: inline-flex; align-items: center; gap: 4px; }
+.ota-dashboard-breadcrumbs__sep { color: var(--dash-border); }
+.ota-dashboard-breadcrumbs__link { color: var(--dash-muted); text-decoration: none; }
+.ota-dashboard-breadcrumbs__link:hover { color: var(--brand-primary); text-decoration: underline; }
+.ota-dashboard-breadcrumbs__current { color: var(--dash-text); font-weight: 600; }
+
+/* ------------------------------------------------------------------ *
+ * 5. Mobile drawer (off-canvas sidebar) — required because Staff/Admin
+ *    have no mobile shell; the desktop sidebar becomes a drawer < lg.
+ * ------------------------------------------------------------------ */
+.ota-dashboard-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dashboard-drawer-overlay);
+  background: rgba(15, 23, 42, 0.45);
+}
+.ota-dashboard-drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: var(--z-dashboard-drawer);
+  width: min(84vw, 320px);
+  max-width: 100%;
+  background: var(--dash-surface);
+  border-inline-end: 1px solid var(--dash-border);
+  box-shadow: var(--shadow-md);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-4, 16px);
+}
+.ota-dashboard-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2, 8px);
+}
+.ota-dashboard-drawer__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--dash-border);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--dash-surface);
+  color: var(--dash-text);
+  cursor: pointer;
+}
+/* Drawer is only a drawer below lg; hidden on desktop where sidebar is inline */
+@media (min-width: 992px) {
+  .ota-dashboard-drawer,
+  .ota-dashboard-drawer-overlay { display: none !important; }
+}
+
+/* ------------------------------------------------------------------ *
+ * 6. Permission-denied / access-denied state (gap P-1)
+ * ------------------------------------------------------------------ */
+.ota-dashboard-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2, 8px);
+  max-width: 460px;
+  margin: var(--space-8, 32px) auto;
+  padding: var(--space-6, 24px);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--dash-surface);
+}
+.ota-dashboard-denied__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-primary) 10%, transparent);
+  color: var(--brand-primary);
+}
+.ota-dashboard-denied__icon .ti { font-size: 22px; }
+.ota-dashboard-denied__title { margin: 0; font-size: var(--font-size-h2); font-weight: 700; color: var(--dash-text); }
+.ota-dashboard-denied__text { margin: 0; font-size: var(--font-size-body); color: var(--dash-muted); }
+.ota-dashboard-denied__reason {
+  font-size: var(--font-size-caption);
+  color: var(--dash-muted);
+  background: var(--color-bg, #f8fafc);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--radius-sm, 8px);
+  padding: 6px 10px;
+}
+.ota-dashboard-denied__actions { margin-top: var(--space-2, 8px); }
+
+/* ------------------------------------------------------------------ *
+ * 7. Loading + skeleton states
+ * ------------------------------------------------------------------ */
+.ota-dashboard-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  color: var(--dash-muted);
+  font-size: var(--font-size-body);
+}
+.ota-dashboard-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--dash-border);
+  border-top-color: var(--brand-primary);
+  border-radius: 999px;
+  animation: ota-dashboard-spin 0.7s linear infinite;
+}
+@keyframes ota-dashboard-spin { to { transform: rotate(360deg); } }
+
+.ota-dashboard-skeleton { display: block; }
+.ota-dashboard-skeleton__line {
+  height: 12px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-sm, 8px);
+  background: linear-gradient(90deg,
+    var(--color-bg, #f1f5f9) 25%,
+    color-mix(in srgb, var(--color-bg, #f1f5f9) 60%, #fff) 37%,
+    var(--color-bg, #f1f5f9) 63%);
+  background-size: 400% 100%;
+  animation: ota-dashboard-shimmer 1.4s ease infinite;
+}
+.ota-dashboard-skeleton__line:last-child { margin-bottom: 0; width: 70%; }
+@keyframes ota-dashboard-shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ota-dashboard-spinner { animation-duration: 1.6s; }
+  .ota-dashboard-skeleton__line { animation: none; }
+}
+
+/* ------------------------------------------------------------------ *
+ * 8. Responsive table wrapper (gap T-1)
+ *    Horizontal scroll by default; opt-in card mode via data-collapse="cards".
+ *    Preserves ALL columns/actions — never hides operational/financial data.
+ * ------------------------------------------------------------------ */
+.ota-dashboard-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-md, 12px);
+}
+.ota-dashboard-table-wrap > table { min-width: 640px; width: 100%; }
+
+.ota-dashboard-table-scroll-hint {
+  display: none;
+  font-size: var(--font-size-caption);
+  color: var(--dash-muted);
+  padding: 4px 2px 0;
+}
+@media (max-width: 575.98px) {
+  .ota-dashboard-table-wrap[data-scroll-hint="true"] + .ota-dashboard-table-scroll-hint { display: block; }
+}
+
+/* Optional card mode: table collapses to stacked cards below md */
+@media (max-width: 767.98px) {
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table,
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table > tbody,
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table > tbody > tr,
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table > tbody > tr > td { display: block; width: 100%; }
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table { min-width: 0; }
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table > thead { display: none; }
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table > tbody > tr {
+    border: 1px solid var(--dash-border);
+    border-radius: var(--radius-md, 12px);
+    padding: var(--space-2, 8px);
+    margin-bottom: var(--space-2, 8px);
+  }
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table > tbody > tr > td {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4, 16px);
+    padding: 4px 0;
+    border: 0;
+  }
+  .ota-dashboard-table-wrap[data-collapse="cards"] > table > tbody > tr > td::before {
+    content: attr(data-label);
+    font-size: var(--font-size-caption);
+    color: var(--dash-muted);
+    font-weight: 600;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 9. Flash region
+ * ------------------------------------------------------------------ */
+.ota-dashboard-flash { display: grid; gap: var(--space-2, 8px); margin-bottom: var(--space-4, 16px); }
+
+/* ------------------------------------------------------------------ *
+ * 10. Body scroll lock helper (set by foundation JS when drawer open)
+ * ------------------------------------------------------------------ */
+body.ota-dashboard-drawer-open { overflow: hidden; }

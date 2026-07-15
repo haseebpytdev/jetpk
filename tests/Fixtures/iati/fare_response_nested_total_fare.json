@@ -1,0 +1,29 @@
+{
+  "result": {
+    "fare_detail_key": "fare-detail-key-live",
+    "offers": [
+      {
+        "offer_key": "offer-key-live-1",
+        "can_book": true
+      }
+    ],
+    "departure_fare": {
+      "fare_info": {
+        "fare_detail": {
+          "currency_code": "PKR",
+          "price_info": {
+            "total_fare": 89692,
+            "base_fare": 80000,
+            "tax": 9692
+          }
+        }
+      }
+    },
+    "change_rules": [
+      {
+        "type": "CHANGE",
+        "before_departure_status": "PERMITTED"
+      }
+    ]
+  }
+}

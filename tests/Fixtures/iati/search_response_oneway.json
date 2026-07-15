@@ -1,0 +1,68 @@
+{
+  "result": {
+    "departure_flights": [
+      {
+        "provider_key": "dep-1",
+        "legs": [
+          {
+            "flight_number": "EK623",
+            "departure_info": {
+              "airport_code": "LHE",
+              "date": "2026-07-01T08:00:00"
+            },
+            "arrival_info": {
+              "airport_code": "DXB",
+              "date": "2026-07-01T11:30:00"
+            },
+            "airline_info": {
+              "carrier_code": "EK",
+              "carrier_name": "Emirates"
+            },
+            "duration": 210,
+            "baggages": [{"amount": "30", "unit": "kg"}]
+          }
+        ],
+        "fares": [
+          {
+            "fare_key": "dep-fare-key-abc",
+            "fare_info": {
+              "class_codes": ["Y"],
+              "fare_basis_codes": ["YLOWPK"],
+              "cabin_types": ["ECONOMY"],
+              "fare_detail": {
+                "currency_code": "USD",
+                "price_info": {
+                  "total_fare": 350.0,
+                  "base_fare": 280.0,
+                  "tax": 70.0
+                },
+                "pax_fares": [
+                  {
+                    "pax_type": "ADULT",
+                    "number_of_pax": 1,
+                    "price_info": {
+                      "total_fare": 350.0,
+                      "base_fare": 280.0,
+                      "tax": 70.0
+                    },
+                    "currency_code": "USD"
+                  }
+                ]
+              }
+            },
+            "change_rules": [
+              {
+                "type": "REFUND",
+                "before_departure_status": "PERMITTED"
+              }
+            ],
+            "default_offer": {
+              "brand_name": "Economy Saver"
+            }
+          }
+        ]
+      }
+    ],
+    "return_flights": []
+  }
+}

@@ -1,0 +1,92 @@
+# JetPK dedicated server — data seed manifest
+# Generated: 2026-07-07 (phase 7J)
+# Classification: planning checklist — NO passwords, hashes, or credentials in this file
+#
+# === IMPORTANT: USER REUSE DECISION ===
+# Reuse the same seeded users already created for the Master Client.
+# Do NOT treat a missing local "bobsif" row as a deployment blocker.
+# Export/import the working Master/JetPK test user set into the dedicated DB.
+# Passwords may be reset on the dedicated server after deployment if required.
+#
+# === A. CLIENT PROFILE (required) ===
+# Table: client_profiles
+# slug=jetpk
+# is_active=true
+# is_master_profile=false
+# active_frontend_theme=jetpakistan
+# active_admin_theme=jetpakistan
+# active_staff_theme=jetpakistan (verify)
+# active_agent_theme=jetpakistan (verify)
+# active_customer_theme=jetpakistan (verify)
+# asset_profile=jetpk-assets
+# domain=jetpakistan.com (optional until DNS live)
+#
+# === B. BRANDING (required) ===
+# Table: client_profile_branding
+# display_name=JetPakistan
+# primary_color=#00843D
+# logo_path=client-assets/jetpk-assets/logo/logo.svg
+# favicon_path=client-assets/jetpk-assets/favicon/favicon.ico
+# support_email=ticketingjp@jetpakistan.com (configure final value post-deploy)
+# support_phone=<configure on dedicated server>
+#
+# === C. PAGE BUILDER ===
+# Table: client_page_settings — STATUS: seed/export required before client handoff if empty
+# Required page_key rows:
+#   home, about, support, group-search, login, register, footer
+# Table: client_page_assets — STATUS: may be empty until editors upload assets
+# Table: client_theme_palettes — STATUS: verify on production export (1 row in 7H audit)
+# ACTION: Do not auto-seed in 7J — approved data pass only
+#
+# === D. USERS (reuse Master Client seed) ===
+# Export users + role assignments from Master Client DB (masked export — no password hashes in docs)
+# Required account_type coverage:
+#   platform_admin / admin — ops login
+#   staff — staff portal
+#   agent, agent_staff — agent portal
+#   customer — customer portal
+# NOTE: Same emails/passwords as Master test environment unless reset post-deploy
+#
+# === E. SUPPLIERS (post-deploy Admin UI) ===
+# Tables: supplier_connections, client_profile_suppliers
+# Records/gates may be exported without credential payload
+# Configure AFTER deployment via Admin → Supplier & API Settings:
+#   Sabre (shared GDS/NDC)
+#   PIA NDC
+#   AirBlue / Zapways
+#   AirSial
+#   Duffel
+#   Al-Haider group ticketing
+# STATUS in audit: disabled/empty — WARNING ONLY, not a package blocker
+#
+# === F. MAIL (post-deploy) ===
+# SMTP host/user/password: set in dedicated .env after deployment
+# MAIL_FROM_ADDRESS=ticketingjp@jetpakistan.com
+# MAIL_FROM_NAME=JetPakistan
+# JetPK email templates: separate future phase — not in this package
+# Ensure no {{ brand_name }} Master placeholders when templates are created
+#
+# === G. GOOGLE OAUTH (post-deploy) ===
+# Configure using JetPK official Google/email account
+# See docs/jetpk-google-oauth-setup.md
+# GOOGLE_REDIRECT_URI=https://jetpakistan.com/auth/google/callback
+# Do not include client secret in package
+#
+# === H. STORAGE ===
+# [ ] php artisan storage:link on dedicated server
+# [ ] public_html/client-assets/jetpk-assets/ copied from live webroot
+# [ ] public_html/storage/group-homepage-tiles/ copied if used
+# [ ] storage/app/public writable for page-builder uploads
+#
+# === I. GROUP TICKETING / SCHEDULER ===
+# Export group ticketing categories/tiles if used
+# Cron: * * * * * php artisan schedule:run
+# Commands: group-ticketing:sync-inventory, group-ticketing:release-expired
+#
+# === PRE-HANDOFF GATE ===
+# [ ] client_profiles jetpk row present
+# [ ] branding row present
+# [ ] users exported from Master Client seed
+# [ ] client_page_settings seeded OR explicitly deferred with approval
+# [ ] supplier rows exported (credentials entered post-deploy)
+# [ ] no haseeb-master or other client profiles in dedicated DB

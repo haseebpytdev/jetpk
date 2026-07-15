@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+   <S:Body>
+      <ns16:IATA_OfferPriceRS xmlns:ns16="http://www.iata.org/IATA/2015/00/2020.1/IATA_OfferPriceRS">
+         <ns16:Response>
+            <ns16:PricedOffer>
+               <ns16:Offer>
+                  <ns16:OfferID>fee-only-offer-id-khi-isb</ns16:OfferID>
+                  <ns16:OwnerCode>PK</ns16:OwnerCode>
+                  <ns16:TotalPrice>
+                     <ns16:BaseAmount CurCode="PKR">0.00</ns16:BaseAmount>
+                     <ns16:TaxSummary>
+                        <ns16:TotalTaxAmount CurCode="PKR">0.00</ns16:TotalTaxAmount>
+                     </ns16:TaxSummary>
+                     <ns16:Fee>
+                        <ns16:Amount CurCode="PKR">1484.00</ns16:Amount>
+                        <ns16:DescText>SF</ns16:DescText>
+                     </ns16:Fee>
+                     <ns16:TotalAmount CurCode="PKR">1484.00</ns16:TotalAmount>
+                  </ns16:TotalPrice>
+                  <ns16:OfferItem>
+                     <ns16:OfferItemID>OfferItem-1</ns16:OfferItemID>
+                     <ns16:MandatoryInd>true</ns16:MandatoryInd>
+                     <ns16:Price>
+                        <ns16:BaseAmount CurCode="PKR">0.00</ns16:BaseAmount>
+                        <ns16:TaxSummary>
+                           <ns16:TotalTaxAmount CurCode="PKR">0.00</ns16:TotalTaxAmount>
+                        </ns16:TaxSummary>
+                        <ns16:Fee>
+                           <ns16:Amount CurCode="PKR">1484.00</ns16:Amount>
+                           <ns16:DescText>SF</ns16:DescText>
+                        </ns16:Fee>
+                        <ns16:TotalAmount CurCode="PKR">1484.00</ns16:TotalAmount>
+                     </ns16:Price>
+                     <ns16:Service>
+                        <ns16:PaxRefID>ADTPax-1</ns16:PaxRefID>
+                     </ns16:Service>
+                  </ns16:OfferItem>
+               </ns16:Offer>
+            </ns16:PricedOffer>
+         </ns16:Response>
+      </ns16:IATA_OfferPriceRS>
+   </S:Body>
+</S:Envelope>

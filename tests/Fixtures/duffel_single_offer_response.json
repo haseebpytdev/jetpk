@@ -1,0 +1,70 @@
+{
+  "data": {
+    "type": "offer",
+    "id": "off_0001",
+    "owner": {
+      "iata_code": "PK",
+      "name": "Pakistan International Airlines"
+    },
+    "slices": [
+      {
+        "segments": [
+          {
+            "origin": { "iata_code": "LHE" },
+            "destination": { "iata_code": "DXB" },
+            "departing_at": "2026-06-15T06:00:00Z",
+            "arriving_at": "2026-06-15T08:10:00Z",
+            "marketing_carrier": { "iata_code": "PK", "name": "Pakistan International Airlines" },
+            "marketing_carrier_flight_number": "203",
+            "cabin_class": "economy"
+          }
+        ]
+      }
+    ],
+    "total_currency": "USD",
+    "total_amount": "255.00",
+    "base_amount": "205.00",
+    "tax_amount": "45.00",
+    "fee_amount": "5.00",
+    "expires_at": "2030-01-01T00:00:00Z",
+    "payment_requirements": {
+      "requires_instant_payment": true,
+      "payment_required_by": "2030-01-01T00:00:00Z"
+    },
+    "conditions": {
+      "price_guarantee": {
+        "enabled": false
+      }
+    },
+    "passengers": [
+      {
+        "id": "pas_ad_1",
+        "type": "adult",
+        "age": 34,
+        "base_amount": "100.00",
+        "tax_amount": "20.00",
+        "total_amount": "120.00",
+        "currency": "USD"
+      },
+      {
+        "id": "pas_ch_1",
+        "type": "child",
+        "age": 10,
+        "base_amount": "70.00",
+        "tax_amount": "20.00",
+        "total_amount": "90.00",
+        "currency": "USD"
+      },
+      {
+        "id": "pas_in_1",
+        "type": "infant",
+        "age": 1,
+        "base_amount": "35.00",
+        "tax_amount": "10.00",
+        "total_amount": "45.00",
+        "currency": "USD"
+      }
+    ]
+  }
+}
+

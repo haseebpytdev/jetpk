@@ -1,0 +1,22 @@
+{
+  "result": {
+    "fare_detail_key": "fare-detail-dup-total",
+    "offers": [
+      {
+        "offer_key": "offer-dup-0",
+        "total_price": 80294,
+        "currency": "PKR"
+      },
+      {
+        "offer_key": "offer-dup-1",
+        "total_price": 85158,
+        "currency": "PKR"
+      },
+      {
+        "offer_key": "offer-dup-2",
+        "total_price": 80294,
+        "currency": "PKR"
+      }
+    ]
+  }
+}

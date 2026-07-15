@@ -1,0 +1,68 @@
+﻿# JetPK dedicated server — public webroot manifest
+# Generated: 2026-07-07 (phase 7J)
+# Package type: MANIFEST-BASED — copy files via SFTP from source to target
+# No tar.gz. No rm -rf. No destructive rsync.
+#
+# === SHARED HOSTINGER SOURCE (authoritative production bytes) ===
+SOURCE_ROOT=/home/u654883295/domains/haseebasif.com/public_html/ota.haseebasif.com
+#
+# === DEDICATED SERVER TARGET ===
+TARGET_ROOT=/home/<jetpk_user>/domains/jetpakistan.com/public_html
+LARAVEL_APP=/home/<jetpk_user>/domains/jetpakistan.com/ota_app
+#
+# === DIRECTORY MAPPINGS ===
+# SOURCE: ${SOURCE_ROOT}/themes/frontend/jetpakistan/
+# TARGET: ${TARGET_ROOT}/themes/frontend/jetpakistan/
+# ALSO:  ${LARAVEL_APP}/public/themes/frontend/jetpakistan/ (mirror if split webroot)
+#
+# SOURCE: ${SOURCE_ROOT}/themes/admin/jetpakistan/
+# TARGET: ${TARGET_ROOT}/themes/admin/jetpakistan/
+#
+# SOURCE: ${SOURCE_ROOT}/client-assets/jetpk-assets/
+# TARGET: ${TARGET_ROOT}/client-assets/jetpk-assets/
+#
+# SOURCE: ${SOURCE_ROOT}/storage/group-homepage-tiles/ (if exists)
+# TARGET: ${TARGET_ROOT}/storage/group-homepage-tiles/
+#
+# SOURCE: ${SOURCE_ROOT}/storage/ (symlink target for page-builder uploads)
+# TARGET: ${TARGET_ROOT}/storage/ -> symlink to ${LARAVEL_APP}/storage/app/public
+#
+# === SHARED PLATFORM ASSETS (if JetPK booking flows reference them) ===
+# SOURCE: ${SOURCE_ROOT}/css/, /js/, /images/
+# TARGET: ${TARGET_ROOT}/css/, /js/, /images/
+#
+# === LOCAL REPO PATHS (verify against live webroot before dedicated upload) ===
+public/client-assets/jetpk-assets/favicon/.gitkeep
+public/client-assets/jetpk-assets/favicon/favicon.ico
+public/client-assets/jetpk-assets/favicon/favicon-16.png
+public/client-assets/jetpk-assets/favicon/favicon-32.png
+public/client-assets/jetpk-assets/favicon/favicon-48.png
+public/client-assets/jetpk-assets/logo/.gitkeep
+public/client-assets/jetpk-assets/logo/logo.svg
+public/client-assets/jetpk-assets/README.md
+public/themes/admin/jetpakistan/css/dashboard.css
+public/themes/admin/jetpakistan/js/dashboard.js
+public/themes/frontend/jetpakistan/css/booking.css
+public/themes/frontend/jetpakistan/css/flight-cards.css
+public/themes/frontend/jetpakistan/css/forms.css
+public/themes/frontend/jetpakistan/css/jp-search.css
+public/themes/frontend/jetpakistan/css/portal.css
+public/themes/frontend/jetpakistan/css/results.css
+public/themes/frontend/jetpakistan/css/results-base.css
+public/themes/frontend/jetpakistan/css/search.css
+public/themes/frontend/jetpakistan/css/search-overrides.css
+public/themes/frontend/jetpakistan/css/theme.css
+public/themes/frontend/jetpakistan/css/tokens.css
+public/themes/frontend/jetpakistan/js/airport-autocomplete.js
+public/themes/frontend/jetpakistan/js/effects.js
+public/themes/frontend/jetpakistan/js/flight-cards.js
+public/themes/frontend/jetpakistan/js/forms.js
+public/themes/frontend/jetpakistan/js/jp-dates.js
+public/themes/frontend/jetpakistan/js/passengers.js
+public/themes/frontend/jetpakistan/js/results.js
+public/themes/frontend/jetpakistan/js/reveal.js
+public/themes/frontend/jetpakistan/js/search.js
+public/themes/frontend/jetpakistan/js/theme.js
+
+# TOTAL files under local public/ JetPK paths: 31
+

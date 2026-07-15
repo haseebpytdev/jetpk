@@ -1,0 +1,76 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "LHE", "time": "2026-08-20T08:00:00" },
+        "arrival": { "airport": "KHI", "time": "2026-08-20T09:30:00" },
+        "elapsedTime": 90,
+        "carrier": { "marketing": "PK", "marketingFlightNumber": "301" }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "ISB", "time": "2026-08-25T10:00:00" },
+        "arrival": { "airport": "DXB", "time": "2026-08-25T12:30:00" },
+        "elapsedTime": 150,
+        "carrier": { "marketing": "EK", "marketingFlightNumber": "615" }
+      },
+      {
+        "ref": 3,
+        "departure": { "airport": "DXB", "time": "2026-09-02T14:00:00" },
+        "arrival": { "airport": "LHE", "time": "2026-09-02T18:30:00" },
+        "elapsedTime": 210,
+        "carrier": { "marketing": "PK", "marketingFlightNumber": "234" }
+      }
+    ],
+    "legDescs": [
+      { "ref": 1, "elapsedTime": 90, "schedules": [{ "ref": 1 }] },
+      { "ref": 2, "elapsedTime": 150, "schedules": [{ "ref": 2 }] },
+      { "ref": 3, "elapsedTime": 210, "schedules": [{ "ref": 3 }] }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-mc-3slice-1",
+            "source": "BFM",
+            "pricingSource": "SHS",
+            "legs": [{ "ref": 1 }, { "ref": 2 }, { "ref": 3 }],
+            "pricingInformation": [
+              {
+                "offerItemId": "offer-mc-item-1",
+                "fareReference": "FR-MC-1",
+                "fare": {
+                  "validatingCarrierCode": "PK",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 185000,
+                    "baseFareAmount": 160000,
+                    "totalTaxAmount": 25000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": true,
+                        "fareComponents": [
+                          {
+                            "segments": [
+                              { "segment": { "cabinCode": "Y", "bookingCode": "V", "fareBasisCode": "VOWPK" } },
+                              { "segment": { "cabinCode": "Y", "bookingCode": "Y", "fareBasisCode": "YOWEK" } },
+                              { "segment": { "cabinCode": "Y", "bookingCode": "V", "fareBasisCode": "VOWPK" } }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

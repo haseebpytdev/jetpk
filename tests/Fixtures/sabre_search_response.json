@@ -1,0 +1,53 @@
+{
+  "groupedItineraryResponse": {
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itn-1",
+            "legs": [
+              {
+                "origin": "LHE",
+                "destination": "DXB"
+              }
+            ],
+            "scheduleDescs": [
+              {
+                "departure": {
+                  "airport": "LHE",
+                  "time": "2026-06-10T08:30:00"
+                },
+                "arrival": {
+                  "airport": "DXB",
+                  "time": "2026-06-10T11:15:00"
+                },
+                "elapsedTime": 165,
+                "carrier": {
+                  "marketing": "PK",
+                  "marketingFlightNumber": "203"
+                }
+              }
+            ],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "currency": "PKR",
+                  "baseFareAmount": 10000,
+                  "taxAmount": 2500,
+                  "totalFare": 12500,
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": false
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

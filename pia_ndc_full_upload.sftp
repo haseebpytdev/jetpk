@@ -1,0 +1,119 @@
+cd /home/u654883295/domains/haseebasif.com/ota_app
+
+mkdir app/Services/Suppliers/PiaNdc
+mkdir app/Services/Suppliers/PiaNdc/Exceptions
+mkdir app/Services/Suppliers/Adapters
+mkdir app/Services/Suppliers/BookingAdapters
+mkdir app/Services/Suppliers/TicketingAdapters
+mkdir app/Services/Suppliers/Duffel
+mkdir app/Support/Bookings
+mkdir app/Support/Suppliers
+mkdir app/Http/Controllers/Concerns
+
+put app/Console/Commands/PiaNdcAuditDocsCommand.php app/Console/Commands/PiaNdcAuditDocsCommand.php
+put app/Console/Commands/PiaNdcAuditReferenceCodeCommand.php app/Console/Commands/PiaNdcAuditReferenceCodeCommand.php
+put app/Console/Commands/PiaNdcCancelCommitCommand.php app/Console/Commands/PiaNdcCancelCommitCommand.php
+put app/Console/Commands/PiaNdcCancelPreviewCommand.php app/Console/Commands/PiaNdcCancelPreviewCommand.php
+put app/Console/Commands/PiaNdcHealthCommand.php app/Console/Commands/PiaNdcHealthCommand.php
+put app/Console/Commands/PiaNdcReissueCommitCommand.php app/Console/Commands/PiaNdcReissueCommitCommand.php
+put app/Console/Commands/PiaNdcReissuePreviewCommand.php app/Console/Commands/PiaNdcReissuePreviewCommand.php
+put app/Console/Commands/PiaNdcRetrieveCommand.php app/Console/Commands/PiaNdcRetrieveCommand.php
+put app/Console/Commands/PiaNdcTestBookingCommand.php app/Console/Commands/PiaNdcTestBookingCommand.php
+put app/Console/Commands/PiaNdcTestOfferPriceCommand.php app/Console/Commands/PiaNdcTestOfferPriceCommand.php
+put app/Console/Commands/PiaNdcTestSearchCommand.php app/Console/Commands/PiaNdcTestSearchCommand.php
+put app/Console/Commands/PiaNdcTestTicketPreviewCommand.php app/Console/Commands/PiaNdcTestTicketPreviewCommand.php
+put app/Console/Commands/PiaNdcTestTicketingCommand.php app/Console/Commands/PiaNdcTestTicketingCommand.php
+put app/Console/Commands/PiaNdcVoidTicketCommand.php app/Console/Commands/PiaNdcVoidTicketCommand.php
+
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcAuthException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcAuthException.php
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcBookingException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcBookingException.php
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcCancellationException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcCancellationException.php
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcException.php
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcProviderException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcProviderException.php
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcTicketingException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcTicketingException.php
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcUnavailableException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcUnavailableException.php
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcValidationException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcValidationException.php
+put app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcXmlException.php app/Services/Suppliers/PiaNdc/Exceptions/PiaNdcXmlException.php
+
+put app/Services/Suppliers/PiaNdc/PiaNdcAncillaryService.php app/Services/Suppliers/PiaNdc/PiaNdcAncillaryService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcBookingRouterService.php app/Services/Suppliers/PiaNdc/PiaNdcBookingRouterService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcBookingService.php app/Services/Suppliers/PiaNdc/PiaNdcBookingService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcCancelService.php app/Services/Suppliers/PiaNdc/PiaNdcCancelService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcClient.php app/Services/Suppliers/PiaNdc/PiaNdcClient.php
+put app/Services/Suppliers/PiaNdc/PiaNdcConfigResolver.php app/Services/Suppliers/PiaNdc/PiaNdcConfigResolver.php
+put app/Services/Suppliers/PiaNdc/PiaNdcCorrelationContext.php app/Services/Suppliers/PiaNdc/PiaNdcCorrelationContext.php
+put app/Services/Suppliers/PiaNdc/PiaNdcDiagnosticService.php app/Services/Suppliers/PiaNdc/PiaNdcDiagnosticService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcFlightSearchService.php app/Services/Suppliers/PiaNdc/PiaNdcFlightSearchService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcOfferPriceService.php app/Services/Suppliers/PiaNdc/PiaNdcOfferPriceService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcResponseNormalizer.php app/Services/Suppliers/PiaNdc/PiaNdcResponseNormalizer.php
+put app/Services/Suppliers/PiaNdc/PiaNdcRetrieveService.php app/Services/Suppliers/PiaNdc/PiaNdcRetrieveService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcReissueService.php app/Services/Suppliers/PiaNdc/PiaNdcReissueService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcTicketPreviewService.php app/Services/Suppliers/PiaNdc/PiaNdcTicketPreviewService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcTicketingService.php app/Services/Suppliers/PiaNdc/PiaNdcTicketingService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcVoidTicketService.php app/Services/Suppliers/PiaNdc/PiaNdcVoidTicketService.php
+put app/Services/Suppliers/PiaNdc/PiaNdcXmlBuilder.php app/Services/Suppliers/PiaNdc/PiaNdcXmlBuilder.php
+put app/Services/Suppliers/PiaNdc/PiaNdcXmlParser.php app/Services/Suppliers/PiaNdc/PiaNdcXmlParser.php
+
+put app/Services/Suppliers/Adapters/PiaNdcFlightSupplierAdapter.php app/Services/Suppliers/Adapters/PiaNdcFlightSupplierAdapter.php
+put app/Services/Suppliers/BookingAdapters/PiaNdcSupplierBookingAdapter.php app/Services/Suppliers/BookingAdapters/PiaNdcSupplierBookingAdapter.php
+put app/Services/Suppliers/TicketingAdapters/PiaNdcSupplierTicketingAdapter.php app/Services/Suppliers/TicketingAdapters/PiaNdcSupplierTicketingAdapter.php
+
+put app/Services/Suppliers/Duffel/DuffelTicketingService.php app/Services/Suppliers/Duffel/DuffelTicketingService.php
+put app/Services/Suppliers/TicketingAdapters/DuffelSupplierTicketingAdapter.php app/Services/Suppliers/TicketingAdapters/DuffelSupplierTicketingAdapter.php
+
+put app/Enums/SupplierProvider.php app/Enums/SupplierProvider.php
+put app/Http/Controllers/Admin/DashboardController.php app/Http/Controllers/Admin/DashboardController.php
+put app/Http/Controllers/Admin/SupplierConnectionController.php app/Http/Controllers/Admin/SupplierConnectionController.php
+put app/Http/Requests/Admin/StoreSupplierConnectionRequest.php app/Http/Requests/Admin/StoreSupplierConnectionRequest.php
+put app/Http/Requests/Admin/UpdateSupplierConnectionRequest.php app/Http/Requests/Admin/UpdateSupplierConnectionRequest.php
+
+put app/Services/Booking/BookingProviderRouter.php app/Services/Booking/BookingProviderRouter.php
+put app/Services/Bookings/BookingCancellationService.php app/Services/Bookings/BookingCancellationService.php
+put app/Services/Reports/BookingReportService.php app/Services/Reports/BookingReportService.php
+put app/Services/Suppliers/SupplierAdapterResolver.php app/Services/Suppliers/SupplierAdapterResolver.php
+put app/Services/Suppliers/SupplierBookingService.php app/Services/Suppliers/SupplierBookingService.php
+put app/Services/Suppliers/SupplierConnectionService.php app/Services/Suppliers/SupplierConnectionService.php
+put app/Services/Suppliers/TicketingService.php app/Services/Suppliers/TicketingService.php
+
+put app/Support/Bookings/AdminPiaNdcDiagnosticPanelsPresenter.php app/Support/Bookings/AdminPiaNdcDiagnosticPanelsPresenter.php
+put app/Support/Bookings/SupplierOperationalStatus.php app/Support/Bookings/SupplierOperationalStatus.php
+put app/Support/Bookings/TicketingOperationalStatus.php app/Support/Bookings/TicketingOperationalStatus.php
+put app/Support/Bookings/TicketingReadinessPresenter.php app/Support/Bookings/TicketingReadinessPresenter.php
+
+put app/Support/Platform/PlatformModuleEnforcer.php app/Support/Platform/PlatformModuleEnforcer.php
+put app/Support/Platform/PlatformModuleGate.php app/Support/Platform/PlatformModuleGate.php
+put app/Support/Platform/PlatformModuleRegistry.php app/Support/Platform/PlatformModuleRegistry.php
+
+put app/Support/Suppliers/IatiSupplierConnectionNormalizer.php app/Support/Suppliers/IatiSupplierConnectionNormalizer.php
+put app/Support/Suppliers/PiaNdcSupplierConnectionNormalizer.php app/Support/Suppliers/PiaNdcSupplierConnectionNormalizer.php
+put app/Support/Suppliers/SabreSupplierConnectionNormalizer.php app/Support/Suppliers/SabreSupplierConnectionNormalizer.php
+
+put config/logging.php config/logging.php
+put config/ota-suppliers.php config/ota-suppliers.php
+put config/supplier_credentials.php config/supplier_credentials.php
+put config/suppliers.php config/suppliers.php
+
+put database/factories/SupplierConnectionFactory.php database/factories/SupplierConnectionFactory.php
+put database/migrations/2026_06_23_120000_rename_pia_provider_to_pia_ndc.php database/migrations/2026_06_23_120000_rename_pia_provider_to_pia_ndc.php
+
+put resources/views/dashboard/admin/api-settings.blade.php resources/views/dashboard/admin/api-settings.blade.php
+put resources/views/dashboard/admin/api-settings/create.blade.php resources/views/dashboard/admin/api-settings/create.blade.php
+put resources/views/dashboard/admin/api-settings/edit.blade.php resources/views/dashboard/admin/api-settings/edit.blade.php
+put resources/views/dashboard/admin/api-settings/form.blade.php resources/views/dashboard/admin/api-settings/form.blade.php
+put resources/views/dashboard/admin/api-settings/index.blade.php resources/views/dashboard/admin/api-settings/index.blade.php
+
+put app/Support/Suppliers/LegacySupplierProviderDataRepair.php app/Support/Suppliers/LegacySupplierProviderDataRepair.php
+put app/Models/SupplierConnection.php app/Models/SupplierConnection.php
+put database/seeders/OtaFoundationSeeder.php database/seeders/OtaFoundationSeeder.php
+put app/Console/Commands/OtaRoutePageHealthAuditCommand.php app/Console/Commands/OtaRoutePageHealthAuditCommand.php
+put app/Http/Controllers/Concerns/HandlesPiaNdcBookingSync.php app/Http/Controllers/Concerns/HandlesPiaNdcBookingSync.php
+put app/Http/Controllers/Admin/BookingManagementController.php app/Http/Controllers/Admin/BookingManagementController.php
+put routes/admin.php routes/admin.php
+put resources/views/dashboard/admin/bookings/show.blade.php resources/views/dashboard/admin/bookings/show.blade.php
+put resources/views/dashboard/admin/reports.blade.php resources/views/dashboard/admin/reports.blade.php
+
+rm app/Services/Suppliers/Adapters/PiaFlightSupplierAdapter.php
+rm app/Services/Suppliers/BookingAdapters/PiaSupplierBookingAdapter.php
+rm app/Services/Suppliers/TicketingAdapters/PiaSupplierTicketingAdapter.php
+
+bye

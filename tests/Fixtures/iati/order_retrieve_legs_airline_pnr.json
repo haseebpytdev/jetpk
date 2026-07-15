@@ -1,0 +1,18 @@
+{
+  "result": {
+    "order_id": "order-456",
+    "status": "BOOKED",
+    "legs": [
+      {
+        "airline_pnr": "legpnr1"
+      },
+      {
+        "segments": [
+          {
+            "airline_pnr": "segpnr2"
+          }
+        ]
+      }
+    ]
+  }
+}

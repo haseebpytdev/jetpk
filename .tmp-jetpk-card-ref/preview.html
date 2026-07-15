@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JetPakistan — Flight Results (redesign)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ---- page chrome (preview only — NOT part of the component kit) -------- */
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--jp-bg, #EEF3F8);
+  font-family: "Inter", system-ui, sans-serif; color: #46566B;
+}
+.pv-top {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 22px;
+  padding: 13px 26px; background: rgba(255,255,255,.86);
+  backdrop-filter: blur(10px); border-bottom: 1px solid #E7ECF3;
+}
+.pv-brand { display: flex; align-items: center; gap: 9px; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 17px; color: #0F1B2D; }
+.pv-logo { width: 26px; height: 26px; border-radius: 8px; background: #16A34A; display: grid; place-items: center; color: #fff; }
+.pv-logo svg { width: 15px; height: 15px; }
+.pv-brand span { color: #F26F21; }
+.pv-nav { display: flex; gap: 20px; font-size: 13.5px; font-weight: 500; color: #46566B; }
+.pv-nav a { color: inherit; text-decoration: none; }
+.pv-nav a:first-child { color: #0F1B2D; font-weight: 600; }
+.pv-right { margin-left: auto; display: flex; align-items: center; gap: 16px; font-size: 13px; }
+.pv-support { color: #46566B; }
+.pv-signin { color: #46566B; text-decoration: none; }
+.pv-reg { background: #F26F21; color: #fff; padding: 8px 16px; border-radius: 9px; font-weight: 600; font-size: 13px; }
+
+.pv-wrap { max-width: 1180px; margin: 0 auto; padding: 22px 26px 60px; }
+.pv-head { margin: 4px 0 18px; }
+.pv-eyebrow { font-family: "JetBrains Mono", monospace; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: #8194AB; }
+.pv-title { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 24px; color: #0F1B2D; margin: 4px 0 3px; }
+.pv-route-sum { font-size: 13px; color: #46566B; }
+.pv-route-sum b { color: #0F1B2D; }
+
+.pv-dates { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 14px; margin-bottom: 6px; }
+.pv-date { flex: none; min-width: 92px; text-align: center; padding: 9px 12px; border-radius: 12px; background: #fff; border: 1px solid #E7ECF3; }
+.pv-date small { display: block; font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #8194AB; }
+.pv-date b { font-family: "Space Grotesk", sans-serif; font-size: 15px; color: #0F1B2D; }
+.pv-date em { display: block; font-style: normal; font-family: "JetBrains Mono", monospace; font-size: 11px; color: #0E9A8A; margin-top: 2px; }
+.pv-date.is-active { border-color: #F26F21; box-shadow: 0 0 0 1px #F26F21 inset; }
+
+.pv-grid { display: grid; grid-template-columns: 250px 1fr; gap: 20px; align-items: start; }
+.pv-side { background: #fff; border: 1px solid #E7ECF3; border-radius: 18px; padding: 16px 16px 18px; position: sticky; top: 78px; }
+.pv-side h3 { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #0F1B2D; margin: 0 0 14px; }
+.pv-fgroup { padding: 12px 0; border-top: 1px solid #EEF2F7; }
+.pv-fgroup:first-of-type { border-top: 0; padding-top: 0; }
+.pv-flabel { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #8194AB; margin-bottom: 7px; }
+.pv-fctl { width: 100%; padding: 9px 11px; border: 1px solid #E7ECF3; border-radius: 9px; font-size: 13px; color: #46566B; background: #F6F9FC; appearance: none; }
+.pv-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #46566B; margin-top: 8px; }
+.pv-check input { accent-color: #F26F21; width: 15px; height: 15px; }
+.pv-apply { width: 100%; margin-top: 16px; background: #F26F21; color: #fff; border: 0; padding: 10px; border-radius: 9px; font-weight: 600; font-size: 13.5px; cursor: pointer; }
+
+.pv-results { display: flex; flex-direction: column; gap: 14px; }
+.pv-count { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: #8194AB; padding: 0 2px 2px; }
+.pv-count b { color: #0F1B2D; }
+
+@media (max-width: 900px) { .pv-grid { grid-template-columns: 1fr; } .pv-side { display: none; } }
+@media (max-width: 560px) { .pv-nav, .pv-support, .pv-signin { display: none; } .pv-wrap { padding: 18px 14px 50px; } }
+
+/* ==== BEGIN component kit (flight-cards.css) ==== */
+/* ==========================================================================
+   JetPakistan — Flight Result Cards
+   Compact result card + branded fares + Flight Details / Fare Summary modals
+   --------------------------------------------------------------------------
+   All styles are namespaced under .jp-  so nothing collides with the rest of
+   your app. Colours, radii, spacing and shadows are exposed as CSS custom
+   properties on :root so you can retune the whole system from one place (or
+   map them onto your existing Blade/Tailwind tokens).
+   ========================================================================== */
+
+/* ------------------------------------------------------------------ Tokens */
+:root {
+  /* Brand */
+  --jp-orange:      #F26F21;
+  --jp-orange-600:  #DE5E12;
+  --jp-orange-050:  #FDEEE2;
+  --jp-teal:        #0E9A8A;
+  --jp-teal-700:    #0B7A6E;
+  --jp-teal-050:    #E4F4F1;
+  --jp-green:       #16A34A;
+
+  /* Neutrals */
+  --jp-ink:      #0F1B2D;   /* headings, codes, prices          */
+  --jp-ink-70:   #34435A;
+  --jp-slate:    #46566B;   /* body copy                        */
+  --jp-muted:    #8194AB;   /* secondary / captions             */
+  --jp-faint:    #A9B7C8;   /* disabled-ish / hairlines on dark */
+  --jp-line:     #E7ECF3;   /* card + divider borders           */
+  --jp-line-2:   #EEF2F7;   /* inner dividers                   */
+  --jp-bg:       #EEF3F8;   /* page background                  */
+  --jp-card:     #FFFFFF;
+  --jp-surface:  #F6F9FC;   /* subtle fills (fare tray, chips)  */
+
+  /* Status */
+  --jp-ok:       #0E9A8A;   /* refundable / included            */
+  --jp-ok-050:   #E4F4F1;
+  --jp-off:      #9AA8BA;   /* not included / not specified     */
+
+  /* Radius */
+  --jp-r-xs: 6px;
+  --jp-r-sm: 9px;
+  --jp-r:    13px;
+  --jp-r-lg: 18px;
+  --jp-r-pill: 999px;
+
+  /* Shadow */
+  --jp-sh-sm:  0 1px 2px rgba(15,27,45,.05), 0 1px 3px rgba(15,27,45,.05);
+  --jp-sh:     0 6px 16px rgba(15,27,45,.07), 0 2px 5px rgba(15,27,45,.05);
+  --jp-sh-lg:  0 22px 48px rgba(15,27,45,.16), 0 6px 14px rgba(15,27,45,.08);
+
+  /* Type */
+  --jp-font:      "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --jp-font-disp: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --jp-font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --jp-ease: cubic-bezier(.2, .7, .2, 1);
+}
+
+/* ---------------------------------------------------------------- Reset-ish */
+.jp-scope, .jp-scope * { box-sizing: border-box; }
+.jp-scope {
+  font-family: var(--jp-font);
+  color: var(--jp-slate);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.jp-scope button { font: inherit; cursor: pointer; border: 0; background: none; }
+.jp-scope ul { margin: 0; padding: 0; list-style: none; }
+
+/* =========================================================== RESULT CARD == */
+.jp-flight {
+  background: var(--jp-card);
+  border: 1px solid var(--jp-line);
+  border-radius: var(--jp-r-lg);
+  box-shadow: var(--jp-sh-sm);
+  overflow: hidden;
+  transition: box-shadow .2s var(--jp-ease), border-color .2s var(--jp-ease), transform .2s var(--jp-ease);
+}
+.jp-flight:hover { box-shadow: var(--jp-sh); border-color: #DBE3EE; }
+.jp-flight.is-expanded { box-shadow: var(--jp-sh); }
+
+/* -- summary row : airline | route | price ------------------------------- */
+.jp-flight__main {
+  display: grid;
+  grid-template-columns: minmax(150px, 200px) 1fr minmax(168px, 210px);
+  align-items: center;
+  gap: 18px;
+  padding: 16px 18px 14px;
+}
+
+/* Airline */
+.jp-flight__airline { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.jp-airline-logo {
+  flex: none;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-line);
+  overflow: hidden;
+}
+.jp-airline-logo img { width: 100%; height: 100%; object-fit: contain; }
+.jp-airline-logo[data-mono] {              /* text monogram fallback */
+  font-family: var(--jp-font-disp);
+  font-weight: 700; font-size: 14px; letter-spacing: .01em;
+  color: #fff;
+}
+.jp-airline-meta { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.jp-airline-name {
+  font-family: var(--jp-font-disp);
+  font-weight: 600; font-size: 15px; color: var(--jp-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.jp-airline-sub {
+  font-size: 12px; color: var(--jp-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Route timeline — the signature “boarding pass” strip */
+.jp-route {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+.jp-route__end { display: flex; flex-direction: column; }
+.jp-route__end--arr { text-align: right; }
+.jp-time {
+  font-family: var(--jp-font-mono);
+  font-weight: 600; font-size: 18px; line-height: 1.05;
+  color: var(--jp-ink); letter-spacing: -.01em;
+}
+.jp-code {
+  font-family: var(--jp-font-disp);
+  font-weight: 700; font-size: 13px; letter-spacing: .06em;
+  color: var(--jp-ink-70); margin-top: 3px;
+}
+.jp-place { font-size: 11.5px; color: var(--jp-muted); margin-top: 1px; }
+
+/* path with animated dashes + plane */
+.jp-route__path { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 2px; }
+.jp-route__dur {
+  font-family: var(--jp-font-mono);
+  font-size: 11px; font-weight: 500; color: var(--jp-slate);
+  letter-spacing: .02em;
+}
+.jp-route__line {
+  position: relative;
+  width: 100%; min-width: 96px; height: 2px;
+  background:
+    repeating-linear-gradient(90deg, var(--jp-line) 0 6px, transparent 6px 11px);
+  border-radius: 2px;
+}
+.jp-route__line::before,                     /* end dots */
+.jp-route__line::after {
+  content: ""; position: absolute; top: 50%; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--jp-teal); transform: translateY(-50%);
+}
+.jp-route__line::before { left: -1px; }
+.jp-route__line::after  { right: -1px; }
+.jp-route__plane {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px; height: 20px;
+  display: grid; place-items: center;
+  background: var(--jp-card); border-radius: 50%;
+  color: var(--jp-orange);
+}
+.jp-route__plane svg { width: 13px; height: 13px; }
+/* layover pip for stops */
+.jp-route__pip {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--jp-card); border: 2px solid var(--jp-orange);
+}
+.jp-route__stops {
+  font-size: 11px; font-weight: 600; letter-spacing: .02em;
+}
+.jp-route__stops--direct { color: var(--jp-teal); }
+.jp-route__stops--stops  { color: var(--jp-orange-600); }
+
+/* Price + primary action */
+.jp-flight__price {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 2px; text-align: right;
+}
+.jp-price__label {
+  font-family: var(--jp-font-mono);
+  font-size: 10px; text-transform: uppercase; letter-spacing: .13em;
+  color: var(--jp-muted);
+}
+.jp-price__amount {
+  font-family: var(--jp-font-disp);
+  font-weight: 700; font-size: 22px; line-height: 1; color: var(--jp-ink);
+  letter-spacing: -.01em;
+}
+.jp-price__cur { font-size: 13px; font-weight: 600; color: var(--jp-slate); margin-right: 2px; }
+.jp-price__per { font-size: 11px; color: var(--jp-muted); margin-bottom: 6px; }
+
+/* -- meta footer --------------------------------------------------------- */
+.jp-flight__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  padding: 10px 18px;
+  border-top: 1px dashed var(--jp-line);
+  background: linear-gradient(0deg, var(--jp-surface), #fff 90%);
+}
+.jp-flight__tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.jp-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 500; color: var(--jp-slate);
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-line);
+  padding: 3px 9px; border-radius: var(--jp-r-pill);
+}
+.jp-chip svg { width: 13px; height: 13px; color: var(--jp-muted); }
+.jp-chip--ok { color: var(--jp-teal-700); background: var(--jp-ok-050); border-color: #CFEAE5; }
+.jp-chip--ok svg { color: var(--jp-teal); }
+.jp-src {
+  font-family: var(--jp-font-mono);
+  font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--jp-faint);
+}
+.jp-flight__links { display: flex; align-items: center; gap: 10px; }
+.jp-dot { color: var(--jp-faint); }
+
+/* -- badges (top-right of card) ------------------------------------------ */
+.jp-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--jp-font-mono);
+  font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: var(--jp-r-pill);
+  border: 1px solid transparent;
+}
+.jp-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.jp-badge--direct { color: var(--jp-teal); background: var(--jp-teal-050); border-color: #CFEAE5; }
+.jp-badge--stops  { color: var(--jp-orange-600); background: var(--jp-orange-050); border-color: #F8D8C2; }
+/* place a badge in the airline row on the far right of the card */
+.jp-flight__badge { justify-self: end; align-self: start; grid-column: 3; grid-row: 1;
+                    position: absolute; top: 14px; right: 18px; }
+.jp-flight { position: relative; }
+
+/* ================================================= BRANDED FARE TRAY ===== */
+.jp-fares {
+  display: grid;
+  grid-template-rows: 0fr;                 /* animates to 1fr when open */
+  transition: grid-template-rows .32s var(--jp-ease);
+  background: var(--jp-surface);
+  border-top: 1px solid var(--jp-line);
+}
+.jp-flight.is-expanded .jp-fares { grid-template-rows: 1fr; }
+.jp-fares__inner { overflow: hidden; }
+.jp-fares__pad { padding: 15px 18px 17px; }
+.jp-fares__head {
+  font-family: var(--jp-font-mono);
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--jp-muted); margin-bottom: 11px;
+}
+.jp-fares__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* individual branded fare */
+.jp-fare {
+  position: relative;
+  display: flex; flex-direction: column;
+  background: var(--jp-card);
+  border: 1px solid var(--jp-line);
+  border-radius: var(--jp-r);
+  padding: 13px 14px 14px;
+  transition: border-color .18s var(--jp-ease), box-shadow .18s var(--jp-ease), transform .18s var(--jp-ease);
+}
+.jp-fare:hover { border-color: #D6DFEC; box-shadow: var(--jp-sh-sm); transform: translateY(-1px); }
+.jp-fare--recommended { border-color: var(--jp-orange); box-shadow: 0 0 0 1px var(--jp-orange) inset; }
+
+.jp-fare__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 11px; }
+.jp-fare__name {
+  font-family: var(--jp-font-disp);
+  font-weight: 600; font-size: 14px; letter-spacing: .04em; color: var(--jp-ink);
+}
+.jp-fare__tag {
+  font-family: var(--jp-font-mono);
+  font-size: 9.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: var(--jp-r-pill);
+}
+.jp-fare__tag--cheap { color: var(--jp-teal-700); background: var(--jp-ok-050); }
+.jp-fare__tag--flex  { color: var(--jp-orange-600); background: var(--jp-orange-050); }
+.jp-fare__tag--best  { color: #fff; background: var(--jp-orange); }
+
+/* feature rows: icon · label ............ value */
+.jp-fare__list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 13px; }
+.jp-fare__row { display: grid; grid-template-columns: 15px 1fr auto; align-items: center; gap: 8px; }
+.jp-fare__row svg { width: 15px; height: 15px; color: var(--jp-muted); }
+.jp-fare__k { font-size: 12px; color: var(--jp-muted); }
+.jp-fare__v { font-size: 12.5px; font-weight: 600; color: var(--jp-ink-70); text-align: right; }
+.jp-fare__v--ok    { color: var(--jp-ok); }
+.jp-fare__v--off   { color: var(--jp-off); font-weight: 500; }
+
+.jp-fare__foot { margin-top: auto; padding-top: 11px; border-top: 1px solid var(--jp-line-2); }
+.jp-fare__price {
+  display: block;
+  font-family: var(--jp-font-disp);
+  font-weight: 700; font-size: 16px; color: var(--jp-ink); margin-bottom: 9px;
+}
+.jp-fare__price small { font-size: 11px; font-weight: 600; color: var(--jp-slate); margin-right: 2px; }
+.jp-fare__actions { display: flex; align-items: center; gap: 8px; }
+.jp-fare__actions .jp-btn { flex: 1; }
+
+/* ===================================================== BUTTONS / LINKS === */
+.jp-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-weight: 600; font-size: 13.5px; line-height: 1;
+  padding: 10px 16px; border-radius: var(--jp-r-sm);
+  transition: background .16s var(--jp-ease), box-shadow .16s var(--jp-ease), transform .06s var(--jp-ease);
+  white-space: nowrap;
+}
+.jp-btn:active { transform: translateY(1px); }
+.jp-btn svg { width: 15px; height: 15px; }
+.jp-btn--sm { padding: 8px 12px; font-size: 12.5px; }
+.jp-btn--primary {
+  background: var(--jp-orange); color: #fff;
+  box-shadow: 0 1px 2px rgba(222,94,18,.35);
+}
+.jp-btn--primary:hover { background: var(--jp-orange-600); }
+.jp-btn--ghost {
+  background: #fff; color: var(--jp-ink-70);
+  border: 1px solid var(--jp-line);
+}
+.jp-btn--ghost:hover { border-color: #C9D4E2; background: var(--jp-surface); }
+.jp-btn--teal { background: var(--jp-teal); color: #fff; }
+.jp-btn--teal:hover { background: var(--jp-teal-700); }
+
+.jp-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12.5px; font-weight: 600; color: var(--jp-teal);
+  transition: color .15s var(--jp-ease);
+}
+.jp-link:hover { color: var(--jp-teal-700); }
+.jp-link svg { width: 13px; height: 13px; transition: transform .28s var(--jp-ease); }
+.jp-caret { display: inline-flex; align-items: center; transition: transform .28s var(--jp-ease); }
+.jp-link--toggle[aria-expanded="true"] .jp-caret { transform: rotate(180deg); }
+
+/* icon spans hydrated by JS (data-icon) — keep them sized + aligned */
+.jp-scope [data-icon] { display: inline-flex; align-items: center; justify-content: center; }
+.jp-route__plane[data-icon] svg { width: 13px; height: 13px; }
+
+/* ============================================================ MODALS ===== */
+.jp-modal[hidden] { display: none; }
+.jp-modal {
+  position: fixed; inset: 0; z-index: 1000;
+  display: grid; place-items: center; padding: 20px;
+}
+.jp-modal__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(11, 20, 34, .48);
+  backdrop-filter: blur(2px);
+  opacity: 0; transition: opacity .2s var(--jp-ease);
+}
+.jp-modal.is-open .jp-modal__backdrop { opacity: 1; }
+.jp-modal__dialog {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(86vh, 720px);
+  display: flex; flex-direction: column;
+  background: var(--jp-card);
+  border-radius: var(--jp-r-lg);
+  box-shadow: var(--jp-sh-lg);
+  opacity: 0; transform: translateY(10px) scale(.985);
+  transition: opacity .22s var(--jp-ease), transform .22s var(--jp-ease);
+}
+.jp-modal.is-open .jp-modal__dialog { opacity: 1; transform: none; }
+
+.jp-modal__head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  padding: 18px 20px 15px;
+  border-bottom: 1px solid var(--jp-line);
+}
+.jp-modal__title { font-family: var(--jp-font-disp); font-weight: 600; font-size: 17px; color: var(--jp-ink); margin: 0; }
+.jp-modal__sub { font-size: 12.5px; color: var(--jp-muted); margin: 3px 0 0; }
+.jp-modal__x {
+  flex: none; width: 30px; height: 30px; border-radius: 8px;
+  display: grid; place-items: center; color: var(--jp-muted);
+  transition: background .15s, color .15s;
+}
+.jp-modal__x:hover { background: var(--jp-surface); color: var(--jp-ink); }
+.jp-modal__x svg { width: 16px; height: 16px; }
+
+.jp-modal__body { padding: 18px 20px; overflow-y: auto; }
+.jp-modal__foot {
+  padding: 14px 20px 16px;
+  border-top: 1px solid var(--jp-line);
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  flex-wrap: wrap;
+  background: var(--jp-surface);
+  border-bottom-left-radius: var(--jp-r-lg); border-bottom-right-radius: var(--jp-r-lg);
+}
+
+/* -- Flight Details : segment timeline ----------------------------------- */
+.jp-seg {
+  border: 1px solid var(--jp-line); border-radius: var(--jp-r);
+  padding: 14px 15px; background: #fff;
+}
+.jp-seg + .jp-seg { margin-top: 12px; }
+.jp-seg__head { display: flex; align-items: center; gap: 9px; margin-bottom: 3px; }
+.jp-seg__dir  { font-family: var(--jp-font-disp); font-weight: 600; font-size: 13.5px; color: var(--jp-ink); }
+.jp-seg__meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0 14px; }
+.jp-pill {
+  font-family: var(--jp-font-mono);
+  font-size: 10px; letter-spacing: .05em; text-transform: uppercase; font-weight: 600;
+  padding: 3px 8px; border-radius: var(--jp-r-pill);
+  background: var(--jp-surface); color: var(--jp-slate); border: 1px solid var(--jp-line);
+}
+.jp-pill--accent { color: var(--jp-orange-600); background: var(--jp-orange-050); border-color: #F8D8C2; }
+
+/* leg: dep — line — arr */
+.jp-leg { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: stretch; }
+.jp-leg__col { display: flex; flex-direction: column; }
+.jp-leg__col--arr { text-align: right; align-items: flex-end; }
+.jp-leg__time { font-family: var(--jp-font-mono); font-weight: 600; font-size: 17px; color: var(--jp-ink); }
+.jp-leg__code { font-family: var(--jp-font-disp); font-weight: 700; font-size: 13px; letter-spacing: .05em; color: var(--jp-teal); margin-top: 2px; }
+.jp-leg__place { font-size: 12px; color: var(--jp-slate); margin-top: 1px; }
+.jp-leg__date  { font-size: 11px; color: var(--jp-muted); margin-top: 1px; }
+.jp-leg__mid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+.jp-leg__dur { font-family: var(--jp-font-mono); font-size: 11px; color: var(--jp-slate); }
+.jp-leg__track {
+  width: 2px; flex: 1; min-height: 26px;
+  background: repeating-linear-gradient(180deg, var(--jp-teal) 0 5px, transparent 5px 10px);
+  border-radius: 2px;
+}
+.jp-seg__foot {
+  margin-top: 13px; padding-top: 12px; border-top: 1px dashed var(--jp-line);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.jp-flight-no {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--jp-slate);
+}
+.jp-flight-no b { font-family: var(--jp-font-disp); color: var(--jp-ink); font-weight: 600; }
+
+/* layover divider between segments */
+.jp-layover {
+  display: flex; align-items: center; gap: 10px;
+  margin: 11px 2px; color: var(--jp-orange-600);
+  font-size: 12px; font-weight: 500;
+}
+.jp-layover::before, .jp-layover::after { content: ""; height: 1px; flex: 1; background: var(--jp-line); }
+
+/* -- Fare Summary : tabs -------------------------------------------------- */
+.jp-tabs {
+  display: inline-flex; padding: 3px; gap: 2px; margin-bottom: 16px;
+  background: var(--jp-surface); border: 1px solid var(--jp-line);
+  border-radius: var(--jp-r-pill); width: 100%;
+}
+.jp-tab {
+  flex: 1; text-align: center;
+  font-size: 12.5px; font-weight: 600; color: var(--jp-muted);
+  padding: 8px 10px; border-radius: var(--jp-r-pill);
+  transition: color .15s, background .15s, box-shadow .15s;
+}
+.jp-tab[aria-selected="true"] { color: var(--jp-ink); background: #fff; box-shadow: var(--jp-sh-sm); }
+.jp-tab:hover:not([aria-selected="true"]) { color: var(--jp-slate); }
+.jp-tabpanel[hidden] { display: none; }
+
+/* key/value block used inside panels */
+.jp-kv { display: grid; gap: 10px; }
+.jp-kv__row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 11px 13px; border: 1px solid var(--jp-line); border-radius: var(--jp-r-sm);
+  background: #fff;
+}
+.jp-kv__k { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--jp-slate); }
+.jp-kv__k svg { width: 15px; height: 15px; color: var(--jp-muted); }
+.jp-kv__v { font-size: 13px; font-weight: 600; color: var(--jp-ink); text-align: right; }
+.jp-kv__v--ok  { color: var(--jp-ok); }
+.jp-kv__v--off { color: var(--jp-off); }
+
+.jp-route-mini {
+  font-family: var(--jp-font-disp); font-weight: 700; font-size: 13px;
+  letter-spacing: .04em; color: var(--jp-ink);
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-bottom: 12px;
+}
+.jp-route-mini svg { width: 15px; height: 15px; color: var(--jp-orange); }
+
+/* price breakdown table */
+.jp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.jp-table thead th {
+  font-family: var(--jp-font-mono);
+  font-size: 10px; letter-spacing: .07em; text-transform: uppercase; font-weight: 600;
+  color: var(--jp-muted); text-align: left; padding: 0 10px 9px;
+  border-bottom: 1px solid var(--jp-line);
+}
+.jp-table thead th:not(:first-child) { text-align: right; }
+.jp-table tbody td { padding: 11px 10px; color: var(--jp-ink-70); border-bottom: 1px solid var(--jp-line-2); }
+.jp-table tbody td:not(:first-child) { text-align: right; font-family: var(--jp-font-mono); font-size: 12.5px; }
+.jp-table tbody td:last-child { font-weight: 600; color: var(--jp-ink); }
+.jp-table tbody tr:last-child td { border-bottom: 0; }
+
+/* modal footer total */
+.jp-total { display: flex; flex-direction: column; gap: 2px; }
+.jp-total__label {
+  font-family: var(--jp-font-mono);
+  font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--jp-muted);
+}
+.jp-total__amount { font-family: var(--jp-font-disp); font-weight: 700; font-size: 20px; color: var(--jp-ink); }
+.jp-total__note { font-size: 11px; color: var(--jp-muted); }
+.jp-foot__actions { display: flex; gap: 9px; }
+
+/* ======================================================== RESPONSIVE ===== */
+@media (max-width: 720px) {
+  .jp-flight__main {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 15px 15px 12px;
+  }
+  .jp-flight__badge { position: static; margin-left: auto; }
+  .jp-flight__airline { order: 1; }
+  .jp-route { order: 2; grid-template-columns: 1fr auto 1fr; gap: 10px; }
+  .jp-flight__price {
+    order: 3; align-items: stretch; text-align: left;
+    flex-direction: row; align-items: center; justify-content: space-between;
+    padding-top: 12px; border-top: 1px dashed var(--jp-line);
+  }
+  .jp-price__amount { font-size: 20px; }
+  .jp-flight__price .jp-btn { margin-left: auto; }
+  .jp-price__per { margin: 0; }
+  .jp-price__label { display: none; }
+  .jp-fares__grid { grid-template-columns: 1fr; }
+  .jp-flight__foot { padding: 10px 15px; }
+}
+
+@media (max-width: 480px) {
+  .jp-route__line { min-width: 60px; }
+  .jp-modal { padding: 0; place-items: end center; }
+  .jp-modal__dialog { width: 100%; max-height: 92vh; border-radius: var(--jp-r-lg) var(--jp-r-lg) 0 0; }
+  .jp-tab { font-size: 11.5px; padding: 8px 6px; }
+}
+
+/* ===================================================== A11Y / MOTION ===== */
+.jp-scope :focus-visible,
+.jp-modal :focus-visible {
+  outline: 2px solid var(--jp-orange);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jp-scope *, .jp-modal * { transition: none !important; animation: none !important; }
+}
+
+/* ==== END component kit ==== */
+</style>
+</head>
+<body class="jp-scope">
+
+<header class="pv-top">
+  <div class="pv-brand"><span class="pv-logo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.5 14 12V5.5A1.5 1.5 0 0 0 12.5 4 1.5 1.5 0 0 0 11 5.5V12l-7 3.5V17l7-2v3l-2 1.3V21l3.5-1 3.5 1v-1.7L13 18v-3l8 2z"/></svg></span>Jet<span>Pakistan</span></div>
+  <nav class="pv-nav"><a href="#">Home</a><a href="#">Booking</a><a href="#">Support</a><a href="#">About</a></nav>
+  <div class="pv-right">
+    <span class="pv-support">📞 24/7 Support</span>
+    <a href="#" class="pv-signin">Sign in</a>
+    <a href="#" class="pv-reg">Register</a>
+  </div>
+</header>
+
+<div class="pv-wrap">
+  <div class="pv-head">
+    <div class="pv-eyebrow">Available flights</div>
+    <h1 class="pv-title">Lahore → Dubai</h1>
+    <div class="pv-route-sum"><b>LHE → DXB</b> · Fri, 31 Jul 2026 · 1 adult · Economy · One way</div>
+  </div>
+
+  <div class="pv-dates">
+    <div class="pv-date"><small>Wed</small><b>29 Jul</b><em>Rs 74k</em></div>
+    <div class="pv-date"><small>Thu</small><b>30 Jul</b><em>Rs 76k</em></div>
+    <div class="pv-date is-active"><small>Fri</small><b>31 Jul</b><em>Rs 78.8k</em></div>
+    <div class="pv-date"><small>Sat</small><b>1 Aug</b><em>Rs 81k</em></div>
+    <div class="pv-date"><small>Sun</small><b>2 Aug</b><em>Rs 79k</em></div>
+    <div class="pv-date"><small>Mon</small><b>3 Aug</b><em>Rs 83k</em></div>
+    <div class="pv-date"><small>Tue</small><b>4 Aug</b><em>Rs 88k</em></div>
+  </div>
+
+  <div class="pv-grid">
+    <!-- Sidebar (static, preview context only) -->
+    <aside class="pv-side">
+      <h3>Refine results</h3>
+      <div class="pv-fgroup">
+        <div class="pv-flabel">Sort</div>
+        <select class="pv-fctl"><option>Recommended</option><option>Cheapest first</option><option>Fastest</option></select>
+      </div>
+      <div class="pv-fgroup">
+        <div class="pv-flabel">Stops</div>
+        <select class="pv-fctl"><option>Any</option><option>Direct only</option><option>1 stop</option></select>
+      </div>
+      <div class="pv-fgroup">
+        <div class="pv-flabel">Airlines</div>
+        <select class="pv-fctl"><option>All carriers</option><option>PIA</option><option>Emirates</option></select>
+      </div>
+      <div class="pv-fgroup">
+        <div class="pv-flabel">Baggage</div>
+        <select class="pv-fctl"><option>Any</option><option>Checked included</option></select>
+      </div>
+      <div class="pv-fgroup">
+        <div class="pv-flabel">Fare rules</div>
+        <label class="pv-check"><input type="checkbox" /> Refundable only</label>
+        <label class="pv-check"><input type="checkbox" checked /> Bookable only</label>
+      </div>
+      <button class="pv-apply">Apply filters</button>
+    </aside>
+
+    <!-- Results -->
+    <section class="pv-results">
+      <div class="pv-count"><span><b>27</b> flights found</span><span>Prices in PKR · updated just now</span></div>
+
+      <!-- ================= CARD 1 : PIA direct ================= -->
+      <article class="jp-flight" data-flight='{"airline":{"name":"PIA","code":"PK"},"flightNumber":"PK 203","cabin":"Economy","stops":"Direct","duration":"3h 55m","departure":{"code":"LHE","city":"Lahore","time":"12:35","date":"Fri, 31 Jul"},"arrival":{"code":"DXB","city":"Dubai","time":"16:30","date":"Fri, 31 Jul"},"source":"Sabre GDS","currency":"Rs","priceFrom":"78,796","fares":[{"name":"ECOLIGHT","tag":"Cheapest","carryOn":"Airline policy","checkIn":"Not included","meal":"Not specified","refund":"Refundable","currency":"PKR","price":"78,796","breakdown":{"base":"44,439","taxes":"34,357","total":"78,796"}},{"name":"SMART","carryOn":"Airline policy","checkIn":"20 kg","meal":"Not specified","refund":"Refundable","currency":"PKR","price":"82,407","breakdown":{"base":"48,050","taxes":"34,357","total":"82,407"}},{"name":"FREEDOM","tag":"Flexible","carryOn":"Airline policy","checkIn":"30 kg","meal":"Not specified","refund":"Refundable","currency":"PKR","price":"88,517","breakdown":{"base":"54,160","taxes":"34,357","total":"88,517"}}]}'>
+        <span class="jp-badge jp-badge--direct jp-flight__badge">Direct</span>
+        <div class="jp-flight__main">
+          <div class="jp-flight__airline">
+            <span class="jp-airline-logo" data-mono style="background:#0A5C3E">PK</span>
+            <span class="jp-airline-meta">
+              <span class="jp-airline-name">PIA</span>
+              <span class="jp-airline-sub">Economy · PK 203</span>
+            </span>
+          </div>
+          <div class="jp-route">
+            <div class="jp-route__end jp-route__end--dep">
+              <span class="jp-time">12:35</span><span class="jp-code">LHE</span><span class="jp-place">Lahore</span>
+            </div>
+            <div class="jp-route__path">
+              <span class="jp-route__dur">3h 55m</span>
+              <span class="jp-route__line"><span class="jp-route__plane" data-icon="plane"></span></span>
+              <span class="jp-route__stops jp-route__stops--direct">Direct</span>
+            </div>
+            <div class="jp-route__end jp-route__end--arr">
+              <span class="jp-time">16:30</span><span class="jp-code">DXB</span><span class="jp-place">Dubai</span>
+            </div>
+          </div>
+          <div class="jp-flight__price">
+            <span class="jp-price__label">from</span>
+            <span class="jp-price__amount"><span class="jp-price__cur">Rs</span>78,796</span>
+            <span class="jp-price__per">per person</span>
+            <button class="jp-btn jp-btn--primary" data-fare-toggle>Select fare</button>
+          </div>
+        </div>
+        <div class="jp-flight__foot">
+          <div class="jp-flight__tags">
+            <span class="jp-chip"><span data-icon="cabin"></span> Cabin bag only</span>
+            <span class="jp-chip jp-chip--ok"><span data-icon="refund"></span> Refundable</span>
+            <span class="jp-src">Sabre GDS</span>
+          </div>
+          <div class="jp-flight__links">
+            <button class="jp-link" data-modal="flight-details">Flight details</button>
+            <span class="jp-dot">·</span>
+            <button class="jp-link jp-link--toggle" data-fare-toggle aria-expanded="false">Fare options <span class="jp-caret" data-icon="caret"></span></button>
+          </div>
+        </div>
+        <div class="jp-fares"><div class="jp-fares__inner"><div class="jp-fares__pad">
+          <div class="jp-fares__head">Select a fare option</div>
+          <div class="jp-fares__grid">
+            <div class="jp-fare">
+              <div class="jp-fare__top"><span class="jp-fare__name">ECOLIGHT</span><span class="jp-fare__tag jp-fare__tag--cheap">Cheapest</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">Airline policy</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--off">Not included</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--off">—</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--ok">Refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>78,796</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="0">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+            <div class="jp-fare">
+              <div class="jp-fare__top"><span class="jp-fare__name">SMART</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">Airline policy</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--ok">20 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--off">—</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--ok">Refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>82,407</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="1">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+            <div class="jp-fare">
+              <div class="jp-fare__top"><span class="jp-fare__name">FREEDOM</span><span class="jp-fare__tag jp-fare__tag--flex">Flexible</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">Airline policy</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--ok">30 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--off">—</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--ok">Refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>88,517</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="2">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- ================= CARD 2 : Etihad 1 stop ================= -->
+      <article class="jp-flight" data-flight='{"airline":{"name":"Etihad Airways","code":"EY"},"flightNumber":"EY 329","cabin":"Economy","stops":"1 Stop","duration":"6h 55m","departure":{"code":"LHE","city":"Lahore","time":"04:05","date":"Fri, 31 Jul"},"arrival":{"code":"DXB","city":"Dubai","time":"11:00","date":"Fri, 31 Jul"},"source":"Amadeus","currency":"Rs","priceFrom":"82,129","segments":[{"airlineName":"Etihad Airways","airlineCode":"EY","flightNo":"329","cabin":"Y","duration":"2h 55m","dep":{"code":"LHE","city":"Lahore","time":"04:05","date":"Fri, 31 Jul"},"arr":{"code":"AUH","city":"Abu Dhabi","time":"06:00","date":"Fri, 31 Jul"}},{"airlineName":"Etihad Airways","airlineCode":"EY","flightNo":"381","cabin":"Y","duration":"1h 20m","layover":"3h 40m","dep":{"code":"AUH","city":"Abu Dhabi","time":"09:40","date":"Fri, 31 Jul"},"arr":{"code":"DXB","city":"Dubai","time":"11:00","date":"Fri, 31 Jul"}}],"fares":[{"name":"ECONOMY SAVER","tag":"Cheapest","carryOn":"7 kg","checkIn":"23 kg","meal":"Included","refund":"Non-refundable","currency":"PKR","price":"82,129","breakdown":{"base":"51,200","taxes":"30,929","total":"82,129"}},{"name":"ECONOMY VALUE","carryOn":"7 kg","checkIn":"30 kg","meal":"Included","refund":"Refundable","currency":"PKR","price":"91,540","breakdown":{"base":"60,611","taxes":"30,929","total":"91,540"}},{"name":"ECONOMY FLEX","tag":"Flexible","carryOn":"7 kg","checkIn":"35 kg","meal":"Included","refund":"Refundable","currency":"PKR","price":"104,980","breakdown":{"base":"74,051","taxes":"30,929","total":"104,980"}}]}'>
+        <span class="jp-badge jp-badge--stops jp-flight__badge">1 Stop</span>
+        <div class="jp-flight__main">
+          <div class="jp-flight__airline">
+            <span class="jp-airline-logo" data-mono style="background:#BD8B13">EY</span>
+            <span class="jp-airline-meta">
+              <span class="jp-airline-name">Etihad Airways</span>
+              <span class="jp-airline-sub">Economy · via AUH</span>
+            </span>
+          </div>
+          <div class="jp-route">
+            <div class="jp-route__end jp-route__end--dep">
+              <span class="jp-time">04:05</span><span class="jp-code">LHE</span><span class="jp-place">Lahore</span>
+            </div>
+            <div class="jp-route__path">
+              <span class="jp-route__dur">6h 55m</span>
+              <span class="jp-route__line">
+                <span class="jp-route__pip" style="left:50%"></span>
+                <span class="jp-route__plane" data-icon="plane" style="left:78%"></span>
+              </span>
+              <span class="jp-route__stops jp-route__stops--stops">1 stop · AUH</span>
+            </div>
+            <div class="jp-route__end jp-route__end--arr">
+              <span class="jp-time">11:00</span><span class="jp-code">DXB</span><span class="jp-place">Dubai</span>
+            </div>
+          </div>
+          <div class="jp-flight__price">
+            <span class="jp-price__label">from</span>
+            <span class="jp-price__amount"><span class="jp-price__cur">Rs</span>82,129</span>
+            <span class="jp-price__per">per person</span>
+            <button class="jp-btn jp-btn--primary" data-fare-toggle>Select fare</button>
+          </div>
+        </div>
+        <div class="jp-flight__foot">
+          <div class="jp-flight__tags">
+            <span class="jp-chip jp-chip--ok"><span data-icon="checked"></span> 23 kg included</span>
+            <span class="jp-chip"><span data-icon="meal"></span> Meal included</span>
+            <span class="jp-src">Amadeus</span>
+          </div>
+          <div class="jp-flight__links">
+            <button class="jp-link" data-modal="flight-details">Flight details</button>
+            <span class="jp-dot">·</span>
+            <button class="jp-link jp-link--toggle" data-fare-toggle aria-expanded="false">Fare options <span class="jp-caret" data-icon="caret"></span></button>
+          </div>
+        </div>
+        <div class="jp-fares"><div class="jp-fares__inner"><div class="jp-fares__pad">
+          <div class="jp-fares__head">Select a fare option</div>
+          <div class="jp-fares__grid">
+            <div class="jp-fare">
+              <div class="jp-fare__top"><span class="jp-fare__name">SAVER</span><span class="jp-fare__tag jp-fare__tag--cheap">Cheapest</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">7 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--ok">23 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--ok">Included</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--off">Non-refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>82,129</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="0">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+            <div class="jp-fare jp-fare--recommended">
+              <div class="jp-fare__top"><span class="jp-fare__name">VALUE</span><span class="jp-fare__tag jp-fare__tag--best">Recommended</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">7 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--ok">30 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--ok">Included</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--ok">Refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>91,540</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="1">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+            <div class="jp-fare">
+              <div class="jp-fare__top"><span class="jp-fare__name">FLEX</span><span class="jp-fare__tag jp-fare__tag--flex">Flexible</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">7 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--ok">35 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--ok">Included</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--ok">Refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>104,980</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="2">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- ================= CARD 3 : Emirates direct ================= -->
+      <article class="jp-flight" data-flight='{"airline":{"name":"Emirates","code":"EK"},"flightNumber":"EK 623","cabin":"Economy","stops":"Direct","duration":"3h 45m","departure":{"code":"LHE","city":"Lahore","time":"09:05","date":"Fri, 31 Jul"},"arrival":{"code":"DXB","city":"Dubai","time":"11:50","date":"Fri, 31 Jul"},"source":"Sabre GDS","currency":"Rs","priceFrom":"99,760","fares":[{"name":"SPECIAL","tag":"Cheapest","carryOn":"7 kg","checkIn":"25 kg","meal":"Included","refund":"Non-refundable","currency":"PKR","price":"99,760","breakdown":{"base":"70,120","taxes":"29,640","total":"99,760"}},{"name":"SAVER","carryOn":"7 kg","checkIn":"30 kg","meal":"Included","refund":"Refundable","currency":"PKR","price":"108,015","breakdown":{"base":"78,375","taxes":"29,640","total":"108,015"}},{"name":"FLEX","tag":"Flexible","carryOn":"7 kg","checkIn":"35 kg","meal":"Included","refund":"Refundable","currency":"PKR","price":"121,300","breakdown":{"base":"91,660","taxes":"29,640","total":"121,300"}}]}'>
+        <span class="jp-badge jp-badge--direct jp-flight__badge">Direct</span>
+        <div class="jp-flight__main">
+          <div class="jp-flight__airline">
+            <span class="jp-airline-logo" data-mono style="background:#D71921">EK</span>
+            <span class="jp-airline-meta">
+              <span class="jp-airline-name">Emirates</span>
+              <span class="jp-airline-sub">Economy · EK 623</span>
+            </span>
+          </div>
+          <div class="jp-route">
+            <div class="jp-route__end jp-route__end--dep">
+              <span class="jp-time">09:05</span><span class="jp-code">LHE</span><span class="jp-place">Lahore</span>
+            </div>
+            <div class="jp-route__path">
+              <span class="jp-route__dur">3h 45m</span>
+              <span class="jp-route__line"><span class="jp-route__plane" data-icon="plane"></span></span>
+              <span class="jp-route__stops jp-route__stops--direct">Direct</span>
+            </div>
+            <div class="jp-route__end jp-route__end--arr">
+              <span class="jp-time">11:50</span><span class="jp-code">DXB</span><span class="jp-place">Dubai</span>
+            </div>
+          </div>
+          <div class="jp-flight__price">
+            <span class="jp-price__label">from</span>
+            <span class="jp-price__amount"><span class="jp-price__cur">Rs</span>99,760</span>
+            <span class="jp-price__per">per person</span>
+            <button class="jp-btn jp-btn--primary" data-fare-toggle>Select fare</button>
+          </div>
+        </div>
+        <div class="jp-flight__foot">
+          <div class="jp-flight__tags">
+            <span class="jp-chip jp-chip--ok"><span data-icon="checked"></span> 25 kg included</span>
+            <span class="jp-chip"><span data-icon="meal"></span> Meal included</span>
+            <span class="jp-src">Sabre GDS</span>
+          </div>
+          <div class="jp-flight__links">
+            <button class="jp-link" data-modal="flight-details">Flight details</button>
+            <span class="jp-dot">·</span>
+            <button class="jp-link jp-link--toggle" data-fare-toggle aria-expanded="false">Fare options <span class="jp-caret" data-icon="caret"></span></button>
+          </div>
+        </div>
+        <div class="jp-fares"><div class="jp-fares__inner"><div class="jp-fares__pad">
+          <div class="jp-fares__head">Select a fare option</div>
+          <div class="jp-fares__grid">
+            <div class="jp-fare">
+              <div class="jp-fare__top"><span class="jp-fare__name">SPECIAL</span><span class="jp-fare__tag jp-fare__tag--cheap">Cheapest</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">7 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--ok">25 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--ok">Included</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--off">Non-refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>99,760</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="0">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+            <div class="jp-fare">
+              <div class="jp-fare__top"><span class="jp-fare__name">SAVER</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">7 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--ok">30 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--ok">Included</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--ok">Refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>108,015</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="1">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+            <div class="jp-fare">
+              <div class="jp-fare__top"><span class="jp-fare__name">FLEX</span><span class="jp-fare__tag jp-fare__tag--flex">Flexible</span></div>
+              <ul class="jp-fare__list">
+                <li class="jp-fare__row"><span data-icon="cabin"></span><span class="jp-fare__k">Carry-on</span><span class="jp-fare__v">7 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="checked"></span><span class="jp-fare__k">Checked</span><span class="jp-fare__v jp-fare__v--ok">35 kg</span></li>
+                <li class="jp-fare__row"><span data-icon="meal"></span><span class="jp-fare__k">Meal</span><span class="jp-fare__v jp-fare__v--ok">Included</span></li>
+                <li class="jp-fare__row"><span data-icon="refund"></span><span class="jp-fare__k">Refund</span><span class="jp-fare__v jp-fare__v--ok">Refundable</span></li>
+              </ul>
+              <div class="jp-fare__foot">
+                <span class="jp-fare__price"><small>PKR</small>121,300</span>
+                <div class="jp-fare__actions">
+                  <button class="jp-btn jp-btn--ghost jp-btn--sm" data-modal="fare-summary" data-fare="2">Details</button>
+                  <button class="jp-btn jp-btn--primary jp-btn--sm">Select</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div></div>
+      </article>
+
+    </section>
+  </div>
+</div>
+
+<!-- ================= SHARED MODAL (one per page) ================= -->
+<div class="jp-modal" id="jpModal" hidden>
+  <div class="jp-modal__backdrop" data-modal-close></div>
+  <div class="jp-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="jpModalTitle" tabindex="-1">
+    <div class="jp-modal__head">
+      <div>
+        <h2 class="jp-modal__title" id="jpModalTitle" data-modal-title></h2>
+        <p class="jp-modal__sub" data-modal-sub></p>
+      </div>
+      <button class="jp-modal__x" data-modal-close aria-label="Close"><span data-icon="close"></span></button>
+    </div>
+    <div class="jp-modal__body" data-modal-body></div>
+    <div class="jp-modal__foot" data-modal-foot></div>
+  </div>
+</div>
+
+<script>
+/* ==== BEGIN component kit (flight-cards.js) ==== */
+/* ==========================================================================
+   JetPakistan — Flight Cards controller  (vanilla JS, no dependencies)
+   --------------------------------------------------------------------------
+   Responsibilities
+     1. Toggle the inline branded-fare tray on each result card.
+     2. Open a SINGLE shared modal for "Flight details" and "Fare summary",
+        building its contents from a JSON payload on the card (data-flight).
+        -> one modal for the whole page, so 100+ results stay cheap.
+     3. Tab switching inside the Fare Summary modal.
+     4. Accessibility: ESC to close, backdrop close, focus return, basic trap.
+
+   Wire-up in markup
+     - Card root:            <article class="jp-flight" data-flight='{...}'>
+     - Toggle fare tray:     any element with  data-fare-toggle
+     - Open flight details:  data-modal="flight-details"
+     - Open a fare summary:  data-modal="fare-summary" data-fare="<index>"
+     - The shared modal:     one element  #jpModal  (see markup in INTEGRATION.md)
+
+   Usage:  JPFlights.init();           // call once after DOM ready
+   ========================================================================== */
+(function (global) {
+  "use strict";
+
+  /* -- tiny SVG icon set (kept here so markup stays clean) ---------------- */
+  const I = {
+    cabin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M9 7V4h6v3M10 11v6M14 11v6"/></svg>',
+    checked: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3M12 12v4"/></svg>',
+    meal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v7a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3M6 12v9M18 3c-1.7 0-3 2.2-3 5s1.3 4 3 4v9"/></svg>',
+    refund: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7M3 21v-5h5"/></svg>',
+    plane: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.5 14 12V5.5A1.5 1.5 0 0 0 12.5 4 1.5 1.5 0 0 0 11 5.5V12l-7 3.5V17l7-2v3l-2 1.3V21l3.5-1 3.5 1v-1.7L13 18v-3l8 2z"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    caret: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
+  };
+  const iconFor = (k) => I[k] || "";
+
+  const esc = (s) => String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+  const flightOf = (card) => {
+    try { return JSON.parse(card.getAttribute("data-flight") || "{}"); }
+    catch (e) { console.warn("[JPFlights] bad data-flight JSON on", card, e); return {}; }
+  };
+
+  /* ================================================= FARE TRAY TOGGLE ==== */
+  function toggleTray(card) {
+    const open = card.classList.toggle("is-expanded");
+    card.querySelectorAll("[data-fare-toggle]").forEach((btn) => {
+      if (btn.hasAttribute("aria-expanded")) btn.setAttribute("aria-expanded", String(open));
+    });
+    return open;
+  }
+
+  /* ========================================================= MODAL ====== */
+  let modal, mBody, mFoot, mTitle, mSub, lastFocus = null;
+
+  function ensureModal() {
+    modal = document.getElementById("jpModal");
+    if (!modal) { console.error("[JPFlights] #jpModal not found in DOM."); return false; }
+    mBody  = modal.querySelector("[data-modal-body]");
+    mFoot  = modal.querySelector("[data-modal-foot]");
+    mTitle = modal.querySelector("[data-modal-title]");
+    mSub   = modal.querySelector("[data-modal-sub]");
+    return true;
+  }
+
+  function openModal({ title, sub, body, foot }) {
+    if (!modal && !ensureModal()) return;
+    lastFocus = document.activeElement;
+    mTitle.textContent = title || "";
+    mSub.textContent   = sub || "";
+    mBody.innerHTML    = body || "";
+    mFoot.innerHTML    = foot || "";
+    mFoot.style.display = foot ? "" : "none";
+    modal.hidden = false;
+    // next frame -> allow CSS transition
+    requestAnimationFrame(() => {
+      modal.classList.add("is-open");
+      const focusable = modal.querySelector(
+        '[data-modal-close], button:not([disabled]), [href], input, [tabindex]:not([tabindex="-1"])'
+      );
+      (focusable || modal).focus?.();
+    });
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    const done = () => { modal.hidden = true; modal.removeEventListener("transitionend", done); };
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) done(); else {
+      modal.addEventListener("transitionend", done);
+      setTimeout(done, 320); // safety net
+    }
+    document.body.style.overflow = "";
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  /* -- content builders ---------------------------------------------------- */
+  function buildFlightDetails(f) {
+    const segs = Array.isArray(f.segments) && f.segments.length
+      ? f.segments
+      : [{
+          airlineName: f.airline && f.airline.name, airlineCode: f.airline && f.airline.code,
+          flightNo: f.flightNumber, cabin: f.cabin,
+          dep: f.departure, arr: f.arrival, duration: f.duration, stops: f.stops
+        }];
+
+    const legHTML = (s) => `
+      <div class="jp-leg">
+        <div class="jp-leg__col">
+          <span class="jp-leg__time">${esc(s.dep && s.dep.time)}</span>
+          <span class="jp-leg__code">${esc(s.dep && s.dep.code)}</span>
+          <span class="jp-leg__place">${esc(s.dep && s.dep.city)}</span>
+          <span class="jp-leg__date">${esc(s.dep && s.dep.date)}</span>
+        </div>
+        <div class="jp-leg__mid">
+          <span class="jp-leg__dur">${esc(s.duration || "")}</span>
+          <span class="jp-leg__track"></span>
+        </div>
+        <div class="jp-leg__col jp-leg__col--arr">
+          <span class="jp-leg__time">${esc(s.arr && s.arr.time)}</span>
+          <span class="jp-leg__code">${esc(s.arr && s.arr.code)}</span>
+          <span class="jp-leg__place">${esc(s.arr && s.arr.city)}</span>
+          <span class="jp-leg__date">${esc(s.arr && s.arr.date)}</span>
+        </div>
+      </div>`;
+
+    const segHTML = segs.map((s, i) => {
+      const layover = i > 0 && segs[i - 1].arr && s.dep
+        ? `<div class="jp-layover">Layover in ${esc(s.dep.city || s.dep.code)}${s.layover ? " · " + esc(s.layover) : ""}</div>`
+        : "";
+      const stopsLabel = (s.stops || (i === 0 ? f.stops : "")) || "Direct";
+      return `${layover}
+        <div class="jp-seg">
+          <div class="jp-seg__head">
+            ${iconForPlaneTile()}
+            <span class="jp-seg__dir">${i === 0 ? "Outbound" : "Continuing"} · ${esc(s.dep && s.dep.code)} → ${esc(s.arr && s.arr.code)}</span>
+          </div>
+          <div class="jp-seg__meta">
+            <span class="jp-pill">${esc(s.duration || f.duration || "")}</span>
+            <span class="jp-pill jp-pill--accent">${esc(stopsLabel)}</span>
+            ${s.cabin ? `<span class="jp-pill">Cabin ${esc(s.cabin)}</span>` : ""}
+          </div>
+          ${legHTML(s)}
+          <div class="jp-seg__foot">
+            <span class="jp-flight-no">
+              ${esc(s.airlineName || (f.airline && f.airline.name) || "")}
+              <b>${esc((s.airlineCode || (f.airline && f.airline.code) || "") + " " + (s.flightNo ? String(s.flightNo).replace(/^\D+/, "") : (f.flightNumber || "").replace(/^\D+\s?/, "")))}</b>
+            </span>
+          </div>
+        </div>`;
+    }).join("");
+
+    return { title: "Flight Details", sub: "Review connections, segments, and layovers.", body: segHTML, foot: "" };
+  }
+
+  function iconForPlaneTile() {
+    return `<span style="width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--jp-orange-050);color:var(--jp-orange)">
+      <span style="width:15px;height:15px;display:block">${iconFor("plane")}</span></span>`;
+  }
+
+  function buildFareSummary(f, idx) {
+    const fare = (f.fares && f.fares[idx]) || {};
+    const cur  = fare.currency || "PKR";
+    const b    = fare.breakdown || {};
+    const dep  = f.departure || {}, arr = f.arrival || {};
+    const routeLine = `<span class="jp-route-mini">${iconFor("plane")} ${esc(dep.code)} → ${esc(arr.code)}</span>`;
+
+    const baggage = `
+      ${routeLine}
+      <div class="jp-kv">
+        <div class="jp-kv__row">
+          <span class="jp-kv__k">${iconFor("cabin")} Carry-on baggage</span>
+          <span class="jp-kv__v">${esc(fare.carryOn || "Airline policy")}</span>
+        </div>
+        <div class="jp-kv__row">
+          <span class="jp-kv__k">${iconFor("checked")} Checked baggage</span>
+          <span class="jp-kv__v ${/(not|—|0)/i.test(fare.checkIn || "") ? "jp-kv__v--off" : "jp-kv__v--ok"}">${esc(fare.checkIn || "Not included")}</span>
+        </div>
+        <div class="jp-kv__row">
+          <span class="jp-kv__k">${iconFor("meal")} Meal</span>
+          <span class="jp-kv__v ${/(not|—)/i.test(fare.meal || "") ? "jp-kv__v--off" : ""}">${esc(fare.meal || "Not specified")}</span>
+        </div>
+      </div>`;
+
+    const policy = `
+      <div class="jp-kv">
+        <div class="jp-kv__row">
+          <span class="jp-kv__k">${iconFor("refund")} Refund</span>
+          <span class="jp-kv__v ${/refundable/i.test(fare.refund || "") ? "jp-kv__v--ok" : "jp-kv__v--off"}">${esc(fare.refund || "Non-refundable")}</span>
+        </div>
+        <div class="jp-kv__row">
+          <span class="jp-kv__k">Changes</span>
+          <span class="jp-kv__v">${esc(fare.changes || "As per airline rules")}</span>
+        </div>
+        <div class="jp-kv__row">
+          <span class="jp-kv__k">Supplier</span>
+          <span class="jp-kv__v">${esc(f.source || "—")}</span>
+        </div>
+      </div>`;
+
+    const details = `
+      <table class="jp-table">
+        <thead><tr><th>Passenger</th><th>Qty</th><th>Base fare</th><th>Taxes &amp; fees</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Adult</td><td>${esc(fare.pax || 1)}</td>
+            <td>${cur} ${esc(b.base || "—")}</td>
+            <td>${cur} ${esc(b.taxes || "—")}</td>
+            <td>${cur} ${esc(b.total || fare.price || "—")}</td>
+          </tr>
+        </tbody>
+      </table>`;
+
+    const tablist = ["Baggage Policy", "Fare Policy", "Fare Details"];
+    const panels  = [baggage, policy, details];
+    const tabsHTML = `
+      <div class="jp-tabs" role="tablist" aria-label="Fare summary">
+        ${tablist.map((t, i) => `<button class="jp-tab" role="tab" id="jpTab${i}"
+            aria-controls="jpPanel${i}" aria-selected="${i === 0}" data-tab="${i}">${t}</button>`).join("")}
+      </div>
+      ${panels.map((p, i) => `<div class="jp-tabpanel" role="tabpanel" id="jpPanel${i}"
+          aria-labelledby="jpTab${i}" ${i === 0 ? "" : "hidden"}>${p}</div>`).join("")}`;
+
+    const foot = `
+      <div class="jp-total">
+        <span class="jp-total__label">Grand total · incl. taxes &amp; fees</span>
+        <span class="jp-total__amount">${cur} ${esc(b.total || fare.price || "—")}</span>
+        <span class="jp-total__note">Fares may change until booking is confirmed.</span>
+      </div>
+      <div class="jp-foot__actions">
+        <button class="jp-btn jp-btn--ghost" data-modal-close>Close</button>
+        <button class="jp-btn jp-btn--primary" data-select-fare="${idx}">Select fare</button>
+      </div>`;
+
+    return { title: "Fare Summary", sub: `${esc(fare.name || "Fare")} — review baggage, policy, and pricing.`, body: tabsHTML, foot };
+  }
+
+  /* ==================================================== EVENT BINDING ==== */
+  function onClick(e) {
+    // fare tray
+    const trayBtn = e.target.closest("[data-fare-toggle]");
+    if (trayBtn) {
+      const card = trayBtn.closest(".jp-flight");
+      if (card) { e.preventDefault(); toggleTray(card); }
+      return;
+    }
+
+    // open modal
+    const opener = e.target.closest("[data-modal]");
+    if (opener) {
+      e.preventDefault();
+      const card = opener.closest(".jp-flight");
+      const f = card ? flightOf(card) : {};
+      const kind = opener.getAttribute("data-modal");
+      if (kind === "fare-summary") {
+        const idx = parseInt(opener.getAttribute("data-fare") || "0", 10) || 0;
+        openModal(buildFareSummary(f, idx));
+      } else {
+        openModal(buildFlightDetails(f));
+      }
+      return;
+    }
+
+    // close modal
+    if (e.target.closest("[data-modal-close]")) { e.preventDefault(); closeModal(); return; }
+
+    // select fare from within modal -> emit event for host app
+    const sel = e.target.closest("[data-select-fare]");
+    if (sel) {
+      const idx = parseInt(sel.getAttribute("data-select-fare") || "0", 10) || 0;
+      document.dispatchEvent(new CustomEvent("jp:selectFare", { detail: { fareIndex: idx } }));
+      closeModal();
+      return;
+    }
+
+    // tabs inside fare summary
+    const tab = e.target.closest(".jp-tab");
+    if (tab && modal && modal.contains(tab)) {
+      const i = tab.getAttribute("data-tab");
+      modal.querySelectorAll(".jp-tab").forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+      modal.querySelectorAll(".jp-tabpanel").forEach((p) => { p.hidden = p.id !== "jpPanel" + i; });
+    }
+  }
+
+  function onKeydown(e) {
+    if (!modal || modal.hidden) return;
+    if (e.key === "Escape") { closeModal(); return; }
+    if (e.key === "Tab") {                                   // simple focus trap
+      const f = modal.querySelectorAll(
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+
+  /* ================================================== ICON HYDRATION ===== */
+  // Any element with data-icon="cabin|checked|meal|refund|plane|caret|close"
+  // gets its SVG injected. Lets your Blade markup stay icon-free.
+  function hydrateIcons(root) {
+    (root || document).querySelectorAll("[data-icon]").forEach((el) => {
+      if (el.dataset.iconDone) return;
+      el.innerHTML = iconFor(el.getAttribute("data-icon"));
+      el.dataset.iconDone = "1";
+    });
+  }
+
+  /* ============================================================ INIT ===== */
+  const JPFlights = {
+    init(opts) {
+      ensureModal();
+      hydrateIcons(document);
+      document.addEventListener("click", onClick);
+      document.addEventListener("keydown", onKeydown);
+      return this;
+    },
+    open: openModal,
+    close: closeModal,
+    icons: I,
+    hydrateIcons
+  };
+
+  global.JPFlights = JPFlights;
+  if (document.readyState !== "loading") { /* caller may init when ready */ }
+})(window);
+
+/* ==== END component kit ==== */
+
+document.addEventListener("DOMContentLoaded", function () {
+  JPFlights.init();
+  document.addEventListener("jp:selectFare", function (e) {
+    console.log("Fare selected:", e.detail.fareIndex);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+{
+  "groupedItineraryResponse": {
+    "version": "6",
+    "scheduleDescs": [
+      {
+        "ref": 1,
+        "departure": { "airport": "LHE", "time": "02:00:00" },
+        "arrival": { "airport": "CMB", "time": "06:00:00" },
+        "elapsedTime": 240,
+        "carrier": { "marketing": "UL", "marketingFlightNumber": "191" }
+      },
+      {
+        "ref": 2,
+        "departure": { "airport": "CMB", "time": "08:00:00" },
+        "arrival": { "airport": "SIN", "time": "12:00:00" },
+        "elapsedTime": 240,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "469" }
+      },
+      {
+        "ref": 3,
+        "departure": { "airport": "SIN", "time": "14:00:00" },
+        "arrival": { "airport": "MEL", "time": "01:00:00", "dateAdjustment": 1 },
+        "elapsedTime": 660,
+        "carrier": { "marketing": "SQ", "marketingFlightNumber": "237" }
+      },
+      {
+        "ref": 4,
+        "departure": { "airport": "MEL", "time": "10:00:00" },
+        "arrival": { "airport": "CMB", "time": "18:00:00" },
+        "elapsedTime": 480,
+        "carrier": { "marketing": "UL", "marketingFlightNumber": "192" }
+      },
+      {
+        "ref": 5,
+        "departure": { "airport": "CMB", "time": "20:00:00" },
+        "arrival": { "airport": "LHE", "time": "02:00:00", "dateAdjustment": 1 },
+        "elapsedTime": 420,
+        "carrier": { "marketing": "UL", "marketingFlightNumber": "193" }
+      }
+    ],
+    "legDescs": [
+      {
+        "ref": 1,
+        "elapsedTime": 1140,
+        "schedules": [{ "ref": 1 }, { "ref": 2 }, { "ref": 3 }]
+      },
+      {
+        "ref": 2,
+        "elapsedTime": 900,
+        "schedules": [{ "ref": 4 }, { "ref": 5 }]
+      }
+    ],
+    "itineraryGroups": [
+      {
+        "itineraries": [
+          {
+            "id": "itin-rt-lhe-mel-time-only-dates",
+            "legs": [{ "ref": 1 }, { "ref": 2 }],
+            "pricingInformation": [
+              {
+                "fare": {
+                  "validatingCarrierCode": "SQ",
+                  "totalFare": {
+                    "currency": "PKR",
+                    "totalPrice": 450000,
+                    "baseFareAmount": 380000,
+                    "totalTaxAmount": 70000
+                  },
+                  "passengerInfoList": [
+                    {
+                      "passengerInfo": {
+                        "nonRefundable": false,
+                        "fareComponents": [
+                          {
+                            "segments": [
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } },
+                              { "segment": { "cabinCode": "Y" } }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

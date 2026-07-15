@@ -1,0 +1,22 @@
+{
+  "result": {
+    "fare_detail_key": "fare-detail-total-match",
+    "offers": [
+      {
+        "offer_key": "offer-total-0",
+        "total_price": 80294,
+        "currency": "PKR"
+      },
+      {
+        "offer_key": "offer-total-1",
+        "total_price": 85158,
+        "currency": "PKR"
+      },
+      {
+        "offer_key": "offer-total-2",
+        "total_price": 90098,
+        "currency": "PKR"
+      }
+    ]
+  }
+}

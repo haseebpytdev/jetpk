@@ -1,0 +1,12 @@
+{
+  "result": {
+    "fare_detail_key": "fare-detail-key-incomplete",
+    "offers": [
+      {
+        "offer_key": "offer-key-incomplete",
+        "can_book": true
+      }
+    ],
+    "change_rules": []
+  }
+}

@@ -1,0 +1,14 @@
+{
+    "hosting_panel": "hostinger",
+    "ssh_host": "REPLACE_SSH_HOST",
+    "ssh_port": 22,
+    "ssh_user": "REPLACE_SSH_USER",
+    "auth_type": "password",
+    "app_path": "/home/REPLACE_USER/domains/REPLACE_DOMAIN/laravel",
+    "public_html_path": "/home/REPLACE_USER/domains/REPLACE_DOMAIN/public_html",
+    "public_assets_path": "/home/REPLACE_USER/domains/REPLACE_DOMAIN/public_html/client-assets/REPLACE_CLIENT_SLUG",
+    "backup_path": "/home/REPLACE_USER/backups/REPLACE_CLIENT_SLUG",
+    "deploy_strategy": "sftp_single_file",
+    "last_deployed_at": null,
+    "last_deployed_by": null
+}

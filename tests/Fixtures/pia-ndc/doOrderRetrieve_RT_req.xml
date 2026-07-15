@@ -1,0 +1,26 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderRetrieveRQ">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <IATA_OrderRetrieveRQ>
+         <Party>
+            <Sender>
+               <TravelAgency>
+                  <AgencyID>SELENS</AgencyID>
+                  <Name>NDC GATEWAY</Name>
+               </TravelAgency>
+            </Sender>
+         </Party>
+         <PayloadAttributes>
+            <PrimaryLangID>EN</PrimaryLangID>
+         </PayloadAttributes>
+         <Request>
+            <OrderFilterCriteria>
+               <Order>
+                  <OrderID>7UU0J4</OrderID>
+                  <OwnerCode>S5</OwnerCode>
+               </Order>
+            </OrderFilterCriteria>
+         </Request>
+      </IATA_OrderRetrieveRQ>
+   </soapenv:Body>
+</soapenv:Envelope>

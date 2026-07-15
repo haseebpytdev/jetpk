@@ -1,0 +1,243 @@
+﻿# JetPK dedicated server — Laravel app files manifest
+# Generated: 2026-07-07 (phase 7J)
+# Package type: MANIFEST-BASED (no file bytes copied into deploy_packages/)
+# Upload source: OTA Laravel project root on build machine
+# Upload target: /home/<jetpk_user>/domains/jetpakistan.com/ota_app/
+#
+# EXCLUDE from upload: .env, vendor/, node_modules/, storage/logs/, storage/framework/cache|sessions|views/
+# EXCLUDE: raw DB dumps, supplier credentials, SMTP/OAuth secrets
+#
+# === CORE LARAVEL APP (upload full trees) ===
+app/
+bootstrap/
+config/
+database/migrations/
+database/seeders/
+routes/
+resources/lang/
+public/index.php
+public/css/
+public/js/
+public/images/
+public/fonts/
+public/build/
+composer.json
+composer.lock
+artisan
+clients/jetpk/
+#
+# === SHARED VIEWS (required for booking/supplier flows) ===
+resources/views/auth/
+resources/views/frontend/
+resources/views/emails/
+resources/views/mail/
+resources/views/errors/
+resources/views/layouts/
+resources/views/components/ota-*/
+resources/views/dashboard/
+resources/views/agent/
+resources/views/staff/
+resources/views/customer/
+resources/views/admin/
+#
+# === JETPK THEME + RUNTIME (explicit paths below) ===
+app/Console/Commands/OtaJetpkDashboardPageSettingsInspectionCommand.php
+app/Console/Commands/OtaJetpkDedicatedPackageAuditCommand.php
+app/Console/Commands/OtaJetpkDedicatedServerReadinessCommand.php
+app/Http/Controllers/Admin/AdminSettingsHubController.php
+app/Http/Controllers/Admin/ClientPageSettingsController.php
+app/Http/Middleware/PersistClientPreviewContext.php
+app/Http/Middleware/ResolvePreviewClient.php
+app/Services/Client/ClientAssetResolver.php
+app/Services/Client/ClientBrandingResolver.php
+app/Services/Client/ClientPageAssetService.php
+app/Services/Client/ClientPageContentResolver.php
+app/Services/Client/ClientPageSettingsParityRouteRegistrar.php
+app/Services/Client/ClientPrefixedRouteRegistrar.php
+app/Services/Client/ClientProfileResolver.php
+app/Services/Client/ClientProfileSyncService.php
+app/Services/Client/ClientRedirectResolver.php
+app/Services/Client/ClientThemeRegistry.php
+app/Services/Client/ClientThemeResolver.php
+app/Services/Client/CurrentClientContext.php
+app/Services/Client/JetPakistanClientProfileProvisioner.php
+app/Services/Client/RuntimeThemeManager.php
+app/Services/Client/RuntimeViewResolver.php
+app/Support/Client/client_helpers.php
+app/Support/Client/ClientPageKeys.php
+app/Support/Client/ClientPreviewLayoutBranding.php
+app/Support/Client/ClientProfile.php
+app/Support/Client/ClientProfileConfigReader.php
+app/Support/Client/ClientProfileExporter.php
+app/Support/Client/ClientPublicWebrootPath.php
+app/Support/Client/JetpkPortalUiIdentityClassifier.php
+app/Support/Client/ReservedClientPreviewSlugs.php
+bootstrap/app.php
+clients/jetpk/branding.json
+clients/jetpk/client.json
+clients/jetpk/deployment.json
+clients/jetpk/env.production.example
+clients/jetpk/modules.json
+clients/jetpk/notes.md
+config/client_route_parity.php
+config/client_themes.php
+config/client_ui.php
+config/client_view_paths.php
+config/filesystems.php
+config/mail.php
+config/ota_client.php
+config/queue.php
+resources/views/components/jp/alert.blade.php
+resources/views/components/jp/bene-card.blade.php
+resources/views/components/jp/booking-timeline.blade.php
+resources/views/components/jp/button.blade.php
+resources/views/components/jp/card.blade.php
+resources/views/components/jp/chip.blade.php
+resources/views/components/jp/dest-card.blade.php
+resources/views/components/jp/empty-state.blade.php
+resources/views/components/jp/fare-card.blade.php
+resources/views/components/jp/flight-arc.blade.php
+resources/views/components/jp/form-group.blade.php
+resources/views/components/jp/google-sign-in.blade.php
+resources/views/components/jp/group-card.blade.php
+resources/views/components/jp/icon.blade.php
+resources/views/components/jp/input.blade.php
+resources/views/components/jp/modal.blade.php
+resources/views/components/jp/page-hero.blade.php
+resources/views/components/jp/payment-summary.blade.php
+resources/views/components/jp/result-card.blade.php
+resources/views/components/jp/route-card.blade.php
+resources/views/components/jp/table.blade.php
+resources/views/components/jp/trust-card.blade.php
+resources/views/components/themes/admin/jetpakistan/components/empty-state.blade.php
+resources/views/components/themes/admin/jetpakistan/components/status-badge.blade.php
+resources/views/themes/admin/jetpakistan/agencies/index.blade.php
+resources/views/themes/admin/jetpakistan/agencies/show.blade.php
+resources/views/themes/admin/jetpakistan/agent-applications/index.blade.php
+resources/views/themes/admin/jetpakistan/agent-applications/show.blade.php
+resources/views/themes/admin/jetpakistan/agents.blade.php
+resources/views/themes/admin/jetpakistan/api-settings/edit.blade.php
+resources/views/themes/admin/jetpakistan/api-settings/index.blade.php
+resources/views/themes/admin/jetpakistan/bookings.blade.php
+resources/views/themes/admin/jetpakistan/bookings/show.blade.php
+resources/views/themes/admin/jetpakistan/components/empty-state.blade.php
+resources/views/themes/admin/jetpakistan/components/status-badge.blade.php
+resources/views/themes/admin/jetpakistan/group-ticketing/categories/index.blade.php
+resources/views/themes/admin/jetpakistan/group-ticketing/index.blade.php
+resources/views/themes/admin/jetpakistan/group-ticketing/inventory/index.blade.php
+resources/views/themes/admin/jetpakistan/group-ticketing/tiles/index.blade.php
+resources/views/themes/admin/jetpakistan/index.blade.php
+resources/views/themes/admin/jetpakistan/layouts/dashboard.blade.php
+resources/views/themes/admin/jetpakistan/markups/index.blade.php
+resources/views/themes/admin/jetpakistan/page-settings/edit.blade.php
+resources/views/themes/admin/jetpakistan/page-settings/index.blade.php
+resources/views/themes/admin/jetpakistan/page-settings/palette.blade.php
+resources/views/themes/admin/jetpakistan/partials/flash.blade.php
+resources/views/themes/admin/jetpakistan/partials/legacy-module-notice.blade.php
+resources/views/themes/admin/jetpakistan/partials/sidebar.blade.php
+resources/views/themes/admin/jetpakistan/partials/topbar.blade.php
+resources/views/themes/admin/jetpakistan/reports.blade.php
+resources/views/themes/admin/jetpakistan/settings/branding.blade.php
+resources/views/themes/admin/jetpakistan/settings/communications/index.blade.php
+resources/views/themes/admin/jetpakistan/settings/index.blade.php
+resources/views/themes/admin/jetpakistan/supplier-diagnostics.blade.php
+resources/views/themes/admin/jetpakistan/support/tickets/index.blade.php
+resources/views/themes/admin/jetpakistan/support/tickets/show.blade.php
+resources/views/themes/admin/jetpakistan/users/index.blade.php
+resources/views/themes/admin/jetpakistan/users/show.blade.php
+resources/views/themes/agent/jetpakistan/bookings/create.blade.php
+resources/views/themes/agent/jetpakistan/bookings/index.blade.php
+resources/views/themes/agent/jetpakistan/bookings/show.blade.php
+resources/views/themes/agent/jetpakistan/index.blade.php
+resources/views/themes/agent/jetpakistan/layouts/agent-portal.blade.php
+resources/views/themes/customer/jetpakistan/bookings/index.blade.php
+resources/views/themes/customer/jetpakistan/bookings/show.blade.php
+resources/views/themes/customer/jetpakistan/dashboard.blade.php
+resources/views/themes/customer/jetpakistan/layouts/customer-account.blade.php
+resources/views/themes/frontend/jetpakistan/auth/forgot-password.blade.php
+resources/views/themes/frontend/jetpakistan/auth/login.blade.php
+resources/views/themes/frontend/jetpakistan/auth/login-otp.blade.php
+resources/views/themes/frontend/jetpakistan/auth/register.blade.php
+resources/views/themes/frontend/jetpakistan/auth/reset-password.blade.php
+resources/views/themes/frontend/jetpakistan/components/portal/empty-state.blade.php
+resources/views/themes/frontend/jetpakistan/components/portal/flash.blade.php
+resources/views/themes/frontend/jetpakistan/components/portal/header-brand.blade.php
+resources/views/themes/frontend/jetpakistan/components/portal/identity-card.blade.php
+resources/views/themes/frontend/jetpakistan/components/portal/nav-agent.blade.php
+resources/views/themes/frontend/jetpakistan/components/portal/nav-customer.blade.php
+resources/views/themes/frontend/jetpakistan/components/portal/status-badge.blade.php
+resources/views/themes/frontend/jetpakistan/components/portal/support-cta.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/airport-field.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/date-field.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/date-range-field.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/flights-panel.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/groups-panel.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/multi-city-segments.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/passenger-selector.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/search-action-row.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/search-shell.blade.php
+resources/views/themes/frontend/jetpakistan/components/search/trip-tabs.blade.php
+resources/views/themes/frontend/jetpakistan/errors/403.blade.php
+resources/views/themes/frontend/jetpakistan/errors/404.blade.php
+resources/views/themes/frontend/jetpakistan/errors/419.blade.php
+resources/views/themes/frontend/jetpakistan/errors/429.blade.php
+resources/views/themes/frontend/jetpakistan/errors/500.blade.php
+resources/views/themes/frontend/jetpakistan/errors/503.blade.php
+resources/views/themes/frontend/jetpakistan/errors/partials/shell.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/about.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/agent-registration/form.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/agent-registration/landing.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/agent-registration/submitted.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/booking/lookup.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/flights/details.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/flights/results.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/group-ticketing/search.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/home.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/support.blade.php
+resources/views/themes/frontend/jetpakistan/frontend/support/submitted.blade.php
+resources/views/themes/frontend/jetpakistan/layouts/auth.blade.php
+resources/views/themes/frontend/jetpakistan/layouts/error.blade.php
+resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php
+resources/views/themes/frontend/jetpakistan/layouts/portal.blade.php
+resources/views/themes/frontend/jetpakistan/partials/drawer.blade.php
+resources/views/themes/frontend/jetpakistan/partials/footer.blade.php
+resources/views/themes/frontend/jetpakistan/partials/header.blade.php
+resources/views/themes/frontend/jetpakistan/sections/destinations.blade.php
+resources/views/themes/frontend/jetpakistan/sections/fares.blade.php
+resources/views/themes/frontend/jetpakistan/sections/feature-board.blade.php
+resources/views/themes/frontend/jetpakistan/sections/groups.blade.php
+resources/views/themes/frontend/jetpakistan/sections/hero.blade.php
+resources/views/themes/frontend/jetpakistan/sections/routes.blade.php
+resources/views/themes/frontend/jetpakistan/sections/support-cta.blade.php
+resources/views/themes/frontend/jetpakistan/sections/trust.blade.php
+resources/views/themes/frontend/jetpakistan/sections/why-book.blade.php
+resources/views/themes/staff/jetpakistan/bookings/index.blade.php
+resources/views/themes/staff/jetpakistan/bookings/show.blade.php
+resources/views/themes/staff/jetpakistan/index.blade.php
+resources/views/themes/staff/jetpakistan/layouts/dashboard.blade.php
+routes/admin.php
+routes/agent.php
+routes/auth.php
+routes/console.php
+routes/customer.php
+routes/preview.php
+routes/staff.php
+routes/web.php
+#
+# === OPTIONAL / DEPLOY-OWNER DECISION ===
+# Dev CP (omit when OTA_MODULE_DEV_CP=false):
+# routes/dev/cp via bootstrap/app.php, app/Http/Controllers/Developer/**
+#
+# === DO NOT UPLOAD ===
+# .env
+# vendor/
+# node_modules/
+# storage/logs/**
+# storage/framework/cache/**
+# storage/framework/sessions/**
+# storage/framework/views/**
+# Binham/, _production_baselines/, 11k-s2-*/
+# public/client-assets/{other-client-slug}/**
+# resources/views/themes/**/v1-classic/** (Master-only, unless fallback needed)
+#
+# TOTAL explicit JetPK/runtime paths listed above: 182

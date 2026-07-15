@@ -1,0 +1,12 @@
+{
+    "logo_path": "logo/logo.svg",
+    "favicon_path": "favicon/favicon.ico",
+    "primary_color": "#00843D",
+    "secondary_color": "#00A651",
+    "accent_color": "#FDB913",
+    "company_name": "JetPakistan",
+    "phone": "+92 21 111 000 000",
+    "email": "support@jetpakistan.com",
+    "address": "Office No. 220, 2nd Floor, Century Tower, Kalma Chowk, Gulberg III, Lahore",
+    "footer_text": "JetPakistan — your gateway to seamless travel."
+}

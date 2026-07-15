@@ -1,0 +1,215 @@
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+   <S:Body>
+      <ns10:IATA_OrderReshopRS xmlns="http://www.iata.org/IATA/2015/00/2020.1/IATA_AirShoppingRQ" xmlns:ns10="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderReshopRS" xmlns:ns11="http://www.iata.org/IATA/2015/00/2020.1/IATA_AirlineProfileRQ" xmlns:ns12="http://www.iata.org/IATA/2015/00/2020.1/IATA_AirlineProfileRS" xmlns:ns13="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderCreateRQ" xmlns:ns14="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderRetrieveRQ" xmlns:ns15="http://www.iata.org/IATA/2015/00/2020.1/IATA_OfferPriceRQ" xmlns:ns16="http://www.iata.org/IATA/2015/00/2020.1/IATA_OfferPriceRS" xmlns:ns17="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderRulesRQ" xmlns:ns18="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderRulesRS" xmlns:ns2="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderChangeRQ" xmlns:ns3="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderViewRS" xmlns:ns4="http://www.iata.org/IATA/2015/00/2020.1/IATA_ServiceListRQ" xmlns:ns5="http://www.iata.org/IATA/2015/00/2020.1/IATA_ServiceListRS" xmlns:ns6="http://www.iata.org/IATA/2015/00/2020.1/IATA_SeatAvailabilityRQ" xmlns:ns7="http://www.iata.org/IATA/2015/00/2020.1/IATA_SeatAvailabilityRS" xmlns:ns8="http://www.iata.org/IATA/2015/00/2020.1/IATA_AirShoppingRS" xmlns:ns9="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderReshopRQ">
+         <ns10:Response>
+            <ns10:DataLists>
+               <ns10:PaxList>
+                  <ns10:Pax>
+                     <ns10:Birthdate>1990-04-01</ns10:Birthdate>
+                     <ns10:Individual>
+                        <ns10:GenderCode>F</ns10:GenderCode>
+                        <ns10:GivenName>MARYAM</ns10:GivenName>
+                        <ns10:IndividualID>IND-1</ns10:IndividualID>
+                        <ns10:Surname>SHAHBAZINIA</ns10:Surname>
+                        <ns10:TitleName>MS</ns10:TitleName>
+                     </ns10:Individual>
+                     <ns10:PaxID>ADTPax-402952413</ns10:PaxID>
+                     <ns10:PTC>ADT</ns10:PTC>
+                  </ns10:Pax>
+               </ns10:PaxList>
+               <ns10:PenaltyList>
+                  <ns10:Penalty>
+                     <ns10:CancelFeeInd>true</ns10:CancelFeeInd>
+                     <ns10:ChangeFeeInd>false</ns10:ChangeFeeInd>
+                     <ns10:DescText>Penalty-1</ns10:DescText>
+                     <ns10:DescText>Change Fee</ns10:DescText>
+                     <ns10:PenaltyID>Penalty-CP2</ns10:PenaltyID>
+                     <ns10:Price>
+                        <ns10:TotalAmount CurCode="PKR">2500.00</ns10:TotalAmount>
+                     </ns10:Price>
+                     <ns10:TypeCode>Cancellation</ns10:TypeCode>
+                  </ns10:Penalty>
+                  <ns10:Penalty>
+                     <ns10:CancelFeeInd>true</ns10:CancelFeeInd>
+                     <ns10:ChangeFeeInd>false</ns10:ChangeFeeInd>
+                     <ns10:DescText>CP=2500.0 PKR</ns10:DescText>
+                     <ns10:FareDetail>
+                        <ns10:PaxRefID>ADTPax-402952413</ns10:PaxRefID>
+                     </ns10:FareDetail>
+                     <ns10:PenaltyID>Penalty-1</ns10:PenaltyID>
+                     <ns10:Price>
+                        <ns10:TotalAmount CurCode="PKR">2500.00</ns10:TotalAmount>
+                     </ns10:Price>
+                     <ns10:TypeCode>Cancellation</ns10:TypeCode>
+                  </ns10:Penalty>
+               </ns10:PenaltyList>
+            </ns10:DataLists>
+            <ns10:ReshopResults>
+               <ns10:ReshopOffers>
+                  <ns10:Offer>
+                     <ns10:DeleteOrderItem>
+                        <ns10:OfferItemID>DeleteOfferItem-ADTPax-402952413-2142417439147</ns10:OfferItemID>
+                        <ns10:PenaltyRefID>Penalty-1</ns10:PenaltyRefID>
+                        <ns10:PriceDifferential>
+                           <ns10:DifferentialTypeCode>Refund</ns10:DifferentialTypeCode>
+                           <ns10:DiffPrice>
+                              <ns10:Price>
+                                 <ns10:BaseAmount CurCode="PKR">21240.00</ns10:BaseAmount>
+                                 <ns10:EquivAmount CurCode="PKR">21240.00</ns10:EquivAmount>
+                                 <ns10:Fee>
+                                    <ns10:Amount CurCode="PKR">0.00</ns10:Amount>
+                                 </ns10:Fee>
+                                 <ns10:MaskedInd>false</ns10:MaskedInd>
+                                 <ns10:Surcharge>
+                                    <ns10:TotalAmount CurCode="PKR">500.00</ns10:TotalAmount>
+                                 </ns10:Surcharge>
+                                 <ns10:TaxSummary>
+                                    <ns10:Tax>
+                                       <ns10:Amount CurCode="PKR">20.00</ns10:Amount>
+                                       <ns10:RefundInd>true</ns10:RefundInd>
+                                       <ns10:TaxCode>YI</ns10:TaxCode>
+                                    </ns10:Tax>
+                                    <ns10:Tax>
+                                       <ns10:Amount CurCode="PKR">100.00</ns10:Amount>
+                                       <ns10:RefundInd>true</ns10:RefundInd>
+                                       <ns10:TaxCode>XZ</ns10:TaxCode>
+                                    </ns10:Tax>
+                                    <ns10:Tax>
+                                       <ns10:Amount CurCode="PKR">500.00</ns10:Amount>
+                                       <ns10:RefundInd>true</ns10:RefundInd>
+                                       <ns10:TaxCode>SP</ns10:TaxCode>
+                                    </ns10:Tax>
+                                    <ns10:Tax>
+                                       <ns10:Amount CurCode="PKR">1500.00</ns10:Amount>
+                                       <ns10:RefundInd>true</ns10:RefundInd>
+                                       <ns10:TaxCode>PK</ns10:TaxCode>
+                                    </ns10:Tax>
+                                    <ns10:TotalTaxAmount CurCode="PKR">2120.00</ns10:TotalTaxAmount>
+                                 </ns10:TaxSummary>
+                                 <ns10:TotalAmount CurCode="PKR">21360.00</ns10:TotalAmount>
+                              </ns10:Price>
+                           </ns10:DiffPrice>
+                           <ns10:GrandTotalAmount CurCode="PKR">21360.00</ns10:GrandTotalAmount>
+                           <ns10:NewPrice>
+                              <ns10:Price>
+                                 <ns10:BaseAmount CurCode="PKR">0</ns10:BaseAmount>
+                                 <ns10:Fee>
+                                    <ns10:Amount CurCode="PKR">0</ns10:Amount>
+                                 </ns10:Fee>
+                                 <ns10:Surcharge>
+                                    <ns10:TotalAmount CurCode="PKR">0</ns10:TotalAmount>
+                                 </ns10:Surcharge>
+                                 <ns10:TotalAmount CurCode="PKR">0</ns10:TotalAmount>
+                              </ns10:Price>
+                           </ns10:NewPrice>
+                           <ns10:OldPrice>
+                              <ns10:Price>
+                                 <ns10:BaseAmount CurCode="PKR">21240.00</ns10:BaseAmount>
+                                 <ns10:EquivAmount CurCode="PKR">21240.00</ns10:EquivAmount>
+                                 <ns10:Fee>
+                                    <ns10:Amount CurCode="PKR">0.00</ns10:Amount>
+                                 </ns10:Fee>
+                                 <ns10:MaskedInd>false</ns10:MaskedInd>
+                                 <ns10:Surcharge>
+                                    <ns10:TotalAmount CurCode="PKR">500.00</ns10:TotalAmount>
+                                 </ns10:Surcharge>
+                                 <ns10:TaxSummary>
+                                    <ns10:Tax>
+                                       <ns10:Amount CurCode="PKR">20.00</ns10:Amount>
+                                       <ns10:RefundInd>true</ns10:RefundInd>
+                                       <ns10:TaxCode>YI</ns10:TaxCode>
+                                    </ns10:Tax>
+                                    <ns10:Tax>
+                                       <ns10:Amount CurCode="PKR">100.00</ns10:Amount>
+                                       <ns10:RefundInd>true</ns10:RefundInd>
+                                       <ns10:TaxCode>XZ</ns10:TaxCode>
+                                    </ns10:Tax>
+                                    <ns10:Tax>
+                                       <ns10:Amount CurCode="PKR">500.00</ns10:Amount>
+                                       <ns10:RefundInd>true</ns10:RefundInd>
+                                       <ns10:TaxCode>SP</ns10:TaxCode>
+                                    </ns10:Tax>
+                                    <ns10:Tax>
+                                       <ns10:Amount CurCode="PKR">1500.00</ns10:Amount>
+                                       <ns10:RefundInd>true</ns10:RefundInd>
+                                       <ns10:TaxCode>PK</ns10:TaxCode>
+                                    </ns10:Tax>
+                                    <ns10:TotalTaxAmount CurCode="PKR">2120.00</ns10:TotalTaxAmount>
+                                 </ns10:TaxSummary>
+                                 <ns10:TotalAmount CurCode="PKR">21360.00</ns10:TotalAmount>
+                              </ns10:Price>
+                           </ns10:OldPrice>
+                        </ns10:PriceDifferential>
+                     </ns10:DeleteOrderItem>
+                     <ns10:DeleteOrderItem>
+                        <ns10:OfferItemID>DeleteOfferItem-ADTPax-402952413-2144200351878</ns10:OfferItemID>
+                        <ns10:PriceDifferential>
+                           <ns10:DifferentialTypeCode>Refund</ns10:DifferentialTypeCode>
+                           <ns10:DiffPrice>
+                              <ns10:Price>
+                                 <ns10:BaseAmount CurCode="PKR">300.00</ns10:BaseAmount>
+                                 <ns10:EquivAmount CurCode="PKR">300.00</ns10:EquivAmount>
+                                 <ns10:Fee>
+                                    <ns10:Amount>0.00</ns10:Amount>
+                                 </ns10:Fee>
+                                 <ns10:MaskedInd>false</ns10:MaskedInd>
+                                 <ns10:Surcharge>
+                                    <ns10:TotalAmount>0.00</ns10:TotalAmount>
+                                 </ns10:Surcharge>
+                                 <ns10:TaxSummary>
+                                    <ns10:TotalTaxAmount CurCode="PKR">0.00</ns10:TotalTaxAmount>
+                                 </ns10:TaxSummary>
+                                 <ns10:TotalAmount CurCode="PKR">300.00</ns10:TotalAmount>
+                              </ns10:Price>
+                           </ns10:DiffPrice>
+                           <ns10:GrandTotalAmount CurCode="PKR">300.00</ns10:GrandTotalAmount>
+                           <ns10:NewPrice>
+                              <ns10:Price>
+                                 <ns10:BaseAmount CurCode="PKR">0</ns10:BaseAmount>
+                                 <ns10:Fee>
+                                    <ns10:Amount CurCode="PKR">0</ns10:Amount>
+                                 </ns10:Fee>
+                                 <ns10:Surcharge>
+                                    <ns10:TotalAmount CurCode="PKR">0</ns10:TotalAmount>
+                                 </ns10:Surcharge>
+                                 <ns10:TotalAmount CurCode="PKR">0</ns10:TotalAmount>
+                              </ns10:Price>
+                           </ns10:NewPrice>
+                           <ns10:OldPrice>
+                              <ns10:Price>
+                                 <ns10:BaseAmount CurCode="PKR">300.00</ns10:BaseAmount>
+                                 <ns10:EquivAmount CurCode="PKR">300.00</ns10:EquivAmount>
+                                 <ns10:Fee>
+                                    <ns10:Amount>0.00</ns10:Amount>
+                                 </ns10:Fee>
+                                 <ns10:MaskedInd>false</ns10:MaskedInd>
+                                 <ns10:Surcharge>
+                                    <ns10:TotalAmount>0.00</ns10:TotalAmount>
+                                 </ns10:Surcharge>
+                                 <ns10:TaxSummary>
+                                    <ns10:TotalTaxAmount CurCode="PKR">0.00</ns10:TotalTaxAmount>
+                                 </ns10:TaxSummary>
+                                 <ns10:TotalAmount CurCode="PKR">300.00</ns10:TotalAmount>
+                              </ns10:Price>
+                           </ns10:OldPrice>
+                        </ns10:PriceDifferential>
+                     </ns10:DeleteOrderItem>
+                     <ns10:OfferID>7UU0JB</ns10:OfferID>
+                     <ns10:OwnerCode>PK</ns10:OwnerCode>
+                     <ns10:TotalPrice>
+                        <ns10:MaskedInd>false</ns10:MaskedInd>
+                        <ns10:TotalAmount CurCode="PKR">21660.0</ns10:TotalAmount>
+                     </ns10:TotalPrice>
+                  </ns10:Offer>
+               </ns10:ReshopOffers>
+            </ns10:ReshopResults>
+            <ns10:ShoppingResponse>
+               <ns10:ShoppingResponseRefID>839df286-a6f7-4b5a-9cb0-a98ca8a00f5a</ns10:ShoppingResponseRefID>
+            </ns10:ShoppingResponse>
+         </ns10:Response>
+         <ns10:PayloadAttributes>
+            <ns10:EchoTokenText>839df286-a6f7-4b5a-9cb0-a98ca8a00f5a</ns10:EchoTokenText>
+         </ns10:PayloadAttributes>
+      </ns10:IATA_OrderReshopRS>
+   </S:Body>
+</S:Envelope>

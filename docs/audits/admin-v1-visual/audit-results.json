@@ -1,0 +1,1967 @@
+{
+  "generatedAt": "2026-06-22T10:48:11.290Z",
+  "baseUrl": "http://127.0.0.1:8000",
+  "playwrightAvailable": true,
+  "authMethod": "default demo fallback",
+  "pagesRequested": [
+    "/admin",
+    "/admin/bookings",
+    "/admin/bookings/{id}",
+    "/admin/reports",
+    "/admin/support/tickets",
+    "/admin/group-ticketing",
+    "/admin/users",
+    "/admin/api-settings",
+    "/admin/settings",
+    "/admin/reports/supplier-diagnostics"
+  ],
+  "captures": [
+    {
+      "pageKey": "dashboard",
+      "label": "Admin Dashboard",
+      "path": "/admin",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\dashboard\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 11,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12.48px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "15.2px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "ota-dash-action-card__cta btn btn-sm ota-dash-action-card__cta--soft",
+          "ota-dash-action-card__cta btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "ota-dash-notice__badge",
+          "ota-dash-status-badge ota-dash-status-badge--muted",
+          "ota-dash-status-badge ota-dash-status-badge--good",
+          "ota-dash-status-badge ota-dash-status-badge--warn"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "0px 16px 14px",
+          "0px",
+          "0px 16px 14px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "dashboard",
+      "label": "Admin Dashboard",
+      "path": "/admin",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\dashboard\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 11,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12.48px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "15.2px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "ota-dash-action-card__cta btn btn-sm ota-dash-action-card__cta--soft",
+          "ota-dash-action-card__cta btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "ota-dash-notice__badge",
+          "ota-dash-status-badge ota-dash-status-badge--muted",
+          "ota-dash-status-badge ota-dash-status-badge--good",
+          "ota-dash-status-badge ota-dash-status-badge--warn"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "0px 16px 14px",
+          "0px",
+          "0px 16px 14px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "dashboard",
+      "label": "Admin Dashboard",
+      "path": "/admin",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\dashboard\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 11,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12.48px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "15.2px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "ota-dash-action-card__cta btn btn-sm ota-dash-action-card__cta--soft",
+          "ota-dash-action-card__cta btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "ota-dash-notice__badge",
+          "ota-dash-status-badge ota-dash-status-badge--muted",
+          "ota-dash-status-badge ota-dash-status-badge--good",
+          "ota-dash-status-badge ota-dash-status-badge--warn"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "0px 16px 14px",
+          "0px",
+          "0px 16px 14px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "dashboard",
+      "label": "Admin Dashboard",
+      "path": "/admin",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\dashboard\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12.48px",
+          "12px",
+          "13px",
+          "14px",
+          "15.2px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "ota-dash-action-card__cta btn btn-sm ota-dash-action-card__cta--soft",
+          "ota-dash-action-card__cta btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "ota-dash-notice__badge",
+          "ota-dash-status-badge ota-dash-status-badge--muted",
+          "ota-dash-status-badge ota-dash-status-badge--good",
+          "ota-dash-status-badge ota-dash-status-badge--warn"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "0px 16px 14px",
+          "0px",
+          "0px 16px 14px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "bookings",
+      "label": "Admin Bookings",
+      "path": "/admin/bookings",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\bookings\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 5,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-outline-secondary",
+          "btn btn-sm btn-outline-primary",
+          "btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "bookings",
+      "label": "Admin Bookings",
+      "path": "/admin/bookings",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\bookings\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 5,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-outline-secondary",
+          "btn btn-sm btn-outline-primary",
+          "btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "bookings",
+      "label": "Admin Bookings",
+      "path": "/admin/bookings",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\bookings\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 5,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-outline-secondary",
+          "btn btn-sm btn-outline-primary",
+          "btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "bookings",
+      "label": "Admin Bookings",
+      "path": "/admin/bookings",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\bookings\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 8,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 5,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-outline-secondary",
+          "btn btn-sm btn-outline-primary",
+          "btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "booking-show",
+      "label": "Booking Detail",
+      "path": "http://127.0.0.1:8000/admin/bookings/1",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\booking-show\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 9,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary btn-sm",
+          "btn btn-outline-primary btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "badge bg-blue-lt text-blue border-0 booking-pipeline-jump",
+          "badge bg-azure-lt text-azure border-0 booking-pipeline-jump",
+          "badge bg-purple-lt text-purple border-0 booking-pipeline-jump",
+          "badge bg-teal-lt text-teal border-0 booking-pipeline-jump"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "booking-show",
+      "label": "Booking Detail",
+      "path": "http://127.0.0.1:8000/admin/bookings/1",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\booking-show\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 9,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary btn-sm",
+          "btn btn-outline-primary btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "badge bg-blue-lt text-blue border-0 booking-pipeline-jump",
+          "badge bg-azure-lt text-azure border-0 booking-pipeline-jump",
+          "badge bg-purple-lt text-purple border-0 booking-pipeline-jump",
+          "badge bg-teal-lt text-teal border-0 booking-pipeline-jump"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "booking-show",
+      "label": "Booking Detail",
+      "path": "http://127.0.0.1:8000/admin/bookings/1",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\booking-show\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 9,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary btn-sm",
+          "btn btn-outline-primary btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "badge bg-blue-lt text-blue border-0 booking-pipeline-jump",
+          "badge bg-azure-lt text-azure border-0 booking-pipeline-jump",
+          "badge bg-purple-lt text-purple border-0 booking-pipeline-jump",
+          "badge bg-teal-lt text-teal border-0 booking-pipeline-jump"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "booking-show",
+      "label": "Booking Detail",
+      "path": "http://127.0.0.1:8000/admin/bookings/1",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\booking-show\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 8,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary btn-sm",
+          "btn btn-outline-primary btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "badge bg-blue-lt text-blue border-0 booking-pipeline-jump",
+          "badge bg-azure-lt text-azure border-0 booking-pipeline-jump",
+          "badge bg-purple-lt text-purple border-0 booking-pipeline-jump",
+          "badge bg-teal-lt text-teal border-0 booking-pipeline-jump"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "reports",
+      "label": "Admin Reports",
+      "path": "/admin/reports",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\reports\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 12,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16.8px",
+          "16px",
+          "17px",
+          "20px",
+          "24px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-outline-secondary",
+          "btn btn-outline-secondary active",
+          "btn btn-primary"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 59,
+        "tableRowSamples": [
+          30,
+          117,
+          30
+        ],
+        "cardPaddingSamples": [
+          "14px",
+          "14px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "reports",
+      "label": "Admin Reports",
+      "path": "/admin/reports",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\reports\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 12,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16.8px",
+          "16px",
+          "17px",
+          "20px",
+          "24px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-outline-secondary",
+          "btn btn-outline-secondary active",
+          "btn btn-primary"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 59,
+        "tableRowSamples": [
+          30,
+          117,
+          30
+        ],
+        "cardPaddingSamples": [
+          "14px",
+          "14px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "reports",
+      "label": "Admin Reports",
+      "path": "/admin/reports",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\reports\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 12,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16.8px",
+          "16px",
+          "17px",
+          "20px",
+          "24px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-outline-secondary",
+          "btn btn-outline-secondary active",
+          "btn btn-primary"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 59,
+        "tableRowSamples": [
+          30,
+          117,
+          30
+        ],
+        "cardPaddingSamples": [
+          "14px",
+          "14px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "reports",
+      "label": "Admin Reports",
+      "path": "/admin/reports",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\reports\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14px",
+          "16.8px",
+          "16px",
+          "17px",
+          "20px",
+          "24px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-outline-secondary",
+          "btn btn-outline-secondary active",
+          "btn btn-primary"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 59,
+        "tableRowSamples": [
+          30,
+          117,
+          30
+        ],
+        "cardPaddingSamples": [
+          "14px",
+          "14px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "support-tickets",
+      "label": "Support Tickets",
+      "path": "/admin/support/tickets",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\support-tickets\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 11,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16.8px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 1,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 98,
+        "tableRowSamples": [
+          98
+        ],
+        "cardPaddingSamples": [],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "support-tickets",
+      "label": "Support Tickets",
+      "path": "/admin/support/tickets",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\support-tickets\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 11,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16.8px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 1,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 98,
+        "tableRowSamples": [
+          98
+        ],
+        "cardPaddingSamples": [],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "support-tickets",
+      "label": "Support Tickets",
+      "path": "/admin/support/tickets",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\support-tickets\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 11,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16.8px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 1,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 98,
+        "tableRowSamples": [
+          98
+        ],
+        "cardPaddingSamples": [],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "support-tickets",
+      "label": "Support Tickets",
+      "path": "/admin/support/tickets",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\support-tickets\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 9,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14px",
+          "16.8px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 1,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 98,
+        "tableRowSamples": [
+          98
+        ],
+        "cardPaddingSamples": [],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "group-ticketing",
+      "label": "Group Ticketing",
+      "path": "/admin/group-ticketing",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\group-ticketing\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "11.5px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary btn-sm",
+          "btn btn-outline-primary btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "group-ticketing",
+      "label": "Group Ticketing",
+      "path": "/admin/group-ticketing",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\group-ticketing\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "11.5px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary btn-sm",
+          "btn btn-outline-primary btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "group-ticketing",
+      "label": "Group Ticketing",
+      "path": "/admin/group-ticketing",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\group-ticketing\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "11.5px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary btn-sm",
+          "btn btn-outline-primary btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "group-ticketing",
+      "label": "Group Ticketing",
+      "path": "/admin/group-ticketing",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\group-ticketing\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 7,
+        "fontSizeSamples": [
+          "11px",
+          "12px",
+          "13px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary btn-sm",
+          "btn btn-outline-primary btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "users",
+      "label": "Users Management",
+      "path": "/admin/users",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\users\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-primary flex-fill",
+          "btn btn-outline-secondary flex-fill"
+        ],
+        "uniqueBadgeClassCombinations": 1,
+        "badgeClassSamples": [
+          "badge bg-azure-lt"
+        ],
+        "averageTableRowHeight": 47,
+        "tableRowSamples": [
+          47,
+          47,
+          47,
+          47,
+          47,
+          47,
+          47,
+          47
+        ],
+        "cardPaddingSamples": [
+          "0px",
+          "14px 16px",
+          "0px",
+          "14px 16px",
+          "0px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 8,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "users",
+      "label": "Users Management",
+      "path": "/admin/users",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\users\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-primary flex-fill",
+          "btn btn-outline-secondary flex-fill"
+        ],
+        "uniqueBadgeClassCombinations": 1,
+        "badgeClassSamples": [
+          "badge bg-azure-lt"
+        ],
+        "averageTableRowHeight": 47,
+        "tableRowSamples": [
+          47,
+          47,
+          47,
+          47,
+          47,
+          47,
+          47,
+          47
+        ],
+        "cardPaddingSamples": [
+          "0px",
+          "14px 16px",
+          "0px",
+          "14px 16px",
+          "0px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 8,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "users",
+      "label": "Users Management",
+      "path": "/admin/users",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\users\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-primary flex-fill",
+          "btn btn-outline-secondary flex-fill"
+        ],
+        "uniqueBadgeClassCombinations": 1,
+        "badgeClassSamples": [
+          "badge bg-azure-lt"
+        ],
+        "averageTableRowHeight": 47,
+        "tableRowSamples": [
+          47,
+          47,
+          47,
+          47,
+          47,
+          47,
+          47,
+          47
+        ],
+        "cardPaddingSamples": [
+          "0px",
+          "14px 16px",
+          "0px",
+          "14px 16px",
+          "0px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 8,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "users",
+      "label": "Users Management",
+      "path": "/admin/users",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\users\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 8,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-primary flex-fill",
+          "btn btn-outline-secondary flex-fill"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": 31,
+        "tableRowSamples": [
+          32,
+          31,
+          31,
+          31,
+          31,
+          31,
+          31,
+          31
+        ],
+        "cardPaddingSamples": [
+          "0px",
+          "14px 16px",
+          "0px",
+          "14px 16px",
+          "0px"
+        ],
+        "visiblePrimaryButtons": 2,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "api-settings",
+      "label": "API / Supplier Settings",
+      "path": "/admin/api-settings",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\api-settings\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 9,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-sm btn-outline-primary",
+          "btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 2,
+        "badgeClassSamples": [
+          "badge bg-secondary",
+          "badge bg-azure-lt text-azure ms-1"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "14px 16px",
+          "0px",
+          "14px 16px",
+          "0px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 8,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "api-settings",
+      "label": "API / Supplier Settings",
+      "path": "/admin/api-settings",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\api-settings\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 9,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-sm btn-outline-primary",
+          "btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 2,
+        "badgeClassSamples": [
+          "badge bg-secondary",
+          "badge bg-azure-lt text-azure ms-1"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "14px 16px",
+          "0px",
+          "14px 16px",
+          "0px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 8,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "api-settings",
+      "label": "API / Supplier Settings",
+      "path": "/admin/api-settings",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\api-settings\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 9,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-sm btn-outline-primary",
+          "btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 2,
+        "badgeClassSamples": [
+          "badge bg-secondary",
+          "badge bg-azure-lt text-azure ms-1"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "14px 16px",
+          "0px",
+          "14px 16px",
+          "0px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 8,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "api-settings",
+      "label": "API / Supplier Settings",
+      "path": "/admin/api-settings",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\api-settings\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 7,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 4,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-primary",
+          "btn btn-sm btn-outline-primary",
+          "btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 2,
+        "badgeClassSamples": [
+          "badge bg-secondary",
+          "badge bg-azure-lt text-azure ms-1"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "14px 16px",
+          "0px",
+          "14px 16px",
+          "0px"
+        ],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 8,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "settings",
+      "label": "Settings Hub",
+      "path": "/admin/settings",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\settings\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 8,
+        "fontSizeSamples": [
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 1,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "settings",
+      "label": "Settings Hub",
+      "path": "/admin/settings",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\settings\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 8,
+        "fontSizeSamples": [
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 1,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "settings",
+      "label": "Settings Hub",
+      "path": "/admin/settings",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\settings\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 8,
+        "fontSizeSamples": [
+          "11px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 1,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "settings",
+      "label": "Settings Hub",
+      "path": "/admin/settings",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\settings\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 7,
+        "fontSizeSamples": [
+          "11px",
+          "12px",
+          "13px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 1,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm"
+        ],
+        "uniqueBadgeClassCombinations": 0,
+        "badgeClassSamples": [],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px",
+          "14px 16px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 0,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "supplier-diagnostics",
+      "label": "Supplier Diagnostics",
+      "path": "/admin/reports/supplier-diagnostics",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\supplier-diagnostics\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-outline-secondary",
+          "btn btn-primary btn-sm w-100"
+        ],
+        "uniqueBadgeClassCombinations": 1,
+        "badgeClassSamples": [
+          "badge bg-blue-lt"
+        ],
+        "averageTableRowHeight": 31,
+        "tableRowSamples": [
+          31
+        ],
+        "cardPaddingSamples": [],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 1,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "supplier-diagnostics",
+      "label": "Supplier Diagnostics",
+      "path": "/admin/reports/supplier-diagnostics",
+      "viewport": "laptop-1366",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\supplier-diagnostics\\laptop-1366.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-outline-secondary",
+          "btn btn-primary btn-sm w-100"
+        ],
+        "uniqueBadgeClassCombinations": 1,
+        "badgeClassSamples": [
+          "badge bg-blue-lt"
+        ],
+        "averageTableRowHeight": 31,
+        "tableRowSamples": [
+          31
+        ],
+        "cardPaddingSamples": [],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 1,
+        "viewportWidth": 1366,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1366,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "supplier-diagnostics",
+      "label": "Supplier Diagnostics",
+      "path": "/admin/reports/supplier-diagnostics",
+      "viewport": "tablet-1024",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\supplier-diagnostics\\tablet-1024.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 10,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13.12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-outline-secondary",
+          "btn btn-primary btn-sm w-100"
+        ],
+        "uniqueBadgeClassCombinations": 1,
+        "badgeClassSamples": [
+          "badge bg-blue-lt"
+        ],
+        "averageTableRowHeight": 31,
+        "tableRowSamples": [
+          31
+        ],
+        "cardPaddingSamples": [],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 1,
+        "viewportWidth": 1024,
+        "viewportHeight": 768,
+        "documentScrollWidth": 1024,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "supplier-diagnostics",
+      "label": "Supplier Diagnostics",
+      "path": "/admin/reports/supplier-diagnostics",
+      "viewport": "mobile-390",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\supplier-diagnostics\\mobile-390.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 8,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12px",
+          "13px",
+          "14px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "btn btn-outline-secondary",
+          "btn btn-primary btn-sm w-100"
+        ],
+        "uniqueBadgeClassCombinations": 1,
+        "badgeClassSamples": [
+          "badge bg-blue-lt"
+        ],
+        "averageTableRowHeight": 31,
+        "tableRowSamples": [
+          31
+        ],
+        "cardPaddingSamples": [],
+        "visiblePrimaryButtons": 1,
+        "visibleStatusBadges": 1,
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "documentScrollWidth": 390,
+        "hasHorizontalOverflow": false
+      }
+    },
+    {
+      "pageKey": "dashboard-ui-v2-check",
+      "label": "Dashboard ui=v2 channel check",
+      "path": "/admin?ui=v2",
+      "viewport": "desktop-1440",
+      "screenshotPath": "C:\\Users\\khadi\\ota\\docs\\audits\\admin-v1-visual\\screenshots\\dashboard-ui-v2-check\\desktop-1440.png",
+      "httpStatus": 200,
+      "metrics": {
+        "uniqueFontSizes": 11,
+        "fontSizeSamples": [
+          "10px",
+          "11px",
+          "12.48px",
+          "12px",
+          "13px",
+          "14.08px",
+          "14px",
+          "15.2px",
+          "16px",
+          "17px",
+          "20px"
+        ],
+        "uniqueButtonClassCombinations": 3,
+        "buttonClassSamples": [
+          "btn btn-outline-danger btn-sm",
+          "ota-dash-action-card__cta btn btn-sm ota-dash-action-card__cta--soft",
+          "ota-dash-action-card__cta btn btn-sm btn-outline-secondary"
+        ],
+        "uniqueBadgeClassCombinations": 4,
+        "badgeClassSamples": [
+          "ota-dash-notice__badge",
+          "ota-dash-status-badge ota-dash-status-badge--muted",
+          "ota-dash-status-badge ota-dash-status-badge--good",
+          "ota-dash-status-badge ota-dash-status-badge--warn"
+        ],
+        "averageTableRowHeight": null,
+        "tableRowSamples": [],
+        "cardPaddingSamples": [
+          "0px",
+          "0px 16px 14px",
+          "0px",
+          "0px 16px 14px"
+        ],
+        "visiblePrimaryButtons": 0,
+        "visibleStatusBadges": 4,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "documentScrollWidth": 1440,
+        "hasHorizontalOverflow": false
+      }
+    }
+  ],
+  "skipped": [],
+  "channelChecks": {
+    "adminV1DashboardOk": true,
+    "adminV2PreviewSameAsV1": true,
+    "notes": [
+      "admin v2 preview query loads; no v2 overlay files — layout matches v1 (expected)."
+    ]
+  }
+}

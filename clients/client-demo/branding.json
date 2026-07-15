@@ -1,0 +1,12 @@
+{
+    "logo_path": "logo/logo.svg",
+    "favicon_path": "favicon/favicon.ico",
+    "primary_color": "#1e40af",
+    "secondary_color": "#3b82f6",
+    "accent_color": "#f59e0b",
+    "company_name": "Demo Travel Agency",
+    "phone": "+92 300 1111111",
+    "email": "support@demo.example.com",
+    "address": "Demo Office, Karachi",
+    "footer_text": "Demo deployment — flights and travel assistance."
+}

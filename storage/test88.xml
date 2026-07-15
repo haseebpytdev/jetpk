@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="C:\Users\khadi\ota\phpunit.xml" tests="1" assertions="5" errors="0" failures="1" skipped="0" time="3.269371">
+    <testsuite name="Feature" tests="1" assertions="5" errors="0" failures="1" skipped="0" time="3.269371">
+      <testsuite name="Tests\Feature\PublicCheckoutPnrStrategyAndFareChangeTest" file="C:\Users\khadi\ota\tests\Feature\PublicCheckoutPnrStrategyAndFareChangeTest.php" tests="1" assertions="5" errors="0" failures="1" skipped="0" time="3.269371">
+        <testcase name="test_booking_88_style_payload_validation_passes_with_ticketing_config_on" file="C:\Users\khadi\ota\tests\Feature\PublicCheckoutPnrStrategyAndFareChangeTest.php" line="598" class="Tests\Feature\PublicCheckoutPnrStrategyAndFareChangeTest" classname="Tests.Feature.PublicCheckoutPnrStrategyAndFareChangeTest" assertions="5" time="3.269371">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\PublicCheckoutPnrStrategyAndFareChangeTest::test_booking_88_style_payload_validation_passes_with_ticketing_config_on&#13;
+Failed asserting that false is true.
+&#13;
+C:\Users\khadi\ota\tests\Feature\PublicCheckoutPnrStrategyAndFareChangeTest.php:655</failure>
+        </testcase>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

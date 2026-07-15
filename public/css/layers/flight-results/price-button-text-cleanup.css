@@ -1,0 +1,36 @@
+/**
+ * UI-HOTFIX-PRICE-BUTTON-1 — flight result price CTA shows fare only (no visible Continue).
+ */
+body.ota-public .ota-results-pro .ota-result-price-btn__label,
+body.ota-public .ota-return-split-pro-card .ota-result-price-btn__label {
+    display: none !important;
+}
+
+body.ota-public .ota-results-pro .ota-result-price-btn,
+body.ota-public .ota-return-split-pro-card .ota-result-price-btn {
+    justify-content: center;
+    padding-inline: 0.65rem;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+body.ota-public .ota-results-pro .ota-result-price-btn__amount,
+body.ota-public .ota-return-split-pro-card .ota-result-price-btn__amount {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.ota-public .ota-results-pro .ota-result-actions-book {
+    max-width: min(118px, 100%);
+}
+
+@media (max-width: 767px) {
+    body.ota-public .ota-results-pro .ota-result-actions-book {
+        max-width: 100%;
+    }
+}

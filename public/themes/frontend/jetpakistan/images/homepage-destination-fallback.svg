@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="JetPakistan travel destination">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E9BB5"/>
+      <stop offset="55%" stop-color="#1577A8"/>
+      <stop offset="100%" stop-color="#46C96F"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#g)"/>
+  <circle cx="480" cy="140" r="72" fill="#fff" opacity="0.18"/>
+  <path d="M0 620 Q300 520 600 660 L600 800 L0 800 Z" fill="#063A40" opacity="0.35"/>
+</svg>

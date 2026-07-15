@@ -1,0 +1,1803 @@
+﻿/* JetPK-owned extraction from ota-public flight results module (scoped) */
+/* —— Flight results (premium OTA) —— */
+.ota-results-pro-head {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(125deg, #0b1530 0%, var(--ota-navy) 38%, #152a52 100%);
+  color: #e2e8f0;
+  padding: 1.65rem 0 4.35rem;
+  margin-bottom: 0;
+}
+.ota-results-pro-head::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  right: -15%;
+  width: 55%;
+  height: 140%;
+  background: radial-gradient(ellipse at center, rgba(96, 165, 250, 0.14) 0%, transparent 62%);
+  pointer-events: none;
+}
+.ota-results-pro-head .container {
+  position: relative;
+  z-index: 1;
+}
+.ota-results-pro-head-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.1rem 1.5rem;
+}
+.ota-results-pro-head-main {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+.ota-results-pro-kicker {
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.72);
+}
+.ota-results-pro-kicker .fa {
+  margin-right: 0.35rem;
+  opacity: 0.85;
+}
+.ota-results-pro-title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.55rem, 2.6vw, 1.95rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.ota-results-pro-sub {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+  line-height: 1.35;
+}
+.ota-results-pro-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 22%, transparent);
+  border: 1px solid rgba(147, 197, 253, 0.35);
+  color: #dbeafe;
+}
+.ota-results-pro-body {
+  padding-bottom: 2.5rem;
+}
+.jp-flights-results .ota-results-pro-body--pullup {
+  position: relative;
+  z-index: 2;
+  margin-top: -2rem;
+  padding-top: 0;
+}
+.jp-flights-results .ota-results-pro-body--wide {
+  width: min(1320px, calc(100% - 18px));
+  max-width: none;
+}
+.jp-flights-results .jp-results-search-placement {
+  position: relative;
+  z-index: 25;
+  margin-bottom: 1.25rem;
+  overflow: visible;
+}
+.jp-flights-results .ota-results-pro-body--pullup .row {
+  position: relative;
+  z-index: 1;
+}
+.jp-flights-results .ota-results-pro-body--pullup {
+  overflow: visible;
+}
+
+/* Refine search card + horizontal toolbar */
+.jp-flights-results .ota-results-refine-card {
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 16px;
+  box-shadow: 0 14px 40px -18px rgba(15, 23, 42, 0.35), 0 4px 14px -6px rgba(15, 23, 42, 0.12);
+  padding: 1.05rem 1.1rem 1.05rem;
+  margin-bottom: 1.15rem;
+}
+.jp-flights-results .ota-results-inline-search__form {
+  margin: 0;
+}
+.jp-flights-results .ota-results-inline-search__primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem 0.55rem;
+}
+.jp-flights-results .ota-refine-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  justify-content: flex-start;
+}
+.jp-flights-results .ota-refine-field--airport {
+  position: relative;
+  flex: 1 1 158px;
+}
+.jp-flights-results .ota-refine-field--trip {
+  flex: 0 0 96px;
+}
+.jp-flights-results .ota-refine-field--trip .ota-refine-shell,
+.jp-flights-results .ota-refine-field--cabin .ota-refine-shell {
+  align-items: center;
+}
+.jp-flights-results .ota-refine-field--date {
+  flex: 0 0 154px;
+}
+.jp-flights-results .ota-refine-field--cabin {
+  flex: 0 0 136px;
+}
+.jp-flights-results .ota-refine-label {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #64748b;
+  line-height: 1.2;
+}
+.jp-flights-results .ota-refine-shell {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 0.45rem 0 0.4rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+.jp-flights-results .ota-refine-shell-icon {
+  align-self: center;
+  flex-shrink: 0;
+  width: 1.1rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  opacity: 0.88;
+}
+.jp-flights-results .ota-refine-stack {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.2rem 0;
+}
+.jp-flights-results .ota-refine-stack .ota-refine-control {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0.1rem 0.15rem !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  color: var(--ota-navy) !important;
+  border-radius: 0 !important;
+}
+.jp-flights-results .ota-refine-shell .ota-refine-control:focus {
+  outline: none;
+}
+.jp-flights-results .ota-refine-shell:focus-within {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+  box-shadow: var(--jp-focus-ring);
+  background: var(--surface);
+}
+.jp-flights-results .ota-refine-sub {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.25;
+  padding: 0 0.15rem 0.05rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jp-flights-results .ota-refine-shell--date {
+  position: relative;
+  align-items: center;
+  min-width: 0;
+  padding-right: 0.35rem;
+}
+.jp-flights-results .ota-refine-date-visual {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.15rem 0.1rem;
+  pointer-events: none;
+}
+.jp-flights-results .ota-refine-date-main {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  line-height: 1.2;
+}
+.jp-flights-results .ota-refine-date-day {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 0.06rem;
+}
+.jp-flights-results .ota-refine-date-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.01;
+  cursor: pointer;
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.jp-flights-results .ota-refine-shell--date .ota-refine-shell-icon {
+  align-self: center;
+}
+.jp-flights-results .ota-refine-shell:not(.ota-refine-shell--date) .ota-refine-control {
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.35rem !important;
+}
+.jp-flights-results .ota-refine-shell:not(.ota-refine-shell--date) select.ota-refine-control {
+  appearance: auto;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  font-weight: 700 !important;
+}
+.jp-flights-results .ota-refine-pax {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+.jp-flights-results .ota-refine-field--pax {
+  flex: 0 0 92px;
+}
+.jp-flights-results .ota-refine-field--pax .ota-refine-shell {
+  min-height: 44px;
+  height: 44px;
+  align-items: center;
+}
+.jp-flights-results .ota-refine-field--pax select.ota-refine-control {
+  font-weight: 700 !important;
+  text-align: center;
+  padding-left: 0.2rem !important;
+  padding-right: 1.2rem !important;
+}
+.jp-flights-results .ota-refine-hint {
+  display: block;
+  margin-top: 0.12rem;
+  min-height: 1.1em;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.jp-flights-results .ota-refine-field--airport .ota-airport-suggest {
+  z-index: 80;
+}
+.jp-flights-results .ota-results-inline-search__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-left: auto;
+  align-self: flex-start;
+  padding-top: 1.35rem;
+}
+.jp-flights-results .ota-results-inline-search__submit {
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0.5rem 1.15rem;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--brand) 55%, transparent);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.jp-flights-results .ota-results-inline-search__submit .fa {
+  margin-right: 0.4rem;
+}
+.jp-flights-results .ota-results-inline-search__status {
+  font-size: 0.75rem;
+  max-width: 11rem;
+}
+.jp-flights-results .ota-results-inline-search__error {
+  margin: 0.55rem 0 0;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.82rem;
+  border-radius: 8px;
+}
+@media (min-width: 992px) {
+  .jp-flights-results .ota-results-refine-card {
+    padding: 1.1rem 1.2rem 1.15rem;
+  }
+  .jp-flights-results .ota-results-inline-search__primary {
+    display: grid;
+    grid-template-columns: 110px 1fr 1fr 160px;
+    gap: 0.7rem 0.75rem;
+    align-items: start;
+  }
+  .jp-flights-results .ota-refine-field--trip { grid-column: 1; grid-row: 1; }
+  .jp-flights-results .ota-refine-field--from { grid-column: 2; grid-row: 1; }
+  .jp-flights-results .ota-refine-field--to { grid-column: 3; grid-row: 1; }
+  .jp-flights-results .ota-refine-field--date { grid-column: 4; grid-row: 1; }
+  .jp-flights-results .ota-refine-field--return { grid-column: 1; grid-row: 2; }
+  .jp-flights-results .ota-refine-field--cabin { grid-column: 2; grid-row: 2; }
+  .jp-flights-results .ota-refine-pax { grid-column: 3; grid-row: 2; }
+  .jp-flights-results .ota-results-inline-search__actions {
+    grid-column: 4;
+    grid-row: 2;
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+    align-self: end;
+    padding-top: 0;
+  }
+  .jp-flights-results .ota-refine-pax {
+    justify-content: stretch;
+    gap: 0.55rem;
+  }
+  .jp-flights-results .ota-refine-field--pax {
+    flex: 1 1 120px;
+  }
+}
+@media (max-width: 1399px) {
+  .jp-flights-results .ota-refine-field--airport {
+    flex-basis: 144px;
+  }
+  .jp-flights-results .ota-refine-field--date {
+    flex-basis: 140px;
+  }
+  .jp-flights-results .ota-refine-field--cabin {
+    flex-basis: 126px;
+  }
+  .jp-flights-results .ota-refine-field--pax {
+    flex-basis: 84px;
+  }
+}
+@media (max-width: 1199px) {
+  .jp-flights-results .ota-results-inline-search__primary {
+    grid-template-columns: 100px 1fr 1fr;
+  }
+  .jp-flights-results .ota-refine-field--from {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .jp-flights-results .ota-refine-field--to {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .jp-flights-results .ota-refine-field--date {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .jp-flights-results .ota-refine-field--return {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .jp-flights-results .ota-refine-field--cabin {
+    grid-column: 3;
+    grid-row: 2;
+  }
+  .jp-flights-results .ota-refine-pax {
+    grid-column: 1 / span 2;
+    grid-row: 3;
+  }
+  .jp-flights-results .ota-results-inline-search__actions {
+    grid-column: 3;
+    grid-row: 3;
+    justify-content: flex-end;
+  }
+  .jp-flights-results .ota-refine-field--trip {
+    flex-basis: 86px;
+  }
+  .jp-flights-results .ota-refine-field--airport {
+    flex: 1 1 calc(33.333% - 0.4rem);
+  }
+  .jp-flights-results .ota-refine-field--date,
+  .jp-flights-results .ota-refine-field--cabin {
+    flex: 1 1 calc(25% - 0.42rem);
+  }
+  .jp-flights-results .ota-refine-pax {
+    flex: 1 1 auto;
+    gap: 0.3rem;
+  }
+  .jp-flights-results .ota-refine-field--pax {
+    flex: 1 1 72px;
+  }
+  .jp-flights-results .ota-results-inline-search__actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 0.2rem;
+  }
+}
+@media (max-width: 767px) {
+  .ota-results-pro-head {
+    padding-bottom: 3.5rem;
+  }
+  .jp-flights-results .ota-results-pro-body--pullup {
+    margin-top: -1.65rem;
+  }
+  .jp-flights-results .ota-refine-field--trip {
+    flex: 1 1 calc(50% - 0.3rem);
+  }
+  .jp-flights-results .ota-refine-field--airport {
+    flex: 1 1 calc(50% - 0.3rem);
+  }
+  .jp-flights-results .ota-refine-field--date {
+    flex: 1 1 calc(50% - 0.3rem);
+  }
+  .jp-flights-results .ota-refine-shell {
+    min-height: 42px;
+  }
+  .jp-flights-results .ota-refine-field--return {
+    flex: 1 1 calc(50% - 0.3rem);
+  }
+  .jp-flights-results .ota-refine-field--cabin {
+    flex: 1 1 100%;
+  }
+  .jp-flights-results .ota-refine-pax {
+    flex: 1 1 100%;
+    justify-content: stretch;
+    gap: 0.35rem;
+  }
+  .jp-flights-results .ota-refine-field--pax {
+    flex: 1 1 calc(33.333% - 0.24rem);
+  }
+  .jp-flights-results .ota-results-inline-search__actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 0;
+  }
+  .jp-flights-results .ota-results-inline-search__submit {
+    flex: 1;
+    min-width: 0;
+  }
+}
+@media (max-width: 575px) {
+  .jp-flights-results .ota-results-refine-card {
+    padding: 0.9rem 0.8rem;
+    border-radius: 14px;
+  }
+  .jp-flights-results .ota-results-inline-search__primary {
+    gap: 0.42rem;
+  }
+  .jp-flights-results .ota-refine-field--trip,
+  .jp-flights-results .ota-refine-field--airport,
+  .jp-flights-results .ota-refine-field--date,
+  .jp-flights-results .ota-refine-field--return,
+  .jp-flights-results .ota-refine-field--cabin,
+  .jp-flights-results .ota-refine-pax {
+    flex: 1 1 100%;
+  }
+  .jp-flights-results .ota-refine-field--pax {
+    flex: 1 1 calc(33.333% - 0.24rem);
+  }
+  .jp-flights-results .ota-refine-sub {
+    white-space: normal;
+    line-height: 1.2;
+    max-height: 2.4em;
+    overflow: hidden;
+  }
+}
+
+/* Results refine card redesign (reference-matched) */
+.jp-flights-results .ota-results-refine-card {
+  border-radius: 14px;
+  padding: 0.95rem 1rem;
+  overflow: hidden;
+}
+.jp-flights-results .ota-trip-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid #dbe4f2;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+}
+.jp-flights-results .ota-trip-switcher__btn {
+  border: 0;
+  border-right: 1px solid #e6edf7;
+  background: #fff;
+  color: #334155;
+  padding: 0.5rem 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.jp-flights-results .ota-trip-switcher__btn:last-child { border-right: 0; }
+.jp-flights-results .ota-trip-switcher__btn.is-active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 40%, var(--line));
+}
+.jp-flights-results .ota-trip-switcher__btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.jp-flights-results .ota-trip-switcher__btn .fa { margin-right: 0.35rem; }
+
+.jp-flights-results .ota-results-inline-search__primary {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.2fr) minmax(140px, 1.2fr) 40px minmax(130px, 0.95fr) minmax(125px, 0.95fr) minmax(250px, 1.1fr) minmax(150px, 0.9fr);
+  gap: 0.78rem 0.72rem;
+  align-items: start;
+}
+.jp-flights-results .ota-refine-field { min-width: 0; }
+.jp-flights-results .ota-refine-field--from { grid-column: 1; grid-row: 1; }
+.jp-flights-results .ota-refine-field--to { grid-column: 2; grid-row: 1; }
+.jp-flights-results .ota-refine-swap-btn {
+  grid-column: 3; grid-row: 1;
+  border: 1px solid #dbe4f2;
+  background: #fff;
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  align-self: center;
+  justify-self: center;
+  color: var(--brand);
+}
+.jp-flights-results .ota-refine-field--date { grid-column: 4; grid-row: 1; }
+.jp-flights-results .ota-refine-field--cabin { grid-column: 5; grid-row: 1; }
+.jp-flights-results .ota-refine-pax { grid-column: 6; grid-row: 1 / span 2; display: grid; grid-template-columns: repeat(3, minmax(96px, 1fr)); gap: 0.45rem; align-content: start; }
+.jp-flights-results .ota-refine-field--pax { min-width: 0; }
+.jp-flights-results .ota-results-inline-search__actions {
+  grid-column: 7; grid-row: 1 / span 2;
+  align-self: end;
+  justify-content: stretch;
+  width: 100%;
+  min-width: 0;
+  margin-left: 0;
+  padding-top: 1.35rem;
+  overflow: hidden;
+}
+.jp-flights-results .ota-results-inline-search__submit {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  max-width: 100%;
+}
+.jp-flights-results .ota-refine-shell {
+  height: 42px;
+  min-height: 42px;
+  background: #fff;
+  border: 1px solid #dfe7f3;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02);
+}
+.jp-flights-results .ota-refine-shell .ota-refine-control {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding-left: 0.1rem !important;
+  padding-right: 0.1rem !important;
+}
+.jp-flights-results .ota-refine-control {
+  width: 100%;
+  min-width: 0;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.jp-flights-results .ota-refine-shell select.ota-refine-control {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 1.1rem !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+.jp-flights-results .ota-refine-shell select.ota-refine-control::-ms-expand {
+  display: none;
+}
+.jp-flights-results .ota-results-inline-search .form-control.ota-refine-control {
+  border: 0 !important;
+  border-color: transparent !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  background: transparent !important;
+}
+.jp-flights-results .ota-results-inline-search .form-control.ota-refine-control:focus,
+.jp-flights-results .ota-results-inline-search .form-control.ota-refine-control:hover {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}
+.jp-flights-results .ota-refine-label {
+  font-size: 0.67rem;
+  margin-bottom: 0.08rem;
+}
+.jp-flights-results .ota-refine-hint {
+  margin-top: 0.18rem;
+  font-size: 0.6rem;
+  white-space: nowrap;
+}
+.jp-flights-results .ota-refine-benefits {
+  margin-top: 0.8rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e9eff8;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.jp-flights-results .ota-refine-benefits .fa {
+  color: var(--brand);
+  margin-right: 0.35rem;
+}
+/* Row modes on results refine form */
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-results-inline-search__primary {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-field--from { grid-column: 1 / span 4; grid-row: 1; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-swap-btn { grid-column: 5 / span 1; grid-row: 1; display: inline-flex; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-field--to { grid-column: 6 / span 4; grid-row: 1; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-field--date { grid-column: 1 / span 3; grid-row: 2; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-field--cabin { grid-column: 4 / span 3; grid-row: 2; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-pax { grid-column: 7 / span 6; grid-row: 2; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-results-inline-search__actions { grid-column: 10 / span 3; grid-row: 3; padding-top: 0.3rem; justify-content: flex-end; }
+
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-results-inline-search__primary {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-field--from { grid-column: 1 / span 4; grid-row: 1; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-swap-btn { grid-column: 5 / span 1; grid-row: 1; display: inline-flex; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-field--to { grid-column: 6 / span 4; grid-row: 1; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-field--date { grid-column: 1 / span 4; grid-row: 2; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-field--return { grid-column: 6 / span 4; grid-row: 2; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-field--cabin { grid-column: 1 / span 4; grid-row: 3; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-pax { grid-column: 5 / span 8; grid-row: 3; }
+.jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-results-inline-search__actions { grid-column: 10 / span 3; grid-row: 4; padding-top: 0.3rem; justify-content: flex-end; }
+@media (max-width: 1400px) {
+  .jp-flights-results .ota-results-pro-body--wide {
+    width: min(1220px, calc(100% - 16px));
+  }
+  .jp-flights-results .ota-results-inline-search__primary {
+    grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr) 38px minmax(146px, 1fr) minmax(146px, 1fr);
+  }
+  .jp-flights-results .ota-refine-pax { grid-template-columns: repeat(3, minmax(84px, 1fr)); }
+}
+@media (max-width: 1199px) {
+  .jp-flights-results .ota-results-pro-body--wide {
+    width: min(1100px, calc(100% - 14px));
+  }
+  .jp-flights-results .ota-results-inline-search__primary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .jp-flights-results .ota-refine-field--from { grid-column: 1; grid-row: 1; }
+  .jp-flights-results .ota-refine-field--to { grid-column: 2; grid-row: 1; }
+  .jp-flights-results .ota-refine-swap-btn { display: none; }
+  .jp-flights-results .ota-refine-pax { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-field--date { grid-column: 1; grid-row: 2; }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-field--cabin { grid-column: 2; grid-row: 2; }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-refine-pax { grid-column: 1 / -1; grid-row: 3; }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="one_way"] .ota-results-inline-search__actions { grid-column: 1 / -1; grid-row: 4; padding-top: 0.35rem; justify-content: stretch; }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-field--date { grid-column: 1; grid-row: 2; }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-field--return { grid-column: 2; grid-row: 2; }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-field--cabin { grid-column: 1; grid-row: 3; }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-refine-pax { grid-column: 2; grid-row: 3; }
+  .jp-flights-results .ota-results-inline-search__form[data-trip-mode="round_trip"] .ota-results-inline-search__actions { grid-column: 1 / -1; grid-row: 4; padding-top: 0.35rem; justify-content: stretch; }
+  .jp-flights-results .ota-results-inline-search__submit { min-width: 0; }
+  .jp-flights-results .ota-refine-benefits { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .jp-flights-results .ota-results-pro-body--wide {
+    width: calc(100% - 10px);
+  }
+  .jp-flights-results .ota-trip-switcher {
+    width: 100%;
+  }
+  .jp-flights-results .ota-trip-switcher__btn {
+    flex: 1 1 50%;
+    font-size: 0.82rem;
+    padding: 0.5rem 0.35rem;
+  }
+  .jp-flights-results .ota-results-inline-search__primary {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .jp-flights-results .ota-refine-field--from { grid-column: 1 / -1; }
+  .jp-flights-results .ota-refine-field--to { grid-column: 1 / -1; }
+  .jp-flights-results .ota-refine-swap-btn { display: none; }
+  .jp-flights-results .ota-refine-field--date { grid-column: 1; grid-row: auto; }
+  .jp-flights-results .ota-refine-field--cabin { grid-column: 2; grid-row: auto; }
+  .jp-flights-results .ota-refine-pax { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .jp-flights-results .ota-results-inline-search__actions { grid-column: 1 / -1; justify-content: stretch; }
+  .jp-flights-results .ota-results-inline-search__submit { min-width: 0; }
+}
+@media (max-width: 575px) {
+  .jp-flights-results .ota-results-inline-search__primary {
+    grid-template-columns: 1fr;
+  }
+  .jp-flights-results .ota-refine-field--date,
+  .jp-flights-results .ota-refine-field--cabin,
+  .jp-flights-results .ota-refine-pax,
+  .jp-flights-results .ota-results-inline-search__actions {
+    grid-column: 1;
+  }
+  .jp-flights-results .ota-refine-pax { grid-template-columns: 1fr; }
+  .jp-flights-results .ota-refine-benefits { grid-template-columns: 1fr; }
+}
+
+.ota-filter-card:not(.jp-filter-panel) {
+  background: var(--ota-card);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  box-shadow: var(--ota-shadow);
+  padding: 1.25rem;
+  position: sticky;
+  top: var(--ota-nav-sticky-top);
+}
+.ota-filter-card:not(.jp-filter-panel) h4 {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ota-navy);
+}
+.ota-result-pro-card {
+  background: var(--ota-card);
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius);
+  box-shadow: var(--ota-shadow);
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.ota-result-pro-card:hover {
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
+  box-shadow: 0 8px 28px -8px rgba(15, 23, 42, 0.15);
+}
+.ota-airline-logo {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 0.35rem;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+  border: 1px solid var(--ota-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--ota-navy);
+  letter-spacing: 0.04em;
+}
+.ota-airline-logo--img {
+  background: #fff;
+  padding: 4px;
+}
+.ota-airline-logo--img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.ota-airline-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ota-text);
+}
+.ota-flight-no {
+  font-size: 0.72rem;
+  color: var(--ota-muted);
+  margin-top: 0.15rem;
+}
+.ota-time-row {
+  margin-top: 0.25rem;
+}
+.ota-time-lg {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: -0.02em;
+}
+.ota-time-sub {
+  font-size: 0.8rem;
+  color: var(--ota-muted);
+  font-weight: 600;
+}
+.ota-dur-line {
+  font-size: 0.75rem;
+  color: var(--ota-muted);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.ota-dur-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--ota-border), var(--ota-blue), var(--ota-border));
+  border-radius: 2px;
+  margin: 0 0.25rem 0.35rem;
+}
+.ota-result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.85rem;
+  font-size: 0.8125rem;
+  color: var(--ota-muted);
+}
+.ota-result-tags .fa {
+  margin-right: 0.25rem;
+  color: var(--ota-blue);
+}
+.ota-price-stack {
+  margin: 0.75rem 0 0.85rem;
+}
+.ota-price-lg {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  letter-spacing: -0.02em;
+}
+.ota-price-sub {
+  font-size: 0.78rem;
+  color: var(--ota-muted);
+}
+.ota-select-primary.btn-primary {
+  background: var(--jp-gradient-primary);
+  border-color: var(--jp-primary-border, var(--jp-primary));
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  font-weight: 700;
+  border-radius: var(--ota-radius-sm);
+  padding: 0.55rem 0.75rem;
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+}
+.ota-select-primary.btn-primary:hover {
+  background: var(--jp-gradient-primary-hover, var(--jp-gradient-primary));
+  border-color: var(--jp-primary-hover, var(--jp-primary));
+}
+.ota-select-primary.btn-primary:focus-visible {
+  box-shadow: var(--jp-focus-ring);
+}
+.ota-filter-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+[data-active-filter-chips] {
+  min-height: 0;
+}
+[data-active-filter-chips]:empty {
+  display: none;
+}
+.ota-filter-chips-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ota-muted);
+  margin-right: 0.35rem;
+}
+.ota-filter-chip {
+  border-radius: 999px;
+  border-color: var(--ota-border);
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+/* Filter panel layout */
+.ota-results-filters[data-filter-panel] {
+  position: relative;
+}
+.ota-filter-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ota-navy);
+}
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section {
+  border: 1px solid var(--ota-border);
+  border-radius: var(--ota-radius-sm);
+  padding: 0 0.85rem;
+  margin-bottom: 0.65rem;
+  background: var(--surface-2);
+}
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section:last-of-type {
+  margin-bottom: 1rem;
+}
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.65rem 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ota-navy);
+}
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section > summary::-webkit-details-marker {
+  display: none;
+}
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section > summary::after {
+  content: "";
+  float: right;
+  width: 0;
+  height: 0;
+  margin-top: 0.35rem;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--ota-muted);
+}
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section[open] > summary::after {
+  transform: rotate(180deg);
+}
+.ota-filter-card:not(.jp-filter-panel) .ota-filter-section .form-group:last-child {
+  margin-bottom: 0.85rem;
+}
+.jp-flights-results .ota-filter-card:not(.jp-filter-panel) .ota-filter-section .checkbox {
+  margin-top: 0.4rem;
+  margin-bottom: 0.45rem;
+}
+.jp-flights-results .ota-filter-card:not(.jp-filter-panel) .ota-filter-section .checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+  cursor: pointer;
+  padding-left: 0;
+}
+.jp-flights-results .ota-filter-card:not(.jp-filter-panel) .ota-filter-section .checkbox input[type="checkbox"] {
+  position: static;
+  margin: 0 !important;
+  margin-left: 0 !important;
+  width: var(--jp-check-box);
+  height: var(--jp-check-box);
+  flex: 0 0 var(--jp-check-box);
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+.ota-filter-actions {
+  margin-top: 0.5rem;
+}
+.ota-filter-actions .btn + .btn {
+  margin-top: 0.45rem;
+}
+
+/* Mobile sticky sort / filters bar */
+.ota-results-mobile-bar {
+  display: flex;
+  gap: 8px;
+  position: sticky;
+  top: calc(var(--ota-fixed-header-height) + 6px);
+  z-index: 1075;
+  padding: 10px 0 12px;
+  margin: 0 -4px 12px;
+  background: linear-gradient(to bottom, #f8fafc 70%, transparent);
+}
+.ota-filter-close-btn {
+  display: none;
+}
+.ota-results-mobile-bar .btn {
+  flex: 1;
+  font-weight: 700;
+  border-radius: var(--ota-radius-sm);
+}
+.ota-results-mobile-bar .btn-primary .badge {
+  background: rgba(255, 255, 255, 0.22);
+  margin-left: 4px;
+}
+.ota-results-mobile-bar .btn .badge {
+  font-weight: 800;
+}
+
+.ota-filter-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: var(--ota-z-modal-backdrop);
+  background: rgba(15, 23, 42, 0.45);
+}
+.ota-filter-backdrop.is-open {
+  display: block;
+}
+body.ota-filter-open {
+  overflow: hidden;
+}
+
+/* Result card v2 */
+.ota-result-card-v2 .ota-result-card-row {
+  align-items: center;
+}
+.ota-result-card--expandable {
+  cursor: default;
+}
+.ota-result-card--expandable a,
+.ota-result-card--expandable button {
+  cursor: pointer;
+}
+.ota-result-card--expandable .ota-flight-details-trigger {
+  cursor: pointer;
+}
+.ota-result-card-actions-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+.ota-flight-details-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0.2rem 0;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--brand);
+  text-align: left;
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+.ota-flight-details-trigger:hover,
+.ota-flight-details-trigger:focus {
+  color: #1d4ed8;
+  text-decoration: underline;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+.ota-flight-details-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  outline-offset: var(--jp-focus-offset);
+  border-radius: 4px;
+}
+.ota-result-actions-book {
+  flex: 0 0 160px;
+  width: 160px;
+  max-width: 160px;
+  margin-left: auto;
+}
+.ota-result-card-v2 .ota-result-actions-book .ota-btn-book {
+  width: 100%;
+  max-width: 160px;
+  display: block;
+  margin: 0;
+}
+.ota-result-card-v2 {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.ota-result-card-v2:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+/* Compact result card typography — shorter cards */
+.ota-result-card-v2.ota-result-pro-card {
+  padding: 1rem 1.15rem;
+  margin-bottom: 0.85rem;
+}
+.ota-result-card-v2 .ota-airline-logo {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 0.25rem;
+  font-size: 0.78rem;
+}
+.ota-result-card-v2 .ota-airline-name {
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+.ota-result-card-v2:not(.ota-result-card-v2--round-compact) .ota-result-carrier-face {
+  margin-top: 0.1rem;
+  line-height: 1.25;
+}
+.ota-result-card-v2:not(.ota-result-card-v2--round-compact) .ota-result-carrier-face__names {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ota-navy);
+}
+.ota-result-card-v2:not(.ota-result-card-v2--round-compact) .ota-result-carrier-face__chain {
+  margin-top: 0.14rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ota-muted);
+  letter-spacing: 0.03em;
+}
+.ota-result-card-v2 .ota-result-leg {
+  min-height: 4.4rem;
+}
+.ota-result-card-v2 .ota-result-leg .ota-time-lg {
+  font-size: 1.2rem;
+}
+.ota-result-card-v2 .ota-result-leg__date {
+  font-size: 0.7rem;
+  margin-top: 0.1rem;
+}
+.ota-result-card-v2 .ota-result-leg__code {
+  font-size: 0.85rem;
+  margin-top: 0.18rem;
+}
+.ota-result-card-v2 .ota-result-leg__city {
+  font-size: 0.7rem;
+  margin-top: 0.08rem;
+}
+.ota-result-card-v2 .ota-dur-line {
+  font-size: 0.7rem;
+  margin-bottom: 0.18rem;
+}
+.ota-result-card-v2 .ota-dur-bar {
+  margin-bottom: 0.25rem;
+}
+.ota-result-card-v2 .ota-result-tags {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  gap: 0.35rem 0.75rem;
+}
+.ota-result-card-v2 .ota-result-col-price .ota-price-lg {
+  font-size: 1.45rem;
+}
+.ota-result-card-v2 .ota-result-col-price .ota-price-sub {
+  font-size: 0.72rem;
+}
+.ota-result-card-v2 .ota-result-badge,
+.ota-result-card-v2 .ota-result-stops {
+  font-size: 9px !important;
+}
+.ota-result-card-v2 .ota-result-col-price .btn-link {
+  font-size: 0.75rem;
+}
+.ota-result-card-v2 .ota-result-col-price .ota-price-stack {
+  margin-top: 0.1rem;
+}
+.ota-result-card-v2 .ota-result-card-actions-row {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+.ota-result-card-v2 .ota-flight-details-trigger {
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+.ota-result-card-v2 .ota-btn-book.btn-primary {
+  min-height: 40px;
+  font-size: 0.875rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+.ota-result-col-brand {
+  padding-bottom: 0;
+}
+
+/* Round-trip compact result card (parallel outbound | return | price) */
+.ota-result-card-v2--round-compact.ota-result-pro-card {
+  padding: 0.7rem 0.95rem;
+  margin-bottom: 0.75rem;
+}
+.ota-result-round-compact {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1.12fr) minmax(0, 10.5rem);
+  gap: 12px;
+  align-items: center;
+}
+.ota-result-round-segment {
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  border-right: 1px solid rgba(148, 163, 184, 0.2);
+}
+.ota-result-round-compact .ota-result-round-segment:last-of-type {
+  border-right: none;
+}
+.ota-result-round-segment__label {
+  margin: 0 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+  line-height: 1.15;
+}
+.ota-result-round-segment__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  min-width: 0;
+}
+.ota-result-round-segment__logo.ota-airline-logo {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+}
+.ota-result-round-segment__logo.ota-airline-logo--img img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.ota-result-round-segment__carrier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.4rem;
+  min-width: 0;
+  flex: 1;
+}
+.ota-result-round-segment__airline {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ota-result-round-segment__brand-tags {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.4rem;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.ota-result-round-segment__mixed {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+  color: var(--brand);
+  letter-spacing: 0.02em;
+}
+.ota-result-round-segment__carrier-chain {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+  word-break: break-word;
+}
+.ota-result-round-segment__flight {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  color: #94a3b8;
+}
+.ota-result-round-segment__route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.3rem 0.45rem;
+  align-items: start;
+}
+.ota-result-round-segment__point {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+.ota-result-round-segment__point--arr {
+  text-align: right;
+  align-items: flex-end;
+}
+.ota-result-round-segment__time {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.ota-result-round-segment__code {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.15;
+}
+.ota-result-round-segment__date {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+.ota-result-round-segment__date-line {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.2rem 0.35rem;
+  max-width: 100%;
+}
+.ota-result-round-segment__point--dep .ota-result-round-segment__date-line {
+  justify-content: flex-start;
+}
+.ota-result-round-segment__date-line .ota-result-round-segment__date {
+  display: inline;
+}
+.ota-result-round-segment__day-offset {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: #475569;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.ota-result-round-segment__mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem;
+  min-width: 4.25rem;
+  max-width: 5.5rem;
+  padding-top: 0.2rem;
+  text-align: center;
+  align-self: center;
+}
+.ota-result-round-segment__dur {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+  line-height: 1.15;
+}
+.ota-result-round-segment__arrow {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  line-height: 1;
+}
+.ota-result-round-segment__stops {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
+.ota-result-round-segment__stops .ota-result-stops {
+  font-size: 0.625rem !important;
+  font-weight: 700;
+  line-height: 1 !important;
+  padding: 2px 6px !important;
+  margin: 0 !important;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16) !important;
+  color: #475569 !important;
+  border: none;
+}
+.ota-result-round-segment__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.5rem;
+  margin-top: 0.3rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+.ota-result-round-segment__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  white-space: nowrap;
+}
+.ota-result-round-segment__meta .fa {
+  font-size: 0.625rem;
+  opacity: 0.85;
+}
+.ota-result-round-action {
+  text-align: right;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.ota-result-round-action .ota-result-badges {
+  margin-bottom: 0.15rem;
+}
+.ota-result-round-action .ota-price-lg {
+  font-size: 1.35rem;
+}
+.ota-result-round-action .ota-price-sub {
+  font-size: 0.68rem;
+}
+.ota-result-round-action .ota-fare-breakdown-link {
+  font-size: 0.72rem;
+  padding: 0;
+}
+.ota-result-card-v2--round-compact .ota-result-card-actions-row--compact {
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.ota-result-card-v2--round-compact .ota-result-card-actions-row--compact .ota-result-actions-book {
+  display: block;
+  flex: 0 0 160px;
+  width: 160px;
+  max-width: 160px;
+  margin-left: auto;
+}
+
+.ota-result-brand-logo {
+  margin-bottom: 0.35rem;
+}
+.ota-result-mid {
+  padding-top: 0;
+}
+.ota-result-stops {
+  font-size: 10px !important;
+  font-weight: 700;
+  padding: 0.28em 0.65em;
+}
+.ota-result-col-price {
+  text-align: right;
+}
+.ota-result-badges {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0.35rem;
+}
+.ota-result-badge {
+  font-size: 10px !important;
+  font-weight: 700;
+  padding: 0.35em 0.65em;
+}
+.ota-result-col-price .ota-price-stack {
+  margin-top: 0.2rem;
+}
+.ota-result-col-price .ota-price-lg {
+  font-size: 1.75rem;
+}
+.ota-btn-book.btn-primary {
+  margin-bottom: 8px;
+  min-height: 46px;
+  font-weight: 800;
+  border-radius: 10px;
+  background: var(--jp-gradient-primary);
+  color: var(--jp-color-primary-contrast, var(--brand-ink));
+  border: 1px solid var(--jp-primary-border, transparent);
+  box-shadow: var(--jp-button-shadow, var(--shadow-brand));
+}
+.ota-btn-book.btn-primary:hover {
+  background: var(--jp-gradient-primary-hover, var(--jp-gradient-primary));
+  box-shadow: var(--jp-button-shadow-hover, var(--shadow-brand));
+}
+.ota-btn-book.btn-primary:focus-visible {
+  box-shadow: var(--jp-focus-ring);
+}
+.ota-btn-details-caret {
+  display: inline-block;
+  margin-left: 0.25rem;
+  font-size: 0.7em;
+  vertical-align: middle;
+}
+.ota-result-actions-book .ota-btn-book.btn-primary {
+  margin-bottom: 0;
+}
+.ota-result-disabled-msg {
+  margin-bottom: 8px;
+}
+.ota-result-details-wrap {
+  margin-top: 0.85rem;
+}
+.ota-result-details {
+  border-top: 1px solid var(--ota-border);
+  padding-top: 0.75rem;
+  margin-top: 0;
+  text-align: left;
+}
+
+/* Compact expandable flight details (results card) */
+.ota-flight-detail-shell {
+  margin-top: 0.15rem;
+}
+.ota-flight-detail-card {
+  background: #fff;
+  border: 1px solid var(--ota-border);
+  border-radius: 12px;
+  padding: 0.85rem 0.95rem 0.95rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+/* Expanded flight details — tabs, journey cards, segments */
+.ota-flight-detail-tabs-wrap {
+  margin-bottom: 0.65rem;
+}
+.ota-flight-detail-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.2rem;
+  margin-bottom: 0.75rem;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+.ota-flight-detail-tab {
+  flex: 1 1 auto;
+  min-width: 5.5rem;
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #475569;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.ota-flight-detail-tab:hover,
+.ota-flight-detail-tab:focus {
+  color: #0f172a;
+  outline: none;
+}
+.ota-flight-detail-tab:focus-visible {
+  box-shadow: var(--jp-focus-ring);
+}
+.ota-flight-detail-tab.is-active {
+  background: #fff;
+  border-color: rgba(148, 163, 184, 0.35);
+  color: var(--ota-navy);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+.ota-flight-detail-tab-panels {
+  min-width: 0;
+}
+.ota-flight-detail-tab-panel[hidden] {
+  display: none !important;
+}
+.ota-flight-detail-journeys-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 0.65rem;
+}
+.ota-flight-detail-journey-card {
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem 0.85rem;
+}
+.ota-flight-detail-journey-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+.ota-flight-detail-journey-header__logo.ota-airline-logo {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+}
+.ota-flight-detail-journey-header__logo.ota-airline-logo--img img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+.ota-flight-detail-journey-header__main {
+  min-width: 0;
+  flex: 1;
+}
+.ota-flight-detail-journey-header__title {
+  margin: 0 0 0.15rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ota-navy);
+  line-height: 1.2;
+}
+.ota-flight-detail-journey-header__route {
+  margin: 0 0 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.3;
+}
+.ota-flight-detail-journey-header__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.4rem;
+}
+.ota-flight-detail-journey-header__chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+}
+.ota-flight-detail-journey-header__chip--mixed {
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+  color: var(--brand);
+}
+.ota-flight-detail-journey-header__chip--muted {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #64748b;
+  font-weight: 600;
+}
+.ota-flight-detail-journey-header__chip--airline {
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+.ota-flight-detail-journey-route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.5rem 0.65rem;
+  align-items: start;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+}
+.ota-flight-detail-journey-route__point {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+.ota-flight-detail-journey-route__point--arr {
+  text-align: right;
+  align-items: flex-end;
+}
+.ota-flight-detail-journey-route__time {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+.ota-flight-detail-journey-route__code {
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--ota-navy);
+}
+.ota-flight-detail-journey-route__city {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ota-muted);
+  line-height: 1.25;
+}
+.ota-flight-detail-journey-route__date,
+.ota-flight-detail-journey-route__date-row {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ota-muted);
+}
+.ota-flight-detail-journey-route__date-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem 0.35rem;
+}
+.ota-flight-detail-journey-route__mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding-top: 0.15rem;
+  min-width: 4.5rem;
+  text-align: center;
+}
+.ota-flight-detail-journey-route__dur {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ota-navy);
+}
+.ota-flight-detail-journey-route__stops {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ota-muted);
+}
+.ota-flight-detail-journey-route__line {
+  display: block;
+  width: 100%;
+  max-width: 3.5rem;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #cbd5e1, #94a3b8, #cbd5e1);
+}
+.ota-flight-detail-day-offset {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: #475569;
+  white-space: nowrap;
+}
+.ota-flight-detail-segments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.ota-flight-detail-connection-msg {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ota-muted);
+}
+.ota-flight-detail-segment-card {
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 10px;

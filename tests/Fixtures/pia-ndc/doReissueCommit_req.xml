@@ -1,0 +1,79 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="http://www.iata.org/IATA/2015/00/2020.1/IATA_OrderChangeRQ">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<IATA_OrderChangeRQ xsi:schemaLocation="xmldsig-core-schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+			<Party>
+				<Sender>
+					<TravelAgency>
+						<AgencyID>SELENS</AgencyID>
+						<Name>NDC GATEWAY</Name>
+					</TravelAgency>
+				</Sender>
+			</Party>
+			<PayloadAttributes>
+				<PrimaryLangID>EN</PrimaryLangID>
+			</PayloadAttributes>
+			<Request>
+				<ChangeOrder>
+					<UpdateOrderItem>
+						<AcceptOffer>
+							<CreateOrderItem>
+								<OfferItemID>NWJiMTI4Y2VkNThlNTdjZWU2NDc4NTc5NmFhYzJiNjFiOGEyODg0MmRmMTRkNjA3Y2E4ZWVmMDFmNTA2YTI1YzA0MmE3YTE2MDZkMGE3ZGVjNDUxZTE1Y2M1NGIxMGI1MjgyZTdiZjY0Yjc5YTlmMWQ3MGYzNWVmOTZkNjFmMTgxYTY5NjY3YTFiNTVlMTZlZGE2NDZkNjczNDg3MGMwNzNiMTZmMzk0YTg4NDgyNmU1NGNlOGE3MTY0NGNiMmQyZGVkY2I5Nzk2ZGQ2OTYzNzQ1MzkxZDMzM2Y2ZTQ0PkxPVzFDT01NL1RFU1Q+RUNPPktIST5JU0I+MjAyNS0wNi0xMCAxMzowMDowMD4yMDI1LTA2LTEwIDE0OjU1OjAwPlBLPjM2OD5MPjk+RUNPTk9NWT4zMkE+UzBoSlNWTkNNelk0Pi0xPmJmZmZjYTlhLTZiODQtNDQ1Yi05NDg1LTA1YWE2Y2Y4N2RmZCMwPk9ORV9XQVk+S0hJPklTQj4tMT4=-</OfferItemID>
+								<OwnerCode>VF</OwnerCode>
+							</CreateOrderItem>
+						</AcceptOffer>
+					</UpdateOrderItem>
+				</ChangeOrder>
+				<DataLists>
+					<PaxSegmentList>
+						<PaxSegment>
+							<Arrival>
+								<AircraftScheduledDateTime>2025-06-02T14:55:00+05:00</AircraftScheduledDateTime>
+								<IATA_LocationCode>ISB</IATA_LocationCode>
+								<StationName>Islamabad International Airpor</StationName>
+							</Arrival>
+							<Dep>
+								<AircraftScheduledDateTime>2025-06-02T13:00:00+05:00</AircraftScheduledDateTime>
+								<IATA_LocationCode>KHI</IATA_LocationCode>
+								<StationName>Jinnah Intl</StationName>
+							</Dep>
+							<Duration>PT1H55M</Duration>
+							<MarketingCarrierInfo>
+								<CarrierDesigCode>PK</CarrierDesigCode>
+								<MarketingCarrierFlightNumberText>368</MarketingCarrierFlightNumberText>
+							</MarketingCarrierInfo>
+							<OperatingCarrierInfo>
+								<CarrierDesigCode>PK</CarrierDesigCode>
+								<OperatingCarrierFlightNumberText>368</OperatingCarrierFlightNumberText>
+							</OperatingCarrierInfo>
+							<PaxSegmentID>PK368-02Jun-KHIISB-NDE3MTE0OA</PaxSegmentID>
+						</PaxSegment>
+					</PaxSegmentList>
+				</DataLists>
+				<Order>
+					<OrderID>7UU0JJ</OrderID>
+					<OwnerCode>S5</OwnerCode>
+				</Order>
+				<OrderChangeParameters>
+					<CurParameter>
+						<CurCode>PKR</CurCode>
+					</CurParameter>
+				</OrderChangeParameters>
+				
+			<PaymentFunctions>
+				<PaymentProcessingDetails>
+					<Amount CurCode="PKR">2000.0</Amount>
+					<PaymentMethod>
+						<AccountableDoc>
+							<DocType>MCO</DocType>
+							<TicketID>4000012043</TicketID>
+						</AccountableDoc>
+					</PaymentMethod>
+					<PaymentRefID>PaymentInfo1</PaymentRefID>
+					<TypeCode>MCO</TypeCode>
+				</PaymentProcessingDetails>
+			</PaymentFunctions>
+			</Request>
+		</IATA_OrderChangeRQ>
+	</soapenv:Body>
+</soapenv:Envelope>
