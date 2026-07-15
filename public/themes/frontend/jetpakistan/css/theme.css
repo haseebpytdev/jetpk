@@ -237,11 +237,17 @@ html[data-theme="day"] .toggle .ico-sun{display:block}
   overflow:visible;
 }
 .hero.hero--has-image{
+  position:relative;
   background:
     linear-gradient(180deg, rgba(7,15,24,.28) 0%, rgba(7,15,24,.12) 38%, transparent 72%),
     linear-gradient(180deg, transparent 0%, transparent 82%, var(--bg) 100%);
-  /* Height follows in-flow hero-inner only; decorative media is out of flow. */
-  min-height:0;
+  /* LCP media is out of flow; stage height is controlled explicitly (2:1 canvas floor). */
+  --jp-hero-stage-pad:calc(var(--header-h) + var(--sp-10));
+  --jp-hero-stage-min:max(
+    calc(var(--jp-hero-stage-pad) + clamp(460px, 48vh, 600px) + var(--sp-10)),
+    calc(50vw + var(--header-h) + var(--sp-8))
+  );
+  min-height:var(--jp-hero-stage-min);
 }
 html[data-theme="day"] .hero.hero--has-image{
   background:
@@ -249,7 +255,7 @@ html[data-theme="day"] .hero.hero--has-image{
     linear-gradient(180deg, transparent 0%, transparent 86%, var(--bg) 100%);
 }
 .hero-media{
-  position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  position:absolute;inset:0;width:100%;height:100%;z-index:0;overflow:hidden;pointer-events:none;
   margin:0;padding:0;
 }
 .hero-media picture{
