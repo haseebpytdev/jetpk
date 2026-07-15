@@ -12,7 +12,7 @@ $(document).ready(function(){
 
 * Version       : 1.0
 
-==================================== */
+ * ------------------------------------ */
 
 
         /*=========== TABLE OF CONTENTS ===========
@@ -24,7 +24,7 @@ $(document).ready(function(){
 5. datepicker
 6. Smooth Scroll spy
 7. Animation support
-======================================*/
+ * -------------------------------------- */
     
 
     // 1. Scroll To Top 
