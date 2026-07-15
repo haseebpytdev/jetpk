@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 <?php
+=======
+﻿<?php
+>>>>>>> jetpk/main
 
 namespace Tests\Feature;
 
@@ -21,7 +25,11 @@ class Phase22StagingPrepTest extends TestCase
     {
         config()->set('app.debug', false);
         config()->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+<<<<<<< HEAD
         config()->set('app.url', 'https://ota.haseebasif.com');
+=======
+        config()->set('app.url', 'https://jetpakistan.pk');
+>>>>>>> jetpk/main
         config()->set('ota.default_agency_slug', 'asif-travels');
         if (! is_dir(public_path('storage'))) {
             mkdir(public_path('storage'), 0777, true);
@@ -63,7 +71,11 @@ class Phase22StagingPrepTest extends TestCase
     {
         config()->set('app.debug', true);
         config()->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+<<<<<<< HEAD
         config()->set('app.url', 'https://ota.haseebasif.com');
+=======
+        config()->set('app.url', 'https://jetpakistan.pk');
+>>>>>>> jetpk/main
         config()->set('ota.default_agency_slug', 'asif-travels');
 
         Agency::factory()->create(['slug' => 'asif-travels']);
@@ -125,3 +137,7 @@ class Phase22StagingPrepTest extends TestCase
         $this->assertSame(0, $configCode);
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> jetpk/main

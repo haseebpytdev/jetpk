@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 <?php
+=======
+﻿<?php
+>>>>>>> jetpk/main
 
 return [
 
@@ -14,7 +18,11 @@ return [
 
     'preview_query_param' => 'ui',
 
+<<<<<<< HEAD
     'public_asset_root_reminder' => '/home/u654883295/domains/haseebasif.com/public_html/ota.haseebasif.com',
+=======
+    'public_asset_root_reminder' => env('OTA_PUBLIC_WEBROOT_PATH', public_path()),
+>>>>>>> jetpk/main
 
     'channels' => [
         'site' => [
@@ -73,3 +81,7 @@ return [
     ],
 
 ];
+<<<<<<< HEAD
+=======
+
+>>>>>>> jetpk/main

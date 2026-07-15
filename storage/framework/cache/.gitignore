@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 *
 !data/
 !.gitignore
+=======
+﻿*
+!.gitignore
+!data/
+>>>>>>> jetpk/main

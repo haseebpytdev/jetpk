@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 <?php
+=======
+﻿<?php
+>>>>>>> jetpk/main
 
 namespace App\Support\Emails;
 
@@ -98,7 +102,11 @@ class JetpkEmailBrandingResolver
                 }
             }
         } catch (\Throwable $e) {
+<<<<<<< HEAD
             // Fall through to JetPK seed defaults — never Master branding.
+=======
+            // Fall through to JetPK seed defaults â€” never Master branding.
+>>>>>>> jetpk/main
         }
 
         return static::profileFromSeedDefaults();
@@ -140,7 +148,11 @@ class JetpkEmailBrandingResolver
     }
 
     /**
+<<<<<<< HEAD
      * JetPK provisioner defaults — used when the DB profile is absent.
+=======
+     * JetPK provisioner defaults â€” used when the DB profile is absent.
+>>>>>>> jetpk/main
      * Never reads Master config/ota-client.php branding.
      *
      * @return array<string, mixed>
@@ -160,7 +172,11 @@ class JetpkEmailBrandingResolver
             'primary_color' => '#00843D',
             'accent_color'  => '#F58220',
             'address'       => 'Karachi, Pakistan',
+<<<<<<< HEAD
             'footer_text'   => 'JetPakistan — your gateway to seamless travel.',
+=======
+            'footer_text'   => 'JetPakistan â€” your gateway to seamless travel.',
+>>>>>>> jetpk/main
         ]);
     }
 
@@ -304,8 +320,16 @@ class JetpkEmailBrandingResolver
         if (function_exists('config')) {
             $base = config('app.url');
         }
+<<<<<<< HEAD
         $base = $base ?: 'https://ota.haseebasif.com';
+=======
+        $base = $base ?: 'https://jetpakistan.pk';
+>>>>>>> jetpk/main
 
         return rtrim($base, '/') . $path;
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> jetpk/main

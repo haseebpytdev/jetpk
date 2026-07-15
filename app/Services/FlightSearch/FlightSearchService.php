@@ -9,8 +9,11 @@ use App\Models\Agency;
 use App\Models\SupplierConnection;
 use App\Services\Pricing\PricingRuleService;
 use App\Services\Suppliers\SupplierAdapterResolver;
+<<<<<<< HEAD
 use App\Services\TravelData\AirportProximityService;
 use App\Support\FlightSearch\DirectFlightsOfferFilter;
+=======
+>>>>>>> jetpk/main
 use App\Support\FlightSearch\PublicSabreMulticitySearchPostProcessor;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
@@ -34,8 +37,11 @@ class FlightSearchService
         protected SabreChannelGateResolver $sabreChannelGateResolver,
         protected SabreMixedCarrierSearchResultsFilter $mixedCarrierSearchFilter,
         protected PublicSabreMulticitySearchPostProcessor $multicitySearchPostProcessor,
+<<<<<<< HEAD
         protected AirportProximityService $airportProximity,
         protected DirectFlightsOfferFilter $directFlightsOfferFilter,
+=======
+>>>>>>> jetpk/main
     ) {}
 
     /**
@@ -55,6 +61,10 @@ class FlightSearchService
     {
         $agency ??= Agency::query()->where('slug', config('ota.default_agency_slug'))->first();
         $criteria = $this->ensureSearchCriteriaId($criteria);
+<<<<<<< HEAD
+=======
+        $request = FlightSearchRequestData::fromArray($criteria, $agency?->id, $sourceChannel);
+>>>>>>> jetpk/main
         if ($agency === null) {
             $connections = collect();
         } else {
@@ -103,6 +113,7 @@ class FlightSearchService
 
         $this->logSupplierProviderSelection($criteria, $connections);
 
+<<<<<<< HEAD
         foreach ($this->expandOriginVariants($criteria) as $variantCriteria) {
             $variantResult = $this->collectOffersFromConnections(
                 $connections,
@@ -122,6 +133,145 @@ class FlightSearchService
             Log::info('flight_search.pipeline', [
                 'stage' => 'after_direct_only_filter',
                 ...$directFilterResult['diagnostics'],
+=======
+        foreach ($connections as $connection) {
+            if ($this->shouldSkipSupplierConnection($connection)) {
+                $skipReason = $this->resolveConnectionSkipReason($connection);
+                Log::info('flight_search.public_diagnostics', [
+                    'stage' => 'connection_skipped',
+                    'search_id' => (string) ($criteria['search_id'] ?? ''),
+                    'connection_id' => $connection->id,
+                    'provider' => $connection->provider->value,
+                    'skipped_reason' => $skipReason,
+                    'blocking_reason' => $skipReason,
+                    'connection_active' => $connection->isEligibleForSupplierSearch(),
+                    'supplier_health_healthy' => $connection->supplierHealthHealthy(),
+                ]);
+
+                continue;
+            }
+
+            $adapter = $this->resolver->resolve($connection->provider);
+            $result = $adapter->search($request, $connection);
+            $warnings = [...$warnings, ...$result->warnings];
+            $acceptedForMerge = 0;
+
+            Log::info('flight_search.pipeline', [
+                'stage' => 'supplier_adapter_returned',
+                'provider' => $connection->provider->value,
+                'connection_id' => $connection->id,
+                'adapter_offer_count' => count($result->offers),
+            ]);
+
+            $normalizeRejectHistogram = [];
+            $postPricingRejectHistogram = [];
+
+            foreach ($result->offers as $offerData) {
+                $offer = $offerData->toArray();
+                if ($this->shouldSkipSearchOffer($offer)) {
+                    continue;
+                }
+                if ($nr = $this->classifyNormalizedOfferRejectReason($offer)) {
+                    $normalizeRejectHistogram[$nr] = ($normalizeRejectHistogram[$nr] ?? 0) + 1;
+                }
+
+                $fare = $offer['fare_breakdown'] ?? [];
+                try {
+                    $supplierFareInput = strtolower((string) ($offer['supplier_provider'] ?? $connection->provider->value)) === SupplierProvider::Iati->value
+                        ? IatiFarePricingResolver::supplierFareFromBreakdown($fare)
+                        : [
+                            'base_fare' => (float) ($fare['base_fare'] ?? 0),
+                            'taxes' => (float) ($fare['taxes'] ?? 0),
+                            'supplier_total' => (float) ($fare['supplier_total'] ?? 0) > 0 ? (float) ($fare['supplier_total'] ?? 0) : 0.0,
+                            'currency' => $fare['currency'] ?? 'PKR',
+                        ];
+                    $pricing = $agency !== null
+                        ? $this->pricingRuleService->calculateMarkup($agency, $supplierFareInput, [
+                            'route' => $request->origin.'-'.$request->destination,
+                            'origin' => $request->origin,
+                            'destination' => $request->destination,
+                            'airline' => strtolower((string) ($offer['airline_code'] ?? '')),
+                            'supplier' => $offer['supplier_provider'] ?? $connection->provider->value,
+                            'agent_id' => $agentId,
+                            'cabin' => $offer['cabin'] ?? null,
+                            'fare_family' => $offer['fare_family'] ?? null,
+                            'travel_date' => $request->departure_date,
+                            'source_channel' => $sourceChannel,
+                        ])
+                        : $this->defaultPricing($fare);
+
+                    if ($agency !== null && PublicCustomerPricing::isPublicChannel($sourceChannel)) {
+                        $pricing = PublicCustomerPricing::sanitizeIfPublicChannel($pricing, $sourceChannel, [
+                            'search_id' => (string) ($criteria['search_id'] ?? ''),
+                            'offer_id' => (string) ($offer['offer_id'] ?? $offer['id'] ?? ''),
+                        ]);
+                    }
+                } catch (\Throwable $e) {
+                    Log::notice('flight_search.pipeline', [
+                        'stage' => 'pricing_exception',
+                        'reason' => 'exception_class',
+                        'exception_class' => $e::class,
+                        'provider' => $connection->provider->value,
+                        'connection_id' => $connection->id,
+                    ]);
+
+                    throw $e;
+                }
+
+                $displayRow = $this->toDisplayOffer($offer, $pricing);
+                $displayRow['supplier_connection_id'] = $connection->id;
+                if (strtolower((string) ($displayRow['supplier_provider'] ?? '')) === 'sabre') {
+                    $displayRow['supplier_source_label'] = SupplierSourcePresenter::labelForOffer(
+                        (string) ($displayRow['supplier_provider'] ?? ''),
+                        isset($offer['source_type']) ? (string) $offer['source_type'] : null,
+                        isset($offer['provider_channel']) ? (string) $offer['provider_channel'] : ($offer['distribution_channel'] ?? null),
+                        $connection,
+                    );
+                }
+                if ($pr = $this->classifyDisplayOfferRejectReason($displayRow)) {
+                    $postPricingRejectHistogram[$pr] = ($postPricingRejectHistogram[$pr] ?? 0) + 1;
+                }
+
+                if (strtolower((string) ($displayRow['supplier_provider'] ?? '')) === 'sabre') {
+                    $digest = SabreFareVerificationDigest::buildFromDisplayOffer($displayRow);
+                    $displayRow['fare_verification_digest'] = $digest;
+                    $displayRow['expected_ui_price'] = $digest['ui_display_price'];
+                }
+
+                $offers[] = $displayRow;
+                $acceptedForMerge++;
+            }
+
+            $supplierCallSummaries[] = [
+                'connection_id' => $connection->id,
+                'provider' => $connection->provider->value,
+                'raw_offer_count' => count($result->offers),
+                'accepted_offer_count' => $acceptedForMerge,
+                'normalized_accepted_count' => $acceptedForMerge,
+                'warning_count' => count($result->warnings),
+            ];
+
+            Log::info('flight_search.public_diagnostics', [
+                'stage' => 'supplier_adapter_returned',
+                'search_id' => (string) ($criteria['search_id'] ?? ''),
+                'connection_id' => $connection->id,
+                'provider' => $connection->provider->value,
+                'raw_offer_count' => count($result->offers),
+                'accepted_offer_count' => $acceptedForMerge,
+                'warning_count' => count($result->warnings),
+                'connection_active' => $connection->isEligibleForSupplierSearch(),
+                'supplier_health_healthy' => $connection->supplierHealthHealthy(),
+            ]);
+
+            Log::info('flight_search.pipeline', [
+                'stage' => 'connection_pricing_complete',
+                'provider' => $connection->provider->value,
+                'connection_id' => $connection->id,
+                'pricing_input_count' => count($result->offers),
+                'pricing_accepted_count' => count($result->offers),
+                'normalize_issue_histogram' => $normalizeRejectHistogram,
+                'post_pricing_issue_histogram' => $postPricingRejectHistogram,
+>>>>>>> jetpk/main
             ]);
         }
 
@@ -640,8 +790,11 @@ class FlightSearchService
                 'infants' => (int) ($criteria['infants'] ?? 0),
                 'cabin' => (string) ($criteria['cabin'] ?? ''),
                 'trip_type' => (string) ($criteria['trip_type'] ?? ''),
+<<<<<<< HEAD
                 'direct_only' => filter_var($criteria['direct_only'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'nearby_airports' => filter_var($criteria['nearby_airports'] ?? false, FILTER_VALIDATE_BOOLEAN),
+=======
+>>>>>>> jetpk/main
             ],
             'agency_id' => $agency?->id,
             'agency_slug' => $agency?->slug,
@@ -656,6 +809,7 @@ class FlightSearchService
     }
 
     /**
+<<<<<<< HEAD
      * @param  array<string, mixed>  $criteria
      * @return list<array<string, mixed>>
      */
@@ -877,6 +1031,8 @@ class FlightSearchService
     }
 
     /**
+=======
+>>>>>>> jetpk/main
      * @param  array<string, mixed>  $offer
      */
     protected function shouldSkipSearchOffer(array $offer): bool

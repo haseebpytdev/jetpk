@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 <?php
+=======
+﻿<?php
+>>>>>>> jetpk/main
 
 $brandName = (string) env('OTA_BRAND_NAME', env('APP_NAME', 'Travel'));
 
@@ -12,9 +16,17 @@ return [
     'support_email' => 'support@haseebasif.com',
     'office_city' => 'Karachi',
     'powered_by' => $brandName,
+<<<<<<< HEAD
     'domain_preview' => 'ota.haseebasif.com',
+=======
+    'domain_preview' => env('OTA_CLIENT_PREVIEW_DOMAIN', 'jetpakistan.pk'),
+>>>>>>> jetpk/main
     'footer_text' => 'We help you plan and book flights with dedicated support.',
     'social_facebook' => 'https://facebook.com/example',
     'social_linkedin' => 'https://linkedin.com/company/example',
     'social_instagram' => 'https://instagram.com/example',
 ];
+<<<<<<< HEAD
+=======
+
+>>>>>>> jetpk/main

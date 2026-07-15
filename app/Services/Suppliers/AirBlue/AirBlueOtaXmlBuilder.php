@@ -19,7 +19,11 @@ class AirBlueOtaXmlBuilder
         $segments = [];
         $segments[] = $this->originDestinationSegment($request->origin, $request->destination, $request->departure_date, 1);
         if ($request->return_date) {
+<<<<<<< HEAD
             $segments[] = $this->originDestinationSegment($request->destination, $request->returnOrigin(), $request->return_date, 2);
+=======
+            $segments[] = $this->originDestinationSegment($request->destination, $request->origin, $request->return_date, 2);
+>>>>>>> jetpk/main
         }
 
         $paxXml = '';
@@ -42,11 +46,14 @@ class AirBlueOtaXmlBuilder
         $agentId = htmlspecialchars((string) $config['agent_id'], ENT_XML1);
         $agentPassword = htmlspecialchars((string) $config['agent_password'], ENT_XML1);
 
+<<<<<<< HEAD
         $travelPrefsXml = '';
         if ($request->direct_only) {
             $travelPrefsXml = '<ota:TravelPreferences><ota:DirectFlightsOnly>true</ota:DirectFlightsOnly></ota:TravelPreferences>';
         }
 
+=======
+>>>>>>> jetpk/main
         return <<<XML
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:zap="http://zapways.com/air/ota/2.0" xmlns:ota="http://www.opentravel.org/OTA/2003/05">
     <soapenv:Header/>
@@ -59,7 +66,10 @@ class AirBlueOtaXmlBuilder
                     </ota:Source>
                 </ota:POS>
                 {$odXml}
+<<<<<<< HEAD
                 {$travelPrefsXml}
+=======
+>>>>>>> jetpk/main
                 <ota:TravelerInfoSummary>
                     <ota:AirTravelerAvail>
                         {$paxXml}

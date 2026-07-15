@@ -117,12 +117,15 @@ class SabreFlightSearchRequestBuilder
             ];
         }
 
+<<<<<<< HEAD
         if ($request->direct_only) {
             $otaBody['TravelPreferences'] = [
                 'DirectFlightsOnly' => true,
             ];
         }
 
+=======
+>>>>>>> jetpk/main
         return $this->applyBrandedFareSearchQualifiers([
             'OTA_AirLowFareSearchRQ' => $otaBody,
         ]);
@@ -160,7 +163,11 @@ class SabreFlightSearchRequestBuilder
                 $this->buildMinimalOriginDestinationSegment(
                     '2',
                     $request->destination,
+<<<<<<< HEAD
                     $request->returnOrigin(),
+=======
+                    $request->origin,
+>>>>>>> jetpk/main
                     $this->formatSabreDepartureDateTime(trim($request->return_date)),
                 ),
             ];
@@ -297,7 +304,11 @@ class SabreFlightSearchRequestBuilder
                     'Cabin' => $sabreCabin,
                     'PreferLevel' => 'Preferred',
                 ],
+<<<<<<< HEAD
                 'DirectFlightsOnly' => $request->direct_only,
+=======
+                'DirectFlightsOnly' => false,
+>>>>>>> jetpk/main
                 'TPA_Extensions' => [
                     'DataSources' => [
                         'ATPCO' => 'Enable',
@@ -364,7 +375,11 @@ class SabreFlightSearchRequestBuilder
         $intelliSell = $this->brandedFaresExactGdsV4IntelliSellRequestType();
 
         $otaBody = [
+<<<<<<< HEAD
             'DirectFlightsOnly' => $request->direct_only,
+=======
+            'DirectFlightsOnly' => false,
+>>>>>>> jetpk/main
             'Version' => $this->otaAirLowFareSearchVersion(),
             'OriginDestinationInformation' => $this->iatiExactOriginDestinationInformation($request),
             'TravelPreferences' => [
@@ -1085,7 +1100,11 @@ class SabreFlightSearchRequestBuilder
                 $this->buildIatiExactOriginDestinationSegment(
                     '2',
                     $request->destination,
+<<<<<<< HEAD
                     $request->returnOrigin(),
+=======
+                    $request->origin,
+>>>>>>> jetpk/main
                     $this->formatSabreDepartureDateTime(trim($request->return_date)),
                 ),
             ];
@@ -1194,7 +1213,11 @@ class SabreFlightSearchRequestBuilder
                 $this->buildOriginDestinationSegment(
                     '2',
                     $request->destination,
+<<<<<<< HEAD
                     $request->returnOrigin(),
+=======
+                    $request->origin,
+>>>>>>> jetpk/main
                     $this->formatSabreDepartureDateTime(trim($request->return_date)),
                     $sabreCabin,
                 ),

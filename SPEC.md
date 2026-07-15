@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 # SPEC.md
 
 ## Project Name
 Asif Travels OTA (Online Travel Agency)
+=======
+﻿# SPEC.md
+
+## Project Name
+JetPakistan OTA (Online Travel Agency)
+>>>>>>> jetpk/main
 
 ## Project Goal
 Build and maintain this Laravel-based OTA platform with minimal regressions, minimal
@@ -18,11 +25,19 @@ flows unless explicitly told otherwise.
 - **PDF:** `barryvdh/laravel-dompdf`
 - **Testing:** PHPUnit 12 (unit/feature) + Playwright 1.59 (E2E desktop/mobile)
 - **Code Style:** Laravel Pint
+<<<<<<< HEAD
 - **Hosting/Deployment:** VPS (production URL: `https://ota.haseebasif.com`)
 - **Suppliers:** Sabre, Duffel (mock supplier was removed — do not re-introduce)
 
 ## Important Existing Architecture
 Cursor must preserve the current architecture unless explicitly told otherwise.
+=======
+- **Hosting/Deployment:** Laravel-compatible Linux VPS. Production credentials, server paths, and operational access details are maintained outside this public repository.
+- **Suppliers:** Sabre, PIA NDC, AirBlue, IATI, Duffel and supported direct-airline integrations. Do not reintroduce unsafe mock behavior into production paths.
+
+## Important Existing Architecture
+Automation agents must preserve the current architecture unless explicitly instructed otherwise.
+>>>>>>> jetpk/main
 
 ### Key Folders
 - `app/Console/Commands/`: Artisan commands (Sabre/Duffel diagnostics, reports, e2e prep)
@@ -31,11 +46,19 @@ Cursor must preserve the current architecture unless explicitly told otherwise.
 - `app/Models/`: Eloquent models (`Booking`, `BookingPassenger`, `SupplierBooking`,
   `Airport`, `Agency`, `User`, `SocialAccount`, `BookingHoldSession`, etc.)
 - `app/Services/`: Domain services grouped by concern
+<<<<<<< HEAD
   - `Booking/` — booking orchestration, router, precheck, state
   - `Bookings/` — fare hold service
   - `Suppliers/` — `Sabre/`, `Duffel/`, adapters under `Adapters/`,
     `BookingAdapters/`, `TicketingAdapters/`
   - `Communication/` — notification, templates, mailers, sanitizers
+=======
+  - `Booking/` â€” booking orchestration, router, precheck, state
+  - `Bookings/` â€” fare hold service
+  - `Suppliers/` â€” `Sabre/`, `Duffel/`, adapters under `Adapters/`,
+    `BookingAdapters/`, `TicketingAdapters/`
+  - `Communication/` â€” notification, templates, mailers, sanitizers
+>>>>>>> jetpk/main
   - `Payments/`, `Documents/`, `Dashboard/`, `Reports/`, `FlightSearch/`,
     `TravelData/`
 - `app/Support/`: Presenters, value helpers (Bookings, FlightSearch, Suppliers)
@@ -61,13 +84,21 @@ Cursor must preserve the current architecture unless explicitly told otherwise.
 - `summary.md`: Agent-oriented map of major files and public APIs; **must stay
   in sync with code** (see non-negotiable #13, Definition of Done, `AGENTS.md`)
 - `.env.example`: Canonical env keys (APP, DB, mail, Sabre, Duffel, OAuth providers)
+<<<<<<< HEAD
 - `composer.json` / `package.json`: Dependency manifests — do not bump versions casually
+=======
+- `composer.json` / `package.json`: Dependency manifests â€” do not bump versions casually
+>>>>>>> jetpk/main
 - `routes/web.php`: Web routes (most of the app)
 - `routes/api.php`: API routes (if/where applicable)
 - `bootstrap/app.php`: Middleware, routing, exception bootstrapping
 - `config/ota.php`, `config/ota-suppliers.php`, `config/suppliers.php`,
   `config/supplier_credentials.php`: OTA-specific configuration surface
+<<<<<<< HEAD
 - `app/Services/Suppliers/SupplierAdapterResolver.php`: Routes provider → adapter
+=======
+- `app/Services/Suppliers/SupplierAdapterResolver.php`: Routes provider â†’ adapter
+>>>>>>> jetpk/main
 - `app/Services/Booking/BookingService.php`: Central booking orchestration
 
 ## Non-Negotiable Rules
@@ -75,7 +106,11 @@ Cursor must preserve the current architecture unless explicitly told otherwise.
 2. Do not refactor the whole project unless the task explicitly asks for refactoring.
 3. Do not remove existing working functionality.
 4. Do not change database structure unless the task requires it. When required,
+<<<<<<< HEAD
    add a new timestamped migration — never edit historical migrations.
+=======
+   add a new timestamped migration â€” never edit historical migrations.
+>>>>>>> jetpk/main
 5. Do not hardcode secrets, API keys, tokens, credentials, or passwords. Use
    `.env` + `config/*.php` + the existing `SupplierConnection` / credential
    storage pattern.
@@ -92,7 +127,11 @@ Cursor must preserve the current architecture unless explicitly told otherwise.
 12. Do not commit unless the user explicitly asks for a commit.
 13. Keep **`summary.md`** accurate when you change code it describes (public APIs,
     file responsibilities, module boundaries). Append a **Changelog** line there
+<<<<<<< HEAD
     for notable structural or behavioral shifts. Same changeset as the code —
+=======
+    for notable structural or behavioral shifts. Same changeset as the code â€”
+>>>>>>> jetpk/main
     do not defer doc updates.
 
 ## Token-Saving Rules for Cursor
@@ -145,7 +184,11 @@ A task is complete only when:
 For every task, respond in this structure:
 
 ### Understanding
+<<<<<<< HEAD
 Briefly explain the task in 2–4 lines.
+=======
+Briefly explain the task in 2â€“4 lines.
+>>>>>>> jetpk/main
 
 ### Relevant Files
 List only the files that need inspection or editing.
@@ -161,3 +204,7 @@ Mention commands run and result (or why they were not run).
 
 ### Notes / Risks
 Mention anything uncertain, skipped, or requiring manual testing.
+<<<<<<< HEAD
+=======
+
+>>>>>>> jetpk/main

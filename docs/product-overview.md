@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Asif Travels OTA — Product overview
+=======
+﻿# Asif Travels OTA â€” Product overview
+>>>>>>> jetpk/main
 
 This document describes **what the codebase implements today**, separate from sales positioning. For deployment steps see [`staging-deployment.md`](staging-deployment.md).
 
@@ -32,13 +36,21 @@ White-label-style **online travel agency** platform built on Laravel:
 1. **Search:** `FlightSearchService` loads active connections for the agency, resolves `FlightSupplierInterface` per provider, merges markup/pricing.
 2. **Offer hold / validation:** Checkout validates offers with the supplier pipeline (`OfferValidationService` and related); unstable-sandbox behavior may be gated by environment flags in `config/ota.php`.
 3. **Booking:** `SupplierBookingService` creates supplier-side orders where supported; failures log diagnostics and can trigger notifications.
+<<<<<<< HEAD
 4. **Ticketing:** `TicketingService` / ticketing adapters — capability depends on supplier and agency rules.
+=======
+4. **Ticketing:** `TicketingService` / ticketing adapters â€” capability depends on supplier and agency rules.
+>>>>>>> jetpk/main
 5. **Diagnostics:** Structured logs in `supplier_diagnostic_logs` with **redacted** metadata for UI and exports.
 
 ## Notifications and scheduled jobs
 
 - **Transactional / operational email:** Central dispatcher (`OtaNotificationService`) respects agency communication settings and templates; payloads are sanitized by scope.
+<<<<<<< HEAD
 - **Scheduled reports:** `routes/console.php` schedules daily/weekly/monthly reports and monthly ledgers **via Artisan** — requires OS-level `schedule:run` (and queue worker if mail is queued).
+=======
+- **Scheduled reports:** `routes/console.php` schedules daily/weekly/monthly reports and monthly ledgers **via Artisan** â€” requires OS-level `schedule:run` (and queue worker if mail is queued).
+>>>>>>> jetpk/main
 
 ## Boundaries (honest scope)
 
@@ -52,6 +64,13 @@ White-label-style **online travel agency** platform built on Laravel:
 
 ## Related documentation
 
+<<<<<<< HEAD
 - [`staging-deployment.md`](staging-deployment.md) — server, env, migrate, build, scheduler.
 - [`releases/phase-23-staging-package.md`](releases/phase-23-staging-package.md) — staged verification snapshot notes.
 - [`releases/phase-23c-notification-management.md`](releases/phase-23c-notification-management.md) — notification module status and remaining expansion items.
+=======
+- [`staging-deployment.md`](staging-deployment.md) â€” server, env, migrate, build, scheduler.
+- [`releases/phase-23-staging-package.md`](releases/phase-23-staging-package.md) â€” staged verification snapshot notes.
+- [`releases/phase-23c-notification-management.md`](releases/phase-23c-notification-management.md) â€” notification module status and remaining expansion items.
+
+>>>>>>> jetpk/main

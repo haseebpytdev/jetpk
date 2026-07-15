@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 <?php
+=======
+﻿<?php
+>>>>>>> jetpk/main
 
 namespace Database\Seeders;
 
@@ -20,7 +24,11 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
+<<<<<<< HEAD
  * Foundation demo data for local/testing. Supplier API credentials are admin-managed —
+=======
+ * Foundation demo data for local/testing. Supplier API credentials are admin-managed â€”
+>>>>>>> jetpk/main
  * {@see seedSupplierConnectionPlaceholders()} runs only in local/testing when explicitly enabled.
  */
 class OtaFoundationSeeder extends Seeder
@@ -42,7 +50,11 @@ class OtaFoundationSeeder extends Seeder
                 'name' => $platformName,
                 'timezone' => 'Asia/Karachi',
                 'settings' => [
+<<<<<<< HEAD
                     'domain' => 'ota.haseebasif.com',
+=======
+                    'domain' => 'jetpakistan.pk',
+>>>>>>> jetpk/main
                 ],
             ],
         );
@@ -55,7 +67,11 @@ class OtaFoundationSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'current_agency_id' => $agency->id,
+<<<<<<< HEAD
                 // Legacy account type — blocked from /admin; tests needing platform admin must use platform_admin.
+=======
+                // Legacy account type â€” blocked from /admin; tests needing platform admin must use platform_admin.
+>>>>>>> jetpk/main
                 'account_type' => AccountType::AgencyAdmin,
             ],
         );
@@ -255,7 +271,11 @@ class OtaFoundationSeeder extends Seeder
     }
 
     /**
+<<<<<<< HEAD
      * Legacy local/testing placeholders only — never run on production or route health audits.
+=======
+     * Legacy local/testing placeholders only â€” never run on production or route health audits.
+>>>>>>> jetpk/main
      */
     protected function seedSupplierConnectionPlaceholders(Agency $agency): void
     {
@@ -412,3 +432,7 @@ class OtaFoundationSeeder extends Seeder
         );
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> jetpk/main

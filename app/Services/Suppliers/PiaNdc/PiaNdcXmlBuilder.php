@@ -130,7 +130,11 @@ class PiaNdcXmlBuilder
         $flightRequest = $doc->createElement('FlightRequest');
         $flightRequest->appendChild($this->originDestCriteria($doc, $request->origin, $request->destination, $request->departure_date, $request->cabin ?? 'Y'));
         if ($request->return_date) {
+<<<<<<< HEAD
             $flightRequest->appendChild($this->originDestCriteria($doc, $request->destination, $request->returnOrigin(), $request->return_date, $request->cabin ?? 'Y'));
+=======
+            $flightRequest->appendChild($this->originDestCriteria($doc, $request->destination, $request->origin, $request->return_date, $request->cabin ?? 'Y'));
+>>>>>>> jetpk/main
         }
         $req->appendChild($flightRequest);
 

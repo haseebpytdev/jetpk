@@ -44,7 +44,11 @@ class DuffelOfferRequestBuilder
             if ($request->return_date !== null && trim($request->return_date) !== '') {
                 $data['slices'][] = [
                     'origin' => $this->normalizeIata($request->destination),
+<<<<<<< HEAD
                     'destination' => $this->normalizeIata($request->returnOrigin()),
+=======
+                    'destination' => $this->normalizeIata($request->origin),
+>>>>>>> jetpk/main
                     'departure_date' => $this->normalizeDate($request->return_date),
                 ];
             }
@@ -55,10 +59,13 @@ class DuffelOfferRequestBuilder
             $data['cabin_class'] = $cabin;
         }
 
+<<<<<<< HEAD
         if ($request->direct_only) {
             $data['max_connections'] = 0;
         }
 
+=======
+>>>>>>> jetpk/main
         return ['data' => $data];
     }
 

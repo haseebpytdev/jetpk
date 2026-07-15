@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 {
   "name": "Asif Travels OTA (Laravel + Playwright)",
+=======
+﻿{
+  "name": "JetPakistan OTA (Laravel + Playwright)",
+>>>>>>> jetpk/main
   "image": "mcr.microsoft.com/devcontainers/php:1-8.3-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
@@ -48,3 +53,7 @@
     }
   }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> jetpk/main
