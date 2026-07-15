@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 *
 !private/
 !public/
 !.gitignore
-=======
-﻿*
-!.gitignore
-!public/
->>>>>>> jetpk/main

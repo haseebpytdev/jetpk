@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 {{--
   errors/403.blade.php — permission-denied state (Phase 6: Agent Staff).
   JETPK-DASHBOARD-UI-FOUNDATION · baseline 6fbfae4
@@ -51,10 +50,3 @@
         <a href="{{ route('support') }}" class="btn btn-secondary">Contact Support</a>
     @endsection
 @endif
-=======
-@extends('errors.layout')
-
-@section('title', 'Forbidden')
-@section('heading', 'Access Restricted')
-@section('message', $message ?? 'You do not have permission to access this area.')
->>>>>>> jetpk/main

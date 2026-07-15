@@ -1,21 +1,11 @@
-<<<<<<< HEAD
 /**
  * JetPK live production visual flow isolation audit (JETPK-LIVE-PLAYWRIGHT-8D).
  * Runs from local/Cursor only — never on Hostinger shared server.
-=======
-﻿/**
- * JetPK live production visual flow isolation audit (JETPK-LIVE-PLAYWRIGHT-8D).
- * Runs from local/Cursor only â€” never on Hostinger shared server.
->>>>>>> jetpk/main
  */
 import { defineConfig, devices } from '@playwright/test';
 
 const LIVE_BASE_URL =
-<<<<<<< HEAD
   process.env.JETPK_LIVE_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? 'https://ota.haseebasif.com';
-=======
-  process.env.JETPK_LIVE_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? 'https://jetpakistan.pk';
->>>>>>> jetpk/main
 
 const host = (() => {
   try {
@@ -28,11 +18,7 @@ const host = (() => {
 const isLocalHost = ['127.0.0.1', 'localhost', '0.0.0.0', '::1'].includes(host);
 if (isLocalHost) {
   throw new Error(
-<<<<<<< HEAD
     `JetPK live audit must target production, not localhost ("${LIVE_BASE_URL}"). Set JETPK_LIVE_BASE_URL=https://ota.haseebasif.com`,
-=======
-    `JetPK live audit must target production, not localhost ("${LIVE_BASE_URL}"). Set JETPK_LIVE_BASE_URL=https://jetpakistan.pk`,
->>>>>>> jetpk/main
   );
 }
 
@@ -76,7 +62,3 @@ export default defineConfig({
     },
   ],
 });
-<<<<<<< HEAD
-=======
-
->>>>>>> jetpk/main

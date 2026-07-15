@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 <?php
-=======
-﻿<?php
->>>>>>> jetpk/main
 
 return [
 
@@ -42,11 +38,7 @@ return [
     */
     'public_webroot_path' => env(
         'OTA_PUBLIC_WEBROOT_PATH',
-<<<<<<< HEAD
         base_path('../public_html/ota.haseebasif.com'),
-=======
-        public_path(),
->>>>>>> jetpk/main
     ),
 
     'modules' => [
@@ -69,7 +61,3 @@ return [
     ],
 
 ];
-<<<<<<< HEAD
-=======
-
->>>>>>> jetpk/main

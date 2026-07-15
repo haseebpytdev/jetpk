@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 # JetPK local fork — setup notes (JETPK-SINGLE-CLIENT-FORK-ROOT-MODE-9A)
-=======
-﻿# JetPK local fork â€” setup notes (JETPK-SINGLE-CLIENT-FORK-ROOT-MODE-9A)
->>>>>>> jetpk/main
 
 ## Paths
 
@@ -16,11 +12,7 @@
 
 ## Local URLs
 
-<<<<<<< HEAD
 ### Option A — Laragon / hosts (preferred)
-=======
-### Option A â€” Laragon / hosts (preferred)
->>>>>>> jetpk/main
 
 1. Add to `C:\Windows\System32\drivers\etc\hosts`:
    ```
@@ -32,11 +24,7 @@
    ```
 3. Open: http://jetpk.test
 
-<<<<<<< HEAD
 ### Option B — Artisan serve (fallback)
-=======
-### Option B â€” Artisan serve (fallback)
->>>>>>> jetpk/main
 
 ```powershell
 cd C:\Users\khadi\ota-jetpk
@@ -58,10 +46,6 @@ php artisan optimize:clear
 
 ## Demo credentials (from OtaFoundationSeeder)
 
-<<<<<<< HEAD
-=======
-> Local development accounts only. These credentials are seeded for local testing and must never be used in production.
->>>>>>> jetpk/main
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | admin@ota.demo | password |
@@ -80,7 +64,3 @@ OTA_MASTER_CLIENT_SLUG=jetpk
 CLIENT_ROUTE_PARITY_ENABLED=false
 APP_URL=http://jetpk.test
 ```
-<<<<<<< HEAD
-=======
-
->>>>>>> jetpk/main

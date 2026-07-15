@@ -24,7 +24,6 @@ class FlightSearchRequestData
         public string $source_channel = 'public_guest',
         public ?string $search_id = null,
         public ?array $segments = null,
-<<<<<<< HEAD
         public bool $direct_only = false,
         public ?string $return_origin = null,
     ) {}
@@ -36,10 +35,6 @@ class FlightSearchRequestData
         return $preferred !== '' ? $preferred : $this->origin;
     }
 
-=======
-    ) {}
-
->>>>>>> jetpk/main
     /**
      * @param  array<string, mixed>  $criteria
      */
@@ -47,13 +42,10 @@ class FlightSearchRequestData
     {
         $tripType = (string) ($criteria['trip_type'] ?? 'one_way');
         $segments = self::normalizeSegments($criteria['segments'] ?? null);
-<<<<<<< HEAD
         $directOnly = filter_var($criteria['direct_only'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $requestedOrigin = strtoupper(trim((string) ($criteria['requested_origin'] ?? $criteria['origin'] ?? '')));
         $searchOrigin = strtoupper(trim((string) ($criteria['origin'] ?? '')));
         $returnOrigin = $requestedOrigin !== '' ? $requestedOrigin : $searchOrigin;
-=======
->>>>>>> jetpk/main
 
         if ($tripType === 'multi_city' && $segments !== null && $segments !== []) {
             $first = $segments[0];
@@ -78,20 +70,13 @@ class FlightSearchRequestData
                 source_channel: $sourceChannel,
                 search_id: self::searchIdFromCriteria($criteria),
                 segments: $segments,
-<<<<<<< HEAD
                 direct_only: $directOnly,
                 return_origin: $returnOrigin !== '' ? $returnOrigin : null,
-=======
->>>>>>> jetpk/main
             );
         }
 
         $depart = (string) ($criteria['depart_date'] ?? $criteria['departure_date'] ?? '');
-<<<<<<< HEAD
         $origin = $searchOrigin;
-=======
-        $origin = strtoupper(trim((string) ($criteria['origin'] ?? '')));
->>>>>>> jetpk/main
         $destination = strtoupper(trim((string) ($criteria['destination'] ?? '')));
         $counts = TravellerCountRules::normalizeCounts(
             (int) ($criteria['adults'] ?? 1),
@@ -114,11 +99,8 @@ class FlightSearchRequestData
             source_channel: $sourceChannel,
             search_id: self::searchIdFromCriteria($criteria),
             segments: null,
-<<<<<<< HEAD
             direct_only: $directOnly,
             return_origin: $returnOrigin !== '' ? $returnOrigin : null,
-=======
->>>>>>> jetpk/main
         );
     }
 

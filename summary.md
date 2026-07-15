@@ -11,11 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-<<<<<<< HEAD
 **Last updated:** 2026-07-15 (JETPK-FLIGHT-UX-ENHANCEMENT-PHASE1B-SEARCH-FILTERS)
-=======
-**Last updated:** 2026-07-14 (JETPK-THEMED-CUSTOMER-DASHBOARD-PHASE2-ADAPTATION)
->>>>>>> jetpk/main
 
 ---
 
@@ -23,11 +19,8 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
-<<<<<<< HEAD
 | 2026-07-15 | JETPK-HOMEPAGE-LCP-LAYOUT-REGRESSION-FIX | **Hero layout:** LCP `<picture>` kept; `picture` + `.hero-img` absolutely positioned inside `.hero-media` so intrinsic `width`/`height` no longer expand hero section height (restores content-sized hero + below-fold positions). `object-fit:cover` / `object-position:center` unchanged. Assets `theme.css` `?v=50`. |
 | 2026-07-15 | JETPK-FLIGHT-UX-ENHANCEMENT-PHASE1B-SEARCH-FILTERS | **Search filters:** `PublicFlightSearchRequest` maps `stops=direct` → `direct_only`, `include_nearby=1` → `nearby_airports`; **`FlightSearchRequestData`** adds `direct_only` + `return_origin`; **`AirportProximityService`** (haversine, same-country, config `ota-flights.nearby_departure_airports`); **`DirectFlightsOfferFilter`** post-normalization `stops=0`; **`FlightSearchService`** expands nearby departure origins only (RT return leg uses requested origin); supplier request hints: Sabre `DirectFlightsOnly`, Duffel `max_connections=0`, AirBlue OTA travel prefs. No booking/checkout/schema changes. Tests: **`DirectFlightsOfferFilterTest`**, **`AirportProximityServiceTest`**, **`PublicFlightSearchRequestFiltersTest`**, **`FlightSearchRequestDataFiltersTest`**. |
-=======
->>>>>>> jetpk/main
 | 2026-07-14 | JETPK-PUBLIC-UX-01B-CMS-HERO-AUTO-OPTIMIZATION-REPAIR | **CMS hero auto-optimization:** shared **`JetpkHeroImageOptimizer`** + **`JetpkHeroImagePixelValidator`** (pixel variance / black / size gates); fingerprinted variants `pages/home/lcp/{hash}/hero-{breakpoint}.{jpg,webp,avif?}`; manifest in `client_page_assets.meta_json.hero_lcp`; upload-time integration in **`ClientPageAssetService`** + **`ClientPageAssetPublicationService`** mirror; **`JetpkHeroLcpPresenter`** binds manifest to current `source_path` only; **`jetpk:hero-lcp-assets`** uses CMS source / `--dry-run`; invalid flat `lcp/hero-*` quarantined. Tests: validator (3), optimizer (3), presenter (rewritten), **`ClientPageAssetServiceTest`** upload manifest, Playwright canvas luminance (8). |
 | 2026-07-14 | JETPK-PUBLIC-UX-01-HOMEPAGE-HERO-LCP-OPTIMIZATION | **Homepage LCP:** CSS `background-image` hero → semantic `<picture>` + AVIF/WebP/JPEG variants under `client-assets/jetpk-assets/pages/home/lcp/` via **`JetpkHeroLcpPresenter`** + **`jetpk:hero-lcp-assets`**. Hero `loading=eager` / `fetchpriority=high` / intrinsic dimensions; head preload (desktop AVIF only). SSR loader starts hidden (`jp-loader done`); `booking.css` skipped on home; logo `width`/`height`. Assets `theme.css`/`theme.js` `?v=48`, `jp-search.css` `?v=35`. Tests: **`JetpkHeroLcpPresenterTest`** (2), Playwright **`homepage-hero-lcp.spec.ts`**. |
 | 2026-07-14 | JETPK-THEMED-CUSTOMER-DASHBOARD-PHASE2-ADAPTATION | **JetPK customer portal Phase 2:** `themes/customer/jetpakistan/dashboard.blade.php` — pending-payment banner, KPI grid, upcoming/latest fallback, recent bookings, quick actions, support meta; bookings index filters/empty/pagination parity. Scoped `portal.css` tokens (`jp-portal-stat--violet`, alert row, pagination). Portal asset `?v=40`. Tests: **`JetpkThemedCustomerDashboardTest`** (7), Playwright **`themed-customer-dashboard.spec.ts`**. Mobile unchanged (`mobile/dashboard/customer.blade.php`). No controller/route changes. |
@@ -813,11 +806,7 @@ Routes: `admin.finance.statements.*`, `staff.finance.statements.*` (`staff.repor
 
 | File | Responsibility | Public API |
 |------|----------------|------------|
-<<<<<<< HEAD
 | `FlightSearchService.php` | Agency-scoped search + metadata wrapper; nearby departure origin expansion + direct-only post-filter; Sabre rows get `fare_verification_digest` / `expected_ui_price`. | `search`, `searchWithMeta` |
-=======
-| `FlightSearchService.php` | Agency-scoped search + metadata wrapper; Sabre rows get `fare_verification_digest` / `expected_ui_price`. | `search`, `searchWithMeta` |
->>>>>>> jetpk/main
 
 **Adapters (supplier search):** `app/Services/Suppliers/Adapters/SabreFlightSupplierAdapter.php`,
 `DuffelFlightSupplierAdapter.php` — implement search against provider APIs;
@@ -1248,11 +1237,7 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 | `Dashboard/` | `AgencyDashboardService` — `build()`, `operationalCountsForAgency()`, `buildAdminCommandCenter()` (PNR/payment/staff/agent/failures panels). |
 | `resources/views/components/dashboard/` | E1 shared dashboard UI: `kpi-stat`, `quick-action`, `empty-state`, `section-header`, `status-badge` (`.ota-kpi-card`, `.ota-bstat` in `layouts/dashboard.blade.php`). |
 | `Reports/` | `BookingReportService` — reporting helpers; **`buildPnrManualReviewDigestSummary()`** (P3 read-only digest metrics); **`buildAgencyBookingActivitySummary()`** (A3 read-only agency activity metrics). |
-<<<<<<< HEAD
 | `TravelData/` | **`AirportImportService`** (OurAirports-style IATA CSV upsert + overrides), **`AirportProximityService`** (nearby departure IATA via haversine + `ota-flights.nearby_departure_airports`), **`AirlineLogoCacheService`** (local `/storage/airline-logos/{IATA}.png` + **`ota:cache-airline-logos`**), `AirlineBrandingService`. |
-=======
-| `TravelData/` | **`AirportImportService`** (OurAirports-style IATA CSV upsert + overrides), **`AirlineLogoCacheService`** (local `/storage/airline-logos/{IATA}.png` + **`ota:cache-airline-logos`**), `AirlineBrandingService`. |
->>>>>>> jetpk/main
 
 ---
 

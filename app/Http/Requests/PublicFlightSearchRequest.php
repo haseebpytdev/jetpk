@@ -175,23 +175,17 @@ class PublicFlightSearchRequest extends FormRequest
         $children = max(0, (int) $this->input('children', 0));
         $infants = min(max(0, (int) $this->input('infants', 0)), $adults);
 
-<<<<<<< HEAD
         $directOnly = $this->input('stops') === 'direct';
         $nearbyAirports = $this->input('include_nearby') === '1';
 
-=======
->>>>>>> jetpk/main
         $base = [
             'trip_type' => $trip,
             'cabin' => (string) $this->input('cabin', 'economy'),
             'adults' => $adults,
             'children' => $children,
             'infants' => $infants,
-<<<<<<< HEAD
             'direct_only' => $directOnly,
             'nearby_airports' => $nearbyAirports,
-=======
->>>>>>> jetpk/main
         ];
 
         if ($trip === 'multi_city') {
@@ -229,10 +223,7 @@ class PublicFlightSearchRequest extends FormRequest
         return array_merge($base, [
             'origin' => strtoupper(trim((string) $this->input('from', ''))),
             'destination' => strtoupper(trim((string) $this->input('to', ''))),
-<<<<<<< HEAD
             'requested_origin' => strtoupper(trim((string) $this->input('from', ''))),
-=======
->>>>>>> jetpk/main
             'depart_date' => (string) $this->input('depart', ''),
             'return_date' => $trip === 'round_trip' ? (string) $this->input('return_date', '') : null,
         ]);

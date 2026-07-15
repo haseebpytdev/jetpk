@@ -1,19 +1,11 @@
-<<<<<<< HEAD
 <?php
-=======
-﻿<?php
->>>>>>> jetpk/main
 
 namespace App\Support\Client;
 
 /**
  * Resolves the live public web-root for on-disk client asset/theme checks.
  *
-<<<<<<< HEAD
  * Production assets may live outside Laravel's public/ (e.g. public_html/ota.haseebasif.com).
-=======
- * Production assets may live outside Laravel's public directory when OTA_PUBLIC_WEBROOT_PATH is explicitly configured.
->>>>>>> jetpk/main
  * URL generation via asset() is unchanged; this class is for filesystem existence checks only.
  */
 final class ClientPublicWebrootPath
@@ -124,7 +116,3 @@ final class ClientPublicWebrootPath
         return is_file(base_path($relative));
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> jetpk/main

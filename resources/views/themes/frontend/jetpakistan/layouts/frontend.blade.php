@@ -1,10 +1,6 @@
 @php
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-<<<<<<< HEAD
     $jpAssetVersion = 50;
-=======
-    $jpAssetVersion = 49;
->>>>>>> jetpk/main
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
     $pageTitle = trim($__env->yieldContent('title'));
