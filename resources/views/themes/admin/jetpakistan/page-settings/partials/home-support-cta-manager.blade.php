@@ -87,7 +87,7 @@
         @endif
         <div class="jp-field">
             <label class="jp-field__label">Upload desktop banner</label>
-            <input type="file" name="support_cta_background_file" accept="image/jpeg,image/png,image/webp" class="jp-control">
+            <input aria-label="Upload desktop banner" type="file" name="support_cta_background_file" accept="image/jpeg,image/png,image/webp" class="jp-control">
         </div>
         @if ($supportBg)
             <label class="jp-toggle"><input type="checkbox" name="support_cta_background_remove" value="1"> Remove desktop banner on save</label>
@@ -101,7 +101,7 @@
         @endif
         <div class="jp-field">
             <label class="jp-field__label">Upload mobile banner</label>
-            <input type="file" name="support_cta_background_mobile_file" accept="image/jpeg,image/png,image/webp" class="jp-control">
+            <input aria-label="Upload mobile banner" type="file" name="support_cta_background_mobile_file" accept="image/jpeg,image/png,image/webp" class="jp-control">
         </div>
         @if ($supportBgMobile)
             <label class="jp-toggle"><input type="checkbox" name="support_cta_background_mobile_remove" value="1"> Remove mobile banner on save</label>

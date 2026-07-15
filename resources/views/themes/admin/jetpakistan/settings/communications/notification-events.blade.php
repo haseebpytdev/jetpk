@@ -94,7 +94,7 @@
                                         <span>Enabled</span>
                                     </label>
                                     <label class="jp-label">Audience</label>
-                                    <select class="jp-control" name="events[{{ $event->value }}][recipient_scope]" required data-jp-event-scope>
+                                    <select aria-label="Audience" class="jp-control" name="events[{{ $event->value }}][recipient_scope]" required data-jp-event-scope>
                                         @foreach (['admin', 'staff', 'agent', 'customer'] as $scope)
                                             <option value="{{ $scope }}" @selected($scopeVal === $scope)>{{ ucfirst($scope) }}</option>
                                         @endforeach
@@ -102,11 +102,11 @@
                                     <details class="jp-notification-advanced">
                                         <summary class="jp-muted">Advanced To / CC / BCC</summary>
                                         <label class="jp-label">To override</label>
-                                        <textarea class="jp-control jp-control--textarea" rows="2" name="events[{{ $event->value }}][recipient_emails]" placeholder="Comma-separated emails">{{ $toVal }}</textarea>
+                                        <textarea aria-label="To override" class="jp-control jp-control--textarea" rows="2" name="events[{{ $event->value }}][recipient_emails]" placeholder="Comma-separated emails">{{ $toVal }}</textarea>
                                         <label class="jp-label">CC</label>
-                                        <textarea class="jp-control jp-control--textarea" rows="2" name="events[{{ $event->value }}][cc_emails]" placeholder="Comma-separated emails">{{ $ccVal }}</textarea>
+                                        <textarea aria-label="CC" class="jp-control jp-control--textarea" rows="2" name="events[{{ $event->value }}][cc_emails]" placeholder="Comma-separated emails">{{ $ccVal }}</textarea>
                                         <label class="jp-label">BCC</label>
-                                        <textarea class="jp-control jp-control--textarea" rows="2" name="events[{{ $event->value }}][bcc_emails]" placeholder="Comma-separated emails">{{ $bccVal }}</textarea>
+                                        <textarea aria-label="BCC" class="jp-control jp-control--textarea" rows="2" name="events[{{ $event->value }}][bcc_emails]" placeholder="Comma-separated emails">{{ $bccVal }}</textarea>
                                     </details>
                                 </div>
                             </details>

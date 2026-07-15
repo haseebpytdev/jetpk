@@ -90,15 +90,15 @@
         <tbody>
             @forelse ($diagnostics as $row)
                 <tr data-testid="ota-diagnostic-row">
-                    <td class="jp-cell-sub">{{ $row['created_at'] }}</td>
-                    <td><strong>{{ ucwords(str_replace('_', ' ', $row['provider'])) }}</strong></td>
-                    <td>{{ display_unknown($row['action'] ?? null) }}</td>
-                    <td><span class="jp-badge-pill {{ ($row['status'] ?? '') === 'success' ? 'jp-badge-pill--green' : 'jp-badge-pill--danger' }}">{{ display_unknown($row['status'] ?? null) }}</span></td>
-                    <td>{{ display_unknown($row['reason_code'] ?? null) }}</td>
-                    <td>{{ display_unknown($row['error_code'] ?? null) }}</td>
-                    <td>{{ display_unknown(isset($row['http_status']) ? (string) $row['http_status'] : null) }}</td>
-                    <td class="jp-cell-sub">{{ display_unknown($row['endpoint'] ?? null) }}</td>
-                    <td>{{ display_unknown($row['safe_message'] ?? null) }}</td>
+                    <td data-label="Time" class="jp-cell-sub">{{ $row['created_at'] }}</td>
+                    <td data-label="Provider"><strong>{{ ucwords(str_replace('_', ' ', $row['provider'])) }}</strong></td>
+                    <td data-label="Action">{{ display_unknown($row['action'] ?? null) }}</td>
+                    <td data-label="Status"><span class="jp-badge-pill {{ ($row['status'] ?? '') === 'success' ? 'jp-badge-pill--green' : 'jp-badge-pill--danger' }}">{{ display_unknown($row['status'] ?? null) }}</span></td>
+                    <td data-label="Reason code">{{ display_unknown($row['reason_code'] ?? null) }}</td>
+                    <td data-label="Error code">{{ display_unknown($row['error_code'] ?? null) }}</td>
+                    <td data-label="HTTP">{{ display_unknown(isset($row['http_status']) ? (string) $row['http_status'] : null) }}</td>
+                    <td data-label="Endpoint" class="jp-cell-sub">{{ display_unknown($row['endpoint'] ?? null) }}</td>
+                    <td data-label="Safe message">{{ display_unknown($row['safe_message'] ?? null) }}</td>
                 </tr>
             @empty
                 <tr><td colspan="9"><x-themes.admin.jetpakistan.components.empty-state title="No diagnostics" message="No supplier diagnostics match these filters." /></td></tr>

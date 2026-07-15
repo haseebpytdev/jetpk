@@ -61,36 +61,36 @@
                 <div class="jp-grid jp-grid--2">
                     <div class="jp-field">
                         <label class="jp-field__label">City / title</label>
-                        <input class="jp-control" name="content[destinations][items][{{ $i }}][title]" value="{{ data_get($item, 'title') }}">
+                        <input aria-label="City / title" class="jp-control" name="content[destinations][items][{{ $i }}][title]" value="{{ data_get($item, 'title') }}">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">IATA code</label>
-                        <input class="jp-control" name="content[destinations][items][{{ $i }}][code]" value="{{ data_get($item, 'code') }}" maxlength="3">
+                        <input aria-label="IATA code" class="jp-control" name="content[destinations][items][{{ $i }}][code]" value="{{ data_get($item, 'code') }}" maxlength="3">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Country label</label>
-                        <input class="jp-control" name="content[destinations][items][{{ $i }}][country]" value="{{ data_get($item, 'country') }}">
+                        <input aria-label="Country label" class="jp-control" name="content[destinations][items][{{ $i }}][country]" value="{{ data_get($item, 'country') }}">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Manual price (PKR)</label>
-                        <input class="jp-control" name="content[destinations][items][{{ $i }}][manual_fallback_price]" value="{{ data_get($item, 'manual_fallback_price', data_get($item, 'price')) }}">
+                        <input aria-label="Manual price (PKR)" class="jp-control" name="content[destinations][items][{{ $i }}][manual_fallback_price]" value="{{ data_get($item, 'manual_fallback_price', data_get($item, 'price')) }}">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Card link URL</label>
-                        <input class="jp-control" name="content[destinations][items][{{ $i }}][link]" value="{{ data_get($item, 'link') }}">
+                        <input aria-label="Card link URL" class="jp-control" name="content[destinations][items][{{ $i }}][link]" value="{{ data_get($item, 'link') }}">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Badge</label>
-                        <input class="jp-control" name="content[destinations][items][{{ $i }}][badge]" value="{{ data_get($item, 'badge') }}">
+                        <input aria-label="Badge" class="jp-control" name="content[destinations][items][{{ $i }}][badge]" value="{{ data_get($item, 'badge') }}">
                     </div>
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Description</label>
-                    <textarea class="jp-control jp-control--textarea" rows="2" name="content[destinations][items][{{ $i }}][text]">{{ data_get($item, 'text') }}</textarea>
+                    <textarea aria-label="Description" class="jp-control jp-control--textarea" rows="2" name="content[destinations][items][{{ $i }}][text]">{{ data_get($item, 'text') }}</textarea>
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Image alt text</label>
-                    <input class="jp-control" name="content[destinations][items][{{ $i }}][alt]" value="{{ data_get($item, 'alt') }}">
+                    <input aria-label="Image alt text" class="jp-control" name="content[destinations][items][{{ $i }}][alt]" value="{{ data_get($item, 'alt') }}">
                 </div>
                 <div class="jp-media-inline">
                     @if ($existingAsset?->public_url)
@@ -98,7 +98,7 @@
                     @endif
                     <div class="jp-field">
                         <label class="jp-field__label">Upload image (JPEG/PNG/WebP, max 5 MB)</label>
-                        <input type="file" name="destination_files[{{ $destId }}]" accept="image/jpeg,image/png,image/webp" class="jp-control">
+                        <input aria-label="Upload image (JPEG/PNG/WebP, max 5 MB)" type="file" name="destination_files[{{ $destId }}]" accept="image/jpeg,image/png,image/webp" class="jp-control">
                     </div>
                     @if ($existingAsset)
                         <label class="jp-toggle">

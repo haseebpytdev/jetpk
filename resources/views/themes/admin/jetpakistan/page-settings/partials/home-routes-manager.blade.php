@@ -62,30 +62,30 @@
                 <div class="jp-grid jp-grid--3">
                     <div class="jp-field">
                         <label class="jp-field__label">Origin IATA</label>
-                        <input class="jp-control" name="content[routes][items][{{ $i }}][from]" value="{{ data_get($item, 'from') }}" maxlength="3" placeholder="KHI">
+                        <input aria-label="Origin IATA" class="jp-control" name="content[routes][items][{{ $i }}][from]" value="{{ data_get($item, 'from') }}" maxlength="3" placeholder="KHI">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Destination IATA</label>
-                        <input class="jp-control" name="content[routes][items][{{ $i }}][to]" value="{{ data_get($item, 'to') }}" maxlength="3" placeholder="DXB">
+                        <input aria-label="Destination IATA" class="jp-control" name="content[routes][items][{{ $i }}][to]" value="{{ data_get($item, 'to') }}" maxlength="3" placeholder="DXB">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Trip type</label>
-                        <select class="jp-control jp-control--select" name="content[routes][items][{{ $i }}][trip_type]">
+                        <select aria-label="Trip type" class="jp-control jp-control--select" name="content[routes][items][{{ $i }}][trip_type]">
                             <option value="one_way" @selected(data_get($item, 'trip_type', 'one_way') === 'one_way')>One-way</option>
                             <option value="return" @selected(data_get($item, 'trip_type') === 'return')>Return</option>
                         </select>
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Return stay (days)</label>
-                        <input type="number" min="1" max="30" class="jp-control" name="content[routes][items][{{ $i }}][return_stay_days]" value="{{ data_get($item, 'return_stay_days', config('jetpk_homepage.default_return_stay_days', 7)) }}">
+                        <input aria-label="Return stay (days)" type="number" min="1" max="30" class="jp-control" name="content[routes][items][{{ $i }}][return_stay_days]" value="{{ data_get($item, 'return_stay_days', config('jetpk_homepage.default_return_stay_days', 7)) }}">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Manual fallback (PKR)</label>
-                        <input class="jp-control" name="content[routes][items][{{ $i }}][manual_fallback_price]" value="{{ data_get($item, 'manual_fallback_price', data_get($item, 'price')) }}">
+                        <input aria-label="Manual fallback (PKR)" class="jp-control" name="content[routes][items][{{ $i }}][manual_fallback_price]" value="{{ data_get($item, 'manual_fallback_price', data_get($item, 'price')) }}">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Badge</label>
-                        <input class="jp-control" name="content[routes][items][{{ $i }}][badge]" value="{{ data_get($item, 'badge') }}">
+                        <input aria-label="Badge" class="jp-control" name="content[routes][items][{{ $i }}][badge]" value="{{ data_get($item, 'badge') }}">
                     </div>
                 </div>
                 <div class="jp-grid jp-grid--3">
@@ -96,11 +96,11 @@
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Adults</label>
-                        <input type="number" min="1" max="9" class="jp-control" name="content[routes][items][{{ $i }}][adults]" value="{{ data_get($item, 'adults', 1) }}">
+                        <input aria-label="Adults" type="number" min="1" max="9" class="jp-control" name="content[routes][items][{{ $i }}][adults]" value="{{ data_get($item, 'adults', 1) }}">
                     </div>
                     <div class="jp-field">
                         <label class="jp-field__label">Cabin</label>
-                        <select class="jp-control jp-control--select" name="content[routes][items][{{ $i }}][cabin]">
+                        <select aria-label="Cabin" class="jp-control jp-control--select" name="content[routes][items][{{ $i }}][cabin]">
                             @foreach (['economy', 'premium_economy', 'business', 'first'] as $cabin)
                                 <option value="{{ $cabin }}" @selected(data_get($item, 'cabin', 'economy') === $cabin)>{{ ucfirst(str_replace('_', ' ', $cabin)) }}</option>
                             @endforeach

@@ -37,11 +37,11 @@
             <form method="get" action="{{ client_route('admin.settings.communications.templates.index') }}" class="jp-form-grid jp-form-grid--filter" data-jp-email-event-content-filters>
                 <div class="jp-field">
                     <label class="jp-label">Search</label>
-                    <input class="jp-control" name="q" value="{{ $filters['q'] }}" placeholder="Name or event key">
+                    <input aria-label="Search" class="jp-control" name="q" value="{{ $filters['q'] }}" placeholder="Name or event key">
                 </div>
                 <div class="jp-field">
                     <label class="jp-label">Audience</label>
-                    <select class="jp-control" name="audience">
+                    <select aria-label="Audience" class="jp-control" name="audience">
                         <option value="">All audiences</option>
                         @foreach(['customer', 'admin', 'agent', 'staff', 'finance', 'mixed'] as $audience)
                             <option value="{{ $audience }}" @selected($filters['audience'] === $audience)>{{ \App\Support\Emails\EmailTemplateRegistry::audienceLabel($audience) }}</option>
@@ -50,7 +50,7 @@
                 </div>
                 <div class="jp-field">
                     <label class="jp-label">State</label>
-                    <select class="jp-control" name="enabled">
+                    <select aria-label="State" class="jp-control" name="enabled">
                         <option value="">All states</option>
                         <option value="enabled" @selected($filters['enabled'] === 'enabled')>Enabled</option>
                         <option value="disabled" @selected($filters['enabled'] === 'disabled')>Disabled</option>
@@ -58,7 +58,7 @@
                 </div>
                 <div class="jp-field">
                     <label class="jp-label">Saved copy</label>
-                    <select class="jp-control" name="db">
+                    <select aria-label="Saved copy" class="jp-control" name="db">
                         <option value="">All</option>
                         <option value="saved" @selected($filters['db'] === 'saved')>Customized</option>
                         <option value="missing" @selected($filters['db'] === 'missing')>Universal default</option>

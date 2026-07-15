@@ -29,6 +29,29 @@ body.side-collapsed .jp-dash {
 .jp-dash__body {
   padding: var(--sp-6, 24px);
   flex: 1;
+  /* JETPK-PHASE7: `.jp-dash` is a CSS grid (`var(--side-w) 1fr`) with `overflow-x: hidden`.
+     Grid items default to `min-width: auto`, so any child that cannot shrink (wide legacy table,
+     long unbreakable string, fixed-width panel) expands the 1fr column past the viewport — and
+     because the grid clips, that content becomes UNREACHABLE (no scrollbar).
+     These three lines were previously applied only via `.jp-dash__body--legacy`, which is set by a
+     view composer that (a) fires only when `is_client_preview()` is true and (b) matches only
+     `dashboard.admin.*` — never `dashboard.staff.*`. So production and ALL Internal Staff legacy
+     pages never received the fix. Applying it unconditionally is safe: branded pages already
+     shrink correctly, and inner scroll containers keep their own horizontal scroll. */
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* JETPK-PHASE7: legacy operational modules (Bootstrap/Tabler markup rendered inside the JetPK ops
+   shell) must scroll their own tables rather than blow out or clip the grid column. Mirrors the
+   `.jp-dash__body--legacy` rules, now unconditional so they also apply in production and to Staff. */
+.jp-dash__body .table-responsive {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.jp-dash__body .card {
+  max-width: 100%;
 }
 
 /* Sidebar */

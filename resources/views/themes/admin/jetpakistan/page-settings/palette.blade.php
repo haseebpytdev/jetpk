@@ -21,7 +21,7 @@
         <form method="post" action="{{ client_route('admin.page-settings.palette.generate') }}" class="jp-stack">
             @csrf
             <label class="jp-label">Logo path (relative to public/)</label>
-            <input class="jp-input" name="logo_path" value="{{ $logoPath }}">
+            <input aria-label="Logo path (relative to public/)" class="jp-input" name="logo_path" value="{{ $logoPath }}">
             <button type="submit" class="jp-btn jp-btn--sm">Generate from logo</button>
         </form>
     </div>

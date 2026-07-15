@@ -72,11 +72,11 @@
             <div class="jp-grid jp-grid--2">
                 <div class="jp-field">
                     <label class="jp-field__label">Value</label>
-                    <input class="jp-control" name="content[feature_board][items][{{ $i }}][value]" value="{{ data_get($content, "feature_board.items.{$i}.value") }}" placeholder="e.g. 400+">
+                    <input aria-label="Value" class="jp-control" name="content[feature_board][items][{{ $i }}][value]" value="{{ data_get($content, "feature_board.items.{$i}.value") }}" placeholder="e.g. 400+">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Label</label>
-                    <input class="jp-control" name="content[feature_board][items][{{ $i }}][label]" value="{{ data_get($content, "feature_board.items.{$i}.label") }}" placeholder="e.g. Airlines">
+                    <input aria-label="Label" class="jp-control" name="content[feature_board][items][{{ $i }}][label]" value="{{ data_get($content, "feature_board.items.{$i}.label") }}" placeholder="e.g. Airlines">
                 </div>
             </div>
         </div>
@@ -119,16 +119,16 @@
             <div class="jp-grid jp-grid--2">
                 <div class="jp-field">
                     <label class="jp-field__label">Icon</label>
-                    <input class="jp-control" name="content[trust][cards][{{ $i }}][icon]" value="{{ data_get($content, "trust.cards.{$i}.icon") }}" placeholder="check-square">
+                    <input aria-label="Icon" class="jp-control" name="content[trust][cards][{{ $i }}][icon]" value="{{ data_get($content, "trust.cards.{$i}.icon") }}" placeholder="check-square">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Title</label>
-                    <input class="jp-control" name="content[trust][cards][{{ $i }}][title]" value="{{ data_get($content, "trust.cards.{$i}.title") }}">
+                    <input aria-label="Title" class="jp-control" name="content[trust][cards][{{ $i }}][title]" value="{{ data_get($content, "trust.cards.{$i}.title") }}">
                 </div>
             </div>
             <div class="jp-field">
                 <label class="jp-field__label">Description</label>
-                <textarea class="jp-control jp-control--textarea" rows="2" name="content[trust][cards][{{ $i }}][text]">{{ data_get($content, "trust.cards.{$i}.text") }}</textarea>
+                <textarea aria-label="Description" class="jp-control jp-control--textarea" rows="2" name="content[trust][cards][{{ $i }}][text]">{{ data_get($content, "trust.cards.{$i}.text") }}</textarea>
             </div>
         </div>
     @endforeach
@@ -170,20 +170,20 @@
             <div class="jp-grid jp-grid--3">
                 <div class="jp-field">
                     <label class="jp-field__label">Number label</label>
-                    <input class="jp-control" name="content[why_book][cards][{{ $i }}][num]" value="{{ data_get($content, "why_book.cards.{$i}.num") }}" placeholder="01 · Pricing">
+                    <input aria-label="Number label" class="jp-control" name="content[why_book][cards][{{ $i }}][num]" value="{{ data_get($content, "why_book.cards.{$i}.num") }}" placeholder="01 · Pricing">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Title</label>
-                    <input class="jp-control" name="content[why_book][cards][{{ $i }}][title]" value="{{ data_get($content, "why_book.cards.{$i}.title") }}">
+                    <input aria-label="Title" class="jp-control" name="content[why_book][cards][{{ $i }}][title]" value="{{ data_get($content, "why_book.cards.{$i}.title") }}">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Icon</label>
-                    <input class="jp-control" name="content[why_book][cards][{{ $i }}][icon]" value="{{ data_get($content, "why_book.cards.{$i}.icon") }}">
+                    <input aria-label="Icon" class="jp-control" name="content[why_book][cards][{{ $i }}][icon]" value="{{ data_get($content, "why_book.cards.{$i}.icon") }}">
                 </div>
             </div>
             <div class="jp-field">
                 <label class="jp-field__label">Description</label>
-                <textarea class="jp-control jp-control--textarea" rows="2" name="content[why_book][cards][{{ $i }}][text]">{{ data_get($content, "why_book.cards.{$i}.text") }}</textarea>
+                <textarea aria-label="Description" class="jp-control jp-control--textarea" rows="2" name="content[why_book][cards][{{ $i }}][text]">{{ data_get($content, "why_book.cards.{$i}.text") }}</textarea>
             </div>
         </div>
     @endforeach
@@ -242,32 +242,32 @@
             <div class="jp-grid jp-grid--2">
                 <div class="jp-field">
                     <label class="jp-field__label">Title</label>
-                    <input class="jp-control" name="content[group_cards][items][{{ $i }}][title]" value="{{ data_get($content, "group_cards.items.{$i}.title") }}">
+                    <input aria-label="Title" class="jp-control" name="content[group_cards][items][{{ $i }}][title]" value="{{ data_get($content, "group_cards.items.{$i}.title") }}">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Badge</label>
-                    <input class="jp-control" name="content[group_cards][items][{{ $i }}][badge]" value="{{ data_get($content, "group_cards.items.{$i}.badge") }}">
+                    <input aria-label="Badge" class="jp-control" name="content[group_cards][items][{{ $i }}][badge]" value="{{ data_get($content, "group_cards.items.{$i}.badge") }}">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Traveller / seat text</label>
-                    <input class="jp-control" name="content[group_cards][items][{{ $i }}][meta]" value="{{ data_get($content, "group_cards.items.{$i}.meta") }}">
+                    <input aria-label="Traveller / seat text" class="jp-control" name="content[group_cards][items][{{ $i }}][meta]" value="{{ data_get($content, "group_cards.items.{$i}.meta") }}">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Route / destination</label>
-                    <input class="jp-control" name="content[group_cards][items][{{ $i }}][route]" value="{{ data_get($content, "group_cards.items.{$i}.route") }}">
+                    <input aria-label="Route / destination" class="jp-control" name="content[group_cards][items][{{ $i }}][route]" value="{{ data_get($content, "group_cards.items.{$i}.route") }}">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Price (PKR)</label>
-                    <input class="jp-control" name="content[group_cards][items][{{ $i }}][price]" value="{{ data_get($content, "group_cards.items.{$i}.price") }}">
+                    <input aria-label="Price (PKR)" class="jp-control" name="content[group_cards][items][{{ $i }}][price]" value="{{ data_get($content, "group_cards.items.{$i}.price") }}">
                 </div>
                 <div class="jp-field">
                     <label class="jp-field__label">Link URL</label>
-                    <input class="jp-control" name="content[group_cards][items][{{ $i }}][link]" value="{{ data_get($content, "group_cards.items.{$i}.link") }}">
+                    <input aria-label="Link URL" class="jp-control" name="content[group_cards][items][{{ $i }}][link]" value="{{ data_get($content, "group_cards.items.{$i}.link") }}">
                 </div>
             </div>
             <div class="jp-field">
                 <label class="jp-field__label">Image alt text</label>
-                <input class="jp-control" name="content[group_cards][items][{{ $i }}][alt]" value="{{ data_get($content, "group_cards.items.{$i}.alt") }}">
+                <input aria-label="Image alt text" class="jp-control" name="content[group_cards][items][{{ $i }}][alt]" value="{{ data_get($content, "group_cards.items.{$i}.alt") }}">
             </div>
         </div>
     @endforeach

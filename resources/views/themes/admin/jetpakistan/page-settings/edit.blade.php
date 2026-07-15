@@ -89,22 +89,22 @@
                             <h2 class="jp-card__title">Page hero</h2>
                             @if ($pageKey === 'agent-registration')
                                 <label class="jp-label">Kicker</label>
-                                <input class="jp-control" name="content[hero][kicker]" value="{{ data_get($content, 'hero.kicker') }}" placeholder="Guidance only — leave empty to hide on publish">
+                                <input aria-label="Kicker" class="jp-control" name="content[hero][kicker]" value="{{ data_get($content, 'hero.kicker') }}" placeholder="Guidance only — leave empty to hide on publish">
                             @elseif ($pageKey !== 'booking-lookup')
                                 <label class="jp-label">Kicker</label>
-                                <input class="jp-control" name="content[hero][kicker]" value="{{ data_get($content, 'hero.kicker') }}" placeholder="Guidance only — leave empty to hide on publish">
+                                <input aria-label="Kicker" class="jp-control" name="content[hero][kicker]" value="{{ data_get($content, 'hero.kicker') }}" placeholder="Guidance only — leave empty to hide on publish">
                             @endif
                             <label class="jp-label">Title</label>
-                            <input class="jp-control" name="content[hero][title]" value="{{ data_get($content, 'hero.title') }}" placeholder="Guidance only — leave empty to hide on publish">
+                            <input aria-label="Title" class="jp-control" name="content[hero][title]" value="{{ data_get($content, 'hero.title') }}" placeholder="Guidance only — leave empty to hide on publish">
                             <label class="jp-label">Description</label>
-                            <textarea class="jp-control jp-control--textarea" rows="4" name="content[hero][description]" placeholder="Guidance only — leave empty to hide on publish">{{ data_get($content, 'hero.description') }}</textarea>
+                            <textarea aria-label="Description" class="jp-control jp-control--textarea" rows="4" name="content[hero][description]" placeholder="Guidance only — leave empty to hide on publish">{{ data_get($content, 'hero.description') }}</textarea>
                             @if ($pageKey === 'booking-lookup')
                                 <label class="jp-label">Help text</label>
-                                <input class="jp-control" name="content[hero][help_text]" value="{{ data_get($content, 'hero.help_text') }}" placeholder="Guidance only — leave empty to hide on publish">
+                                <input aria-label="Help text" class="jp-control" name="content[hero][help_text]" value="{{ data_get($content, 'hero.help_text') }}" placeholder="Guidance only — leave empty to hide on publish">
                             @endif
                             @if ($pageKey === 'agent-registration')
                                 <label class="jp-label">CTA text</label>
-                                <input class="jp-control" name="content[hero][cta_text]" value="{{ data_get($content, 'hero.cta_text') }}" placeholder="Guidance only — leave empty to hide on publish">
+                                <input aria-label="CTA text" class="jp-control" name="content[hero][cta_text]" value="{{ data_get($content, 'hero.cta_text') }}" placeholder="Guidance only — leave empty to hide on publish">
                             @endif
                         </div>
                         @if (in_array($pageKey, ['about', 'support'], true))
@@ -112,27 +112,27 @@
                                 <h2 class="jp-card__title">Contact details</h2>
                                 <p class="jp-muted jp-muted--sm">Clear a field and publish to intentionally hide that detail on the public page.</p>
                                 <label class="jp-label">Phone</label>
-                                <input class="jp-control" name="content[contact][phone]" value="{{ data_get($content, 'contact.phone') }}">
+                                <input aria-label="Phone" class="jp-control" name="content[contact][phone]" value="{{ data_get($content, 'contact.phone') }}">
                                 <label class="jp-label">Email</label>
-                                <input class="jp-control" name="content[contact][email]" value="{{ data_get($content, 'contact.email') }}">
+                                <input aria-label="Email" class="jp-control" name="content[contact][email]" value="{{ data_get($content, 'contact.email') }}">
                                 @if ($pageKey === 'support')
                                     <label class="jp-label">WhatsApp number (digits only)</label>
-                                    <input class="jp-control" name="content[contact][whatsapp]" value="{{ data_get($content, 'contact.whatsapp') }}">
+                                    <input aria-label="WhatsApp number (digits only)" class="jp-control" name="content[contact][whatsapp]" value="{{ data_get($content, 'contact.whatsapp') }}">
                                 @endif
                                 <label class="jp-label">Website URL</label>
-                                <input class="jp-control" name="content[contact][website]" value="{{ data_get($content, 'contact.website') }}">
+                                <input aria-label="Website URL" class="jp-control" name="content[contact][website]" value="{{ data_get($content, 'contact.website') }}">
                                 @if ($pageKey === 'about')
                                     <label class="jp-label">Office address</label>
-                                    <textarea class="jp-control jp-control--textarea" rows="3" name="content[contact][office]">{{ data_get($content, 'contact.office') }}</textarea>
+                                    <textarea aria-label="Office address" class="jp-control jp-control--textarea" rows="3" name="content[contact][office]">{{ data_get($content, 'contact.office') }}</textarea>
                                 @endif
                                 <label class="jp-label">Support hours</label>
-                                <input class="jp-control" name="content[contact][hours]" value="{{ data_get($content, 'contact.hours') }}">
+                                <input aria-label="Support hours" class="jp-control" name="content[contact][hours]" value="{{ data_get($content, 'contact.hours') }}">
                             </div>
                             @if ($pageKey === 'support')
                                 <div class="jp-card">
                                     <h2 class="jp-card__title">Contact form</h2>
                                     <label class="jp-label">Helper text</label>
-                                    <textarea class="jp-control jp-control--textarea" rows="2" name="content[form][helper_text]">{{ data_get($content, 'form.helper_text') }}</textarea>
+                                    <textarea aria-label="Helper text" class="jp-control jp-control--textarea" rows="2" name="content[form][helper_text]">{{ data_get($content, 'form.helper_text') }}</textarea>
                                 </div>
                             @endif
                         @endif

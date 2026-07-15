@@ -5,7 +5,7 @@
     $dashProductName = BrandDisplayResolver::displayName($dbSettings, auth()->user());
     $brandCssVariables = $brandCssVariables ?? BrandDisplayResolver::cssVariables($dbSettings);
     $dashFaviconUrl = null;
-    $jpDashAssetVersion = 20;
+    $jpDashAssetVersion = 21; // JETPK-PHASE7: bumped — dashboard.css changed (grid overflow hardening)
 
     if (uses_jetpk_company_branding()) {
         $dashProductName = jetpk_company_branding()->companyName();

@@ -98,11 +98,11 @@
             <tbody>
             @forelse($staffMembers as $member)
                 <tr>
-                    <td>{{ $member->name }}</td>
-                    <td>{{ $member->email }}</td>
-                    <td>{{ AccountTypeLabels::accessModeLabel($member) }}</td>
-                    <td><x-themes.admin.jetpakistan.components.status-badge :label="$member->status?->value ?? 'unknown'" /></td>
-                    <td>{{ $member->last_login_at?->format('Y-m-d H:i') ?? 'Never' }}</td>
+                    <td data-label="Name">{{ $member->name }}</td>
+                    <td data-label="Email">{{ $member->email }}</td>
+                    <td data-label="Access mode">{{ AccountTypeLabels::accessModeLabel($member) }}</td>
+                    <td data-label="Status"><x-themes.admin.jetpakistan.components.status-badge :label="$member->status?->value ?? 'unknown'" /></td>
+                    <td data-label="Last login">{{ $member->last_login_at?->format('Y-m-d H:i') ?? 'Never' }}</td>
                     <td><a href="{{ client_route('admin.users.show', $member) }}" class="jp-btn jp-btn--sm jp-btn--ghost">Access</a></td>
                 </tr>
             @empty
@@ -118,9 +118,9 @@
             <tbody>
             @forelse($markupRuleRows as $rule)
                 <tr>
-                    <td>{{ $rule['name'] }}</td>
-                    <td>{{ $rule['type'] }}</td>
-                    <td><x-themes.admin.jetpakistan.components.status-badge :label="$rule['status']" /></td>
+                    <td data-label="Rule">{{ $rule['name'] }}</td>
+                    <td data-label="Type">{{ $rule['type'] }}</td>
+                    <td data-label="Status"><x-themes.admin.jetpakistan.components.status-badge :label="$rule['status']" /></td>
                 </tr>
             @empty
                 <tr><td colspan="3"><x-themes.admin.jetpakistan.components.empty-state title="No markup rules" /></td></tr>
@@ -146,10 +146,10 @@
             <tbody>
             @forelse($depositRequests as $deposit)
                 <tr>
-                    <td><a href="{{ client_route('admin.agent-deposits.show', $deposit['id']) }}">#{{ $deposit['id'] }}</a></td>
-                    <td class="num">{{ number_format((float) $deposit['amount'], 2) }}</td>
-                    <td>{{ $deposit['status'] }}</td>
-                    <td>{{ $deposit['created_at'] }}</td>
+                    <td data-label="ID"><a href="{{ client_route('admin.agent-deposits.show', $deposit['id']) }}">#{{ $deposit['id'] }}</a></td>
+                    <td data-label="Amount" class="num">{{ number_format((float) $deposit['amount'], 2) }}</td>
+                    <td data-label="Status">{{ $deposit['status'] }}</td>
+                    <td data-label="Submitted">{{ $deposit['created_at'] }}</td>
                 </tr>
             @empty
                 <tr><td colspan="4"><x-themes.admin.jetpakistan.components.empty-state title="No deposits" /></td></tr>
@@ -164,10 +164,10 @@
             <tbody>
             @forelse($recentBookings as $booking)
                 <tr>
-                    <td><a href="{{ client_route('admin.bookings.show', $booking['id']) }}">{{ $booking['booking_reference'] }}</a></td>
-                    <td>{{ $booking['route'] }}</td>
-                    <td>{{ $booking['status'] }}</td>
-                    <td>{{ $booking['created_at'] }}</td>
+                    <td data-label="Reference"><a href="{{ client_route('admin.bookings.show', $booking['id']) }}">{{ $booking['booking_reference'] }}</a></td>
+                    <td data-label="Route">{{ $booking['route'] }}</td>
+                    <td data-label="Status">{{ $booking['status'] }}</td>
+                    <td data-label="Created">{{ $booking['created_at'] }}</td>
                 </tr>
             @empty
                 <tr><td colspan="4"><x-themes.admin.jetpakistan.components.empty-state title="No bookings" /></td></tr>
@@ -182,10 +182,10 @@
             <tbody>
             @forelse($travelerUsers as $traveler)
                 <tr>
-                    <td>{{ $traveler->name }}</td>
-                    <td>{{ $traveler->email }}</td>
-                    <td>{{ $traveler->status?->value ?? '—' }}</td>
-                    <td>{{ $traveler->last_login_at?->format('Y-m-d H:i') ?? 'Never' }}</td>
+                    <td data-label="Name">{{ $traveler->name }}</td>
+                    <td data-label="Email">{{ $traveler->email }}</td>
+                    <td data-label="Status">{{ $traveler->status?->value ?? '—' }}</td>
+                    <td data-label="Last login">{{ $traveler->last_login_at?->format('Y-m-d H:i') ?? 'Never' }}</td>
                 </tr>
             @empty
                 <tr><td colspan="4"><x-themes.admin.jetpakistan.components.empty-state title="No travelers" /></td></tr>
@@ -200,10 +200,10 @@
             <tbody>
             @forelse($supportTickets as $ticket)
                 <tr>
-                    <td><a href="{{ client_route('admin.support.tickets.show', $ticket['id']) }}">{{ $ticket['subject'] }}</a></td>
-                    <td>{{ $ticket['status'] }}</td>
-                    <td>{{ $ticket['priority'] }}</td>
-                    <td>{{ $ticket['created_at'] }}</td>
+                    <td data-label="Subject"><a href="{{ client_route('admin.support.tickets.show', $ticket['id']) }}">{{ $ticket['subject'] }}</a></td>
+                    <td data-label="Status">{{ $ticket['status'] }}</td>
+                    <td data-label="Priority">{{ $ticket['priority'] }}</td>
+                    <td data-label="Created">{{ $ticket['created_at'] }}</td>
                 </tr>
             @empty
                 <tr><td colspan="4"><x-themes.admin.jetpakistan.components.empty-state title="No tickets" /></td></tr>
@@ -218,14 +218,14 @@
             <tbody>
             @forelse($auditLogs as $log)
                 <tr>
-                    <td>
+                    <td data-label="Action">
                         {{ $log['action'] }}
                         @if (! empty($log['details']))
                             <div class="jp-cell-sub">{{ \Illuminate\Support\Str::limit(json_encode($log['details'], JSON_UNESCAPED_UNICODE), 240) }}</div>
                         @endif
                     </td>
-                    <td>{{ $log['actor_label'] ?? 'System' }} <span class="jp-cell-sub">{{ $log['actor_code'] }}</span></td>
-                    <td>{{ $log['created_at'] }}</td>
+                    <td data-label="{{ IdentityDisplay::labelPerformedBy() }}">{{ $log['actor_label'] ?? 'System' }} <span class="jp-cell-sub">{{ $log['actor_code'] }}</span></td>
+                    <td data-label="When">{{ $log['created_at'] }}</td>
                 </tr>
             @empty
                 <tr><td colspan="3"><x-themes.admin.jetpakistan.components.empty-state title="No activity" /></td></tr>
