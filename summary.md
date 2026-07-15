@@ -1334,4 +1334,13 @@ commands (`OtaSend*Report`), **`ota:route-safety-audit --client=haseeb-master`**
 
 ## Finance follow-ups (planned, not implemented)
 
-**Zero-balance duplicate wallet archive (Finance-Reports-16):** Audit via **`agent-wallets:audit`** / **`/admin/finance/w
+**Zero-balance duplicate wallet archive (Finance-Reports-16):** Audit via **`agent-wallets:audit`** / **`/admin/finance/wallet-audit`**. Archive via **`/admin/finance/wallet-audit/archive-preview`** + POST or **`agent-wallets:archive-candidates --agency=ID --dry-run`** then **`--apply --reason="..."`**. Dry-run by default; no auto-archive on deploy.
+
+---
+
+## Tests & E2E
+
+| Path | Role |
+|------|------|
+| `tests/` | PHPUnit feature + unit. |
+| `test/e2e/` | Playwright (`npm run e2e:*`). |
