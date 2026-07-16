@@ -840,6 +840,32 @@ html[data-theme="day"] .search input[type=date]{color-scheme:light}
 html[data-theme="day"] .jp-home .hero-glow{
   background:radial-gradient(60% 80% at 80% 6%,rgba(99,179,46,.12),transparent 55%),radial-gradient(95% 75% at 50% 102%,rgba(0,107,69,.10),transparent 60%),radial-gradient(80% 100% at 15% 0%,rgba(79,148,35,.08),transparent 62%);
 }
+
+/* JETPK-RESPONSIVE-CLUMPING-CORRECTION — shell shrink + text wrap (no homepage layout change) */
+.wrap,
+.ota-container,
+.jp-site-main,
+.jp-page-wrap{
+  min-width:0;
+  max-width:100%;
+}
+.jp-site-header .header-inner,
+.jp-site-header .header-right{
+  min-width:0;
+  max-width:100%;
+}
+.jp-page :where(p,dd,li,a[href^="mailto:"],a[href^="http"]:not(.jp-btn):not(.btn)),
+.jp-card :where(p,dd,li):not(.jp-home *){
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+@media(max-width:680px){
+  .header-right{
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    row-gap:var(--sp-2);
+  }
+}
 .jp-home .g-jeddah .bg{background:radial-gradient(120% 100% at 70% 12%,#4F9423,#063a40 72%),linear-gradient(160deg,#0a2a40,#07131e)}
 .jp-home .g-uk .bg{background:radial-gradient(120% 100% at 70% 12%,#63B32E,#10283e 72%),linear-gradient(160deg,#143a5e,#08131e)}
 .jp-home .g-dubai .bg{background:radial-gradient(120% 100% at 75% 15%,#63B32E,#5a2a0e 75%),linear-gradient(160deg,#15777A,#1a0e06)}

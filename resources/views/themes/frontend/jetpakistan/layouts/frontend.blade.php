@@ -1,6 +1,6 @@
 @php
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpAssetVersion = 50;
+    $jpAssetVersion = 51; // JETPK-RESPONSIVE-CLUMPING — theme.css + forms.css + booking.css
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
     $pageTitle = trim($__env->yieldContent('title'));

@@ -294,3 +294,67 @@
 .jp-portal-profile__back{align-self:start}
 .jp-portal-profile__password,.jp-portal-profile__danger{margin-top:var(--sp-4)}
 .jp-portal .ota-profile-wrap,.jp-portal .ota-profile-page{max-width:100%}
+
+/* JETPK-RESPONSIVE-CLUMPING-CORRECTION — portal shrink guards (layout-neutral) */
+.jp-portal__top-inner,
+.jp-portal__shell,
+.jp-portal__aside,
+.jp-portal__main,
+.jp-portal-grid,
+.jp-portal-card,
+.jp-portal-trip,
+.jp-portal-trip > *,
+.jp-portal-page-head > *,
+.jp-portal-card__head > *,
+.jp-portal-profile__hero-grid > *,
+.jp-portal-profile__title-row > *{
+  min-width:0;
+  max-width:100%;
+}
+.jp-portal :where(
+  .jp-portal-trip__route,
+  .jp-portal-trip__meta,
+  .jp-portal__identity strong,
+  .jp-portal__identity span,
+  .jp-portal-profile__name,
+  .jp-portal-profile__email,
+  .jp-portal-page-head p,
+  .jp-portal-table td:not(.num),
+  .jp-portal-highlight__ref
+){
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.jp-portal-trip__ref,
+.jp-portal-table .num,
+.jp-portal-stat__v{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+
+@media(max-width:480px){
+  .jp-portal__top-inner{
+    padding:var(--sp-3) var(--sp-4);
+    gap:var(--sp-3);
+    flex-wrap:wrap;
+  }
+  .jp-portal__top-actions{
+    margin-left:0;
+    width:100%;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+    gap:var(--sp-2);
+  }
+  .jp-portal__shell{padding:var(--sp-3) var(--sp-4) var(--sp-6)}
+  .jp-portal-trip{grid-template-columns:minmax(0,1fr);align-items:start}
+  .jp-portal-card__head,
+  .jp-portal-card__body{padding-left:var(--sp-4);padding-right:var(--sp-4)}
+  .jp-portal__user-name{
+    max-width:min(100%,14rem);
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    text-overflow:unset;
+  }
+  .jp-portal-page-head h1{font-size:var(--fs-20)}
+}

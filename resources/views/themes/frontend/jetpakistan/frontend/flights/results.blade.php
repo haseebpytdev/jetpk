@@ -3,7 +3,7 @@
 
 @php
     $jpBrandName = client_branding()->companyName();
-    $jpAssetVersion = 43;
+    $jpAssetVersion = 44; // JETPK-RESPONSIVE-CLUMPING — results.css long-string guards
     $jpSearchAssetVersion = 34;
 @endphp
 

@@ -13,6 +13,8 @@ const SCROLLABLE_TABLE_WRAPPER_CLASSES = [
   'bookings-table-wrap',
   'staff-table-wrap',
   'admin-table-scroll',
+  'jp-portal-table-wrap',
+  'jp-table-wrap',
 ] as const;
 
 export type LayoutCheckContext = {

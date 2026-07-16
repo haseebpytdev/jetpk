@@ -1,7 +1,7 @@
 @php
     $portalVariant = $portalVariant ?? 'agent';
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpPortalAssetVersion = 42;
+    $jpPortalAssetVersion = 43; // JETPK-RESPONSIVE-CLUMPING — portal.css + shared theme/forms
     $jpFavicon = client_branding()->faviconUrl();
     $jpBrandName = client_branding()->companyName();
     $pageTitle = trim($__env->yieldContent('title'));

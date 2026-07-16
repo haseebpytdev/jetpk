@@ -1813,3 +1813,20 @@ body.jp-flights-results .ota-fare-breakdown-modal__footer {
     gap: var(--sp-4);
   }
 }
+
+/* JETPK-RESPONSIVE-CLUMPING-CORRECTION — results long names (layout-neutral) */
+.jp-flights-results .jp-flight-card__place,
+.jp-flights-results .jp-flight-card__route,
+body.jp-flights-results .ota-flight-detail-segment-card__point-title,
+body.jp-flights-results .ota-flight-detail-layover-divider__text,
+body.jp-flights-results .ota-fare-summary-modal__route{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.jp-flights-results .jp-flight-card__code,
+.jp-flights-results .jp-flight-card__time,
+body.jp-flights-results .ota-fare-breakdown-modal__total,
+body.jp-flights-results .jp-flight-card__price{
+  overflow-wrap:normal;
+  word-break:normal;
+}

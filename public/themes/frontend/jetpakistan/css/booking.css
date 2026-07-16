@@ -2222,3 +2222,30 @@ body.jp-offer-refresh-modal-open {
   }
 }
 
+/* JETPK-RESPONSIVE-CLUMPING-CORRECTION — checkout shrink + long strings (layout-neutral) */
+.jp-site-main .ota-checkout-grid > *,
+.jp-site-main .ota-booking-layout > *,
+.jp-site-main .ota-passenger-card,
+.jp-site-main .ota-checkout-card,
+.jp-site-main .ota-checkout-summary-card,
+.jp-site-main .ota-payment-card,
+.jp-checkout-grid__main,
+.jp-checkout-grid__aside{
+  min-width:0;
+  max-width:100%;
+}
+.jp-site-main .ota-passenger-card :where(p,dd,dt,label,span):not([class*="amount"]):not([class*="price"]):not(.num),
+.jp-site-main .ota-checkout-card :where(p,a[href^="mailto:"],span:not([class*="fare"]):not([class*="price"]):not([class*="amount"])),
+.jp-site-main .ota-booking-ref,
+.jp-site-main .ota-support-subject{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.jp-site-main .ota-fare-amount,
+.jp-site-main .ota-price,
+.jp-site-main [class*="total"],
+.jp-site-main .mono.jp-pnr{
+  overflow-wrap:normal;
+  word-break:normal;
+}
+
