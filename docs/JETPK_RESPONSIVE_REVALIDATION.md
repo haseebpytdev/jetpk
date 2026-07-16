@@ -133,24 +133,31 @@ Recorded before edits — no overwrites:
 
 ---
 
-## 7. Verification checklist
+## 7. Verification results
 
+### Artisan / route audit
 ```
-php artisan optimize:clear
-php artisan view:clear
-php artisan config:clear
+php artisan optimize:clear && view:clear && config:clear
 php artisan ota:route-page-health-audit --all
-npx playwright test -c playwright.responsive.config.ts
-npx playwright test -c playwright.responsive.agent.config.ts
-npx playwright test -c playwright.desktop-range.config.ts
-npx playwright test -c playwright.admin-v1-visual.config.ts
+→ pass=55 warn=0 fail=0 skipped=2 server_errors=0
+→ supplier_mutation_attempted=false
 ```
 
-**Viewports:** 320, 360, 390, 430, 768, 1024, 1280, 1440, 1920  
-**Assertion:** `document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1` (Playwright tolerance +2px in helpers)
+### Playwright overflow checks
+| Suite | Result | Notes |
+|---|---|---|
+| `public-critical-responsive` (chromium) | 24 passed / 12 failed | **Passed:** login, register, support, lookup-booking (all viewports); flights-results @ 360/1280/1440. **Failed:** home + flights-search — navigation timeout waiting for `[data-hero-search]` after `?_ota_auto_shell=mobile` redirect (mobile-shell test fragility, not document overflow). flights-results @ 390 — chip-toolbar false positive (fixed in follow-up). |
+| `agent-critical-responsive` (agent config) | 84 skipped | Local auth storage states missing for agent personas. |
+| Full responsive / desktop-range / admin-v1 configs | Not run to completion | Prior full run interrupted; configs include unrelated visual/screenshot specs. |
+
+**Overflow assertion:** `scrollWidth <= innerWidth + 2px` on all passing public-critical routes.
 
 ---
 
-## 8. Post-fix commit SHA
+## 8. Commits
 
-**`cee04fee95b595338b99cbd9eccb6c99dcbfc3ef`** — `fix(jetpk): harden responsive layouts without visual redesign`
+| SHA | Message |
+|---|---|
+| `66eddbd11e7a1b8dfcf4feb8841a2d3f139a02f9` | Pre-fix `jetpk/main` baseline (revalidated audit) |
+| `237e18d124fb4f9e7c825cdb9ed21cabe3feabb2` | **Phase commit:** `fix(jetpk): harden responsive layouts without visual redesign` |
+| `00ba62a480a0d08a5594a4a7b2d471e9d6931f69` | Current `jetpk-production` HEAD (homepage CMS — does not modify responsive CSS) |

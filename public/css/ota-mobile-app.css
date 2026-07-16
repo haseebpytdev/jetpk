@@ -1202,6 +1202,8 @@ body.ota-mobile-app .ota-mobile-results__chips-wrap {
   padding: 0.75rem 0 0.25rem;
   background: #fff;
   border-bottom: 1px solid #eef2f7;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 body.ota-mobile-app .ota-mobile-results__chips {
@@ -1212,6 +1214,7 @@ body.ota-mobile-app .ota-mobile-results__chips {
   -webkit-overflow-scrolling: touch;
   padding: 0 1rem 0.75rem;
   scrollbar-width: none;
+  max-width: 100%;
 }
 
 body.ota-mobile-app .ota-mobile-results__chips::-webkit-scrollbar {

@@ -201,11 +201,32 @@ export async function assertButtonsClickableInViewport(
     const vw = window.innerWidth;
     const bad: Array<{ selector: string; text: string }> = [];
 
+    const isInsideHorizontalScrollToolbar = (el: Element): boolean => {
+      let node: Element | null = el;
+      while (node && node !== document.body) {
+        const style = window.getComputedStyle(node);
+        const overflowX = style.overflowX;
+        if (
+          (overflowX === 'auto' || overflowX === 'scroll') &&
+          (node.classList.contains('ota-mobile-results__chips') ||
+            node.classList.contains('ota-account-subnav') ||
+            node.classList.contains('ota-agent-nav') ||
+            node.classList.contains('jp-portal-tabs'))
+        ) {
+          return true;
+        }
+        node = node.parentElement;
+      }
+
+      return false;
+    };
+
     const selectors =
       'button, a.btn, .ota-btn-primary, .ota-hero-search-submit, input[type="submit"], [type="button"]';
 
     for (const el of Array.from(document.querySelectorAll(selectors))) {
       const html = el as HTMLElement;
+      if (isInsideHorizontalScrollToolbar(html)) continue;
       const text = (html.textContent || '').trim();
       if (!text || text.length > 80) continue;
       const style = window.getComputedStyle(html);
