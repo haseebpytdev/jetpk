@@ -42,6 +42,9 @@ database/database.sqlite
 
 # Local SFTP credentials
 .vscode/sftp.json
+*.sftp
+*-deploy.sftp
+.tmp-route-list-portal.txt
 
 # Per-client deployment secrets (keep JSON metadata tracked)
 clients/*/env.production
