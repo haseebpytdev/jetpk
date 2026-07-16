@@ -42,7 +42,9 @@ class MobileViewPreferenceTest extends TestCase
 
     public function test_mobile_user_agent_auto_renders_mobile_home_without_preference_cookie(): void
     {
-        $html = $this->withHeaders($this->mobileUserAgentHeaders())
+        $html = $this->withHeaders(array_merge($this->mobileUserAgentHeaders(), [
+            'Sec-CH-Viewport-Width' => '390',
+        ]))
             ->get('/')
             ->assertOk()
             ->getContent();
@@ -50,6 +52,93 @@ class MobileViewPreferenceTest extends TestCase
         $this->assertStringContainsString('data-testid="ota-mobile-app-shell"', $html);
         $this->assertStringContainsString('ota-mobile-app.css', $html);
         $this->assertStringNotContainsString('data-testid="public-nav-desktop"', $html);
+    }
+
+    public function test_viewport_width_header_auto_renders_mobile_home_without_mobile_user_agent(): void
+    {
+        $html = $this->get('/?_ota_auto_shell=mobile')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('data-testid="ota-mobile-app-shell"', $html);
+        $this->assertStringNotContainsString('jp-site-main', $html);
+    }
+
+    public function test_viewport_width_header_auto_renders_desktop_home_above_breakpoint(): void
+    {
+        $html = $this->withHeaders(['Sec-CH-Viewport-Width' => '1440'])
+            ->get('/?_ota_auto_shell=desktop')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('jp-site-main', $html);
+        $this->assertStringNotContainsString('data-testid="ota-mobile-app-shell"', $html);
+    }
+
+    public function test_manual_desktop_preference_overrides_narrow_viewport_header(): void
+    {
+        $cookieName = (string) config('ota-mobile.cookie_name', 'ota_view_mode');
+
+        $html = $this->withHeaders(['Sec-CH-Viewport-Width' => '390'])
+            ->withCookie($cookieName, MobileViewPreference::MODE_DESKTOP)
+            ->get('/')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('jp-site-main', $html);
+        $this->assertStringNotContainsString('data-testid="ota-mobile-app-shell"', $html);
+    }
+
+    public function test_manual_mobile_preference_overrides_wide_viewport_header(): void
+    {
+        $cookieName = (string) config('ota-mobile.cookie_name', 'ota_view_mode');
+
+        $html = $this->withHeaders(['Sec-CH-Viewport-Width' => '1440'])
+            ->withCookie($cookieName, MobileViewPreference::MODE_MOBILE)
+            ->get('/')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('data-testid="ota-mobile-app-shell"', $html);
+        $this->assertStringNotContainsString('jp-site-main', $html);
+    }
+
+    public function test_jetpk_desktop_shows_mobile_app_view_toggle_above_breakpoint(): void
+    {
+        $html = $this->withHeaders(['Sec-CH-Viewport-Width' => '1440'])
+            ->get('/')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('data-testid="jp-desktop-mobile-app-toggle"', $html);
+        $this->assertStringContainsString('jp-site-main', $html);
+    }
+
+    public function test_auto_shell_query_reconciles_mobile_without_cookie(): void
+    {
+        $html = $this->get('/?_ota_auto_shell=mobile')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('data-testid="ota-mobile-app-shell"', $html);
+    }
+
+    public function test_jetpk_mobile_theme_includes_jp_app_and_app_css_when_enabled(): void
+    {
+        config(['ota-mobile.app_theme' => 'jetpakistan-app']);
+
+        $html = $this->withHeaders(array_merge($this->mobileUserAgentHeaders(), [
+            'Sec-CH-Viewport-Width' => '390',
+        ]))
+            ->get('/')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('class="ota-mobile-app jp-app', $html);
+        $this->assertMatchesRegularExpression(
+            '#themes/mobile/jetpakistan-app/css/app\.css\?v=\d+#',
+            $html,
+        );
     }
 
     public function test_mobile_home_renders_travellers_cabin_sheet_markup(): void

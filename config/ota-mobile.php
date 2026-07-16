@@ -7,7 +7,7 @@ return [
     | Mobile app shell view preference
     |--------------------------------------------------------------------------
     |
-    | Cookie absent = auto (phone/tablet UA uses mobile shell where mapped).
+    | Cookie absent = auto (viewport + device UA; see viewport_breakpoint).
     | ota_view_mode=mobile|desktop = manual override until changed again.
     |
     */
@@ -26,7 +26,10 @@ return [
     |
     */
 
-    'app_theme' => env('OTA_MOBILE_APP_THEME', 'default-mobile'),
+    'app_theme' => env(
+        'OTA_MOBILE_APP_THEME',
+        env('OTA_CLIENT_SLUG') === 'jetpk' ? 'jetpakistan-app' : 'default-mobile',
+    ),
 
     'cookie_name' => 'ota_view_mode',
 
@@ -38,6 +41,13 @@ return [
     ],
 
     'session_key' => 'ota_view_mode',
+
+    /*
+    | Auto shell breakpoint (px). <= breakpoint prefers mobile; > breakpoint prefers desktop.
+    | Manual ota_view_mode cookie always wins. Client script may pass ?_ota_auto_shell= for
+    | one-request reconciliation without persisting a preference.
+    */
+    'viewport_breakpoint' => (int) env('OTA_MOBILE_VIEWPORT_BREAKPOINT', 768),
 
     /*
     | User-agent regex for auto mobile mode (phones and tablets).

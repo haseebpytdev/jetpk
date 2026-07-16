@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/proposed-safe-tests',
-  testMatch: 'mobile-integration-screenshots.spec.ts',
+  testMatch: /mobile-(live-activation|integration-screenshots)\.spec\.ts/,
   timeout: 120_000,
   workers: 1,
   use: {

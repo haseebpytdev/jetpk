@@ -115,7 +115,37 @@ class MobileViewPreference
             return false;
         }
 
+        $viewportPrefersMobile = $this->viewportPrefersMobile($request);
+        if ($viewportPrefersMobile !== null) {
+            return $viewportPrefersMobile;
+        }
+
         return $this->isMobileDevice($request);
+    }
+
+    /**
+     * Viewport signal for auto mode only. Returns null when no viewport hint is present.
+     */
+    public function viewportPrefersMobile(Request $request): ?bool
+    {
+        $threshold = max(320, (int) config('ota-mobile.viewport_breakpoint', 768));
+
+        $autoShell = strtolower(trim((string) $request->query('_ota_auto_shell', '')));
+        if ($autoShell === 'mobile') {
+            return true;
+        }
+        if ($autoShell === 'desktop') {
+            return false;
+        }
+
+        foreach (['Sec-CH-Viewport-Width', 'Viewport-Width'] as $header) {
+            $width = $request->headers->get($header);
+            if ($width !== null && is_numeric($width)) {
+                return (int) $width <= $threshold;
+            }
+        }
+
+        return null;
     }
 
     protected function storedPreference(Request $request): ?string

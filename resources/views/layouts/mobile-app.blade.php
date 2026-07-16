@@ -91,5 +91,6 @@
         })();
     </script>
     @stack('scripts')
+    @include('layouts.partials.mobile-viewport-reconcile')
 </body>
 </html>

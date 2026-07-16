@@ -81,12 +81,12 @@ class HomeController extends Controller
             'agentBookingAgencyName' => AgentBookingContext::agencyDisplayName($request) ?? '',
         ];
 
-        if ($this->shouldUseJetPakistanThemeHome()) {
-            return view(client_view('frontend.home', 'frontend'), $viewData);
-        }
-
         if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
             return view('mobile.home', $viewData);
+        }
+
+        if ($this->shouldUseJetPakistanThemeHome()) {
+            return view(client_view('frontend.home', 'frontend'), $viewData);
         }
 
         if (is_v2_ui()) {
