@@ -191,7 +191,7 @@ final class ClientProfileConfigReader
             $slug = ClientProfile::slug();
         }
         if ($slug === '') {
-            $slug = 'haseeb-master';
+            $slug = trim((string) config('client.canonical_client.slug', '')) ?: 'jetpk';
         }
 
         $agencyBranding = $mergeAgencyBranding ? $this->loadAgencyBranding() : null;
@@ -213,7 +213,8 @@ final class ClientProfileConfigReader
             'domain' => $branding['domain'],
             'modules' => $this->modulesFromConfig(),
             'branding' => $branding,
-            'is_master_profile' => $slug === 'haseeb-master',
+            'is_master_profile' => ! config('client.standalone', true)
+                && $slug === trim((string) config('ota_client.master_client_slug', 'haseeb-master')),
         ];
     }
 

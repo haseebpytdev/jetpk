@@ -14,12 +14,8 @@
          (route customer.bookings.show), Last updated (j M Y, H:i)
        • data-testid="customer-support-reply-form"
 
-     KNOWN REMAINING LEGACY FRAGMENT — flagged, not hidden:
-       @include('dashboard.support._thread') is a SHARED partial (customer + agent + staff).
-       It is retained here deliberately: recomposing it inside a customer-only theme view would
-       either fork it for one role or silently change the agent/staff thread. It should become a
-       JetPK portal component (e.g. portal/support-thread) in a dedicated pass covering all roles.
-       Until then this page is JetPK-themed EXCEPT the message thread. --}}
+     THREAD: rendered by the role-neutral JetPK portal support-thread component (JP-PORTAL-3 TASK 4).
+     The legacy shared partials are no longer referenced from this page. --}}
 @extends(client_layout('customer-account', 'customer'))
 
 @section('title', 'Ticket #' . $ticket->id)
@@ -44,8 +40,10 @@
 
     <div class="jp-portal__detail-grid">
         <div class="jp-portal__stack">
-            {{-- Shared thread partial — see the header note. --}}
-            @include('dashboard.support._thread', ['messages' => $ticket->messages])
+            @include('themes.frontend.jetpakistan.components.portal.support-thread', [
+                'messages' => $ticket->messages,
+                'audience' => 'customer',
+            ])
 
             @can('reply', $ticket)
                 <x-jp.card class="jp-portal__panel">

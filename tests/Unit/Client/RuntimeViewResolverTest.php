@@ -4,10 +4,13 @@ namespace Tests\Unit\Client;
 
 use App\Models\ClientProfile;
 use App\Models\ClientProfileModule;
+use App\Services\Client\CurrentClientContext;
 use App\Services\Client\RuntimeViewResolver;
 use App\Support\Client\ClientProfileConfigReader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
+use Illuminate\View\ViewException;
 use Tests\TestCase;
 
 class RuntimeViewResolverTest extends TestCase
@@ -32,11 +35,14 @@ class RuntimeViewResolverTest extends TestCase
 
     public function test_falls_back_to_legacy_view_when_theme_view_missing(): void
     {
+        Config::set('client.standalone', false);
+
         $profile = $this->makeProfile([
             'slug' => 'haseeb-master',
             'active_frontend_theme' => 'v1-classic',
             'is_master_profile' => true,
         ]);
+        app(CurrentClientContext::class)->set($profile);
 
         $resolver = app(RuntimeViewResolver::class);
 
@@ -76,6 +82,7 @@ class RuntimeViewResolverTest extends TestCase
             'active_frontend_theme' => 'v1-classic',
             'is_master_profile' => true,
         ]);
+        app(CurrentClientContext::class)->set($profile);
 
         $resolver = app(RuntimeViewResolver::class);
 
@@ -88,11 +95,14 @@ class RuntimeViewResolverTest extends TestCase
 
     public function test_client_view_helper_returns_fallback_safely(): void
     {
-        $this->makeProfile([
+        Config::set('client.standalone', false);
+
+        $profile = $this->makeProfile([
             'slug' => 'haseeb-master',
             'active_frontend_theme' => 'v1-classic',
             'is_master_profile' => true,
         ]);
+        app(CurrentClientContext::class)->set($profile);
 
         $this->assertSame('frontend.home', client_view('home', 'frontend'));
         $this->assertTrue(client_view_exists('home', 'frontend'));
@@ -101,12 +111,15 @@ class RuntimeViewResolverTest extends TestCase
 
     public function test_client_layout_app_alias_resolves_theme_or_legacy_layout(): void
     {
-        $this->makeProfile([
+        Config::set('client.standalone', false);
+
+        $profile = $this->makeProfile([
             'slug' => 'haseeb-master',
             'active_frontend_theme' => 'v1-classic',
             'active_admin_theme' => 'default-admin',
             'is_master_profile' => true,
         ]);
+        app(CurrentClientContext::class)->set($profile);
 
         $this->assertSame('themes.frontend.v1-classic.layouts.frontend', client_layout('app', 'frontend'));
         $this->assertSame('themes.admin.default-admin.layouts.dashboard', client_layout('app', 'admin'));
@@ -116,11 +129,14 @@ class RuntimeViewResolverTest extends TestCase
 
     public function test_client_layout_prefers_theme_layout_when_present(): void
     {
+        Config::set('client.standalone', false);
+
         $profile = $this->makeProfile([
             'slug' => 'haseeb-master',
             'active_frontend_theme' => 'v1-classic',
             'is_master_profile' => true,
         ]);
+        app(CurrentClientContext::class)->set($profile);
 
         $resolver = app(RuntimeViewResolver::class);
 
@@ -139,11 +155,14 @@ class RuntimeViewResolverTest extends TestCase
 
     public function test_client_layout_falls_back_to_legacy_layout_when_theme_missing(): void
     {
+        Config::set('client.standalone', false);
+
         $profile = $this->makeProfile([
             'slug' => 'haseeb-master',
             'active_frontend_theme' => 'v1-classic',
             'is_master_profile' => true,
         ]);
+        app(CurrentClientContext::class)->set($profile);
 
         $themeLayout = resource_path('views/themes/frontend/v1-classic/layouts/frontend.blade.php');
         $backup = File::get($themeLayout);
@@ -165,11 +184,14 @@ class RuntimeViewResolverTest extends TestCase
 
     public function test_client_layout_exists_helper(): void
     {
-        $this->makeProfile([
+        Config::set('client.standalone', false);
+
+        $profile = $this->makeProfile([
             'slug' => 'haseeb-master',
             'active_frontend_theme' => 'v1-classic',
             'is_master_profile' => true,
         ]);
+        app(CurrentClientContext::class)->set($profile);
 
         $this->assertTrue(client_layout_exists('frontend', 'frontend'));
         $this->assertFalse(client_layout_exists('definitely-missing-layout', 'frontend'));
@@ -197,6 +219,8 @@ class RuntimeViewResolverTest extends TestCase
 
     public function test_first_returns_first_existing_view_name(): void
     {
+        Config::set('client.standalone', false);
+
         $profile = $this->makeProfile([
             'slug' => 'haseeb-master',
             'is_master_profile' => true,
@@ -235,6 +259,28 @@ class RuntimeViewResolverTest extends TestCase
 
         $this->assertSame('themes.agent.jetpakistan.index', $resolver->themeViewName('index', 'agent', $profile));
         $this->assertSame('themes.customer.jetpakistan.dashboard', $resolver->themeViewName('dashboard', 'customer', $profile));
+    }
+
+    public function test_standalone_mode_throws_when_agent_theme_view_missing(): void
+    {
+        Config::set('client.standalone', true);
+        Config::set('client.fallback_policy.allow_cross_client_views', false);
+
+        $profile = $this->makeProfile([
+            'slug' => 'jetpk',
+            'active_frontend_theme' => 'jetpakistan',
+            'active_admin_theme' => 'jetpakistan',
+        ]);
+
+        $resolver = app(RuntimeViewResolver::class);
+
+        $this->expectException(ViewException::class);
+        $resolver->view('definitely-missing-jetpk-view', 'agent', $profile);
+    }
+
+    public function test_canonical_client_defaults_to_jetpk_slug(): void
+    {
+        $this->assertSame('jetpk', app(\App\Services\Client\ClientProfileResolver::class)->defaultDeploymentSlug());
     }
 
     /**

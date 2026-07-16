@@ -6,7 +6,7 @@ return [
 
     'default_version' => env('CLIENT_UI_DEFAULT_VERSION', 'v1'),
 
-    'master_client_slug' => env('CLIENT_UI_MASTER_SLUG', 'haseeb-master'),
+    'master_client_slug' => env('CLIENT_UI_MASTER_SLUG', config('client.canonical_client.slug', 'jetpk')),
 
     'allowed_versions' => ['v1', 'v2'],
 

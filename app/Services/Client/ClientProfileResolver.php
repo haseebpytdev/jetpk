@@ -37,9 +37,14 @@ final class ClientProfileResolver
 
     public function defaultDeploymentSlug(): string
     {
+        $canonical = trim((string) config('client.canonical_client.slug', ''));
+        if ($canonical !== '') {
+            return $canonical;
+        }
+
         $slug = trim((string) config('ota_client.slug', ''));
 
-        return $slug !== '' ? $slug : 'haseeb-master';
+        return $slug !== '' ? $slug : 'jetpk';
     }
 
     public function isDefaultDeploymentSlug(string $slug): bool

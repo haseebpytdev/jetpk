@@ -25,7 +25,7 @@ return [
 
     'default_client' => (string) env('OTA_DEFAULT_CLIENT', env('OTA_CLIENT_SLUG', '')),
 
-    'master_client_slug' => (string) env('OTA_MASTER_CLIENT_SLUG', env('OTA_CLIENT_SLUG', 'haseeb-master')),
+    'master_client_slug' => (string) env('OTA_MASTER_CLIENT_SLUG', env('OTA_CLIENT_SLUG', config('client.canonical_client.slug', 'jetpk'))),
 
     'theme' => (string) env('OTA_ACTIVE_THEME', 'v1-classic'),
 

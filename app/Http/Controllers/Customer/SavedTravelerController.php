@@ -7,6 +7,7 @@ use App\Http\Requests\Travelers\UpsertSavedTravelerRequest;
 use App\Models\SavedTraveler;
 use App\Models\User;
 use App\Support\Geo\CountryList;
+use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,10 @@ use Illuminate\Support\Facades\Gate;
 
 class SavedTravelerController extends Controller
 {
+    public function __construct(
+        protected MobileViewPreference $mobileViewPreference,
+    ) {}
+
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', SavedTraveler::class);
@@ -31,24 +36,36 @@ class SavedTravelerController extends Controller
             ->orderBy('first_name')
             ->paginate(20);
 
-        return view(client_view('travelers.index', 'customer'), [
+        $viewData = [
             'travelers' => $travelers,
             'defaultTraveler' => $defaultTraveler,
             'routePrefix' => 'customer.travelers',
             'portalLabel' => 'Customer',
-        ]);
+        ];
+
+        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
+            return view('mobile.customer.travelers.index', $viewData);
+        }
+
+        return view(client_view('travelers.index', 'customer'), $viewData);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         Gate::authorize('create', SavedTraveler::class);
 
-        return view(client_view('travelers.create', 'customer'), [
+        $viewData = [
             'traveler' => new SavedTraveler,
             'routePrefix' => 'customer.travelers',
             'portalLabel' => 'Customer',
             'countries' => CountryList::forSelect(),
-        ]);
+        ];
+
+        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
+            return view('mobile.customer.travelers.create', $viewData);
+        }
+
+        return view(client_view('travelers.create', 'customer'), $viewData);
     }
 
     public function store(UpsertSavedTravelerRequest $request): RedirectResponse
@@ -71,16 +88,22 @@ class SavedTravelerController extends Controller
             ->with('status', 'traveler-saved');
     }
 
-    public function edit(SavedTraveler $traveler): View
+    public function edit(Request $request, SavedTraveler $traveler): View
     {
         Gate::authorize('update', $traveler);
 
-        return view(client_view('travelers.edit', 'customer'), [
+        $viewData = [
             'traveler' => $traveler,
             'routePrefix' => 'customer.travelers',
             'portalLabel' => 'Customer',
             'countries' => CountryList::forSelect(),
-        ]);
+        ];
+
+        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
+            return view('mobile.customer.travelers.edit', $viewData);
+        }
+
+        return view(client_view('travelers.edit', 'customer'), $viewData);
     }
 
     public function update(UpsertSavedTravelerRequest $request, SavedTraveler $traveler): RedirectResponse

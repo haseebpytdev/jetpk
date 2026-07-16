@@ -42,7 +42,7 @@ class OtaFoundationSeeder extends Seeder
                 'name' => $platformName,
                 'timezone' => 'Asia/Karachi',
                 'settings' => [
-                    'domain' => 'ota.haseebasif.com',
+                    'domain' => (string) config('client.canonical_client.domain', config('ota-brand.domain', 'jetpakistan.pk')),
                 ],
             ],
         );

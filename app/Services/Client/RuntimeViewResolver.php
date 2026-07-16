@@ -3,7 +3,9 @@
 namespace App\Services\Client;
 
 use App\Models\ClientProfile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
+use Illuminate\View\ViewException;
 
 /**
  * Resolves theme-specific Blade view and layout names with legacy fallback (MC-8B/8D).
@@ -30,6 +32,10 @@ final class RuntimeViewResolver
 
         if (View::exists($themeName)) {
             return $themeName;
+        }
+
+        if ($this->requiresStrictThemedView($area)) {
+            $this->handleMissingThemedView($name, $area, $themeName);
         }
 
         return $this->legacyViewName($name, $area);
@@ -63,6 +69,10 @@ final class RuntimeViewResolver
 
         if (View::exists($themeView)) {
             return $themeView;
+        }
+
+        if ($this->requiresStrictThemedView($normalizedArea)) {
+            $this->handleMissingThemedLayout($name, $normalizedArea, $themeView);
         }
 
         return $this->legacyLayoutName($name, $normalizedArea);
@@ -336,6 +346,13 @@ final class RuntimeViewResolver
             }
         }
 
+        if (config('client.standalone', false)) {
+            $canonical = trim((string) config('client.canonical_client.theme', ''));
+            if ($canonical !== '') {
+                return $canonical;
+            }
+        }
+
         return $fallback !== '' ? $fallback : 'default-'.$area;
     }
 
@@ -402,5 +419,58 @@ final class RuntimeViewResolver
         $area = strtolower(trim($area));
 
         return in_array($area, self::AREAS, true) ? $area : 'frontend';
+    }
+
+    private function requiresStrictThemedView(string $area): bool
+    {
+        if (! config('client.standalone', false)) {
+            return false;
+        }
+
+        if (config('client.fallback_policy.allow_cross_client_views', false)) {
+            return false;
+        }
+
+        return in_array($this->normalizeArea($area), ['frontend', 'customer', 'agent', 'mobile'], true);
+    }
+
+    private function handleMissingThemedView(string $logicalName, string $area, string $themeViewName): void
+    {
+        Log::warning('jetpk.standalone.missing_themed_view', [
+            'logical_name' => $logicalName,
+            'area' => $area,
+            'theme_view' => $themeViewName,
+        ]);
+
+        if (app()->environment('production') && ! app()->runningUnitTests()) {
+            throw new ViewException('The requested page is temporarily unavailable.');
+        }
+
+        throw new ViewException(sprintf(
+            'Missing JetPK themed view [%s] for logical key [%s] in area [%s].',
+            $themeViewName,
+            $logicalName,
+            $area,
+        ));
+    }
+
+    private function handleMissingThemedLayout(string $layoutName, string $area, string $themeLayoutName): void
+    {
+        Log::warning('jetpk.standalone.missing_themed_layout', [
+            'layout_name' => $layoutName,
+            'area' => $area,
+            'theme_layout' => $themeLayoutName,
+        ]);
+
+        if (app()->environment('production') && ! app()->runningUnitTests()) {
+            throw new ViewException('The requested page is temporarily unavailable.');
+        }
+
+        throw new ViewException(sprintf(
+            'Missing JetPK themed layout [%s] for layout [%s] in area [%s].',
+            $themeLayoutName,
+            $layoutName,
+            $area,
+        ));
     }
 }

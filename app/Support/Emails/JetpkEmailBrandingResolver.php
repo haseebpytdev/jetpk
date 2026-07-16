@@ -324,7 +324,7 @@ class JetpkEmailBrandingResolver
         if (function_exists('config')) {
             $base = config('app.url');
         }
-        $base = $base ?: 'https://ota.haseebasif.com';
+        $base = $base ?: ('https://'.trim((string) config('client.canonical_client.domain', 'jetpakistan.pk')));
 
         return rtrim($base, '/') . $path;
     }

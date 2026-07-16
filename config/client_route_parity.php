@@ -18,7 +18,7 @@ return [
 
     'host_guard_enabled' => env('CLIENT_ROUTE_PARITY_HOST_GUARD_ENABLED', false),
 
-    'default_client_slug' => env('CLIENT_ROUTE_PARITY_DEFAULT_SLUG', 'haseeb-master'),
+    'default_client_slug' => env('CLIENT_ROUTE_PARITY_DEFAULT_SLUG', config('client.canonical_client.slug', 'jetpk')),
 
     'allow_haseeb_master_prefixed_parity' => env('CLIENT_ROUTE_PARITY_ALLOW_HASEEB_MASTER', true), // deprecated: default slug always redirects
 
