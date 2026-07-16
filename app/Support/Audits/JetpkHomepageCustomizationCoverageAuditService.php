@@ -31,14 +31,18 @@ final class JetpkHomepageCustomizationCoverageAuditService
             }
         }
 
-        $fail = count($failures);
+        $failedSections = count(array_filter(
+            $sections,
+            static fn (array $section): bool => array_filter($section['checks'] ?? [], static fn (bool $ok): bool => ! $ok) !== [],
+        ));
+        $passSections = count($sections) - $failedSections;
         $payload = [
             'generated_at' => now()->toIso8601String(),
             'phase' => 'jetpk-9h-e',
             'page_key' => ClientPageKeys::HOME,
             'section_count' => count($sections),
-            'pass' => count($sections) - ($fail > 0 ? 1 : 0),
-            'fail' => $fail > 0 ? 1 : 0,
+            'pass' => $passSections,
+            'fail' => $failedSections,
             'failure_details' => $failures,
             'sections' => $sections,
         ];
@@ -51,8 +55,8 @@ final class JetpkHomepageCustomizationCoverageAuditService
         File::put($mdPath, $this->markdown($payload));
 
         return [
-            'pass' => $fail === 0 ? 1 : 0,
-            'fail' => $fail > 0 ? 1 : 0,
+            'pass' => $passSections,
+            'fail' => $failedSections,
             'path' => $jsonPath,
             'md_path' => $mdPath,
         ];
@@ -63,8 +67,7 @@ final class JetpkHomepageCustomizationCoverageAuditService
      */
     private function sectionMatrix(): array
     {
-        $editorPath = resource_path('views/themes/admin/jetpakistan/page-settings/partials/home-sections.blade.php');
-        $editor = is_file($editorPath) ? (string) file_get_contents($editorPath) : '';
+        $editor = $this->homepageEditorSource();
         $schemaSections = collect(ClientPageSectionSchema::sectionsFor(ClientPageKeys::HOME))->keyBy('key');
         $mediaKeys = ClientPageMediaSchema::assetKeysFor(ClientPageKeys::HOME);
 
@@ -131,6 +134,21 @@ final class JetpkHomepageCustomizationCoverageAuditService
         }
 
         return $rows;
+    }
+
+    private function homepageEditorSource(): string
+    {
+        $paths = [
+            resource_path('views/themes/admin/jetpakistan/page-settings/partials/home-sections.blade.php'),
+            resource_path('views/themes/admin/jetpakistan/page-settings/partials/home-routes-manager.blade.php'),
+            resource_path('views/themes/admin/jetpakistan/page-settings/partials/home-destinations-manager.blade.php'),
+            resource_path('views/themes/admin/jetpakistan/page-settings/partials/home-support-cta-manager.blade.php'),
+        ];
+
+        return implode("\n", array_map(
+            static fn (string $path): string => is_file($path) ? (string) file_get_contents($path) : '',
+            $paths,
+        ));
     }
 
     private function consumerExists(string $consumer): bool

@@ -42,7 +42,7 @@ class JetpkPageSettingsParityTest extends TestCase
             ->get('/admin/page-settings/about')
             ->assertOk()
             ->assertSee('Cheap flights and secure online booking for Pakistan', false)
-            ->assertSee('ticketingjp@jetpakistan.com', false)
+            ->assertSee('ota@jetpakistan.pk', false)
             ->assertSee('Form source: public fallback', false);
     }
 

@@ -12,6 +12,7 @@ use App\Services\Client\ClientPageAdminContentResolver;
 use App\Services\Client\ClientPageAssetService;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Homepage\JetpkHomepageAssetService;
+use App\Services\Homepage\JetpkHomepageContentMergeService;
 use App\Services\Homepage\JetpkHomepageContentValidator;
 use App\Services\Homepage\JetpkHomepageRouteFareRefreshService;
 use App\Support\Client\ClientPageKeys;
@@ -37,6 +38,7 @@ class ClientPageSettingsController extends Controller
         private readonly ClientPageAssetService $assetService,
         private readonly ClientThemePaletteService $paletteService,
         private readonly JetpkHomepageContentValidator $homepageValidator,
+        private readonly JetpkHomepageContentMergeService $homepageMergeService,
         private readonly JetpkHomepageAssetService $homepageAssetService,
         private readonly JetpkHomepageRouteFareRefreshService $routeFareRefreshService,
     ) {}
@@ -112,9 +114,16 @@ class ClientPageSettingsController extends Controller
             'destination_remove' => ['nullable', 'array'],
             'support_cta_background_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'support_cta_background_mobile_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'submitted_sections' => ['nullable', 'array'],
+            'submitted_sections.*' => ['string', 'max:64'],
         ]);
 
         $content = $this->preserveIntentionalEmptyScalars($validated['content']);
+        $existing = $this->adminContentResolver->formContentFor($profile, $pageKey);
+        if ($pageKey === ClientPageKeys::HOME) {
+            $panels = array_values(array_filter((array) $request->input('submitted_sections', [])));
+            $content = $this->homepageMergeService->mergeOnSave($existing, $content, $panels);
+        }
         $content = $this->homepageValidator->validateAndNormalize($pageKey, $content);
 
         if ($pageKey === ClientPageKeys::HOME) {

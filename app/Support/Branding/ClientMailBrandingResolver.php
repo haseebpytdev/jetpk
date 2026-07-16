@@ -12,7 +12,7 @@ use App\Support\Auth\ClientLoginOtpGate;
  */
 final class ClientMailBrandingResolver
 {
-    private const JETPK_REPLY_TO = 'ticketingjp@jetpakistan.com';
+    private const JETPK_REPLY_TO = 'ota@jetpakistan.pk';
 
     public static function resolve(?string $clientSlug = null): ClientMailBrandingProfile
     {

@@ -24,7 +24,7 @@ final class ClientPageSectionSchema
                 ['key' => 'group_cards', 'label' => 'Group travel cards', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'cta_text', 'cta_url', 'items']],
                 ['key' => 'featured_deals', 'label' => 'Featured deals', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'cta_text', 'cta_url', 'card_count', 'source']],
                 ['key' => 'groups', 'label' => 'Group ticketing CTA', 'fields' => ['enabled', 'title', 'subtitle', 'cta_text', 'cta_url']],
-                ['key' => 'support_cta', 'label' => 'Support callout', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'phone_label', 'phone_value', 'cta_label', 'cta_link', 'overlay_strength', 'text_alignment']],
+                ['key' => 'support_cta', 'label' => 'Support callout', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'phone_label', 'phone_value', 'call_enabled', 'call_label', 'call_url', 'chat_enabled', 'chat_label', 'chat_url', 'cta_label', 'cta_link', 'background_mode', 'overlay_strength', 'text_alignment']],
             ],
             ClientPageKeys::ABOUT, ClientPageKeys::SUPPORT => [
                 ['key' => 'hero', 'label' => 'Page hero', 'fields' => ['kicker', 'title', 'description']],

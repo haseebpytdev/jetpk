@@ -61,7 +61,7 @@
                         <ul class="ota-support-list">
                             <li><strong>Website:</strong> <a href="https://www.jetpakistan.com" target="_blank" rel="noopener">www.jetpakistan.com</a></li>
                             <li><strong>Phone:</strong> 0311 1222427</li>
-                            <li><strong>Email:</strong> <a href="mailto:ticketingjp@jetpakistan.com">ticketingjp@jetpakistan.com</a></li>
+                            <li><strong>Email:</strong> <a href="mailto:ota@jetpakistan.pk">ota@jetpakistan.pk</a></li>
                             <li><strong>Office:</strong> Office No. 220, 2nd Floor, Century Tower, Kalma Chowk, Gulberg III, Lahore</li>
                         </ul>
                     </div>

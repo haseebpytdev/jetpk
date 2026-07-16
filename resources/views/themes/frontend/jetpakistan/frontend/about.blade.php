@@ -10,7 +10,7 @@
     $aboutTitle = client_page_content(ClientPageKeys::ABOUT, 'hero.title', 'Cheap flights and secure online booking for Pakistan');
     $aboutDescription = client_page_content(ClientPageKeys::ABOUT, 'hero.description', 'JetPakistan helps travellers discover low fares, compare airlines, and complete domestic and international flight bookings online with confidence.');
     $aboutPhone = client_page_content(ClientPageKeys::ABOUT, 'contact.phone', '0311 1222427');
-    $aboutEmail = client_page_content(ClientPageKeys::ABOUT, 'contact.email', 'ticketingjp@jetpakistan.com');
+    $aboutEmail = client_page_content(ClientPageKeys::ABOUT, 'contact.email', 'ota@jetpakistan.pk');
     $aboutWebsite = client_page_content(ClientPageKeys::ABOUT, 'contact.website', 'https://www.jetpakistan.com');
     $aboutOffice = client_page_content(ClientPageKeys::ABOUT, 'contact.office', 'Office No. 220, 2nd Floor, Century Tower, Kalma Chowk, Gulberg III, Lahore');
 @endphp

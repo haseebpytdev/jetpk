@@ -11,7 +11,7 @@
     $isJetPakistanTheme = is_client_preview() && client_theme()->frontendTheme() === 'jetpakistan';
     if ($isJetPakistanTheme) {
         $brandName = 'JetPakistan';
-        $supportEmail = 'ticketingjp@jetpakistan.com';
+        $supportEmail = 'ota@jetpakistan.pk';
         $supportPhone = '0311 1222427';
         $supportWhatsapp = '923111222427';
     }

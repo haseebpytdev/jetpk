@@ -49,7 +49,7 @@ final class LoginOtpMailDiagnostics
     public static function userFacingMessage(?string $clientSlug): string
     {
         if ($clientSlug === 'jetpk') {
-            return 'We could not send your JetPakistan verification code right now. Please try again in a minute, or contact ticketingjp@jetpakistan.com if this continues.';
+            return 'We could not send your JetPakistan verification code right now. Please try again in a minute, or contact ota@jetpakistan.pk if this continues.';
         }
 
         return 'We could not send a verification code right now. Please try again shortly or contact support.';

@@ -5,7 +5,7 @@
 
     $brandName = BrandDisplayResolver::displayName();
     $tagline = 'Reliable travel support for agencies and customers.';
-    $supportEmail = (string) (config('mail.from.address') ?: 'support@haseebasif.com');
+    $supportEmail = (string) (config('mail.from.address') ?: 'ota@jetpakistan.pk');
     $supportPhone = '+92 300 0000000';
     $primary = '#0c4a6e';
 

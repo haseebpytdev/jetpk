@@ -9,7 +9,7 @@
     $jpSupportUrl = Route::has('support') ? '/support' : '/lookup-booking';
     $jpBrandName = client_branding()->companyName();
     $jpTagline = 'Book flights, manage bookings, and travel with confidence.';
-    $jpSupportEmail = 'support@jetpakistan.com';
+    $jpSupportEmail = 'ota@jetpakistan.pk';
     $jpSupportPhone = '';
 
     try {

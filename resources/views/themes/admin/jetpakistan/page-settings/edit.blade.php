@@ -62,6 +62,7 @@
                 <form method="post" action="{{ client_route('admin.page-settings.update', ['pageKey' => $pageKey]) }}" class="jp-stack jp-form-shell" data-jp-content-form @if($pageKey === 'home') enctype="multipart/form-data" @endif>
                     @csrf
                     @method('PATCH')
+                    <div id="jp-submitted-sections" aria-hidden="true"></div>
 
                     @if ($pageKey === 'home')
                         <nav class="jp-page-editor__nav" aria-label="Home sections" data-jp-section-nav>
@@ -195,5 +196,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('themes/admin/jetpakistan/js/page-settings-editor.js') }}?v=3"></script>
+<script src="{{ asset('themes/admin/jetpakistan/js/page-settings-editor.js') }}?v=4"></script>
 @endpush

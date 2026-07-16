@@ -236,8 +236,9 @@ final class JetpkHomepageContentValidator
         $support['phone_value'] = $phone;
         $support['call_enabled'] = $this->boolString($support['call_enabled'] ?? '1');
         $support['chat_enabled'] = $this->boolString($support['chat_enabled'] ?? '1');
-        $support['background_mode'] = in_array((string) ($support['background_mode'] ?? 'gradient'), ['uploaded', 'gradient', 'uploaded_overlay'], true)
-            ? (string) $support['background_mode']
+        $backgroundMode = (string) ($support['background_mode'] ?? 'gradient');
+        $support['background_mode'] = in_array($backgroundMode, ['uploaded', 'gradient', 'uploaded_overlay'], true)
+            ? $backgroundMode
             : 'gradient';
 
         return $support;

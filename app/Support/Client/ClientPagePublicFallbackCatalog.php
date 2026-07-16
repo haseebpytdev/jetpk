@@ -26,7 +26,7 @@ final class ClientPagePublicFallbackCatalog
                 ],
                 'contact' => [
                     'phone' => '0311 1222427',
-                    'email' => 'ticketingjp@jetpakistan.com',
+                    'email' => 'ota@jetpakistan.pk',
                     'website' => 'https://www.jetpakistan.com',
                     'office' => 'Office No. 220, 2nd Floor, Century Tower, Kalma Chowk, Gulberg III, Lahore',
                 ],
@@ -39,7 +39,7 @@ final class ClientPagePublicFallbackCatalog
                 ],
                 'contact' => [
                     'phone' => '0311 1222427',
-                    'email' => 'ticketingjp@jetpakistan.com',
+                    'email' => 'ota@jetpakistan.pk',
                     'whatsapp' => '923111222427',
                     'website' => 'https://www.jetpakistan.com',
                 ],

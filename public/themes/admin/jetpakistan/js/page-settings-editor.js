@@ -33,10 +33,13 @@
 
   var sectionNav = root.querySelector('[data-jp-section-nav]');
   var sectionPanels = root.querySelectorAll('[data-jp-section-panel]');
+  var activeSection = 'hero';
+
   if (sectionNav && sectionPanels.length) {
     sectionNav.querySelectorAll('[data-jp-section]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var key = btn.getAttribute('data-jp-section');
+        activeSection = key || activeSection;
         sectionNav.querySelectorAll('[data-jp-section]').forEach(function (t) {
           t.classList.toggle('is-active', t === btn);
         });
@@ -44,6 +47,20 @@
           panel.classList.toggle('jp-is-hidden', panel.getAttribute('data-jp-section-panel') !== key);
         });
       });
+    });
+  }
+
+  var contentForm = root.querySelector('[data-jp-content-form]');
+  if (contentForm && sectionNav) {
+    contentForm.addEventListener('submit', function () {
+      var holder = contentForm.querySelector('#jp-submitted-sections');
+      if (!holder) return;
+      holder.innerHTML = '';
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'submitted_sections[]';
+      input.value = activeSection;
+      holder.appendChild(input);
     });
   }
 

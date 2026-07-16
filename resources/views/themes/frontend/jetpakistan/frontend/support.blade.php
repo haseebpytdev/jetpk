@@ -3,7 +3,7 @@
 @php
     use App\Support\Client\ClientPageKeys;
 
-    $supportEmail = client_page_content(ClientPageKeys::SUPPORT, 'contact.email', 'ticketingjp@jetpakistan.com');
+    $supportEmail = client_page_content(ClientPageKeys::SUPPORT, 'contact.email', 'ota@jetpakistan.pk');
     $supportPhone = client_page_content(ClientPageKeys::SUPPORT, 'contact.phone', '0311 1222427');
     $supportWhatsapp = client_page_content(ClientPageKeys::SUPPORT, 'contact.whatsapp', '923111222427');
     $supportWebsite = client_page_content(ClientPageKeys::SUPPORT, 'contact.website', 'https://www.jetpakistan.com');

@@ -18,7 +18,7 @@
             You will receive login access only after approval.
         </div>
 
-        <p class="ota-agent-register-note">Need help with your application? Contact support@haseebasif.com.</p>
+        <p class="ota-agent-register-note">Need help with your application? Contact ota@jetpakistan.pk.</p>
 
         <nav class="ota-register-links" aria-label="Agent application options">
             <a href="{{ client_route('agent.register') }}">Agent info</a>

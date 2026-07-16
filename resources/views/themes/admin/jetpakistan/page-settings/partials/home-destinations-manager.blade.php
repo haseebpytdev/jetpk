@@ -93,6 +93,7 @@
                     <input aria-label="Image alt text" class="jp-control" name="content[destinations][items][{{ $i }}][alt]" value="{{ data_get($item, 'alt') }}">
                 </div>
                 <div class="jp-media-inline">
+                    <p class="jp-field__help">Image: Media tab key <code>destination_{{ $i + 1 }}</code> — upload here, choose library, or remove.</p>
                     @if ($existingAsset?->public_url)
                         <img src="{{ $existingAsset->public_url }}" alt="" class="jp-media-inline__preview" loading="lazy">
                     @endif

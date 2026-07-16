@@ -369,7 +369,7 @@ final class ClientPageContentResolver
             ],
             'header_support' => [
                 'phone' => '+92 21 111 000 000',
-                'email' => 'support@jetpakistan.pk',
+                'email' => 'ota@jetpakistan.pk',
                 'hours' => 'Sun–Sat, 9:00–21:00 PKT',
             ],
             'seo' => [

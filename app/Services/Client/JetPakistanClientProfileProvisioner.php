@@ -71,7 +71,7 @@ final class JetPakistanClientProfileProvisioner
                     'secondary_color' => '#00A651',
                     'accent_color' => '#FDB913',
                     'phone' => '',
-                    'email' => 'support@jetpakistan.com',
+                    'email' => 'ota@jetpakistan.pk',
                     'address' => 'Karachi, Pakistan',
                     'footer_text' => 'JetPakistan — your gateway to seamless travel.',
                     'config' => [

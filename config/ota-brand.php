@@ -9,7 +9,7 @@ return [
     'tagline' => 'Book domestic and international flights with trusted travel support.',
     'support_phone' => '+92 300 7654321',
     'support_whatsapp' => '923007654321',
-    'support_email' => 'support@haseebasif.com',
+    'support_email' => env('OTA_SUPPORT_EMAIL', 'ota@jetpakistan.pk'),
     'company_note' => 'Flight booking support for individuals, families, and corporate travelers.',
     'homepage_headline' => 'Book Flights With Confidence',
     'homepage_subheadline' => 'Search routes, compare fares, and confirm your booking with dedicated support.',

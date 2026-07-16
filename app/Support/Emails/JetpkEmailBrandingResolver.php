@@ -37,7 +37,7 @@ class JetpkEmailBrandingResolver
         'logo_url'         => null,
         'home_url'         => null,
         'manage_url'       => null,
-        'support_email'    => 'support@jetpakistan.com',
+        'support_email'    => 'ota@jetpakistan.pk',
         'support_phone'    => null,
         'primary_color'    => '#00843D',
         'accent_color'     => '#F58220',
@@ -77,8 +77,28 @@ class JetpkEmailBrandingResolver
 
         // Guarantee the client slug is always JetPK for these views.
         $brand['client_slug'] = self::CLIENT_SLUG;
+        $brand['support_email'] = static::canonicalBusinessEmail($brand['support_email'] ?? null);
 
         return $brand;
+    }
+
+    /**
+     * Map legacy JetPakistan sender/contact defaults to the canonical business mailbox.
+     */
+    protected static function canonicalBusinessEmail(?string $email): string
+    {
+        $email = strtolower(trim((string) $email));
+        $legacy = [
+            'support@jetpakistan.com',
+            'ticketingjp@jetpakistan.com',
+            'support@haseebasif.com',
+        ];
+
+        if ($email === '' || in_array($email, $legacy, true)) {
+            return 'ota@jetpakistan.pk';
+        }
+
+        return trim((string) $email);
     }
 
     /**
@@ -130,7 +150,7 @@ class JetpkEmailBrandingResolver
             'logo_url'      => static::resolveLogoUrl($profile, $branding),
             'home_url'      => $homeUrl,
             'manage_url'    => $manageUrl,
-            'support_email' => $branding?->email,
+            'support_email' => static::canonicalBusinessEmail($branding?->email),
             'support_phone' => $branding?->phone,
             'primary_color' => $branding?->primary_color,
             'accent_color'  => $branding?->accent_color,
@@ -155,7 +175,7 @@ class JetpkEmailBrandingResolver
             'logo_url'      => static::resolveLogoUrlFromPaths('jetpk-assets', 'logo/logo.svg'),
             'home_url'      => static::previewHomeUrl($previewPath) ?? 'https://www.jetpakistan.com',
             'manage_url'    => static::previewManageUrl($previewPath),
-            'support_email' => 'support@jetpakistan.com',
+            'support_email' => 'ota@jetpakistan.pk',
             'support_phone' => '+92 21 111 000 000',
             'primary_color' => '#00843D',
             'accent_color'  => '#F58220',

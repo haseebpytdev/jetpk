@@ -61,7 +61,7 @@ class SafeBrandingResolver
                 'fallback_brand' => [
                     'name' => 'JetPakistan',
                     'tagline' => 'Book flights, manage bookings, and travel with confidence.',
-                    'support_email' => 'support@jetpakistan.com',
+                    'support_email' => 'ota@jetpakistan.pk',
                     'support_phone' => '',
                 ],
             ];

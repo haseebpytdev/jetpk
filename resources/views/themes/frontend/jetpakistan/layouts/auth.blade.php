@@ -1,7 +1,7 @@
 @php
     $jpAuthCardClass = trim($__env->yieldContent('auth_card_class'));
     $jpAuthBrand = client_branding()->companyName();
-    $jpSupportEmail = client_branding()->email() ?: 'ticketingjp@jetpakistan.com';
+    $jpSupportEmail = client_branding()->email() ?: 'ota@jetpakistan.pk';
     $jpSupportPhone = client_branding()->phone() ?: '0311 1222427';
     $jpAuthLogoUrl = client_branding()->logoUrl();
 @endphp

@@ -21,7 +21,7 @@ trait JetpkEmailSampleData
         $brand = JetpkEmailBrandingResolver::resolve('jetpk');
 
         // Ensure previews show support details even before branding is wired.
-        $brand['support_email'] = $brand['support_email'] ?? 'support@jetpakistan.com';
+        $brand['support_email'] = $brand['support_email'] ?? 'ota@jetpakistan.pk';
         $brand['support_phone'] = $brand['support_phone'] ?? '+92 21 111 000 000';
         $brand['manage_url']    = $brand['manage_url'] ?? ($brand['home_url'] ?? config('app.url', 'https://jetpakistan.pk'));
 
