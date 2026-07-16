@@ -102,5 +102,12 @@
         <p class="ota-mobile-customer__footer-note">
             <a href="{{ $dashboardUrl ?? route('customer.dashboard') }}" class="ota-mobile-customer__link">Back to dashboard</a>
         </p>
+
+        <section class="ota-mobile-customer__card">
+            <form method="post" action="{{ route('logout') }}" class="ota-mobile-customer__form">
+                @csrf
+                <button type="submit" class="ota-mobile-customer__btn ota-mobile-customer__btn--secondary ota-mobile-customer__btn--block" data-testid="mobile-customer-logout">Log out</button>
+            </form>
+        </section>
     </div>
 @endsection

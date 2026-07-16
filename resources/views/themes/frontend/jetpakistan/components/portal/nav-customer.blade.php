@@ -3,7 +3,7 @@
     use Illuminate\Support\Facades\Route;
 
     $customerNavItems = [
-        ['route' => 'customer.dashboard', 'label' => 'Overview', 'icon' => 'plane', 'match' => 'customer.dashboard', 'module' => 'customer_portal'],
+        ['route' => 'customer.dashboard', 'label' => 'Dashboard', 'icon' => 'plane', 'match' => 'customer.dashboard', 'module' => 'customer_portal'],
         ['route' => 'customer.bookings.index', 'label' => 'My trips', 'icon' => 'calendar', 'match' => 'customer.bookings.*', 'module' => 'customer_portal'],
         ['route' => 'customer.travelers.index', 'label' => 'Travelers', 'icon' => 'users', 'match' => 'customer.travelers.*', 'module' => 'saved_travelers'],
         ['route' => 'customer.support.tickets.index', 'label' => 'Support', 'icon' => 'chat', 'match' => 'customer.support.*', 'module' => 'support_system'],
@@ -29,4 +29,5 @@
     <x-jp.icon name="search" />
     <span>Search flights</span>
   </a>
+  @include('themes.frontend.jetpakistan.components.portal.nav-account-footer')
 </nav>

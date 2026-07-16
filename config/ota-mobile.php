@@ -86,6 +86,7 @@ return [
         'booking.lookup' => true,
         'guest.bookings.show' => true,
         'profile.edit-frontend' => true,
+        'profile.edit-agent' => true,
         'customer.bookings.index' => true,
         'customer.bookings.show' => true,
         'customer.support.index' => true,

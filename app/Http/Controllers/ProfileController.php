@@ -36,9 +36,17 @@ class ProfileController extends Controller
             return view('mobile.customer.profile.edit', $viewData);
         }
 
+        if ($user->isAgentPortalUser() && $this->mobileViewPreference->shouldUseMobileShell($request, 'profile.edit-agent')) {
+            return view('mobile.agent.profile.edit', $viewData);
+        }
+
         $view = match (true) {
-            $user->isCustomer() => 'profile.edit-frontend',
-            $user->isAgentPortalUser() => 'profile.edit-agent',
+            $user->isCustomer() => client_view_exists('profile.edit', 'customer')
+                ? client_view('profile.edit', 'customer')
+                : 'profile.edit-frontend',
+            $user->isAgentPortalUser() => client_view_exists('profile.edit', 'agent')
+                ? client_view('profile.edit', 'agent')
+                : 'profile.edit-agent',
             default => 'profile.edit-dashboard',
         };
 

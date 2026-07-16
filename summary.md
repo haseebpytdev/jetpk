@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-07-16 (JETPK mobile app live activation + viewport auto-switch)
+**Last updated:** 2026-07-16 (JETPK portal customer/agent/agent-staff parity closure)
 
 ---
 
@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-07-16 | JETPK-PORTAL-PARITY-CLOSURE | **Customer + Agent + Agent Staff portal closure:** JetPK themed `profile/edit` under `themes/{customer,agent}/jetpakistan/`; sidebar Profile + POST Logout (`nav-account-footer`); top-right avatar chip; full agent nav (commissions, deposits, ledger, reports, statements); mobile agent profile + logout; `ProfileController` uses `client_view_exists()` with legacy fallback. `portal.css` `?v=42`. Docs: `JETPK_PORTAL_PARITY_AUDIT.md`, `JETPK_PORTAL_ROUTE_MATRIX.md`. Tests: `JetpkPortalParityTest`. |
 | 2026-07-16 | JETPK-MOBILE-APP-LIVE-ACTIVATION | **Live mobile activation:** `OTA_MOBILE_APP_THEME=jetpakistan-app` default for `jetpk`; **`MobileViewPreference::viewportPrefersMobile()`** reconciles auto mode via `Sec-CH-Viewport-Width` / `Viewport-Width` / `_ota_auto_shell` (≤768px → mobile, >768px → desktop); manual **`ota_view_mode`** cookie still overrides; client **`mobile-viewport-reconcile`** partial avoids refresh loops; JetPK desktop floating **Mobile App** toggle (`jp-desktop-mobile-app-toggle`); **`HomeController`** mobile shell check before JetPK theme home. Tests: **`MobileViewportPreferenceTest`**, **`mobile-live-activation.spec.ts`**. Assets unchanged: `app.css` `?v=5`, desktop `theme.css` `?v=50`. |
 | 2026-07-15 | JETPK-MOBILE-APP-THEME MA-0–MA-6 | **Mobile app theme integration:** `mobile` area in `client_view_paths` / `client_themes`; `OTA_MOBILE_APP_THEME` toggle (`default-mobile` \| `jetpakistan-app`); `RuntimeViewResolver::resolvedMobileTheme()` independent of desktop theme; theme shells under `themes/mobile/{default-mobile,jetpakistan-app}/layouts/mobile-app`; `public/themes/mobile/jetpakistan-app/css/app.css` (`$jpMobileAssetVersion=5`); 50 mobile views wired via `client_layout('mobile-app','mobile')`. Docs: `JETPK_MOBILE_INTEGRATION_AUDIT.md`, `JETPK_MOBILE_ROUTE_MATRIX.md`, MA-6 QA reports. No supplier/booking/payment changes. |
 | 2026-07-15 | JETPK-HOMEPAGE-LCP-LAYOUT-REGRESSION-FIX | **Hero layout:** LCP `<picture>` kept; `picture` + `.hero-img` absolutely positioned inside `.hero-media` so intrinsic `width`/`height` no longer expand hero section height (restores content-sized hero + below-fold positions). `object-fit:cover` / `object-position:center` unchanged. Assets `theme.css` `?v=50`. |

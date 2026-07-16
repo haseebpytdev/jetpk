@@ -1,7 +1,7 @@
 @php
     $portalVariant = $portalVariant ?? 'agent';
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpPortalAssetVersion = 41;
+    $jpPortalAssetVersion = 42;
     $jpFavicon = client_branding()->faviconUrl();
     $jpBrandName = client_branding()->companyName();
     $pageTitle = trim($__env->yieldContent('title'));
@@ -72,7 +72,10 @@ html[data-theme="day"] {
     <div class="jp-portal__top-actions">
       <a href="{{ client_route('home') }}" class="jp-portal-btn jp-portal-btn--ghost jp-portal-btn--sm">Public site</a>
       @if (Route::has('profile.edit'))
-        <a href="{{ client_route('profile.edit') }}" class="jp-portal-btn jp-portal-btn--ghost jp-portal-btn--sm">Profile</a>
+        <a href="{{ client_route('profile.edit') }}" class="jp-portal__user-chip" data-testid="jp-portal-top-profile" aria-label="Profile settings">
+          <span class="jp-portal__avatar jp-portal__avatar--sm" aria-hidden="true">{{ $portalInitial }}</span>
+          <span class="jp-portal__user-name">{{ $portalName }}</span>
+        </a>
       @endif
     </div>
   </div>

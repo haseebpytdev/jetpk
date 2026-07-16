@@ -235,3 +235,62 @@
 .jp-portal-grid{display:grid;gap:var(--sp-5)}
 @media(min-width:960px){.jp-portal-grid--2{grid-template-columns:minmax(0,1fr) minmax(280px,360px)}}
 .jp-portal-grid .jp-portal-card,.jp-portal-grid .ota-account-card{margin-bottom:var(--sp-4)}
+.jp-portal__nav-footer{
+  margin-top:var(--sp-4);padding-top:var(--sp-4);
+  border-top:1px solid var(--line-soft);
+  display:flex;flex-direction:column;gap:var(--sp-1);
+}
+.jp-portal__logout-form{margin:0}
+.jp-portal__nav-logout{
+  display:flex;align-items:center;gap:var(--sp-3);width:100%;
+  padding:var(--sp-3) var(--sp-4);border-radius:var(--r-input);
+  border:0;background:transparent;color:var(--muted);
+  font:inherit;font-size:var(--fs-14);font-weight:500;text-align:left;cursor:pointer;
+}
+.jp-portal__nav-logout:hover{background:var(--surface-2);color:var(--text)}
+.jp-portal__user-chip{
+  display:inline-flex;align-items:center;gap:var(--sp-2);
+  padding:var(--sp-1) var(--sp-3) var(--sp-1) var(--sp-1);
+  border-radius:var(--r-pill);border:1px solid var(--line-soft);
+  background:var(--surface);color:var(--text);text-decoration:none;
+}
+.jp-portal__user-chip:hover{border-color:var(--gold-deep)}
+.jp-portal__avatar--sm{width:28px;height:28px;font-size:var(--fs-12)}
+.jp-portal__user-name{font-size:var(--fs-13);font-weight:600;max-width:12ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jp-portal-profile{margin-bottom:var(--sp-6)}
+.jp-portal-profile__hero-grid{display:grid;gap:var(--sp-4);grid-template-columns:96px 1fr}
+@media(max-width:720px){.jp-portal-profile__hero-grid{grid-template-columns:1fr}}
+.jp-portal-profile__avatar{
+  width:96px;height:96px;border-radius:50%;overflow:hidden;
+  background:var(--surface-2);border:1px solid var(--line-soft);
+  display:flex;align-items:center;justify-content:center;
+}
+.jp-portal-profile__avatar img{width:100%;height:100%;object-fit:cover}
+.jp-portal-profile__initials{font-size:var(--fs-24);font-weight:700;color:var(--gold-deep)}
+.jp-portal-profile__name{margin:0;font-size:var(--fs-20);font-family:var(--font-display)}
+.jp-portal-profile__title-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2)}
+.jp-portal-profile__email{margin:var(--sp-1) 0;color:var(--muted);font-size:var(--fs-14)}
+.jp-portal-profile__note,.jp-portal-profile__hint{margin:var(--sp-2) 0 0;color:var(--muted);font-size:var(--fs-13)}
+.jp-portal-profile__optional{font-weight:400;color:var(--muted)}
+.jp-portal-profile__file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.jp-portal-profile__upload label.jp-portal-btn{cursor:pointer}
+.jp-portal-profile__check{display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-2);font-size:var(--fs-13)}
+.jp-portal-profile__grid{display:grid;gap:var(--sp-4);grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:720px){.jp-portal-profile__grid{grid-template-columns:1fr}}
+.jp-portal-profile__field--full{grid-column:1/-1}
+.jp-portal-profile__label{display:block;margin-bottom:var(--sp-2);font-size:var(--fs-13);font-weight:600}
+.jp-portal-profile__input{
+  width:100%;padding:var(--sp-3) var(--sp-4);border-radius:var(--r-input);
+  border:1px solid var(--line);background:var(--surface);color:var(--text);
+  font:inherit;font-size:var(--fs-14);
+}
+.jp-portal-profile__input:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+.jp-portal-profile__input.is-invalid{border-color:#dc2626}
+.jp-portal-profile__error{margin:var(--sp-1) 0 0;color:#dc2626;font-size:var(--fs-12)}
+.jp-portal-profile__actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-3);margin-top:var(--sp-4)}
+.jp-portal-profile__success{color:#15803d;font-size:var(--fs-13)}
+.jp-portal-profile__link-btn{border:0;background:transparent;padding:0;color:var(--gold-deep);cursor:pointer;text-decoration:underline}
+.jp-portal-profile__hidden{display:none}
+.jp-portal-profile__back{align-self:start}
+.jp-portal-profile__password,.jp-portal-profile__danger{margin-top:var(--sp-4)}
+.jp-portal .ota-profile-wrap,.jp-portal .ota-profile-page{max-width:100%}

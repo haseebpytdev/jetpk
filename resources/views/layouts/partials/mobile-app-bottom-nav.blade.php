@@ -101,8 +101,8 @@
             $financeLabel = 'Finance';
         }
         $supportUrl = $canManageSupport ? ui_preserve_route('agent.support.tickets.index') : ui_preserve_route('agent.dashboard');
-        $accountUrl = $canViewAgency ? ui_preserve_route('agent.agency.show') : ui_preserve_route('agent.dashboard');
-        $accountActive = request()->routeIs('agent.agency.*', 'agent.staff.*');
+        $accountUrl = ui_preserve_route('profile.edit');
+        $accountActive = request()->routeIs('profile.*', 'agent.agency.*', 'agent.staff.*');
     @endphp
     <nav class="ota-mobile-app__bottom-nav" aria-label="Agent app navigation" data-testid="ota-mobile-app-bottom-nav">
         @if ($navAgentPortal)
@@ -158,7 +158,7 @@
             <span class="ota-mobile-app__bottom-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z"/></svg>
             </span>
-            <span class="ota-mobile-app__bottom-nav-label">Agency</span>
+            <span class="ota-mobile-app__bottom-nav-label">Account</span>
         </a>
         @endif
     </nav>

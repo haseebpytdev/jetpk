@@ -21,6 +21,8 @@
 @case('menu')<path d="M3 6h18M3 12h18M3 18h18"/>@break
 @case('close')<path d="M18 6 6 18M6 6l12 12"/>@break
 @case('lock')<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>@break
+@case('user')<path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/>@break
+@case('log-out')<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>@break
 @case('x')<path d="M4 4l16 16M20 4 4 20"/>@break
 @case('instagram')<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>@break
 @default<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5 5.3 6.7c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 3.8c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" stroke="none" fill="currentColor"/>
