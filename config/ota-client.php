@@ -9,7 +9,7 @@ return [
     'primary_color' => '#0c4a6e',
     'support_phone' => '+92 300 4455667',
     'support_whatsapp' => '923004455667',
-    'support_email' => env('OTA_SUPPORT_EMAIL', 'ota@jetpakistan.pk'),
+    'support_email' => 'support@haseebasif.com',
     'office_city' => 'Karachi',
     'powered_by' => $brandName,
     'domain_preview' => 'ota.haseebasif.com',

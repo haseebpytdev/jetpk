@@ -25,6 +25,10 @@
         if ($jpUsesClientBranding && function_exists('client_branding')) {
             $jpBrandName = client_branding()->companyName() ?: $jpBrandName;
             $jpSupportEmail = client_branding()->email() ?: $jpSupportEmail;
+            $legacyJetpkEmails = ['support@haseebasif.com', 'ticketingjp@jetpakistan.com', 'support@jetpakistan.com'];
+            if (in_array(strtolower(trim($jpSupportEmail)), $legacyJetpkEmails, true)) {
+                $jpSupportEmail = 'ota@jetpakistan.pk';
+            }
             $configuredPhone = trim((string) client_branding()->phone());
             if ($configuredPhone !== '' && ! preg_match('/^(123|\\+92\\s*300\\s*0{6}|\\+92\\s*21\\s*111\\s*000\\s*000)$/i', $configuredPhone)) {
                 $jpSupportPhone = $configuredPhone;

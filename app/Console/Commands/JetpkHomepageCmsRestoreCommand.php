@@ -120,12 +120,18 @@ class JetpkHomepageCmsRestoreCommand extends Command
         $this->line('db_write_attempted=true');
         $this->newLine();
 
-        $backupDir = is_dir($target)
-            ? $target
-            : storage_path(self::BACKUP_ROOT.'/'.trim($target, '/'));
+        $backupDir = $this->resolveBackupDir($target);
+        $rollbackPath = $backupDir.DIRECTORY_SEPARATOR.'rollback.json';
+        $snapshotPath = $backupDir.DIRECTORY_SEPARATOR.'homepage-cms-snapshot.json';
 
-        $rollbackPath = $backupDir.'/rollback.json';
         if (! is_file($rollbackPath)) {
+            if (is_file($snapshotPath)) {
+                $this->error('Backup at '.$backupDir.' is a forensic snapshot (homepage-cms-snapshot.json only).');
+                $this->error('Rollback requires rollback.json from a prior --apply backup. Use --apply to create one.');
+
+                return self::FAILURE;
+            }
+
             $this->error('Rollback file not found: '.$rollbackPath);
 
             return self::FAILURE;
@@ -139,21 +145,44 @@ class JetpkHomepageCmsRestoreCommand extends Command
         }
 
         $profileId = (int) ($payload['client_profile_id'] ?? 0);
+        if ($profileId <= 0) {
+            $this->error('rollback.json is missing client_profile_id');
+
+            return self::FAILURE;
+        }
+
         foreach (['draft', 'published'] as $key) {
             if (! isset($payload[$key]) || ! is_array($payload[$key])) {
                 continue;
             }
+
+            $content = $payload[$key]['content_json'] ?? null;
+            if (! is_array($content)) {
+                $this->error("rollback.json {$key} row is missing content_json");
+
+                return self::FAILURE;
+            }
+
             $status = $key === 'draft' ? ClientPageSettingStatus::Draft : ClientPageSettingStatus::Published;
             $row = ClientPageSetting::query()
                 ->where('client_profile_id', $profileId)
                 ->where('page_key', ClientPageKeys::HOME)
                 ->where('status', $status)
                 ->first();
+
             if ($row === null) {
                 continue;
             }
-            $row->content_json = $payload[$key]['content_json'] ?? $row->content_json;
+
+            $expectedHash = (string) ($payload[$key]['content_sha256'] ?? '');
+            $row->content_json = $content;
             $row->save();
+
+            if ($expectedHash !== '' && $expectedHash !== $this->contentHash($content)) {
+                $this->error("Rollback hash mismatch for {$key} after restore");
+
+                return self::FAILURE;
+            }
         }
 
         $this->info('Rollback applied from '.$backupDir);
@@ -187,8 +216,8 @@ class JetpkHomepageCmsRestoreCommand extends Command
             'client_profile_id' => $profile->id,
             'client_slug' => $profile->slug,
             'page_key' => ClientPageKeys::HOME,
-            'content_sha256_before' => hash('sha256', json_encode($baseContent)),
-            'content_sha256_after' => hash('sha256', json_encode($repaired)),
+            'content_sha256_before' => $this->contentHash($baseContent),
+            'content_sha256_after' => $this->contentHash($repaired),
             'draft' => $draft?->toArray(),
             'published' => $published?->toArray(),
             'assets' => $assets,
@@ -201,8 +230,16 @@ class JetpkHomepageCmsRestoreCommand extends Command
         $rollback = [
             'client_profile_id' => $profile->id,
             'page_key' => ClientPageKeys::HOME,
-            'draft' => $draft ? ['id' => $draft->id, 'content_json' => $draft->content_json] : null,
-            'published' => $published ? ['id' => $published->id, 'content_json' => $published->content_json] : null,
+            'draft' => $draft ? [
+                'id' => $draft->id,
+                'content_json' => $draft->content_json,
+                'content_sha256' => $this->contentHash(is_array($draft->content_json) ? $draft->content_json : []),
+            ] : null,
+            'published' => $published ? [
+                'id' => $published->id,
+                'content_json' => $published->content_json,
+                'content_sha256' => $this->contentHash(is_array($published->content_json) ? $published->content_json : []),
+            ] : null,
         ];
         File::put($backupDir.'/rollback.json', json_encode($rollback, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         File::put(
@@ -218,6 +255,23 @@ class JetpkHomepageCmsRestoreCommand extends Command
         if ($homepageHtml !== null) {
             File::put($backupDir.'/homepage-rendered.html', $homepageHtml);
         }
+    }
+
+    private function resolveBackupDir(string $target): string
+    {
+        if (is_dir($target)) {
+            return rtrim($target, '/\\');
+        }
+
+        return storage_path(self::BACKUP_ROOT.'/'.trim($target, '/'));
+    }
+
+    /**
+     * @param  array<string, mixed>  $content
+     */
+    private function contentHash(array $content): string
+    {
+        return hash('sha256', json_encode($content) ?: '');
     }
 
     private function fetchHomepageHtml(): ?string

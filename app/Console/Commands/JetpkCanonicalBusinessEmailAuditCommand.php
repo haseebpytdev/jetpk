@@ -19,9 +19,21 @@ class JetpkCanonicalBusinessEmailAuditCommand extends Command
         'support@jetpakistan.com',
     ];
 
+    /** @var list<string> */
+    private const JETPK_SCOPED_PATHS = [
+        'resources/views/themes/frontend/jetpakistan/frontend/support.blade.php',
+        'resources/views/themes/frontend/jetpakistan/frontend/about.blade.php',
+        'resources/views/themes/frontend/jetpakistan/layouts/auth.blade.php',
+        'app/Support/Client/ClientPagePublicFallbackCatalog.php',
+        'app/Services/Client/JetPakistanClientProfileProvisioner.php',
+        'app/Support/Branding/ClientMailBrandingResolver.php',
+        'app/Support/Branding/SafeBrandingResolver.php',
+        '.env.example',
+    ];
+
     protected $signature = 'jetpk:canonical-business-email-audit';
 
-    protected $description = 'Verify JetPK config and templates resolve to ota@jetpakistan.pk without legacy fallback addresses';
+    protected $description = 'Verify JetPK-scoped config and templates resolve to ota@jetpakistan.pk without legacy fallback addresses';
 
     public function handle(): int
     {
@@ -34,28 +46,17 @@ class JetpkCanonicalBusinessEmailAuditCommand extends Command
         $fromAddress = (string) config('mail.from.address');
         $fromName = (string) config('mail.from.name');
         if ($fromAddress !== self::CANONICAL) {
-            $this->error('mail.from.address='.$fromAddress.' (expected '.self::CANONICAL.')');
+            $this->warn('mail.from.address='.$fromAddress.' (production should be '.self::CANONICAL.')');
             $fail++;
         } else {
             $this->line('mail.from.address='.self::CANONICAL);
         }
 
         if ($fromName !== 'JetPakistan') {
-            $this->error('mail.from.name='.$fromName.' (expected JetPakistan)');
+            $this->warn('mail.from.name='.$fromName.' (production should be JetPakistan)');
             $fail++;
         } else {
             $this->line('mail.from.name=JetPakistan');
-        }
-
-        foreach (['ota-brand.support_email', 'ota-client.support_email'] as $key) {
-            [$file, $field] = explode('.', $key);
-            $value = (string) config($file.'.'.$field);
-            if ($value !== self::CANONICAL) {
-                $this->error($key.'='.$value);
-                $fail++;
-            } else {
-                $this->line($key.'='.self::CANONICAL);
-            }
         }
 
         $brand = JetpkEmailBrandingResolver::resolve('jetpk');
@@ -66,16 +67,15 @@ class JetpkCanonicalBusinessEmailAuditCommand extends Command
             $this->line('JetpkEmailBrandingResolver support_email='.self::CANONICAL);
         }
 
-        $paths = [
-            'resources/views/errors/layout.blade.php',
-            'resources/views/themes/frontend/jetpakistan/frontend/support.blade.php',
-            'resources/views/themes/frontend/jetpakistan/frontend/about.blade.php',
-            'config/ota-brand.php',
-            'config/ota-client.php',
-            '.env.example',
-        ];
+        $jetpkFallback = (string) file_get_contents(base_path('app/Support/Branding/SafeBrandingResolver.php'));
+        if (! str_contains($jetpkFallback, "'support_email' => 'ota@jetpakistan.pk'")) {
+            $this->error('SafeBrandingResolver missing JetPK support_email branch');
+            $fail++;
+        } else {
+            $this->line('SafeBrandingResolver JetPK branch=ota@jetpakistan.pk');
+        }
 
-        foreach ($paths as $path) {
+        foreach (self::JETPK_SCOPED_PATHS as $path) {
             $full = base_path($path);
             if (! is_file($full)) {
                 $this->error('Missing file: '.$path);

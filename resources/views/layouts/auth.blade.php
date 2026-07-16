@@ -3,7 +3,7 @@
     $client = config('ota-client', []);
     $safeBranding = \App\Support\Branding\SafeBrandingResolver::resolveForPublic(app(\App\Services\Agencies\AgencyBrandingService::class));
     $settings = $safeBranding['settings'] ?? null;
-    $supportEmail = $settings?->support_email ?: ($client['support_email'] ?? ($brand['support_email'] ?? 'ota@jetpakistan.pk'));
+    $supportEmail = $settings?->support_email ?: ($client['support_email'] ?? ($brand['support_email'] ?? 'support@haseebasif.com'));
     $authCardClass = trim($__env->yieldContent('auth_card_class'));
     $isLoginPage = str_contains($authCardClass, 'login-premium');
     $authLogoPath = $settings?->logo_path;

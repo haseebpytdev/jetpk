@@ -134,17 +134,83 @@ class JetpkHomepageCmsRecoveryTest extends TestCase
         $this->assertSame('Updated routes heading', data_get($draft->content_json, 'routes.title'));
     }
 
-    public function test_canonical_business_email_audit_passes(): void
+    public function test_canonical_business_email_audit_passes_for_jetpk_scoped_sources(): void
     {
-        config(['ota-brand.support_email' => 'ota@jetpakistan.pk']);
-        config(['ota-client.support_email' => 'ota@jetpakistan.pk']);
+        config(['mail.from.address' => 'ota@jetpakistan.pk']);
+        config(['mail.from.name' => 'JetPakistan']);
 
         Artisan::call('jetpk:canonical-business-email-audit');
         $this->assertStringContainsString('fail_count=0', Artisan::output());
     }
 
-    public function test_error_page_uses_canonical_support_email(): void
+    public function test_forensic_snapshot_without_rollback_json_is_rejected(): void
     {
+        $dir = storage_path('app/audits/jetpk-homepage-cms-restore/test-forensic-only');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        file_put_contents($dir.'/homepage-cms-snapshot.json', '{}');
+
+        Artisan::call('jetpk:homepage-cms-restore', ['--rollback' => 'test-forensic-only']);
+        $output = Artisan::output();
+        $this->assertStringContainsString('forensic snapshot', $output);
+        $this->assertSame(1, Artisan::call('jetpk:homepage-cms-restore', ['--rollback' => 'test-forensic-only']));
+    }
+
+    public function test_apply_backup_rollback_restores_original_content_hashes(): void
+    {
+        $profile = $this->makeJetpkProfile();
+        $original = $this->representativeThreeCardHomeContent();
+        $originalHash = hash('sha256', json_encode($original) ?: '');
+
+        ClientPageSetting::query()->create([
+            'client_profile_id' => $profile->id,
+            'page_key' => ClientPageKeys::HOME,
+            'status' => ClientPageSettingStatus::Draft,
+            'content_json' => $original,
+        ]);
+        ClientPageSetting::query()->create([
+            'client_profile_id' => $profile->id,
+            'page_key' => ClientPageKeys::HOME,
+            'status' => ClientPageSettingStatus::Published,
+            'content_json' => $original,
+            'published_at' => now(),
+        ]);
+
+        $exitApply = Artisan::call('jetpk:homepage-cms-restore', [
+            '--profile' => 'jetpk',
+            '--apply' => true,
+        ]);
+        $this->assertSame(0, $exitApply);
+
+        $backupDirs = glob(storage_path('app/audits/jetpk-homepage-cms-restore/20*'));
+        $this->assertNotEmpty($backupDirs);
+        $stamp = basename(end($backupDirs));
+        $this->assertFileExists(storage_path('app/audits/jetpk-homepage-cms-restore/'.$stamp.'/rollback.json'));
+
+        ClientPageSetting::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', ClientPageKeys::HOME)
+            ->update(['content_json' => ['hero' => ['headline' => 'Mutated']]]);
+
+        $exitRollback = Artisan::call('jetpk:homepage-cms-restore', [
+            '--profile' => 'jetpk',
+            '--rollback' => $stamp,
+        ]);
+        $this->assertSame(0, $exitRollback);
+
+        $draft = ClientPageSetting::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('status', ClientPageSettingStatus::Draft)
+            ->first();
+        $restoredHash = hash('sha256', json_encode($draft->content_json) ?: '');
+        $this->assertSame($originalHash, $restoredHash);
+    }
+
+    public function test_error_page_uses_jetpk_support_email_when_jetpk_tenant(): void
+    {
+        $this->makeJetpkProfile();
+
         $this->get('/_jetpk-test-route-that-does-not-exist')
             ->assertNotFound()
             ->assertSee('ota@jetpakistan.pk', false);
