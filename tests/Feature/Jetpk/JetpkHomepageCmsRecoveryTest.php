@@ -64,6 +64,69 @@ class JetpkHomepageCmsRecoveryTest extends TestCase
         $this->assertSame('Destinations on the rise.', data_get($repaired, 'destinations.title'));
     }
 
+    public function test_blank_trust_cards_restore_visible_fields_and_preserve_enabled_and_sort_order(): void
+    {
+        $damaged = $this->representativeThreeCardHomeContent();
+        $damaged['trust'] = [
+            'enabled' => '1',
+            'title' => 'Existing trust title',
+            'cards' => [
+                ['icon' => '', 'title' => '', 'text' => '', 'enabled' => '1', 'sort_order' => '0'],
+                ['icon' => '', 'title' => '', 'text' => '', 'enabled' => '0', 'sort_order' => '1'],
+                ['icon' => '', 'title' => '', 'text' => '', 'enabled' => '1', 'sort_order' => '2'],
+            ],
+        ];
+
+        $service = app(JetpkHomepageContentRestoreService::class);
+        $changes = $service->buildChangePlan($damaged);
+        $trustChange = collect($changes)->firstWhere('path', 'trust.cards');
+
+        $this->assertNotNull($trustChange);
+        $this->assertSame('CHANGED', $trustChange['action']);
+        $this->assertSame('Transparent PKR pricing', $trustChange['proposed'][0]['title']);
+        $this->assertSame('0', $trustChange['proposed'][0]['sort_order']);
+        $this->assertSame('1', $trustChange['proposed'][0]['enabled']);
+        $this->assertSame('0', $trustChange['proposed'][1]['enabled']);
+    }
+
+    public function test_blank_trust_cards_are_not_marked_changed_when_only_scalar_types_differ(): void
+    {
+        $damaged = $this->representativeThreeCardHomeContent();
+        $damaged['trust'] = [
+            'enabled' => '1',
+            'title' => 'Existing trust title',
+            'cards' => [
+                [
+                    'icon' => 'check-square',
+                    'title' => 'Transparent PKR pricing',
+                    'text' => 'No FX shock between search and checkout.',
+                    'enabled' => '1',
+                    'sort_order' => '0',
+                ],
+                [
+                    'icon' => 'check-square',
+                    'title' => 'Licensed operations',
+                    'text' => 'IATA accredited and PCAA licensed.',
+                    'enabled' => '0',
+                    'sort_order' => '1',
+                ],
+                [
+                    'icon' => 'check-square',
+                    'title' => 'Human support',
+                    'text' => 'Pakistan-based desk in Urdu and English.',
+                    'enabled' => '1',
+                    'sort_order' => '2',
+                ],
+            ],
+        ];
+
+        $service = app(JetpkHomepageContentRestoreService::class);
+        $changes = $service->buildChangePlan($damaged);
+        $trustChange = collect($changes)->firstWhere('path', 'trust.cards');
+
+        $this->assertNull($trustChange);
+    }
+
     public function test_merge_on_save_preserves_unrelated_sections_when_routes_panel_submitted(): void
     {
         $existing = [
@@ -136,11 +199,33 @@ class JetpkHomepageCmsRecoveryTest extends TestCase
 
     public function test_canonical_business_email_audit_passes_for_jetpk_scoped_sources(): void
     {
+        config(['ota_client.slug' => 'jetpk']);
         config(['mail.from.address' => 'ota@jetpakistan.pk']);
         config(['mail.from.name' => 'JetPakistan']);
 
         Artisan::call('jetpk:canonical-business-email-audit');
         $this->assertStringContainsString('fail_count=0', Artisan::output());
+    }
+
+    public function test_jetpk_runtime_mail_sender_rejects_legacy_jetpk_abbreviation(): void
+    {
+        config(['ota_client.slug' => 'jetpk']);
+        config(['mail.from.name' => 'JetPk']);
+
+        $agency = $this->seedJetpkAgency();
+        \App\Models\AgencySetting::query()->create([
+            'agency_id' => $agency->id,
+            'display_name' => 'JetPk',
+        ]);
+        \App\Models\AgencyCommunicationSetting::query()->create([
+            'agency_id' => $agency->id,
+            'mail_from_name' => 'JetPk',
+        ]);
+
+        \App\Support\Branding\PlatformBrandingResolver::applyRuntimeConfig();
+
+        $this->assertSame('JetPakistan', config('mail.from.name'));
+        $this->assertNotSame('JetPk', config('mail.from.name'));
     }
 
     public function test_forensic_snapshot_without_rollback_json_is_rejected(): void

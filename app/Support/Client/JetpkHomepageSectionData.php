@@ -168,6 +168,18 @@ final class JetpkHomepageSectionData
     /**
      * @return list<array<string, mixed>>
      */
+    public function authoritativeTrustCardDefaults(): array
+    {
+        return [
+            ['icon' => 'check-square', 'title' => 'Transparent PKR pricing', 'text' => 'No FX shock between search and checkout.', 'enabled' => '1'],
+            ['icon' => 'check-square', 'title' => 'Licensed operations', 'text' => 'IATA accredited and PCAA licensed.', 'enabled' => '1'],
+            ['icon' => 'check-square', 'title' => 'Human support', 'text' => 'Pakistan-based desk in Urdu and English.', 'enabled' => '1'],
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
     public function trustCardsWithFallback(): array
     {
         $items = $this->field('trust.cards', null);

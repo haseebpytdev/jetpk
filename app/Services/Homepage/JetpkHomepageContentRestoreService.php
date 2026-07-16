@@ -3,7 +3,6 @@
 namespace App\Services\Homepage;
 
 use App\Services\Client\ClientPageContentResolver;
-use App\Support\Client\JetpkHomepageSectionData;
 
 /**
  * Section-scoped homepage CMS repair for blanked JetPK Page Settings fields.
@@ -28,9 +27,15 @@ final class JetpkHomepageContentRestoreService
         '_media_removed',
     ];
 
+    /** @var list<array{icon: string, title: string, text: string, enabled: string}> */
+    private const AUTHORITATIVE_TRUST_CARD_DEFAULTS = [
+        ['icon' => 'check-square', 'title' => 'Transparent PKR pricing', 'text' => 'No FX shock between search and checkout.', 'enabled' => '1'],
+        ['icon' => 'check-square', 'title' => 'Licensed operations', 'text' => 'IATA accredited and PCAA licensed.', 'enabled' => '1'],
+        ['icon' => 'check-square', 'title' => 'Human support', 'text' => 'Pakistan-based desk in Urdu and English.', 'enabled' => '1'],
+    ];
+
     public function __construct(
         private readonly ClientPageContentResolver $contentResolver,
-        private readonly JetpkHomepageSectionData $sectionData,
     ) {}
 
     /**
@@ -97,12 +102,6 @@ final class JetpkHomepageContentRestoreService
      */
     private function planTrust(array &$changes, array $current): void
     {
-        $presenterCards = $this->sectionData->trustCardsWithFallback();
-        $cardDefaults = array_map(static fn (array $card): array => array_merge(
-            ['icon' => 'check-square', 'enabled' => '1'],
-            $card,
-        ), $presenterCards);
-
         $scalarDefaults = [
             'trust.eyebrow' => 'Why travellers stay',
             'trust.title' => 'Booking that respects your time and money.',
@@ -119,21 +118,25 @@ final class JetpkHomepageContentRestoreService
         }
 
         $cards = data_get($current, 'trust.cards', []);
-        if (! is_array($cards) || $this->trustCardsAreFullyBlank($cards)) {
-            $existingEnabled = collect(is_array($cards) ? $cards : [])
-                ->mapWithKeys(static fn ($card, $index) => [$index => data_get($card, 'enabled', '1')])
-                ->all();
-
-            $proposedCards = [];
-            foreach ($cardDefaults as $index => $card) {
-                $proposedCards[] = array_merge($card, [
-                    'sort_order' => $index,
-                    'enabled' => $existingEnabled[$index] ?? ($card['enabled'] ?? '1'),
-                ]);
-            }
-
-            $this->propose($changes, 'trust.cards', $cards, $proposedCards, 'JetpkHomepageSectionData::trustCardsWithFallback()');
+        if (! is_array($cards) || ! $this->trustCardsAreFullyBlank($cards)) {
+            return;
         }
+
+        $authoritativeDefaults = self::AUTHORITATIVE_TRUST_CARD_DEFAULTS;
+        if ($authoritativeDefaults === []) {
+            $this->proposeManualContentGap($changes, 'trust.cards', $cards);
+
+            return;
+        }
+
+        $proposedCards = $this->mergeTrustCardsPreservingStructure($cards, $authoritativeDefaults);
+        $this->propose(
+            $changes,
+            'trust.cards',
+            $cards,
+            $proposedCards,
+            'JetpkHomepageSectionData::authoritativeTrustCardDefaults()',
+        );
     }
 
     /**
@@ -252,7 +255,12 @@ final class JetpkHomepageContentRestoreService
         string $source,
         string $action = 'CHANGED',
     ): void {
-        if ($action === 'CHANGED' && $current === $proposed) {
+        if ($action === 'CHANGED' && $path === 'trust.cards' && is_array($current) && is_array($proposed)) {
+            if ($this->trustCardsSemanticallyEqual($current, $proposed)) {
+                $action = 'PRESERVED';
+                $proposed = $current;
+            }
+        } elseif ($action === 'CHANGED' && $current === $proposed) {
             $action = 'PRESERVED';
         }
 
@@ -310,12 +318,93 @@ final class JetpkHomepageContentRestoreService
             if (! is_array($card)) {
                 continue;
             }
-            if (! $this->isBlank($card['title'] ?? '') || ! $this->isBlank($card['text'] ?? '')) {
+            if (
+                ! $this->isBlank($card['icon'] ?? '')
+                || ! $this->isBlank($card['title'] ?? '')
+                || ! $this->isBlank($card['text'] ?? '')
+            ) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * @param  list<mixed>  $cards
+     * @param  list<array<string, mixed>>  $defaults
+     * @return list<array<string, mixed>>
+     */
+    private function mergeTrustCardsPreservingStructure(array $cards, array $defaults): array
+    {
+        $normalizedCards = array_values(array_filter($cards, static fn ($card): bool => is_array($card)));
+        $cardCount = $normalizedCards !== [] ? count($normalizedCards) : count($defaults);
+        $merged = [];
+
+        for ($index = 0; $index < $cardCount; $index++) {
+            $current = is_array($normalizedCards[$index] ?? null) ? $normalizedCards[$index] : [];
+            $default = is_array($defaults[$index] ?? null) ? $defaults[$index] : [];
+            $next = $current;
+
+            foreach (['icon', 'title', 'text'] as $field) {
+                if ($this->isBlank($current[$field] ?? '') && ! $this->isBlank($default[$field] ?? '')) {
+                    $next[$field] = $default[$field];
+                }
+            }
+
+            if (! array_key_exists('enabled', $next)) {
+                $next['enabled'] = $default['enabled'] ?? '1';
+            }
+
+            $merged[] = $next;
+        }
+
+        return $merged;
+    }
+
+    /**
+     * @param  list<mixed>  $left
+     * @param  list<mixed>  $right
+     */
+    private function trustCardsSemanticallyEqual(array $left, array $right): bool
+    {
+        $leftCards = array_values(array_filter($left, static fn ($card): bool => is_array($card)));
+        $rightCards = array_values(array_filter($right, static fn ($card): bool => is_array($card)));
+
+        if (count($leftCards) !== count($rightCards)) {
+            return false;
+        }
+
+        foreach ($leftCards as $index => $leftCard) {
+            $rightCard = $rightCards[$index];
+
+            foreach (['icon', 'title', 'text'] as $field) {
+                if (trim((string) ($leftCard[$field] ?? '')) !== trim((string) ($rightCard[$field] ?? ''))) {
+                    return false;
+                }
+            }
+
+            if ((string) ($leftCard['enabled'] ?? '1') !== (string) ($rightCard['enabled'] ?? '1')) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $changes
+     */
+    private function proposeManualContentGap(array &$changes, string $path, mixed $current): void
+    {
+        $changes[] = [
+            'path' => $path,
+            'current' => $current,
+            'proposed' => $current,
+            'source' => 'MANUAL CONTENT GAP',
+            'action' => 'MANUAL CONTENT GAP',
+            'risk' => 'blocked',
+        ];
     }
 
     private function isBlank(mixed $value): bool

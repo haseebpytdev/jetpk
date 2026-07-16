@@ -17,6 +17,12 @@ class PlatformBrandingResolverTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config()->set('ota_client.slug', '');
+    }
+
     public function test_resolves_company_name_prefixes_and_email_sender_from_admin_settings(): void
     {
         $slug = 'brand-co-'.uniqid();
@@ -71,6 +77,30 @@ class PlatformBrandingResolverTest extends TestCase
 
         $this->assertSame('Parwaaz Travels', config('app.name'));
         $this->assertSame('Parwaaz Travels Support', config('mail.from.name'));
+    }
+
+    public function test_jetpk_runtime_config_rejects_legacy_jetpk_db_abbreviation_and_uses_env_mail_from_name(): void
+    {
+        $slug = 'jetpk-brand-'.uniqid();
+        config()->set('ota_client.slug', 'jetpk');
+        config()->set('ota.default_agency_slug', $slug);
+        config()->set('mail.from.name', 'JetPakistan');
+        config()->set('app.name', 'JetPakistan');
+
+        $agency = Agency::factory()->create(['slug' => $slug]);
+        AgencySetting::query()->create([
+            'agency_id' => $agency->id,
+            'display_name' => 'JetPk',
+        ]);
+        AgencyCommunicationSetting::query()->create([
+            'agency_id' => $agency->id,
+            'mail_from_name' => 'JetPk',
+        ]);
+
+        PlatformBrandingResolver::applyRuntimeConfig();
+
+        $this->assertSame('JetPakistan', config('mail.from.name'));
+        $this->assertNotSame('JetPk', config('mail.from.name'));
     }
 
     public function test_existing_ota_stored_reference_displays_unchanged(): void

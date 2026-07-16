@@ -171,15 +171,7 @@ final class PlatformBrandingResolver
         $brand = config('ota-brand', []);
         $mailFrom = config('mail.from', []);
 
-        $emailFromName = self::firstNonEmptyString(
-            $communication?->mail_from_name,
-            $settings?->display_name,
-            $mailFrom['name'] ?? null,
-            $brand['product_name'] ?? null,
-            $brand['name'] ?? null,
-            $client['agency_name'] ?? null,
-            config('app.name'),
-        ) ?? 'Travel';
+        $emailFromName = self::resolveEmailFromName($communication, $settings, $mailFrom, $client, $brand);
 
         return new PlatformBranding(
             companyName: $companyName,
@@ -253,5 +245,64 @@ final class PlatformBrandingResolver
         }
 
         return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $mailFrom
+     * @param  array<string, mixed>  $client
+     * @param  array<string, mixed>  $brand
+     */
+    protected static function resolveEmailFromName(
+        ?AgencyCommunicationSetting $communication,
+        ?AgencySetting $settings,
+        array $mailFrom,
+        array $client,
+        array $brand,
+    ): string {
+        if (self::isJetpkDedicatedDeployment()) {
+            return self::firstNonEmptyString(
+                self::rejectJetpkLegacyMailAbbreviation($mailFrom['name'] ?? null),
+                self::rejectJetpkLegacyMailAbbreviation($communication?->mail_from_name),
+                self::rejectJetpkLegacyMailAbbreviation($settings?->display_name),
+                self::rejectJetpkLegacyMailAbbreviation($brand['product_name'] ?? null),
+                self::rejectJetpkLegacyMailAbbreviation($brand['name'] ?? null),
+                self::rejectJetpkLegacyMailAbbreviation($client['agency_name'] ?? null),
+                self::rejectJetpkLegacyMailAbbreviation(config('app.name')),
+                'JetPakistan',
+            ) ?? 'JetPakistan';
+        }
+
+        return self::firstNonEmptyString(
+            $communication?->mail_from_name,
+            $settings?->display_name,
+            $mailFrom['name'] ?? null,
+            $brand['product_name'] ?? null,
+            $brand['name'] ?? null,
+            $client['agency_name'] ?? null,
+            config('app.name'),
+        ) ?? 'Travel';
+    }
+
+    protected static function isJetpkDedicatedDeployment(): bool
+    {
+        if (function_exists('ota_single_client_root_slug') && ota_single_client_root_slug() === 'jetpk') {
+            return true;
+        }
+
+        return strtolower(trim((string) config('ota_client.slug', ''))) === 'jetpk';
+    }
+
+    protected static function rejectJetpkLegacyMailAbbreviation(mixed $value): ?string
+    {
+        if (! is_string($value) && ! is_numeric($value)) {
+            return null;
+        }
+
+        $trimmed = trim((string) $value);
+        if ($trimmed === '' || strcasecmp($trimmed, 'JetPk') === 0) {
+            return null;
+        }
+
+        return $trimmed;
     }
 }
