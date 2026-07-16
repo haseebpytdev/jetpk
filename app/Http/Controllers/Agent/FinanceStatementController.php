@@ -50,7 +50,7 @@ class FinanceStatementController extends Controller
             return view('mobile.agent.finance.statement.show', $viewData);
         }
 
-        return view('dashboard.agent.finance.statement.show', $viewData);
+        return view(client_view('finance.statement.show', 'agent'), $viewData);
     }
 
     public function export(Request $request): StreamedResponse

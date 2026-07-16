@@ -43,7 +43,7 @@ class AgentDepositController extends Controller
             return view('mobile.agent.deposits.index', $viewData);
         }
 
-        return view('dashboard.agent.deposits.index', $viewData);
+        return view(client_view('deposits.index', 'agent'), $viewData);
     }
 
     public function create(Request $request): View
@@ -60,7 +60,7 @@ class AgentDepositController extends Controller
             return view('mobile.agent.deposits.create', $viewData);
         }
 
-        return view('dashboard.agent.deposits.create', $viewData);
+        return view(client_view('deposits.create', 'agent'), $viewData);
     }
 
     public function store(StoreAgentDepositRequest $request): RedirectResponse

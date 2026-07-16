@@ -31,7 +31,7 @@ class SavedTravelerController extends Controller
             ->orderBy('first_name')
             ->paginate(20);
 
-        return view('dashboard.travelers.index', [
+        return view(client_view('travelers.index', 'customer'), [
             'travelers' => $travelers,
             'defaultTraveler' => $defaultTraveler,
             'routePrefix' => 'customer.travelers',
@@ -43,7 +43,7 @@ class SavedTravelerController extends Controller
     {
         Gate::authorize('create', SavedTraveler::class);
 
-        return view('dashboard.travelers.create', [
+        return view(client_view('travelers.create', 'customer'), [
             'traveler' => new SavedTraveler,
             'routePrefix' => 'customer.travelers',
             'portalLabel' => 'Customer',
@@ -75,7 +75,7 @@ class SavedTravelerController extends Controller
     {
         Gate::authorize('update', $traveler);
 
-        return view('dashboard.travelers.edit', [
+        return view(client_view('travelers.edit', 'customer'), [
             'traveler' => $traveler,
             'routePrefix' => 'customer.travelers',
             'portalLabel' => 'Customer',

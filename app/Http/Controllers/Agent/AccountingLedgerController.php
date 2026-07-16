@@ -42,7 +42,7 @@ class AccountingLedgerController extends Controller
             return view('mobile.agent.accounting.ledger.index', $viewData);
         }
 
-        return view('dashboard.agent.accounting.ledger.index', $viewData);
+        return view(client_view('accounting.ledger.index', 'agent'), $viewData);
     }
 
     public function show(Request $request, LedgerTransaction $ledgerTransaction): View
@@ -63,6 +63,6 @@ class AccountingLedgerController extends Controller
             return view('mobile.agent.accounting.ledger.show', $viewData);
         }
 
-        return view('dashboard.agent.accounting.ledger.show', $viewData);
+        return view(client_view('accounting.ledger.show', 'agent'), $viewData);
     }
 }

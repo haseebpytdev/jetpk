@@ -67,7 +67,7 @@ class AgentStaffController extends Controller
             return view('mobile.agent.staff.index', $viewData);
         }
 
-        return view('dashboard.agent.staff.index', $viewData);
+        return view(client_view('staff.index', 'agent'), $viewData);
     }
 
     public function create(Request $request): View
@@ -86,7 +86,7 @@ class AgentStaffController extends Controller
             return view('mobile.agent.staff.create', $viewData);
         }
 
-        return view('dashboard.agent.staff.create', $viewData);
+        return view(client_view('staff.create', 'agent'), $viewData);
     }
 
     public function store(StoreAgentStaffRequest $request): RedirectResponse
@@ -147,7 +147,7 @@ class AgentStaffController extends Controller
             return view('mobile.agent.staff.edit', $viewData);
         }
 
-        return view('dashboard.agent.staff.edit', $viewData);
+        return view(client_view('staff.edit', 'agent'), $viewData);
     }
 
     public function update(UpdateAgentStaffRequest $request, User $staff): RedirectResponse

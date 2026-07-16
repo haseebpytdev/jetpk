@@ -106,6 +106,11 @@ final class RuntimeViewResolver
             }
         }
 
+        $sharedDashboard = 'dashboard.'.$name;
+        if (View::exists($sharedDashboard)) {
+            return $sharedDashboard;
+        }
+
         if (str_contains($name, '.')) {
             return $name;
         }

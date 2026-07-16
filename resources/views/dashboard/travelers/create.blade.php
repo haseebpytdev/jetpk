@@ -3,8 +3,15 @@
     $isAgentAccount = str_starts_with($routePrefix ?? '', 'agent.');
     $isPortalAccount = $isCustomerAccount || $isAgentAccount;
     $portalLayout = match (true) {
-        $isCustomerAccount => 'layouts.customer-account',
-        $isAgentAccount => 'layouts.agent-portal',
+        // JP-PORTAL-1 TASK 1 — tenant-safe resolver migration.
+        // Was the hardcoded 'layouts.customer-account', which bypassed the theme resolver: JetPK
+        // customers were dropped into the legacy shell here while every other portal page renders
+        // jp-portal (a full-shell transition mid-navigation).
+        // SAFETY: client_layout() resolves the tenant theme layout and FALLS BACK to this exact
+        // legacy name when the tenant has no theme layout, so Parwaaz/default behaviour is
+        // unchanged. No JetPK classes, wording or colours are introduced in this shared file.
+        $isCustomerAccount => client_layout('customer-account', 'customer'),
+        $isAgentAccount => client_layout('agent-portal', 'agent'),   // JP-PORTAL-1 TASK 1 — see above
         default => 'layouts.dashboard',
     };
 @endphp

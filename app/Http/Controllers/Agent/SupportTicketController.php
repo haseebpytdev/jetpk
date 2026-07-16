@@ -41,7 +41,7 @@ class SupportTicketController extends Controller
             return view('mobile.agent.support.index', compact('tickets'));
         }
 
-        return view('dashboard.agent.support.tickets.index', compact('tickets'));
+        return view(client_view('support.tickets.index', 'agent'), compact('tickets'));
     }
 
     public function create(Request $request): View
@@ -57,7 +57,7 @@ class SupportTicketController extends Controller
             return view('mobile.agent.support.create', $viewData);
         }
 
-        return view('dashboard.agent.support.tickets.create', $viewData);
+        return view(client_view('support.tickets.create', 'agent'), $viewData);
     }
 
     public function store(StoreSupportTicketRequest $request): RedirectResponse
@@ -88,7 +88,7 @@ class SupportTicketController extends Controller
             return view('mobile.agent.support.show', compact('ticket'));
         }
 
-        return view('dashboard.agent.support.tickets.show', compact('ticket'));
+        return view(client_view('support.tickets.show', 'agent'), compact('ticket'));
     }
 
     public function reply(ReplySupportTicketRequest $request, SupportTicket $ticket): RedirectResponse

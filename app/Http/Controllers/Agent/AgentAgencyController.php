@@ -50,7 +50,7 @@ class AgentAgencyController extends Controller
             return view('mobile.agent.agency.show', $viewData);
         }
 
-        return view('dashboard.agent.agency', $viewData);
+        return view(client_view('agency', 'agent'), $viewData);
     }
 
     public function edit(Request $request): View
@@ -69,7 +69,7 @@ class AgentAgencyController extends Controller
             return view('mobile.agent.agency.edit', $viewData);
         }
 
-        return view('dashboard.agent.agency-edit', $viewData);
+        return view(client_view('agency-edit', 'agent'), $viewData);
     }
 
     public function update(UpdateAgentAgencyRequest $request): RedirectResponse

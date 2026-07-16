@@ -46,7 +46,7 @@ class SupportTicketController extends Controller
             return view('mobile.customer.support.index', compact('tickets'));
         }
 
-        return view('dashboard.customer.support.tickets.index', compact('tickets'));
+        return view(client_view('support.tickets.index', 'customer'), compact('tickets'));
     }
 
     public function create(Request $request): View
@@ -62,7 +62,7 @@ class SupportTicketController extends Controller
             return view('mobile.customer.support.create', $viewData);
         }
 
-        return view('dashboard.customer.support.tickets.create', $viewData);
+        return view(client_view('support.tickets.create', 'customer'), $viewData);
     }
 
     public function store(StoreSupportTicketRequest $request): RedirectResponse
@@ -93,7 +93,7 @@ class SupportTicketController extends Controller
             return view('mobile.customer.support.show', compact('ticket'));
         }
 
-        return view('dashboard.customer.support.tickets.show', compact('ticket'));
+        return view(client_view('support.tickets.show', 'customer'), compact('ticket'));
     }
 
     public function reply(ReplySupportTicketRequest $request, SupportTicket $ticket): RedirectResponse

@@ -55,6 +55,6 @@ class AgentWalletController extends Controller
             return view('mobile.agent.wallet.show', $viewData);
         }
 
-        return view('dashboard.agent.wallet', $viewData);
+        return view(client_view('wallet', 'agent'), $viewData);
     }
 }

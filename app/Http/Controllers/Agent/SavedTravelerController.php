@@ -43,7 +43,7 @@ class SavedTravelerController extends Controller
             return view('mobile.agent.travelers.index', $viewData);
         }
 
-        return view('dashboard.travelers.index', $viewData);
+        return view(client_view('travelers.index', 'agent'), $viewData);
     }
 
     public function create(Request $request): View
@@ -62,7 +62,7 @@ class SavedTravelerController extends Controller
             return view('mobile.agent.travelers.create', $viewData);
         }
 
-        return view('dashboard.travelers.create', $viewData);
+        return view(client_view('travelers.create', 'agent'), $viewData);
     }
 
     public function store(UpsertSavedTravelerRequest $request): RedirectResponse
@@ -102,7 +102,7 @@ class SavedTravelerController extends Controller
             return view('mobile.agent.travelers.edit', $viewData);
         }
 
-        return view('dashboard.travelers.edit', $viewData);
+        return view(client_view('travelers.edit', 'agent'), $viewData);
     }
 
     public function update(UpsertSavedTravelerRequest $request, SavedTraveler $traveler): RedirectResponse

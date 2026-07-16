@@ -45,6 +45,6 @@ class AgentReportsController extends Controller
             return view('mobile.agent.reports.index', $viewData);
         }
 
-        return view('dashboard.agent.reports.index', $viewData);
+        return view(client_view('reports.index', 'agent'), $viewData);
     }
 }

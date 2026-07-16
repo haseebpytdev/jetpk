@@ -82,6 +82,6 @@ class AgentLedgerController extends Controller
             return view('mobile.agent.ledger.index', $viewData);
         }
 
-        return view('dashboard.agent.ledger.index', $viewData);
+        return view(client_view('ledger.index', 'agent'), $viewData);
     }
 }

@@ -40,7 +40,7 @@ class AgentCommissionController extends Controller
             return view('mobile.agent.commissions.index', $viewData);
         }
 
-        return view('dashboard.agent.commissions.index', $viewData);
+        return view(client_view('commissions.index', 'agent'), $viewData);
     }
 
     public function showStatement(Request $request, AgentCommissionStatement $statement): View
@@ -56,6 +56,6 @@ class AgentCommissionController extends Controller
             return view('mobile.agent.commissions.statement', $viewData);
         }
 
-        return view('dashboard.agent.commissions.statement', $viewData);
+        return view(client_view('commissions.statement', 'agent'), $viewData);
     }
 }
