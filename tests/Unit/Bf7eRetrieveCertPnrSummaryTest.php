@@ -3,8 +3,10 @@
 namespace Tests\Unit;
 
 use Illuminate\Support\Facades\Config;
+use PHPUnit\Framework\Attributes\RunClassInSeparateProcess;
 use Tests\TestCase;
 
+#[RunClassInSeparateProcess]
 class Bf7eRetrieveCertPnrSummaryTest extends TestCase
 {
     public function test_cli_self_test_parse_exits_zero(): void
