@@ -30,6 +30,10 @@ final class JetpkHomepageContentValidator
             $content['destinations']['items'] = $this->normalizeDestinations($content['destinations']['items']);
         }
 
+        if (isset($content['featured_deals']['items']) && is_array($content['featured_deals']['items'])) {
+            $content['featured_deals']['items'] = $this->normalizeFeaturedDeals($content['featured_deals']['items']);
+        }
+
         if (isset($content['support_cta']) && is_array($content['support_cta'])) {
             $content['support_cta'] = $this->normalizeSupportCta($content['support_cta']);
         }
@@ -204,6 +208,69 @@ final class JetpkHomepageContentValidator
         if (count($normalized) > $max) {
             throw ValidationException::withMessages([
                 'content.destinations.items' => "Maximum {$max} destination cards allowed.",
+            ]);
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param  list<mixed>  $items
+     * @return list<array<string, mixed>>
+     */
+    private function normalizeFeaturedDeals(array $items): array
+    {
+        $normalized = [];
+        $errors = [];
+
+        foreach (array_values($items) as $index => $raw) {
+            if (! is_array($raw)) {
+                continue;
+            }
+
+            $from = strtoupper(trim((string) ($raw['from'] ?? '')));
+            $to = strtoupper(trim((string) ($raw['to'] ?? '')));
+            $airline = $this->sanitize($raw['airline'] ?? '');
+            if ($airline === '' && $from === '' && $to === '') {
+                continue;
+            }
+
+            if ($from !== '' && ! preg_match('/^[A-Z]{3}$/', $from)) {
+                $errors["content.featured_deals.items.{$index}.from"] = 'Origin must be a 3-letter IATA code.';
+            }
+            if ($to !== '' && ! preg_match('/^[A-Z]{3}$/', $to)) {
+                $errors["content.featured_deals.items.{$index}.to"] = 'Destination must be a 3-letter IATA code.';
+            }
+
+            $price = $this->optionalPositivePrice($raw['price'] ?? null);
+            if ($price === false) {
+                $errors["content.featured_deals.items.{$index}.price"] = 'Price must be a positive number when provided.';
+            }
+
+            $normalized[] = [
+                'airline' => $airline,
+                'from' => $from,
+                'to' => $to,
+                'depart' => $this->sanitize($raw['depart'] ?? ''),
+                'arrive' => $this->sanitize($raw['arrive'] ?? ''),
+                'dur' => $this->sanitize($raw['dur'] ?? ''),
+                'stops' => max(0, min(9, (int) ($raw['stops'] ?? 0))),
+                'price' => $price === false ? 0 : (int) round((float) ($price ?? 0)),
+                'sort_order' => (int) ($raw['sort_order'] ?? $index),
+                'enabled' => $this->boolString($raw['enabled'] ?? '1'),
+            ];
+        }
+
+        usort($normalized, static fn (array $a, array $b): int => $a['sort_order'] <=> $b['sort_order']);
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        $max = (int) config('jetpk_homepage.max_featured_deals', 6);
+        if (count($normalized) > $max) {
+            throw ValidationException::withMessages([
+                'content.featured_deals.items' => "Maximum {$max} featured deal cards allowed.",
             ]);
         }
 

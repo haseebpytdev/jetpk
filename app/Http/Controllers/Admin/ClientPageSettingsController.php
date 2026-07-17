@@ -11,6 +11,8 @@ use App\Services\Branding\ClientThemePaletteService;
 use App\Services\Client\ClientPageAdminContentResolver;
 use App\Services\Client\ClientPageAssetService;
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\Client\ClientPageSettingDefaultService;
+use App\Services\Client\ClientPageResetService;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Services\Homepage\JetpkHomepageContentMergeService;
 use App\Services\Homepage\JetpkHomepageContentValidator;
@@ -41,6 +43,8 @@ class ClientPageSettingsController extends Controller
         private readonly JetpkHomepageContentMergeService $homepageMergeService,
         private readonly JetpkHomepageAssetService $homepageAssetService,
         private readonly JetpkHomepageRouteFareRefreshService $routeFareRefreshService,
+        private readonly ClientPageSettingDefaultService $defaultService,
+        private readonly ClientPageResetService $resetService,
     ) {}
 
     public function index(): View
@@ -98,6 +102,9 @@ class ClientPageSettingsController extends Controller
                 ->orderBy('asset_key')
                 ->get(),
             'palette' => ClientThemePalette::query()->where('client_profile_id', $profile->id)->first(),
+            'activeDefault' => Schema::hasTable('client_page_setting_defaults')
+                ? $this->defaultService->getActive($profile, $pageKey)
+                : null,
         ]);
     }
 
@@ -176,6 +183,105 @@ class ClientPageSettingsController extends Controller
             ->with('status', 'Page published.');
     }
 
+    public function saveCurrentAsDefault(Request $request, string $pageKey): RedirectResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+        abort_unless(ClientPageKeys::isValid($pageKey), 404);
+
+        $validated = $request->validate([
+            'visual_approval_confirmed' => ['required', 'accepted'],
+            'label' => ['nullable', 'string', 'max:255'],
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $profile = $this->requireProfile();
+
+        try {
+            $this->defaultService->saveCurrentPublishedAsDefault(
+                $profile,
+                $pageKey,
+                visualApprovalConfirmed: true,
+                label: $validated['label'] ?? null,
+                note: $validated['note'] ?? null,
+                userId: auth()->id(),
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['default' => $exception->getMessage()]);
+        }
+
+        return redirect()
+            ->to(client_route('admin.page-settings.edit', ['pageKey' => $pageKey]))
+            ->with('status', 'Current published content saved as the new default.');
+    }
+
+    public function previewReset(string $pageKey): RedirectResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+        abort_unless(ClientPageKeys::isValid($pageKey), 404);
+
+        $profile = $this->requireProfile();
+        $result = $this->resetService->previewReset($profile, $pageKey);
+
+        if (! $result['success']) {
+            return back()->withErrors(['reset' => $result['message']]);
+        }
+
+        $status = $result['message'];
+        if (! empty($result['missing_media'])) {
+            $status .= ' Warning — referenced media not found: '.implode(', ', $result['missing_media']).'.';
+        }
+
+        return back()->with('status', $status);
+    }
+
+    public function resetDraft(string $pageKey): RedirectResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+        abort_unless(ClientPageKeys::isValid($pageKey), 404);
+
+        $profile = $this->requireProfile();
+        $result = $this->resetService->resetDraftToDefault($profile, $pageKey, auth()->id());
+
+        if (! $result['success']) {
+            return back()->withErrors(['reset' => $result['message']]);
+        }
+
+        $status = $result['message'];
+        if (! empty($result['missing_media'])) {
+            $status .= ' Warning — referenced media not found: '.implode(', ', $result['missing_media']).'.';
+        }
+
+        return redirect()
+            ->to(client_route('admin.page-settings.edit', ['pageKey' => $pageKey]))
+            ->with('status', $status);
+    }
+
+    public function resetAndPublish(Request $request, string $pageKey): RedirectResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+        abort_unless(ClientPageKeys::isValid($pageKey), 404);
+
+        $request->validate([
+            'reset_and_publish_confirmed' => ['required', 'accepted'],
+        ]);
+
+        $profile = $this->requireProfile();
+        $result = $this->resetService->resetAndPublish($profile, $pageKey, auth()->id());
+
+        if (! $result['success']) {
+            return back()->withErrors(['reset' => $result['message']]);
+        }
+
+        $status = $result['message'];
+        if (! empty($result['missing_media'])) {
+            $status .= ' Warning — referenced media not found: '.implode(', ', $result['missing_media']).'.';
+        }
+
+        return redirect()
+            ->to(client_route('admin.page-settings.edit', ['pageKey' => $pageKey]))
+            ->with('status', $status);
+    }
+
     public function beginPreview(string $pageKey): RedirectResponse
     {
         Gate::authorize('client.page-settings.manage');
@@ -243,7 +349,7 @@ class ClientPageSettingsController extends Controller
         return $redirect;
     }
 
-    public function destroyAsset(string $pageKey, ClientPageAsset $asset): RedirectResponse
+    public function destroyAsset(string $pageKey, ClientPageAsset $asset, Request $request): RedirectResponse
     {
         Gate::authorize('client.page-settings.manage');
         abort_unless(ClientPageKeys::isValid($pageKey), 404);
@@ -251,9 +357,51 @@ class ClientPageSettingsController extends Controller
         $profile = $this->requireProfile();
         abort_unless($asset->client_profile_id === $profile->id, 404);
 
+        if (! $request->boolean('force') && $this->assetIsStillReferenced($profile, $pageKey, $asset->asset_key)) {
+            return back()->withErrors([
+                'asset' => "\"{$asset->asset_key}\" is still referenced in this page's Draft or Published content. "
+                    .'Remove the reference first, or resubmit with force=1 to delete anyway and leave a broken image reference.',
+            ]);
+        }
+
         $this->assetService->destroy($asset);
 
         return back()->with('status', 'Asset removed.');
+    }
+
+    private function assetIsStillReferenced(\App\Models\ClientProfile $profile, string $pageKey, string $assetKey): bool
+    {
+        $rows = ClientPageSetting::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', $pageKey)
+            ->whereIn('status', [ClientPageSettingStatus::Draft, ClientPageSettingStatus::Published])
+            ->get();
+
+        foreach ($rows as $row) {
+            if (is_array($row->content_json) && $this->arrayContainsValue($row->content_json, $assetKey)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function arrayContainsValue(array $data, string $needle): bool
+    {
+        foreach ($data as $value) {
+            if (is_array($value)) {
+                if ($this->arrayContainsValue($value, $needle)) {
+                    return true;
+                }
+
+                continue;
+            }
+            if (is_string($value) && $value === $needle) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function palette(): View
