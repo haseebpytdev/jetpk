@@ -1,7 +1,7 @@
 # JetPK Homepage CMS — SSH Verification & Supported Commands
 
-**Integration HEAD:** `824ab74`  
-**App root:** `/home/pkjetp/jetpk_app`  
+**Integration HEAD:** `824ab74`
+**App root:** `/home/pkjetp/jetpk_app`
 **Public root:** `/home/pkjetp/public_html`
 
 ## Supported production command signatures (verified locally)

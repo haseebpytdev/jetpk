@@ -134,4 +134,3 @@ put resources/views/themes/frontend/jetpakistan/sections/trust.blade.php trust.b
 
 cd /home/pkjetp/jetpk_app/routes
 put routes/admin-page-settings.php admin-page-settings.php
-

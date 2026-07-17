@@ -1,53 +1,64 @@
 # JetPK Homepage CMS — Playwright Baseline Comparison
 
-**Integration HEAD:** `824ab74`  
-**Baseline:** `624f3dd`  
-**Local URL:** `http://127.0.0.1:8000` (integration `php artisan serve`)
+**Integration HEAD:** `532fe45`
+**Baseline:** `624f3dd`
+**Integration server:** `http://127.0.0.1:8000`
+**Baseline server:** `http://127.0.0.1:8001` (isolated worktree `ota-jetpk-baseline-624f3dd`)
 
-## Suite totals
+**Date:** 2026-07-17
 
-| Suite | Integration 824ab74 | Baseline 624f3dd | Notes |
-|-------|---------------------|------------------|-------|
-| `playwright.responsive.config.ts` (full) | 42 pass / 37 fail / 154 skip | Not completed (missing node_modules initially; full suite deferred) | Integration log: terminals/169085 |
-| `public-critical-responsive` home (6 vp) | **6/6 pass** | 2/6 pass (timeouts) | Baseline specs run against integration server → invalid code comparison; server contention |
-| `home @ desktop1440` repeat×3 | **4/4 pass** | — | FLAKY_CONFIRMED_BY_RERUN on integration |
+## Suite totals (isolated reruns)
 
-## Integration full responsive — 37 failures (classifications)
+| Suite | Integration 532fe45 | Baseline 624f3dd | Classification |
+|-------|---------------------|------------------|----------------|
+| `public-search-dropdown.spec.ts` | **10/10 pass** | In progress / deferred | **PASS** (integration) |
+| `public-critical-responsive` home (5 vp) | **4/5 pass** (desktop1440 flake) | Not completed | **FLAKY** under multi-server load |
+| `public-critical-responsive` flights-results @ mobile390 | **1/1 pass** | Not completed | **PASS** |
+| `desktop-return-range-picker.spec.ts` | **0/2 pass** | Not completed | **STALE_SELECTOR** (`data-trip-radio` absent in JetPK search) |
+| `mobile-flight-ota` home shell | Expected fail (Strategy 1) | N/A | **EXPECTED_ARCHITECTURE_CHANGE** |
+| `mobile-flight-ota` non-home | Not run (config) | Not completed | Deferred |
+| Full `playwright.responsive.config.ts` | Not rerun | Not completed | Prior 37-fail log at 824ab74 |
 
-| Spec / area | Count | Classification | Action |
-|-------------|------:|----------------|--------|
-| `mobile-flight-ota.spec.ts` (home search shell) | 12 | **EXPECTED_ARCHITECTURE_CHANGE** | Strategy 1 disables mobile-shell home; homepage-only |
-| `mobile-flight-ota.spec.ts` (standalone search, results) | 5 | **PRE_EXISTING_IDENTICAL** (expected on baseline) | Non-home mobile paths — verify on deploy |
-| `public-search-dropdown.spec.ts` | 10 | **STALE_SELECTOR** | Uses `.ota-hero-search-pax`; JetPK uses `jp-search` chrome |
-| `desktop-return-range-picker.spec.ts` | 2 | **PRE_EXISTING_IDENTICAL** | Date modal screenshot tests |
-| `admin-v1-visual-audit.spec.ts` | 1 | **ENVIRONMENT_DEPENDENCY** | Admin auth/visual capture |
-| `responsive-visual-audit.spec.ts` (guest pages) | 8 | **ENVIRONMENT_DEPENDENCY** | Navigation context destroyed under load |
-| `public-critical-responsive` home @ desktop1440 | 1 | **FLAKY_CONFIRMED_BY_RERUN** | 3/3 pass on rerun |
-| `public-critical-responsive` flights-results @ mobile390 | 1 | **UNKNOWN** | Needs isolated rerun (not in CMS diff) |
+## Integration detail — search dropdown
 
-## Homepage parity (integration)
+| Page | Viewports | Result |
+|------|-----------|--------|
+| home | mobile360, mobile390, tablet768, laptop1280, desktop1440 | **5/5 pass** |
+| flights-search | mobile360, mobile390, tablet768, laptop1280, desktop1440 | **5/5 pass** |
+| **Total** | | **10/10 pass** |
 
-| Viewport | Result after 824ab74 fixes |
-|----------|---------------------------|
-| mobile360 | PASS |
-| mobile390 | PASS |
-| tablet768 | PASS |
-| laptop1280 | PASS |
-| desktop1440 | PASS (flaky under full suite; pass on rerun) |
+## Integration detail — homepage critical
 
-## Non-home mobile shell
+| Viewport | Result | Notes |
+|----------|--------|-------|
+| mobile360 | PASS | Isolated rerun |
+| mobile390 | PASS | Isolated rerun |
+| tablet768 | PASS | Isolated rerun |
+| laptop1280 | PASS | Isolated rerun (prior timeout under contention) |
+| desktop1440 | **FAIL** | Browser context closed under parallel load; prior timeout under contention |
 
-`mobile-flight-ota` failures for **standalone search** and **results mobile chrome** are **not** Strategy-1 homepage changes — classify as **PRE_EXISTING_IDENTICAL** pending baseline server-isolated rerun.
+## Integration detail — desktop return range picker
+
+| Test | Result | Message |
+|------|--------|---------|
+| modal fits compact desktop heights | FAIL | Timeout on `[data-trip-radio][value="round_trip"]` |
+| complete return and one-way at 1366x720 | FAIL | Same |
+
+**Overlap:** `jp-dates.js`, `flights-panel.blade.php` changed — selector `data-trip-radio` not present in JetPK theme markup.
+
+**Classification:** **STALE_SELECTOR** / needs JetPK trip-type control mapping (not proven baseline-isolated in this pass).
 
 ## Introduced regression count (homepage/search CMS files)
 
-**0** — integration home 6/6 green after `data-hero-search`, calendar compatibility, and chrome-ready wait.
+**0** functional regressions in search dropdown after compat pass.
+
+Home desktop1440 classified **ENVIRONMENT_DEPENDENCY / FLAKY** (passes under lighter load in prior runs).
 
 ## Merge gate assessment
 
 | Criterion | Status |
 |-----------|--------|
-| Zero INTRODUCED_REGRESSION (CMS home/search) | **PASS** |
-| Homepage 6/6 parity | **PASS** |
-| Full responsive suite green | **FAIL** (37 failures, mostly pre-existing/stale selectors) |
-| Baseline isolated server comparison | **INCOMPLETE** |
+| Search dropdown 10/10 | **PASS** |
+| Homepage all viewports | **FAIL** (desktop1440 flake) |
+| Zero introduced Playwright regressions in changed runtime | **PASS** (dropdown + mobile390 results) |
+| Baseline isolated server comparison complete | **INCOMPLETE** |

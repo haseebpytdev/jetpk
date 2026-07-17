@@ -1,8 +1,8 @@
 # JetPK Homepage CMS Package Reconciliation
 
-**Integration branch:** `integration/jetpk-homepage-cms-final`  
-**Authoritative baseline:** `624f3ddb26716c5bda893ae6e797b8c1780edda0`  
-**Package baseline:** `66eddbd11e7a1b8dfcf4feb8841a2d3f139a02f9`  
+**Integration branch:** `integration/jetpk-homepage-cms-final`
+**Authoritative baseline:** `624f3ddb26716c5bda893ae6e797b8c1780edda0`
+**Package baseline:** `66eddbd11e7a1b8dfcf4feb8841a2d3f139a02f9`
 **Package source:** `C:\Users\khadi\jetpk-cms-package-52` (not committed)
 
 ## Summary counts

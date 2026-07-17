@@ -9,21 +9,26 @@ class JetpkLocalAuditFixtureCommand extends Command
 {
     protected $signature = 'jetpk:local-audit-fixture
                             {--seed : Create jetpk profile with draft/published homepage for local audits}
-                            {--profile=jetpk : Client profile slug}
-                            {--force : Allow outside local/testing (still no supplier mutations)}';
+                            {--profile=jetpk : Client profile slug}';
 
-    protected $description = 'Seed local JetPK homepage fixture for content/media audit CLI gates';
+    protected $description = 'Seed local JetPK homepage fixture for content/media audit CLI gates (local/testing only)';
 
     public function handle(JetpkHomepageAuditFixtureBuilder $builder): int
     {
+        if (app()->environment('production')) {
+            $this->error('Refusing fixture seed in production.');
+
+            return self::FAILURE;
+        }
+
         if (! $this->option('seed')) {
             $this->error('Specify --seed to create the local audit fixture.');
 
             return self::FAILURE;
         }
 
-        if (! in_array(app()->environment(), ['local', 'testing'], true) && ! $this->option('force')) {
-            $this->error('Refusing fixture seed outside local/testing without --force');
+        if (! in_array(app()->environment(), ['local', 'testing'], true)) {
+            $this->error('Refusing fixture seed outside local/testing environments.');
 
             return self::FAILURE;
         }

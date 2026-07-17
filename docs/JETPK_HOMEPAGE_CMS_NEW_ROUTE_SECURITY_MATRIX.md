@@ -1,7 +1,7 @@
 # JetPK Homepage CMS — New Route Security Matrix
 
-**Branch:** `integration/jetpk-homepage-cms-final`  
-**Baseline:** `624f3dd`  
+**Branch:** `integration/jetpk-homepage-cms-final`
+**Baseline:** `624f3dd`
 **Scope:** Routes added in `routes/admin-page-settings.php` between baseline and HEAD
 
 All routes inherit the existing `admin` route group middleware from `bootstrap/app.php` / route service provider (web stack, auth, admin portal). No new public/guest routes were added.
