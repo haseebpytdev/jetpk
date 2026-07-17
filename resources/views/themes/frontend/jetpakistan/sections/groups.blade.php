@@ -9,8 +9,15 @@
     $defaults = $jpHome->defaults();
     $eyebrow = $jpHome->field('group_cards.eyebrow', data_get($defaults, 'group_cards.eyebrow', ''));
     $title = $jpHome->field('group_cards.title', data_get($defaults, 'group_cards.title', ''));
+    $subtitle = $jpHome->field('group_cards.subtitle', data_get($defaults, 'group_cards.subtitle', ''));
     $groups = $jpHome->groupCardsWithFallback();
-    $ctaUrl = $jpHome->field('groups.cta_url', data_get($defaults, 'groups.cta_url', '/group-ticketing'));
+
+    // JETPK-HOMEPAGE-CMS Task 9: previously read the retired 'groups.cta_url' key
+    // and never rendered it at all. Now reads the canonical 'group_cards.*'
+    // fields per Task 6's decision, and the link below actually uses them.
+    $ctaText = $jpHome->field('group_cards.cta_text', data_get($defaults, 'group_cards.cta_text', 'View all packages'));
+    $ctaUrl = $jpHome->field('group_cards.cta_url', data_get($defaults, 'group_cards.cta_url', ''));
+    $ctaHref = $ctaUrl !== '' ? (str_starts_with($ctaUrl, 'http') ? $ctaUrl : client_url($ctaUrl)) : client_route('group-ticketing.search');
 @endphp
 @if ($groups !== [])
 <section class="section" style="padding-top:0">
@@ -19,8 +26,11 @@
       <div>
         @if ($eyebrow !== '')<span class="eyebrow">{{ $eyebrow }}</span>@endif
         @if ($title !== '')<h2>{{ $title }}</h2>@endif
+        @if ($subtitle !== '')<p>{{ $subtitle }}</p>@endif
       </div>
-      <a href="{{ client_route('group-ticketing.search') }}" class="link">View all packages <x-jp.icon name="arrow-right" /></a>
+      @if ($ctaText !== '')
+        <a href="{{ $ctaHref }}" class="link">{{ $ctaText }} <x-jp.icon name="arrow-right" /></a>
+      @endif
     </div>
     <div class="grid-3 stagger">
       @foreach($groups as $g)

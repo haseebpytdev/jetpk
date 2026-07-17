@@ -22,6 +22,10 @@
     $heroSubtitle = $jpHome->field('hero.subtitle', data_get($defaults, 'hero.subtitle', ''));
     $trustChips = $jpHome->field('trust_chips', data_get($defaults, 'trust_chips', []));
     $searchVisible = $jpHome->field('hero.search_visible', data_get($defaults, 'hero.search_visible', '1'));
+    $heroCtaPrimaryText = $jpHome->field('hero.cta_primary_text', data_get($defaults, 'hero.cta_primary_text', ''));
+    $heroCtaPrimaryUrl = $jpHome->field('hero.cta_primary_url', data_get($defaults, 'hero.cta_primary_url', ''));
+    $heroCtaSecondaryText = $jpHome->field('hero.cta_secondary_text', data_get($defaults, 'hero.cta_secondary_text', ''));
+    $heroCtaSecondaryUrl = $jpHome->field('hero.cta_secondary_url', data_get($defaults, 'hero.cta_secondary_url', ''));
 @endphp
 @if ($jpHeroLcp)
   @push('head')
@@ -87,6 +91,21 @@
     <h1 class="hseq hseq-2">{{ $heroHeadline }}@if($heroHighlight !== '')<br><span class="gold">{{ $heroHighlight }}</span>@endif</h1>
     @if ($heroSubtitle !== '')
       <p class="sub hseq hseq-3">{{ $heroSubtitle }}</p>
+    @endif
+
+    @php
+      $heroCtaPrimaryHref = $heroCtaPrimaryUrl !== '' ? (str_starts_with($heroCtaPrimaryUrl, 'http') ? $heroCtaPrimaryUrl : client_url($heroCtaPrimaryUrl)) : null;
+      $heroCtaSecondaryHref = $heroCtaSecondaryUrl !== '' ? (str_starts_with($heroCtaSecondaryUrl, 'http') ? $heroCtaSecondaryUrl : client_url($heroCtaSecondaryUrl)) : null;
+    @endphp
+    @if (($heroCtaPrimaryText !== '' && $heroCtaPrimaryHref) || ($heroCtaSecondaryText !== '' && $heroCtaSecondaryHref))
+      <div class="hero-ctas hseq hseq-4">
+        @if ($heroCtaPrimaryText !== '' && $heroCtaPrimaryHref)
+          <a href="{{ $heroCtaPrimaryHref }}" class="btn btn-primary btn-lg hero-cta-primary">{{ $heroCtaPrimaryText }}</a>
+        @endif
+        @if ($heroCtaSecondaryText !== '' && $heroCtaSecondaryHref)
+          <a href="{{ $heroCtaSecondaryHref }}" class="btn btn-ghost btn-lg hero-cta-secondary">{{ $heroCtaSecondaryText }}</a>
+        @endif
+      </div>
     @endif
 
     @if (\App\Support\Platform\PlatformModuleGate::visible('public_flight_search') && in_array((string) $searchVisible, ['1', 'true', 'yes', 'on'], true))

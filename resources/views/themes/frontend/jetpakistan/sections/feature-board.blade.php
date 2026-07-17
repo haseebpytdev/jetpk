@@ -2,6 +2,10 @@
     use App\Support\Client\JetpkHomepageSectionData;
 
     $jpHome = app(JetpkHomepageSectionData::class);
+    if (! $jpHome->isEnabled('feature_board')) {
+        return;
+    }
+
     $items = $jpHome->featureBoardWithFallback();
 @endphp
 @if ($items !== [])

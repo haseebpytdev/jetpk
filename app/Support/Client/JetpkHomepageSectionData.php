@@ -126,7 +126,48 @@ final class JetpkHomepageSectionData
     }
 
     /**
-     * @return array<string, mixed>
+     * @return list<array<string, mixed>>
+     */
+    public function featuredDealsForDisplay(): array
+    {
+        $items = $this->field('featured_deals.items', null);
+        if (is_array($items) && $items !== []) {
+            $deals = [];
+            foreach ($this->sortedEnabledItems($items) as $item) {
+                if (! is_array($item)) {
+                    continue;
+                }
+                $from = strtoupper(trim((string) ($item['from'] ?? '')));
+                $to = strtoupper(trim((string) ($item['to'] ?? '')));
+                if ($from === '' && $to === '') {
+                    continue;
+                }
+                $deals[] = [
+                    'airline' => trim((string) ($item['airline'] ?? '')),
+                    'from' => $from,
+                    'to' => $to,
+                    'depart' => trim((string) ($item['depart'] ?? '')),
+                    'arrive' => trim((string) ($item['arrive'] ?? '')),
+                    'dur' => trim((string) ($item['dur'] ?? '')),
+                    'stops' => (int) ($item['stops'] ?? 0),
+                    'price' => (int) ($item['price'] ?? 0),
+                ];
+            }
+
+            if ($deals !== []) {
+                return $deals;
+            }
+        }
+
+        return [
+            ['airline' => 'PIA', 'from' => 'KHI', 'to' => 'DXB', 'depart' => '08:40', 'arrive' => '11:15', 'dur' => '2h 35m', 'stops' => 0, 'price' => 96500],
+            ['airline' => 'AirBlue', 'from' => 'LHE', 'to' => 'IST', 'depart' => '14:10', 'arrive' => '20:30', 'dur' => '6h 20m', 'stops' => 1, 'price' => 142300],
+            ['airline' => 'AirSial', 'from' => 'ISB', 'to' => 'JED', 'depart' => '23:55', 'arrive' => '02:45', 'dur' => '2h 50m', 'stops' => 0, 'price' => 118900],
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
      */
     public function supportCtaForDisplay(): array
     {

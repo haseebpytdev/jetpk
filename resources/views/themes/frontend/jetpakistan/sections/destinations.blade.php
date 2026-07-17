@@ -39,6 +39,8 @@
           :image="$d['image'] ?? null"
           :href="$d['href'] ?? null"
           :alt="$d['alt'] ?? ($d['title'] ?? '')"
+          :badge="$d['badge'] ?? null"
+          :text="$d['text'] ?? null"
         />
       @endforeach
     </div>

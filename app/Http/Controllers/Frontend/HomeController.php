@@ -11,6 +11,10 @@ use App\Services\GroupTicketing\GroupInventoryFacetService;
 use App\Support\Booking\AgentBookingContext;
 use App\Support\Branding\SafeBrandingResolver;
 use App\Support\GroupTicketing\GroupHomepageTilePresenter;
+use App\Support\Client\Homepage\JetpkHomepageContextDiagnostic;
+use App\Support\Client\Homepage\HomepageSectionOrderResolver;
+use App\Support\Client\ClientPageKeys;
+use App\Services\Client\ClientPageContentResolver;
 use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -24,6 +28,7 @@ class HomeController extends Controller
         protected MobileViewPreference $mobileViewPreference,
         protected GroupHomepageTilePresenter $groupHomepageTiles,
         protected GroupInventoryFacetService $groupInventoryFacets,
+        protected JetpkHomepageContextDiagnostic $homepageDiagnostic,
     ) {}
 
     public function index(Request $request): View
@@ -86,6 +91,11 @@ class HomeController extends Controller
         }
 
         if ($this->shouldUseJetPakistanThemeHome()) {
+            $this->homepageDiagnostic->logIfEnabled($request);
+            $homepageContent = app(ClientPageContentResolver::class)->contentFor(ClientPageKeys::HOME);
+            $viewData['homepageOrderedSections'] = app(HomepageSectionOrderResolver::class)
+                ->orderedSections($homepageContent);
+
             return view(client_view('frontend.home', 'frontend'), $viewData);
         }
 
