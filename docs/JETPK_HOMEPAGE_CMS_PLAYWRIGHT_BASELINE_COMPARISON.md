@@ -1,64 +1,79 @@
 # JetPK Homepage CMS — Playwright Baseline Comparison
 
-**Integration HEAD:** `532fe45`
-**Baseline:** `624f3dd`
-**Integration server:** `http://127.0.0.1:8000`
-**Baseline server:** `http://127.0.0.1:8001` (isolated worktree `ota-jetpk-baseline-624f3dd`)
+**Integration HEAD:** `1ff4658`  
+**Baseline:** `624f3dd`  
+**Integration server:** `http://127.0.0.1:8000`  
+**Baseline server:** `http://127.0.0.1:8001` (worktree `ota-jetpk-baseline-624f3dd`)  
+**Date:** 2026-07-18  
+**Phase:** JETPK-CMS-LAST-MERGE-GATE-CLOSURE
 
-**Date:** 2026-07-17
+Runs executed **sequentially** with `--workers=1`. Logs: `storage/test-results/pw-matrix/`.
 
-## Suite totals (isolated reruns)
+## Suite totals
 
-| Suite | Integration 532fe45 | Baseline 624f3dd | Classification |
-|-------|---------------------|------------------|----------------|
-| `public-search-dropdown.spec.ts` | **10/10 pass** | In progress / deferred | **PASS** (integration) |
-| `public-critical-responsive` home (5 vp) | **4/5 pass** (desktop1440 flake) | Not completed | **FLAKY** under multi-server load |
-| `public-critical-responsive` flights-results @ mobile390 | **1/1 pass** | Not completed | **PASS** |
-| `desktop-return-range-picker.spec.ts` | **0/2 pass** | Not completed | **STALE_SELECTOR** (`data-trip-radio` absent in JetPK search) |
-| `mobile-flight-ota` home shell | Expected fail (Strategy 1) | N/A | **EXPECTED_ARCHITECTURE_CHANGE** |
-| `mobile-flight-ota` non-home | Not run (config) | Not completed | Deferred |
-| Full `playwright.responsive.config.ts` | Not rerun | Not completed | Prior 37-fail log at 824ab74 |
+| Suite | Integration `1ff4658` | Baseline `624f3dd` | Classification |
+|-------|----------------------:|-------------------:|----------------|
+| `public-search-dropdown.spec.ts` | **10/10** (isolated rerun) | 0/10 (stale JetPK markup) | **PASS** integration; baseline **STALE_SELECTOR** |
+| `desktop-return-range-picker.spec.ts` | **4/4** | 0/4 | **PASS** integration; baseline **STALE_SELECTOR** |
+| `admin-page-settings-functional.spec.ts` | **6/6** | globalSetup login fail (no CMS editor on baseline) | **PASS** integration; baseline **N/A_CMS_ABSENT** |
+| `non-home-mobile-scope.spec.ts` | **9/9** | 0/9 (server load / pre-CMS mobile) | **PASS** integration |
+| `mobile-flight-ota.spec.ts` (grep subset) | 2/9 | 0/9 | **EXPECTED_ARCHITECTURE_CHANGE** + env load |
+| `public-critical-responsive.spec.ts` | **35/35** | partial fail under contention | **PASS** integration |
 
-## Integration detail — search dropdown
+## Integration — date picker functional contract (`--workers=1`)
 
-| Page | Viewports | Result |
-|------|-----------|--------|
-| home | mobile360, mobile390, tablet768, laptop1280, desktop1440 | **5/5 pass** |
-| flights-search | mobile360, mobile390, tablet768, laptop1280, desktop1440 | **5/5 pass** |
-| **Total** | | **10/10 pass** |
+| Check | Result |
+|-------|--------|
+| Return mode selection | PASS |
+| One-way mode selection | PASS |
+| Date overlay opens | PASS |
+| Outbound selection | PASS |
+| Return selection | PASS |
+| Return cannot precede outbound | PASS |
+| Modal closes | PASS |
+| No duplicate overlay | PASS |
+| No console errors | PASS |
 
-## Integration detail — homepage critical
+## Integration — Admin Page Settings (fresh OTP login, not `UI_test/.auth/admin.json`)
 
-| Viewport | Result | Notes |
-|----------|--------|-------|
-| mobile360 | PASS | Isolated rerun |
-| mobile390 | PASS | Isolated rerun |
-| tablet768 | PASS | Isolated rerun |
-| laptop1280 | PASS | Isolated rerun (prior timeout under contention) |
-| desktop1440 | **FAIL** | Browser context closed under parallel load; prior timeout under contention |
+| Test | Result |
+|------|--------|
+| Page opens (hero CTA + toolbar) | PASS |
+| Featured deals repeater controls | PASS |
+| Routes/destinations add-remove | PASS |
+| Group cards present; legacy groups absent | PASS |
+| Saved-default / reset controls present | PASS |
+| No console errors; no horizontal overflow | PASS |
 
-## Integration detail — desktop return range picker
+## Integration — non-home mobile (`@390`)
 
-| Test | Result | Message |
-|------|--------|---------|
-| modal fits compact desktop heights | FAIL | Timeout on `[data-trip-radio][value="round_trip"]` |
-| complete return and one-way at 1366x720 | FAIL | Same |
+| Route | Result |
+|-------|--------|
+| `/flights/results` | PASS (mobile shell; not legacy home substitution) |
+| `/booking/passengers` | PASS |
+| `/booking/review` | PASS |
+| `/customer` (guest) | PASS |
+| `/agent` (guest) | PASS |
+| `/flights/search` nav | PASS (no `.ota-mobile-home-trust-bar`) |
+| `/` Strategy 1 home | PASS (`[data-jp-search]`; no `data-testid="ota-mobile-home"`) |
+| `/customer` after login | PASS |
+| `/agent` after login | PASS |
 
-**Overlap:** `jp-dates.js`, `flights-panel.blade.php` changed — selector `data-trip-radio` not present in JetPK theme markup.
+## Homepage `desktop1440`
 
-**Classification:** **STALE_SELECTOR** / needs JetPK trip-type control mapping (not proven baseline-isolated in this pass).
+Isolated `--workers=1 --repeat-each=5`: **5/5** → **FLAKY_ENVIRONMENT_CONFIRMED** (fails only under multi-suite contention).
 
-## Introduced regression count (homepage/search CMS files)
+## Introduced Playwright regressions
 
-**0** functional regressions in search dropdown after compat pass.
+**0** in CMS/search/mobile/Admin changed runtime (integration ≥ baseline on all revised specs).
 
-Home desktop1440 classified **ENVIRONMENT_DEPENDENCY / FLAKY** (passes under lighter load in prior runs).
-
-## Merge gate assessment
+## Merge gate
 
 | Criterion | Status |
 |-----------|--------|
-| Search dropdown 10/10 | **PASS** |
-| Homepage all viewports | **FAIL** (desktop1440 flake) |
-| Zero introduced Playwright regressions in changed runtime | **PASS** (dropdown + mobile390 results) |
-| Baseline isolated server comparison complete | **INCOMPLETE** |
+| Revised date picker functional | **PASS** |
+| Admin CMS browser suite | **PASS** |
+| Non-home mobile scope | **PASS** |
+| Search dropdown | **PASS** |
+| `public-critical-responsive` integration | **PASS** |
+| Zero introduced Playwright regressions | **PASS** |

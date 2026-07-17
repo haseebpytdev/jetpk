@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-07-18T01:25:00+05:00",
+  "integration_head": "1ff4658",
+  "baseline": "624f3dd",
+  "method": "Per-directory batch comparison plus individual baseline reruns for Admin/Jetpk/Ui spot-checks; zero asymmetric failure test names across all 23 Feature directories.",
+  "introduced_by_integration_count": 0,
+  "unknown_in_changed_subsystems_count": 0,
+  "changed_subsystems": ["Admin", "Jetpk", "FlightSearch", "Ui", "Client"],
+  "verdict_gate": "PASS",
+  "notes": {
+    "Client": "Integration has more tests (95 vs 77) and fewer failures (45 vs 52); all integration failure test names exist in baseline batch failures.",
+    "Ui": "22 MobileViewPreference failures are EXPECTED_ARCHITECTURE_CHANGE (home Strategy 1 / mobile_pages.home=false); identical on both SHAs.",
+    "Admin": "2 failures identical on baseline (spot-checked individually).",
+    "Jetpk": "2 failures identical on baseline (spot-checked individually)."
+  }
+}
