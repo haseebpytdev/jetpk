@@ -97,7 +97,7 @@
 
             <div class="field jp-submit-field" data-jp-submit-field>
                 <span class="jp-field-sr-label">Search</span>
-                <button type="submit" class="btn btn-primary btn-search jp-search-submit" data-jp-flight-submit>
+                <button type="submit" class="btn btn-primary btn-search jp-search-submit ota-hero-search-submit" data-jp-flight-submit>
                     <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
                     <span class="jp-search-submit-text">Search</span>
                 </button>

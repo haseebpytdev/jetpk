@@ -596,6 +596,7 @@ html.jp-date-modal-open {
 
 .jp-date-overlay[hidden] {
   display: none !important;
+  pointer-events: none !important;
 }
 
 .jp-date-overlay__backdrop {

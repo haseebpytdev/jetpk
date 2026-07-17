@@ -515,7 +515,7 @@ export async function assertCalendarUsable(page: Page, ctx: PublicCriticalContex
 
   const calendar = page
     .locator(
-      '.flatpickr-calendar.open, .ota-return-range-picker--open, .ota-return-range-picker[role="dialog"]:not([hidden])',
+      '.flatpickr-calendar.open, .ota-return-range-picker--open, .ota-return-range-picker[role="dialog"]:not([hidden]), .jp-date-overlay:not([hidden]) .jp-date-calendar',
     )
     .first();
 
@@ -525,6 +525,7 @@ export async function assertCalendarUsable(page: Page, ctx: PublicCriticalContex
   const nativeOk = triggerType === 'date' && (await trigger.isVisible().catch(() => false));
 
   if (!opened && !nativeOk) {
+    await page.keyboard.press('Escape').catch(() => undefined);
     return [
       failure(
         'calendar',

@@ -159,7 +159,7 @@ window.JpDates = (function () {
     overlay.hidden = true;
     overlay.innerHTML =
       '<button type="button" class="jp-date-overlay__backdrop" data-jp-cal-close aria-label="Close calendar"></button>' +
-      '<div class="jp-date-calendar" role="dialog" aria-modal="true" aria-label="Choose dates">' +
+      '<div class="jp-date-calendar ota-return-range-picker" role="dialog" aria-modal="true" aria-label="Choose dates">' +
       '<div class="jp-date-calendar__top">' +
       '<div class="jp-date-cal-head">' +
       '<p class="jp-date-cal-hint" data-jp-cal-hint></p>' +
@@ -187,6 +187,8 @@ window.JpDates = (function () {
     if (!overlay) return;
     overlay.hidden = true;
     overlay.setAttribute('aria-hidden', 'true');
+    var dialog = overlay.querySelector('.jp-date-calendar');
+    if (dialog) dialog.classList.remove('ota-return-range-picker--open');
     document.documentElement.classList.remove('jp-date-modal-open');
     if (active && active.trigger) active.trigger.setAttribute('aria-expanded', 'false');
     active = null;
@@ -502,6 +504,8 @@ window.JpDates = (function () {
 
     o.hidden = false;
     o.setAttribute('aria-hidden', 'false');
+    var dialog = o.querySelector('.jp-date-calendar');
+    if (dialog) dialog.classList.add('ota-return-range-picker--open');
     document.documentElement.classList.add('jp-date-modal-open');
     repaint(state);
   }
