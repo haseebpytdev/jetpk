@@ -21,6 +21,58 @@
                     @endif
                 </p>
             @endif
+            {{-- JETPK-HOMEPAGE-CMS Task 12: saved-default metadata --}}
+            <p class="jp-muted jp-muted--sm" data-jp-default-metadata>
+                @if ($activeDefault)
+                    Saved default: {{ $activeDefault->label ?: 'Untitled' }}
+                    (saved {{ $activeDefault->created_at?->diffForHumans() }}@if($activeDefault->createdBy) by {{ $activeDefault->createdBy->name }}@endif).
+                    <button type="button" class="jp-btn jp-btn--sm jp-btn--ghost" data-jp-default-toggle-form>Save current published as new default</button>
+                @else
+                    No saved default yet for this page —
+                    <button type="button" class="jp-btn jp-btn--sm jp-btn--ghost" data-jp-default-toggle-form>Save current published state as the default</button>
+                @endif
+            </p>
+            <form method="post" action="{{ client_route('admin.page-settings.save-as-default', ['pageKey' => $pageKey]) }}" class="jp-card jp-is-hidden" data-jp-default-form>
+                @csrf
+                <p class="jp-muted jp-muted--sm">This becomes the target for "Reset to Default." Only save this after visually reviewing the live published page — not just the editor form.</p>
+                <div class="jp-field">
+                    <label class="jp-field__label" for="default-label">Label (optional)</label>
+                    <input id="default-label" class="jp-control" name="label" maxlength="255" placeholder="e.g. Launch v1">
+                </div>
+                <div class="jp-field">
+                    <label class="jp-field__label" for="default-note">Note (optional)</label>
+                    <textarea id="default-note" class="jp-control jp-control--textarea" rows="2" name="note" maxlength="2000"></textarea>
+                </div>
+                <label class="jp-toggle">
+                    <input type="checkbox" name="visual_approval_confirmed" value="1" required>
+                    I have viewed the live published page and confirm it is correct.
+                </label>
+                <button type="submit" class="jp-btn jp-btn--sm">Save as default</button>
+            </form>
+
+            {{-- JETPK-HOMEPAGE-CMS Task 13: reset to default --}}
+            @if ($activeDefault)
+                <div class="jp-toolbar">
+                    <form method="post" action="{{ client_route('admin.page-settings.reset.preview', ['pageKey' => $pageKey]) }}">
+                        @csrf
+                        <button type="submit" class="jp-btn jp-btn--sm jp-btn--ghost">Preview reset to default</button>
+                    </form>
+                    <form method="post" action="{{ client_route('admin.page-settings.reset.draft', ['pageKey' => $pageKey]) }}" onsubmit="return confirm('Reset the DRAFT to the saved default? Published is not affected. A revision of the current draft will be kept.');">
+                        @csrf
+                        <button type="submit" class="jp-btn jp-btn--sm jp-btn--ghost">Reset draft to default</button>
+                    </form>
+                    <button type="button" class="jp-btn jp-btn--sm jp-btn--ghost" data-jp-reset-publish-toggle>Reset and publish…</button>
+                </div>
+                <form method="post" action="{{ client_route('admin.page-settings.reset.publish', ['pageKey' => $pageKey]) }}" class="jp-card jp-is-hidden" data-jp-reset-publish-form>
+                    @csrf
+                    <p class="jp-muted jp-muted--sm"><strong>This overwrites the LIVE page immediately.</strong> A revision of the current published state is kept and can be reviewed afterward, but visitors will see the default content right away.</p>
+                    <label class="jp-toggle">
+                        <input type="checkbox" name="reset_and_publish_confirmed" value="1" required>
+                        I understand this replaces the live published page right now, and I want to proceed.
+                    </label>
+                    <button type="submit" class="jp-btn jp-btn--sm">Reset draft and publish immediately</button>
+                </form>
+            @endif
         </div>
         <div class="jp-toolbar">
             <form method="post" action="{{ client_route('admin.page-settings.preview.begin', ['pageKey' => $pageKey]) }}">
@@ -62,20 +114,19 @@
                 <form method="post" action="{{ client_route('admin.page-settings.update', ['pageKey' => $pageKey]) }}" class="jp-stack jp-form-shell" data-jp-content-form @if($pageKey === 'home') enctype="multipart/form-data" @endif>
                     @csrf
                     @method('PATCH')
-                    <div id="jp-submitted-sections" aria-hidden="true"></div>
+                    <div id="jp-submitted-sections" style="display:none" aria-hidden="true"></div>
 
                     @if ($pageKey === 'home')
                         <nav class="jp-page-editor__nav" aria-label="Home sections" data-jp-section-nav>
                             <button type="button" class="jp-queue-tab is-active" data-jp-section="hero">Hero</button>
-                            <button type="button" class="jp-queue-tab" data-jp-section="trust-chips">Trust</button>
-                            <button type="button" class="jp-queue-tab" data-jp-section="feature-board">Stats</button>
-                            <button type="button" class="jp-queue-tab" data-jp-section="why-book">Why us</button>
+                            <button type="button" class="jp-queue-tab" data-jp-section="trust-chips">Trust badges</button>
+                            <button type="button" class="jp-queue-tab" data-jp-section="feature-board">Stats strip</button>
                             <button type="button" class="jp-queue-tab" data-jp-section="trust">Trust cards</button>
+                            <button type="button" class="jp-queue-tab" data-jp-section="group-cards">Group cards</button>
                             <button type="button" class="jp-queue-tab" data-jp-section="featured-deals">Deals</button>
                             <button type="button" class="jp-queue-tab" data-jp-section="routes">Routes</button>
                             <button type="button" class="jp-queue-tab" data-jp-section="destinations">Destinations</button>
-                            <button type="button" class="jp-queue-tab" data-jp-section="group-cards">Group cards</button>
-                            <button type="button" class="jp-queue-tab" data-jp-section="groups">Groups CTA</button>
+                            <button type="button" class="jp-queue-tab" data-jp-section="why-book">Why us</button>
                             <button type="button" class="jp-queue-tab" data-jp-section="support-cta">Support CTA</button>
                         </nav>
                         <div class="jp-page-editor__sections" data-jp-section-panels>
@@ -196,5 +247,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('themes/admin/jetpakistan/js/page-settings-editor.js') }}?v=4"></script>
+<script src="{{ asset('themes/admin/jetpakistan/js/page-settings-editor.js') }}?v=3"></script>
 @endpush

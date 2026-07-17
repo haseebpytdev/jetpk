@@ -15,6 +15,11 @@
             <label for="routes-enabled">Enabled</label>
         </div>
     </div>
+    <div class="jp-field jp-field--inline" style="max-width:160px;">
+        <label class="jp-field__label" for="routes-order">Position on page</label>
+        <input id="routes-order" type="number" min="2" max="9" class="jp-control" name="content[routes][order]" value="{{ data_get($content, 'routes.order', '') }}">
+        <p class="jp-field__help">Lower numbers render higher on the page. Leave blank to use the default position.</p>
+    </div>
     <p class="jp-field__help">Dynamic fares search travel date = today + {{ $offsetDays }} days (read-only; no booking). Use toolbar “Refresh route fares” after publishing.</p>
     <div class="jp-grid jp-grid--2">
         <div class="jp-field">
@@ -48,7 +53,7 @@
                 $routeId = data_get($item, 'id') ?: 'route-'.$i;
                 $cache = is_array($fareCache[$routeId] ?? null) ? $fareCache[$routeId] : [];
             @endphp
-            <div class="jp-repeatable-card" data-jp-repeatable-row>
+            <div class="jp-repeatable-card" data-jp-repeatable-row data-index="{{ $i }}">
                 <div class="jp-between">
                     <p class="jp-muted" style="margin:0;">Route {{ $i + 1 }}</p>
                     <div class="jp-toggle">
@@ -58,7 +63,10 @@
                     </div>
                 </div>
                 <input type="hidden" name="content[routes][items][{{ $i }}][id]" value="{{ $routeId }}">
-                <input type="hidden" name="content[routes][items][{{ $i }}][sort_order]" value="{{ data_get($item, 'sort_order', $i) }}">
+                <div class="jp-field jp-field--inline" style="max-width:140px;">
+                    <label class="jp-field__label">Order</label>
+                    <input aria-label="Order" type="number" min="0" class="jp-control" name="content[routes][items][{{ $i }}][sort_order]" value="{{ data_get($item, 'sort_order', $i) }}">
+                </div>
                 <div class="jp-grid jp-grid--3">
                     <div class="jp-field">
                         <label class="jp-field__label">Origin IATA</label>
