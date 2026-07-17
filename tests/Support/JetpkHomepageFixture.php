@@ -8,6 +8,7 @@ use App\Models\Airport;
 use App\Models\ClientPageSetting;
 use App\Models\ClientProfile;
 use App\Models\ClientProfileModule;
+use App\Models\User;
 use App\Services\Client\CurrentClientContext;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\ClientProfileConfigReader;
@@ -78,6 +79,26 @@ trait JetpkHomepageFixture
         config(['ota_client.slug' => 'jetpk']);
 
         return $profile;
+    }
+
+    /** Ensure FK-safe user rows exist for CMS pipeline tests. */
+    protected function seedCmsTestUsers(int ...$ids): void
+    {
+        foreach ($ids as $id) {
+            if (User::query()->find($id) !== null) {
+                continue;
+            }
+
+            User::unguarded(function () use ($id): void {
+                User::query()->create([
+                    'id' => $id,
+                    'name' => 'CMS Test User '.$id,
+                    'email' => 'cms-test-'.$id.'@jetpakistan.pk.test',
+                    'password' => bcrypt('password'),
+                    'account_type' => \App\Enums\AccountType::PlatformAdmin,
+                ]);
+            });
+        }
     }
 
     /**
