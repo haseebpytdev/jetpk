@@ -22,6 +22,8 @@ return [
 
     'max_destinations' => 12,
 
+    'max_featured_deals' => 6,
+
     'default_adults' => 1,
 
     'default_cabin' => 'economy',
@@ -37,4 +39,6 @@ return [
     'hero_lcp_subdirectory' => 'lcp',
 
     'refresh_lock_seconds' => 900,
+
+    'context_diagnostic_enabled' => (bool) env('JETPK_CMS_CONTEXT_DIAGNOSTIC', false),
 ];
