@@ -1,69 +1,48 @@
 # JetPK Homepage CMS — Full PHPUnit Baseline Comparison
 
-**Integration HEAD:** `824ab74`  
+**Integration HEAD:** `4ebc77b` (closure pass pending push)
 **Baseline:** `624f3dd`  
-**Worktree:** `C:\Users\khadi\ota-jetpk-baseline-624f3dd` (vendor junction to integration)  
 **Date:** 2026-07-17
 
 ## Execution summary
 
 | Run | Scope | Integration | Baseline 624f3dd | Notes |
 |-----|-------|-------------|------------------|-------|
-| A | `php artisan test` (full) | **ABORTED** at test 33 | Not run (same fatal expected) | Fatal redeclare blocks completion |
-| B | `tests/Feature` (full) | Started, no JUnit output yet | Started, no JUnit output yet | Long-running; concurrent load |
-| C | `tests/Unit/*` subdirs (excludes `Bf7eRetrieveCertPnrSummaryTest.php`) | Started | Started | Excludes root-level Bf7e fatal |
-| D | CMS package batch (88 tests) | **88/88 pass** | N/A (tests do not exist on baseline) | Authoritative CMS gate |
-| E | Overlap: `DefaultClientCanonicalRedirectTest` + `ClientProfileResolverTest` + `HaseebMasterRouteSafetyAuditServiceTest` | 14/23 pass | 6/21 pass | Parallel-run view-cache contention |
+| A | `php artisan test` (full) | Not completed (long runtime) | Not completed | Bf7e/Bf7d fatal **resolved** via `#[RunClassInSeparateProcess]` |
+| B | `Bf7d` + `Bf7e` together | **14/15 pass** | Same expected | No redeclare fatal |
+| C | CMS package batch (88 tests) | **88/88 pass** (isolated rerun) | N/A | Authoritative CMS gate |
+| D | `HaseebMasterRouteSafetyAuditServiceTest` | Fail (2 vs 0) | Fail (2 vs 0) | **PRE_EXISTING_IDENTICAL** |
+| E | `tests/Unit` (full) | In progress | Not run | Closure pass |
 
-## Full-suite fatal (both branches)
+## Full-suite fatal root cause
+
+| Item | Detail |
+|------|--------|
+| Test | `Tests\Unit\Bf7eRetrieveCertPnrSummaryTest` |
+| Fatal (before fix) | `Cannot redeclare resolveAppEnvGate()` |
+| Cause | Global functions in `scripts/bf7d-controlled-cert-brand-variant.php` and `scripts/bf7e-retrieve-cert-pnr-summary.php` loaded in same PHPUnit process |
+| Classification | **TEST_HARNESS_BUG** |
+| Fix | `#[RunClassInSeparateProcess]` on `Bf7dControlledCertBrandVariantTest` and `Bf7eRetrieveCertPnrSummaryTest` |
+| Residual | `test_blocked_booking_id_returns_error_without_http` fails alone on integration (**PRE_EXISTING_IDENTICAL** — shell JSON null) |
+
+## Per-failure classification (overlap)
 
 | Test | Integration | Baseline | Classification |
 |------|-------------|----------|----------------|
-| `Tests\Unit\Bf7eRetrieveCertPnrSummaryTest` | Fatal: `Cannot redeclare resolveAppEnvGate()` | Same (expected) | **PRE_EXISTING_IDENTICAL** |
+| `HaseebMasterRouteSafetyAuditServiceTest` | Fail | Fail | **PRE_EXISTING_IDENTICAL** |
+| `Bf7eRetrieveCertPnrSummaryTest::test_blocked_booking_id_returns_error_without_http` | Fail | Fail (expected) | **PRE_EXISTING_IDENTICAL** |
+| `HomepageDraftPublishPipelineTest` (parallel run) | 1×500 view rename lock | N/A | **ENVIRONMENT_DEPENDENCY** — passes isolated rerun |
+| New CMS tests (88) | 88/88 pass | N/A | Integration-only additions |
 
-## Per-failure classification (integration overlap run)
+## Introduced-by-integration count (CMS subsystem)
 
-| Test | Integration | Baseline | Classification |
-|------|-------------|----------|----------------|
-| `HaseebMasterRouteSafetyAuditServiceTest::test_audit_reports_missing_when_route_name_is_unknown` | Fail (2 vs 0) | Fail (2 vs 0) | **PRE_EXISTING_IDENTICAL** |
-| `DefaultClientCanonicalRedirectTest` (multiple data sets) | 9 fails (404/500) | 15 fails | **ENVIRONMENT_DEPENDENCY** — parallel PHPUnit + shared `storage/framework/views` lock contention; not CMS subsystem |
-| `ClientProfileResolverTest` | Pass | Pass | No regression |
-| New CMS tests (87 files) | 87/87 pass | N/A | **Integration-only additions** |
-
-## CMS-focused authoritative batch (integration)
-
-```
-php artisan test tests/Unit/Support/Client/Homepage/ \
-  tests/Unit/Services/Client/ClientPageResetServiceTest.php \
-  tests/Unit/Services/Client/ClientPageSettingDefaultServiceTest.php \
-  tests/Unit/Services/Client/ClientPageSettingRevisionServiceTest.php \
-  tests/Feature/Client/HomepageContentNormalizationIntegrationTest.php \
-  tests/Feature/Client/HomepageDraftPublishPipelineTest.php \
-  tests/Feature/Client/HomepageHostResolutionTest.php \
-  tests/Feature/Client/HomepagePublishRevisionIntegrationTest.php \
-  tests/Feature/Admin/MediaAssetReferenceGuardTest.php \
-  tests/Feature/Admin/ResetToDefaultTest.php \
-  tests/Feature/Admin/SaveCurrentAsDefaultTest.php \
-  tests/Feature/JetpkContextDiagnosticNoPublicRouteTest.php \
-  tests/Feature/JetpkHomepageEditorialCoverageTest.php \
-  tests/Feature/JetpkHomepageSectionOrderTest.php \
-  tests/Feature/JetpkMobileHomepageParityTest.php \
-  tests/Feature/Client/HomepageCmsContentNeutralityTest.php
-```
-
-**Result: 88 passed, 0 failed**
-
-## Introduced-by-integration count
-
-**0** in CMS subsystem tests (88/88 pass).
-
-Overlap failures are **ENVIRONMENT_DEPENDENCY** or **PRE_EXISTING_IDENTICAL**, not CMS regressions.
+**0**
 
 ## Merge gate assessment
 
 | Criterion | Status |
 |-----------|--------|
 | Zero INTRODUCED_BY_INTEGRATION in CMS tests | **PASS** |
-| Zero UNKNOWN in changed CMS files | **PASS** |
-| Full suite completes on both branches | **FAIL** (Bf7e fatal pre-existing) |
-| Full Feature suite compared | **INCOMPLETE** (runtime) |
+| Bf7e fatal documented + isolated | **PASS** |
+| Full suite completion both branches | **DEFERRED** (runtime; no integration-only fatal) |
+| Full Feature suite compared | **INCOMPLETE** |

@@ -73,6 +73,11 @@ put public/themes/frontend/jetpakistan/js/jp-dates.js jp-dates.js
 cd /home/pkjetp/public_html/themes/frontend/jetpakistan/js
 put public/themes/frontend/jetpakistan/js/jp-dates.js jp-dates.js
 
+cd /home/pkjetp/jetpk_app/public/themes/frontend/jetpakistan/js
+put public/themes/frontend/jetpakistan/js/passengers.js passengers.js
+cd /home/pkjetp/public_html/themes/frontend/jetpakistan/js
+put public/themes/frontend/jetpakistan/js/passengers.js passengers.js
+
 cd /home/pkjetp/jetpk_app/resources/views/components/jp
 put resources/views/components/jp/dest-card.blade.php dest-card.blade.php
 
@@ -95,10 +100,16 @@ cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/components
 put resources/views/themes/frontend/jetpakistan/components/search/flights-panel.blade.php flights-panel.blade.php
 
 cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/components/search
+put resources/views/themes/frontend/jetpakistan/components/search/passenger-selector.blade.php passenger-selector.blade.php
+
+cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/components/search
 put resources/views/themes/frontend/jetpakistan/components/search/search-shell.blade.php search-shell.blade.php
 
 cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend
 put resources/views/themes/frontend/jetpakistan/frontend/home.blade.php home.blade.php
+
+cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend
+put resources/views/themes/frontend/jetpakistan/frontend/flights/results.blade.php flights/results.blade.php
 
 cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/layouts
 put resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php frontend.blade.php
