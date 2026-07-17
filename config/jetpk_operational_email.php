@@ -216,6 +216,21 @@ return [
   */
   'dedup_minutes' => 5,
 
+  /*
+  | Rejection markers for operational email brand scanning — not fallback values.
+  */
+  'prohibited_brand_markers' => [
+    'Parwaaz',
+    'parwaaz',
+    'Parwaaz Travels',
+    'YD Travel',
+    'YoursDomain',
+    'yoursdomain',
+    'haseeb-master',
+    'placeholder 123',
+  ],
+
+  // @deprecated alias — use prohibited_brand_markers
   'forbidden_brand_fragments' => [
     'Parwaaz',
     'parwaaz',

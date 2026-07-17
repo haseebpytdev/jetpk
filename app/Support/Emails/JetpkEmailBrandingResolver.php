@@ -88,14 +88,14 @@ class JetpkEmailBrandingResolver
     protected static function canonicalBusinessEmail(?string $email): string
     {
         $email = strtolower(trim((string) $email));
-        $legacy = [
-            'support@jetpakistan.com',
-            'ticketingjp@jetpakistan.com',
-            'support@haseebasif.com',
-        ];
+        $legacy = array_map(
+            static fn (string $value): string => strtolower(trim($value)),
+            (array) config('client.deprecated_operational_emails', []),
+        );
+        $canonical = strtolower(trim((string) config('client.canonical_support_email', 'ota@jetpakistan.pk')));
 
         if ($email === '' || in_array($email, $legacy, true)) {
-            return 'ota@jetpakistan.pk';
+            return $canonical !== '' ? $canonical : 'ota@jetpakistan.pk';
         }
 
         return trim((string) $email);

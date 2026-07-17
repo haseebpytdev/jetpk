@@ -3,7 +3,7 @@
 
      REQUIRED because the legacy partial is built entirely from `ota-account-*` classes, which
      Task 13 forbids in any JetPK-resolved page. The legacy partial REMAINS on disk untouched and
-     continues to serve default/Parwaaz clients.
+     serves legacy dashboard clients when standalone mode is off\.
 
      Preserved verbatim from dashboard.customer.partials.default-traveler-card:
        • $defaultTraveler['source'] === 'saved' vs 'profile' branching

@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 2 · Customer travelers — create (JetPK theme)
      Resolved by client_view('travelers.create', 'customer'); dashboard.travelers.create remains
-     the fallback for default/Parwaaz clients and is NOT modified.
+     the fallback for standalone mode is off\.
 
      Preserved verbatim from the legacy $isPortalAccount branch of dashboard.travelers.create:
        • controller vars: $traveler (new SavedTraveler), $routePrefix, $countries

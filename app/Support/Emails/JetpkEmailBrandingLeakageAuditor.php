@@ -24,8 +24,10 @@ class JetpkEmailBrandingLeakageAuditor
      */
     public function forbiddenFragments(): array
     {
-        $operational = config('jetpk_operational_email.forbidden_brand_fragments', []);
-        $email = config('jetpk_email.forbidden_brand_fragments', []);
+        $operational = config('jetpk_operational_email.prohibited_brand_markers')
+            ?? config('jetpk_operational_email.forbidden_brand_fragments', []);
+        $email = config('jetpk_email.prohibited_brand_markers')
+            ?? config('jetpk_email.forbidden_brand_fragments', []);
 
         return array_values(array_unique(array_filter(array_merge(
             is_array($operational) ? $operational : [],

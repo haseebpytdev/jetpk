@@ -39,8 +39,20 @@ return [
 
     /*
     | Fragments that must never appear in resolved email brand/agency names.
-    | Kept in config so email support classes stay free of master-brand literals.
+    | Rejection markers only — not runtime branding fallbacks.
     */
+    'prohibited_brand_markers' => [
+        'Parwaaz',
+        'parwaaz',
+        'Parwaaz Travels',
+        'YD Travel',
+        'YoursDomain',
+        'yoursdomain',
+        'haseeb-master',
+        'placeholder 123',
+    ],
+
+    // @deprecated alias — use prohibited_brand_markers
     'forbidden_brand_fragments' => [
         'Parwaaz',
         'parwaaz',

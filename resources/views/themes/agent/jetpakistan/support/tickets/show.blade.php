@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 8 · Agent / Agent Staff support ticket — show (JetPK theme)
      Resolved by client_view('support.tickets.show', 'agent'); dashboard.agent.support.tickets.show
-     remains the fallback for default/Parwaaz clients and is NOT modified.
+     remains the fallback for standalone mode is off\.
      Route gate: agent.permission:SupportManage + platform.module:agent_support.
 
      THREAD: uses the SAME role-neutral JetPK portal support-thread component as the customer show

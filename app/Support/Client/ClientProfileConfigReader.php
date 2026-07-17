@@ -214,7 +214,7 @@ final class ClientProfileConfigReader
             'modules' => $this->modulesFromConfig(),
             'branding' => $branding,
             'is_master_profile' => ! config('client.standalone', true)
-                && $slug === trim((string) config('ota_client.master_client_slug', 'haseeb-master')),
+                && $slug === trim((string) config('ota_client.master_client_slug', config('client.canonical_client.slug', 'jetpk'))),
         ];
     }
 

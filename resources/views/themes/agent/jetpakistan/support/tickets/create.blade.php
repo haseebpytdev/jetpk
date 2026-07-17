@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 8 · Agent / Agent Staff support tickets — create (JetPK theme)
      Resolved by client_view('support.tickets.create', 'agent'); dashboard.agent.support.tickets.create
-     remains the fallback for default/Parwaaz clients and is NOT modified.
+     remains the fallback for standalone mode is off\.
      Route gate: agent.permission:SupportManage + platform.module:agent_support.
 
      *** ENCODING FIX — DELIBERATE, DOCUMENTED ***

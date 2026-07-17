@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 5 · Agent commission statement — show (JetPK theme)
      Resolved by client_view('commissions.statement', 'agent'); dashboard.agent.commissions.statement
-     remains the fallback for default/Parwaaz clients and is NOT modified.
+     remains the fallback for standalone mode is off\.
 
      *** AGENT ADMIN ONLY *** — route gate is `agent.admin`; controller enforces
      Gate::authorize('view', $statement). Agent Staff must never reach this page.

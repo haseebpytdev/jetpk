@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 3 · Agent / Agent Staff travelers — edit (JetPK theme)
      Resolved by client_view('travelers.edit', 'agent'); dashboard.travelers.edit remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
      Agent Staff reuses this view; route access is gated by
      agent.permission:TravelersManage + platform.module:saved_travelers.
 

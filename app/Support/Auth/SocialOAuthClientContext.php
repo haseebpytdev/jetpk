@@ -92,9 +92,9 @@ final class SocialOAuthClientContext
         }
 
         $slug = trim($slug);
-        $masterSlug = (string) config('client_route_parity.default_client_slug', 'haseeb-master');
+        $defaultSlug = (string) config('client_route_parity.default_client_slug', config('client.canonical_client.slug', 'jetpk'));
 
-        if ($slug === $masterSlug || $slug === 'haseeb-master') {
+        if ($slug === $defaultSlug) {
             return null;
         }
 

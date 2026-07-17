@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 5 · Agent commissions — index (JetPK theme)
      Resolved by client_view('commissions.index', 'agent'); dashboard.agent.commissions.index
-     remains the fallback for default/Parwaaz clients and is NOT modified.
+     remains the fallback for standalone mode is off\.
 
      *** AGENT ADMIN ONLY *** — route gate is `agent.admin` (NOT an agent.permission).
      Controller also enforces Gate::authorize('view', $agent). Agent Staff must never reach this

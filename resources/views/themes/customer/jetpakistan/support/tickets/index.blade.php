@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-2B · Customer support tickets — index (JetPK theme)
      Resolved by client_view('support.tickets.index', 'customer'); falls back to
-     dashboard.customer.support.tickets.index for default/Parwaaz clients.
+     dashboard.customer.support.tickets.index when standalone mode is off\.
 
      RECOMPOSED (not wrapped) into the JetPK vocabulary. Preserved verbatim from the legacy view:
        • every column: Ticket, Subject, Booking, Status, Last updated, Action

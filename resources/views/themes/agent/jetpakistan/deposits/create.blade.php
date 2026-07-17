@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 5 · Agent / Agent Staff deposits — create (JetPK theme)
      Resolved by client_view('deposits.create', 'agent'); dashboard.agent.deposits.create remains
-     the fallback for default/Parwaaz clients and is NOT modified.
+     the fallback for standalone mode is off\.
      Route gate: agent.permission:PaymentsUpload + platform.module:agent_deposits.
      Controller also enforces Gate::authorize('create', AgentDepositRequest::class) and
      PlatformModuleEnforcer::ensureAgentDepositsEnabled() on store.

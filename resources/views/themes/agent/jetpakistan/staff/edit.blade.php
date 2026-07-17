@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 7 · Agent staff management — edit (JetPK theme)
      Resolved by client_view('staff.edit', 'agent'); dashboard.agent.staff.edit remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
      Route gate: agent.permission:StaffManage + platform.module:agent_staff.
 
      *** THREE INDEPENDENT FORMS — DO NOT MERGE ***

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
  * Request-scoped runtime client profile context (MC-4 preview, MC-5A default).
  *
  * Preview routes call set() (isPreview=true). All other requests lazily resolve
- * the default profile (config slug or haseeb-master) without marking preview mode.
+ * the default profile (config slug or canonical client) without marking preview mode.
  */
 final class CurrentClientContext
 {

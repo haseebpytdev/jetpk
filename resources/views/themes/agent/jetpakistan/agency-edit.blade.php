@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 6 · Agent agency — edit (JetPK theme)
      Resolved by client_view('agency-edit', 'agent'); dashboard.agent.agency-edit remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
      Route gate: agent.permission:AgencyEdit (both GET /agency/edit and PATCH /agency).
      Agent Staff without AgencyEdit never reaches this view — the restriction is unchanged.
 

@@ -14,7 +14,10 @@ return [
 
     'preview_query_param' => 'ui',
 
-    'public_asset_root_reminder' => '/home/u654883295/domains/haseebasif.com/public_html/ota.haseebasif.com',
+    'public_asset_root_reminder' => env(
+        'OTA_PUBLIC_ASSET_ROOT_REMINDER',
+        'Set OTA_PUBLIC_WEBROOT_PATH to the live document root (production: /home/pkjetp/public_html).',
+    ),
 
     'channels' => [
         'site' => [

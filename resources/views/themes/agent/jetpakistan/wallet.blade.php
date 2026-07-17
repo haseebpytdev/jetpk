@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 5 · Agent / Agent Staff wallet (JetPK theme)
      Resolved by client_view('wallet', 'agent'); dashboard.agent.wallet remains the fallback for
-     default/Parwaaz clients and is NOT modified.
+     standalone mode is off\.
      Route gate: agent.permission:WalletView + platform.module:agent_wallet.
      Controller also enforces Gate::authorize('viewWallet', $agent).
      NOTE: AgentWalletController branches to mobile.agent.wallet.show BEFORE this view when

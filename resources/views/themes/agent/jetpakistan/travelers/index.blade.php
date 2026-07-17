@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 3 · Agent / Agent Staff travelers — index (JetPK theme)
      Resolved by client_view('travelers.index', 'agent'); dashboard.travelers.index remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
 
      AGENT STAFF: this exact view is reused. No themes/agent-staff/** tree exists or is needed.
 

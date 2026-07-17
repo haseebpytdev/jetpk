@@ -5,8 +5,8 @@ namespace App\Support\Client;
 /**
  * Resolves the live public web-root for on-disk client asset/theme checks.
  *
- * Production assets may live outside Laravel's public/ (e.g. public_html/ota.haseebasif.com).
- * URL generation via asset() is unchanged; this class is for filesystem existence checks only.
+ * Production assets may live outside Laravel's public/ when OTA_PUBLIC_WEBROOT_PATH
+ * points at a separate document root. URL generation via asset() is unchanged.
  */
 final class ClientPublicWebrootPath
 {

@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 2 · Customer travelers — index (JetPK theme)
      Resolved by client_view('travelers.index', 'customer'); dashboard.travelers.index remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
 
      RECOMPOSED (not wrapped) into the JetPK vocabulary. Preserved verbatim from the legacy
      $isCustomerAccount branch of dashboard.travelers.index:

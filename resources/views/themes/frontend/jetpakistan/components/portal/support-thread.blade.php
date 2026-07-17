@@ -3,7 +3,7 @@
        dashboard.support._thread   (the loop + empty state)
        dashboard.support._message  (a single message card)
 
-     Both legacy partials REMAIN on disk untouched and continue to serve default/Parwaaz clients
+     Both legacy partials REMAIN on disk untouched and serve legacy dashboard clients when standalone mode is off
      and the admin/staff dashboard. This component does not modify the support-ticket backend.
 
      ROLE-NEUTRAL BY DESIGN. Used by:

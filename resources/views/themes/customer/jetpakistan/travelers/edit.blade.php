@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 2 · Customer travelers — edit (JetPK theme)
      Resolved by client_view('travelers.edit', 'customer'); dashboard.travelers.edit remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
 
      Preserved verbatim from the legacy $isPortalAccount branch of dashboard.travelers.edit:
        • controller vars: $traveler, $routePrefix, $countries

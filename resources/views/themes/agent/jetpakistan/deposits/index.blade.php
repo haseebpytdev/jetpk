@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 5 · Agent / Agent Staff deposits — index (JetPK theme)
      Resolved by client_view('deposits.index', 'agent'); dashboard.agent.deposits.index remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
      Route gate: agent.permission:WalletView + platform.module:agent_deposits.
      Controller also enforces Gate::authorize('viewWallet', $agent).
      Mobile branch: mobile.agent.deposits.index — see Task 12.

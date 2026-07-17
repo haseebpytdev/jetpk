@@ -25,7 +25,10 @@
         if ($jpUsesClientBranding && function_exists('client_branding')) {
             $jpBrandName = client_branding()->companyName() ?: $jpBrandName;
             $jpSupportEmail = client_branding()->email() ?: $jpSupportEmail;
-            $legacyJetpkEmails = ['support@haseebasif.com', 'ticketingjp@jetpakistan.com', 'support@jetpakistan.com'];
+            $legacyJetpkEmails = array_map(
+                static fn (string $value): string => strtolower(trim($value)),
+                (array) config('client.deprecated_operational_emails', []),
+            );
             if (in_array(strtolower(trim($jpSupportEmail)), $legacyJetpkEmails, true)) {
                 $jpSupportEmail = 'ota@jetpakistan.pk';
             }

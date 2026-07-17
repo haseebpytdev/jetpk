@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 6 · Agent / Agent Staff agency — show (JetPK theme)
      Resolved by client_view('agency', 'agent'); dashboard.agent.agency remains the fallback for
-     default/Parwaaz clients and is NOT modified.
+     standalone mode is off\.
      Route gate: agent.permission:AgencyView.
 
      PRESERVED EXACTLY:

@@ -12,6 +12,8 @@ class ClientPublicWebrootPathTest extends TestCase
     {
         config(['ota_client.public_webroot_path' => base_path('nonexistent-webroot-'.uniqid())]);
 
+        $this->assertStringNotContainsString('ota.haseebasif.com', (string) config('ota_client.public_webroot_path'));
+
         $this->assertSame(
             rtrim(str_replace('\\', '/', public_path()), '/'),
             ClientPublicWebrootPath::resolve(),

@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Resolves an active ClientProfile from the {clientSlug} route parameter for client preview/parity routes.
  *
- * Default deployment slug (config ota_client.slug or haseeb-master) is alias-only: prefixed URLs
+ * Default deployment slug (config ota_client.slug or canonical client) is alias-only: prefixed URLs
  * redirect to canonical root paths (302). Non-default clients keep /{clientSlug}/* parity routes.
  */
 class ResolvePreviewClient

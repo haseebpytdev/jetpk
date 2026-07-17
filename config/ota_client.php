@@ -38,7 +38,7 @@ return [
     */
     'public_webroot_path' => env(
         'OTA_PUBLIC_WEBROOT_PATH',
-        base_path('../public_html/ota.haseebasif.com'),
+        base_path('public'),
     ),
 
     'modules' => [

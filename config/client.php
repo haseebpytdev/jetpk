@@ -41,4 +41,21 @@ return [
         'vendor.',
     ],
 
+    /*
+    | Canonical JetPK contact defaults (never master-client addresses).
+    */
+    'canonical_support_email' => (string) env(
+        'JETPK_CANONICAL_SUPPORT_EMAIL',
+        env('OTA_SUPPORT_EMAIL', 'ota@jetpakistan.pk'),
+    ),
+
+    /*
+    | Legacy JetPK mailboxes remapped to canonical_support_email at runtime.
+    | Intentionally excludes third-party / master-client domains.
+    */
+    'deprecated_operational_emails' => [
+        'support@jetpakistan.com',
+        'ticketingjp@jetpakistan.com',
+    ],
+
 ];

@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 7 · Agent staff management — create (JetPK theme)
      Resolved by client_view('staff.create', 'agent'); dashboard.agent.staff.create remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
      Route gate: agent.permission:StaffManage + platform.module:agent_staff.
 
      PRESERVED EXACTLY:

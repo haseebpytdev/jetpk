@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 5 · Agent / Agent Staff wallet ledger — index (JetPK theme)
      Resolved by client_view('ledger.index', 'agent'); dashboard.agent.ledger.index remains the
-     fallback for default/Parwaaz clients and is NOT modified.
+     fallback for standalone mode is off\.
      Route gate: agent.permission:LedgerView + platform.module:agent_ledger.
      Controller also enforces Gate::authorize('viewLedger', $agent).
      Mobile branch: mobile.agent.ledger.index — see Task 12.

@@ -1,6 +1,6 @@
 {{-- JP-PORTAL-3 TASK 7 · JetPK portal Agent Staff form (create + edit)
      Replaces dashboard.agent.staff._form on JetPK-resolved pages. The legacy partial REMAINS on
-     disk untouched for default/Parwaaz clients.
+     unchanged for legacy dashboard clients when standalone mode is off\.
 
      Preserved verbatim from dashboard.agent.staff._form:
        • $staffModel = $staff ?? null  — presence of $staff is what switches create vs edit
