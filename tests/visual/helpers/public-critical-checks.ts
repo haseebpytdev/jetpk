@@ -396,7 +396,17 @@ export async function assertPublicSearchFormUsable(
     return failures;
   }
 
-  const submit = page.locator('.ota-hero-search-submit').first();
+  await page
+    .locator('[data-hero-search][data-jp-search-ready="true"]')
+    .first()
+    .waitFor({ state: 'attached', timeout: 10_000 })
+    .catch(() => undefined);
+
+  const submit = page
+    .locator(
+      '[data-jp-submit-slot-action] .ota-hero-search-submit, [data-jp-submit-slot-row] .ota-hero-search-submit, [data-jp-submit-slot-multi] .ota-hero-search-submit, [data-hero-search] .ota-hero-search-submit',
+    )
+    .first();
   if ((await submit.count()) === 0 || !(await submit.isVisible())) {
     failures.push(
       failure('clickable_actions', ctx, '.ota-hero-search-submit', 'Search submit button not visible', 'High'),
