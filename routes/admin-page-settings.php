@@ -9,6 +9,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/palette', [ClientPageSettingsController::class, 'palette'])->name('palette');
         Route::post('/palette/generate', [ClientPageSettingsController::class, 'generatePalette'])->name('palette.generate');
         Route::post('/palette/apply', [ClientPageSettingsController::class, 'applyPalette'])->name('palette.apply');
+        Route::get('/custom-pages', [\App\Http\Controllers\Admin\ClientCustomPageController::class, 'index'])->name('custom-pages.index');
+        Route::get('/custom-pages/create', [\App\Http\Controllers\Admin\ClientCustomPageController::class, 'create'])->name('custom-pages.create');
+        Route::post('/custom-pages', [\App\Http\Controllers\Admin\ClientCustomPageController::class, 'store'])->name('custom-pages.store');
         Route::get('/{pageKey}', [ClientPageSettingsController::class, 'edit'])->name('edit');
         Route::patch('/{pageKey}', [ClientPageSettingsController::class, 'update'])->name('update');
         Route::post('/home/refresh-fares', [ClientPageSettingsController::class, 'refreshHomeRouteFares'])->name('home.refresh-fares');
