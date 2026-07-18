@@ -62,7 +62,7 @@
 
   .jp-flight-form:not(.is-multi-city) .jp-submit-slot-action .btn-search {
     width: 100%;
-    min-height: var(--jp-input-height);
+    min-height: var(--jp-search-control-height);
     white-space: nowrap;
     padding-left: var(--jp-space-lg);
     padding-right: var(--jp-space-lg);

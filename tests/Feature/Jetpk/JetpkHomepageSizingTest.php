@@ -44,7 +44,7 @@ class JetpkHomepageSizingTest extends TestCase
         $html = $this->get(route('home'))->assertOk()->getContent();
         $this->assertIsString($html);
         $this->assertStringContainsString('--jp-hero-headline-scale: 1.1', $html);
-        $this->assertStringContainsString('--jp-search-ui-scale:', $html);
+        $this->assertStringContainsString('--jp-search-ui-scale: 0.95', $html);
         $this->assertStringContainsString('--jp-header-top-offset', file_get_contents(public_path('themes/frontend/jetpakistan/css/theme.css')) ?: '');
         $this->assertStringContainsString('.jp-home .jp-site-header', file_get_contents(public_path('themes/frontend/jetpakistan/css/theme.css')) ?: '');
         $this->assertStringContainsString('grid-template-columns:repeat(4,minmax(0,280px))', file_get_contents(public_path('themes/frontend/jetpakistan/css/theme.css')) ?: '');

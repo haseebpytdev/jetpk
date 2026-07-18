@@ -1,6 +1,6 @@
 @php
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpAssetVersion = 55; // JETPK-HOMEPAGE-DESTINATIONS-HERO-SEARCH-SCALING
+    $jpAssetVersion = 57; // JETPK-SEARCH-UI-SCALE-VISUAL-EFFECT-FIX (derived tokens on .jp-home)
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
     $pageTitle = trim($__env->yieldContent('title'));

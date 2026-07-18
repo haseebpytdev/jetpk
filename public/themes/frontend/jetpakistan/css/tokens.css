@@ -78,36 +78,50 @@
   --jp-search-ui-scale:1;
   --jp-search-control-bg:var(--surface);
   --jp-search-control-border:var(--line);
-  --jp-search-field-padding-y-base:var(--jp-space-sm);
-  --jp-search-field-padding-x-base:var(--jp-space-md);
+  /* Compact baseline encoded at CMS 100% / scale 1.0 (fixed px @ ~1440) */
+  --jp-search-field-height-base:51px;
+  --jp-search-field-padding-y-base:11px;
+  --jp-search-field-padding-x-base:15px;
+  --jp-search-control-icon-size-base:16px;
+  --jp-search-label-size-base:11px;
+  --jp-search-value-size-base:15px;
+  --jp-search-control-inner-min-height-base:28px;
+  --jp-search-control-radius-base:14px;
+  --jp-search-gap-base:12px;
+  --jp-search-card-padding-base:18px;
+  --jp-search-card-radius-base:26px;
+  --jp-search-card-margin-top-base:24px;
+  --jp-search-btn-padding-y-base:14px;
+  --jp-search-btn-padding-x-base:28px;
+  --jp-search-swap-size-base:38px;
+  --jp-search-check-box-base:20px;
+  --jp-search-box-max-width-base:1160px;
+  --jp-search-tab-min-height-base:36px;
+  --jp-search-seg-padding-base:3px;
+  --jp-search-label-gap-base:6px;
+  --jp-search-field-outer-height-base:73px;
+  /* Non-home search shells (e.g. results) keep scale 1.0 defaults on :root */
   --jp-search-field-padding-y:calc(var(--jp-search-field-padding-y-base) * var(--jp-search-ui-scale, 1));
   --jp-search-field-padding-x:calc(var(--jp-search-field-padding-x-base) * var(--jp-search-ui-scale, 1));
-  --jp-search-control-icon-size-base:var(--jp-icon-md);
-  --jp-search-control-icon-size:clamp(13px,calc(var(--jp-search-control-icon-size-base) * var(--jp-search-ui-scale, 1)),19px);
-  --jp-search-label-size-base:var(--jp-fs-xs);
-  --jp-search-label-size:clamp(10px,calc(var(--jp-search-label-size-base) * var(--jp-search-ui-scale, 1)),14px);
-  --jp-search-value-size-base:var(--jp-fs-body);
-  --jp-search-value-size:clamp(14px,calc(var(--jp-search-value-size-base) * var(--jp-search-ui-scale, 1)),18px);
-  --jp-search-control-inner-min-height-base:clamp(26px,calc(1.625rem + 0.078125vw),30px);
-  --jp-search-control-inner-min-height:max(22px,calc(var(--jp-search-control-inner-min-height-base) * var(--jp-search-ui-scale, 1)));
-  --jp-search-field-height-base:clamp(44px,calc(2.875rem + 0.15625vw),50px);
-  --jp-search-control-height:max(44px,calc(var(--jp-search-field-height-base) * var(--jp-search-ui-scale, 1)));
-  --jp-search-control-radius-base:var(--r-input);
+  --jp-search-control-icon-size:calc(var(--jp-search-control-icon-size-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-label-size:calc(var(--jp-search-label-size-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-value-size:calc(var(--jp-search-value-size-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-control-inner-min-height:calc(var(--jp-search-control-inner-min-height-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-control-height:calc(var(--jp-search-field-height-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-field-outer-min-height:calc(var(--jp-search-field-outer-height-base) * var(--jp-search-ui-scale, 1));
   --jp-search-control-radius:calc(var(--jp-search-control-radius-base) * var(--jp-search-ui-scale, 1));
-  --jp-search-gap-base:var(--jp-space-sm);
   --jp-search-gap:calc(var(--jp-search-gap-base) * var(--jp-search-ui-scale, 1));
-  --jp-search-card-padding-base:var(--jp-space-lg);
   --jp-search-card-padding:calc(var(--jp-search-card-padding-base) * var(--jp-search-ui-scale, 1));
-  --jp-search-card-radius-base:var(--r-feat);
   --jp-search-card-radius:calc(var(--jp-search-card-radius-base) * var(--jp-search-ui-scale, 1));
-  --jp-search-btn-padding-y-base:var(--jp-space-md);
-  --jp-search-btn-padding-x-base:var(--jp-space-2xl);
+  --jp-search-card-margin-top:calc(var(--jp-search-card-margin-top-base) * var(--jp-search-ui-scale, 1));
   --jp-search-btn-padding-y:calc(var(--jp-search-btn-padding-y-base) * var(--jp-search-ui-scale, 1));
   --jp-search-btn-padding-x:calc(var(--jp-search-btn-padding-x-base) * var(--jp-search-ui-scale, 1));
-  --jp-swap-size-base:clamp(38px,calc(2.375rem + 0.078125vw),42px);
-  --jp-swap-size:max(34px,calc(var(--jp-swap-size-base) * var(--jp-search-ui-scale, 1)));
-  --jp-check-box-base:clamp(18px,calc(1.125rem + 0.078125vw),22px);
-  --jp-check-box:max(16px,calc(var(--jp-check-box-base) * var(--jp-search-ui-scale, 1)));
+  --jp-swap-size:calc(var(--jp-search-swap-size-base) * var(--jp-search-ui-scale, 1));
+  --jp-check-box:calc(var(--jp-search-check-box-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-box-max-width:min(100%,calc(var(--jp-search-box-max-width-base) * var(--jp-search-ui-scale, 1)));
+  --jp-search-tab-min-height:calc(var(--jp-search-tab-min-height-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-seg-padding:calc(var(--jp-search-seg-padding-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-label-gap:calc(var(--jp-search-label-gap-base) * var(--jp-search-ui-scale, 1));
   /* --jp-icon-sm: 13→14→15 | old 14px */
   --jp-icon-sm:clamp(13px,calc(0.8125rem + 0.078125vw),15px);
   /* --jp-icon-md: 15→16→17 | old 16px */
@@ -183,6 +197,31 @@
   --hero-glow:radial-gradient(60% 80% at 80% 6%,rgba(50,189,209,.18),transparent 55%),radial-gradient(95% 75% at 50% 102%,rgba(99,179,46,.14),transparent 60%),radial-gradient(80% 100% at 15% 0%,rgba(56,189,248,.12),transparent 62%);
   --shadow-sm:0 1px 2px rgba(2,8,14,.5);--shadow-md:0 12px 30px -12px rgba(2,8,14,.6);--shadow-lg:0 36px 80px -30px rgba(2,8,14,.78);--shadow-brand:0 16px 44px -16px rgba(99,179,46,.35);
   --ring:var(--jp-focus-ring);--notch:var(--card);
+}
+
+/* Homepage CMS scale must recompute derived tokens on the same selector (not :root). */
+.jp-home{
+  --jp-search-field-padding-y:calc(var(--jp-search-field-padding-y-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-field-padding-x:calc(var(--jp-search-field-padding-x-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-control-icon-size:calc(var(--jp-search-control-icon-size-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-label-size:calc(var(--jp-search-label-size-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-value-size:calc(var(--jp-search-value-size-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-control-inner-min-height:calc(var(--jp-search-control-inner-min-height-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-control-height:calc(var(--jp-search-field-height-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-field-outer-min-height:calc(var(--jp-search-field-outer-height-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-control-radius:calc(var(--jp-search-control-radius-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-gap:calc(var(--jp-search-gap-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-card-padding:calc(var(--jp-search-card-padding-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-card-radius:calc(var(--jp-search-card-radius-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-card-margin-top:calc(var(--jp-search-card-margin-top-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-btn-padding-y:calc(var(--jp-search-btn-padding-y-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-btn-padding-x:calc(var(--jp-search-btn-padding-x-base) * var(--jp-search-ui-scale, 1));
+  --jp-swap-size:calc(var(--jp-search-swap-size-base) * var(--jp-search-ui-scale, 1));
+  --jp-check-box:calc(var(--jp-search-check-box-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-box-max-width:min(100%,calc(var(--jp-search-box-max-width-base) * var(--jp-search-ui-scale, 1)));
+  --jp-search-tab-min-height:calc(var(--jp-search-tab-min-height-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-seg-padding:calc(var(--jp-search-seg-padding-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-label-gap:calc(var(--jp-search-label-gap-base) * var(--jp-search-ui-scale, 1));
 }
 
 html[data-theme="day"]{
