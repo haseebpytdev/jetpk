@@ -10,7 +10,6 @@ use App\Models\SavedTraveler;
 use App\Services\Agents\AgentCommissionService;
 use App\Services\Agents\AgentWalletService;
 use App\Support\Agents\AgentPermission;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -19,7 +18,6 @@ class DashboardController extends Controller
     public function __construct(
         protected AgentCommissionService $commissionService,
         protected AgentWalletService $walletService,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function index(Request $request): View
@@ -114,10 +112,6 @@ class DashboardController extends Controller
             'firstPendingPaymentBooking' => $pendingPaymentQuery->orderByDesc('created_at')->first(),
             'travelersCount' => $travelersCount,
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.dashboard.agent', $viewData);
-        }
 
         return view(client_view('index', 'agent'), $viewData);
     }

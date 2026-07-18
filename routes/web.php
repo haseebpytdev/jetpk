@@ -14,7 +14,6 @@ use App\Http\Controllers\Frontend\GroupTicketingSearchController;
 use App\Http\Controllers\Frontend\GuestBookingCancellationController;
 use App\Http\Controllers\Frontend\GuestBookingLookupController;
 use App\Http\Controllers\Frontend\HomeController;
-use App\Http\Controllers\Frontend\MobileViewController;
 use App\Http\Controllers\Frontend\RequestDemoController;
 use App\Http\Controllers\Frontend\SupportController;
 use App\Http\Controllers\Payments\AbhiPayPaymentController;
@@ -34,12 +33,6 @@ Route::get('/devcp/{path}', static function (string $path) {
 })->where('path', '.*')->name('devcp.alias');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-Route::post('/view-preference/mobile', [MobileViewController::class, 'mobile'])->name('view-preference.mobile');
-Route::post('/view-preference/desktop', [MobileViewController::class, 'desktop'])->name('view-preference.desktop');
-Route::get('/mobile-view', [MobileViewController::class, 'previewMobile'])->name('view-preference.mobile-get');
-Route::get('/mobile-app-preview', [MobileViewController::class, 'previewMobile'])->name('view-preference.mobile-preview');
-Route::get('/desktop-view', [MobileViewController::class, 'previewDesktop'])->name('view-preference.desktop-preview');
 
 Route::get('/request-demo', RequestDemoController::class)->name('request-demo');
 Route::middleware('platform.module:support_system')->group(function (): void {

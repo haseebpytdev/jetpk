@@ -292,10 +292,6 @@ final class ClientPageContentResolver
                 'headline' => 'Every flight from Pakistan,',
                 'headline_highlight' => 'one honest fare.',
                 'subtitle' => 'Compare 400+ airlines, pay in rupees, and get your e-ticket in seconds. The price you see is the price you pay — no surprises at checkout.',
-                'cta_primary_text' => 'Search flights',
-                'cta_primary_url' => '/flights',
-                'cta_secondary_text' => 'Group fares',
-                'cta_secondary_url' => '/group-ticketing',
                 'search_visible' => '1',
             ],
             'trust_chips' => [

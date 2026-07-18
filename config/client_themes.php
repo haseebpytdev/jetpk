@@ -17,41 +17,6 @@ return [
 
     'areas' => [
 
-        /*
-        | MA-1: mobile app shell themes.
-        | NOTE: the JetPK mobile theme is keyed 'jetpakistan-app', deliberately NOT 'jetpakistan'.
-        | RuntimeThemeManager::resolveArea() coerces an area to 'jetpakistan' when
-        | active_admin_theme === 'jetpakistan' AND validateTheme('jetpakistan', $area) passes.
-        | Because no theme is keyed 'jetpakistan' in the mobile area, that coercion cannot fire —
-        | which keeps the mobile skin INDEPENDENT of the desktop theme, as required.
-        */
-        'mobile' => [
-            'fallback' => 'default-mobile',
-            'themes' => [
-                'default-mobile' => [
-                    'key' => 'default-mobile',
-                    'name' => 'Default mobile layout',
-                    'area' => 'mobile',
-                    'version' => '1',
-                    'status' => 'active',
-                    'asset_base' => 'css',
-                    'preview_image' => null,
-                    'description' => 'Current shared mobile shell (layouts/mobile-app + ota-mobile-app.css). Byte-identical to today.',
-                    'supports' => ['css', 'js', 'layouts'],
-                ],
-                'jetpakistan-app' => [
-                    'key' => 'jetpakistan-app',
-                    'name' => 'JetPakistan app style',
-                    'area' => 'mobile',
-                    'version' => '1',
-                    'status' => 'active',
-                    'asset_base' => 'themes/mobile/jetpakistan-app',
-                    'preview_image' => null,
-                    'description' => 'JetPakistan compact app-style mobile shell.',
-                    'supports' => ['css', 'js', 'layouts'],
-                ],
-            ],
-        ],
         'frontend' => [
             'fallback' => 'v1-classic',
             'themes' => [

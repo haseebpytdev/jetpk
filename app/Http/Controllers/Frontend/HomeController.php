@@ -15,7 +15,6 @@ use App\Support\Client\Homepage\JetpkHomepageContextDiagnostic;
 use App\Support\Client\Homepage\HomepageSectionOrderResolver;
 use App\Support\Client\ClientPageKeys;
 use App\Services\Client\ClientPageContentResolver;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -25,7 +24,6 @@ class HomeController extends Controller
     public function __construct(
         protected AgencyBrandingService $brandingService,
         protected HomepageSectionPresenter $homepageSections,
-        protected MobileViewPreference $mobileViewPreference,
         protected GroupHomepageTilePresenter $groupHomepageTiles,
         protected GroupInventoryFacetService $groupInventoryFacets,
         protected JetpkHomepageContextDiagnostic $homepageDiagnostic,
@@ -86,10 +84,6 @@ class HomeController extends Controller
             'agentBookingAgencyName' => AgentBookingContext::agencyDisplayName($request) ?? '',
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.home', $viewData);
-        }
-
         if ($this->shouldUseJetPakistanThemeHome()) {
             $this->homepageDiagnostic->logIfEnabled($request);
             $homepageContent = app(ClientPageContentResolver::class)->contentFor(ClientPageKeys::HOME);
@@ -136,10 +130,6 @@ class HomeController extends Controller
 
     protected function shouldUseJetPakistanThemeHome(): bool
     {
-        if (! is_client_preview()) {
-            return false;
-        }
-
         if (client_theme()->frontendTheme() !== 'jetpakistan') {
             return false;
         }

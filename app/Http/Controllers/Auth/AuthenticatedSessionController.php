@@ -14,7 +14,6 @@ use App\Services\Communication\AuthSecurityEmailNotificationService;
 use App\Services\Security\SecurityEventLogger;
 use App\Support\Auth\ClientLoginOtpGate;
 use App\Support\Auth\CheckoutReturnIntent;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +26,6 @@ class AuthenticatedSessionController extends Controller
 {
     public function __construct(
         protected AuthSecurityEmailNotificationService $authSecurityEmailNotificationService,
-        protected MobileViewPreference $mobileViewPreference,
         protected ClientRedirectResolver $clientRedirectResolver,
         protected LoginOtpService $loginOtpService,
     ) {}
@@ -38,10 +36,6 @@ class AuthenticatedSessionController extends Controller
     public function create(Request $request): View
     {
         CheckoutReturnIntent::primeSessionFromQuery($request);
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.auth.login');
-        }
 
         return view(client_view('auth.login', 'frontend'));
     }
@@ -224,9 +218,29 @@ class AuthenticatedSessionController extends Controller
 
     private function safeLoginRedirectPath(string $url): string
     {
-        return $this->mobileViewPreference->safeRedirectUrl(
-            $url,
-            $this->clientRedirectResolver->pathForRoute('dashboard'),
-        );
+        $fallback = $this->clientRedirectResolver->pathForRoute('dashboard');
+        $trimmed = trim($url);
+
+        if ($trimmed === '') {
+            return $fallback;
+        }
+
+        if (str_starts_with($trimmed, '/')) {
+            return $trimmed;
+        }
+
+        $appRoot = rtrim((string) config('app.url', ''), '/');
+        if ($appRoot !== '' && str_starts_with($trimmed, $appRoot)) {
+            $path = substr($trimmed, strlen($appRoot));
+            if (is_string($path) && $path !== '' && str_starts_with($path, '/')) {
+                return $path;
+            }
+
+            if ($path === '') {
+                return '/';
+            }
+        }
+
+        return $fallback;
     }
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\Security\SecurityEventLogger;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -13,19 +12,11 @@ use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
-    public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
-    ) {}
-
     /**
      * Display the password reset link request view.
      */
     public function create(Request $request): View
     {
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.auth.forgot-password');
-        }
-
         return view(client_view('auth.forgot-password', 'frontend'));
     }
 

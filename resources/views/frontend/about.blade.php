@@ -67,7 +67,7 @@
                     </div>
                     <div class="ota-about-panel">
                         <h2 class="ota-about-panel-title">Services customers see publicly</h2>
-                        <p>The JetPakistan public website lists Flights, Hotels, Tour, Online Check-in, Why JetPakistan, About Us, and Contact Us in its public navigation. In this OTA integration phase, flight booking, group search, booking lookup, auth, agent entry, and support remain active through the existing Master Client backend.</p>
+                        <p>The JetPakistan public website lists Flights, Hotels, Tour, Online Check-in, Why JetPakistan, About Us, and Contact Us in its public navigation. In this OTA integration phase, flight booking, group search, booking lookup, auth, agent entry, and support remain active through the JetPakistan platform.</p>
                         <p>Future module visibility can be controlled later through Dev CP. This phase does not disable backend features.</p>
                     </div>
                 </div>

@@ -12,7 +12,6 @@ use App\Models\Agency;
 use App\Models\User;
 use App\Services\Client\ClientRedirectResolver;
 use App\Support\Auth\CheckoutReturnIntent;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -27,7 +26,6 @@ use Throwable;
 class RegisteredUserController extends Controller
 {
     public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
         protected ClientRedirectResolver $clientRedirectResolver,
     ) {}
 
@@ -46,10 +44,6 @@ class RegisteredUserController extends Controller
         $viewData = [
             'securityQuestion' => $question,
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.auth.register', $viewData);
-        }
 
         return view(client_view('auth.register', 'frontend'), $viewData);
     }

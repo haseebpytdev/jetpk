@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Services\FlightSearch\FlightSearchService;
 use App\Support\FlightSearch\PublicMulticityInquiryPolicy;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Mockery;
@@ -18,7 +17,6 @@ class PublicMulticityFlightResultsTest extends TestCase
     {
         parent::setUp();
         Config::set('ota.itinerary_fare_consolidation_enabled', false);
-        $this->withCookie(config('ota-mobile.cookie_name', 'ota_view_mode'), MobileViewPreference::MODE_DESKTOP);
     }
 
     public function test_multicity_results_show_inquiry_only_and_block_checkout(): void

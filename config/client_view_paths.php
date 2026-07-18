@@ -47,19 +47,6 @@ return [
             'theme_fallback' => 'default-agent',
             'legacy_prefix' => 'dashboard.agent',
         ],
-
-        /*
-        | MA-1: mobile app shell area.
-        | legacy_prefix 'mobile' means client_view('customer.bookings.index', 'mobile')
-        | resolves themes.mobile.{theme}.customer.bookings.index when it exists, and otherwise
-        | falls back to the EXISTING mobile.customer.bookings.index view.
-        */
-        'mobile' => [
-            'theme_root' => 'themes/mobile/{theme}',
-            'legacy_root' => 'resources/views/mobile',
-            'theme_fallback' => 'default-mobile',
-            'legacy_prefix' => 'mobile',
-        ],
     ],
 
     /*
@@ -88,14 +75,12 @@ return [
         ['area' => 'staff', 'name' => 'dashboard', 'label' => 'staff dashboard layout'],
         ['area' => 'agent', 'name' => 'agent-portal', 'label' => 'agent portal layout'],
         ['area' => 'customer', 'name' => 'customer-account', 'label' => 'customer account layout'],
-        ['area' => 'mobile', 'name' => 'mobile-app', 'label' => 'mobile app shell layout'],
     ],
 
     'mc8d_note' => 'MC-8D: client_layout() resolves theme layout shells with legacy fallback; opt-in page migration only.',
 
     /*
     | MC-8C first migrated page — public homepage desktop shell (HomeController).
-    | Mobile shell still uses mobile.home until a later phase.
     */
     'mc8c_migrated_page' => [
         'area' => 'frontend',

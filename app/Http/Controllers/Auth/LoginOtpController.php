@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\PersistClientPreviewContext;
 use App\Services\Auth\LoginOtpService;
 use App\Services\Client\ClientRedirectResolver;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,20 +16,12 @@ class LoginOtpController extends Controller
     public function __construct(
         protected LoginOtpService $loginOtpService,
         protected ClientRedirectResolver $clientRedirectResolver,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function create(Request $request): View|RedirectResponse
     {
         if (! $this->loginOtpService->hasPending($request)) {
             return $this->clientRedirectResolver->route('login');
-        }
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.auth.login-otp', [
-                'maskedEmail' => $this->loginOtpService->maskedEmail($request),
-                'resendAvailableIn' => $this->loginOtpService->resendAvailableIn($request),
-            ]);
         }
 
         return view(client_view('auth.login-otp', 'frontend'), [

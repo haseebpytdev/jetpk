@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Services\FlightSearch\FlightSearchService;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
@@ -18,7 +17,6 @@ class Phase21KAjaxFlightResultsTest extends TestCase
     {
         parent::setUp();
         Config::set('ota.itinerary_fare_consolidation_enabled', false);
-        $this->withCookie(config('ota-mobile.cookie_name', 'ota_view_mode'), MobileViewPreference::MODE_DESKTOP);
     }
 
     public function test_results_page_renders_without_embedded_full_offer_array(): void

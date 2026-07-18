@@ -39,12 +39,10 @@ return [
         'css' => [
             'css/ota-design-system.css' => 'css/v2/ota-design-system-v2.css',
             'css/ota-public.css' => 'css/v2/ota-public-v2.css',
-            'css/ota-mobile-app.css' => 'css/v2/ota-mobile-app-v2.css',
             'css/ota-admin-console.css' => 'css/v2/ota-admin-console-v2.css',
             'css/ota-portal-console.css' => 'css/v2/ota-portal-console-v2.css',
         ],
         'js' => [
-            'js/ota-mobile-app.js' => 'js/v2/ota-mobile-app-v2.js',
             'js/ota-flight-detail-builders.js' => 'js/v2/ota-flight-detail-builders-v2.js',
             'js/ota-flight-details-modal.js' => 'js/v2/ota-flight-details-modal-v2.js',
             'js/ota-branded-fares.js' => 'js/v2/ota-branded-fares-v2.js',

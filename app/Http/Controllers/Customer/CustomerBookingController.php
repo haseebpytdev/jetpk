@@ -16,7 +16,6 @@ use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\PaymentOperationalStatus;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Bookings\TicketingOperationalStatus;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,7 +28,6 @@ class CustomerBookingController extends Controller
 {
     public function __construct(
         protected BookingPaymentService $paymentService,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function dashboard(Request $request): View
@@ -79,10 +77,6 @@ class CustomerBookingController extends Controller
                 ->count(),
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.dashboard.customer', $viewData);
-        }
-
         return view(client_view('dashboard', 'customer'), $viewData);
     }
 
@@ -130,10 +124,6 @@ class CustomerBookingController extends Controller
             'bookings' => $bookings,
             'filter' => $filter,
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.customer.bookings.index', $viewData);
-        }
 
         return view(client_view('bookings.index', 'customer'), $viewData);
     }
@@ -189,10 +179,6 @@ class CustomerBookingController extends Controller
                 'customer',
             ),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.customer.bookings.show', $viewData);
-        }
 
         return view(client_view('bookings.show', 'customer'), $viewData);
     }

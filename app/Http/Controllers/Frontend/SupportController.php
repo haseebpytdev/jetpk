@@ -10,7 +10,6 @@ use App\Services\Agencies\AboutUsContentPresenter;
 use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Support\SupportTicketService;
 use App\Support\Branding\BrandDisplayResolver;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,7 +17,6 @@ use Illuminate\View\View;
 class SupportController extends Controller
 {
     public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
         protected SupportTicketService $tickets,
         protected AgencyBrandingService $brandingService,
         protected AboutUsContentPresenter $aboutUsPresenter,
@@ -29,10 +27,6 @@ class SupportController extends Controller
         $viewData = [
             'categories' => SupportTicketCategory::cases(),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.support.index', $viewData);
-        }
 
         return view(client_view('frontend.support', 'frontend'), $viewData);
     }
@@ -83,10 +77,6 @@ class SupportController extends Controller
             'brandName' => BrandDisplayResolver::displayName(),
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view(client_view('frontend.support.submitted', 'frontend'), $viewData);
-        }
-
         return view(client_view('frontend.support.submitted', 'frontend'), $viewData);
     }
 
@@ -94,10 +84,6 @@ class SupportController extends Controller
     {
         $viewData = $this->publicStaticPageBrandData();
         $viewData['aboutUs'] = $this->resolveAboutUsPresentation();
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.public.about', $viewData);
-        }
 
         return view(client_view('frontend.about', 'frontend'), $viewData);
     }

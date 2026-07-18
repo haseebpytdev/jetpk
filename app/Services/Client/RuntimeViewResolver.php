@@ -19,7 +19,7 @@ final class RuntimeViewResolver
     /**
      * @var list<string>
      */
-    private const AREAS = ['frontend', 'admin', 'staff', 'customer', 'agent', 'mobile'];
+    private const AREAS = ['frontend', 'admin', 'staff', 'customer', 'agent'];
 
     public function __construct(
         private readonly RuntimeThemeManager $themeManager,
@@ -109,7 +109,7 @@ final class RuntimeViewResolver
             return $name;
         }
 
-        if ($prefix !== '' && in_array($normalizedArea, ['admin', 'staff', 'customer', 'agent', 'mobile'], true)) {
+        if ($prefix !== '' && in_array($normalizedArea, ['admin', 'staff', 'customer', 'agent'], true)) {
             $prefixed = $prefix.'.'.$name;
             if (View::exists($prefixed)) {
                 return $prefixed;
@@ -302,32 +302,8 @@ final class RuntimeViewResolver
             'admin' => $this->themeManager->admin($profile),
             'staff' => $this->themeManager->staff($profile),
             'agent', 'customer' => $this->resolvedAgentCustomerTheme($area, $profile),
-            'mobile' => $this->resolvedMobileTheme(),
             default => trim((string) (config('client_view_paths.areas.'.$area.'.theme_fallback') ?? '')),
         };
-    }
-
-    /**
-     * MA-1: the mobile app skin is INDEPENDENT of the desktop theme.
-     *
-     * It is resolved from config('ota-mobile.app_theme') only — never from
-     * active_admin_theme/active_frontend_theme — so it can be switched on or off on its own.
-     * An unknown or unregistered value falls back to 'default-mobile', whose theme layout
-     * delegates to the existing layouts/mobile-app (no visual change).
-     */
-    private function resolvedMobileTheme(): string
-    {
-        $fallback = trim((string) (config('client_view_paths.areas.mobile.theme_fallback') ?? ''));
-        $fallback = $fallback !== '' ? $fallback : 'default-mobile';
-
-        $selected = trim((string) (config('ota-mobile.app_theme') ?? ''));
-        if ($selected === '') {
-            return $fallback;
-        }
-
-        $registered = array_keys((array) config('client_themes.areas.mobile.themes', []));
-
-        return in_array($selected, $registered, true) ? $selected : $fallback;
     }
 
     /**
@@ -431,7 +407,7 @@ final class RuntimeViewResolver
             return false;
         }
 
-        return in_array($this->normalizeArea($area), ['frontend', 'customer', 'agent', 'mobile'], true);
+        return in_array($this->normalizeArea($area), ['frontend', 'customer', 'agent'], true);
     }
 
     private function handleMissingThemedView(string $logicalName, string $area, string $themeViewName): void

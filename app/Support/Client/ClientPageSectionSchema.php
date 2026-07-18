@@ -14,7 +14,7 @@ final class ClientPageSectionSchema
     {
         return match ($pageKey) {
             ClientPageKeys::HOME => [
-                ['key' => 'hero', 'label' => 'Hero', 'fields' => ['eyebrow', 'headline', 'headline_highlight', 'subtitle', 'cta_primary_text', 'cta_primary_url', 'cta_secondary_text', 'cta_secondary_url', 'search_visible']],
+                ['key' => 'hero', 'label' => 'Hero', 'fields' => ['eyebrow', 'headline', 'headline_highlight', 'subtitle', 'search_visible']],
                 ['key' => 'trust_chips', 'label' => 'Trust badges', 'fields' => ['label']],
                 ['key' => 'feature_board', 'label' => 'Stats strip', 'fields' => ['items']],
                 ['key' => 'why_book', 'label' => 'Why JetPakistan', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'cards']],
@@ -23,7 +23,6 @@ final class ClientPageSectionSchema
                 ['key' => 'destinations', 'label' => 'Popular destinations', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'cta_text', 'cta_url', 'items']],
                 ['key' => 'group_cards', 'label' => 'Group travel cards', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'cta_text', 'cta_url', 'items']],
                 ['key' => 'featured_deals', 'label' => 'Featured deals', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'cta_text', 'cta_url', 'card_count', 'source']],
-                ['key' => 'groups', 'label' => 'Group ticketing CTA', 'fields' => ['enabled', 'title', 'subtitle', 'cta_text', 'cta_url']],
                 ['key' => 'support_cta', 'label' => 'Support callout', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'phone_label', 'phone_value', 'call_enabled', 'call_label', 'call_url', 'chat_enabled', 'chat_label', 'chat_url', 'cta_label', 'cta_link', 'background_mode', 'overlay_strength', 'text_alignment']],
             ],
             ClientPageKeys::ABOUT, ClientPageKeys::SUPPORT => [

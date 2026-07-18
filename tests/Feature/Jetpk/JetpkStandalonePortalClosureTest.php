@@ -31,13 +31,12 @@ class JetpkStandalonePortalClosureTest extends TestCase
         $this->actingAs($user)->get(route('agent.finance.statement.show'))->assertOk();
     }
 
-    public function test_customer_travelers_mobile_shell_renders(): void
+    public function test_customer_travelers_renders_canonical_responsive_page(): void
     {
         $this->actingAs($this->customerUser())
-            ->withCookie('ota_view_mode', 'mobile')
             ->get(route('customer.travelers.index'))
             ->assertOk()
-            ->assertSee('data-testid="ota-mobile-customer-travelers-index"', false);
+            ->assertSee('data-testid="saved-travelers-table-card"', false);
     }
 
     public function test_jp_icon_names_are_defined(): void

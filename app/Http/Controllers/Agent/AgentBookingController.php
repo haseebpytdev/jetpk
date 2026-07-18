@@ -12,7 +12,6 @@ use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\PaymentOperationalStatus;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Bookings\TicketingOperationalStatus;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -21,10 +20,6 @@ use Illuminate\View\View;
 
 class AgentBookingController extends Controller
 {
-    public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
-    ) {}
-
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', Booking::class);
@@ -75,10 +70,6 @@ class AgentBookingController extends Controller
             'filter' => $filter,
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.bookings.index', $viewData);
-        }
-
         return view(client_view('bookings.index', 'agent'), $viewData);
     }
 
@@ -100,10 +91,6 @@ class AgentBookingController extends Controller
         $viewData = [
             'agencyName' => $agencyName,
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.bookings.create', $viewData);
-        }
 
         return view(client_view('bookings.create', 'agent'), $viewData);
     }
@@ -184,10 +171,6 @@ class AgentBookingController extends Controller
                 'agent',
             ),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.bookings.show', $viewData);
-        }
 
         return view(client_view('bookings.show', 'agent'), $viewData);
     }
