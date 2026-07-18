@@ -289,11 +289,21 @@ final class JetpkHomepageContentValidator
             $errors['content.support_cta.phone_value'] = 'Phone number contains invalid characters.';
         }
 
-        foreach (['cta_link' => 'CTA link', 'chat_url' => 'Live chat URL', 'call_url' => 'Call support URL'] as $field => $label) {
+        $callUrl = $this->sanitizeUrl($support['call_url'] ?? '');
+        if ($callUrl !== '') {
+            $callUrl = $this->normalizeCallSupportUrl($callUrl);
+            if (! $this->isSafeCallSupportUrl($callUrl)) {
+                $errors['content.support_cta.call_url'] = 'Call support URL must be a valid relative, https, or telephone link.';
+            }
+        }
+        $support['call_url'] = $callUrl;
+
+        foreach (['cta_link' => 'CTA link', 'chat_url' => 'Live chat URL'] as $field => $label) {
             $url = $this->sanitizeUrl($support[$field] ?? '');
             if ($url !== '' && ! $this->isSafeUrl($url)) {
                 $errors["content.support_cta.{$field}"] = "{$label} must be a valid relative or https URL.";
             }
+            $support[$field] = $url;
         }
 
         if ($errors !== []) {
@@ -347,6 +357,52 @@ final class JetpkHomepageContentValidator
         return trim(strip_tags((string) $value));
     }
 
+    private function normalizeCallSupportUrl(string $url): string
+    {
+        $url = trim($url);
+        if (! str_starts_with(strtolower($url), 'tel:')) {
+            return $url;
+        }
+
+        return 'tel:'.trim(substr($url, 4));
+    }
+
+    private function isSafeCallSupportUrl(string $url): bool
+    {
+        if ($url === '') {
+            return true;
+        }
+
+        if (str_starts_with(strtolower($url), 'tel:')) {
+            return $this->isSafeTelephoneUrl($url);
+        }
+
+        return $this->isSafeUrl($url);
+    }
+
+    private function isSafeTelephoneUrl(string $url): bool
+    {
+        if (! str_starts_with(strtolower($url), 'tel:')) {
+            return false;
+        }
+
+        $number = trim(substr($url, 4));
+        if ($number === '') {
+            return false;
+        }
+
+        if (preg_match('/[a-z]/i', $number)) {
+            return false;
+        }
+
+        $normalized = preg_replace('/[\s\-().]/', '', $number) ?? '';
+        if ($normalized === '' || ! preg_match('/^\+?\d{7,15}$/', $normalized)) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function sanitizeAssetKey(mixed $value): string
     {
         $key = Str::slug((string) $value, '_');
@@ -356,11 +412,24 @@ final class JetpkHomepageContentValidator
 
     private function isSafeUrl(string $url): bool
     {
-        if ($url === '' || str_starts_with($url, '/')) {
+        if ($url === '') {
             return true;
         }
 
-        return (bool) filter_var($url, FILTER_VALIDATE_URL) && str_starts_with(strtolower($url), 'https://');
+        if (str_starts_with($url, '//')) {
+            return false;
+        }
+
+        $lower = strtolower($url);
+        if (str_starts_with($lower, 'javascript:') || str_starts_with($lower, 'data:')) {
+            return false;
+        }
+
+        if (str_starts_with($url, '/')) {
+            return true;
+        }
+
+        return (bool) filter_var($url, FILTER_VALIDATE_URL) && str_starts_with($lower, 'https://');
     }
 
     private function boolString(mixed $value): string

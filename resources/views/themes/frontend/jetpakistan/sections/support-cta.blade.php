@@ -30,6 +30,10 @@
             return null;
         }
 
+        if (str_starts_with(strtolower($raw), 'tel:')) {
+            return $raw;
+        }
+
         return str_starts_with($raw, 'http') ? $raw : client_url($raw);
     };
 
