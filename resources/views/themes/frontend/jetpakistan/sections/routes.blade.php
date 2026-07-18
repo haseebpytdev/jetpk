@@ -7,10 +7,10 @@
     }
 
     $defaults = $jpHome->defaults();
-    $eyebrow = $jpHome->field('routes.eyebrow', 'Trending routes');
-    $title = $jpHome->field('routes.title', data_get($defaults, 'routes.title', 'Where Pakistan is flying.'));
+    $eyebrow = $jpHome->field('routes.eyebrow', '');
+    $title = $jpHome->field('routes.title', '');
     $subtitle = $jpHome->field('routes.subtitle', '');
-    $ctaText = $jpHome->field('routes.cta_text', 'Search routes');
+    $ctaText = $jpHome->field('routes.cta_text', '');
     $ctaUrl = $jpHome->field('routes.cta_url', client_route('home').'#jp-flight-search');
     $routes = $jpHome->routesForDisplay();
     $carousel = count($routes) > 4;

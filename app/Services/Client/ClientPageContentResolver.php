@@ -299,119 +299,16 @@ final class ClientPageContentResolver
     {
         return [
             'hero' => \App\Support\Client\Homepage\JetpkHomepageHeroSizing::defaultHeroSizingFields([
-                'eyebrow' => 'Now boarding · Pakistan',
-                'headline' => 'Every flight from Pakistan,',
-                'headline_highlight' => 'one honest fare.',
-                'subtitle' => 'Compare 400+ airlines, pay in rupees, and get your e-ticket in seconds. The price you see is the price you pay — no surprises at checkout.',
                 'search_visible' => '1',
             ]),
-            'trust_chips' => [
-                ['label' => 'IATA accredited'],
-                ['label' => 'PCAA licensed'],
-                ['label' => 'Instant e-ticket'],
-                ['label' => 'Lowest PKR fares'],
-            ],
-            'feature_board' => [
-                'enabled' => '1',
-                'items' => [
-                    ['value' => '400+', 'label' => 'Airlines'],
-                    ['value' => 'Best', 'label' => 'PKR fares'],
-                    ['value' => 'Instant', 'label' => 'e-ticket'],
-                    ['value' => 'IATA', 'label' => 'accredited'],
-                    ['value' => 'PCAA', 'label' => 'licensed'],
-                ],
-            ],
-            'why_book' => [
-                'eyebrow' => 'The JetPakistan difference',
-                'title' => 'Built for how Pakistan books.',
-                'subtitle' => 'Four things we got obsessive about, so your next trip starts without friction.',
-                'cards' => [
-                    ['num' => '01 · Pricing', 'title' => 'True PKR pricing', 'text' => 'Fares converted and locked in rupees — no FX shock between search and payment.'],
-                    ['num' => '02 · Speed', 'title' => 'Seconds to ticket', 'text' => 'Confirmed PNR and e-ticket delivered to email and WhatsApp the moment you pay.'],
-                    ['num' => '03 · Choice', 'title' => '400+ airlines', 'text' => 'Local carriers and global alliances side by side, ranked by real total cost.'],
-                    ['num' => '04 · Trust', 'title' => 'Licensed & secure', 'text' => 'IATA accredited, PCAA licensed, PCI-DSS payments. Your booking is protected end to end.'],
-                ],
-            ],
-            'groups' => [
-                'enabled' => '1',
-                'title' => 'Group & series fares',
-                'subtitle' => 'Charter blocks, hajj/umrah groups, and corporate series — managed inventory with manual approval.',
-                'cta_text' => 'Browse group inventory',
-                'cta_url' => '/group-ticketing',
-            ],
-            'support_cta' => [
-                'enabled' => '1',
-                'eyebrow' => 'We pick up',
-                'title' => 'Stuck mid-booking? Talk to a human.',
-                'subtitle' => 'Our Pakistan-based travel desk handles changes, refunds and group quotes — 24 hours a day, in Urdu or English.',
-                'phone_label' => 'Call support',
-                'phone_value' => '',
-                'call_enabled' => '1',
-                'call_label' => 'Call support',
-                'call_url' => '',
-                'cta_label' => 'Live chat',
-                'cta_link' => '/support',
-                'chat_enabled' => '1',
-                'chat_label' => 'Live chat',
-                'chat_url' => '/support',
-                'background_mode' => 'gradient',
-                'overlay_strength' => 'medium',
-                'text_alignment' => 'left',
-            ],
-            'destinations' => [
-                'enabled' => '1',
-                'eyebrow' => 'Worth the trip',
-                'title' => 'Destinations on the rise.',
-                'subtitle' => 'Hand-picked routes Pakistan travellers book most.',
-                'items' => [
-                    ['id' => 'seed-dxb', 'code' => 'DXB', 'title' => 'Dubai', 'text' => 'Daily departures', 'enabled' => '1', 'sort_order' => 0, 'manual_fallback_price' => 42500],
-                    ['id' => 'seed-jed', 'code' => 'JED', 'title' => 'Jeddah', 'text' => 'Umrah & Hajj routes', 'enabled' => '1', 'sort_order' => 1, 'manual_fallback_price' => 68900],
-                    ['id' => 'seed-lhr', 'code' => 'LHR', 'title' => 'London', 'text' => 'UK family travel', 'enabled' => '1', 'sort_order' => 2, 'manual_fallback_price' => 198000],
-                    ['id' => 'seed-ist', 'code' => 'IST', 'title' => 'Istanbul', 'text' => 'Europe connections', 'enabled' => '1', 'sort_order' => 3, 'manual_fallback_price' => 85000],
-                ],
-            ],
-            'routes' => [
-                'enabled' => '1',
-                'eyebrow' => 'Trending routes',
-                'title' => 'Where Pakistan is flying.',
-                'subtitle' => '',
-                'items' => [
-                    ['id' => 'seed-khi-dxb', 'from' => 'KHI', 'to' => 'DXB', 'enabled' => '1', 'sort_order' => 0, 'trip_type' => 'one_way', 'dynamic_fare_enabled' => '1', 'manual_fallback_price' => 42500],
-                    ['id' => 'seed-lhe-jed', 'from' => 'LHE', 'to' => 'JED', 'enabled' => '1', 'sort_order' => 1, 'trip_type' => 'one_way', 'dynamic_fare_enabled' => '1', 'manual_fallback_price' => 68900],
-                    ['id' => 'seed-isb-lhr', 'from' => 'ISB', 'to' => 'LHR', 'enabled' => '1', 'sort_order' => 2, 'trip_type' => 'one_way', 'dynamic_fare_enabled' => '1', 'manual_fallback_price' => 198000],
-                    ['id' => 'seed-khi-ruh', 'from' => 'KHI', 'to' => 'RUH', 'enabled' => '1', 'sort_order' => 3, 'trip_type' => 'one_way', 'dynamic_fare_enabled' => '1', 'manual_fallback_price' => 72000],
-                ],
-            ],
-            'trust' => [
-                'enabled' => '1',
-                'eyebrow' => 'Why travellers stay',
-                'title' => 'Booking that respects your time and money.',
-                'subtitle' => 'No hidden markups, no chasing call centres. Every part of the journey is built to be clear and quick.',
-                'cards' => [],
-            ],
-            'group_cards' => [
-                'enabled' => '1',
-                'eyebrow' => 'Curated journeys',
-                'title' => 'Group travel packages.',
-                'subtitle' => 'Charter blocks, hajj/umrah groups, and corporate series — managed inventory with manual approval.',
-                'cta_text' => 'Browse group inventory',
-                'cta_url' => '/group-ticketing',
-                'items' => [],
-            ],
-            'featured_deals' => [
-                'enabled' => '1',
-                'eyebrow' => 'Editorial picks',
-                'title' => 'Featured deals',
-                'subtitle' => 'Hand-picked sample fares for inspiration — prices shown are editorial examples, not live quotes.',
-                'cta_text' => '',
-                'cta_url' => '',
-                'card_count' => 3,
-                'items' => [
-                    ['airline' => 'PIA', 'from' => 'KHI', 'to' => 'DXB', 'depart' => '08:40', 'arrive' => '11:15', 'dur' => '2h 35m', 'stops' => 0, 'price' => 96500, 'enabled' => '1', 'sort_order' => 0],
-                    ['airline' => 'AirBlue', 'from' => 'LHE', 'to' => 'IST', 'depart' => '14:10', 'arrive' => '20:30', 'dur' => '6h 20m', 'stops' => 1, 'price' => 142300, 'enabled' => '1', 'sort_order' => 1],
-                    ['airline' => 'AirSial', 'from' => 'ISB', 'to' => 'JED', 'depart' => '23:55', 'arrive' => '02:45', 'dur' => '2h 50m', 'stops' => 0, 'price' => 118900, 'enabled' => '1', 'sort_order' => 2],
-                ],
-            ],
+            'feature_board' => ['enabled' => '1', 'items' => []],
+            'why_book' => ['enabled' => '1', 'cards' => []],
+            'trust' => ['enabled' => '1', 'cards' => []],
+            'routes' => ['enabled' => '1', 'items' => []],
+            'destinations' => ['enabled' => '1', 'items' => []],
+            'group_cards' => ['enabled' => '1', 'items' => []],
+            'featured_deals' => ['enabled' => '1', 'items' => []],
+            'support_cta' => ['enabled' => '1', 'background_mode' => 'gradient', 'overlay_strength' => 'medium', 'text_alignment' => 'left'],
         ];
     }
 
@@ -421,17 +318,9 @@ final class ClientPageContentResolver
     public function defaultFooterContent(): array
     {
         return [
-            'description' => [
-                'text' => 'JetPakistan is a Pakistan-focused online travel platform for domestic and international flights, with transparent PKR pricing and licensed operations.',
-            ],
-            'legal' => [
-                'copyright' => '© '.date('Y').' JetPakistan. All rights reserved.',
-                'company_line' => 'JetPakistan — IATA accredited travel services.',
-            ],
-            'social' => [
-                ['platform' => 'Facebook', 'url' => 'https://facebook.com/jetpakistan'],
-                ['platform' => 'Instagram', 'url' => 'https://instagram.com/jetpakistan'],
-            ],
+            'description' => ['text' => ''],
+            'legal' => ['copyright' => '', 'company_line' => ''],
+            'social' => [],
         ];
     }
 
@@ -441,22 +330,9 @@ final class ClientPageContentResolver
     public function defaultGlobalContent(): array
     {
         return [
-            'announcement' => [
-                'enabled' => '0',
-                'text' => '',
-                'link' => '',
-                'style' => 'info',
-            ],
-            'header_support' => [
-                'phone' => '+92 21 111 000 000',
-                'email' => 'ota@jetpakistan.pk',
-                'hours' => 'Sun–Sat, 9:00–21:00 PKT',
-            ],
-            'seo' => [
-                'title' => 'JetPakistan — Cheap flights & online booking',
-                'description' => 'Compare airlines, book domestic and international flights in PKR, and get instant e-tickets with JetPakistan.',
-                'og_image' => '',
-            ],
+            'announcement' => ['enabled' => '0', 'text' => '', 'link' => '', 'style' => 'info'],
+            'header_support' => ['phone' => '', 'email' => '', 'hours' => ''],
+            'seo' => ['title' => '', 'description' => '', 'og_image' => ''],
         ];
     }
 

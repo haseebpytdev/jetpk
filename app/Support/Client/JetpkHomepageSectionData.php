@@ -21,7 +21,7 @@ final class JetpkHomepageSectionData
      */
     public function defaults(): array
     {
-        return $this->resolver->defaultHomeContent();
+        return [];
     }
 
     public function field(string $key, mixed $defaultWhenAbsent = ''): mixed
@@ -175,11 +175,7 @@ final class JetpkHomepageSectionData
             }
         }
 
-        return [
-            ['airline' => 'PIA', 'from' => 'KHI', 'to' => 'DXB', 'depart' => '08:40', 'arrive' => '11:15', 'dur' => '2h 35m', 'stops' => 0, 'price' => 96500],
-            ['airline' => 'AirBlue', 'from' => 'LHE', 'to' => 'IST', 'depart' => '14:10', 'arrive' => '20:30', 'dur' => '6h 20m', 'stops' => 1, 'price' => 142300],
-            ['airline' => 'AirSial', 'from' => 'ISB', 'to' => 'JED', 'depart' => '23:55', 'arrive' => '02:45', 'dur' => '2h 50m', 'stops' => 0, 'price' => 118900],
-        ];
+        return [];
     }
 
     /**
@@ -203,23 +199,7 @@ final class JetpkHomepageSectionData
             return array_values(array_filter($items, static fn ($item) => is_array($item) && ($item['enabled'] ?? '1') !== '0'));
         }
 
-        return [
-            ['variant' => 'g-jeddah', 'badge' => 'Featured', 'gold' => true, 'title' => 'Group · Jeddah', 'meta' => '10+ travellers · coordinated seats', 'price' => 285000, 'image' => null, 'link' => ''],
-            ['variant' => 'g-dubai', 'badge' => 'Group fares', 'gold' => false, 'title' => 'Corporate · Dubai', 'meta' => '10+ travellers · locked group rate', 'price' => 96500, 'image' => null, 'link' => ''],
-            ['variant' => 'g-uk', 'badge' => 'Family', 'gold' => false, 'title' => 'Family · London', 'meta' => 'Flexible dates · seats together', 'price' => 198000, 'image' => null, 'link' => ''],
-        ];
-    }
-
-    /** @deprecated Use routesForDisplay() */
-    public function routesWithFallback(): array
-    {
-        return $this->routesForDisplay();
-    }
-
-    /** @deprecated Use destinationsForDisplay() */
-    public function destinationsWithFallback(): array
-    {
-        return $this->destinationsForDisplay();
+        return [];
     }
 
     /**
@@ -227,11 +207,7 @@ final class JetpkHomepageSectionData
      */
     public function authoritativeTrustCardDefaults(): array
     {
-        return [
-            ['icon' => 'check-square', 'title' => 'Transparent PKR pricing', 'text' => 'No FX shock between search and checkout.', 'enabled' => '1'],
-            ['icon' => 'check-square', 'title' => 'Licensed operations', 'text' => 'IATA accredited and PCAA licensed.', 'enabled' => '1'],
-            ['icon' => 'check-square', 'title' => 'Human support', 'text' => 'Pakistan-based desk in Urdu and English.', 'enabled' => '1'],
-        ];
+        return [];
     }
 
     /**
@@ -244,11 +220,7 @@ final class JetpkHomepageSectionData
             return array_values($items);
         }
 
-        return [
-            ['title' => 'Transparent PKR pricing', 'text' => 'No FX shock between search and checkout.'],
-            ['title' => 'Licensed operations', 'text' => 'IATA accredited and PCAA licensed.'],
-            ['title' => 'Human support', 'text' => 'Pakistan-based desk in Urdu and English.'],
-        ];
+        return [];
     }
 
     /**
@@ -261,13 +233,7 @@ final class JetpkHomepageSectionData
             return array_values($items);
         }
 
-        return [
-            ['value' => '400+', 'label' => 'Airlines'],
-            ['value' => 'Best', 'label' => 'PKR fares'],
-            ['value' => 'Instant', 'label' => 'e-ticket'],
-            ['value' => 'IATA', 'label' => 'accredited'],
-            ['value' => 'PCAA', 'label' => 'licensed'],
-        ];
+        return [];
     }
 
     /**
@@ -367,12 +333,7 @@ final class JetpkHomepageSectionData
      */
     private function defaultRouteItems(): array
     {
-        return [
-            ['id' => 'default-khi-dxb', 'from' => 'KHI', 'to' => 'DXB', 'enabled' => '1', 'sort_order' => 0, 'manual_fallback_price' => 42500, 'dynamic_fare_enabled' => '1'],
-            ['id' => 'default-lhe-jed', 'from' => 'LHE', 'to' => 'JED', 'enabled' => '1', 'sort_order' => 1, 'manual_fallback_price' => 68900, 'dynamic_fare_enabled' => '1'],
-            ['id' => 'default-isb-lhr', 'from' => 'ISB', 'to' => 'LHR', 'enabled' => '1', 'sort_order' => 2, 'manual_fallback_price' => 198000, 'dynamic_fare_enabled' => '1'],
-            ['id' => 'default-khi-ruh', 'from' => 'KHI', 'to' => 'RUH', 'enabled' => '1', 'sort_order' => 3, 'manual_fallback_price' => 72000, 'dynamic_fare_enabled' => '1'],
-        ];
+        return [];
     }
 
     /**
@@ -380,11 +341,6 @@ final class JetpkHomepageSectionData
      */
     private function defaultDestinationItems(): array
     {
-        return [
-            ['id' => 'default-dxb', 'code' => 'DXB', 'title' => 'Dubai', 'text' => 'Daily departures', 'enabled' => '1', 'sort_order' => 0, 'manual_fallback_price' => 42500],
-            ['id' => 'default-jed', 'code' => 'JED', 'title' => 'Jeddah', 'text' => 'Umrah & Hajj routes', 'enabled' => '1', 'sort_order' => 1, 'manual_fallback_price' => 68900],
-            ['id' => 'default-lhr', 'code' => 'LHR', 'title' => 'London', 'text' => 'UK family travel', 'enabled' => '1', 'sort_order' => 2, 'manual_fallback_price' => 198000],
-            ['id' => 'default-ist', 'code' => 'IST', 'title' => 'Istanbul', 'text' => 'Europe connections', 'enabled' => '1', 'sort_order' => 3, 'manual_fallback_price' => 85000],
-        ];
+        return [];
     }
 }

@@ -6,9 +6,9 @@
         return;
     }
 
-    $eyebrow = $jpHome->field('featured_deals.eyebrow', 'Editorial picks');
-    $title = $jpHome->field('featured_deals.title', 'Featured deals');
-    $subtitle = $jpHome->field('featured_deals.subtitle', 'Hand-picked sample fares for inspiration — prices shown are editorial examples, not live quotes.');
+    $eyebrow = $jpHome->field('featured_deals.eyebrow', '');
+    $title = $jpHome->field('featured_deals.title', '');
+    $subtitle = $jpHome->field('featured_deals.subtitle', '');
     $ctaText = $jpHome->field('featured_deals.cta_text', '');
     $ctaUrl = $jpHome->field('featured_deals.cta_url', '');
     $cardCount = max(1, min(6, (int) $jpHome->field('featured_deals.card_count', 3)));

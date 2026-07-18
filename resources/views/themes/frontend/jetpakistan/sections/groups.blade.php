@@ -15,7 +15,7 @@
     // JETPK-HOMEPAGE-CMS Task 9: previously read the retired 'groups.cta_url' key
     // and never rendered it at all. Now reads the canonical 'group_cards.*'
     // fields per Task 6's decision, and the link below actually uses them.
-    $ctaText = $jpHome->field('group_cards.cta_text', data_get($defaults, 'group_cards.cta_text', 'View all packages'));
+    $ctaText = $jpHome->field('group_cards.cta_text', data_get($defaults, 'group_cards.cta_text', ''));
     $ctaUrl = $jpHome->field('group_cards.cta_url', data_get($defaults, 'group_cards.cta_url', ''));
     $ctaHref = $ctaUrl !== '' ? (str_starts_with($ctaUrl, 'http') ? $ctaUrl : client_url($ctaUrl)) : client_route('group-ticketing.search');
 @endphp
