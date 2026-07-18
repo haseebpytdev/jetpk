@@ -487,6 +487,7 @@ class ClientPageSettingsController extends Controller
                 $request->file('support_cta_background_file'),
                 auth()->id(),
             );
+            $content = $this->ensureSupportCtaUploadedBackgroundMode($content);
         }
 
         if ($request->hasFile('support_cta_background_mobile_file')) {
@@ -496,6 +497,7 @@ class ClientPageSettingsController extends Controller
                 $request->file('support_cta_background_mobile_file'),
                 auth()->id(),
             );
+            $content = $this->ensureSupportCtaUploadedBackgroundMode($content);
         }
 
         if ($request->boolean('support_cta_background_remove')) {
@@ -520,6 +522,22 @@ class ClientPageSettingsController extends Controller
         if ($existing !== null) {
             $this->homepageAssetService->destroyAsset($existing);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $content
+     * @return array<string, mixed>
+     */
+    private function ensureSupportCtaUploadedBackgroundMode(array $content): array
+    {
+        $support = is_array($content['support_cta'] ?? null) ? $content['support_cta'] : [];
+        $mode = (string) ($support['background_mode'] ?? 'gradient');
+        if ($mode === 'gradient') {
+            $support['background_mode'] = 'uploaded_overlay';
+            $content['support_cta'] = $support;
+        }
+
+        return $content;
     }
 
     private function requireProfile(): \App\Models\ClientProfile

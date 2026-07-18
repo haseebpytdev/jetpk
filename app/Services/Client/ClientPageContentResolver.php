@@ -3,6 +3,7 @@
 namespace App\Services\Client;
 
 use App\Enums\ClientPageSettingStatus;
+use App\Models\ClientPageAsset;
 use App\Models\ClientPageSetting;
 use App\Models\ClientPageSettingRevision;
 use App\Models\ClientProfile;
@@ -232,7 +233,11 @@ final class ClientPageContentResolver
             ? $this->homepageValidator->validateAndNormalize($pageKey, $draft->content_json)
             : [];
 
-        return $this->promoteToPublished(
+        if ($pageKey === ClientPageKeys::HOME) {
+            $validatedContent = $this->syncHomepageSupportCtaBackgroundMode($profile, $validatedContent);
+        }
+
+        $published = $this->promoteToPublished(
             $profile,
             $pageKey,
             $draft,
@@ -240,6 +245,12 @@ final class ClientPageContentResolver
             $userId,
             ClientPageSettingRevision::REASON_BEFORE_PUBLISH,
         );
+
+        if ($pageKey === ClientPageKeys::HOME) {
+            $this->assetService->publishAllForPage($profile, $pageKey);
+        }
+
+        return $published;
     }
 
     public function promoteToPublished(
@@ -461,5 +472,41 @@ final class ClientPageContentResolver
         $decoded = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         return trim(strip_tags($decoded));
+    }
+
+    /**
+     * When a Support CTA banner asset exists but background_mode stayed at gradient,
+     * promote the published mode so the uploaded image renders publicly.
+     *
+     * @param  array<string, mixed>  $content
+     * @return array<string, mixed>
+     */
+    private function syncHomepageSupportCtaBackgroundMode(ClientProfile $profile, array $content): array
+    {
+        if (! Schema::hasTable('client_page_assets')) {
+            return $content;
+        }
+
+        $support = is_array($content['support_cta'] ?? null) ? $content['support_cta'] : [];
+        $mode = (string) ($support['background_mode'] ?? 'gradient');
+        if ($mode !== 'gradient') {
+            return $content;
+        }
+
+        $hasDesktop = ClientPageAsset::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', ClientPageKeys::HOME)
+            ->where('asset_key', 'support_cta_background')
+            ->where('path', '!=', '')
+            ->exists();
+
+        if (! $hasDesktop) {
+            return $content;
+        }
+
+        $support['background_mode'] = 'uploaded_overlay';
+        $content['support_cta'] = $support;
+
+        return $content;
     }
 }

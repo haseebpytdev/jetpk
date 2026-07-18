@@ -4,6 +4,7 @@ namespace App\Services\Homepage;
 
 use App\Models\ClientPageAsset;
 use App\Models\ClientProfile;
+use App\Services\Client\ClientPageAssetPublicationService;
 use App\Services\Client\ClientPageAssetService;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\JetpkHomepageFareDisplay;
@@ -22,6 +23,7 @@ final class JetpkHomepageAssetService
 
     public function __construct(
         private readonly ClientPageAssetService $assetService,
+        private readonly ClientPageAssetPublicationService $publicationService,
     ) {}
 
     public function storeDestinationImage(
@@ -85,7 +87,7 @@ final class JetpkHomepageAssetService
             : trim((string) $profile->slug);
 
         $extension = $this->resolveExtension($file);
-        $filename = Str::slug($assetKey, '_').'-'.now()->format('YmdHis').'.'.$extension;
+        $filename = Str::slug($assetKey, '_').'-'.now()->format('YmdHis').'-'.substr(str_replace('.', '', uniqid('', true)), -10).'.'.$extension;
         $directory = rtrim($storagePrefix, '/').'/'.$profileSlug;
         $relativePath = $directory.'/'.$filename;
 
@@ -105,7 +107,7 @@ final class JetpkHomepageAssetService
             $this->assetService->deleteStoredFile($existing->path, (string) ($existing->disk ?: 'public'));
         }
 
-        return ClientPageAsset::query()->updateOrCreate(
+        $asset = ClientPageAsset::query()->updateOrCreate(
             [
                 'client_profile_id' => $profile->id,
                 'page_key' => ClientPageKeys::HOME,
@@ -125,6 +127,10 @@ final class JetpkHomepageAssetService
                 'created_by' => $userId,
             ],
         );
+
+        $this->publicationService->publishPublicDiskRelativePath($relativePath);
+
+        return $asset->fresh() ?? $asset;
     }
 
     private function assertSafeImage(UploadedFile $file): void
