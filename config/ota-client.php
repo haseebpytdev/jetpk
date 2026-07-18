@@ -3,7 +3,7 @@
 $brandName = (string) env('OTA_BRAND_NAME', env('APP_NAME', 'Travel'));
 
 $canonicalDomain = (string) config('client.canonical_client.domain', 'jetpakistan.pk');
-$canonicalEmail = (string) env('OTA_SUPPORT_EMAIL', 'support@jetpakistan.pk');
+$canonicalEmail = (string) env('OTA_SUPPORT_EMAIL', 'ota@jetpakistan.pk');
 
 return [
     'agency_name' => $brandName,

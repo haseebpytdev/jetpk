@@ -25,24 +25,6 @@
         <textarea id="hero-subtitle" class="jp-control jp-control--textarea" rows="3" name="content[hero][subtitle]">{{ data_get($content, 'hero.subtitle') }}</textarea>
         <p class="jp-field__help">Leave empty to hide this text on the public homepage.</p>
     </div>
-    <div class="jp-grid jp-grid--2">
-        <div class="jp-field">
-            <label class="jp-field__label" for="hero-cta1-text">Primary CTA text</label>
-            <input id="hero-cta1-text" class="jp-control" name="content[hero][cta_primary_text]" value="{{ data_get($content, 'hero.cta_primary_text') }}">
-        </div>
-        <div class="jp-field">
-            <label class="jp-field__label" for="hero-cta1-url">Primary CTA URL</label>
-            <input id="hero-cta1-url" class="jp-control" name="content[hero][cta_primary_url]" value="{{ data_get($content, 'hero.cta_primary_url') }}">
-        </div>
-        <div class="jp-field">
-            <label class="jp-field__label" for="hero-cta2-text">Secondary CTA text</label>
-            <input id="hero-cta2-text" class="jp-control" name="content[hero][cta_secondary_text]" value="{{ data_get($content, 'hero.cta_secondary_text') }}">
-        </div>
-        <div class="jp-field">
-            <label class="jp-field__label" for="hero-cta2-url">Secondary CTA URL</label>
-            <input id="hero-cta2-url" class="jp-control" name="content[hero][cta_secondary_url]" value="{{ data_get($content, 'hero.cta_secondary_url') }}">
-        </div>
-    </div>
     <div class="jp-toggle">
         <input type="hidden" name="content[hero][search_visible]" value="0">
         <input type="checkbox" id="hero-search-visible" name="content[hero][search_visible]" value="1" @checked(data_get($content, 'hero.search_visible', '1') == '1')>

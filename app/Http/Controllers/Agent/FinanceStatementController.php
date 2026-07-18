@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Policies\FinanceStatementPolicy;
 use App\Services\Finance\Statements\AgentStatementService;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
@@ -23,7 +22,6 @@ class FinanceStatementController extends Controller
     public function __construct(
         protected AgentStatementService $statements,
         protected FinanceStatementPolicy $policy,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function show(Request $request): View
@@ -45,10 +43,6 @@ class FinanceStatementController extends Controller
             'pageTitle' => 'Agency Statement',
             'routePrefix' => 'agent.finance.statement',
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.finance.statement.show', $viewData);
-        }
 
         return view(client_view('finance.statement.show', 'agent'), $viewData);
     }

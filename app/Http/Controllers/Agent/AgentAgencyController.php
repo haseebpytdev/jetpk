@@ -11,7 +11,6 @@ use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Agents\AgentWalletService;
 use App\Support\Agencies\AgencyPrefixService;
 use App\Support\Agents\AgentPermission;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +25,6 @@ class AgentAgencyController extends Controller
     public function __construct(
         protected AgencyBrandingService $brandingService,
         protected AgentWalletService $walletService,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function show(Request $request): View
@@ -46,10 +44,6 @@ class AgentAgencyController extends Controller
             'canViewWallet' => $canViewWallet,
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.agency.show', $viewData);
-        }
-
         return view(client_view('agency', 'agent'), $viewData);
     }
 
@@ -64,10 +58,6 @@ class AgentAgencyController extends Controller
         $viewData = [
             'details' => $details,
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.agency.edit', $viewData);
-        }
 
         return view(client_view('agency-edit', 'agent'), $viewData);
     }

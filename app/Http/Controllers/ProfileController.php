@@ -6,7 +6,6 @@ use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
 use App\Support\Auth\LoginDestination;
 use App\Support\Geo\CountryList;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,10 +15,6 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
-    ) {}
-
     public function edit(Request $request): View
     {
         $user = $request->user();
@@ -31,14 +26,6 @@ class ProfileController extends Controller
             'dashboardUrl' => $this->dashboardUrlFor($user),
             'countries' => CountryList::forSelect(),
         ];
-
-        if ($user->isCustomer() && $this->mobileViewPreference->shouldUseMobileShell($request, 'profile.edit-frontend')) {
-            return view('mobile.customer.profile.edit', $viewData);
-        }
-
-        if ($user->isAgentPortalUser() && $this->mobileViewPreference->shouldUseMobileShell($request, 'profile.edit-agent')) {
-            return view('mobile.agent.profile.edit', $viewData);
-        }
 
         $view = match (true) {
             $user->isCustomer() => client_view_exists('profile.edit', 'customer')

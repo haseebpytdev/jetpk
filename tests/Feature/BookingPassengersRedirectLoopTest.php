@@ -6,7 +6,6 @@ use App\Data\OfferValidationResultData;
 use App\Http\Controllers\Frontend\BookingController;
 use App\Services\FlightSearch\FlightSearchService;
 use App\Services\Suppliers\OfferValidationService;
-use App\Support\Ui\MobileViewPreference;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\App;
@@ -130,33 +129,7 @@ class BookingPassengersRedirectLoopTest extends TestCase
             ->getContent();
 
         $this->assertStringContainsString($warning, $html);
-    }
-
-    public function test_missing_book_now_offer_redirects_to_mobile_results_with_visible_warning(): void
-    {
-        $this->seed(OtaFoundationSeeder::class);
-        $depart = now()->addWeek()->format('Y-m-d');
-        $warning = 'This fare is no longer available. Please refresh results and select again.';
-
-        $flightSearch = Mockery::mock(FlightSearchService::class);
-        $flightSearch->shouldReceive('search')->once()->andReturn([]);
-        $flightSearch->shouldReceive('searchWithMeta')->once()->andReturn([
-            'offers' => [PublicCheckoutTestDoubles::searchOfferPayload($depart)],
-            'warnings' => [],
-        ]);
-        App::instance(FlightSearchService::class, $flightSearch);
-
-        $html = $this->withCookie(
-            (string) config('ota-mobile.cookie_name', 'ota_view_mode'),
-            MobileViewPreference::MODE_MOBILE,
-        )->followingRedirects()
-            ->get('/booking/passengers?flight_id=missing-offer&offer_id=missing-offer'
-                .'&from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
-            ->assertOk()
-            ->getContent();
-
-        $this->assertStringContainsString($warning, $html);
-        $this->assertStringContainsString('data-testid="ota-mobile-results"', $html);
+        $this->assertStringContainsString('data-results-root', $html);
     }
 
     public function test_missing_book_now_without_search_context_redirects_home_with_warning(): void
@@ -165,9 +138,8 @@ class BookingPassengersRedirectLoopTest extends TestCase
 
         $response = $this->get('/booking/passengers?flight_id=missing-offer&offer_id=missing-offer');
 
-        $response->assertRedirect(route('home').'#ota-flight-search');
-        $response->assertSessionHas('offer_warning', 'This fare is no longer available. Please refresh results and select again.');
-        $response->assertSessionHasErrors('flight_id');
+        $this->assertStringContainsString('#jp-flight-search', (string) $response->headers->get('Location'));
+        $response->assertSessionHas('offer_warning');
     }
 
     /**

@@ -6,7 +6,6 @@ use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Services\Reports\BookingReportService;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -18,7 +17,6 @@ class AgentReportsController extends Controller
 {
     public function __construct(
         protected BookingReportService $bookingReportService,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function index(Request $request): View
@@ -40,10 +38,6 @@ class AgentReportsController extends Controller
             'reportsTitle' => 'Agency Reports',
             'reportsScope' => 'agency',
         ]);
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.reports.index', $viewData);
-        }
 
         return view(client_view('reports.index', 'agent'), $viewData);
     }

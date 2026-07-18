@@ -297,7 +297,6 @@ final class HaseebMasterRouteSafetyCatalog
     {
         return [
             ['section' => 'Static asset paths', 'route' => '-', 'method' => 'GET', 'uri' => '/css/ota-public.css', 'notes' => 'CSS served from public/; slug `css` reserved'],
-            ['section' => 'Static asset paths', 'route' => '-', 'method' => 'GET', 'uri' => '/js/ota-mobile-app.js', 'notes' => 'JS served from public/; slug `js` reserved'],
             ['section' => 'Static asset paths', 'route' => '-', 'method' => 'GET', 'uri' => '/images/logo.svg', 'notes' => 'Images under public/; slug `images` reserved'],
             ['section' => 'Static asset paths', 'route' => '-', 'method' => 'GET', 'uri' => '/storage/branding/logo.svg', 'notes' => 'Storage symlink; slug `storage` reserved'],
             ['section' => 'Static asset paths', 'route' => '-', 'method' => 'GET', 'uri' => '/client-assets/haseeb-master/logo/logo.svg', 'notes' => 'Client assets; slug `client-assets` reserved'],

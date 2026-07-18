@@ -137,6 +137,20 @@ final class HomepageContentNormalizer
     private function stripDeprecatedFields(array $content): array
     {
         $stripped = [];
+        $deprecatedScalarPaths = [
+            'hero.cta_primary_text',
+            'hero.cta_primary_url',
+            'hero.cta_secondary_text',
+            'hero.cta_secondary_url',
+        ];
+
+        foreach ($deprecatedScalarPaths as $path) {
+            if (Arr::has($content, $path)) {
+                $stripped[] = ['path' => $path, 'value' => Arr::get($content, $path)];
+                $content = $this->forget($content, $path);
+            }
+        }
+
         $deprecatedItemFields = [
             'group_cards.items' => ['route', 'alt'],
         ];

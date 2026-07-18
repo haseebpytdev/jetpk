@@ -17,7 +17,6 @@ use App\Support\Agencies\AgencyRoleAssignment;
 use App\Support\Agencies\AgencyRolePermissionMatrix;
 use App\Support\Agencies\AgencyRoleResolver;
 use App\Support\Agents\AgentPermission;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -30,10 +29,6 @@ use Illuminate\Support\Str;
  */
 class AgentStaffController extends Controller
 {
-    public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
-    ) {}
-
     public function index(Request $request): View
     {
         $this->authorizeStaff('viewAny');
@@ -63,10 +58,6 @@ class AgentStaffController extends Controller
             'permissionLabels' => $this->staffPermissionLabels(),
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.staff.index', $viewData);
-        }
-
         return view(client_view('staff.index', 'agent'), $viewData);
     }
 
@@ -81,10 +72,6 @@ class AgentStaffController extends Controller
                 AgentPermission::AgencyView,
             ],
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.staff.create', $viewData);
-        }
 
         return view(client_view('staff.create', 'agent'), $viewData);
     }
@@ -142,10 +129,6 @@ class AgentStaffController extends Controller
             'agencyRoleLabel' => AgencyRoleResolver::labelFor($staff, $agencyId),
             'showAgentStaffOwnerLabelWarning' => $agencyRole === AgencyRole::Owner,
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.staff.edit', $viewData);
-        }
 
         return view(client_view('staff.edit', 'agent'), $viewData);
     }

@@ -76,7 +76,6 @@ use App\Support\ProviderUnstableTestMode;
 use App\Support\PublicBooking;
 use App\Support\Sabre\SabreHostSellClassifier;
 use App\Support\Security\SensitiveDataRedactor;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -112,7 +111,6 @@ class BookingController extends Controller
         protected GuestBookingAccessService $guestAccessService,
         protected PaymentTransactionService $paymentTransactionService,
         protected PublicAbhiPayCheckoutPresenter $publicAbhiPayCheckoutPresenter,
-        protected MobileViewPreference $mobileViewPreference,
         protected ReturnSplitComboService $returnSplitComboService,
         protected PiaNdcOptionPnrService $piaNdcOptionPnrService,
         protected PiaNdcSelectedFareReadinessService $piaNdcSelectedFareReadinessService,
@@ -1186,10 +1184,6 @@ class BookingController extends Controller
             ),
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.bookings.passengers', $viewData);
-        }
-
         $resolvedView = client_view('frontend.booking.passenger-details', 'frontend');
         $this->logJetpkCheckoutPassengersRender($request, $resolvedView);
 
@@ -1692,10 +1686,6 @@ class BookingController extends Controller
             'isPiaNdcReview' => $supplierForReview === SupplierProvider::PiaNdc->value,
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.bookings.review', $viewData);
-        }
-
         return view(client_view('frontend.booking.review', 'frontend'), $viewData);
     }
 
@@ -1770,10 +1760,6 @@ class BookingController extends Controller
             'supplierProvider' => app(SupplierLifecycleContextResolver::class)->resolve($booking)['supplier_provider'],
             'supplierLifecycle' => app(SupplierLifecycleRouter::class)->adminLifecycleSummary($booking),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.bookings.confirmation', $viewData);
-        }
 
         $checkoutView = 'frontend.booking.confirmation';
         if (

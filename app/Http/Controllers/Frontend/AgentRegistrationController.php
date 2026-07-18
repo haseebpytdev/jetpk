@@ -10,7 +10,6 @@ use App\Models\Agency;
 use App\Models\AgentApplication;
 use App\Models\User;
 use App\Services\Communication\OtaNotificationService;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,23 +20,16 @@ class AgentRegistrationController extends Controller
 {
     public function __construct(
         protected OtaNotificationService $notificationService,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function landing(Request $request): View
     {
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent-registration.landing');
-        }
 
         return view(client_view('frontend.agent-registration.landing', 'frontend'));
     }
 
     public function create(Request $request): View
     {
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent-registration.form');
-        }
 
         return view(client_view('frontend.agent-registration.form', 'frontend'));
     }
@@ -152,9 +144,6 @@ class AgentRegistrationController extends Controller
 
     public function submitted(Request $request): View
     {
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent-registration.submitted');
-        }
 
         return view(client_view('frontend.agent-registration.submitted', 'frontend'));
     }

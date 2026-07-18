@@ -20,7 +20,6 @@ return [
         'key' => (string) env('OTA_CANONICAL_CLIENT_KEY', 'jetpk'),
         'slug' => (string) env('OTA_CANONICAL_CLIENT_SLUG', env('OTA_CLIENT_SLUG', 'jetpk')),
         'theme' => (string) env('OTA_CANONICAL_CLIENT_THEME', 'jetpakistan'),
-        'mobile_theme' => (string) env('OTA_CANONICAL_MOBILE_THEME', 'jetpakistan-app'),
         'domain' => (string) env('OTA_CANONICAL_CLIENT_DOMAIN', env('OTA_BRAND_DOMAIN', 'jetpakistan.pk')),
     ],
 

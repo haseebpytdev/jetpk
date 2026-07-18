@@ -7,6 +7,7 @@ use App\Models\ClientPageSetting;
 use App\Models\ClientProfile;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\ClientPagePublicFallbackCatalog;
+use App\Support\Client\Homepage\HomepageContentNormalizer;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 
@@ -40,17 +41,17 @@ final class ClientPageAdminContentResolver
 
         $draft = $this->row($profile->id, $pageKey, ClientPageSettingStatus::Draft);
         if ($draft !== null && is_array($draft->content_json)) {
-            return $draft->content_json;
+            return $this->normalizeHomeContent($pageKey, $draft->content_json);
         }
 
         $published = $this->row($profile->id, $pageKey, ClientPageSettingStatus::Published);
         if ($published !== null && is_array($published->content_json)) {
-            return $published->content_json;
+            return $this->normalizeHomeContent($pageKey, $published->content_json);
         }
 
         $fallback = ClientPagePublicFallbackCatalog::contentFor($pageKey);
 
-        return $fallback !== [] ? $fallback : [];
+        return $fallback !== [] ? $this->normalizeHomeContent($pageKey, $fallback) : [];
     }
 
   /**
@@ -66,10 +67,10 @@ final class ClientPageAdminContentResolver
 
         $published = $this->row($profile->id, $pageKey, ClientPageSettingStatus::Published);
         if ($published !== null && is_array($published->content_json)) {
-            return $published->content_json;
+            return $this->normalizeHomeContent($pageKey, $published->content_json);
         }
 
-        return ClientPagePublicFallbackCatalog::contentFor($pageKey);
+        return $this->normalizeHomeContent($pageKey, ClientPagePublicFallbackCatalog::contentFor($pageKey));
     }
 
     public function effectiveSource(ClientProfile $profile, string $pageKey): string
@@ -196,5 +197,18 @@ final class ClientPageAdminContentResolver
             ->where('page_key', $pageKey)
             ->where('status', $status)
             ->first();
+    }
+
+    /**
+     * @param  array<string, mixed>  $content
+     * @return array<string, mixed>
+     */
+    private function normalizeHomeContent(string $pageKey, array $content): array
+    {
+        if ($pageKey !== ClientPageKeys::HOME || $content === []) {
+            return $content;
+        }
+
+        return app(HomepageContentNormalizer::class)->normalize($content)['content'];
     }
 }

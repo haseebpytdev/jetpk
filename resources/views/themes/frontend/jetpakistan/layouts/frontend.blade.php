@@ -1,6 +1,6 @@
 @php
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpAssetVersion = 51; // JETPK-RESPONSIVE-CLUMPING — theme.css + forms.css + booking.css
+    $jpAssetVersion = 52; // JETPK-CANONICAL-RESPONSIVE-UI — legacy mobile-app shell removed
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
     $pageTitle = trim($__env->yieldContent('title'));
@@ -104,16 +104,11 @@ html[data-theme="day"] {
 
 @include('themes.frontend.jetpakistan.partials.footer')
 
-@include('themes.frontend.jetpakistan.partials.mobile-app-view-link')
-
 @stack('modals')
 
 <script src="{{ $jpThemeBase }}/js/theme.js?v={{ $jpAssetVersion }}" defer></script>
 <script>document.documentElement.classList.add('js');</script>
 @stack('theme-scripts')
 @stack('scripts')
-@if (! request()->routeIs('home'))
-@include('layouts.partials.mobile-viewport-reconcile')
-@endif
 </body>
 </html>

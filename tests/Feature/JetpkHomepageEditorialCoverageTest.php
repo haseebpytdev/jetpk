@@ -26,7 +26,7 @@ class JetpkHomepageEditorialCoverageTest extends TestCase
         $this->seedJetpkAgency();
     }
 
-    public function test_hero_cta_buttons_render_when_configured(): void
+    public function test_hero_cta_buttons_never_render_even_when_legacy_content_present(): void
     {
         $profile = $this->makeJetpkProfile();
         $this->seedPublishedHome($profile, [
@@ -40,18 +40,26 @@ class JetpkHomepageEditorialCoverageTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('PROBE-PRIMARY-CTA', false)
-            ->assertSee('PROBE-SECONDARY-CTA', false);
+            ->assertDontSee('PROBE-PRIMARY-CTA', false)
+            ->assertDontSee('PROBE-SECONDARY-CTA', false)
+            ->assertDontSee('hero-cta-primary', false)
+            ->assertDontSee('hero-cta-secondary', false);
     }
 
-    public function test_hero_cta_buttons_do_not_render_when_text_is_empty(): void
+    public function test_canonical_home_renders_section_stack_without_preview_context(): void
     {
         $profile = $this->makeJetpkProfile();
         $this->seedPublishedHome($profile, [
-            'hero' => ['cta_primary_text' => '', 'cta_primary_url' => '/flights'],
+            'routes' => ['enabled' => '1', 'items' => [['from' => 'KHI', 'to' => 'DXB', 'enabled' => '1']]],
+            'destinations' => ['enabled' => '1', 'items' => [['code' => 'DXB', 'title' => 'Dubai', 'enabled' => '1']]],
+            'support_cta' => ['enabled' => '1', 'title' => 'PROBE-SUPPORT-CTA'],
         ]);
 
-        $this->get('/')->assertOk()->assertDontSee('hero-cta-primary', false);
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('jp-section-start:routes', false)
+            ->assertSee('jp-section-start:destinations', false)
+            ->assertSee('PROBE-SUPPORT-CTA', false);
     }
 
     public function test_group_cards_subtitle_and_cta_render_from_canonical_key(): void
