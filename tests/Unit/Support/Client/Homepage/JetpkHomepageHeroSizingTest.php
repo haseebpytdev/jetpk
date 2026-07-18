@@ -15,14 +15,15 @@ class JetpkHomepageHeroSizingTest extends TestCase
         $this->assertSame(1.1, JetpkHomepageHeroSizing::heroTextScaleDecimal(110));
     }
 
-    public function test_search_ui_percent_clamps_and_scales_against_compact_baseline(): void
+    public function test_search_ui_percent_maps_directly_to_css_scale(): void
     {
         $this->assertSame(100, JetpkHomepageHeroSizing::normalizeSearchUiPercent(''));
         $this->assertSame(80, JetpkHomepageHeroSizing::normalizeSearchUiPercent(10));
         $this->assertSame(115, JetpkHomepageHeroSizing::normalizeSearchUiPercent(500));
-        $this->assertSame(0.90, JetpkHomepageHeroSizing::searchUiScaleDecimal(100));
-        $this->assertSame(0.72, JetpkHomepageHeroSizing::searchUiScaleDecimal(80));
-        $this->assertSame(1.035, JetpkHomepageHeroSizing::searchUiScaleDecimal(115));
+        $this->assertSame(1.0, JetpkHomepageHeroSizing::searchUiScaleDecimal(100));
+        $this->assertSame(0.8, JetpkHomepageHeroSizing::searchUiScaleDecimal(80));
+        $this->assertSame(0.9, JetpkHomepageHeroSizing::searchUiScaleDecimal(90));
+        $this->assertSame(1.15, JetpkHomepageHeroSizing::searchUiScaleDecimal(115));
     }
 
     public function test_css_variables_from_hero_content(): void
@@ -39,7 +40,7 @@ class JetpkHomepageHeroSizingTest extends TestCase
         $this->assertSame('1.1', $vars['--jp-hero-headline-scale']);
         $this->assertSame('1.05', $vars['--jp-hero-highlight-scale']);
         $this->assertSame('0.95', $vars['--jp-hero-subtitle-scale']);
-        $this->assertSame('0.9', $vars['--jp-search-ui-scale']);
+        $this->assertSame('1', $vars['--jp-search-ui-scale']);
     }
 
     public function test_normalize_hero_section_coerces_invalid_values(): void
@@ -53,5 +54,18 @@ class JetpkHomepageHeroSizingTest extends TestCase
         $this->assertSame('100', $normalized['eyebrow_size']);
         $this->assertSame('120', $normalized['headline_size']);
         $this->assertSame('115', $normalized['search_ui_scale']);
+    }
+
+    public function test_tokens_do_not_scale_search_shell_width(): void
+    {
+        $tokens = file_get_contents(dirname(__DIR__, 5).'/public/themes/frontend/jetpakistan/css/tokens.css') ?: '';
+        $theme = file_get_contents(dirname(__DIR__, 5).'/public/themes/frontend/jetpakistan/css/theme.css') ?: '';
+
+        $this->assertStringNotContainsString('--jp-search-box-max-width', $tokens.$theme);
+        $this->assertDoesNotMatchRegularExpression(
+            '/--jp-search-(?:card-padding-x|field-padding-x|btn-padding-x)[^;]*var\(--jp-search-ui-scale/',
+            $tokens,
+        );
+        $this->assertStringNotContainsString('max(44px,calc(var(--jp-search-field-height-base)', $tokens);
     }
 }

@@ -132,7 +132,7 @@ final class HomepageCanonicalSchema
                 self::field('hero.headline_size', 'Hero headline size', 'int', default: '100', validation: 'min:75,max:140'),
                 self::field('hero.highlight_size', 'Hero highlighted line size', 'int', default: '100', validation: 'min:75,max:140'),
                 self::field('hero.subtitle_size', 'Hero subtitle size', 'int', default: '100', validation: 'min:75,max:140'),
-                self::field('hero.search_ui_scale', 'Search box size', 'int', default: '100', validation: 'min:80,max:115', note: 'Percentage of compact search baseline (100 = 0.90× legacy tokens).'),
+                self::field('hero.search_ui_scale', 'Search box size', 'int', default: '100', validation: 'min:80,max:115', note: 'Percentage maps directly to --jp-search-ui-scale (100 = 1.0). Adjusts vertical compactness only; width stays responsive.'),
                 self::field('trust_chips', 'Trust badges (top-level key, rendered inside hero)', 'repeating_scalar', repeating: ['item_fields' => ['label'], 'fixed_count' => 4], note: 'Lives at the top level, not hero.trust_chips — kept as-is; renaming would be a breaking migration for no functional gain.'),
             ],
 

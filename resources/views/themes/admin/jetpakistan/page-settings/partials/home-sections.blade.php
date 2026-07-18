@@ -87,7 +87,7 @@
                 value="{{ $searchUiScale }}"
                 data-jp-hero-size-slider
             >
-            <p class="jp-field__help">{{ HeroSizing::SEARCH_UI_MIN }}%–{{ HeroSizing::SEARCH_UI_MAX }}% · 100% = compact baseline (legacy tokens × {{ HeroSizing::SEARCH_UI_COMPACT_BASELINE }})</p>
+            <p class="jp-field__help">{{ HeroSizing::SEARCH_UI_MIN }}%–{{ HeroSizing::SEARCH_UI_MAX }}% · Adjusts the vertical compactness and internal control sizes of the search interface. The responsive width and field layout remain unchanged.</p>
         </div>
     </div>
 </div>
