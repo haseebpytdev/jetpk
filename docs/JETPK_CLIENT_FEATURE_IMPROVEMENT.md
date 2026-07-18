@@ -1,6 +1,6 @@
 # JetPK Homepage CMS — Client Feature test improvement
 
-**Integration HEAD:** `d3c38fe` (post-hygiene commit pending)  
+**Integration HEAD:** `d3c38fe` (post-hygiene commit pending)
 **Baseline:** `624f3dd`
 
 ## Totals
@@ -47,7 +47,7 @@ The remaining **45** integration failures are **the same test names** as **45** 
 
 ## Confirmation
 
-- No `@skip` added to passing tests  
-- No assertions weakened on repaired tests  
-- No renames of failing tests to exclude them from the suite  
+- No `@skip` added to passing tests
+- No assertions weakened on repaired tests
+- No renames of failing tests to exclude them from the suite
 - Improvement is **+18 new passing CMS tests** and **+7 repaired redirect tests**

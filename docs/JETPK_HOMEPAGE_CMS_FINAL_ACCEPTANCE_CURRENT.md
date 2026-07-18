@@ -2,9 +2,9 @@
 
 **Branch:** `integration/jetpk-homepage-cms-final`
 **Baseline:** `624f3dd`
-**HEAD:** post hygiene closure (commits pending push)
+**HEAD:** `d5870cd` (final pre-merge corrections pending push)
 **Date:** 2026-07-18
-**Phase:** JETPK-CMS-PRE-MERGE-REPOSITORY-HYGIENE-AND-LEGACY-TEST-CLOSURE
+**Phase:** JETPK-CMS-FINAL-PRE-MERGE-CORRECTIONS
 
 ## Final verdict
 

@@ -1,8 +1,8 @@
 # JetPK mobile-flight-ota.spec.ts — retirement record
 
-**Phase:** JETPK-CMS-PRE-MERGE-REPOSITORY-HYGIENE-AND-LEGACY-TEST-CLOSURE  
-**Date:** 2026-07-18  
-**Replacement:** `tests/visual/non-home-mobile-scope.spec.ts`  
+**Phase:** JETPK-CMS-PRE-MERGE-REPOSITORY-HYGIENE-AND-LEGACY-TEST-CLOSURE
+**Date:** 2026-07-18
+**Replacement:** `tests/visual/non-home-mobile-scope.spec.ts`
 **Config removed:** `playwright.mobile-non-home.config.ts`
 
 ## Why retired

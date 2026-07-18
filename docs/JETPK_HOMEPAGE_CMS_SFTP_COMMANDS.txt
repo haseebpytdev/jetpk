@@ -1,15 +1,17 @@
 ﻿# JetPK Homepage CMS — consolidated SFTP upload list
-# Phase: JETPK-CMS-PRE-MERGE (full CMS runtime vs baseline 624f3dd)
+# Phase: JETPK-CMS-FINAL-PRE-MERGE-CORRECTIONS (full CMS runtime vs baseline 624f3dd)
 # Generated: 2026-07-18
 # Remote app root: /home/pkjetp/jetpk_app
 # Public web mirror: /home/pkjetp/public_html (theme assets duplicated below)
+# Application runtime files: 38 (explicit put each below)
+# Public mirrored assets: 4 unique files × 2 trees = 8 put lines
+# REPOSITORY_ONLY_LOCAL_TOOLING (do not upload):
+#   app/Console/Commands/JetpkLocalAuditFixtureCommand.php
+#   app/Support/Fixtures/JetpkHomepageAuditFixtureBuilder.php
 
 lcd C:/Users/khadi/ota-jetpk
 
 # --- App / PHP ---
-cd /home/pkjetp/jetpk_app/app/Console/Commands
-put app/Console/Commands/JetpkLocalAuditFixtureCommand.php JetpkLocalAuditFixtureCommand.php
-
 cd /home/pkjetp/jetpk_app/app/Http/Controllers/Admin
 put app/Http/Controllers/Admin/ClientPageSettingsController.php ClientPageSettingsController.php
 
@@ -40,9 +42,6 @@ put app/Support/Client/Homepage/JetpkHomepageContextDiagnostic.php JetpkHomepage
 
 cd /home/pkjetp/jetpk_app/app/Support/Client
 put app/Support/Client/JetpkHomepageSectionData.php JetpkHomepageSectionData.php
-
-cd /home/pkjetp/jetpk_app/app/Support/Fixtures
-put app/Support/Fixtures/JetpkHomepageAuditFixtureBuilder.php JetpkHomepageAuditFixtureBuilder.php
 
 # --- Config ---
 cd /home/pkjetp/jetpk_app/config
@@ -113,7 +112,8 @@ put resources/views/themes/frontend/jetpakistan/sections/hero.blade.php hero.bla
 put resources/views/themes/frontend/jetpakistan/sections/trust.blade.php trust.blade.php
 
 # --- Post-upload SSH (staging) ---
-# php artisan migrate --force
+# php artisan migrate --path=database/migrations/2026_07_16_120000_create_client_page_setting_revisions_table.php --force
+# php artisan migrate --path=database/migrations/2026_07_16_130000_create_client_page_setting_defaults_table.php --force
 # php artisan optimize:clear
 # php artisan view:clear
 # php artisan ota:route-page-health-audit --all

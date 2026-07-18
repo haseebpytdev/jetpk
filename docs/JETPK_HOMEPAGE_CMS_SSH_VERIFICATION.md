@@ -98,4 +98,4 @@ php artisan optimize:clear
 
 ## SFTP
 
-See `docs/JETPK_HOMEPAGE_CMS_SFTP_COMMANDS.txt` (39 runtime files, explicit `put` each, no `bye`).
+See `docs/JETPK_HOMEPAGE_CMS_SFTP_COMMANDS.txt` (38 application runtime files, 4 public assets mirrored to both trees, explicit `put` each, no `bye`).

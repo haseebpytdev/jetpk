@@ -1,9 +1,9 @@
 # JetPK Homepage CMS — Playwright Baseline Comparison
 
-**Integration HEAD:** post-hygiene closure  
-**Baseline:** `624f3dd`  
-**Integration server:** `http://127.0.0.1:8000`  
-**Baseline server:** `http://127.0.0.1:8001` (worktree `ota-jetpk-baseline-624f3dd`)  
+**Integration HEAD:** post-hygiene closure
+**Baseline:** `624f3dd`
+**Integration server:** `http://127.0.0.1:8000`
+**Baseline server:** `http://127.0.0.1:8001` (worktree `ota-jetpk-baseline-624f3dd`)
 **Date:** 2026-07-18
 
 Runs executed **sequentially** with `--workers=1`, one Laravel server at a time.
