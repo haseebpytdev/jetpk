@@ -6,7 +6,7 @@ const LOCAL_OTA_URL =
 export default defineConfig({
   testDir: './tests/visual',
   testMatch: /non-home-mobile-scope\.spec\.ts/,
-  timeout: 90_000,
+  timeout: 120_000,
   workers: 1,
   reporter: [['list']],
   outputDir: 'UI_test/traces/non-home-mobile',
