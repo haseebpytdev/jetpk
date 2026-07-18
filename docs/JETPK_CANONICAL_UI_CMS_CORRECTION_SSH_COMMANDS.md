@@ -1,5 +1,6 @@
 # JETPK Canonical UI CMS Correction — SSH Commands
 Baseline: 5f97dc6c512d59ac2106c2bfa9854da2dc1210c8
+Final main SHA: 1a64a0ce017cc77400c90025adadd6d1a8e79f65
 Pre-deployment: date; tar czf ~/jetpk_pre_canonical_ui_$(date +%Y%m%d_%H%M%S).tgz -C /home/pkjetp jetpk_app public_html
 Upload via SFTP using docs/JETPK_CANONICAL_UI_CMS_CORRECTION_SFTP_COMMANDS.txt
 Remove obsolete mobile-app runtime files:
