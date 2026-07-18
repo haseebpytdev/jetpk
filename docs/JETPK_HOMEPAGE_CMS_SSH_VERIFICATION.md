@@ -1,6 +1,6 @@
 # JetPK Homepage CMS — SSH Verification & Supported Commands
 
-**Main SHA:** `ea25dd9c6335be1391a63e2e7a1044aea6672f87`
+**Main SHA:** `d3e10ce7c0cedb19a5bfbcb670eeef6dd358dfd8`
 **Merge commit:** `0f48c97` (integration `e1fef54` → main `624f3dd`)
 **Baseline:** `624f3ddb26716c5bda893ae6e797b8c1780edda0`
 **App root:** `/home/pkjetp/jetpk_app`
