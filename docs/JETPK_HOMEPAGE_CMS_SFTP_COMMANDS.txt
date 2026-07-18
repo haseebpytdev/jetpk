@@ -1,5 +1,8 @@
 ﻿# JetPK Homepage CMS — consolidated SFTP upload list
-# Phase: JETPK-CMS-FINAL-PRE-MERGE-CORRECTIONS (full CMS runtime vs baseline 624f3dd)
+# Phase: JETPK-HOMEPAGE-CMS-MAIN-MERGE-AND-DEPLOYMENT-PREPARATION
+# Main SHA: 0f48c97a1dafe59f5900008d82cb0b43862196b7
+# Merge commit: 0f48c97 (integration e1fef54 into main 624f3dd)
+# Baseline: 624f3ddb26716c5bda893ae6e797b8c1780edda0
 # Generated: 2026-07-18
 # Remote app root: /home/pkjetp/jetpk_app
 # Public web mirror: /home/pkjetp/public_html (theme assets duplicated below)

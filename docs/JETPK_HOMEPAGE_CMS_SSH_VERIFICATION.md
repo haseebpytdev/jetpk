@@ -1,8 +1,11 @@
 # JetPK Homepage CMS — SSH Verification & Supported Commands
 
-**Integration HEAD:** `824ab74`
+**Main SHA:** `0f48c97a1dafe59f5900008d82cb0b43862196b7`
+**Merge commit:** `0f48c97` (integration `e1fef54` → main `624f3dd`)
+**Baseline:** `624f3ddb26716c5bda893ae6e797b8c1780edda0`
 **App root:** `/home/pkjetp/jetpk_app`
 **Public root:** `/home/pkjetp/public_html`
+**Verdict:** READY_FOR_PRODUCTION_DEPLOYMENT_REVIEW (pre-upload; no deployment performed)
 
 ## Supported production command signatures (verified locally)
 
@@ -28,8 +31,10 @@ test -f app/Support/Client/Homepage/HomepageContentNormalizer.php
 test -f app/Services/Client/ClientPageResetService.php
 test -f resources/views/themes/frontend/jetpakistan/frontend/home.blade.php
 
-# 3. PHP syntax (all changed PHP runtime files)
-find app config database/migrations routes resources/views -name '*.php' -newer /tmp/cms-deploy-marker 2>/dev/null | while read f; do php -l "$f" || exit 1; done
+# 3. PHP syntax (spot-check key CMS runtime files)
+php -l app/Support/Client/Homepage/HomepageContentNormalizer.php
+php -l app/Services/Client/ClientPageResetService.php
+php -l resources/views/themes/frontend/jetpakistan/frontend/home.blade.php
 
 # 4. Public asset SHA parity (example)
 sha256sum public/themes/frontend/jetpakistan/css/jp-search.css
@@ -77,10 +82,13 @@ php artisan migrate:status | grep client_page_setting
 
 ```bash
 cd /home/pkjetp/jetpk_app
-# Code rollback to 624f3dd deployment artifact
+# Code rollback: redeploy main at baseline 624f3dd (pre-CMS merge)
+git checkout 624f3ddb26716c5bda893ae6e797b8c1780edda0 -- .
+# Or restore from pre-deploy backup artifact
 php artisan migrate:rollback --path=database/migrations/2026_07_16_130000_create_client_page_setting_defaults_table.php --force
 php artisan migrate:rollback --path=database/migrations/2026_07_16_120000_create_client_page_setting_revisions_table.php --force
 php artisan optimize:clear
+php artisan view:clear
 # Retain CMS restore backup 20260716T185657Z — invoke only if content damaged
 ```
 

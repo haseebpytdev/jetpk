@@ -1,20 +1,20 @@
 ﻿# JetPK Homepage CMS — Exact Runtime Manifest
 
-**Integration HEAD:** d5870cd (pre-final-corrections) | **Baseline:** 624f3dd | **Changed files:** 89
+**Main SHA:** `0f48c97a1dafe59f5900008d82cb0b43862196b7` | **Merge:** `0f48c97` | **Integration merged:** `e1fef54` | **Baseline:** `624f3dd` | **Changed files:** 89
 
-## Summary counts
+## Deployment classification summary
 
-| Class | Count | Meaning |
-|-------|------:|---------|
-| A | 36 | Application runtime (upload) |
-| B | 4 | Public assets (upload; mirror both trees) |
-| C | 2 | Migrations (upload as files; path-scoped migrate) |
-| D | 24 | Tests (repository only) |
-| E | 10 | Docs (repository only) |
-| F | 2 | REPOSITORY_ONLY_LOCAL_TOOLING (do not upload) |
-| G | 4 | CI/scripts config (repository only) |
+| Classification | Count |
+|----------------|------:|
+| APP_RUNTIME | 36 |
+| PUBLIC_RUNTIME_BOTH_TREES | 4 |
+| MIGRATION | 2 |
+| REPOSITORY_ONLY_TEST | 24 |
+| REPOSITORY_ONLY_DOC | 10 |
+| REPOSITORY_ONLY_LOCAL_TOOLING | 2 |
+| REPOSITORY_ONLY_CI | 4 (.gitignore, playwright configs, scripts/test) |
 
-**SFTP upload totals:** 38 application runtime files + 4 public assets (8 mirrored put lines) = 42 unique paths.
+**SFTP upload totals:** 38 application runtime paths (36 APP_RUNTIME + 2 MIGRATION) + 4 public assets (8 mirrored put lines).
 
 ## REPOSITORY_ONLY_LOCAL_TOOLING (Class F — never upload)
 
