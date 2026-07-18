@@ -1,6 +1,6 @@
 ﻿# JetPK Homepage CMS — Exact Runtime Manifest
 
-**Main SHA:** `0f48c97a1dafe59f5900008d82cb0b43862196b7` | **Merge:** `0f48c97` | **Integration merged:** `e1fef54` | **Baseline:** `624f3dd` | **Changed files:** 89
+**Main SHA:** `ea25dd9c6335be1391a63e2e7a1044aea6672f87` | **Merge:** `0f48c97` | **Integration merged:** `e1fef54` | **Baseline:** `624f3dd` | **Changed files:** 89
 
 ## Deployment classification summary
 
