@@ -113,4 +113,30 @@ class ClientProfileResolverTest extends TestCase
         $this->assertFalse($modules['sabre']);
         $this->assertFalse($modules['admin_panel']);
     }
+
+    /**
+     * Root-cause regression (JETPK-CMS-ROOT-CAUSE-ANALYSIS, H2): if OTA_CLIENT_SLUG
+     * is ever unset in production, the default deployment slug must fall back to
+     * 'jetpk', not the retired 'haseeb-master' slug. This was the exact mechanism
+     * flagged as a plausible cause of "publish changed nothing" symptoms.
+     */
+    public function test_default_deployment_slug_falls_back_to_jetpk_when_env_missing(): void
+    {
+        config(['ota_client.slug' => '']);
+
+        $resolver = app(ClientProfileResolver::class);
+
+        $this->assertSame('jetpk', $resolver->defaultDeploymentSlug());
+        $this->assertTrue($resolver->isDefaultDeploymentSlug('jetpk'));
+        $this->assertFalse($resolver->isDefaultDeploymentSlug('haseeb-master'));
+    }
+
+    public function test_default_deployment_slug_respects_configured_env_value(): void
+    {
+        config(['ota_client.slug' => 'jetpk']);
+
+        $resolver = app(ClientProfileResolver::class);
+
+        $this->assertSame('jetpk', $resolver->defaultDeploymentSlug());
+    }
 }

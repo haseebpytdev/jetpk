@@ -1,5 +1,4 @@
 @php
-    use App\Support\Client\ClientPageKeys;
     use App\Support\Client\JetpkHomepageSectionData;
 
     $jpHome = app(JetpkHomepageSectionData::class);
@@ -7,19 +6,13 @@
         return;
     }
 
-    $eyebrow = $jpHome->field('featured_deals.eyebrow', 'Live fares');
-    $title = $jpHome->field('featured_deals.title', 'Featured deals, updated hourly.');
-    $subtitle = $jpHome->field('featured_deals.subtitle', 'Real round-trip prices pulled live from our airline partners.');
+    $eyebrow = $jpHome->field('featured_deals.eyebrow', 'Editorial picks');
+    $title = $jpHome->field('featured_deals.title', 'Featured deals');
+    $subtitle = $jpHome->field('featured_deals.subtitle', 'Hand-picked sample fares for inspiration — prices shown are editorial examples, not live quotes.');
     $ctaText = $jpHome->field('featured_deals.cta_text', '');
     $ctaUrl = $jpHome->field('featured_deals.cta_url', '');
     $cardCount = max(1, min(6, (int) $jpHome->field('featured_deals.card_count', 3)));
-    $source = (string) $jpHome->field('featured_deals.source', 'hybrid');
-
-    $fares = [
-        ['airline' => 'PIA', 'from' => 'KHI', 'to' => 'DXB', 'depart' => '08:40', 'arrive' => '11:15', 'dur' => '2h 35m', 'stops' => 0, 'price' => 96500],
-        ['airline' => 'AirBlue', 'from' => 'LHE', 'to' => 'IST', 'depart' => '14:10', 'arrive' => '20:30', 'dur' => '6h 20m', 'stops' => 1, 'price' => 142300],
-        ['airline' => 'AirSial', 'from' => 'ISB', 'to' => 'JED', 'depart' => '23:55', 'arrive' => '02:45', 'dur' => '2h 50m', 'stops' => 0, 'price' => 118900],
-    ];
+    $fares = $jpHome->featuredDealsForDisplay();
 @endphp
 <section class="section" style="padding-top:0">
   <div class="wrap">
@@ -38,8 +31,5 @@
         <x-jp.fare-card :airline="$f['airline']" :from="$f['from']" :to="$f['to']" :depart="$f['depart']" :arrive="$f['arrive']" :dur="$f['dur']" :stops="$f['stops']" :price="$f['price']" />
       @endforeach
     </div>
-    @if ($source !== 'demo')
-      <p class="jp-muted" style="margin-top:12px;font-size:13px;">Source: {{ str_replace('_', ' ', $source) }} — configure routes in Homepage featured fares.</p>
-    @endif
   </div>
 </section>

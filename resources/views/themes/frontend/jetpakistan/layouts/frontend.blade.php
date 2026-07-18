@@ -14,6 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{{ $documentTitle }}</title>
+@stack('head-meta')
 @stack('head')
 @if($jpFavicon)
 <link rel="icon" href="{{ $jpFavicon }}" sizes="any">
@@ -111,6 +112,8 @@ html[data-theme="day"] {
 <script>document.documentElement.classList.add('js');</script>
 @stack('theme-scripts')
 @stack('scripts')
+@if (! request()->routeIs('home'))
 @include('layouts.partials.mobile-viewport-reconcile')
+@endif
 </body>
 </html>

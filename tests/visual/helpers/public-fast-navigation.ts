@@ -7,10 +7,16 @@ const SEARCH_SHELL_KEYS = new Set(['home', 'flights-search']);
 
 export function publicPageShellLocator(page: Page, pageKey: string) {
   if (SEARCH_SHELL_KEYS.has(pageKey)) {
-    return page.locator('[data-hero-search], main, .ota-main-nav').first();
+    return page
+      .locator('[data-hero-search], [data-jp-search], [data-flight-search-form], main, .ota-main-nav')
+      .first();
   }
   if (pageKey === 'flights-results') {
-    return page.locator('.ota-results-pro, [data-results-root], [data-hero-search], main').first();
+    return page
+      .locator(
+        '.ota-results-pro, [data-results-root], .ota-mobile-results, [data-testid="ota-mobile-results"], [data-hero-search], main',
+      )
+      .first();
   }
   return page.locator('main, [data-hero-search], form, .ota-main-nav').first();
 }
@@ -70,9 +76,11 @@ export async function gotoPublicPage(
           .waitFor({ state: 'visible', timeout: Math.min(8_000, shellTimeout) });
       } else if (pageKey === 'flights-results') {
         await page
-          .locator('.ota-results-pro, [data-results-root], main')
+          .locator(
+            '.ota-results-pro, [data-results-root], .ota-mobile-results, [data-testid="ota-mobile-results"], main',
+          )
           .first()
-          .waitFor({ state: 'visible', timeout: Math.min(8_000, shellTimeout) });
+          .waitFor({ state: 'visible', timeout: Math.min(12_000, shellTimeout) });
       }
       return response;
     } catch (err) {

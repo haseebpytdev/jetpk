@@ -11,6 +11,11 @@
             <label for="support-cta-enabled">Enabled</label>
         </div>
     </div>
+    <div class="jp-field jp-field--inline" style="max-width:160px;">
+        <label class="jp-field__label" for="support-cta-order">Position on page</label>
+        <input id="support-cta-order" type="number" min="2" max="9" class="jp-control" name="content[support_cta][order]" value="{{ data_get($content, 'support_cta.order', '') }}">
+        <p class="jp-field__help">Lower numbers render higher on the page. Leave blank to use the default position.</p>
+    </div>
     <div class="jp-field">
         <label class="jp-field__label" for="support-eyebrow">Eyebrow</label>
         <input id="support-eyebrow" class="jp-control" name="content[support_cta][eyebrow]" value="{{ data_get($content, 'support_cta.eyebrow') }}">

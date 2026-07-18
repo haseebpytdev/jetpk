@@ -67,7 +67,7 @@ return [
     | false = keep desktop layout even under mobile preference or auto mobile UA.
     */
     'mobile_pages' => [
-        'home' => true,
+        'home' => false,
         'flights.results' => true,
         'flights.results.offer' => true,
         'flights.details' => true,

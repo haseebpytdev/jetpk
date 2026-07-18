@@ -3,8 +3,10 @@
 namespace Tests\Unit;
 
 use Illuminate\Support\Facades\Config;
+use PHPUnit\Framework\Attributes\RunClassInSeparateProcess;
 use Tests\TestCase;
 
+#[RunClassInSeparateProcess]
 class Bf7dControlledCertBrandVariantTest extends TestCase
 {
     /**

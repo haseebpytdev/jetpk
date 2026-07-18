@@ -58,6 +58,17 @@ window.JpPassengers = (function () {
     return counts.adults + counts.children + counts.infants;
   }
 
+  function syncCompatSelects(picker) {
+    var panel = getPanel(picker);
+    if (!panel) return;
+    ['adults', 'children', 'infants'].forEach(function (kind) {
+      var compat = panel.querySelector('[data-jp-pax-compat-select="' + kind + '"]');
+      var input = panel.querySelector('[data-jp-pax-input="' + kind + '"]');
+      if (!compat || !input) return;
+      compat.value = String(input.value);
+    });
+  }
+
   function applyCounts(picker, counts) {
     var panel = getPanel(picker);
     if (!panel) return;
@@ -67,8 +78,10 @@ window.JpPassengers = (function () {
       var input = panel.querySelector('[data-jp-pax-input="' + kind + '"]');
       var stepper = panel.querySelector('[data-jp-pax-stepper="' + kind + '"]');
       var countEl = stepper ? stepper.querySelector('[data-jp-pax-count]') : null;
+      var compat = panel.querySelector('[data-jp-pax-compat-select="' + kind + '"]');
       if (input) input.value = String(val);
       if (countEl) countEl.textContent = String(val);
+      if (compat) compat.value = String(val);
     });
   }
 
@@ -296,9 +309,13 @@ window.JpPassengers = (function () {
 
   function closeAllPanels() {
     document.querySelectorAll('[data-jp-pax-panel]').forEach(restorePanelHome);
+    document.querySelectorAll('[data-pax-picker][open]').forEach(function (picker) {
+      picker.removeAttribute('open');
+    });
     if (openPicker) {
       var trigger = openPicker.querySelector('[data-jp-pax-trigger]');
       if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      openPicker.removeAttribute('open');
     }
     openPicker = null;
   }
@@ -315,22 +332,6 @@ window.JpPassengers = (function () {
     panel._jpPaxHome = picker;
     panel._jpPaxPicker = picker;
     picker._jpPaxPanelRef = panel;
-
-    if (isMobileViewport()) {
-      if (panel.parentElement !== document.body) {
-        document.body.appendChild(panel);
-      }
-      panel.style.position = 'fixed';
-      panel.style.left = '16px';
-      panel.style.right = '16px';
-      panel.style.width = 'auto';
-      panel.style.top = 'auto';
-      panel.style.bottom = '16px';
-      panel.style.maxHeight = '70vh';
-      panel.classList.remove('is-flip-above');
-      panel.classList.add('is-open');
-      return;
-    }
 
     if (panel.parentElement !== picker) {
       picker.appendChild(panel);
@@ -366,8 +367,10 @@ window.JpPassengers = (function () {
     normalizeCounts(picker);
     panel.hidden = false;
     trigger.setAttribute('aria-expanded', 'true');
+    picker.setAttribute('open', '');
     openPicker = picker;
     positionPanel(picker);
+    syncCompatSelects(picker);
   }
 
   function showInlineError(picker, message) {
@@ -482,7 +485,23 @@ window.JpPassengers = (function () {
       });
     }
 
+    panelRoot.querySelectorAll('[data-jp-pax-compat-select]').forEach(function (compat) {
+      compat.addEventListener('change', function () {
+        var kind = compat.getAttribute('data-jp-pax-compat-select');
+        if (!kind) return;
+        var stepper = panelRoot.querySelector('[data-jp-pax-stepper="' + kind + '"]');
+        var next = parseInt(compat.value, 10);
+        if (!stepper || !Number.isFinite(next)) return;
+        if (!canSetStepperValue(stepper, next)) {
+          syncCompatSelects(picker);
+          return;
+        }
+        setStepperValue(stepper, next);
+      });
+    });
+
     normalizeCounts(picker);
+    syncCompatSelects(picker);
   }
 
   function bindGlobalListeners() {

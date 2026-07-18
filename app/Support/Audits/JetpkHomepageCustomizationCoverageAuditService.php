@@ -98,7 +98,7 @@ final class JetpkHomepageCustomizationCoverageAuditService
             ['id' => 'support_cta', 'label' => 'Support CTA / pre-footer', 'consumer' => 'themes/frontend/jetpakistan/sections/support-cta.blade.php', 'owner' => 'support_cta', 'panel' => 'support-cta'],
             ['id' => 'footer_promo', 'label' => 'Footer promotional areas', 'consumer' => 'themes/frontend/jetpakistan/partials/footer.blade.php', 'owner' => 'footer page settings', 'panel' => 'footer (separate page)'],
             ['id' => 'trust_chips', 'label' => 'Trust badges below hero', 'consumer' => 'hero trust chips', 'owner' => 'trust_chips', 'panel' => 'trust-chips'],
-            ['id' => 'groups_cta', 'label' => 'Group ticketing CTA', 'consumer' => 'groups section CTA', 'owner' => 'groups', 'panel' => 'groups'],
+            ['id' => 'groups_cta', 'label' => 'Group ticketing CTA', 'consumer' => 'groups section CTA', 'owner' => 'group_cards', 'panel' => 'group-cards'],
         ];
 
         $rows = [];

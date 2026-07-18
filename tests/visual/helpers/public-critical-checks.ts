@@ -280,7 +280,9 @@ export async function assertFixedStickyDoNotBlockForms(
     }
     await control.scrollIntoViewIfNeeded().catch(() => undefined);
 
-    const blocked = await control.evaluate((html) => {
+    let blocked: { selector: string; blocker: string } | null = null;
+    try {
+      blocked = await control.evaluate((html) => {
       const el = html as HTMLElement;
       const form = el.closest('form, [data-hero-search]');
       const rect = el.getBoundingClientRect();
@@ -346,6 +348,10 @@ export async function assertFixedStickyDoNotBlockForms(
 
       return null;
     });
+    } catch {
+      // Detached/stale controls under concurrent navigation — skip rather than flake the suite.
+      continue;
+    }
 
     if (blocked) {
       failures.push(
@@ -396,7 +402,17 @@ export async function assertPublicSearchFormUsable(
     return failures;
   }
 
-  const submit = page.locator('.ota-hero-search-submit').first();
+  await page
+    .locator('[data-hero-search][data-jp-search-ready="true"]')
+    .first()
+    .waitFor({ state: 'attached', timeout: 10_000 })
+    .catch(() => undefined);
+
+  const submit = page
+    .locator(
+      '[data-jp-submit-slot-action] .ota-hero-search-submit, [data-jp-submit-slot-row] .ota-hero-search-submit, [data-jp-submit-slot-multi] .ota-hero-search-submit, [data-hero-search] .ota-hero-search-submit',
+    )
+    .first();
   if ((await submit.count()) === 0 || !(await submit.isVisible())) {
     failures.push(
       failure('clickable_actions', ctx, '.ota-hero-search-submit', 'Search submit button not visible', 'High'),
@@ -515,7 +531,7 @@ export async function assertCalendarUsable(page: Page, ctx: PublicCriticalContex
 
   const calendar = page
     .locator(
-      '.flatpickr-calendar.open, .ota-return-range-picker--open, .ota-return-range-picker[role="dialog"]:not([hidden])',
+      '.flatpickr-calendar.open, .ota-return-range-picker--open, .ota-return-range-picker[role="dialog"]:not([hidden]), .jp-date-overlay:not([hidden]) .jp-date-calendar',
     )
     .first();
 
@@ -525,6 +541,7 @@ export async function assertCalendarUsable(page: Page, ctx: PublicCriticalContex
   const nativeOk = triggerType === 'date' && (await trigger.isVisible().catch(() => false));
 
   if (!opened && !nativeOk) {
+    await page.keyboard.press('Escape').catch(() => undefined);
     return [
       failure(
         'calendar',

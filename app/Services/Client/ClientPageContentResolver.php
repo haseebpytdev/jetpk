@@ -4,10 +4,16 @@ namespace App\Services\Client;
 
 use App\Enums\ClientPageSettingStatus;
 use App\Models\ClientPageSetting;
+use App\Models\ClientPageSettingRevision;
 use App\Models\ClientProfile;
+use App\Services\Homepage\JetpkHomepageContentValidator;
+use App\Support\Client\ClientPageKeys;
+use App\Support\Client\Homepage\HomepageContentNormalizer;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Resolves published (or admin draft-preview) client page content for JetPK public pages.
@@ -19,6 +25,8 @@ final class ClientPageContentResolver
     public function __construct(
         private readonly CurrentClientContext $clientContext,
         private readonly ClientPageAssetService $assetService,
+        private readonly JetpkHomepageContentValidator $homepageValidator,
+        private readonly ClientPageSettingRevisionService $revisions,
     ) {}
 
     public function isDraftPreview(string $pageKey): bool
@@ -124,7 +132,13 @@ final class ClientPageContentResolver
                 ->first();
         }
 
-        return is_array($row?->content_json) ? $row->content_json : [];
+        $content = is_array($row?->content_json) ? $row->content_json : [];
+
+        if ($pageKey === ClientPageKeys::HOME && $content !== []) {
+            $content = app(HomepageContentNormalizer::class)->normalize($content)['content'];
+        }
+
+        return $content;
     }
 
     public function assetUrl(string $pageKey, string $assetKey, ?string $default = null): ?string
@@ -177,20 +191,27 @@ final class ClientPageContentResolver
             throw new \RuntimeException('Page builder tables are not migrated yet.');
         }
 
+        $attributes = [
+            'client_profile_id' => $profile->id,
+            'page_key' => $pageKey,
+            'status' => ClientPageSettingStatus::Draft,
+        ];
+
+        $existing = ClientPageSetting::query()->where($attributes)->first();
+
         return ClientPageSetting::query()->updateOrCreate(
-            [
-                'client_profile_id' => $profile->id,
-                'page_key' => $pageKey,
-                'status' => ClientPageSettingStatus::Draft,
-            ],
+            $attributes,
             [
                 'content_json' => $content,
                 'updated_by' => $userId,
-                'created_by' => $userId,
+                'created_by' => $existing?->created_by ?? $userId,
             ],
         );
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function publish(ClientProfile $profile, string $pageKey, ?int $userId = null): ?ClientPageSetting
     {
         if (! Schema::hasTable('client_page_settings')) {
@@ -207,25 +228,57 @@ final class ClientPageContentResolver
             return null;
         }
 
-        $published = ClientPageSetting::query()->updateOrCreate(
-            [
-                'client_profile_id' => $profile->id,
-                'page_key' => $pageKey,
-                'status' => ClientPageSettingStatus::Published,
-            ],
-            [
-                'title' => $draft->title,
-                'seo_title' => $draft->seo_title,
-                'seo_description' => $draft->seo_description,
-                'content_json' => $draft->content_json,
-                'settings_json' => $draft->settings_json,
-                'published_at' => now(),
-                'updated_by' => $userId,
-                'created_by' => $draft->created_by ?? $userId,
-            ],
-        );
+        $validatedContent = is_array($draft->content_json)
+            ? $this->homepageValidator->validateAndNormalize($pageKey, $draft->content_json)
+            : [];
 
-        return $published;
+        return $this->promoteToPublished(
+            $profile,
+            $pageKey,
+            $draft,
+            $validatedContent,
+            $userId,
+            ClientPageSettingRevision::REASON_BEFORE_PUBLISH,
+        );
+    }
+
+    public function promoteToPublished(
+        ClientProfile $profile,
+        string $pageKey,
+        ClientPageSetting $source,
+        array $validatedContent,
+        ?int $userId,
+        string $revisionReason,
+    ): ClientPageSetting {
+        return DB::transaction(function () use ($profile, $pageKey, $source, $validatedContent, $userId, $revisionReason): ClientPageSetting {
+            $existingPublished = ClientPageSetting::query()
+                ->where('client_profile_id', $profile->id)
+                ->where('page_key', $pageKey)
+                ->where('status', ClientPageSettingStatus::Published)
+                ->first();
+
+            if ($existingPublished !== null) {
+                $this->revisions->snapshot($existingPublished, $revisionReason, $userId);
+            }
+
+            return ClientPageSetting::query()->updateOrCreate(
+                [
+                    'client_profile_id' => $profile->id,
+                    'page_key' => $pageKey,
+                    'status' => ClientPageSettingStatus::Published,
+                ],
+                [
+                    'title' => $source->title,
+                    'seo_title' => $source->seo_title,
+                    'seo_description' => $source->seo_description,
+                    'content_json' => $validatedContent,
+                    'settings_json' => $source->settings_json,
+                    'published_at' => now(),
+                    'updated_by' => $userId,
+                    'created_by' => $source->created_by ?? $userId,
+                ],
+            );
+        });
     }
 
     /**
@@ -252,6 +305,7 @@ final class ClientPageContentResolver
                 ['label' => 'Lowest PKR fares'],
             ],
             'feature_board' => [
+                'enabled' => '1',
                 'items' => [
                     ['value' => '400+', 'label' => 'Airlines'],
                     ['value' => 'Best', 'label' => 'PKR fares'],
@@ -323,14 +377,33 @@ final class ClientPageContentResolver
             ],
             'trust' => [
                 'enabled' => '1',
-                'title' => 'Why travellers stay',
+                'eyebrow' => 'Why travellers stay',
+                'title' => 'Booking that respects your time and money.',
+                'subtitle' => 'No hidden markups, no chasing call centres. Every part of the journey is built to be clear and quick.',
                 'cards' => [],
             ],
             'group_cards' => [
                 'enabled' => '1',
                 'eyebrow' => 'Curated journeys',
                 'title' => 'Group travel packages.',
+                'subtitle' => 'Charter blocks, hajj/umrah groups, and corporate series — managed inventory with manual approval.',
+                'cta_text' => 'Browse group inventory',
+                'cta_url' => '/group-ticketing',
                 'items' => [],
+            ],
+            'featured_deals' => [
+                'enabled' => '1',
+                'eyebrow' => 'Editorial picks',
+                'title' => 'Featured deals',
+                'subtitle' => 'Hand-picked sample fares for inspiration — prices shown are editorial examples, not live quotes.',
+                'cta_text' => '',
+                'cta_url' => '',
+                'card_count' => 3,
+                'items' => [
+                    ['airline' => 'PIA', 'from' => 'KHI', 'to' => 'DXB', 'depart' => '08:40', 'arrive' => '11:15', 'dur' => '2h 35m', 'stops' => 0, 'price' => 96500, 'enabled' => '1', 'sort_order' => 0],
+                    ['airline' => 'AirBlue', 'from' => 'LHE', 'to' => 'IST', 'depart' => '14:10', 'arrive' => '20:30', 'dur' => '6h 20m', 'stops' => 1, 'price' => 142300, 'enabled' => '1', 'sort_order' => 1],
+                    ['airline' => 'AirSial', 'from' => 'ISB', 'to' => 'JED', 'depart' => '23:55', 'arrive' => '02:45', 'dur' => '2h 50m', 'stops' => 0, 'price' => 118900, 'enabled' => '1', 'sort_order' => 2],
+                ],
             ],
         ];
     }

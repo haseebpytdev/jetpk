@@ -13,6 +13,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::patch('/{pageKey}', [ClientPageSettingsController::class, 'update'])->name('update');
         Route::post('/home/refresh-fares', [ClientPageSettingsController::class, 'refreshHomeRouteFares'])->name('home.refresh-fares');
         Route::post('/{pageKey}/publish', [ClientPageSettingsController::class, 'publish'])->name('publish');
+        Route::post('/{pageKey}/save-as-default', [ClientPageSettingsController::class, 'saveCurrentAsDefault'])->name('save-as-default');
+        Route::post('/{pageKey}/reset/preview', [ClientPageSettingsController::class, 'previewReset'])->name('reset.preview');
+        Route::post('/{pageKey}/reset/draft', [ClientPageSettingsController::class, 'resetDraft'])->name('reset.draft');
+        Route::post('/{pageKey}/reset/publish', [ClientPageSettingsController::class, 'resetAndPublish'])->name('reset.publish');
         Route::post('/{pageKey}/preview', [ClientPageSettingsController::class, 'beginPreview'])->name('preview.begin');
         Route::post('/{pageKey}/assets', [ClientPageSettingsController::class, 'storeAsset'])->name('assets.store');
         Route::delete('/{pageKey}/assets/{asset}', [ClientPageSettingsController::class, 'destroyAsset'])->name('assets.destroy');

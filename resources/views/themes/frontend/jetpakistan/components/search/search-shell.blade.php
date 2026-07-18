@@ -25,6 +25,7 @@
     class="search hseq hseq-4"
     id="jp-flight-search"
     role="search"
+    data-hero-search
     data-jp-search
     data-jp-search-ready="false"
     data-min-date="{{ $minDate }}"
