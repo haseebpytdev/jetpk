@@ -7,7 +7,7 @@ namespace App\Support\Client\Homepage;
  *
  * Contract:
  * - Hero text fields store integer percentages (75–140); 100 = design baseline.
- * - Search UI scale stores integer percentages (80–115); 100 maps directly to CSS scale 1.0.
+ * - Search UI scale stores integer percentages (80–115); 100 = compact baseline (0.90× legacy tokens).
  */
 final class JetpkHomepageHeroSizing
 {
@@ -22,6 +22,9 @@ final class JetpkHomepageHeroSizing
     public const SEARCH_UI_MAX = 115;
 
     public const SEARCH_UI_DEFAULT = 100;
+
+    /** Compact search baseline as a fraction of legacy full-size tokens. */
+    public const SEARCH_UI_COMPACT_BASELINE = 0.90;
 
     /**
      * @return list<string>
@@ -88,7 +91,7 @@ final class JetpkHomepageHeroSizing
 
     public static function searchUiScaleDecimal(mixed $percent): float
     {
-        return round(self::normalizeSearchUiPercent($percent) / 100, 4);
+        return round(self::SEARCH_UI_COMPACT_BASELINE * (self::normalizeSearchUiPercent($percent) / 100), 4);
     }
 
     /**
