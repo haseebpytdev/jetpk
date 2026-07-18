@@ -1,30 +1,49 @@
 @extends('themes.frontend.jetpakistan.layouts.frontend')
 
-@section('title', 'Lookup your booking')
+@php
+    use App\Services\Client\ClientPageRenderer;
+    /** @var array<string, mixed> $content */
+    /** @var array<string, mixed> $seo */
+    $renderer = app(ClientPageRenderer::class);
+    $hero = is_array($content['hero'] ?? null) ? $content['hero'] : [];
+    $instructions = is_array($content['instructions'] ?? null) ? $content['instructions'] : [];
+    $cta = is_array($content['cta'] ?? null) ? $content['cta'] : [];
+@endphp
+
+@section('title', $seo['title'] ?? 'Lookup your booking')
 
 @section('content')
 <section class="jp-page jp-page--lookup" aria-labelledby="jp-lookup-heading">
   <div class="wrap jp-page-wrap">
     <x-jp.page-hero
       id="jp-lookup-heading"
-      kicker="Manage booking"
-      title="Lookup your booking"
-      description="Access your booking request, documents, payment status, and travel updates securely. We verify your details before showing sensitive information."
+      :kicker="(string) ($hero['kicker'] ?? '')"
+      :title="(string) ($hero['title'] ?? '')"
+      :description="(string) ($hero['description'] ?? '')"
     />
 
     <div class="jp-page-grid jp-page-grid--2">
       <div class="jp-page-stack">
-        <x-jp.card title="How lookup works">
-          <p>Enter the booking reference from your confirmation together with the email address used when you booked. If everything matches our records, we send you a secure link to view your trip.</p>
-          <p class="jp-field-hint">Your reference usually looks like a short code or alphanumeric ID from your confirmation email or receipt.</p>
-        </x-jp.card>
+        @if (($instructions['how_it_works'] ?? '') !== '')
+          <x-jp.card title="How lookup works">
+            <p>{{ $instructions['how_it_works'] }}</p>
+            @if (($instructions['hint'] ?? '') !== '')
+              <p class="jp-field-hint">{{ $instructions['hint'] }}</p>
+            @endif
+          </x-jp.card>
+        @endif
 
-        <x-jp.card title="What you need">
-          <ul class="jp-list">
-            <li><strong>Booking reference</strong> — from your confirmation</li>
-            <li><strong>Email address</strong> — must match what we have on file</li>
-          </ul>
-        </x-jp.card>
+        @if (($instructions['requirements'] ?? '') !== '')
+          <x-jp.card title="What you need">
+            <ul class="jp-list">
+              @foreach (preg_split('/\r\n|\r|\n/', (string) $instructions['requirements']) ?: [] as $line)
+                @if (trim($line) !== '')
+                  <li>{{ trim($line) }}</li>
+                @endif
+              @endforeach
+            </ul>
+          </x-jp.card>
+        @endif
       </div>
 
       <x-jp.card title="Enter your details">
@@ -43,16 +62,17 @@
             <input id="lookup_email" class="jp-input" name="email" type="email" value="{{ old('email') }}" autocomplete="email" required>
           </x-jp.form-group>
 
-          <p class="jp-field-hint">For privacy, access links are only sent when your details match the booking.</p>
+          @if (($content['help_text'] ?? '') !== '')
+            <p class="jp-field-hint">{{ is_array($content['help_text']) ? ($content['help_text']['text'] ?? '') : $content['help_text'] }}</p>
+          @endif
 
           <x-turnstile />
           <x-jp.button type="submit" variant="primary" block>Lookup booking</x-jp.button>
         </form>
 
-        <nav class="jp-form-foot" aria-label="Booking help">
-          <a href="{{ client_route('support') }}">Need help? Contact support</a>
-          <a href="{{ client_route('home') }}#jp-flight-search">Back to flight search</a>
-        </nav>
+        @if (($cta['label'] ?? '') !== '')
+          <p class="jp-form-foot"><a href="{{ $renderer->resolveDestination((string) ($cta['url'] ?? '')) }}">{{ $cta['label'] }}</a></p>
+        @endif
       </x-jp.card>
     </div>
   </div>

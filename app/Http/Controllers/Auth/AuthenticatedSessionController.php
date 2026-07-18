@@ -9,7 +9,8 @@ use App\Http\Middleware\PersistClientPreviewContext;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use App\Services\Auth\LoginOtpService;
-use App\Services\Client\ClientRedirectResolver;
+use App\Services\Client\ClientPageRenderer;
+use App\Support\Client\ClientPageKeys;
 use App\Services\Communication\AuthSecurityEmailNotificationService;
 use App\Services\Security\SecurityEventLogger;
 use App\Support\Auth\ClientLoginOtpGate;
@@ -28,6 +29,7 @@ class AuthenticatedSessionController extends Controller
         protected AuthSecurityEmailNotificationService $authSecurityEmailNotificationService,
         protected ClientRedirectResolver $clientRedirectResolver,
         protected LoginOtpService $loginOtpService,
+        protected ClientPageRenderer $pageRenderer,
     ) {}
 
     /**
@@ -37,7 +39,7 @@ class AuthenticatedSessionController extends Controller
     {
         CheckoutReturnIntent::primeSessionFromQuery($request);
 
-        return view(client_view('auth.login', 'frontend'));
+        return view(client_view('auth.login', 'frontend'), $this->pageRenderer->viewModel(ClientPageKeys::LOGIN));
     }
 
     /**

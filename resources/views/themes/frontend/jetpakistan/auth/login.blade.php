@@ -1,11 +1,17 @@
 @extends('themes.frontend.jetpakistan.layouts.auth')
 
-@section('title', 'Log in')
+@section('title', $seo['title'] ?? 'Log in')
+
+@php
+    $hero = is_array($content['hero'] ?? null) ? $content['hero'] : [];
+@endphp
 
 @push('auth_form')
     <header class="jp-auth-form-head">
-        <h2 class="jp-auth-form-title">Log in</h2>
-        <p class="jp-auth-form-lead">Sign in to manage bookings, e-tickets, and travel updates.</p>
+        <h2 class="jp-auth-form-title">{{ $hero['title'] ?? 'Log in' }}</h2>
+        @if (($hero['subtitle'] ?? '') !== '')
+            <p class="jp-auth-form-lead">{{ $hero['subtitle'] }}</p>
+        @endif
     </header>
 
     @if (\App\Support\Auth\CheckoutReturnIntent::hasGroupBookingIntent(request()))
@@ -70,26 +76,14 @@
             <p class="jp-field-error" data-jp-field-error @if(! $errors->has('password')) hidden @endif>{{ $errors->first('password') }}</p>
         </x-jp.form-group>
 
-        <div class="jp-auth-row">
-            <label class="jp-auth-remember" for="remember">
-                <input id="remember" type="checkbox" name="remember">
+        <div class="jp-form-row">
+            <label class="jp-checkbox">
+                <input type="checkbox" name="remember" @checked(old('remember'))>
                 <span>Remember me</span>
             </label>
-            @if (Route::has('password.request'))
-                <a class="jp-auth-link" href="{{ client_route('password.request') }}">Forgot password?</a>
-            @endif
+            <a href="{{ route('password.request') }}" class="jp-link">Forgot password?</a>
         </div>
 
-        <x-jp.button type="submit" variant="primary" block data-jp-loading-label="Logging in…">Log in</x-jp.button>
+        <x-jp.button type="submit" variant="primary" block>Log in</x-jp.button>
     </form>
-
-    <nav class="jp-auth-links" aria-label="Account options">
-        <a href="{{ client_route('register') }}">Create account</a>
-        <a href="{{ client_route('agent.register') }}">Register as travel agent</a>
-        <a href="{{ client_route('home') }}">Back to home</a>
-    </nav>
-@endpush
-
-@push('scripts')
-    <script src="{{ rtrim(client_theme()->frontendThemeUrl(), '/') }}/js/login.js?v={{ 49 }}" defer></script>
 @endpush

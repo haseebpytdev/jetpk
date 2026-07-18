@@ -10,7 +10,8 @@ use App\Mail\AdminNewCustomerSignupMail;
 use App\Mail\CustomerWelcomeMail;
 use App\Models\Agency;
 use App\Models\User;
-use App\Services\Client\ClientRedirectResolver;
+use App\Services\Client\ClientPageRenderer;
+use App\Support\Client\ClientPageKeys;
 use App\Support\Auth\CheckoutReturnIntent;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
@@ -27,6 +28,7 @@ class RegisteredUserController extends Controller
 {
     public function __construct(
         protected ClientRedirectResolver $clientRedirectResolver,
+        protected ClientPageRenderer $pageRenderer,
     ) {}
 
     /**
@@ -41,9 +43,9 @@ class RegisteredUserController extends Controller
             $question = $this->storeSecurityChallenge($request);
         }
 
-        $viewData = [
+        $viewData = array_merge($this->pageRenderer->viewModel(ClientPageKeys::REGISTER), [
             'securityQuestion' => $question,
-        ];
+        ]);
 
         return view(client_view('auth.register', 'frontend'), $viewData);
     }

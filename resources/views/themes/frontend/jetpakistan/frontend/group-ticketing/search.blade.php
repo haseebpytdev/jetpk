@@ -24,9 +24,10 @@
     <section class="jp-page jp-group-search-page" id="gt-search-root" data-results-url="{{ client_route('group-ticketing.search.results') }}">
         <div class="wrap jp-page-wrap">
             <header class="jp-page-hero">
-                <p class="jp-page-hero__kicker">Group travel</p>
-                <h1 class="jp-page-hero__title">Search group departures</h1>
-                <p class="jp-page-hero__desc">Find block-seat group inventory by airline, sector, and travel dates.</p>
+                @php $groupHero = is_array($groupPageContent['hero'] ?? null) ? $groupPageContent['hero'] : []; @endphp
+                <p class="jp-page-hero__kicker">{{ $groupHero['kicker'] ?? '' }}</p>
+                <h1 class="jp-page-hero__title">{{ $groupHero['title'] ?? '' }}</h1>
+                <p class="jp-page-hero__desc">{{ $groupHero['description'] ?? '' }}</p>
             </header>
 
             <div

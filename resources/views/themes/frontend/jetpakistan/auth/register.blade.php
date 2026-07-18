@@ -1,16 +1,19 @@
 @extends('themes.frontend.jetpakistan.layouts.auth')
 
-@section('title', 'Sign up')
+@section('title', $seo['title'] ?? 'Sign up')
 
 @php
+    $hero = is_array($content['hero'] ?? null) ? $content['hero'] : [];
     $countryCodes = ['+92' => 'Pakistan (+92)', '+971' => 'UAE (+971)', '+966' => 'Saudi Arabia (+966)', '+44' => 'UK (+44)', '+1' => 'US/Canada (+1)'];
     $selectedCountryCode = old('mobile_country_code', '+92');
 @endphp
 
 @push('auth_form')
     <header class="jp-auth-form-head">
-        <h2 class="jp-auth-form-title">Create account</h2>
-        <p class="jp-auth-form-lead">Book flights, track requests, and manage travel with JetPakistan.</p>
+        <h2 class="jp-auth-form-title">{{ $hero['title'] ?? 'Create account' }}</h2>
+        @if (($hero['subtitle'] ?? '') !== '')
+            <p class="jp-auth-form-lead">{{ $hero['subtitle'] }}</p>
+        @endif
     </header>
 
     @if ($errors->has('social'))

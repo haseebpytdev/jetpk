@@ -8,7 +8,8 @@ use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingDocument;
-use App\Services\Customer\GuestBookingAccessService;
+use App\Services\Client\ClientPageRenderer;
+use App\Support\Client\ClientPageKeys;
 use App\Services\Payments\BookingPaymentService;
 use App\Support\Bookings\BookingDetailTimelinePresenter;
 use App\Support\Bookings\BookingItineraryOverviewPresenter;
@@ -29,12 +30,13 @@ class GuestBookingLookupController extends Controller
     public function __construct(
         protected GuestBookingAccessService $guestAccessService,
         protected BookingPaymentService $paymentService,
+        protected ClientPageRenderer $pageRenderer,
     ) {}
 
     public function showLookupForm(Request $request): View
     {
 
-        return view(client_view('frontend.booking.lookup', 'frontend'));
+        return view(client_view('frontend.booking.lookup', 'frontend'), $this->pageRenderer->viewModel(ClientPageKeys::BOOKING_LOOKUP));
     }
 
     public function lookup(Request $request): RedirectResponse

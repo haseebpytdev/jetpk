@@ -9,7 +9,8 @@ use App\Http\Requests\Frontend\StoreAgentApplicationRequest;
 use App\Models\Agency;
 use App\Models\AgentApplication;
 use App\Models\User;
-use App\Services\Communication\OtaNotificationService;
+use App\Services\Client\ClientPageRenderer;
+use App\Support\Client\ClientPageKeys;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,12 +21,13 @@ class AgentRegistrationController extends Controller
 {
     public function __construct(
         protected OtaNotificationService $notificationService,
+        protected ClientPageRenderer $pageRenderer,
     ) {}
 
     public function landing(Request $request): View
     {
 
-        return view(client_view('frontend.agent-registration.landing', 'frontend'));
+        return view(client_view('frontend.agent-registration.landing', 'frontend'), $this->pageRenderer->viewModel(ClientPageKeys::AGENT_REGISTRATION));
     }
 
     public function create(Request $request): View
