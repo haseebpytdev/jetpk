@@ -228,6 +228,62 @@ html[data-theme="day"] .toggle .ico-sun{display:block}
 .jp-site-header .jp-header-support{display:flex;align-items:center;gap:var(--jp-space-xs);padding:var(--jp-space-xs) var(--jp-space-md);border-radius:var(--r-pill);border:1px solid var(--line);font-size:var(--fs-12);font-weight:600;color:var(--text-2);white-space:nowrap;flex-shrink:0}
 .jp-site-header .jp-header-theme-toggle{width:var(--jp-toggle-w);height:var(--jp-toggle-h);border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--surface-2)}
 
+/* Homepage hero top-state header readability (unscrolled, transparent header) */
+.jp-home .jp-site-header:not(.scrolled){
+  --jp-header-top-text:var(--text);
+  --jp-header-top-muted:color-mix(in srgb,var(--text) 84%,transparent);
+  --jp-header-top-shadow:0 1px 2px rgba(7,15,24,.58),0 0 10px rgba(7,15,24,.34);
+  --jp-header-top-pill-bg:rgba(7,15,24,.44);
+  --jp-header-top-pill-border:rgba(241,246,249,.24);
+}
+html[data-theme="day"] .jp-home .jp-site-header:not(.scrolled){
+  --jp-header-top-text:#0B1D2A;
+  --jp-header-top-muted:rgba(11,29,42,.82);
+  --jp-header-top-shadow:0 1px 2px rgba(255,255,255,.88),0 0 10px rgba(255,255,255,.58);
+  --jp-header-top-pill-bg:rgba(255,255,255,.76);
+  --jp-header-top-pill-border:rgba(11,29,42,.16);
+}
+.jp-home .jp-site-header:not(.scrolled) .nav a{
+  color:var(--jp-header-top-muted);
+  text-shadow:var(--jp-header-top-shadow);
+}
+.jp-home .jp-site-header:not(.scrolled) .nav a:hover,
+.jp-home .jp-site-header:not(.scrolled) .nav a.active{
+  color:var(--jp-header-top-text);
+}
+.jp-home .jp-site-header:not(.scrolled) .jp-header-signin{
+  color:var(--jp-header-top-muted);
+  text-shadow:var(--jp-header-top-shadow);
+}
+.jp-home .jp-site-header:not(.scrolled) .jp-header-signin:hover{color:var(--jp-header-top-text)}
+.jp-home .jp-site-header:not(.scrolled) .jp-header-support{
+  color:var(--jp-header-top-muted);
+  background:var(--jp-header-top-pill-bg);
+  border-color:var(--jp-header-top-pill-border);
+  backdrop-filter:blur(10px) saturate(130%);
+  -webkit-backdrop-filter:blur(10px) saturate(130%);
+  text-shadow:var(--jp-header-top-shadow);
+}
+.jp-home .jp-site-header:not(.scrolled) .jp-header-support .mono{color:var(--jp-header-top-text)}
+.jp-home .jp-site-header:not(.scrolled) .jp-header-theme-toggle,
+.jp-home .jp-site-header:not(.scrolled) .hamburger{
+  background:var(--jp-header-top-pill-bg);
+  border-color:var(--jp-header-top-pill-border);
+  backdrop-filter:blur(10px) saturate(130%);
+  -webkit-backdrop-filter:blur(10px) saturate(130%);
+}
+.jp-home .jp-site-header:not(.scrolled) .logo,
+.jp-home .jp-site-header:not(.scrolled) .logo .logo__wordmark{
+  color:var(--jp-header-top-text);
+  text-shadow:var(--jp-header-top-shadow);
+}
+.jp-home .jp-site-header:not(.scrolled) .logo img{
+  filter:drop-shadow(0 1px 2px rgba(7,15,24,.48)) drop-shadow(0 0 8px rgba(7,15,24,.28));
+}
+html[data-theme="day"] .jp-home .jp-site-header:not(.scrolled) .logo img{
+  filter:drop-shadow(0 1px 2px rgba(255,255,255,.92)) drop-shadow(0 0 8px rgba(255,255,255,.68));
+}
+
 /* ============================================================
    HERO
    ============================================================ */
@@ -301,10 +357,22 @@ html[data-theme="day"] .hero.hero--has-image .hero-inner .eyebrow{
 .hero h1 .gold{color:var(--gold)}
 .jp-home .hero h1 .gold{
   color:#63B32E;
-  text-shadow:0 0 18px rgba(99,179,46,.55),0 0 36px rgba(99,179,46,.35),0 2px 10px rgba(7,15,24,.42);
+  -webkit-text-stroke:2px #0B1D2A;
+  paint-order:stroke fill;
+  text-shadow:
+    -1px -1px 0 #0B1D2A,1px -1px 0 #0B1D2A,-1px 1px 0 #0B1D2A,1px 1px 0 #0B1D2A,
+    0 -1px 0 #0B1D2A,0 1px 0 #0B1D2A,-1px 0 0 #0B1D2A,1px 0 0 #0B1D2A;
 }
-html[data-theme="day"] .jp-home .hero.hero--has-image .hero-inner h1 .gold{
-  text-shadow:0 0 20px rgba(99,179,46,.68),0 0 42px rgba(99,179,46,.42),0 1px 6px rgba(255,255,255,.78);
+html[data-theme="day"] .jp-home .hero h1 .gold,
+html[data-theme="night"] .jp-home .hero h1 .gold,
+html[data-theme="day"] .jp-home .hero.hero--has-image .hero-inner h1 .gold,
+html[data-theme="night"] .jp-home .hero.hero--has-image .hero-inner h1 .gold{
+  color:#63B32E;
+  -webkit-text-stroke:2px #0B1D2A;
+  paint-order:stroke fill;
+  text-shadow:
+    -1px -1px 0 #0B1D2A,1px -1px 0 #0B1D2A,-1px 1px 0 #0B1D2A,1px 1px 0 #0B1D2A,
+    0 -1px 0 #0B1D2A,0 1px 0 #0B1D2A,-1px 0 0 #0B1D2A,1px 0 0 #0B1D2A;
 }
 .hero .sub{font-size:var(--jp-fs-sub);color:var(--text-2);max-width:min(600px,90vw);margin:0 auto;line-height:var(--jp-lh-body)}
 
