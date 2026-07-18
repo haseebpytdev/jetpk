@@ -1,3 +1,17 @@
+# JetPakistan Canonical Responsive UI + CMS Correction
+# Baseline SHA: 5f97dc6c512d59ac2106c2bfa9854da2dc1210c8
+# Merge commit: 1a64a0ce017cc77400c90025adadd6d1a8e79f65
+# Runtime source SHA: a9bc7826f4beb14deeaef29e17bbf4bfd195a737
+# Runbook content SHA: __RUNBOOK_CONTENT_SHA__
+# Runbook metadata stamp SHA: __RUNBOOK_METADATA_STAMP_SHA__
+# Local root: C:/Users/khadi/ota-jetpk
+# Remote app root: /home/pkjetp/jetpk_app
+# Runtime uploads: 50
+# Public mirrored uploads: 0
+# Keep the SFTP session open.
+# Do not add a trailing bye.
+
+lcd C:/Users/khadi/ota-jetpk
 put app/Http/Controllers/Agent/AccountingLedgerController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AccountingLedgerController.php
 put app/Http/Controllers/Agent/AgentAgencyController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentAgencyController.php
 put app/Http/Controllers/Agent/AgentBookingController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentBookingController.php
