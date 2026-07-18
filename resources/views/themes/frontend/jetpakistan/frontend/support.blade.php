@@ -1,80 +1,71 @@
 @extends('themes.frontend.jetpakistan.layouts.frontend')
 
 @php
-    use App\Support\Client\ClientPageKeys;
-
-    $supportEmail = client_page_content(ClientPageKeys::SUPPORT, 'contact.email', 'ota@jetpakistan.pk');
-    $supportPhone = client_page_content(ClientPageKeys::SUPPORT, 'contact.phone', '0311 1222427');
-    $supportWhatsapp = client_page_content(ClientPageKeys::SUPPORT, 'contact.whatsapp', '923111222427');
-    $supportWebsite = client_page_content(ClientPageKeys::SUPPORT, 'contact.website', 'https://www.jetpakistan.com');
-    $supportFormHelper = client_page_content(ClientPageKeys::SUPPORT, 'form.helper_text', 'Tell us what you need and our team will respond shortly.');
-    $supportKicker = client_page_content(ClientPageKeys::SUPPORT, 'hero.kicker', 'Support & contact');
-    $supportTitle = client_page_content(ClientPageKeys::SUPPORT, 'hero.title', 'Flight booking help, 24/7');
-    $supportDescription = client_page_content(ClientPageKeys::SUPPORT, 'hero.description', 'Get assistance with online ticket booking, fare questions, payments, e-tickets, changes, and online check-in.');
+    use App\Services\Client\ClientPageRenderer;
+    /** @var array<string, mixed> $content */
+    /** @var array<string, mixed> $seo */
+    /** @var array<string, mixed> $contact */
+    $renderer = app(ClientPageRenderer::class);
+    $hero = is_array($content['hero'] ?? null) ? $content['hero'] : [];
+    $departments = $renderer->enabledItems($content['department_cards']['items'] ?? []);
+    $form = is_array($content['form'] ?? null) ? $content['form'] : [];
 @endphp
 
-@section('title', 'Support & contact - JetPakistan')
+@section('title', $seo['title'] ?? 'Support & contact')
 
 @section('content')
 <section class="jp-page jp-page--support" aria-labelledby="jp-support-heading">
   <div class="wrap jp-page-wrap">
     <x-jp.page-hero
       id="jp-support-heading"
-      :kicker="$supportKicker"
-      :title="$supportTitle"
-      :description="$supportDescription"
+      :kicker="(string) ($hero['kicker'] ?? '')"
+      :title="(string) ($hero['title'] ?? '')"
+      :description="(string) ($hero['description'] ?? '')"
     />
 
-    <div class="jp-page-grid jp-page-grid--3 jp-support-categories">
-      <x-jp.card title="Booking assistance">
-        <p>New bookings, itinerary changes, and passenger detail updates.</p>
-      </x-jp.card>
-      <x-jp.card title="Payments & confirmation">
-        <p>Payment proof, booking confirmation, and invoice questions.</p>
-      </x-jp.card>
-      <x-jp.card title="Online check-in">
-        <p>Guidance for airline check-in and boarding pass access.</p>
-      </x-jp.card>
-    </div>
+    @if (($content['department_cards']['enabled'] ?? '1') !== '0' && $departments !== [])
+      <div class="jp-page-grid jp-page-grid--3 jp-support-categories">
+        @foreach ($departments as $card)
+          <x-jp.card :title="(string) ($card['title'] ?? '')">
+            <p>{{ $card['body'] ?? '' }}</p>
+          </x-jp.card>
+        @endforeach
+      </div>
+    @endif
 
     <div class="jp-page-grid jp-page-grid--2">
       <div class="jp-page-stack">
         <x-jp.card title="Contact JetPakistan">
           <ul class="jp-list jp-list--contact">
-            @if ($supportPhone !== '')
-              <li><strong>Phone:</strong> <a href="tel:+923111222427">{{ $supportPhone }}</a></li>
+            @if ($contact['phone'] !== '')
+              <li><strong>Phone:</strong> <a href="tel:{{ $contact['phone_e164'] ?: preg_replace('/\D+/', '', $contact['phone']) }}">{{ $contact['phone'] }}</a></li>
             @endif
-            @if ($supportWhatsapp !== '')
-              <li><strong>WhatsApp:</strong> <a href="https://wa.me/{{ $supportWhatsapp }}" target="_blank" rel="noopener">Chat on WhatsApp</a></li>
+            @if ($contact['whatsapp'] !== '')
+              <li><strong>WhatsApp:</strong> <a href="https://wa.me/{{ $contact['whatsapp'] }}" target="_blank" rel="noopener">Chat on WhatsApp</a></li>
             @endif
-            @if ($supportEmail !== '')
-              <li><strong>Email:</strong> <a href="mailto:{{ $supportEmail }}">{{ $supportEmail }}</a></li>
+            @if ($contact['email'] !== '')
+              <li><strong>Email:</strong> <a href="mailto:{{ $contact['email'] }}">{{ $contact['email'] }}</a></li>
             @endif
-            @if ($supportWebsite !== '')
-              <li><strong>Website:</strong> <a href="{{ $supportWebsite }}" target="_blank" rel="noopener">{{ parse_url($supportWebsite, PHP_URL_HOST) ?: $supportWebsite }}</a></li>
+            @if ($contact['website'] !== '')
+              <li><strong>Website:</strong> <a href="{{ $contact['website'] }}" target="_blank" rel="noopener">{{ parse_url($contact['website'], PHP_URL_HOST) ?: $contact['website'] }}</a></li>
             @endif
           </ul>
         </x-jp.card>
 
-        <x-jp.card title="FAQ">
-          <details class="jp-faq">
-            <summary>How do I book a flight on JetPakistan?</summary>
-            <p>Search your route on the homepage, select dates and travellers, then complete checkout with your passenger details.</p>
-          </details>
-          <details class="jp-faq">
-            <summary>Can I book domestic and international flights?</summary>
-            <p>Yes. JetPakistan supports both domestic Pakistan routes and international destinations from major Pakistani cities.</p>
-          </details>
-          <details class="jp-faq">
-            <summary>How do I get help after booking?</summary>
-            <p>Contact us by phone, WhatsApp, or email with your booking reference. You can also use Manage booking on the website.</p>
-          </details>
-        </x-jp.card>
+        @php $faqTeaser = is_array($content['faq_teaser'] ?? null) ? $content['faq_teaser'] : []; @endphp
+        @if (($faqTeaser['enabled'] ?? '0') === '1' && ($faqTeaser['title'] ?? '') !== '')
+          <x-jp.card :title="(string) $faqTeaser['title']">
+            <p>{{ $faqTeaser['body'] ?? '' }}</p>
+            @if (($faqTeaser['link_label'] ?? '') !== '')
+              <p><a href="{{ $renderer->resolveDestination((string) ($faqTeaser['link_url'] ?? 'route:faq')) }}">{{ $faqTeaser['link_label'] }}</a></p>
+            @endif
+          </x-jp.card>
+        @endif
       </div>
 
       <x-jp.card title="Support request">
-        @if ($supportFormHelper !== '')
-          <p class="jp-card__lead">{{ $supportFormHelper }}</p>
+        @if (($form['helper_text'] ?? '') !== '')
+          <p class="jp-card__lead">{{ $form['helper_text'] }}</p>
         @endif
 
         @if ($errors->getBag('supportRequest')->any())

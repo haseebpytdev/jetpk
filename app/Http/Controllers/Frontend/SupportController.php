@@ -6,7 +6,8 @@ use App\Enums\SupportTicketCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Support\StorePublicSupportTicketRequest;
 use App\Models\Agency;
-use App\Services\Agencies\AboutUsContentPresenter;
+use App\Services\Client\ClientPageRenderer;
+use App\Support\Client\ClientPageKeys;
 use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Support\SupportTicketService;
 use App\Support\Branding\BrandDisplayResolver;
@@ -19,16 +20,16 @@ class SupportController extends Controller
     public function __construct(
         protected SupportTicketService $tickets,
         protected AgencyBrandingService $brandingService,
-        protected AboutUsContentPresenter $aboutUsPresenter,
+        protected ClientPageRenderer $pageRenderer,
     ) {}
 
     public function support(Request $request): View
     {
-        $viewData = [
-            'categories' => SupportTicketCategory::cases(),
-        ];
+        $vm = $this->pageRenderer->viewModel(ClientPageKeys::SUPPORT);
 
-        return view(client_view('frontend.support', 'frontend'), $viewData);
+        return view(client_view('frontend.support', 'frontend'), array_merge($vm, [
+            'categories' => SupportTicketCategory::cases(),
+        ]));
     }
 
     public function store(StorePublicSupportTicketRequest $request): RedirectResponse
@@ -82,10 +83,7 @@ class SupportController extends Controller
 
     public function about(Request $request): View
     {
-        $viewData = $this->publicStaticPageBrandData();
-        $viewData['aboutUs'] = $this->resolveAboutUsPresentation();
-
-        return view(client_view('frontend.about', 'frontend'), $viewData);
+        return view(client_view('frontend.about', 'frontend'), $this->pageRenderer->viewModel(ClientPageKeys::ABOUT));
     }
 
     /**
@@ -93,19 +91,7 @@ class SupportController extends Controller
      */
     protected function resolveAboutUsPresentation(): array
     {
-        $slug = (string) config('ota.default_agency_slug', '');
-        if ($slug === '') {
-            return $this->aboutUsPresenter->presentForPublic(null);
-        }
-
-        $agency = Agency::query()->where('slug', $slug)->first();
-        if ($agency === null) {
-            return $this->aboutUsPresenter->presentForPublic(null);
-        }
-
-        $settings = $this->brandingService->getSettingsForAgency($agency);
-
-        return $this->aboutUsPresenter->presentForPublic($settings);
+        return ['has_custom' => false, 'mode' => null, 'body_html' => ''];
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\AgentRegistrationController;
 use App\Http\Controllers\Frontend\AirportSearchController;
 use App\Http\Controllers\Frontend\BookingCheckoutPromoController;
 use App\Http\Controllers\Frontend\BookingController;
+use App\Http\Controllers\Frontend\ClientManagedPageController;
 use App\Http\Controllers\Frontend\CmsPageController;
 use App\Http\Controllers\Frontend\FlightController;
 use App\Http\Controllers\Frontend\GroupTicketingBookingController;
@@ -43,6 +44,11 @@ Route::middleware('platform.module:support_system')->group(function (): void {
     Route::get('/support/submitted', [SupportController::class, 'submitted'])->name('support.submitted');
 });
 Route::get('/about-us', [SupportController::class, 'about'])->name('about');
+Route::get('/faq', [ClientManagedPageController::class, 'faq'])->name('faq');
+Route::get('/terms', [ClientManagedPageController::class, 'terms'])->name('terms');
+Route::get('/privacy', [ClientManagedPageController::class, 'privacy'])->name('privacy');
+Route::redirect('/pages/terms-and-conditions', '/terms');
+Route::redirect('/pages/privacy-policy', '/privacy');
 Route::get('/pages/{slug}', [CmsPageController::class, 'show'])->name('pages.show');
 Route::permanentRedirect('/contact', '/about-us');
 Route::middleware('platform.module:agent_applications')->group(function (): void {
@@ -151,6 +157,10 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/{slug}', [ClientManagedPageController::class, 'customShow'])
+    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')
+    ->name('client.custom-page.show');
 
 if (app()->environment('testing')) {
     Route::get('/_test/ui-version', static function () {
