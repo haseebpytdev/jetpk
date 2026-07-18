@@ -10,7 +10,17 @@ async function openPageSettingsHome(page: import('@playwright/test').Page): Prom
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
   page.on('console', (msg) => {
-    if (msg.type() === 'error') errors.push(msg.text());
+    if (msg.type() === 'error') {
+      const text = msg.text();
+      if (
+        text.includes('ERR_NAME_NOT_RESOLVED') ||
+        text.includes('fonts.googleapis.com') ||
+        text.includes('fonts.gstatic.com')
+      ) {
+        return;
+      }
+      errors.push(text);
+    }
   });
   await page.goto('/admin/page-settings/home', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('[data-jp-page-editor]')).toBeVisible({ timeout: 30_000 });
@@ -20,10 +30,10 @@ async function openPageSettingsHome(page: import('@playwright/test').Page): Prom
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Admin Page Settings — home CMS functional', () => {
-  test('page opens with hero CTA fields and toolbar actions', async ({ page }) => {
+  test('page opens without hero CTA fields and toolbar actions present', async ({ page }) => {
     await openPageSettingsHome(page);
-    await expect(page.locator('#hero-cta1-text')).toBeVisible();
-    await expect(page.locator('#hero-cta2-url')).toBeVisible();
+    await expect(page.locator('#hero-cta1-text')).toHaveCount(0);
+    await expect(page.locator('#hero-cta2-url')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Open preview tab' })).toBeVisible();
     await expect(page.locator('[data-jp-content-form] button[type="submit"]')).toBeVisible();

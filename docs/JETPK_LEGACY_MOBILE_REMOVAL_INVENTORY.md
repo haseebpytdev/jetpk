@@ -1,6 +1,6 @@
 # JETPK Legacy Mobile-App Removal Inventory
 
-Branch: `fix/jetpk-canonical-responsive-ui-cms`  
+Branch: `fix/jetpk-canonical-responsive-ui-cms`
 Baseline: `5f97dc6c512d59ac2106c2bfa9854da2dc1210c8`
 
 ## Classification legend
