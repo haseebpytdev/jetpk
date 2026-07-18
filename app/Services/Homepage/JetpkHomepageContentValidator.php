@@ -4,6 +4,7 @@ namespace App\Services\Homepage;
 
 use App\Models\Airport;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -36,6 +37,10 @@ final class JetpkHomepageContentValidator
 
         if (isset($content['support_cta']) && is_array($content['support_cta'])) {
             $content['support_cta'] = $this->normalizeSupportCta($content['support_cta']);
+        }
+
+        if (isset($content['hero']) && is_array($content['hero'])) {
+            $content['hero'] = JetpkHomepageHeroSizing::normalizeHeroSection($content['hero']);
         }
 
         return $content;

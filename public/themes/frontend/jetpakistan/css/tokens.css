@@ -75,18 +75,39 @@
   /* --jp-input-height: 44→48→50 | old 48px search btn */
   --jp-input-height:clamp(44px,calc(2.875rem + 0.15625vw),50px);
   /* Canonical search-shell control tokens (Home + Results share) */
-  --jp-search-control-height:var(--jp-input-height);
-  --jp-search-control-radius:var(--r-input);
+  --jp-search-ui-scale:1;
   --jp-search-control-bg:var(--surface);
   --jp-search-control-border:var(--line);
-  --jp-search-field-padding-y:var(--jp-space-sm);
-  --jp-search-field-padding-x:var(--jp-space-md);
-  --jp-search-control-icon-size:var(--jp-icon-md);
-  --jp-search-label-size:var(--jp-fs-xs);
-  --jp-search-value-size:var(--jp-fs-body);
-  --jp-search-control-inner-min-height:clamp(26px,calc(1.625rem + 0.078125vw),30px);
-  --jp-search-btn-padding-y:var(--jp-space-md);
-  --jp-search-btn-padding-x:var(--jp-space-2xl);
+  --jp-search-field-padding-y-base:var(--jp-space-sm);
+  --jp-search-field-padding-x-base:var(--jp-space-md);
+  --jp-search-field-padding-y:calc(var(--jp-search-field-padding-y-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-field-padding-x:calc(var(--jp-search-field-padding-x-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-control-icon-size-base:var(--jp-icon-md);
+  --jp-search-control-icon-size:clamp(13px,calc(var(--jp-search-control-icon-size-base) * var(--jp-search-ui-scale, 1)),19px);
+  --jp-search-label-size-base:var(--jp-fs-xs);
+  --jp-search-label-size:clamp(10px,calc(var(--jp-search-label-size-base) * var(--jp-search-ui-scale, 1)),14px);
+  --jp-search-value-size-base:var(--jp-fs-body);
+  --jp-search-value-size:clamp(14px,calc(var(--jp-search-value-size-base) * var(--jp-search-ui-scale, 1)),18px);
+  --jp-search-control-inner-min-height-base:clamp(26px,calc(1.625rem + 0.078125vw),30px);
+  --jp-search-control-inner-min-height:max(22px,calc(var(--jp-search-control-inner-min-height-base) * var(--jp-search-ui-scale, 1)));
+  --jp-search-field-height-base:clamp(44px,calc(2.875rem + 0.15625vw),50px);
+  --jp-search-control-height:max(44px,calc(var(--jp-search-field-height-base) * var(--jp-search-ui-scale, 1)));
+  --jp-search-control-radius-base:var(--r-input);
+  --jp-search-control-radius:calc(var(--jp-search-control-radius-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-gap-base:var(--jp-space-sm);
+  --jp-search-gap:calc(var(--jp-search-gap-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-card-padding-base:var(--jp-space-lg);
+  --jp-search-card-padding:calc(var(--jp-search-card-padding-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-card-radius-base:var(--r-feat);
+  --jp-search-card-radius:calc(var(--jp-search-card-radius-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-btn-padding-y-base:var(--jp-space-md);
+  --jp-search-btn-padding-x-base:var(--jp-space-2xl);
+  --jp-search-btn-padding-y:calc(var(--jp-search-btn-padding-y-base) * var(--jp-search-ui-scale, 1));
+  --jp-search-btn-padding-x:calc(var(--jp-search-btn-padding-x-base) * var(--jp-search-ui-scale, 1));
+  --jp-swap-size-base:clamp(38px,calc(2.375rem + 0.078125vw),42px);
+  --jp-swap-size:max(34px,calc(var(--jp-swap-size-base) * var(--jp-search-ui-scale, 1)));
+  --jp-check-box-base:clamp(18px,calc(1.125rem + 0.078125vw),22px);
+  --jp-check-box:max(16px,calc(var(--jp-check-box-base) * var(--jp-search-ui-scale, 1)));
   /* --jp-icon-sm: 13→14→15 | old 14px */
   --jp-icon-sm:clamp(13px,calc(0.8125rem + 0.078125vw),15px);
   /* --jp-icon-md: 15→16→17 | old 16px */
@@ -101,10 +122,6 @@
   --jp-toggle-h:clamp(28px,calc(1.75rem + 0.078125vw),32px);
   /* --jp-toggle-knob: 22→24→26 | old 24px */
   --jp-toggle-knob:clamp(22px,calc(1.375rem + 0.078125vw),26px);
-  /* --jp-swap-size: 38→40→42 | old 40px */
-  --jp-swap-size:clamp(38px,calc(2.375rem + 0.078125vw),42px);
-  /* --jp-check-box: 18→20→22 | old 20px */
-  --jp-check-box:clamp(18px,calc(1.125rem + 0.078125vw),22px);
   /* --jp-card-pad: 23→24→25 | old 24px */
   --jp-card-pad:clamp(23px,calc(1.4375rem + 0.078125vw),25px);
   /* --jp-section-pad-y: 95→96→97 | old 96px */

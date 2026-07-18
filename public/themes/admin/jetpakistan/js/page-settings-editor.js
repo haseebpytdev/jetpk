@@ -269,4 +269,15 @@
       event.returnValue = '';
     });
   }
+
+  root.querySelectorAll('[data-jp-hero-size-control]').forEach(function (control) {
+    var slider = control.querySelector('[data-jp-hero-size-slider]');
+    var valueEl = control.querySelector('[data-jp-hero-size-value]');
+    if (!slider || !valueEl) return;
+    var sync = function () {
+      valueEl.textContent = slider.value + '%';
+    };
+    slider.addEventListener('input', sync);
+    sync();
+  });
 })();

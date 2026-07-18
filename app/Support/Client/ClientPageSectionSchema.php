@@ -14,7 +14,7 @@ final class ClientPageSectionSchema
     {
         return match ($pageKey) {
             ClientPageKeys::HOME => [
-                ['key' => 'hero', 'label' => 'Hero', 'fields' => ['eyebrow', 'headline', 'headline_highlight', 'subtitle', 'search_visible']],
+                ['key' => 'hero', 'label' => 'Hero', 'fields' => ['eyebrow', 'headline', 'headline_highlight', 'subtitle', 'search_visible', 'eyebrow_size', 'headline_size', 'highlight_size', 'subtitle_size', 'search_ui_scale']],
                 ['key' => 'trust_chips', 'label' => 'Trust badges', 'fields' => ['label']],
                 ['key' => 'feature_board', 'label' => 'Stats strip', 'fields' => ['items']],
                 ['key' => 'why_book', 'label' => 'Why JetPakistan', 'fields' => ['enabled', 'eyebrow', 'title', 'subtitle', 'cards']],

@@ -7,10 +7,12 @@ use App\Models\ClientPageAsset;
 use App\Models\ClientPageSetting;
 use App\Models\ClientProfile;
 use App\Services\Client\ClientPageAssetService;
+use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Services\Homepage\JetpkHomepageRouteFareRefreshService;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\ClientPageMediaSchema;
 use App\Support\Client\ClientPublicWebrootPath;
+use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
 use App\Support\Client\JetpkHomepageFareDisplay;
 use Illuminate\Support\Facades\Storage;
 
@@ -138,6 +140,7 @@ final class JetpkHomepageContentAuditService
             }
         }
 
+        $checks = array_merge($checks, $this->auditHeroSizing($content));
         $checks = array_merge($checks, $this->leakageChecks($content));
 
         $failCount = count(array_filter($checks, static fn (array $c) => ($c['status'] ?? '') === 'fail'));
@@ -425,14 +428,58 @@ final class JetpkHomepageContentAuditService
      */
     private function destinationImageUrl(ClientProfile $profile, array $item, int $index): ?string
     {
+        $candidates = [];
+
         $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
         if ($assetKey !== '') {
-            return $this->assetService->urlFor($profile, ClientPageKeys::HOME, $assetKey);
+            $candidates[] = $assetKey;
         }
 
-        $legacyKey = 'destination_'.($index + 1);
+        $itemId = trim((string) ($item['id'] ?? ''));
+        if ($itemId !== '') {
+            $candidates[] = JetpkHomepageAssetService::destinationAssetKey($itemId);
+            $candidates[] = 'destination_'.$itemId;
+        }
 
-        return $this->assetService->urlFor($profile, ClientPageKeys::HOME, $legacyKey);
+        $candidates[] = 'destination_'.($index + 1);
+
+        foreach (array_unique($candidates) as $key) {
+            $url = $this->assetService->urlFor($profile, ClientPageKeys::HOME, $key);
+            if ($url !== null) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $content
+     * @return list<array<string, mixed>>
+     */
+    private function auditHeroSizing(array $content): array
+    {
+        $checks = [];
+        $hero = is_array($content['hero'] ?? null) ? $content['hero'] : [];
+
+        foreach (JetpkHomepageHeroSizing::heroTextFieldKeys() as $field) {
+            if (! array_key_exists($field, $hero)) {
+                continue;
+            }
+            $normalized = JetpkHomepageHeroSizing::normalizeHeroTextPercent($hero[$field]);
+            if ((string) $hero[$field] !== (string) $normalized && $hero[$field] !== '') {
+                $checks[] = $this->warn('hero_size_clamped', "hero.{$field} clamped to {$normalized}%");
+            }
+        }
+
+        if (array_key_exists('search_ui_scale', $hero)) {
+            $normalized = JetpkHomepageHeroSizing::normalizeSearchUiPercent($hero['search_ui_scale']);
+            if ((string) $hero['search_ui_scale'] !== (string) $normalized && $hero['search_ui_scale'] !== '') {
+                $checks[] = $this->warn('search_ui_scale_clamped', "hero.search_ui_scale clamped to {$normalized}%");
+            }
+        }
+
+        return $checks;
     }
 
     /**

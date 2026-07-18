@@ -1,4 +1,6 @@
 @php
+    use App\Services\Homepage\JetpkHomepageAssetService;
+
     $destItems = collect(data_get($content, 'destinations.items', []))->values();
     if ($destItems->count() < 4) {
         $destItems = $destItems->pad(4, []);
@@ -48,7 +50,7 @@
             @php
                 $item = is_array($item) ? $item : [];
                 $destId = data_get($item, 'id') ?: 'dest-'.$i;
-                $assetKey = data_get($item, 'image_asset_key') ?: 'destination_'.$destId;
+                $assetKey = data_get($item, 'image_asset_key') ?: JetpkHomepageAssetService::destinationAssetKey($destId);
                 $existingAsset = $assets->firstWhere('asset_key', $assetKey) ?? $assets->firstWhere('asset_key', 'destination_'.($i + 1));
             @endphp
             <div class="jp-repeatable-card" data-jp-repeatable-row data-index="{{ $i }}" data-item-id="{{ $destId }}">

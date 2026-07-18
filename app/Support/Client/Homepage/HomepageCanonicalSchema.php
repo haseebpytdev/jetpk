@@ -128,6 +128,11 @@ final class HomepageCanonicalSchema
                 self::field('hero.headline_highlight', 'Highlighted line', 'string', default: 'one honest fare.', emptyBehavior: 'hide'),
                 self::field('hero.subtitle', 'Subtitle', 'text', default: 'Compare 400+ airlines...', emptyBehavior: 'hide'),
                 self::field('hero.search_visible', 'Show flight search on hero', 'bool_string', default: '1'),
+                self::field('hero.eyebrow_size', 'Hero eyebrow size', 'int', default: '100', validation: 'min:75,max:140', note: 'Percentage scale; 100 = responsive baseline.'),
+                self::field('hero.headline_size', 'Hero headline size', 'int', default: '100', validation: 'min:75,max:140'),
+                self::field('hero.highlight_size', 'Hero highlighted line size', 'int', default: '100', validation: 'min:75,max:140'),
+                self::field('hero.subtitle_size', 'Hero subtitle size', 'int', default: '100', validation: 'min:75,max:140'),
+                self::field('hero.search_ui_scale', 'Search box size', 'int', default: '100', validation: 'min:80,max:115', note: 'Percentage of compact search baseline (100 = 0.90× legacy tokens).'),
                 self::field('trust_chips', 'Trust badges (top-level key, rendered inside hero)', 'repeating_scalar', repeating: ['item_fields' => ['label'], 'fixed_count' => 4], note: 'Lives at the top level, not hero.trust_chips — kept as-is; renaming would be a breaking migration for no functional gain.'),
             ],
 

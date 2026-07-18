@@ -298,13 +298,13 @@ final class ClientPageContentResolver
     public function defaultHomeContent(): array
     {
         return [
-            'hero' => [
+            'hero' => \App\Support\Client\Homepage\JetpkHomepageHeroSizing::defaultHeroSizingFields([
                 'eyebrow' => 'Now boarding · Pakistan',
                 'headline' => 'Every flight from Pakistan,',
                 'headline_highlight' => 'one honest fare.',
                 'subtitle' => 'Compare 400+ airlines, pay in rupees, and get your e-ticket in seconds. The price you see is the price you pay — no surprises at checkout.',
                 'search_visible' => '1',
-            ],
+            ]),
             'trust_chips' => [
                 ['label' => 'IATA accredited'],
                 ['label' => 'PCAA licensed'],

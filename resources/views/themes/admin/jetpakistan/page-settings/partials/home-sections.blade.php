@@ -30,6 +30,66 @@
         <input type="checkbox" id="hero-search-visible" name="content[hero][search_visible]" value="1" @checked(data_get($content, 'hero.search_visible', '1') == '1')>
         <label class="jp-field__label" for="hero-search-visible">Show flight search on homepage hero</label>
     </div>
+
+    <div class="jp-card__subsection" style="margin-top:var(--jp-space-lg,1.25rem);">
+        <h3 class="jp-card__subtitle">Hero sizing</h3>
+        <p class="jp-field__help">Percentage scale where 100% is the responsive design baseline. Changes appear in the live preview after save.</p>
+        @php
+            use App\Support\Client\Homepage\JetpkHomepageHeroSizing as HeroSizing;
+            $heroSizingFields = [
+                ['key' => 'eyebrow_size', 'id' => 'hero-eyebrow-size', 'label' => 'Hero eyebrow size', 'default' => HeroSizing::HERO_TEXT_DEFAULT],
+                ['key' => 'headline_size', 'id' => 'hero-headline-size', 'label' => 'Hero headline size', 'default' => HeroSizing::HERO_TEXT_DEFAULT],
+                ['key' => 'highlight_size', 'id' => 'hero-highlight-size', 'label' => 'Hero highlighted line size', 'default' => HeroSizing::HERO_TEXT_DEFAULT],
+                ['key' => 'subtitle_size', 'id' => 'hero-subtitle-size', 'label' => 'Hero subtitle size', 'default' => HeroSizing::HERO_TEXT_DEFAULT],
+            ];
+        @endphp
+        @foreach ($heroSizingFields as $field)
+            @php
+                $current = (int) HeroSizing::normalizeHeroTextPercent(data_get($content, 'hero.'.$field['key'], $field['default']));
+            @endphp
+            <div class="jp-field" data-jp-hero-size-control data-default="{{ $field['default'] }}">
+                <div class="jp-between" style="align-items:center;gap:var(--jp-space-sm,0.75rem);">
+                    <label class="jp-field__label" for="{{ $field['id'] }}">{{ $field['label'] }}</label>
+                    <output class="jp-muted" for="{{ $field['id'] }}" data-jp-hero-size-value>{{ $current }}%</output>
+                </div>
+                <input
+                    type="range"
+                    class="jp-control"
+                    id="{{ $field['id'] }}"
+                    name="content[hero][{{ $field['key'] }}]"
+                    min="{{ HeroSizing::HERO_TEXT_MIN }}"
+                    max="{{ HeroSizing::HERO_TEXT_MAX }}"
+                    step="1"
+                    value="{{ $current }}"
+                    data-jp-hero-size-slider
+                >
+                <p class="jp-field__help">{{ HeroSizing::HERO_TEXT_MIN }}%–{{ HeroSizing::HERO_TEXT_MAX }}% · default {{ $field['default'] }}%</p>
+            </div>
+        @endforeach
+    </div>
+
+    <div class="jp-card__subsection" style="margin-top:var(--jp-space-lg,1.25rem);">
+        <h3 class="jp-card__subtitle">Search interface sizing</h3>
+        @php $searchUiScale = (int) HeroSizing::normalizeSearchUiPercent(data_get($content, 'hero.search_ui_scale', HeroSizing::SEARCH_UI_DEFAULT)); @endphp
+        <div class="jp-field" data-jp-hero-size-control data-default="{{ HeroSizing::SEARCH_UI_DEFAULT }}">
+            <div class="jp-between" style="align-items:center;gap:var(--jp-space-sm,0.75rem);">
+                <label class="jp-field__label" for="hero-search-ui-scale">Search box size</label>
+                <output class="jp-muted" for="hero-search-ui-scale" data-jp-hero-size-value>{{ $searchUiScale }}%</output>
+            </div>
+            <input
+                type="range"
+                class="jp-control"
+                id="hero-search-ui-scale"
+                name="content[hero][search_ui_scale]"
+                min="{{ HeroSizing::SEARCH_UI_MIN }}"
+                max="{{ HeroSizing::SEARCH_UI_MAX }}"
+                step="1"
+                value="{{ $searchUiScale }}"
+                data-jp-hero-size-slider
+            >
+            <p class="jp-field__help">{{ HeroSizing::SEARCH_UI_MIN }}%–{{ HeroSizing::SEARCH_UI_MAX }}% · 100% = compact baseline (legacy tokens × {{ HeroSizing::SEARCH_UI_COMPACT_BASELINE }})</p>
+        </div>
+    </div>
 </div>
 
 {{-- Trust badges --}}

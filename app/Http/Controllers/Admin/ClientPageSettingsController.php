@@ -468,7 +468,7 @@ class ClientPageSettingsController extends Controller
             }
 
             if ($request->boolean('destination_remove.'.$itemId)) {
-                $assetKey = (string) ($item['image_asset_key'] ?? 'destination_'.$itemId);
+                $assetKey = (string) ($item['image_asset_key'] ?? JetpkHomepageAssetService::destinationAssetKey($itemId));
                 $existing = ClientPageAsset::query()
                     ->where('client_profile_id', $profile->id)
                     ->where('page_key', ClientPageKeys::HOME)

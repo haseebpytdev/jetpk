@@ -3,6 +3,8 @@
 namespace App\Support\Client;
 
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\Homepage\JetpkHomepageAssetService;
+use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
 use Illuminate\Support\Str;
 
 /**
@@ -37,6 +39,20 @@ final class JetpkHomepageSectionData
     public function assetUrl(string $assetKey, ?string $default = null): ?string
     {
         return $this->resolver->assetUrl(ClientPageKeys::HOME, $assetKey, $default);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function heroLayoutCssVariables(): array
+    {
+        $defaults = $this->defaults();
+        $hero = $this->field('hero', data_get($defaults, 'hero', []));
+        if (! is_array($hero)) {
+            $hero = [];
+        }
+
+        return JetpkHomepageHeroSizing::cssVariablesFromHero($hero);
     }
 
     /**
@@ -284,17 +300,26 @@ final class JetpkHomepageSectionData
      */
     private function destinationImageUrl(array $item, int $index): string
     {
+        $candidates = [];
+
         $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
         if ($assetKey !== '') {
-            $url = $this->assetUrl($assetKey);
+            $candidates[] = $assetKey;
+        }
+
+        $itemId = trim((string) ($item['id'] ?? ''));
+        if ($itemId !== '') {
+            $candidates[] = JetpkHomepageAssetService::destinationAssetKey($itemId);
+            $candidates[] = 'destination_'.$itemId;
+        }
+
+        $candidates[] = 'destination_'.($index + 1);
+
+        foreach (array_unique($candidates) as $key) {
+            $url = $this->assetUrl($key);
             if ($url !== null) {
                 return $url;
             }
-        }
-
-        $legacy = $this->assetUrl('destination_'.($index + 1));
-        if ($legacy !== null) {
-            return $legacy;
         }
 
         $fallback = (string) config('jetpk_homepage.destination_fallback_image', '');

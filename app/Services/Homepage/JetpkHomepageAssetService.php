@@ -26,6 +26,13 @@ final class JetpkHomepageAssetService
         private readonly ClientPageAssetPublicationService $publicationService,
     ) {}
 
+    public static function destinationAssetKey(string $itemId): string
+    {
+        $slug = Str::slug($itemId, '_');
+
+        return 'destination_'.($slug !== '' ? $slug : 'item');
+    }
+
     public function storeDestinationImage(
         ClientProfile $profile,
         string $itemId,
@@ -35,7 +42,7 @@ final class JetpkHomepageAssetService
     ): ClientPageAsset {
         return $this->storeScopedImage(
             $profile,
-            'destination_'.$this->safeItemKey($itemId),
+            self::destinationAssetKey($itemId),
             $file,
             (string) config('jetpk_homepage.destination_storage_prefix', 'jetpk/homepage/popular-destinations'),
             $userId,

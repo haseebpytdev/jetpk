@@ -34,6 +34,22 @@
 <link rel="stylesheet" href="{{ rtrim(client_theme()->frontendThemeUrl(), '/') }}/css/jp-search.css?v={{ $jpSearchAssetVersion }}">
 @endpush
 
+@php
+    use App\Support\Client\JetpkHomepageSectionData;
+
+    $jpHomeSizing = app(JetpkHomepageSectionData::class);
+    $jpHeroLayoutCss = $jpHomeSizing->heroLayoutCssVariables();
+@endphp
+@push('head')
+<style>
+.jp-home {
+@foreach ($jpHeroLayoutCss as $cssVar => $cssValue)
+  {{ $cssVar }}: {{ $cssValue }};
+@endforeach
+}
+</style>
+@endpush
+
 @section('content')
   @include('themes.frontend.jetpakistan.sections.hero')
   @foreach (($homepageOrderedSections ?? []) as $jpSection)
