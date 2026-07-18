@@ -10,10 +10,10 @@ Runtime source SHA:
 a9bc7826f4beb14deeaef29e17bbf4bfd195a737
 
 Runbook content SHA:
-__RUNBOOK_CONTENT_SHA__
+725d6a470393ac45b4dfbbff6ca65a06c90214e5
 
 Runbook metadata stamp SHA:
-__RUNBOOK_METADATA_STAMP_SHA__
+35ff22098ced63507c78dfa03b5c0ce32a8fd52b
 
 This runbook deploys runtime source `a9bc7826f4beb14deeaef29e17bbf4bfd195a737` only. Documentation-only commits on `main` after that SHA do not change application runtime.
 
