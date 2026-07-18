@@ -238,8 +238,18 @@ final class JetpkHomepageContentAuditService
             && $resolvedUrl !== null
             && ! str_contains($resolvedUrl, 'v=');
 
+        $renderContractOk = $this->supportCtaRenderContractOk(
+            $published,
+            $assetKey,
+            $resolvedUrl,
+            $storageExists,
+            $publicHttpExpected,
+        );
+
         $status = 'pass';
-        if ($asset === null) {
+        if ($assetKey === 'support_cta_background' && ! $renderContractOk) {
+            $status = 'fail';
+        } elseif ($asset === null) {
             $status = 'pass';
         } elseif ($asset->path === '') {
             $status = 'fail';
@@ -247,11 +257,6 @@ final class JetpkHomepageContentAuditService
             $status = 'fail';
         } elseif (! $publicHttpExpected) {
             $status = 'fail';
-        } elseif ($assetKey === 'support_cta_background' && $this->isTruthy(data_get($published, 'support_cta.enabled', '1'))) {
-            $mode = (string) data_get($published, 'support_cta.background_mode', 'gradient');
-            if ($mode === 'gradient') {
-                $status = 'fail';
-            }
         }
 
         return [
@@ -266,8 +271,37 @@ final class JetpkHomepageContentAuditService
             'draft_published_match_status' => $draftPublishedMatch,
             'stale_cache_risk' => $staleCacheRisk,
             'draft_only' => false,
+            'render_contract_ok' => $renderContractOk,
             'status' => $status,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $published
+     */
+    private function supportCtaRenderContractOk(
+        array $published,
+        string $assetKey,
+        ?string $resolvedUrl,
+        bool $storageExists,
+        bool $publicHttpExpected,
+    ): bool {
+        if ($assetKey !== 'support_cta_background') {
+            return true;
+        }
+
+        if (! $this->isTruthy(data_get($published, 'support_cta.enabled', '1'))) {
+            return true;
+        }
+
+        $mode = (string) data_get($published, 'support_cta.background_mode', 'gradient');
+        $expectsUploadedMedia = in_array($mode, ['uploaded', 'uploaded_overlay'], true);
+
+        if ($expectsUploadedMedia) {
+            return $resolvedUrl !== null && $storageExists && $publicHttpExpected;
+        }
+
+        return $resolvedUrl === null;
     }
 
     /**
@@ -344,6 +378,7 @@ final class JetpkHomepageContentAuditService
             'draft_published_match_status='.($slotReport['draft_published_match_status'] ?? 'unknown'),
             'stale_cache_risk='.(($slotReport['stale_cache_risk'] ?? false) ? 'true' : 'false'),
             'draft_only='.(($slotReport['draft_only'] ?? false) ? 'true' : 'false'),
+            'render_contract_ok='.(($slotReport['render_contract_ok'] ?? true) ? 'true' : 'false'),
         ];
 
         return implode(' ', $parts);

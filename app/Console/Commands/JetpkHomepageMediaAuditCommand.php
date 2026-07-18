@@ -45,6 +45,7 @@ class JetpkHomepageMediaAuditCommand extends Command
                 'public_http_expected',
                 'draft_only',
                 'stale_cache_risk',
+                'render_contract_ok',
             ] as $key) {
                 if (! array_key_exists($key, $slot)) {
                     continue;

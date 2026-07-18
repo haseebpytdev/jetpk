@@ -1,6 +1,6 @@
 @php
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpAssetVersion = 53; // JETPK-HOMEPAGE-HEADER-HERO-POLISH — hero top-state header + title outline
+    $jpAssetVersion = 54; // JETPK-SUPPORT-CTA-CSS-BACKGROUND — uploaded image layer contract
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
     $pageTitle = trim($__env->yieldContent('title'));
