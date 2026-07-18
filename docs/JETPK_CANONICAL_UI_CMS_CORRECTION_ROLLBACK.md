@@ -12,8 +12,8 @@ a9bc7826f4beb14deeaef29e17bbf4bfd195a737
 Runbook content SHA:
 725d6a470393ac45b4dfbbff6ca65a06c90214e5
 
-Runbook metadata stamp SHA:
-a287d9399d04f23a67d697b1d967eda3b0e4b6ec
+Runbook reference SHA:
+ae880169ed331de2aaff2a40f68afc1ef5b9999a
 
 Use this rollback only when the pre-deployment backup from the SSH runbook completed successfully.
 
@@ -22,6 +22,7 @@ Use this rollback only when the pre-deployment backup from the SSH runbook compl
 - Extracting the archive restores the pre-deployment `jetpk_app` and `public_html` trees.
 - Deleted legacy mobile files are recreated from the archive.
 - Overwritten runtime files return to their pre-deployment versions.
+- Paths classified `NEW_FILE` in the pre-deployment upload-target presence manifest are removed before archive extraction, so rollback is exact when SFTP introduced files that did not exist before deployment (for example `AgentAgencyController.php`).
 - `.env` is restored separately from its dedicated backup.
 - `vendor` remains unchanged because Composer dependencies are unchanged.
 - No database rollback is required.
@@ -35,16 +36,24 @@ BACKUP_DIR="/home/pkjetp/deploy_backups"
 ARCHIVE=$(cat "${BACKUP_DIR}/JETPK_CANONICAL_UI_LATEST_BACKUP.txt")
 ENV_BACKUP=$(cat "${BACKUP_DIR}/JETPK_CANONICAL_UI_LATEST_ENV_BACKUP.txt")
 METADATA=$(cat "${BACKUP_DIR}/JETPK_CANONICAL_UI_LATEST_METADATA.txt")
+UPLOAD_PRESENCE=$(cat "${BACKUP_DIR}/JETPK_CANONICAL_UI_LATEST_UPLOAD_PRESENCE.txt")
 
 test -s "$ARCHIVE"
 test -s "$ENV_BACKUP"
 test -s "$METADATA"
+test -s "$UPLOAD_PRESENCE"
 test -s "${ARCHIVE}.sha256"
 
 sha256sum -c "${ARCHIVE}.sha256"
 
 cd /home/pkjetp/jetpk_app
 php artisan down --retry=60
+
+while IFS=$'\t' read -r STATUS FILEPATH; do
+    if [ "$STATUS" = "NEW_FILE" ]; then
+        rm -f -- "$FILEPATH"
+    fi
+done < "$UPLOAD_PRESENCE"
 
 cd /home/pkjetp
 tar -xzf "$ARCHIVE"

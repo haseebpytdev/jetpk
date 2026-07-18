@@ -12,10 +12,13 @@ a9bc7826f4beb14deeaef29e17bbf4bfd195a737
 Runbook content SHA:
 725d6a470393ac45b4dfbbff6ca65a06c90214e5
 
-Runbook metadata stamp SHA:
-a287d9399d04f23a67d697b1d967eda3b0e4b6ec
+Runbook reference SHA:
+ae880169ed331de2aaff2a40f68afc1ef5b9999a
 
 Runtime uploads:
+50
+
+Upload-target presence checks:
 50
 
 Git runtime deletions:

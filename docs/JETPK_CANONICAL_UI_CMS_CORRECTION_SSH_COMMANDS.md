@@ -12,8 +12,8 @@ a9bc7826f4beb14deeaef29e17bbf4bfd195a737
 Runbook content SHA:
 725d6a470393ac45b4dfbbff6ca65a06c90214e5
 
-Runbook metadata stamp SHA:
-a287d9399d04f23a67d697b1d967eda3b0e4b6ec
+Runbook reference SHA:
+ae880169ed331de2aaff2a40f68afc1ef5b9999a
 
 This runbook deploys runtime source `a9bc7826f4beb14deeaef29e17bbf4bfd195a737` only. Documentation-only commits on `main` after that SHA do not change application runtime.
 
@@ -152,6 +152,333 @@ tee "/home/pkjetp/deploy_backups/jetpk-canonical-ui-${STAMP}.php-version.txt"
 php artisan --version | \
 tee "/home/pkjetp/deploy_backups/jetpk-canonical-ui-${STAMP}.laravel-version.txt"
 ```
+
+
+---
+
+## 2.5 Pre-deployment upload-target presence manifest
+
+Record whether each of the 50 SFTP upload targets already exists on the server before upload. Rollback uses this manifest to remove only paths classified `NEW_FILE` (for example `AgentAgencyController.php` when it was absent pre-deployment but introduced by SFTP).
+
+Requires section 1 variables: `BACKUP_BASE`, `BACKUP_DIR`, `METADATA`, `STAMP`.
+
+```bash
+UPLOAD_PRESENCE="${BACKUP_BASE}.upload-target-presence.tsv"
+
+: > "$UPLOAD_PRESENCE"
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AccountingLedgerController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AccountingLedgerController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AccountingLedgerController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentAgencyController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentAgencyController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentAgencyController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentBookingController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentBookingController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentBookingController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentCommissionController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentCommissionController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentCommissionController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentDepositController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentDepositController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentDepositController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentLedgerController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentLedgerController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentLedgerController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentReportsController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentReportsController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentReportsController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentStaffController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentStaffController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentStaffController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentWalletController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentWalletController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentWalletController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/DashboardController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/DashboardController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/DashboardController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/FinanceStatementController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/FinanceStatementController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/FinanceStatementController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/SavedTravelerController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/SavedTravelerController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/SavedTravelerController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/SupportTicketController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/SupportTicketController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Agent/SupportTicketController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/AuthenticatedSessionController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/AuthenticatedSessionController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/AuthenticatedSessionController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/LoginOtpController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/LoginOtpController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/LoginOtpController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/NewPasswordController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/NewPasswordController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/NewPasswordController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/PasswordResetLinkController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/PasswordResetLinkController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/PasswordResetLinkController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/RegisteredUserController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/RegisteredUserController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Auth/RegisteredUserController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Customer/CustomerBookingController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Customer/CustomerBookingController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Customer/CustomerBookingController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Customer/SavedTravelerController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Customer/SavedTravelerController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Customer/SavedTravelerController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Customer/SupportTicketController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Customer/SupportTicketController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Customer/SupportTicketController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/AgentRegistrationController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/AgentRegistrationController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/AgentRegistrationController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/BookingController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/BookingController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/BookingController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/FlightController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/FlightController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/FlightController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/GuestBookingLookupController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/GuestBookingLookupController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/GuestBookingLookupController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/HomeController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/HomeController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/HomeController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/SupportController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/SupportController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/SupportController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Http/Controllers/ProfileController.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/ProfileController.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Http/Controllers/ProfileController.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Providers/AppServiceProvider.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Providers/AppServiceProvider.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Providers/AppServiceProvider.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Services/Client/ClientPageAdminContentResolver.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Services/Client/ClientPageAdminContentResolver.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Services/Client/ClientPageAdminContentResolver.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Services/Client/ClientPageContentResolver.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Services/Client/ClientPageContentResolver.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Services/Client/ClientPageContentResolver.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Services/Client/RuntimeViewResolver.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Services/Client/RuntimeViewResolver.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Services/Client/RuntimeViewResolver.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Services/Communication/NotificationRecipientResolver.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Services/Communication/NotificationRecipientResolver.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Services/Communication/NotificationRecipientResolver.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Support/Audits/HaseebMasterRouteSafetyCatalog.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Support/Audits/HaseebMasterRouteSafetyCatalog.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Support/Audits/HaseebMasterRouteSafetyCatalog.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Support/Client/ClientPageSectionSchema.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Support/Client/ClientPageSectionSchema.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Support/Client/ClientPageSectionSchema.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Support/Client/Homepage/HomepageCanonicalSchema.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Support/Client/Homepage/HomepageCanonicalSchema.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Support/Client/Homepage/HomepageCanonicalSchema.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/app/Support/Client/Homepage/HomepageContentNormalizer.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/app/Support/Client/Homepage/HomepageContentNormalizer.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/app/Support/Client/Homepage/HomepageContentNormalizer.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/config/client.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/config/client.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/config/client.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/config/client_themes.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/config/client_themes.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/config/client_themes.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/config/client_ui.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/config/client_ui.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/config/client_ui.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/config/client_view_paths.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/config/client_view_paths.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/config/client_view_paths.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/config/ota-brand.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/config/ota-brand.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/config/ota-brand.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/config/ota-client.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/config/ota-client.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/config/ota-client.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/resources/views/frontend/about.blade.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/resources/views/frontend/about.blade.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/resources/views/frontend/about.blade.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/resources/views/layouts/frontend.blade.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/resources/views/layouts/frontend.blade.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/resources/views/layouts/frontend.blade.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/resources/views/themes/admin/jetpakistan/page-settings/partials/home-sections.blade.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/resources/views/themes/admin/jetpakistan/page-settings/partials/home-sections.blade.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/resources/views/themes/admin/jetpakistan/page-settings/partials/home-sections.blade.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/sections/hero.blade.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/sections/hero.blade.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/sections/hero.blade.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/resources/views/ui/site/v2/layouts/frontend.blade.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/resources/views/ui/site/v2/layouts/frontend.blade.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/resources/views/ui/site/v2/layouts/frontend.blade.php' >> "$UPLOAD_PRESENCE"
+fi
+
+if [ -e /home/pkjetp/jetpk_app/routes/web.php ]; then
+    printf 'EXISTING\t%s\n' '/home/pkjetp/jetpk_app/routes/web.php' >> "$UPLOAD_PRESENCE"
+else
+    printf 'NEW_FILE\t%s\n' '/home/pkjetp/jetpk_app/routes/web.php' >> "$UPLOAD_PRESENCE"
+fi
+
+test -s "$UPLOAD_PRESENCE"
+wc -l "$UPLOAD_PRESENCE"
+
+printf 'upload_presence=%s\n' "$UPLOAD_PRESENCE" >> "$METADATA"
+
+printf '%s\n' "$UPLOAD_PRESENCE" \
+> "${BACKUP_DIR}/JETPK_CANONICAL_UI_LATEST_UPLOAD_PRESENCE.txt"
+
+echo "upload_presence=$UPLOAD_PRESENCE"
+```
+
+Required: `wc -l` reports exactly 50 lines.
 
 ---
 
