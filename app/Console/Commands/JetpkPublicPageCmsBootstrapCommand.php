@@ -63,7 +63,7 @@ class JetpkPublicPageCmsBootstrapCommand extends Command
                 ->exists();
             if ($exists) {
                 $skipped++;
-                $rows[] = [$pageKey, 'skip', 'existing draft or published row'];
+                $rows[] = [$pageKey, 'SKIP', 'existing draft or published row'];
 
                 continue;
             }
@@ -71,7 +71,7 @@ class JetpkPublicPageCmsBootstrapCommand extends Command
             $payload = ClientPageBootstrapTemplate::contentFor($pageKey);
             if ($payload === []) {
                 $skipped++;
-                $rows[] = [$pageKey, 'skip', 'no bootstrap template'];
+                $rows[] = [$pageKey, 'NO_CHANGE', 'no bootstrap template'];
 
                 continue;
             }
@@ -91,11 +91,11 @@ class JetpkPublicPageCmsBootstrapCommand extends Command
             }
 
             $imported++;
-            $rows[] = [$pageKey, $dryRun ? 'would_import' : 'imported', count($payload).' top-level keys'];
+            $rows[] = [$pageKey, 'CREATE', count($payload).' top-level keys'];
         }
 
         $this->table(['page_key', 'action', 'detail'], $rows);
-        $this->line("imported={$imported} skipped={$skipped} dry_run=".($dryRun ? '1' : '0'));
+        $this->line("create={$imported} skip={$skipped} dry_run=".($dryRun ? '1' : '0'));
 
         return self::SUCCESS;
     }

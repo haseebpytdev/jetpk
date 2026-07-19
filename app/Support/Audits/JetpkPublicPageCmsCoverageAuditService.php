@@ -8,11 +8,11 @@ use App\Models\ClientProfile;
 use App\Support\Client\ClientManagedPageCatalog;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\ClientPageSectionSchema;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 
 /**
  * Read-only public-page CMS coverage audit for JetPK managed pages.
@@ -34,13 +34,7 @@ final class JetpkPublicPageCmsCoverageAuditService
         foreach (ClientManagedPageCatalog::pages() as $definition) {
             $pageKey = (string) $definition['page_key'];
             $page = $this->auditPage($definition, $profile, $baseUrl);
-            if (! in_array($page['status'], ['FULL_CMS_OWNERSHIP', 'GLOBAL_COMPONENT'], true)
-                && ! ($pageKey === ClientPageKeys::HOME && $page['status'] === 'PARTIAL_CMS_OWNERSHIP')) {
-                if ($page['status'] !== 'ROUTE_MISSING' || $pageKey === ClientPageKeys::FAQ) {
-                    $fail++;
-                }
-            }
-            if ($page['server_error']) {
+            if ($this->shouldCountAsFailure($pageKey, $page)) {
                 $fail++;
             }
             $pages[] = $page;
@@ -83,24 +77,14 @@ final class JetpkPublicPageCmsCoverageAuditService
 
         $routeExists = Route::has($routeName);
         $httpStatus = null;
+        $httpProbe = 'untested';
         $serverError = false;
 
-        if ($routeExists && $path !== '/') {
-            try {
-                $response = Http::timeout(8)->get($baseUrl.$path);
-                $httpStatus = $response->status();
-                $serverError = $httpStatus >= 500;
-            } catch (\Throwable) {
-                $httpStatus = 0;
-            }
-        } elseif ($routeExists && $path === '/') {
-            try {
-                $response = Http::timeout(8)->get($baseUrl.'/');
-                $httpStatus = $response->status();
-                $serverError = $httpStatus >= 500;
-            } catch (\Throwable) {
-                $httpStatus = 0;
-            }
+        if ($routeExists) {
+            $probe = $this->probeHttp($baseUrl, $path);
+            $httpStatus = $probe['status'];
+            $httpProbe = $probe['probe'];
+            $serverError = $probe['server_error'];
         }
 
         $draftExists = false;
@@ -149,6 +133,7 @@ final class JetpkPublicPageCmsCoverageAuditService
             'public_route' => $path,
             'public_route_name' => $routeName,
             'http_status' => $httpStatus,
+            'http_probe' => $httpProbe,
             'ownership_type' => $definition['ownership_type'],
             'visible_text_nodes' => $visibleTextNodes,
             'cms_backed_text_nodes' => $cmsBackedTextNodes,
@@ -167,6 +152,73 @@ final class JetpkPublicPageCmsCoverageAuditService
             'runtime_classification' => $definition['runtime_classification'],
             'status' => $status,
         ];
+    }
+
+    /**
+     * @return array{status: int, probe: string, server_error: bool}
+     */
+    private function probeHttp(string $baseUrl, string $path): array
+    {
+        $requestPath = $path === '/' ? '/' : $path;
+
+        try {
+            $response = Http::timeout(8)->get(rtrim($baseUrl, '/').$requestPath);
+            $status = $response->status();
+
+            return [
+                'status' => $status,
+                'probe' => 'external_http',
+                'server_error' => $status >= 500,
+            ];
+        } catch (\Throwable) {
+            try {
+                $request = Request::create($requestPath, 'GET');
+                $response = app()->handle($request);
+                app()->terminate($request, $response);
+                $status = $response->getStatusCode();
+
+                return [
+                    'status' => $status,
+                    'probe' => 'kernel_http',
+                    'server_error' => $status >= 500,
+                ];
+            } catch (\Throwable) {
+                return [
+                    'status' => 0,
+                    'probe' => 'untested',
+                    'server_error' => false,
+                ];
+            }
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $page
+     */
+    private function shouldCountAsFailure(string $pageKey, array $page): bool
+    {
+        if (($page['http_probe'] ?? '') === 'untested') {
+            return false;
+        }
+
+        if ($page['server_error'] ?? false) {
+            return true;
+        }
+
+        $status = (string) ($page['status'] ?? '');
+        if (in_array($status, ['FULL_CMS_OWNERSHIP', 'GLOBAL_COMPONENT'], true)) {
+            return false;
+        }
+
+        if ($pageKey === ClientPageKeys::HOME && $status === 'PARTIAL_CMS_OWNERSHIP') {
+            return false;
+        }
+
+        if ($status === 'ROUTE_MISSING' && $pageKey !== ClientPageKeys::FAQ) {
+            return false;
+        }
+
+        return true;
     }
 
     private function resolveProfile(string $slug): ?ClientProfile
@@ -267,14 +319,15 @@ final class JetpkPublicPageCmsCoverageAuditService
             '',
             'Generated: '.($payload['generated_at'] ?? ''),
             '',
-            '| page_key | http_status | ownership | status | hardcoded_text | cms_backed_text | published |',
-            '| --- | --- | --- | --- | --- | --- | --- |',
+            '| page_key | http_status | http_probe | ownership | status | hardcoded_text | cms_backed_text | published |',
+            '| --- | --- | --- | --- | --- | --- | --- | --- |',
         ];
         foreach ($payload['pages'] ?? [] as $page) {
             $lines[] = sprintf(
-                '| %s | %s | %s | %s | %d | %d | %s |',
+                '| %s | %s | %s | %s | %s | %d | %d | %s |',
                 $page['page_key'],
                 (string) ($page['http_status'] ?? 'n/a'),
+                $page['http_probe'] ?? 'n/a',
                 $page['ownership_type'],
                 $page['status'],
                 $page['hardcoded_text_nodes'],

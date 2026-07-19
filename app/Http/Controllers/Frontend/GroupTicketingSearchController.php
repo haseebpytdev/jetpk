@@ -10,6 +10,7 @@ use App\Services\GroupTicketing\GroupInventoryFreshnessService;
 use App\Services\GroupTicketing\GroupInventorySearchService;
 use App\Services\Client\ClientPageRenderer;
 use App\Support\Client\ClientPageKeys;
+use App\Support\GroupTicketing\GroupInventoryCardPresenter;
 use App\Support\GroupTicketing\GroupTicketingLivePolicy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;

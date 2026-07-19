@@ -28,10 +28,11 @@ class JetpkPublicPageCmsCoverageAuditCommand extends Command
         );
 
         $this->table(
-            ['page_key', 'http_status', 'ownership', 'status', 'hardcoded', 'cms_backed', 'published'],
+            ['page_key', 'http_status', 'http_probe', 'ownership', 'status', 'hardcoded', 'cms_backed', 'published'],
             collect($result['pages'] ?? [])->map(fn (array $page) => [
                 $page['page_key'],
                 (string) ($page['http_status'] ?? 'n/a'),
+                $page['http_probe'] ?? 'n/a',
                 $page['ownership_type'],
                 $page['status'],
                 (string) $page['hardcoded_text_nodes'],

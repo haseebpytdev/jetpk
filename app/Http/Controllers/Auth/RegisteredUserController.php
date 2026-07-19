@@ -11,6 +11,7 @@ use App\Mail\CustomerWelcomeMail;
 use App\Models\Agency;
 use App\Models\User;
 use App\Services\Client\ClientPageRenderer;
+use App\Services\Client\ClientRedirectResolver;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Auth\CheckoutReturnIntent;
 use Illuminate\Auth\Events\Registered;
