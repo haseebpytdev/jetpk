@@ -138,6 +138,16 @@
                 </div>
             @endif
 
+            @if (($o['supplier_provider'] ?? $o['supplier'] ?? '') === 'one_api')
+                @include('frontend.bookings.one-api.extras', [
+                    'workflowContextId' => data_get($validationResult ?? [], 'meta.one_api_workflow_context_id')
+                        ?? data_get($o, 'raw_payload.provider_context.one_api_workflow_context_id'),
+                    'supplierConnectionId' => $o['supplier_connection_id'] ?? null,
+                    'holdDeadline' => data_get($draft, 'one_api_hold_deadline'),
+                    'o' => $o,
+                ])
+            @endif
+
             <div class="ota-checkout-grid ota-booking-layout">
                 <div class="ota-checkout-main">
                     @if (!empty($hideInlineAccount))
@@ -480,7 +490,11 @@
                         </div>
 
                         <div class="ota-checkout-submit-bar ota-booking-actions">
-                            <button type="submit" class="ota-btn-primary-lg btn btn-lg btn-block">Continue to review</button>
+                            <button
+                                type="submit"
+                                class="ota-btn-primary-lg btn btn-lg btn-block"
+                                @if (($o['supplier_provider'] ?? $o['supplier'] ?? '') === 'one_api') data-one-api-continue disabled @endif
+                            >Continue to review</button>
                         </div>
                     </form>
                 </div>

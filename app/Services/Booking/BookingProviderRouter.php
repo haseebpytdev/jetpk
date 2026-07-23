@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\Suppliers\AirBlue\AirBlueBookingRouterService;
 use App\Services\Suppliers\Duffel\DuffelBookingService;
 use App\Services\Suppliers\Iati\IatiBookingRouterService;
+use App\Services\Suppliers\OneApi\OneApiBookingRouterService;
 use App\Services\Suppliers\PiaNdc\PiaNdcBookingRouterService;
 use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\SupplierBookingService;
@@ -31,6 +32,7 @@ class BookingProviderRouter
         protected SupplierBookingService $supplierBookingService,
         protected DuffelBookingService $duffelBookingService,
         protected IatiBookingRouterService $iatiBookingRouterService,
+        protected OneApiBookingRouterService $oneApiBookingRouterService,
         protected PiaNdcBookingRouterService $piaNdcBookingRouterService,
         protected AirBlueBookingRouterService $airBlueBookingRouterService,
         protected SabreBookingService $sabreBookingService,
@@ -120,6 +122,16 @@ class BookingProviderRouter
 
         if ($p === SupplierProvider::PiaNdc->value) {
             return $this->piaNdcBookingRouterService->createSupplierBooking(
+                $booking,
+                $actor,
+                $adminOverride,
+                $explicitRetry,
+                $attemptSource,
+            );
+        }
+
+        if ($p === SupplierProvider::OneApi->value) {
+            return $this->oneApiBookingRouterService->createSupplierBooking(
                 $booking,
                 $actor,
                 $adminOverride,
@@ -258,5 +270,20 @@ class BookingProviderRouter
                 SupplierProvider::Airblue,
                 SupplierProvider::AirlineDirect,
             ], true);
+    }
+
+    public function isBookingEligible(Booking $booking): bool
+    {
+        return $this->supplierBookingService->isBookingEligible($booking);
+    }
+
+    public function markManualPnr(
+        Booking $booking,
+        User $actor,
+        string $pnr,
+        ?string $supplierReference = null,
+        ?string $note = null,
+    ): \App\Models\SupplierBooking {
+        return $this->supplierBookingService->markManualPnr($booking, $actor, $pnr, $supplierReference, $note);
     }
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+  <soapenv:Body>
+    <OTA_AirBookModifyRS xmlns="http://www.opentravel.org/OTA/2003/05" TransactionIdentifier="TID_FIXTURE_HOLD_PAID_001">
+      <BookingReferenceID ID="PNR_FIXTURE_HOLD_001" Type="14"/>
+      <TicketingStatus>Ticketed</TicketingStatus>
+      <PaymentAmount Amount="250.00" CurrencyCode="AED" DecimalPlaces="2"/>
+    </OTA_AirBookModifyRS>
+  </soapenv:Body>
+</soapenv:Envelope>

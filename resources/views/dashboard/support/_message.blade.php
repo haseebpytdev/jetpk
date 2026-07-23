@@ -1,4 +1,4 @@
-﻿@php
+@php
     $isInternal = $message->visibility->value === 'internal';
 @endphp
 

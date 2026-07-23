@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 $brandName = (string) env('OTA_BRAND_NAME', env('APP_NAME', 'Travel'));
 

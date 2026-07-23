@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+  <soapenv:Body>
+    <SeatMapRS>
+      <Seat SeatNumber="12A" SeatStatus="A" Amount="25.00" CurrencyCode="AED" PassengerRef="A1" SegmentRef="1"/>
+      <Seat SeatNumber="12B" SeatStatus="O" Amount="25.00" CurrencyCode="AED" PassengerRef="A1" SegmentRef="1"/>
+    </SeatMapRS>
+  </soapenv:Body>
+</soapenv:Envelope>

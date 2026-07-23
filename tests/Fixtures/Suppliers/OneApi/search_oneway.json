@@ -1,0 +1,44 @@
+{
+  "serviceErrors": [],
+  "ondWiseFlightCombinations": {
+    "SHJ/KHI": {
+      "dateWiseFlightCombinations": {
+        "2026-08-15": {
+          "flightOptions": [
+            {
+              "availabilityStatus": "AVAILABLE",
+              "flightSegments": [
+                {
+                  "flightNumber": "G9101",
+                  "marketingCarrier": "G9",
+                  "operatingCarrier": "G9",
+                  "origin": { "airportCode": "SHJ" },
+                  "destination": { "airportCode": "KHI" },
+                  "departureDateTimeLocal": "2026-08-15T10:00:00",
+                  "arrivalDateTimeLocal": "2026-08-15T12:30:00",
+                  "segmentCode": "SHJ/KHI",
+                  "flightSegmentId": "SEG_FIXTURE_001"
+                }
+              ],
+              "cabinPrices": [
+                {
+                  "cabinClass": "Y",
+                  "fareFamily": "Basic",
+                  "price": 250.00,
+                  "currency": "AED",
+                  "availabilityStatus": "AVAILABLE",
+                  "paxTypeWiseBasePrices": [{ "paxType": "ADT", "price": 250.00 }]
+                }
+              ]
+            },
+            {
+              "availabilityStatus": "NOT_AVAILABLE",
+              "flightSegments": [],
+              "cabinPrices": []
+            }
+          ]
+        }
+      }
+    }
+  }
+}

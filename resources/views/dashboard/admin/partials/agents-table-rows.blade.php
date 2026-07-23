@@ -1,4 +1,4 @@
-﻿@php
+@php
     /**
      * Agents table body partial — used by both the full Agents page render
      * and the AJAX filter endpoint (admin.agents.data). Keeps row markup in

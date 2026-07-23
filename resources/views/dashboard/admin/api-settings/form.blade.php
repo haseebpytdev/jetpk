@@ -20,6 +20,7 @@
     $isIati = $selectedProvider === 'iati';
     $isPiaNdc = $selectedProvider === 'pia_ndc';
     $isAirblue = $selectedProvider === 'airblue';
+    $isOneApi = $selectedProvider === 'one_api';
     $lockProvider = ($isIati && ($isEdit || $preselectedProvider === 'iati'))
         || ($isPiaNdc && ($isEdit || $preselectedProvider === 'pia_ndc'))
         || ($isAirblue && ($isEdit || $preselectedProvider === 'airblue'));
@@ -66,7 +67,7 @@
                     @endif
                     @foreach ($providers as $provider)
                         <option value="{{ $provider->value }}" @selected($resolvedProvider === $provider->value)>
-                            {{ strtoupper(match ($provider->value) { 'iati' => 'IATI', 'pia_ndc' => 'PIA NDC', 'airblue' => 'AirBlue', default => str_replace('_', ' ', $provider->value) }) }}
+                            {{ strtoupper(match ($provider->value) { 'iati' => 'IATI', 'pia_ndc' => 'PIA NDC', 'airblue' => 'AirBlue', 'one_api' => 'One API', default => str_replace('_', ' ', $provider->value) }) }}
                         </option>
                     @endforeach
                 </select>
@@ -97,6 +98,7 @@
         @include('dashboard.admin.api-settings.partials.supplier-panels.iati')
         @include('dashboard.admin.api-settings.partials.supplier-panels.pia_ndc')
         @include('dashboard.admin.api-settings.partials.supplier-panels.airblue')
+        @include('dashboard.admin.api-settings.partials.supplier-panels.one_api')
         @include('dashboard.admin.api-settings.partials.supplier-panels.sabre')
         @include('dashboard.admin.api-settings.partials.supplier-panels.generic')
     </div>

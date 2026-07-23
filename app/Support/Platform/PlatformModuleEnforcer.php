@@ -333,6 +333,7 @@ final class PlatformModuleEnforcer
             'duffel' => 'duffel_supplier',
             'iati' => 'iati_supplier',
             'pia_ndc' => 'pia_ndc_supplier',
+            'one_api' => 'one_api_supplier',
             'airblue' => 'airblue_supplier',
             default => null,
         };

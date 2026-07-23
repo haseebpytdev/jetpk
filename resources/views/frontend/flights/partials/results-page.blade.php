@@ -1,4 +1,4 @@
-﻿@section('content')
+@section('content')
     @php
         $inlineDisplay = $inlineDisplay ?? [
             'origin_code' => strtoupper(trim((string) ($criteria['origin'] ?? ''))),

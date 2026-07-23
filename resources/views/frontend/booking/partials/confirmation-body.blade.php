@@ -1,4 +1,4 @@
-﻿    @php
+    @php
         use App\Enums\BookingStatus;
         use App\Enums\SupplierProvider;
         use App\Support\Bookings\BookingSupplierProviderResolver;

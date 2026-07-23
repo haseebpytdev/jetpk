@@ -1,4 +1,4 @@
-﻿@php
+@php
     /**
      * Agent preview body partial — used by both the full Agents page render
      * and the AJAX preview endpoint (admin.agents.preview). Keeping the markup

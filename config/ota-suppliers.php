@@ -49,6 +49,18 @@ return [
             ],
             'notes' => 'IATI Flight API v2: search, fare confirmation, option/book, retrieve, cancel. Cert uses testapi.iati.com; Live uses api.iati.com.',
         ],
+        'one_api' => [
+            'name' => 'One API',
+            'type' => 'FlyJinnah / Air Arabia hybrid REST+SOAP',
+            'status' => 'not_configured',
+            'environment' => 'staging',
+            'required_credentials' => [
+                'REST auth + search URLs',
+                'Username, password, agent code',
+                'SOAP URL (when supplied by vendor)',
+            ],
+            'notes' => 'REST search + SOAP price, bundles, ancillaries, book, read, hold payment. No cancel API in vendor docs.',
+        ],
         'airline_direct' => [
             'name' => 'Airline Direct API',
             'type' => 'Generic NDC / proprietary airline API',

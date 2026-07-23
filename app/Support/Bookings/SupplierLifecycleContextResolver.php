@@ -27,6 +27,8 @@ final class SupplierLifecycleContextResolver
 
     public const HANDLER_IATI = 'iati';
 
+    public const HANDLER_ONE_API = 'one_api';
+
     public const HANDLER_OTHER = 'other';
 
     public const CHANNEL_GDS = 'gds';
@@ -192,6 +194,7 @@ final class SupplierLifecycleContextResolver
             SupplierProvider::Airblue->value => self::HANDLER_AIRBLUE,
             SupplierProvider::Duffel->value => self::HANDLER_DUFFEL,
             SupplierProvider::Iati->value => self::HANDLER_IATI,
+            SupplierProvider::OneApi->value => self::HANDLER_ONE_API,
             'airsial', 'air_sial' => self::HANDLER_AIRSIAL,
             'group', 'al_haider', 'group_ticketing' => self::HANDLER_GROUP,
             default => $provider !== '' ? self::HANDLER_OTHER : self::HANDLER_OTHER,
@@ -334,6 +337,14 @@ final class SupplierLifecycleContextResolver
                 'supports_void' => false,
                 'supports_refund' => false,
             ],
+            self::HANDLER_ONE_API => [
+                'supports_revalidation' => true,
+                'supports_pnr_or_order' => true,
+                'supports_ticketing' => true,
+                'supports_cancellation' => false,
+                'supports_void' => false,
+                'supports_refund' => false,
+            ],
             self::HANDLER_GROUP => [
                 'supports_revalidation' => false,
                 'supports_pnr_or_order' => false,
@@ -364,6 +375,7 @@ final class SupplierLifecycleContextResolver
             self::HANDLER_DUFFEL => 'Duffel',
             self::HANDLER_GROUP => 'Group fare',
             self::HANDLER_IATI => 'IATI',
+            self::HANDLER_ONE_API => 'One API',
             default => 'Other supplier',
         };
     }
