@@ -126,3 +126,29 @@ playwright-report/
 # Generated archives
 *_backup/
 backup/
+
+# Full third-party source/reference repositories
+/templates-source/
+
+# Historical deployment and sprint evidence
+/storage/app/deployment/
+/storage/app/ota-sprint-*/
+/storage/app/local-before-live-sync-*/
+/storage/app/sabre-createbooking-style-compare-*.json
+/storage/app/test-output.txt
+
+# Obsolete local project summary
+/OTA-Project-Summary.md
+
+# Extracted theme and temporary supplier reference copies
+/storage/app/jetpk-theme-extract/
+/docs/providers/*-temp/
+
+# Generated application diagnostics and previews
+/storage/app/diagnostics/
+/storage/app/playwright/
+/storage/app/previews/
+dashboard/.env.local
+dashboard/test-results/
+dashboard/playwright-report/
+dashboard/tsconfig.tsbuildinfo
