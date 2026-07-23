@@ -1,4 +1,4 @@
-﻿<form method="POST" action="{{ $action }}" class="jp-card">
+<form method="POST" action="{{ $action }}" class="jp-card">
     @csrf
     @if ($method !== 'POST')
         @method($method)

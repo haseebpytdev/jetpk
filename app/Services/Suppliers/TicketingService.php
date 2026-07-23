@@ -25,6 +25,7 @@ use App\Services\Suppliers\TicketingAdapters\AirBlueSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\AirlineDirectSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\DuffelSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\IatiSupplierTicketingAdapter;
+use App\Services\Suppliers\TicketingAdapters\OneApiSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\PiaNdcSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingAdapters\SabreSupplierTicketingAdapter;
 use App\Support\Bookings\AdminBookingSupplierActionAuditor;
@@ -46,6 +47,7 @@ class TicketingService
         protected AirlineDirectSupplierTicketingAdapter $airlineDirectAdapter,
         protected DuffelSupplierTicketingAdapter $duffelAdapter,
         protected IatiSupplierTicketingAdapter $iatiAdapter,
+        protected OneApiSupplierTicketingAdapter $oneApiAdapter,
         protected PiaNdcEticketDeliveryService $piaNdcEticketDeliveryService,
         protected PlatformModuleEnforcer $platformModuleEnforcer,
         protected AdminBookingSupplierActionGate $adminBookingSupplierActionGate,
@@ -362,6 +364,7 @@ class TicketingService
             SupplierProvider::Airblue => $this->airBlueAdapter,
             SupplierProvider::AirlineDirect => $this->airlineDirectAdapter,
             SupplierProvider::Iati => $this->iatiAdapter,
+            SupplierProvider::OneApi => $this->oneApiAdapter,
             default => throw new \InvalidArgumentException('Ticketing adapter not configured for provider: '.($provider?->value ?? 'unknown')),
         };
     }

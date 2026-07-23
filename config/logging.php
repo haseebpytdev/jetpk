@@ -143,6 +143,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'one-api' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/one-api.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'air-blue' => [
             'driver' => 'daily',
             'path' => storage_path('logs/airblue.log'),

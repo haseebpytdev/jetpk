@@ -210,6 +210,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 return redirect()->guest(client_route('login'));
             }
 
+            if ($e instanceof \App\Services\Suppliers\OneApi\Exceptions\OneApiException) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => $e->safeMessage,
+                        'error' => $e->normalizedCode,
+                    ], $e->httpStatus);
+                }
+            }
+
             if ($e instanceof PlatformModuleDisabledException) {
                 if ($request->expectsJson() || ! $request->isMethodSafe()) {
                     return response()->json([

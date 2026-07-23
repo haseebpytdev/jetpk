@@ -1,4 +1,4 @@
-﻿@php
+@php
     $u = $userModel;
     $initialAccountType = old('account_type', $u->account_type?->value ?? 'staff');
     $selectedAgentPermissions = collect(old('permissions', $u->meta['agent_permissions'] ?? []))->all();

@@ -4,6 +4,8 @@ namespace App\Services\Suppliers;
 
 use App\Contracts\Suppliers\SupplierBookingInterface;
 use App\Data\SupplierBookingResultData;
+use App\Data\SupplierHoldPaymentResultData;
+use App\Enums\BookingCommunicationEvent;
 use App\Enums\BookingStatus;
 use App\Enums\OtaNotificationEvent;
 use App\Enums\SupplierConnectionStatus;
@@ -21,8 +23,10 @@ use App\Services\Suppliers\BookingAdapters\AirBlueSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\AirlineDirectSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\DuffelSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\IatiSupplierBookingAdapter;
+use App\Services\Suppliers\BookingAdapters\OneApiSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\PiaNdcSupplierBookingAdapter;
 use App\Services\Suppliers\BookingAdapters\SabreSupplierBookingAdapter;
+use App\Services\Suppliers\OneApi\OneApiSupplierHoldPaymentOrchestrator;
 use App\Support\Bookings\IatiReservationLifecycleService;
 use App\Support\Bookings\IatiSupplierBookingEligibility;
 use App\Support\Bookings\SabreOperationalPnrReadiness;
@@ -54,6 +58,7 @@ class SupplierBookingService
         protected AirlineDirectSupplierBookingAdapter $airlineDirectAdapter,
         protected DuffelSupplierBookingAdapter $duffelAdapter,
         protected IatiSupplierBookingAdapter $iatiAdapter,
+        protected OneApiSupplierBookingAdapter $oneApiAdapter,
         protected PlatformModuleEnforcer $platformModuleEnforcer,
         protected SupplierBookingPreflightGuard $preflightGuard,
         protected SabrePnrCertificationSupport $sabrePnrCertificationSupport,
@@ -376,6 +381,20 @@ class SupplierBookingService
                     return $result;
                 }
 
+                $supplierStatus = (string) ($result->safe_summary['supplier_booking_status'] ?? 'pending_ticketing');
+                $meta = is_array($booking->meta) ? $booking->meta : [];
+                if (($result->safe_summary['hold_deadline'] ?? null) !== null) {
+                    $meta['one_api_hold'] = [
+                        'ticket_time_limit' => $result->safe_summary['hold_deadline'],
+                    ];
+                }
+                if (($result->safe_summary['transaction_identifier'] ?? null) !== null) {
+                    $meta['one_api_context'] = array_merge(
+                        is_array($meta['one_api_context'] ?? null) ? $meta['one_api_context'] : [],
+                        ['last_transaction_identifier' => $result->safe_summary['transaction_identifier']],
+                    );
+                }
+
                 SupplierBooking::query()->create([
                     'agency_id' => $booking->agency_id,
                     'booking_id' => $booking->id,
@@ -384,7 +403,7 @@ class SupplierBookingService
                     'supplier_api_booking_id' => $result->supplier_reference,
                     'supplier_reference' => $result->supplier_reference,
                     'pnr' => $result->pnr,
-                    'status' => 'pending_ticketing',
+                    'status' => $supplierStatus === 'on_hold' ? 'on_hold' : 'pending_ticketing',
                     'raw_summary' => SensitiveDataRedactor::redact($result->safe_summary),
                     'created_by' => $actor->id,
                     'created_at_supplier' => now(),
@@ -400,11 +419,12 @@ class SupplierBookingService
                 ])->save();
 
                 $booking->forceFill([
-                    'supplier_booking_status' => 'pending_ticketing',
+                    'supplier_booking_status' => $supplierStatus,
                     'supplier_api_booking_id' => $result->supplier_reference,
                     'supplier_reference' => $result->supplier_reference,
                     'pnr' => $result->pnr,
                     'supplier_booking_created_at' => now(),
+                    'meta' => $meta,
                 ])->save();
 
                 $this->writeAudit($booking, $actor, 'booking.supplier_booking_created', [
@@ -412,9 +432,10 @@ class SupplierBookingService
                     'provider' => $result->provider,
                     'supplier_reference' => $result->supplier_reference,
                     'pnr' => $result->pnr,
+                    'supplier_booking_status' => $supplierStatus,
                 ]);
 
-                $this->communicationService->sendSupplierBookingCreated($booking->fresh());
+                $this->dispatchSupplierBookingCommunication($booking->fresh(), $result);
 
                 return $result;
             });
@@ -422,6 +443,43 @@ class SupplierBookingService
             $this->attemptGuard->setInFlightAttemptId(null);
             $lock->release();
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $diagnosticContext
+     */
+    public function payHeldOneApiReservation(
+        Booking $booking,
+        SupplierConnection $connection,
+        User $actor,
+        array $diagnosticContext = [],
+    ): SupplierHoldPaymentResultData {
+        return app(OneApiSupplierHoldPaymentOrchestrator::class)->payHeldReservation(
+            $booking,
+            $connection,
+            $actor,
+            $diagnosticContext,
+        );
+    }
+
+    protected function dispatchSupplierBookingCommunication(Booking $booking, SupplierBookingResultData $result): void
+    {
+        if ($result->provider !== SupplierProvider::OneApi->value) {
+            $this->communicationService->sendSupplierBookingCreated($booking);
+
+            return;
+        }
+
+        if ($result->safe_summary['suppress_supplier_booking_created'] ?? false) {
+            $this->communicationService->logSystemEvent($booking, BookingCommunicationEvent::BookingStatusChanged->value, [
+                'supplier_booking_status' => 'on_hold',
+                'communication_policy' => 'hold_persisted_no_customer_hold_email_template',
+            ]);
+
+            return;
+        }
+
+        $this->communicationService->sendSupplierBookingCreated($booking);
     }
 
     /**
@@ -517,6 +575,7 @@ class SupplierBookingService
             SupplierProvider::AirlineDirect => $this->airlineDirectAdapter,
             SupplierProvider::Duffel => $this->duffelAdapter,
             SupplierProvider::Iati => $this->iatiAdapter,
+            SupplierProvider::OneApi => $this->oneApiAdapter,
             default => throw new InvalidArgumentException(
                 'Automated supplier booking is not implemented for provider: '.$provider->value
             ),

@@ -407,6 +407,7 @@ final class PlatformModuleRegistry
                     'duffel_supplier' => false,
                     'iati_supplier' => false,
                     'pia_ndc_supplier' => false,
+                    'one_api_supplier' => false,
                     'airblue_supplier' => false,
                     'ticketing' => false,
                     'payment_proofs' => false,
@@ -522,6 +523,7 @@ final class PlatformModuleRegistry
             $modules['duffel_supplier'] = false;
             $modules['iati_supplier'] = false;
             $modules['pia_ndc_supplier'] = false;
+            $modules['one_api_supplier'] = false;
             $modules['airblue_supplier'] = false;
         }
 
@@ -773,6 +775,14 @@ final class PlatformModuleRegistry
                 'supplier_sabre',
                 'high',
                 configHints: ['PIA_NDC_TIMEOUT_SECONDS'],
+            ),
+            self::mod(
+                'one_api_supplier',
+                'One API supplier',
+                'FlyJinnah / Air Arabia hybrid REST search and SOAP book lifecycle.',
+                'supplier_sabre',
+                'high',
+                configHints: ['ONE_API_LIVE_SEARCH_ENABLED', 'ONE_API_LIVE_BOOKING_ENABLED'],
             ),
             self::mod(
                 'airblue_supplier',

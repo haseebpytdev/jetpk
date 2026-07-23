@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\AgentRegistrationController;
 use App\Http\Controllers\Frontend\AirportSearchController;
 use App\Http\Controllers\Frontend\BookingCheckoutPromoController;
 use App\Http\Controllers\Frontend\BookingController;
+use App\Http\Controllers\Frontend\OneApiCheckoutController;
 use App\Http\Controllers\Frontend\CmsPageController;
 use App\Http\Controllers\Frontend\FlightController;
 use App\Http\Controllers\Frontend\GroupTicketingBookingController;
@@ -112,6 +113,12 @@ Route::middleware('platform.module:customer_checkout')->group(function (): void 
     Route::match(['get', 'post'], '/booking/review', [BookingController::class, 'review'])->middleware('throttle:public-booking-submit')->name('booking.review');
     Route::post('/booking/{booking}/accept-updated-fare', [BookingController::class, 'acceptUpdatedFare'])->middleware('throttle:public-booking-submit')->name('booking.accept-updated-fare');
     Route::post('/booking/{booking}/decline-updated-fare', [BookingController::class, 'declineUpdatedFare'])->middleware('throttle:public-booking-submit')->name('booking.decline-updated-fare');
+    Route::middleware('auth')->group(function (): void {
+        Route::get('/booking/one-api/catalog', [OneApiCheckoutController::class, 'catalog'])->name('booking.one-api.catalog');
+        Route::post('/booking/one-api/final-price', [OneApiCheckoutController::class, 'saveSelections'])->middleware('throttle:public-booking-submit')->name('booking.one-api.final-price');
+        Route::get('/booking/one-api/extras', [OneApiCheckoutController::class, 'showExtras'])->name('booking.one-api.extras');
+        Route::post('/booking/one-api/selections', [OneApiCheckoutController::class, 'saveSelections'])->middleware('throttle:public-booking-submit')->name('booking.one-api.selections');
+    });
 });
 Route::get('/booking/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
 Route::middleware('platform.module:customer_booking_lookup')->group(function (): void {

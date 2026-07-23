@@ -1,4 +1,4 @@
-﻿@php
+@php
     /** Base URL for TourNest static assets copied to public/vendor/tournest/assets */
     $tournest = asset('vendor/tournest/assets');
 @endphp
