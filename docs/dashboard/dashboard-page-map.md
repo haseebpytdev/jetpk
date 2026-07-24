@@ -1,6 +1,6 @@
 # Dashboard Page Map (Legacy → `/testdash`)
 
-Phase: **JETPK-DASH-03** (extends DASH-02)
+Phase: **JETPK-DASH-04-05** (extends DASH-03)
 
 ## Architecture authority
 
@@ -12,7 +12,7 @@ Phase: **JETPK-DASH-03** (extends DASH-02)
 
 | Status | Meaning |
 |--------|---------|
-| **live** | Implemented in Next (DASH-01 overview, DASH-02 bookings, DASH-03 payments) |
+| **live** | Implemented in Next (DASH-01 overview, DASH-02 bookings, DASH-03 payments, DASH-04 customers, DASH-05 suppliers) |
 | **planned** | Nav stub / placeholder page |
 | **n/a** | No Laravel equivalent; mock-only |
 
@@ -31,8 +31,8 @@ Phase: **JETPK-DASH-03** (extends DASH-02)
 | Bookings | `admin.bookings` / `staff.bookings.index` | `/testdash/bookings` | **live** |
 | Payments | `admin.payments` (future) | `/testdash/payments` | **live** |
 | Flight search | `flights.search` | `/testdash/planned/flights` | planned (public search) |
-| Customers | `admin.customers.index` | `/testdash/planned/customers` | planned |
-| Suppliers | `admin.api-settings` | `/testdash/planned/suppliers` | planned |
+| Customers | `admin.customers.index` | `/testdash/customers` | **live** |
+| Suppliers | `admin.api-settings` | `/testdash/suppliers` | **live** |
 | Group ticketing | `admin.group-ticketing.index` | `/testdash/planned/group-ticketing` | planned |
 | Reports | `admin.reports` / `staff.reports.index` | `/testdash/planned/reports` | planned |
 | Accounting | `admin.ledger.index`, accounting.* | `/testdash/planned/accounting` | planned |

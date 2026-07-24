@@ -41,9 +41,8 @@ export const navGroups: NavGroup[] = [
     items: [
       {
         label: "Customers",
-        href: "/planned/customers",
+        href: "/customers",
         laravelRoute: "admin.customers.index",
-        planned: true,
       },
       {
         label: "Agents",
@@ -76,9 +75,8 @@ export const navGroups: NavGroup[] = [
       },
       {
         label: "Suppliers",
-        href: "/planned/suppliers",
+        href: "/suppliers",
         laravelRoute: "admin.api-settings",
-        planned: true,
       },
       {
         label: "Markups & Settings",
