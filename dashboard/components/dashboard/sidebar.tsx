@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { primaryNav } from "@/lib/nav-config";
+import { navGroups } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
 import { mockUser } from "@/mocks/overview-fixtures";
 
@@ -10,6 +10,14 @@ type Props = {
   open: boolean;
   onClose: () => void;
 };
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/") {
+    return pathname === "/" || pathname === "";
+  }
+  const base = href.split("?")[0];
+  return pathname === base || pathname.startsWith(`${base}/`);
+}
 
 export function DashboardSidebar({ open, onClose }: Props) {
   const pathname = usePathname();
@@ -26,7 +34,7 @@ export function DashboardSidebar({ open, onClose }: Props) {
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(100%,280px)] flex-col bg-jp-sidebar text-white transition-transform duration-drawer motion-reduce:transition-none lg:static lg:z-auto lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-[min(100%,280px)] flex-col bg-jp-sidebar text-white transition-transform duration-drawer motion-reduce:transition-none lg:static lg:z-auto lg:shrink-0 lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
         aria-label="Dashboard navigation"
@@ -50,30 +58,40 @@ export function DashboardSidebar({ open, onClose }: Props) {
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto p-3">
-          <ul className="space-y-1">
-            {primaryNav.map((item) => {
-              const active = item.href === "/" ? pathname === "/" || pathname === "" : pathname.startsWith(item.href);
-              return (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    onClick={onClose}
-                    className={cn(
-                      "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
-                      active ? "bg-jp-accent font-medium text-white" : "text-gray-300 hover:bg-white/10 hover:text-white",
-                    )}
-                  >
-                    <span className="flex-1">{item.label}</span>
-                    {item.planned ? (
-                      <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
-                        Planned
-                      </span>
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          {navGroups.map((group) => (
+            <div key={group.label} className="mb-4 last:mb-0">
+              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                {group.label}
+              </p>
+              <ul className="space-y-1">
+                {group.items.map((item) => {
+                  const active = isActive(pathname, item.href);
+                  return (
+                    <li key={`${group.label}-${item.label}`}>
+                      <Link
+                        href={item.href}
+                        onClick={onClose}
+                        className={cn(
+                          "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
+                          active
+                            ? "bg-jp-accent font-medium text-white"
+                            : "text-gray-300 hover:bg-white/10 hover:text-white",
+                        )}
+                        aria-current={active ? "page" : undefined}
+                      >
+                        <span className="flex-1">{item.label}</span>
+                        {item.planned ? (
+                          <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
+                            Planned
+                          </span>
+                        ) : null}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
         <div className="border-t border-white/10 p-4">
           <div className="rounded-xl bg-white/5 p-4">

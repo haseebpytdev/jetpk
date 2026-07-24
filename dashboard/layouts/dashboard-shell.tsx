@@ -10,7 +10,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-jp-surface text-gray-900">
       <DashboardSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6">{children}</main>
         <footer className="flex flex-col gap-2 border-t border-jp-border bg-white px-4 py-4 text-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
