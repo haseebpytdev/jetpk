@@ -1,6 +1,6 @@
 # Dashboard Page Map (Legacy → `/testdash`)
 
-Phase: **JETPK-DASH-01**
+Phase: **JETPK-DASH-02**
 
 ## Architecture authority
 
@@ -12,7 +12,7 @@ Phase: **JETPK-DASH-01**
 
 | Status | Meaning |
 |--------|---------|
-| **live** | Implemented in Next DASH-01 |
+| **live** | Implemented in Next (DASH-01 overview, DASH-02 bookings) |
 | **planned** | Nav stub / placeholder page |
 | **n/a** | No Laravel equivalent; mock-only |
 
@@ -28,7 +28,7 @@ Phase: **JETPK-DASH-01**
 | Sidebar label | Laravel route(s) | Testdash path | Status |
 |---------------|------------------|---------------|--------|
 | Dashboard | `admin.dashboard` | `/testdash` | **live** |
-| Bookings | `admin.bookings` / `staff.bookings.index` | `/testdash/planned/bookings` | planned |
+| Bookings | `admin.bookings` / `staff.bookings.index` | `/testdash/bookings` | **live** |
 | Flight search | `flights.search` | `/testdash/planned/flights` | planned (public search) |
 | Customers | `admin.customers.index` | `/testdash/planned/customers` | planned |
 | Suppliers | `admin.api-settings` | `/testdash/planned/suppliers` | planned |
