@@ -1,0 +1,134 @@
+{
+  "payload_style": "bfm_revalidate_v1",
+  "endpoint_path": "/v4/shop/flights/revalidate",
+  "api_draft": {
+    "provider": "sabre",
+    "validating_carrier": "QR",
+    "fare": { "amount": 520.83, "currency": "USD" },
+    "segments": [
+      {
+        "origin": "LHE",
+        "destination": "DOH",
+        "departure_at": "2026-09-01T02:15:00",
+        "arrival_at": "2026-09-01T04:30:00",
+        "carrier": "QR",
+        "flight_number": "615",
+        "booking_class": "S",
+        "fare_basis_code": "SLOW1",
+        "segment_cabin_code": "Y"
+      },
+      {
+        "origin": "DOH",
+        "destination": "JED",
+        "departure_at": "2026-09-01T06:00:00",
+        "arrival_at": "2026-09-01T08:15:00",
+        "carrier": "QR",
+        "flight_number": "1184",
+        "booking_class": "S",
+        "fare_basis_code": "SLOW2",
+        "segment_cabin_code": "Y"
+      }
+    ],
+    "passengers": [{ "type": "ADT", "first_name": "A", "last_name": "B" }],
+    "_sabre_shop_identifiers": { "pseudo_city_code": "TEST" }
+  },
+  "response": {
+    "groupedItineraryResponse": {
+      "statistics": {
+        "itineraryCount": 31,
+        "messages": [
+          {
+            "type": "INFO",
+            "severity": "INFO",
+            "code": "PROCESS",
+            "text": "Completed processing."
+          }
+        ]
+      },
+      "scheduleDescs": [
+        {
+          "ref": 1,
+          "departure": { "airport": "LHE", "time": "02:15:00" },
+          "arrival": { "airport": "DOH", "time": "04:30:00" },
+          "carrier": { "marketing": "QR", "marketingFlightNumber": "615" }
+        },
+        {
+          "ref": 2,
+          "departure": { "airport": "DOH", "time": "06:00:00" },
+          "arrival": { "airport": "JED", "time": "08:15:00" },
+          "carrier": { "marketing": "QR", "marketingFlightNumber": "1184" }
+        }
+      ],
+      "legDescs": [
+        { "ref": 1, "schedules": [{ "ref": 1 }] },
+        { "ref": 2, "schedules": [{ "ref": 2 }] }
+      ],
+      "itineraryGroups": [
+        {
+          "itineraries": [
+            {
+              "id": "candidate-1",
+              "legs": [{ "ref": 1 }, { "ref": 2 }],
+              "pricingInformation": [
+                {
+                  "fare": {
+                    "validatingCarrierCode": "QR",
+                    "totalFare": { "totalPrice": 400.0, "currencyCode": "USD" },
+                    "passengerInfoList": [
+                      {
+                        "passengerInfo": {
+                          "fareComponents": [
+                            {
+                              "segments": [
+                                { "segment": { "bookingCode": "X", "fareBasisCode": "WRONG1", "cabinCode": "Y" } },
+                                { "segment": { "bookingCode": "X", "fareBasisCode": "WRONG2", "cabinCode": "Y" } }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "candidate-2",
+              "legs": [{ "ref": 1 }, { "ref": 2 }],
+              "pricingInformation": [
+                {
+                  "fare": {
+                    "validatingCarrierCode": "QR",
+                    "totalFare": { "totalPrice": 520.83, "currencyCode": "USD" },
+                    "passengerInfoList": [
+                      {
+                        "passengerInfo": {
+                          "fareComponents": [
+                            {
+                              "segments": [
+                                { "segment": { "bookingCode": "S", "fareBasisCode": "SLOW1", "cabinCode": "Y" } },
+                                { "segment": { "bookingCode": "S", "fareBasisCode": "SLOW2", "cabinCode": "Y" } }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "response_structure": {
+    "top_level_keys": "groupedItineraryResponse",
+    "key_paths": "",
+    "empty_body": "false",
+    "json_valid": "true",
+    "candidate_fields": "totalFare",
+    "candidate_count": "31"
+  }
+}

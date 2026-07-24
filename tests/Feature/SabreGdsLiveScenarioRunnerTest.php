@@ -14,7 +14,9 @@ use App\Models\SupplierConnection;
 use App\Support\Sabre\GdsPnrCreate\SabreGdsAutoPnrContextCompletionService;
 use App\Support\Sabre\GdsPnrCreate\SabreGdsPnrCreateStrategyRegistry;
 use App\Support\Sabre\GdsPnrCreate\SabreGdsPnrCreateStrategySelector;
+use App\Support\Sabre\Scenario\SabreGdsLiveScenarioRevalidationGate;
 use App\Support\Sabre\Scenario\SabreGdsLiveScenarioRunner;
+use Tests\Support\Sabre\AlwaysSuccessfulScenarioRevalidationGate;
 use App\Support\Sabre\Scenario\SabreGdsLiveScenarioMulticityClassifier;
 use App\Support\Sabre\Scenario\SabreGdsLiveScenarioPresetResolver;
 use App\Support\Sabre\Scenario\SabreGdsLiveScenarioRunnerPassengerLoader;
@@ -152,7 +154,7 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
         Config::set('suppliers.sabre.public_auto_pnr_enabled', false);
 
         $booking = $this->makePkDirectStaleFareScenarioBooking();
-        $this->fakeSabreShopAndPnr();
+        $this->fakeSabreShopAndPnr(82485);
         $attemptsBefore = SupplierBookingAttempt::query()->where('booking_id', $booking->id)->count();
 
         $result = app(SabreGdsLiveScenarioRunnerPnrExecutor::class)->execute($booking, true);
@@ -209,9 +211,9 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
         $this->assertSame('iati_like_cpnr_v2_4_gds', $selection['strategy_option'] ?? null);
     }
 
-    public function test_iati_scenario_runner_skips_bfm_revalidation_when_revalidation_enabled(): void
+    public function test_iati_scenario_runner_blocks_pnr_when_mandatory_revalidation_fails(): void
     {
-        $this->configureScenarioRunnerSabre();
+        $this->configureScenarioRunnerSabre(false);
         Config::set('suppliers.sabre.revalidate_before_booking', true);
         Config::set('suppliers.sabre.pnr_only_waive_mandatory_revalidation', false);
 
@@ -223,20 +225,13 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
             if (str_contains($url, $tokenPath) || (is_array($payload) && array_key_exists('grant_type', $payload))) {
                 return Http::response(['access_token' => 'fake-token-for-tests-only', 'expires_in' => 1800], 200);
             }
-            if (str_contains($url, 'revalidate') || str_contains($url, 'offers/shop')) {
+            if (str_contains($url, 'revalidate')) {
                 $revalidationCalled = true;
 
                 return Http::response([], 400);
             }
             if (str_contains($url, 'passenger/records')) {
-                $this->assertStringContainsString('v2.4.0', $url);
-
-                return Http::response([
-                    'CreatePassengerNameRecordRS' => [
-                        'ApplicationResults' => ['status' => 'Complete'],
-                        'ItineraryRef' => ['ID' => 'SCNR02'],
-                    ],
-                ], 200);
+                $this->fail('PNR create must not run when mandatory revalidation fails.');
             }
 
             return Http::response([], 404);
@@ -245,20 +240,15 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
         $booking = $this->makePkDirectStaleFareScenarioBooking();
         $result = app(SabreGdsLiveScenarioRunnerPnrExecutor::class)->execute($booking, true);
 
-        $this->assertFalse($revalidationCalled);
-        $this->assertSame(
-            SabreGdsPnrCreateStrategyRegistry::STRATEGY_IATI_LIKE_CPNR_V2_4_GDS,
-            $result['selected_strategy'] ?? null,
-        );
-        $this->assertTrue(($result['live_call_attempted'] ?? false) === true);
-        $this->assertFalse($result['revalidation_attempted'] ?? true);
-        $this->assertSame(1, SupplierBookingAttempt::query()->where('booking_id', $booking->id)->count());
+        $this->assertFalse($result['live_call_attempted'] ?? true);
+        $this->assertFalse($result['freshness_satisfied'] ?? true);
+        $this->assertSame(0, SupplierBookingAttempt::query()->where('booking_id', $booking->id)->count());
     }
 
     public function test_scenario_runner_override_persisted_in_safe_summary_and_checkout_outcome(): void
     {
         $this->configureScenarioRunnerSabre();
-        $this->fakeSabreShopAndPnr();
+        $this->fakeSabreShopAndPnr(82485);
         $booking = $this->makePkDirectStaleFareScenarioBooking();
 
         $result = app(SabreGdsLiveScenarioRunnerPnrExecutor::class)->execute($booking, true);
@@ -334,7 +324,7 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
     public function test_repaired_return_context_reaches_one_pnr_create_attempt(): void
     {
         $this->configureScenarioRunnerSabre();
-        $this->fakeSabreShopAndPnr();
+        $this->fakeSabreShopAndPnr(210000);
         $booking = $this->makeScenarioRunnerReadyReturnBooking();
 
         $result = app(SabreGdsLiveScenarioRunnerPnrExecutor::class)->execute($booking, true);
@@ -567,13 +557,14 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
         $this->assertStringContainsString('cancel_approval_required', Artisan::output());
     }
 
-    protected function configureScenarioRunnerSabre(): void
+    protected function configureScenarioRunnerSabre(bool $stubRevalidationSuccess = true): void
     {
         Config::set('app.env', 'testing');
         Config::set('suppliers.sabre.booking_enabled', true);
         Config::set('suppliers.sabre.booking_live_call_enabled', true);
         Config::set('suppliers.sabre.pnr_create_enabled', true);
-        Config::set('suppliers.sabre.revalidate_before_booking', false);
+        Config::set('suppliers.sabre.revalidate_before_booking', true);
+        Config::set('suppliers.sabre.revalidate_path', '/v4/shop/flights/revalidate');
         Config::set('suppliers.sabre.refresh_offer_before_public_pnr', false);
         Config::set('suppliers.sabre.ticketing_enabled', false);
         Config::set('suppliers.sabre.certified_route_selector_public_checkout_enabled', false);
@@ -581,6 +572,20 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
         Config::set('suppliers.sabre.booking_schema', 'create_passenger_name_record');
         Config::set('suppliers.sabre.pnr_only_waive_mandatory_revalidation', true);
         Config::set('suppliers.sabre.admin_manual_pnr_enabled', true);
+
+        if ($stubRevalidationSuccess) {
+            $this->bindSuccessfulScenarioRevalidationGate();
+        }
+    }
+
+    protected function bindSuccessfulScenarioRevalidationGate(): void
+    {
+        $this->app->instance(
+            SabreGdsLiveScenarioRevalidationGate::class,
+            new AlwaysSuccessfulScenarioRevalidationGate,
+        );
+        $this->app->forgetInstance(SabreGdsLiveScenarioRunner::class);
+        $this->app->forgetInstance(\App\Support\Sabre\Scenario\SabreGdsLiveScenarioRunnerPnrExecutor::class);
     }
 
     protected function makeScenarioRunnerReadyDirectBooking(): Booking
@@ -799,9 +804,9 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
         ]);
     }
 
-    protected function fakeSabreShopAndPnr(): void
+    protected function fakeSabreShopAndPnr(?float $revalidateTotal = 450.5): void
     {
-        Http::fake(function (Request $request, array $options) {
+        Http::fake(function (Request $request, array $options) use ($revalidateTotal) {
             $url = strtolower($request->url());
             $payload = $options['laravel_data'] ?? [];
             $tokenPath = strtolower((string) config('suppliers.sabre.token_path', '/v2/auth/token'));
@@ -810,6 +815,24 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
             }
             if (str_contains($url, 'v4/offers/shop')) {
                 return Http::response($this->shopFixtureWithBookingCode('Y'), 200);
+            }
+            if (str_contains($url, 'revalidate')) {
+                return Http::response([
+                    'pricedItineraries' => [[
+                        'airItineraryPricingInfo' => [
+                            'fareInfos' => [[
+                                'fareBasisCode' => 'YOWPK',
+                                'departureAirport' => 'LHE',
+                                'arrivalAirport' => 'DXB',
+                                'bookingCode' => 'Y',
+                            ]],
+                            'validatingCarrier' => 'PK',
+                            'itinTotalFare' => [
+                                'totalFare' => ['totalPrice' => $revalidateTotal, 'currencyCode' => 'PKR'],
+                            ],
+                        ],
+                    ]],
+                ], 200);
             }
             if (str_contains($url, 'passenger/records')) {
                 return Http::response([
@@ -874,6 +897,7 @@ class SabreGdsLiveScenarioRunnerTest extends TestCase
         );
         $this->assertIsArray($shopFixture);
         data_set($shopFixture, 'groupedItineraryResponse.itineraryGroups.0.itineraries.0.pricingInformation.0.fare.bookingCode', $bookingCode);
+        data_set($shopFixture, 'groupedItineraryResponse.itineraryGroups.0.itineraries.0.pricingInformation.0.fare.passengerInfoList.0.passengerInfo.fareComponents.0.segments.0.segment.bookingCode', $bookingCode);
 
         return $shopFixture;
     }

@@ -108,7 +108,7 @@
 <div class="jp-card">
     <div class="jp-card__head"><h2 class="jp-card__title">Financial performance</h2></div>
     <div class="jp-kpis jp-kpis--compact">
-        <div class="jp-kpi"><div class="jp-kpi__v">{{ ota_money($financial['gross_sales'] ?? 0) }}</div><div class="jp-kpi__l">Gross sales</div></div>
+        <div class="jp-kpi"><div class="jp-kpi__v">{{ ota_money($financial['gross_sales'] ?? 0) }}</div><div class="jp-kpi__l">Gross booking value</div></div>
         <div class="jp-kpi"><div class="jp-kpi__v">{{ ota_money($financial['net_revenue'] ?? 0) }}</div><div class="jp-kpi__l">Net revenue</div></div>
         <div class="jp-kpi"><div class="jp-kpi__v">{{ ota_money($financial['markup_revenue'] ?? 0) }}</div><div class="jp-kpi__l">Markup revenue</div></div>
         <div class="jp-kpi"><div class="jp-kpi__v">{{ ota_money($financial['refund_paid'] ?? 0) }}</div><div class="jp-kpi__l">Refund paid</div></div>

@@ -1021,7 +1021,7 @@
             <div class="row g-3 mb-3 ota-kpi-responsive-row ota-kpi-responsive-row--six" data-testid="ota-financial-kpis">
                 @php
                     $finCards = [
-                        ['Gross sales', ota_money($financial['gross_sales'] ?? 0), 'All bookings, total ticket value'],
+                        ['Gross booking value', ota_money($financial['gross_sales'] ?? 0), 'Non-cancelled bookings, total ticket value'],
                         ['Net revenue', ota_money($financial['net_revenue'] ?? 0), 'Markup + fees - discount'],
                         ['Markup revenue', ota_money($financial['markup_revenue'] ?? 0), 'Operator margin'],
                         ['Service fees', ota_money($financial['service_fees'] ?? 0), 'Booking fees collected'],

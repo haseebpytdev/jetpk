@@ -326,10 +326,14 @@ final class SabreCancelBookingInspectProbe
             $postCancel = $this->postCancelVerificationForBooking($booking);
             $payload['post_cancel_get_booking'] = $postCancel;
             $payload['cancel_outcome_classification'] = $this->classifyCancelOutcome($httpResult, $postCancel);
-        }
-
-        if ($payload['live_call_attempted'] === true) {
-            $this->recordProbeAttempt($booking, $connection, $selected, $httpResult);
+            $this->recordProbeAttempt(
+                $booking,
+                $connection,
+                $selected,
+                $httpResult,
+                $postCancel,
+                (string) $payload['cancel_outcome_classification'],
+            );
         }
 
         return SensitiveDataRedactor::redact($payload);
@@ -1635,6 +1639,14 @@ final class SabreCancelBookingInspectProbe
     /**
      * @return array<string, mixed>
      */
+    public function sanitizedPostCancelVerificationForBooking(Booking $booking): array
+    {
+        return $this->postCancelVerificationForBooking($booking);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     protected function postCancelVerificationForBooking(Booking $booking): array
     {
         $fetch = $this->pnrRetrieveProbe->fetchTripOrdersGetBooking($booking);
@@ -1679,7 +1691,9 @@ final class SabreCancelBookingInspectProbe
             $airPathCount = $this->sumSafePathCounts($row['possible_air_item_paths'] ?? []);
             $segmentPathCount = $this->sumSafePathCounts($row['possible_segment_paths'] ?? []);
             $segmentCount = $segmentPathCount > 0 ? $segmentPathCount : $airPathCount;
-            $ticketNumbersPresent = (bool) ($inspectSummary->extractDirectCancelSafetyFlags($json)['ticket_numbers_present'] ?? false);
+            $safetyFlags = $inspectSummary->extractDirectCancelSafetyFlags($json);
+            $ticketNumbersPresent = (bool) ($safetyFlags['ticket_numbers_present'] ?? false);
+            $postCancelIsTicketed = $safetyFlags['is_ticketed'] ?? null;
             $pnrShellPresent = ((int) ($statusSummary['traveler_count'] ?? 0) > 0)
                 || ((int) ($statusSummary['fare_count'] ?? 0) > 0)
                 || ((int) ($statusSummary['remark_count'] ?? 0) > 0)
@@ -1692,6 +1706,10 @@ final class SabreCancelBookingInspectProbe
             $summary['post_cancel_segment_count'] = $segmentCount;
             $summary['post_cancel_pnr_shell_present'] = $pnrShellPresent;
             $summary['post_cancel_ticket_numbers_present'] = $ticketNumbersPresent;
+            if ($postCancelIsTicketed !== null) {
+                $summary['post_cancel_is_ticketed'] = $postCancelIsTicketed === true;
+            }
+            $summary['verification_timestamp'] = now()->toIso8601String();
             $summary['cancel_air_segments_removed'] = $httpStatus >= 200
                 && $httpStatus < 300
                 && $segmentCount === 0
@@ -1765,12 +1783,20 @@ final class SabreCancelBookingInspectProbe
     /**
      * @param  array{style: string, body: array<string, mixed>, primary_identifier_source: string}  $selected
      * @param  array<string, mixed>  $httpResult
+     * @param  array<string, mixed>  $postCancel
      */
-    protected function recordProbeAttempt(Booking $booking, SupplierConnection $connection, array $selected, array $httpResult): void
-    {
+    protected function recordProbeAttempt(
+        Booking $booking,
+        SupplierConnection $connection,
+        array $selected,
+        array $httpResult,
+        array $postCancel,
+        string $cancelOutcomeClassification,
+    ): void {
         $diag = is_array($httpResult['booking_diagnostics'] ?? null) ? $httpResult['booking_diagnostics'] : [];
         $httpStatus = (int) ($httpResult['http_status'] ?? 0);
         $access = SabreBookingService::discoveryAccessResultForProbe($httpStatus, null);
+        $cancelProbe = $this->safeCancelProbeSummary($httpResult);
 
         $probeSanitized = SabreCancelProbeDiagnostics::cancelProbeSliceFromDigest($diag);
 
@@ -1823,6 +1849,18 @@ final class SabreCancelBookingInspectProbe
                 ),
                 'response_error_details_sanitized' => $probeSanitized['response_error_details_sanitized'],
                 'validation_missing_fields_sanitized' => $probeSanitized['validation_missing_fields_sanitized'],
+                'cancel_http_success' => $httpStatus >= 200 && $httpStatus < 300,
+                'cancel_ack_state' => (string) ($cancelProbe['status'] ?? 'unknown'),
+                'cancel_outcome_classification' => $cancelOutcomeClassification,
+                'classification' => $cancelOutcomeClassification,
+                'post_cancel_segment_count' => (int) ($postCancel['post_cancel_segment_count'] ?? 0),
+                'post_cancel_air_segments_present' => ($postCancel['post_cancel_air_segments_present'] ?? false) === true,
+                'cancel_air_segments_removed' => ($postCancel['cancel_air_segments_removed'] ?? false) === true,
+                'post_cancel_ticket_numbers_present' => ($postCancel['post_cancel_ticket_numbers_present'] ?? false) === true,
+                'post_cancel_is_ticketed' => array_key_exists('post_cancel_is_ticketed', $postCancel)
+                    ? ($postCancel['post_cancel_is_ticketed'] === true)
+                    : null,
+                'verification_timestamp' => (string) ($postCancel['verification_timestamp'] ?? now()->toIso8601String()),
             ]),
             'attempted_by' => null,
             'attempted_at' => now(),

@@ -276,7 +276,7 @@ class FlightOfferFallbackDetailsPresenter
 
     protected static function nullableString(mixed $value): ?string
     {
-        if ($value === null) {
+        if ($value === null || is_array($value) || is_object($value)) {
             return null;
         }
         $trimmed = trim((string) $value);

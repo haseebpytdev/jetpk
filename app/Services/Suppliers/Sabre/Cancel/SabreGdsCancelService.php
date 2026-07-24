@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\DB;
  */
 final class SabreGdsCancelService
 {
+    /** @var array<string, mixed> */
+    private array $currentCancelExecutionContext = [];
+
     public function __construct(
         private readonly SabreBookingCancelService $bookingCancelService,
         private readonly SabreGdsCancelReadiness $readiness,
@@ -80,8 +83,11 @@ final class SabreGdsCancelService
         }
 
         try {
+            $this->currentCancelExecutionContext = $executionContext;
+
             return $this->runLockedCancel($booking, $operatorConfirmed, $executionContext, $lock);
         } finally {
+            $this->currentCancelExecutionContext = [];
             $lock->release();
         }
     }
@@ -129,11 +135,24 @@ final class SabreGdsCancelService
         array $executionContext,
     ): array {
         $booking->refresh();
-        $syncSlice = $this->postCancelSync($booking);
+        $syncSlice = ($executionContext['skip_post_cancel_retrieve'] ?? false) === true
+            ? [
+                'attempted' => false,
+                'skipped' => true,
+                'reason' => 'deferred_to_qr_unticketed_retrieve_phase',
+            ]
+            : $this->postCancelSync($booking);
         $segmentStatuses = $this->extractSegmentStatuses($booking, $syncSlice, $outcome);
 
         $persisted = $this->persistCancelMeta($booking, $outcome, $classification, $segmentStatuses, $syncSlice);
         $this->writeAdminAudit($booking, $executionContext, $persisted);
+
+        if (($executionContext['defer_local_cancellation_closure'] ?? false) !== true) {
+            app(SabreGdsCancellationReconciliationService::class)->reconcileFromStoredEvidence(
+                $booking->fresh(),
+                array_merge($executionContext, ['source' => 'sabre_gds_cancel_finalize']),
+            );
+        }
 
         return array_merge($outcome, [
             'sabre_gds_cancel' => $persisted,
@@ -293,6 +312,10 @@ final class SabreGdsCancelService
             $booking->forceFill(['meta' => $meta])->save();
         });
 
+        if (($this->currentCancelExecutionContext['skip_internal_cancel_booking_attempt_rows'] ?? false) === true) {
+            return;
+        }
+
         SupplierBookingAttempt::query()->create([
             'agency_id' => $booking->agency_id,
             'booking_id' => $booking->id,
@@ -315,6 +338,10 @@ final class SabreGdsCancelService
      */
     protected function completeInProgressAttempt(Booking $booking, string $terminalStatus, array $outcome): void
     {
+        if (($this->currentCancelExecutionContext['skip_internal_cancel_booking_attempt_rows'] ?? false) === true) {
+            return;
+        }
+
         SupplierBookingAttempt::query()
             ->where('booking_id', $booking->id)
             ->where('provider', SupplierProvider::Sabre->value)
@@ -354,6 +381,10 @@ final class SabreGdsCancelService
                     'classification' => $this->resolveClassification($outcome),
                 ]);
                 $booking->forceFill(['meta' => $meta])->save();
+            }
+
+            if (($this->currentCancelExecutionContext['skip_internal_cancel_booking_attempt_rows'] ?? false) === true) {
+                return;
             }
 
             SupplierBookingAttempt::query()

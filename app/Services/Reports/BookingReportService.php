@@ -45,15 +45,21 @@ class BookingReportService
             ]);
         }
 
+        $grossSalesQuery = $this->grossSalesBookingsQuery($baseQuery);
+
         $summary = [
-            'gross_sales' => $this->sumFare((clone $baseQuery), 'fare.total'),
+            'gross_sales' => $this->sumFare((clone $grossSalesQuery), 'fare.total'),
             'net_revenue' => $this->sumNetRevenue((clone $baseQuery)),
             'total_bookings' => (clone $baseQuery)->count(),
             'ticketed_bookings' => (clone $baseQuery)->where('status', BookingStatus::Ticketed)->count(),
             'pending_bookings' => (clone $baseQuery)->where('status', BookingStatus::Pending)->count(),
             'cancelled_bookings' => (clone $baseQuery)->where('status', BookingStatus::Cancelled)->count(),
-            'agent_sales' => $this->sumFare((clone $baseQuery)->whereNotNull('bookings.agent_id'), 'fare.total'),
-            'direct_customer_sales' => $this->sumFare((clone $baseQuery)->whereNull('bookings.agent_id'), 'fare.total'),
+            'cancelled_booking_value' => $this->sumFare(
+                (clone $baseQuery)->where('bookings.status', BookingStatus::Cancelled),
+                'fare.total',
+            ),
+            'agent_sales' => $this->sumFare((clone $grossSalesQuery)->whereNotNull('bookings.agent_id'), 'fare.total'),
+            'direct_customer_sales' => $this->sumFare((clone $grossSalesQuery)->whereNull('bookings.agent_id'), 'fare.total'),
             'refund_paid_amount' => $this->refundPaidAmount($user, $filters),
             'pending_refund_count' => $this->pendingRefundCount($user, $filters),
             'cancellation_count' => (clone $baseQuery)->whereNotNull('bookings.cancellation_status')->count(),
@@ -66,7 +72,7 @@ class BookingReportService
         ];
 
         $monthExpr = $this->monthExpression('bookings.created_at');
-        $monthlySales = (clone $baseQuery)
+        $monthlySales = (clone $grossSalesQuery)
             ->leftJoin('booking_fare_breakdowns as fare', 'fare.booking_id', '=', 'bookings.id')
             ->selectRaw("{$monthExpr} as month")
             ->selectRaw('COUNT(bookings.id) as bookings')
@@ -305,6 +311,14 @@ class BookingReportService
         }
     }
 
+    /**
+     * Gross booking value: non-cancelled bookings only (excludes cancelled ticket value from sales KPIs).
+     */
+    protected function grossSalesBookingsQuery(Builder $baseQuery): Builder
+    {
+        return (clone $baseQuery)->where('bookings.status', '!=', BookingStatus::Cancelled);
+    }
+
     protected function sumFare(Builder $query, string $column): float
     {
         return (float) $query
@@ -420,7 +434,7 @@ class BookingReportService
     {
         $monthExpr = $this->monthExpression('bookings.created_at');
 
-        return (clone $baseQuery)
+        return $this->grossSalesBookingsQuery($baseQuery)
             ->leftJoin('booking_fare_breakdowns as fare', 'fare.booking_id', '=', 'bookings.id')
             ->selectRaw("{$monthExpr} as period")
             ->selectRaw('COUNT(bookings.id) as bookings')
@@ -612,7 +626,7 @@ class BookingReportService
      */
     protected function buildAgentPerformance(Builder $baseQuery): Collection
     {
-        $agentRows = (clone $baseQuery)
+        $agentRows = $this->grossSalesBookingsQuery($baseQuery)
             ->whereNotNull('bookings.agent_id')
             ->leftJoin('booking_fare_breakdowns as fare', 'fare.booking_id', '=', 'bookings.id')
             ->leftJoin('agents', 'agents.id', '=', 'bookings.agent_id')

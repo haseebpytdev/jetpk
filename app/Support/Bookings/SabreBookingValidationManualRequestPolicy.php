@@ -138,13 +138,20 @@ final class SabreBookingValidationManualRequestPolicy
             '/airprice/',
             'object instance has properties',
             'sabre booking validation failed:',
+            'sabre validation failed',
             'json schema',
+            'requestorid',
+            'invalid rbd',
         ];
 
         foreach ($needles as $needle) {
             if (str_contains($lower, $needle)) {
                 return true;
             }
+        }
+
+        if (preg_match('/\b(?:pcc|targetcity)\s*[:=]/i', $text) === 1) {
+            return true;
         }
 
         return false;

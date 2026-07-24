@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Services\Booking\BookingActionStateService;
 use App\Services\Booking\BookingProviderRouter;
 use App\Services\Booking\BookingService;
-use App\Services\Suppliers\SupplierBookingService;
 use App\Services\Suppliers\TicketingService;
 use App\Support\Bookings\AdminBookingSupplierActions;
 use App\Support\Bookings\AdminSabreDiagnosticPanelsPresenter;
@@ -36,7 +35,6 @@ class BookingController extends Controller
     public function __construct(
         protected BookingService $bookingService,
         protected BookingActionStateService $bookingActionStateService,
-        protected SupplierBookingService $supplierBookingService,
         protected BookingProviderRouter $bookingProviderRouter,
         protected TicketingService $ticketingService,
         protected AdminBookingSupplierActions $adminBookingSupplierActions,
@@ -116,7 +114,7 @@ class BookingController extends Controller
             ->limit(25)
             ->get();
 
-        $supplierBookingEligible = $this->supplierBookingService->isBookingEligible($booking);
+        $supplierBookingEligible = $this->bookingProviderRouter->isBookingEligible($booking);
         $ticketingEligible = $this->ticketingService->isBookingEligibleForTicketing($booking);
 
         $staffShowView = client_view_exists('bookings.show', 'staff')
@@ -157,7 +155,7 @@ class BookingController extends Controller
 
         $postBlock = $this->adminBookingSupplierActions->assertSupplierBookingPostAllowed(
             $booking,
-            $this->supplierBookingService->isBookingEligible($booking),
+            $this->bookingProviderRouter->isBookingEligible($booking),
         );
         if ($postBlock !== null) {
             return back()->withErrors(['supplier_booking' => $postBlock]);
@@ -188,7 +186,7 @@ class BookingController extends Controller
         ]);
 
         try {
-            $this->supplierBookingService->markManualPnr(
+            $this->bookingProviderRouter->markManualPnr(
                 $booking,
                 $request->user(),
                 (string) $validated['pnr'],

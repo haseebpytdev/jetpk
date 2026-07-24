@@ -1,0 +1,33 @@
+{
+  "http_status": 400,
+  "payload_style": "iati_like_bfm_revalidate_v1",
+  "endpoint_path": "/v4/shop/flights/revalidate",
+  "response_structure": {
+    "top_level_keys": "status,timeStamp,server,type,errorCode,message,additionalMessages",
+    "key_paths": "",
+    "empty_body": "false",
+    "json_valid": "true",
+    "candidate_fields": "",
+    "candidate_count": "0"
+  },
+  "body": {
+    "status": "Incomplete",
+    "timeStamp": "2026-07-20T10:15:30Z",
+    "server": "Sabre",
+    "type": "Validation",
+    "errorCode": "ERR.2SG.INVALID.REQUEST",
+    "message": "Revalidation request failed validation for OTA_AirLowFareSearchRQ.OriginDestinationInformation",
+    "additionalMessages": [
+      {
+        "type": "Warning",
+        "errorCode": "WARN.REVALIDATE.LINKAGE",
+        "message": "Missing fare component reference in pricingInformation"
+      },
+      {
+        "type": "Error",
+        "errorCode": "ERR.REVALIDATE.UNSUPPORTED",
+        "message": "Unsupported element in TravelPreferences.TPA_Extensions"
+      }
+    ]
+  }
+}

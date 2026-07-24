@@ -46,6 +46,8 @@ class AgencyDashboardService
                     'ticketed_bookings' => 0,
                     'unpaid_partial_bookings' => 0,
                     'gross_sales' => 0,
+                    'paid_sales' => 0,
+                    'ticketed_sales' => 0,
                     'markup_revenue' => 0,
                     'agent_sales' => 0,
                     'direct_customer_sales' => 0,
@@ -75,10 +77,16 @@ class AgencyDashboardService
             'pending_bookings' => (clone $baseQuery)->where('status', BookingStatus::Pending)->count(),
             'ticketed_bookings' => (clone $baseQuery)->where('status', BookingStatus::Ticketed)->count(),
             'unpaid_partial_bookings' => (clone $baseQuery)->whereIn('payment_status', ['unpaid', 'partial'])->count(),
-            'gross_sales' => $this->sumFareColumn($baseQuery, 'total'),
-            'markup_revenue' => $this->sumFareColumn($baseQuery, 'markup'),
-            'agent_sales' => $this->sumFareForChannel($baseQuery, true),
-            'direct_customer_sales' => $this->sumFareForChannel($baseQuery, false),
+            'gross_sales' => $this->sumFareColumn($this->grossSalesBookingsQuery($baseQuery), 'total'),
+            'paid_sales' => $this->sumFareColumn($this->paidSalesBookingsQuery($baseQuery), 'total'),
+            'ticketed_sales' => $this->sumFareColumn($this->ticketedSalesBookingsQuery($baseQuery), 'total'),
+            'markup_revenue' => $this->sumFareColumn($this->grossSalesBookingsQuery($baseQuery), 'markup'),
+            'agent_sales' => $this->sumFareForChannel($this->grossSalesBookingsQuery($baseQuery), true),
+            'direct_customer_sales' => $this->sumFareForChannel($this->grossSalesBookingsQuery($baseQuery), false),
+            'cancelled_booking_value' => $this->sumFareColumn(
+                (clone $baseQuery)->where('bookings.status', BookingStatus::Cancelled),
+                'total',
+            ),
             'cancellation_count' => (clone $baseQuery)->whereNotNull('cancellation_status')->count(),
             'refund_amount_paid' => $this->refundPaidAmount($user),
             'pending_refund_count' => $this->pendingRefundCount($user),
@@ -253,6 +261,25 @@ class AgencyDashboardService
         }
 
         return $query;
+    }
+
+    /**
+     * Gross booking value KPI: active pipeline only (excludes cancelled bookings).
+     */
+    protected function grossSalesBookingsQuery(Builder $baseQuery): Builder
+    {
+        return (clone $baseQuery)->where('bookings.status', '!=', BookingStatus::Cancelled);
+    }
+
+    protected function paidSalesBookingsQuery(Builder $baseQuery): Builder
+    {
+        return $this->grossSalesBookingsQuery($baseQuery)
+            ->where('bookings.payment_status', 'paid');
+    }
+
+    protected function ticketedSalesBookingsQuery(Builder $baseQuery): Builder
+    {
+        return (clone $baseQuery)->where('bookings.status', BookingStatus::Ticketed);
     }
 
     protected function scopedNotesQuery(User $user): Builder

@@ -48,6 +48,7 @@ final class SabreGdsLiveScenarioRunnerBookingFactory
         array $candidate,
         ?array $selectedFareFamilyOption,
         ?string $fareOptionKey,
+        ?SabreGdsAuthoritativeRevalidatedBookingContext $authoritativeContext = null,
     ): Booking {
         $agency = Agency::query()->where('slug', 'asif-travels')->first()
             ?? Agency::query()->orderBy('id')->firstOrFail();
@@ -61,6 +62,7 @@ final class SabreGdsLiveScenarioRunnerBookingFactory
             $row,
             $selectedFareFamilyOption,
             $fareOptionKey,
+            $authoritativeContext,
         );
         $snap = $prepared['snap'];
         $handoff = $prepared['handoff'];
@@ -125,6 +127,9 @@ final class SabreGdsLiveScenarioRunnerBookingFactory
             'status' => BookingStatus::Pending,
             'booking_reference' => $this->referenceGenerator->generateUnique('bookings', 'booking_reference', 8),
             'submitted_at' => now(),
+            'meta' => $authoritativeContext !== null
+                ? $authoritativeContext->mergeIntoBookingMeta(is_array($booking->meta) ? $booking->meta : $prepared['meta'])
+                : $prepared['meta'],
         ])->save();
 
         return $booking->fresh([
@@ -199,7 +204,11 @@ final class SabreGdsLiveScenarioRunnerBookingFactory
         array $row,
         ?array $selectedFareFamilyOption,
         ?string $fareOptionKey,
+        ?SabreGdsAuthoritativeRevalidatedBookingContext $authoritativeContext = null,
     ): array {
+        if ($authoritativeContext !== null) {
+            $snap = $authoritativeContext->normalizedOfferSnapshot;
+        }
         $snap['supplier_provider'] = SupplierProvider::Sabre->value;
         $snap['supplier_connection_id'] = $connection->id;
 

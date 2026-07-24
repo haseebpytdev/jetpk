@@ -2,13 +2,20 @@
 
 namespace App\Support\Sabre\Scenario;
 
+use App\Enums\BookingCommunicationEvent;
+use App\Enums\BookingStatus;
 use App\Enums\SupplierProvider;
+use App\Models\AuditLog;
 use App\Models\Booking;
+use App\Models\CommunicationLog;
+use App\Models\SupplierBooking;
 use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\Sabre\Booking\SabreBookingService;
 use App\Services\Suppliers\Sabre\Cancel\SabreGdsCancelService;
+use App\Services\Suppliers\Sabre\Cancel\SabreGdsCancellationReconciliationService;
 use App\Services\Suppliers\Sabre\PnrRetrieve\SabrePnrItinerarySyncService;
+use App\Services\Communication\BookingCommunicationService;
 use App\Support\Bookings\SabrePnrCertificationSupport;
 use App\Support\Bookings\SupplierBookingAttemptGuard;
 use App\Support\Sabre\GdsPnrCreate\SabreGdsAutoPnrContextCompletionService;
@@ -40,6 +47,10 @@ final class SabreGdsLiveScenarioRunner
         protected SabreGdsLiveScenarioMulticityShopService $multicityShop,
         protected SabrePnrItinerarySyncService $pnrSync,
         protected SabreGdsCancelService $cancelService,
+        protected SabreGdsCancellationReconciliationService $cancellationReconciliation,
+        protected SabreGdsLiveScenarioRevalidationGate $revalidationGate,
+        protected SabreGdsLiveScenarioRevalidationOutcomeMapper $revalidationOutcomeMapper,
+        protected BookingCommunicationService $communicationService,
         protected SabrePnrCertificationSupport $certificationSupport,
         protected SupplierBookingAttemptGuard $attemptGuard,
     ) {}
@@ -87,12 +98,12 @@ final class SabreGdsLiveScenarioRunner
             }
             try {
                 $passengerBundle = $this->passengerLoader->loadFromPath($passengerPath);
-            } catch (\InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException) {
                 return $this->finalizeRun($runId, [
                     'run_id' => $runId,
                     'mode' => $mode,
                     'error' => 'passenger_json_invalid',
-                    'reason' => $e->getMessage(),
+                    'reason_code' => SabreGdsLiveScenarioRunnerPassengerLoader::REASON_VALIDATION_FAILED,
                 ]);
             }
         }
@@ -179,28 +190,73 @@ final class SabreGdsLiveScenarioRunner
             }
 
             if ($mode === 'plan') {
-                $scenarioResults[] = [
+                $pick = $this->offerCatalog->pickCandidate($search['eligible'], $farePick);
+                $candidates = $this->offerCatalog->buildPlanSummaries(
+                    $search['eligible'],
+                    $scenario,
+                    $planCandidateLimit,
+                    [
+                        'mixed_carrier_certification_approved' => $mixedCertApproved,
+                        'connection' => $connection,
+                        'shop_captured_at' => $search['shop_captured_at'] ?? null,
+                    ],
+                );
+                /** @var array{row: array<string, mixed>, snap: array<string, mixed>}|null $pickedCandidate */
+                $pickedCandidate = is_array($pick['candidate'] ?? null) ? $pick['candidate'] : null;
+                $selectedFareFamilyOption = is_array($pick['selected_fare_family_option'] ?? null)
+                    ? $pick['selected_fare_family_option']
+                    : null;
+                $selectedIndex = $pickedCandidate !== null
+                    ? $this->offerCatalog->findSelectedCandidateIndex(
+                        $search['eligible'],
+                        $pickedCandidate,
+                        $connection,
+                        $selectedFareFamilyOption,
+                    )
+                    : null;
+                $selectedSummary = $selectedIndex !== null ? ($candidates[$selectedIndex] ?? null) : null;
+                $selectedEvidence = $pickedCandidate !== null
+                    ? app(SabreGdsLiveScenarioExactOfferEvidence::class)->buildPlanCandidateEvidence(
+                        $connection,
+                        is_array($pickedCandidate['snap'] ?? null) ? $pickedCandidate['snap'] : [],
+                        is_array($pickedCandidate['row'] ?? null) ? $pickedCandidate['row'] : [],
+                        $selectedFareFamilyOption,
+                        is_string($search['shop_captured_at'] ?? null) ? $search['shop_captured_at'] : null,
+                    )
+                    : [];
+
+                $scenarioResults[] = array_merge([
                     'scenario' => $this->safeScenarioLabel($scenario),
                     'shop_http_status' => $search['shop_http_status'],
+                    'shop_captured_at' => $search['shop_captured_at'] ?? null,
                     'normalized_offer_count' => $search['normalized_offer_count'],
                     'eligible_offer_count' => count($search['eligible']),
-                    'candidates' => $this->offerCatalog->buildPlanSummaries(
-                        $search['eligible'],
-                        $scenario,
-                        $planCandidateLimit,
-                        [
-                            'mixed_carrier_certification_approved' => $mixedCertApproved,
-                            'connection' => $connection,
-                        ],
-                    ),
+                    'candidates' => $candidates,
+                    'selected_candidate_index' => $selectedIndex,
+                    'selected_candidate' => $selectedSummary,
+                    'selected_total' => $selectedEvidence['selected_total'] ?? null,
+                    'selected_currency' => $selectedEvidence['currency'] ?? null,
+                    'selected_offer_fingerprint' => $selectedEvidence['safe_offer_fingerprint'] ?? null,
+                    'offer_identifier_present' => ($selectedEvidence['offer_identifier_present'] ?? false) === true,
+                    'source_identifier_hash_present' => ($selectedEvidence['source_identifier_hash_present'] ?? false) === true,
+                    'source_identifier_hash_length' => $selectedEvidence['source_identifier_hash_length'] ?? 0,
+                    'segment_signature_present' => ($selectedEvidence['segment_signature_present'] ?? false) === true,
+                    'segment_signature_length' => $selectedEvidence['segment_signature_length'] ?? 0,
+                    'revalidation_linkage_ready' => ($selectedEvidence['revalidation_linkage_ready'] ?? false) === true,
+                    'revalidation_linkage_missing_components' => $selectedEvidence['revalidation_linkage_missing_components'] ?? [],
                     'booking_created' => false,
                     'pnr_attempted' => false,
-                ];
+                ]);
 
                 continue;
             }
 
-            $pick = $this->offerCatalog->pickCandidate($search['eligible'], $farePick);
+            $candidateIndex = array_key_exists('candidate_index', $options)
+                ? (int) $options['candidate_index']
+                : null;
+            $pick = $candidateIndex !== null
+                ? $this->offerCatalog->pickCandidateByIndex($search['eligible'], $candidateIndex)
+                : $this->offerCatalog->pickCandidate($search['eligible'], $farePick);
             if (($pick['selection_error'] ?? null) !== null || ($pick['candidate'] ?? null) === null) {
                 $scenarioResults[] = [
                     'scenario' => $this->safeScenarioLabel($scenario),
@@ -238,6 +294,64 @@ final class SabreGdsLiveScenarioRunner
             $offerSnap = is_array($candidate['snap'] ?? null) ? $candidate['snap'] : [];
             $offerSnap['supplier_provider'] = SupplierProvider::Sabre->value;
             $offerSnap['supplier_connection_id'] = $connection->id;
+            $selectedFareFamilyOption = is_array($pick['selected_fare_family_option'] ?? null)
+                ? $pick['selected_fare_family_option']
+                : null;
+            $exactOfferEvidence = app(SabreGdsLiveScenarioExactOfferEvidence::class);
+            $continuityEvidence = $exactOfferEvidence->buildLinkageContext(
+                $connection,
+                $offerSnap,
+                $row,
+                $selectedFareFamilyOption,
+                is_string($search['shop_captured_at'] ?? null) ? $search['shop_captured_at'] : null,
+            );
+            $expectedFingerprint = (string) ($continuityEvidence['safe_offer_fingerprint'] ?? '');
+            if (($continuityEvidence['revalidation_linkage_ready'] ?? false) !== true) {
+                $scenarioResults[] = array_merge([
+                    'scenario' => $this->safeScenarioLabel($scenario),
+                    'shop_http_status' => $search['shop_http_status'],
+                    'error' => SabreGdsLiveScenarioExactOfferEvidence::REASON_EXACT_OFFER_LINKAGE_UNAVAILABLE,
+                    'safe_reason_code' => SabreGdsLiveScenarioExactOfferEvidence::REASON_EXACT_OFFER_LINKAGE_UNAVAILABLE,
+                    'booking_created' => false,
+                    'pnr_attempted' => false,
+                    'selected_total' => $continuityEvidence['selected_total'] ?? null,
+                    'selected_currency' => $continuityEvidence['currency'] ?? null,
+                    'selected_offer_fingerprint' => $expectedFingerprint !== '' ? $expectedFingerprint : null,
+                    'offer_identifier_present' => ($continuityEvidence['offer_identifier_present'] ?? false) === true,
+                    'source_identifier_hash_present' => ($continuityEvidence['source_identifier_hash_present'] ?? false) === true,
+                    'segment_signature_present' => ($continuityEvidence['segment_signature_present'] ?? false) === true,
+                    'revalidation_linkage_ready' => false,
+                    'revalidation_linkage_missing_components' => $continuityEvidence['revalidation_linkage_missing_components'] ?? [],
+                ]);
+
+                continue;
+            }
+
+            $continuityMismatch = $exactOfferEvidence->assertContinuityMatch(
+                $continuityEvidence,
+                $connection,
+                $offerSnap,
+                $row,
+                $selectedFareFamilyOption,
+                is_string($search['shop_captured_at'] ?? null) ? $search['shop_captured_at'] : null,
+            );
+            if ($continuityMismatch !== null) {
+                $scenarioResults[] = [
+                    'scenario' => $this->safeScenarioLabel($scenario),
+                    'shop_http_status' => $search['shop_http_status'],
+                    'error' => $continuityMismatch,
+                    'safe_reason_code' => $continuityMismatch,
+                    'booking_created' => false,
+                    'pnr_attempted' => false,
+                    'selected_total' => $continuityEvidence['selected_total'] ?? null,
+                    'selected_currency' => $continuityEvidence['currency'] ?? null,
+                    'selected_offer_fingerprint' => $expectedFingerprint,
+                    'revalidation_linkage_ready' => true,
+                ];
+
+                continue;
+            }
+
             $gate = app(SabreBookingService::class)->validateNormalizedSabreOffer($offerSnap);
             if (! $gate->success) {
                 $scenarioResults[] = [
@@ -250,6 +364,76 @@ final class SabreGdsLiveScenarioRunner
                 continue;
             }
 
+            $selectedTotal = (float) ($continuityEvidence['selected_total']
+                ?? $pick['selected_fare_family_option']['displayed_price']
+                ?? $pick['selected_fare_family_option']['price_total']
+                ?? $row['total_fare']
+                ?? 0);
+            $selectedCurrency = is_string($continuityEvidence['currency'] ?? null)
+                ? (string) $continuityEvidence['currency']
+                : null;
+
+            $revalidationEvidence = $this->revalidationGate->revalidateSelectedOffer(
+                $connection,
+                $offerSnap,
+                $passengerBundle,
+                $selectedTotal,
+                null,
+                [
+                    'expected_fingerprint' => $expectedFingerprint,
+                    'expected_source_identifier_hash' => $continuityEvidence['source_identifier_hash'] ?? null,
+                    'expected_segment_signature' => $continuityEvidence['segment_signature'] ?? null,
+                    'selected_currency' => $selectedCurrency,
+                    'shop_captured_at' => $search['shop_captured_at'] ?? null,
+                    'offer_source' => $continuityEvidence['offer_source'] ?? null,
+                    'revalidation_linkage_ready' => ($continuityEvidence['revalidation_linkage_ready'] ?? false) === true,
+                    'continuity_evidence' => $continuityEvidence,
+                    'continuity_row' => $row,
+                    'selected_fare_family_option' => $selectedFareFamilyOption,
+                ],
+            );
+            if (! $this->revalidationProceeds($revalidationEvidence, $options)) {
+                $scenarioResults[] = array_merge([
+                    'scenario' => $this->safeScenarioLabel($scenario),
+                    'booking_created' => false,
+                    'pnr_attempted' => false,
+                ], $this->revalidationOutcomeFields($revalidationEvidence, $selectedCurrency, $expectedFingerprint, $continuityEvidence));
+
+                continue;
+            }
+
+            $authoritativeContext = null;
+            $preCreateDiagnostics = [];
+            $lifecycleDedicated = ($options['lifecycle_dedicated'] ?? false) === true;
+            if ($lifecycleDedicated && $passengerBundle !== null) {
+                $handoff = app(SabreGdsQrUnticketedBookAndRetrieveRevalidationHandoff::class);
+                $authoritativeContext = $handoff->buildAuthoritativeContext(
+                    $connection,
+                    $offerSnap,
+                    $revalidationEvidence,
+                    $continuityEvidence,
+                    $passengerBundle,
+                    is_string($options['lifecycle_run_id'] ?? null) ? (string) $options['lifecycle_run_id'] : null,
+                );
+                $preCreateDiagnostics = $handoff->validateFinalOffer(
+                    $authoritativeContext,
+                    $revalidationEvidence,
+                    $passengerBundle,
+                );
+                if (($preCreateDiagnostics['final_offer_validation_success'] ?? false) !== true) {
+                    $scenarioResults[] = array_merge([
+                        'scenario' => $this->safeScenarioLabel($scenario),
+                        'booking_created' => false,
+                        'pnr_attempted' => false,
+                        'live_call_attempted' => false,
+                        'safe_reason_code' => (string) ($preCreateDiagnostics['final_offer_validation_reason_code'] ?? 'final_offer_validation_failed'),
+                        'error' => (string) ($preCreateDiagnostics['final_offer_validation_reason_code'] ?? 'final_offer_validation_failed'),
+                    ], $preCreateDiagnostics, $this->revalidationOutcomeFields($revalidationEvidence, $selectedCurrency, $expectedFingerprint, $continuityEvidence));
+
+                    continue;
+                }
+            }
+
             $booking = $this->bookingFactory->create(
                 $connection,
                 $scenario,
@@ -257,7 +441,16 @@ final class SabreGdsLiveScenarioRunner
                 $candidate,
                 is_array($pick['selected_fare_family_option'] ?? null) ? $pick['selected_fare_family_option'] : null,
                 is_string($pick['fare_option_key'] ?? null) ? $pick['fare_option_key'] : null,
+                $authoritativeContext,
             );
+            $this->revalidationGate->persistOnBooking($booking, $revalidationEvidence);
+            if ($preCreateDiagnostics !== []) {
+                $meta = is_array($booking->meta) ? $booking->meta : [];
+                $meta['qr_unticketed_pre_create_diagnostics'] = $preCreateDiagnostics;
+                $meta['pre_create_gate_complete'] = true;
+                $meta['booking_row_created_at_stage'] = 'post_pre_create_gate';
+                $booking->forceFill(['meta' => $meta])->save();
+            }
             $bookingsCreated++;
 
             $guard = $this->attemptGuard->assertRetryAllowed($booking, SupplierProvider::Sabre->value);
@@ -288,26 +481,75 @@ final class SabreGdsLiveScenarioRunner
             ]), $operatorApproved, [
                 'strategy' => strtolower(trim((string) ($options['strategy'] ?? 'auto'))) ?: 'auto',
                 'mixed_carrier_certification_approved' => $mixedCertApproved,
+                'lifecycle_dedicated' => $lifecycleDedicated,
+                'lifecycle_run_id' => is_string($options['lifecycle_run_id'] ?? null) ? (string) $options['lifecycle_run_id'] : null,
+                'authoritative_revalidated_context' => $authoritativeContext?->toArray(),
+                'skip_redundant_revalidation' => $authoritativeContext !== null,
             ]);
 
             $booking->refresh();
-            $retrieveResult = null;
-            $cancelResult = null;
-            $cancellationAttempted = false;
-
             $pnr = trim((string) ($pnrResult['pnr'] ?? $booking->pnr ?? ''));
-            if ($pnr !== '' && in_array($mode, ['book-and-retrieve', 'book-retrieve-and-cancel'], true)) {
-                $retrieveResult = $this->pnrSync->sync($booking->fresh(), false);
-                $booking->refresh();
+            if ($pnr !== '' && ($pnrResult['live_call_attempted'] ?? false) === true) {
+                $this->communicationService->sendSupplierBookingCreated($booking->fresh());
             }
 
-            if ($mode === 'book-retrieve-and-cancel' && $pnr !== '' && $cancelApproval === self::CANCEL_APPROVAL_PHRASE) {
+            $retrieveResult = null;
+            $retrieveResult2 = null;
+            $cancelResult = null;
+            $reconcileResult = null;
+            $reconcileResult2 = null;
+            $cancellationAttempted = false;
+            $segmentCountBeforeCancel = null;
+            $supplierBookingCreatedCommsAfterCreate = null;
+            $supplierBookingCreatedCommsAfterSecondRetrieve = null;
+
+            if ($pnr !== '' && in_array($mode, ['book-and-retrieve', 'book-retrieve-and-cancel'], true)) {
+                $denyLocators = array_map(
+                    static fn (string $code): string => strtoupper(trim($code)),
+                    is_array($options['deny_locators'] ?? null) ? $options['deny_locators'] : [],
+                );
+                if ($denyLocators !== [] && in_array(strtoupper($pnr), $denyLocators, true)) {
+                    $retrieveResult = [
+                        'success' => false,
+                        'reason_code' => 'denylisted_locator',
+                    ];
+                } else {
+                    $retrieveResult = $this->pnrSync->sync($booking->fresh(), false);
+                }
+                $booking->refresh();
+                $supplierBookingCreatedCommsAfterCreate = $this->countSupplierBookingCreatedComms($booking);
+
+                if (($options['single_retrieve_only'] ?? false) !== true) {
+                    $retrieveResult2 = $this->pnrSync->sync($booking->fresh(), false);
+                    $booking->refresh();
+                    $supplierBookingCreatedCommsAfterSecondRetrieve = $this->countSupplierBookingCreatedComms($booking);
+                }
+            }
+
+            if ($mode === 'book-retrieve-and-cancel'
+                && ($options['lifecycle_dedicated'] ?? false) !== true
+                && $pnr !== ''
+                && $cancelApproval === self::CANCEL_APPROVAL_PHRASE) {
+                $segmentCountBeforeCancel = $this->resolveActiveSegmentCount($booking);
                 $cancellationAttempted = true;
                 $cancelResult = $this->cancelService->cancelForBooking($booking->fresh(), true, [
                     'source' => 'sabre_gds_live_scenario_runner',
                     'run_id' => $runId,
                 ]);
                 $booking->refresh();
+                if (($cancelResult['success'] ?? false) === true) {
+                    $reconcileResult = $this->cancellationReconciliation->reconcileFromStoredEvidence($booking->fresh(), [
+                        'source' => 'sabre_gds_live_scenario_runner',
+                        'run_id' => $runId,
+                    ]);
+                    $booking->refresh();
+                    $reconcileResult2 = $this->cancellationReconciliation->reconcileFromStoredEvidence($booking->fresh(), [
+                        'source' => 'sabre_gds_live_scenario_runner',
+                        'run_id' => $runId,
+                        'phase' => 'idempotency_proof',
+                    ]);
+                    $booking->refresh();
+                }
             }
 
             $scenarioResults[] = $this->buildBookingResultSlice(
@@ -318,11 +560,39 @@ final class SabreGdsLiveScenarioRunner
                 $pick,
                 $candidate,
                 [
+                    'revalidation_attempted' => ($revalidationEvidence['revalidation_attempted'] ?? false) === true,
+                    'revalidation_success' => ($revalidationEvidence['revalidation_success'] ?? false) === true,
+                    'revalidated_total' => $revalidationEvidence['revalidated_total'] ?? null,
+                    'fare_changed' => ($revalidationEvidence['fare_changed'] ?? false) === true,
+                    'revalidation_at' => $revalidationEvidence['revalidation_at'] ?? null,
+                    'selected_currency' => $selectedCurrency,
+                    'revalidated_currency' => $revalidationEvidence['revalidated_currency'] ?? null,
+                    'selected_offer_fingerprint' => $expectedFingerprint,
+                    'revalidation_linkage_ready' => ($revalidationEvidence['revalidation_linkage_ready'] ?? $continuityEvidence['revalidation_linkage_ready'] ?? false) === true,
+                    'offer_identifiers' => $this->sanitizeOfferIdentifiers($offerSnap),
                     'retrieve_attempted' => $retrieveResult !== null,
-                    'retrieve_success' => ($retrieveResult['success'] ?? false) === true,
+                    'retrieve_success' => $this->isRetrieveSuccessful($retrieveResult),
+                    'retrieve_attempt_2' => $retrieveResult2 !== null,
+                    'retrieve_success_2' => $this->isRetrieveSuccessful($retrieveResult2),
+                    'supplier_booking_created_comm_count_after_create' => $supplierBookingCreatedCommsAfterCreate,
+                    'supplier_booking_created_comm_count_after_second_retrieve' => $supplierBookingCreatedCommsAfterSecondRetrieve,
                     'cancellation_attempted' => $cancellationAttempted,
                     'cancellation_success' => ($cancelResult['success'] ?? false) === true,
                     'cancellation_reason_code' => $cancelResult['reason_code'] ?? null,
+                    'cancellation_classification' => data_get($cancelResult, 'post_cancel_verification.classification')
+                        ?? data_get($cancelResult, 'sabre_gds_cancel.classification')
+                        ?? ($cancelResult['classification'] ?? null),
+                    'segment_count_before_cancel' => $segmentCountBeforeCancel,
+                    'segment_count_after_cancel' => data_get($cancelResult, 'sabre_gds_cancel.post_cancel_segment_count')
+                        ?? data_get($cancelResult, 'post_cancel_sync.post_cancel_segment_count'),
+                    'reconciliation_success' => ($reconcileResult['success'] ?? false) === true,
+                    'reconciliation_already_reconciled_on_second_run' => ($reconcileResult2['already_reconciled'] ?? false) === true,
+                    'closure_verification' => $this->buildClosureVerification(
+                        $booking,
+                        $cancelResult,
+                        $reconcileResult,
+                        $reconcileResult2,
+                    ),
                 ],
             );
         }
@@ -563,6 +833,27 @@ final class SabreGdsLiveScenarioRunner
     }
 
     /**
+     * @param  array<string, mixed>  $revalidationEvidence
+     * @param  array<string, mixed>  $continuityEvidence
+     * @return array<string, mixed>
+     */
+    protected function revalidationOutcomeFields(
+        array $revalidationEvidence,
+        ?string $selectedCurrency,
+        string $expectedFingerprint,
+        array $continuityEvidence,
+    ): array {
+        return array_merge(
+            $this->revalidationOutcomeMapper->extractScenarioResultFields($revalidationEvidence),
+            array_filter([
+                'selected_currency' => $selectedCurrency,
+                'selected_offer_fingerprint' => $expectedFingerprint !== '' ? $expectedFingerprint : null,
+                'revalidation_linkage_ready' => ($continuityEvidence['revalidation_linkage_ready'] ?? $revalidationEvidence['revalidation_linkage_ready'] ?? false) === true,
+            ], static fn ($value) => $value !== null),
+        );
+    }
+
+    /**
      * @param  array<string, mixed>  $scenario
      */
     protected function safeScenarioLabel(array $scenario): string
@@ -640,6 +931,180 @@ final class SabreGdsLiveScenarioRunner
     }
 
     /**
+     * @param  array<string, mixed>|null  $retrieveResult
+     */
+    protected function isRetrieveSuccessful(?array $retrieveResult): bool
+    {
+        if ($retrieveResult === null) {
+            return false;
+        }
+
+        return ($retrieveResult['synced'] ?? false) === true
+            || ($retrieveResult['success'] ?? false) === true;
+    }
+
+    /**
+     * @param  array<string, mixed>  $offerSnap
+     * @return array<string, mixed>
+     */
+    protected function sanitizeOfferIdentifiers(array $offerSnap): array
+    {
+        return array_filter([
+            'supplier_offer_id' => is_scalar($offerSnap['supplier_offer_id'] ?? null)
+                ? (string) $offerSnap['supplier_offer_id']
+                : null,
+            'offer_id' => is_scalar($offerSnap['offer_id'] ?? null)
+                ? (string) $offerSnap['offer_id']
+                : null,
+            'validating_carrier' => is_scalar($offerSnap['validating_carrier'] ?? null)
+                ? (string) $offerSnap['validating_carrier']
+                : null,
+            'distribution_channel' => is_scalar($offerSnap['distribution_channel'] ?? null)
+                ? (string) $offerSnap['distribution_channel']
+                : null,
+            'supplier_connection_id' => isset($offerSnap['supplier_connection_id']) && is_numeric($offerSnap['supplier_connection_id'])
+                ? (int) $offerSnap['supplier_connection_id']
+                : null,
+        ], static fn ($value) => $value !== null && $value !== '');
+    }
+
+    protected function countSupplierBookingCreatedComms(Booking $booking): int
+    {
+        return CommunicationLog::query()
+            ->where('booking_id', $booking->id)
+            ->where('event', BookingCommunicationEvent::SupplierBookingCreated->value)
+            ->count();
+    }
+
+    protected function resolveActiveSegmentCount(Booking $booking): ?int
+    {
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $snapshot = is_array($meta['pnr_itinerary_snapshot'] ?? null) ? $meta['pnr_itinerary_snapshot'] : [];
+        $segments = is_array($snapshot['segments'] ?? null) ? $snapshot['segments'] : [];
+        if ($segments !== []) {
+            return count($segments);
+        }
+
+        return isset($snapshot['segment_count']) && is_numeric($snapshot['segment_count'])
+            ? (int) $snapshot['segment_count']
+            : null;
+    }
+
+    protected function resolveIsTicketed(Booking $booking): bool
+    {
+        if ($booking->tickets()->exists()) {
+            return true;
+        }
+
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $syncSidecar = is_array($meta['pnr_itinerary_sync'] ?? null) ? $meta['pnr_itinerary_sync'] : [];
+
+        return ($syncSidecar['is_ticketed'] ?? false) === true;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $cancelResult
+     * @param  array<string, mixed>|null  $reconcileResult
+     * @param  array<string, mixed>|null  $reconcileResult2
+     * @return array<string, mixed>
+     */
+    protected function buildClosureVerification(
+        Booking $booking,
+        ?array $cancelResult,
+        ?array $reconcileResult,
+        ?array $reconcileResult2,
+    ): array {
+        $booking->refresh();
+        $booking->loadMissing(['tickets']);
+
+        $supplierBooking = SupplierBooking::query()
+            ->where('booking_id', $booking->id)
+            ->where('provider', SupplierProvider::Sabre->value)
+            ->first();
+
+        $createAttempts = SupplierBookingAttempt::query()
+            ->where('booking_id', $booking->id)
+            ->where('provider', SupplierProvider::Sabre->value)
+            ->where('action', 'create_pnr')
+            ->count();
+        $cancelAttempts = SupplierBookingAttempt::query()
+            ->where('booking_id', $booking->id)
+            ->where('provider', SupplierProvider::Sabre->value)
+            ->where('action', 'cancel_booking')
+            ->whereIn('status', ['success', 'attempted', 'failed', 'in_progress'])
+            ->count();
+        $ticketAttempts = SupplierBookingAttempt::query()
+            ->where('booking_id', $booking->id)
+            ->where('provider', SupplierProvider::Sabre->value)
+            ->where('action', 'ticket')
+            ->count();
+
+        $supplierCreatedComms = CommunicationLog::query()
+            ->where('booking_id', $booking->id)
+            ->where('event', BookingCommunicationEvent::SupplierBookingCreated->value)
+            ->get(['status']);
+        $cancellationComms = CommunicationLog::query()
+            ->where('booking_id', $booking->id)
+            ->whereIn('event', [
+                BookingCommunicationEvent::BookingCancelled->value,
+                'booking_cancelled',
+            ])
+            ->get(['status']);
+
+        $reconciliationAuditCount = AuditLog::query()
+            ->where('auditable_type', Booking::class)
+            ->where('auditable_id', $booking->id)
+            ->where('action', SabreGdsCancellationReconciliationService::AUDIT_ACTION)
+            ->count();
+        $statusLogCount = $booking->statusLogs()
+            ->where('to_status', BookingStatus::Cancelled->value)
+            ->where('note', 'Sabre GDS cancellation reconciled from stored supplier evidence')
+            ->count();
+
+        return [
+            'booking_status' => (string) ($booking->status->value ?? $booking->status),
+            'supplier_booking_status' => (string) ($booking->supplier_booking_status ?? ''),
+            'cancelled_at_populated' => $booking->cancelled_at !== null,
+            'supplier_booking_row_status' => (string) ($supplierBooking?->status ?? ''),
+            'pnr_preserved' => trim((string) ($booking->pnr ?? '')) !== '',
+            'supplier_reference_preserved' => trim((string) ($booking->supplier_reference ?? '')) !== '',
+            'is_ticketed' => $this->resolveIsTicketed($booking),
+            'ticketing_attempt_count' => $ticketAttempts,
+            'create_pnr_attempt_count' => $createAttempts,
+            'cancel_booking_attempt_count' => $cancelAttempts,
+            'supplier_booking_created_comm_count' => $supplierCreatedComms->count(),
+            'supplier_booking_created_comm_statuses' => $supplierCreatedComms->pluck('status')->values()->all(),
+            'cancellation_comm_count' => $cancellationComms->count(),
+            'cancellation_comm_statuses' => $cancellationComms->pluck('status')->values()->all(),
+            'communication_logs_queued_count' => CommunicationLog::query()
+                ->where('booking_id', $booking->id)
+                ->where('status', 'queued')
+                ->count(),
+            'reconciliation_audit_count' => $reconciliationAuditCount,
+            'cancellation_status_log_count' => $statusLogCount,
+            'reconciliation_success' => ($reconcileResult['success'] ?? false) === true,
+            'reconciliation_already_reconciled_on_second_run' => ($reconcileResult2['already_reconciled'] ?? false) === true,
+            'cancellation_classification' => data_get($cancelResult, 'post_cancel_verification.classification')
+                ?? data_get($cancelResult, 'sabre_gds_cancel.classification')
+                ?? ($cancelResult['classification'] ?? null),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $revalidationEvidence
+     * @param  array<string, mixed>  $options
+     */
+    protected function revalidationProceeds(array $revalidationEvidence, array $options): bool
+    {
+        if (($options['lifecycle_dedicated'] ?? false) === true) {
+            return app(SabreGdsQrUnticketedBookAndRetrieveRevalidationHandoff::class)
+                ->allowsPnrCreate($revalidationEvidence);
+        }
+
+        return $this->revalidationGate->shouldProceed($revalidationEvidence);
+    }
+
+    /**
      * @param  array<string, mixed>  $summary
      * @return array<string, mixed>
      */
@@ -660,7 +1125,9 @@ final class SabreGdsLiveScenarioRunner
 
         $relativePath = 'sabre-gds-scenario-runs/'.$runId.'.json';
         Storage::disk('local')->put($relativePath, json_encode($summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        $summary['output_json_path'] = Storage::disk('local')->path($relativePath);
+        $absolutePath = Storage::disk('local')->path($relativePath);
+        @chmod($absolutePath, 0600);
+        $summary['output_json_path'] = $absolutePath;
 
         return $summary;
     }

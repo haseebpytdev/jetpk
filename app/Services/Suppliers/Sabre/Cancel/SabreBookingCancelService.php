@@ -19,6 +19,9 @@ use App\Support\Security\SensitiveDataRedactor;
  */
 final class SabreBookingCancelService
 {
+    /** @var array<string, mixed> */
+    private array $currentExecutionContext = [];
+
     public const CLASSIFICATION_CANCEL_CONFIRMED = 'CANCEL_CONFIRMED';
 
     public const CLASSIFICATION_CANCEL_CONFIRMED_AIR_SEGMENTS_REMOVED = 'CANCEL_CONFIRMED_AIR_SEGMENTS_REMOVED';
@@ -51,6 +54,20 @@ final class SabreBookingCancelService
      * @return array<string, mixed>
      */
     public function cancelForBooking(Booking $booking, bool $operatorConfirmed = false, array $executionContext = []): array
+    {
+        $this->currentExecutionContext = $executionContext;
+        try {
+            return $this->runCancelForBooking($booking, $operatorConfirmed, $executionContext);
+        } finally {
+            $this->currentExecutionContext = [];
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $executionContext
+     * @return array<string, mixed>
+     */
+    protected function runCancelForBooking(Booking $booking, bool $operatorConfirmed, array $executionContext): array
     {
         $meta = is_array($booking->meta) ? $booking->meta : [];
         $provider = strtolower(trim((string) ($meta['supplier_provider'] ?? $booking->supplier ?? '')));
@@ -570,7 +587,8 @@ final class SabreBookingCancelService
         string $message,
         array $extra = [],
     ): array {
-        if ($selected !== null && ($base['live_call_attempted'] ?? false) === true) {
+        if ($selected !== null && ($base['live_call_attempted'] ?? false) === true
+            && ($this->currentExecutionContext['skip_booking_cancel_service_attempt_row'] ?? false) !== true) {
             $this->recordCancelAttempt($booking, $connection, $selected, $httpResult, $category, $success);
         }
 

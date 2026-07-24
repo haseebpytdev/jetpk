@@ -85,6 +85,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->scoped(CurrentClientContext::class);
         $this->app->scoped(ClientRedirectResolver::class);
+        $this->app->singleton(\App\Support\Sabre\Scenario\SabreGdsScenarioCorrelationRegistry::class);
     }
 
     /**

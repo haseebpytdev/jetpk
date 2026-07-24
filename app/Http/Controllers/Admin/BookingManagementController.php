@@ -24,7 +24,6 @@ use App\Services\Booking\BookingProviderRouter;
 use App\Services\Booking\BookingService;
 use App\Services\Communication\AgencyCommunicationSettingsService;
 use App\Services\Communication\BookingCommunicationService;
-use App\Services\Suppliers\SupplierBookingService;
 use App\Services\Suppliers\TicketingService;
 use App\Support\Bookings\AdminAirBlueDiagnosticPanelsPresenter;
 use App\Support\Bookings\AdminBookingSupplierActions;
@@ -67,7 +66,6 @@ class BookingManagementController extends Controller
 
     public function __construct(
         protected BookingService $bookingService,
-        protected SupplierBookingService $supplierBookingService,
         protected BookingProviderRouter $bookingProviderRouter,
         protected TicketingService $ticketingService,
         protected BookingActionStateService $bookingActionStateService,
@@ -198,7 +196,7 @@ class BookingManagementController extends Controller
 
         $assignableStaff = $this->assignableUsersForAgency(auth()->user(), $booking, staffOnly: true);
 
-        $supplierBookingEligible = $this->supplierBookingService->isBookingEligible($booking);
+        $supplierBookingEligible = $this->bookingProviderRouter->isBookingEligible($booking);
         $ticketingEligible = $this->ticketingService->isBookingEligibleForTicketing($booking);
         $supplierActions = $this->adminBookingSupplierActions->build($booking, $supplierBookingEligible, $ticketingEligible);
 
@@ -351,7 +349,7 @@ class BookingManagementController extends Controller
 
         $postBlock = $this->adminBookingSupplierActions->assertSupplierBookingPostAllowed(
             $booking,
-            $this->supplierBookingService->isBookingEligible($booking),
+            $this->bookingProviderRouter->isBookingEligible($booking),
         );
         if ($postBlock !== null) {
             return back()->withErrors(['supplier_booking' => $postBlock]);
@@ -402,7 +400,7 @@ class BookingManagementController extends Controller
         ]);
 
         try {
-            $this->supplierBookingService->markManualPnr(
+            $this->bookingProviderRouter->markManualPnr(
                 $booking,
                 $request->user(),
                 (string) $validated['pnr'],

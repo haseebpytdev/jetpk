@@ -1,4 +1,4 @@
-*.log
+﻿*.log
 .DS_Store
 .env
 .env.*
@@ -7,6 +7,68 @@
 .env.backup
 .env.production
 .phpactor.json
+auth.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa
+id_rsa.pub
+
+# Dependencies
+/vendor/
+/node_modules/
+/dashboard/node_modules/
+/dashboard/.next/
+/dashboard/out/
+
+# Laravel runtime and generated content
+/storage/*.key
+/storage/app/private/
+/storage/app/audits/
+/storage/app/email-previews/
+/storage/app/staging/
+/storage/app/testing/
+/storage/app/public/*
+!/storage/app/public/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+!/storage/framework/cache/data/
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/framework/testing/
+/storage/logs/*
+!/storage/logs/.gitignore
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# Runtime public storage
+/public/storage
+
+# Local databases and exports
+*.sqlite
+*.sqlite3
+database.sqlite
+*.sql
+*.dump
+*.bak
+*.backup
+
+# Generated documents and customer files
+invoice-*.pdf
+payment_receipt-*.pdf
+refund_note-*.pdf
+booking_confirmation-*.pdf
+cancellation_confirmation-*.pdf
+ticket_itinerary-*.pdf
+test-*.pdf
+
+# Generated testing output
 .phpunit.result.cache
 /.codex
 /.cursor/
@@ -15,14 +77,11 @@
 /.phpunit.cache
 /.vscode
 /.zed
-/auth.json
 /node_modules
 /_tabler_pkg
 /_icons_tmp
 /public/build
 /public/hot
-/public/storage
-/storage/*.key
 /storage/pail
 /vendor
 _ide_helper.php

@@ -310,6 +310,46 @@ class SabreGdsLiveScenarioRunnerCommand extends Command
                     }
                 }
             }
+            foreach ([
+                'revalidation_attempted',
+                'revalidation_success',
+                'freshness_satisfied',
+                'revalidation_reason_code',
+                'revalidation_failure_category',
+                'revalidation_http_status',
+                'supplier_call_attempted',
+                'supplier_response_received',
+                'revalidation_style',
+                'retry_safe',
+                'selected_total',
+                'revalidated_total',
+                'fare_changed',
+                'revalidation_at',
+                'retrieve_attempt_2',
+                'retrieve_success_2',
+                'supplier_booking_created_comm_count_after_create',
+                'supplier_booking_created_comm_count_after_second_retrieve',
+                'cancellation_classification',
+                'segment_count_before_cancel',
+                'segment_count_after_cancel',
+                'reconciliation_success',
+                'reconciliation_already_reconciled_on_second_run',
+            ] as $closureKey) {
+                if (array_key_exists($closureKey, $result)) {
+                    $closureValue = $result[$closureKey];
+                    if (is_bool($closureValue)) {
+                        $this->line($prefix.$closureKey.'='.($closureValue ? 'true' : 'false'));
+                    } elseif ($closureValue !== null) {
+                        $this->line($prefix.$closureKey.'='.(string) $closureValue);
+                    }
+                }
+            }
+            if (isset($result['closure_verification']) && is_array($result['closure_verification'])) {
+                $this->line($prefix.'closure_verification='.json_encode($result['closure_verification'], JSON_UNESCAPED_SLASHES));
+            }
+            if (isset($result['offer_identifiers']) && is_array($result['offer_identifiers'])) {
+                $this->line($prefix.'offer_identifiers='.json_encode($result['offer_identifiers'], JSON_UNESCAPED_SLASHES));
+            }
             if (isset($result['block_reason']) && ($result['block_reason'] ?? null) !== null) {
                 $this->line($prefix.'block_reason='.(string) $result['block_reason']);
             }
@@ -321,6 +361,31 @@ class SabreGdsLiveScenarioRunnerCommand extends Command
             }
             if ($summary['mode'] === 'plan' && isset($result['candidates']) && is_array($result['candidates'])) {
                 $this->line($prefix.'candidate_count='.count($result['candidates']));
+            }
+            foreach ([
+                'selected_candidate_index',
+                'selected_total',
+                'selected_currency',
+                'selected_offer_fingerprint',
+                'offer_identifier_present',
+                'source_identifier_hash_present',
+                'source_identifier_hash_length',
+                'segment_signature_present',
+                'segment_signature_length',
+                'revalidation_linkage_ready',
+                'revalidation_linkage_missing_components',
+            ] as $planKey) {
+                if (! array_key_exists($planKey, $result)) {
+                    continue;
+                }
+                $planValue = $result[$planKey];
+                if (is_bool($planValue)) {
+                    $this->line($prefix.$planKey.'='.($planValue ? 'true' : 'false'));
+                } elseif (is_array($planValue)) {
+                    $this->line($prefix.$planKey.'='.json_encode(array_values($planValue), JSON_UNESCAPED_SLASHES));
+                } elseif ($planValue !== null) {
+                    $this->line($prefix.$planKey.'='.(string) $planValue);
+                }
             }
         }
     }

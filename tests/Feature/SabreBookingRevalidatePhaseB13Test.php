@@ -315,7 +315,8 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
         $this->assertArrayHasKey('pricingInformation', $wire);
         $this->assertArrayHasKey('fare_context', $wire);
         $this->assertArrayHasKey('passenger_counts', $wire);
-        $this->assertIsArray(data_get($wire, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation.0.FlightSegment'));
+        $this->assertIsArray(data_get($wire, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation.0.TPA_Extensions.Flight'));
+        $this->assertNull(data_get($wire, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation.0.FlightSegment'));
     }
 
     public function test_revalidation_payload_includes_segment_class_of_service_and_flight_segment_details(): void
@@ -332,22 +333,25 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
         $payload = $builder->buildPayload($internalDraft);
         $odis = data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation');
         $this->assertIsArray($odis);
-        $this->assertCount(2, $odis);
+        $this->assertCount(1, $odis);
 
-        $firstSeg = $odis[0]['FlightSegment'] ?? [];
+        $firstSeg = data_get($odis, '0.TPA_Extensions.Flight.0');
+        $this->assertIsArray($firstSeg);
         $this->assertSame('LHE', data_get($firstSeg, 'OriginLocation.LocationCode'));
         $this->assertSame('KHI', data_get($firstSeg, 'DestinationLocation.LocationCode'));
-        $this->assertSame('Y', $firstSeg['ResBookDesigCode'] ?? null);
         $this->assertSame('Y', $firstSeg['ClassOfService'] ?? null);
-        $this->assertSame('YOWPK', $firstSeg['FareBasisCode'] ?? null);
-        $this->assertSame('PK', data_get($firstSeg, 'MarketingAirline.Code'));
-        $this->assertSame('303', data_get($firstSeg, 'MarketingAirline.FlightNumber'));
+        $this->assertArrayNotHasKey('ResBookDesigCode', $firstSeg);
+        $this->assertArrayNotHasKey('FareBasisCode', $firstSeg);
+        $this->assertSame('PK', data_get($firstSeg, 'Airline.Marketing'));
+        $this->assertIsString(data_get($firstSeg, 'Airline.Marketing'));
 
-        $secondSeg = $odis[1]['FlightSegment'] ?? [];
+        $secondSeg = data_get($odis, '0.TPA_Extensions.Flight.1');
+        $this->assertIsArray($secondSeg);
         $this->assertSame('KHI', data_get($secondSeg, 'OriginLocation.LocationCode'));
         $this->assertSame('DXB', data_get($secondSeg, 'DestinationLocation.LocationCode'));
-        $this->assertSame('K', $secondSeg['ResBookDesigCode'] ?? null);
-        $this->assertSame('KLITE1', $secondSeg['FareBasisCode'] ?? null);
+        $this->assertSame('K', $secondSeg['ClassOfService'] ?? null);
+        $this->assertArrayNotHasKey('ResBookDesigCode', $secondSeg);
+        $this->assertArrayNotHasKey('FareBasisCode', $secondSeg);
 
         $summary = $builder->safePayloadSummary($payload);
         $this->assertSame(2, $summary['segment_count']);
@@ -1603,12 +1607,14 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
             ->where('provider', SupplierProvider::Sabre->value)
             ->firstOrFail();
         $conn->update([
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         $sabre = $this->app->make(SabreBookingService::class);
+        $draft = $this->sampleInternalDraftWithSegments('Y', 'YOWPK', 'K', 'KLITE1');
+        $draft['supplier_connection_id'] = $conn->id;
         $out = $sabre->runRevalidationBeforeBooking(
-            $this->sampleInternalDraftWithSegments('Y', 'YOWPK', 'K', 'KLITE1'),
+            $draft,
             $conn,
             null,
             $revalidatePath,
@@ -1656,12 +1662,14 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
             ->where('provider', SupplierProvider::Sabre->value)
             ->firstOrFail();
         $conn->update([
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         $sabre = $this->app->make(SabreBookingService::class);
+        $draft = $this->sampleInternalDraftWithSegments('Y', 'YOWPK', 'K', 'KLITE1');
+        $draft['supplier_connection_id'] = $conn->id;
         $out = $sabre->runRevalidationBeforeBooking(
-            $this->sampleInternalDraftWithSegments('Y', 'YOWPK', 'K', 'KLITE1'),
+            $draft,
             $conn,
             null,
             $revalidatePath,
@@ -1683,7 +1691,12 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
             $sabreBase.$tokenPath => Http::response(['access_token' => 'tok-warn', 'expires_in' => 3600], 200),
             $sabreBase.$revalidatePath => Http::response([
                 'warnings' => [
-                    ['code' => 'APP-1', 'title' => 'Warning title', 'detail' => 'Something is off'],
+                    [
+                        'code' => 'APP-BLOCK',
+                        'severity' => 'WARNING',
+                        'title' => 'NO FARES FOR REQUESTED ITINERARY',
+                        'detail' => 'NO FARES',
+                    ],
                 ],
             ], 200),
         ]);
@@ -1694,12 +1707,14 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
             ->where('provider', SupplierProvider::Sabre->value)
             ->firstOrFail();
         $conn->update([
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         $sabre = $this->app->make(SabreBookingService::class);
+        $draft = $this->sampleInternalDraftWithSegments('Y', 'YOWPK', 'K', 'KLITE1');
+        $draft['supplier_connection_id'] = $conn->id;
         $out = $sabre->runRevalidationBeforeBooking(
-            $this->sampleInternalDraftWithSegments('Y', 'YOWPK', 'K', 'KLITE1'),
+            $draft,
             $conn,
             null,
             $revalidatePath,

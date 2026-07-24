@@ -56,6 +56,12 @@ use App\Support\Sabre\GdsPnrCreate\SabreGdsMixedCarrierFareBasisPayloadPreflight
 use App\Support\Sabre\GdsPnrCreate\SabreGdsPnrCreateStrategyEvidenceRecorder;
 use App\Support\Sabre\GdsPnrCreate\SabreGdsPnrCreateStrategyRegistry;
 use App\Support\Sabre\GdsPnrCreate\SabreGdsPnrCreateStrategySelector;
+use App\Support\Sabre\Revalidation\SabreGdsRevalidationApplicationMessageDiagnostics;
+use App\Support\Sabre\Revalidation\SabreGdsRevalidationCanonicalSignatureRuntimePropagation;
+use App\Support\Sabre\Revalidation\SabreGdsRevalidationHttpSupplierErrorSanitizer;
+use App\Support\Sabre\Revalidation\SabreGdsRevalidationLinkageAggregateContract;
+use App\Support\Sabre\Revalidation\SabreGdsRevalidationResponseCandidateLinker;
+use App\Support\Sabre\Revalidation\SabreGdsRevalidationSanitizedOutcomeContract;
 use App\Support\Sabre\SabreCpnrIatiWireSchemaValidator;
 use App\Support\Sabre\SabreHostSellClassifier;
 use App\Support\Sabre\SabreHostSellFingerprint;
@@ -405,6 +411,40 @@ class SabreBookingService
         }
 
         return $tripOrdersMessage;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payloadSchema
+     */
+    protected function revalidationPayloadSchemaBlockMessage(array $payloadSchema, string $styleLabel): string
+    {
+        $reason = (string) ($payloadSchema['payload_schema_reason_code'] ?? 'revalidation_payload_schema_invalid');
+
+        return match ($reason) {
+            SabreRevalidationPayloadBuilder::REASON_INVALID_AIRLINE_MARKETING_TYPE =>
+                'TPA_Extensions.Flight[].Airline.Marketing must be a scalar string on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_INVALID_AIRLINE_OPERATING_TYPE =>
+                'TPA_Extensions.Flight[].Airline.Operating must be a scalar string on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_INVALID_FLIGHTSEGMENT_LOCATION =>
+                'OriginDestinationInformation.FlightSegment is not accepted on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_UNSUPPORTED_FLIGHT_SEGMENT_NUMBER =>
+                'TPA_Extensions.Flight[].SegmentNumber is not accepted on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_UNSUPPORTED_RESBOOKDESIGCODE =>
+                'TPA_Extensions.Flight[].ResBookDesigCode is not accepted on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_UNSUPPORTED_FARE_BASIS_CODE =>
+                'TPA_Extensions.Flight[].FareBasisCode is not accepted on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_UNSUPPORTED_CABIN_CODE =>
+                'TPA_Extensions.Flight[].CabinCode is not accepted on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_UNSUPPORTED_SINGLE_BRANDED_FARE =>
+                'TravelerInfoSummary.PriceRequestInformation.TPA_Extensions.BrandedFareIndicators.singleBrandedFare is not accepted on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_MISSING_OR_INVALID_ROOT_VERSION =>
+                'OTA_AirLowFareSearchRQ.Version is required and must be a non-empty scalar string on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_MISSING_OR_INVALID_REQUESTOR_ID =>
+                'OTA_AirLowFareSearchRQ.POS.Source.RequestorID.ID is required and must be a non-empty scalar string on /v4/shop/flights/revalidate for '.$styleLabel,
+            SabreRevalidationPayloadBuilder::REASON_MISSING_OR_INVALID_PSEUDO_CITY_CODE =>
+                'OTA_AirLowFareSearchRQ.POS.Source.PseudoCityCode is required and must be a non-empty scalar string on /v4/shop/flights/revalidate for '.$styleLabel,
+            default => 'Sabre revalidation payload schema validation failed for '.$styleLabel,
+        };
     }
 
     /**
@@ -2230,6 +2270,10 @@ class SabreBookingService
             'ticketing_enabled_required' => false,
             'scenario_runner_strategy_option' => strtolower(trim((string) ($runnerOptions['strategy'] ?? 'auto'))) ?: 'auto',
         ];
+        if (isset($runnerOptions['qr_unticketed_pre_dispatched_attempt_id'])
+            && is_numeric($runnerOptions['qr_unticketed_pre_dispatched_attempt_id'])) {
+            $options['qr_unticketed_pre_dispatched_attempt_id'] = (int) $runnerOptions['qr_unticketed_pre_dispatched_attempt_id'];
+        }
 
         $result = $this->createBooking(
             $offer,
@@ -2237,6 +2281,9 @@ class SabreBookingService
             $booking->id,
             $options,
         );
+        if (isset($options['qr_unticketed_pre_dispatched_attempt_id'])) {
+            $result['qr_unticketed_pre_dispatched_attempt_id'] = (int) $options['qr_unticketed_pre_dispatched_attempt_id'];
+        }
         $result['source'] = 'scenario_runner';
         $liveAttempted = ($result['live_call_attempted'] ?? false) === true;
         $result = array_merge($result, $this->gdsPnrStrategyResultSlice($strategySelection), [
@@ -5219,36 +5266,44 @@ class SabreBookingService
             }
         } elseif ($status === 'pending_payment_or_ticketing' && ($result['success'] ?? false)) {
             $this->persistLiveSabrePnrOnBooking($booking, $result, null);
-            SupplierBookingAttempt::query()->create([
-                'agency_id' => $booking->agency_id,
-                'booking_id' => $booking->id,
-                'supplier_connection_id' => $attemptConnectionId,
-                'provider' => SupplierProvider::Sabre->value,
-                'action' => 'create_pnr',
-                'status' => 'success',
-                'supplier_reference' => trim((string) ($result['provider_booking_id'] ?? $result['pnr'] ?? '')) !== ''
-                    ? trim((string) ($result['provider_booking_id'] ?? $result['pnr']))
-                    : null,
-                'safe_summary' => $this->appendBookingContextToAttemptSummary(array_merge([
-                    'source' => $attemptSource,
-                    'pnr' => $result['pnr'] ?? null,
-                    'http_status' => $result['http_status'] ?? null,
-                    'provider_status' => $result['provider_status'] ?? null,
-                    'payload_schema' => self::resolvePayloadSchemaForSummary($result),
-                    'booking_schema' => $result['booking_schema'] ?? null,
-                    'ticketing_disabled' => true,
-                    'ticketing_pending' => true,
-                    'live_call_attempted' => true,
-                    'segment_count' => (int) ($result['segment_count'] ?? 0),
-                    'passenger_count' => (int) ($result['passenger_count'] ?? 0),
-                ], self::bookingRevalidationAuditForMeta($result), self::linkageFlagSliceFromResult($result), self::passengerRecordsEndpointSliceFromResult($result), $completionAttemptSlice, array_intersect_key(
-                    $this->resolveEndpointSummaryPreferringBookingResult($result, (int) ($attemptConnectionId ?? 0)),
-                    array_flip(['endpoint_host', 'endpoint_path', 'timeout_seconds', 'connect_timeout_seconds'])
-                )), $result),
-                'attempted_by' => null,
-                'attempted_at' => now(),
-                'completed_at' => now(),
-            ]);
+            $preDispatchedAttemptId = is_numeric($result['qr_unticketed_pre_dispatched_attempt_id'] ?? null)
+                ? (int) $result['qr_unticketed_pre_dispatched_attempt_id']
+                : null;
+            if ($preDispatchedAttemptId !== null && $preDispatchedAttemptId > 0) {
+                app(\App\Support\Sabre\Scenario\SabreGdsQrUnticketedSupplierCreateAttemptRecorder::class)
+                    ->completeFromCheckoutResult($preDispatchedAttemptId, $booking, $result, $attemptSource);
+            } else {
+                SupplierBookingAttempt::query()->create([
+                    'agency_id' => $booking->agency_id,
+                    'booking_id' => $booking->id,
+                    'supplier_connection_id' => $attemptConnectionId,
+                    'provider' => SupplierProvider::Sabre->value,
+                    'action' => 'create_pnr',
+                    'status' => 'success',
+                    'supplier_reference' => trim((string) ($result['provider_booking_id'] ?? $result['pnr'] ?? '')) !== ''
+                        ? trim((string) ($result['provider_booking_id'] ?? $result['pnr']))
+                        : null,
+                    'safe_summary' => $this->appendBookingContextToAttemptSummary(array_merge([
+                        'source' => $attemptSource,
+                        'pnr' => $result['pnr'] ?? null,
+                        'http_status' => $result['http_status'] ?? null,
+                        'provider_status' => $result['provider_status'] ?? null,
+                        'payload_schema' => self::resolvePayloadSchemaForSummary($result),
+                        'booking_schema' => $result['booking_schema'] ?? null,
+                        'ticketing_disabled' => true,
+                        'ticketing_pending' => true,
+                        'live_call_attempted' => true,
+                        'segment_count' => (int) ($result['segment_count'] ?? 0),
+                        'passenger_count' => (int) ($result['passenger_count'] ?? 0),
+                    ], self::bookingRevalidationAuditForMeta($result), self::linkageFlagSliceFromResult($result), self::passengerRecordsEndpointSliceFromResult($result), $completionAttemptSlice, array_intersect_key(
+                        $this->resolveEndpointSummaryPreferringBookingResult($result, (int) ($attemptConnectionId ?? 0)),
+                        array_flip(['endpoint_host', 'endpoint_path', 'timeout_seconds', 'connect_timeout_seconds'])
+                    )), $result),
+                    'attempted_by' => null,
+                    'attempted_at' => now(),
+                    'completed_at' => now(),
+                ]);
+            }
         } elseif ($status === 'failed' && in_array((string) ($result['error_code'] ?? ''), ['sabre_revalidation_failed', 'sabre_revalidation_gatekeeper_failed', 'sabre_gds_fare_validation_failed'], true)) {
             $ep = $this->resolveEndpointSummaryPreferringBookingResult($result, (int) ($attemptConnectionId ?? 0));
             $revSummary = is_array($result['revalidation_payload_summary'] ?? null) ? $result['revalidation_payload_summary'] : [];
@@ -11818,8 +11873,12 @@ class SabreBookingService
         string $failureClass,
         string $freezeFingerprint,
         array $payloadCoverageSummary = [],
+        bool $supplierCallAttempted = true,
+        bool $supplierResponseReceived = true,
+        ?Throwable $transportException = null,
+        ?string $revalidationCorrelationId = null,
     ): array {
-        return [
+        return $this->wrapSanitizedRevalidationOutcome([
             'success' => false,
             'http_status' => $http,
             'duration_ms' => $durationMs,
@@ -11838,7 +11897,116 @@ class SabreBookingService
             'response_structure' => $responseStructure,
             'revalidation_failure_class' => $failureClass,
             'revalidation_freeze_fingerprint' => $freezeFingerprint,
-        ];
+        ], $supplierCallAttempted, $supplierResponseReceived, $transportException, $revalidationCorrelationId);
+    }
+
+    /**
+     * @param  array<string, mixed>  $canonicalNormalization
+     * @param  array<string, mixed>  $preSupplierCanonical
+     * @return array<string, mixed>
+     */
+    protected function canonicalLinkageOutcomeExtras(array $canonicalNormalization, array $preSupplierCanonical): array
+    {
+        return array_filter([
+            'canonical_linkage_normalization' => $canonicalNormalization !== [] ? $canonicalNormalization : null,
+            'revalidation_canonical_linkage_normalization' => $canonicalNormalization !== [] ? $canonicalNormalization : null,
+            'pre_supplier_canonical_linkage_normalization' => $preSupplierCanonical !== [] ? $preSupplierCanonical : null,
+        ], static fn ($value) => $value !== null && $value !== []);
+    }
+
+    /**
+     * @param  array<string, mixed>  $linkageAnalysis
+     * @return array<string, mixed>
+     */
+    protected function safeResponseLinkageDiagnosticsSlice(array $linkageAnalysis): array
+    {
+        return array_filter([
+            'response_candidate_count' => $linkageAnalysis['response_candidate_count'] ?? null,
+            'structurally_eligible_candidate_count' => $linkageAnalysis['structurally_eligible_candidate_count'] ?? null,
+            'exact_segment_signature_match_count' => $linkageAnalysis['exact_segment_signature_match_count'] ?? null,
+            'exact_itinerary_match_count' => $linkageAnalysis['exact_itinerary_match_count'] ?? null,
+            'pricing_compatible_match_count' => $linkageAnalysis['pricing_compatible_match_count'] ?? null,
+            'fare_basis_compatible_match_count' => $linkageAnalysis['fare_basis_compatible_match_count'] ?? null,
+            'booking_class_compatible_match_count' => $linkageAnalysis['booking_class_compatible_match_count'] ?? null,
+            'unique_usable_linkage_match_count' => $linkageAnalysis['unique_usable_linkage_match_count'] ?? null,
+            'ambiguous_linkage_match_count' => $linkageAnalysis['ambiguous_linkage_match_count'] ?? null,
+            'selected_response_candidate_ordinal' => $linkageAnalysis['selected_response_candidate_ordinal'] ?? null,
+            'usable_fare_linkage' => array_key_exists('usable_fare_linkage', $linkageAnalysis) ? (bool) $linkageAnalysis['usable_fare_linkage'] : null,
+            'linkage_failure_reason_code' => $linkageAnalysis['linkage_failure_reason_code'] ?? null,
+            'linkage_missing_components' => $linkageAnalysis['linkage_missing_components'] ?? null,
+            'linkage_conflicting_components' => $linkageAnalysis['linkage_conflicting_components'] ?? null,
+            'pricing_complete' => array_key_exists('pricing_complete', $linkageAnalysis) ? (bool) $linkageAnalysis['pricing_complete'] : null,
+            'selected_fare_basis_complete' => $linkageAnalysis['selected_fare_basis_complete'] ?? null,
+            'draft_fare_basis_complete' => $linkageAnalysis['draft_fare_basis_complete'] ?? null,
+            'candidate_fare_basis_complete' => $linkageAnalysis['candidate_fare_basis_complete'] ?? null,
+            'overall_fare_basis_complete' => $linkageAnalysis['overall_fare_basis_complete'] ?? null,
+            'fare_basis_complete' => $linkageAnalysis['fare_basis_complete'] ?? null,
+            'linkage_aggregate_derivation' => is_array($linkageAnalysis['linkage_aggregate_derivation'] ?? null)
+                ? $linkageAnalysis['linkage_aggregate_derivation']
+                : null,
+            'linkage_normalization_diagnostics' => is_array($linkageAnalysis['linkage_normalization_diagnostics'] ?? null)
+                ? $linkageAnalysis['linkage_normalization_diagnostics']
+                : null,
+            'canonical_linkage_normalization' => is_array($linkageAnalysis['canonical_linkage_normalization'] ?? null)
+                ? $linkageAnalysis['canonical_linkage_normalization']
+                : null,
+        ], static fn ($value) => $value !== null && $value !== []);
+    }
+
+    /**
+     * @param  array<string, mixed>  $linkageAnalysis
+     * @param  array<string, mixed>  $canonicalNormalization
+     * @param  array<string, mixed>  $priorStale
+     * @return array<string, mixed>
+     */
+    protected function enrichLinkageAnalysisWithAuthoritativeAggregates(
+        array $linkageAnalysis,
+        array $canonicalNormalization,
+        array $priorStale = [],
+    ): array {
+        $aggregates = app(SabreGdsRevalidationLinkageAggregateContract::class)->normalize(
+            $linkageAnalysis,
+            $canonicalNormalization,
+            $priorStale,
+        );
+
+        $derivationMeta = array_filter([
+            'aggregate_derivation_inputs' => $aggregates['aggregate_derivation_inputs'],
+            'aggregate_derivation_predicate' => $aggregates['aggregate_derivation_predicate'],
+            'aggregate_derivation_source' => $aggregates['aggregate_derivation_source'],
+            'prior_stale_values' => $aggregates['prior_stale_values'],
+        ], static fn ($value) => $value !== null && $value !== []);
+
+        return array_merge($linkageAnalysis, array_filter([
+            'selected_fare_basis_complete' => $aggregates['selected_fare_basis_complete'],
+            'draft_fare_basis_complete' => $aggregates['draft_fare_basis_complete'],
+            'candidate_fare_basis_complete' => $aggregates['candidate_fare_basis_complete'],
+            'overall_fare_basis_complete' => $aggregates['overall_fare_basis_complete'],
+            'fare_basis_complete' => $aggregates['fare_basis_complete'],
+            'pricing_complete' => $aggregates['pricing_complete'],
+            'usable_fare_linkage' => $aggregates['usable_fare_linkage'],
+            'linkage_aggregate_derivation' => $derivationMeta !== [] ? $derivationMeta : null,
+        ], static fn ($value) => $value !== null));
+    }
+
+    /**
+     * @param  array<string, mixed>  $outcome
+     * @return array<string, mixed>
+     */
+    protected function wrapSanitizedRevalidationOutcome(
+        array $outcome,
+        bool $supplierCallAttempted,
+        bool $supplierResponseReceived,
+        ?Throwable $transportException = null,
+        ?string $revalidationCorrelationId = null,
+    ): array {
+        return SabreGdsRevalidationSanitizedOutcomeContract::wrap(
+            $outcome,
+            $supplierCallAttempted,
+            $supplierResponseReceived,
+            $transportException,
+            $revalidationCorrelationId,
+        );
     }
 
     /**
@@ -11949,6 +12117,7 @@ class SabreBookingService
      * @param  array<string, mixed>  $apiDraft  Internal booking draft (with \_sabre_shop_identifiers)
      * @param  ?string  $payloadStyle  Optional override for {@code SABRE_REVALIDATE_PAYLOAD_STYLE} (local/testing)
      * @param  ?string  $pathOverride  Optional POST path override (local/testing inspect only; production uses config)
+     * @param  array<string, mixed>  $correlatedLogContext  Optional run/search correlation for sanitized HTTP failure logs
      * @return array<string, mixed>
      */
     public function runRevalidationBeforeBooking(
@@ -11958,6 +12127,8 @@ class SabreBookingService
         ?string $pathOverride = null,
         ?int $bookingIdForDiagnostics = null,
         ?string $bookingReference = null,
+        ?string $revalidationCorrelationId = null,
+        array $correlatedLogContext = [],
     ): array {
         $effectiveStyle = $payloadStyle !== null && trim($payloadStyle) !== ''
             ? trim($payloadStyle)
@@ -11970,8 +12141,95 @@ class SabreBookingService
         $wire = $this->revalidationBuilder->wireableRequestPayload($payload);
         $wireRootKeys = array_keys($wire);
         $endpointPath = $this->effectiveRevalidatePathSuffix($pathOverride);
+        $payloadSchema = $this->revalidationBuilder->evaluateRevalidationPayloadSchema($payload, $endpointPath);
         $expectedSegmentCount = count(is_array($apiDraft['segments'] ?? null) ? $apiDraft['segments'] : []);
         $startedAt = microtime(true);
+
+        if (($payloadSchema['revalidation_payload_schema_valid'] ?? true) !== true) {
+            $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
+
+            return $this->revalidationFailureOutcome(
+                http: null,
+                durationMs: $durationMs,
+                reasonCode: (string) ($payloadSchema['payload_schema_reason_code'] ?? 'revalidation_payload_schema_invalid'),
+                message: $this->contextualRevalidationFailureMessage(
+                    'Sabre revalidation blocked by payload schema validation; supplier call was not attempted.',
+                ),
+                payloadSummary: array_merge($payloadSummary, [
+                    'payload_schema_valid' => false,
+                    'payload_schema_reason_code' => $payloadSchema['payload_schema_reason_code'] ?? null,
+                    'root_version_present' => ($payloadSchema['root_version_present'] ?? false) === true,
+                    'root_version_type_valid' => ($payloadSchema['root_version_type_valid'] ?? false) === true,
+                    'root_child_keys' => $payloadSchema['root_child_keys'] ?? [],
+                    'root_target_present' => ($payloadSchema['root_target_present'] ?? false) === true,
+                    'root_target_type_valid' => ($payloadSchema['root_target_type_valid'] ?? true) === true,
+                    'requestor_id_present' => ($payloadSchema['requestor_id_present'] ?? false) === true,
+                    'requestor_id_type_valid' => ($payloadSchema['requestor_id_type_valid'] ?? false) === true,
+                    'requestor_id_non_empty' => ($payloadSchema['requestor_id_non_empty'] ?? false) === true,
+                    'pos_child_keys' => $payloadSchema['pos_child_keys'] ?? [],
+                    'source_child_keys' => $payloadSchema['source_child_keys'] ?? [],
+                    'requestor_id_child_keys' => $payloadSchema['requestor_id_child_keys'] ?? [],
+                    'requestor_id_child_types' => $payloadSchema['requestor_id_child_types'] ?? [],
+                    'requestor_identity_source_present' => ($payloadSchema['requestor_identity_source_present'] ?? false) === true,
+                    'requestor_identity_source_location' => $payloadSchema['requestor_identity_source_location'] ?? null,
+                    'pseudo_city_code_present' => ($payloadSchema['pseudo_city_code_present'] ?? false) === true,
+                    'pseudo_city_code_type_valid' => ($payloadSchema['pseudo_city_code_type_valid'] ?? false) === true,
+                    'pseudo_city_code_non_empty' => ($payloadSchema['pseudo_city_code_non_empty'] ?? false) === true,
+                    'pseudo_city_code_source_present' => ($payloadSchema['pseudo_city_code_source_present'] ?? false) === true,
+                    'pseudo_city_code_source_location' => $payloadSchema['pseudo_city_code_source_location'] ?? null,
+                    'contains_invalid_direct_flight_segment' => ($payloadSchema['contains_invalid_direct_flight_segment'] ?? false) === true,
+                    'airline_marketing_type_valid' => ($payloadSchema['airline_marketing_type_valid'] ?? true) === true,
+                    'airline_operating_type_valid' => ($payloadSchema['airline_operating_type_valid'] ?? true) === true,
+                    'contains_unsupported_segment_number' => ($payloadSchema['contains_unsupported_segment_number'] ?? false) === true,
+                    'contains_unsupported_resbookdesigcode' => ($payloadSchema['contains_unsupported_resbookdesigcode'] ?? false) === true,
+                    'contains_unsupported_fare_basis_code' => ($payloadSchema['contains_unsupported_fare_basis_code'] ?? false) === true,
+                    'contains_unsupported_cabin_code' => ($payloadSchema['contains_unsupported_cabin_code'] ?? false) === true,
+                    'contains_unsupported_single_branded_fare' => ($payloadSchema['contains_unsupported_single_branded_fare'] ?? false) === true,
+                    'unsupported_branded_fare_indicator_keys' => $payloadSchema['unsupported_branded_fare_indicator_keys'] ?? [],
+                    'branded_fare_indicator_child_keys' => $payloadSchema['branded_fare_indicator_child_keys'] ?? [],
+                    'branded_fare_indicator_child_types' => $payloadSchema['branded_fare_indicator_child_types'] ?? [],
+                    'branded_fare_context_present' => ($payloadSchema['branded_fare_context_present'] ?? false) === true,
+                    'branded_fare_context_location' => $payloadSchema['branded_fare_context_location'] ?? null,
+                    'unsupported_flight_child_keys' => $payloadSchema['unsupported_flight_child_keys'] ?? [],
+                    'pricing_context_present' => ($payloadSchema['pricing_context_present'] ?? false) === true,
+                    'fare_component_references_present' => ($payloadSchema['fare_component_references_present'] ?? false) === true,
+                    'booking_class_context_present' => ($payloadSchema['booking_class_context_present'] ?? false) === true,
+                    'booking_class_context_location' => $payloadSchema['booking_class_context_location'] ?? null,
+                    'cabin_context_present' => ($payloadSchema['cabin_context_present'] ?? false) === true,
+                    'cabin_context_location' => $payloadSchema['cabin_context_location'] ?? null,
+                    'fare_basis_context_present' => ($payloadSchema['fare_basis_context_present'] ?? false) === true,
+                    'fare_basis_context_location' => $payloadSchema['fare_basis_context_location'] ?? null,
+                    'invalid_schema_paths' => $payloadSchema['invalid_schema_paths'] ?? [],
+                    'invalid_schema_type_count' => (int) ($payloadSchema['invalid_schema_type_count'] ?? 0),
+                    'origin_destination_child_keys' => $payloadSchema['origin_destination_child_keys'] ?? [],
+                    'flight_child_keys' => $payloadSchema['flight_child_keys'] ?? [],
+                    'airline_child_keys' => $payloadSchema['airline_child_keys'] ?? [],
+                ]),
+                linkage: [],
+                linkageDigest: [],
+                errorDigest: [
+                    'response_error_codes' => [(string) ($payloadSchema['payload_schema_reason_code'] ?? 'revalidation_payload_schema_invalid')],
+                    'response_error_messages' => [$this->revalidationPayloadSchemaBlockMessage($payloadSchema, $styleLabel)],
+                ],
+                styleLabel: $styleLabel,
+                endpointPath: $endpointPath,
+                wireRootKeys: $wireRootKeys,
+                responseStructure: [
+                    'top_level_keys' => '',
+                    'key_paths' => '',
+                    'empty_body' => 'true',
+                    'json_valid' => 'false',
+                    'candidate_fields' => '',
+                    'candidate_count' => '0',
+                ],
+                failureClass: 'payload_schema_invalid',
+                freezeFingerprint: $freezeFingerprint,
+                payloadCoverageSummary: $payloadCoverageSummary,
+                supplierCallAttempted: false,
+                supplierResponseReceived: false,
+                revalidationCorrelationId: $revalidationCorrelationId,
+            );
+        }
 
         try {
             $this->revalidationBuilder->assertGatekeeperOrThrow($payload, $apiDraft);
@@ -12006,8 +12264,13 @@ class SabreBookingService
                 failureClass: 'gatekeeper_failed',
                 freezeFingerprint: $freezeFingerprint,
                 payloadCoverageSummary: $payloadCoverageSummary,
+                supplierCallAttempted: false,
+                supplierResponseReceived: false,
+                revalidationCorrelationId: $revalidationCorrelationId,
             );
         }
+
+        $preSupplierCanonical = app(SabreGdsRevalidationCanonicalSignatureRuntimePropagation::class)->preSupplierHttpDiagnostics($apiDraft);
 
         try {
             $response = $this->sabreClient->postRevalidatePayload($connection, $payload, $pathOverride);
@@ -12018,9 +12281,10 @@ class SabreBookingService
                 'connection_id' => $connection->id,
                 'duration_ms' => $durationMs,
                 'exception_class' => $e::class,
+                'revalidation_correlation_id' => $revalidationCorrelationId,
             ]);
 
-            return [
+            return $this->wrapSanitizedRevalidationOutcome([
                 'success' => false,
                 'http_status' => null,
                 'duration_ms' => $durationMs,
@@ -12043,7 +12307,7 @@ class SabreBookingService
                     'candidate_fields' => '',
                     'candidate_count' => '0',
                 ],
-            ];
+            ], true, false, $e, $revalidationCorrelationId);
         }
 
         $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
@@ -12054,7 +12318,24 @@ class SabreBookingService
         $responseStructure = $this->normalizeRevalidateResponseStructureForOutcome(
             $this->revalidationBuilder->digestRevalidateResponseStructure($rawBody, is_array($json) ? $json : null)
         );
-        $linkage = $this->revalidationBuilder->extractFareLinkage($arr);
+        $applicationMessageDiagnostics = app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->analyze($arr);
+        $selectedContext = app(SabreGdsRevalidationResponseCandidateLinker::class)->buildSelectedContextFromDraft($apiDraft);
+        $declaredCandidateCount = (int) ($responseStructure['candidate_count'] ?? 0);
+        $linkageAnalysis = app(SabreGdsRevalidationResponseCandidateLinker::class)->analyze(
+            $arr,
+            $selectedContext,
+            $declaredCandidateCount > 0 ? $declaredCandidateCount : null,
+        );
+        $canonicalNormalization = app(SabreGdsRevalidationCanonicalSignatureRuntimePropagation::class)->postResponseDiagnostics(
+            $apiDraft,
+            $selectedContext,
+            $linkageAnalysis,
+            $arr,
+        );
+        $linkageAnalysis['canonical_linkage_normalization'] = $canonicalNormalization;
+        $linkageAnalysis = $this->enrichLinkageAnalysisWithAuthoritativeAggregates($linkageAnalysis, $canonicalNormalization);
+        $canonicalOutcomeExtras = $this->canonicalLinkageOutcomeExtras($canonicalNormalization, $preSupplierCanonical);
+        $linkage = [];
         $linkageDigest = $this->revalidationBuilder->linkageDigest($linkage);
         $errorDigest = $response->successful()
             ? []
@@ -12063,14 +12344,34 @@ class SabreBookingService
         $changed27131 = $this->revalidationResponseDeviatesFrom27131Pattern($http, $errorDigest);
 
         if (! $response->successful()) {
-            Log::notice('sabre.revalidate.http_failed', [
-                'provider' => SupplierProvider::Sabre->value,
-                'connection_id' => $connection->id,
-                'http_status' => $http,
-                'duration_ms' => $durationMs,
-            ]);
+            $supplierError = app(SabreGdsRevalidationHttpSupplierErrorSanitizer::class)->extract(
+                $http,
+                $arr !== [] ? $arr : null,
+                is_string($rawBody) ? $rawBody : null,
+                $errorDigest,
+            );
 
-            return [
+            app(SabreGdsRevalidationHttpSupplierErrorSanitizer::class)->emitCorrelatedLog(array_merge(
+                $correlatedLogContext,
+                [
+                    'provider' => SupplierProvider::Sabre->value,
+                    'connection_id' => $connection->id,
+                    'http_status' => $http,
+                    'duration_ms' => $durationMs,
+                    'endpoint_path' => $endpointPath,
+                    'payload_style' => $styleLabel,
+                    'revalidation_correlation_id' => $revalidationCorrelationId,
+                    'response_candidate_count' => (int) ($responseStructure['candidate_count'] ?? 0),
+                    'supplier_error_type' => $supplierError['supplier_error_type'] ?? null,
+                    'supplier_error_code' => $supplierError['supplier_error_code'] ?? null,
+                    'supplier_error_message_safe' => $supplierError['supplier_error_message_safe'] ?? null,
+                    'supplier_http_failure_classification' => $supplierError['supplier_http_failure_classification'] ?? null,
+                    'failure_category' => $supplierError['failure_category'] ?? 'http_rejected',
+                    'reason_code' => $supplierError['reason_code'] ?? 'sabre_revalidation_failed',
+                ],
+            ));
+
+            return $this->wrapSanitizedRevalidationOutcome([
                 'success' => false,
                 'http_status' => $http,
                 'duration_ms' => $durationMs,
@@ -12090,7 +12391,8 @@ class SabreBookingService
                 'includes_sabre_error_27131' => $includes27131,
                 'changed_from_typical_27131_failure' => $changed27131,
                 'response_structure' => $responseStructure,
-            ];
+                'revalidation_failure_class' => 'http_rejected',
+            ] + $supplierError, true, true, null, $revalidationCorrelationId);
         }
 
         $girFailure = $this->revalidationBuilder->evaluateGroupedItineraryMessages($arr);
@@ -12125,16 +12427,19 @@ class SabreBookingService
                 failureClass: (string) ($girFailure['failure_class'] ?? 'gir_message'),
                 freezeFingerprint: $freezeFingerprint,
                 payloadCoverageSummary: $payloadCoverageSummary,
+                revalidationCorrelationId: $revalidationCorrelationId,
             );
         }
 
         $warnDigest = $this->revalidationBuilder->extractHttp200ApplicationWarningDigest($arr);
-        if ($this->revalidationBuilder->http200ApplicationWarningDigestNonEmpty($warnDigest)) {
+        if (app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->hasBlockingMessages($applicationMessageDiagnostics)) {
             Log::notice('sabre.revalidate.application_warnings', [
                 'provider' => SupplierProvider::Sabre->value,
                 'connection_id' => $connection->id,
                 'http_status' => $http,
                 'duration_ms' => $durationMs,
+                'blocking_application_error_present' => ($applicationMessageDiagnostics['blocking_application_error_present'] ?? false) === true,
+                'blocking_application_warning_present' => ($applicationMessageDiagnostics['blocking_application_warning_present'] ?? false) === true,
             ]);
 
             return $this->revalidationFailureOutcome(
@@ -12142,7 +12447,7 @@ class SabreBookingService
                 durationMs: $durationMs,
                 reasonCode: 'sabre_revalidation_application_warning_or_error',
                 message: $this->contextualRevalidationFailureMessage(
-                    'Sabre revalidation returned HTTP 200 with application warnings or errors; Trip Orders booking was not attempted.',
+                    'Sabre revalidation returned HTTP 200 with blocking application warnings or errors; Trip Orders booking was not attempted.',
                 ),
                 payloadSummary: $payloadSummary,
                 linkage: $linkage,
@@ -12152,14 +12457,54 @@ class SabreBookingService
                 endpointPath: $endpointPath,
                 wireRootKeys: $wireRootKeys,
                 responseStructure: $responseStructure,
-                failureClass: 'application_warning',
+                failureClass: ($applicationMessageDiagnostics['blocking_application_error_present'] ?? false) === true
+                    ? 'application_error'
+                    : 'application_warning',
                 freezeFingerprint: $freezeFingerprint,
                 payloadCoverageSummary: $payloadCoverageSummary,
-            );
+                revalidationCorrelationId: $revalidationCorrelationId,
+            ) + $canonicalOutcomeExtras + [
+                'application_message_diagnostics' => app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->safeDigestSlice($applicationMessageDiagnostics),
+                'response_linkage_diagnostics' => $this->safeResponseLinkageDiagnosticsSlice($linkageAnalysis),
+            ];
         }
 
+        if (($linkageAnalysis['usable_fare_linkage'] ?? false) !== true) {
+            return $this->revalidationFailureOutcome(
+                http: $http,
+                durationMs: $durationMs,
+                reasonCode: 'sabre_revalidation_empty_or_unusable_response',
+                message: $this->contextualRevalidationFailureMessage(
+                    'Sabre revalidation returned HTTP 200 without a unique usable fare linkage match; Trip Orders booking was not attempted.',
+                ),
+                payloadSummary: $payloadSummary,
+                linkage: $linkage,
+                linkageDigest: $linkageDigest,
+                errorDigest: array_merge($errorDigest, [
+                    'revalidation_failure_class' => 'unusable_linkage',
+                    'linkage_failure_reason_code' => $linkageAnalysis['linkage_failure_reason_code'] ?? null,
+                ]),
+                styleLabel: $styleLabel,
+                endpointPath: $endpointPath,
+                wireRootKeys: $wireRootKeys,
+                responseStructure: $responseStructure,
+                failureClass: 'unusable_linkage',
+                freezeFingerprint: $freezeFingerprint,
+                payloadCoverageSummary: $payloadCoverageSummary,
+                revalidationCorrelationId: $revalidationCorrelationId,
+            ) + $canonicalOutcomeExtras + [
+                'application_message_diagnostics' => app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->safeDigestSlice($applicationMessageDiagnostics),
+                'response_linkage_diagnostics' => $this->safeResponseLinkageDiagnosticsSlice($linkageAnalysis),
+            ];
+        }
+
+        $linkage = app(SabreGdsRevalidationResponseCandidateLinker::class)->extractLinkageForSelectedCandidate($arr, $linkageAnalysis);
+        $linkageDigest = $this->revalidationBuilder->linkageDigest($linkage);
+
         $fareBasisGap = $this->revalidationBuilder->assertPerSegmentFareBasisComplete($arr, $expectedSegmentCount);
-        if ($fareBasisGap !== null) {
+        $linkerFareBasisAuthoritative = ($linkageAnalysis['overall_fare_basis_complete'] ?? $linkageAnalysis['fare_basis_complete'] ?? null) === true
+            && (int) ($linkageAnalysis['unique_usable_linkage_match_count'] ?? 0) === 1;
+        if ($fareBasisGap !== null && ! $linkerFareBasisAuthoritative) {
             return $this->revalidationFailureOutcome(
                 http: $http,
                 durationMs: $durationMs,
@@ -12176,6 +12521,7 @@ class SabreBookingService
                         'expected='.$fareBasisGap['expected'].' actual='.$fareBasisGap['actual'],
                     ],
                     'revalidation_failure_class' => $fareBasisGap['failure_class'] ?? 'fare_basis_incomplete',
+                    'linkage_failure_reason_code' => $linkageAnalysis['linkage_failure_reason_code'] ?? null,
                 ],
                 styleLabel: $styleLabel,
                 endpointPath: $endpointPath,
@@ -12184,7 +12530,11 @@ class SabreBookingService
                 failureClass: (string) ($fareBasisGap['failure_class'] ?? 'fare_basis_incomplete'),
                 freezeFingerprint: $freezeFingerprint,
                 payloadCoverageSummary: $payloadCoverageSummary,
-            );
+                revalidationCorrelationId: $revalidationCorrelationId,
+            ) + $canonicalOutcomeExtras + [
+                'application_message_diagnostics' => app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->safeDigestSlice($applicationMessageDiagnostics),
+                'response_linkage_diagnostics' => $this->safeResponseLinkageDiagnosticsSlice($linkageAnalysis),
+            ];
         }
 
         $pricingTripwire = $this->revalidationBuilder->evaluateRevalidationPricingTripwire($linkage, $apiDraft);
@@ -12200,6 +12550,7 @@ class SabreBookingService
                 errorDigest: [
                     'response_error_codes' => [(string) ($pricingTripwire['failure_class'] ?? 'pricing_tripwire')],
                     'revalidation_failure_class' => $pricingTripwire['failure_class'] ?? 'pricing_tripwire',
+                    'linkage_failure_reason_code' => $linkageAnalysis['linkage_failure_reason_code'] ?? null,
                 ],
                 styleLabel: $styleLabel,
                 endpointPath: $endpointPath,
@@ -12208,23 +12559,26 @@ class SabreBookingService
                 failureClass: (string) ($pricingTripwire['failure_class'] ?? 'pricing_tripwire'),
                 freezeFingerprint: $freezeFingerprint,
                 payloadCoverageSummary: $payloadCoverageSummary,
-            );
+                revalidationCorrelationId: $revalidationCorrelationId,
+            ) + $canonicalOutcomeExtras + [
+                'application_message_diagnostics' => app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->safeDigestSlice($applicationMessageDiagnostics),
+                'response_linkage_diagnostics' => $this->safeResponseLinkageDiagnosticsSlice($linkageAnalysis),
+            ];
         }
 
         $linkage['expected_segment_count'] = $expectedSegmentCount;
         $linkageDigest = $this->revalidationBuilder->linkageDigest($linkage);
+        $linkageAnalysis = $this->enrichLinkageAnalysisWithAuthoritativeAggregates($linkageAnalysis, $canonicalNormalization, [
+            'linkage_digest_per_segment_fare_basis_complete' => $linkageDigest['per_segment_fare_basis_complete'] ?? null,
+        ]);
 
-        $usableLinkage = $linkage !== []
-            && ($linkageDigest['per_segment_fare_basis_complete'] ?? false) === true
-            && ($linkageDigest['has_revalidated_fare'] ?? false)
-            && ($linkageDigest['has_revalidated_currency'] ?? false);
-
-        if (! $usableLinkage) {
+        if (($linkageAnalysis['usable_fare_linkage'] ?? false) !== true) {
             Log::notice('sabre.revalidate.no_linkage', [
                 'provider' => SupplierProvider::Sabre->value,
                 'connection_id' => $connection->id,
                 'http_status' => $http,
                 'duration_ms' => $durationMs,
+                'linkage_failure_reason_code' => $linkageAnalysis['linkage_failure_reason_code'] ?? null,
             ]);
 
             return $this->revalidationFailureOutcome(
@@ -12237,7 +12591,10 @@ class SabreBookingService
                 payloadSummary: $payloadSummary,
                 linkage: $linkage,
                 linkageDigest: $linkageDigest,
-                errorDigest: $errorDigest,
+                errorDigest: array_merge($errorDigest, [
+                    'revalidation_failure_class' => 'unusable_linkage',
+                    'linkage_failure_reason_code' => $linkageAnalysis['linkage_failure_reason_code'] ?? null,
+                ]),
                 styleLabel: $styleLabel,
                 endpointPath: $endpointPath,
                 wireRootKeys: $wireRootKeys,
@@ -12245,10 +12602,14 @@ class SabreBookingService
                 failureClass: 'unusable_linkage',
                 freezeFingerprint: $freezeFingerprint,
                 payloadCoverageSummary: $payloadCoverageSummary,
-            );
+                revalidationCorrelationId: $revalidationCorrelationId,
+            ) + $canonicalOutcomeExtras + [
+                'application_message_diagnostics' => app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->safeDigestSlice($applicationMessageDiagnostics),
+                'response_linkage_diagnostics' => $this->safeResponseLinkageDiagnosticsSlice($linkageAnalysis),
+            ];
         }
 
-        return [
+        return $this->wrapSanitizedRevalidationOutcome(array_merge([
             'success' => true,
             'http_status' => $http,
             'duration_ms' => $durationMs,
@@ -12263,9 +12624,13 @@ class SabreBookingService
             'wire_root_keys' => $wireRootKeys,
             'includes_sabre_error_27131' => false,
             'changed_from_typical_27131_failure' => true,
-            'error_digest' => [],
+            'error_digest' => (($warnDigest['revalidation_failure_class'] ?? null) === 'application_informational')
+                ? $warnDigest
+                : [],
             'response_structure' => $responseStructure,
-        ];
+            'application_message_diagnostics' => app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->safeDigestSlice($applicationMessageDiagnostics),
+            'response_linkage_diagnostics' => $this->safeResponseLinkageDiagnosticsSlice($linkageAnalysis),
+        ], $canonicalOutcomeExtras), true, true, null, $revalidationCorrelationId);
     }
 
     /**

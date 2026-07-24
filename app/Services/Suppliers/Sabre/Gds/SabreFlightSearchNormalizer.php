@@ -11,6 +11,8 @@ use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
 use App\Support\FlightSearch\BaggageDisplayNormalizer;
 use App\Support\FlightSearch\SabreMarketEndpointEquivalence;
+use App\Support\Sabre\Scenario\SabreGdsScenarioCorrelationRegistry;
+use App\Support\Sabre\Revalidation\SabreGdsBfmScheduleEndpointLocalClock;
 use App\Support\Suppliers\SabreItineraryTimingValidator;
 use App\Support\Suppliers\SabreSegmentChronologyRepair;
 use DateTimeImmutable;
@@ -65,6 +67,11 @@ class SabreFlightSearchNormalizer
      */
     protected ?array $currentGirDescriptorLists = null;
 
+    /**
+     * @var list<array<string, mixed>>
+     */
+    protected array $pendingSegmentEndpointClockEvidence = [];
+
     protected int $descriptorRejectProbeEmitted = 0;
 
     /**
@@ -115,6 +122,7 @@ class SabreFlightSearchNormalizer
         ];
         $this->descriptorResolutionCtx = null;
         $this->currentGirDescriptorLists = null;
+        $this->pendingSegmentEndpointClockEvidence = [];
         $this->descriptorRejectProbeEmitted = 0;
     }
 
@@ -783,6 +791,21 @@ class SabreFlightSearchNormalizer
     }
 
     /**
+     * @param  array<string, mixed>  $schedule
+     * @param  array<string, mixed>  $mergedNode
+     */
+    protected function composeScheduleEndpointRaw(array $schedule, string $endpoint, array $mergedNode): string
+    {
+        $localClock = app(SabreGdsBfmScheduleEndpointLocalClock::class);
+        $clockRaw = $localClock->endpointClockRaw($schedule, $endpoint);
+        if ($clockRaw !== '') {
+            return $clockRaw;
+        }
+
+        return $this->stringifyScheduleDateTime($mergedNode);
+    }
+
+    /**
      * @return list<array<string, mixed>>
      */
     protected function snapshotPresabreSegmentRows(array $segmentModels): array
@@ -990,11 +1013,14 @@ class SabreFlightSearchNormalizer
         $fareNode = $this->firstFareNode($itinerary);
 
         $segments = [];
-        foreach ($workingSegments as $sm) {
+        foreach ($workingSegments as $i => $sm) {
             $row = $sm->toArray();
             $isoSegDur = $this->durationMinutesFromIso($sm->departure_at, $sm->arrival_at);
             if ($isoSegDur > 0) {
                 $row['duration_minutes'] = $isoSegDur;
+            }
+            if (isset($this->pendingSegmentEndpointClockEvidence[$i])) {
+                $row['bfm_endpoint_clock_evidence'] = $this->pendingSegmentEndpointClockEvidence[$i];
             }
             $segments[] = $row;
         }
@@ -4185,6 +4211,7 @@ class SabreFlightSearchNormalizer
         array $itinerary,
         ?FlightSearchRequestData $searchRequest,
     ): array {
+        $this->pendingSegmentEndpointClockEvidence = [];
         $segments = [];
         $itineraryLegs = $itinerary['legs'] ?? null;
         if (! is_array($itineraryLegs) || $itineraryLegs === []) {
@@ -4721,6 +4748,19 @@ class SabreFlightSearchNormalizer
      */
     protected function logSabreOfferRejected(string $offerId, string $rejectReason, array $context): void
     {
+        $registry = app(SabreGdsScenarioCorrelationRegistry::class);
+        $searchCorrelationId = $registry->searchCorrelationId();
+        if (is_string($searchCorrelationId) && $searchCorrelationId !== '') {
+            $context['scenario_search_correlation_id'] = $searchCorrelationId;
+        }
+        $revalidationCorrelationId = $registry->revalidationCorrelationId();
+        if (is_string($revalidationCorrelationId) && $revalidationCorrelationId !== '') {
+            $context['revalidation_correlation_id'] = $revalidationCorrelationId;
+        }
+        if (trim($offerId) !== '') {
+            $context['offer_id_hash'] = hash('sha256', $offerId);
+        }
+
         Log::warning('sabre.normalizer.offer_rejected', array_merge([
             'provider' => 'sabre',
             'offer_id' => $offerId,
@@ -4795,9 +4835,10 @@ class SabreFlightSearchNormalizer
         $destination = $this->stringifyAirportCode($arrNode['airport'] ?? null)
             ?: $this->stringifyAirportCode($arrNode['airportCode'] ?? null);
 
-        $rawDep = $this->stringifyScheduleDateTime($depNode);
-        $rawArr = $this->stringifyScheduleDateTime($arrNode);
+        $rawDep = $this->composeScheduleEndpointRaw($schedule, 'departure', $depNode);
+        $rawArr = $this->composeScheduleEndpointRaw($schedule, 'arrival', $arrNode);
 
+        $localClock = app(SabreGdsBfmScheduleEndpointLocalClock::class);
         $depDateHint = $state['prev_arrival'] !== null
             ? substr((string) $state['prev_arrival'], 0, 10)
             : $anchorYmd;
@@ -4866,9 +4907,9 @@ class SabreFlightSearchNormalizer
 
         $elapsedSchedule = $this->readElapsedMinutesFromSchedule($schedule);
 
-        // Sabre block time (minutes): when present for a typical short/medium leg, force canonical arrival
-        // so a mis-tagged +1 day on arrival does not steal layover time into segment wall duration (S29).
-        if ($elapsedSchedule > 0 && $elapsedSchedule <= 600 && $departureAt !== '') {
+        // Sabre block time (minutes): only when arrival local time is absent (never override BFM endpoint.time).
+        if (! $localClock->endpointLocalTimePresent($schedule, 'arrival')
+            && $elapsedSchedule > 0 && $elapsedSchedule <= 600 && $departureAt !== '') {
             try {
                 $arrivalAt = (new DateTimeImmutable($departureAt))->modify('+'.$elapsedSchedule.' minutes')->format('Y-m-d\TH:i:s');
             } catch (\Throwable) {
@@ -4896,6 +4937,12 @@ class SabreFlightSearchNormalizer
         if ($arrivalAt !== '') {
             $state['prev_arrival'] = $arrivalAt;
         }
+
+        $this->pendingSegmentEndpointClockEvidence[] = [
+            'ordinal' => count($this->pendingSegmentEndpointClockEvidence) + 1,
+            'departure' => $localClock->endpointEvidence($schedule, 'departure', $departureAt),
+            'arrival' => $localClock->endpointEvidence($schedule, 'arrival', $arrivalAt),
+        ];
 
         return new FlightSegmentData(
             origin: $origin,

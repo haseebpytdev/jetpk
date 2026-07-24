@@ -28,14 +28,20 @@ final class SabreGdsRevalidationService
         SupplierConnection $connection,
         ?string $payloadStyle = null,
         ?int $bookingId = null,
+        ?string $revalidationCorrelationId = null,
+        ?string $endpointPath = null,
+        array $correlatedLogContext = [],
     ): array {
         $style = $payloadStyle ?? $this->defaultRevalidateStyle();
         $outcome = $this->sabreBookingService->runRevalidationBeforeBooking(
             $apiDraft,
             $connection,
             $style,
-            null,
+            $endpointPath,
             $bookingId,
+            null,
+            $revalidationCorrelationId,
+            $correlatedLogContext,
         );
 
         return $this->enrichOutcome($outcome, $apiDraft);
@@ -106,11 +112,18 @@ final class SabreGdsRevalidationService
      */
     private function enrichOutcome(array $outcome, array $apiDraft): array
     {
-        $storedTotal = (float) ($apiDraft['total_fare'] ?? $apiDraft['fare_total'] ?? 0);
-        $storedCurrency = strtoupper(trim((string) ($apiDraft['currency'] ?? $apiDraft['fare_currency'] ?? '')));
+        $storedTotal = (float) ($apiDraft['fare']['amount'] ?? $apiDraft['total_fare'] ?? $apiDraft['fare_total'] ?? 0);
+        $storedCurrency = strtoupper(trim((string) ($apiDraft['fare']['currency'] ?? $apiDraft['currency'] ?? $apiDraft['fare_currency'] ?? '')));
         $linkage = is_array($outcome['linkage'] ?? null) ? $outcome['linkage'] : [];
-        $freshTotal = (float) ($linkage['revalidated_fare_total'] ?? $linkage['total_fare'] ?? 0);
-        $freshCurrency = strtoupper(trim((string) ($linkage['revalidated_fare_currency'] ?? $linkage['currency'] ?? '')));
+        $linkageDiagnostics = is_array($outcome['response_linkage_diagnostics'] ?? null) ? $outcome['response_linkage_diagnostics'] : [];
+        $freshTotal = (float) ($linkage['revalidated_total']
+            ?? $linkage['revalidated_fare_total']
+            ?? $linkage['total_fare']
+            ?? 0);
+        $freshCurrency = strtoupper(trim((string) ($linkage['revalidated_currency']
+            ?? $linkage['revalidated_fare_currency']
+            ?? $linkage['currency']
+            ?? '')));
 
         $mismatches = [];
         if ($storedTotal > 0 && $freshTotal > 0 && abs($storedTotal - $freshTotal) > 0.01) {
@@ -120,11 +133,12 @@ final class SabreGdsRevalidationService
             $mismatches[] = 'currency_change';
         }
 
-        $itineraryCount = (int) data_get($outcome, 'response_structure.itinerary_count', 0);
-        if (($outcome['success'] ?? false) && $itineraryCount === 0) {
+        $candidateCount = (int) data_get($outcome, 'response_candidate_count', data_get($outcome, 'response_structure.candidate_count', 0));
+        if (($outcome['success'] ?? false) && $candidateCount === 0 && ($outcome['usable_fare_linkage'] ?? true) !== true) {
             $mismatches[] = 'no_pricing';
             $outcome['success'] = false;
             $outcome['reason_code'] = $outcome['reason_code'] ?? 'sabre_revalidation_empty_or_unusable_response';
+            $outcome['usable_fare_linkage'] = false;
         }
 
         $outcome['fare_comparison'] = [
@@ -133,6 +147,15 @@ final class SabreGdsRevalidationService
             'fresh_total' => $freshTotal > 0 ? $freshTotal : null,
             'fresh_currency' => $freshCurrency !== '' ? $freshCurrency : null,
             'mismatches' => $mismatches,
+            'fare_changed' => in_array('price_change', $mismatches, true),
+            'absolute_fare_difference' => ($storedTotal > 0 && $freshTotal > 0)
+                ? round(abs($freshTotal - $storedTotal), 2)
+                : null,
+            'percentage_fare_difference' => ($storedTotal > 0 && $freshTotal > 0)
+                ? round((abs($freshTotal - $storedTotal) / $storedTotal) * 100, 4)
+                : null,
+            'pricing_source_location' => $linkageDiagnostics['pricing_complete'] ?? null ? 'selected_response_candidate' : null,
+            'pricing_complete' => ($linkageDiagnostics['pricing_complete'] ?? false) === true,
         ];
 
         return $outcome;
@@ -204,9 +227,16 @@ final class SabreGdsRevalidationService
     private function resolveOfferFromBooking(Booking $booking): array
     {
         $meta = is_array($booking->meta) ? $booking->meta : [];
-        $snapshot = is_array($meta['offer_snapshot'] ?? null) ? $meta['offer_snapshot'] : [];
-        if ($snapshot !== []) {
-            return $snapshot;
+        foreach ([
+            'normalized_offer_snapshot',
+            'validated_offer_snapshot',
+            'flight_offer_snapshot',
+            'offer_snapshot',
+        ] as $key) {
+            $snapshot = is_array($meta[$key] ?? null) ? $meta[$key] : [];
+            if ($snapshot !== []) {
+                return $snapshot;
+            }
         }
 
         $context = is_array($meta['sabre_booking_context'] ?? null) ? $meta['sabre_booking_context'] : [];

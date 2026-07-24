@@ -3,6 +3,8 @@
 namespace App\Support\Sabre\Scenario;
 
 use App\Models\Booking;
+use App\Models\SupplierConnection;
+use App\Services\Communication\BookingCommunicationService;
 use App\Services\Suppliers\Sabre\Booking\SabreBookingService;
 use App\Support\Bookings\SabrePnrCertificationSupport;
 use App\Enums\SupplierProvider;
@@ -54,6 +56,9 @@ final class SabreGdsLiveScenarioRunnerPnrExecutor
         protected SabreGdsPnrCreateStrategySelector $strategySelector,
         protected SabreGdsMixedCarrierCertificationGate $mixedCarrierGate,
         protected SabreGdsMixedCarrierFareBasisPayloadPreflight $mixedCarrierPayloadPreflight,
+        protected SabreGdsLiveScenarioRevalidationGate $revalidationGate,
+        protected BookingCommunicationService $communicationService,
+        protected SabreGdsQrUnticketedSupplierCreateAttemptRecorder $createAttemptRecorder,
     ) {}
 
     /**
@@ -67,6 +72,37 @@ final class SabreGdsLiveScenarioRunnerPnrExecutor
         $block = $this->preflight($booking, $operatorApproved);
         if ($block !== null) {
             return $block;
+        }
+
+        $connection = $this->resolveConnection($booking);
+        if ($connection === null) {
+            return $this->blockedResult('scenario_revalidation_connection_missing', $booking);
+        }
+
+        $skipRedundantRevalidation = ($options['skip_redundant_revalidation'] ?? false) === true
+            && is_array($options['authoritative_revalidated_context'] ?? null);
+        $revalidationEvidence = [];
+        if ($skipRedundantRevalidation) {
+            $revalidationEvidence = [
+                'freshness_satisfied' => true,
+                'revalidation_success' => true,
+                'source' => 'authoritative_revalidated_context',
+                'skipped_redundant_revalidation' => true,
+            ];
+        } else {
+            $revalidationEvidence = $this->revalidationGate->revalidateForBooking($booking, $connection);
+            if (! $this->revalidationGate->shouldProceed($revalidationEvidence)) {
+                return $this->blockedResult(
+                    (string) ($revalidationEvidence['block_reason'] ?? SabreGdsLiveScenarioRevalidationGate::REASON_FRESHNESS_NOT_SATISFIED),
+                    $booking,
+                    null,
+                    null,
+                    null,
+                    $this->sanitizeRevalidationEvidenceForBlockedResult($revalidationEvidence),
+                );
+            }
+            $this->revalidationGate->persistOnBooking($booking->fresh(), $revalidationEvidence);
+            $booking->refresh();
         }
 
         $completion = $this->contextCompletion->completeForBooking($booking);
@@ -167,6 +203,24 @@ final class SabreGdsLiveScenarioRunnerPnrExecutor
             );
         }
 
+        if ($skipRedundantRevalidation) {
+            $lifecycleRunId = trim((string) ($options['lifecycle_run_id'] ?? ''));
+            $idempotencyKey = $lifecycleRunId !== '' ? $lifecycleRunId : 'booking-'.$booking->id;
+            $authContext = SabreGdsAuthoritativeRevalidatedBookingContext::fromArray(
+                is_array($options['authoritative_revalidated_context'] ?? null) ? $options['authoritative_revalidated_context'] : [],
+            );
+            $authDiagnostics = $authContext?->safeDiagnostics ?? [];
+            $startedAttempt = $this->createAttemptRecorder->recordStarted(
+                $booking->fresh(),
+                $connection,
+                $lifecycleRunId !== '' ? $lifecycleRunId : $idempotencyKey,
+                $idempotencyKey,
+                $authDiagnostics,
+            );
+            $options['qr_unticketed_pre_dispatched_attempt_id'] = $startedAttempt->id;
+            $booking->refresh();
+        }
+
         if (is_array($strategySelection['unexpected_strategy_priority'] ?? null)) {
             return $this->blockedResult(
                 SabreGdsPnrCreateStrategySelector::SAFE_REASON_UNEXPECTED_STRATEGY_PRIORITY,
@@ -196,6 +250,11 @@ final class SabreGdsLiveScenarioRunnerPnrExecutor
         }
 
         $booking->refresh();
+
+        $pnr = trim((string) ($result['pnr'] ?? $booking->pnr ?? ''));
+        if ($pnr !== '' && ($result['live_call_attempted'] ?? false) === true) {
+            $this->communicationService->sendSupplierBookingCreated($booking->fresh());
+        }
 
         return array_merge($result, [
             'scenario_live_pnr_create_approved' => true,
@@ -320,8 +379,8 @@ final class SabreGdsLiveScenarioRunnerPnrExecutor
     }
 
     /**
-     * @param  array<string, mixed>|null  $completion
-     * @param  array<string, mixed>|null  $strategySelection
+     * @param  array<string, mixed>|null  $mixedCarrierSummary
+     * @param  array<string, mixed>|null  $revalidationEvidence
      * @return array<string, mixed>
      */
     protected function blockedResult(
@@ -330,6 +389,7 @@ final class SabreGdsLiveScenarioRunnerPnrExecutor
         ?array $completion = null,
         ?array $strategySelection = null,
         ?array $mixedCarrierSummary = null,
+        ?array $revalidationEvidence = null,
     ): array {
         $selectedStrategy = trim((string) ($strategySelection['selected_strategy'] ?? ''));
 
@@ -363,6 +423,34 @@ final class SabreGdsLiveScenarioRunnerPnrExecutor
                 ? $strategySelection['unexpected_strategy_priority']
                 : null,
             'booking_id' => $booking->id,
-        ], is_array($mixedCarrierSummary) ? $mixedCarrierSummary : []);
+        ], is_array($mixedCarrierSummary) ? $mixedCarrierSummary : [], is_array($revalidationEvidence) ? $revalidationEvidence : []);
+    }
+
+    /**
+     * Prevent raw revalidation transport fields from overwriting blocked result reason codes.
+     *
+     * @param  array<string, mixed>  $revalidationEvidence
+     * @return array<string, mixed>
+     */
+    protected function sanitizeRevalidationEvidenceForBlockedResult(array $revalidationEvidence): array
+    {
+        return array_intersect_key($revalidationEvidence, array_flip([
+            'block_reason',
+            'revalidation_reason_code',
+            'freshness_satisfied',
+            'revalidation_success',
+            'reason_code',
+        ]));
+    }
+
+    protected function resolveConnection(Booking $booking): ?SupplierConnection
+    {
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $connectionId = (int) ($meta['supplier_connection_id'] ?? 0);
+        if ($connectionId <= 0) {
+            return null;
+        }
+
+        return SupplierConnection::query()->find($connectionId);
     }
 }

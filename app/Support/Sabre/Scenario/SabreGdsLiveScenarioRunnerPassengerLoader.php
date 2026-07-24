@@ -9,6 +9,8 @@ use InvalidArgumentException;
  */
 final class SabreGdsLiveScenarioRunnerPassengerLoader
 {
+    public const REASON_VALIDATION_FAILED = 'passenger_json_validation_failed';
+
     /** @var list<string> */
     private const REQUIRED = [
         'title',

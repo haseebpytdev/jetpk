@@ -22,6 +22,8 @@ final class SabreGdsLiveScenarioOfferCatalog
         protected SabreFlightSearchNormalizer $normalizer,
         protected SabreStoredPricingContextDigest $digestor,
         protected SabreGdsLiveScenarioPlanCandidateDiagnostics $planDiagnostics,
+        protected SabreGdsLiveScenarioExactOfferEvidence $exactOfferEvidence,
+        protected SabreGdsScenarioCorrelationRegistry $correlationRegistry,
     ) {}
 
     /**
@@ -36,6 +38,8 @@ final class SabreGdsLiveScenarioOfferCatalog
      */
     public function search(SupplierConnection $connection, array $scenario, array $discoveryFilters = []): array
     {
+        $this->correlationRegistry->startSearchCorrelation();
+
         $origin = (string) ($scenario['origin'] ?? '');
         $destination = (string) ($scenario['destination'] ?? '');
         $departureDate = (string) ($scenario['departure_date'] ?? '');
@@ -98,6 +102,7 @@ final class SabreGdsLiveScenarioOfferCatalog
 
         return [
             'shop_http_status' => $shopHttpStatus,
+            'shop_captured_at' => now()->toIso8601String(),
             'normalized_offer_count' => count($normalized),
             'candidates' => $candidates,
             'eligible' => $eligible,
@@ -112,6 +117,10 @@ final class SabreGdsLiveScenarioOfferCatalog
     public function buildPlanSummaries(array $eligible, array $scenario = [], ?int $limit = null, array $options = []): array
     {
         $summaries = [];
+        /** @var SupplierConnection|null $connection */
+        $connection = ($options['connection'] ?? null) instanceof SupplierConnection ? $options['connection'] : null;
+        $shopCapturedAt = is_string($options['shop_captured_at'] ?? null) ? $options['shop_captured_at'] : null;
+
         foreach ($eligible as $candidate) {
             if ($limit !== null && count($summaries) >= $limit) {
                 break;
@@ -130,10 +139,73 @@ final class SabreGdsLiveScenarioOfferCatalog
             if (($row['brand_code'] ?? null) === null && $brandCodes !== []) {
                 $row['brand_code'] = $brandCodes[0];
             }
-            $summaries[] = $this->planDiagnostics->diagnose($snap, $row, $scenario, $options);
+
+            $fareSelection = $this->resolveDefaultFareSelection($snap);
+            $exactEvidence = $connection instanceof SupplierConnection
+                ? $this->exactOfferEvidence->buildPlanCandidateEvidence(
+                    $connection,
+                    $snap,
+                    $row,
+                    is_array($fareSelection['selected_fare_family_option'] ?? null)
+                        ? $fareSelection['selected_fare_family_option']
+                        : null,
+                    $shopCapturedAt,
+                )
+                : [];
+
+            $summaries[] = array_merge(
+                $this->planDiagnostics->diagnose($snap, $row, $scenario, $options),
+                $exactEvidence,
+            );
         }
 
         return $summaries;
+    }
+
+    /**
+     * @param  list<array{row: array<string, mixed>, snap: array<string, mixed>}>  $eligible
+     */
+    public function findSelectedCandidateIndex(
+        array $eligible,
+        ?array $pickedCandidate,
+        SupplierConnection $connection,
+        ?array $selectedFareFamilyOption = null,
+    ): ?int {
+        if ($pickedCandidate === null) {
+            return null;
+        }
+
+        $pickedRow = is_array($pickedCandidate['row'] ?? null) ? $pickedCandidate['row'] : [];
+        $pickedSnap = is_array($pickedCandidate['snap'] ?? null) ? $pickedCandidate['snap'] : [];
+        $pickedContext = $this->exactOfferEvidence->buildLinkageContext(
+            $connection,
+            $pickedSnap,
+            $pickedRow,
+            $selectedFareFamilyOption,
+            null,
+        );
+        $pickedFingerprint = (string) ($pickedContext['safe_offer_fingerprint'] ?? '');
+
+        foreach ($eligible as $index => $candidate) {
+            $row = is_array($candidate['row'] ?? null) ? $candidate['row'] : [];
+            $snap = is_array($candidate['snap'] ?? null) ? $candidate['snap'] : [];
+            $fareSelection = $this->resolveDefaultFareSelection($snap);
+            $fareOption = is_array($fareSelection['selected_fare_family_option'] ?? null)
+                ? $fareSelection['selected_fare_family_option']
+                : null;
+            $context = $this->exactOfferEvidence->buildLinkageContext(
+                $connection,
+                $snap,
+                $row,
+                $fareOption,
+                null,
+            );
+            if ($pickedFingerprint !== '' && ($context['safe_offer_fingerprint'] ?? '') === $pickedFingerprint) {
+                return $index;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -180,6 +252,51 @@ final class SabreGdsLiveScenarioOfferCatalog
 
         $selected = $sorted[0];
         $fareSelection = $this->resolveDefaultFareSelection($selected['snap']);
+
+        return [
+            'candidate' => $selected,
+            'selected_fare_family_option' => $fareSelection['selected_fare_family_option'],
+            'fare_option_key' => $fareSelection['fare_option_key'],
+            'brand_code' => $fareSelection['brand_code'],
+            'selection_error' => $fareSelection['selection_error'],
+        ];
+    }
+
+    /**
+     * @param  list<array{row: array<string, mixed>, snap: array<string, mixed>}>  $eligible
+     * @return array{
+     *     candidate: array{row: array<string, mixed>, snap: array<string, mixed>}|null,
+     *     selected_fare_family_option: array<string, mixed>|null,
+     *     fare_option_key: string|null,
+     *     brand_code: string|null,
+     *     selection_error: string|null
+     * }
+     */
+    public function pickCandidateByIndex(array $eligible, int $index): array
+    {
+        if ($eligible === []) {
+            return [
+                'candidate' => null,
+                'selected_fare_family_option' => null,
+                'fare_option_key' => null,
+                'brand_code' => null,
+                'selection_error' => 'no_eligible_gds_offer',
+            ];
+        }
+
+        if ($index < 0 || $index >= count($eligible)) {
+            return [
+                'candidate' => null,
+                'selected_fare_family_option' => null,
+                'fare_option_key' => null,
+                'brand_code' => null,
+                'selection_error' => 'candidate_index_out_of_range',
+            ];
+        }
+
+        $selected = $eligible[$index];
+        $snap = is_array($selected['snap'] ?? null) ? $selected['snap'] : [];
+        $fareSelection = $this->resolveDefaultFareSelection($snap);
 
         return [
             'candidate' => $selected,

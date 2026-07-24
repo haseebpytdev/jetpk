@@ -5,6 +5,7 @@ namespace App\Services\Suppliers\Sabre\Gds;
 use App\Enums\SupplierProvider;
 use App\Exceptions\SabreRevalidateGatekeeperException;
 use App\Models\SupplierConnection;
+use App\Support\Sabre\Revalidation\SabreGdsRevalidationApplicationMessageDiagnostics;
 
 /**
  * B13 Sabre revalidation helpers used immediately before Trip Orders {@code createBooking} to acquire fare/offer
@@ -47,6 +48,66 @@ final class SabreRevalidationPayloadBuilder
     /** @var list<string> */
     private const PRODUCTION_BLOCKED_REVALIDATE_STYLES = [
         'bfm_revalidate_minimal_segments',
+    ];
+
+    public const REASON_INVALID_FLIGHTSEGMENT_LOCATION = 'revalidation_payload_invalid_flightsegment_location';
+
+    public const REASON_INVALID_AIRLINE_MARKETING_TYPE = 'revalidation_payload_invalid_airline_marketing_type';
+
+    public const REASON_INVALID_AIRLINE_OPERATING_TYPE = 'revalidation_payload_invalid_airline_operating_type';
+
+    public const REASON_UNSUPPORTED_FLIGHT_SEGMENT_NUMBER = 'revalidation_payload_unsupported_flight_segment_number';
+
+    public const REASON_UNSUPPORTED_RESBOOKDESIGCODE = 'revalidation_payload_unsupported_resbookdesigcode';
+
+    public const REASON_UNSUPPORTED_FARE_BASIS_CODE = 'revalidation_payload_unsupported_fare_basis_code';
+
+    public const REASON_UNSUPPORTED_CABIN_CODE = 'revalidation_payload_unsupported_cabin_code';
+
+    public const REASON_UNSUPPORTED_SINGLE_BRANDED_FARE = 'revalidation_payload_unsupported_single_branded_fare';
+
+    public const REASON_MISSING_OR_INVALID_ROOT_VERSION = 'revalidation_payload_missing_or_invalid_root_version';
+
+    public const REASON_MISSING_OR_INVALID_REQUESTOR_ID = 'revalidation_payload_missing_or_invalid_requestor_id';
+
+    public const REASON_MISSING_OR_INVALID_PSEUDO_CITY_CODE = 'revalidation_payload_missing_or_invalid_pseudo_city_code';
+
+    public const DEFAULT_REVALIDATE_ENDPOINT_PATH = '/v4/shop/flights/revalidate';
+
+    /**
+     * BFM v4 OTA root Version — matches {@see SabreFlightSearchRequestBuilder::otaAirLowFareSearchVersion()}
+     * and {@code iati_like_bfm_revalidate_v1} wire parity for {@code /v4/*} endpoints.
+     */
+    public const BFM_REVALIDATE_OTA_VERSION = '4';
+
+    /**
+     * BFM POS RequestorID parity — matches {@see SabreFlightSearchRequestBuilder::buildMinimalShopPayload()}
+     * and {@code buildIatiLikeBfmRevalidateV1Envelope()} (OTA schema constant, not passenger identity).
+     */
+    public const BFM_REVALIDATE_REQUESTOR_ID = '1';
+
+    public const BFM_REVALIDATE_REQUESTOR_TYPE = '1';
+
+    public const BFM_REVALIDATE_REQUESTOR_COMPANY_CODE = 'TN';
+
+    /** @var list<string> */
+    private const BFM_REVALIDATE_SUPPORTED_FLIGHT_CHILD_KEYS = [
+        'Airline',
+        'ArrivalDateTime',
+        'ClassOfService',
+        'DepartureDateTime',
+        'DestinationLocation',
+        'Number',
+        'OriginLocation',
+        'Type',
+    ];
+
+    /** @var list<string> */
+    private const BFM_REVALIDATE_UNSUPPORTED_FLIGHT_CHILD_KEYS = [
+        'CabinCode',
+        'FareBasisCode',
+        'ResBookDesigCode',
+        'SegmentNumber',
     ];
 
     /** @var list<string> */
@@ -146,45 +207,18 @@ final class SabreRevalidationPayloadBuilder
         $selectedOfferId = trim((string) ($internalDraft['selected_offer_id'] ?? ''));
         $supplierOfferId = trim((string) ($internalDraft['supplier_offer_id'] ?? ''));
 
-        $odis = [];
+        $bfmFlightNodes = [];
         foreach ($segments as $idx => $seg) {
             if (! is_array($seg)) {
                 continue;
             }
-            $depAt = (string) ($seg['departure_at'] ?? $seg['depart_at'] ?? '');
-            $arrAt = (string) ($seg['arrival_at'] ?? $seg['arrive_at'] ?? '');
-            $origin = strtoupper(trim((string) ($seg['origin'] ?? '')));
-            $dest = strtoupper(trim((string) ($seg['destination'] ?? '')));
-            $mkt = strtoupper(trim((string) ($seg['carrier'] ?? $seg['airline_code'] ?? '')));
-            $op = strtoupper(trim((string) ($seg['operating_airline_code'] ?? '')));
-            $flightNumber = trim((string) ($seg['flight_number'] ?? $seg['flight_no'] ?? ''));
-            $bookingClass = strtoupper(trim((string) ($seg['booking_class'] ?? '')));
-            $fareBasis = strtoupper(trim((string) ($seg['fare_basis_code'] ?? '')));
-            $cabin = strtoupper(trim((string) ($seg['segment_cabin_code'] ?? '')));
-
-            $flightSegment = array_filter([
-                'Number' => $idx + 1,
-                'SegmentNumber' => $idx + 1,
-                'DepartureDateTime' => $depAt !== '' ? $depAt : null,
-                'ArrivalDateTime' => $arrAt !== '' ? $arrAt : null,
-                'OriginLocation' => $origin !== '' ? ['LocationCode' => $origin] : null,
-                'DestinationLocation' => $dest !== '' ? ['LocationCode' => $dest] : null,
-                'MarketingAirline' => $mkt !== '' ? array_filter([
-                    'Code' => $mkt,
-                    'FlightNumber' => $flightNumber !== '' ? $flightNumber : null,
-                ]) : null,
-                'OperatingAirline' => $op !== '' ? ['Code' => $op] : null,
-                'FlightNumber' => $flightNumber !== '' ? $flightNumber : null,
-                'ResBookDesigCode' => $bookingClass !== '' ? $bookingClass : null,
-                'ClassOfService' => $bookingClass !== '' ? $bookingClass : null,
-                'CabinCode' => $cabin !== '' ? $cabin : null,
-                'FareBasisCode' => $fareBasis !== '' ? $fareBasis : null,
-            ], static fn ($v) => $v !== null && $v !== [] && $v !== '');
-
-            $odis[] = [
-                'FlightSegment' => $flightSegment,
-            ];
+            $node = $this->buildBfmRevalidateFlightNodeFromSegment($seg, $idx);
+            if ($node !== []) {
+                $bfmFlightNodes[] = $node;
+            }
         }
+        $bfmGrouped = $this->groupIatiLikeOriginDestinationInformation($bfmFlightNodes);
+        $odis = $bfmGrouped['odis'];
 
         $shopContext = $this->sanitizeShopContext($mergedShopSource);
         $fareBasisCodes = $this->fareBasisCodesFromSegmentsAndContext($segments, $shopContext);
@@ -203,16 +237,20 @@ final class SabreRevalidationPayloadBuilder
             ],
         ];
 
+        $pccContext = $this->resolveBfmRevalidatePseudoCityCodeContext($internalDraft);
+        $posSourceRow = ['RequestorID' => $this->buildBfmRevalidatePosRequestorIdBlock()];
+        if ($pccContext['pcc'] !== '') {
+            $posSourceRow['PseudoCityCode'] = $pccContext['pcc'];
+        }
+
         $payload = [
             '_ota_provider' => SupplierProvider::Sabre->value,
             '_ota_payload_schema' => 'sabre_revalidate_v4_shop_flights_v1',
             'OTA_AirLowFareSearchRQ' => [
+                'Version' => $this->bfmRevalidateOtaAirLowFareSearchVersion(),
                 'POS' => [
                     'Source' => [
-                        ['RequestorID' => array_filter([
-                            'Type' => '1',
-                            'CompanyName' => ['Code' => 'TN'],
-                        ])],
+                        $posSourceRow,
                     ],
                 ],
                 'OriginDestinationInformation' => $odis,
@@ -226,11 +264,6 @@ final class SabreRevalidationPayloadBuilder
                 'TravelerInfoSummary' => array_filter([
                     'PriceRequestInformation' => array_filter([
                         'CurrencyCode' => $currency !== '' ? $currency : null,
-                        'TPA_Extensions' => array_filter([
-                            'BrandedFareIndicators' => [
-                                'singleBrandedFare' => true,
-                            ],
-                        ], static fn ($v) => $v !== null && $v !== []),
                     ], static fn ($v) => $v !== null && $v !== ''),
                     'AirTravelerAvail' => $travelerInfoSummary['AirTravelerAvail'],
                 ], static fn ($v) => $v !== null && $v !== []),
@@ -267,6 +300,8 @@ final class SabreRevalidationPayloadBuilder
             'passenger_counts' => array_filter($ptcCounts, static fn (int $n): bool => $n > 0),
         ];
         $payload['_ota_revalidate_payload_style'] = $style;
+        $payload['_ota_bfm_grouping'] = $bfmGrouped['meta'];
+        $payload['_ota_revalidate_pcc_source_location'] = $pccContext['source_location'];
 
         return match ($style) {
             'bfm_revalidate_minimal_segments' => $this->withMinimalSegmentsStyle($payload),
@@ -536,9 +571,11 @@ final class SabreRevalidationPayloadBuilder
             'has_origin_location' => $has($seg, ['OriginLocation', 'originLocation', 'origin']),
             'has_destination_location' => $has($seg, ['DestinationLocation', 'destinationLocation', 'destination']),
             'has_marketing_airline' => $has($seg, ['MarketingAirline', 'marketingAirline', 'AirlineMarketing'])
-                || is_array(data_get($seg, 'Airline.Marketing')),
+                || is_array(data_get($seg, 'Airline.Marketing'))
+                || is_string(data_get($seg, 'Airline.Marketing')),
             'has_operating_airline' => $has($seg, ['OperatingAirline', 'operatingAirline', 'AirlineOperating'])
-                || is_array(data_get($seg, 'Airline.Operating')),
+                || is_array(data_get($seg, 'Airline.Operating'))
+                || is_string(data_get($seg, 'Airline.Operating')),
             'has_flight_number' => $has($seg, ['FlightNumber', 'flightNumber', 'Number', 'number'])
                 || trim((string) data_get($seg, 'MarketingAirline.FlightNumber', '')) !== '',
             'has_pcc' => $pccPresent,
@@ -1311,6 +1348,50 @@ final class SabreRevalidationPayloadBuilder
     }
 
     /**
+     * BFM {@code /v4/shop/flights/revalidate} expects scalar {@code Airline.Marketing}/{@code Airline.Operating} strings.
+     *
+     * @param  array<string, mixed>  $seg
+     * @return array<string, string>
+     */
+    protected function buildBfmRevalidateScalarAirlineFromSegment(array $seg): array
+    {
+        $mkt = strtoupper(trim((string) ($seg['carrier'] ?? $seg['airline_code'] ?? '')));
+        $op = strtoupper(trim((string) ($seg['operating_airline_code'] ?? '')));
+
+        return array_filter([
+            'Marketing' => $mkt !== '' ? $mkt : null,
+            'Operating' => $op !== '' ? $op : null,
+        ], static fn ($v): bool => is_string($v) && $v !== '');
+    }
+
+    /**
+     * BFM revalidate flight node for {@code TPA_Extensions.Flight[]} (schema-safe vs direct {@code FlightSegment} on ODI).
+     *
+     * @param  array<string, mixed>  $seg
+     * @return array<string, mixed>
+     */
+    protected function buildBfmRevalidateFlightNodeFromSegment(array $seg, int $segmentIndex): array
+    {
+        $node = $this->buildIatiLikeFlightNodeFromSegment($seg);
+        if ($node === []) {
+            return [];
+        }
+
+        $airline = $this->buildBfmRevalidateScalarAirlineFromSegment($seg);
+        if ($airline !== []) {
+            $node['Airline'] = $airline;
+        }
+
+        $bookingClass = strtoupper(trim((string) ($seg['booking_class'] ?? '')));
+
+        if ($bookingClass !== '') {
+            $node['ClassOfService'] = $bookingClass;
+        }
+
+        return array_filter($node, static fn ($v) => $v !== null && $v !== [] && $v !== '');
+    }
+
+    /**
      * Group consecutive flight nodes into IATI-style ODI legs (gap {@code >24h} or broken route starts new leg).
      *
      * @param  list<array<string, mixed>>  $flightNodes
@@ -1453,40 +1534,64 @@ final class SabreRevalidationPayloadBuilder
      */
     protected function resolvePseudoCityCodeFromDraft(array $internalDraft): string
     {
+        return $this->resolveBfmRevalidatePseudoCityCodeContext($internalDraft)['pcc'];
+    }
+
+    /**
+     * Safe PCC resolution context for BFM revalidate (value used only during build; artifacts get location label only).
+     *
+     * @param  array<string, mixed>  $internalDraft
+     * @return array{pcc: string, source_location: ?string}
+     */
+    public function resolveBfmRevalidatePseudoCityCodeContext(array $internalDraft): array
+    {
         $explicit = trim((string) ($internalDraft['_sabre_pseudo_city_code'] ?? ''));
         if ($explicit !== '') {
-            return strtoupper(substr($explicit, 0, 16));
+            return [
+                'pcc' => strtoupper(substr($explicit, 0, 16)),
+                'source_location' => 'draft_sabre_pseudo_city_code',
+            ];
         }
+
         $shop = $this->sanitizeShopContext($this->mergeDraftShopSources($internalDraft));
         foreach (['pcc', 'PCC', 'pseudo_city_code', 'pseudoCityCode'] as $key) {
             $v = trim((string) ($shop[$key] ?? ''));
             if ($v !== '') {
-                return strtoupper(substr($v, 0, 16));
+                return [
+                    'pcc' => strtoupper(substr($v, 0, 16)),
+                    'source_location' => 'shop_context_'.$key,
+                ];
             }
         }
 
         $cid = (int) ($internalDraft['supplier_connection_id'] ?? 0);
         if ($cid <= 0) {
-            return '';
+            return ['pcc' => '', 'source_location' => null];
         }
         $conn = SupplierConnection::query()->find($cid);
         if ($conn === null) {
-            return '';
+            return ['pcc' => '', 'source_location' => null];
         }
         $cred = is_array($conn->credentials) ? $conn->credentials : [];
         $settings = is_array($conn->settings) ? $conn->settings : [];
         foreach (['pcc', 'PCC', 'pseudo_city_code', 'pseudoCityCode'] as $key) {
             $v = trim((string) ($cred[$key] ?? ''));
             if ($v !== '') {
-                return strtoupper(substr($v, 0, 16));
+                return [
+                    'pcc' => strtoupper(substr($v, 0, 16)),
+                    'source_location' => 'supplier_connection_credentials_'.$key,
+                ];
             }
             $v = trim((string) data_get($settings, $key));
             if ($v !== '') {
-                return strtoupper(substr($v, 0, 16));
+                return [
+                    'pcc' => strtoupper(substr($v, 0, 16)),
+                    'source_location' => 'supplier_connection_settings_'.$key,
+                ];
             }
         }
 
-        return '';
+        return ['pcc' => '', 'source_location' => null];
     }
 
     /**
@@ -1742,6 +1847,9 @@ final class SabreRevalidationPayloadBuilder
                     $hasBookingClass = true;
                     $hasClassOfService = true;
                 }
+                if (trim((string) ($fs['FareBasisCode'] ?? '')) !== '') {
+                    $hasFareBasis = true;
+                }
                 if (trim((string) ($fs['Number'] ?? '')) !== '') {
                     $hasSegmentNumbers = true;
                 }
@@ -1777,6 +1885,18 @@ final class SabreRevalidationPayloadBuilder
         }
         $shopCtx = is_array($payload['shop_context'] ?? null) ? $payload['shop_context'] : [];
         $fareCtx = is_array($payload['fare_context'] ?? null) ? $payload['fare_context'] : [];
+        if (! $hasFareBasis) {
+            foreach ([
+                is_array($shopCtx['fare_basis_codes'] ?? null) ? $shopCtx['fare_basis_codes'] : [],
+                is_array($shopCtx['fare_basis_codes_by_segment'] ?? null) ? $shopCtx['fare_basis_codes_by_segment'] : [],
+                is_array($fareCtx['fare_basis_codes'] ?? null) ? $fareCtx['fare_basis_codes'] : [],
+            ] as $fareBasisRows) {
+                if ($fareBasisRows !== []) {
+                    $hasFareBasis = true;
+                    break;
+                }
+            }
+        }
         $hasOfferReference = false;
         foreach (array_merge($shopCtx, $fareCtx) as $k => $v) {
             if (! is_string($k)) {
@@ -1839,7 +1959,8 @@ final class SabreRevalidationPayloadBuilder
             'has_schedule_refs' => is_array($shopCtx['schedule_refs'] ?? null) && $shopCtx['schedule_refs'] !== [],
             'has_pricing_information_ref' => $hasPricingInformationRef,
             'has_reconstructed_pricing_context' => $hasReconstructedPricingContext,
-            'has_fare_component_refs' => is_array($shopCtx['fare_component_refs'] ?? null) && $shopCtx['fare_component_refs'] !== [],
+            'has_fare_component_refs' => (is_array($shopCtx['fare_component_refs'] ?? null) && $shopCtx['fare_component_refs'] !== [])
+                || (is_array($fareCtx['fare_component_refs'] ?? null) && $fareCtx['fare_component_refs'] !== []),
             'has_booking_class' => $hasBookingClass,
             'has_fare_basis' => $hasFareBasis,
             'has_validating_carrier' => trim((string) (data_get($payload, 'fare_context.validating_carrier') ?? '')) !== '',
@@ -2207,29 +2328,9 @@ final class SabreRevalidationPayloadBuilder
      */
     public function extractHttp200ApplicationWarningDigest(?array $json): array
     {
-        if (! is_array($json) || $json === []) {
-            return [];
-        }
-
-        $codes = [];
-        $messages = [];
-        $roots = [
-            'warnings', 'messages', 'errors',
-            'error.warnings', 'error.messages', 'error.errors',
-            'result.warnings', 'result.messages', 'result.errors',
-            'data.warnings', 'data.messages', 'data.errors',
-            'groupedItineraryResponse.messages',
-            'groupedItineraryResponse.itineraryGroups.0.itineraries.0.messages',
-        ];
-        foreach ($roots as $dot) {
-            $v = data_get($json, $dot);
-            $this->appendWarningRowsFromNode($v, $codes, $messages);
-        }
-
-        return array_filter([
-            'response_error_codes' => array_slice(array_values(array_unique($codes)), 0, 12),
-            'response_error_messages' => array_slice(array_values(array_unique($messages)), 0, 12),
-        ], static fn ($x): bool => $x !== null && $x !== []);
+        return app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->toErrorDigest(
+            app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->analyze($json),
+        );
     }
 
     /**
@@ -2237,10 +2338,29 @@ final class SabreRevalidationPayloadBuilder
      */
     public function http200ApplicationWarningDigestNonEmpty(array $digest): bool
     {
-        $c = $digest['response_error_codes'] ?? [];
-        $m = $digest['response_error_messages'] ?? [];
+        $diagnostics = is_array($digest['application_message_diagnostics'] ?? null)
+            ? $digest['application_message_diagnostics']
+            : [];
 
-        return (is_array($c) && $c !== []) || (is_array($m) && $m !== []);
+        if ($diagnostics !== []) {
+            return app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->hasBlockingMessages($diagnostics);
+        }
+
+        $failureClass = (string) ($digest['revalidation_failure_class'] ?? '');
+        if (in_array($failureClass, ['application_error', 'application_warning'], true)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $json
+     * @return array<string, mixed>
+     */
+    public function extractHttp200ApplicationMessageDiagnostics(?array $json): array
+    {
+        return app(SabreGdsRevalidationApplicationMessageDiagnostics::class)->analyze($json);
     }
 
     /**
@@ -2249,14 +2369,14 @@ final class SabreRevalidationPayloadBuilder
      * @param  array<string, mixed>|null  $json
      * @return array<string, mixed>
      */
-    public function extractFareLinkage(?array $json): array
+    public function extractFareLinkage(?array $json, ?array $selectedItinerary = null): array
     {
         if (! is_array($json) || $json === []) {
             return [];
         }
 
-        $selectedGirItinerary = $this->selectGroupedItineraryForRevalidation($json);
-        $perSegment = $this->collectPerSegmentFareBasis($json);
+        $selectedGirItinerary = $selectedItinerary ?? $this->selectGroupedItineraryForRevalidation($json);
+        $perSegment = $this->collectPerSegmentFareBasis($json, $selectedGirItinerary);
         $fareBasisFirst = $perSegment !== [] ? (string) ($perSegment[0]['fare_basis_code'] ?? '') : '';
 
         $fareReference = $this->firstScalarFromPaths($selectedGirItinerary, [
@@ -2591,10 +2711,10 @@ final class SabreRevalidationPayloadBuilder
      * @param  array<string, mixed>  $json
      * @return list<array<string, string>>
      */
-    protected function collectPerSegmentFareBasis(array $json): array
+    protected function collectPerSegmentFareBasis(array $json, ?array $selectedGirItinerary = null): array
     {
         $out = [];
-        $selectedGirItinerary = $this->selectGroupedItineraryForRevalidation($json);
+        $selectedGirItinerary = $selectedGirItinerary ?? $this->selectGroupedItineraryForRevalidation($json);
 
         $tryRows = [
             data_get($selectedGirItinerary, 'pricingInformation.0.fare.fareInfos'),
@@ -3591,7 +3711,1022 @@ final class SabreRevalidationPayloadBuilder
             ]);
         }
 
-        return substr(hash('sha256', $style.'::'.json_encode($sell).'::'.json_encode(array_keys($wire))), 0, 24);
+        $schema = $this->evaluateRevalidationPayloadSchema($payload);
+        $odiChildKeys = implode(',', $schema['origin_destination_child_keys'] ?? []);
+        $wireFlightCount = count($this->collectWireFlightNodesForGatekeeper($payload));
+        $airlineTypeDigest = $this->firstWireAirlineFieldTypeDigest($payload);
+        $flightChildKeyDigest = $this->allWireFlightChildKeyDigest($payload);
+        $brandedFareIndicatorDigest = implode(',', $schema['branded_fare_indicator_child_keys'] ?? []);
+        $rootVersionDigest = (($schema['root_version_present'] ?? false) ? '1' : '0')
+            .':'.(($schema['root_version_type_valid'] ?? false) ? '1' : '0');
+        $requestorIdDigest = (($schema['requestor_id_present'] ?? false) ? '1' : '0')
+            .':'.(($schema['requestor_id_type_valid'] ?? false) ? '1' : '0')
+            .':'.(($schema['requestor_id_non_empty'] ?? false) ? '1' : '0');
+        $pseudoCityCodeDigest = (($schema['pseudo_city_code_present'] ?? false) ? '1' : '0')
+            .':'.(($schema['pseudo_city_code_type_valid'] ?? false) ? '1' : '0')
+            .':'.(($schema['pseudo_city_code_non_empty'] ?? false) ? '1' : '0');
+
+        return substr(hash('sha256', $style.'::'.json_encode($sell).'::'.json_encode(array_keys($wire)).'::odi='.$odiChildKeys.'::wire_flights='.$wireFlightCount.'::airline_types='.$airlineTypeDigest.'::flight_keys='.$flightChildKeyDigest.'::branded_fare_keys='.$brandedFareIndicatorDigest.'::root_version='.$rootVersionDigest.'::requestor_id='.$requestorIdDigest.'::pseudo_city_code='.$pseudoCityCodeDigest), 0, 24);
+    }
+
+    /**
+     * Safe key-only digest for all wire {@code TPA_Extensions.Flight[]} nodes.
+     */
+    protected function allWireFlightChildKeyDigest(array $payload): string
+    {
+        $keys = $this->collectAllWireFlightChildKeyNames($payload);
+        sort($keys);
+
+        return implode(',', $keys);
+    }
+
+    /**
+     * Safe type-only digest for first wire {@code Airline} node (no carrier values).
+     */
+    protected function firstWireAirlineFieldTypeDigest(array $payload): string
+    {
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        foreach ($odis as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $flights = data_get($row, 'TPA_Extensions.Flight');
+            if (! is_array($flights)) {
+                continue;
+            }
+            foreach ($flights as $flight) {
+                if (! is_array($flight)) {
+                    continue;
+                }
+                $airline = $flight['Airline'] ?? null;
+                if (! is_array($airline)) {
+                    return '';
+                }
+                $parts = [];
+                foreach ($airline as $key => $value) {
+                    if (! is_string($key)) {
+                        continue;
+                    }
+                    $parts[] = $key.':'.gettype($value);
+                }
+                sort($parts);
+
+                return implode('|', $parts);
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Local/read-only schema guard for {@code /v4/shop/flights/revalidate} — blocks direct {@code FlightSegment} on ODI.
+     *
+     * @return array{
+     *     revalidation_payload_schema_valid: bool,
+     *     payload_schema_reason_code: ?string,
+     *     origin_destination_child_keys: list<string>,
+     *     contains_invalid_direct_flight_segment: bool,
+     *     airline_marketing_type_valid: bool,
+     *     airline_operating_type_valid: bool,
+     *     contains_unsupported_segment_number: bool,
+     *     contains_unsupported_resbookdesigcode: bool,
+     *     contains_unsupported_fare_basis_code: bool,
+     *     contains_unsupported_cabin_code: bool,
+     *     contains_unsupported_single_branded_fare: bool,
+     *     unsupported_branded_fare_indicator_keys: list<string>,
+     *     branded_fare_indicator_child_keys: list<string>,
+     *     branded_fare_indicator_child_types: array<string, string>,
+     *     branded_fare_context_present: bool,
+     *     branded_fare_context_location: ?string,
+     *     unsupported_flight_child_keys: list<string>,
+     *     booking_class_context_present: bool,
+     *     booking_class_context_location: ?string,
+     *     cabin_context_present: bool,
+     *     cabin_context_location: ?string,
+     *     fare_basis_context_present: bool,
+     *     fare_basis_context_location: ?string,
+     *     pricing_context_present: bool,
+     *     fare_component_references_present: bool,
+     *     invalid_schema_paths: list<string>,
+     *     invalid_schema_type_count: int,
+     *     flight_child_keys: list<string>,
+     *     airline_child_keys: list<string>,
+     *     payload_style: string,
+     *     endpoint: string
+     * }
+     */
+    public function evaluateRevalidationPayloadSchema(array $payload, ?string $endpointPath = null): array
+    {
+        $style = (string) ($payload['_ota_revalidate_payload_style'] ?? 'bfm_revalidate_v1');
+        $endpoint = $this->normalizeRevalidateEndpointPath($endpointPath);
+        $childKeys = $this->collectOriginDestinationChildKeyNames($payload);
+        $containsInvalid = $this->payloadContainsInvalidDirectFlightSegment($payload);
+        $flightChildKeys = $this->collectAllWireFlightChildKeyNames($payload);
+        $airlineChildKeys = $this->collectFirstWireAirlineChildKeyNames($payload);
+        $bfmFlightReview = ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH)
+            ? $this->evaluateBfmRevalidateFlightChildCompatibility($payload)
+            : [
+                'unsupported_flight_child_keys' => [],
+                'contains_unsupported_segment_number' => false,
+                'contains_unsupported_resbookdesigcode' => false,
+                'contains_unsupported_fare_basis_code' => false,
+                'contains_unsupported_cabin_code' => false,
+                'segment_number_paths' => [],
+                'resbookdesigcode_paths' => [],
+                'fare_basis_code_paths' => [],
+                'cabin_code_paths' => [],
+            ];
+        $contextLinkage = ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH)
+            ? $this->evaluateBfmRevalidateBookingClassFareContextDigest($payload)
+            : [
+                'booking_class_context_present' => false,
+                'booking_class_context_location' => null,
+                'cabin_context_present' => false,
+                'cabin_context_location' => null,
+                'fare_basis_context_present' => false,
+                'fare_basis_context_location' => null,
+                'pricing_context_present' => false,
+                'fare_component_references_present' => false,
+            ];
+        $brandedFareReview = ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH)
+            ? $this->evaluateBfmRevalidateBrandedFareIndicatorCompatibility($payload)
+            : [
+                'unsupported_branded_fare_indicator_keys' => [],
+                'contains_unsupported_single_branded_fare' => false,
+                'single_branded_fare_paths' => [],
+                'branded_fare_indicator_child_keys' => [],
+                'branded_fare_indicator_child_types' => [],
+            ];
+        $brandedFareContext = ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH)
+            ? $this->evaluateBfmRevalidateBrandedFareContextDigest($payload)
+            : [
+                'branded_fare_context_present' => false,
+                'branded_fare_context_location' => null,
+            ];
+        $rootOtaReview = ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH)
+            ? $this->evaluateBfmRevalidateRootOtaSchemaDigest($payload, $endpoint)
+            : [
+                'root_child_keys' => [],
+                'root_version_present' => false,
+                'root_version_type_valid' => false,
+                'root_target_present' => false,
+                'root_target_type_valid' => true,
+                'root_version_paths' => [],
+            ];
+        $posRequestorReview = ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH)
+            ? $this->evaluateBfmRevalidatePosRequestorSchemaDigest($payload)
+            : [
+                'pos_child_keys' => [],
+                'source_child_keys' => [],
+                'requestor_id_child_keys' => [],
+                'requestor_id_child_types' => [],
+                'requestor_id_present' => false,
+                'requestor_id_type_valid' => false,
+                'requestor_id_non_empty' => false,
+                'requestor_identity_source_present' => false,
+                'requestor_identity_source_location' => null,
+                'requestor_id_paths' => [],
+            ];
+        $pseudoCityCodeReview = ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH)
+            ? $this->evaluateBfmRevalidatePseudoCityCodeSchemaDigest($payload)
+            : [
+                'pseudo_city_code_present' => false,
+                'pseudo_city_code_type_valid' => false,
+                'pseudo_city_code_non_empty' => false,
+                'pseudo_city_code_source_present' => false,
+                'pseudo_city_code_source_location' => null,
+                'pseudo_city_code_paths' => [],
+            ];
+        $airlineViolations = ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH)
+            ? $this->collectBfmRevalidateAirlineScalarViolations($payload)
+            : [];
+        $marketingViolations = array_values(array_filter(
+            $airlineViolations,
+            static fn (string $path): bool => str_ends_with($path, '.Marketing'),
+        ));
+        $operatingViolations = array_values(array_filter(
+            $airlineViolations,
+            static fn (string $path): bool => str_ends_with($path, '.Operating'),
+        ));
+        $segmentNumberPaths = $bfmFlightReview['segment_number_paths'];
+        $resBookDesigCodePaths = $bfmFlightReview['resbookdesigcode_paths'];
+        $fareBasisCodePaths = $bfmFlightReview['fare_basis_code_paths'];
+        $cabinCodePaths = $bfmFlightReview['cabin_code_paths'];
+        $singleBrandedFarePaths = $brandedFareReview['single_branded_fare_paths'];
+        $rootVersionPaths = $rootOtaReview['root_version_paths'];
+        $requestorIdPaths = $posRequestorReview['requestor_id_paths'];
+        $pseudoCityCodePaths = $pseudoCityCodeReview['pseudo_city_code_paths'];
+        $invalidSchemaPaths = array_values(array_merge(
+            $rootVersionPaths,
+            $requestorIdPaths,
+            $pseudoCityCodePaths,
+            $airlineViolations,
+            $segmentNumberPaths,
+            $resBookDesigCodePaths,
+            $fareBasisCodePaths,
+            $cabinCodePaths,
+            $singleBrandedFarePaths,
+        ));
+
+        $valid = true;
+        $reasonCode = null;
+        if ($style === 'bfm_revalidate_v1' && $endpoint === self::DEFAULT_REVALIDATE_ENDPOINT_PATH) {
+            if ($rootVersionPaths !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_MISSING_OR_INVALID_ROOT_VERSION;
+            } elseif ($requestorIdPaths !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_MISSING_OR_INVALID_REQUESTOR_ID;
+            } elseif ($pseudoCityCodePaths !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_MISSING_OR_INVALID_PSEUDO_CITY_CODE;
+            } elseif ($containsInvalid) {
+                $valid = false;
+                $reasonCode = self::REASON_INVALID_FLIGHTSEGMENT_LOCATION;
+            } elseif ($marketingViolations !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_INVALID_AIRLINE_MARKETING_TYPE;
+            } elseif ($operatingViolations !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_INVALID_AIRLINE_OPERATING_TYPE;
+            } elseif ($segmentNumberPaths !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_UNSUPPORTED_FLIGHT_SEGMENT_NUMBER;
+            } elseif ($resBookDesigCodePaths !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_UNSUPPORTED_RESBOOKDESIGCODE;
+            } elseif ($fareBasisCodePaths !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_UNSUPPORTED_FARE_BASIS_CODE;
+            } elseif ($cabinCodePaths !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_UNSUPPORTED_CABIN_CODE;
+            } elseif ($singleBrandedFarePaths !== []) {
+                $valid = false;
+                $reasonCode = self::REASON_UNSUPPORTED_SINGLE_BRANDED_FARE;
+            }
+        }
+
+        return [
+            'revalidation_payload_schema_valid' => $valid,
+            'payload_schema_reason_code' => $reasonCode,
+            'root_version_present' => ($rootOtaReview['root_version_present'] ?? false) === true,
+            'root_version_type_valid' => ($rootOtaReview['root_version_type_valid'] ?? false) === true,
+            'root_child_keys' => $rootOtaReview['root_child_keys'] ?? [],
+            'root_target_present' => ($rootOtaReview['root_target_present'] ?? false) === true,
+            'root_target_type_valid' => ($rootOtaReview['root_target_type_valid'] ?? true) === true,
+            'requestor_id_present' => ($posRequestorReview['requestor_id_present'] ?? false) === true,
+            'requestor_id_type_valid' => ($posRequestorReview['requestor_id_type_valid'] ?? false) === true,
+            'requestor_id_non_empty' => ($posRequestorReview['requestor_id_non_empty'] ?? false) === true,
+            'pos_child_keys' => $posRequestorReview['pos_child_keys'] ?? [],
+            'source_child_keys' => $posRequestorReview['source_child_keys'] ?? [],
+            'requestor_id_child_keys' => $posRequestorReview['requestor_id_child_keys'] ?? [],
+            'requestor_id_child_types' => $posRequestorReview['requestor_id_child_types'] ?? [],
+            'requestor_identity_source_present' => ($posRequestorReview['requestor_identity_source_present'] ?? false) === true,
+            'requestor_identity_source_location' => $posRequestorReview['requestor_identity_source_location'] ?? null,
+            'pseudo_city_code_present' => ($pseudoCityCodeReview['pseudo_city_code_present'] ?? false) === true,
+            'pseudo_city_code_type_valid' => ($pseudoCityCodeReview['pseudo_city_code_type_valid'] ?? false) === true,
+            'pseudo_city_code_non_empty' => ($pseudoCityCodeReview['pseudo_city_code_non_empty'] ?? false) === true,
+            'pseudo_city_code_source_present' => ($pseudoCityCodeReview['pseudo_city_code_source_present'] ?? false) === true,
+            'pseudo_city_code_source_location' => $pseudoCityCodeReview['pseudo_city_code_source_location'] ?? null,
+            'origin_destination_child_keys' => $childKeys,
+            'contains_invalid_direct_flight_segment' => $containsInvalid,
+            'airline_marketing_type_valid' => $marketingViolations === [],
+            'airline_operating_type_valid' => $operatingViolations === [],
+            'contains_unsupported_segment_number' => ($bfmFlightReview['contains_unsupported_segment_number'] ?? false) === true,
+            'contains_unsupported_resbookdesigcode' => ($bfmFlightReview['contains_unsupported_resbookdesigcode'] ?? false) === true,
+            'contains_unsupported_fare_basis_code' => ($bfmFlightReview['contains_unsupported_fare_basis_code'] ?? false) === true,
+            'contains_unsupported_cabin_code' => ($bfmFlightReview['contains_unsupported_cabin_code'] ?? false) === true,
+            'contains_unsupported_single_branded_fare' => ($brandedFareReview['contains_unsupported_single_branded_fare'] ?? false) === true,
+            'unsupported_branded_fare_indicator_keys' => $brandedFareReview['unsupported_branded_fare_indicator_keys'] ?? [],
+            'branded_fare_indicator_child_keys' => $brandedFareReview['branded_fare_indicator_child_keys'] ?? [],
+            'branded_fare_indicator_child_types' => $brandedFareReview['branded_fare_indicator_child_types'] ?? [],
+            'branded_fare_context_present' => ($brandedFareContext['branded_fare_context_present'] ?? false) === true,
+            'branded_fare_context_location' => $brandedFareContext['branded_fare_context_location'] ?? null,
+            'unsupported_flight_child_keys' => $bfmFlightReview['unsupported_flight_child_keys'] ?? [],
+            'booking_class_context_present' => ($contextLinkage['booking_class_context_present'] ?? false) === true,
+            'booking_class_context_location' => $contextLinkage['booking_class_context_location'] ?? null,
+            'cabin_context_present' => ($contextLinkage['cabin_context_present'] ?? false) === true,
+            'cabin_context_location' => $contextLinkage['cabin_context_location'] ?? null,
+            'fare_basis_context_present' => ($contextLinkage['fare_basis_context_present'] ?? false) === true,
+            'fare_basis_context_location' => $contextLinkage['fare_basis_context_location'] ?? null,
+            'pricing_context_present' => ($contextLinkage['pricing_context_present'] ?? false) === true,
+            'fare_component_references_present' => ($contextLinkage['fare_component_references_present'] ?? false) === true,
+            'invalid_schema_paths' => $invalidSchemaPaths,
+            'invalid_schema_type_count' => count($invalidSchemaPaths),
+            'flight_child_keys' => $flightChildKeys,
+            'airline_child_keys' => $airlineChildKeys,
+            'payload_style' => $style,
+            'endpoint' => $endpoint,
+        ];
+    }
+
+    public function isProductionBlockedRevalidateStyle(string $style): bool
+    {
+        return in_array($style, self::PRODUCTION_BLOCKED_REVALIDATE_STYLES, true);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function collectWireRootKeyNames(array $payload): array
+    {
+        return array_values(array_filter(array_keys($this->wireableRequestPayload($payload)), static fn ($k): bool => is_string($k)));
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function collectOriginDestinationChildKeyNames(array $payload): array
+    {
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        $keys = [];
+        foreach ($odis as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            foreach (array_keys($row) as $key) {
+                if (is_string($key)) {
+                    $keys[$key] = true;
+                }
+            }
+        }
+
+        $sorted = array_keys($keys);
+        sort($sorted);
+
+        return $sorted;
+    }
+
+    protected function payloadContainsInvalidDirectFlightSegment(array $payload): bool
+    {
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        foreach ($odis as $row) {
+            if (is_array($row) && array_key_exists('FlightSegment', $row)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function collectBfmRevalidateAirlineScalarViolations(array $payload): array
+    {
+        $violations = [];
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        foreach ($odis as $odiIndex => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $flights = data_get($row, 'TPA_Extensions.Flight');
+            if (! is_array($flights)) {
+                continue;
+            }
+            foreach ($flights as $flightIndex => $flight) {
+                if (! is_array($flight)) {
+                    continue;
+                }
+                $airline = $flight['Airline'] ?? null;
+                if (! is_array($airline)) {
+                    continue;
+                }
+                $prefix = '$.OTA_AirLowFareSearchRQ.OriginDestinationInformation['.$odiIndex.'].TPA_Extensions.Flight['.$flightIndex.'].Airline';
+                if (array_key_exists('Marketing', $airline) && ! is_string($airline['Marketing'])) {
+                    $violations[] = $prefix.'.Marketing';
+                }
+                if (array_key_exists('Operating', $airline) && ! is_string($airline['Operating'])) {
+                    $violations[] = $prefix.'.Operating';
+                }
+            }
+        }
+
+        return $violations;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function collectAllWireFlightChildKeyNames(array $payload): array
+    {
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        $keys = [];
+        foreach ($odis as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $flights = data_get($row, 'TPA_Extensions.Flight');
+            if (! is_array($flights)) {
+                continue;
+            }
+            foreach ($flights as $flight) {
+                if (! is_array($flight)) {
+                    continue;
+                }
+                foreach (array_keys($flight) as $key) {
+                    if (is_string($key)) {
+                        $keys[$key] = true;
+                    }
+                }
+            }
+        }
+        $sorted = array_keys($keys);
+        sort($sorted);
+
+        return $sorted;
+    }
+
+    /**
+     * @return array{
+     *     unsupported_flight_child_keys: list<string>,
+     *     contains_unsupported_segment_number: bool,
+     *     contains_unsupported_resbookdesigcode: bool,
+     *     contains_unsupported_fare_basis_code: bool,
+     *     contains_unsupported_cabin_code: bool,
+     *     segment_number_paths: list<string>,
+     *     resbookdesigcode_paths: list<string>,
+     *     fare_basis_code_paths: list<string>,
+     *     cabin_code_paths: list<string>
+     * }
+     */
+    protected function evaluateBfmRevalidateFlightChildCompatibility(array $payload): array
+    {
+        $presentKeys = $this->collectAllWireFlightChildKeyNames($payload);
+        $supported = array_fill_keys(self::BFM_REVALIDATE_SUPPORTED_FLIGHT_CHILD_KEYS, true);
+        $unsupportedKnown = array_fill_keys(self::BFM_REVALIDATE_UNSUPPORTED_FLIGHT_CHILD_KEYS, true);
+        $unsupported = [];
+        foreach ($presentKeys as $key) {
+            if (isset($unsupportedKnown[$key]) || ! isset($supported[$key])) {
+                $unsupported[] = $key;
+            }
+        }
+        sort($unsupported);
+
+        $segmentNumberPaths = $this->collectBfmRevalidateFlightChildKeyPaths($payload, 'SegmentNumber');
+        $resBookDesigCodePaths = $this->collectBfmRevalidateFlightChildKeyPaths($payload, 'ResBookDesigCode');
+        $fareBasisCodePaths = $this->collectBfmRevalidateFlightChildKeyPaths($payload, 'FareBasisCode');
+        $cabinCodePaths = $this->collectBfmRevalidateFlightChildKeyPaths($payload, 'CabinCode');
+
+        return [
+            'unsupported_flight_child_keys' => $unsupported,
+            'contains_unsupported_segment_number' => $segmentNumberPaths !== [],
+            'contains_unsupported_resbookdesigcode' => $resBookDesigCodePaths !== [],
+            'contains_unsupported_fare_basis_code' => $fareBasisCodePaths !== [],
+            'contains_unsupported_cabin_code' => $cabinCodePaths !== [],
+            'segment_number_paths' => $segmentNumberPaths,
+            'resbookdesigcode_paths' => $resBookDesigCodePaths,
+            'fare_basis_code_paths' => $fareBasisCodePaths,
+            'cabin_code_paths' => $cabinCodePaths,
+        ];
+    }
+
+    /**
+     * Safe booking-class, cabin, and fare-basis linkage locations (key names only, no values).
+     *
+     * @return array{
+     *     booking_class_context_present: bool,
+     *     booking_class_context_location: ?string,
+     *     cabin_context_present: bool,
+     *     cabin_context_location: ?string,
+     *     fare_basis_context_present: bool,
+     *     fare_basis_context_location: ?string,
+     *     pricing_context_present: bool,
+     *     fare_component_references_present: bool
+     * }
+     */
+    public function evaluateBfmRevalidateBookingClassFareContextDigest(array $payload): array
+    {
+        $bookingLocations = [];
+        $cabinLocations = [];
+        $fareBasisLocations = [];
+
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        foreach ($odis as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $flights = data_get($row, 'TPA_Extensions.Flight');
+            if (! is_array($flights)) {
+                continue;
+            }
+            foreach ($flights as $flight) {
+                if (! is_array($flight)) {
+                    continue;
+                }
+                if (array_key_exists('ClassOfService', $flight)) {
+                    $bookingLocations['ota_flight_class_of_service'] = true;
+                }
+            }
+        }
+
+        $shopCtx = is_array($payload['shop_context'] ?? null) ? $payload['shop_context'] : [];
+        if ($shopCtx !== []) {
+            foreach (['booking_classes', 'booking_classes_by_segment', 'booking_classes_csv'] as $shopKey) {
+                if (array_key_exists($shopKey, $shopCtx)) {
+                    $bookingLocations['shop_context_'.$shopKey] = true;
+                }
+            }
+            foreach (['fare_basis_codes', 'fare_basis_codes_by_segment', 'fare_basis_codes_csv'] as $shopKey) {
+                if (array_key_exists($shopKey, $shopCtx)) {
+                    $fareBasisLocations['shop_context_'.$shopKey] = true;
+                }
+            }
+            if (array_key_exists('fare_component_refs', $shopCtx) && is_array($shopCtx['fare_component_refs'])) {
+                $fareBasisLocations['shop_context_fare_component_refs'] = true;
+            }
+        }
+
+        $fareCtx = is_array($payload['fare_context'] ?? null) ? $payload['fare_context'] : [];
+        if (array_key_exists('fare_basis_codes', $fareCtx)) {
+            $fareBasisLocations['fare_context_fare_basis_codes'] = true;
+        }
+        if (array_key_exists('fare_component_refs', $fareCtx) && is_array($fareCtx['fare_component_refs'])) {
+            $fareBasisLocations['fare_context_fare_component_refs'] = true;
+        }
+
+        $pricing = $payload['pricingInformation'] ?? null;
+        $pricingContextPresent = is_array($pricing) && $pricing !== [];
+        if (! $pricingContextPresent) {
+            foreach ([
+                'pricing_information_ref',
+                'pricing_information_id',
+                'pricing_0_ref',
+                'pricing_0_pricingRef',
+                'pricing_0_pricingInformationRef',
+            ] as $pricingKey) {
+                if (trim((string) ($shopCtx[$pricingKey] ?? '')) !== ''
+                    || trim((string) ($fareCtx[$pricingKey] ?? '')) !== '') {
+                    $pricingContextPresent = true;
+                    break;
+                }
+            }
+        }
+        if ($pricingContextPresent) {
+            $fareBasisLocations['pricing_information'] = true;
+            $bookingLocations['pricing_information'] = true;
+        }
+
+        $cabinPrefs = data_get($payload, 'OTA_AirLowFareSearchRQ.TravelPreferences.CabinPref');
+        if (is_array($cabinPrefs) && $cabinPrefs !== []) {
+            $cabinLocations['ota_travel_preferences_cabin_pref'] = true;
+        }
+
+        $itinerarySegments = data_get($payload, 'itinerary.segments');
+        if (is_array($itinerarySegments) && $itinerarySegments !== []) {
+            $bookingLocations['itinerary_segments'] = true;
+            foreach ($itinerarySegments as $segment) {
+                if (is_array($segment) && array_key_exists('cabin', $segment)) {
+                    $cabinLocations['itinerary_segments_cabin'] = true;
+                    break;
+                }
+            }
+        }
+
+        if ($shopCtx !== []) {
+            foreach (['segment_cabin_codes', 'cabin_codes', 'cabin_codes_by_segment'] as $shopKey) {
+                if (array_key_exists($shopKey, $shopCtx)) {
+                    $cabinLocations['shop_context_'.$shopKey] = true;
+                }
+            }
+        }
+
+        $fareComponentRefsPresent = array_key_exists('shop_context_fare_component_refs', $fareBasisLocations)
+            || array_key_exists('fare_context_fare_component_refs', $fareBasisLocations)
+            || (is_array($shopCtx['fare_component_refs'] ?? null) && $shopCtx['fare_component_refs'] !== [])
+            || (is_array($fareCtx['fare_component_refs'] ?? null) && $fareCtx['fare_component_refs'] !== []);
+
+        $bookingKeys = array_keys($bookingLocations);
+        sort($bookingKeys);
+        $cabinKeys = array_keys($cabinLocations);
+        sort($cabinKeys);
+        $fareBasisKeys = array_keys($fareBasisLocations);
+        sort($fareBasisKeys);
+
+        return [
+            'booking_class_context_present' => $bookingKeys !== [],
+            'booking_class_context_location' => $bookingKeys !== [] ? implode('|', $bookingKeys) : null,
+            'cabin_context_present' => $cabinKeys !== [],
+            'cabin_context_location' => $cabinKeys !== [] ? implode('|', $cabinKeys) : null,
+            'fare_basis_context_present' => $fareBasisKeys !== [],
+            'fare_basis_context_location' => $fareBasisKeys !== [] ? implode('|', $fareBasisKeys) : null,
+            'pricing_context_present' => $pricingContextPresent,
+            'fare_component_references_present' => $fareComponentRefsPresent,
+        ];
+    }
+
+    /**
+     * BFM v4 OTA root Version for {@code /v4/shop/flights/revalidate} — aligned with shop builder v4 parity.
+     */
+    public function bfmRevalidateOtaAirLowFareSearchVersion(?string $endpointPath = null): string
+    {
+        $path = $this->normalizeRevalidateEndpointPath($endpointPath);
+        $normalized = str_starts_with($path, '/') ? $path : '/'.$path;
+
+        if (str_starts_with($normalized, '/v5/')) {
+            return '5';
+        }
+
+        return self::BFM_REVALIDATE_OTA_VERSION;
+    }
+
+    /**
+     * BFM POS RequestorID block — parity with {@see SabreFlightSearchRequestBuilder::buildMinimalShopPayload()}
+     * and {@see self::buildIatiLikeBfmRevalidateV1Envelope()}.
+     *
+     * @return array{ID: string, Type: string, CompanyName: array{Code: string}}
+     */
+    public function buildBfmRevalidatePosRequestorIdBlock(): array
+    {
+        return [
+            'ID' => self::BFM_REVALIDATE_REQUESTOR_ID,
+            'Type' => self::BFM_REVALIDATE_REQUESTOR_TYPE,
+            'CompanyName' => ['Code' => self::BFM_REVALIDATE_REQUESTOR_COMPANY_CODE],
+        ];
+    }
+
+    /**
+     * Safe POS/Source/RequestorID schema digest for BFM revalidate (key/type names only).
+     *
+     * @return array{
+     *     pos_child_keys: list<string>,
+     *     source_child_keys: list<string>,
+     *     requestor_id_child_keys: list<string>,
+     *     requestor_id_child_types: array<string, string>,
+     *     requestor_id_present: bool,
+     *     requestor_id_type_valid: bool,
+     *     requestor_id_non_empty: bool,
+     *     requestor_identity_source_present: bool,
+     *     requestor_identity_source_location: ?string,
+     *     requestor_id_paths: list<string>
+     * }
+     */
+    public function evaluateBfmRevalidatePosRequestorSchemaDigest(array $payload): array
+    {
+        $pos = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.POS'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.POS')
+            : [];
+        $posChildKeys = array_values(array_filter(array_keys($pos), static fn ($key): bool => is_string($key)));
+        sort($posChildKeys);
+
+        $sources = is_array($pos['Source'] ?? null) ? $pos['Source'] : [];
+        $firstSource = is_array($sources[0] ?? null) ? $sources[0] : [];
+        $sourceChildKeys = array_values(array_filter(array_keys($firstSource), static fn ($key): bool => is_string($key)));
+        sort($sourceChildKeys);
+
+        $requestorId = is_array($firstSource['RequestorID'] ?? null) ? $firstSource['RequestorID'] : [];
+        $requestorChildKeys = array_values(array_filter(array_keys($requestorId), static fn ($key): bool => is_string($key)));
+        sort($requestorChildKeys);
+        $requestorChildTypes = [];
+        foreach ($requestorId as $key => $value) {
+            if (! is_string($key)) {
+                continue;
+            }
+            if ($key === 'CompanyName' && is_array($value)) {
+                $requestorChildTypes[$key] = 'array';
+            } else {
+                $requestorChildTypes[$key] = gettype($value);
+            }
+        }
+        ksort($requestorChildTypes);
+
+        $idRaw = $requestorId['ID'] ?? null;
+        $idPresent = array_key_exists('ID', $requestorId);
+        $idTypeValid = is_string($idRaw) && trim($idRaw) !== '';
+        $idNonEmpty = $idTypeValid;
+
+        $paths = [];
+        if (! $idPresent || $idRaw === null || ! $idTypeValid) {
+            $paths[] = '$.OTA_AirLowFareSearchRQ.POS.Source[0].RequestorID.ID';
+        }
+
+        $identitySourcePresent = $idTypeValid
+            && in_array('ID', $requestorChildKeys, true)
+            && in_array('Type', $requestorChildKeys, true);
+
+        return [
+            'pos_child_keys' => $posChildKeys,
+            'source_child_keys' => $sourceChildKeys,
+            'requestor_id_child_keys' => $requestorChildKeys,
+            'requestor_id_child_types' => $requestorChildTypes,
+            'requestor_id_present' => $idPresent,
+            'requestor_id_type_valid' => $idTypeValid,
+            'requestor_id_non_empty' => $idNonEmpty,
+            'requestor_identity_source_present' => $identitySourcePresent,
+            'requestor_identity_source_location' => $identitySourcePresent
+                ? 'sabre_bfm_shop_requestor_id_parity'
+                : null,
+            'requestor_id_paths' => $paths,
+        ];
+    }
+
+    /**
+     * Safe PseudoCityCode schema digest for BFM revalidate POS.Source (key/type/source labels only).
+     *
+     * @return array{
+     *     pseudo_city_code_present: bool,
+     *     pseudo_city_code_type_valid: bool,
+     *     pseudo_city_code_non_empty: bool,
+     *     pseudo_city_code_source_present: bool,
+     *     pseudo_city_code_source_location: ?string,
+     *     pseudo_city_code_paths: list<string>
+     * }
+     */
+    public function evaluateBfmRevalidatePseudoCityCodeSchemaDigest(array $payload): array
+    {
+        $sources = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.POS.Source'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.POS.Source')
+            : [];
+        $firstSource = is_array($sources[0] ?? null) ? $sources[0] : [];
+        $pccRaw = $firstSource['PseudoCityCode'] ?? null;
+        $pccPresent = array_key_exists('PseudoCityCode', $firstSource);
+        $pccTypeValid = is_string($pccRaw) && trim($pccRaw) !== '';
+        $pccNonEmpty = $pccTypeValid;
+
+        $sourceLocation = is_string($payload['_ota_revalidate_pcc_source_location'] ?? null)
+            ? trim((string) $payload['_ota_revalidate_pcc_source_location'])
+            : '';
+        $sourcePresent = $sourceLocation !== '';
+
+        $paths = [];
+        if (! $pccPresent || $pccRaw === null || ! $pccTypeValid) {
+            $paths[] = '$.OTA_AirLowFareSearchRQ.POS.Source[0].PseudoCityCode';
+        }
+
+        return [
+            'pseudo_city_code_present' => $pccPresent,
+            'pseudo_city_code_type_valid' => $pccTypeValid,
+            'pseudo_city_code_non_empty' => $pccNonEmpty,
+            'pseudo_city_code_source_present' => $sourcePresent,
+            'pseudo_city_code_source_location' => $sourcePresent ? $sourceLocation : null,
+            'pseudo_city_code_paths' => $paths,
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function collectOtaAirLowFareSearchRootChildKeyNames(array $payload): array
+    {
+        $ota = is_array($payload['OTA_AirLowFareSearchRQ'] ?? null) ? $payload['OTA_AirLowFareSearchRQ'] : [];
+        $keys = array_values(array_filter(array_keys($ota), static fn ($key): bool => is_string($key)));
+        sort($keys);
+
+        return $keys;
+    }
+
+    /**
+     * Safe OTA root schema digest for BFM revalidate (key/type names only).
+     *
+     * @return array{
+     *     root_child_keys: list<string>,
+     *     root_version_present: bool,
+     *     root_version_type_valid: bool,
+     *     root_target_present: bool,
+     *     root_target_type_valid: bool,
+     *     root_version_paths: list<string>
+     * }
+     */
+    public function evaluateBfmRevalidateRootOtaSchemaDigest(array $payload, ?string $endpointPath = null): array
+    {
+        $endpointPath = $this->normalizeRevalidateEndpointPath($endpointPath);
+        $ota = is_array($payload['OTA_AirLowFareSearchRQ'] ?? null) ? $payload['OTA_AirLowFareSearchRQ'] : [];
+        $rootChildKeys = $this->collectOtaAirLowFareSearchRootChildKeyNames($payload);
+        $versionRaw = $ota['Version'] ?? null;
+        $versionPresent = array_key_exists('Version', $ota);
+        $versionTypeValid = is_string($versionRaw) && trim($versionRaw) !== '';
+        $targetRaw = $ota['Target'] ?? null;
+        $targetPresent = array_key_exists('Target', $ota);
+        $targetTypeValid = ! $targetPresent
+            || is_string($targetRaw)
+            || is_int($targetRaw)
+            || is_float($targetRaw);
+
+        $paths = [];
+        if (! $versionPresent || $versionRaw === null || ! $versionTypeValid) {
+            $paths[] = '$.OTA_AirLowFareSearchRQ.Version';
+        }
+        if ($targetPresent && ! $targetTypeValid) {
+            $paths[] = '$.OTA_AirLowFareSearchRQ.Target';
+        }
+
+        return [
+            'root_child_keys' => $rootChildKeys,
+            'root_version_present' => $versionPresent,
+            'root_version_type_valid' => $versionTypeValid,
+            'root_target_present' => $targetPresent,
+            'root_target_type_valid' => $targetTypeValid,
+            'root_version_paths' => $paths,
+        ];
+    }
+
+    /**
+     * Safe branded-fare linkage locations (key names only, no values).
+     *
+     * @return array{
+     *     branded_fare_context_present: bool,
+     *     branded_fare_context_location: ?string
+     * }
+     */
+    public function evaluateBfmRevalidateBrandedFareContextDigest(array $payload): array
+    {
+        $locations = [];
+        $shopCtx = is_array($payload['shop_context'] ?? null) ? $payload['shop_context'] : [];
+        $fareCtx = is_array($payload['fare_context'] ?? null) ? $payload['fare_context'] : [];
+
+        foreach (['brand_code', 'selected_brand_code', 'selected_branded_fare_id'] as $key) {
+            if (array_key_exists($key, $shopCtx) && trim((string) ($shopCtx[$key] ?? '')) !== '') {
+                $locations['shop_context_'.$key] = true;
+            }
+            if (array_key_exists($key, $fareCtx) && trim((string) ($fareCtx[$key] ?? '')) !== '') {
+                $locations['fare_context_'.$key] = true;
+            }
+        }
+
+        $selectedOfferId = trim((string) ($payload['fare_context']['selected_offer_id'] ?? $payload['shop_context']['selected_offer_id'] ?? ''));
+        if ($selectedOfferId !== '') {
+            $locations['selected_offer_context'] = true;
+        }
+
+        $pricing = $payload['pricingInformation'] ?? null;
+        if (is_array($pricing) && $pricing !== []) {
+            $locations['pricing_information'] = true;
+        }
+
+        $locationKeys = array_keys($locations);
+        sort($locationKeys);
+
+        return [
+            'branded_fare_context_present' => $locationKeys !== [],
+            'branded_fare_context_location' => $locationKeys !== [] ? implode('|', $locationKeys) : null,
+        ];
+    }
+
+    /**
+     * @return array{
+     *     unsupported_branded_fare_indicator_keys: list<string>,
+     *     contains_unsupported_single_branded_fare: bool,
+     *     single_branded_fare_paths: list<string>,
+     *     branded_fare_indicator_child_keys: list<string>,
+     *     branded_fare_indicator_child_types: array<string, string>
+     * }
+     */
+    protected function evaluateBfmRevalidateBrandedFareIndicatorCompatibility(array $payload): array
+    {
+        $indicators = data_get(
+            $payload,
+            'OTA_AirLowFareSearchRQ.TravelerInfoSummary.PriceRequestInformation.TPA_Extensions.BrandedFareIndicators',
+        );
+        $childKeys = [];
+        $childTypes = [];
+        $unsupportedKeys = [];
+        $paths = [];
+
+        if (is_array($indicators)) {
+            foreach ($indicators as $key => $value) {
+                if (! is_string($key)) {
+                    continue;
+                }
+                $childKeys[] = $key;
+                $childTypes[$key] = gettype($value);
+                if ($key === 'singleBrandedFare') {
+                    $unsupportedKeys[] = $key;
+                    $paths[] = '$.OTA_AirLowFareSearchRQ.TravelerInfoSummary.PriceRequestInformation.TPA_Extensions.BrandedFareIndicators.singleBrandedFare';
+                }
+            }
+            sort($childKeys);
+            ksort($childTypes);
+            sort($unsupportedKeys);
+        }
+
+        return [
+            'unsupported_branded_fare_indicator_keys' => $unsupportedKeys,
+            'contains_unsupported_single_branded_fare' => $paths !== [],
+            'single_branded_fare_paths' => $paths,
+            'branded_fare_indicator_child_keys' => $childKeys,
+            'branded_fare_indicator_child_types' => $childTypes,
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function collectBfmRevalidateFlightChildKeyPaths(array $payload, string $childKey): array
+    {
+        $paths = [];
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        foreach ($odis as $odiIndex => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $flights = data_get($row, 'TPA_Extensions.Flight');
+            if (! is_array($flights)) {
+                continue;
+            }
+            foreach ($flights as $flightIndex => $flight) {
+                if (is_array($flight) && array_key_exists($childKey, $flight)) {
+                    $paths[] = '$.OTA_AirLowFareSearchRQ.OriginDestinationInformation['.$odiIndex.'].TPA_Extensions.Flight['.$flightIndex.'].'.$childKey;
+                }
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function collectBfmRevalidateSegmentNumberPaths(array $payload): array
+    {
+        return $this->collectBfmRevalidateFlightChildKeyPaths($payload, 'SegmentNumber');
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function collectFirstWireFlightChildKeyNames(array $payload): array
+    {
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        foreach ($odis as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $flights = data_get($row, 'TPA_Extensions.Flight');
+            if (! is_array($flights)) {
+                continue;
+            }
+            foreach ($flights as $flight) {
+                if (! is_array($flight)) {
+                    continue;
+                }
+                $keys = array_values(array_filter(array_keys($flight), static fn ($k): bool => is_string($k)));
+                sort($keys);
+
+                return $keys;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function collectFirstWireAirlineChildKeyNames(array $payload): array
+    {
+        $odis = is_array(data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation'))
+            ? data_get($payload, 'OTA_AirLowFareSearchRQ.OriginDestinationInformation')
+            : [];
+        foreach ($odis as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $flights = data_get($row, 'TPA_Extensions.Flight');
+            if (! is_array($flights)) {
+                continue;
+            }
+            foreach ($flights as $flight) {
+                if (! is_array($flight)) {
+                    continue;
+                }
+                $airline = $flight['Airline'] ?? null;
+                if (! is_array($airline)) {
+                    return [];
+                }
+                $keys = array_values(array_filter(array_keys($airline), static fn ($k): bool => is_string($k)));
+                sort($keys);
+
+                return $keys;
+            }
+        }
+
+        return [];
+    }
+
+    protected function normalizeRevalidateEndpointPath(?string $endpointPath): string
+    {
+        $raw = $endpointPath !== null && trim($endpointPath) !== ''
+            ? trim($endpointPath)
+            : self::DEFAULT_REVALIDATE_ENDPOINT_PATH;
+
+        return '/'.ltrim($raw, '/');
     }
 
     /**
@@ -3685,8 +4820,18 @@ final class SabreRevalidationPayloadBuilder
             }
             $mkt = '';
             if ($iatiShape) {
-                $mkt = strtoupper(trim((string) data_get($node, 'Airline.Marketing.Code', '')));
-                $op = strtoupper(trim((string) data_get($node, 'Airline.Operating.Code', '')));
+                $marketingRaw = data_get($node, 'Airline.Marketing');
+                if (is_string($marketingRaw)) {
+                    $mkt = strtoupper(trim($marketingRaw));
+                } else {
+                    $mkt = strtoupper(trim((string) data_get($node, 'Airline.Marketing.Code', '')));
+                }
+                $operatingRaw = data_get($node, 'Airline.Operating');
+                if (is_string($operatingRaw)) {
+                    $op = strtoupper(trim($operatingRaw));
+                } else {
+                    $op = strtoupper(trim((string) data_get($node, 'Airline.Operating.Code', '')));
+                }
                 $fn = trim((string) ($node['Number'] ?? ''));
             } else {
                 $mkt = strtoupper(trim((string) data_get($node, 'MarketingAirline.Code', data_get($node, 'MarketingAirline.code', ''))));
