@@ -1,4 +1,4 @@
-﻿    @php
+    @php
         $o = $offer;
         $cr = $criteria;
         $checkoutContact = $publicAgencyContact ?? \App\Support\Branding\PublicAgencyContactResolver::resolve($agencySettings ?? null);

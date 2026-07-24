@@ -1,4 +1,4 @@
-﻿@php
+@php
     use App\Support\Suppliers\AirBlueSupplierConnectionNormalizer;
     use App\Support\Suppliers\IatiSupplierConnectionNormalizer;
     use App\Support\Suppliers\PiaNdcSupplierConnectionNormalizer;
