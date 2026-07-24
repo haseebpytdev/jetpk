@@ -1,16 +1,18 @@
 # Mock Data Policy
 
-Phase: **JETPK-DASH-04-05** (extends DASH-03)
+Phase: **JETPK-DASH-06-07** (extends DASH-04-05)
 
 ## Rules
 
-1. All dashboard metrics, bookings, payments, customers, and notifications in `/testdash` are **synthetic**.
+1. All dashboard metrics, bookings, payments, PNRs, tickets, agents, customers, and notifications in `/testdash` are **synthetic**.
 2. Do not embed real PNRs, passenger names from production, payment amounts from live DB, or supplier credentials in fixtures or `NEXT_PUBLIC_*` variables.
 3. `NEXT_PUBLIC_USE_MOCK_DATA=true` is required for preview; live data flags stay off until a gated API phase.
 4. UI actions that would mutate Laravel state show **preview-only** feedback (alerts / disabled controls) and never POST to `/admin` or `/staff`.
 5. Bookings list/detail in DASH-02 is **read-only** — no cancel, refund, ticket, or payment actions.
 6. Payments ledger in DASH-03 is **read-only** — no capture, refund, reconcile, or mark-paid actions.
 7. Customers and suppliers in DASH-04-05 are **read-only** — no edit, suspend, credential reveal, settlement, or live API actions.
+8. Agents, PNRs/orders, and tickets/documents in DASH-06-07 are **read-only** — no agent mutations, PNR retrieve/sync, ticket issue/reissue/exchange/void/refund, or live supplier calls.
+9. GDS PNRs and NDC orders remain **distinct** fixture types; ticket numbers are synthetic and masked (e.g. `157-XXXXXXX123`); no LNIATA, PCC, or credential values in fixtures.
 
 ## Fixture location
 
@@ -19,13 +21,16 @@ Phase: **JETPK-DASH-04-05** (extends DASH-03)
 - [`dashboard/mocks/payment-fixtures.ts`](../../dashboard/mocks/payment-fixtures.ts) — deterministic payment/transaction ledger (35 records, linked to bookings)
 - [`dashboard/mocks/customer-fixtures.ts`](../../dashboard/mocks/customer-fixtures.ts) — deterministic customer/traveller records (30 records, linked to bookings/payments)
 - [`dashboard/mocks/supplier-fixtures.ts`](../../dashboard/mocks/supplier-fixtures.ts) — deterministic supplier records (22 records, linked to bookings/payments)
-- Loaded via [`dashboard/services/overview-service.ts`](../../dashboard/services/overview-service.ts), [`dashboard/services/booking-service.ts`](../../dashboard/services/booking-service.ts), [`dashboard/services/payment-service.ts`](../../dashboard/services/payment-service.ts), [`dashboard/services/customer-service.ts`](../../dashboard/services/customer-service.ts), and [`dashboard/services/supplier-service.ts`](../../dashboard/services/supplier-service.ts)
+- [`dashboard/mocks/agent-fixtures.ts`](../../dashboard/mocks/agent-fixtures.ts) — deterministic agent/agency records (26 records, linked to customers/bookings/payments/PNRs/tickets)
+- [`dashboard/mocks/pnr-fixtures.ts`](../../dashboard/mocks/pnr-fixtures.ts) — deterministic GDS PNR and NDC/order records (40 records, linked to bookings/customers/agents/suppliers)
+- [`dashboard/mocks/ticket-fixtures.ts`](../../dashboard/mocks/ticket-fixtures.ts) — deterministic ticket/fulfilment document records (55 records, masked identifiers)
+- Loaded via [`dashboard/services/overview-service.ts`](../../dashboard/services/overview-service.ts), [`dashboard/services/booking-service.ts`](../../dashboard/services/booking-service.ts), [`dashboard/services/payment-service.ts`](../../dashboard/services/payment-service.ts), [`dashboard/services/customer-service.ts`](../../dashboard/services/customer-service.ts), [`dashboard/services/supplier-service.ts`](../../dashboard/services/supplier-service.ts), [`dashboard/services/agent-service.ts`](../../dashboard/services/agent-service.ts), [`dashboard/services/pnr-service.ts`](../../dashboard/services/pnr-service.ts), and [`dashboard/services/ticket-service.ts`](../../dashboard/services/ticket-service.ts)
 
 ## Recoverable error preview (bookings, payments, customers & suppliers)
 
-Append `previewError=1` to the bookings, payments, customers, or suppliers query string to simulate a recoverable service error (deterministic, for QA only).
+Append `previewError=1` to the bookings, payments, customers, suppliers, agents, PNRs, or tickets query string to simulate a recoverable service error (deterministic, for QA only).
 
-Append `previewLoading=1` to customers or suppliers to render the deterministic loading skeleton (QA only).
+Append `previewLoading=1` to customers, suppliers, agents, PNRs, or tickets to render the deterministic loading skeleton (QA only).
 
 ## Laravel-side flags (future wiring)
 

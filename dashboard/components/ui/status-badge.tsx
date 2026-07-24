@@ -169,6 +169,14 @@ const credentialStatusStyles: Record<string, string> = {
   "Not Required": "bg-gray-100 text-gray-800 ring-gray-500/20",
 };
 
+const commercialStatusStyles: Record<string, string> = {
+  Standard: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Preferred: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  "Credit Enabled": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  "Prepaid Only": "bg-violet-50 text-violet-800 ring-violet-600/20",
+  "On Hold": "bg-amber-50 text-amber-900 ring-amber-600/20",
+};
+
 const settlementStatusStyles: Record<string, string> = {
   Current: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
   Due: "bg-amber-50 text-amber-900 ring-amber-600/20",
@@ -222,11 +230,224 @@ export function CredentialStatusBadge({ status }: { status: string }) {
   );
 }
 
+export function CommercialStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={commercialStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
 export function SettlementStatusBadge({ status }: { status: string }) {
   return (
     <StatusPill
       label={status}
       tone={settlementStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+const documentTypeStyles: Record<string, string> = {
+  "E-Ticket": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  "NDC Fulfilment Document": "bg-violet-50 text-violet-800 ring-violet-600/20",
+  EMD: "bg-cyan-50 text-cyan-900 ring-cyan-600/20",
+  "Manual Ticket Record": "bg-gray-100 text-gray-800 ring-gray-500/20",
+  "Refund Document": "bg-orange-50 text-orange-900 ring-orange-600/20",
+  "Void Record": "bg-red-50 text-red-800 ring-red-600/20",
+};
+
+const issueStatusStyles: Record<string, string> = {
+  Pending: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  Issued: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  "Partially Issued": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  Blocked: "bg-red-50 text-red-800 ring-red-600/20",
+  Failed: "bg-red-50 text-red-800 ring-red-600/20",
+  Voided: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Refunded: "bg-orange-50 text-orange-900 ring-orange-600/20",
+  "Not Applicable": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+const refundEligibilityStyles: Record<string, string> = {
+  Eligible: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  "Not Eligible": "bg-red-50 text-red-800 ring-red-600/20",
+  "Airline Review Required": "bg-amber-50 text-amber-900 ring-amber-600/20",
+  "Fare Rules Required": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  "Already Refunded": "bg-orange-50 text-orange-900 ring-orange-600/20",
+  Unknown: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  "Not Applicable": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+const exchangeEligibilityStyles: Record<string, string> = {
+  Eligible: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  "Not Eligible": "bg-red-50 text-red-800 ring-red-600/20",
+  "Fare Rules Required": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  "Airline Review Required": "bg-amber-50 text-amber-900 ring-amber-600/20",
+  "Already Exchanged": "bg-orange-50 text-orange-900 ring-orange-600/20",
+  Unknown: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  "Not Applicable": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+const voidStatusStyles: Record<string, string> = {
+  "Within Window": "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  "Window Expired": "bg-amber-50 text-amber-900 ring-amber-600/20",
+  Voided: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  "Not Applicable": "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Unknown: "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+export function DocumentTypeBadge({ type }: { type: string }) {
+  return (
+    <StatusPill
+      label={type}
+      tone={documentTypeStyles[type] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function IssueStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={issueStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function RefundEligibilityBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={refundEligibilityStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function ExchangeEligibilityBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={exchangeEligibilityStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function VoidStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={voidStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+const referenceTypeStyles: Record<string, string> = {
+  "GDS PNR": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  "NDC Order": "bg-violet-50 text-violet-800 ring-violet-600/20",
+  "One API Order": "bg-cyan-50 text-cyan-900 ring-cyan-600/20",
+  "Manual Reference": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+const channelStyles: Record<string, string> = {
+  "Sabre GDS": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  "Sabre NDC": "bg-violet-50 text-violet-800 ring-violet-600/20",
+  "One API": "bg-cyan-50 text-cyan-900 ring-cyan-600/20",
+  Manual: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Mock: "bg-amber-50 text-amber-900 ring-amber-600/20",
+};
+
+const lifecycleStatusStyles: Record<string, string> = {
+  Active: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  Confirmed: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  "On Hold": "bg-amber-50 text-amber-900 ring-amber-600/20",
+  "Pending Supplier": "bg-amber-50 text-amber-900 ring-amber-600/20",
+  "Partially Confirmed": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  Cancelled: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Expired: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Failed: "bg-red-50 text-red-800 ring-red-600/20",
+  "Review Required": "bg-orange-50 text-orange-900 ring-orange-600/20",
+};
+
+const fulfilmentStatusStyles: Record<string, string> = {
+  "Not Required": "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Pending: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  "Partially Fulfilled": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  Fulfilled: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  Failed: "bg-red-50 text-red-800 ring-red-600/20",
+  Refunded: "bg-blue-50 text-blue-800 ring-blue-600/20",
+};
+
+const pnrTicketingStatusStyles: Record<string, string> = {
+  "Not Ticketed": "bg-gray-100 text-gray-800 ring-gray-500/20",
+  "Ready for Ticketing": "bg-blue-50 text-blue-800 ring-blue-600/20",
+  "Ticketing Blocked": "bg-orange-50 text-orange-900 ring-orange-600/20",
+  "Partially Ticketed": "bg-amber-50 text-amber-900 ring-amber-600/20",
+  Ticketed: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  Failed: "bg-red-50 text-red-800 ring-red-600/20",
+  Voided: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Refunded: "bg-blue-50 text-blue-800 ring-blue-600/20",
+  "Not Applicable": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+const cancellationEligibilityStyles: Record<string, string> = {
+  Eligible: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  "Not Eligible": "bg-red-50 text-red-800 ring-red-600/20",
+  "Supplier Review Required": "bg-amber-50 text-amber-900 ring-amber-600/20",
+  "Already Cancelled": "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Unknown: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  "Not Applicable": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+export function ReferenceTypeBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={referenceTypeStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function ChannelBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={channelStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function LifecycleStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={lifecycleStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function FulfilmentStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={fulfilmentStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function PnrTicketingStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={pnrTicketingStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function CancellationEligibilityBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={cancellationEligibilityStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
     />
   );
 }
