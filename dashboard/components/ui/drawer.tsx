@@ -10,9 +10,10 @@ type Props = {
   title: string;
   description?: string;
   children: React.ReactNode;
+  closeAriaLabel?: string;
 };
 
-export function Drawer({ open, onClose, title, description, children }: Props) {
+export function Drawer({ open, onClose, title, description, children, closeAriaLabel = "Close details" }: Props) {
   const titleId = useId();
   const descId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -85,7 +86,7 @@ export function Drawer({ open, onClose, title, description, children }: Props) {
               </p>
             ) : null}
           </div>
-          <IconButton label="Close booking details" onClick={onClose}>
+          <IconButton label={closeAriaLabel} onClick={onClose}>
             <span aria-hidden className="text-xl leading-none">
               ×
             </span>

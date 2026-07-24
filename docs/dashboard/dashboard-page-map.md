@@ -1,6 +1,6 @@
 # Dashboard Page Map (Legacy → `/testdash`)
 
-Phase: **JETPK-DASH-02**
+Phase: **JETPK-DASH-03** (extends DASH-02)
 
 ## Architecture authority
 
@@ -12,7 +12,7 @@ Phase: **JETPK-DASH-02**
 
 | Status | Meaning |
 |--------|---------|
-| **live** | Implemented in Next (DASH-01 overview, DASH-02 bookings) |
+| **live** | Implemented in Next (DASH-01 overview, DASH-02 bookings, DASH-03 payments) |
 | **planned** | Nav stub / placeholder page |
 | **n/a** | No Laravel equivalent; mock-only |
 
@@ -29,6 +29,7 @@ Phase: **JETPK-DASH-02**
 |---------------|------------------|---------------|--------|
 | Dashboard | `admin.dashboard` | `/testdash` | **live** |
 | Bookings | `admin.bookings` / `staff.bookings.index` | `/testdash/bookings` | **live** |
+| Payments | `admin.payments` (future) | `/testdash/payments` | **live** |
 | Flight search | `flights.search` | `/testdash/planned/flights` | planned (public search) |
 | Customers | `admin.customers.index` | `/testdash/planned/customers` | planned |
 | Suppliers | `admin.api-settings` | `/testdash/planned/suppliers` | planned |
@@ -48,7 +49,7 @@ Phase: **JETPK-DASH-02**
 
 | Mockup label | Maps to | Testdash |
 |--------------|---------|----------|
-| Payments | Booking queues `payment_review` + payment actions on detail | planned (bookings) |
+| Payments | Booking payment ledger + reconciliation (future Laravel) | `/testdash/payments` |
 | Tickets | `ticketing` queue + issue-ticket action | planned (bookings) |
 | Cancellations | Cancellations queue + cancellation workflow | planned (bookings) |
 | Audit Logs | `admin.bookings.audit.export`, wallet-audit | planned (diagnostics) |

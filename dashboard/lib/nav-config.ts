@@ -19,9 +19,8 @@ export const navGroups: NavGroup[] = [
       { label: "Bookings", href: "/bookings", laravelRoute: "admin.bookings" },
       {
         label: "Payments",
-        href: "/planned/bookings?queue=payment_review",
-        laravelRoute: "admin.bookings",
-        planned: true,
+        href: "/payments",
+        laravelRoute: "admin.payments",
       },
       {
         label: "Tickets",
