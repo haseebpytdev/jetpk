@@ -1,4 +1,4 @@
-﻿@props(['messages'])
+@props(['messages'])
 
 <div class="vstack gap-3" data-testid="support-ticket-thread">
     @forelse($messages as $message)

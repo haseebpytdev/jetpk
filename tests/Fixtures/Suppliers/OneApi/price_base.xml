@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+  <soapenv:Body>
+    <OTA_AirPriceRS xmlns="http://www.opentravel.org/OTA/2003/05" TransactionIdentifier="TID_FIXTURE_001">
+      <PricedItineraries>
+        <PricedItinerary>
+          <AirItineraryPricingInfo>
+            <ItinTotalFare>
+              <BaseFare Amount="200.00" CurrencyCode="AED" DecimalPlaces="2"/>
+              <EquiBaseFare Amount="200.00" CurrencyCode="AED" DecimalPlaces="2"/>
+              <TotalFare Amount="250.00" CurrencyCode="AED" DecimalPlaces="2"/>
+            </ItinTotalFare>
+          </AirItineraryPricingInfo>
+        </PricedItinerary>
+      </PricedItineraries>
+      <AABundledServiceExt applicableOnd="SHJ/KHI" applicableOndSequence="1">
+        <bundledService>
+          <bunldedServiceId>BUNDLE_FIXTURE_001</bunldedServiceId>
+          <bundledServiceName>Value Bundle</bundledServiceName>
+          <includedServies>BAGGAGE</includedServies>
+        </bundledService>
+      </AABundledServiceExt>
+    </OTA_AirPriceRS>
+  </soapenv:Body>
+</soapenv:Envelope>

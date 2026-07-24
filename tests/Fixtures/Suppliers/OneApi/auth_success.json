@@ -1,0 +1,7 @@
+{
+  "tokenPair": {
+    "login": "ONE_API_TEST_USERNAME",
+    "accessToken": "TOKEN_REDACTED_ACCESS",
+    "refreshToken": "TOKEN_REDACTED_REFRESH"
+  }
+}

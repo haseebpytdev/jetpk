@@ -1,4 +1,4 @@
-﻿@extends(client_layout('dashboard', 'admin'))
+@extends(client_layout('dashboard', 'admin'))
 
 @php
     use App\Http\Controllers\Admin\BookingManagementController;

@@ -321,6 +321,10 @@ class BookingCommunicationService
     public function sendSupplierBookingCreated(Booking $booking): void
     {
         $booking = $booking->fresh(['agency.agencySetting', 'contact', 'customer', 'agent.user']);
+        if ($this->supplierBookingCreatedAlreadyLogged($booking)) {
+            return;
+        }
+
         $this->logSystemEvent($booking, BookingCommunicationEvent::SupplierBookingCreated->value, [
             'supplier_booking_status' => $booking->supplier_booking_status,
             'pnr' => $booking->pnr,
@@ -388,6 +392,15 @@ class BookingCommunicationService
             'meta' => $meta,
             'sent_at' => now(),
         ]);
+    }
+
+    public function sendCancellationConfirmedIfNeeded(Booking $booking): void
+    {
+        if ($this->cancellationConfirmedAlreadySent($booking)) {
+            return;
+        }
+
+        $this->sendBookingStatusChanged($booking, 'cancelled');
     }
 
     public function sendBookingStatusChanged(Booking $booking, string $statusLabel): void
@@ -690,7 +703,7 @@ class BookingCommunicationService
             $mailable = $mailableFactory($booking);
             $subject = $mailable->envelope()->subject;
 
-            if ($this->isImmediateMailer()) {
+            if (! $this->shouldQueueMail()) {
                 Mail::to($recipient['email'])->send($mailable);
                 $log->forceFill([
                     'status' => 'sent',
@@ -713,7 +726,7 @@ class BookingCommunicationService
         } catch (Throwable $e) {
             $log->forceFill([
                 'status' => 'failed',
-                'error_message' => $e->getMessage(),
+                'error_message' => $this->safeMailError($e->getMessage(), $settings->smtp_password),
             ])->save();
             $this->logWhatsappFutureProviderEvent($booking, $event->value, $settings->notification_rules ?? []);
         }
@@ -758,6 +771,22 @@ class BookingCommunicationService
     protected function isImmediateMailer(): bool
     {
         return in_array((string) config('mail.default'), ['log', 'array', 'local'], true);
+    }
+
+    protected function shouldQueueMail(): bool
+    {
+        return ! $this->isImmediateMailer()
+            && (string) config('queue.default') !== 'sync';
+    }
+
+    protected function safeMailError(string $message, ?string $smtpPassword): string
+    {
+        $safeMessage = $message;
+        if (filled($smtpPassword)) {
+            $safeMessage = str_replace((string) $smtpPassword, '[REDACTED]', $safeMessage);
+        }
+
+        return Str::limit((string) $safeMessage, 2000);
     }
 
     /**
@@ -1037,6 +1066,31 @@ class BookingCommunicationService
         return is_string($value) && trim($value) !== '' ? $value : null;
     }
 
+    protected function supplierBookingCreatedAlreadyLogged(Booking $booking): bool
+    {
+        return CommunicationLog::query()
+            ->where('booking_id', $booking->id)
+            ->where('event', BookingCommunicationEvent::SupplierBookingCreated->value)
+            ->whereIn('status', ['queued', 'sent', 'sending', 'logged'])
+            ->exists();
+    }
+
+    protected function cancellationConfirmedAlreadySent(Booking $booking): bool
+    {
+        if ($this->customerEmailAlreadySent($booking, BookingCommunicationEvent::BookingCancelled->value)) {
+            return true;
+        }
+
+        return CommunicationLog::query()
+            ->where('booking_id', $booking->id)
+            ->whereIn('event', [
+                BookingCommunicationEvent::BookingCancelled->value,
+                'booking_cancelled',
+            ])
+            ->whereIn('status', ['queued', 'sent', 'sending', 'logged'])
+            ->exists();
+    }
+
     protected function operationalNotificationAlreadyLogged(Booking $booking, string $eventKey, ?string $notificationType = null): bool
     {
         $query = CommunicationLog::query()
@@ -1233,7 +1287,7 @@ class BookingCommunicationService
             );
             $subject = $mailable->envelope()->subject;
 
-            if ($this->isImmediateMailer()) {
+            if (! $this->shouldQueueMail()) {
                 Mail::to($recipient['email'])->send($mailable);
                 $log->forceFill([
                     'status' => 'sent',
@@ -1254,7 +1308,7 @@ class BookingCommunicationService
         } catch (Throwable $e) {
             $log->forceFill([
                 'status' => 'failed',
-                'error_message' => $e->getMessage(),
+                'error_message' => $this->safeMailError($e->getMessage(), $settings->smtp_password),
             ])->save();
 
             return false;

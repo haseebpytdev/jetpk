@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+  <soapenv:Body>
+    <MealRS>
+      <Meal Code="ML01" PassengerRef="A1" SegmentRef="1">
+        <Description>Chicken Sandwich</Description>
+        <Amount>15.00</Amount>
+        <CurrencyCode>AED</CurrencyCode>
+      </Meal>
+      <Meal Code="ML01" PassengerRef="A1" SegmentRef="1">
+        <Description>Bundle meal</Description>
+        <Amount>0</Amount>
+        <CurrencyCode>AED</CurrencyCode>
+      </Meal>
+    </MealRS>
+  </soapenv:Body>
+</soapenv:Envelope>

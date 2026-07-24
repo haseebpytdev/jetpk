@@ -1,4 +1,4 @@
-﻿    @php
+    @php
         use App\Support\Travel\TravelDocumentFormatter;
         $d = $draft;
         $o = $offer;

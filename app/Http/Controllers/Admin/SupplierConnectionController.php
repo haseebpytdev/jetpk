@@ -12,6 +12,7 @@ use App\Models\SupplierConnection;
 use App\Services\Suppliers\SupplierConnectionService;
 use App\Support\Suppliers\AirBlueSupplierConnectionNormalizer;
 use App\Support\Suppliers\IatiSupplierConnectionNormalizer;
+use App\Support\Suppliers\OneApiSupplierConnectionNormalizer;
 use App\Support\Suppliers\PiaNdcSupplierConnectionNormalizer;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
@@ -281,10 +282,13 @@ class SupplierConnectionController extends Controller
             $payload['sabre_ndc_enabled'] = $request->boolean('sabre_ndc_enabled', false);
         }
 
-        return AirBlueSupplierConnectionNormalizer::normalizePayload(
-            PiaNdcSupplierConnectionNormalizer::normalizePayload(
-                IatiSupplierConnectionNormalizer::normalizePayload(
-                    SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+        return OneApiSupplierConnectionNormalizer::normalizePayload(
+            AirBlueSupplierConnectionNormalizer::normalizePayload(
+                PiaNdcSupplierConnectionNormalizer::normalizePayload(
+                    IatiSupplierConnectionNormalizer::normalizePayload(
+                        SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+                        $existing
+                    ),
                     $existing
                 ),
                 $existing

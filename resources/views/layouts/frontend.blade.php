@@ -1,4 +1,4 @@
-﻿@php
+@php
     /** TourNest: legacy scripts only; public shell is overridden by ota-public.css */
     use App\Services\Agencies\FooterSettingsPresenter;
     use App\Services\Agencies\SlimTopbarPresenter;

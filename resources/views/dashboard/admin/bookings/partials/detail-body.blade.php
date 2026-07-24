@@ -1,4 +1,4 @@
-﻿@php
+@php
     use App\Http\Controllers\Admin\BookingManagementController;
     use App\Support\Bookings\BookingItineraryOverviewPresenter;
     use App\Support\Bookings\BookingOperationalStatus;

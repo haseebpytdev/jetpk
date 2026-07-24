@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+  <soapenv:Body>
+    <BaggageRS>
+      <Baggage Code="BAG20" PassengerRef="A1" SegmentRef="1" OndSequence="1">
+        <Description>20kg Checked</Description>
+        <Amount>50.00</Amount>
+        <CurrencyCode>AED</CurrencyCode>
+      </Baggage>
+      <Baggage Code="BAG0" PassengerRef="A1" SegmentRef="1" OndSequence="1">
+        <Description>Bundle included 20kg</Description>
+        <Amount>0</Amount>
+        <CurrencyCode>AED</CurrencyCode>
+      </Baggage>
+    </BaggageRS>
+  </soapenv:Body>
+</soapenv:Envelope>
