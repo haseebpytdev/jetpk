@@ -4,7 +4,7 @@
 @php
     $jpBrandName = client_branding()->companyName();
     $jpAssetVersion = 44; // JETPK-RESPONSIVE-CLUMPING — results.css long-string guards
-    $jpSearchAssetVersion = 34;
+    $jpSearchAssetVersion = 37;
 @endphp
 
 @section('title', 'Flight results — '.$jpBrandName)

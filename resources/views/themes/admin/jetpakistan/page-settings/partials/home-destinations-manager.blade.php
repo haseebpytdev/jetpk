@@ -1,4 +1,6 @@
 @php
+    use App\Services\Homepage\JetpkHomepageAssetService;
+
     $destItems = collect(data_get($content, 'destinations.items', []))->values();
     if ($destItems->count() < 4) {
         $destItems = $destItems->pad(4, []);
@@ -12,6 +14,11 @@
             <input type="checkbox" id="destinations-enabled" name="content[destinations][enabled]" value="1" @checked(data_get($content, 'destinations.enabled', '1') == '1')>
             <label for="destinations-enabled">Enabled</label>
         </div>
+    </div>
+    <div class="jp-field jp-field--inline" style="max-width:160px;">
+        <label class="jp-field__label" for="destinations-order">Position on page</label>
+        <input id="destinations-order" type="number" min="2" max="9" class="jp-control" name="content[destinations][order]" value="{{ data_get($content, 'destinations.order', '') }}">
+        <p class="jp-field__help">Lower numbers render higher on the page. Leave blank to use the default position.</p>
     </div>
     <div class="jp-grid jp-grid--2">
         <div class="jp-field">
@@ -43,10 +50,10 @@
             @php
                 $item = is_array($item) ? $item : [];
                 $destId = data_get($item, 'id') ?: 'dest-'.$i;
-                $assetKey = data_get($item, 'image_asset_key') ?: 'destination_'.$destId;
+                $assetKey = data_get($item, 'image_asset_key') ?: JetpkHomepageAssetService::destinationAssetKey($destId);
                 $existingAsset = $assets->firstWhere('asset_key', $assetKey) ?? $assets->firstWhere('asset_key', 'destination_'.($i + 1));
             @endphp
-            <div class="jp-repeatable-card" data-jp-repeatable-row>
+            <div class="jp-repeatable-card" data-jp-repeatable-row data-index="{{ $i }}" data-item-id="{{ $destId }}">
                 <div class="jp-between">
                     <p class="jp-muted" style="margin:0;">Destination {{ $i + 1 }}</p>
                     <div class="jp-toggle">
@@ -56,8 +63,11 @@
                     </div>
                 </div>
                 <input type="hidden" name="content[destinations][items][{{ $i }}][id]" value="{{ $destId }}">
-                <input type="hidden" name="content[destinations][items][{{ $i }}][sort_order]" value="{{ data_get($item, 'sort_order', $i) }}">
                 <input type="hidden" name="content[destinations][items][{{ $i }}][image_asset_key]" value="{{ $assetKey }}">
+                <div class="jp-field jp-field--inline" style="max-width:140px;">
+                    <label class="jp-field__label">Order</label>
+                    <input aria-label="Order" type="number" min="0" class="jp-control" name="content[destinations][items][{{ $i }}][sort_order]" value="{{ data_get($item, 'sort_order', $i) }}">
+                </div>
                 <div class="jp-grid jp-grid--2">
                     <div class="jp-field">
                         <label class="jp-field__label">City / title</label>
@@ -93,7 +103,6 @@
                     <input aria-label="Image alt text" class="jp-control" name="content[destinations][items][{{ $i }}][alt]" value="{{ data_get($item, 'alt') }}">
                 </div>
                 <div class="jp-media-inline">
-                    <p class="jp-field__help">Image: Media tab key <code>destination_{{ $i + 1 }}</code> — upload here, choose library, or remove.</p>
                     @if ($existingAsset?->public_url)
                         <img src="{{ $existingAsset->public_url }}" alt="" class="jp-media-inline__preview" loading="lazy">
                     @endif

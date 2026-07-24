@@ -162,13 +162,11 @@ class AppServiceProvider extends ServiceProvider
         View::composer(
             [
                 'layouts.frontend',
-                'layouts.mobile-app',
                 'layouts.auth',
                 'layouts.dashboard',
                 'errors.layout',
                 'frontend.*',
                 'auth.*',
-                'mobile.*',
                 'dashboard.customer.*',
                 'themes.frontend.jetpakistan.*',
             ],

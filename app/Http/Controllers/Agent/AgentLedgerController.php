@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Agent;
 use App\Http\Controllers\Controller;
 use App\Models\AgentWalletTransaction;
 use App\Services\Agents\AgentWalletService;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,7 +16,6 @@ class AgentLedgerController extends Controller
 {
     public function __construct(
         protected AgentWalletService $walletService,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function index(Request $request): View
@@ -77,10 +75,6 @@ class AgentLedgerController extends Controller
                 'q' => $request->string('q')->toString(),
             ],
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.ledger.index', $viewData);
-        }
 
         return view(client_view('ledger.index', 'agent'), $viewData);
     }

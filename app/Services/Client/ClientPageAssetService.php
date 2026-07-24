@@ -114,9 +114,39 @@ final class ClientPageAssetService
     {
         if ($asset->path !== '') {
             $this->deleteStoredFile($asset->path, (string) ($asset->disk ?: 'public'));
+            $this->publicationService->deletePublishedRelativePath($asset->path);
         }
 
         $asset->delete();
+    }
+
+    /**
+     * Mirror every stored asset for a page into Laravel public/storage and the live webroot.
+     *
+     * @return int number of assets mirrored
+     */
+    public function publishAllForPage(ClientProfile $profile, string $pageKey): int
+    {
+        if (! Schema::hasTable('client_page_assets')) {
+            return 0;
+        }
+
+        $count = 0;
+        $assets = ClientPageAsset::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', $pageKey)
+            ->get();
+
+        foreach ($assets as $asset) {
+            if ($asset->path === '') {
+                continue;
+            }
+
+            $this->publicationService->publishPublicDiskRelativePath((string) $asset->path);
+            $count++;
+        }
+
+        return $count;
     }
 
     public function urlFor(ClientProfile $profile, string $pageKey, string $assetKey): ?string
@@ -136,12 +166,27 @@ final class ClientPageAssetService
         }
 
         $diskName = (string) ($asset->disk ?: 'public');
+        $url = null;
 
         if (Storage::disk($diskName)->exists($asset->path)) {
-            return Storage::disk($diskName)->url($asset->path);
+            $url = Storage::disk($diskName)->url($asset->path);
+        } else {
+            $url = $asset->public_url ?: null;
         }
 
-        return $asset->public_url ?: null;
+        return $this->versionedPublicUrl($url, $asset);
+    }
+
+    public function versionedPublicUrl(?string $url, ClientPageAsset $asset): ?string
+    {
+        if ($url === null || $url === '') {
+            return null;
+        }
+
+        $version = $asset->updated_at?->getTimestamp() ?? $asset->id;
+        $separator = str_contains($url, '?') ? '&' : '?';
+
+        return $url.$separator.'v='.$version;
     }
 
     public function absolutePathFor(ClientPageAsset $asset): ?string

@@ -1,0 +1,122 @@
+﻿# JetPK Homepage CMS — consolidated SFTP upload list
+# Phase: JETPK-HOMEPAGE-CMS-MAIN-MERGE-AND-DEPLOYMENT-PREPARATION
+# Main SHA: d3e10ce7c0cedb19a5bfbcb670eeef6dd358dfd8
+# Merge commit: 0f48c97 (integration e1fef54 into main 624f3dd)
+# Baseline: 624f3ddb26716c5bda893ae6e797b8c1780edda0
+# Generated: 2026-07-18
+# Remote app root: /home/pkjetp/jetpk_app
+# Public web mirror: /home/pkjetp/public_html (theme assets duplicated below)
+# Application runtime files: 38 (explicit put each below)
+# Public mirrored assets: 4 unique files × 2 trees = 8 put lines
+# REPOSITORY_ONLY_LOCAL_TOOLING (do not upload):
+#   app/Console/Commands/JetpkLocalAuditFixtureCommand.php
+#   app/Support/Fixtures/JetpkHomepageAuditFixtureBuilder.php
+
+lcd C:/Users/khadi/ota-jetpk
+
+# --- App / PHP ---
+cd /home/pkjetp/jetpk_app/app/Http/Controllers/Admin
+put app/Http/Controllers/Admin/ClientPageSettingsController.php ClientPageSettingsController.php
+
+cd /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend
+put app/Http/Controllers/Frontend/HomeController.php HomeController.php
+
+cd /home/pkjetp/jetpk_app/app/Models
+put app/Models/ClientPageSettingDefault.php ClientPageSettingDefault.php
+put app/Models/ClientPageSettingRevision.php ClientPageSettingRevision.php
+
+cd /home/pkjetp/jetpk_app/app/Services/Client
+put app/Services/Client/ClientPageContentResolver.php ClientPageContentResolver.php
+put app/Services/Client/ClientPageResetService.php ClientPageResetService.php
+put app/Services/Client/ClientPageSettingDefaultService.php ClientPageSettingDefaultService.php
+put app/Services/Client/ClientPageSettingRevisionService.php ClientPageSettingRevisionService.php
+
+cd /home/pkjetp/jetpk_app/app/Services/Homepage
+put app/Services/Homepage/JetpkHomepageContentValidator.php JetpkHomepageContentValidator.php
+
+cd /home/pkjetp/jetpk_app/app/Support/Audits
+put app/Support/Audits/JetpkHomepageCustomizationCoverageAuditService.php JetpkHomepageCustomizationCoverageAuditService.php
+
+cd /home/pkjetp/jetpk_app/app/Support/Client/Homepage
+put app/Support/Client/Homepage/HomepageCanonicalSchema.php HomepageCanonicalSchema.php
+put app/Support/Client/Homepage/HomepageContentNormalizer.php HomepageContentNormalizer.php
+put app/Support/Client/Homepage/HomepageSectionOrderResolver.php HomepageSectionOrderResolver.php
+put app/Support/Client/Homepage/JetpkHomepageContextDiagnostic.php JetpkHomepageContextDiagnostic.php
+
+cd /home/pkjetp/jetpk_app/app/Support/Client
+put app/Support/Client/JetpkHomepageSectionData.php JetpkHomepageSectionData.php
+
+# --- Config ---
+cd /home/pkjetp/jetpk_app/config
+put config/jetpk_homepage.php jetpk_homepage.php
+put config/ota-mobile.php ota-mobile.php
+
+# --- Migrations (run on staging only; never production without approval) ---
+cd /home/pkjetp/jetpk_app/database/migrations
+put database/migrations/2026_07_16_120000_create_client_page_setting_revisions_table.php 2026_07_16_120000_create_client_page_setting_revisions_table.php
+put database/migrations/2026_07_16_130000_create_client_page_setting_defaults_table.php 2026_07_16_130000_create_client_page_setting_defaults_table.php
+
+# --- Routes ---
+cd /home/pkjetp/jetpk_app/routes
+put routes/admin-page-settings.php admin-page-settings.php
+
+# --- Admin theme JS ---
+cd /home/pkjetp/jetpk_app/public/themes/admin/jetpakistan/js
+put public/themes/admin/jetpakistan/js/page-settings-editor.js page-settings-editor.js
+cd /home/pkjetp/public_html/themes/admin/jetpakistan/js
+put public/themes/admin/jetpakistan/js/page-settings-editor.js page-settings-editor.js
+
+# --- Frontend theme assets ---
+cd /home/pkjetp/jetpk_app/public/themes/frontend/jetpakistan/css
+put public/themes/frontend/jetpakistan/css/jp-search.css jp-search.css
+cd /home/pkjetp/public_html/themes/frontend/jetpakistan/css
+put public/themes/frontend/jetpakistan/css/jp-search.css jp-search.css
+
+cd /home/pkjetp/jetpk_app/public/themes/frontend/jetpakistan/js
+put public/themes/frontend/jetpakistan/js/jp-dates.js jp-dates.js
+put public/themes/frontend/jetpakistan/js/passengers.js passengers.js
+cd /home/pkjetp/public_html/themes/frontend/jetpakistan/js
+put public/themes/frontend/jetpakistan/js/jp-dates.js jp-dates.js
+put public/themes/frontend/jetpakistan/js/passengers.js passengers.js
+
+# --- Blade: shared components ---
+cd /home/pkjetp/jetpk_app/resources/views/components/jp
+put resources/views/components/jp/dest-card.blade.php dest-card.blade.php
+
+# --- Blade: admin page settings ---
+cd /home/pkjetp/jetpk_app/resources/views/themes/admin/jetpakistan/page-settings
+put resources/views/themes/admin/jetpakistan/page-settings/edit.blade.php edit.blade.php
+
+cd /home/pkjetp/jetpk_app/resources/views/themes/admin/jetpakistan/page-settings/partials
+put resources/views/themes/admin/jetpakistan/page-settings/partials/home-destinations-manager.blade.php home-destinations-manager.blade.php
+put resources/views/themes/admin/jetpakistan/page-settings/partials/home-routes-manager.blade.php home-routes-manager.blade.php
+put resources/views/themes/admin/jetpakistan/page-settings/partials/home-sections.blade.php home-sections.blade.php
+put resources/views/themes/admin/jetpakistan/page-settings/partials/home-support-cta-manager.blade.php home-support-cta-manager.blade.php
+
+# --- Blade: frontend search + home ---
+cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/components/search
+put resources/views/themes/frontend/jetpakistan/components/search/flights-panel.blade.php flights-panel.blade.php
+put resources/views/themes/frontend/jetpakistan/components/search/passenger-selector.blade.php passenger-selector.blade.php
+put resources/views/themes/frontend/jetpakistan/components/search/search-shell.blade.php search-shell.blade.php
+
+cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend
+put resources/views/themes/frontend/jetpakistan/frontend/home.blade.php home.blade.php
+put resources/views/themes/frontend/jetpakistan/frontend/flights/results.blade.php flights/results.blade.php
+
+cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/layouts
+put resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php frontend.blade.php
+
+cd /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/sections
+put resources/views/themes/frontend/jetpakistan/sections/destinations.blade.php destinations.blade.php
+put resources/views/themes/frontend/jetpakistan/sections/fares.blade.php fares.blade.php
+put resources/views/themes/frontend/jetpakistan/sections/feature-board.blade.php feature-board.blade.php
+put resources/views/themes/frontend/jetpakistan/sections/groups.blade.php groups.blade.php
+put resources/views/themes/frontend/jetpakistan/sections/hero.blade.php hero.blade.php
+put resources/views/themes/frontend/jetpakistan/sections/trust.blade.php trust.blade.php
+
+# --- Post-upload SSH (staging) ---
+# php artisan migrate --path=database/migrations/2026_07_16_120000_create_client_page_setting_revisions_table.php --force
+# php artisan migrate --path=database/migrations/2026_07_16_130000_create_client_page_setting_defaults_table.php --force
+# php artisan optimize:clear
+# php artisan view:clear
+# php artisan ota:route-page-health-audit --all

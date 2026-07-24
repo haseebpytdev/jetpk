@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\SupportTicketCategory;
 use App\Support\Security\TurnstileVerifier;
-use App\Support\Ui\MobileViewPreference;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,12 +36,9 @@ class TurnstileProtectionTest extends TestCase
         ]);
     }
 
-    protected function mobileCookieRequest(): static
+    protected function canonicalRequest(): static
     {
-        return $this->withCookie(
-            (string) config('ota-mobile.cookie_name', 'ota_view_mode'),
-            MobileViewPreference::MODE_MOBILE,
-        );
+        return $this;
     }
 
     public function test_support_page_includes_turnstile_widget_when_enabled(): void
@@ -70,26 +66,14 @@ class TurnstileProtectionTest extends TestCase
         ])->assertSessionHasErrors(TurnstileVerifier::RESPONSE_FIELD, null, 'supportRequest');
     }
 
-    public function test_booking_lookup_desktop_includes_turnstile_widget_when_enabled(): void
+    public function test_booking_lookup_includes_turnstile_widget_when_enabled(): void
     {
         $this->enableTurnstile();
 
         $html = $this->get(route('booking.lookup'))->assertOk()->getContent();
 
         $this->assertStringContainsString('cf-turnstile', $html);
-    }
-
-    public function test_booking_lookup_mobile_includes_turnstile_widget_when_enabled(): void
-    {
-        $this->enableTurnstile();
-
-        $html = $this->mobileCookieRequest()
-            ->get(route('booking.lookup'))
-            ->assertOk()
-            ->getContent();
-
-        $this->assertStringContainsString('cf-turnstile', $html);
-        $this->assertStringContainsString('data-testid="ota-mobile-booking-lookup"', $html);
+        $this->assertStringContainsString('jp-page--lookup', $html);
     }
 
     public function test_booking_lookup_submission_requires_turnstile_when_enabled(): void
@@ -128,7 +112,7 @@ class TurnstileProtectionTest extends TestCase
         $this->assertStringNotContainsString('challenges.cloudflare.com/turnstile/v0/api.js', $html);
     }
 
-    public function test_checkout_review_mobile_does_not_include_turnstile_when_enabled(): void
+    public function test_checkout_review_does_not_include_turnstile_when_enabled(): void
     {
         $this->enableTurnstile();
         $this->seed(OtaFoundationSeeder::class);
@@ -148,13 +132,13 @@ class TurnstileProtectionTest extends TestCase
             PublicBookingPassengersPayload::internationalDocuments(),
         ))->assertRedirect(route('booking.review'));
 
-        $html = $this->mobileCookieRequest()
+        $html = $this->canonicalRequest()
             ->get(route('booking.review'))
             ->assertOk()
             ->getContent();
 
         $this->assertStringNotContainsString('cf-turnstile', $html);
-        $this->assertStringContainsString('data-testid="ota-mobile-review"', $html);
+        $this->assertStringContainsString('jp-page--checkout', $html);
     }
 
     public function test_checkout_passengers_page_does_not_include_turnstile_when_enabled(): void
@@ -166,10 +150,10 @@ class TurnstileProtectionTest extends TestCase
         $url = '/booking/passengers?flight_id='.PublicCheckoutTestDoubles::OFFER_ID.'&offer_id='.PublicCheckoutTestDoubles::OFFER_ID.'&search_id=sid-turnstile&from=LHE&to=DXB&depart='.$depart;
 
         $desktopHtml = $this->get($url)->assertOk()->getContent();
-        $mobileHtml = $this->mobileCookieRequest()->get($url)->assertOk()->getContent();
+        $canonicalHtml = $this->canonicalRequest()->get($url)->assertOk()->getContent();
 
         $this->assertStringNotContainsString('cf-turnstile', $desktopHtml);
-        $this->assertStringNotContainsString('cf-turnstile', $mobileHtml);
+        $this->assertStringNotContainsString('cf-turnstile', $canonicalHtml);
     }
 
     public function test_registration_desktop_does_not_include_turnstile_when_enabled(): void
@@ -181,17 +165,17 @@ class TurnstileProtectionTest extends TestCase
         $this->assertStringNotContainsString('cf-turnstile', $html);
     }
 
-    public function test_registration_mobile_does_not_include_turnstile_when_enabled(): void
+    public function test_registration_does_not_include_turnstile_when_enabled(): void
     {
         $this->enableTurnstile();
 
-        $html = $this->mobileCookieRequest()
+        $html = $this->canonicalRequest()
             ->get(route('register'))
             ->assertOk()
             ->getContent();
 
         $this->assertStringNotContainsString('cf-turnstile', $html);
-        $this->assertStringContainsString('data-testid="ota-mobile-register"', $html);
+        $this->assertStringContainsString('jp-auth-form', $html);
     }
 
     public function test_registration_does_not_require_turnstile_when_enabled(): void
@@ -220,11 +204,11 @@ class TurnstileProtectionTest extends TestCase
         $this->assertStringNotContainsString('cf-turnstile', $html);
     }
 
-    public function test_agent_registration_mobile_does_not_include_turnstile_when_enabled(): void
+    public function test_agent_registration_does_not_include_turnstile_when_enabled(): void
     {
         $this->enableTurnstile();
 
-        $html = $this->mobileCookieRequest()
+        $html = $this->canonicalRequest()
             ->get(route('agent.register.form'))
             ->assertOk()
             ->getContent();
@@ -244,18 +228,18 @@ class TurnstileProtectionTest extends TestCase
         ])->assertSessionDoesntHaveErrors(TurnstileVerifier::RESPONSE_FIELD);
     }
 
-    public function test_forgot_password_mobile_does_not_include_or_require_turnstile_when_enabled(): void
+    public function test_forgot_password_does_not_include_or_require_turnstile_when_enabled(): void
     {
         $this->enableTurnstile();
 
-        $html = $this->mobileCookieRequest()
+        $html = $this->canonicalRequest()
             ->get(route('password.request'))
             ->assertOk()
             ->getContent();
         $this->assertStringNotContainsString('cf-turnstile', $html);
-        $this->assertStringContainsString('data-testid="ota-mobile-forgot-password"', $html);
+        $this->assertStringContainsString('jp-auth-form', $html);
 
-        $this->mobileCookieRequest()->post(route('password.email'), [
+        $this->canonicalRequest()->post(route('password.email'), [
             'email' => 'user@example.com',
         ])->assertSessionDoesntHaveErrors(TurnstileVerifier::RESPONSE_FIELD);
     }
@@ -271,17 +255,17 @@ class TurnstileProtectionTest extends TestCase
             ->assertSessionDoesntHaveErrors(TurnstileVerifier::RESPONSE_FIELD);
     }
 
-    public function test_reset_password_mobile_does_not_include_or_require_turnstile_when_enabled(): void
+    public function test_reset_password_does_not_include_or_require_turnstile_when_enabled_on_canonical_view(): void
     {
         $this->enableTurnstile();
 
-        $html = $this->mobileCookieRequest()
+        $html = $this->canonicalRequest()
             ->get(route('password.reset', ['token' => 'reset-token']))
             ->assertOk()
             ->getContent();
         $this->assertStringNotContainsString('cf-turnstile', $html);
 
-        $this->mobileCookieRequest()->post(route('password.store'), $this->resetPasswordPayload())
+        $this->canonicalRequest()->post(route('password.store'), $this->resetPasswordPayload())
             ->assertSessionDoesntHaveErrors(TurnstileVerifier::RESPONSE_FIELD);
     }
 

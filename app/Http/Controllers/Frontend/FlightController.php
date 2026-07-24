@@ -31,7 +31,6 @@ use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use App\Support\FlightSearch\SabreOfferFreshness;
 use App\Support\Suppliers\SupplierSourcePresenter;
-use App\Support\Ui\MobileViewPreference;
 use Carbon\Carbon;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
@@ -50,7 +49,6 @@ class FlightController extends Controller
         protected FlightSearchResultStore $searchStore,
         protected AirlineBrandingService $airlineBranding,
         protected FlightDeparturePolicy $departurePolicy,
-        protected MobileViewPreference $mobileViewPreference,
         protected SabreSelectedOfferRevalidationGate $sabreSelectedOfferRevalidationGate,
         protected IatiSelectedOfferRevalidationGate $iatiSelectedOfferRevalidationGate,
         protected SabreOfferFreshness $sabreOfferFreshness,
@@ -169,10 +167,6 @@ class FlightController extends Controller
             'multicityInquiryNotice' => PublicMulticityInquiryPolicy::INQUIRY_NOTICE,
             'multicityInquiryUrl' => client_route('flights.multicity.inquiry'),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.flights.results', $viewData);
-        }
 
         return view(client_view('frontend.flights.results', 'frontend'), $viewData);
     }
@@ -699,10 +693,6 @@ class FlightController extends Controller
             'resultsUrl' => client_route('flights.results', $this->criteriaToResultsQuery($criteria)),
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.flights.return-options', $viewData);
-        }
-
         return view(client_view('frontend.flights.return-options', 'frontend'), $viewData);
     }
 
@@ -969,82 +959,19 @@ class FlightController extends Controller
     public function resultsOfferDetails(Request $request): View|RedirectResponse
     {
         $searchId = trim((string) $request->query('search_id', ''));
-        $offerId = trim((string) $request->query('offer_id', ''));
 
         if ($searchId !== '' && ! PublicFlightSearchSecurity::isValidSearchId($searchId)) {
             abort(404);
         }
 
-        if (! $this->mobileViewPreference->shouldUseMobileShell($request)) {
-            if ($searchId !== '') {
-                $payload = $this->searchStore->get($searchId);
-                $crit = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
+        if ($searchId !== '') {
+            $payload = $this->searchStore->get($searchId);
+            $crit = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
 
-                return $this->redirectSelectedOfferWarning($crit);
-            }
-
-            return $this->redirectSelectedOfferWarning();
-        }
-
-        if ($searchId === '' || $offerId === '') {
-            return $this->redirectSelectedOfferWarning();
-        }
-
-        $payload = $this->searchStore->get($searchId);
-        if ($payload === null) {
-            return $this->redirectSelectedOfferWarning();
-        }
-
-        $crit = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
-        $backUrl = client_route('flights.results', $this->criteriaToResultsQuery($crit));
-
-        /** @var list<array<string, mixed>> $offers */
-        $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
-        $rawOffer = null;
-        foreach ($offers as $candidate) {
-            if (! is_array($candidate)) {
-                continue;
-            }
-            $candidateId = (string) ($candidate['id'] ?? $candidate['offer_id'] ?? '');
-            if ($candidateId === $offerId) {
-                $rawOffer = $candidate;
-                break;
-            }
-        }
-
-        if ($rawOffer === null) {
             return $this->redirectSelectedOfferWarning($crit);
         }
 
-        $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
-            AirlineDisplayNameResolver::collectCodesFromOffers([$rawOffer])
-        );
-        $airlineLogos = $this->airlineBranding->mapLogosForOffers([$rawOffer]);
-        $iataCodes = FlightOfferDisplayPresenter::collectIataCodes($rawOffer);
-        $cityMap = FlightOfferDisplayPresenter::airportCityMap($iataCodes);
-
-        $mappedOffer = PublicFlightSearchSecurity::sanitizeResultsOffer(
-            $this->mapOfferForResultsApi(
-                $rawOffer,
-                $payload,
-                $searchId,
-                $request,
-                $airlineLogos,
-                $cityMap,
-                $airlineNameMap,
-            ),
-            PublicFlightSearchSecurity::allowsDebugFares($request),
-        );
-
-        return view('mobile.flights.details', [
-            'offer' => $mappedOffer,
-            'criteria' => $crit,
-            'searchId' => $searchId,
-            'routeLabel' => (string) ($mappedOffer['route'] ?? ''),
-            'backUrl' => $backUrl,
-            'expired' => false,
-            'errorMessage' => '',
-        ]);
+        return $this->redirectSelectedOfferWarning();
     }
 
     /**

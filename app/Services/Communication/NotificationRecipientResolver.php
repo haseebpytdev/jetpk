@@ -311,7 +311,7 @@ class NotificationRecipientResolver
         return $this->normalizeEmails([
             is_string($finance) ? $finance : null,
             $agency->agencySetting?->support_email,
-            config('ota-brand.support_email'),
+            config('client.canonical_support_email', 'ota@jetpakistan.pk'),
         ]);
     }
 
@@ -470,7 +470,7 @@ class NotificationRecipientResolver
 
         return $this->normalizeEmails([
             $agency->agencySetting?->support_email,
-            config('ota-brand.support_email'),
+            config('client.canonical_support_email', 'ota@jetpakistan.pk'),
         ]);
     }
 

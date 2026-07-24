@@ -1,71 +1,85 @@
 @extends('themes.frontend.jetpakistan.layouts.frontend')
 
-@section('title', 'Agent partnership — JetPakistan')
+@php
+    use App\Services\Client\ClientPageRenderer;
+    /** @var array<string, mixed> $content */
+    /** @var array<string, mixed> $seo */
+    $renderer = app(ClientPageRenderer::class);
+    $hero = is_array($content['hero'] ?? null) ? $content['hero'] : [];
+    $steps = $renderer->enabledItems($content['steps']['items'] ?? []);
+    $benefits = is_array($content['benefits'] ?? null) ? $content['benefits'] : [];
+    $benefitItems = $renderer->enabledItems($benefits['items'] ?? []);
+    $faqItems = $renderer->enabledItems($content['faq']['items'] ?? []);
+    $cta = is_array($content['cta'] ?? null) ? $content['cta'] : [];
+@endphp
+
+@section('title', $seo['title'] ?? 'Agent partnership')
 
 @section('content')
 <section class="jp-page jp-page--agent-landing" aria-labelledby="jp-agent-heading">
   <div class="wrap jp-page-wrap">
     <x-jp.page-hero
       id="jp-agent-heading"
-      kicker="Agent partnership"
-      title="Join the JetPakistan agent network"
-      description="Partner with our OTA platform to manage client bookings, track performance, and grow your agency sales with PKR fares and dedicated support."
+      :kicker="(string) ($hero['kicker'] ?? '')"
+      :title="(string) ($hero['title'] ?? '')"
+      :description="(string) ($hero['description'] ?? '')"
     />
 
-    <div class="jp-page-actions">
-      <a href="{{ client_route('agent.register.form') }}" class="jp-btn jp-btn--primary">Apply as agent</a>
-      <a href="{{ client_route('support') }}" class="jp-btn jp-btn--secondary">Partner support</a>
-    </div>
+    @if (($hero['cta_text'] ?? '') !== '')
+      <div class="jp-page-actions">
+        <a href="{{ $renderer->resolveDestination((string) ($hero['cta_url'] ?? 'route:agent.register.form')) }}" class="jp-btn jp-btn--primary">{{ $hero['cta_text'] }}</a>
+        <a href="{{ client_route('support') }}" class="jp-btn jp-btn--secondary">Partner support</a>
+      </div>
+    @endif
 
-    <div class="jp-page-grid jp-page-grid--3 jp-agent-steps">
-      <x-jp.card title="1. Submit application">
-        <p>Share your agency and verification details through our secure application form.</p>
-      </x-jp.card>
-      <x-jp.card title="2. Admin review">
-        <p>Our team validates your business profile and may request supporting documents.</p>
-      </x-jp.card>
-      <x-jp.card title="3. Start booking">
-        <p>Approved partners receive onboarding instructions and agent dashboard access.</p>
-      </x-jp.card>
-    </div>
+    @if ($steps !== [])
+      <div class="jp-page-grid jp-page-grid--3 jp-agent-steps">
+        @foreach ($steps as $step)
+          <x-jp.card :title="(string) ($step['title'] ?? '')">
+            <p>{{ $step['body'] ?? '' }}</p>
+          </x-jp.card>
+        @endforeach
+      </div>
+    @endif
 
     <div class="jp-page-grid jp-page-grid--2">
-      <x-jp.card title="Benefits for agents">
-        <ul class="jp-list">
-          <li>Agent dashboard to manage booking requests in one place</li>
-          <li>Fast flight search and fare tools for client itineraries</li>
-          <li>Commission tracking and performance visibility</li>
-          <li>Priority partner support for urgent travel issues</li>
-        </ul>
-      </x-jp.card>
+      @if ($benefitItems !== [])
+        <x-jp.card :title="(string) ($benefits['title'] ?? 'Benefits for agents')">
+          <ul class="jp-list">
+            @foreach ($benefitItems as $item)
+              <li>{{ $item['text'] ?? '' }}</li>
+            @endforeach
+          </ul>
+        </x-jp.card>
+      @endif
 
-      <x-jp.card title="FAQ">
-        <details class="jp-faq">
-          <summary>Who can apply?</summary>
-          <p>Licensed agencies, consultants, and travel businesses handling customer bookings.</p>
-        </details>
-        <details class="jp-faq">
-          <summary>Is approval instant?</summary>
-          <p>No — every application is reviewed before access is granted.</p>
-        </details>
-        <details class="jp-faq">
-          <summary>Are there registration fees?</summary>
-          <p>No registration fee is charged for application submission.</p>
-        </details>
-        <details class="jp-faq">
-          <summary>When do I get dashboard access?</summary>
-          <p>Only after approval and account activation email setup.</p>
-        </details>
-      </x-jp.card>
+      @if ($faqItems !== [])
+        <x-jp.card title="FAQ">
+          @foreach ($faqItems as $faq)
+            <details class="jp-faq" id="{{ $faq['id'] ?? '' }}">
+              <summary>{{ $faq['question'] ?? '' }}</summary>
+              <p>{{ $faq['answer'] ?? '' }}</p>
+            </details>
+          @endforeach
+        </x-jp.card>
+      @endif
     </div>
 
-    <x-jp.card title="Ready to partner?">
-      <p class="jp-card__lead">Complete the agency application and our team will contact you after verification.</p>
-      <div class="jp-page-actions">
-        <a href="{{ client_route('agent.register.form') }}" class="jp-btn jp-btn--primary">Start application</a>
-        <a href="{{ client_route('login') }}" class="jp-btn jp-btn--secondary">Agent log in</a>
-      </div>
-    </x-jp.card>
+    @if (($cta['title'] ?? '') !== '')
+      <x-jp.card :title="(string) $cta['title']">
+        @if (($cta['body'] ?? '') !== '')
+          <p class="jp-card__lead">{{ $cta['body'] }}</p>
+        @endif
+        <div class="jp-page-actions">
+          @if (($cta['primary_label'] ?? '') !== '')
+            <a href="{{ $renderer->resolveDestination((string) ($cta['primary_url'] ?? '')) }}" class="jp-btn jp-btn--primary">{{ $cta['primary_label'] }}</a>
+          @endif
+          @if (($cta['secondary_label'] ?? '') !== '')
+            <a href="{{ $renderer->resolveDestination((string) ($cta['secondary_url'] ?? '')) }}" class="jp-btn jp-btn--secondary">{{ $cta['secondary_label'] }}</a>
+          @endif
+        </div>
+      </x-jp.card>
+    @endif
   </div>
 </section>
 @endsection

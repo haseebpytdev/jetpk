@@ -3,6 +3,8 @@
 namespace App\Support\Client;
 
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\Homepage\JetpkHomepageAssetService;
+use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
 use Illuminate\Support\Str;
 
 /**
@@ -19,7 +21,7 @@ final class JetpkHomepageSectionData
      */
     public function defaults(): array
     {
-        return $this->resolver->defaultHomeContent();
+        return [];
     }
 
     public function field(string $key, mixed $defaultWhenAbsent = ''): mixed
@@ -37,6 +39,20 @@ final class JetpkHomepageSectionData
     public function assetUrl(string $assetKey, ?string $default = null): ?string
     {
         return $this->resolver->assetUrl(ClientPageKeys::HOME, $assetKey, $default);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function heroLayoutCssVariables(): array
+    {
+        $defaults = $this->defaults();
+        $hero = $this->field('hero', data_get($defaults, 'hero', []));
+        if (! is_array($hero)) {
+            $hero = [];
+        }
+
+        return JetpkHomepageHeroSizing::cssVariablesFromHero($hero);
     }
 
     /**
@@ -126,7 +142,44 @@ final class JetpkHomepageSectionData
     }
 
     /**
-     * @return array<string, mixed>
+     * @return list<array<string, mixed>>
+     */
+    public function featuredDealsForDisplay(): array
+    {
+        $items = $this->field('featured_deals.items', null);
+        if (is_array($items) && $items !== []) {
+            $deals = [];
+            foreach ($this->sortedEnabledItems($items) as $item) {
+                if (! is_array($item)) {
+                    continue;
+                }
+                $from = strtoupper(trim((string) ($item['from'] ?? '')));
+                $to = strtoupper(trim((string) ($item['to'] ?? '')));
+                if ($from === '' && $to === '') {
+                    continue;
+                }
+                $deals[] = [
+                    'airline' => trim((string) ($item['airline'] ?? '')),
+                    'from' => $from,
+                    'to' => $to,
+                    'depart' => trim((string) ($item['depart'] ?? '')),
+                    'arrive' => trim((string) ($item['arrive'] ?? '')),
+                    'dur' => trim((string) ($item['dur'] ?? '')),
+                    'stops' => (int) ($item['stops'] ?? 0),
+                    'price' => (int) ($item['price'] ?? 0),
+                ];
+            }
+
+            if ($deals !== []) {
+                return $deals;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
      */
     public function supportCtaForDisplay(): array
     {
@@ -146,23 +199,7 @@ final class JetpkHomepageSectionData
             return array_values(array_filter($items, static fn ($item) => is_array($item) && ($item['enabled'] ?? '1') !== '0'));
         }
 
-        return [
-            ['variant' => 'g-jeddah', 'badge' => 'Featured', 'gold' => true, 'title' => 'Group · Jeddah', 'meta' => '10+ travellers · coordinated seats', 'price' => 285000, 'image' => null, 'link' => ''],
-            ['variant' => 'g-dubai', 'badge' => 'Group fares', 'gold' => false, 'title' => 'Corporate · Dubai', 'meta' => '10+ travellers · locked group rate', 'price' => 96500, 'image' => null, 'link' => ''],
-            ['variant' => 'g-uk', 'badge' => 'Family', 'gold' => false, 'title' => 'Family · London', 'meta' => 'Flexible dates · seats together', 'price' => 198000, 'image' => null, 'link' => ''],
-        ];
-    }
-
-    /** @deprecated Use routesForDisplay() */
-    public function routesWithFallback(): array
-    {
-        return $this->routesForDisplay();
-    }
-
-    /** @deprecated Use destinationsForDisplay() */
-    public function destinationsWithFallback(): array
-    {
-        return $this->destinationsForDisplay();
+        return [];
     }
 
     /**
@@ -170,11 +207,7 @@ final class JetpkHomepageSectionData
      */
     public function authoritativeTrustCardDefaults(): array
     {
-        return [
-            ['icon' => 'check-square', 'title' => 'Transparent PKR pricing', 'text' => 'No FX shock between search and checkout.', 'enabled' => '1'],
-            ['icon' => 'check-square', 'title' => 'Licensed operations', 'text' => 'IATA accredited and PCAA licensed.', 'enabled' => '1'],
-            ['icon' => 'check-square', 'title' => 'Human support', 'text' => 'Pakistan-based desk in Urdu and English.', 'enabled' => '1'],
-        ];
+        return [];
     }
 
     /**
@@ -187,11 +220,7 @@ final class JetpkHomepageSectionData
             return array_values($items);
         }
 
-        return [
-            ['title' => 'Transparent PKR pricing', 'text' => 'No FX shock between search and checkout.'],
-            ['title' => 'Licensed operations', 'text' => 'IATA accredited and PCAA licensed.'],
-            ['title' => 'Human support', 'text' => 'Pakistan-based desk in Urdu and English.'],
-        ];
+        return [];
     }
 
     /**
@@ -204,13 +233,7 @@ final class JetpkHomepageSectionData
             return array_values($items);
         }
 
-        return [
-            ['value' => '400+', 'label' => 'Airlines'],
-            ['value' => 'Best', 'label' => 'PKR fares'],
-            ['value' => 'Instant', 'label' => 'e-ticket'],
-            ['value' => 'IATA', 'label' => 'accredited'],
-            ['value' => 'PCAA', 'label' => 'licensed'],
-        ];
+        return [];
     }
 
     /**
@@ -243,17 +266,26 @@ final class JetpkHomepageSectionData
      */
     private function destinationImageUrl(array $item, int $index): string
     {
+        $candidates = [];
+
         $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
         if ($assetKey !== '') {
-            $url = $this->assetUrl($assetKey);
+            $candidates[] = $assetKey;
+        }
+
+        $itemId = trim((string) ($item['id'] ?? ''));
+        if ($itemId !== '') {
+            $candidates[] = JetpkHomepageAssetService::destinationAssetKey($itemId);
+            $candidates[] = 'destination_'.$itemId;
+        }
+
+        $candidates[] = 'destination_'.($index + 1);
+
+        foreach (array_unique($candidates) as $key) {
+            $url = $this->assetUrl($key);
             if ($url !== null) {
                 return $url;
             }
-        }
-
-        $legacy = $this->assetUrl('destination_'.($index + 1));
-        if ($legacy !== null) {
-            return $legacy;
         }
 
         $fallback = (string) config('jetpk_homepage.destination_fallback_image', '');
@@ -301,12 +333,7 @@ final class JetpkHomepageSectionData
      */
     private function defaultRouteItems(): array
     {
-        return [
-            ['id' => 'default-khi-dxb', 'from' => 'KHI', 'to' => 'DXB', 'enabled' => '1', 'sort_order' => 0, 'manual_fallback_price' => 42500, 'dynamic_fare_enabled' => '1'],
-            ['id' => 'default-lhe-jed', 'from' => 'LHE', 'to' => 'JED', 'enabled' => '1', 'sort_order' => 1, 'manual_fallback_price' => 68900, 'dynamic_fare_enabled' => '1'],
-            ['id' => 'default-isb-lhr', 'from' => 'ISB', 'to' => 'LHR', 'enabled' => '1', 'sort_order' => 2, 'manual_fallback_price' => 198000, 'dynamic_fare_enabled' => '1'],
-            ['id' => 'default-khi-ruh', 'from' => 'KHI', 'to' => 'RUH', 'enabled' => '1', 'sort_order' => 3, 'manual_fallback_price' => 72000, 'dynamic_fare_enabled' => '1'],
-        ];
+        return [];
     }
 
     /**
@@ -314,11 +341,6 @@ final class JetpkHomepageSectionData
      */
     private function defaultDestinationItems(): array
     {
-        return [
-            ['id' => 'default-dxb', 'code' => 'DXB', 'title' => 'Dubai', 'text' => 'Daily departures', 'enabled' => '1', 'sort_order' => 0, 'manual_fallback_price' => 42500],
-            ['id' => 'default-jed', 'code' => 'JED', 'title' => 'Jeddah', 'text' => 'Umrah & Hajj routes', 'enabled' => '1', 'sort_order' => 1, 'manual_fallback_price' => 68900],
-            ['id' => 'default-lhr', 'code' => 'LHR', 'title' => 'London', 'text' => 'UK family travel', 'enabled' => '1', 'sort_order' => 2, 'manual_fallback_price' => 198000],
-            ['id' => 'default-ist', 'code' => 'IST', 'title' => 'Istanbul', 'text' => 'Europe connections', 'enabled' => '1', 'sort_order' => 3, 'manual_fallback_price' => 85000],
-        ];
+        return [];
     }
 }

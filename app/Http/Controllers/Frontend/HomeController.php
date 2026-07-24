@@ -11,7 +11,10 @@ use App\Services\GroupTicketing\GroupInventoryFacetService;
 use App\Support\Booking\AgentBookingContext;
 use App\Support\Branding\SafeBrandingResolver;
 use App\Support\GroupTicketing\GroupHomepageTilePresenter;
-use App\Support\Ui\MobileViewPreference;
+use App\Support\Client\Homepage\JetpkHomepageContextDiagnostic;
+use App\Support\Client\Homepage\HomepageSectionOrderResolver;
+use App\Support\Client\ClientPageKeys;
+use App\Services\Client\ClientPageContentResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -21,9 +24,9 @@ class HomeController extends Controller
     public function __construct(
         protected AgencyBrandingService $brandingService,
         protected HomepageSectionPresenter $homepageSections,
-        protected MobileViewPreference $mobileViewPreference,
         protected GroupHomepageTilePresenter $groupHomepageTiles,
         protected GroupInventoryFacetService $groupInventoryFacets,
+        protected JetpkHomepageContextDiagnostic $homepageDiagnostic,
     ) {}
 
     public function index(Request $request): View
@@ -81,11 +84,12 @@ class HomeController extends Controller
             'agentBookingAgencyName' => AgentBookingContext::agencyDisplayName($request) ?? '',
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.home', $viewData);
-        }
-
         if ($this->shouldUseJetPakistanThemeHome()) {
+            $this->homepageDiagnostic->logIfEnabled($request);
+            $homepageContent = app(ClientPageContentResolver::class)->contentFor(ClientPageKeys::HOME);
+            $viewData['homepageOrderedSections'] = app(HomepageSectionOrderResolver::class)
+                ->orderedSections($homepageContent);
+
             return view(client_view('frontend.home', 'frontend'), $viewData);
         }
 
@@ -126,10 +130,6 @@ class HomeController extends Controller
 
     protected function shouldUseJetPakistanThemeHome(): bool
     {
-        if (! is_client_preview()) {
-            return false;
-        }
-
         if (client_theme()->frontendTheme() !== 'jetpakistan') {
             return false;
         }

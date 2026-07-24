@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Client\ClientRedirectResolver;
 use App\Services\Security\SecurityEventLogger;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +19,6 @@ use Illuminate\View\View;
 class NewPasswordController extends Controller
 {
     public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
         protected ClientRedirectResolver $clientRedirectResolver,
     ) {}
 
@@ -30,10 +28,6 @@ class NewPasswordController extends Controller
     public function create(Request $request): View
     {
         $viewData = ['request' => $request];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.auth.reset-password', $viewData);
-        }
 
         return view(client_view('auth.reset-password', 'frontend'), $viewData);
     }

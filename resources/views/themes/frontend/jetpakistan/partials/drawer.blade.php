@@ -1,3 +1,8 @@
+@php
+    use App\Services\Client\ClientHeaderFooterPresenter;
+    $jpHeader = app(ClientHeaderFooterPresenter::class)->header();
+    $navItems = $jpHeader['nav_items'] ?? [];
+@endphp
 <div class="drawer" id="drawer">
   <div class="scrim" data-close></div>
   <div class="panel">
@@ -5,10 +10,9 @@
       <x-jp.brand-logo />
       <button class="hamburger" data-close aria-label="Close menu" style="display:grid"><x-jp.icon name="close" /></button>
     </div>
-    <a href="{{ client_route('home') }}">Home</a>
-    <a href="{{ client_route('booking.lookup') }}">Booking</a>
-    <a href="{{ client_route('support') }}">Support</a>
-    <a href="{{ client_route('about') }}">About</a>
+    @foreach ($navItems as $item)
+      <a href="{{ app(\App\Services\Client\ClientPageRenderer::class)->resolveDestination((string) ($item['destination'] ?? '')) }}">{{ $item['label'] ?? '' }}</a>
+    @endforeach
     @auth
       <div class="d-account">
         <x-account-dropdown variant="mobile" />
@@ -16,9 +20,9 @@
     @endauth
     <div class="d-actions">
       @guest
-        <a href="{{ client_route('login') }}" class="btn btn-ghost btn-lg">Sign in</a>
+        <a href="{{ client_route('login') }}" class="btn btn-ghost btn-lg">{{ $jpHeader['sign_in_label'] ?? 'Sign in' }}</a>
         <div class="d-register">
-          <span class="d-register-label">Register</span>
+          <span class="d-register-label">{{ $jpHeader['register_label'] ?? 'Register' }}</span>
           <a href="{{ client_route('register') }}" class="btn btn-primary btn-lg">Customer Registration</a>
           <a href="{{ client_route('agent.register') }}" class="btn btn-ghost btn-lg">Agent Registration</a>
         </div>

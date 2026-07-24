@@ -1,0 +1,64 @@
+# JetPakistan Canonical Responsive UI + CMS Correction
+# Baseline SHA: 5f97dc6c512d59ac2106c2bfa9854da2dc1210c8
+# Merge commit: 1a64a0ce017cc77400c90025adadd6d1a8e79f65
+# Runtime source SHA: a9bc7826f4beb14deeaef29e17bbf4bfd195a737
+# Runbook content SHA: 725d6a470393ac45b4dfbbff6ca65a06c90214e5
+# Runbook reference SHA: ae880169ed331de2aaff2a40f68afc1ef5b9999a
+# Local root: C:/Users/khadi/ota-jetpk
+# Remote app root: /home/pkjetp/jetpk_app
+# Runtime uploads: 50
+# Public mirrored uploads: 0
+# Keep the SFTP session open.
+# Do not add a trailing bye.
+
+lcd C:/Users/khadi/ota-jetpk
+put app/Http/Controllers/Agent/AccountingLedgerController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AccountingLedgerController.php
+put app/Http/Controllers/Agent/AgentAgencyController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentAgencyController.php
+put app/Http/Controllers/Agent/AgentBookingController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentBookingController.php
+put app/Http/Controllers/Agent/AgentCommissionController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentCommissionController.php
+put app/Http/Controllers/Agent/AgentDepositController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentDepositController.php
+put app/Http/Controllers/Agent/AgentLedgerController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentLedgerController.php
+put app/Http/Controllers/Agent/AgentReportsController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentReportsController.php
+put app/Http/Controllers/Agent/AgentStaffController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentStaffController.php
+put app/Http/Controllers/Agent/AgentWalletController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/AgentWalletController.php
+put app/Http/Controllers/Agent/DashboardController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/DashboardController.php
+put app/Http/Controllers/Agent/FinanceStatementController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/FinanceStatementController.php
+put app/Http/Controllers/Agent/SavedTravelerController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/SavedTravelerController.php
+put app/Http/Controllers/Agent/SupportTicketController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Agent/SupportTicketController.php
+put app/Http/Controllers/Auth/AuthenticatedSessionController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/AuthenticatedSessionController.php
+put app/Http/Controllers/Auth/LoginOtpController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/LoginOtpController.php
+put app/Http/Controllers/Auth/NewPasswordController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/NewPasswordController.php
+put app/Http/Controllers/Auth/PasswordResetLinkController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/PasswordResetLinkController.php
+put app/Http/Controllers/Auth/RegisteredUserController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Auth/RegisteredUserController.php
+put app/Http/Controllers/Customer/CustomerBookingController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Customer/CustomerBookingController.php
+put app/Http/Controllers/Customer/SavedTravelerController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Customer/SavedTravelerController.php
+put app/Http/Controllers/Customer/SupportTicketController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Customer/SupportTicketController.php
+put app/Http/Controllers/Frontend/AgentRegistrationController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/AgentRegistrationController.php
+put app/Http/Controllers/Frontend/BookingController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/BookingController.php
+put app/Http/Controllers/Frontend/FlightController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/FlightController.php
+put app/Http/Controllers/Frontend/GuestBookingLookupController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/GuestBookingLookupController.php
+put app/Http/Controllers/Frontend/HomeController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/HomeController.php
+put app/Http/Controllers/Frontend/SupportController.php /home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/SupportController.php
+put app/Http/Controllers/ProfileController.php /home/pkjetp/jetpk_app/app/Http/Controllers/ProfileController.php
+put app/Providers/AppServiceProvider.php /home/pkjetp/jetpk_app/app/Providers/AppServiceProvider.php
+put app/Services/Client/ClientPageAdminContentResolver.php /home/pkjetp/jetpk_app/app/Services/Client/ClientPageAdminContentResolver.php
+put app/Services/Client/ClientPageContentResolver.php /home/pkjetp/jetpk_app/app/Services/Client/ClientPageContentResolver.php
+put app/Services/Client/RuntimeViewResolver.php /home/pkjetp/jetpk_app/app/Services/Client/RuntimeViewResolver.php
+put app/Services/Communication/NotificationRecipientResolver.php /home/pkjetp/jetpk_app/app/Services/Communication/NotificationRecipientResolver.php
+put app/Support/Audits/HaseebMasterRouteSafetyCatalog.php /home/pkjetp/jetpk_app/app/Support/Audits/HaseebMasterRouteSafetyCatalog.php
+put app/Support/Client/ClientPageSectionSchema.php /home/pkjetp/jetpk_app/app/Support/Client/ClientPageSectionSchema.php
+put app/Support/Client/Homepage/HomepageCanonicalSchema.php /home/pkjetp/jetpk_app/app/Support/Client/Homepage/HomepageCanonicalSchema.php
+put app/Support/Client/Homepage/HomepageContentNormalizer.php /home/pkjetp/jetpk_app/app/Support/Client/Homepage/HomepageContentNormalizer.php
+put config/client.php /home/pkjetp/jetpk_app/config/client.php
+put config/client_themes.php /home/pkjetp/jetpk_app/config/client_themes.php
+put config/client_ui.php /home/pkjetp/jetpk_app/config/client_ui.php
+put config/client_view_paths.php /home/pkjetp/jetpk_app/config/client_view_paths.php
+put config/ota-brand.php /home/pkjetp/jetpk_app/config/ota-brand.php
+put config/ota-client.php /home/pkjetp/jetpk_app/config/ota-client.php
+put resources/views/frontend/about.blade.php /home/pkjetp/jetpk_app/resources/views/frontend/about.blade.php
+put resources/views/layouts/frontend.blade.php /home/pkjetp/jetpk_app/resources/views/layouts/frontend.blade.php
+put resources/views/themes/admin/jetpakistan/page-settings/partials/home-sections.blade.php /home/pkjetp/jetpk_app/resources/views/themes/admin/jetpakistan/page-settings/partials/home-sections.blade.php
+put resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php
+put resources/views/themes/frontend/jetpakistan/sections/hero.blade.php /home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/sections/hero.blade.php
+put resources/views/ui/site/v2/layouts/frontend.blade.php /home/pkjetp/jetpk_app/resources/views/ui/site/v2/layouts/frontend.blade.php
+put routes/web.php /home/pkjetp/jetpk_app/routes/web.php

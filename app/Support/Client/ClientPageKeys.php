@@ -93,8 +93,35 @@ final class ClientPageKeys
         ];
     }
 
+    public const CUSTOM_PREFIX = 'custom:';
+
     public static function isValid(string $pageKey): bool
     {
+        if (self::isCustom($pageKey)) {
+            $slug = self::customSlug($pageKey);
+
+            return $slug !== ''
+                && ClientManagedPageReservedSlugs::isValidFormat($slug)
+                && ! ClientManagedPageReservedSlugs::isReserved($slug);
+        }
+
         return in_array($pageKey, self::all(), true);
+    }
+
+    public static function isCustom(string $pageKey): bool
+    {
+        return str_starts_with($pageKey, self::CUSTOM_PREFIX);
+    }
+
+    public static function customKey(string $slug): string
+    {
+        return self::CUSTOM_PREFIX.ClientManagedPageReservedSlugs::normalize($slug);
+    }
+
+    public static function customSlug(string $pageKey): string
+    {
+        return self::isCustom($pageKey)
+            ? ClientManagedPageReservedSlugs::normalize(substr($pageKey, strlen(self::CUSTOM_PREFIX)))
+            : '';
     }
 }

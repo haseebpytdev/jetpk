@@ -8,7 +8,9 @@ use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingDocument;
+use App\Services\Client\ClientPageRenderer;
 use App\Services\Customer\GuestBookingAccessService;
+use App\Support\Client\ClientPageKeys;
 use App\Services\Payments\BookingPaymentService;
 use App\Support\Bookings\BookingDetailTimelinePresenter;
 use App\Support\Bookings\BookingItineraryOverviewPresenter;
@@ -17,7 +19,6 @@ use App\Support\Bookings\PaymentOperationalStatus;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Bookings\TicketingOperationalStatus;
 use App\Support\Security\TurnstileVerifier;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,16 +31,13 @@ class GuestBookingLookupController extends Controller
     public function __construct(
         protected GuestBookingAccessService $guestAccessService,
         protected BookingPaymentService $paymentService,
-        protected MobileViewPreference $mobileViewPreference,
+        protected ClientPageRenderer $pageRenderer,
     ) {}
 
     public function showLookupForm(Request $request): View
     {
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.guest.booking-lookup');
-        }
 
-        return view(client_view('frontend.booking.lookup', 'frontend'));
+        return view(client_view('frontend.booking.lookup', 'frontend'), $this->pageRenderer->viewModel(ClientPageKeys::BOOKING_LOOKUP));
     }
 
     public function lookup(Request $request): RedirectResponse
@@ -132,10 +130,6 @@ class GuestBookingLookupController extends Controller
             'customerTimeline' => BookingDetailTimelinePresenter::forBooking($booking, $meta, $hasPnr),
             'paymentSummary' => BookingPaymentSummaryPresenter::forBooking($booking, $canUploadProof, 'customer'),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.customer.bookings.guest-show', array_merge($viewData, ['isGuestView' => true]));
-        }
 
         return view('frontend.booking.guest-show', $viewData);
     }

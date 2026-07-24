@@ -7,10 +7,10 @@
     }
 
     $defaults = $jpHome->defaults();
-    $eyebrow = $jpHome->field('destinations.eyebrow', 'Worth the trip');
-    $title = $jpHome->field('destinations.title', data_get($defaults, 'destinations.title', 'Destinations on the rise.'));
-    $subtitle = $jpHome->field('destinations.subtitle', data_get($defaults, 'destinations.subtitle', ''));
-    $ctaText = $jpHome->field('destinations.cta_text', 'Explore fares');
+    $eyebrow = $jpHome->field('destinations.eyebrow', '');
+    $title = $jpHome->field('destinations.title', '');
+    $subtitle = $jpHome->field('destinations.subtitle', '');
+    $ctaText = $jpHome->field('destinations.cta_text', '');
     $ctaUrl = $jpHome->field('destinations.cta_url', client_route('home').'#jp-flight-search');
     $dests = $jpHome->destinationsForDisplay();
     $carousel = count($dests) > 4;
@@ -39,6 +39,8 @@
           :image="$d['image'] ?? null"
           :href="$d['href'] ?? null"
           :alt="$d['alt'] ?? ($d['title'] ?? '')"
+          :badge="$d['badge'] ?? null"
+          :text="$d['text'] ?? null"
         />
       @endforeach
     </div>

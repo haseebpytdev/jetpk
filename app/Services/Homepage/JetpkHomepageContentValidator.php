@@ -4,6 +4,7 @@ namespace App\Services\Homepage;
 
 use App\Models\Airport;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -30,8 +31,16 @@ final class JetpkHomepageContentValidator
             $content['destinations']['items'] = $this->normalizeDestinations($content['destinations']['items']);
         }
 
+        if (isset($content['featured_deals']['items']) && is_array($content['featured_deals']['items'])) {
+            $content['featured_deals']['items'] = $this->normalizeFeaturedDeals($content['featured_deals']['items']);
+        }
+
         if (isset($content['support_cta']) && is_array($content['support_cta'])) {
             $content['support_cta'] = $this->normalizeSupportCta($content['support_cta']);
+        }
+
+        if (isset($content['hero']) && is_array($content['hero'])) {
+            $content['hero'] = JetpkHomepageHeroSizing::normalizeHeroSection($content['hero']);
         }
 
         return $content;
@@ -211,6 +220,69 @@ final class JetpkHomepageContentValidator
     }
 
     /**
+     * @param  list<mixed>  $items
+     * @return list<array<string, mixed>>
+     */
+    private function normalizeFeaturedDeals(array $items): array
+    {
+        $normalized = [];
+        $errors = [];
+
+        foreach (array_values($items) as $index => $raw) {
+            if (! is_array($raw)) {
+                continue;
+            }
+
+            $from = strtoupper(trim((string) ($raw['from'] ?? '')));
+            $to = strtoupper(trim((string) ($raw['to'] ?? '')));
+            $airline = $this->sanitize($raw['airline'] ?? '');
+            if ($airline === '' && $from === '' && $to === '') {
+                continue;
+            }
+
+            if ($from !== '' && ! preg_match('/^[A-Z]{3}$/', $from)) {
+                $errors["content.featured_deals.items.{$index}.from"] = 'Origin must be a 3-letter IATA code.';
+            }
+            if ($to !== '' && ! preg_match('/^[A-Z]{3}$/', $to)) {
+                $errors["content.featured_deals.items.{$index}.to"] = 'Destination must be a 3-letter IATA code.';
+            }
+
+            $price = $this->optionalPositivePrice($raw['price'] ?? null);
+            if ($price === false) {
+                $errors["content.featured_deals.items.{$index}.price"] = 'Price must be a positive number when provided.';
+            }
+
+            $normalized[] = [
+                'airline' => $airline,
+                'from' => $from,
+                'to' => $to,
+                'depart' => $this->sanitize($raw['depart'] ?? ''),
+                'arrive' => $this->sanitize($raw['arrive'] ?? ''),
+                'dur' => $this->sanitize($raw['dur'] ?? ''),
+                'stops' => max(0, min(9, (int) ($raw['stops'] ?? 0))),
+                'price' => $price === false ? 0 : (int) round((float) ($price ?? 0)),
+                'sort_order' => (int) ($raw['sort_order'] ?? $index),
+                'enabled' => $this->boolString($raw['enabled'] ?? '1'),
+            ];
+        }
+
+        usort($normalized, static fn (array $a, array $b): int => $a['sort_order'] <=> $b['sort_order']);
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        $max = (int) config('jetpk_homepage.max_featured_deals', 6);
+        if (count($normalized) > $max) {
+            throw ValidationException::withMessages([
+                'content.featured_deals.items' => "Maximum {$max} featured deal cards allowed.",
+            ]);
+        }
+
+        return $normalized;
+    }
+
+    /**
      * @param  array<string, mixed>  $support
      * @return array<string, mixed>
      */
@@ -222,11 +294,21 @@ final class JetpkHomepageContentValidator
             $errors['content.support_cta.phone_value'] = 'Phone number contains invalid characters.';
         }
 
-        foreach (['cta_link' => 'CTA link', 'chat_url' => 'Live chat URL', 'call_url' => 'Call support URL'] as $field => $label) {
+        $callUrl = $this->sanitizeUrl($support['call_url'] ?? '');
+        if ($callUrl !== '') {
+            $callUrl = $this->normalizeCallSupportUrl($callUrl);
+            if (! $this->isSafeCallSupportUrl($callUrl)) {
+                $errors['content.support_cta.call_url'] = 'Call support URL must be a valid relative, https, or telephone link.';
+            }
+        }
+        $support['call_url'] = $callUrl;
+
+        foreach (['cta_link' => 'CTA link', 'chat_url' => 'Live chat URL'] as $field => $label) {
             $url = $this->sanitizeUrl($support[$field] ?? '');
             if ($url !== '' && ! $this->isSafeUrl($url)) {
                 $errors["content.support_cta.{$field}"] = "{$label} must be a valid relative or https URL.";
             }
+            $support[$field] = $url;
         }
 
         if ($errors !== []) {
@@ -280,6 +362,52 @@ final class JetpkHomepageContentValidator
         return trim(strip_tags((string) $value));
     }
 
+    private function normalizeCallSupportUrl(string $url): string
+    {
+        $url = trim($url);
+        if (! str_starts_with(strtolower($url), 'tel:')) {
+            return $url;
+        }
+
+        return 'tel:'.trim(substr($url, 4));
+    }
+
+    private function isSafeCallSupportUrl(string $url): bool
+    {
+        if ($url === '') {
+            return true;
+        }
+
+        if (str_starts_with(strtolower($url), 'tel:')) {
+            return $this->isSafeTelephoneUrl($url);
+        }
+
+        return $this->isSafeUrl($url);
+    }
+
+    private function isSafeTelephoneUrl(string $url): bool
+    {
+        if (! str_starts_with(strtolower($url), 'tel:')) {
+            return false;
+        }
+
+        $number = trim(substr($url, 4));
+        if ($number === '') {
+            return false;
+        }
+
+        if (preg_match('/[a-z]/i', $number)) {
+            return false;
+        }
+
+        $normalized = preg_replace('/[\s\-().]/', '', $number) ?? '';
+        if ($normalized === '' || ! preg_match('/^\+?\d{7,15}$/', $normalized)) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function sanitizeAssetKey(mixed $value): string
     {
         $key = Str::slug((string) $value, '_');
@@ -289,11 +417,24 @@ final class JetpkHomepageContentValidator
 
     private function isSafeUrl(string $url): bool
     {
-        if ($url === '' || str_starts_with($url, '/')) {
+        if ($url === '') {
             return true;
         }
 
-        return (bool) filter_var($url, FILTER_VALIDATE_URL) && str_starts_with(strtolower($url), 'https://');
+        if (str_starts_with($url, '//')) {
+            return false;
+        }
+
+        $lower = strtolower($url);
+        if (str_starts_with($lower, 'javascript:') || str_starts_with($lower, 'data:')) {
+            return false;
+        }
+
+        if (str_starts_with($url, '/')) {
+            return true;
+        }
+
+        return (bool) filter_var($url, FILTER_VALIDATE_URL) && str_starts_with($lower, 'https://');
     }
 
     private function boolString(mixed $value): string

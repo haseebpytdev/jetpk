@@ -20,17 +20,17 @@ class DefaultClientCanonicalRedirectTest extends TestCase
     public static function defaultSlugAliasRedirectProvider(): array
     {
         return [
-            'root' => ['/haseeb-master', '/'],
-            'home alias' => ['/haseeb-master/home', '/'],
-            'login' => ['/haseeb-master/login', '/login'],
-            'register' => ['/haseeb-master/register', '/register'],
-            'admin' => ['/haseeb-master/admin', '/admin'],
-            'admin bookings' => ['/haseeb-master/admin/bookings', '/admin/bookings'],
-            'staff' => ['/haseeb-master/staff', '/staff'],
-            'agent' => ['/haseeb-master/agent', '/agent'],
-            'customer' => ['/haseeb-master/customer', '/customer'],
-            'lookup booking' => ['/haseeb-master/lookup-booking', '/lookup-booking'],
-            'groups search' => ['/haseeb-master/groups/search', '/groups/search'],
+            'root' => ['/jetpk', '/'],
+            'home alias' => ['/jetpk/home', '/'],
+            'login' => ['/jetpk/login', '/login'],
+            'register' => ['/jetpk/register', '/register'],
+            'admin' => ['/jetpk/admin', '/admin'],
+            'admin bookings' => ['/jetpk/admin/bookings', '/admin/bookings'],
+            'staff' => ['/jetpk/staff', '/staff'],
+            'agent' => ['/jetpk/agent', '/agent'],
+            'customer' => ['/jetpk/customer', '/customer'],
+            'lookup booking' => ['/jetpk/lookup-booking', '/lookup-booking'],
+            'groups search' => ['/jetpk/groups/search', '/groups/search'],
         ];
     }
 
@@ -38,8 +38,8 @@ class DefaultClientCanonicalRedirectTest extends TestCase
     public function test_default_slug_prefixed_paths_redirect_to_canonical_root(string $from, string $to): void
     {
         $this->makeProfile([
-            'slug' => 'haseeb-master',
-            'name' => 'Haseeb Master',
+            'slug' => 'jetpk',
+            'name' => 'Jet Pakistan',
             'is_master_profile' => true,
         ]);
 
@@ -51,12 +51,12 @@ class DefaultClientCanonicalRedirectTest extends TestCase
     public function test_default_slug_redirect_preserves_query_string(): void
     {
         $this->makeProfile([
-            'slug' => 'haseeb-master',
-            'name' => 'Haseeb Master',
+            'slug' => 'jetpk',
+            'name' => 'Jet Pakistan',
             'is_master_profile' => true,
         ]);
 
-        $this->get('/haseeb-master/flights/results?x=1')
+        $this->get('/jetpk/flights/results?x=1')
             ->assertStatus(302)
             ->assertRedirect('/flights/results?x=1');
     }
@@ -64,8 +64,8 @@ class DefaultClientCanonicalRedirectTest extends TestCase
     public function test_root_login_still_returns_200(): void
     {
         $this->makeProfile([
-            'slug' => 'haseeb-master',
-            'name' => 'Haseeb Master',
+            'slug' => 'jetpk',
+            'name' => 'Jet Pakistan',
             'is_master_profile' => true,
         ]);
 
@@ -75,8 +75,8 @@ class DefaultClientCanonicalRedirectTest extends TestCase
     public function test_root_admin_still_redirects_guest_to_login(): void
     {
         $this->makeProfile([
-            'slug' => 'haseeb-master',
-            'name' => 'Haseeb Master',
+            'slug' => 'jetpk',
+            'name' => 'Jet Pakistan',
             'is_master_profile' => true,
         ]);
 
@@ -86,21 +86,21 @@ class DefaultClientCanonicalRedirectTest extends TestCase
     public function test_non_default_client_keeps_prefixed_path(): void
     {
         $this->makeProfile([
-            'slug' => 'jetpk',
-            'name' => 'Jet Pakistan',
+            'slug' => 'client-demo',
+            'name' => 'Client Demo',
         ]);
 
-        $this->get('/jetpk/login')->assertOk();
-        $this->get('/jetpk/admin')->assertRedirect('/jetpk/login');
+        $this->get('/client-demo/login')->assertOk();
+        $this->get('/client-demo/admin')->assertRedirect('/client-demo/login');
     }
 
     public function test_is_default_deployment_slug_helper(): void
     {
         $resolver = app(ClientProfileResolver::class);
 
-        $this->assertTrue($resolver->isDefaultDeploymentSlug('haseeb-master'));
-        $this->assertTrue($resolver->isDefaultDeploymentSlug('Haseeb-Master'));
-        $this->assertFalse($resolver->isDefaultDeploymentSlug('jetpk'));
+        $this->assertTrue($resolver->isDefaultDeploymentSlug('jetpk'));
+        $this->assertTrue($resolver->isDefaultDeploymentSlug('Jetpk'));
+        $this->assertFalse($resolver->isDefaultDeploymentSlug('haseeb-master'));
     }
 
     /**
@@ -113,9 +113,9 @@ class DefaultClientCanonicalRedirectTest extends TestCase
             'slug' => 'test-client-'.uniqid(),
             'domain' => null,
             'environment' => 'staging',
-            'active_frontend_theme' => 'v1-classic',
-            'active_admin_theme' => 'v1-classic',
-            'active_staff_theme' => 'v1-classic',
+            'active_frontend_theme' => 'jetpakistan',
+            'active_admin_theme' => 'jetpakistan',
+            'active_staff_theme' => 'jetpakistan',
             'asset_profile' => 'test-assets',
             'default_locale' => 'en',
             'timezone' => 'Asia/Karachi',

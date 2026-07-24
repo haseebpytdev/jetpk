@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Travelers\UpsertSavedTravelerRequest;
 use App\Models\SavedTraveler;
 use App\Support\Geo\CountryList;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,10 +13,6 @@ use Illuminate\Support\Facades\Gate;
 
 class SavedTravelerController extends Controller
 {
-    public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
-    ) {}
-
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', SavedTraveler::class);
@@ -39,10 +34,6 @@ class SavedTravelerController extends Controller
             'portalLabel' => 'Agent',
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.travelers.index', $viewData);
-        }
-
         return view(client_view('travelers.index', 'agent'), $viewData);
     }
 
@@ -57,10 +48,6 @@ class SavedTravelerController extends Controller
             'portalLabel' => 'Agent',
             'countries' => CountryList::forSelect(),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.travelers.create', $viewData);
-        }
 
         return view(client_view('travelers.create', 'agent'), $viewData);
     }
@@ -97,10 +84,6 @@ class SavedTravelerController extends Controller
             'portalLabel' => 'Agent',
             'countries' => CountryList::forSelect(),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.travelers.edit', $viewData);
-        }
 
         return view(client_view('travelers.edit', 'agent'), $viewData);
     }

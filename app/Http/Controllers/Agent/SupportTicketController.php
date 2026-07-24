@@ -11,7 +11,6 @@ use App\Http\Requests\Support\StoreSupportTicketRequest;
 use App\Models\Agency;
 use App\Models\SupportTicket;
 use App\Services\Support\SupportTicketService;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +22,6 @@ class SupportTicketController extends Controller
 
     public function __construct(
         protected SupportTicketService $tickets,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function index(Request $request): View
@@ -37,10 +35,6 @@ class SupportTicketController extends Controller
             ->orderByDesc('created_at')
             ->paginate(20);
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.support.index', compact('tickets'));
-        }
-
         return view(client_view('support.tickets.index', 'agent'), compact('tickets'));
     }
 
@@ -52,10 +46,6 @@ class SupportTicketController extends Controller
             'bookings' => $this->bookableOptionsForUser($request->user()),
             'categories' => SupportTicketCategory::cases(),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.support.create', $viewData);
-        }
 
         return view(client_view('support.tickets.create', 'agent'), $viewData);
     }
@@ -83,10 +73,6 @@ class SupportTicketController extends Controller
             'booking',
             'messages' => fn ($q) => $q->where('visibility', SupportTicketMessageVisibility::CustomerVisible)->with('author'),
         ]);
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.support.show', compact('ticket'));
-        }
 
         return view(client_view('support.tickets.show', 'agent'), compact('ticket'));
     }

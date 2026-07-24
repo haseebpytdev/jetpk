@@ -7,9 +7,9 @@
     }
 
     $defaults = $jpHome->defaults();
-    $eyebrow = $jpHome->field('trust.eyebrow', 'Why travellers stay');
-    $title = $jpHome->field('trust.title', 'Booking that respects your time and money.');
-    $subtitle = $jpHome->field('trust.subtitle', 'No hidden markups, no chasing call centres. Every part of the journey is built to be clear and quick.');
+    $eyebrow = $jpHome->field('trust.eyebrow', data_get($defaults, 'trust.eyebrow', ''));
+    $title = $jpHome->field('trust.title', data_get($defaults, 'trust.title', ''));
+    $subtitle = $jpHome->field('trust.subtitle', data_get($defaults, 'trust.subtitle', ''));
     $cards = collect($jpHome->trustCardsWithFallback())
         ->filter(static fn ($card) => is_array($card) && ($card['enabled'] ?? '1') !== '0' && trim((string) ($card['title'] ?? '')) !== '')
         ->values()

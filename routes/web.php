@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\AgentRegistrationController;
 use App\Http\Controllers\Frontend\AirportSearchController;
 use App\Http\Controllers\Frontend\BookingCheckoutPromoController;
 use App\Http\Controllers\Frontend\BookingController;
+use App\Http\Controllers\Frontend\ClientManagedPageController;
 use App\Http\Controllers\Frontend\OneApiCheckoutController;
 use App\Http\Controllers\Frontend\CmsPageController;
 use App\Http\Controllers\Frontend\FlightController;
@@ -15,7 +16,6 @@ use App\Http\Controllers\Frontend\GroupTicketingSearchController;
 use App\Http\Controllers\Frontend\GuestBookingCancellationController;
 use App\Http\Controllers\Frontend\GuestBookingLookupController;
 use App\Http\Controllers\Frontend\HomeController;
-use App\Http\Controllers\Frontend\MobileViewController;
 use App\Http\Controllers\Frontend\RequestDemoController;
 use App\Http\Controllers\Frontend\SupportController;
 use App\Http\Controllers\Payments\AbhiPayPaymentController;
@@ -36,12 +36,6 @@ Route::get('/devcp/{path}', static function (string $path) {
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::post('/view-preference/mobile', [MobileViewController::class, 'mobile'])->name('view-preference.mobile');
-Route::post('/view-preference/desktop', [MobileViewController::class, 'desktop'])->name('view-preference.desktop');
-Route::get('/mobile-view', [MobileViewController::class, 'previewMobile'])->name('view-preference.mobile-get');
-Route::get('/mobile-app-preview', [MobileViewController::class, 'previewMobile'])->name('view-preference.mobile-preview');
-Route::get('/desktop-view', [MobileViewController::class, 'previewDesktop'])->name('view-preference.desktop-preview');
-
 Route::get('/request-demo', RequestDemoController::class)->name('request-demo');
 Route::middleware('platform.module:support_system')->group(function (): void {
     Route::get('/support', [SupportController::class, 'support'])->name('support');
@@ -51,6 +45,11 @@ Route::middleware('platform.module:support_system')->group(function (): void {
     Route::get('/support/submitted', [SupportController::class, 'submitted'])->name('support.submitted');
 });
 Route::get('/about-us', [SupportController::class, 'about'])->name('about');
+Route::get('/faq', [ClientManagedPageController::class, 'faq'])->name('faq');
+Route::get('/terms', [ClientManagedPageController::class, 'terms'])->name('terms');
+Route::get('/privacy', [ClientManagedPageController::class, 'privacy'])->name('privacy');
+Route::redirect('/pages/terms-and-conditions', '/terms');
+Route::redirect('/pages/privacy-policy', '/privacy');
 Route::get('/pages/{slug}', [CmsPageController::class, 'show'])->name('pages.show');
 Route::permanentRedirect('/contact', '/about-us');
 Route::middleware('platform.module:agent_applications')->group(function (): void {
@@ -165,6 +164,10 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/{slug}', [ClientManagedPageController::class, 'customShow'])
+    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')
+    ->name('client.custom-page.show');
 
 if (app()->environment('testing')) {
     Route::get('/_test/ui-version', static function () {

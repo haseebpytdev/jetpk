@@ -1,6 +1,6 @@
 @php
     $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/');
-    $jpAssetVersion = 51; // JETPK-RESPONSIVE-CLUMPING — theme.css + forms.css + booking.css
+    $jpAssetVersion = 58; // JETPK-SEARCH-UI-VERTICAL-COMPACTNESS-HEIGHT-ONLY-SCALING-FIX
     $jpBrandName = client_branding()->companyName();
     $jpFavicon = client_branding()->faviconUrl();
     $pageTitle = trim($__env->yieldContent('title'));
@@ -14,6 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{{ $documentTitle }}</title>
+@stack('head-meta')
 @stack('head')
 @if($jpFavicon)
 <link rel="icon" href="{{ $jpFavicon }}" sizes="any">
@@ -103,14 +104,11 @@ html[data-theme="day"] {
 
 @include('themes.frontend.jetpakistan.partials.footer')
 
-@include('themes.frontend.jetpakistan.partials.mobile-app-view-link')
-
 @stack('modals')
 
 <script src="{{ $jpThemeBase }}/js/theme.js?v={{ $jpAssetVersion }}" defer></script>
 <script>document.documentElement.classList.add('js');</script>
 @stack('theme-scripts')
 @stack('scripts')
-@include('layouts.partials.mobile-viewport-reconcile')
 </body>
 </html>

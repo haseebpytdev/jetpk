@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Agent;
 use App\Http\Controllers\Controller;
 use App\Models\AgentCommissionStatement;
 use App\Services\Agents\AgentCommissionService;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -14,7 +13,6 @@ class AgentCommissionController extends Controller
 {
     public function __construct(
         protected AgentCommissionService $commissionService,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function index(Request $request): View
@@ -36,10 +34,6 @@ class AgentCommissionController extends Controller
             'paid' => (float) $entries->where('status', 'paid')->sum('commission_amount'),
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.commissions.index', $viewData);
-        }
-
         return view(client_view('commissions.index', 'agent'), $viewData);
     }
 
@@ -51,10 +45,6 @@ class AgentCommissionController extends Controller
         $viewData = [
             'statement' => $statement,
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.commissions.statement', $viewData);
-        }
 
         return view(client_view('commissions.statement', 'agent'), $viewData);
     }

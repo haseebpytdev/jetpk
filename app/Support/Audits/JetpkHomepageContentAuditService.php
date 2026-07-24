@@ -7,8 +7,12 @@ use App\Models\ClientPageAsset;
 use App\Models\ClientPageSetting;
 use App\Models\ClientProfile;
 use App\Services\Client\ClientPageAssetService;
+use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Services\Homepage\JetpkHomepageRouteFareRefreshService;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Client\ClientPageMediaSchema;
+use App\Support\Client\ClientPublicWebrootPath;
+use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
 use App\Support\Client\JetpkHomepageFareDisplay;
 use Illuminate\Support\Facades\Storage;
 
@@ -136,6 +140,7 @@ final class JetpkHomepageContentAuditService
             }
         }
 
+        $checks = array_merge($checks, $this->auditHeroSizing($content));
         $checks = array_merge($checks, $this->leakageChecks($content));
 
         $failCount = count(array_filter($checks, static fn (array $c) => ($c['status'] ?? '') === 'fail'));
@@ -147,39 +152,253 @@ final class JetpkHomepageContentAuditService
     }
 
     /**
-     * @return array{fail_count: int, checks: list<array<string, mixed>>}
+     * @return array{
+     *     fail_count: int,
+     *     checks: list<array<string, mixed>>,
+     *     slots: list<array<string, mixed>>,
+     *     db_write_attempted: bool,
+     *     cms_mutation_attempted: bool,
+     *     publish_attempted: bool
+     * }
      */
     public function auditMedia(?ClientProfile $profile = null): array
     {
+        $readOnlyFlags = [
+            'db_write_attempted' => false,
+            'cms_mutation_attempted' => false,
+            'publish_attempted' => false,
+        ];
+
         if ($profile === null) {
-            return ['fail_count' => 1, 'checks' => [$this->fail('profile_missing', 'Client profile not resolved.')]];
+            return array_merge($readOnlyFlags, [
+                'fail_count' => 1,
+                'checks' => [$this->fail('profile_missing', 'Client profile not resolved.')],
+                'slots' => [],
+            ]);
         }
 
         $checks = [];
-        $assets = ClientPageAsset::query()
-            ->where('client_profile_id', $profile->id)
-            ->where('page_key', ClientPageKeys::HOME)
-            ->get();
+        $slots = [];
+        $published = $this->publishedContent($profile);
+        $draft = $this->draftContent($profile);
+        $canonicalSlots = $this->canonicalHomepageMediaSlots($published);
 
-        foreach ($assets as $asset) {
-            if ($asset->path === '') {
-                $checks[] = $this->fail('asset_empty_path', "Asset {$asset->asset_key} has empty path");
+        foreach ($canonicalSlots as $slot) {
+            $slotReport = $this->auditMediaSlot($profile, $slot, $published, $draft);
+            $slots[] = $slotReport;
 
-                continue;
-            }
-
-            if (! Storage::disk('public')->exists($asset->path)) {
-                $checks[] = $this->fail('asset_missing_file', "Asset {$asset->asset_key} file missing at {$asset->path}");
-            }
-
-            if (str_contains(strtolower($asset->path), '..')) {
-                $checks[] = $this->fail('asset_path_traversal', "Asset {$asset->asset_key} path traversal risk");
+            if (($slotReport['status'] ?? '') === 'fail') {
+                $checks[] = $this->fail(
+                    'media_slot_'.$slotReport['slot'],
+                    $this->formatMediaSlotMessage($slotReport),
+                );
+            } else {
+                $checks[] = [
+                    'code' => 'media_slot_'.$slotReport['slot'],
+                    'status' => 'pass',
+                    'message' => $this->formatMediaSlotMessage($slotReport),
+                ];
             }
         }
 
         $failCount = count(array_filter($checks, static fn (array $c) => ($c['status'] ?? '') === 'fail'));
 
-        return ['fail_count' => $failCount, 'checks' => $checks];
+        return array_merge($readOnlyFlags, [
+            'fail_count' => $failCount,
+            'checks' => $checks,
+            'slots' => $slots,
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $slot
+     * @param  array<string, mixed>  $published
+     * @param  array<string, mixed>  $draft
+     * @return array<string, mixed>
+     */
+    private function auditMediaSlot(ClientProfile $profile, array $slot, array $published, array $draft): array
+    {
+        $assetKey = (string) $slot['slot'];
+        $asset = ClientPageAsset::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', ClientPageKeys::HOME)
+            ->where('asset_key', $assetKey)
+            ->first();
+
+        $resolvedUrl = $this->assetService->urlFor($profile, ClientPageKeys::HOME, $assetKey);
+        $usingFallback = $resolvedUrl === null;
+        $storageExists = $asset !== null && $asset->path !== '' && Storage::disk('public')->exists($asset->path);
+        $publicHttpExpected = $asset !== null && $asset->path !== ''
+            ? $this->publicMirrorExists((string) $asset->path)
+            : false;
+
+        $draftPublishedMatch = 'not_applicable';
+        if ($asset !== null) {
+            $draftPublishedMatch = 'shared_asset_record';
+        }
+
+        $staleCacheRisk = $asset !== null
+            && $resolvedUrl !== null
+            && ! str_contains($resolvedUrl, 'v=');
+
+        $renderContractOk = $this->supportCtaRenderContractOk(
+            $published,
+            $assetKey,
+            $resolvedUrl,
+            $storageExists,
+            $publicHttpExpected,
+        );
+
+        $status = 'pass';
+        if ($assetKey === 'support_cta_background' && ! $renderContractOk) {
+            $status = 'fail';
+        } elseif ($asset === null) {
+            $status = 'pass';
+        } elseif ($asset->path === '') {
+            $status = 'fail';
+        } elseif (! $storageExists) {
+            $status = 'fail';
+        } elseif (! $publicHttpExpected) {
+            $status = 'fail';
+        }
+
+        return [
+            'slot' => $assetKey,
+            'section' => (string) $slot['section'],
+            'published_asset_found' => $asset !== null,
+            'published_asset_id_present' => $asset?->id !== null,
+            'resolved_url_present' => $resolvedUrl !== null,
+            'using_fallback' => $usingFallback,
+            'file_exists' => $storageExists,
+            'public_http_expected' => $publicHttpExpected,
+            'draft_published_match_status' => $draftPublishedMatch,
+            'stale_cache_risk' => $staleCacheRisk,
+            'draft_only' => false,
+            'render_contract_ok' => $renderContractOk,
+            'status' => $status,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $published
+     */
+    private function supportCtaRenderContractOk(
+        array $published,
+        string $assetKey,
+        ?string $resolvedUrl,
+        bool $storageExists,
+        bool $publicHttpExpected,
+    ): bool {
+        if ($assetKey !== 'support_cta_background') {
+            return true;
+        }
+
+        if (! $this->isTruthy(data_get($published, 'support_cta.enabled', '1'))) {
+            return true;
+        }
+
+        $mode = (string) data_get($published, 'support_cta.background_mode', 'gradient');
+        $expectsUploadedMedia = in_array($mode, ['uploaded', 'uploaded_overlay'], true);
+
+        if ($expectsUploadedMedia) {
+            return $resolvedUrl !== null && $storageExists && $publicHttpExpected;
+        }
+
+        return $resolvedUrl === null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $published
+     * @return list<array{slot: string, section: string}>
+     */
+    private function canonicalHomepageMediaSlots(array $published): array
+    {
+        $slots = [];
+        foreach (ClientPageMediaSchema::fieldsFor(ClientPageKeys::HOME) as $field) {
+            $slots[] = [
+                'slot' => (string) $field['key'],
+                'section' => (string) $field['section'],
+            ];
+        }
+
+        $items = is_array($published['destinations']['items'] ?? null) ? $published['destinations']['items'] : [];
+        foreach ($items as $index => $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
+            if ($assetKey === '') {
+                continue;
+            }
+            $slots[] = ['slot' => $assetKey, 'section' => 'destinations'];
+        }
+
+        $seen = [];
+        $unique = [];
+        foreach ($slots as $slot) {
+            if (isset($seen[$slot['slot']])) {
+                continue;
+            }
+            $seen[$slot['slot']] = true;
+            $unique[] = $slot;
+        }
+
+        return $unique;
+    }
+
+    private function publicMirrorExists(string $relativePath): bool
+    {
+        $relative = ltrim(str_replace('\\', '/', $relativePath), '/');
+        if ($relative === '') {
+            return false;
+        }
+
+        if (is_file(public_path('storage/'.$relative))) {
+            return true;
+        }
+
+        if (ClientPublicWebrootPath::usingConfiguredPath()) {
+            return ClientPublicWebrootPath::isFile('storage/'.$relative);
+        }
+
+        return Storage::disk('public')->exists($relative);
+    }
+
+    /**
+     * @param  array<string, mixed>  $slotReport
+     */
+    private function formatMediaSlotMessage(array $slotReport): string
+    {
+        $parts = [
+            'slot='.$slotReport['slot'],
+            'section='.$slotReport['section'],
+            'published_asset_found='.(($slotReport['published_asset_found'] ?? false) ? 'true' : 'false'),
+            'published_asset_id_present='.(($slotReport['published_asset_id_present'] ?? false) ? 'true' : 'false'),
+            'resolved_url_present='.(($slotReport['resolved_url_present'] ?? false) ? 'true' : 'false'),
+            'using_fallback='.(($slotReport['using_fallback'] ?? false) ? 'true' : 'false'),
+            'file_exists='.(($slotReport['file_exists'] ?? false) ? 'true' : 'false'),
+            'public_http_expected='.(($slotReport['public_http_expected'] ?? false) ? 'true' : 'false'),
+            'draft_published_match_status='.($slotReport['draft_published_match_status'] ?? 'unknown'),
+            'stale_cache_risk='.(($slotReport['stale_cache_risk'] ?? false) ? 'true' : 'false'),
+            'draft_only='.(($slotReport['draft_only'] ?? false) ? 'true' : 'false'),
+            'render_contract_ok='.(($slotReport['render_contract_ok'] ?? true) ? 'true' : 'false'),
+        ];
+
+        return implode(' ', $parts);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function draftContent(ClientProfile $profile): array
+    {
+        $row = ClientPageSetting::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', ClientPageKeys::HOME)
+            ->where('status', ClientPageSettingStatus::Draft)
+            ->first();
+
+        return is_array($row?->content_json) ? $row->content_json : [];
     }
 
     /**
@@ -209,14 +428,58 @@ final class JetpkHomepageContentAuditService
      */
     private function destinationImageUrl(ClientProfile $profile, array $item, int $index): ?string
     {
+        $candidates = [];
+
         $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
         if ($assetKey !== '') {
-            return $this->assetService->urlFor($profile, ClientPageKeys::HOME, $assetKey);
+            $candidates[] = $assetKey;
         }
 
-        $legacyKey = 'destination_'.($index + 1);
+        $itemId = trim((string) ($item['id'] ?? ''));
+        if ($itemId !== '') {
+            $candidates[] = JetpkHomepageAssetService::destinationAssetKey($itemId);
+            $candidates[] = 'destination_'.$itemId;
+        }
 
-        return $this->assetService->urlFor($profile, ClientPageKeys::HOME, $legacyKey);
+        $candidates[] = 'destination_'.($index + 1);
+
+        foreach (array_unique($candidates) as $key) {
+            $url = $this->assetService->urlFor($profile, ClientPageKeys::HOME, $key);
+            if ($url !== null) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $content
+     * @return list<array<string, mixed>>
+     */
+    private function auditHeroSizing(array $content): array
+    {
+        $checks = [];
+        $hero = is_array($content['hero'] ?? null) ? $content['hero'] : [];
+
+        foreach (JetpkHomepageHeroSizing::heroTextFieldKeys() as $field) {
+            if (! array_key_exists($field, $hero)) {
+                continue;
+            }
+            $normalized = JetpkHomepageHeroSizing::normalizeHeroTextPercent($hero[$field]);
+            if ((string) $hero[$field] !== (string) $normalized && $hero[$field] !== '') {
+                $checks[] = $this->warn('hero_size_clamped', "hero.{$field} clamped to {$normalized}%");
+            }
+        }
+
+        if (array_key_exists('search_ui_scale', $hero)) {
+            $normalized = JetpkHomepageHeroSizing::normalizeSearchUiPercent($hero['search_ui_scale']);
+            if ((string) $hero['search_ui_scale'] !== (string) $normalized && $hero['search_ui_scale'] !== '') {
+                $checks[] = $this->warn('search_ui_scale_clamped', "hero.search_ui_scale clamped to {$normalized}%");
+            }
+        }
+
+        return $checks;
     }
 
     /**

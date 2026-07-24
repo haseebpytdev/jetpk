@@ -4,6 +4,7 @@ namespace App\Services\Client;
 
 use App\Support\Client\ClientPublicWebrootPath;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Mirrors storage/public disk assets into Laravel public/storage and the configured live webroot.
@@ -20,7 +21,7 @@ final class ClientPageAssetPublicationService
             return [];
         }
 
-        $source = storage_path('app/public/'.$relative);
+        $source = Storage::disk('public')->path($relative);
         if (! is_file($source)) {
             return [];
         }

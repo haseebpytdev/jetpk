@@ -251,7 +251,6 @@
         'footerPresentation' => $footerPresentation,
         'partnerAgencyName' => $partnerAgencyName,
     ])
-    @include('layouts.partials.desktop-mobile-link')
     <script src="{{ $tn }}/js/jquery.js"></script>
     <script src="{{ $tn }}/js/bootstrap.min.js"></script>
     <script>

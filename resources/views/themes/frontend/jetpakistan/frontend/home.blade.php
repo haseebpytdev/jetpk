@@ -4,25 +4,62 @@
 @section('title', client_branding()->companyName().' — Book flights across Pakistan')
 @section('jp_body_class', 'jp-home')
 
+@push('head-meta')
+@php
+    $jpSeoResolver = app(\App\Services\Client\ClientPageContentResolver::class);
+    $jpIsPreview = $jpSeoResolver->isDraftPreview(\App\Support\Client\ClientPageKeys::HOME);
+    $jpBrandName = client_branding()->companyName();
+    $jpMetaDescription = trim((string) config('ota-brand.tagline', 'Book domestic and international flights with trusted travel support.'));
+    $jpCanonical = url('/');
+    $jpOgImage = client_branding()->logoUrl() ?: asset('themes/frontend/jetpakistan/images/og-default.png');
+@endphp
+<meta name="description" content="{{ $jpMetaDescription }}">
+@if (! $jpIsPreview)
+<link rel="canonical" href="{{ $jpCanonical }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ $jpBrandName }} — Book flights across Pakistan">
+<meta property="og:description" content="{{ $jpMetaDescription }}">
+<meta property="og:url" content="{{ $jpCanonical }}">
+<meta property="og:image" content="{{ $jpOgImage }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $jpBrandName }} — Book flights across Pakistan">
+<meta name="twitter:description" content="{{ $jpMetaDescription }}">
+@else
+<meta name="robots" content="noindex, nofollow">
+@endif
+@endpush
+
 @push('styles')
-@php $jpSearchAssetVersion = 35; @endphp
+@php $jpSearchAssetVersion = 37; @endphp
 <link rel="stylesheet" href="{{ rtrim(client_theme()->frontendThemeUrl(), '/') }}/css/jp-search.css?v={{ $jpSearchAssetVersion }}">
+@endpush
+
+@php
+    use App\Support\Client\JetpkHomepageSectionData;
+
+    $jpHomeSizing = app(JetpkHomepageSectionData::class);
+    $jpHeroLayoutCss = $jpHomeSizing->heroLayoutCssVariables();
+@endphp
+@push('head')
+<style>
+.jp-home {
+@foreach ($jpHeroLayoutCss as $cssVar => $cssValue)
+  {{ $cssVar }}: {{ $cssValue }};
+@endforeach
+}
+</style>
 @endpush
 
 @section('content')
   @include('themes.frontend.jetpakistan.sections.hero')
-  @include('themes.frontend.jetpakistan.sections.feature-board')
-  @include('themes.frontend.jetpakistan.sections.trust')
-  @include('themes.frontend.jetpakistan.sections.groups')
-  @include('themes.frontend.jetpakistan.sections.fares')
-  @include('themes.frontend.jetpakistan.sections.routes')
-  @include('themes.frontend.jetpakistan.sections.destinations')
-  @include('themes.frontend.jetpakistan.sections.why-book')
-  @include('themes.frontend.jetpakistan.sections.support-cta')
+  @foreach (($homepageOrderedSections ?? []) as $jpSection)
+    <!-- jp-section-start:{{ $jpSection['key'] }}:order-{{ $jpSection['order'] }} -->
+    @include('themes.frontend.jetpakistan.sections.'.$jpSection['view'])
+  @endforeach
 @endsection
 
 @push('theme-scripts')
-@php $jpSearchAssetVersion = 35; @endphp
+@php $jpSearchAssetVersion = 37; @endphp
 @php $jpThemeBase = rtrim(client_theme()->frontendThemeUrl(), '/'); @endphp
 <script src="{{ $jpThemeBase }}/js/reveal.js?v={{ $jpSearchAssetVersion }}" defer></script>
 <script src="{{ $jpThemeBase }}/js/effects.js?v={{ $jpSearchAssetVersion }}" defer></script>

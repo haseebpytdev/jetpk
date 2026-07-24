@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\LedgerTransaction;
 use App\Services\Finance\Ledger\LedgerQueryService;
 use App\Services\Finance\Ledger\LedgerReconciliationDashboardService;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -19,7 +18,6 @@ class AccountingLedgerController extends Controller
     public function __construct(
         protected LedgerQueryService $queryService,
         protected LedgerReconciliationDashboardService $dashboard,
-        protected MobileViewPreference $mobileViewPreference,
     ) {}
 
     public function index(Request $request): View
@@ -38,10 +36,6 @@ class AccountingLedgerController extends Controller
             'routePrefix' => 'agent.accounting.ledger',
         ]);
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.accounting.ledger.index', $viewData);
-        }
-
         return view(client_view('accounting.ledger.index', 'agent'), $viewData);
     }
 
@@ -58,10 +52,6 @@ class AccountingLedgerController extends Controller
             'pageTitle' => 'Accounting Ledger',
             'routePrefix' => 'agent.accounting.ledger',
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.accounting.ledger.show', $viewData);
-        }
 
         return view(client_view('accounting.ledger.show', 'agent'), $viewData);
     }

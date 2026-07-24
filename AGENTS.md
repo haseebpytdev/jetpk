@@ -64,13 +64,6 @@ When you edit `public/css/ota-public.css`, always increment `?v=` on the
 stylesheet link in `resources/views/layouts/frontend.blade.php` in the **same
 change** (e.g. `?v=83` → `?v=84`).
 
-## Mobile app cache bust
-When you edit `public/css/ota-mobile-app.css` or `public/js/ota-mobile-app.js`,
-always increment `?v=` on **both** asset links in
-`resources/views/layouts/mobile-app.blade.php` in the **same change**
-(e.g. `?v=8` → `?v=9`). CSS and JS share one integer version. See
-`.cursor/rules/mobile-app-cache-bust.mdc`.
-
 ## Sprint workflow
 Multi-sprint work follows `.cursor/rules/sprint-workflow.mdc`:
 

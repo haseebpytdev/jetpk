@@ -7,7 +7,6 @@ use App\Http\Requests\Agent\StoreAgentDepositRequest;
 use App\Models\AgentDepositRequest;
 use App\Services\Agents\AgentWalletService;
 use App\Support\Platform\PlatformModuleEnforcer;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,7 +16,6 @@ class AgentDepositController extends Controller
 {
     public function __construct(
         protected AgentWalletService $walletService,
-        protected MobileViewPreference $mobileViewPreference,
         protected PlatformModuleEnforcer $platformModuleEnforcer,
     ) {}
 
@@ -39,10 +37,6 @@ class AgentDepositController extends Controller
             'summary' => $summary,
         ];
 
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.deposits.index', $viewData);
-        }
-
         return view(client_view('deposits.index', 'agent'), $viewData);
     }
 
@@ -55,10 +49,6 @@ class AgentDepositController extends Controller
         $viewData = [
             'summary' => $this->walletService->summary($agent),
         ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.agent.deposits.create', $viewData);
-        }
 
         return view(client_view('deposits.create', 'agent'), $viewData);
     }

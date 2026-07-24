@@ -10,9 +10,10 @@ use App\Mail\AdminNewCustomerSignupMail;
 use App\Mail\CustomerWelcomeMail;
 use App\Models\Agency;
 use App\Models\User;
+use App\Services\Client\ClientPageRenderer;
 use App\Services\Client\ClientRedirectResolver;
+use App\Support\Client\ClientPageKeys;
 use App\Support\Auth\CheckoutReturnIntent;
-use App\Support\Ui\MobileViewPreference;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -27,8 +28,8 @@ use Throwable;
 class RegisteredUserController extends Controller
 {
     public function __construct(
-        protected MobileViewPreference $mobileViewPreference,
         protected ClientRedirectResolver $clientRedirectResolver,
+        protected ClientPageRenderer $pageRenderer,
     ) {}
 
     /**
@@ -43,13 +44,9 @@ class RegisteredUserController extends Controller
             $question = $this->storeSecurityChallenge($request);
         }
 
-        $viewData = [
+        $viewData = array_merge($this->pageRenderer->viewModel(ClientPageKeys::REGISTER), [
             'securityQuestion' => $question,
-        ];
-
-        if ($this->mobileViewPreference->shouldUseMobileShell($request)) {
-            return view('mobile.auth.register', $viewData);
-        }
+        ]);
 
         return view(client_view('auth.register', 'frontend'), $viewData);
     }
