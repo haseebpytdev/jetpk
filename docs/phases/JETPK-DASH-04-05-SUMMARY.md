@@ -153,12 +153,12 @@ All customer and supplier records are synthetic. No production PII, credentials,
 
 ## Final commit SHA
 
-_TBD — updated after push_
+`0b4b9f3` — feat(dashboard): add customers and suppliers management foundation
 
 ## Remote tracking branch
 
-_TBD — updated after push_
+`jetpk/phase/jetpk-dash-04-05-customers-suppliers-foundation`
 
 ## Final status
 
-**JETPK-DASH-04-05 COMPLETE** (pending commit SHA)
+**JETPK-DASH-04-05 COMPLETE**
