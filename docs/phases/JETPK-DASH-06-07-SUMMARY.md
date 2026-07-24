@@ -164,7 +164,7 @@ Prior baseline: 124 tests — all preserved (no removals, no skips).
 
 ## Exact changed-file count
 
-_PENDING — see git diff after commit_
+55 files changed, 8942 insertions(+), 30 deletions(-) under permitted paths.
 
 ## Known limitations
 
@@ -199,11 +199,11 @@ All agent, PNR/order, and ticket/document records are synthetic. No production P
 
 ## Final commit SHA
 
-_PENDING_
+`aebd261` — feat(dashboard): add agents tickets and PNR management foundation
 
 ## Optional documentation follow-up SHA
 
-_PENDING_
+See git log for `docs(dashboard): finalize DASH-06-07 phase summary` (recorded in final report).
 
 ## Remote tracking branch
 
