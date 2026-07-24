@@ -1,6 +1,6 @@
 # Mock Data Policy
 
-Phase: **JETPK-DASH-03** (extends DASH-02)
+Phase: **JETPK-DASH-04-05** (extends DASH-03)
 
 ## Rules
 
@@ -10,17 +10,22 @@ Phase: **JETPK-DASH-03** (extends DASH-02)
 4. UI actions that would mutate Laravel state show **preview-only** feedback (alerts / disabled controls) and never POST to `/admin` or `/staff`.
 5. Bookings list/detail in DASH-02 is **read-only** — no cancel, refund, ticket, or payment actions.
 6. Payments ledger in DASH-03 is **read-only** — no capture, refund, reconcile, or mark-paid actions.
+7. Customers and suppliers in DASH-04-05 are **read-only** — no edit, suspend, credential reveal, settlement, or live API actions.
 
 ## Fixture location
 
 - [`dashboard/mocks/overview-fixtures.ts`](../../dashboard/mocks/overview-fixtures.ts) — overview widgets
 - [`dashboard/mocks/booking-fixtures.ts`](../../dashboard/mocks/booking-fixtures.ts) — deterministic booking list (25 records)
 - [`dashboard/mocks/payment-fixtures.ts`](../../dashboard/mocks/payment-fixtures.ts) — deterministic payment/transaction ledger (35 records, linked to bookings)
-- Loaded via [`dashboard/services/overview-service.ts`](../../dashboard/services/overview-service.ts), [`dashboard/services/booking-service.ts`](../../dashboard/services/booking-service.ts), and [`dashboard/services/payment-service.ts`](../../dashboard/services/payment-service.ts)
+- [`dashboard/mocks/customer-fixtures.ts`](../../dashboard/mocks/customer-fixtures.ts) — deterministic customer/traveller records (30 records, linked to bookings/payments)
+- [`dashboard/mocks/supplier-fixtures.ts`](../../dashboard/mocks/supplier-fixtures.ts) — deterministic supplier records (22 records, linked to bookings/payments)
+- Loaded via [`dashboard/services/overview-service.ts`](../../dashboard/services/overview-service.ts), [`dashboard/services/booking-service.ts`](../../dashboard/services/booking-service.ts), [`dashboard/services/payment-service.ts`](../../dashboard/services/payment-service.ts), [`dashboard/services/customer-service.ts`](../../dashboard/services/customer-service.ts), and [`dashboard/services/supplier-service.ts`](../../dashboard/services/supplier-service.ts)
 
-## Recoverable error preview (bookings & payments)
+## Recoverable error preview (bookings, payments, customers & suppliers)
 
-Append `previewError=1` to the bookings or payments query string to simulate a recoverable service error (deterministic, for QA only).
+Append `previewError=1` to the bookings, payments, customers, or suppliers query string to simulate a recoverable service error (deterministic, for QA only).
+
+Append `previewLoading=1` to customers or suppliers to render the deterministic loading skeleton (QA only).
 
 ## Laravel-side flags (future wiring)
 

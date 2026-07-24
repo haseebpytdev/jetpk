@@ -130,3 +130,103 @@ export function ReconciliationStatusBadge({ status }: { status: ReconciliationSt
 export function TransactionTypeBadge({ type }: { type: TransactionType }) {
   return <StatusPill label={formatStatusLabel(type)} tone={transactionTypeStyles[type]} />;
 }
+
+const accountStatusStyles: Record<string, string> = {
+  Active: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  Inactive: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Suspended: "bg-red-50 text-red-800 ring-red-600/20",
+  "Review Required": "bg-amber-50 text-amber-900 ring-amber-600/20",
+};
+
+const verificationStatusStyles: Record<string, string> = {
+  Verified: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  Pending: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  Incomplete: "bg-orange-50 text-orange-900 ring-orange-600/20",
+  "Not Required": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+const operationalStatusStyles: Record<string, string> = {
+  Active: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  Inactive: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Maintenance: "bg-blue-50 text-blue-800 ring-blue-600/20",
+  Restricted: "bg-orange-50 text-orange-900 ring-orange-600/20",
+  "Review Required": "bg-amber-50 text-amber-900 ring-amber-600/20",
+};
+
+const integrationStatusStyles: Record<string, string> = {
+  Connected: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  "Mock Only": "bg-violet-50 text-violet-800 ring-violet-600/20",
+  Manual: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  Degraded: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  Disabled: "bg-red-50 text-red-800 ring-red-600/20",
+};
+
+const credentialStatusStyles: Record<string, string> = {
+  Configured: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  Missing: "bg-red-50 text-red-800 ring-red-600/20",
+  "Expiring Soon": "bg-amber-50 text-amber-900 ring-amber-600/20",
+  Invalid: "bg-red-50 text-red-800 ring-red-600/20",
+  "Not Required": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+const settlementStatusStyles: Record<string, string> = {
+  Current: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  Due: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  Overdue: "bg-red-50 text-red-800 ring-red-600/20",
+  "Reconciliation Required": "bg-orange-50 text-orange-900 ring-orange-600/20",
+  "Not Applicable": "bg-gray-100 text-gray-800 ring-gray-500/20",
+};
+
+export function AccountStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={accountStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function VerificationStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={verificationStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function OperationalStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={operationalStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function IntegrationStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={integrationStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function CredentialStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={credentialStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function SettlementStatusBadge({ status }: { status: string }) {
+  return (
+    <StatusPill
+      label={status}
+      tone={settlementStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}

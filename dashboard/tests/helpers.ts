@@ -8,7 +8,11 @@ export async function expectTableReady(table: Locator): Promise<void> {
 
 /** Wait until the filter panel and Apply control are interactive. */
 export async function expectFiltersReady(page: Page): Promise<void> {
-  const filters = page.getByTestId("payments-filters").or(page.getByTestId("bookings-filters"));
+  const filters = page
+    .getByTestId("payments-filters")
+    .or(page.getByTestId("bookings-filters"))
+    .or(page.getByTestId("customers-filters"))
+    .or(page.getByTestId("suppliers-filters"));
   await expect(filters).toBeVisible();
   const apply = page.getByRole("button", { name: "Apply filters" });
   await expect(apply).toBeEnabled();
