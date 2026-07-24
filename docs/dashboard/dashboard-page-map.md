@@ -1,6 +1,6 @@
 # Dashboard Page Map (Legacy → `/testdash`)
 
-Phase: **JETPK-DASH-04-05** (extends DASH-03)
+Phase: **JETPK-DASH-06-07** (extends DASH-04-05)
 
 ## Architecture authority
 
@@ -12,7 +12,7 @@ Phase: **JETPK-DASH-04-05** (extends DASH-03)
 
 | Status | Meaning |
 |--------|---------|
-| **live** | Implemented in Next (DASH-01 overview, DASH-02 bookings, DASH-03 payments, DASH-04 customers, DASH-05 suppliers) |
+| **live** | Implemented in Next (DASH-01 overview, DASH-02 bookings, DASH-03 payments, DASH-04 customers, DASH-05 suppliers, DASH-06 agents, DASH-07 PNRs/tickets) |
 | **planned** | Nav stub / placeholder page |
 | **n/a** | No Laravel equivalent; mock-only |
 
@@ -30,16 +30,12 @@ Phase: **JETPK-DASH-04-05** (extends DASH-03)
 | Dashboard | `admin.dashboard` | `/testdash` | **live** |
 | Bookings | `admin.bookings` / `staff.bookings.index` | `/testdash/bookings` | **live** |
 | Payments | `admin.payments` (future) | `/testdash/payments` | **live** |
+| PNRs | `admin.bookings` (PNR/order views) | `/testdash/pnrs` | **live** |
+| Tickets | `admin.bookings` (ticketing queue) | `/testdash/tickets` | **live** |
 | Flight search | `flights.search` | `/testdash/planned/flights` | planned (public search) |
 | Customers | `admin.customers.index` | `/testdash/customers` | **live** |
 | Suppliers | `admin.api-settings` | `/testdash/suppliers` | **live** |
-| Group ticketing | `admin.group-ticketing.index` | `/testdash/planned/group-ticketing` | planned |
-| Reports | `admin.reports` / `staff.reports.index` | `/testdash/planned/reports` | planned |
-| Accounting | `admin.ledger.index`, accounting.* | `/testdash/planned/accounting` | planned |
-| Markups | `admin.markups` | `/testdash/planned/markups` | planned |
-| Support tickets | `admin.support.tickets.index` | `/testdash/planned/support` | planned |
-| Users | `admin.users.index` | `/testdash/planned/users` | planned |
-| Agents | `admin.agents` | `/testdash/planned/agents` | planned |
+| Agents | `admin.agents` | `/testdash/agents` | **live** |
 | Page settings | `admin.page-settings.index` | `/testdash/planned/page-settings` | planned |
 | Settings | `admin.settings.index` | `/testdash/planned/settings` | planned |
 | Communications | `admin.settings.communications.index` | `/testdash/planned/communications` | planned |
@@ -50,7 +46,7 @@ Phase: **JETPK-DASH-04-05** (extends DASH-03)
 | Mockup label | Maps to | Testdash |
 |--------------|---------|----------|
 | Payments | Booking payment ledger + reconciliation (future Laravel) | `/testdash/payments` |
-| Tickets | `ticketing` queue + issue-ticket action | planned (bookings) |
+| Tickets | `ticketing` queue + issue-ticket action | `/testdash/tickets` (read-only preview) |
 | Cancellations | Cancellations queue + cancellation workflow | planned (bookings) |
 | Audit Logs | `admin.bookings.audit.export`, wallet-audit | planned (diagnostics) |
 | Notifications | Comms delivery log / failed notification KPIs | mock widget + planned comms |

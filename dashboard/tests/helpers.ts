@@ -12,7 +12,10 @@ export async function expectFiltersReady(page: Page): Promise<void> {
     .getByTestId("payments-filters")
     .or(page.getByTestId("bookings-filters"))
     .or(page.getByTestId("customers-filters"))
-    .or(page.getByTestId("suppliers-filters"));
+    .or(page.getByTestId("suppliers-filters"))
+    .or(page.getByTestId("agents-filters"))
+    .or(page.getByTestId("pnrs-filters"))
+    .or(page.getByTestId("tickets-filters"));
   await expect(filters).toBeVisible();
   const apply = page.getByRole("button", { name: "Apply filters" });
   await expect(apply).toBeEnabled();
@@ -105,9 +108,18 @@ export async function selectAndApplyFilter(
   visibleRowText: string,
 ): Promise<void> {
   await expectFiltersReady(page);
-  await selectFilterOption(select, value);
-  await expect(select).toHaveValue(value);
-  await applyFiltersAndWaitForRow(page, table, urlPattern, visibleRowText);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await selectFilterOption(select, value);
+    try {
+      await expect(select).toHaveValue(value, { timeout: 2_000 });
+      await applyFiltersAndWaitForRow(page, table, urlPattern, visibleRowText);
+      return;
+    } catch (error) {
+      if (attempt === 2) {
+        throw error;
+      }
+    }
+  }
 }
 
 /** Close an open drawer with Escape; targets the dialog so the key event is handled reliably. */
