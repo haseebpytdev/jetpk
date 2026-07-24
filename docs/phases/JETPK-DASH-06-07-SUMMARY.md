@@ -203,7 +203,7 @@ All agent, PNR/order, and ticket/document records are synthetic. No production P
 
 ## Optional documentation follow-up SHA
 
-See git log for `docs(dashboard): finalize DASH-06-07 phase summary` (recorded in final report).
+`0057a3e` — docs(dashboard): finalize DASH-06-07 phase summary
 
 ## Remote tracking branch
 
