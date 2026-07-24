@@ -34,7 +34,7 @@
     <td><x-dashboard.status-badge :status="$tx->status->value" /></td>
     <td class="text-end">
         @if ($showRoute)
-            <a href="{{ $showRoute }}" class="jp-btn jp-btn--sm jp-btn--ghost">View</a>
+            <a href="{{ $showRoute }}" class="btn btn-sm btn-outline-secondary">View</a>
         @endif
     </td>
 </tr>

@@ -28,7 +28,7 @@
 @section('content')
     <div class="card border-0 shadow-sm admin-support-tickets-table ota-admin-table">
         <div class="table-responsive ota-r-table-wrap">
-            <table class="table card-jp-table mb-0 ota-r-text-safe ota-admin-table" data-testid="admin-support-tickets-table">
+            <table class="table card-table table-vcenter mb-0 ota-r-text-safe ota-admin-table" data-testid="admin-support-tickets-table">
                 <thead class="table-light"><tr>
                     <th>#</th><th>Subject</th><th>From</th><th>Booking</th><th>Category</th><th>Status</th><th>Last reply</th><th class="text-end w-1">Action</th>
                 </tr></thead>
@@ -44,7 +44,7 @@
                         <td class="small text-secondary text-nowrap">{{ $ticket->last_reply_at?->diffForHumans() ?? '—' }}</td>
                         <td class="text-end">
                             <div class="ota-r-table-actions justify-content-end ota-admin-action-group">
-                                <a href="{{ route('admin.support.tickets.show', $ticket) }}" class="jp-btn jp-btn--sm jp-btn--outline">View</a>
+                                <a href="{{ route('admin.support.tickets.show', $ticket) }}" class="btn btn-sm btn-outline-primary">View</a>
                             </div>
                         </td>
                     </tr>

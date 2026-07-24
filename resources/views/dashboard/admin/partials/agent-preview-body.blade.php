@@ -1,4 +1,4 @@
-@php
+﻿@php
     /**
      * Agent preview body partial — used by both the full Agents page render
      * and the AJAX preview endpoint (admin.agents.preview). Keeping the markup
@@ -163,25 +163,25 @@
         <h6 class="preview-section-title"><i class="ti ti-bolt"></i> Actions</h6>
         <div class="preview-actions">
             @if ($hasUser)
-                <a href="{{ route('admin.users.show', ['user' => $userId]) }}" class="jp-btn jp-btn--primary" data-testid="ota-agents-action-open-profile">
+                <a href="{{ route('admin.users.show', ['user' => $userId]) }}" class="btn btn-primary" data-testid="ota-agents-action-open-profile">
                     <i class="ti ti-external-link"></i> Open full profile
                 </a>
             @else
-                <button type="button" class="jp-btn jp-btn--ghost btn-disabled" aria-disabled="true" title="No linked user account" data-testid="ota-agents-action-open-profile">
+                <button type="button" class="btn btn-outline-secondary btn-disabled" aria-disabled="true" title="No linked user account" data-testid="ota-agents-action-open-profile">
                     <i class="ti ti-external-link"></i> Open full profile
                     <span class="action-helper">No user</span>
                 </button>
             @endif
 
-            <a href="{{ route('admin.bookings', ['agent_customer' => 'agent', 'search' => $a['agent_code']]) }}" class="jp-btn jp-btn--ghost" data-testid="ota-agents-action-view-bookings">
+            <a href="{{ route('admin.bookings', ['agent_customer' => 'agent', 'search' => $a['agent_code']]) }}" class="btn btn-outline-secondary" data-testid="ota-agents-action-view-bookings">
                 <i class="ti ti-clipboard-list"></i> View bookings
             </a>
 
-            <a href="{{ route('admin.commissions.show', ['agent' => $a['id']]) }}#statement" class="jp-btn jp-btn--ghost" data-testid="ota-agents-action-generate-statement">
+            <a href="{{ route('admin.commissions.show', ['agent' => $a['id']]) }}#statement" class="btn btn-outline-secondary" data-testid="ota-agents-action-generate-statement">
                 <i class="ti ti-file-invoice"></i> Generate statement
             </a>
 
-            <a href="{{ route('admin.commissions.show', ['agent' => $a['id']]) }}#payouts" class="jp-btn jp-btn--ghost" data-testid="ota-agents-action-record-payment">
+            <a href="{{ route('admin.commissions.show', ['agent' => $a['id']]) }}#payouts" class="btn btn-outline-secondary" data-testid="ota-agents-action-record-payment">
                 <i class="ti ti-coin"></i> Record commission payment
             </a>
         </div>
@@ -189,10 +189,10 @@
         <details class="mt-3" data-testid="ota-agents-planned-features">
             <summary class="small text-secondary">Planned features (not available yet)</summary>
             <div class="preview-actions mt-2">
-                <button type="button" class="jp-btn jp-btn--sm jp-btn--ghost" disabled aria-disabled="true" title="Commission rate editing is coming soon — for now, edit on the agent record." data-testid="ota-agents-action-edit-commission">
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true" title="Commission rate editing is coming soon — for now, edit on the agent record." data-testid="ota-agents-action-edit-commission">
                     <i class="ti ti-edit"></i> Edit commission
                 </button>
-                <button type="button" class="jp-btn jp-btn--sm jp-btn--ghost" disabled aria-disabled="true" title="Deactivate from preview is not wired — use the user profile status section." data-testid="ota-agents-action-deactivate">
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true" title="Deactivate from preview is not wired — use the user profile status section." data-testid="ota-agents-action-deactivate">
                     <i class="ti ti-user-off"></i> Deactivate agent
                 </button>
             </div>

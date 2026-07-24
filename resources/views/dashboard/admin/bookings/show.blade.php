@@ -1,4 +1,4 @@
-@extends(client_layout('dashboard', 'admin'))
+﻿@extends(client_layout('dashboard', 'admin'))
 
 @php
     use App\Http\Controllers\Admin\BookingManagementController;
@@ -94,8 +94,8 @@
         .lifecycle-track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .passenger-grid { grid-template-columns: 1fr; }
         .booking-detail .card-body .btn,
-        .booking-detail .card-body .jp-control,
-        .booking-detail .card-body .jp-control {
+        .booking-detail .card-body .form-select,
+        .booking-detail .card-body .form-control {
             width: 100%;
         }
         .booking-detail .card-body .btn-sm {
@@ -110,10 +110,10 @@
 @endpush
 
 @section('page-header')
-    <div class="jp-between ota-admin-page-header">
+    <div class="row g-2 align-items-center ota-admin-page-header">
         <div class="col">
             <div class="page-pretitle"><a href="{{ $listUrl }}" class="text-secondary">Bookings</a></div>
-            <h1 class="jp-page-title">
+            <h1 class="page-title">
                 {{ $booking->booking_reference ?: 'Draft #'.$booking->id }}
                 @if($p === 'admin')
                     <x-dashboard.status-badge :status="$booking->status" class="ms-2" />

@@ -1,8 +1,8 @@
 <div class="jp-provider-panel {{ $isIati ? '' : 'jp-is-hidden' }}" data-provider-panel="iati">
     <div class="jp-form-grid jp-form-grid--2">
         <div class="jp-field">
-            <label class="jp-label" for="iati-environment">Environment</label>
-            <select id="iati-environment" name="environment" class="jp-control" required data-iati-environment @disabled(! $isIati)>
+            <label class="form-label" for="iati-environment">Environment</label>
+            <select id="iati-environment" name="environment" class="form-select" required data-iati-environment @disabled(! $isIati)>
                 <option value="sandbox" @selected($iatiEnv === 'sandbox')>Cert</option>
                 <option value="live" @selected($iatiEnv === 'live')>Live</option>
             </select>

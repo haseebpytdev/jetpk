@@ -1,4 +1,4 @@
-@php
+﻿@php
     /**
      * Agents table body partial — used by both the full Agents page render
      * and the AJAX filter endpoint (admin.agents.data). Keeps row markup in
@@ -34,7 +34,7 @@
             <strong class="d-block mb-1">No agents yet</strong>
             <p class="mb-3">Agents and partner agencies will appear here after approval or manual creation.</p>
             <a href="{{ route('admin.agent-applications.index') }}"
-               class="jp-btn jp-btn--sm jp-btn--primary"
+               class="btn btn-sm btn-primary"
                data-testid="ota-agents-empty-review-applications">
                 <i class="ti ti-clipboard-check me-1"></i> Review applications
             </a>

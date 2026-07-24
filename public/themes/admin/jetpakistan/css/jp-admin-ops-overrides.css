@@ -1,0 +1,27 @@
+/**
+ * JetPakistan admin: narrow bridge between jp-dash shell and OTA ops-console components.
+ * Load after ota-design-system.css and ota-admin-console.css.
+ */
+body.ota-admin-console.jp-dash-body .jp-dash__body .card,
+body.ota-admin-console.jp-dash-body .jp-dash__body .ota-dash-panel {
+  border-radius: var(--ota-radius-md, 12px);
+}
+
+body.ota-admin-console.jp-dash-body .jp-kpis {
+  margin-bottom: var(--sp-5, 20px);
+}
+
+body.ota-admin-console.jp-dash-body .jp-filterbar,
+body.ota-admin-console.jp-dash-body .jp-table-wrap {
+  background: var(--ota-surface-1, var(--bg-2));
+  border: 1px solid var(--ota-border-subtle, var(--line));
+  border-radius: var(--ota-radius-md, 12px);
+}
+
+body.ota-admin-console.jp-dash-body .jp-table {
+  width: 100%;
+}
+
+body.ota-admin-console.jp-dash-body .ota-dash-overview .ota-dash-action-grid {
+  gap: var(--sp-4, 16px);
+}

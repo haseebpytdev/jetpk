@@ -1,8 +1,8 @@
 <div class="jp-provider-panel {{ $isSabre ? '' : 'jp-is-hidden' }}" data-provider-panel="sabre">
     <div class="jp-form-grid jp-form-grid--2">
         <div class="jp-field">
-            <label class="jp-label" for="sabre-environment">Environment</label>
-            <select id="sabre-environment" name="environment" class="jp-control" required data-sabre-environment @disabled(! $isSabre)>
+            <label class="form-label" for="sabre-environment">Environment</label>
+            <select id="sabre-environment" name="environment" class="form-select" required data-sabre-environment @disabled(! $isSabre)>
                 <option value="sandbox" @selected($sabreEnv === 'sandbox')>CERT</option>
                 <option value="live" @selected($sabreEnv === 'live')>LIVE</option>
             </select>

@@ -5,7 +5,8 @@
     $dashProductName = BrandDisplayResolver::displayName($dbSettings, auth()->user());
     $brandCssVariables = $brandCssVariables ?? BrandDisplayResolver::cssVariables($dbSettings);
     $dashFaviconUrl = null;
-    $jpDashAssetVersion = 21; // JETPK-PHASE7: bumped — dashboard.css changed (grid overflow hardening)
+    $jpDashAssetVersion = 22;
+    $tabler = asset('vendor/tabler');
 
     if (uses_jetpk_company_branding()) {
         $dashProductName = jetpk_company_branding()->companyName();
@@ -101,6 +102,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ rtrim(client_theme()->frontendThemeUrl(), '/') }}/css/tokens.css?v={{ $jpDashAssetVersion }}">
     <link rel="stylesheet" href="{{ $jpAdminThemeBase }}/css/dashboard.css?v={{ $jpDashAssetVersion }}">
+    <link href="{{ $tabler }}/css/tabler.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ ui_asset('css/ota-design-system.css') }}">
+    <link rel="stylesheet" href="{{ ui_asset('css/ota-admin-console.css') }}">
+    <link rel="stylesheet" href="{{ $jpAdminThemeBase }}/css/jp-admin-ops-overrides.css?v={{ $jpDashAssetVersion }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.40.0/dist/tabler-icons.min.css">
     @php
         $paletteCss = app(\App\Services\Branding\ClientThemePaletteService::class)->cssVariablesForProfile();
         if ($paletteCss !== []) {
@@ -133,7 +139,7 @@
     </style>
     @stack('styles')
 </head>
-<body class="jp-dash-body" data-jp-dash-area="{{ $dashArea }}">
+<body class="jp-dash-body ota-admin-console ota-admin-compact ota-ops-console" data-jp-dash-area="{{ $dashArea }}">
 <div class="jp-dash">
     @include('themes.admin.jetpakistan.partials.sidebar', [
         'dashArea' => $dashArea,
