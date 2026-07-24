@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -22,6 +22,11 @@ type Props = {
 export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  const [drawerDismissed, setDrawerDismissed] = useState(false);
+
+  useEffect(() => {
+    setDrawerDismissed(false);
+  }, [query.selectedId]);
 
   const pushQuery = useCallback(
     (overrides: Partial<BookingsQuery>) => {
@@ -44,8 +49,11 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
   };
 
   const onCloseDrawer = useCallback(() => {
+    setDrawerDismissed(true);
     pushQuery({ selectedId: null });
   }, [pushQuery]);
+
+  const drawerOpen = !drawerDismissed && Boolean(query.selectedId && selectedBooking);
 
   const empty = result.total === 0;
 
@@ -80,10 +88,11 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
       )}
 
       <Drawer
-        open={Boolean(query.selectedId && selectedBooking)}
+        open={drawerOpen}
         onClose={onCloseDrawer}
         title={selectedBooking ? selectedBooking.id : "Booking details"}
         description={selectedBooking ? `PNR ${selectedBooking.pnr}` : undefined}
+        closeAriaLabel="Close booking details"
       >
         {selectedBooking ? <BookingDetailDrawerContent booking={selectedBooking} /> : null}
       </Drawer>

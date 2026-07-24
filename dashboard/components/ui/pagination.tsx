@@ -12,6 +12,7 @@ type Props = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   className?: string;
+  ariaLabel?: string;
 };
 
 export function Pagination({
@@ -22,6 +23,7 @@ export function Pagination({
   onPageChange,
   onPageSizeChange,
   className,
+  ariaLabel = "Pagination",
 }: Props) {
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
@@ -29,7 +31,7 @@ export function Pagination({
   return (
     <nav
       className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between", className)}
-      aria-label="Bookings pagination"
+      aria-label={ariaLabel}
     >
       <p className="text-sm text-jp-muted">
         Showing <span className="font-medium text-gray-900">{from}</span>–

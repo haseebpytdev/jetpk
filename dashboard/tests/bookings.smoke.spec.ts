@@ -1,4 +1,12 @@
 import { test, expect } from "@playwright/test";
+import {
+  applySearchAndWaitForRow,
+  closeDrawerWithButton,
+  closeDrawerWithEscape,
+  expectTableReady,
+  fillSearchInput,
+  selectAndApplyFilter,
+} from "./helpers";
 
 const viewports = [
   { width: 360, height: 740 },
@@ -52,9 +60,10 @@ test("search filters visible bookings", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
-  await page.locator("#bookings-search").fill("JP-BK-10001");
-  await page.getByRole("button", { name: "Apply filters" }).click();
-  await expect(table.getByText("JP-BK-10001")).toBeVisible();
+  await expectTableReady(table);
+  const search = page.locator("#bookings-search");
+  await fillSearchInput(search, "JP-BK-10001");
+  await applySearchAndWaitForRow(page, search, table, /q=JP-BK-10001/, "JP-BK-10001");
   await expect(table.getByText("JP-BK-10002")).not.toBeVisible();
 });
 
@@ -62,9 +71,9 @@ test("status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
-  await page.locator("#filter-status").selectOption("cancelled");
-  await page.getByRole("button", { name: "Apply filters" }).click();
-  await expect(table.getByText("JP-BK-10005")).toBeVisible();
+  await expectTableReady(table);
+  const status = page.locator("#filter-status");
+  await selectAndApplyFilter(page, table, status, "cancelled", /status=cancelled/, "JP-BK-10005");
   await expect(table.getByText("JP-BK-10001")).not.toBeVisible();
 });
 
@@ -74,13 +83,17 @@ test("clear filters restores results", async ({ page }) => {
   const table = page.getByTestId("bookings-table");
   await expect(table.getByText("JP-BK-10002")).not.toBeVisible();
   await page.getByRole("button", { name: "Clear all" }).click();
-  await expect(table.getByText("JP-BK-10002")).toBeVisible({ timeout: 15_000 });
+  await page.waitForURL((url) => !url.search.includes("q=JP-BK-10001"), { timeout: 15_000 });
+  await expectTableReady(table);
+  await expect(table.getByText("JP-BK-10002")).toBeVisible();
 });
 
 test("sorting changes displayed ordering", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings?sort=amount&direction=asc&pageSize=50", { waitUntil: "load" });
-  const firstRow = page.getByTestId("bookings-table").locator("tbody tr").first();
+  const table = page.getByTestId("bookings-table");
+  await expectTableReady(table);
+  const firstRow = table.locator("tbody tr").first();
   await expect(firstRow).toContainText("JP-BK-10005");
 });
 
@@ -88,17 +101,22 @@ test("pagination works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings?pageSize=10", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
+  await expectTableReady(table);
   await expect(page.getByText("1 /")).toBeVisible();
   await page.getByRole("button", { name: "Next page" }).click();
-  await expect(page).toHaveURL(/page=2/);
+  await page.waitForURL(/page=2/, { timeout: 15_000 });
+  await expectTableReady(table);
   await expect(table.getByText("JP-BK-10011")).toBeVisible();
 });
 
 test("page size change works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings", { waitUntil: "load" });
+  const table = page.getByTestId("bookings-table");
+  await expectTableReady(table);
   await page.getByLabel("Rows per page").selectOption("10");
-  await expect(page).toHaveURL(/pageSize=10/);
+  await page.waitForURL(/pageSize=10/, { timeout: 15_000 });
+  await expect(table.locator("tbody tr")).toHaveCount(10);
 });
 
 test("URL query state is preserved on reload", async ({ page }) => {
@@ -113,34 +131,34 @@ test("URL query state is preserved on reload", async ({ page }) => {
 test("booking drawer opens", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings", { waitUntil: "load" });
-  await page.getByTestId("bookings-table").getByRole("button", { name: "View" }).first().click();
+  const table = page.getByTestId("bookings-table");
+  await expectTableReady(table);
+  await table.getByRole("button", { name: "View" }).first().click();
+  await page.waitForURL(/id=JP-BK-/, { timeout: 15_000 });
   await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(page).toHaveURL(/id=JP-BK-/);
 });
 
 test("booking drawer displays selected booking", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings?id=JP-BK-10001", { waitUntil: "load" });
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(page.getByTestId("booking-drawer-content")).toContainText("JP-BK-10001");
-  await expect(page.getByTestId("booking-drawer-content")).toContainText("ABC123");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  const content = page.getByTestId("booking-drawer-content");
+  await expect(content).toContainText("JP-BK-10001");
+  await expect(content).toContainText("ABC123");
 });
 
 test("booking drawer closes through close control", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings?id=JP-BK-10001", { waitUntil: "load" });
-  await page.getByRole("button", { name: "Close booking details" }).click();
-  await expect(page.getByRole("dialog")).not.toBeVisible();
-  await expect(page).not.toHaveURL(/id=JP-BK-10001/);
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await closeDrawerWithButton(page, "Close booking details", /id=JP-BK-10001/);
 });
 
 test("booking drawer closes using Escape", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/bookings?id=JP-BK-10001", { waitUntil: "load" });
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).not.toBeVisible();
-  await expect(page).not.toHaveURL(/id=JP-BK-10001/);
+  await closeDrawerWithEscape(page, /id=JP-BK-10001/);
 });
 
 test("mobile booking cards render without horizontal viewport overflow", async ({ page }) => {
