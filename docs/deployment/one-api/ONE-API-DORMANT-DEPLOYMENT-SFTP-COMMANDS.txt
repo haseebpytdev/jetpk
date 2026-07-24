@@ -1,0 +1,142 @@
+# ONE API Dormant Deployment — Manual SFTP Commands
+# Source commit bae3e32 — dormant runtime package
+# Local package LCD: storage/app/deployment/one-api-dormant-bae3e32/package
+
+lcd C:/Users/khadi/ota-jetpk-oneapi-dormant-safety-fix/storage/app/deployment/one-api-dormant-bae3e32/package
+
+# Create remote directories
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Console/Commands
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Contracts/Suppliers/OneApi
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Data
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Enums
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Http/Controllers/Admin
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Http/Controllers/Frontend
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Providers
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Booking
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Communication
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/Adapters
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/BookingAdapters
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Ancillaries
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Authentication
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Booking
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Bundles
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Checkout
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Exceptions
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Money
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Normalization
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Pricing
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Reservation
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Search
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Support
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Transport
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Workflow
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/TicketingAdapters
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Bookings
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Support/OneApi
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Platform
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Suppliers
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/bootstrap
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/config
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/resources/views/dashboard/admin/api-settings
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/resources/views/dashboard/admin/api-settings/partials/supplier-panels
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/resources/views/frontend/booking/partials
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/resources/views/frontend/bookings/one-api
+mkdir /home/u654883295/domains/haseebasif.com/ota_app/routes
+mkdir /home/u654883295/domains/haseebasif.com/public_html/ota.haseebasif.com/js
+
+# Upload files
+put app/Console/Commands/OneApiAncillaryProbeCommand.php /home/u654883295/domains/haseebasif.com/ota_app/app/Console/Commands/OneApiAncillaryProbeCommand.php
+put app/Console/Commands/OneApiAuditCommand.php /home/u654883295/domains/haseebasif.com/ota_app/app/Console/Commands/OneApiAuditCommand.php
+put app/Console/Commands/OneApiConnectionAuditCommand.php /home/u654883295/domains/haseebasif.com/ota_app/app/Console/Commands/OneApiConnectionAuditCommand.php
+put app/Console/Commands/OneApiPriceProbeCommand.php /home/u654883295/domains/haseebasif.com/ota_app/app/Console/Commands/OneApiPriceProbeCommand.php
+put app/Console/Commands/OneApiReadReservationCommand.php /home/u654883295/domains/haseebasif.com/ota_app/app/Console/Commands/OneApiReadReservationCommand.php
+put app/Console/Commands/OneApiReconcileBookingCommand.php /home/u654883295/domains/haseebasif.com/ota_app/app/Console/Commands/OneApiReconcileBookingCommand.php
+put app/Console/Commands/OneApiSearchProbeCommand.php /home/u654883295/domains/haseebasif.com/ota_app/app/Console/Commands/OneApiSearchProbeCommand.php
+put app/Contracts/Suppliers/OneApi/OneApiSoapTransportContract.php /home/u654883295/domains/haseebasif.com/ota_app/app/Contracts/Suppliers/OneApi/OneApiSoapTransportContract.php
+put app/Data/SupplierHoldPaymentResultData.php /home/u654883295/domains/haseebasif.com/ota_app/app/Data/SupplierHoldPaymentResultData.php
+put app/Enums/SupplierProvider.php /home/u654883295/domains/haseebasif.com/ota_app/app/Enums/SupplierProvider.php
+put app/Http/Controllers/Admin/SupplierConnectionController.php /home/u654883295/domains/haseebasif.com/ota_app/app/Http/Controllers/Admin/SupplierConnectionController.php
+put app/Http/Controllers/Frontend/OneApiCheckoutController.php /home/u654883295/domains/haseebasif.com/ota_app/app/Http/Controllers/Frontend/OneApiCheckoutController.php
+put app/Providers/OneApiServiceProvider.php /home/u654883295/domains/haseebasif.com/ota_app/app/Providers/OneApiServiceProvider.php
+put app/Services/Booking/BookingProviderRouter.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Booking/BookingProviderRouter.php
+put app/Services/Communication/BookingCommunicationService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Communication/BookingCommunicationService.php
+put app/Services/Suppliers/Adapters/OneApiFlightSupplierAdapter.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/Adapters/OneApiFlightSupplierAdapter.php
+put app/Services/Suppliers/BookingAdapters/OneApiSupplierBookingAdapter.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/BookingAdapters/OneApiSupplierBookingAdapter.php
+put app/Services/Suppliers/OneApi/Ancillaries/OneApiAncillaryCatalogService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Ancillaries/OneApiAncillaryCatalogService.php
+put app/Services/Suppliers/OneApi/Ancillaries/OneApiBaggageResponseParser.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Ancillaries/OneApiBaggageResponseParser.php
+put app/Services/Suppliers/OneApi/Ancillaries/OneApiMealResponseParser.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Ancillaries/OneApiMealResponseParser.php
+put app/Services/Suppliers/OneApi/Ancillaries/OneApiSeatMapResponseParser.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Ancillaries/OneApiSeatMapResponseParser.php
+put app/Services/Suppliers/OneApi/Authentication/OneApiAuthService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Authentication/OneApiAuthService.php
+put app/Services/Suppliers/OneApi/Booking/OneApiBookingService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Booking/OneApiBookingService.php
+put app/Services/Suppliers/OneApi/Bundles/OneApiBundleParser.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Bundles/OneApiBundleParser.php
+put app/Services/Suppliers/OneApi/Bundles/OneApiBundleSelectionBuilder.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Bundles/OneApiBundleSelectionBuilder.php
+put app/Services/Suppliers/OneApi/Checkout/OneApiCheckoutCatalogPresenter.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Checkout/OneApiCheckoutCatalogPresenter.php
+put app/Services/Suppliers/OneApi/Checkout/OneApiCheckoutFlowService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Checkout/OneApiCheckoutFlowService.php
+put app/Services/Suppliers/OneApi/Checkout/OneApiCheckoutSelectionValidator.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Checkout/OneApiCheckoutSelectionValidator.php
+put app/Services/Suppliers/OneApi/Exceptions/OneApiAuthException.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Exceptions/OneApiAuthException.php
+put app/Services/Suppliers/OneApi/Exceptions/OneApiBookingAmbiguousException.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Exceptions/OneApiBookingAmbiguousException.php
+put app/Services/Suppliers/OneApi/Exceptions/OneApiException.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Exceptions/OneApiException.php
+put app/Services/Suppliers/OneApi/Exceptions/OneApiPriceChangedException.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Exceptions/OneApiPriceChangedException.php
+put app/Services/Suppliers/OneApi/Exceptions/OneApiTimeoutException.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Exceptions/OneApiTimeoutException.php
+put app/Services/Suppliers/OneApi/Exceptions/OneApiTransportException.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Exceptions/OneApiTransportException.php
+put app/Services/Suppliers/OneApi/Exceptions/OneApiValidationException.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Exceptions/OneApiValidationException.php
+put app/Services/Suppliers/OneApi/Money/OneApiMoney.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Money/OneApiMoney.php
+put app/Services/Suppliers/OneApi/Normalization/OneApiOfferTokenSigner.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Normalization/OneApiOfferTokenSigner.php
+put app/Services/Suppliers/OneApi/Normalization/OneApiResponseNormalizer.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Normalization/OneApiResponseNormalizer.php
+put app/Services/Suppliers/OneApi/OneApiBookingRouterService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/OneApiBookingRouterService.php
+put app/Services/Suppliers/OneApi/OneApiFareRevalidationService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/OneApiFareRevalidationService.php
+put app/Services/Suppliers/OneApi/OneApiSupplierHoldPaymentOrchestrator.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/OneApiSupplierHoldPaymentOrchestrator.php
+put app/Services/Suppliers/OneApi/Pricing/OneApiAirPriceRequestBuilder.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Pricing/OneApiAirPriceRequestBuilder.php
+put app/Services/Suppliers/OneApi/Pricing/OneApiAirPriceResponseParser.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Pricing/OneApiAirPriceResponseParser.php
+put app/Services/Suppliers/OneApi/Pricing/OneApiPricingService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Pricing/OneApiPricingService.php
+put app/Services/Suppliers/OneApi/Reservation/OneApiHoldPaymentService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Reservation/OneApiHoldPaymentService.php
+put app/Services/Suppliers/OneApi/Reservation/OneApiReadRequestBuilder.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Reservation/OneApiReadRequestBuilder.php
+put app/Services/Suppliers/OneApi/Reservation/OneApiReadResponseParser.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Reservation/OneApiReadResponseParser.php
+put app/Services/Suppliers/OneApi/Reservation/OneApiReservationReadOrchestrator.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Reservation/OneApiReservationReadOrchestrator.php
+put app/Services/Suppliers/OneApi/Reservation/OneApiRetrieveService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Reservation/OneApiRetrieveService.php
+put app/Services/Suppliers/OneApi/Search/OneApiFlightSearchService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Search/OneApiFlightSearchService.php
+put app/Services/Suppliers/OneApi/Search/OneApiSearchRequestBuilder.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Search/OneApiSearchRequestBuilder.php
+put app/Services/Suppliers/OneApi/Search/OneApiSearchResponseParser.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Search/OneApiSearchResponseParser.php
+put app/Services/Suppliers/OneApi/Support/OneApiBookResponseInterpreter.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Support/OneApiBookResponseInterpreter.php
+put app/Services/Suppliers/OneApi/Support/OneApiCarrierFilter.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Support/OneApiCarrierFilter.php
+put app/Services/Suppliers/OneApi/Support/OneApiConfigResolver.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Support/OneApiConfigResolver.php
+put app/Services/Suppliers/OneApi/Support/OneApiCorrelationContext.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Support/OneApiCorrelationContext.php
+put app/Services/Suppliers/OneApi/Support/OneApiReadinessService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Support/OneApiReadinessService.php
+put app/Services/Suppliers/OneApi/Transport/FixtureOneApiSoapTransport.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Transport/FixtureOneApiSoapTransport.php
+put app/Services/Suppliers/OneApi/Transport/LiveOneApiSoapTransport.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Transport/LiveOneApiSoapTransport.php
+put app/Services/Suppliers/OneApi/Transport/OneApiFixtureCaseCatalog.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Transport/OneApiFixtureCaseCatalog.php
+put app/Services/Suppliers/OneApi/Transport/OneApiRestClient.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Transport/OneApiRestClient.php
+put app/Services/Suppliers/OneApi/Transport/OneApiSoapSecurityBuilder.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Transport/OneApiSoapSecurityBuilder.php
+put app/Services/Suppliers/OneApi/Transport/OneApiSoapTransport.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Transport/OneApiSoapTransport.php
+put app/Services/Suppliers/OneApi/Transport/OneApiXmlParser.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Transport/OneApiXmlParser.php
+put app/Services/Suppliers/OneApi/Workflow/OneApiWorkflowContext.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Workflow/OneApiWorkflowContext.php
+put app/Services/Suppliers/OneApi/Workflow/OneApiWorkflowContextStore.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/OneApi/Workflow/OneApiWorkflowContextStore.php
+put app/Services/Suppliers/SupplierAdapterResolver.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/SupplierAdapterResolver.php
+put app/Services/Suppliers/SupplierBookingService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/SupplierBookingService.php
+put app/Services/Suppliers/SupplierConnectionService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/SupplierConnectionService.php
+put app/Services/Suppliers/TicketingAdapters/OneApiSupplierTicketingAdapter.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/TicketingAdapters/OneApiSupplierTicketingAdapter.php
+put app/Services/Suppliers/TicketingService.php /home/u654883295/domains/haseebasif.com/ota_app/app/Services/Suppliers/TicketingService.php
+put app/Support/Bookings/SupplierLifecycleContextResolver.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Bookings/SupplierLifecycleContextResolver.php
+put app/Support/OneApi/OneApiFixtureTransportScope.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/OneApi/OneApiFixtureTransportScope.php
+put app/Support/OneApi/OneApiMutationCommandGate.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/OneApi/OneApiMutationCommandGate.php
+put app/Support/OneApi/OneApiWorkflowContextGuard.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/OneApi/OneApiWorkflowContextGuard.php
+put app/Support/OneApi/OneApiWorkflowFingerprint.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/OneApi/OneApiWorkflowFingerprint.php
+put app/Support/Platform/PlatformModuleEnforcer.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Platform/PlatformModuleEnforcer.php
+put app/Support/Platform/PlatformModuleGate.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Platform/PlatformModuleGate.php
+put app/Support/Platform/PlatformModuleRegistry.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Platform/PlatformModuleRegistry.php
+put app/Support/Suppliers/OneApiSupplierConnectionNormalizer.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Suppliers/OneApiSupplierConnectionNormalizer.php
+put app/Support/Suppliers/SupplierLifecycleCapabilities.php /home/u654883295/domains/haseebasif.com/ota_app/app/Support/Suppliers/SupplierLifecycleCapabilities.php
+put bootstrap/app.php /home/u654883295/domains/haseebasif.com/ota_app/bootstrap/app.php
+put bootstrap/providers.php /home/u654883295/domains/haseebasif.com/ota_app/bootstrap/providers.php
+put config/logging.php /home/u654883295/domains/haseebasif.com/ota_app/config/logging.php
+put config/ota-suppliers.php /home/u654883295/domains/haseebasif.com/ota_app/config/ota-suppliers.php
+put config/supplier_credentials.php /home/u654883295/domains/haseebasif.com/ota_app/config/supplier_credentials.php
+put config/suppliers.php /home/u654883295/domains/haseebasif.com/ota_app/config/suppliers.php
+put public/js/ota-one-api-checkout.js /home/u654883295/domains/haseebasif.com/public_html/ota.haseebasif.com/js/ota-one-api-checkout.js
+put resources/views/dashboard/admin/api-settings/form.blade.php /home/u654883295/domains/haseebasif.com/ota_app/resources/views/dashboard/admin/api-settings/form.blade.php
+put resources/views/dashboard/admin/api-settings/partials/supplier-panels/one_api.blade.php /home/u654883295/domains/haseebasif.com/ota_app/resources/views/dashboard/admin/api-settings/partials/supplier-panels/one_api.blade.php
+put resources/views/frontend/booking/partials/passenger-details-body.blade.php /home/u654883295/domains/haseebasif.com/ota_app/resources/views/frontend/booking/partials/passenger-details-body.blade.php
+put resources/views/frontend/bookings/one-api/extras.blade.php /home/u654883295/domains/haseebasif.com/ota_app/resources/views/frontend/bookings/one-api/extras.blade.php
+put routes/web.php /home/u654883295/domains/haseebasif.com/ota_app/routes/web.php

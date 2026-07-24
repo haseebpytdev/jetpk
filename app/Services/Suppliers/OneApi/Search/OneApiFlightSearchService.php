@@ -7,10 +7,12 @@ use App\Data\FlightSearchResultData;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\OneApi\Exceptions\OneApiException;
+use App\Services\Suppliers\OneApi\Exceptions\OneApiValidationException;
 use App\Services\Suppliers\OneApi\Normalization\OneApiResponseNormalizer;
 use App\Services\Suppliers\OneApi\Support\OneApiConfigResolver;
 use App\Services\Suppliers\OneApi\Transport\OneApiRestClient;
 use App\Services\Suppliers\SupplierDiagnosticLogger;
+use App\Support\OneApi\OneApiFixtureTransportScope;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -29,8 +31,12 @@ class OneApiFlightSearchService
     {
         try {
             $config = $this->configResolver->resolve($connection);
-            if (! ($config['live_search_enabled'] ?? false) && ! app()->runningUnitTests()) {
-                // Fixture-only search in non-test runtime unless live flag set — probes use Http::fake in tests.
+            if (! ($config['live_search_enabled'] ?? false) && ! OneApiFixtureTransportScope::isEnabled()) {
+                throw new OneApiValidationException(
+                    'live_search_disabled',
+                    403,
+                    'One API live search is disabled for this connection.',
+                );
             }
 
             $payload = $this->requestBuilder->build($request, $connection);
