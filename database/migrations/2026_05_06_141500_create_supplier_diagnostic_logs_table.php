@@ -21,7 +21,7 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
 
-            $table->index(['supplier_connection_id', 'action', 'status']);
+            $table->index(['supplier_connection_id', 'action', 'status'], 'sdl_conn_action_status_idx');
             $table->index(['provider', 'action', 'created_at']);
         });
     }

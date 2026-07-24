@@ -7,62 +7,21 @@ namespace App\Support\Client;
  */
 final class ClientManagedPageReservedSlugs
 {
-    /** @var list<string> */
-    public const RESERVED = [
-        'admin',
-        'login',
-        'register',
-        'logout',
-        'flights',
-        'booking',
-        'checkout',
-        'payment',
-        'support',
-        'api',
-        'storage',
-        'assets',
-        'agent',
-        'dashboard',
-        'about-us',
-        'about',
-        'faq',
-        'terms',
-        'privacy',
-        'lookup-booking',
-        'groups',
-        'pages',
-        'contact',
-        'guest',
-        'payment',
-        'profile',
-        'airports',
-        'umrah-groups',
-        'request-demo',
-        'devcp',
-        'ui',
-    ];
-
     public static function isReserved(string $slug): bool
     {
-        $normalized = self::normalize($slug);
-
-        return $normalized === '' || in_array($normalized, self::RESERVED, true);
+        return ReservedPublicPath::isReservedFirstSegment($slug);
     }
 
     public static function normalize(string $slug): string
     {
-        $slug = strtolower(trim($slug));
-        $slug = preg_replace('/[^a-z0-9-]+/', '-', $slug) ?? '';
-        $slug = trim($slug, '-');
-
-        return $slug;
+        return ReservedPublicPath::normalizeSegment($slug);
     }
 
     public static function isValidFormat(string $slug): bool
     {
         $normalized = self::normalize($slug);
 
-        if ($normalized === '' || $normalized !== $slug) {
+        if ($normalized === '' || $normalized !== strtolower(trim($slug))) {
             return false;
         }
 

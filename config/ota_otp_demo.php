@@ -14,6 +14,12 @@ return [
 
     'fixed_enabled' => filter_var(env('OTP_DEMO_FIXED_ENABLED', false), FILTER_VALIDATE_BOOL),
 
+    /*
+    | Temporary production QA override.
+    | Must remain false unless explicitly enabled for controlled live testing.
+    */
+    'allow_production' => filter_var(env('OTP_DEMO_ALLOW_PRODUCTION', false), FILTER_VALIDATE_BOOL),
+
     'fixed_code' => (string) env('OTP_DEMO_FIXED_CODE', ''),
 
     'allowed_emails' => array_values(array_filter(array_map(

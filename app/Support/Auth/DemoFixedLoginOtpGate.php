@@ -14,11 +14,16 @@ final class DemoFixedLoginOtpGate
 {
     public static function isEnabled(): bool
     {
-        if (app()->environment('production')) {
-            return false;
-        }
+        $environmentAllowed = app()->environment(['local', 'testing'])
+            || (
+                app()->environment('production')
+                && filter_var(
+                    config('ota_otp_demo.allow_production', false),
+                    FILTER_VALIDATE_BOOL
+                )
+            );
 
-        if (! app()->environment(['local', 'testing'])) {
+        if (! $environmentAllowed) {
             return false;
         }
 

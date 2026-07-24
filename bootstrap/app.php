@@ -28,6 +28,7 @@ use App\Http\Middleware\ResolveClientUiVersion;
 use App\Http\Middleware\ResolvePreviewClient;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\UiVersionRoutePrefixMiddleware;
+use App\Services\Client\ClientCustomPageRouteRegistrar;
 use App\Services\Client\ClientMutatingFlowParityRouteRegistrar;
 use App\Services\Client\ClientPageSettingsParityRouteRegistrar;
 use App\Services\Client\ClientPrefixedRouteRegistrar;
@@ -156,6 +157,7 @@ return Application::configure(basePath: dirname(__DIR__))
             app(ClientPrefixedRouteRegistrar::class)->register();
             app(ClientPageSettingsParityRouteRegistrar::class)->register();
             app(ClientMutatingFlowParityRouteRegistrar::class)->register();
+            app(ClientCustomPageRouteRegistrar::class)->register();
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {

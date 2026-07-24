@@ -165,10 +165,6 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/{slug}', [ClientManagedPageController::class, 'customShow'])
-    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')
-    ->name('client.custom-page.show');
-
 if (app()->environment('testing')) {
     Route::get('/_test/ui-version', static function () {
         $resolver = app(UiVersionResolver::class);
