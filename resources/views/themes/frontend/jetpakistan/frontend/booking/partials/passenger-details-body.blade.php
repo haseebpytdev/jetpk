@@ -52,6 +52,6 @@
 </div>
 @once
 @push('theme-scripts')
-<script src="{{ rtrim(client_theme()->frontendThemeUrl(), '/') }}/js/booking.js?v={{ $jpCheckoutAssetVersion ?? 35 }}" defer></script>
+<script src="{{ rtrim(client_theme()->frontendThemeUrl(), '/') }}/js/booking.js?v={{ $jpCheckoutAssetVersion ?? 36 }}" defer></script>
 @endpush
 @endonce
