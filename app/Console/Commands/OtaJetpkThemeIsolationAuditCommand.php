@@ -60,9 +60,10 @@ class OtaJetpkThemeIsolationAuditCommand extends Command
 
     /** @var list<string> */
     private array $brokenEntityPatterns = [
-        '&nbsp;',
-        '&quot;',
-        '&#039;',
+        '&amp;nbsp;',
+        '&amp;quot;',
+        '&amp;#039;',
+        '&amp;amp;',
     ];
 
     /** @var list<string> */
@@ -71,6 +72,16 @@ class OtaJetpkThemeIsolationAuditCommand extends Command
         'themes/frontend/jetpakistan',
         '/themes/admin/jetpakistan/',
         'themes/admin/jetpakistan',
+    ];
+
+    /** @var list<string> */
+    private array $jetpkStylesheetBasenames = [
+        'tokens.css',
+        'theme.css',
+        'forms.css',
+        'jp-search.css',
+        'booking.css',
+        'portal.css',
     ];
 
     /** @var list<array{path:string,label:string,auth?:bool}> */
@@ -147,8 +158,8 @@ class OtaJetpkThemeIsolationAuditCommand extends Command
      */
     private function auditPath(string $clientSlug, string $path, string $label, int &$failCount, int &$warnCount, bool $authRequired = false): array
     {
-        $uri = '/'.$clientSlug.$path;
-        $response = $this->dispatchGet($uri);
+        $uri = $this->resolveAuditUri($clientSlug, $path);
+        $response = $this->dispatchGet($uri, ! $authRequired);
         $statusCode = $response->getStatusCode();
 
         if ($statusCode >= 500) {
@@ -223,12 +234,60 @@ class OtaJetpkThemeIsolationAuditCommand extends Command
         ];
     }
 
-    private function dispatchGet(string $uri): Response
+    private function resolveAuditUri(string $clientSlug, string $path): string
+    {
+        $normalized = '/'.ltrim($path, '/');
+        if ($normalized === '/home') {
+            $normalized = '/';
+        }
+
+        if (function_exists('ota_single_client_root_slug') && ota_single_client_root_slug() === $clientSlug) {
+            return $normalized;
+        }
+
+        if ($normalized === '/') {
+            return '/'.$clientSlug.'/home';
+        }
+
+        return '/'.$clientSlug.$normalized;
+    }
+
+    private function dispatchGet(string $uri, bool $followRedirects = true): Response
     {
         $kernel = app(Kernel::class);
         $request = Request::create($uri, 'GET');
 
-        return $kernel->handle($request);
+        if (! $followRedirects) {
+            return $kernel->handle($request);
+        }
+
+        $visited = [];
+
+        for ($hop = 0; $hop < 5; $hop++) {
+            $response = $kernel->handle($request);
+            $statusCode = $response->getStatusCode();
+            if (! in_array($statusCode, [301, 302, 303, 307, 308], true)) {
+                return $response;
+            }
+
+            $location = (string) $response->headers->get('Location', '');
+            if ($location === '') {
+                return $response;
+            }
+
+            $nextUri = str_starts_with($location, 'http')
+                ? (string) (parse_url($location, PHP_URL_PATH) ?? $location)
+                : $location;
+
+            if (isset($visited[$nextUri])) {
+                return $response;
+            }
+            $visited[$nextUri] = true;
+
+            $request = Request::create($location, 'GET');
+        }
+
+        return $response;
     }
 
     /**
@@ -260,6 +319,10 @@ class OtaJetpkThemeIsolationAuditCommand extends Command
             return false;
         }
 
+        if ($this->hasJetpkStylesheetReference($html)) {
+            return false;
+        }
+
         foreach ($this->jetpkAssetPrefixHints as $hint) {
             if (stripos($html, $hint) !== false) {
                 return false;
@@ -269,8 +332,43 @@ class OtaJetpkThemeIsolationAuditCommand extends Command
         return true;
     }
 
+    private function hasJetpkStylesheetReference(string $html): bool
+    {
+        if (! preg_match_all('#<link[^>]+rel=["\']stylesheet["\'][^>]*>#i', $html, $links)) {
+            return false;
+        }
+
+        foreach ($links[0] as $tag) {
+            if (! preg_match('#\bhref=["\']([^"\']+)#i', $tag, $hrefMatch)) {
+                continue;
+            }
+
+            $href = html_entity_decode($hrefMatch[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $path = strtolower((string) (parse_url($href, PHP_URL_PATH) ?? $href));
+            $path = strtok($path, '?') ?: $path;
+
+            if (! str_contains($path, '/themes/frontend/jetpakistan/') && ! str_contains($path, '/themes/admin/jetpakistan/')) {
+                continue;
+            }
+
+            foreach ($this->jetpkStylesheetBasenames as $basename) {
+                if (str_ends_with($path, '/'.$basename) || str_ends_with($path, $basename)) {
+                    return true;
+                }
+            }
+
+            if (str_contains($path, '/themes/frontend/jetpakistan/') || str_contains($path, '/themes/admin/jetpakistan/')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function countBrokenEntities(string $html): int
     {
+        $html = preg_replace('#<title[^>]*>.*?</title>#is', '', $html) ?? $html;
+
         $count = 0;
         foreach ($this->brokenEntityPatterns as $pattern) {
             $count += substr_count($html, $pattern);
