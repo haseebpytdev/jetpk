@@ -224,6 +224,19 @@ class FlightController extends Controller
             ], 410);
         }
 
+        if ($this->searchPayloadBlocksSelection($payload)) {
+            return response()->json([
+                'success' => false,
+                'status' => 'offer_stale',
+                'message' => $this->sabreOfferFreshness->customerSafeMessage('offer_stale_before_checkout'),
+                'search_freshness' => $this->sabreOfferFreshness->sanitizeForCustomerApi(
+                    is_array($payload['offer_freshness'] ?? null)
+                        ? $payload['offer_freshness']
+                        : $this->sabreOfferFreshness->buildSearchFreshnessMeta($payload),
+                ),
+            ], 410);
+        }
+
         $offer = $this->searchStore->findOffer($searchId, $offerId);
         if ($offer === null) {
             return response()->json([
@@ -1004,6 +1017,9 @@ class FlightController extends Controller
         $conversionStatus = (string) ($offer['conversion_status'] ?? 'same_currency');
         $hasPkrFare = $this->offerHasConfirmedPkrFare($offer);
         $canSelect = $this->offerIsCustomerBookable($offer, $crit);
+        if ($this->searchPayloadBlocksSelection($payload)) {
+            $canSelect = false;
+        }
         $isMulticityInquiry = PublicMulticityInquiryPolicy::blocksAutomaticCheckout($crit, $offer);
         if ($isMulticityInquiry) {
             $canSelect = false;
@@ -1025,11 +1041,13 @@ class FlightController extends Controller
 
         $disabledReason = $canSelect
             ? null
-            : (! $hasPkrFare
+            : ($this->searchPayloadBlocksSelection($payload)
+                ? $this->sabreOfferFreshness->customerSafeMessage('offer_stale_before_checkout')
+                : (! $hasPkrFare
                 ? ($conversionStatus === 'conversion_missing'
                     ? 'PKR fare not confirmed for this option.'
                     : 'PKR fare not available online for this option.')
-                : FlightDeparturePolicy::SAME_DAY_LEAD_MESSAGE);
+                : FlightDeparturePolicy::SAME_DAY_LEAD_MESSAGE));
 
         $providerLc = strtolower((string) ($offer['supplier_provider'] ?? ''));
         if ($providerLc === 'sabre' && ! $hasConfirmedPkrQuote) {
@@ -1477,6 +1495,18 @@ class FlightController extends Controller
         }
 
         return $this->departurePolicy->offerMeetsLeadTimeForBooking($offer, $criteria);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function searchPayloadBlocksSelection(array $payload): bool
+    {
+        $freshness = is_array($payload['offer_freshness'] ?? null)
+            ? $payload['offer_freshness']
+            : $this->sabreOfferFreshness->buildSearchFreshnessMeta($payload);
+
+        return (string) ($freshness['offer_freshness_status'] ?? '') === SabreOfferFreshness::STATUS_STALE;
     }
 
     /**
