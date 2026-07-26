@@ -3,6 +3,7 @@
 namespace App\Services\FlightSearch;
 
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
+use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use App\Support\FlightSearch\ItineraryFareConsolidator;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use Illuminate\Support\Facades\Cache;
@@ -45,6 +46,16 @@ class FlightSearchResultStore
         ];
         if ($meta !== []) {
             $payload = array_merge($payload, $meta);
+        }
+
+        $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
+            $criteria,
+            is_array($meta['criteria_cache_context'] ?? null) ? $meta['criteria_cache_context'] : [],
+        );
+        $payload['criteria_cache_fingerprint'] = $cacheDescribe['fingerprint'];
+        $payload['criteria_cache_summary'] = $cacheDescribe['summary'];
+        if (is_array($meta['criteria_cache'] ?? null)) {
+            $payload['criteria_cache'] = $meta['criteria_cache'];
         }
 
         $splitService = app(ReturnSplitComboService::class);

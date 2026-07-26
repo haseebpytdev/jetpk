@@ -2082,6 +2082,13 @@ class FlightController extends Controller
         $searchId = $this->searchStore->store($criteria, $storedOffers, $warnings, [
             'mixed_carrier_filter' => $mixedCarrierFilter,
             'multicity_diagnostics' => $multicityDiagnostics,
+            'criteria_cache' => is_array($result['criteria_cache'] ?? null) ? $result['criteria_cache'] : null,
+            'criteria_cache_context' => [
+                'client_slug' => current_client_slug(),
+                'agency_id' => $agency?->id,
+                'source_channel' => $channel['source_channel'],
+                'agent_id' => $channel['agent_id'],
+            ],
         ]);
         $this->captureMarketingSearchSnapshot($agency, $searchId, $criteria, $storedOffers, $warnings);
         if (function_exists('session')) {

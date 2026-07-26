@@ -27,6 +27,10 @@ return [
             'seats_left' => 6,
         ],
     ],
+    'search_result_cache' => [
+        'enabled' => filter_var(env('OTA_FLIGHT_SEARCH_RESULT_CACHE_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'ttl_seconds' => max(60, (int) env('OTA_FLIGHT_SEARCH_RESULT_CACHE_TTL', 300)),
+    ],
     'nearby_date_strip' => [
         'enabled' => env('OTA_NEARBY_DATE_STRIP_ENABLED', true),
         'radius_days' => 3,

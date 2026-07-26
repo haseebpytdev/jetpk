@@ -3,6 +3,7 @@
 namespace App\Services\FlightSearch;
 
 use App\Models\Agency;
+use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +16,7 @@ class NearbyDateFareStripService
 {
     public function __construct(
         private readonly FlightSearchService $flightSearch,
+        private readonly FlightSearchCriteriaCacheKey $criteriaCacheKey,
     ) {}
 
     /**
@@ -55,18 +57,16 @@ class NearbyDateFareStripService
 
         $radius = max(1, min((int) config('ota-flights.nearby_date_strip.radius_days', 3), 7));
         $ttl = max(60, (int) config('ota-flights.nearby_date_strip.cache_ttl_seconds', 900));
-        $cacheKey = 'nearby_date_strip:'.md5(json_encode([
-            'origin' => strtoupper(trim((string) ($criteria['origin'] ?? ''))),
-            'destination' => strtoupper(trim((string) ($criteria['destination'] ?? ''))),
-            'depart' => $selected->toDateString(),
-            'return' => trim((string) ($criteria['return_date'] ?? '')),
-            'trip' => $tripType,
-            'adults' => (int) ($criteria['adults'] ?? 1),
-            'children' => (int) ($criteria['children'] ?? 0),
-            'infants' => (int) ($criteria['infants'] ?? 0),
-            'cabin' => (string) ($criteria['cabin'] ?? 'economy'),
-            'radius' => $radius,
-        ]));
+        $cacheKey = $this->criteriaCacheKey->buildNearbyStripKey(
+            $criteria,
+            $agency,
+            $selected->toDateString(),
+            $radius,
+            [
+                'client_slug' => current_client_slug(),
+                'source_channel' => (string) ($criteria['source_channel'] ?? 'public_guest'),
+            ],
+        );
 
         $cached = Cache::get($cacheKey);
         if (is_array($cached)) {

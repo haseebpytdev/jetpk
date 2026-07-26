@@ -11,6 +11,7 @@ use App\Services\Pricing\PricingRuleService;
 use App\Services\Suppliers\SupplierAdapterResolver;
 use App\Services\TravelData\AirportProximityService;
 use App\Support\FlightSearch\DirectFlightsOfferFilter;
+use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use App\Support\FlightSearch\PublicSabreMulticitySearchPostProcessor;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
@@ -36,6 +37,8 @@ class FlightSearchService
         protected PublicSabreMulticitySearchPostProcessor $multicitySearchPostProcessor,
         protected AirportProximityService $airportProximity,
         protected DirectFlightsOfferFilter $directFlightsOfferFilter,
+        protected FlightSearchSupplierResultCache $supplierResultCache,
+        protected FlightSearchCriteriaCacheKey $criteriaCacheKey,
     ) {}
 
     /**
@@ -94,6 +97,31 @@ class FlightSearchService
             return [
                 'offers' => [],
                 'warnings' => [],
+            ];
+        }
+
+        $cacheContext = $this->buildCriteriaCacheContext($agency, $sourceChannel, $agentId, $connections);
+        $cachedResult = $this->supplierResultCache->get($criteria, $cacheContext);
+        if ($cachedResult !== null) {
+            Log::info('flight_search.pipeline', [
+                'stage' => 'supplier_result_cache_hit',
+                'search_id' => (string) ($criteria['search_id'] ?? ''),
+                'criteria_fingerprint' => $this->supplierResultCache->describe($criteria, $cacheContext)['fingerprint'],
+            ]);
+
+            return [
+                'offers' => $cachedResult['offers'],
+                'warnings' => $cachedResult['warnings'],
+                'mixed_carrier_filter' => is_array($cachedResult['meta']['mixed_carrier_filter'] ?? null)
+                    ? $cachedResult['meta']['mixed_carrier_filter']
+                    : [],
+                'multicity_diagnostics' => is_array($cachedResult['meta']['multicity_diagnostics'] ?? null)
+                    ? $cachedResult['meta']['multicity_diagnostics']
+                    : [],
+                'criteria_cache' => [
+                    'hit' => true,
+                    'fingerprint' => $this->supplierResultCache->describe($criteria, $cacheContext)['fingerprint'],
+                ],
             ];
         }
 
@@ -197,11 +225,27 @@ class FlightSearchService
             'final_offer_count' => count($offers),
         ]);
 
+        $criteriaCacheDescribe = $this->supplierResultCache->describe($criteria, $cacheContext);
+        $this->supplierResultCache->put(
+            $criteria,
+            $cacheContext,
+            $offers,
+            array_values(array_unique($warnings)),
+            [
+                'mixed_carrier_filter' => $mixedCarrierFilterDiagnostics,
+                'multicity_diagnostics' => $multicityDiagnostics,
+            ],
+        );
+
         return [
             'offers' => $offers,
             'warnings' => array_values(array_unique($warnings)),
             'mixed_carrier_filter' => $mixedCarrierFilterDiagnostics,
             'multicity_diagnostics' => $multicityDiagnostics,
+            'criteria_cache' => [
+                'hit' => false,
+                'fingerprint' => $criteriaCacheDescribe['fingerprint'],
+            ],
         ];
     }
 
@@ -539,6 +583,41 @@ class FlightSearchService
         return $moduleKey === null
             ? 'provider_module_unknown'
             : 'provider_module_disabled:'.$moduleKey;
+    }
+
+    /**
+     * @param  Collection<int, SupplierConnection>  $connections
+     * @return array<string, mixed>
+     */
+    protected function buildCriteriaCacheContext(
+        ?Agency $agency,
+        string $sourceChannel,
+        ?int $agentId,
+        Collection $connections,
+    ): array {
+        $scope = [];
+        foreach ($connections as $connection) {
+            if ($this->shouldSkipSupplierConnection($connection)) {
+                continue;
+            }
+            $lanes = $connection->provider === SupplierProvider::Sabre
+                ? $this->sabreChannelGateResolver->selectedSabreLanes($connection)
+                : [];
+            $scope[] = [
+                'connection_id' => $connection->id,
+                'provider' => $connection->provider->value,
+                'lanes' => $lanes,
+            ];
+        }
+
+        return [
+            'client_slug' => current_client_slug(),
+            'agency_id' => $agency?->id,
+            'source_channel' => $sourceChannel,
+            'agent_id' => $agentId,
+            'app_environment' => app()->environment(),
+            'supplier_connection_scope' => $scope,
+        ];
     }
 
     /**
