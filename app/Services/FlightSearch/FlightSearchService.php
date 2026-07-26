@@ -21,6 +21,7 @@ use App\Support\Pricing\PublicCustomerPricing;
 use App\Support\Suppliers\SabreChannelGateResolver;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use App\Support\Suppliers\SupplierSourcePresenter;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -131,17 +132,19 @@ class FlightSearchService
 
         $this->logSupplierProviderSelection($criteria, $connections);
 
-        foreach ($this->expandOriginVariants($criteria) as $variantCriteria) {
-            $variantResult = $this->collectOffersFromConnections(
-                $connections,
-                $variantCriteria,
-                $agency,
-                $sourceChannel,
-                $agentId,
-            );
-            $offers = [...$offers, ...$variantResult['offers']];
-            $warnings = [...$warnings, ...$variantResult['warnings']];
-            $supplierCallSummaries = [...$supplierCallSummaries, ...$variantResult['supplier_call_summaries']];
+        foreach ($this->expandDepartDateVariants($criteria) as $dateCriteria) {
+            foreach ($this->expandOriginVariants($dateCriteria) as $variantCriteria) {
+                $variantResult = $this->collectOffersFromConnections(
+                    $connections,
+                    $variantCriteria,
+                    $agency,
+                    $sourceChannel,
+                    $agentId,
+                );
+                $offers = [...$offers, ...$variantResult['offers']];
+                $warnings = [...$warnings, ...$variantResult['warnings']];
+                $supplierCallSummaries = [...$supplierCallSummaries, ...$variantResult['supplier_call_summaries']];
+            }
         }
 
         if ($this->directFlightsOfferFilter->isEnabled($criteria)) {
@@ -781,6 +784,56 @@ class FlightSearchService
         ]);
 
         return $variants;
+    }
+
+    /**
+     * ±1 day flexible outbound departure (return date unchanged for round-trip).
+     *
+     * @param  array<string, mixed>  $criteria
+     * @return list<array<string, mixed>>
+     */
+    protected function expandDepartDateVariants(array $criteria): array
+    {
+        if (! filter_var($criteria['flexible_dates'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+            return [$criteria];
+        }
+
+        if ((string) ($criteria['trip_type'] ?? '') === 'multi_city') {
+            return [$criteria];
+        }
+
+        $depart = trim((string) ($criteria['depart_date'] ?? $criteria['departure_date'] ?? ''));
+        if ($depart === '') {
+            return [$criteria];
+        }
+
+        try {
+            $anchor = Carbon::parse($depart)->startOfDay();
+        } catch (\Throwable) {
+            return [$criteria];
+        }
+
+        $today = now()->startOfDay();
+        $variants = [];
+        foreach ([-1, 0, 1] as $offset) {
+            $candidate = $anchor->copy()->addDays($offset);
+            if ($candidate->lt($today)) {
+                continue;
+            }
+            $variant = $criteria;
+            $variant['depart_date'] = $candidate->toDateString();
+            $variant['flexible_dates_anchor'] = $anchor->toDateString();
+            $variants[] = $variant;
+        }
+
+        Log::info('flight_search.pipeline', [
+            'stage' => 'flexible_departure_date_expansion',
+            'search_id' => (string) ($criteria['search_id'] ?? ''),
+            'anchor_depart_date' => $anchor->toDateString(),
+            'variant_count' => count($variants),
+        ]);
+
+        return $variants !== [] ? $variants : [$criteria];
     }
 
     /**

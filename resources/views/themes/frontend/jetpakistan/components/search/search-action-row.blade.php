@@ -1,6 +1,7 @@
 @php
     $directChecked = old('stops', ($defaultStopsDirect ?? false) ? 'direct' : '') === 'direct';
     $nearbyChecked = old('include_nearby', ($defaultIncludeNearby ?? false) ? '1' : '') === '1';
+    $flexibleChecked = old('flexible_dates', ($defaultFlexibleDates ?? false) ? '1' : '') === '1';
 @endphp
 
 <div class="jp-search-action-row search-bottom" data-jp-search-action-row>
@@ -14,6 +15,11 @@
             <span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></span>
             <input type="checkbox" name="include_nearby" value="1" @checked($nearbyChecked) hidden>
             <span>Include nearby airports</span>
+        </label>
+        <label class="check @if($flexibleChecked) on @endif" data-jp-flexible-dates-filter>
+            <span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></span>
+            <input type="checkbox" name="flexible_dates" value="1" @checked($flexibleChecked) hidden>
+            <span>Flexible dates &plusmn;1 day</span>
         </label>
     </div>
     <div class="jp-chrome-slot jp-submit-slot-action" data-jp-submit-slot-action></div>

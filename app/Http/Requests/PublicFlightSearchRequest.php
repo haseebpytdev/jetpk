@@ -177,6 +177,7 @@ class PublicFlightSearchRequest extends FormRequest
 
         $directOnly = $this->input('stops') === 'direct';
         $nearbyAirports = $this->input('include_nearby') === '1';
+        $flexibleDates = $this->input('flexible_dates') === '1';
 
         $base = [
             'trip_type' => $trip,
@@ -186,6 +187,7 @@ class PublicFlightSearchRequest extends FormRequest
             'infants' => $infants,
             'direct_only' => $directOnly,
             'nearby_airports' => $nearbyAirports,
+            'flexible_dates' => $flexibleDates,
         ];
 
         if ($trip === 'multi_city') {
