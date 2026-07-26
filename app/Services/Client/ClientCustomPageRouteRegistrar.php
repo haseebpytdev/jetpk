@@ -3,7 +3,7 @@
 namespace App\Services\Client;
 
 use App\Http\Controllers\Frontend\ClientManagedPageController;
-use App\Support\Client\ReservedPublicPath;
+use App\Support\Client\ClientManagedPageReservedSlugs;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -16,14 +16,14 @@ final class ClientCustomPageRouteRegistrar
         if (Route::has('client.custom-page.show')) {
             $existing = Route::getRoutes()->getByName('client.custom-page.show');
             if ($existing !== null) {
-                $existing->where('slug', ReservedPublicPath::customPageSlugConstraint());
+                $existing->where('slug', ClientManagedPageReservedSlugs::routeSlugConstraint());
             }
 
             return;
         }
 
         Route::get('/{slug}', [ClientManagedPageController::class, 'customShow'])
-            ->where('slug', ReservedPublicPath::customPageSlugConstraint())
+            ->where('slug', ClientManagedPageReservedSlugs::routeSlugConstraint())
             ->name('client.custom-page.show');
     }
 }

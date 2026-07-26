@@ -1,0 +1,4 @@
+# Phase 17E/17F fixture files (embedded in support/catalog; no standalone fixture directory)
+tests/Support/Sabre/SabrePublicCreateStructuralScenarioCatalog.php
+tests/Support/Sabre/SabrePublicCreatePhase17ETestSupport.php
+tests/Feature/SabreBookingReviewSubmitTest.php#sabreB74GdsStrategyEligibleMeta

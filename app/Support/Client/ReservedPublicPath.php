@@ -102,7 +102,7 @@ final class ReservedPublicPath
             self::FIRST_SEGMENT,
         ));
 
-        return '(?!^(?:'.$alternation.')$)[a-z0-9]+(?:-[a-z0-9]+)*';
+        return '(?!(?:'.$alternation.')$)[a-z0-9]+(?:-[a-z0-9]+)*';
     }
 
     /**

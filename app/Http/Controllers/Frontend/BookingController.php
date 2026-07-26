@@ -56,6 +56,7 @@ use App\Support\Bookings\SabreCertifiedRouteSelector;
 use App\Support\Bookings\SabreHostRejectionFingerprintMatcher;
 use App\Support\Bookings\SabreOfferRefreshAcceptance;
 use App\Support\Bookings\SabreOperationalPnrReadiness;
+use App\Support\Bookings\SabrePnrFailureClassifier;
 use App\Support\Bookings\SabrePreCheckoutKnownFailureSoftBlock;
 use App\Support\Bookings\SabrePreCheckoutSellabilityDryRun;
 use App\Support\Bookings\SabrePreCheckoutSellabilityPresentation;
@@ -1422,6 +1423,11 @@ class BookingController extends Controller
                             $sabreCheckoutNotice = (string) __('Booking request saved. Passenger Records live create was not attempted for this itinerary; staff must complete supplier booking manually. No PNR or ticket has been issued.');
                         } elseif ($code === 'sabre_passenger_records_stale_shop_segment' && $statusOut === 'needs_review') {
                             $sabreCheckoutNotice = (string) __('This flight is no longer available at the selected schedule/class. Please search again or contact staff.');
+                        } elseif (SabrePnrFailureClassifier::isPostDispatchAmbiguousTransportFailure(
+                            $code,
+                            ['live_call_attempted' => ($outcome['live_call_attempted'] ?? false) === true],
+                        ) && $statusOut === 'needs_review') {
+                            $sabreCheckoutNotice = (string) __('Booking request received. Supplier confirmation is pending verification. No ticket has been issued.');
                         } elseif ($code === SabreOfferRefreshAcceptance::ERROR_CODE_REQUIRES_ACCEPTANCE) {
                             return $this->clientRedirect()->route('booking.review')
                                 ->with('show_offer_refresh_modal', true);
@@ -3603,6 +3609,32 @@ class BookingController extends Controller
             }
 
             return null;
+        }
+
+        if ($latestPublicAttempt->status === 'needs_review'
+            && SabrePnrFailureClassifier::isPostDispatchAmbiguousTransportFailure(
+                (string) ($latestPublicAttempt->error_code ?? ''),
+                $summary,
+            )) {
+            if ($this->publicSabreCheckoutAttemptCompletedWithinMinutes($latestPublicAttempt, 60)) {
+                return $this->clientRedirect()->route('booking.review')
+                    ->withErrors(['booking' => (string) __('Booking request received. Supplier confirmation is pending verification. Please do not submit again yet.')]);
+            }
+
+            return null;
+        }
+
+        if ($latestPublicAttempt->status === 'failed'
+            && ($summary['live_call_attempted'] ?? false)
+            && $this->publicSabreCheckoutAttemptCompletedWithinMinutes($latestPublicAttempt, 60)) {
+            $classification = SabrePnrFailureClassifier::classify(
+                (string) ($latestPublicAttempt->error_code ?? ''),
+                $summary,
+            );
+            if (($classification['retry_allowed'] ?? true) === false) {
+                return $this->clientRedirect()->route('booking.review')
+                    ->withErrors(['booking' => (string) __('Sabre could not complete this booking automatically. Our team will review it; please do not submit again yet.')]);
+            }
         }
 
         if ($this->publicSabreCreateShouldThrottleCooldown($latestPublicAttempt)) {

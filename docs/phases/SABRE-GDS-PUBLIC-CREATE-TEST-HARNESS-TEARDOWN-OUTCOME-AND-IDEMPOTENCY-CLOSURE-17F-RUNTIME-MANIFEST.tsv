@@ -1,0 +1,4 @@
+relative_path	size_bytes	sha256	deployment_target	public_html_mirror_target	activation_required
+app/Http/Controllers/Frontend/BookingController.php	202636	736D3B1ADB927733606A12D0A5BCC396BA33AE95A9F1F8615066A84309CEC79C	/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/BookingController.php	n/a	opcache/route-cache-if-configured
+app/Services/Suppliers/Sabre/Booking/SabreBookingService.php	699119	EBBEB560D65E0E048E1CC42638435019F3E787DDBFB4686D1BF5FCD599B0ECE3	/home/pkjetp/jetpk_app/app/Services/Suppliers/Sabre/Booking/SabreBookingService.php	n/a	composer-autoload
+app/Support/Bookings/SabrePnrFailureClassifier.php	39878	3524238D050509861E09507F4E468D12B3208F4D504A4E82E4E98C7209025300	/home/pkjetp/jetpk_app/app/Support/Bookings/SabrePnrFailureClassifier.php	n/a	composer-autoload

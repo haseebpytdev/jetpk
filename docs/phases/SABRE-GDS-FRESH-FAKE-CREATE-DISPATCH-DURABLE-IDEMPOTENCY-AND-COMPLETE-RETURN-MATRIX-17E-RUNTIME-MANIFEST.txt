@@ -1,0 +1,2 @@
+# Phase 17E runtime file manifest
+# (empty — test-only phase; no production SFTP runtime changes)

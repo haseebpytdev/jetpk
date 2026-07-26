@@ -1,0 +1,4 @@
+# Phase 17F runtime/core files (changed in phase)
+app/Http/Controllers/Frontend/BookingController.php
+app/Services/Suppliers/Sabre/Booking/SabreBookingService.php
+app/Support/Bookings/SabrePnrFailureClassifier.php

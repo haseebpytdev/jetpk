@@ -28,4 +28,12 @@ class ClientManagedPageReservedSlugsTest extends TestCase
         $this->assertFalse(ClientManagedPageReservedSlugs::isValidFormat('Admin'));
         $this->assertFalse(ClientManagedPageReservedSlugs::isReserved('our-story'));
     }
+
+    public function test_route_slug_constraint_delegates_to_reserved_public_path(): void
+    {
+        $this->assertSame(
+            ReservedPublicPath::customPageSlugConstraint(),
+            ClientManagedPageReservedSlugs::routeSlugConstraint(),
+        );
+    }
 }

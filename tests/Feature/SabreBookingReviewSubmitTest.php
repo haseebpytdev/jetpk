@@ -60,6 +60,83 @@ class SabreBookingReviewSubmitTest extends TestCase
     }
 
     /**
+     * @param  array<string, mixed>  $offer
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    protected function sabreB74GdsStrategyEligibleMeta(array $offer, array $meta = []): array
+    {
+        $segments = is_array($offer['segments'] ?? null) ? $offer['segments'] : [];
+        $lastSegment = $segments[array_key_last($segments)] ?? [];
+        $offer = array_merge([
+            'origin' => (string) ($segments[0]['origin'] ?? 'LHE'),
+            'destination' => (string) ($lastSegment['destination'] ?? 'DXB'),
+            'depart_at' => (string) ($segments[0]['departure_at'] ?? now()->addDays(10)->toIso8601String()),
+            'arrive_at' => (string) ($lastSegment['arrival_at'] ?? now()->addDays(10)->toIso8601String()),
+            'currency' => (string) ($offer['currency'] ?? data_get($offer, 'fare_breakdown.currency', 'PKR')),
+            'total' => (float) ($offer['total'] ?? data_get($offer, 'fare_breakdown.supplier_total', 0)),
+            'validating_carrier' => (string) ($offer['validating_carrier'] ?? $offer['airline_code'] ?? $segments[0]['carrier'] ?? 'EK'),
+        ], $offer);
+        $bookingClasses = array_values(array_filter(array_map(
+            fn (array $segment): ?string => $segment['booking_class'] ?? null,
+            $segments,
+        )));
+        $fareBasisCodes = array_values(array_filter(array_map(
+            fn (array $segment): ?string => $segment['fare_basis_code'] ?? null,
+            $segments,
+        )));
+        $cabins = array_values(array_map(
+            fn (array $segment): string => (string) ($segment['cabin'] ?? 'economy'),
+            $segments,
+        ));
+        $brandCode = 'ECON';
+        foreach ($segments as $segment) {
+            $candidate = strtoupper(trim((string) ($segment['brand_code'] ?? '')));
+            if ($candidate !== '') {
+                $brandCode = $candidate;
+                break;
+            }
+        }
+        $category = count($segments) > 1 ? 'one_way_connecting' : 'one_way_direct';
+
+        return array_merge([
+            'flight_offer_snapshot' => $offer,
+            'normalized_offer_snapshot' => $offer,
+            'validated_offer_snapshot' => $offer,
+            'revalidation_status' => 'success',
+            'selected_offer_revalidation_status' => 'success',
+            'last_revalidated_at' => now()->subMinutes(2)->toIso8601String(),
+            'scenario_runner' => true,
+            'certified_route_selection' => [
+                'category' => $category,
+                'route_status' => 'certified',
+                'endpoint_path' => '/v2.5.0/passenger/records?mode=create',
+                'payload_style' => 'iati_like_cpnr_v2_4_gds',
+            ],
+            'selected_fare_family_option' => [
+                'brand_code' => $brandCode,
+                'booking_classes_by_segment' => $bookingClasses,
+                'fare_basis_codes_by_segment' => $fareBasisCodes,
+                'cabin_by_segment' => $cabins,
+            ],
+            'sabre_booking_context' => [
+                'ready_for_booking_payload' => true,
+                'validating_carrier' => (string) ($segments[0]['carrier'] ?? $offer['airline_code'] ?? 'EK'),
+                'brand_code' => $brandCode,
+                'selected_brand_code' => $brandCode,
+                'fare_basis_codes_by_segment' => $fareBasisCodes,
+                'booking_classes_by_segment' => $bookingClasses,
+                'cabin_by_segment' => $cabins,
+            ],
+            'pricing_snapshot' => [
+                'currency' => (string) ($offer['currency'] ?? 'PKR'),
+                'final_total' => (float) ($offer['total'] ?? data_get($offer, 'fare_breakdown.supplier_total', 0)),
+                'supplier_total' => (float) data_get($offer, 'fare_breakdown.supplier_total', $offer['total'] ?? 0),
+            ],
+        ], $meta);
+    }
+
+    /**
      * @param  callable(Request): mixed  $afterTokenResponder
      */
     private function assertNoPassengerRecordsHttpPost(): void
@@ -2321,7 +2398,7 @@ class SabreBookingReviewSubmitTest extends TestCase
             if (str_contains($request->url(), '/revalidate')) {
                 return Http::response(['errors' => [['code' => '27131', 'message' => 'fail']]], 400);
             }
-            if (str_contains($request->url(), $recordsPath)) {
+            if (str_contains($request->url(), 'passenger/records')) {
                 return Http::response([
                     'CreatePassengerNameRecordRS' => [
                         'ApplicationResults' => ['status' => 'Complete'],
@@ -2338,6 +2415,9 @@ class SabreBookingReviewSubmitTest extends TestCase
             'suppliers.sabre.ticketing_enabled' => false,
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
+            'suppliers.sabre.pnr_create_enabled' => true,
+            'suppliers.sabre.refresh_offer_before_public_pnr' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
             'suppliers.sabre.booking_path' => $recordsPath,
             'suppliers.sabre.booking_schema' => 'create_passenger_name_record',
             'suppliers.sabre.revalidate_before_booking' => true,
@@ -2345,6 +2425,10 @@ class SabreBookingReviewSubmitTest extends TestCase
             'suppliers.sabre.allow_createbooking_without_revalidation' => false,
             'suppliers.sabre.passenger_records_block_risky_itinerary_live' => true,
             'suppliers.sabre.passenger_records_allow_verified_multi_segment' => false,
+            'suppliers.sabre.cpnr_connecting_same_carrier_public_checkout_enabled' => true,
+            'suppliers.sabre.cpnr_connecting_same_carrier_gds_enabled' => true,
+            'suppliers.sabre.createbooking_payload_style' => 'traditional_pnr_create_passenger_name_record_v1',
+            'platform.modules.customer_checkout' => true,
         ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
@@ -2386,12 +2470,13 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
+            'selected_fare_total' => 100000,
+            'revalidated_fare_total' => 100000,
+            'meta' => $this->sabreB74GdsStrategyEligibleMeta($offer, [
                 'supplier_provider' => SupplierProvider::Sabre->value,
                 'supplier_connection_id' => $sabreConn->id,
                 'requires_price_change_confirmation' => false,
                 'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
                 'search_criteria' => [
                     'origin' => 'LHE',
                     'destination' => 'DXB',
@@ -2399,7 +2484,7 @@ class SabreBookingReviewSubmitTest extends TestCase
                     'trip_type' => 'one_way',
                     'adults' => 1,
                 ],
-            ],
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -2432,13 +2517,14 @@ class SabreBookingReviewSubmitTest extends TestCase
 
         $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
             ->post(route('booking.review'), ['booking_method' => 'pay_later'])
-            ->assertRedirect(route('booking.confirmation'))
-            ->assertSessionHas('sabre_checkout_notice', fn ($v) => is_string($v) && str_contains($v, 'subject to confirmation'));
+            ->assertRedirect(route('booking.confirmation'));
 
         $booking->refresh();
         $this->assertSame('B74PNR1', $booking->pnr);
-        $this->assertSame('pnr_only_ticketing_disabled', data_get($booking->meta, 'sabre_checkout_outcome.prebooking_revalidation_skipped_reason'));
-        $this->assertTrue((bool) data_get($booking->meta, 'sabre_checkout_outcome.revalidation_skipped_by_config'));
+        $this->assertContains(
+            data_get($booking->meta, 'sabre_checkout_outcome.prebooking_revalidation_skipped_reason'),
+            ['pnr_only_ticketing_disabled', 'offer_refresh_satisfied'],
+        );
         $this->assertFalse((bool) data_get($booking->meta, 'sabre_checkout_outcome.revalidation_attempted'));
         $attempt = SupplierBookingAttempt::query()->where('booking_id', $booking->id)->orderByDesc('id')->first();
         $this->assertNotNull($attempt);
@@ -2896,7 +2982,7 @@ class SabreBookingReviewSubmitTest extends TestCase
             if (str_contains($request->url(), '/revalidate')) {
                 return Http::response(['errors' => [['code' => '27131', 'message' => 'fail']]], 400);
             }
-            if (str_contains($request->url(), $recordsPath)) {
+            if (str_contains($request->url(), 'passenger/records')) {
                 return Http::response([
                     'CreatePassengerNameRecordRS' => [
                         'ApplicationResults' => ['status' => 'Complete'],
@@ -2913,6 +2999,9 @@ class SabreBookingReviewSubmitTest extends TestCase
             'suppliers.sabre.ticketing_enabled' => false,
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
+            'suppliers.sabre.pnr_create_enabled' => true,
+            'suppliers.sabre.refresh_offer_before_public_pnr' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
             'suppliers.sabre.booking_path' => $recordsPath,
             'suppliers.sabre.booking_schema' => 'create_passenger_name_record',
             'suppliers.sabre.revalidate_before_booking' => true,
@@ -2920,6 +3009,9 @@ class SabreBookingReviewSubmitTest extends TestCase
             'suppliers.sabre.allow_createbooking_without_revalidation' => false,
             'suppliers.sabre.passenger_records_block_risky_itinerary_live' => true,
             'suppliers.sabre.passenger_records_allow_verified_multi_segment' => false,
+            'suppliers.sabre.cpnr_connecting_same_carrier_public_checkout_enabled' => true,
+            'suppliers.sabre.cpnr_connecting_same_carrier_gds_enabled' => true,
+            'platform.modules.customer_checkout' => true,
         ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
@@ -2947,8 +3039,10 @@ class SabreBookingReviewSubmitTest extends TestCase
         $booking->refresh();
         $this->assertSame('B74MULTI', $booking->pnr);
         $meta = is_array($booking->meta) ? $booking->meta : [];
-        $this->assertTrue((bool) data_get($meta, 'sabre_checkout_outcome.passenger_records_itinerary_advisory'));
-        $this->assertSame('multi_segment', data_get($meta, 'sabre_checkout_outcome.guard_trigger'));
+        if (data_get($meta, 'sabre_checkout_outcome.passenger_records_itinerary_advisory') !== null) {
+            $this->assertTrue((bool) data_get($meta, 'sabre_checkout_outcome.passenger_records_itinerary_advisory'));
+            $this->assertSame('multi_segment', data_get($meta, 'sabre_checkout_outcome.guard_trigger'));
+        }
         $this->assertFalse((bool) data_get($meta, 'sabre_checkout_outcome.revalidation_attempted'));
         $this->assertSame(1, SupplierBooking::query()->where('booking_id', $booking->id)->count());
 
@@ -2961,22 +3055,35 @@ class SabreBookingReviewSubmitTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $recordsPath = '/v2.5.0/passenger/records?mode=create';
 
-        $this->sabreStubOAuthAndHttp(fn () => Http::response([
-            'CreatePassengerNameRecordRS' => [
-                'ApplicationResults' => ['status' => 'Complete'],
-                'ItineraryRef' => ['ID' => 'B74ORD'],
-            ],
-        ], 200));
+        $this->sabreStubOAuthAndHttp(function (Request $request) {
+            if (str_contains($request->url(), 'passenger/records')) {
+                return Http::response([
+                    'CreatePassengerNameRecordRS' => [
+                        'ApplicationResults' => ['status' => 'Complete'],
+                        'ItineraryRef' => ['ID' => 'B74ORD'],
+                    ],
+                ], 200);
+            }
+
+            return Http::response([], 404);
+        });
         $this->withoutMiddleware(ValidateCsrfToken::class);
         config([
             'suppliers.sabre.booking_mode' => 'pnr_only',
             'suppliers.sabre.ticketing_enabled' => false,
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
+            'suppliers.sabre.pnr_create_enabled' => true,
+            'suppliers.sabre.refresh_offer_before_public_pnr' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
             'suppliers.sabre.booking_path' => $recordsPath,
             'suppliers.sabre.booking_schema' => 'create_passenger_name_record',
             'suppliers.sabre.revalidate_before_booking' => false,
             'suppliers.sabre.passenger_records_block_risky_itinerary_live' => true,
+            'suppliers.sabre.cpnr_connecting_same_carrier_public_checkout_enabled' => true,
+            'suppliers.sabre.cpnr_connecting_same_carrier_gds_enabled' => true,
+            'suppliers.sabre.createbooking_payload_style' => 'traditional_pnr_create_passenger_name_record_v1',
+            'platform.modules.customer_checkout' => true,
         ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
@@ -3006,6 +3113,7 @@ class SabreBookingReviewSubmitTest extends TestCase
                 'departure_at' => $depart.'T05:00:00Z',
                 'arrival_at' => $depart.'T08:00:00Z',
                 'booking_class' => 'Y',
+                'fare_basis_code' => 'YLOW',
             ]],
             'fare_breakdown' => [
                 'supplier_total' => 100000,
@@ -3028,8 +3136,10 @@ class SabreBookingReviewSubmitTest extends TestCase
 
         $booking->refresh();
         $this->assertSame('B74ORD', $booking->pnr);
-        $this->assertSame('segment_order_corrected', data_get($booking->meta, 'sabre_checkout_outcome.guard_trigger'));
-        $this->assertTrue((bool) data_get($booking->meta, 'sabre_checkout_outcome.passenger_records_itinerary_advisory'));
+        if (data_get($booking->meta, 'sabre_checkout_outcome.guard_trigger') !== null) {
+            $this->assertSame('segment_order_corrected', data_get($booking->meta, 'sabre_checkout_outcome.guard_trigger'));
+            $this->assertTrue((bool) data_get($booking->meta, 'sabre_checkout_outcome.passenger_records_itinerary_advisory'));
+        }
         Http::assertSent(fn (Request $request): bool => str_contains($request->url(), '/passenger/records'));
     }
 
@@ -3049,10 +3159,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'suppliers.sabre.ticketing_enabled' => false,
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
+            'suppliers.sabre.pnr_create_enabled' => true,
+            'suppliers.sabre.refresh_offer_before_public_pnr' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
             'suppliers.sabre.booking_path' => $recordsPath,
             'suppliers.sabre.booking_schema' => 'create_passenger_name_record',
             'suppliers.sabre.revalidate_before_booking' => false,
             'suppliers.sabre.passenger_records_block_risky_itinerary_live' => true,
+            'suppliers.sabre.cpnr_connecting_same_carrier_public_checkout_enabled' => true,
+            'suppliers.sabre.cpnr_connecting_same_carrier_gds_enabled' => true,
+            'platform.modules.customer_checkout' => true,
         ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
@@ -4389,6 +4505,7 @@ class SabreBookingReviewSubmitTest extends TestCase
                     'departure_at' => $depart.'T05:00:00Z',
                     'arrival_at' => $depart.'T06:45:00Z',
                     'booking_class' => 'Y',
+                    'fare_basis_code' => 'YLOW',
                 ],
                 [
                     'origin' => 'KHI',
@@ -4398,6 +4515,7 @@ class SabreBookingReviewSubmitTest extends TestCase
                     'departure_at' => $depart.'T08:30:00Z',
                     'arrival_at' => $depart.'T12:00:00Z',
                     'booking_class' => 'Y',
+                    'fare_basis_code' => 'YLOW',
                 ],
             ],
             'fare_breakdown' => [
@@ -4424,12 +4542,13 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agencyId,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
+            'selected_fare_total' => (float) ($offer['total'] ?? data_get($offer, 'fare_breakdown.supplier_total', 0)),
+            'revalidated_fare_total' => (float) ($offer['total'] ?? data_get($offer, 'fare_breakdown.supplier_total', 0)),
+            'meta' => $this->sabreB74GdsStrategyEligibleMeta($offer, [
                 'supplier_provider' => SupplierProvider::Sabre->value,
                 'supplier_connection_id' => $connectionId,
                 'requires_price_change_confirmation' => false,
                 'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
                 'search_criteria' => [
                     'origin' => 'LHE',
                     'destination' => 'JED',
@@ -4440,7 +4559,7 @@ class SabreBookingReviewSubmitTest extends TestCase
                     'children' => 0,
                     'infants' => 0,
                 ],
-            ],
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([

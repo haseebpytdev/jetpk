@@ -20,6 +20,7 @@ use App\Http\Controllers\Frontend\RequestDemoController;
 use App\Http\Controllers\Frontend\SupportController;
 use App\Http\Controllers\Payments\AbhiPayPaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Ui\UiVersionResolver;
 use Illuminate\Support\Facades\Route;
 
@@ -164,6 +165,10 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/{slug}', [ClientManagedPageController::class, 'customShow'])
+    ->where('slug', ClientManagedPageReservedSlugs::routeSlugConstraint())
+    ->name('client.custom-page.show');
 
 if (app()->environment('testing')) {
     Route::get('/_test/ui-version', static function () {

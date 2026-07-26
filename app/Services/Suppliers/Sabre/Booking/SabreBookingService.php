@@ -2664,6 +2664,86 @@ class SabreBookingService
     }
 
     /**
+     * @param  array<string, mixed>  $draft
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>|null
+     */
+    protected function blockedPublicCheckoutCreateWhenAlreadySucceeded(
+        ?int $bookingIdForDiagnostics,
+        array $options,
+        array $draft,
+    ): ?array {
+        if ($bookingIdForDiagnostics === null || $bookingIdForDiagnostics < 1) {
+            return null;
+        }
+
+        if ($this->isOperatorApprovedPnrBypassActive($options)
+            || $this->isScenarioRunnerPnrCreateActive($options)
+            || $this->isAdminManualStrategyFallbackActive($options)) {
+            return null;
+        }
+
+        $booking = Booking::query()
+            ->with(['supplierBookings', 'supplierBookingAttempts'])
+            ->find($bookingIdForDiagnostics);
+        if ($booking === null) {
+            return null;
+        }
+
+        if (trim((string) ($booking->pnr ?? '')) !== ''
+            || trim((string) ($booking->supplier_reference ?? '')) !== ''
+            || trim((string) ($booking->supplier_api_booking_id ?? '')) !== '') {
+            return $this->duplicatePublicCheckoutCreateBlockedResult($draft, 'existing_supplier_identity');
+        }
+
+        $hasSuccessfulSupplierBooking = $booking->supplierBookings->contains(
+            fn (SupplierBooking $row): bool => in_array((string) $row->status, ['created', 'pending_ticketing', 'ticketed'], true),
+        );
+        if ($hasSuccessfulSupplierBooking) {
+            return $this->duplicatePublicCheckoutCreateBlockedResult($draft, 'existing_supplier_booking');
+        }
+
+        $meaningfulAttempt = SupplierBookingAttemptResolution::resolveLatestMeaningfulCreateAttempt(
+            $booking->supplierBookingAttempts,
+        );
+        if ($meaningfulAttempt !== null
+            && strtolower((string) $meaningfulAttempt->status) === 'success') {
+            $summary = is_array($meaningfulAttempt->safe_summary) ? $meaningfulAttempt->safe_summary : [];
+            if (($summary['source'] ?? '') === 'sabre_public_checkout') {
+                return $this->duplicatePublicCheckoutCreateBlockedResult($draft, 'successful_public_checkout_attempt_exists');
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $draft
+     * @return array<string, mixed>
+     */
+    protected function duplicatePublicCheckoutCreateBlockedResult(array $draft, string $reasonCode): array
+    {
+        $paxCount = count(is_array($draft['passengers'] ?? null) ? $draft['passengers'] : []);
+        $segCount = count(is_array($draft['segments'] ?? null) ? $draft['segments'] : []);
+
+        return [
+            'success' => false,
+            'status' => 'blocked',
+            'message' => 'A successful supplier booking attempt already exists for this booking.',
+            'live_call_attempted' => false,
+            'live_call_allowed' => $this->isBookingLiveCallEnabled(),
+            'reason_code' => $reasonCode,
+            'error_code' => 'supplier_booking_success_attempt_exists',
+            'passenger_count' => $paxCount,
+            'segment_count' => $segCount,
+            'supplier_connection_id' => (int) ($draft['supplier_connection_id'] ?? 0),
+            'selected_offer_id' => (string) ($draft['selected_offer_id'] ?? ''),
+            'fare_amount' => (float) data_get($draft, 'fare.amount', 0),
+            'fare_currency' => (string) data_get($draft, 'fare.currency', ''),
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $offer
      * @param  array<string, mixed>  $passengerData
      * @param  array<string, mixed>  $options  C4: {@code certification_full_itinerary_fallback} — allow full-itinerary re-shop confirmation before blocking stale OW segment guard
@@ -2702,6 +2782,15 @@ class SabreBookingService
                 'passenger_count' => $pax,
                 'segment_count' => $seg,
             ], $endpointExtras, $timingExtras);
+        }
+
+        $duplicateBlock = $this->blockedPublicCheckoutCreateWhenAlreadySucceeded(
+            $bookingIdForDiagnostics,
+            $options,
+            $draft,
+        );
+        if ($duplicateBlock !== null) {
+            return $duplicateBlock;
         }
 
         $routeSelection = $this->resolvePublicCertifiedRouteForAttempt($bookingIdForDiagnostics, $options);
@@ -3803,6 +3892,48 @@ class SabreBookingService
                         'booking_schema' => $this->effectiveSabreBookingSchema(),
                         'payload_schema' => $diagFlags['payload_schema'] ?? null,
                     ], $contextResultSlice, $diagFlat, $revalidationResultContext, self::extractLinkageMissingFlags($diagFlags), $endpointPersistence, self::passengerRecordsApplicationDigestSliceFromResult($live)), $createPayloadSafeSummary),
+                    $this->controlledRetryRecordedSlices($controlledF9jRetryRecorded, $controlledF9lSchemaRecoveryRecorded, $controlledF9qFinalRetryRecorded),
+                );
+            }
+
+            if (SabrePnrFailureClassifier::isPostDispatchAmbiguousTransportFailure(
+                (string) ($live['error_code'] ?? ''),
+                ['live_call_attempted' => (bool) ($live['live_call_attempted'] ?? true)],
+            )) {
+                $errorCode = (string) ($live['error_code'] ?? 'sabre_booking_connection_error');
+                $this->logSabrePnrAttemptSummaryFromLiveResult(
+                    $bookingIdForDiagnostics,
+                    is_string($bookingRefEarly) ? $bookingRefEarly : null,
+                    $bookingContextSummary,
+                    $live,
+                    true,
+                    false,
+                    $errorCode,
+                );
+
+                return array_merge(
+                    $this->withCreatePayloadSafeSummary(array_merge([
+                        'success' => false,
+                        'status' => 'needs_review',
+                        'message' => (string) __('Booking request received. Supplier confirmation is pending verification. No ticket has been issued.'),
+                        'live_call_attempted' => true,
+                        'live_call_allowed' => true,
+                        'passenger_count' => $paxCount,
+                        'segment_count' => $segCount,
+                        'supplier_connection_id' => $connId,
+                        'selected_offer_id' => $selectedOffer,
+                        'fare_amount' => $fareAmt,
+                        'fare_currency' => $fareCur,
+                        'pnr' => null,
+                        'provider_booking_id' => null,
+                        'provider_status' => $live['provider_status'] ?? null,
+                        'http_status' => $live['http_status'] ?? null,
+                        'reason_code' => 'post_dispatch_ambiguous_transport',
+                        'error_code' => $errorCode,
+                        'manual_reconciliation_required' => true,
+                        'booking_schema' => $this->effectiveSabreBookingSchema(),
+                        'payload_schema' => $diagFlags['payload_schema'] ?? null,
+                    ], $v25LiveSlice, $contextResultSlice, $diagFlat, $revalidationResultContext, self::extractLinkageMissingFlags($diagFlags), $endpointPersistence), $createPayloadSafeSummary),
                     $this->controlledRetryRecordedSlices($controlledF9jRetryRecorded, $controlledF9lSchemaRecoveryRecorded, $controlledF9qFinalRetryRecorded),
                 );
             }
@@ -5372,6 +5503,41 @@ class SabreBookingService
                 ], array_intersect_key($result, array_flip([
                     'endpoint_host', 'endpoint_path', 'exception_class', 'http_status',
                     'duration_ms', 'timeout_seconds', 'connect_timeout_seconds',
+                ]))),
+                'attempted_by' => null,
+                'attempted_at' => now(),
+                'completed_at' => now(),
+            ]);
+        } elseif (SabrePnrFailureClassifier::isPostDispatchAmbiguousTransportFailure(
+            (string) ($result['error_code'] ?? ''),
+            ['live_call_attempted' => ($result['live_call_attempted'] ?? false) === true],
+        ) && $status === 'needs_review') {
+            $errCode = (string) ($result['error_code'] ?? 'sabre_booking_connection_error');
+            $bookingColumnPatch['supplier_booking_status'] = 'manual_review';
+            SupplierBookingAttempt::query()->create([
+                'agency_id' => $booking->agency_id,
+                'booking_id' => $booking->id,
+                'supplier_connection_id' => $attemptConnectionId,
+                'provider' => SupplierProvider::Sabre->value,
+                'action' => 'create_pnr',
+                'status' => 'needs_review',
+                'error_code' => $errCode,
+                'error_message' => (string) ($result['message'] ?? 'Sabre create PNR response was not received after dispatch.'),
+                'safe_summary' => array_merge([
+                    'source' => $attemptSource,
+                    'live_call_attempted' => true,
+                    'segment_count' => (int) ($result['segment_count'] ?? 0),
+                    'passenger_count' => (int) ($result['passenger_count'] ?? 0),
+                    'reason_code' => (string) ($result['reason_code'] ?? 'post_dispatch_ambiguous_transport'),
+                    'manual_reconciliation_required' => true,
+                    'ambiguous_outcome' => 'supplier_response_not_received_after_dispatch',
+                    'has_booking_class' => (bool) ($result['has_booking_class'] ?? false),
+                    'has_fare_basis' => (bool) ($result['has_fare_basis'] ?? false),
+                    'has_end_transaction' => (bool) ($result['has_end_transaction'] ?? false),
+                ], self::bookingRevalidationAuditForMeta($result), self::linkageFlagSliceFromResult($result), self::passengerRecordsEndpointSliceFromResult($result), $completionAttemptSlice, array_intersect_key($result, array_flip([
+                    'endpoint_host', 'duration_ms', 'exception_class', 'http_status',
+                    'timeout_seconds', 'connect_timeout_seconds', 'safe_validation_excerpts',
+                    'payload_schema', 'booking_schema', 'manual_reconciliation_required',
                 ]))),
                 'attempted_by' => null,
                 'attempted_at' => now(),

@@ -80,6 +80,8 @@ class SabrePnrFailureClassifier
 
     public const ADMIN_MESSAGE_MANUAL_SABRE_PRICING = 'Shopping returned this fare, but auto-PNR pricing linkage is incomplete. Manual Sabre pricing or a different fare is required.';
 
+    public const ADMIN_MESSAGE_POST_DISPATCH_AMBIGUOUS_TRANSPORT = 'Sabre create PNR was dispatched but no response was received; manual reconciliation is required before retry to avoid duplicate PNR risk.';
+
     public const NEXT_ACTION_ACCEPT_UPDATED_FARE = 'accept_updated_fare';
 
     /**
@@ -245,6 +247,19 @@ class SabrePnrFailureClassifier
                 'manual_staff_confirmation',
                 false,
                 'Supplier booking payload validation failed — staff review required before retry.',
+            );
+        }
+
+        if (self::isPostDispatchAmbiguousTransportFailure($errorCode, $safeSummary)) {
+            return self::result(
+                self::CLASSIFICATION_UNKNOWN_STAFF_REVIEW,
+                'manual_staff_confirmation',
+                false,
+                self::ADMIN_MESSAGE_POST_DISPATCH_AMBIGUOUS_TRANSPORT,
+                [
+                    'post_dispatch_ambiguous_transport',
+                    'manual_reconciliation_required',
+                ],
             );
         }
 
@@ -765,6 +780,26 @@ class SabrePnrFailureClassifier
         }
 
         return [];
+    }
+
+    /**
+     * Post-dispatch transport/timeout failures where Sabre may have created a PNR despite no response.
+     *
+     * @param  array<string, mixed>  $safeSummary
+     */
+    public static function isPostDispatchAmbiguousTransportFailure(string $errorCode, array $safeSummary = []): bool
+    {
+        if (($safeSummary['live_call_attempted'] ?? false) !== true) {
+            return false;
+        }
+
+        $errorCode = strtolower(trim($errorCode));
+
+        if (in_array($errorCode, ['sabre_booking_connection_error', 'transport_timeout', 'sabre_timeout'], true)) {
+            return true;
+        }
+
+        return str_contains($errorCode, 'timeout');
     }
 
     /**

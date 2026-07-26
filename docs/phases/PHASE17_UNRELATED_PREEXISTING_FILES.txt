@@ -1,0 +1,6 @@
+# Pre-existing untracked paths preserved (not modified/staged in Phase 17F)
+# A. dashboard/
+# B. deployment_packages/
+# C. docs/audit/, docs/dashboard/, docs/integrations/
+# D. prior phase summaries under docs/phases/ (except 17F outputs listed in PHASE17_DOC_FILES.txt)
+# H. dashboard/next-env.d.ts and other unrelated workspace artifacts

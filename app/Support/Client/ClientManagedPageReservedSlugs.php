@@ -31,4 +31,12 @@ final class ClientManagedPageReservedSlugs
 
         return (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug);
     }
+
+    /**
+     * Laravel `where` constraint for the CMS custom-page catch-all route.
+     */
+    public static function routeSlugConstraint(): string
+    {
+        return ReservedPublicPath::customPageSlugConstraint();
+    }
 }
