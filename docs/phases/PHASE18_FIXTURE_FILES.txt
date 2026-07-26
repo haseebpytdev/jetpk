@@ -1,0 +1,2 @@
+tests/Fixtures/sabre_bfm_v4_grouped_refs_response.json
+tests/fixtures/sabre/revalidation/http-200-informational-warning-31-candidates-linkage.json

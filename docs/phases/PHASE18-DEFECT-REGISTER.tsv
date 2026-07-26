@@ -1,0 +1,15 @@
+id	severity	area	disposition	phase	evidence
+DEF-18-001	High	Search cache key	fixed	18B	FlightSearchCriteriaCacheKey + FlightSearchSupplierResultCache + matrix tests
+DEF-18-002	High	Nearby strip cache	fixed	18B	NearbyDateFareStripService uses FlightSearchCriteriaCacheKey
+DEF-18-003	Medium	Result truncation	intentionally deferred	18I	MAX_STORED_OFFERS=150 unchanged; fail-safe messaging exists; cap raise needs perf audit
+DEF-18-004	Medium	Stale offer	fixed	18C/18E/18F	FlightSearchResultStore forSelection guards; FlightController stale blocks; tests green
+DEF-18-005	Medium	Revalidation parity	fixed	18E	SabreGdsAuthoritativeRevalidationLinkagePhase18ETest (Http::fake controller path)
+DEF-18-006	Medium	Offer linkage	fixed	18E	Linkage fixture end-to-end revalidation preserves segments/fare basis
+DEF-18-007	Medium	Freshness bypass	intentionally deferred	18I	Branded-fare bypass unchanged; covered by existing SabreOfferRefreshPublicCheckoutTest
+DEF-18-008	Low	Fare digest	intentionally deferred	18I	offer_identity_mismatch diagnostic optional; no product regression
+DEF-18-009	Low	UX / session	intentionally deferred	18I	GET review back-button guard out of Phase 18 scope
+DEF-18-010	Info	Flexible dates	fixed	18F	flexible_dates criteria + expandDepartDateVariants + UI checkbox
+DEF-18-011	Info	GDS/NDC lane isolation	fixed	18B	Cache key includes supplier lane/channel dimensions
+DEF-18-012	Info	Live probe	requires approved live probe	18H	Plan committed; execution explicitly not performed
+DEF-18-013	Blocked	Ticketing	blocked by LNIATA	—	SABRE_TICKETING_ENABLED remains false
+DEF-18-014	Blocked	PIA NDC	future Sabre NDC scope	—	No PiaNdc file diffs in 29f21e5..HEAD

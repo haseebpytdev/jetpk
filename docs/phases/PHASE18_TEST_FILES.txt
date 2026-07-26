@@ -1,0 +1,8 @@
+tests/Feature/FlightSearch/FlightSearchFlexibleDatesPhase18FTest.php
+tests/Feature/FlightSearch/FlightSearchResultStoreStaleOfferTest.php
+tests/Feature/FlightSearch/FlightSearchSupplierResultCacheTest.php
+tests/Feature/SabreGdsAuthoritativeRevalidationLinkagePhase18ETest.php
+tests/Feature/SabreGdsCheckoutRoleParityPhase18GTest.php
+tests/Feature/SabreGdsShoppingNormalizationMatrixPhase18DTest.php
+tests/Support/Sabre/SabreGdsShoppingNormalizationMatrixSupport.php
+tests/Unit/Support/FlightSearch/FlightSearchCriteriaCacheKeyTest.php
