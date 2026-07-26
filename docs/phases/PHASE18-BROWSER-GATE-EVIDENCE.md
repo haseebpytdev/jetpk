@@ -1,7 +1,7 @@
 # Phase 18J — Browser Gate Evidence
 
-**Local base URL:** `http://127.0.0.1:8000`  
-**Configs:** `playwright.jetpk-header-filter.config.ts`, `playwright.phase18-browser-gate.config.ts`  
+**Local base URL:** `http://127.0.0.1:8000`
+**Configs:** `playwright.jetpk-header-filter.config.ts`, `playwright.phase18-browser-gate.config.ts`
 **Retries:** 0 | **Workers:** 1 | **Terminations:** none | **Exit codes:** 0
 
 ## Commands
