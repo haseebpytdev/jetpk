@@ -6,7 +6,9 @@ use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
 use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use App\Support\FlightSearch\ItineraryFareConsolidator;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
+use App\Support\FlightSearch\SabreOfferFreshness;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class FlightSearchResultStore
@@ -16,6 +18,8 @@ class FlightSearchResultStore
     private const TTL_SECONDS = 1800;
 
     private const MAX_STORED_OFFERS = 150;
+
+    public const PAYLOAD_SCHEMA_VERSION = 'v1';
 
     /**
      * @param  list<array<string, mixed>>  $offers
@@ -38,6 +42,7 @@ class FlightSearchResultStore
         }
 
         $payload = [
+            'schema_version' => self::PAYLOAD_SCHEMA_VERSION,
             'search_id' => $searchId,
             'criteria' => $criteria,
             'offers' => $trimmedOffers,
@@ -71,13 +76,87 @@ class FlightSearchResultStore
     /**
      * @return array<string, mixed>|null
      */
-    public function get(string $searchId): ?array
+    public function get(string $searchId, bool $forSelection = false): ?array
     {
-        $payload = Cache::get($this->key($searchId));
-        if (! is_array($payload)) {
+        $searchId = trim($searchId);
+        if ($searchId === '') {
             return null;
         }
 
+        $raw = Cache::get($this->key($searchId));
+        if (! is_array($raw)) {
+            return null;
+        }
+
+        if (! $this->isReadablePayload($raw)) {
+            Log::warning('flight_search.cache.payload_unreadable', [
+                'search_id' => $searchId,
+                'reason' => $this->payloadUnreadableReason($raw),
+            ]);
+
+            return null;
+        }
+
+        $payload = $this->normalizePayloadTimestamps($raw);
+        $payload['offer_freshness'] = app(SabreOfferFreshness::class)->buildSearchFreshnessMeta($payload);
+
+        if ($forSelection && $this->isPayloadStaleForSelection($payload)) {
+            return null;
+        }
+
+        return $payload;
+    }
+
+    public function isPayloadStaleForSelection(array $payload): bool
+    {
+        $freshness = is_array($payload['offer_freshness'] ?? null)
+            ? $payload['offer_freshness']
+            : app(SabreOfferFreshness::class)->buildSearchFreshnessMeta($payload);
+
+        return (string) ($freshness['offer_freshness_status'] ?? '') === SabreOfferFreshness::STATUS_STALE;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function isReadablePayload(array $payload): bool
+    {
+        return $this->payloadUnreadableReason($payload) === null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function payloadUnreadableReason(array $payload): ?string
+    {
+        if (! is_array($payload['offers'] ?? null)) {
+            return 'offers_not_array';
+        }
+
+        if (! is_array($payload['criteria'] ?? null)) {
+            return 'criteria_not_array';
+        }
+
+        $schema = trim((string) ($payload['schema_version'] ?? ''));
+        if ($schema !== '' && $schema !== self::PAYLOAD_SCHEMA_VERSION) {
+            return 'schema_version_mismatch';
+        }
+
+        foreach ($payload['offers'] as $offer) {
+            if ($offer !== null && ! is_array($offer)) {
+                return 'offer_row_not_array';
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    protected function normalizePayloadTimestamps(array $payload): array
+    {
         if (! isset($payload['search_created_at']) && isset($payload['created_at'])) {
             $payload['search_created_at'] = $payload['created_at'];
         }
@@ -120,7 +199,12 @@ class FlightSearchResultStore
             return null;
         }
 
-        foreach ($this->listOffersForDisplay($searchId) as $offer) {
+        $payload = $this->get($searchId, true);
+        if ($payload === null) {
+            return null;
+        }
+
+        foreach ($this->displayOffersFromPayload($payload) as $offer) {
             if (! is_array($offer)) {
                 continue;
             }
@@ -131,11 +215,6 @@ class FlightSearchResultStore
 
                 return $offer;
             }
-        }
-
-        $payload = $this->get($searchId);
-        if ($payload === null) {
-            return null;
         }
 
         $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
@@ -248,7 +327,7 @@ class FlightSearchResultStore
      */
     public function getReturnSplitIndex(string $searchId): ?array
     {
-        $payload = $this->get($searchId);
+        $payload = $this->get($searchId, true);
         if ($payload === null) {
             return null;
         }
