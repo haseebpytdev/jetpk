@@ -99,9 +99,9 @@ See `docs/phases/PHASE18-BROWSER-GATE-EVIDENCE.md` and `playwright.phase18-brows
 
 | SHA | Message |
 |-----|---------|
-| _(pending)_ | `fix(ui): align JetPK results containers with header wrap` |
-| _(pending)_ | `test(sabre): close Phase 18 browser regression gate` |
-| _(pending)_ | `docs(sabre): reconcile Phase 18 release evidence` |
+| `eb23c61` | `fix(ui): align JetPK results containers with header wrap` |
+| `ef75ca5` | `test(sabre): close Phase 18 browser regression gate` |
+| `98c3a61` | `docs(sabre): reconcile Phase 18 release evidence` |
 
 ## Rollback
 
