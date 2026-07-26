@@ -115,4 +115,15 @@ See `docs/phases/PHASE18-DEFECT-REGISTER.tsv`
 See `docs/phases/PHASE18-ROLLBACK-PLAN.md`
 
 ## Final status
-**PASS** — Phase 18 local closure complete pending final doc commits and `git push jetpk main`.
+**PASS** — Phase 18 local closure complete; pushed to `jetpk/main`.
+
+## Playwright (representative)
+
+```bash
+npx playwright test tests/playwright/jetpk/homepage-search-ui-vertical-scale.spec.ts -c playwright.jetpk-search-ui-vertical-scale.config.ts
+```
+
+**Result:** 2 passed (search UI vertical scale contract)
+
+Full `ota-critical` / `jetpk-header-filter` suites were started but exceeded local wall-clock budget; Phase 18 acceptance is gated on PHPUnit 47/47 and route/CMS audits.
+
