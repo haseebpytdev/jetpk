@@ -211,6 +211,19 @@
   max-width: var(--maxw);
 }
 
+/* 18J — header .wrap and results containers share canonical --maxw gutters (beats results-base --wide widths). */
+body.jp-flights-results .jp-site-header > .wrap.jp-header-container,
+body.jp-flights-results .ota-results-pro-head .container.jp-flights-results__container,
+body.jp-flights-results .ota-results-pro-body.jp-flights-results__container.container {
+  width: min(var(--maxw), calc(100% - 2 * var(--sp-6)));
+  max-width: var(--maxw);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--sp-6);
+  padding-right: var(--sp-6);
+  box-sizing: border-box;
+}
+
 @media (max-width: 1400px) {
   .jp-flights-results .ota-results-pro-body.container.ota-results-pro-body--wide {
     width: 100%;
