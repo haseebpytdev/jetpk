@@ -23,8 +23,8 @@ Close Phase 18 search cache isolation, stale-offer safety, shopping normalizatio
 | `b48e2ff` | `fix(sabre): enforce authoritative revalidation linkage` |
 | `a1d3a7f` | `fix(flights): align filters and JetPakistan checkout continuity` |
 | `b1c6b6f` | `fix(checkout): close Sabre role and JetPakistan flow parity` |
-| *(pending)* | `docs(sabre): prepare controlled search and revalidation probe` |
-| *(pending)* | `docs(sabre): finalize Phase 18 release evidence` |
+| `e37a573` | `docs(sabre): prepare controlled search and revalidation probe` |
+| `e77cdee` | `docs(sabre): finalize Phase 18 release evidence` |
 
 ## Included scope
 
