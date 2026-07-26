@@ -1,8 +1,8 @@
 # Phase 18H — Controlled Live Search and Revalidation Probe Plan
 
-**Status:** PLAN ONLY — **NOT EXECUTED** in Phase 18 local closure.  
-**Phase:** SABRE-GDS-SEARCH-CACHE-REVALIDATION-FINAL-CLOSURE-18H  
-**Baseline commit:** `29f21e5` (Phase 17F safety closure)  
+**Status:** PLAN ONLY — **NOT EXECUTED** in Phase 18 local closure.
+**Phase:** SABRE-GDS-SEARCH-CACHE-REVALIDATION-FINAL-CLOSURE-18H
+**Baseline commit:** `29f21e5` (Phase 17F safety closure)
 **Related defect:** DEF-18-012 (requires approved live probe)
 
 ---

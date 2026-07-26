@@ -1,12 +1,12 @@
 # Phase 18A — Sabre GDS Search, Cache, Revalidation, and Checkout Baseline
 
-**Phase:** SABRE-GDS-SEARCH-CACHE-REVALIDATION-FINAL-CLOSURE-18  
-**Subphase:** 18A — Baseline, inventory, and defect register (read-only)  
-**Date:** 2026-07-26  
-**Branch at inventory:** `main`  
-**Baseline commit:** `29f21e51e1241eb6f74b990d006abe73848a130f` (`docs: record Phase 17F Create PNR safety closure`)  
-**Remote sync:** `jetpk/main` matches local `HEAD`  
-**Production Laravel root:** `/home/pkjetp/jetpk_app`  
+**Phase:** SABRE-GDS-SEARCH-CACHE-REVALIDATION-FINAL-CLOSURE-18
+**Subphase:** 18A — Baseline, inventory, and defect register (read-only)
+**Date:** 2026-07-26
+**Branch at inventory:** `main`
+**Baseline commit:** `29f21e51e1241eb6f74b990d006abe73848a130f` (`docs: record Phase 17F Create PNR safety closure`)
+**Remote sync:** `jetpk/main` matches local `HEAD`
+**Production Laravel root:** `/home/pkjetp/jetpk_app`
 **Ticketing:** `SABRE_TICKETING_ENABLED` must remain `false` (confirmed in `config/suppliers.php`)
 
 ---
@@ -338,11 +338,11 @@ Search, cache, revalidation, and Sabre gates are **shared**; differences are cha
 
 ## 20. Safety constraints (carried forward)
 
-1. `SABRE_TICKETING_ENABLED=false` — no AirTicket, void, refund, EMD, LNIATA ops.  
-2. No PIA NDC logic changes.  
-3. No Sabre GDS/NDC assumption merge.  
-4. No production migrations, seeders, or live Create PNR in Phase 18 unless explicitly approved (18H probe: search/revalidation only).  
-5. Protected bookings 1–3 and attempts 4,5,7,8,9 untouched.  
+1. `SABRE_TICKETING_ENABLED=false` — no AirTicket, void, refund, EMD, LNIATA ops.
+2. No PIA NDC logic changes.
+3. No Sabre GDS/NDC assumption merge.
+4. No production migrations, seeders, or live Create PNR in Phase 18 unless explicitly approved (18H probe: search/revalidation only).
+5. Protected bookings 1–3 and attempts 4,5,7,8,9 untouched.
 6. No automatic retry on ambiguous supplier outcomes.
 
 ---

@@ -1,8 +1,8 @@
 # Phase 18 — Production Deployment Plan
 
-**Phase:** SABRE-GDS-SEARCH-CACHE-REVALIDATION-FINAL-CLOSURE-18  
-**Target Laravel root:** `/home/pkjetp/jetpk_app`  
-**Deploy method:** SFTP changed files only (no `git pull` on production)  
+**Phase:** SABRE-GDS-SEARCH-CACHE-REVALIDATION-FINAL-CLOSURE-18
+**Target Laravel root:** `/home/pkjetp/jetpk_app`
+**Deploy method:** SFTP changed files only (no `git pull` on production)
 **Live probe:** NOT part of this deploy (see 18H plan; requires separate approval)
 
 ---
