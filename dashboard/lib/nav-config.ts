@@ -88,10 +88,17 @@ export const navGroups: NavGroup[] = [
         planned: true,
       },
       {
-        label: "CMS & Pages",
-        href: "/planned/page-settings",
+        label: "CMS",
+        href: "/cms",
         laravelRoute: "admin.page-settings.index",
-        planned: true,
+        children: [
+          { label: "Overview", href: "/cms" },
+          { label: "Pages", href: "/cms/pages" },
+          { label: "Sections", href: "/cms/sections" },
+          { label: "Banners", href: "/cms/banners" },
+          { label: "Notices", href: "/cms/notices" },
+          { label: "Assets", href: "/cms/assets" },
+        ],
       },
     ],
   },
@@ -100,9 +107,15 @@ export const navGroups: NavGroup[] = [
     items: [
       {
         label: "Reports",
-        href: "/planned/reports",
+        href: "/reports",
         laravelRoute: "admin.reports",
-        planned: true,
+        children: [
+          { label: "Overview", href: "/reports" },
+          { label: "Sales", href: "/reports/sales" },
+          { label: "Bookings", href: "/reports/bookings" },
+          { label: "Payments", href: "/reports/payments" },
+          { label: "Operations", href: "/reports/operations" },
+        ],
       },
       {
         label: "Notifications",

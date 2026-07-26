@@ -451,3 +451,43 @@ export function CancellationEligibilityBadge({ status }: { status: string }) {
     />
   );
 }
+
+const reportTrendStyles: Record<string, string> = {
+  positive: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  negative: "bg-red-50 text-red-800 ring-red-600/20",
+  neutral: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  warning: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  unavailable: "bg-violet-50 text-violet-800 ring-violet-600/20",
+};
+
+const cmsStatusStyles: Record<string, string> = {
+  draft: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  inReview: "bg-blue-50 text-blue-800 ring-blue-600/20",
+  approved: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  scheduled: "bg-cyan-50 text-cyan-900 ring-cyan-600/20",
+  published: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  expired: "bg-orange-50 text-orange-900 ring-orange-600/20",
+  archived: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  valid: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  warning: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  blocked: "bg-red-50 text-red-800 ring-red-600/20",
+  unapproved: "bg-red-50 text-red-800 ring-red-600/20",
+};
+
+export function ReportTrendBadge({ trend }: { trend: string }) {
+  return (
+    <StatusPill
+      label={formatStatusLabel(trend)}
+      tone={reportTrendStyles[trend] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function CmsStatusBadge({ status, label }: { status: string; label?: string }) {
+  return (
+    <StatusPill
+      label={label ?? formatStatusLabel(status)}
+      tone={cmsStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
