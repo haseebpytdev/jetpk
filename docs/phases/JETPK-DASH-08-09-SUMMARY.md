@@ -253,7 +253,7 @@ Documented in `docs/dashboard/NEXTJS-INTEGRATION-ROADMAP.md`. Targeted specs dur
 
 ## Documentation commit SHA
 
-`PLACEHOLDER` — docs(dashboard): finalize DASH-08-09 phase summary
+`53c6389` — docs(dashboard): finalize DASH-08-09 phase summary
 
 ## Remote tracking branch
 
