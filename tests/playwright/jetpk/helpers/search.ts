@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { futureDepartDate, futureReturnDate } from './constants';
+import { CLIENT_PREFIX, futureDepartDate, futureReturnDate } from './constants';
 
 export async function selectTripType(page: Page, trip: 'one_way' | 'round_trip' | 'multi_city'): Promise<void> {
   const tab = page.locator(`[data-jp-trip-tabs] button[data-jp-trip="${trip}"]`).first();
@@ -145,8 +145,10 @@ export async function fillReturnDates(page: Page): Promise<void> {
 }
 
 export async function submitFlightSearch(page: Page): Promise<void> {
-  await page.locator('[data-jp-flight-submit]').first().click();
-  await page.waitForURL(/\/jetpk\/flights\/results/, { timeout: 120_000 });
+  const resultsPath = `${CLIENT_PREFIX}/flights/results`.replace('//', '/');
+  const submit = page.locator('[data-jp-flight-submit]').first();
+  await submit.click({ noWaitAfter: true, timeout: 60_000 });
+  await page.waitForURL(new RegExp(`${resultsPath.replace(/\//g, '\\/')}`), { timeout: 120_000 });
 }
 
 export async function searchOneWayFromHome(page: Page): Promise<void> {

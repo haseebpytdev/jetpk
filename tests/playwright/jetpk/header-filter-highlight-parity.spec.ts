@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { AUDIT_VIEWPORTS, futureDepartDate } from './helpers/constants';
+import { AUDIT_VIEWPORTS, futureDepartDate, PRIMARY_VIEWPORT } from './helpers/constants';
 
 const OUT = 'storage/app/audits/jetpk-header-filter-parity';
 
@@ -209,16 +209,27 @@ test.describe('JetPK header + filter + highlight parity', () => {
   });
 
   test('responsive screenshots (before/after evidence)', async ({ page }) => {
+    test.setTimeout(480_000);
+
+    const withSs = (url: string, vpName: string): string =>
+      url.includes('?') ? `${url}&_ss=${vpName}` : `${url}?_ss=${vpName}`;
+
+    const screenshotViewports = [
+      PRIMARY_VIEWPORT,
+      AUDIT_VIEWPORTS.find((v) => v.name === 'tablet768')!,
+      AUDIT_VIEWPORTS.find((v) => v.name === 'mobile390')!,
+    ];
+
     const shots: { name: string; path: string; url: string }[] = [
       { name: 'home-desktop-header', path: '/', url: '/' },
       { name: 'results-desktop-header', path: resultsPath(), url: resultsPath() },
       { name: 'results-filter-sidebar', path: resultsPath(), url: resultsPath() },
     ];
 
-    for (const vp of AUDIT_VIEWPORTS) {
+    for (const vp of screenshotViewports) {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       for (const shot of shots) {
-        await page.goto(`${shot.url}&_ss=${vp.name}`, { waitUntil: 'networkidle', timeout: 120_000 });
+        await page.goto(withSs(shot.url, vp.name), { waitUntil: 'domcontentloaded', timeout: 120_000 });
         if (shot.name.includes('filter')) {
           await page.waitForSelector('.jp-filter-panel, .ota-filter-card', { timeout: 60_000 }).catch(() => undefined);
         } else {

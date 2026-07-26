@@ -4,7 +4,8 @@ export const LIVE_BASE_URL =
     '',
   );
 
-export const CLIENT_PREFIX = '/jetpk';
+/** Empty on dedicated local JetPK host; `/jetpk` on shared haseebasif.com staging. */
+export const CLIENT_PREFIX = process.env.JETPK_CLIENT_PREFIX ?? '/jetpk';
 
 export const AUDIT_OUTPUT_DIR = 'storage/app/audits/jetpk-playwright-live';
 
@@ -26,24 +27,36 @@ export const AUDIT_VIEWPORTS: ViewportDef[] = [
 
 export const PRIMARY_VIEWPORT = AUDIT_VIEWPORTS.find((v) => v.name === 'desktop1440')!;
 
+export function clientPath(path: string): string {
+  if (path === '' || path === '/') {
+    return CLIENT_PREFIX === '' ? '/' : CLIENT_PREFIX;
+  }
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  if (CLIENT_PREFIX === '') {
+    return normalized;
+  }
+
+  return `${CLIENT_PREFIX}${normalized}`;
+}
+
 export const PUBLIC_PAGES: { key: string; path: string }[] = [
-  { key: 'root', path: '/jetpk' },
-  { key: 'home', path: '/jetpk/home' },
-  { key: 'about', path: '/jetpk/about-us' },
-  { key: 'support', path: '/jetpk/support' },
-  { key: 'login', path: '/jetpk/login' },
-  { key: 'register', path: '/jetpk/register' },
-  { key: 'forgot-password', path: '/jetpk/forgot-password' },
-  { key: 'lookup-booking', path: '/jetpk/lookup-booking' },
-  { key: 'groups-search', path: '/jetpk/groups/search' },
-  { key: 'agent-register', path: '/jetpk/agent/register' },
+  { key: 'root', path: clientPath('') },
+  { key: 'home', path: clientPath('') },
+  { key: 'about', path: clientPath('/about-us') },
+  { key: 'support', path: clientPath('/support') },
+  { key: 'login', path: clientPath('/login') },
+  { key: 'register', path: clientPath('/register') },
+  { key: 'forgot-password', path: clientPath('/forgot-password') },
+  { key: 'lookup-booking', path: clientPath('/lookup-booking') },
+  { key: 'groups-search', path: clientPath('/groups/search') },
+  { key: 'agent-register', path: clientPath('/agent/register') },
 ];
 
 export const GUEST_DASHBOARD_REDIRECTS: { key: string; path: string }[] = [
-  { key: 'admin', path: '/jetpk/admin' },
-  { key: 'staff', path: '/jetpk/staff' },
-  { key: 'agent', path: '/jetpk/agent' },
-  { key: 'customer', path: '/jetpk/customer' },
+  { key: 'admin', path: clientPath('/admin') },
+  { key: 'staff', path: clientPath('/staff') },
+  { key: 'agent', path: clientPath('/agent') },
+  { key: 'customer', path: clientPath('/customer') },
 ];
 
 export const FORBIDDEN_TEXT_PATTERNS = [
@@ -93,7 +106,7 @@ export function oneWayResultsUrl(): string {
     infants: '0',
     cabin: 'economy',
   });
-  return `${CLIENT_PREFIX}/flights/results?${q.toString()}`;
+  return `${CLIENT_PREFIX}/flights/results?${q.toString()}`.replace('//flights', '/flights');
 }
 
 export function returnResultsUrl(): string {
@@ -112,5 +125,5 @@ export function returnResultsUrl(): string {
     infants: '0',
     cabin: 'economy',
   });
-  return `${CLIENT_PREFIX}/flights/results?${q.toString()}`;
+  return `${CLIENT_PREFIX}/flights/results?${q.toString()}`.replace('//flights', '/flights');
 }

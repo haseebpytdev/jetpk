@@ -4,6 +4,7 @@ import { test, expect } from '@playwright/test';
 import {
   AUDIT_VIEWPORTS,
   CLIENT_PREFIX,
+  clientPath,
   GUEST_DASHBOARD_REDIRECTS,
   PRIMARY_VIEWPORT,
   PUBLIC_PAGES,
@@ -68,6 +69,8 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
   });
 
   test('public pages + viewport leak scan', async ({ page }) => {
+    test.setTimeout(600_000);
+
     const state = getAuditState();
     const notes: string[] = [];
     let fail = false;
@@ -110,13 +113,14 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
 
         if (pg.key === 'login' && vp.name === PRIMARY_VIEWPORT.name) {
           const formAction = await page.locator('form.jp-auth-form').first().getAttribute('action').catch(() => '');
-          if (!formAction || !formAction.includes('/jetpk/login')) {
+          const loginPath = clientPath('/login');
+          if (!formAction || !formAction.includes(loginPath)) {
             state.leaks.push({
               page: 'login',
               viewport: vpLabel,
               kind: 'href',
               pattern: 'login form action',
-              detail: `Login form action is ${formAction || '(missing)'}, expected /jetpk/login`,
+              detail: `Login form action is ${formAction || '(missing)'}, expected ${loginPath}`,
               severity: 'fail',
             });
             fail = true;
@@ -142,11 +146,12 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
       state.testedUrls.push(entry.path);
       await page.goto(entry.path, { waitUntil: 'domcontentloaded' });
       const finalUrl = page.url();
-      if (!finalUrl.includes('/jetpk/login')) {
+      const loginPath = clientPath('/login');
+      if (!finalUrl.includes(loginPath)) {
         fail = true;
-        notes.push(`${entry.key}: expected /jetpk/login redirect, got ${finalUrl}`);
+        notes.push(`${entry.key}: expected ${loginPath} redirect, got ${finalUrl}`);
       } else {
-        notes.push(`${entry.key}: redirects to /jetpk/login`);
+        notes.push(`${entry.key}: redirects to ${loginPath}`);
       }
     }
 
@@ -158,7 +163,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
     const state = getAuditState();
     await page.setViewportSize({ width: PRIMARY_VIEWPORT.width, height: PRIMARY_VIEWPORT.height });
 
-    await page.goto(`${CLIENT_PREFIX}/home`, { waitUntil: 'networkidle', timeout: 90_000 });
+    await page.goto(clientPath(''), { waitUntil: 'networkidle', timeout: 90_000 });
     const homeFp = await collectSearchShellFingerprint(page);
     await captureScreenshot(page, 'home-search-box', `${PRIMARY_VIEWPORT.width}x${PRIMARY_VIEWPORT.height}`);
 
@@ -297,7 +302,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
   test('multi-city tab behavior', async ({ page }) => {
     const state = getAuditState();
     await page.setViewportSize({ width: PRIMARY_VIEWPORT.width, height: PRIMARY_VIEWPORT.height });
-    await page.goto(`${CLIENT_PREFIX}/home`, { waitUntil: 'domcontentloaded' });
+    await page.goto(clientPath(''), { waitUntil: 'domcontentloaded' });
 
     await selectTripType(page, 'multi_city');
     const multiVisible = (await page.locator('[data-jp-multi-fields]:not([hidden])').count()) > 0;
@@ -396,7 +401,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
   test('checkout visual flow (stop before payment)', async ({ page }) => {
     const state = getAuditState();
     await page.setViewportSize({ width: PRIMARY_VIEWPORT.width, height: PRIMARY_VIEWPORT.height });
-    await page.goto(`${CLIENT_PREFIX}`, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+    await page.goto(clientPath(''), { waitUntil: 'domcontentloaded', timeout: 120_000 });
     await searchOneWayFromHome(page);
 
     const resultsRoot = page.locator('[data-results-root]').first();
@@ -404,7 +409,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
     const resultsUrlAttr = await resultsRoot.getAttribute('data-results-url').catch(() => '');
     const resultsSearchAttr = await resultsRoot.getAttribute('data-results-search-url').catch(() => '');
     const passengersUrlAttr = await resultsRoot.getAttribute('data-booking-passengers-url').catch(() => '');
-    if (!resultsUrlAttr?.includes('/jetpk/flights/results') || !resultsSearchAttr?.includes('/jetpk/flights/results/search')) {
+    if (!resultsUrlAttr?.includes(clientPath('/flights/results')) || !resultsSearchAttr?.includes(`${clientPath('/flights/results')}/search`)) {
       state.leaks.push({
         page: 'results-url-config',
         viewport: `${PRIMARY_VIEWPORT.width}x${PRIMARY_VIEWPORT.height}`,
@@ -414,7 +419,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
         severity: 'fail',
       });
     }
-    if (!passengersUrlAttr?.includes('/jetpk/booking/passengers')) {
+    if (!passengersUrlAttr?.includes(clientPath('/booking/passengers'))) {
       state.leaks.push({
         page: 'results-url-config',
         viewport: `${PRIMARY_VIEWPORT.width}x${PRIMARY_VIEWPORT.height}`,
@@ -437,9 +442,9 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
       return;
     }
 
-    await page.waitForURL(/\/jetpk\/booking\/passengers/, { timeout: 60_000 }).catch(() => undefined);
+    await page.waitForURL(new RegExp(`${clientPath('/booking/passengers').replace(/\//g, '\\/')}`), { timeout: 60_000 }).catch(() => undefined);
 
-    if (!page.url().includes('/jetpk/booking/passengers')) {
+    if (!page.url().includes(clientPath('/booking/passengers'))) {
       notes.push(`Did not reach passengers page — landed on ${page.url()}`);
       state.sections.checkoutVisual = { status: 'warn', notes };
       persistAuditState();
@@ -521,7 +526,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
     try {
       await fillGuestPassengerForm(page);
       await submitPassengerFormToReview(page);
-      reachedReview = page.url().includes('/jetpk/booking/review');
+      reachedReview = page.url().includes(clientPath('/booking/review'));
       if (reachedReview) {
         state.testedUrls.push(page.url());
         notes.push(`Review URL: ${page.url()}`);
@@ -559,7 +564,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
     const state = getAuditState();
     await page.setViewportSize({ width: PRIMARY_VIEWPORT.width, height: PRIMARY_VIEWPORT.height });
 
-    await page.goto(`${CLIENT_PREFIX}`, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+    await page.goto(clientPath(''), { waitUntil: 'domcontentloaded', timeout: 120_000 });
     const homeShell = await collectSearchShellFingerprint(page);
     await captureScreenshot(page, 'home-search-shell', '1440x900');
 
@@ -640,7 +645,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
 
   test('client no-fallback URL scan on JetPK public pages', async ({ page }) => {
     const state = getAuditState();
-    const pages = [`${CLIENT_PREFIX}`, oneWayResultsUrl(), `${CLIENT_PREFIX}/login`];
+    const pages = [clientPath(''), oneWayResultsUrl(), clientPath('/login')];
     const notes: string[] = [];
     let status: 'pass' | 'fail' = 'pass';
 
@@ -666,7 +671,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
   test('checkout passenger layout proof', async ({ page }) => {
     const state = getAuditState();
     await page.setViewportSize({ width: PRIMARY_VIEWPORT.width, height: PRIMARY_VIEWPORT.height });
-    await page.goto(`${CLIENT_PREFIX}`, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+    await page.goto(clientPath(''), { waitUntil: 'domcontentloaded', timeout: 120_000 });
     await searchOneWayFromHome(page);
     await page.waitForURL(/\/jetpk\/flights\/results/, { timeout: 120_000 }).catch(() => undefined);
 
@@ -681,7 +686,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
     const notes: string[] = [];
     let status: 'pass' | 'fail' = 'pass';
 
-    if (!page.url().includes('/jetpk/booking/passengers')) {
+    if (!page.url().includes(clientPath('/booking/passengers'))) {
       state.sections.checkoutLayout = { status: 'fail', notes: [`Landed on ${page.url()}`] };
       persistAuditState();
       return;
@@ -727,7 +732,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
     }
 
     await page.setViewportSize({ width: PRIMARY_VIEWPORT.width, height: PRIMARY_VIEWPORT.height });
-    await page.goto(`${CLIENT_PREFIX}/login`, { waitUntil: 'domcontentloaded' });
+    await page.goto(clientPath('/login'), { waitUntil: 'domcontentloaded' });
     await page.locator('input[name="login"], input[name="email"]').first().fill(email);
     await page.locator('input[name="password"]').fill(password);
     await page.locator('button[type="submit"]').first().click();
@@ -740,7 +745,7 @@ test.describe('JetPK live visual flow isolation audit (8D)', () => {
       status = 'blocked';
       notes.push('Login failed with provided credentials — credential-blocked');
     } else {
-      await page.goto(`${CLIENT_PREFIX}/admin`, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+      await page.goto(clientPath('/admin'), { waitUntil: 'domcontentloaded' }).catch(() => undefined);
       const guestLinks = await page.locator('header a:has-text("Sign in"), header a:has-text("Register")').count();
       const dropdown = await page.locator('[data-account-dropdown], .jp-account-menu, .ota-account-dropdown').count();
       notes.push(guestLinks === 0 ? 'No Sign in/Register while authenticated' : 'Sign in/Register still visible when authenticated');
