@@ -67,7 +67,7 @@ Operational fixture graph → `lib/reports/query-filters.ts` → `lib/reports/ag
 | CMS assets | 40 |
 | CMS revisions | 48 |
 | CMS FAQ items | 20 |
-| Operational bookings | 26 (existing) |
+| Operational bookings | 25 (existing) |
 | Report reference date | `2026-07-01` |
 
 ## Reports KPI model
