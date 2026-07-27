@@ -175,7 +175,7 @@ npx playwright test --retries=0
 | `audit-security.foundation.spec.ts` | 22 |
 | **DASH-10 subtotal** | **252** |
 | Prior DASH-01–09 + critical regression | ~518 |
-| **Full suite (expected)** | **~770** |
+| **Full suite (actual)** | **769** |
 
 Audit coverage: **58 tests** (36 smoke + 22 foundation).
 
@@ -230,13 +230,13 @@ Automated screenshots not captured in this documentation pass.
 
 ## Commit SHA
 
-Implementation commit: **TBD**
+Implementation commit: **e4a18b2**
 
 Documentation commit: **TBD**
 
 ## Documentation commit SHA
 
-**TBD**
+**TBD** (pending docs-only commit after implementation SHA recorded)
 
 ## Remote tracking branch
 
@@ -244,7 +244,7 @@ Documentation commit: **TBD**
 
 ## Final status
 
-**JETPK-DASH-10 DOCUMENTATION COMPLETE** — implementation SHA TBD pending phase gate verification (`FINAL_FAIL=0` on full ~770-test suite).
+**JETPK-DASH-10 COMPLETE** — `FINAL_FAIL=0` on full 769-test suite (retries=0).
 
 ## Fixture summary
 
@@ -255,7 +255,7 @@ Documentation commit: **TBD**
 | Permissions | 46 |
 | Settings sections | 4 |
 | Audit events | 60 |
-| Reference date | `2026-07-01` |
+| Reference date | `2026-06-30` |
 
 ## Related documentation
 
