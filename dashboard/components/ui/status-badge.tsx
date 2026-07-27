@@ -491,3 +491,63 @@ export function CmsStatusBadge({ status, label }: { status: string; label?: stri
     />
   );
 }
+
+const userStatusStyles: Record<string, string> = {
+  active: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  invited: "bg-blue-50 text-blue-800 ring-blue-600/20",
+  pendingVerification: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  suspended: "bg-red-50 text-red-800 ring-red-600/20",
+  locked: "bg-orange-50 text-orange-900 ring-orange-600/20",
+  disabled: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  archived: "bg-gray-100 text-gray-600 ring-gray-500/20",
+};
+
+const mfaStatusStyles: Record<string, string> = {
+  enabled: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  disabled: "bg-gray-100 text-gray-800 ring-gray-500/20",
+  required: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  pendingSetup: "bg-blue-50 text-blue-800 ring-blue-600/20",
+};
+
+const validationStateStyles: Record<string, string> = {
+  valid: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+  warning: "bg-amber-50 text-amber-900 ring-amber-600/20",
+  blocked: "bg-red-50 text-red-800 ring-red-600/20",
+  review: "bg-blue-50 text-blue-800 ring-blue-600/20",
+};
+
+export function UserStatusBadge({ status, label }: { status: string; label?: string }) {
+  return (
+    <StatusPill
+      label={label ?? formatStatusLabel(status)}
+      tone={userStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function MfaStatusBadge({ status, label }: { status: string; label?: string }) {
+  return (
+    <StatusPill
+      label={label ?? formatStatusLabel(status)}
+      tone={mfaStatusStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function AccessValidationBadge({ status, label }: { status: string; label?: string }) {
+  return (
+    <StatusPill
+      label={label ?? formatStatusLabel(status)}
+      tone={validationStateStyles[status] ?? "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}
+
+export function AccessRiskBadge({ highRisk, label }: { highRisk: boolean; label?: string }) {
+  return (
+    <StatusPill
+      label={label ?? (highRisk ? "High risk" : "Standard")}
+      tone={highRisk ? "bg-red-50 text-red-800 ring-red-600/20" : "bg-gray-100 text-gray-800 ring-gray-500/20"}
+    />
+  );
+}

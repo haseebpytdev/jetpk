@@ -68,6 +68,38 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
+    label: "Access control",
+    items: [
+      {
+        label: "Users",
+        href: "/users",
+        laravelRoute: "admin.staff",
+        children: [
+          { label: "Users", href: "/users" },
+          { label: "Roles", href: "/users/roles" },
+          { label: "Permissions", href: "/users/permissions" },
+        ],
+      },
+      {
+        label: "Settings",
+        href: "/settings",
+        laravelRoute: "admin.settings.index",
+        children: [
+          { label: "Overview", href: "/settings" },
+          { label: "General", href: "/settings/general" },
+          { label: "Security", href: "/settings/security" },
+          { label: "Notifications", href: "/settings/notifications" },
+          { label: "Integrations", href: "/settings/integrations" },
+        ],
+      },
+      {
+        label: "Audit",
+        href: "/audit",
+        laravelRoute: "admin.finance.wallet-audit.index",
+      },
+    ],
+  },
+  {
     label: "Inventory & pricing",
     items: [
       {

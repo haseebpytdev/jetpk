@@ -17,7 +17,11 @@ export async function expectFiltersReady(page: Page): Promise<void> {
     .or(page.getByTestId("pnrs-filters"))
     .or(page.getByTestId("tickets-filters"))
     .or(page.getByTestId("reports-filters"))
-    .or(page.getByTestId("cms-filters"));
+    .or(page.getByTestId("cms-filters"))
+    .or(page.getByTestId("users-filters"))
+    .or(page.getByTestId("roles-filters"))
+    .or(page.getByTestId("permissions-filters"))
+    .or(page.getByTestId("audit-filters"));
   await expect(filters).toBeVisible();
   const apply = page.getByRole("button", { name: "Apply filters" });
   await expect(apply).toBeEnabled();
@@ -92,7 +96,7 @@ export async function applySearchAndWaitForRow(
   await expectFiltersReady(page);
   await Promise.all([waitForClientUrl(page, urlPattern), search.press("Enter")]);
   await expectTableReady(table);
-  await expect(table.getByText(visibleRowText)).toBeVisible();
+  await expect(table.getByText(visibleRowText).first()).toBeVisible();
 }
 
 /** Apply filters and wait for URL + rendered row before assertions. */
@@ -106,7 +110,7 @@ export async function applyFiltersAndWaitForRow(
   const apply = page.getByRole("button", { name: "Apply filters" });
   await clickApplyAndWaitForUrl(page, apply, urlPattern);
   await expectTableReady(table);
-  await expect(table.getByText(visibleRowText)).toBeVisible();
+  await expect(table.getByText(visibleRowText).first()).toBeVisible();
 }
 
 /** Select a filter, re-verify draft, then apply and wait for results. */
@@ -410,4 +414,456 @@ export async function resetReportsFiltersAndWait(page: Page, urlMustNotMatch: Re
     page.getByRole("button", { name: "Reset filters" }).click(),
   ]);
   await expectReportsReady(page);
+}
+
+/** Wait until a users route transition finishes and workspace content is interactive. */
+export async function expectUsersReady(page: Page): Promise<void> {
+  await expect(page.getByRole("heading", { name: "Users", level: 1 })).toBeVisible({ timeout: 60_000 });
+
+  const routeLoading = page
+    .getByTestId("users-loading-state")
+    .or(page.locator('[aria-busy="true"][aria-label="Loading users"]'));
+  if ((await routeLoading.count()) > 0) {
+    await expect(routeLoading.first()).toBeHidden({ timeout: 30_000 });
+  }
+
+  await expect(
+    page.getByTestId("users-workspace").or(page.getByText(/Unable to load users/i)),
+  ).toBeVisible({ timeout: 30_000 });
+}
+
+/** Apply users filters and wait for URL update. */
+export async function applyUsersFiltersAndWait(page: Page, urlPattern: RegExp): Promise<void> {
+  await expectUsersReady(page);
+  const apply = page.getByRole("button", { name: "Apply filters" });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(apply).toBeEnabled();
+    try {
+      await Promise.all([page.waitForURL(urlPattern, CMS_URL_WAIT), apply.click()]);
+      await expectUsersReady(page);
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectUsersReady(page);
+    }
+  }
+}
+
+/** Click a users table sort header and wait for URL update. */
+export async function clickUsersSortHeader(page: Page, columnLabel: string, sortKey: string): Promise<void> {
+  await expectUsersReady(page);
+  const table = page.getByTestId("users-table");
+  await expectTableReady(table);
+  const header = table.getByRole("button", { name: columnLabel });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(header).toBeEnabled();
+    try {
+      await Promise.all([
+        page.waitForURL(new RegExp(`sort=${sortKey}`), CMS_URL_WAIT),
+        header.click(),
+      ]);
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectUsersReady(page);
+    }
+  }
+}
+
+/** Reset users filters and wait for cleared URL state. */
+export async function resetUsersFiltersAndWait(page: Page, urlMustNotMatch: RegExp): Promise<void> {
+  await expectUsersReady(page);
+  await page.getByRole("button", { name: "Reset filters" }).click();
+  await expect.poll(() => page.url(), { timeout: 30_000 }).not.toMatch(urlMustNotMatch);
+  await expectUsersReady(page);
+}
+
+/** Open a user drawer from the data table. */
+export async function openUserDrawer(page: Page, userId: string): Promise<void> {
+  await expectUsersReady(page);
+  const table = page.getByTestId("users-table");
+  await expectTableReady(table);
+  const rowButton = table.getByRole("button", { name: userId });
+  const urlPattern = new RegExp(`selected=${userId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(rowButton).toBeVisible();
+    await expect(rowButton).toBeEnabled();
+    try {
+      await Promise.all([page.waitForURL(urlPattern, CMS_URL_WAIT), rowButton.click()]);
+      await expect(page.getByRole("dialog")).toBeVisible({ timeout: 15_000 });
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectUsersReady(page);
+    }
+  }
+}
+
+/** Apply role preview in user drawer. */
+export async function applyUserRolePreview(page: Page, roleId: string): Promise<void> {
+  const preview = page.getByTestId("role-assignment-preview");
+  await expect(preview).toBeVisible();
+  const select = preview.locator("#role-preview-select");
+  await selectFilterOption(select, roleId);
+  await preview.getByRole("button", { name: "Apply to preview" }).click();
+}
+
+/** Reset role preview in user drawer. */
+export async function resetUserRolePreview(page: Page): Promise<void> {
+  const preview = page.getByTestId("role-assignment-preview");
+  await preview.getByRole("button", { name: "Reset preview" }).click();
+}
+
+/** Wait until a roles route transition finishes and workspace content is interactive. */
+export async function expectRolesReady(page: Page): Promise<void> {
+  await expect(page.getByRole("heading", { name: "Users", level: 1 })).toBeVisible({ timeout: 60_000 });
+
+  const routeLoading = page
+    .getByTestId("roles-loading-state")
+    .or(page.locator('[aria-busy="true"][aria-label="Loading roles"]'));
+  if ((await routeLoading.count()) > 0) {
+    await expect(routeLoading.first()).toBeHidden({ timeout: 30_000 });
+  }
+
+  await expect(
+    page.getByTestId("roles-workspace").or(page.getByText(/Unable to load users/i)),
+  ).toBeVisible({ timeout: 30_000 });
+}
+
+/** Apply roles filters and wait for URL update. */
+export async function applyRolesFiltersAndWait(page: Page, urlPattern: RegExp): Promise<void> {
+  await expectRolesReady(page);
+  const apply = page.getByRole("button", { name: "Apply filters" });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(apply).toBeEnabled();
+    try {
+      await Promise.all([page.waitForURL(urlPattern, CMS_URL_WAIT), apply.click()]);
+      await expectRolesReady(page);
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectRolesReady(page);
+    }
+  }
+}
+
+/** Click a roles table sort header and wait for URL update. */
+export async function clickRolesSortHeader(page: Page, columnLabel: string, sortKey: string): Promise<void> {
+  await expectRolesReady(page);
+  const table = page.getByTestId("roles-table");
+  await expectTableReady(table);
+  const header = table.getByRole("button", { name: columnLabel });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(header).toBeEnabled();
+    try {
+      await Promise.all([
+        page.waitForURL(new RegExp(`sort=${sortKey}`), CMS_URL_WAIT),
+        header.click(),
+      ]);
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectRolesReady(page);
+    }
+  }
+}
+
+/** Reset roles filters and wait for cleared URL state. */
+export async function resetRolesFiltersAndWait(page: Page, urlMustNotMatch: RegExp): Promise<void> {
+  await expectRolesReady(page);
+  const filters = page.getByTestId("roles-filters");
+  await filters.getByRole("button", { name: "Reset filters" }).click();
+  await expect.poll(() => page.url(), { timeout: 30_000 }).not.toMatch(urlMustNotMatch);
+  await expectRolesReady(page);
+}
+
+/** Open a role drawer from the data table. */
+export async function openRoleDrawer(page: Page, roleId: string): Promise<void> {
+  await expectRolesReady(page);
+  const table = page.getByTestId("roles-table");
+  await expectTableReady(table);
+  const rowButton = table.getByRole("button", { name: roleId });
+  const urlPattern = new RegExp(`selected=${roleId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(rowButton).toBeVisible();
+    await expect(rowButton).toBeEnabled();
+    try {
+      await Promise.all([page.waitForURL(urlPattern, CMS_URL_WAIT), rowButton.click()]);
+      await expect(page.getByRole("dialog")).toBeVisible({ timeout: 15_000 });
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectRolesReady(page);
+    }
+  }
+}
+
+/** Apply permission preview in role drawer. */
+export async function applyRolePermissionPreview(page: Page, permissionKey: string): Promise<void> {
+  const preview = page.getByTestId("permission-assignment-preview");
+  await expect(preview).toBeVisible();
+  const select = preview.locator("#permission-preview-select");
+  await selectFilterOption(select, permissionKey);
+  await preview.getByRole("button", { name: "Apply to preview" }).click();
+}
+
+/** Reset permission preview in role drawer. */
+export async function resetRolePermissionPreview(page: Page): Promise<void> {
+  const preview = page.getByTestId("permission-assignment-preview");
+  await preview.getByRole("button", { name: "Reset preview" }).click();
+}
+
+/** Wait until a permissions route transition finishes and workspace content is interactive. */
+export async function expectPermissionsReady(page: Page): Promise<void> {
+  await expect(page.getByRole("heading", { name: "Users", level: 1 })).toBeVisible({ timeout: 60_000 });
+
+  const routeLoading = page
+    .getByTestId("permissions-loading-state")
+    .or(page.locator('[aria-busy="true"][aria-label="Loading permissions"]'));
+  if ((await routeLoading.count()) > 0) {
+    await expect(routeLoading.first()).toBeHidden({ timeout: 30_000 });
+  }
+
+  await expect(
+    page.getByTestId("permissions-workspace").or(page.getByText(/Unable to load users/i)),
+  ).toBeVisible({ timeout: 30_000 });
+}
+
+/** Apply permissions filters and wait for URL update. */
+export async function applyPermissionsFiltersAndWait(page: Page, urlPattern: RegExp): Promise<void> {
+  await expectPermissionsReady(page);
+  const apply = page.getByRole("button", { name: "Apply filters" });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(apply).toBeEnabled();
+    try {
+      await Promise.all([page.waitForURL(urlPattern, CMS_URL_WAIT), apply.click()]);
+      await expectPermissionsReady(page);
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectPermissionsReady(page);
+    }
+  }
+}
+
+/** Click a permissions table sort header and wait for URL update. */
+export async function clickPermissionsSortHeader(page: Page, columnLabel: string, sortKey: string): Promise<void> {
+  await expectPermissionsReady(page);
+  const table = page.getByTestId("permissions-table");
+  await expectTableReady(table);
+  const header = table.getByRole("button", { name: columnLabel });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(header).toBeEnabled();
+    try {
+      await Promise.all([
+        page.waitForURL(new RegExp(`sort=${sortKey}`), CMS_URL_WAIT),
+        header.click(),
+      ]);
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectPermissionsReady(page);
+    }
+  }
+}
+
+/** Reset permissions filters and wait for cleared URL state. */
+export async function resetPermissionsFiltersAndWait(page: Page, urlMustNotMatch: RegExp): Promise<void> {
+  await expectPermissionsReady(page);
+  await page.getByRole("button", { name: "Reset filters" }).click();
+  await expect.poll(() => page.url(), { timeout: 30_000 }).not.toMatch(urlMustNotMatch);
+  await expectPermissionsReady(page);
+}
+
+/** Open a permission drawer from the data table. */
+export async function openPermissionDrawer(page: Page, permissionId: string): Promise<void> {
+  await expectPermissionsReady(page);
+  const table = page.getByTestId("permissions-table");
+  await expectTableReady(table);
+  const rowButton = table.getByRole("button", { name: permissionId });
+  await rowButton.click();
+  await expect(page).toHaveURL(new RegExp(`selected=${permissionId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`), {
+    timeout: 30_000,
+  });
+  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 15_000 });
+}
+
+/** Wait until a settings route transition finishes and workspace content is interactive. */
+export async function expectSettingsReady(page: Page): Promise<void> {
+  await expect(page.getByRole("heading", { name: "Settings", level: 1 })).toBeVisible({ timeout: 60_000 });
+
+  const routeLoading = page
+    .getByTestId("settings-loading-state")
+    .or(page.locator('[aria-busy="true"][aria-label="Loading settings"]'));
+  if ((await routeLoading.count()) > 0) {
+    await expect(routeLoading.first()).toBeHidden({ timeout: 30_000 });
+  }
+
+  await expect(
+    page
+      .getByTestId("settings-overview")
+      .or(page.getByTestId("general-settings-workspace"))
+      .or(page.getByTestId("security-settings-workspace"))
+      .or(page.getByTestId("notification-settings-workspace"))
+      .or(page.getByTestId("integration-settings-workspace"))
+      .or(page.getByText(/Unable to load settings/i))
+      .or(page.getByText(/No settings data in preview/i)),
+  ).toBeVisible({ timeout: 30_000 });
+}
+
+async function getSettingsPreviewForm(page: Page, workspaceTestId: string) {
+  const workspace = page.getByTestId(workspaceTestId);
+  await expect(workspace).toBeVisible();
+  return workspace.getByTestId("settings-local-preview-form");
+}
+
+async function applySettingsFieldPreview(
+  page: Page,
+  workspaceTestId: string,
+  fieldLabel: string,
+  value: string,
+): Promise<void> {
+  await expectSettingsReady(page);
+  const form = await getSettingsPreviewForm(page, workspaceTestId);
+  const control = form.getByLabel(fieldLabel);
+  const tagName = await control.evaluate((el) => el.tagName.toLowerCase());
+  if (tagName === "select") {
+    await selectFilterOption(control, value);
+  } else {
+    await fillSearchInput(control, value);
+  }
+  await form.getByRole("button", { name: "Apply to preview" }).click();
+  await expect(page.getByText("Unsaved preview")).toBeVisible();
+}
+
+async function resetSettingsSectionPreview(page: Page, workspaceTestId: string): Promise<void> {
+  const form = await getSettingsPreviewForm(page, workspaceTestId);
+  await form.getByRole("button", { name: "Reset preview" }).click();
+}
+
+/** Apply local preview changes on general settings. */
+export async function applyGeneralSettingsPreview(page: Page, fieldLabel: string, value: string): Promise<void> {
+  await applySettingsFieldPreview(page, "general-settings-workspace", fieldLabel, value);
+}
+
+/** Reset general settings local preview. */
+export async function resetGeneralSettingsPreview(page: Page): Promise<void> {
+  await resetSettingsSectionPreview(page, "general-settings-workspace");
+}
+
+/** Reset security settings local preview. */
+export async function resetSecuritySettingsPreview(page: Page): Promise<void> {
+  await resetSettingsSectionPreview(page, "security-settings-workspace");
+}
+
+/** Reset notification settings local preview. */
+export async function resetNotificationSettingsPreview(page: Page): Promise<void> {
+  await resetSettingsSectionPreview(page, "notification-settings-workspace");
+}
+
+/** Reset integration settings local preview. */
+export async function resetIntegrationSettingsPreview(page: Page): Promise<void> {
+  await resetSettingsSectionPreview(page, "integration-settings-workspace");
+}
+
+/** Wait until an audit route transition finishes and workspace content is interactive. */
+export async function expectAuditReady(page: Page): Promise<void> {
+  await expect(page.getByRole("heading", { name: "Audit", level: 1 })).toBeVisible({ timeout: 60_000 });
+
+  const routeLoading = page
+    .getByTestId("audit-loading-state")
+    .or(page.locator('[aria-busy="true"][aria-label="Loading audit"]'));
+  if ((await routeLoading.count()) > 0) {
+    await expect(routeLoading.first()).toBeHidden({ timeout: 30_000 });
+  }
+
+  await expect(
+    page.getByTestId("audit-workspace").or(page.getByText(/Unable to load audit events/i)),
+  ).toBeVisible({ timeout: 30_000 });
+}
+
+/** Apply audit filters and wait for URL update. */
+export async function applyAuditFiltersAndWait(page: Page, urlPattern: RegExp): Promise<void> {
+  await expectAuditReady(page);
+  const apply = page.getByRole("button", { name: "Apply filters" });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(apply).toBeEnabled();
+    try {
+      await Promise.all([page.waitForURL(urlPattern, CMS_URL_WAIT), apply.click()]);
+      await expectAuditReady(page);
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectAuditReady(page);
+    }
+  }
+}
+
+/** Click an audit table sort header and wait for URL update. */
+export async function clickAuditSortHeader(page: Page, columnLabel: string, sortKey: string): Promise<void> {
+  await expectAuditReady(page);
+  const table = page.getByTestId("audit-table");
+  await expectTableReady(table);
+  const header = table.getByRole("button", { name: columnLabel });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(header).toBeEnabled();
+    try {
+      await Promise.all([
+        page.waitForURL(new RegExp(`sort=${sortKey}`), CMS_URL_WAIT),
+        header.click(),
+      ]);
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectAuditReady(page);
+    }
+  }
+}
+
+/** Reset audit filters and wait for cleared URL state. */
+export async function resetAuditFiltersAndWait(page: Page, urlMustNotMatch: RegExp): Promise<void> {
+  await expectAuditReady(page);
+  await page.getByRole("button", { name: "Reset filters" }).click();
+  await expect.poll(() => page.url(), { timeout: 30_000 }).not.toMatch(urlMustNotMatch);
+  await expectAuditReady(page);
+}
+
+/** Open an audit event drawer from the data table. */
+export async function openAuditEventDrawer(page: Page, eventId: string): Promise<void> {
+  await expectAuditReady(page);
+  const table = page.getByTestId("audit-table");
+  await expectTableReady(table);
+  const rowButton = table.getByRole("button", { name: eventId });
+  const urlPattern = new RegExp(`selected=${eventId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await expect(rowButton).toBeVisible();
+    await expect(rowButton).toBeEnabled();
+    try {
+      await Promise.all([page.waitForURL(urlPattern, CMS_URL_WAIT), rowButton.click()]);
+      await expect(page.getByRole("dialog")).toBeVisible({ timeout: 15_000 });
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await expectAuditReady(page);
+    }
+  }
+}
+
+/** Apply audit date preset and wait for URL. */
+export async function applyAuditPresetAndWait(page: Page, preset: string, urlPattern: RegExp): Promise<void> {
+  await expectAuditReady(page);
+  const select = page.locator("#audit-date-preset");
+  await selectFilterOption(select, preset);
+  await applyAuditFiltersAndWait(page, urlPattern);
+}
+
+/** Open audit export preview drawer. */
+export async function openAuditExportDrawer(page: Page): Promise<void> {
+  await expectAuditReady(page);
+  const exportButton = page.getByTestId("audit-export-button");
+  await expect(exportButton).toBeEnabled();
+  await exportButton.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible({ timeout: 10_000 });
+  await expect(dialog.getByRole("button", { name: "Download CSV" })).toBeVisible();
 }
