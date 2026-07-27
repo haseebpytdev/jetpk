@@ -66,19 +66,33 @@ php artisan test --filter="FlightSearchCriteriaCacheKeyTest|FlightSearchSupplier
 
 **Result:** failures=0, errors=0, skips=0, exit=0, assertions=249
 
-## Runtime SHA-256 manifest (uppercase)
+## Runtime manifest (18K — authoritative 11 files)
 
-| Path | SHA-256 |
-|------|---------|
-| `app/Http/Controllers/Frontend/FlightController.php` | `C57F4932654619174B671032A456F26F09F7D26DC371EE53F79E64ADF79A2583` |
-| `app/Http/Requests/PublicFlightSearchRequest.php` | `120665409D936DF6F71CF0C169B013CDD7260B046FE3FE5A61BDE8092934B9B5` |
-| `app/Services/FlightSearch/FlightSearchResultStore.php` | `2A8D7CA0C1C36684AD82530569AB6424F0E8FF4F24FA8FF17CF8BC25422FA05C` |
-| `app/Services/FlightSearch/FlightSearchService.php` | `23BDE13713AF1F11B255E625499DF45C4462B09F3D2DD5ED0ED88642789C517E` |
-| `app/Services/FlightSearch/FlightSearchSupplierResultCache.php` | `B5A011C170B9ED2F6D96ED0B8A24B5A6049026EA5AF05F4AF3FBB321C788AFA1` |
-| `app/Services/FlightSearch/NearbyDateFareStripService.php` | `296EB94078777F49CA115945A9A202674BFC72DD36050E72397FE2F1447F5C06` |
-| `app/Support/FlightSearch/FlightSearchCriteriaCacheKey.php` | `B3F1C277B0D58E79929F0401908DE722589013497A78A9D74C6FE750D92B5C6D` |
-| `config/ota-flights.php` | `77A2F3BC6F905796E0A3A6E020BA53BD521807B308568E449DDC4F80D4D8693C` |
-| `resources/views/themes/frontend/jetpakistan/components/search/search-action-row.blade.php` | `D44EE10F2178A2B5BC07DB0DA80818BD11882F5E880C8AC1E9F1936B6D7F04BF` |
+**Count:** 11 (verified: exists, tracked, changed in `29f21e5..HEAD`, no duplicates/omissions)
+**Manifest:** `docs/phases/PHASE18_RUNTIME_FILES.txt`
+**Hashes:** `docs/phases/PHASE18-RUNTIME-SHA256.tsv`
+
+| # | Path | SHA-256 (uppercase) | Production target |
+|---|------|---------------------|-------------------|
+| 1 | `app/Http/Controllers/Frontend/FlightController.php` | `C57F4932654619174B671032A456F26F09F7D26DC371EE53F79E64ADF79A2583` | `/home/pkjetp/jetpk_app/app/Http/Controllers/Frontend/FlightController.php` |
+| 2 | `app/Http/Requests/PublicFlightSearchRequest.php` | `120665409D936DF6F71CF0C169B013CDD7260B046FE3FE5A61BDE8092934B9B5` | `/home/pkjetp/jetpk_app/app/Http/Requests/PublicFlightSearchRequest.php` |
+| 3 | `app/Services/FlightSearch/FlightSearchResultStore.php` | `2A8D7CA0C1C36684AD82530569AB6424F0E8FF4F24FA8FF17CF8BC25422FA05C` | `/home/pkjetp/jetpk_app/app/Services/FlightSearch/FlightSearchResultStore.php` |
+| 4 | `app/Services/FlightSearch/FlightSearchService.php` | `23BDE13713AF1F11B255E625499DF45C4462B09F3D2DD5ED0ED88642789C517E` | `/home/pkjetp/jetpk_app/app/Services/FlightSearch/FlightSearchService.php` |
+| 5 | `app/Services/FlightSearch/FlightSearchSupplierResultCache.php` | `B5A011C170B9ED2F6D96ED0B8A24B5A6049026EA5AF05F4AF3FBB321C788AFA1` | `/home/pkjetp/jetpk_app/app/Services/FlightSearch/FlightSearchSupplierResultCache.php` |
+| 6 | `app/Services/FlightSearch/NearbyDateFareStripService.php` | `296EB94078777F49CA115945A9A202674BFC72DD36050E72397FE2F1447F5C06` | `/home/pkjetp/jetpk_app/app/Services/FlightSearch/NearbyDateFareStripService.php` |
+| 7 | `app/Support/FlightSearch/FlightSearchCriteriaCacheKey.php` | `B3F1C277B0D58E79929F0401908DE722589013497A78A9D74C6FE750D92B5C6D` | `/home/pkjetp/jetpk_app/app/Support/FlightSearch/FlightSearchCriteriaCacheKey.php` |
+| 8 | `config/ota-flights.php` | `77A2F3BC6F905796E0A3A6E020BA53BD521807B308568E449DDC4F80D4D8693C` | `/home/pkjetp/jetpk_app/config/ota-flights.php` |
+| 9 | `resources/views/themes/frontend/jetpakistan/components/search/search-action-row.blade.php` | `D44EE10F2178A2B5BC07DB0DA80818BD11882F5E880C8AC1E9F1936B6D7F04BF` | `/home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/components/search/search-action-row.blade.php` |
+| 10 | `public/themes/frontend/jetpakistan/css/results.css` | `E12CE8017A10341906D23FD6D916FD68BB18C1C9F5F8218DCF742C6E97EC3649` | `/home/pkjetp/public_html/themes/frontend/jetpakistan/css/results.css` **and** `/home/pkjetp/jetpk_app/public/themes/frontend/jetpakistan/css/results.css` |
+| 11 | `resources/views/themes/frontend/jetpakistan/frontend/flights/results.blade.php` | `1E446C48DE66273ABFF45BD793A0E2219EFB98B736F62815B12CEC20128AA1DE` | `/home/pkjetp/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend/flights/results.blade.php` |
+
+### Public webroot handling
+
+`/home/pkjetp/jetpk_app/public` and `/home/pkjetp/public_html` are independent directories (not a symlink). Theme CSS is served from `public_html`; `jetpk_app/public` holds a mirror copy. File 10 must be uploaded to both targets with identical SHA-256.
+
+### Asset cache-busting
+
+`results.blade.php` (file 11) sets `$jpAssetVersion = 45` and loads `results.css?v={{ $jpAssetVersion }}`. No additional cache-bust runtime change required for 18K.
 
 ## Safety confirmations
 
@@ -102,6 +116,17 @@ See `docs/phases/PHASE18-BROWSER-GATE-EVIDENCE.md` and `playwright.phase18-brows
 | `eb23c61` | `fix(ui): align JetPK results containers with header wrap` |
 | `ef75ca5` | `test(sabre): close Phase 18 browser regression gate` |
 | `98c3a61` | `docs(sabre): reconcile Phase 18 release evidence` |
+| `72c6f3f` | `docs(sabre): strip trailing whitespace in browser gate evidence` |
+
+## Phase 18K deployment manifest closure
+
+| Item | Status |
+|------|--------|
+| Authoritative runtime count | **11** |
+| Manifest / hash / deploy / rollback alignment | **CONFIRMED** |
+| Asset cache-bust fix required | **NO** (`$jpAssetVersion = 45` already present) |
+| Production test commands in deploy plan | **REMOVED** |
+| Deployment readiness | **READY** |
 
 ## Rollback
 

@@ -7,3 +7,5 @@ app/Services/FlightSearch/NearbyDateFareStripService.php
 app/Support/FlightSearch/FlightSearchCriteriaCacheKey.php
 config/ota-flights.php
 resources/views/themes/frontend/jetpakistan/components/search/search-action-row.blade.php
+public/themes/frontend/jetpakistan/css/results.css
+resources/views/themes/frontend/jetpakistan/frontend/flights/results.blade.php
