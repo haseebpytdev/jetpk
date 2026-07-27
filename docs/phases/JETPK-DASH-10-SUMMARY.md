@@ -232,11 +232,11 @@ Automated screenshots not captured in this documentation pass.
 
 Implementation commit: **e4a18b2**
 
-Documentation commit: **TBD**
+Documentation commit: **2adb665**
 
 ## Documentation commit SHA
 
-**TBD** (pending docs-only commit after implementation SHA recorded)
+`2adb665` — docs(dashboard): finalize DASH-10 phase summary
 
 ## Remote tracking branch
 
