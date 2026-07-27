@@ -1,0 +1,362 @@
+import { PERMISSION_CATALOG } from "@/lib/access-control/permission-catalog";
+import type { Role, RolePermission } from "@/types/access-control";
+
+export const RBAC_REFERENCE_DATE = "2026-07-01T00:00:00.000Z";
+
+export const mockRoles: Role[] = [
+  {
+    id: "JP-ROL-0001",
+    key: "super_administrator",
+    name: "Super Administrator",
+    description: "Full platform administration with protected system access.",
+    category: "system",
+    status: "active",
+    isSystem: true,
+    isProtected: true,
+    assignedUserCount: 2,
+    permissionCount: 46,
+    permissionGroups: ["dashboard", "bookings", "payments", "customers", "suppliers", "agents", "pnrs", "tickets", "reports", "cms", "users", "roles", "settings", "audit"],
+    scope: "allRecords",
+    createdAt: "2025-01-10T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0001",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0002",
+    key: "operations_manager",
+    name: "Operations Manager",
+    description: "Oversees bookings, PNRs, tickets, and operational queues.",
+    category: "operations",
+    status: "active",
+    isSystem: true,
+    isProtected: false,
+    assignedUserCount: 4,
+    permissionCount: 22,
+    permissionGroups: ["dashboard", "bookings", "payments", "customers", "agents", "pnrs", "tickets", "reports"],
+    scope: "allRecords",
+    createdAt: "2025-01-10T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 2,
+    lastEditor: "JP-USR-0001",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0003",
+    key: "booking_agent",
+    name: "Booking Agent",
+    description: "Creates and manages bookings without approval authority.",
+    category: "operations",
+    status: "active",
+    isSystem: true,
+    isProtected: false,
+    assignedUserCount: 8,
+    permissionCount: 8,
+    permissionGroups: ["dashboard", "bookings", "customers", "agents"],
+    scope: "ownRecords",
+    createdAt: "2025-01-10T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0002",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0004",
+    key: "ticketing_agent",
+    name: "Ticketing Agent",
+    description: "GDS and NDC ticketing operations with channel-scoped access.",
+    category: "operations",
+    status: "active",
+    isSystem: true,
+    isProtected: false,
+    assignedUserCount: 5,
+    permissionCount: 10,
+    permissionGroups: ["dashboard", "pnrs", "tickets", "bookings"],
+    scope: "gdsOnly",
+    createdAt: "2025-02-01T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 3,
+    lastEditor: "JP-USR-0002",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0005",
+    key: "finance_officer",
+    name: "Finance Officer",
+    description: "Payment reconciliation and refund request handling.",
+    category: "finance",
+    status: "active",
+    isSystem: true,
+    isProtected: false,
+    assignedUserCount: 3,
+    permissionCount: 9,
+    permissionGroups: ["dashboard", "payments", "reports"],
+    scope: "allRecords",
+    createdAt: "2025-02-01T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0001",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0006",
+    key: "customer_support",
+    name: "Customer Support",
+    description: "Customer service with view and limited update access.",
+    category: "operations",
+    status: "active",
+    isSystem: true,
+    isProtected: false,
+    assignedUserCount: 6,
+    permissionCount: 7,
+    permissionGroups: ["dashboard", "customers", "bookings", "tickets"],
+    scope: "ownRecords",
+    createdAt: "2025-03-01T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0002",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0007",
+    key: "content_manager",
+    name: "Content Manager",
+    description: "CMS authoring, review, and publication requests.",
+    category: "content",
+    status: "active",
+    isSystem: true,
+    isProtected: false,
+    assignedUserCount: 3,
+    permissionCount: 8,
+    permissionGroups: ["dashboard", "cms"],
+    scope: "allRecords",
+    createdAt: "2025-03-15T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 2,
+    lastEditor: "JP-USR-0007",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0008",
+    key: "analyst",
+    name: "Analyst",
+    description: "Read-only analytics and report export access.",
+    category: "analytics",
+    status: "active",
+    isSystem: true,
+    isProtected: false,
+    assignedUserCount: 4,
+    permissionCount: 4,
+    permissionGroups: ["dashboard", "reports"],
+    scope: "allRecords",
+    createdAt: "2025-04-01T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0001",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0009",
+    key: "read_only_auditor",
+    name: "Read-only Auditor",
+    description: "Audit log and read-only module access without mutations.",
+    category: "audit",
+    status: "active",
+    isSystem: true,
+    isProtected: true,
+    assignedUserCount: 2,
+    permissionCount: 12,
+    permissionGroups: ["dashboard", "bookings", "payments", "reports", "audit"],
+    scope: "allRecords",
+    createdAt: "2025-04-01T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0001",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0010",
+    key: "pnr_reviewer",
+    name: "PNR Reviewer",
+    description: "Reviews PNR and NDC orders with cancellation request capability.",
+    category: "operations",
+    status: "active",
+    isSystem: false,
+    isProtected: false,
+    assignedUserCount: 2,
+    permissionCount: 6,
+    permissionGroups: ["dashboard", "pnrs", "bookings"],
+    scope: "ndcOnly",
+    createdAt: "2025-05-01T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0002",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0011",
+    key: "incomplete_role",
+    name: "Incomplete Role",
+    description: "Intentionally incomplete role for validation testing.",
+    category: "custom",
+    status: "draft",
+    isSystem: false,
+    isProtected: false,
+    assignedUserCount: 1,
+    permissionCount: 1,
+    permissionGroups: ["dashboard"],
+    scope: "ownRecords",
+    createdAt: "2025-06-01T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0001",
+    validationState: "warning",
+  },
+  {
+    id: "JP-ROL-0012",
+    key: "overly_broad_role",
+    name: "Overly Broad Role",
+    description: "Demonstrates validation warning for excessive domain access.",
+    category: "custom",
+    status: "active",
+    isSystem: false,
+    isProtected: false,
+    assignedUserCount: 1,
+    permissionCount: 35,
+    permissionGroups: ["dashboard", "bookings", "payments", "customers", "suppliers", "agents", "pnrs", "tickets", "reports", "cms", "users"],
+    scope: "allRecords",
+    createdAt: "2025-06-15T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 2,
+    lastEditor: "JP-USR-0001",
+    validationState: "warning",
+  },
+  {
+    id: "JP-ROL-0013",
+    key: "administrator",
+    name: "Administrator",
+    description: "User and settings administration without full super-admin scope.",
+    category: "system",
+    status: "active",
+    isSystem: true,
+    isProtected: false,
+    assignedUserCount: 3,
+    permissionCount: 18,
+    permissionGroups: ["dashboard", "users", "roles", "settings", "audit"],
+    scope: "allRecords",
+    createdAt: "2025-01-10T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0001",
+    validationState: "valid",
+  },
+  {
+    id: "JP-ROL-0014",
+    key: "ndc_specialist",
+    name: "NDC Specialist",
+    description: "NDC channel specialist with scoped ticketing permissions.",
+    category: "operations",
+    status: "active",
+    isSystem: false,
+    isProtected: false,
+    assignedUserCount: 2,
+    permissionCount: 7,
+    permissionGroups: ["dashboard", "pnrs", "tickets"],
+    scope: "ndcOnly",
+    createdAt: "2025-07-01T08:00:00.000Z",
+    updatedAt: RBAC_REFERENCE_DATE,
+    revision: 1,
+    lastEditor: "JP-USR-0004",
+    validationState: "valid",
+  },
+];
+
+const ROLE_PERMISSION_MAP: Record<string, string[]> = {
+  "JP-ROL-0001": PERMISSION_CATALOG.map((p) => p.key),
+  "JP-ROL-0002": [
+    "dashboard.view", "bookings.view", "bookings.create", "bookings.update", "bookings.cancel.request",
+    "payments.view", "customers.view", "agents.view", "pnrs.view", "pnrs.review", "pnrs.cancel.request",
+    "tickets.view", "tickets.review", "tickets.issue.request", "reports.view",
+  ],
+  "JP-ROL-0003": [
+    "dashboard.view", "bookings.view", "bookings.create", "bookings.update", "customers.view", "agents.view",
+  ],
+  "JP-ROL-0004": [
+    "dashboard.view", "bookings.view", "pnrs.view", "pnrs.review", "tickets.view", "tickets.review",
+    "tickets.issue.request",
+  ],
+  "JP-ROL-0005": [
+    "dashboard.view", "payments.view", "payments.record", "payments.reconcile", "payments.refund.request",
+    "reports.view", "reports.export",
+  ],
+  "JP-ROL-0006": [
+    "dashboard.view", "customers.view", "customers.update", "bookings.view", "tickets.view",
+  ],
+  "JP-ROL-0007": [
+    "dashboard.view", "cms.view", "cms.preview", "cms.edit", "cms.review", "cms.publish.request",
+  ],
+  "JP-ROL-0008": [
+    "dashboard.view", "reports.view", "reports.export",
+  ],
+  "JP-ROL-0009": [
+    "dashboard.view", "bookings.view", "payments.view", "reports.view", "audit.view",
+  ],
+  "JP-ROL-0010": [
+    "dashboard.view", "pnrs.view", "pnrs.review", "pnrs.cancel.request", "bookings.view",
+  ],
+  "JP-ROL-0011": ["dashboard.view"],
+  "JP-ROL-0012": PERMISSION_CATALOG.filter((p) => p.domain !== "audit" && p.domain !== "roles").map((p) => p.key),
+  "JP-ROL-0013": [
+    "dashboard.view", "users.view", "users.invite", "users.update", "users.assignRoles",
+    "roles.view", "roles.create", "roles.update", "settings.view", "settings.update", "audit.view",
+  ],
+  "JP-ROL-0014": [
+    "dashboard.view", "pnrs.view", "pnrs.review", "tickets.view", "tickets.review", "tickets.issue.request",
+  ],
+};
+
+function scopeForRole(roleId: string, permissionKey: string): RolePermission["scope"] {
+  if (roleId === "JP-ROL-0004") {
+    if (permissionKey.startsWith("pnrs.") || permissionKey.startsWith("tickets.")) {
+      return "channel:gds";
+    }
+  }
+  if (roleId === "JP-ROL-0010" || roleId === "JP-ROL-0014") {
+    if (permissionKey.startsWith("pnrs.") || permissionKey.startsWith("tickets.")) {
+      return "channel:ndc";
+    }
+  }
+  if (roleId === "JP-ROL-0003" || roleId === "JP-ROL-0006") {
+    return "own";
+  }
+  return "all";
+}
+
+export const mockRolePermissions: RolePermission[] = Object.entries(ROLE_PERMISSION_MAP).flatMap(
+  ([roleId, keys]) =>
+    keys.map((permissionKey) => {
+      const perm = PERMISSION_CATALOG.find((p) => p.key === permissionKey);
+      return {
+        roleId,
+        permissionId: perm?.id ?? "",
+        permissionKey,
+        effect: "allow" as const,
+        scope: scopeForRole(roleId, permissionKey),
+      };
+    }),
+);
+
+export const RBAC_FIXTURE_COUNTS = {
+  roles: mockRoles.length,
+  permissions: PERMISSION_CATALOG.length,
+  rolePermissions: mockRolePermissions.length,
+};
+
+export function getRoleById(id: string): Role | undefined {
+  return mockRoles.find((r) => r.id === id);
+}
+
+export function getRolePermissions(roleId: string): RolePermission[] {
+  return mockRolePermissions.filter((rp) => rp.roleId === roleId);
+}
