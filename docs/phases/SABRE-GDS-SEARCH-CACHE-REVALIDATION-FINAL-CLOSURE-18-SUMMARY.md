@@ -117,8 +117,12 @@ See `docs/phases/PHASE18-BROWSER-GATE-EVIDENCE.md` and `playwright.phase18-brows
 | `ef75ca5` | `test(sabre): close Phase 18 browser regression gate` |
 | `98c3a61` | `docs(sabre): reconcile Phase 18 release evidence` |
 | `72c6f3f` | `docs(sabre): strip trailing whitespace in browser gate evidence` |
+| `bae0e4a` | `docs(sabre): finalize Phase 18 deployment manifest` |
 
 ## Phase 18K deployment manifest closure
+
+**Prior HEAD:** `72c6f3f3b37666a70c4b36a69bb7ec16574de64e`
+**Final HEAD:** `bae0e4ab7823a35a332d8642bbd450e70389f374`
 
 | Item | Status |
 |------|--------|
