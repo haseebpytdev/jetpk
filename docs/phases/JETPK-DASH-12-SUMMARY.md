@@ -137,15 +137,15 @@ Public Next.js frontend **not started**. Blade public frontend remains authorita
 
 ## 29. Documentation commit SHA
 
-*(filled after docs commit)*
+`baf9857` — docs(dashboard): finalize DASH-12 integration summary
 
 ## 30. Push result
 
-*(filled after push)*
+Success — `jetpk/main` updated `ae820f5..baf9857`.
 
 ## 31. Final main HEAD
 
-*(filled after push)*
+`baf9857` — docs(dashboard): finalize DASH-12 integration summary
 
 ## 32. Working-tree status
 
