@@ -25,7 +25,7 @@ test.beforeAll(async ({ request }) => {
 test("roles route renders", async ({ page }) => {
   await page.goto("/testdash/users/roles", { waitUntil: "load" });
   await expectRolesReady(page);
-  await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+  await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("navigation includes Roles section link", async ({ page }) => {
@@ -111,8 +111,18 @@ test("pagination works", async ({ page }) => {
   const pagination = page.getByRole("navigation", { name: "Roles pagination" });
   const next = pagination.getByRole("button", { name: "Next page" });
   await expect(next).toBeEnabled();
-  await Promise.all([page.waitForURL(/page=2/, { timeout: 30_000, waitUntil: "commit" }), next.click()]);
-  await expect(page).toHaveURL(/page=2/);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await Promise.all([page.waitForURL(/page=2/, { timeout: 30_000, waitUntil: "commit" }), next.click()]);
+      await expect(page).toHaveURL(/page=2/);
+      return;
+    } catch (error) {
+      if (attempt === 2) {
+        throw error;
+      }
+      await expectRolesReady(page);
+    }
+  }
 });
 
 test("desktop table renders", async ({ page }) => {

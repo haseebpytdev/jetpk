@@ -61,7 +61,7 @@ for (const route of cmsRoutes) {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto(route, { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "CMS", level: 1 })).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByText(/Dashboard preview only/i)).toBeVisible();
+    await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
   });
 }
 

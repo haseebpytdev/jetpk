@@ -104,7 +104,7 @@ test("no brand selector exists on overview", async ({ page }) => {
 
 test("dashboard preview notice is visible", async ({ page }) => {
   await page.goto("/testdash/cms", { waitUntil: "load" });
-  await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+  await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("scheduled queue panel renders", async ({ page }) => {

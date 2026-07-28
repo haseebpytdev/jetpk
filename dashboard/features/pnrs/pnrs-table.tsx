@@ -25,7 +25,7 @@ function sortIndicator(active: boolean, direction: PnrsQuery["direction"]) {
 
 export function PnrsTable({ pnrs, query, onSort, onView }: Props) {
   return (
-    <div className="hidden md:block" data-testid="pnrs-table">
+    <div className="hidden xl:block min-w-0 w-full max-w-full" data-testid="pnrs-table">
       <Table>
         <TableHead>
           <TableRow>
@@ -93,7 +93,7 @@ export function PnrsTable({ pnrs, query, onSort, onView }: Props) {
                 {formatCurrency(pnr.bookingValue, pnr.currency)}
               </Td>
               <Td>
-                <Button variant="secondary" size="sm" onClick={() => onView(pnr.id)}>
+                <Button variant="secondary" size="sm" aria-label={pnr.id} onClick={() => onView(pnr.id)}>
                   View
                 </Button>
               </Td>

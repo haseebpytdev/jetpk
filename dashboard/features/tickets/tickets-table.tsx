@@ -26,7 +26,7 @@ function sortIndicator(active: boolean, direction: TicketsQuery["direction"]) {
 
 export function TicketsTable({ tickets, query, onSort, onView }: Props) {
   return (
-    <div className="hidden md:block" data-testid="tickets-table">
+    <div className="hidden xl:block min-w-0 w-full max-w-full" data-testid="tickets-table">
       <Table>
         <TableHead>
           <TableRow>
@@ -94,7 +94,7 @@ export function TicketsTable({ tickets, query, onSort, onView }: Props) {
               </Td>
               <Td>{formatDate(ticket.travelDate)}</Td>
               <Td>
-                <Button variant="secondary" size="sm" onClick={() => onView(ticket.id)}>
+                <Button variant="secondary" size="sm" aria-label={ticket.id} onClick={() => onView(ticket.id)}>
                   View
                 </Button>
               </Td>

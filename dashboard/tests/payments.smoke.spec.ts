@@ -121,8 +121,10 @@ test("pagination works", async ({ page }) => {
   await expectTableReady(table);
   await expect(page.getByText("1 /")).toBeVisible();
   const firstPageId = await table.locator("tbody tr").first().textContent();
-  await page.getByRole("button", { name: "Next page" }).click();
-  await waitForUrlChange(page, /page=2/);
+  const pagination = page.getByRole("navigation", { name: "Payments pagination" });
+  const next = pagination.getByRole("button", { name: "Next page" });
+  await expect(next).toBeEnabled();
+  await Promise.all([page.waitForURL(/page=2/, { timeout: 30_000, waitUntil: "commit" }), next.click()]);
   await expectTableReady(table);
   await expect(table.locator("tbody tr").first()).not.toHaveText(firstPageId ?? "");
 });

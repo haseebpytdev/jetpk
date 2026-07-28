@@ -28,7 +28,7 @@ function methodLabel(method: TransactionRecord["paymentMethod"]): string {
 
 export function PaymentsTable({ transactions, query, onSort, onView }: Props) {
   return (
-    <div className="hidden md:block" data-testid="payments-table">
+    <div className="hidden xl:block min-w-0 w-full max-w-full" data-testid="payments-table">
       <Table>
         <TableHead>
           <TableRow>

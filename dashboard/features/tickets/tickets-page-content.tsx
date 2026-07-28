@@ -1,9 +1,17 @@
 import { TicketsWorkspace } from "@/features/tickets/tickets-workspace";
 import { TicketsErrorPanel } from "@/features/tickets/tickets-error-panel";
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parseTicketsQuery } from "@/lib/tickets-query";
 import { getTicketDetail, getTicketsPage, TicketsServiceError } from "@/services/ticket-service";
+import {
+  ForbiddenState,
+  SanitizedErrorState,
+  ServiceUnavailableState,
+  UnauthorizedState,
+} from "@/components/ui/data-source-status";
+import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -38,7 +46,7 @@ export async function TicketsPageContent({ searchParams }: Props) {
             />
           }
           title="Tickets & Documents"
-          description="Ticket and fulfilment document records — mock preview data."
+          description="Ticket and fulfilment document records."
         />
         <TicketsLoadingSkeleton />
       </PageContainer>
@@ -51,6 +59,7 @@ export async function TicketsPageContent({ searchParams }: Props) {
 
     return (
       <PageContainer>
+        <PreviewModeBadgeSlot />
         <PageHeader
           breadcrumb={
             <Breadcrumb
@@ -58,21 +67,37 @@ export async function TicketsPageContent({ searchParams }: Props) {
             />
           }
           title="Tickets & Documents"
-          description="Ticket and fulfilment document records — mock preview data with filters, sorting, and read-only detail."
+          description="Ticket and fulfilment document records with filters, sorting, and read-only detail."
         />
-        <PreviewDataBanner />
+        <DataSourceNoticeSlot />
         <TicketsWorkspace query={query} result={result} selectedTicket={selectedTicket} />
       </PageContainer>
     );
   } catch (e) {
-    if (e instanceof TicketsServiceError) {
-      return (
-        <PageContainer>
-          <PageHeader title="Tickets & Documents" />
-          <TicketsErrorPanel referenceId={e.referenceId} message={e.message} />
-        </PageContainer>
-      );
-    }
-    throw e;
+    return (
+      <PageContainer>
+        <PageHeader title="Tickets & Documents" />
+        <TicketsModuleError error={e} />
+      </PageContainer>
+    );
   }
+}
+
+function TicketsModuleError({ error }: { error: unknown }) {
+  if (error instanceof ReadOnlyServiceError) {
+    const code = error.envelope.error.code;
+    if (code === "unauthenticated") return <UnauthorizedState />;
+    if (code === "forbidden") return <ForbiddenState resource="tickets" />;
+    if (code === "unavailable") return <ServiceUnavailableState />;
+    return (
+      <SanitizedErrorState
+        message={error.envelope.error.message}
+        referenceId={error.envelope.error.referenceIdSafe}
+      />
+    );
+  }
+  if (error instanceof TicketsServiceError) {
+    return <TicketsErrorPanel referenceId={error.referenceId} message={error.message} />;
+  }
+  throw error;
 }

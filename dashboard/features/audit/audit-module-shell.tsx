@@ -1,4 +1,5 @@
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { AuditWorkspace } from "@/features/audit/audit-workspace";
@@ -11,18 +12,15 @@ type Props = {
 export function AuditModuleShell({ result }: Props) {
   return (
     <PageContainer>
+      <PreviewModeBadgeSlot />
       <PageHeader
         breadcrumb={
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Audit" }]} />
         }
         title="Audit"
-        description="Audit event directory — synthetic preview events only. No live persistence."
+        description="Audit event directory with masked network data and read-only Laravel integration."
       />
-      <PreviewDataBanner />
-
-      <div role="status" className="rounded-2xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm text-blue-900">
-        Dashboard preview only — audit events are synthetic and do not record live mutations.
-      </div>
+      <DataSourceNoticeSlot />
 
       {result.state === "loading" ? (
         <div aria-busy="true" aria-label="Loading audit" data-testid="audit-loading-state">

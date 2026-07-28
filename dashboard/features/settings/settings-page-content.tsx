@@ -1,6 +1,14 @@
 import { SettingsErrorShell, SettingsModuleShell } from "@/features/settings/settings-module-shell";
 import { parseSettingsQuery } from "@/lib/settings-query";
 import { getSettingsModule, SettingsServiceError } from "@/services/settings-service";
+import {
+  ForbiddenState,
+  SanitizedErrorState,
+  ServiceUnavailableState,
+  UnauthorizedState,
+} from "@/components/ui/data-source-status";
+import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
+import { PageContainer, PageHeader } from "@/components/ui/page-layout";
 import type { SettingsSection } from "@/types/access-control";
 
 type Props = {
@@ -16,9 +24,30 @@ export async function SettingsPageContent({ searchParams, section }: Props) {
     const result = await getSettingsModule(query);
     return <SettingsModuleShell section={section} result={result} />;
   } catch (e) {
-    if (e instanceof SettingsServiceError) {
-      return <SettingsErrorShell referenceId={e.referenceId} message={e.message} />;
-    }
-    throw e;
+    return (
+      <PageContainer>
+        <PageHeader title="Settings" />
+        <SettingsModuleError error={e} />
+      </PageContainer>
+    );
   }
+}
+
+function SettingsModuleError({ error }: { error: unknown }) {
+  if (error instanceof ReadOnlyServiceError) {
+    const code = error.envelope.error.code;
+    if (code === "unauthenticated") return <UnauthorizedState />;
+    if (code === "forbidden") return <ForbiddenState resource="settings" />;
+    if (code === "unavailable") return <ServiceUnavailableState />;
+    return (
+      <SanitizedErrorState
+        message={error.envelope.error.message}
+        referenceId={error.envelope.error.referenceIdSafe}
+      />
+    );
+  }
+  if (error instanceof SettingsServiceError) {
+    return <SettingsErrorShell referenceId={error.referenceId} message={error.message} />;
+  }
+  throw error;
 }

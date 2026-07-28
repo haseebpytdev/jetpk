@@ -24,7 +24,7 @@ test.beforeAll(async ({ request }) => {
 test("audit route renders", async ({ page }) => {
   await page.goto("/testdash/audit", { waitUntil: "load" });
   await expectAuditReady(page);
-  await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+  await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("summary metrics derive from fixtures", async ({ page }) => {

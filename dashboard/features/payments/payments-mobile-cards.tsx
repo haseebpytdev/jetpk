@@ -17,7 +17,7 @@ type Props = {
 
 export function PaymentsMobileCards({ transactions, onView }: Props) {
   return (
-    <ul className="space-y-3 md:hidden" data-testid="payments-mobile-cards">
+    <ul className="space-y-3 xl:hidden" data-testid="payments-mobile-cards">
       {transactions.map((tx) => (
         <li key={tx.transactionId}>
           <Card className="space-y-3">

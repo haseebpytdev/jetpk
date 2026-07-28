@@ -23,7 +23,7 @@ test.beforeAll(async ({ request }) => {
 test("users route renders", async ({ page }) => {
   await page.goto("/testdash/users", { waitUntil: "load" });
   await expectUsersReady(page);
-  await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+  await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("navigation includes Users Settings and Audit links", async ({ page }) => {
@@ -248,6 +248,6 @@ test("route shells render for roles permissions settings audit", async ({ page }
   ];
   for (const route of routes) {
     await page.goto(route, { waitUntil: "load" });
-    await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+    await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
   }
 });

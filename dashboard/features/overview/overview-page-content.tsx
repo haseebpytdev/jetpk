@@ -8,62 +8,86 @@ import {
   SidePanels,
   SummaryStatsRow,
 } from "@/features/overview/overview-panels";
-import { getOverviewData } from "@/services/overview-service";
+import { getOverviewData, OverviewServiceError } from "@/services/overview-service";
 import { OverviewToolbarActions } from "@/components/dashboard/overview-toolbar";
-import { Card } from "@/components/ui/card";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import {
+  ForbiddenState,
+  SanitizedErrorState,
+  ServiceUnavailableState,
+  UnauthorizedState,
+} from "@/components/ui/data-source-status";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 
 export async function OverviewPageContent() {
-  const data = await getOverviewData();
+  try {
+    const data = await getOverviewData();
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <nav aria-label="Breadcrumb" className="text-xs text-jp-muted">
-            <ol className="flex gap-1">
-              <li>Home</li>
-              <li aria-hidden>/</li>
-              <li className="text-gray-900">Dashboard</li>
-            </ol>
-          </nav>
-          <h1 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
-          <p className="mt-1 text-sm text-jp-muted">
-            Welcome back — preview overview with operational priorities (mock data).
-          </p>
+    return (
+      <PageContainer>
+        <PreviewModeBadgeSlot />
+        <PageHeader
+          breadcrumb={<Breadcrumb items={[{ label: "Home" }, { label: "Dashboard" }]} />}
+          title="Dashboard"
+          description="Operational overview with read-only data from the configured source."
+          actions={<OverviewToolbarActions />}
+        />
+        <DataSourceNoticeSlot />
+
+        <SummaryStatsRow summaryStats={data.summaryStats} />
+
+        <OperationalQueueGrid cards={data.operationalActionCards} />
+
+        <div className="grid gap-4 xl:grid-cols-3">
+          <div className="space-y-4 xl:col-span-2">
+            <Suspense
+              fallback={
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <Skeleton className="h-72" />
+                  <Skeleton className="h-72" />
+                </div>
+              }
+            >
+              <OverviewChartsLazy bookingTrend={data.bookingTrend} statusBreakdown={data.statusBreakdown} />
+            </Suspense>
+            <RecentBookingsTable recentBookings={data.recentBookings} />
+          </div>
+          <div className="space-y-4">
+            <RecentNotificationsPanel recentNotifications={data.recentNotifications} />
+            <SidePanels topRoutes={data.topRoutes} systemHealth={data.systemHealth} />
+          </div>
         </div>
-        <OverviewToolbarActions />
-      </div>
 
-      <Card className="border-emerald-200 bg-emerald-50/60 text-sm text-emerald-900">
-        Preview mode — all metrics are synthetic. No production PNRs, payments, or customer data.
-      </Card>
+        <QuickActionsBar actions={data.shortcutActions} />
+      </PageContainer>
+    );
+  } catch (error) {
+    return (
+      <PageContainer>
+        <PageHeader title="Dashboard" />
+        <OverviewErrorState error={error} />
+      </PageContainer>
+    );
+  }
+}
 
-      <SummaryStatsRow summaryStats={data.summaryStats} />
-
-      <OperationalQueueGrid cards={data.operationalActionCards} />
-
-      <div className="grid gap-4 xl:grid-cols-3">
-        <div className="space-y-4 xl:col-span-2">
-          <Suspense
-            fallback={
-              <div className="grid gap-4 lg:grid-cols-2">
-                <Skeleton className="h-72" />
-                <Skeleton className="h-72" />
-              </div>
-            }
-          >
-            <OverviewChartsLazy bookingTrend={data.bookingTrend} statusBreakdown={data.statusBreakdown} />
-          </Suspense>
-          <RecentBookingsTable recentBookings={data.recentBookings} />
-        </div>
-        <div className="space-y-4">
-          <RecentNotificationsPanel recentNotifications={data.recentNotifications} />
-          <SidePanels topRoutes={data.topRoutes} systemHealth={data.systemHealth} />
-        </div>
-      </div>
-
-      <QuickActionsBar actions={data.shortcutActions} />
-    </div>
-  );
+function OverviewErrorState({ error }: { error: unknown }) {
+  if (error instanceof ReadOnlyServiceError) {
+    const code = error.envelope.error.code;
+    if (code === "unauthenticated") return <UnauthorizedState />;
+    if (code === "forbidden") return <ForbiddenState resource="dashboard overview" />;
+    if (code === "unavailable") return <ServiceUnavailableState />;
+    return (
+      <SanitizedErrorState
+        message={error.envelope.error.message}
+        referenceId={error.envelope.error.referenceIdSafe}
+      />
+    );
+  }
+  if (error instanceof OverviewServiceError) {
+    return <SanitizedErrorState message={error.message} referenceId="OV-ERROR" />;
+  }
+  return <SanitizedErrorState message="Something went wrong while loading data." referenceId="OV-UNKNOWN" />;
 }

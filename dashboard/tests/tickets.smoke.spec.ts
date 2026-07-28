@@ -287,7 +287,7 @@ test("drawer opens", async ({ page }) => {
   await page.goto("/testdash/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
-  await table.getByRole("button", { name: "View" }).first().click();
+  await table.getByRole("button", { name: /^JP-TK-/ }).first().click();
   await page.waitForURL(/id=JP-TK-/, { timeout: 15_000 });
   await expect(page.getByRole("dialog")).toBeVisible();
 });

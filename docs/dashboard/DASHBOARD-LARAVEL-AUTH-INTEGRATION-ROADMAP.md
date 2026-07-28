@@ -1,6 +1,8 @@
-# Dashboard Laravel Auth Integration Roadmap — JETPK-DASH-10 Prompt 02
+# Dashboard Laravel Auth Integration Roadmap — JETPK-DASH-10 / DASH-11
 
-Phase: **JETPK-DASH-10 Prompt 02** (RBAC + settings UI foundation documented)
+Phase: **JETPK-DASH-11 Prompt 01** (read-only integration foundation documented)
+
+**DASH-11 update:** Authentication contract is documented for read-only integration. Login/session wiring is **architecture only** until Prompt 02. See [`LARAVEL-READ-ONLY-ARCHITECTURE.md`](./LARAVEL-READ-ONLY-ARCHITECTURE.md).
 
 This document describes how the JetPakistan Next dashboard preview will connect to **Laravel as the authoritative authentication and RBAC layer**. Prompt 02 delivers full fixture-backed RBAC and settings UI with local-preview editing; Laravel connectivity remains future work.
 
@@ -274,6 +276,10 @@ Before each integration phase:
 
 ## Related documentation
 
+- [`LARAVEL-READ-ONLY-ARCHITECTURE.md`](./LARAVEL-READ-ONLY-ARCHITECTURE.md) — **DASH-11** read-only contracts
+- [`LARAVEL-READ-ONLY-MODULE-MAP.md`](./LARAVEL-READ-ONLY-MODULE-MAP.md) — per-module migration map
+- [`LARAVEL-READ-ONLY-SECURITY-BOUNDARIES.md`](./LARAVEL-READ-ONLY-SECURITY-BOUNDARIES.md) — sensitive field exclusions
+- [`DASHBOARD-VISUAL-SYSTEM.md`](./DASHBOARD-VISUAL-SYSTEM.md) — visual system contract
 - [`DASHBOARD-AUDIT-ARCHITECTURE.md`](./DASHBOARD-AUDIT-ARCHITECTURE.md) — audit event catalog and live integration
 - [`USERS-RBAC-ARCHITECTURE.md`](./USERS-RBAC-ARCHITECTURE.md)
 - [`RBAC-PERMISSION-CATALOG.md`](./RBAC-PERMISSION-CATALOG.md)

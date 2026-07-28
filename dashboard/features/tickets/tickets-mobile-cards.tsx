@@ -17,7 +17,7 @@ type Props = {
 
 export function TicketsMobileCards({ tickets, onView }: Props) {
   return (
-    <ul className="space-y-3 md:hidden" data-testid="tickets-mobile-cards">
+    <ul className="space-y-3 xl:hidden" data-testid="tickets-mobile-cards">
       {tickets.map((ticket) => (
         <li key={ticket.id}>
           <Card className="space-y-3">

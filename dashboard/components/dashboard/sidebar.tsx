@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import { navGroups } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
 import { mockUser } from "@/mocks/overview-fixtures";
+import type { DashboardSessionSummary } from "@/services/session-service";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  session?: DashboardSessionSummary | null;
 };
 
 function isActive(pathname: string, href: string): boolean {
@@ -19,8 +21,14 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === base || pathname.startsWith(`${base}/`);
 }
 
-export function DashboardSidebar({ open, onClose }: Props) {
+export function DashboardSidebar({ open, onClose, session }: Props) {
   const pathname = usePathname();
+  const profile = session ?? {
+    displayName: mockUser.name,
+    email: mockUser.email,
+    initials: mockUser.initials,
+    roles: [mockUser.role],
+  };
 
   return (
     <>
@@ -48,11 +56,11 @@ export function DashboardSidebar({ open, onClose }: Props) {
           </Link>
           <div className="mt-4 flex items-center gap-3 rounded-xl bg-white/5 p-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-jp-accent text-sm font-semibold">
-              {mockUser.initials}
+              {profile.initials}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{mockUser.name}</p>
-              <p className="truncate text-xs text-gray-400">{mockUser.role}</p>
+              <p className="truncate text-sm font-semibold">{profile.displayName}</p>
+              <p className="truncate text-xs text-gray-400">{profile.roles?.[0] ?? mockUser.role}</p>
             </div>
             <span className="ml-auto h-2.5 w-2.5 rounded-full bg-jp-accent" title="Online" />
           </div>

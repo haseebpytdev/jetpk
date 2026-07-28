@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,8 +39,8 @@ function SettingsSectionContent({ section, result }: { section: SettingsSection 
   if (result.state === "empty") {
     return (
       <EmptyState
-        title="No settings data in preview"
-        description="The mock service returned an empty settings payload. Clear preview query flags or reload the page."
+        title="No settings data"
+        description="The settings service returned an empty payload."
       />
     );
   }
@@ -65,19 +66,15 @@ export function SettingsModuleShell({ section, result }: Props) {
 
   return (
     <PageContainer>
+      <PreviewModeBadgeSlot />
       <PageHeader
         breadcrumb={
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Settings" }, { label: current.label }]} />
         }
         title="Settings"
-        description="System settings architecture — metadata and status only, no credentials."
+        description="System settings metadata — no credentials, read-only Laravel integration."
       />
-      <PreviewDataBanner />
-
-      <div role="status" className="rounded-2xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm text-blue-900">
-        Dashboard preview only — settings are typed contracts with local component preview. No credentials, PCC, LNIATA,
-        or publish workflow.
-      </div>
+      <DataSourceNoticeSlot />
 
       <nav aria-label="Settings sections" className="flex flex-wrap gap-2">
         {SUBROUTES.map((route) => (
@@ -97,7 +94,7 @@ export function SettingsModuleShell({ section, result }: Props) {
       ) : result?.state === "error" ? (
         <ErrorState
           title="Unable to load settings"
-          message="The settings preview service returned an error state."
+          message="The settings service returned an error state."
           referenceId="SET-PREVIEW-STATE-ERR"
         />
       ) : result ? (

@@ -13,6 +13,7 @@ use App\Http\Controllers\Developer\DeveloperAuthController;
 use App\Http\Controllers\Developer\DeveloperPasswordController;
 use App\Http\Controllers\Developer\PlatformModuleControlController;
 use App\Http\Middleware\EnsureAccountType;
+use App\Http\Middleware\EnsureDashboardPermission;
 use App\Http\Middleware\EnsureAgencyContext;
 use App\Http\Middleware\EnsureAgentAdmin;
 use App\Http\Middleware\EnsureAgentPermission;
@@ -155,6 +156,16 @@ return Application::configure(basePath: dirname(__DIR__))
             app(ClientPrefixedRouteRegistrar::class)->register();
             app(ClientPageSettingsParityRouteRegistrar::class)->register();
             app(ClientMutatingFlowParityRouteRegistrar::class)->register();
+
+            Route::middleware([
+                'web',
+                'auth',
+                'agency.context',
+                'account.type:platform_admin,agency_admin,staff,agent,agent_staff',
+            ])
+                ->prefix('api/dashboard')
+                ->name('api.dashboard.')
+                ->group(base_path('routes/api-dashboard.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -181,6 +192,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'customer.email.portal.verified' => EnsureCustomerEmailVerifiedForPortal::class,
             'developer.cp' => EnsureDeveloperControlPanelAccess::class,
             'platform.module' => EnsurePlatformModuleRouteEnabled::class,
+            'dashboard.permission' => EnsureDashboardPermission::class,
             'preview.client' => ResolvePreviewClient::class,
             'preview.client.persist' => PersistClientPreviewContext::class,
             'client.ui.preview.protect' => ProtectClientUiPreview::class,
@@ -197,8 +209,18 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (Throwable $e, Request $request) {
+            $isDashboardApi = $request->is('api/dashboard', 'api/dashboard/*');
+
             if ($e instanceof AuthenticationException) {
-                if ($request->expectsJson()) {
+                if ($isDashboardApi || $request->expectsJson()) {
+                    if ($isDashboardApi) {
+                        return \App\Support\Dashboard\DashboardReadOnlyEnvelope::error(
+                            'unauthenticated',
+                            'Sign in is required to view this data.',
+                            401,
+                        );
+                    }
+
                     return response()->json(['message' => 'Authentication required.'], 401);
                 }
 
@@ -233,6 +255,14 @@ return Application::configure(basePath: dirname(__DIR__))
                     ? 'You do not have permission to access this area.'
                     : ($e->getMessage() !== '' ? $e->getMessage() : 'You do not have permission to access this area.');
 
+                if ($isDashboardApi) {
+                    return \App\Support\Dashboard\DashboardReadOnlyEnvelope::error(
+                        'forbidden',
+                        'You do not have permission to view this data.',
+                        403,
+                    );
+                }
+
                 if ($request->expectsJson()) {
                     return response()->json(['message' => 'You do not have permission to access this area.'], 403);
                 }
@@ -241,6 +271,14 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if ($e instanceof AccessDeniedHttpException) {
+                if ($isDashboardApi) {
+                    return \App\Support\Dashboard\DashboardReadOnlyEnvelope::error(
+                        'forbidden',
+                        'You do not have permission to view this data.',
+                        403,
+                    );
+                }
+
                 $message = app()->environment('production')
                     ? 'You do not have permission to access this area.'
                     : ($e->getMessage() !== '' ? $e->getMessage() : 'You do not have permission to access this area.');
@@ -261,6 +299,14 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if ($e instanceof TooManyRequestsHttpException) {
+                if ($isDashboardApi) {
+                    return \App\Support\Dashboard\DashboardReadOnlyEnvelope::error(
+                        'rate_limited',
+                        'Too many requests. Wait a moment and try again.',
+                        429,
+                    );
+                }
+
                 if ($request->expectsJson()) {
                     return response()->json(['message' => 'Too many requests. Please try again later.'], 429);
                 }

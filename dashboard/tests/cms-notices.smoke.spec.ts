@@ -91,7 +91,7 @@ test("pagination works", async ({ page }) => {
 
 test("dashboard preview notice visible", async ({ page }) => {
   await page.goto("/testdash/cms/notices", { waitUntil: "load" });
-  await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+  await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("no save button", async ({ page }) => {

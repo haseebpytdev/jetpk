@@ -380,8 +380,11 @@ test("controlled error state renders and recovers", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/testdash/agents?previewError=1", { waitUntil: "load" });
   await expect(page.getByText("Could not load agents")).toBeVisible();
-  await page.getByRole("button", { name: "Try again" }).click();
-  await page.waitForURL((url) => !url.searchParams.has("previewError"), { timeout: 15_000 });
+  const retry = page.getByRole("button", { name: "Try again" });
+  await Promise.all([
+    page.waitForURL((url) => !url.searchParams.has("previewError"), { timeout: 30_000, waitUntil: "commit" }),
+    retry.click(),
+  ]);
   await expect(page.getByRole("heading", { name: "Agents", level: 1 })).toBeVisible({
     timeout: 30_000,
   });

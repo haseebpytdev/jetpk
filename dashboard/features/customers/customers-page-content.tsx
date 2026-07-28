@@ -1,9 +1,17 @@
 import { CustomersWorkspace } from "@/features/customers/customers-workspace";
 import { CustomersErrorPanel } from "@/features/customers/customers-error-panel";
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parseCustomersQuery } from "@/lib/customers-query";
 import { CustomersServiceError, getCustomerDetail, getCustomersPage } from "@/services/customer-service";
+import {
+  ForbiddenState,
+  SanitizedErrorState,
+  ServiceUnavailableState,
+  UnauthorizedState,
+} from "@/components/ui/data-source-status";
+import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -38,7 +46,7 @@ export async function CustomersPageContent({ searchParams }: Props) {
             />
           }
           title="Customers"
-          description="Customer accounts and traveller profiles — mock preview data."
+          description="Customer accounts and traveller profiles."
         />
         <CustomersLoadingSkeleton />
       </PageContainer>
@@ -51,6 +59,7 @@ export async function CustomersPageContent({ searchParams }: Props) {
 
     return (
       <PageContainer>
+        <PreviewModeBadgeSlot />
         <PageHeader
           breadcrumb={
             <Breadcrumb
@@ -58,21 +67,37 @@ export async function CustomersPageContent({ searchParams }: Props) {
             />
           }
           title="Customers"
-          description="Customer accounts and traveller profiles — mock preview data with filters, sorting, and read-only detail."
+          description="Customer accounts and traveller profiles with filters, sorting, and read-only detail."
         />
-        <PreviewDataBanner />
+        <DataSourceNoticeSlot />
         <CustomersWorkspace query={query} result={result} selectedCustomer={selectedCustomer} />
       </PageContainer>
     );
   } catch (e) {
-    if (e instanceof CustomersServiceError) {
-      return (
-        <PageContainer>
-          <PageHeader title="Customers" />
-          <CustomersErrorPanel referenceId={e.referenceId} message={e.message} />
-        </PageContainer>
-      );
-    }
-    throw e;
+    return (
+      <PageContainer>
+        <PageHeader title="Customers" />
+        <CustomersModuleError error={e} />
+      </PageContainer>
+    );
   }
+}
+
+function CustomersModuleError({ error }: { error: unknown }) {
+  if (error instanceof ReadOnlyServiceError) {
+    const code = error.envelope.error.code;
+    if (code === "unauthenticated") return <UnauthorizedState />;
+    if (code === "forbidden") return <ForbiddenState resource="customers" />;
+    if (code === "unavailable") return <ServiceUnavailableState />;
+    return (
+      <SanitizedErrorState
+        message={error.envelope.error.message}
+        referenceId={error.envelope.error.referenceIdSafe}
+      />
+    );
+  }
+  if (error instanceof CustomersServiceError) {
+    return <CustomersErrorPanel referenceId={error.referenceId} message={error.message} />;
+  }
+  throw error;
 }
