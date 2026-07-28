@@ -170,7 +170,7 @@ Manual/code review against required breakpoints:
 
 ## Commit SHA
 
-_To be filled after commit._
+`115fcb2`
 
 ## Final status
 
