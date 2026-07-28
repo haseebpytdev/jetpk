@@ -383,7 +383,7 @@ Automated screenshots not captured in this documentation pass.
 
 Implementation commit: **29e5b70**
 
-Documentation commit: **TBD**
+Documentation commit: **pending**
 
 ## Documentation commit SHA
 
