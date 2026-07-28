@@ -7,8 +7,8 @@
 | Phase | JP-FE-03-PUBLIC-CONTENT-PAGES-SUPPORT-CONTACT-FAQ-LEGAL-AND-CMS-READY-SHELL |
 | Branch | `phase/jetpk-fe-03-public-content` |
 | Feature commit | `719b30c` |
-| Docs commit | `a6e3887` |
-| Merge commit | _recorded after merge_ |
+| Docs commit | `ec7ceda` |
+| Merge commit | `5162186` |
 | Final status | COMPLETE (local merge; no deployment) |
 
 ## Objective
