@@ -1,164 +1,166 @@
-# Dashboard Production Deployment — DASH-13 (Operator Package)
+# Dashboard Production Deployment — DASH-13 (Operator Hard-Closure)
 
-**Status:** Operator-ready. **Live upload not executed from Cursor.**
+**Domain:** https://jetpakistan.pk  
+**Status:** Operator package — **not deployed from Cursor**
 
-## Verified production runtime
+## Verified runtime
 
 | Item | Value |
 |------|-------|
-| OS | AlmaLinux 8.10 (x86_64, glibc 2.28) |
-| Node.js | **v24.18.0** (`/home/pkjetp/.nvm/versions/node/v24.18.0/bin/node`) |
-| npm | **11.16.0** |
-| PM2 | **7.0.3** (fork mode) |
-| Next.js | **15.5.21** (from `package-lock.json`) |
-| Bind | **127.0.0.1:3001** |
-| Laravel proxy | `http://127.0.0.1:3001` (30s timeout) |
-| Persistence | PM2 + **one-minute cron watchdog** + `pm2 save` |
-| PHP | 8.3 — `/opt/alt/php-fpm83/usr/bin/php` |
+| OS | AlmaLinux 8.10 x86_64 |
+| Node | v24.18.0 (`/home/pkjetp/.nvm/versions/node/v24.18.0/bin/node`) |
+| npm | 11.16.0 |
+| PM2 | 7.0.3 fork mode, process `jetpk-dashboard` |
+| Bind | 127.0.0.1:3001 |
+| Watchdog health | `http://127.0.0.1:3001/admin/dashboard` → **HTTP 200** (direct Next.js, no Laravel auth) |
+| Persistence | PM2 + one-minute cron watchdog + `pm2 save` after online |
 
-## Server paths
-
-| Purpose | Path |
-|---------|------|
-| Laravel app | `/home/pkjetp/jetpk_app` |
-| Public webroot | `/home/pkjetp/public_html` |
-| Dashboard runtime | `/home/pkjetp/jetpk_app/dashboard` |
-| PM2 home | `/home/pkjetp/.pm2` |
-| Logs | `/home/pkjetp/logs` |
-| Watchdog script | `/home/pkjetp/bin/ensure-jetpk-dashboard.sh` |
-| Backups | `/home/pkjetp/backups/dashboard-cutover-$STAMP/` |
-
-## Environment (Laravel `.env`)
-
-```env
-DASHBOARD_NEXT_SERVER_URL=http://127.0.0.1:3001
-DASHBOARD_NEXT_PROXY_ENABLED=true
-```
-
-Rollback line:
-
-```env
-DASHBOARD_NEXT_PROXY_ENABLED=false
-```
-
-## Deployment order
-
-1. Verify port 3001 free
-2. Create backup
-3. Maintenance mode
-4. SFTP Laravel files (5)
-5. SFTP dashboard source (369 files)
-6. Update `.env`
-7. `npm ci && npm run build`
-8. PM2 start `jetpk-dashboard`
-9. Node health check
-10. Install watchdog script + cron
-11. `pm2 save`
-12. Laravel cache clear/optimize
-13. `artisan up`
-14. Live verification
-15. Merge after sign-off only
-
-## Step 0 — Pre-flight
+## Step 0 — Port check
 
 ```bash
 ss -ltnp 2>/dev/null | grep ":3001" || netstat -ltnp 2>/dev/null | grep ":3001" || echo "PORT_3001_FREE"
-export PATH="/home/pkjetp/.nvm/versions/node/v24.18.0/bin:$PATH"
-node -v   # expect v24.18.0
-npm -v    # expect 11.16.0
-pm2 -v    # expect 7.0.3
 ```
 
-## Step 1 — Backup
+## Step 1 — Backup (persists path + manifest)
 
 ```bash
-STAMP=$(date +%Y%m%d-%H%M%S)
-BACKUP=/home/pkjetp/backups/dashboard-cutover-$STAMP
+STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+BACKUP="/home/pkjetp/backups/dashboard-cutover-$STAMP"
+APP=/home/pkjetp/jetpk_app
+MANIFEST="$BACKUP/jetpk_app/MANIFEST.tsv"
+
 mkdir -p "$BACKUP/jetpk_app/app/Http/Controllers/BackOffice"
 mkdir -p "$BACKUP/jetpk_app/config"
 mkdir -p "$BACKUP/jetpk_app/routes"
 mkdir -p "$BACKUP/jetpk_app/dashboard"
-test -f /home/pkjetp/jetpk_app/routes/admin.php && cp -a /home/pkjetp/jetpk_app/routes/admin.php "$BACKUP/jetpk_app/routes/"
-test -f /home/pkjetp/jetpk_app/routes/staff.php && cp -a /home/pkjetp/jetpk_app/routes/staff.php "$BACKUP/jetpk_app/routes/"
-test -f /home/pkjetp/jetpk_app/routes/web.php && cp -a /home/pkjetp/jetpk_app/routes/web.php "$BACKUP/jetpk_app/routes/"
-test -f /home/pkjetp/jetpk_app/config/dashboard.php && cp -a /home/pkjetp/jetpk_app/config/dashboard.php "$BACKUP/jetpk_app/config/"
-test -f /home/pkjetp/jetpk_app/app/Http/Controllers/BackOffice/BackOfficeDashboardController.php && cp -a /home/pkjetp/jetpk_app/app/Http/Controllers/BackOffice/BackOfficeDashboardController.php "$BACKUP/jetpk_app/app/Http/Controllers/BackOffice/"
-test -d /home/pkjetp/jetpk_app/dashboard && cp -a /home/pkjetp/jetpk_app/dashboard "$BACKUP/jetpk_app/" || true
-echo "BACKUP=$BACKUP" | tee "$BACKUP/STAMP.txt"
-ls -la "$BACKUP"
+
+record() {
+  local path="$1" existed="$2" action="$3"
+  printf '%s\t%s\t%s\n' "$path" "$existed" "$action" >>"$MANIFEST"
+}
+
+for f in routes/admin.php routes/staff.php routes/web.php; do
+  if [ -f "$APP/$f" ]; then
+    cp -a "$APP/$f" "$BACKUP/jetpk_app/$f"
+    record "$f" yes restore
+  else
+    record "$f" no restore
+  fi
+done
+
+if [ -f "$APP/config/dashboard.php" ]; then
+  cp -a "$APP/config/dashboard.php" "$BACKUP/jetpk_app/config/dashboard.php"
+  record "config/dashboard.php" yes restore
+else
+  record "config/dashboard.php" no delete_on_rollback
+fi
+
+if [ -f "$APP/app/Http/Controllers/BackOffice/BackOfficeDashboardController.php" ]; then
+  cp -a "$APP/app/Http/Controllers/BackOffice/BackOfficeDashboardController.php" \
+    "$BACKUP/jetpk_app/app/Http/Controllers/BackOffice/BackOfficeDashboardController.php"
+  record "app/Http/Controllers/BackOffice/BackOfficeDashboardController.php" yes restore
+else
+  record "app/Http/Controllers/BackOffice/BackOfficeDashboardController.php" no delete_on_rollback
+fi
+
+if [ -d "$APP/dashboard" ]; then
+  cp -a "$APP/dashboard" "$BACKUP/jetpk_app/"
+  record "dashboard/" yes restore_tree
+else
+  record "dashboard/" no delete_on_rollback
+fi
+
+printf '%s\n' "$BACKUP" > "$APP/storage/app/dash13-last-backup-path.txt"
+test -d "$BACKUP"
+cat "$APP/storage/app/dash13-last-backup-path.txt"
+cat "$MANIFEST"
 ```
 
 ## Step 2 — Maintenance
 
 ```bash
-PHP=/opt/alt/php-fpm83/usr/bin/php
-APP=/home/pkjetp/jetpk_app
-cd "$APP"
-$PHP artisan down
+/opt/alt/php-fpm83/usr/bin/php /home/pkjetp/jetpk_app/artisan down
 ```
 
-## Step 3 — SFTP upload
+## Step 3 — SFTP
 
-Run every `mkdir` and `put` from `docs/dashboard/DASH-13-SFTP-COMMANDS.txt` (81 mkdir + 374 put).
+Execute all mkdir and put commands from operator package (81 mkdir + 369 put + watchdog).
 
-## Step 4 — Environment
+## Step 4 — `.env` (idempotent)
 
-Edit `/home/pkjetp/jetpk_app/.env` — append or update:
+```bash
+ENV_FILE=/home/pkjetp/jetpk_app/.env
+ENV_BACKUP=/home/pkjetp/jetpk_app/.env.dash13-backup-$(date -u +%Y%m%dT%H%M%SZ)
+cp -a "$ENV_FILE" "$ENV_BACKUP"
 
-```env
-DASHBOARD_NEXT_SERVER_URL=http://127.0.0.1:3001
-DASHBOARD_NEXT_PROXY_ENABLED=true
+python3 <<'PY'
+import pathlib, re
+path = pathlib.Path("/home/pkjetp/jetpk_app/.env")
+text = path.read_text(encoding="utf-8", errors="replace").splitlines()
+updates = {
+    "DASHBOARD_NEXT_SERVER_URL": "http://127.0.0.1:3001",
+    "DASHBOARD_NEXT_PROXY_ENABLED": "true",
+}
+seen = set()
+out = []
+for line in text:
+    m = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=", line)
+    if m and m.group(1) in updates:
+        key = m.group(1)
+        out.append(f"{key}={updates[key]}")
+        seen.add(key)
+    else:
+        out.append(line)
+for key, val in updates.items():
+    if key not in seen:
+        out.append(f"{key}={val}")
+path.write_text("\n".join(out) + "\n", encoding="utf-8")
+PY
+
+grep -E '^DASHBOARD_NEXT_SERVER_URL=|^DASHBOARD_NEXT_PROXY_ENABLED=' "$ENV_FILE"
 ```
 
 ## Step 5 — Build
 
 ```bash
-export PATH="/home/pkjetp/.nvm/versions/node/v24.18.0/bin:$PATH"
 export HOME=/home/pkjetp
+export PATH="/home/pkjetp/.nvm/versions/node/v24.18.0/bin:$PATH"
 cd /home/pkjetp/jetpk_app/dashboard
 /home/pkjetp/.nvm/versions/node/v24.18.0/bin/npm ci
 /home/pkjetp/.nvm/versions/node/v24.18.0/bin/npm run build
 ```
 
-## Step 6 — PM2 start (fork mode, single process)
+## Step 6 — PM2 start (fork, single process)
 
 ```bash
 export HOME=/home/pkjetp
 export PM2_HOME=/home/pkjetp/.pm2
 export PATH="/home/pkjetp/.nvm/versions/node/v24.18.0/bin:$PATH"
+PM2=/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2
 cd /home/pkjetp/jetpk_app/dashboard
-/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2 delete jetpk-dashboard 2>/dev/null || true
-/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2 start /home/pkjetp/.nvm/versions/node/v24.18.0/bin/npm \
+$PM2 delete jetpk-dashboard 2>/dev/null || true
+$PM2 start /home/pkjetp/.nvm/versions/node/v24.18.0/bin/npm \
   --name jetpk-dashboard \
   --cwd /home/pkjetp/jetpk_app/dashboard \
   --interpreter none \
   -- run start
-/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2 status jetpk-dashboard
+$PM2 status jetpk-dashboard
+curl -sS -o /dev/null -w "node_admin %{http_code}\n" http://127.0.0.1:3001/admin/dashboard
 ```
 
-## Step 7 — Node health
+## Step 7 — PM2 save (only after online)
 
 ```bash
-curl -fsS -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:3001/admin/dashboard
-curl -fsS -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:3001/staff/dashboard
+export HOME=/home/pkjetp
+export PM2_HOME=/home/pkjetp/.pm2
+/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2 save
 ```
 
-## Step 8 — Watchdog script
+## Step 8 — Watchdog + cron
 
 ```bash
 mkdir -p /home/pkjetp/bin /home/pkjetp/logs
-cp /home/pkjetp/jetpk_app/docs/dashboard/ensure-jetpk-dashboard.sh /home/pkjetp/bin/ensure-jetpk-dashboard.sh 2>/dev/null || \
-  cat > /home/pkjetp/bin/ensure-jetpk-dashboard.sh <<'WATCHDOG_EOF'
-# paste contents from docs/dashboard/ensure-jetpk-dashboard.sh
-WATCHDOG_EOF
 chmod 755 /home/pkjetp/bin/ensure-jetpk-dashboard.sh
-```
-
-Or upload `docs/dashboard/ensure-jetpk-dashboard.sh` to `/home/pkjetp/bin/ensure-jetpk-dashboard.sh` via SFTP.
-
-## Step 9 — Cron (preserve Laravel scheduler)
-
-```bash
 TMP=/tmp/pkjetp.cron.$$
 crontab -l 2>/dev/null > "$TMP" || true
 grep -q 'schedule:run' "$TMP" || echo '* * * * * /opt/alt/php-fpm83/usr/bin/php /home/pkjetp/jetpk_app/artisan schedule:run >> /dev/null 2>&1' >> "$TMP"
@@ -168,15 +170,7 @@ rm -f "$TMP"
 crontab -l
 ```
 
-## Step 10 — PM2 save
-
-```bash
-export HOME=/home/pkjetp
-export PM2_HOME=/home/pkjetp/.pm2
-/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2 save
-```
-
-## Step 11 — Laravel caches
+## Step 9 — Laravel caches
 
 ```bash
 PHP=/opt/alt/php-fpm83/usr/bin/php
@@ -188,58 +182,28 @@ $PHP artisan cache:clear
 $PHP artisan view:clear
 $PHP artisan optimize
 $PHP artisan route:list | grep -E "admin/dashboard|staff/dashboard|testdash"
-```
-
-## Step 12 — Application up
-
-```bash
-PHP=/opt/alt/php-fpm83/usr/bin/php
-cd /home/pkjetp/jetpk_app
 $PHP artisan up
 ```
 
-## Step 13 — Laravel proxy health
+## Step 10 — Live checks (jetpakistan.pk)
 
 ```bash
-curl -sS -o /dev/null -w "session %{http_code}\n" http://127.0.0.1/api/dashboard/session
-# Expect 401 unauthenticated from public webroot path — verify via browser when logged in:
-# /admin/dashboard, /staff/dashboard
+curl -sS -o /dev/null -w "session %{http_code}\n" https://jetpakistan.pk/api/dashboard/session
+curl -sS -I https://jetpakistan.pk/login
+curl -sS -I https://jetpakistan.pk/admin/dashboard
+curl -sS -I https://jetpakistan.pk/staff/dashboard
+curl -sS -I https://jetpakistan.pk/testdash
 ```
 
-## Step 14 — Logs
+| URL | Unauthenticated expected |
+|-----|--------------------------|
+| `/api/dashboard/session` | **401** |
+| `/login` | **200** |
+| `/admin/dashboard` | **302** → login |
+| `/staff/dashboard` | **302** → login |
+| `/testdash` | **302** → login or role dashboard |
 
-```bash
-export PM2_HOME=/home/pkjetp/.pm2
-/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2 logs jetpk-dashboard --lines 50 --nostream
-tail -n 50 /home/pkjetp/logs/jetpk-dashboard-watchdog.log
-tail -n 50 /home/pkjetp/jetpk_app/storage/logs/laravel.log
-```
-
-## Live verification checklist
-
-- [ ] `/dashboard` — role-based redirect
-- [ ] `/admin/dashboard` — authenticated admin shell
-- [ ] `/staff/dashboard` — authenticated staff shell
-- [ ] `/testdash` — redirect only (not preview)
-- [ ] `/api/dashboard/session` — 401 when unauthenticated
-- [ ] `/admin/dashboard/bookings`, `/payments`, `/pnrs`, `/users`, `/settings`
-- [ ] `/staff/dashboard/bookings`, `/payments`, `/pnrs`, `/reports`
-- [ ] Agent Dashboard — legacy Blade (not Next.js)
-- [ ] Agent Staff Dashboard — legacy (not Next.js)
-- [ ] Customer Dashboard — unchanged
-- [ ] Public homepage, login, flights search
-- [ ] PM2 `jetpk-dashboard` online after SSH disconnect
-- [ ] Watchdog log shows no restart loop
-
-## Production file manifest
-
-**Laravel (5):** `BackOfficeDashboardController.php`, `config/dashboard.php`, `routes/admin.php`, `routes/staff.php`, `routes/web.php`
-
-**Dashboard (369 source files):** per `DASH-13-SFTP-COMMANDS.txt`
-
-**Excluded:** `node_modules/`, `.next/`, `tests/`, playwright artifacts, `eslint.config.mjs`, `playwright*.config.ts`, `scripts/sync-dashboard-export.mjs`, `scripts/generate-sftp-commands.ps1`
-
-## Post-verification merge (operator only, after sign-off)
+## Post-sign-off merge
 
 ```bash
 git fetch jetpk

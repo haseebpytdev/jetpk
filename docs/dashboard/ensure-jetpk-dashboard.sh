@@ -1,12 +1,12 @@
 #!/bin/bash
-# JetPakistan back-office dashboard watchdog — install to /home/pkjetp/bin/ensure-jetpk-dashboard.sh
+# JetPakistan back-office dashboard watchdog — /home/pkjetp/bin/ensure-jetpk-dashboard.sh
+# Health: direct Next.js returns HTTP 200 for /admin/dashboard (no Laravel auth on :3001).
 set -euo pipefail
 
 export HOME=/home/pkjetp
 export PM2_HOME=/home/pkjetp/.pm2
 export PATH="/home/pkjetp/.nvm/versions/node/v24.18.0/bin:${PATH:-}"
 
-NODE_BIN="/home/pkjetp/.nvm/versions/node/v24.18.0/bin/node"
 NPM_BIN="/home/pkjetp/.nvm/versions/node/v24.18.0/bin/npm"
 PM2_BIN="/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2"
 LOG="/home/pkjetp/logs/jetpk-dashboard-watchdog.log"
@@ -21,7 +21,8 @@ log() {
 }
 
 http_ok() {
-  curl -fsS --max-time 5 -o /dev/null "$HEALTH_URL"
+  code=$(curl -sS --max-time 5 -o /dev/null -w "%{http_code}" "$HEALTH_URL" 2>/dev/null || echo "000")
+  [ "$code" = "200" ]
 }
 
 pm2_registered() {
