@@ -27,15 +27,31 @@ test("homepage loads with full hero and search shell", async ({ page }) => {
   await expect(page.getByRole("contentinfo")).toBeVisible();
 });
 
-test("one way tab validates and shows integration preview", async ({ page }) => {
-  await page.goto("/", { waitUntil: "load" });
+test("one way tab submits to Laravel search-init when departure is set", async ({ page }) => {
+  let initRequested = false;
+  await page.route("**/laravel/flights/results/search**", async (route) => {
+    initRequested = true;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        search_id: "mock-search-id",
+        results_page_url: "http://127.0.0.1:8000/flights/results",
+        initial_results_url: "http://127.0.0.1:8000/flights/results/data?search_id=mock-search-id",
+      }),
+    });
+  });
 
+  await page.addInitScript(() => {
+    window.location.assign = (() => undefined) as typeof window.location.assign;
+  });
+
+  await page.goto("/", { waitUntil: "load" });
   await page.getByRole("tab", { name: "One Way" }).click();
   await page.getByLabel("Departure").fill(tomorrowIso());
   await page.getByRole("button", { name: "Search Flights" }).click();
 
-  await expect(page.getByTestId("search-submit-preview")).toBeVisible();
-  await expect(page.getByText(/connect to Laravel in a later phase/i)).toBeVisible();
+  await expect.poll(() => initRequested).toBe(true);
 });
 
 test("return tab shows return date field", async ({ page }) => {

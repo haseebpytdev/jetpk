@@ -5,4 +5,4 @@ export { TravelersCabinSelector } from "./components/TravelersCabinSelector";
 export * from "./types";
 export { AIRPORT_FIXTURES } from "./fixtures/airports";
 export { GROUP_CATEGORY_FIXTURES } from "./fixtures/group-categories";
-export { buildSearchDraft, buildGroupSearchDraft } from "./utils/validation";
+export { buildFlightSearchQueryParams, buildGroupSearchQueryParams } from "./utils/laravel-payload";

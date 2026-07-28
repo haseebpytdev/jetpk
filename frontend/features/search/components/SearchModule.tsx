@@ -1,29 +1,30 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  handoffToGroupSearch,
+  handoffToLaravelResults,
+  initFlightSearch,
+  buildGroupHandoffQuery,
+  type SearchSubmitState,
+} from "@/services/flight-search";
 import { findAirportByIata } from "../utils/airport-filter";
 import { usePassengerSelection } from "../hooks/use-passenger-selection";
 import {
   MULTI_CITY_MAX_SEGMENTS,
   MULTI_CITY_MIN_SEGMENTS,
   type FlightSegment,
-  type GroupSearchDraft,
-  type SearchDraft,
   type SearchMode,
   type SearchOptions,
 } from "../types";
-import {
-  buildGroupSearchDraft,
-  buildSearchDraft,
-  validateFlightSearch,
-  validateGroupSearch,
-} from "../utils/validation";
+import { validateFlightSearch, validateGroupSearch } from "../utils/validation";
+import { flattenLaravelFieldErrors } from "../utils/laravel-errors";
 import { GroupTicketingForm } from "./GroupTicketingForm";
 import { MultiCityForm } from "./MultiCityForm";
 import { OneWayForm } from "./OneWayForm";
 import { ReturnForm } from "./ReturnForm";
-import { SearchSubmitPreview } from "./SearchSubmitPreview";
+import { SearchStatusBanner } from "./SearchStatusBanner";
 import { SearchTabs } from "./SearchTabs";
 
 function createSegment(id: string): FlightSegment {
@@ -55,7 +56,8 @@ export function SearchModule({ className }: SearchModuleProps) {
   const [groupCategory, setGroupCategory] = useState("all");
   const [groupTravelDate, setGroupTravelDate] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
-  const [preview, setPreview] = useState<SearchDraft | GroupSearchDraft | null>(null);
+  const [submitState, setSubmitState] = useState<SearchSubmitState>({ status: "idle" });
+  const abortRef = useRef<AbortController | null>(null);
 
   const {
     passengers,
@@ -64,6 +66,8 @@ export function SearchModule({ className }: SearchModuleProps) {
     setInfants,
     setCabin,
   } = usePassengerSelection();
+
+  const isSubmitting = submitState.status === "submitting" || submitState.status === "redirecting";
 
   const passengerHandlers = useMemo(
     () => ({
@@ -76,37 +80,75 @@ export function SearchModule({ className }: SearchModuleProps) {
   );
 
   const handleModeChange = useCallback((next: SearchMode) => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
     setMode(next);
     setErrors([]);
-    setPreview(null);
+    setSubmitState({ status: "idle" });
   }, []);
 
-  const submitFlightSearch = useCallback(
-    (searchMode: Exclude<SearchMode, "group">, draftSegments: FlightSegment[], extraReturnDate?: string) => {
+  const submitToLaravel = useCallback(
+    async (searchMode: Exclude<SearchMode, "group">, draftSegments: FlightSegment[], extraReturnDate?: string) => {
       const result = validateFlightSearch(searchMode, draftSegments, passengers, extraReturnDate);
       if (!result.valid) {
         setErrors(result.errors);
-        setPreview(null);
+        setSubmitState({ status: "idle" });
         return;
       }
-      setErrors([]);
-      const draft = buildSearchDraft(searchMode, draftSegments, passengers, options);
-      setPreview(draft);
-      if (process.env.NODE_ENV === "development") {
-        console.info("[SearchDraft]", draft);
+
+      const primary = draftSegments[0];
+      if (!primary?.from || !primary?.to) {
+        setErrors(["Origin and destination are required."]);
+        setSubmitState({ status: "idle" });
+        return;
       }
+
+      setErrors([]);
+      setSubmitState({ status: "submitting" });
+
+      if (abortRef.current) abortRef.current.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      const response = await initFlightSearch(
+        {
+          mode: searchMode,
+          origin: primary.from.iata,
+          destination: primary.to.iata,
+          departureDate: primary.departureDate,
+          returnDate: extraReturnDate,
+          segments: searchMode === "multi_city" ? draftSegments : undefined,
+          passengers,
+          options,
+        },
+        controller.signal,
+      );
+
+      if (!response.ok) {
+        const laravelErrors = flattenLaravelFieldErrors(response.fieldErrors);
+        setErrors(laravelErrors.length > 0 ? laravelErrors : [response.message]);
+        setSubmitState({
+          status: "error",
+          message: response.message,
+          fieldErrors: response.fieldErrors,
+        });
+        return;
+      }
+
+      setSubmitState({ status: "redirecting", targetUrl: response.resultsPath });
+      handoffToLaravelResults(response.resultsPath);
     },
     [options, passengers],
   );
 
   const handleOneWaySubmit = () => {
-    submitFlightSearch("one_way", [
-      { id: "one-way", from: origin, to: destination, departureDate },
-    ]);
+    void submitToLaravel("one_way", [{ id: "one-way", from: origin, to: destination, departureDate }]);
   };
 
   const handleReturnSubmit = () => {
-    submitFlightSearch(
+    void submitToLaravel(
       "return",
       [{ id: "outbound", from: origin, to: destination, departureDate }],
       returnDate,
@@ -114,7 +156,7 @@ export function SearchModule({ className }: SearchModuleProps) {
   };
 
   const handleMultiCitySubmit = () => {
-    submitFlightSearch("multi_city", segments);
+    void submitToLaravel("multi_city", segments);
   };
 
   const handleGroupSubmit = () => {
@@ -128,15 +170,13 @@ export function SearchModule({ className }: SearchModuleProps) {
     const result = validateGroupSearch(draftInput);
     if (!result.valid) {
       setErrors(result.errors);
-      setPreview(null);
+      setSubmitState({ status: "idle" });
       return;
     }
+
     setErrors([]);
-    const draft = buildGroupSearchDraft(draftInput);
-    setPreview(draft);
-    if (process.env.NODE_ENV === "development") {
-      console.info("[GroupSearchDraft]", draft);
-    }
+    setSubmitState({ status: "redirecting", targetUrl: "/groups/search" });
+    handoffToGroupSearch(buildGroupHandoffQuery(draftInput));
   };
 
   const updateSegment = (index: number, segment: FlightSegment) => {
@@ -183,6 +223,7 @@ export function SearchModule({ className }: SearchModuleProps) {
             onOptionsChange={setOptions}
             onSubmit={handleOneWaySubmit}
             errors={errors}
+            disabled={isSubmitting}
           />
         ) : null}
 
@@ -202,6 +243,7 @@ export function SearchModule({ className }: SearchModuleProps) {
             onOptionsChange={setOptions}
             onSubmit={handleReturnSubmit}
             errors={errors}
+            disabled={isSubmitting}
           />
         ) : null}
 
@@ -215,6 +257,7 @@ export function SearchModule({ className }: SearchModuleProps) {
             onPassengersChange={passengerHandlers}
             onSubmit={handleMultiCitySubmit}
             errors={errors}
+            disabled={isSubmitting}
           />
         ) : null}
 
@@ -232,11 +275,12 @@ export function SearchModule({ className }: SearchModuleProps) {
             onPassengersChange={passengerHandlers}
             onSubmit={handleGroupSubmit}
             errors={errors}
+            disabled={isSubmitting}
           />
         ) : null}
       </div>
 
-      <SearchSubmitPreview draft={preview} />
+      <SearchStatusBanner state={submitState} />
     </section>
   );
 }

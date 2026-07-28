@@ -28,6 +28,7 @@ type ReturnFormProps = {
   onOptionsChange: (options: SearchOptions) => void;
   onSubmit: () => void;
   errors: string[];
+  disabled?: boolean;
 };
 
 export function ReturnForm({
@@ -45,6 +46,7 @@ export function ReturnForm({
   onOptionsChange,
   onSubmit,
   errors,
+  disabled = false,
 }: ReturnFormProps) {
   const id = useId();
 
@@ -96,7 +98,7 @@ export function ReturnForm({
       <SearchOptionsBar options={options} onChange={onOptionsChange} />
 
       {errors.length > 0 ? (
-        <div role="alert" className="rounded-jp-md border border-red-200 bg-red-50 px-3 py-2 text-jp-sm text-red-800">
+        <div role="status" aria-live="polite" className="rounded-jp-md border border-red-200 bg-red-50 px-3 py-2 text-jp-sm text-red-800">
           <ul className="list-disc pl-4">
             {errors.map((error) => (
               <li key={error}>{error}</li>
@@ -105,8 +107,8 @@ export function ReturnForm({
         </div>
       ) : null}
 
-      <PrimaryButton type="submit" className="w-full sm:w-auto">
-        Search Flights
+      <PrimaryButton type="submit" className="w-full sm:w-auto" disabled={disabled}>
+        {disabled ? "Searching…" : "Search Flights"}
       </PrimaryButton>
     </form>
   );

@@ -41,13 +41,42 @@ type GroupSearchDraft = {
 
 On submit, the UI validates locally and shows an integration preview message. In development, the draft JSON is logged/rendered for inspection.
 
+## Search submit contract (JP-FE-02A)
+
+### Flight search init
+
+1. Next.js builds query params matching `PublicFlightSearchRequest` / Blade `flights-panel`.
+2. Browser calls same-origin `GET /laravel/flights/results/search?...` (Next rewrite → Laravel).
+3. Laravel validates, runs `FlightController::runSearch`, returns JSON:
+
+```json
+{
+  "search_id": "uuid",
+  "results_page_url": "/flights/results?...",
+  "initial_results_url": "/flights/results/data?search_id=...",
+  "criteria": { ... },
+  "warnings": []
+}
+```
+
+4. On success, browser navigates to `results_page_url` on the Laravel origin (existing Blade results workflow).
+5. On `422`, Laravel returns `{ "message", "errors" }` for inline form display.
+
+### Group ticketing handoff
+
+`GET /groups/search` with `sector`, `date_from`, `category` (same as `groups-panel.blade.php`).
+
+### Proxy
+
+`next.config.ts` rewrites `/laravel/:path*` → `LARAVEL_URL/:path*` for local dev and Nginx-compatible same-origin routing.
+
 ## Fixture → Laravel replacement plan
 
 | Fixture module | Service boundary | Future Laravel source |
 | --- | --- | --- |
-| `features/search/fixtures/airports.ts` | `services/airports.ts` (`AirportSearchService`) | `GET /airports/search?q=` |
+| `features/search/fixtures/airports.ts` | `services/airports.ts` (`AirportSearchService`) | `GET /airports/search?q=` (connected JP-FE-02A) |
 | `features/home/fixtures/*.ts` | `services/homepage-content.ts` (`HomepageContentService`) | CMS / public homepage API |
-| Search submit | N/A (preview only) | Flight search controller + group ticketing routes |
+| Search submit | `services/flight-search.ts` | `GET /flights/results/search` init + redirect to `flights.results` |
 
 Replace fixtures by implementing the service methods to call Laravel and mapping responses to the existing TypeScript types. Do not duplicate fare logic in Next.js.
 

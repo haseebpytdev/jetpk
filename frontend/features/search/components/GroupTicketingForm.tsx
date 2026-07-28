@@ -26,6 +26,7 @@ type GroupTicketingFormProps = {
   };
   onSubmit: () => void;
   errors: string[];
+  disabled?: boolean;
 };
 
 export function GroupTicketingForm({
@@ -41,6 +42,7 @@ export function GroupTicketingForm({
   onPassengersChange,
   onSubmit,
   errors,
+  disabled = false,
 }: GroupTicketingFormProps) {
   const id = useId();
 
@@ -108,7 +110,7 @@ export function GroupTicketingForm({
       </div>
 
       {errors.length > 0 ? (
-        <div role="alert" className="rounded-jp-md border border-red-200 bg-red-50 px-3 py-2 text-jp-sm text-red-800">
+        <div role="status" aria-live="polite" className="rounded-jp-md border border-red-200 bg-red-50 px-3 py-2 text-jp-sm text-red-800">
           <ul className="list-disc pl-4">
             {errors.map((error) => (
               <li key={error}>{error}</li>
@@ -117,8 +119,8 @@ export function GroupTicketingForm({
         </div>
       ) : null}
 
-      <PrimaryButton type="submit" className="w-full sm:w-auto">
-        Search Group Fares
+      <PrimaryButton type="submit" className="w-full sm:w-auto" disabled={disabled}>
+        {disabled ? "Searching…" : "Search Group Fares"}
       </PrimaryButton>
     </form>
   );

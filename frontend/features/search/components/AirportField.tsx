@@ -4,6 +4,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { cn } from "@/lib/cn";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { AirportSearchService } from "@/services/airports";
 import { filterAirports } from "../utils/airport-filter";
 import type { Airport } from "../types";
 
@@ -50,8 +51,35 @@ export function AirportField({
   }, [value]);
 
   useEffect(() => {
-    setResults(filterAirports(query));
+    if (value && query === `${value.city} (${value.iata})`) {
+      return;
+    }
+
+    const localResults = filterAirports(query);
+    setResults(localResults);
     setActiveIndex(0);
+
+    let cancelled = false;
+    const normalized = query.trim();
+    if (normalized.length < 2) {
+      void AirportSearchService.listPopular().then((popular) => {
+        if (!cancelled && popular.length > 0) setResults(popular);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    void AirportSearchService.search(normalized).then((remote) => {
+      if (!cancelled && remote.length > 0) {
+        setResults(remote);
+        setActiveIndex(0);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [query]);
 
   const selectAirport = (airport: Airport) => {
