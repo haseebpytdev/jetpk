@@ -152,3 +152,8 @@ dashboard/.env.local
 dashboard/test-results/
 dashboard/playwright-report/
 dashboard/tsconfig.tsbuildinfo
+
+# Local workspace artifacts (kept outside repository)
+/UI_test/
+/deployment_packages/
+/_dash12-reviewed-untracked-backup/
