@@ -27,8 +27,8 @@ export const primaryNavigation: NavItem[] = [
     label: "Support",
     items: [
       { label: "Help Center", href: "/support", description: "Browse help articles" },
-      { label: "Contact Us", href: "/support/contact", description: "Reach our support team" },
-      { label: "FAQs", href: "/support/faq", description: "Common booking questions" },
+      { label: "Contact Us", href: "/contact", description: "Reach our support team" },
+      { label: "FAQs", href: "/faq", description: "Common booking questions" },
     ],
   },
 ];
@@ -47,7 +47,7 @@ export const footerColumns: FooterColumn[] = [
   {
     title: "Company",
     links: [
-      { label: "About Us", href: "/about" },
+      { label: "About Us", href: "/about-us" },
       { label: "Careers", href: "/careers" },
       { label: "Press", href: "/press" },
       { label: "Investor Relations", href: "/investors" },
@@ -58,7 +58,8 @@ export const footerColumns: FooterColumn[] = [
     title: "Support",
     links: [
       { label: "Help Center", href: "/support" },
-      { label: "Contact Us", href: "/support/contact" },
+      { label: "Contact Us", href: "/contact" },
+      { label: "FAQ", href: "/faq" },
       { label: "Manage Booking", href: "/manage-booking" },
       { label: "Baggage Information", href: "/support/baggage" },
       { label: "Flight Status", href: "/support/flight-status" },
@@ -67,8 +68,8 @@ export const footerColumns: FooterColumn[] = [
   {
     title: "Legal",
     links: [
-      { label: "Terms & Conditions", href: "/legal/terms" },
-      { label: "Privacy Policy", href: "/legal/privacy" },
+      { label: "Terms & Conditions", href: "/terms" },
+      { label: "Privacy Policy", href: "/privacy" },
       { label: "Cookie Policy", href: "/legal/cookies" },
       { label: "Refund Policy", href: "/legal/refund" },
     ],

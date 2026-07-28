@@ -77,3 +77,22 @@ body {
     opacity: 1;
   }
 }
+
+.prose-jp p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose-jp ul {
+  @apply mb-4 list-disc space-y-2 pl-5;
+}
+
+.prose-jp a {
+  @apply text-jp-primary underline;
+}
+
+@media print {
+  .jp-print-friendly {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

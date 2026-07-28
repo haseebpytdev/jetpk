@@ -11,6 +11,7 @@ use App\Support\Client\ClientPageKeys;
 use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Support\SupportTicketService;
 use App\Support\Branding\BrandDisplayResolver;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -32,7 +33,7 @@ class SupportController extends Controller
         ]));
     }
 
-    public function store(StorePublicSupportTicketRequest $request): RedirectResponse
+    public function store(StorePublicSupportTicketRequest $request): RedirectResponse|JsonResponse
     {
         $agency = $this->tickets->resolveDefaultAgency();
         $user = $request->user();
@@ -60,6 +61,14 @@ class SupportController extends Controller
             $user,
             $booking,
         );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'ticket_reference' => $ticket->ticket_reference,
+                'form_type' => $validated['form_type'] ?? 'support',
+            ]);
+        }
 
         return redirect()
             ->to(client_route('support.submitted'))
