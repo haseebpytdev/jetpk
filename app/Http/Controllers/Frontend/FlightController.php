@@ -187,6 +187,7 @@ class FlightController extends Controller
             'criteria' => $criteria,
             'warnings' => $warnings,
             'initial_results_url' => client_route('flights.results.data', ['search_id' => $searchId]),
+            'results_page_url' => client_route('flights.results', $request->query()),
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta([
                 'search_created_at' => now()->toIso8601String(),
                 'created_at' => now()->toIso8601String(),

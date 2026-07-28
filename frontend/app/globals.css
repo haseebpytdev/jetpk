@@ -52,3 +52,28 @@ body {
     transform: translateX(6px);
   }
 }
+
+@keyframes flight-draw {
+  0% {
+    stroke-dashoffset: 1200;
+  }
+  45%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flight-move {
+  0% {
+    transform: translate(120px, 24px);
+    opacity: 0.2;
+  }
+  45% {
+    transform: translate(748px, 48px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(748px, 48px);
+    opacity: 1;
+  }
+}

@@ -81,6 +81,15 @@ class PublicFlightSearchRequest extends FormRequest
 
     protected function failedValidation(Validator $validator): void
     {
+        if ($this->expectsJson()) {
+            throw new HttpResponseException(
+                response()->json([
+                    'message' => __('The given data was invalid.'),
+                    'errors' => $validator->errors(),
+                ], 422)
+            );
+        }
+
         $target = current_client_slug() !== null
             ? client_route('home').'#jp-flight-search'
             : route('flights.search');

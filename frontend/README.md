@@ -37,15 +37,18 @@ npm run test:smoke
 
 ## Phase scope
 
-JP-FE-01 delivers:
+JP-FE-01 delivered the responsive public shell foundation.
 
-- responsive public shell (header, footer, navigation)
-- design token foundation
-- fixture session adapter for auth presentation states
-- Laravel API client boundary scaffold
-- homepage placeholder only
+JP-FE-02 delivers:
 
-Full homepage, search UI, and booking flow belong to later phases.
+- full homepage hero, content sections, and trust strip
+- interactive flight search shell (One Way, Return, Multi-City, Group Ticketing)
+- typed fixture data and Laravel integration boundaries
+- homepage Playwright coverage
+
+See `frontend/docs/HOMEPAGE-AND-SEARCH.md` for architecture and replacement plan.
+
+Full supplier search, results, and booking flow belong to later phases.
 
 ## Session preview
 

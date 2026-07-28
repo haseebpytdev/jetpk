@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img">
+  <rect width="640" height="360" fill="#e8f6ef"/>
+  <path d="M40 200h560" stroke="#63b32e" stroke-width="3" stroke-dasharray="8 8"/>
+  <circle cx="120" cy="200" r="8" fill="#63b32e"/>
+  <circle cx="520" cy="200" r="8" fill="#63b32e"/>
+  <text x="320" y="320" text-anchor="middle" fill="#62788a" font-family="sans-serif" font-size="18">GCC routes</text>
+</svg>
