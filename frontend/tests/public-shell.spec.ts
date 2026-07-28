@@ -9,7 +9,8 @@ test("public shell renders header, hero, and footer", async ({ page }) => {
 
   await expect(page.getByRole("banner")).toBeVisible();
   await expect(page.getByRole("contentinfo")).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Explore the world with/i })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Explore the world with/i })).toBeVisible();
+  await expect(page.getByTestId("search-module")).toBeVisible();
   await expect(page.getByRole("link", { name: "JetPakistan home" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
   await expect(page.getByText("Stay Updated")).toBeVisible();
