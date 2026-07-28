@@ -383,11 +383,11 @@ Automated screenshots not captured in this documentation pass.
 
 Implementation commit: **29e5b70**
 
-Documentation commit: **pending**
+Documentation commit: **a2e9a0a**
 
 ## Documentation commit SHA
 
-**TBD** — docs(dashboard): finalize JETPK-DASH-11 phase summary
+**a2e9a0a** — docs(dashboard): finalize DASH-11 integration summary
 
 ## Remote tracking branch
 
