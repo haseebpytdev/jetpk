@@ -1,9 +1,0 @@
-﻿NEW_FILE	/home/USER/jetpk_app/app/Console/Commands/JetpkCmsRouteSafetyAuditCommand.php
-NEW_FILE	/home/USER/jetpk_app/app/Console/Commands/JetpkManagedPageHardcodeAuditCommand.php
-NEW_FILE	/home/USER/jetpk_app/app/Console/Commands/JetpkPublicPageCmsCoverageAuditCommand.php
-NEW_FILE	/home/USER/jetpk_app/app/Support/Audits/JetpkCmsRouteSafetyAuditService.php
-NEW_FILE	/home/USER/jetpk_app/app/Support/Audits/JetpkManagedPageHardcodeAuditService.php
-NEW_FILE	/home/USER/jetpk_app/app/Support/Audits/JetpkPublicPageCmsCoverageAuditService.php
-NEW_FILE	/home/USER/jetpk_app/app/Support/Client/ClientManagedPageCatalog.php
-NEW_FILE	/home/USER/jetpk_app/app/Support/Client/ClientManagedPageHardcodeAllowlist.php
-NEW_FILE	/home/USER/jetpk_app/app/Support/Client/ClientManagedPageReservedSlugs.php
