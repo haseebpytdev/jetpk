@@ -141,11 +141,11 @@ Public Next.js frontend **not started**. Blade public frontend remains authorita
 
 ## 30. Push result
 
-Success — `jetpk/main` updated `ae820f5..baf9857`.
+Success — `jetpk/main` updated `ae820f5..4bfaafa`.
 
 ## 31. Final main HEAD
 
-`baf9857` — docs(dashboard): finalize DASH-12 integration summary
+`4bfaafa` — docs(dashboard): record DASH-12 push result and final HEAD
 
 ## 32. Working-tree status
 
