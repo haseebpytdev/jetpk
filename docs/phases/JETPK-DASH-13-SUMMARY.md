@@ -6,7 +6,7 @@
 
 ## HEAD
 
-See git log for successor to `b45fe27`.
+`bf6a992`
 
 ## Status
 
