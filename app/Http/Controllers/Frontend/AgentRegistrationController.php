@@ -11,12 +11,15 @@ use App\Models\AgentApplication;
 use App\Models\User;
 use App\Services\Client\ClientPageRenderer;
 use App\Services\Communication\OtaNotificationService;
+use App\Support\Auth\PublicAuthRedirectAllowlist;
 use App\Support\Client\ClientPageKeys;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class AgentRegistrationController extends Controller
 {
@@ -85,7 +88,7 @@ class AgentRegistrationController extends Controller
         ]);
     }
 
-    public function store(StoreAgentApplicationRequest $request): RedirectResponse
+    public function store(StoreAgentApplicationRequest $request): RedirectResponse|JsonResponse
     {
         $validated = $request->applicationAttributes();
         $email = (string) $validated['email'];
@@ -96,6 +99,13 @@ class AgentRegistrationController extends Controller
             ->exists();
 
         if ($agentExists) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => StoreAgentApplicationRequest::DUPLICATE_EMAIL_MESSAGE,
+                    'errors' => ['email' => [StoreAgentApplicationRequest::DUPLICATE_EMAIL_MESSAGE]],
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
             return back()
                 ->withErrors(['email' => StoreAgentApplicationRequest::DUPLICATE_EMAIL_MESSAGE])
                 ->withInput($request->except('terms'));
@@ -106,9 +116,24 @@ class AgentRegistrationController extends Controller
             ->first();
 
         if ($existingApplication) {
+            $redirectPath = PublicAuthRedirectAllowlist::sanitize(
+                route('agent.register.submitted', absolute: false),
+                '/agent/register/submitted',
+            );
+            $message = 'We already received an agent application for this email address. Our team will review the existing application.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'ok' => true,
+                    'redirect' => $redirectPath,
+                    'pending' => true,
+                    'message' => $message,
+                ]);
+            }
+
             return redirect()
                 ->route('agent.register.submitted')
-                ->with('status', 'We already received an agent application for this email address. Our team will review the existing application.');
+                ->with('status', $message);
         }
 
         AgentApplication::query()->create([
@@ -140,6 +165,20 @@ class AgentRegistrationController extends Controller
             } catch (\Throwable $e) {
                 report($e);
             }
+        }
+
+        $redirectPath = PublicAuthRedirectAllowlist::sanitize(
+            route('agent.register.submitted', absolute: false),
+            '/agent/register/submitted',
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'redirect' => $redirectPath,
+                'pending' => true,
+                'message' => 'Your agent application has been submitted and is pending review.',
+            ]);
         }
 
         return redirect()->route('agent.register.submitted');

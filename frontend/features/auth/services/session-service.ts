@@ -1,0 +1,58 @@
+import type { PublicSession } from "@/types/session";
+import type { SessionBootstrap } from "../types";
+import { buildCookieHeader, laravelJsonFetch } from "../utils/laravel-auth-api";
+import { sanitizeDashboardUrl } from "../utils/dashboard-allowlist";
+
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+export function mapBootstrapToPublicSession(bootstrap: SessionBootstrap): PublicSession {
+  if (!bootstrap.authenticated || !bootstrap.user) {
+    return { status: "anonymous" };
+  }
+
+  return {
+    status: "authenticated",
+    user: {
+      id: bootstrap.user.id,
+      displayName: bootstrap.user.name,
+      email: bootstrap.user.email,
+      initials: initialsFromName(bootstrap.user.name),
+    },
+    dashboardUrl: sanitizeDashboardUrl(bootstrap.dashboard_url, "/"),
+    accountType: bootstrap.user.account_type ?? bootstrap.role ?? null,
+    role: bootstrap.role ?? bootstrap.user.account_type ?? null,
+  };
+}
+
+export async function fetchSessionBootstrap(cookieHeader?: string): Promise<SessionBootstrap> {
+  const headers: HeadersInit = {};
+  if (cookieHeader) {
+    headers.Cookie = cookieHeader;
+  }
+
+  const result = await laravelJsonFetch<SessionBootstrap>("/api/public/auth/session", {
+    method: "GET",
+    headers,
+  });
+
+  if (!result.ok) {
+    return { authenticated: false };
+  }
+
+  return result.data;
+}
+
+export async function fetchSessionBootstrapFromCookies(
+  cookies: Array<{ name: string; value: string }>,
+): Promise<SessionBootstrap> {
+  if (cookies.length === 0) {
+    return { authenticated: false };
+  }
+
+  return fetchSessionBootstrap(buildCookieHeader(cookies));
+}

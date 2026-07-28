@@ -16,6 +16,7 @@ use App\Support\Client\ClientPageKeys;
 use App\Services\Security\SecurityEventLogger;
 use App\Support\Auth\ClientLoginOtpGate;
 use App\Support\Auth\CheckoutReturnIntent;
+use App\Support\Auth\PublicAuthRedirectAllowlist;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -157,7 +158,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request): RedirectResponse|JsonResponse
     {
         $previewSlug = $request->session()->get(PersistClientPreviewContext::SESSION_KEY);
 
@@ -169,9 +170,21 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->to($this->clientRedirectResolver->afterLogoutPath(
-            is_string($previewSlug) ? $previewSlug : null,
-        ));
+        $redirectPath = PublicAuthRedirectAllowlist::sanitize(
+            $this->clientRedirectResolver->afterLogoutPath(
+                is_string($previewSlug) ? $previewSlug : null,
+            ),
+            '/',
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'redirect' => $redirectPath,
+            ]);
+        }
+
+        return redirect()->to($redirectPath);
     }
 
     private function primeClientSlugFromRequest(Request $request): void
@@ -209,7 +222,9 @@ class AuthenticatedSessionController extends Controller
     {
         $payload = [
             'ok' => true,
-            'redirect' => $this->safeLoginRedirectPath($redirectPath),
+            'redirect' => PublicAuthRedirectAllowlist::sanitize(
+                $this->safeLoginRedirectPath($redirectPath),
+            ),
         ];
 
         if ($requiresOtp) {

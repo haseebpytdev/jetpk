@@ -1,8 +1,11 @@
 "use client";
 
 import { Dropdown } from "@/components/ui/Dropdown";
+import { logout } from "@/features/auth/services/auth-service";
 import { cn } from "@/lib/cn";
 import type { PublicSession } from "@/types/session";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 type AccountMenuProps = {
   session: PublicSession;
@@ -11,6 +14,9 @@ type AccountMenuProps = {
 };
 
 export function AccountMenu({ session, className, compact = false }: AccountMenuProps) {
+  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
+
   if (session.status === "anonymous") {
     return (
       <a
@@ -27,7 +33,20 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
     );
   }
 
-  const { user } = session;
+  const { user, dashboardUrl } = session;
+  const bookingsHref = dashboardUrl.startsWith("/customer") ? "/laravel/customer/bookings" : dashboardUrl;
+
+  async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    const result = await logout();
+    if (result.ok) {
+      window.location.assign(result.redirect);
+      return;
+    }
+    setLoggingOut(false);
+    router.refresh();
+  }
 
   return (
     <Dropdown
@@ -64,25 +83,29 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
         <p className="truncate text-jp-xs text-jp-muted">{user.email}</p>
       </div>
       <a
-        href="/account"
+        href={dashboardUrl}
         role="menuitem"
         className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
       >
         Dashboard
       </a>
-      <a
-        href="/account/bookings"
-        role="menuitem"
-        className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
-      >
-        Bookings
-      </a>
+      {session.accountType === "customer" ? (
+        <a
+          href={bookingsHref}
+          role="menuitem"
+          className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+        >
+          Bookings
+        </a>
+      ) : null}
       <button
         type="button"
         role="menuitem"
-        className="block w-full rounded-jp-sm px-3 py-2 text-left text-jp-sm text-jp-muted transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+        disabled={loggingOut}
+        onClick={() => void handleLogout()}
+        className="block w-full rounded-jp-sm px-3 py-2 text-left text-jp-sm text-jp-muted transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus disabled:opacity-60"
       >
-        Log out
+        {loggingOut ? "Signing out…" : "Log out"}
       </button>
     </Dropdown>
   );
