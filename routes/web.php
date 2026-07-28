@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\BackOffice\BackOfficeDashboardController;
 use App\Http\Controllers\ClientUiPreviewController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Frontend\AgentRegistrationController;
@@ -149,6 +150,10 @@ Route::get('/payment/success', [AbhiPayPaymentController::class, 'success'])->na
 Route::get('/payment/cancel', [AbhiPayPaymentController::class, 'cancel'])->name('payments.cancel');
 Route::get('/payment/decline', [AbhiPayPaymentController::class, 'decline'])->name('payments.decline');
 Route::post('/guest/bookings/{booking}/access/{token}/cancellations', [GuestBookingCancellationController::class, 'store'])->middleware('throttle:guest-token')->name('guest.bookings.cancellations.store');
+
+Route::get('/testdash/{path?}', [BackOfficeDashboardController::class, 'testdashRedirect'])
+    ->where('path', '.*')
+    ->name('testdash.redirect');
 
 Route::get('/dashboard', DashboardRedirectController::class)->middleware(['auth'])->name('dashboard');
 

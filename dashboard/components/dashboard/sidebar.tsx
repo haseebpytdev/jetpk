@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navGroups } from "@/lib/nav-config";
+import { stripDashboardBasePath } from "@/lib/portal-path";
+import { dashboardHref } from "@/lib/portal-path";
+import { useDashboardPortal } from "@/lib/portal-context";
+import { useDashboardPath } from "@/lib/use-dashboard-path";
 import { cn } from "@/lib/utils";
 import { mockUser } from "@/mocks/overview-fixtures";
 import type { DashboardSessionSummary } from "@/services/session-service";
@@ -23,6 +27,9 @@ function isActive(pathname: string, href: string): boolean {
 
 export function DashboardSidebar({ open, onClose, session }: Props) {
   const pathname = usePathname();
+  const homePath = useDashboardPath();
+  const relativePathname = stripDashboardBasePath(pathname);
+  const portal = useDashboardPortal();
   const profile = session ?? {
     displayName: mockUser.name,
     email: mockUser.email,
@@ -48,7 +55,7 @@ export function DashboardSidebar({ open, onClose, session }: Props) {
         aria-label="Dashboard navigation"
       >
         <div className="border-b border-white/10 p-5">
-          <Link href="/" className="block" onClick={onClose}>
+          <Link href={homePath} className="block" onClick={onClose}>
             <span className="font-display text-lg font-bold tracking-tight">JetPakistan</span>
             <span className="mt-1 block text-xs uppercase tracking-widest text-emerald-400/90">
               Fly smart, fly easy
@@ -73,11 +80,12 @@ export function DashboardSidebar({ open, onClose, session }: Props) {
               </p>
               <ul className="space-y-1">
                 {group.items.map((item) => {
-                  const active = isActive(pathname, item.href);
+                  const active = isActive(relativePathname, item.href);
+                  const href = dashboardHref(portal, item.href);
                   return (
                     <li key={`${group.label}-${item.label}`}>
                       <Link
-                        href={item.href}
+                        href={href}
                         onClick={onClose}
                         className={cn(
                           "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",

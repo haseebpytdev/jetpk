@@ -17,7 +17,7 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run start:smoke",
-    url: `${baseURL}/testdash`,
+    url: `${baseURL}/admin/dashboard`,
     reuseExistingServer: false,
     timeout: 180_000,
   },

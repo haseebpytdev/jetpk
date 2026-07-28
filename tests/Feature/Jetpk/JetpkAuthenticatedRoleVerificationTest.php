@@ -7,6 +7,7 @@ use App\Models\Agency;
 use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Tests\Feature\Agent\Concerns\BuildsAgentPortalScenario;
 use Tests\Support\JetpkHomepageFixture;
@@ -54,6 +55,7 @@ class JetpkAuthenticatedRoleVerificationTest extends TestCase
 
     public function test_staff_dashboard_renders_without_supplier_calls(): void
     {
+        $this->seedBackOfficeDashboardExport();
         $staff = User::factory()->create([
             'account_type' => AccountType::Staff,
             'current_agency_id' => Agency::query()->where('slug', 'asif-travels')->value('id'),
@@ -61,13 +63,15 @@ class JetpkAuthenticatedRoleVerificationTest extends TestCase
 
         $this->actingAs($staff)
             ->get(route('staff.dashboard'))
-            ->assertOk();
+            ->assertOk()
+            ->assertHeader('content-type', 'text/html; charset=UTF-8');
 
         Http::assertNothingSent();
     }
 
     public function test_platform_admin_dashboard_renders_without_supplier_calls(): void
     {
+        $this->seedBackOfficeDashboardExport();
         $admin = User::factory()->create([
             'account_type' => AccountType::PlatformAdmin,
             'current_agency_id' => null,
@@ -77,7 +81,7 @@ class JetpkAuthenticatedRoleVerificationTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="ota-dash-overview"', false);
+            ->assertHeader('content-type', 'text/html; charset=UTF-8');
 
         Http::assertNothingSent();
     }
@@ -103,5 +107,14 @@ class JetpkAuthenticatedRoleVerificationTest extends TestCase
         $agency->users()->attach($customer->id, ['role' => 'customer']);
 
         return $customer;
+    }
+
+    private function seedBackOfficeDashboardExport(): void
+    {
+        foreach (['admin', 'staff'] as $portal) {
+            $base = storage_path("app/back-office-dashboard/{$portal}/dashboard");
+            File::ensureDirectoryExists($base);
+            File::put("{$base}/index.html", '<!DOCTYPE html><html><body>JetPakistan</body></html>');
+        }
     }
 }

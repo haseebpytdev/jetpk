@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { DASHBOARD_PORTALS, dashboardHref, type DashboardPortal } from "@/lib/portal-path";
 
 const labels: Record<string, { title: string; laravelRoute: string }> = {
   bookings: { title: "Bookings", laravelRoute: "admin.bookings" },
@@ -19,8 +20,13 @@ const labels: Record<string, { title: string; laravelRoute: string }> = {
   accounting: { title: "Accounting", laravelRoute: "admin.ledger.index" },
 };
 
-export default async function PlannedPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export function generateStaticParams(): Array<{ portal: DashboardPortal; slug: string }> {
+  const slugs = Object.keys(labels);
+  return DASHBOARD_PORTALS.flatMap((portal) => slugs.map((slug) => ({ portal, slug })));
+}
+
+export default async function PlannedPage({ params }: { params: Promise<{ portal: DashboardPortal; slug: string }> }) {
+  const { portal, slug } = await params;
   const meta = labels[slug] ?? { title: slug, laravelRoute: "admin.dashboard" };
 
   return (
@@ -31,7 +37,7 @@ export default async function PlannedPage({ params }: { params: Promise<{ slug: 
         <code className="rounded bg-gray-100 px-1">{meta.laravelRoute}</code>
       </CardDescription>
       <Link
-        href="/"
+        href={dashboardHref(portal)}
         className="mt-6 inline-flex min-h-11 items-center rounded-xl border border-jp-border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
       >
         Back to overview

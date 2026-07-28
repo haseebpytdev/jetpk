@@ -26,24 +26,24 @@ const viewports = [
 ];
 
 const reportRoutes = [
-  "/testdash/reports",
-  "/testdash/reports/sales",
-  "/testdash/reports/bookings",
-  "/testdash/reports/payments",
-  "/testdash/reports/operations",
+  "/admin/dashboard/reports",
+  "/admin/dashboard/reports/sales",
+  "/admin/dashboard/reports/bookings",
+  "/admin/dashboard/reports/payments",
+  "/admin/dashboard/reports/operations",
 ];
 
 const cmsRoutes = [
-  "/testdash/cms",
-  "/testdash/cms/pages",
-  "/testdash/cms/sections",
-  "/testdash/cms/banners",
-  "/testdash/cms/notices",
-  "/testdash/cms/assets",
+  "/admin/dashboard/cms",
+  "/admin/dashboard/cms/pages",
+  "/admin/dashboard/cms/sections",
+  "/admin/dashboard/cms/banners",
+  "/admin/dashboard/cms/notices",
+  "/admin/dashboard/cms/assets",
 ];
 
 test.beforeAll(async ({ request }) => {
-  const response = await request.get("/testdash/reports", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard/reports", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
@@ -67,7 +67,7 @@ for (const route of cmsRoutes) {
 
 test("navigation includes Reports and CMS links", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await expect(page.getByRole("link", { name: "Reports" })).toBeVisible();
   await expect(page.getByRole("link", { name: "CMS" })).toBeVisible();
 });
@@ -75,7 +75,7 @@ test("navigation includes Reports and CMS links", async ({ page }) => {
 for (const viewport of viewports.filter((v) => v.width < 768)) {
   test(`mobile navigation remains usable at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/reports", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/reports", { waitUntil: "load" });
     await page.getByRole("button", { name: "Open navigation menu" }).click();
     await expect(page.getByLabel("Dashboard navigation")).toBeVisible();
     await expect(page.getByLabel("Dashboard navigation").getByRole("link", { name: "CMS" })).toBeVisible();
@@ -83,7 +83,7 @@ for (const viewport of viewports.filter((v) => v.width < 768)) {
 }
 
 test("reports URL state rejects invalid values safely", async ({ page }) => {
-  await page.goto("/testdash/reports?datePreset=invalid&currency=XYZ&comparison=bad", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?datePreset=invalid&currency=XYZ&comparison=bad", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Reports", level: 1 })).toBeVisible();
   const query = parseReportsQuery({ datePreset: "invalid", currency: "XYZ", comparison: "bad" });
   expect(query.datePreset).toBe("current_year");
@@ -92,7 +92,7 @@ test("reports URL state rejects invalid values safely", async ({ page }) => {
 });
 
 test("cms URL state rejects invalid values safely", async ({ page }) => {
-  await page.goto("/testdash/cms?status=bad&themeMode=raw_css", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/cms?status=bad&themeMode=raw_css", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "CMS", level: 1 })).toBeVisible();
   const query = parseCmsQuery({ status: "bad", themeMode: "raw_css" });
   expect(query.status).toBe("all");
@@ -191,36 +191,36 @@ test("JetPakistan brand is fixed", () => {
 });
 
 test("no brand-switch UI exists", async ({ page }) => {
-  await page.goto("/testdash/cms", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/cms", { waitUntil: "load" });
   await expect(page.getByText(/Brand:\s*JetPakistan/i)).toBeVisible();
   await expect(page.getByRole("combobox", { name: /brand/i })).toHaveCount(0);
 });
 
 test("loading state renders for reports", async ({ page }) => {
-  await page.goto("/testdash/reports?previewLoading=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?previewLoading=1", { waitUntil: "load" });
   await expect(page.getByTestId("reports-loading-state")).toBeVisible({ timeout: 15_000 });
   await expect(page.getByLabel("Loading report data")).toBeVisible();
 });
 
 test("empty state renders for reports", async ({ page }) => {
-  await page.goto("/testdash/reports?previewEmpty=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?previewEmpty=1", { waitUntil: "load" });
   await expect(page.getByText("No report data for current filters")).toBeVisible();
 });
 
 test("controlled error state renders for reports", async ({ page }) => {
-  await page.goto("/testdash/reports?previewError=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?previewError=1", { waitUntil: "load" });
   await expect(page.getByText("Unable to load reports")).toBeVisible();
   await expect(page.getByText(/RPT-PREVIEW-SIM-ERR/)).toBeVisible();
 });
 
 test("loading and error states render for CMS", async ({ page }) => {
-  await page.goto("/testdash/cms?previewLoading=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/cms?previewLoading=1", { waitUntil: "load" });
   await expect(page.getByLabel("Loading CMS foundation")).toBeVisible();
-  await page.goto("/testdash/cms?previewError=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/cms?previewError=1", { waitUntil: "load" });
   await expect(page.getByText("Unable to load CMS")).toBeVisible();
 });
 
 test("bookings route remains functional after foundation changes", async ({ page }) => {
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Bookings", level: 1 })).toBeVisible();
 });

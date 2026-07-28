@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export function CmsWorkspace({ result }: Props) {
-  const router = useRouter();
+  const router = useDashboardRouter();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
   const previewMode = result.query.previewMode;
   const modulePath = MODULE_PATHS[result.module];

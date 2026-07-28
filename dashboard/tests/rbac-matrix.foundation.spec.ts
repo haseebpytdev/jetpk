@@ -164,17 +164,17 @@ test("high-risk permissions are catalogued", () => {
 });
 
 test("roles route remains reachable", async ({ request }) => {
-  const response = await request.get("/testdash/users/roles", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard/users/roles", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
 test("permissions route remains reachable", async ({ request }) => {
-  const response = await request.get("/testdash/users/permissions", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard/users/permissions", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
 test("settings route remains reachable", async ({ request }) => {
-  const response = await request.get("/testdash/settings", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard/settings", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 

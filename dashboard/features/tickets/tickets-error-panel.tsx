@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { ErrorState } from "@/components/ui/error-state";
 import { defaultTicketsQuery, ticketsQueryToSearchParams } from "@/lib/tickets-query";
 
@@ -11,7 +11,7 @@ export function TicketsErrorPanel({
   message: string;
   referenceId: string;
 }) {
-  const router = useRouter();
+  const router = useDashboardRouter();
 
   return (
     <ErrorState

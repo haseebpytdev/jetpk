@@ -192,10 +192,10 @@ test("JetPakistan brand is fixed", () => {
 });
 
 test("existing users and settings routes remain functional", async ({ request }) => {
-  const users = await request.get("/testdash/users", { timeout: 120_000 });
+  const users = await request.get("/admin/dashboard/users", { timeout: 120_000 });
   expect(users.ok()).toBeTruthy();
-  const settings = await request.get("/testdash/settings", { timeout: 120_000 });
+  const settings = await request.get("/admin/dashboard/settings", { timeout: 120_000 });
   expect(settings.ok()).toBeTruthy();
-  const audit = await request.get("/testdash/audit", { timeout: 120_000 });
+  const audit = await request.get("/admin/dashboard/audit", { timeout: 120_000 });
   expect(audit.ok()).toBeTruthy();
 });

@@ -1,3 +1,4 @@
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 "use client";
 
 import { Divider } from "@/components/ui/divider";

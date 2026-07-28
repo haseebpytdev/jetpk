@@ -29,7 +29,7 @@ use App\Http\Controllers\Admin\BookingRefundController;
 use App\Http\Controllers\Admin\CmsPageController;
 use App\Http\Controllers\Admin\CommunicationDeliveryLogController;
 use App\Http\Controllers\Admin\CustomerManagementController;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\BackOffice\BackOfficeDashboardController;
 use App\Http\Controllers\Admin\FinanceAdjustmentController;
 use App\Http\Controllers\Admin\FinanceDashboardController;
 use App\Http\Controllers\Admin\FinanceStatementController;
@@ -58,7 +58,10 @@ Route::bind('customer', function (string $value): User {
 });
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::redirect('/', '/admin/dashboard');
+    Route::get('/dashboard/{path?}', [BackOfficeDashboardController::class, 'admin'])
+        ->where('path', '.*')
+        ->name('dashboard');
 
     Route::get('/customers', [CustomerManagementController::class, 'index'])->name('customers.index');
     Route::get('/customers/guests/show', [CustomerManagementController::class, 'showGuest'])->name('customers.guests.show');

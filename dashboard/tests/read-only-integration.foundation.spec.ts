@@ -136,7 +136,7 @@ test("GDS and NDC endpoint contracts remain distinct", () => {
 });
 
 test("no token storage in dashboard source", async ({ page }) => {
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   const storage = await page.evaluate(() => ({
     local: Object.keys(localStorage),
     session: Object.keys(sessionStorage),
@@ -146,39 +146,39 @@ test("no token storage in dashboard source", async ({ page }) => {
 });
 
 test("fixture preview notice renders via query gate", async ({ page }) => {
-  await page.goto("/testdash/bookings?dataSourcePreview=fixture", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?dataSourcePreview=fixture", { waitUntil: "load" });
   await expect(page.getByTestId("data-source-preview-gate")).toBeVisible();
   await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("live read-only notice renders via query gate", async ({ page }) => {
-  await page.goto("/testdash/users?dataSourcePreview=live", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/users?dataSourcePreview=live", { waitUntil: "load" });
   await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
 });
 
 test("stale notice renders via query gate", async ({ page }) => {
-  await page.goto("/testdash/reports?dataSourcePreview=stale", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?dataSourcePreview=stale", { waitUntil: "load" });
   await expect(page.getByTestId("stale-data-notice")).toBeVisible();
 });
 
 test("unauthorized state renders via query gate", async ({ page }) => {
-  await page.goto("/testdash/audit?dataSourcePreview=unauthorized", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/audit?dataSourcePreview=unauthorized", { waitUntil: "load" });
   await expect(page.getByRole("alert").filter({ hasText: /Sign in required/i })).toBeVisible();
 });
 
 test("forbidden state renders via query gate", async ({ page }) => {
-  await page.goto("/testdash/audit?dataSourcePreview=forbidden", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/audit?dataSourcePreview=forbidden", { waitUntil: "load" });
   await expect(page.getByRole("alert").filter({ hasText: /Access denied/i })).toBeVisible();
 });
 
 test("unavailable state renders via query gate", async ({ page }) => {
-  await page.goto("/testdash?dataSourcePreview=unavailable", { waitUntil: "load" });
+  await page.goto("/admin/dashboard?dataSourcePreview=unavailable", { waitUntil: "load" });
   const alert = page.getByRole("alert").filter({ hasText: /Service unavailable/i });
   await expect(alert).toBeVisible();
   await expect(alert).toContainText(/not shown as a fallback/i);
 });
 
 test("metadata summary renders via query gate", async ({ page }) => {
-  await page.goto("/testdash?dataSourcePreview=metadata", { waitUntil: "load" });
+  await page.goto("/admin/dashboard?dataSourcePreview=metadata", { waitUntil: "load" });
   await expect(page.getByTestId("data-source-metadata-summary")).toContainText("Fixture preview");
 });

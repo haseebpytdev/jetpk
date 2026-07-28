@@ -17,13 +17,13 @@ const viewports = [
 ];
 
 test.beforeAll(async ({ request }) => {
-  const response = await request.get("/testdash", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
 test("pnrs route loads", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "PNRs & Orders", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -32,9 +32,9 @@ test("pnrs route loads", async ({ page }) => {
 
 test("navigation link works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await page.getByRole("link", { name: "PNRs", exact: true }).click();
-  await page.waitForURL(/\/testdash\/pnrs/, { timeout: 15_000 });
+  await page.waitForURL("**/admin/dashboard/pnrs", { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: "PNRs & Orders", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -43,7 +43,7 @@ test("navigation link works", async ({ page }) => {
 for (const viewport of viewports.filter((v) => v.width >= 1280)) {
   test(`pnrs route renders at desktop ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/pnrs", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "PNRs & Orders", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -55,7 +55,7 @@ for (const viewport of viewports.filter((v) => v.width >= 1280)) {
 for (const viewport of viewports.filter((v) => v.width < 768)) {
   test(`pnrs route renders at mobile ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/pnrs", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "PNRs & Orders", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -65,7 +65,7 @@ for (const viewport of viewports.filter((v) => v.width < 768)) {
 
 test("heading and summaries render", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const summary = page.getByLabel("PNR summary metrics");
   await expect(summary).toBeVisible();
   await expect(summary.getByText("Total records", { exact: true })).toBeVisible();
@@ -75,7 +75,7 @@ test("heading and summaries render", async ({ page }) => {
 
 test("deterministic fixture count", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   await expect(table.locator("tbody tr")).toHaveCount(PNR_FIXTURE_COUNT);
@@ -83,7 +83,7 @@ test("deterministic fixture count", async ({ page }) => {
 
 test("search filters pnrs", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const search = page.locator("#pnrs-search");
@@ -94,7 +94,7 @@ test("search filters pnrs", async ({ page }) => {
 
 test("reference-type filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const referenceType = page.locator("#filter-reference-type");
@@ -104,7 +104,7 @@ test("reference-type filter works", async ({ page }) => {
 
 test("channel filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const channel = page.locator("#filter-channel");
@@ -114,7 +114,7 @@ test("channel filter works", async ({ page }) => {
 
 test("supplier filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const supplier = page.locator("#filter-supplier");
@@ -124,7 +124,7 @@ test("supplier filter works", async ({ page }) => {
 
 test("lifecycle-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const lifecycle = page.locator("#filter-lifecycle-status");
@@ -141,7 +141,7 @@ test("lifecycle-status filter works", async ({ page }) => {
 
 test("fulfilment-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const fulfilment = page.locator("#filter-fulfilment-status");
@@ -158,7 +158,7 @@ test("fulfilment-status filter works", async ({ page }) => {
 
 test("ticketing-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const ticketing = page.locator("#filter-ticketing-status");
@@ -175,7 +175,7 @@ test("ticketing-status filter works", async ({ page }) => {
 
 test("payment-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const payment = page.locator("#filter-payment-status");
@@ -185,7 +185,7 @@ test("payment-status filter works", async ({ page }) => {
 
 test("has-agent filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const hasAgent = page.locator("#filter-has-agent");
@@ -195,7 +195,7 @@ test("has-agent filter works", async ({ page }) => {
 
 test("review-required filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const review = page.locator("#filter-review-required");
@@ -205,7 +205,7 @@ test("review-required filter works", async ({ page }) => {
 
 test("sorting changes ordering", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?sort=bookingValue&direction=desc&pageSize=50", {
+  await page.goto("/admin/dashboard/pnrs?sort=bookingValue&direction=desc&pageSize=50", {
     waitUntil: "load",
   });
   const table = page.getByTestId("pnrs-table");
@@ -216,7 +216,7 @@ test("sorting changes ordering", async ({ page }) => {
 
 test("pagination works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?pageSize=10", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?pageSize=10", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   await expect(page.getByText("1 /")).toBeVisible();
@@ -229,7 +229,7 @@ test("pagination works", async ({ page }) => {
 
 test("reset filters restores results", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?q=JP-PN-70001&pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?q=JP-PN-70001&pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expect(table.getByText("JP-PN-70002")).not.toBeVisible();
   await page.getByRole("button", { name: "Clear all" }).click();
@@ -240,7 +240,7 @@ test("reset filters restores results", async ({ page }) => {
 
 test("URL state survives reload", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?q=ABC123&referenceType=GDS+PNR", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?q=ABC123&referenceType=GDS+PNR", { waitUntil: "load" });
   await page.reload({ waitUntil: "load" });
   await expect(page).toHaveURL(/q=ABC123/);
   await expect(page).toHaveURL(/referenceType=GDS/);
@@ -249,7 +249,7 @@ test("URL state survives reload", async ({ page }) => {
 
 test("browser back and forward preserves state", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   const search = page.locator("#pnrs-search");
@@ -265,14 +265,14 @@ test("browser back and forward preserves state", async ({ page }) => {
 
 test("desktop table renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   await expect(page.getByTestId("pnrs-table")).toBeVisible();
   await expect(page.getByTestId("pnrs-mobile-cards")).toBeHidden();
 });
 
 test("mobile cards render", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const cards = page.getByTestId("pnrs-mobile-cards");
   await expect(cards).toBeVisible();
   await expect(cards.getByText("ABC123")).toBeVisible();
@@ -280,7 +280,7 @@ test("mobile cards render", async ({ page }) => {
 
 test("drawer opens", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
   await table.getByRole("button", { name: /^JP-PN-/ }).first().click();
@@ -290,7 +290,7 @@ test("drawer opens", async ({ page }) => {
 
 test("drawer content shows pnr details", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content).toContainText("JP-PN-70001");
@@ -300,12 +300,12 @@ test("drawer content shows pnr details", async ({ page }) => {
 
 test("drawer shows GDS versus NDC distinction", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   const gdsContent = page.getByTestId("pnr-drawer-content");
   await expect(gdsContent).toContainText("traditional GDS passenger name record");
   await expect(gdsContent).toContainText("GDS PNR");
 
-  await page.goto("/testdash/pnrs?id=JP-PN-70002", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70002", { waitUntil: "load" });
   const ndcContent = page.getByTestId("pnr-drawer-content");
   await expect(ndcContent).toContainText("NDC order reference");
   await expect(ndcContent).toContainText("not a traditional GDS PNR");
@@ -313,7 +313,7 @@ test("drawer shows GDS versus NDC distinction", async ({ page }) => {
 
 test("drawer shows safe ticketing limitation note", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70040", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70040", { waitUntil: "load" });
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content.getByTestId("gds-ticketing-limitation-note")).toBeVisible();
   await expect(content).toContainText("printer designation is pending");
@@ -322,7 +322,7 @@ test("drawer shows safe ticketing limitation note", async ({ page }) => {
 
 test("drawer shows abstract cancellation eligibility", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content.getByText("Cancellation eligibility")).toBeVisible();
   await expect(content).toContainText("Display-only fixture status");
@@ -330,62 +330,62 @@ test("drawer shows abstract cancellation eligibility", async ({ page }) => {
 
 test("drawer shows linked booking", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content).toContainText("JP-BK-10001");
 });
 
 test("drawer shows linked customer", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content).toContainText("JP-CU-40001");
 });
 
 test("drawer shows linked agent", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70002", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70002", { waitUntil: "load" });
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content).toContainText("JP-AG-60001");
 });
 
 test("drawer shows linked supplier", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content).toContainText("Sabre");
 });
 
 test("drawer shows linked payments", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content).toContainText("JP-TX-20001");
 });
 
 test("drawer shows linked tickets", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   const content = page.getByTestId("pnr-drawer-content");
   await expect(content).toContainText("JP-TK-80001");
 });
 
 test("drawer closes through close control", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   await closeDrawerWithButton(page, "Close PNR details", /id=JP-PN-70001/);
 });
 
 test("drawer closes using Escape", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-70001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-70001", { waitUntil: "load" });
   await closeDrawerWithEscape(page, /id=JP-PN-70001/);
 });
 
 test("invalid record ID does not crash", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?id=JP-PN-INVALID", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?id=JP-PN-INVALID", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "PNRs & Orders", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -395,19 +395,19 @@ test("invalid record ID does not crash", async ({ page }) => {
 
 test("loading state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?previewLoading=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?previewLoading=1", { waitUntil: "load" });
   await expect(page.getByLabel("Loading PNRs and orders")).toBeVisible();
 });
 
 test("empty filtered state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?q=zzznomatchzzz", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?q=zzznomatchzzz", { waitUntil: "load" });
   await expect(page.getByText("No PNRs or orders match your filters")).toBeVisible();
 });
 
 test("controlled error state renders and recovers", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/pnrs?previewError=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs?previewError=1", { waitUntil: "load" });
   await expect(page.getByText("Could not load PNRs and orders")).toBeVisible();
   await page.getByRole("button", { name: "Try again" }).click();
   await page.waitForURL((url) => !url.searchParams.has("previewError"), { timeout: 15_000 });
@@ -419,7 +419,7 @@ test("controlled error state renders and recovers", async ({ page }) => {
 
 test("mobile view has no horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/pnrs", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/pnrs", { waitUntil: "load" });
   const overflow = await page.evaluate(() => {
     return document.documentElement.scrollWidth > document.documentElement.clientWidth;
   });
@@ -429,7 +429,7 @@ test("mobile view has no horizontal overflow", async ({ page }) => {
 test("invalid URL values do not crash", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto(
-    "/testdash/pnrs?referenceType=invalid&sort=notafield&pageSize=999&page=-1&direction=sideways",
+    "/admin/dashboard/pnrs?referenceType=invalid&sort=notafield&pageSize=999&page=-1&direction=sideways",
     { waitUntil: "load" },
   );
   await expect(page.getByRole("heading", { name: "PNRs & Orders", level: 1 })).toBeVisible({
@@ -440,7 +440,7 @@ test("invalid URL values do not crash", async ({ page }) => {
 
 test("bookings route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Bookings", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -449,7 +449,7 @@ test("bookings route remains functional", async ({ page }) => {
 
 test("customers route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
     timeout: 60_000,
   });

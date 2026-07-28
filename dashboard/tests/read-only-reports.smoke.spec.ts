@@ -3,7 +3,7 @@ import { getReportModule } from "@/services/report-service";
 import { containsSensitiveKeys } from "@/lib/read-only/sensitive-fields";
 
 test.beforeAll(async ({ request }) => {
-  expect((await request.get("/testdash/reports", { timeout: 120_000 })).ok()).toBeTruthy();
+  expect((await request.get("/admin/dashboard/reports", { timeout: 120_000 })).ok()).toBeTruthy();
 });
 
 test("fixture reports overview loads", async () => {
@@ -39,23 +39,23 @@ test("fixture reports overview loads", async () => {
 });
 
 test("fixture source notice on reports", async ({ page }) => {
-  await page.goto("/testdash/reports?dataSourcePreview=fixture", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?dataSourcePreview=fixture", { waitUntil: "load" });
   await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("report date range URL sync", async ({ page }) => {
-  await page.goto("/testdash/reports?datePreset=last_7_days&currency=PKR", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?datePreset=last_7_days&currency=PKR", { waitUntil: "load" });
   await expect(page).toHaveURL(/datePreset=last_7_days/);
   await expect(page).toHaveURL(/currency=PKR/);
 });
 
 test("report currency filter URL sync", async ({ page }) => {
-  await page.goto("/testdash/reports/payments?currency=USD", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports/payments?currency=USD", { waitUntil: "load" });
   await expect(page).toHaveURL(/currency=USD/);
 });
 
 test("reports bookings sub-route", async ({ page }) => {
-  await page.goto("/testdash/reports/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports/bookings", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Reports" })).toBeVisible();
 });
 
@@ -92,29 +92,29 @@ test("report export preview manifest", async () => {
 });
 
 test("reports forbidden preview", async ({ page }) => {
-  await page.goto("/testdash/reports?dataSourcePreview=forbidden", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?dataSourcePreview=forbidden", { waitUntil: "load" });
   await expect(page.getByText(/Access denied/i)).toBeVisible();
 });
 
 test("reports live read-only notice", async ({ page }) => {
-  await page.goto("/testdash/reports?dataSourcePreview=live", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?dataSourcePreview=live", { waitUntil: "load" });
   await expect(page.getByTestId("live-readonly-notice")).toBeVisible();
 });
 
 test("reports no overflow at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/testdash/reports", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports", { waitUntil: "load" });
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
   expect(overflow).toBeFalsy();
 });
 
 test("reports stale preview", async ({ page }) => {
-  await page.goto("/testdash/reports?dataSourcePreview=stale", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports?dataSourcePreview=stale", { waitUntil: "load" });
   await expect(page.getByTestId("stale-data-notice")).toBeVisible();
 });
 
 test("reports operations sub-route", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/reports/operations", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/reports/operations", { waitUntil: "load" });
   await expect(page.getByText(/Ticketing state is informational only/i)).toBeVisible();
 });

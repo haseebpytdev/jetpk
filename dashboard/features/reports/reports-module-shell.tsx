@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";

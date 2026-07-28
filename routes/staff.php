@@ -9,7 +9,7 @@ use App\Http\Controllers\Staff\BookingCancellationController;
 use App\Http\Controllers\Staff\BookingController;
 use App\Http\Controllers\Staff\BookingPaymentController;
 use App\Http\Controllers\Staff\BookingRefundController;
-use App\Http\Controllers\Staff\DashboardController;
+use App\Http\Controllers\BackOffice\BackOfficeDashboardController;
 use App\Http\Controllers\Staff\FinanceStatementController;
 use App\Http\Controllers\Staff\LedgerController;
 use App\Http\Controllers\Staff\ReportsController;
@@ -19,7 +19,10 @@ use App\Support\Ui\UiVersionResolver;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('staff')->name('staff.')->group(function (): void {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::redirect('/', '/staff/dashboard');
+    Route::get('/dashboard/{path?}', [BackOfficeDashboardController::class, 'staff'])
+        ->where('path', '.*')
+        ->name('dashboard');
 
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
