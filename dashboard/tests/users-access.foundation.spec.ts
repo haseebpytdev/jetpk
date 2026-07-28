@@ -145,6 +145,6 @@ test("fixture counts within expected range", () => {
 });
 
 test("existing critical regression routes remain valid", async ({ request }) => {
-  const response = await request.get("/testdash", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });

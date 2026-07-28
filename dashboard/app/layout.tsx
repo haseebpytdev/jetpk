@@ -4,8 +4,8 @@ import { getDashboardSession } from "@/services/session-service";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "JetPakistan Admin Preview",
-  description: "Preview dashboard at /testdash — read-only integration",
+  title: "JetPakistan Back Office",
+  description: "JetPakistan admin and staff back-office dashboard",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

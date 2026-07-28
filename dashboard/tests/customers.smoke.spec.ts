@@ -17,13 +17,13 @@ const viewports = [
 ];
 
 test.beforeAll(async ({ request }) => {
-  const response = await request.get("/testdash", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
 test("customers route loads", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -32,9 +32,9 @@ test("customers route loads", async ({ page }) => {
 
 test("navigation link works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await page.getByRole("link", { name: "Customers", exact: true }).click();
-  await page.waitForURL(/\/testdash\/customers/, { timeout: 15_000 });
+  await page.waitForURL("**/admin/dashboard/customers", { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -43,7 +43,7 @@ test("navigation link works", async ({ page }) => {
 for (const viewport of viewports.filter((v) => v.width >= 1280)) {
   test(`customers route renders at desktop ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/customers", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -55,7 +55,7 @@ for (const viewport of viewports.filter((v) => v.width >= 1280)) {
 for (const viewport of viewports.filter((v) => v.width < 768)) {
   test(`customers route renders at mobile ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/customers", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -65,7 +65,7 @@ for (const viewport of viewports.filter((v) => v.width < 768)) {
 
 test("heading and summaries render", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const summary = page.getByLabel("Customer summary metrics");
   await expect(summary).toBeVisible();
   await expect(summary.getByText("Total customers", { exact: true })).toBeVisible();
@@ -75,7 +75,7 @@ test("heading and summaries render", async ({ page }) => {
 
 test("deterministic fixture count", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   await expect(table.locator("tbody tr")).toHaveCount(CUSTOMER_FIXTURE_COUNT);
@@ -83,7 +83,7 @@ test("deterministic fixture count", async ({ page }) => {
 
 test("search filters customers", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   const search = page.locator("#customers-search");
@@ -94,7 +94,7 @@ test("search filters customers", async ({ page }) => {
 
 test("account-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   const accountStatus = page.locator("#filter-account-status");
@@ -104,7 +104,7 @@ test("account-status filter works", async ({ page }) => {
 
 test("verification-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   const verification = page.locator("#filter-verification-status");
@@ -114,7 +114,7 @@ test("verification-status filter works", async ({ page }) => {
 
 test("customer-type filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   const customerType = page.locator("#filter-customer-type");
@@ -124,7 +124,7 @@ test("customer-type filter works", async ({ page }) => {
 
 test("outstanding-balance filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   const outstanding = page.locator("#filter-outstanding");
@@ -134,7 +134,7 @@ test("outstanding-balance filter works", async ({ page }) => {
 
 test("sorting changes ordering", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?sort=totalBookedValue&direction=desc&pageSize=50", {
+  await page.goto("/admin/dashboard/customers?sort=totalBookedValue&direction=desc&pageSize=50", {
     waitUntil: "load",
   });
   const table = page.getByTestId("customers-table");
@@ -145,7 +145,7 @@ test("sorting changes ordering", async ({ page }) => {
 
 test("pagination works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?pageSize=10", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?pageSize=10", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   await expect(page.getByText("1 /")).toBeVisible();
@@ -158,7 +158,7 @@ test("pagination works", async ({ page }) => {
 
 test("reset filters restores results", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?q=JP-CU-40001&pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?q=JP-CU-40001&pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expect(table.getByText("JP-CU-40002")).not.toBeVisible();
   await page.getByRole("button", { name: "Clear all" }).click();
@@ -169,7 +169,7 @@ test("reset filters restores results", async ({ page }) => {
 
 test("URL state survives reload", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?q=Ayesha&accountStatus=Active", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?q=Ayesha&accountStatus=Active", { waitUntil: "load" });
   await page.reload({ waitUntil: "load" });
   await expect(page).toHaveURL(/q=Ayesha/);
   await expect(page).toHaveURL(/accountStatus=Active/);
@@ -178,7 +178,7 @@ test("URL state survives reload", async ({ page }) => {
 
 test("browser back and forward preserves state", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   const search = page.locator("#customers-search");
@@ -194,14 +194,14 @@ test("browser back and forward preserves state", async ({ page }) => {
 
 test("desktop table renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   await expect(page.getByTestId("customers-table")).toBeVisible();
   await expect(page.getByTestId("customers-mobile-cards")).toBeHidden();
 });
 
 test("mobile cards render", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const cards = page.getByTestId("customers-mobile-cards");
   await expect(cards).toBeVisible();
   await expect(cards.getByText("JP-CU-40025")).toBeVisible();
@@ -209,7 +209,7 @@ test("mobile cards render", async ({ page }) => {
 
 test("drawer opens", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const table = page.getByTestId("customers-table");
   await expectTableReady(table);
   await table.getByRole("button", { name: "View" }).first().click();
@@ -219,7 +219,7 @@ test("drawer opens", async ({ page }) => {
 
 test("drawer content shows customer details", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?id=JP-CU-40001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?id=JP-CU-40001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   const content = page.getByTestId("customer-drawer-content");
   await expect(content).toContainText("JP-CU-40001");
@@ -229,34 +229,34 @@ test("drawer content shows customer details", async ({ page }) => {
 
 test("drawer shows linked bookings", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?id=JP-CU-40001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?id=JP-CU-40001", { waitUntil: "load" });
   const content = page.getByTestId("customer-drawer-content");
   await expect(content).toContainText("JP-BK-10001");
 });
 
 test("drawer shows linked payments", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?id=JP-CU-40001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?id=JP-CU-40001", { waitUntil: "load" });
   const content = page.getByTestId("customer-drawer-content");
   await expect(content).toContainText("JP-TX-20001");
 });
 
 test("drawer closes through close control", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?id=JP-CU-40001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?id=JP-CU-40001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   await closeDrawerWithButton(page, "Close customer details", /id=JP-CU-40001/);
 });
 
 test("drawer closes using Escape", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?id=JP-CU-40001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?id=JP-CU-40001", { waitUntil: "load" });
   await closeDrawerWithEscape(page, /id=JP-CU-40001/);
 });
 
 test("invalid customer ID does not crash", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?id=JP-CU-INVALID", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?id=JP-CU-INVALID", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -266,19 +266,19 @@ test("invalid customer ID does not crash", async ({ page }) => {
 
 test("loading state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?previewLoading=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?previewLoading=1", { waitUntil: "load" });
   await expect(page.getByLabel("Loading customers")).toBeVisible();
 });
 
 test("empty filtered state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?q=zzznomatchzzz", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?q=zzznomatchzzz", { waitUntil: "load" });
   await expect(page.getByText("No customers match your filters")).toBeVisible();
 });
 
 test("controlled error state renders and recovers", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers?previewError=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers?previewError=1", { waitUntil: "load" });
   await expect(page.getByText("Could not load customers")).toBeVisible();
   await page.getByRole("button", { name: "Try again" }).click();
   await page.waitForURL((url) => !url.searchParams.has("previewError"), { timeout: 15_000 });
@@ -290,7 +290,7 @@ test("controlled error state renders and recovers", async ({ page }) => {
 
 test("mobile view has no horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   const overflow = await page.evaluate(() => {
     return document.documentElement.scrollWidth > document.documentElement.clientWidth;
   });
@@ -300,7 +300,7 @@ test("mobile view has no horizontal overflow", async ({ page }) => {
 test("invalid URL values do not crash", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto(
-    "/testdash/customers?accountStatus=invalid&sort=notafield&pageSize=999&page=-1&direction=sideways",
+    "/admin/dashboard/customers?accountStatus=invalid&sort=notafield&pageSize=999&page=-1&direction=sideways",
     { waitUntil: "load" },
   );
   await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
@@ -311,7 +311,7 @@ test("invalid URL values do not crash", async ({ page }) => {
 
 test("payments route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/payments", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/payments", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Payments", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -320,7 +320,7 @@ test("payments route remains functional", async ({ page }) => {
 
 test("bookings route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Bookings", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -329,7 +329,7 @@ test("bookings route remains functional", async ({ page }) => {
 
 test("overview route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Dashboard", level: 1 })).toBeVisible({
     timeout: 60_000,
   });

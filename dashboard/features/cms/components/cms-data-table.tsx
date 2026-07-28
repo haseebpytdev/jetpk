@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Table, Td, Th } from "@/components/ui/table";
 import type { CmsModuleTable } from "@/types/cms";

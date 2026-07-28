@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { ErrorState } from "@/components/ui/error-state";
 import { defaultSuppliersQuery, suppliersQueryToSearchParams } from "@/lib/suppliers-query";
 
@@ -11,7 +11,7 @@ export function SuppliersErrorPanel({
   message: string;
   referenceId: string;
 }) {
-  const router = useRouter();
+  const router = useDashboardRouter();
 
   return (
     <ErrorState

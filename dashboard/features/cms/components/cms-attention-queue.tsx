@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DashboardLink } from "@/components/dashboard/dashboard-link";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import type { CmsAttentionItem } from "@/types/cms";
 
@@ -18,12 +18,12 @@ export function CmsAttentionQueue({ items }: { items: CmsAttentionItem[] }) {
                 <p className="font-medium text-gray-900">{item.title}</p>
                 <p className="text-sm text-jp-muted">{item.description}</p>
               </div>
-              <Link
+              <DashboardLink
                 href={item.href}
                 className="min-h-11 shrink-0 rounded-lg border border-jp-border px-3 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
               >
                 {item.linkLabel}
-              </Link>
+              </DashboardLink>
             </li>
           ))}
         </ul>

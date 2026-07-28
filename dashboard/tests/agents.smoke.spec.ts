@@ -17,13 +17,13 @@ const viewports = [
 ];
 
 test.beforeAll(async ({ request }) => {
-  const response = await request.get("/testdash", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
 test("agents route loads", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Agents", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -32,9 +32,9 @@ test("agents route loads", async ({ page }) => {
 
 test("navigation link works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await page.getByRole("link", { name: "Agents", exact: true }).click();
-  await page.waitForURL(/\/testdash\/agents/, { timeout: 15_000 });
+  await page.waitForURL("**/admin/dashboard/agents", { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: "Agents", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -43,7 +43,7 @@ test("navigation link works", async ({ page }) => {
 for (const viewport of viewports.filter((v) => v.width >= 1280)) {
   test(`agents route renders at desktop ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/agents", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Agents", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -55,7 +55,7 @@ for (const viewport of viewports.filter((v) => v.width >= 1280)) {
 for (const viewport of viewports.filter((v) => v.width < 768)) {
   test(`agents route renders at mobile ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/agents", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Agents", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -65,7 +65,7 @@ for (const viewport of viewports.filter((v) => v.width < 768)) {
 
 test("heading and summaries render", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const summary = page.getByLabel("Agent summary metrics");
   await expect(summary).toBeVisible();
   await expect(summary.getByText("Total agents", { exact: true })).toBeVisible();
@@ -75,7 +75,7 @@ test("heading and summaries render", async ({ page }) => {
 
 test("deterministic fixture count", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   await expect(table.locator("tbody tr")).toHaveCount(AGENT_FIXTURE_COUNT);
@@ -83,7 +83,7 @@ test("deterministic fixture count", async ({ page }) => {
 
 test("search filters agents", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const search = page.locator("#agents-search");
@@ -94,7 +94,7 @@ test("search filters agents", async ({ page }) => {
 
 test("account-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const accountStatus = page.locator("#filter-account-status");
@@ -111,7 +111,7 @@ test("account-status filter works", async ({ page }) => {
 
 test("verification-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const verification = page.locator("#filter-verification-status");
@@ -128,7 +128,7 @@ test("verification-status filter works", async ({ page }) => {
 
 test("commercial-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const commercial = page.locator("#filter-commercial-status");
@@ -145,7 +145,7 @@ test("commercial-status filter works", async ({ page }) => {
 
 test("settlement-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const settlement = page.locator("#filter-settlement-status");
@@ -162,7 +162,7 @@ test("settlement-status filter works", async ({ page }) => {
 
 test("agent-type filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const agentType = page.locator("#filter-agent-type");
@@ -179,7 +179,7 @@ test("agent-type filter works", async ({ page }) => {
 
 test("outstanding-balance filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const outstanding = page.locator("#filter-outstanding");
@@ -196,7 +196,7 @@ test("outstanding-balance filter works", async ({ page }) => {
 
 test("pending-commission filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const pendingCommission = page.locator("#filter-pending-commission");
@@ -213,7 +213,7 @@ test("pending-commission filter works", async ({ page }) => {
 
 test("sorting changes ordering", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?sort=grossBookingValue&direction=desc&pageSize=50", {
+  await page.goto("/admin/dashboard/agents?sort=grossBookingValue&direction=desc&pageSize=50", {
     waitUntil: "load",
   });
   const table = page.getByTestId("agents-table");
@@ -224,7 +224,7 @@ test("sorting changes ordering", async ({ page }) => {
 
 test("pagination works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?pageSize=10", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?pageSize=10", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   await expect(page.getByText("1 /")).toBeVisible();
@@ -237,7 +237,7 @@ test("pagination works", async ({ page }) => {
 
 test("reset filters restores results", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?q=JP-AG-60001&pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?q=JP-AG-60001&pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expect(table.getByText("JP-AG-60002")).not.toBeVisible();
   await page.getByRole("button", { name: "Clear all" }).click();
@@ -248,7 +248,7 @@ test("reset filters restores results", async ({ page }) => {
 
 test("URL state survives reload", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?q=Lahore&accountStatus=Active", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?q=Lahore&accountStatus=Active", { waitUntil: "load" });
   await page.reload({ waitUntil: "load" });
   await expect(page).toHaveURL(/q=Lahore/);
   await expect(page).toHaveURL(/accountStatus=Active/);
@@ -257,7 +257,7 @@ test("URL state survives reload", async ({ page }) => {
 
 test("browser back and forward preserves state", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   const search = page.locator("#agents-search");
@@ -273,14 +273,14 @@ test("browser back and forward preserves state", async ({ page }) => {
 
 test("desktop table renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   await expect(page.getByTestId("agents-table")).toBeVisible();
   await expect(page.getByTestId("agents-mobile-cards")).toBeHidden();
 });
 
 test("mobile cards render", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const cards = page.getByTestId("agents-mobile-cards");
   await expect(cards).toBeVisible();
   await expect(cards.getByText("JP-AG-60026")).toBeVisible();
@@ -288,7 +288,7 @@ test("mobile cards render", async ({ page }) => {
 
 test("drawer opens", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const table = page.getByTestId("agents-table");
   await expectTableReady(table);
   await table.getByRole("button", { name: "View" }).first().click();
@@ -298,7 +298,7 @@ test("drawer opens", async ({ page }) => {
 
 test("drawer content shows agent details", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-60001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-60001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   const content = page.getByTestId("agent-drawer-content");
   await expect(content).toContainText("JP-AG-60001");
@@ -308,55 +308,55 @@ test("drawer content shows agent details", async ({ page }) => {
 
 test("drawer shows linked customers", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-60001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-60001", { waitUntil: "load" });
   const content = page.getByTestId("agent-drawer-content");
   await expect(content).toContainText("JP-CU-40002");
 });
 
 test("drawer shows linked bookings", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-60001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-60001", { waitUntil: "load" });
   const content = page.getByTestId("agent-drawer-content");
   await expect(content).toContainText("JP-BK-10002");
 });
 
 test("drawer shows linked payments", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-60001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-60001", { waitUntil: "load" });
   const content = page.getByTestId("agent-drawer-content");
   await expect(content.getByRole("link", { name: "JP-TX-20002" })).toBeVisible();
 });
 
 test("drawer shows linked PNRs and orders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-60001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-60001", { waitUntil: "load" });
   const content = page.getByTestId("agent-drawer-content");
   await expect(content).toContainText("JP-PN-70002");
 });
 
 test("drawer shows linked tickets and documents", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-60001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-60001", { waitUntil: "load" });
   const content = page.getByTestId("agent-drawer-content");
   await expect(content.getByRole("link", { name: "JP-TK-80008" })).toBeVisible();
 });
 
 test("drawer closes through close control", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-60001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-60001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   await closeDrawerWithButton(page, "Close agent details", /id=JP-AG-60001/);
 });
 
 test("drawer closes using Escape", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-60001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-60001", { waitUntil: "load" });
   await closeDrawerWithEscape(page, /id=JP-AG-60001/);
 });
 
 test("invalid agent ID does not crash", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?id=JP-AG-INVALID", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?id=JP-AG-INVALID", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Agents", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -366,19 +366,19 @@ test("invalid agent ID does not crash", async ({ page }) => {
 
 test("loading state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?previewLoading=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?previewLoading=1", { waitUntil: "load" });
   await expect(page.getByLabel("Loading agents")).toBeVisible();
 });
 
 test("empty filtered state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?q=zzznomatchzzz", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?q=zzznomatchzzz", { waitUntil: "load" });
   await expect(page.getByText("No agents match your filters")).toBeVisible();
 });
 
 test("controlled error state renders and recovers", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/agents?previewError=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents?previewError=1", { waitUntil: "load" });
   await expect(page.getByText("Could not load agents")).toBeVisible();
   const retry = page.getByRole("button", { name: "Try again" });
   await Promise.all([
@@ -393,7 +393,7 @@ test("controlled error state renders and recovers", async ({ page }) => {
 
 test("mobile view has no horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/agents", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/agents", { waitUntil: "load" });
   const overflow = await page.evaluate(() => {
     return document.documentElement.scrollWidth > document.documentElement.clientWidth;
   });
@@ -403,7 +403,7 @@ test("mobile view has no horizontal overflow", async ({ page }) => {
 test("invalid URL values do not crash", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto(
-    "/testdash/agents?accountStatus=invalid&sort=notafield&pageSize=999&page=-1&direction=sideways",
+    "/admin/dashboard/agents?accountStatus=invalid&sort=notafield&pageSize=999&page=-1&direction=sideways",
     { waitUntil: "load" },
   );
   await expect(page.getByRole("heading", { name: "Agents", level: 1 })).toBeVisible({
@@ -414,7 +414,7 @@ test("invalid URL values do not crash", async ({ page }) => {
 
 test("customers route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -423,7 +423,7 @@ test("customers route remains functional", async ({ page }) => {
 
 test("bookings route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Bookings", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -432,7 +432,7 @@ test("bookings route remains functional", async ({ page }) => {
 
 test("overview route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Dashboard", level: 1 })).toBeVisible({
     timeout: 60_000,
   });

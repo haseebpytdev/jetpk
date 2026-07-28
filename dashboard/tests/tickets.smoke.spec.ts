@@ -17,13 +17,13 @@ const viewports = [
 ];
 
 test.beforeAll(async ({ request }) => {
-  const response = await request.get("/testdash", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
 test("tickets route loads", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Tickets & Documents", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -32,9 +32,9 @@ test("tickets route loads", async ({ page }) => {
 
 test("navigation link works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await page.getByRole("link", { name: "Tickets", exact: true }).click();
-  await page.waitForURL(/\/testdash\/tickets/, { timeout: 15_000 });
+  await page.waitForURL("**/admin/dashboard/tickets", { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: "Tickets & Documents", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -43,7 +43,7 @@ test("navigation link works", async ({ page }) => {
 for (const viewport of viewports.filter((v) => v.width >= 1280)) {
   test(`tickets route renders at desktop ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/tickets", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Tickets & Documents", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -55,7 +55,7 @@ for (const viewport of viewports.filter((v) => v.width >= 1280)) {
 for (const viewport of viewports.filter((v) => v.width < 768)) {
   test(`tickets route renders at mobile ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/tickets", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Tickets & Documents", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -65,7 +65,7 @@ for (const viewport of viewports.filter((v) => v.width < 768)) {
 
 test("heading and summaries render", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const summary = page.getByLabel("Ticket summary metrics");
   await expect(summary).toBeVisible();
   await expect(summary.getByText("Total documents", { exact: true })).toBeVisible();
@@ -75,7 +75,7 @@ test("heading and summaries render", async ({ page }) => {
 
 test("deterministic fixture count", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   await expect(page.getByText(`of ${TICKET_FIXTURE_COUNT}`)).toBeVisible();
@@ -84,7 +84,7 @@ test("deterministic fixture count", async ({ page }) => {
 
 test("search filters tickets", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const search = page.locator("#tickets-search");
@@ -95,7 +95,7 @@ test("search filters tickets", async ({ page }) => {
 
 test("document-type filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const documentType = page.locator("#filter-document-type");
@@ -105,7 +105,7 @@ test("document-type filter works", async ({ page }) => {
 
 test("channel filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const channel = page.locator("#filter-channel");
@@ -115,7 +115,7 @@ test("channel filter works", async ({ page }) => {
 
 test("airline filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const airline = page.locator("#filter-airline");
@@ -125,7 +125,7 @@ test("airline filter works", async ({ page }) => {
 
 test("supplier filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const supplier = page.locator("#filter-supplier");
@@ -135,7 +135,7 @@ test("supplier filter works", async ({ page }) => {
 
 test("issue-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const issueStatus = page.locator("#filter-issue-status");
@@ -145,7 +145,7 @@ test("issue-status filter works", async ({ page }) => {
 
 test("fulfilment-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const fulfilmentStatus = page.locator("#filter-fulfilment-status");
@@ -162,7 +162,7 @@ test("fulfilment-status filter works", async ({ page }) => {
 
 test("payment-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const paymentStatus = page.locator("#filter-payment-status");
@@ -172,7 +172,7 @@ test("payment-status filter works", async ({ page }) => {
 
 test("refund-eligibility filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const refundEligibility = page.locator("#filter-refund-eligibility");
@@ -189,7 +189,7 @@ test("refund-eligibility filter works", async ({ page }) => {
 
 test("void-status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const voidStatus = page.locator("#filter-void-status");
@@ -199,7 +199,7 @@ test("void-status filter works", async ({ page }) => {
 
 test("has-agent filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const hasAgent = page.locator("#filter-has-agent");
@@ -209,7 +209,7 @@ test("has-agent filter works", async ({ page }) => {
 
 test("sorting changes ordering", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?sort=totalValue&direction=desc&pageSize=50", {
+  await page.goto("/admin/dashboard/tickets?sort=totalValue&direction=desc&pageSize=50", {
     waitUntil: "load",
   });
   const table = page.getByTestId("tickets-table");
@@ -220,7 +220,7 @@ test("sorting changes ordering", async ({ page }) => {
 
 test("pagination works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?pageSize=10", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?pageSize=10", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   await expect(page.getByText("1 /")).toBeVisible();
@@ -233,7 +233,7 @@ test("pagination works", async ({ page }) => {
 
 test("reset filters restores results", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?q=JP-TK-80001&pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?q=JP-TK-80001&pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expect(table.getByText("JP-TK-80002")).not.toBeVisible();
   await page.getByRole("button", { name: "Clear all" }).click();
@@ -244,7 +244,7 @@ test("reset filters restores results", async ({ page }) => {
 
 test("URL state survives reload", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?q=Emirates&documentType=E-Ticket", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?q=Emirates&documentType=E-Ticket", { waitUntil: "load" });
   await page.reload({ waitUntil: "load" });
   await expect(page).toHaveURL(/q=Emirates/);
   await expect(page).toHaveURL(/documentType=E-Ticket/);
@@ -253,7 +253,7 @@ test("URL state survives reload", async ({ page }) => {
 
 test("browser back and forward preserves state", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   const search = page.locator("#tickets-search");
@@ -269,14 +269,14 @@ test("browser back and forward preserves state", async ({ page }) => {
 
 test("desktop table renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   await expect(page.getByTestId("tickets-table")).toBeVisible();
   await expect(page.getByTestId("tickets-mobile-cards")).toBeHidden();
 });
 
 test("mobile cards render", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const cards = page.getByTestId("tickets-mobile-cards");
   await expect(cards).toBeVisible();
   await expect(cards.getByText("JP-TK-80051")).toBeVisible();
@@ -284,7 +284,7 @@ test("mobile cards render", async ({ page }) => {
 
 test("drawer opens", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const table = page.getByTestId("tickets-table");
   await expectTableReady(table);
   await table.getByRole("button", { name: /^JP-TK-/ }).first().click();
@@ -294,7 +294,7 @@ test("drawer opens", async ({ page }) => {
 
 test("drawer content shows ticket details", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content).toContainText("JP-TK-80001");
@@ -304,14 +304,14 @@ test("drawer content shows ticket details", async ({ page }) => {
 
 test("drawer shows masked identifier", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content.getByText("157-XXXXXXX100")).toBeVisible();
 });
 
 test("drawer shows informational-only notice", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content).toContainText("Informational preview only");
   await expect(content).toContainText("issue, reissue, exchange, void, and refund actions are not available");
@@ -319,62 +319,62 @@ test("drawer shows informational-only notice", async ({ page }) => {
 
 test("drawer shows linked booking", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content).toContainText("JP-BK-10001");
 });
 
 test("drawer shows linked PNR/order", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content).toContainText("JP-PN-70001");
 });
 
 test("drawer shows linked customer", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content).toContainText("JP-CU-40001");
 });
 
 test("drawer shows linked agent", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80002", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80002", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content).toContainText("JP-AG-60001");
 });
 
 test("drawer shows linked supplier", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content).toContainText("JP-SU-50001");
 });
 
 test("drawer shows linked payments", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
   await expect(content).toContainText("JP-TX-20001");
 });
 
 test("drawer closes through close control", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   await closeDrawerWithButton(page, "Close ticket details", /id=JP-TK-80001/);
 });
 
 test("drawer closes using Escape", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-80001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   await closeDrawerWithEscape(page, /id=JP-TK-80001/);
 });
 
 test("invalid ticket ID does not crash", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?id=JP-TK-INVALID", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?id=JP-TK-INVALID", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Tickets & Documents", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -384,19 +384,19 @@ test("invalid ticket ID does not crash", async ({ page }) => {
 
 test("loading state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?previewLoading=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?previewLoading=1", { waitUntil: "load" });
   await expect(page.getByLabel("Loading tickets")).toBeVisible();
 });
 
 test("empty filtered state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?q=zzznomatchzzz", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?q=zzznomatchzzz", { waitUntil: "load" });
   await expect(page.getByText("No tickets or documents match your filters")).toBeVisible();
 });
 
 test("controlled error state renders and recovers", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/tickets?previewError=1", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets?previewError=1", { waitUntil: "load" });
   await expect(page.getByText("Could not load tickets")).toBeVisible();
   await page.getByRole("button", { name: "Try again" }).click();
   await page.waitForURL((url) => !url.searchParams.has("previewError"), { timeout: 15_000 });
@@ -408,7 +408,7 @@ test("controlled error state renders and recovers", async ({ page }) => {
 
 test("mobile view has no horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/tickets", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/tickets", { waitUntil: "load" });
   const overflow = await page.evaluate(() => {
     return document.documentElement.scrollWidth > document.documentElement.clientWidth;
   });
@@ -418,7 +418,7 @@ test("mobile view has no horizontal overflow", async ({ page }) => {
 test("invalid URL values do not crash", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto(
-    "/testdash/tickets?documentType=invalid&sort=notafield&pageSize=999&page=-1&direction=sideways",
+    "/admin/dashboard/tickets?documentType=invalid&sort=notafield&pageSize=999&page=-1&direction=sideways",
     { waitUntil: "load" },
   );
   await expect(page.getByRole("heading", { name: "Tickets & Documents", level: 1 })).toBeVisible({
@@ -429,7 +429,7 @@ test("invalid URL values do not crash", async ({ page }) => {
 
 test("customers route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/customers", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/customers", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Customers", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -438,7 +438,7 @@ test("customers route remains functional", async ({ page }) => {
 
 test("bookings route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Bookings", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -447,7 +447,7 @@ test("bookings route remains functional", async ({ page }) => {
 
 test("overview route remains functional", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Dashboard", level: 1 })).toBeVisible({
     timeout: 60_000,
   });

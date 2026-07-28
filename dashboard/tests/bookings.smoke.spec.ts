@@ -15,12 +15,12 @@ const viewports = [
 ];
 
 test.beforeAll(async ({ request }) => {
-  const response = await request.get("/testdash", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
 test("overview page from DASH-01 still works", async ({ page }) => {
-  await page.goto("/testdash", { waitUntil: "load" });
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
   await expect(page.getByRole("heading", { name: "Dashboard", level: 1 })).toBeVisible({
     timeout: 60_000,
   });
@@ -28,7 +28,7 @@ test("overview page from DASH-01 still works", async ({ page }) => {
 });
 
 test("planned module route from DASH-01 still works", async ({ page }) => {
-  await page.goto("/testdash/planned/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/planned/bookings", { waitUntil: "load" });
   await expect(page.getByText(/Planned module/i)).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("admin.bookings")).toBeVisible();
 });
@@ -36,7 +36,7 @@ test("planned module route from DASH-01 still works", async ({ page }) => {
 for (const viewport of viewports.filter((v) => v.width >= 1280)) {
   test(`bookings route renders at desktop ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/bookings", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Bookings", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -48,7 +48,7 @@ for (const viewport of viewports.filter((v) => v.width >= 1280)) {
 for (const viewport of viewports.filter((v) => v.width < 768)) {
   test(`bookings route renders at mobile ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash/bookings", { waitUntil: "load" });
+    await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Bookings", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -58,7 +58,7 @@ for (const viewport of viewports.filter((v) => v.width < 768)) {
 
 test("search filters visible bookings", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expectTableReady(table);
   const search = page.locator("#bookings-search");
@@ -69,7 +69,7 @@ test("search filters visible bookings", async ({ page }) => {
 
 test("status filter works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expectTableReady(table);
   const status = page.locator("#filter-status");
@@ -79,7 +79,7 @@ test("status filter works", async ({ page }) => {
 
 test("clear filters restores results", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings?q=JP-BK-10001&pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?q=JP-BK-10001&pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expect(table.getByText("JP-BK-10002")).not.toBeVisible();
   await page.getByRole("button", { name: "Clear all" }).click();
@@ -90,7 +90,7 @@ test("clear filters restores results", async ({ page }) => {
 
 test("sorting changes displayed ordering", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings?sort=amount&direction=asc&pageSize=50", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?sort=amount&direction=asc&pageSize=50", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expectTableReady(table);
   const firstRow = table.locator("tbody tr").first();
@@ -99,7 +99,7 @@ test("sorting changes displayed ordering", async ({ page }) => {
 
 test("pagination works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings?pageSize=10", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?pageSize=10", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expectTableReady(table);
   await expect(page.getByText("1 /")).toBeVisible();
@@ -111,7 +111,7 @@ test("pagination works", async ({ page }) => {
 
 test("page size change works", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expectTableReady(table);
   await page.getByLabel("Rows per page").selectOption("10");
@@ -121,7 +121,7 @@ test("page size change works", async ({ page }) => {
 
 test("URL query state is preserved on reload", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings?q=Emirates&status=confirmed", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?q=Emirates&status=confirmed", { waitUntil: "load" });
   await page.reload({ waitUntil: "load" });
   await expect(page).toHaveURL(/q=Emirates/);
   await expect(page).toHaveURL(/status=confirmed/);
@@ -130,7 +130,7 @@ test("URL query state is preserved on reload", async ({ page }) => {
 
 test("booking drawer opens", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expectTableReady(table);
   const trigger = table.locator("tbody tr").first().getByRole("button");
@@ -141,7 +141,7 @@ test("booking drawer opens", async ({ page }) => {
 
 test("booking drawer displays selected booking", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings?id=JP-BK-10001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?id=JP-BK-10001", { waitUntil: "load" });
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   const content = page.getByTestId("booking-drawer-content");
@@ -151,20 +151,20 @@ test("booking drawer displays selected booking", async ({ page }) => {
 
 test("booking drawer closes through close control", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings?id=JP-BK-10001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?id=JP-BK-10001", { waitUntil: "load" });
   await expect(page.getByRole("dialog")).toBeVisible();
   await closeDrawerWithButton(page, "Close booking details", /id=JP-BK-10001/);
 });
 
 test("booking drawer closes using Escape", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings?id=JP-BK-10001", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?id=JP-BK-10001", { waitUntil: "load" });
   await closeDrawerWithEscape(page, /id=JP-BK-10001/);
 });
 
 test("mobile booking cards render without horizontal viewport overflow", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
-  await page.goto("/testdash/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   const overflow = await page.evaluate(() => {
     return document.documentElement.scrollWidth > document.documentElement.clientWidth;
   });
@@ -173,6 +173,6 @@ test("mobile booking cards render without horizontal viewport overflow", async (
 
 test("empty filter state renders", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/testdash/bookings?q=zzznomatchzzz", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/bookings?q=zzznomatchzzz", { waitUntil: "load" });
   await expect(page.getByText("No bookings match your filters")).toBeVisible();
 });

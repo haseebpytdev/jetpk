@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DashboardLink } from "@/components/dashboard/dashboard-link";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { CmsStatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/format";
@@ -55,12 +55,12 @@ export function SettingsOverview({ result }: Props) {
                 </div>
                 <div className="flex items-center gap-2">
                   <CmsStatusBadge status={category.ready ? "valid" : "blocked"} label={category.ready ? "Ready" : "Blocked"} />
-                  <Link
+                  <DashboardLink
                     href={`/settings/${category.section}`}
                     className="text-xs font-medium text-jp-accent hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
                   >
                     Open
-                  </Link>
+                  </DashboardLink>
                 </div>
               </li>
             ))}

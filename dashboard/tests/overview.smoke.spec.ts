@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.beforeAll(async ({ request }) => {
-  const response = await request.get("/testdash", { timeout: 120_000 });
+  const response = await request.get("/admin/dashboard", { timeout: 120_000 });
   expect(response.ok()).toBeTruthy();
 });
 
@@ -19,7 +19,7 @@ const viewports = [
 for (const viewport of viewports) {
   test(`overview renders at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/testdash", { waitUntil: "load" });
+    await page.goto("/admin/dashboard", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: "Dashboard", level: 1 })).toBeVisible({
       timeout: 60_000,
     });
@@ -29,7 +29,7 @@ for (const viewport of viewports) {
 }
 
 test("planned module stub", async ({ page }) => {
-  await page.goto("/testdash/planned/bookings", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/planned/bookings", { waitUntil: "load" });
   await expect(page.getByText(/Planned module/i)).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("admin.bookings")).toBeVisible();
 });

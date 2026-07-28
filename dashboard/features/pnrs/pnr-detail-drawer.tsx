@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Divider } from "@/components/ui/divider";
 import { PreviewDataBanner } from "@/components/ui/page-layout";
 import {

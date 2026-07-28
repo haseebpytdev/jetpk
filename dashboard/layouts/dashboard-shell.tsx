@@ -27,8 +27,8 @@ export function DashboardShell({
           {children}
         </main>
         <footer className="flex flex-col gap-2 border-t border-jp-border bg-white px-4 py-4 text-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <span>© 2026 JetPakistan.pk — preview dashboard</span>
-          <span>Version 2.0.0-preview</span>
+          <span>© 2026 JetPakistan.pk — back-office dashboard</span>
+          <span>Version 2.0.0</span>
         </footer>
       </div>
     </div>

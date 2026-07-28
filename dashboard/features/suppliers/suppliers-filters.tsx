@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DateInput, SearchInput } from "@/components/ui/input";
@@ -17,7 +17,7 @@ type Props = {
 };
 
 export function SuppliersFilters({ query, facets }: Props) {
-  const router = useRouter();
+  const router = useDashboardRouter();
   const [pending, startTransition] = useTransition();
   const [draft, setDraft] = useState(query);
 
