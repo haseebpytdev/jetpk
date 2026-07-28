@@ -152,6 +152,13 @@ dashboard/.env.local
 dashboard/test-results/
 dashboard/playwright-report/
 dashboard/tsconfig.tsbuildinfo
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+frontend/.env.local
+frontend/test-results/
+frontend/playwright-report/
+frontend/tsconfig.tsbuildinfo
 
 # Local workspace artifacts (kept outside repository)
 /UI_test/
