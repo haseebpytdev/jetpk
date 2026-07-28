@@ -145,9 +145,11 @@ Architecture + contracts + visual audit baseline.
 
 ## Public frontend planning (JP-FE-01+)
 
+**Authoritative plan:** [`docs/frontend/JETPAKISTAN-NEXTJS-PUBLIC-FRONTEND-MASTER-PLAN.md`](../frontend/JETPAKISTAN-NEXTJS-PUBLIC-FRONTEND-MASTER-PLAN.md)
+
 1. **Blade frontend remains in maintenance mode** — only critical fixes (broken flows, 500s, security, branding leaks, severe mobile issues).
 2. **No comprehensive Blade refactor.**
-3. Valid audit findings become **Next.js acceptance criteria**.
-4. Future public frontend begins with **JP-FE-01** — architecture, design system, contracts, route map, CMS registry.
+3. Valid audit findings become **Next.js acceptance criteria** (see master plan §12–§16).
+4. Future public frontend begins with **JP-FE-01** — architecture, design system, contracts, route map, day/night theme system, Scroll-to-Discover motion system, and CMS registry per the master plan.
 5. **Laravel/Sabre hardened logic remains authoritative** — no business logic duplication in Next.js.
-6. Every public frontend phase requires visual QA at: **1440, 1280, 1024, 768, 430, 390, 360**.
+6. Every public frontend phase requires visual QA at: **1440, 1280, 1024, 768, 430, 390, 360** (master plan §16).

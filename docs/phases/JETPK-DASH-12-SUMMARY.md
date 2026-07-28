@@ -129,7 +129,11 @@ No Parwaaz, Easy Ticket, Asif Travels, master OTA, or cross-client branding in i
 
 ## 27. Public frontend-plan preservation
 
-Public Next.js frontend **not started**. Blade public frontend remains authoritative. `JETPAKISTAN-NEXTJS-PUBLIC-FRONTEND-MASTER-PLAN.md` was not present in the repository or dashboard worktree; not added during DASH-12. Next workstream: **JP-FE-01**.
+Public Next.js frontend **not started**. Blade public frontend remains authoritative.
+
+**Authoritative plan (tracked):** [`docs/frontend/JETPAKISTAN-NEXTJS-PUBLIC-FRONTEND-MASTER-PLAN.md`](../frontend/JETPAKISTAN-NEXTJS-PUBLIC-FRONTEND-MASTER-PLAN.md)
+
+Implementation begins only after dashboard integration (gate complete). Next workstream: **JP-FE-01** per the master plan.
 
 ## 28. Main integration commit SHA
 
