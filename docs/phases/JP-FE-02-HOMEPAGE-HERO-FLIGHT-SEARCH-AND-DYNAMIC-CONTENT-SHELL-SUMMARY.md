@@ -224,4 +224,4 @@ git checkout main -- frontend/
 
 ## Commit SHA
 
-_To be recorded after commit._
+`7fdad41` — feat(frontend): add JP-FE-02 homepage hero and flight search shell
