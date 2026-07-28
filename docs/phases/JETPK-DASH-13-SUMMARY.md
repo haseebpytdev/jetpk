@@ -1,83 +1,110 @@
-# JETPK-DASH-13 — Admin/Staff Production Cutover
+# JETPK-DASH-13 — Pre-Deployment Validation and Production Runtime Closure
 
 ## Phase
 
-JETPK-DASH-13 — Admin/Staff production cutover, role routing, legacy dashboard retirement
+JETPK-DASH-13 — Pre-deployment validation and production runtime closure
 
 ## Branch
 
 `phase/jetpk-dash-13-admin-staff-production-cutover`
 
-## Starting HEAD
+## Commits (baseline)
 
-`903d9b5`
+- `e6fd408` — feat(dashboard): cut over Admin and Staff production routes
+- `d61715d` — docs(dashboard): finalize DASH-13 production cutover
 
 ## Objective
 
-Mount the Next.js back-office dashboard at `/admin/dashboard` and `/staff/dashboard`, retire `/testdash` and legacy Blade entry routes, preserve Agent/Customer dashboards.
+Close all pre-deployment gaps before JetPakistan production upload: full Playwright suite, runtime requirements, process-manager decision framework, environment contract, deployment/rollback manifests, SFTP commands. **No live deploy.**
 
-## Route audit summary
+## Part A — Local state (verified)
 
-| Route | Controller | Middleware | Final behavior |
-|-------|------------|------------|----------------|
-| `/admin/dashboard/*` | `BackOfficeDashboardController@admin` | web, auth, agency, platform_admin | Next.js shell (static or proxy) |
-| `/staff/dashboard/*` | `BackOfficeDashboardController@staff` | web, auth, agency, staff | Next.js shell |
-| `/admin` | redirect | same as admin group | → `/admin/dashboard` |
-| `/staff` | redirect | same as staff group | → `/staff/dashboard` |
-| `/dashboard` | `DashboardRedirectController` | auth | Role-based redirect |
-| `/testdash/*` | `BackOfficeDashboardController@testdashRedirect` | web | Login or role redirect |
-| `/agent` | unchanged | agent | Agent Blade dashboard |
-| `/customer` | unchanged | customer | Customer dashboard |
+| Check | Result |
+|-------|--------|
+| Branch | `phase/jetpk-dash-13-admin-staff-production-cutover` |
+| Remote | `jetpk` → `https://github.com/haseebpytdev/jetpk.git` |
+| Baseline commits | `e6fd408`, `d61715d` present |
+| Working tree | Clean after closure commits |
 
-## Next.js strategy
+## Part B — Full Playwright suite
 
-- Shared app at `dashboard/app/[portal]/dashboard/*` (`admin` \| `staff`)
-- No `basePath`; canonical URLs `/admin/dashboard/*`, `/staff/dashboard/*`
-- Production: `next build` + `next start` on port 3001; Laravel proxies after auth (`config/dashboard.php`)
-- Internal navigation uses `useDashboardRouter` / `DashboardLink` for portal-prefixed paths
+| Item | Value |
+|------|-------|
+| Inventory | **1080 tests in 49 files** (`npx playwright test --list`) |
+| Config | `playwright.reuse.config.ts` with verified `npm run start:smoke` on **:3002** |
+| Retries | **0** |
+| Sharding | 6 non-overlapping shards (`--shard=1/6` … `6/6`) |
 
-## Local validation
+| Shard | Tests | Result |
+|-------|-------|--------|
+| 1/6 | 180 | 180 passed |
+| 2/6 | 183 | 183 passed |
+| 3/6 | 177 | 177 passed (re-run after `pnrs-filters` fix; initial run had 1 timing flake on permissions drawer) |
+| 4/6 | 180 | 180 passed |
+| 5/6 | 184 | 184 passed |
+| 6/6 | 176 | 176 passed |
+| **Union** | **1080** | **1080 passed, 0 failed, 0 flaky, 0 skipped** |
 
-| Gate | Result |
-|------|--------|
-| Typecheck | Pass |
-| Lint | Pass |
-| Build | Pass (89 prerendered routes incl. admin+staff) |
-| Laravel API tests | 30/30 (232 assertions) |
-| Back-office routing tests | 12/12 |
-| Role verification tests | 5/5 |
-| **Laravel total (dashboard-related)** | **47/47, 270 assertions** |
-| Targeted Playwright (cutover gate) | **102/102, retries=0** |
-| Full Playwright suite (397 baseline) | **Deferred** — rerun `npx playwright test -c playwright.reuse.config.ts --retries=0` before live deploy |
+**Fix applied:** `dashboard/features/pnrs/pnrs-filters.tsx` — `useDashboardRouter()` for portal-prefixed filter navigation (same pattern as bookings).
 
-## `/testdash` disposition
+## Part C — Production runtime requirements
 
-Laravel redirect only; not a public preview mount.
+| Item | Value |
+|------|-------|
+| Node.js | `^18.18.0 \|\| ^19.8.0 \|\| >= 20.0.0` |
+| npm | Lockfile-driven (`npm ci`); local **11.4.2** |
+| Next.js | **15.5.21** |
+| Port | **3001** (`next start -p 3001`) |
+| Binding | Next.js default (`0.0.0.0`, reachable at `127.0.0.1:3001`) |
+| Startup | `cd /home/pkjetp/jetpk_app/dashboard && npm run start` |
+| Laravel proxy timeout | **30s** |
+| Failure | **503** when static HTML absent and proxy fails |
+| Build | Server-side `npm ci && npm run build` (no `.next` upload) |
 
-## Legacy disposition
+## Part D–E — Process manager
 
-`/admin` and `/staff` Blade dashboard entries retired (redirect). Controllers/views retained for rollback.
+**Unresolved — operator input required.** Run server capability commands in `docs/dashboard/DASHBOARD-PRODUCTION-DEPLOYMENT.md`. Select cPanel Node.js App or PM2 per documented templates.
 
-## Security
+## Part F — Environment contract
 
-- Dashboard API remains GET\|HEAD only (38 routes)
-- No localStorage auth tokens
-- Sabre cancellation gates unchanged (not modified in this phase)
+```env
+DASHBOARD_NEXT_SERVER_URL=http://127.0.0.1:3001
+DASHBOARD_NEXT_PROXY_ENABLED=true
+```
+
+Rollback: `DASHBOARD_NEXT_PROXY_ENABLED=false` and restore Laravel files.
+
+## Part G — Production manifest
+
+- **Laravel:** 5 files (controller, config, 3 routes)
+- **Dashboard:** 364 source files
+- **SFTP:** `docs/dashboard/DASH-13-SFTP-COMMANDS.txt` (81 mkdir + 374 put)
+- **Tests/docs:** not uploaded
+
+## Part H — Upload strategy
+
+Server-side build only. Upload source per SFTP manifest; exclude `node_modules/`, `.next/`, `tests/`.
+
+## Parts I–M — Backup, SFTP, deploy, rollback
+
+Documented in:
+
+- `docs/dashboard/DASHBOARD-PRODUCTION-DEPLOYMENT.md`
+- `docs/dashboard/DASHBOARD-ROLLBACK.md`
+- `docs/dashboard/DASH-13-SFTP-COMMANDS.txt`
+
+## Laravel validation (unchanged)
+
+47/47 PHPUnit tests, 270 assertions (dashboard-related).
 
 ## Live deployment
 
-**Not executed in this session** — SFTP/server commands documented in `docs/dashboard/DASHBOARD-PRODUCTION-DEPLOYMENT.md`.
-
-## Known limitations
-
-1. Full 397-test Playwright suite not rerun in this pass (targeted 102-test cutover gate passed).
-2. Static HTML export deferred (searchParams on module pages); production uses Laravel auth proxy to `next start`.
-3. Main integration and live verification pending operator deploy.
-
-## Final status
-
-**LOCAL IMPLEMENTATION COMPLETE** — live cutover and main merge pending deployment verification.
+**NOT EXECUTED.** Awaiting operator server capability output and explicit deploy approval.
 
 ## JP-FE-01
 
 Not started.
+
+## Final status
+
+**PRE-DEPLOYMENT VALIDATION COMPLETE** — branch ready for operator deployment. Process manager selection blocked on server capability output.
