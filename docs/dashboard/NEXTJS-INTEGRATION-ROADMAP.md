@@ -112,3 +112,42 @@ Contract tests, registry uniqueness, link safety, Playwright route shells, and C
 - WYSIWYG HTML editor
 - Live CMS persistence
 - Brand switching / multi-tenant UI
+
+---
+
+## DASH-11 — Laravel read-only dashboard integration
+
+### Prompt 02 (current)
+
+| Area | Status |
+|------|--------|
+| Laravel GET `/api/dashboard/*` | ✅ Session, overview, bookings, payments, customers |
+| Next.js adapters | ✅ `laravel-client` + module services |
+| Auth shell | ✅ Session summary in header/sidebar |
+| Data-source switching | ✅ Explicit fixture / laravelReadOnly / unavailable |
+| No silent fallback | ✅ Enforced in `createReadOnlyService` |
+| Tests | ✅ Targeted Laravel + Next.js read-only specs |
+
+### Prompt 01 baseline
+
+Architecture + contracts + visual audit baseline.
+
+| Area | Prompt 01 | Prompt 02+ |
+|------|-----------|------------|
+| Read-only API contracts | ✅ Documented | ✅ Laravel implementation (Prompt 02 modules) |
+| Response/error envelopes | ✅ Typed | ✅ Wired to live APIs |
+| Data-source modes | ✅ | ✅ Live shell for core modules |
+| Visual system doc | ✅ | Maintained during integration |
+
+**Explicitly prohibited in DASH-11:** mutation APIs, login UI changes, silent fixture fallback, credential exposure.
+
+---
+
+## Public frontend planning (JP-FE-01+)
+
+1. **Blade frontend remains in maintenance mode** — only critical fixes (broken flows, 500s, security, branding leaks, severe mobile issues).
+2. **No comprehensive Blade refactor.**
+3. Valid audit findings become **Next.js acceptance criteria**.
+4. Future public frontend begins with **JP-FE-01** — architecture, design system, contracts, route map, CMS registry.
+5. **Laravel/Sabre hardened logic remains authoritative** — no business logic duplication in Next.js.
+6. Every public frontend phase requires visual QA at: **1440, 1280, 1024, 768, 430, 390, 360**.

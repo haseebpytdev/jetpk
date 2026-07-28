@@ -3,6 +3,14 @@ import { UsersModuleShell, UsersErrorShell } from "@/features/users/users-module
 import { parsePermissionsQuery } from "@/lib/permissions-query";
 import { getPermissionsModule, PermissionsServiceError } from "@/services/permission-service";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ForbiddenState,
+  SanitizedErrorState,
+  ServiceUnavailableState,
+  UnauthorizedState,
+} from "@/components/ui/data-source-status";
+import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
+import { PageContainer, PageHeader } from "@/components/ui/page-layout";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -32,9 +40,30 @@ export async function PermissionsPageContent({ searchParams }: Props) {
       </UsersModuleShell>
     );
   } catch (e) {
-    if (e instanceof PermissionsServiceError) {
-      return <UsersErrorShell referenceId={e.referenceId} message={e.message} />;
-    }
-    throw e;
+    return (
+      <PageContainer>
+        <PageHeader title="Permissions" />
+        <PermissionsModuleError error={e} />
+      </PageContainer>
+    );
   }
+}
+
+function PermissionsModuleError({ error }: { error: unknown }) {
+  if (error instanceof ReadOnlyServiceError) {
+    const code = error.envelope.error.code;
+    if (code === "unauthenticated") return <UnauthorizedState />;
+    if (code === "forbidden") return <ForbiddenState resource="permissions" />;
+    if (code === "unavailable") return <ServiceUnavailableState />;
+    return (
+      <SanitizedErrorState
+        message={error.envelope.error.message}
+        referenceId={error.envelope.error.referenceIdSafe}
+      />
+    );
+  }
+  if (error instanceof PermissionsServiceError) {
+    return <UsersErrorShell referenceId={error.referenceId} message={error.message} />;
+  }
+  throw error;
 }

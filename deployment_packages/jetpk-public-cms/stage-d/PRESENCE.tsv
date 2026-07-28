@@ -1,0 +1,11 @@
+﻿NEW_FILE	/home/USER/jetpk_app/app/Http/Controllers/Admin/ClientCustomPageController.php
+NEW_FILE	/home/USER/jetpk_app/app/Models/ClientPage.php
+EXISTING	/home/USER/jetpk_app/app/Support/Client/ClientPageKeys.php
+NEW_FILE	/home/USER/jetpk_app/database/migrations/2026_07_19_120000_create_client_pages_table.php
+NEW_FILE	/home/USER/jetpk_app/resources/views/themes/admin/jetpakistan/page-settings/custom-pages/create.blade.php
+NEW_FILE	/home/USER/jetpk_app/resources/views/themes/admin/jetpakistan/page-settings/custom-pages/index.blade.php
+NEW_FILE	/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend/content-page.blade.php
+NEW_FILE	/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/sections/cms/feature_cards.blade.php
+NEW_FILE	/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/sections/cms/rich_text.blade.php
+EXISTING	/home/USER/jetpk_app/routes/admin-page-settings.php
+EXISTING	/home/USER/jetpk_app/routes/web.php

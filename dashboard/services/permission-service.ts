@@ -1,12 +1,17 @@
-import { PERMISSION_CATALOG } from "@/lib/access-control/permission-catalog";
-import { useMockData } from "@/lib/preview";
+import { PERMISSION_CATALOG, PERMISSION_BY_ID } from "@/lib/access-control/permission-catalog";
 import {
   buildPermissionsPage,
   getAssignedRolesForPermission,
   getPermissionValidationIssues,
 } from "@/lib/permissions/query-filters";
-import { PERMISSION_BY_ID } from "@/lib/access-control/permission-catalog";
+import type { Permission } from "@/types/access-control";
 import type { PermissionsModuleResult, PermissionsQuery } from "@/types/permissions";
+import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
+import { createReadOnlyService, ReadOnlyServiceError, type ReadOnlyFetchOptions } from "@/lib/read-only/read-only-service";
+import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
+import { DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
+import { transformPermissionDetail, transformPermissionsModule } from "@/lib/read-only/laravel/transformers/permissions";
+import type { LaravelPermissionsListPayload } from "@/lib/read-only/laravel/types";
 
 export class PermissionsServiceError extends Error {
   readonly referenceId: string;
@@ -29,20 +34,29 @@ const emptySummary = {
   permissionsRequiringPrerequisiteReview: 0,
 };
 
-export async function getPermissionsModule(query: PermissionsQuery): Promise<PermissionsModuleResult> {
-  if (!useMockData()) {
-    throw new PermissionsServiceError("Live permission data is disabled in preview.", "PRM-PREVIEW-NO-LIVE");
+function mapReadOnlyError(error: unknown): never {
+  if (error instanceof ReadOnlyServiceError) {
+    throw new PermissionsServiceError(error.envelope.error.message, error.envelope.error.referenceIdSafe);
   }
+  throw error;
+}
 
-  if (query.previewError) {
-    throw new PermissionsServiceError(
-      "Mock permissions service returned a recoverable error (preview simulation).",
-      "PRM-PREVIEW-SIM-ERR",
-    );
-  }
+function toLaravelQuery(query: PermissionsQuery): Record<string, string | number> {
+  return {
+    page: query.page,
+    pageSize: query.pageSize,
+    q: query.search,
+    domain: query.domain,
+    action: query.action,
+    risk: query.risk,
+    scope: query.scope,
+    validationState: query.validationState,
+    sort: query.sort,
+    direction: query.direction,
+  };
+}
 
-  await new Promise((r) => setTimeout(r, 60));
-
+function buildFixtureResult(query: PermissionsQuery): PermissionsModuleResult {
   if (query.previewLoading) {
     return {
       state: "loading",
@@ -59,8 +73,6 @@ export async function getPermissionsModule(query: PermissionsQuery): Promise<Per
   const source = query.previewEmpty ? [] : PERMISSION_CATALOG;
   const page = buildPermissionsPage(query, source);
   const selectedPermission = query.selected ? PERMISSION_BY_ID.get(query.selected) ?? null : null;
-  const assignedRoles = selectedPermission ? getAssignedRolesForPermission(selectedPermission.key) : [];
-  const validationIssues = selectedPermission ? getPermissionValidationIssues(selectedPermission) : [];
 
   return {
     state: page.total === 0 ? "empty" : "ready",
@@ -75,7 +87,68 @@ export async function getPermissionsModule(query: PermissionsQuery): Promise<Per
     },
     facets: page.facets,
     selectedPermission,
-    assignedRoles,
-    validationIssues,
+    assignedRoles: selectedPermission ? getAssignedRolesForPermission(selectedPermission.key) : [],
+    validationIssues: selectedPermission ? getPermissionValidationIssues(selectedPermission) : [],
   };
+}
+
+const permissionsService = createReadOnlyService<PermissionsQuery, PermissionsModuleResult>({
+  module: "permissions",
+  fixtureAdapter: {
+    mode: "fixture",
+    async fetch(query, options) {
+      if (query.previewError) {
+        throw new ReadOnlyServiceError({
+          error: {
+            code: "internal_error",
+            message: "Mock permissions service returned a recoverable error (preview simulation).",
+            referenceIdSafe: "PRM-PREVIEW-SIM-ERR",
+          },
+          meta: { source: "fixture", schemaVersion: "dash-read-only-v1" },
+        });
+      }
+      await new Promise((r) => setTimeout(r, 60));
+      return createReadOnlyEnvelope({ data: buildFixtureResult(query), metadata: options?.metadata });
+    },
+  },
+  laravelAdapter: {
+    mode: "laravelReadOnly",
+    async fetch(query, options) {
+      const envelope = await fetchDashboardApi<LaravelPermissionsListPayload>(DASHBOARD_API_ROUTES.permissions, {
+        signal: options?.signal,
+        query: toLaravelQuery(query),
+      });
+      const pagination = envelope.pagination ?? { page: 1, pageSize: 25, total: 0, pageCount: 1 };
+      let selectedPermission: Permission | null = null;
+      if (query.selected) {
+        try {
+          const detail = await fetchDashboardApi<Record<string, unknown>>(
+            DASHBOARD_API_ROUTES.permissionDetail(query.selected),
+            { signal: options?.signal },
+          );
+          selectedPermission = transformPermissionDetail(detail.data);
+        } catch (error) {
+          if (!(error instanceof ReadOnlyServiceError && error.envelope.error.code === "not_found")) {
+            throw error;
+          }
+        }
+      }
+      return {
+        ...envelope,
+        data: transformPermissionsModule(envelope.data, query, pagination, selectedPermission),
+      };
+    },
+  },
+});
+
+export async function getPermissionsModule(
+  query: PermissionsQuery,
+  options?: ReadOnlyFetchOptions,
+): Promise<PermissionsModuleResult> {
+  try {
+    const envelope = await permissionsService.fetchReadOnly(query, options);
+    return envelope.data;
+  } catch (error) {
+    mapReadOnlyError(error);
+  }
 }

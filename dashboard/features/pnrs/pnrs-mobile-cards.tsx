@@ -17,7 +17,7 @@ type Props = {
 
 export function PnrsMobileCards({ pnrs, onView }: Props) {
   return (
-    <ul className="space-y-3 md:hidden" data-testid="pnrs-mobile-cards">
+    <ul className="space-y-3 xl:hidden" data-testid="pnrs-mobile-cards">
       {pnrs.map((pnr) => (
         <li key={pnr.id}>
           <Card className="space-y-3">

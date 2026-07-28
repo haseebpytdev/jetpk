@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { ReportsWorkspace } from "@/features/reports/reports-workspace";
@@ -23,14 +24,15 @@ export function ReportsModuleShell({ module, result }: Props) {
 
   return (
     <PageContainer>
+      <PreviewModeBadgeSlot />
       <PageHeader
         breadcrumb={
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Reports" }, { label: current.label }]} />
         }
         title="Reports"
-        description="Operational and commercial analytics from deterministic JetPakistan preview records."
+        description="Operational and commercial analytics with explicit currency and read-only export preview."
       />
-      <PreviewDataBanner />
+      <DataSourceNoticeSlot />
 
       <nav aria-label="Reports sections" className="flex flex-wrap gap-2">
         {SUBROUTES.map((route) => (

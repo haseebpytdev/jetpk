@@ -1,8 +1,11 @@
 import type { ReactNode, HTMLAttributes, LabelHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export function PageContainer({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("mx-auto w-full max-w-[1600px] space-y-6", className)} {...props} />;
+  return <div className={cn("mx-auto w-full min-w-0 max-w-[1600px] space-y-6", className)} {...props} />;
 }
 
 export function PageHeader({
@@ -69,7 +72,7 @@ export function PreviewDataBanner({ className }: { className?: string }) {
       )}
       role="status"
     >
-      Preview data — synthetic bookings for layout and workflow testing. Not live production records.
+      Preview data — synthetic records for layout and workflow testing. Not live production data.
     </div>
   );
 }
@@ -81,3 +84,61 @@ export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElem
 export function VisuallyHidden({ children }: { children: ReactNode }) {
   return <span className="sr-only">{children}</span>;
 }
+
+/** Shared dashboard page shell contract — title, notices, filters, and state regions. */
+export function DashboardPageShell({
+  title,
+  description,
+  breadcrumb,
+  actions,
+  previewNotice,
+  dataSourceNotice,
+  summary,
+  filters,
+  activeFilters,
+  children,
+  state,
+  error,
+  empty,
+  className,
+}: {
+  title: string;
+  description?: string;
+  breadcrumb?: ReactNode;
+  actions?: ReactNode;
+  previewNotice?: ReactNode;
+  dataSourceNotice?: ReactNode;
+  summary?: ReactNode;
+  filters?: ReactNode;
+  activeFilters?: ReactNode;
+  children?: ReactNode;
+  state?: "loading" | "ready" | "empty" | "error";
+  error?: { title: string; message: string; referenceId: string; onRetry?: () => void };
+  empty?: { title: string; description: string };
+  className?: string;
+}) {
+  return (
+    <PageContainer className={className}>
+      <PageHeader title={title} description={description} breadcrumb={breadcrumb} actions={actions} />
+      {previewNotice}
+      {dataSourceNotice}
+      {summary}
+      {filters}
+      {activeFilters}
+      {state === "loading" ? <LoadingState /> : null}
+      {state === "error" && error ? (
+        <ErrorState
+          title={error.title}
+          message={error.message}
+          referenceId={error.referenceId}
+          onRetry={error.onRetry}
+        />
+      ) : null}
+      {state === "empty" && empty ? <EmptyState title={empty.title} description={empty.description} /> : null}
+      {state === "ready" || !state ? children : null}
+    </PageContainer>
+  );
+}
+
+/** @deprecated Use FixtureDataNotice from data-source-status for explicit source labeling. */
+export { PreviewDataBanner as PreviewNotice };

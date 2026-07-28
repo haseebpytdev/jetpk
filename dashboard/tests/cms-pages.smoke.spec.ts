@@ -127,10 +127,7 @@ test("search filter applies", async ({ page }) => {
   await page.goto("/testdash/cms/pages", { waitUntil: "load" });
   await expectFiltersReady(page);
   await fillSearchInput(page.locator("#cms-search"), "Homepage");
-  const apply = page.getByRole("button", { name: "Apply filters" });
-  await apply.click();
-  await expect(page).toHaveURL(/search=Homepage/i, { timeout: 30_000 });
-  await expectCmsReady(page);
+  await applyCmsFiltersAndWait(page, /search=Homepage/i);
 });
 
 test("open drawer from table", async ({ page }) => {

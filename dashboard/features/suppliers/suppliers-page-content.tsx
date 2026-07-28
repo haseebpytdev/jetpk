@@ -1,9 +1,17 @@
 import { SuppliersWorkspace } from "@/features/suppliers/suppliers-workspace";
 import { SuppliersErrorPanel } from "@/features/suppliers/suppliers-error-panel";
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parseSuppliersQuery } from "@/lib/suppliers-query";
 import { SuppliersServiceError, getSupplierDetail, getSuppliersPage } from "@/services/supplier-service";
+import {
+  ForbiddenState,
+  SanitizedErrorState,
+  ServiceUnavailableState,
+  UnauthorizedState,
+} from "@/components/ui/data-source-status";
+import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -38,7 +46,7 @@ export async function SuppliersPageContent({ searchParams }: Props) {
             />
           }
           title="Suppliers"
-          description="Supplier inventory and integration status — mock preview data."
+          description="Supplier inventory and integration status."
         />
         <SuppliersLoadingSkeleton />
       </PageContainer>
@@ -51,6 +59,7 @@ export async function SuppliersPageContent({ searchParams }: Props) {
 
     return (
       <PageContainer>
+        <PreviewModeBadgeSlot />
         <PageHeader
           breadcrumb={
             <Breadcrumb
@@ -58,21 +67,37 @@ export async function SuppliersPageContent({ searchParams }: Props) {
             />
           }
           title="Suppliers"
-          description="Supplier inventory and integration status — mock preview data with filters, sorting, and read-only detail."
+          description="Supplier inventory and integration status with filters, sorting, and read-only detail."
         />
-        <PreviewDataBanner />
+        <DataSourceNoticeSlot />
         <SuppliersWorkspace query={query} result={result} selectedSupplier={selectedSupplier} />
       </PageContainer>
     );
   } catch (e) {
-    if (e instanceof SuppliersServiceError) {
-      return (
-        <PageContainer>
-          <PageHeader title="Suppliers" />
-          <SuppliersErrorPanel referenceId={e.referenceId} message={e.message} />
-        </PageContainer>
-      );
-    }
-    throw e;
+    return (
+      <PageContainer>
+        <PageHeader title="Suppliers" />
+        <SuppliersModuleError error={e} />
+      </PageContainer>
+    );
   }
+}
+
+function SuppliersModuleError({ error }: { error: unknown }) {
+  if (error instanceof ReadOnlyServiceError) {
+    const code = error.envelope.error.code;
+    if (code === "unauthenticated") return <UnauthorizedState />;
+    if (code === "forbidden") return <ForbiddenState resource="suppliers" />;
+    if (code === "unavailable") return <ServiceUnavailableState />;
+    return (
+      <SanitizedErrorState
+        message={error.envelope.error.message}
+        referenceId={error.envelope.error.referenceIdSafe}
+      />
+    );
+  }
+  if (error instanceof SuppliersServiceError) {
+    return <SuppliersErrorPanel referenceId={error.referenceId} message={error.message} />;
+  }
+  throw error;
 }

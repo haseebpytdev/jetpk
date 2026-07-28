@@ -707,7 +707,7 @@ export async function expectSettingsReady(page: Page): Promise<void> {
       .or(page.getByTestId("notification-settings-workspace"))
       .or(page.getByTestId("integration-settings-workspace"))
       .or(page.getByText(/Unable to load settings/i))
-      .or(page.getByText(/No settings data in preview/i)),
+      .or(page.getByText(/No settings data/i)),
   ).toBeVisible({ timeout: 30_000 });
 }
 

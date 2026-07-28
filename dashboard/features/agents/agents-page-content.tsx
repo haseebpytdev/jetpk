@@ -1,9 +1,17 @@
 import { AgentsWorkspace } from "@/features/agents/agents-workspace";
 import { AgentsErrorPanel } from "@/features/agents/agents-error-panel";
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parseAgentsQuery } from "@/lib/agents-query";
 import { AgentsServiceError, getAgentDetail, getAgentsPage } from "@/services/agent-service";
+import {
+  ForbiddenState,
+  SanitizedErrorState,
+  ServiceUnavailableState,
+  UnauthorizedState,
+} from "@/components/ui/data-source-status";
+import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -38,7 +46,7 @@ export async function AgentsPageContent({ searchParams }: Props) {
             />
           }
           title="Agents"
-          description="Agent and agency accounts — mock preview data."
+          description="Agent and agency accounts."
         />
         <AgentsLoadingSkeleton />
       </PageContainer>
@@ -51,6 +59,7 @@ export async function AgentsPageContent({ searchParams }: Props) {
 
     return (
       <PageContainer>
+        <PreviewModeBadgeSlot />
         <PageHeader
           breadcrumb={
             <Breadcrumb
@@ -58,21 +67,37 @@ export async function AgentsPageContent({ searchParams }: Props) {
             />
           }
           title="Agents"
-          description="Agent and agency accounts — mock preview data with filters, sorting, and read-only detail."
+          description="Agent and agency accounts with filters, sorting, and read-only detail."
         />
-        <PreviewDataBanner />
+        <DataSourceNoticeSlot />
         <AgentsWorkspace query={query} result={result} selectedAgent={selectedAgent} />
       </PageContainer>
     );
   } catch (e) {
-    if (e instanceof AgentsServiceError) {
-      return (
-        <PageContainer>
-          <PageHeader title="Agents" />
-          <AgentsErrorPanel referenceId={e.referenceId} message={e.message} />
-        </PageContainer>
-      );
-    }
-    throw e;
+    return (
+      <PageContainer>
+        <PageHeader title="Agents" />
+        <AgentsModuleError error={e} />
+      </PageContainer>
+    );
   }
+}
+
+function AgentsModuleError({ error }: { error: unknown }) {
+  if (error instanceof ReadOnlyServiceError) {
+    const code = error.envelope.error.code;
+    if (code === "unauthenticated") return <UnauthorizedState />;
+    if (code === "forbidden") return <ForbiddenState resource="agents" />;
+    if (code === "unavailable") return <ServiceUnavailableState />;
+    return (
+      <SanitizedErrorState
+        message={error.envelope.error.message}
+        referenceId={error.envelope.error.referenceIdSafe}
+      />
+    );
+  }
+  if (error instanceof AgentsServiceError) {
+    return <AgentsErrorPanel referenceId={error.referenceId} message={error.message} />;
+  }
+  throw error;
 }

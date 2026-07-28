@@ -283,7 +283,7 @@ test("drawer opens", async ({ page }) => {
   await page.goto("/testdash/pnrs", { waitUntil: "load" });
   const table = page.getByTestId("pnrs-table");
   await expectTableReady(table);
-  await table.getByRole("button", { name: "View" }).first().click();
+  await table.getByRole("button", { name: /^JP-PN-/ }).first().click();
   await page.waitForURL(/id=JP-PN-/, { timeout: 15_000 });
   await expect(page.getByRole("dialog")).toBeVisible();
 });

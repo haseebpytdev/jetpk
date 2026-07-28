@@ -19,7 +19,7 @@ test.beforeAll(async ({ request }) => {
 test("settings overview route renders", async ({ page }) => {
   await page.goto("/testdash/settings", { waitUntil: "load" });
   await expectSettingsReady(page);
-  await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+  await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("settings section navigation renders", async ({ page }) => {
@@ -205,7 +205,7 @@ test("loading state works", async ({ page }) => {
 
 test("empty state works", async ({ page }) => {
   await page.goto("/testdash/settings?previewEmpty=1", { waitUntil: "load" });
-  await expect(page.getByText(/No settings data in preview/i)).toBeVisible();
+  await expect(page.getByText(/No settings data/i)).toBeVisible();
 });
 
 test("error state works", async ({ page }) => {
@@ -284,6 +284,6 @@ test("all settings subroutes render preview banner", async ({ page }) => {
   ];
   for (const route of routes) {
     await page.goto(route, { waitUntil: "load" });
-    await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+    await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
   }
 });

@@ -3,12 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { mockUser } from "@/mocks/overview-fixtures";
+import type { DashboardSessionSummary } from "@/services/session-service";
 
 type Props = {
   onMenuClick: () => void;
+  session?: DashboardSessionSummary | null;
 };
 
-export function DashboardHeader({ onMenuClick }: Props) {
+export function DashboardHeader({ onMenuClick, session }: Props) {
+  const profile = session ?? {
+    displayName: mockUser.name,
+    email: mockUser.email,
+    initials: mockUser.initials,
+    roles: [mockUser.role],
+  };
   const [profileOpen, setProfileOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -73,9 +81,9 @@ export function DashboardHeader({ onMenuClick }: Props) {
             onClick={() => setProfileOpen((v) => !v)}
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-jp-accent/15 text-xs font-semibold text-jp-accent-muted">
-              {mockUser.initials}
+              {profile.initials}
             </span>
-            <span className="hidden max-w-[120px] truncate sm:inline">{mockUser.name}</span>
+            <span className="hidden max-w-[120px] truncate sm:inline">{profile.displayName}</span>
           </button>
           {profileOpen ? (
             <div
@@ -83,8 +91,9 @@ export function DashboardHeader({ onMenuClick }: Props) {
               className="absolute right-0 mt-2 w-56 rounded-xl border border-jp-border bg-white py-2 shadow-lg"
             >
               <div className="border-b px-4 pb-2">
-                <p className="text-sm font-semibold">{mockUser.name}</p>
-                <p className="text-xs text-jp-muted">{mockUser.email}</p>
+                <p className="text-sm font-semibold">{profile.displayName}</p>
+                <p className="text-xs text-jp-muted">{profile.email}</p>
+                {profile.roles?.[0] ? <p className="mt-1 text-xs text-jp-muted">{profile.roles[0]}</p> : null}
               </div>
               <button type="button" className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50" role="menuitem">
                 Profile (preview)

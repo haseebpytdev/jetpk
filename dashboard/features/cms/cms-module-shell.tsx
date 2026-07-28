@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { CmsWorkspace } from "@/features/cms/cms-workspace";
@@ -24,18 +25,15 @@ export function CmsModuleShell({ module, result }: Props) {
 
   return (
     <PageContainer>
+      <PreviewModeBadgeSlot />
       <PageHeader
         breadcrumb={
           <Breadcrumb items={[{ label: "Home" }, { label: "Inventory & pricing" }, { label: "CMS" }, { label: current.label }]} />
         }
         title="CMS"
-        description="Theme-aware structured content for JetPakistan public pages. Preview data only — no live persistence."
+        description="Theme-aware structured content metadata with read-only Laravel integration for pages."
       />
-      <PreviewDataBanner />
-
-      <div role="status" className="rounded-2xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm text-blue-900">
-        Dashboard preview only — content contracts are fixture-backed and not connected to the live frontend.
-      </div>
+      <DataSourceNoticeSlot />
 
       <nav aria-label="CMS sections" className="flex flex-wrap gap-2">
         {SUBROUTES.map((route) => (

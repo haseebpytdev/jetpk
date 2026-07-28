@@ -23,7 +23,7 @@ test.beforeAll(async ({ request }) => {
 test("permissions route renders", async ({ page }) => {
   await page.goto("/testdash/users/permissions", { waitUntil: "load" });
   await expectPermissionsReady(page);
-  await expect(page.getByText(/Dashboard preview only/i).first()).toBeVisible();
+  await expect(page.getByTestId("fixture-data-notice").first()).toBeVisible();
 });
 
 test("navigation includes Permissions section link", async ({ page }) => {

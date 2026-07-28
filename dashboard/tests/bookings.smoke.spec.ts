@@ -133,7 +133,8 @@ test("booking drawer opens", async ({ page }) => {
   await page.goto("/testdash/bookings", { waitUntil: "load" });
   const table = page.getByTestId("bookings-table");
   await expectTableReady(table);
-  await table.getByRole("button", { name: "View" }).first().click();
+  const trigger = table.locator("tbody tr").first().getByRole("button");
+  await trigger.click();
   await page.waitForURL(/id=JP-BK-/, { timeout: 15_000 });
   await expect(page.getByRole("dialog")).toBeVisible();
 });

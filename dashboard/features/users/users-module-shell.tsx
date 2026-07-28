@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Breadcrumb, PageContainer, PageHeader, PreviewDataBanner } from "@/components/ui/page-layout";
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { UsersWorkspace } from "@/features/users/users-workspace";
@@ -22,18 +23,15 @@ export function UsersModuleShell({ module, result, children }: Props) {
 
   return (
     <PageContainer>
+      <PreviewModeBadgeSlot />
       <PageHeader
         breadcrumb={
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Users" }, { label: current.label }]} />
         }
         title="Users"
-        description="Dashboard user directory, roles, and permissions — fixture-backed preview only."
+        description="Dashboard user directory, roles, and permissions with read-only Laravel integration."
       />
-      <PreviewDataBanner />
-
-      <div role="status" className="rounded-2xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm text-blue-900">
-        Dashboard preview only — access control contracts are fixture-backed and not connected to Laravel authentication.
-      </div>
+      <DataSourceNoticeSlot />
 
       <nav aria-label="Users sections" className="flex flex-wrap gap-2">
         {SUBROUTES.map((route) => (
@@ -50,15 +48,21 @@ export function UsersModuleShell({ module, result, children }: Props) {
 
       {module !== "directory" && children ? (
         children
-      ) : module !== "directory" ? null : result?.state === "loading" ? (
-        <div aria-busy="true" aria-label="Loading users" data-testid="users-loading-state">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="mt-4 h-40 w-full" />
-        </div>
-      ) : result ? (
+      ) : module === "directory" && result?.state === "loading" ? (
+        <UsersLoadingState />
+      ) : module === "directory" && result ? (
         <UsersWorkspace result={result} />
       ) : null}
     </PageContainer>
+  );
+}
+
+function UsersLoadingState() {
+  return (
+    <div aria-busy="true" aria-label="Loading users" data-testid="users-loading-state">
+      <Skeleton className="h-24 w-full" />
+      <Skeleton className="mt-4 h-40 w-full" />
+    </div>
   );
 }
 

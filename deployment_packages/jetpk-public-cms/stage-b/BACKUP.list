@@ -1,0 +1,17 @@
+﻿/home/USER/jetpk_app/app/Http/Controllers/Auth/AuthenticatedSessionController.php
+/home/USER/jetpk_app/app/Http/Controllers/Auth/RegisteredUserController.php
+/home/USER/jetpk_app/app/Http/Controllers/Frontend/AgentRegistrationController.php
+/home/USER/jetpk_app/app/Http/Controllers/Frontend/GroupTicketingSearchController.php
+/home/USER/jetpk_app/app/Http/Controllers/Frontend/GuestBookingLookupController.php
+/home/USER/jetpk_app/app/Http/Controllers/Frontend/SupportController.php
+/home/USER/jetpk_app/app/Support/Client/ClientPagePublicFallbackCatalog.php
+/home/USER/jetpk_app/app/Support/Client/ClientPageSectionSchema.php
+/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/auth/login.blade.php
+/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/auth/register.blade.php
+/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend/about.blade.php
+/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend/agent-registration/landing.blade.php
+/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend/booking/lookup.blade.php
+/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend/group-ticketing/search.blade.php
+/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/frontend/support.blade.php
+/home/USER/jetpk_app/resources/views/themes/frontend/jetpakistan/layouts/auth.blade.php
+/home/USER/jetpk_app/routes/web.php

@@ -1,0 +1,10 @@
+﻿cd /home/USER/jetpk_app
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Console\Commands\JetpkCmsRouteSafetyAuditCommand.php" "/home/USER/jetpk_app/app/Console/Commands/JetpkCmsRouteSafetyAuditCommand.php"
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Console\Commands\JetpkManagedPageHardcodeAuditCommand.php" "/home/USER/jetpk_app/app/Console/Commands/JetpkManagedPageHardcodeAuditCommand.php"
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Console\Commands\JetpkPublicPageCmsCoverageAuditCommand.php" "/home/USER/jetpk_app/app/Console/Commands/JetpkPublicPageCmsCoverageAuditCommand.php"
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Support\Audits\JetpkCmsRouteSafetyAuditService.php" "/home/USER/jetpk_app/app/Support/Audits/JetpkCmsRouteSafetyAuditService.php"
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Support\Audits\JetpkManagedPageHardcodeAuditService.php" "/home/USER/jetpk_app/app/Support/Audits/JetpkManagedPageHardcodeAuditService.php"
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Support\Audits\JetpkPublicPageCmsCoverageAuditService.php" "/home/USER/jetpk_app/app/Support/Audits/JetpkPublicPageCmsCoverageAuditService.php"
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Support\Client\ClientManagedPageCatalog.php" "/home/USER/jetpk_app/app/Support/Client/ClientManagedPageCatalog.php"
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Support\Client\ClientManagedPageHardcodeAllowlist.php" "/home/USER/jetpk_app/app/Support/Client/ClientManagedPageHardcodeAllowlist.php"
+put "C:\Users\khadi\ota-jetpk\deployment_packages\jetpk-public-cms\stage-a\app\Support\Client\ClientManagedPageReservedSlugs.php" "/home/USER/jetpk_app/app/Support/Client/ClientManagedPageReservedSlugs.php"

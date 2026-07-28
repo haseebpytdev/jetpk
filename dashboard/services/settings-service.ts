@@ -5,7 +5,6 @@ import {
   validateNotificationSettings,
   validateSecuritySettings,
 } from "@/lib/access-control/settings-validation";
-import { useMockData } from "@/lib/preview";
 import {
   cloneGeneralSettings,
   cloneIntegrationSettings,
@@ -18,7 +17,19 @@ import {
   SETTINGS_FIXTURE_REVISION,
 } from "@/mocks/settings-fixtures";
 import type { SettingsSection } from "@/types/access-control";
-import type { SettingsModuleResult, SettingsOverviewMetrics, SettingsQuery } from "@/types/settings-module";
+import type {
+  GeneralSettingsValues,
+  IntegrationSettingsValues,
+  NotificationSettingsValues,
+  SecuritySettingsValues,
+  SettingsModuleResult,
+  SettingsQuery,
+} from "@/types/settings-module";
+import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
+import { createReadOnlyService, ReadOnlyServiceError, type ReadOnlyFetchOptions } from "@/lib/read-only/read-only-service";
+import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
+import { DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
+import { transformSettingsModule } from "@/lib/read-only/laravel/transformers/settings";
 
 export class SettingsServiceError extends Error {
   readonly referenceId: string;
@@ -30,13 +41,20 @@ export class SettingsServiceError extends Error {
   }
 }
 
+function mapReadOnlyError(error: unknown): never {
+  if (error instanceof ReadOnlyServiceError) {
+    throw new SettingsServiceError(error.envelope.error.message, error.envelope.error.referenceIdSafe);
+  }
+  throw error;
+}
+
 function readinessState(issueCount: number, blocking: number): "ready" | "warning" | "incomplete" {
   if (blocking > 0) return "incomplete";
   if (issueCount > 0) return "warning";
   return "ready";
 }
 
-function buildOverview(): SettingsOverviewMetrics {
+function buildOverview(): SettingsModuleResult["overview"] {
   const generalIssues = validateGeneralSettings(FIXTURE_GENERAL_SETTINGS);
   const securityIssues = validateSecuritySettings(FIXTURE_SECURITY_SETTINGS);
   const notificationIssues = validateNotificationSettings(FIXTURE_NOTIFICATION_SETTINGS);
@@ -70,34 +88,12 @@ function buildCategoryReadiness(): SettingsModuleResult["categoryReadiness"] {
   }));
 }
 
-export async function getSettingsModule(query: SettingsQuery): Promise<SettingsModuleResult> {
-  if (!useMockData()) {
-    throw new SettingsServiceError("Live settings are disabled in preview.", "SET-PREVIEW-NO-LIVE");
-  }
-
-  if (query.previewError) {
-    throw new SettingsServiceError(
-      "Mock settings service returned a recoverable error (preview simulation).",
-      "SET-PREVIEW-SIM-ERR",
-    );
-  }
-
-  await new Promise((r) => setTimeout(r, 60));
-
+function buildFixtureResult(query: SettingsQuery): SettingsModuleResult {
   if (query.previewLoading) {
     return {
       state: "loading",
       query,
-      overview: {
-        generalState: "ready",
-        securityPolicyState: "ready",
-        notificationState: "ready",
-        integrationState: "ready",
-        settingsRequiringReview: 0,
-        highRiskPolicyWarnings: 0,
-        incompleteMetadata: 0,
-        lastFixtureRevision: SETTINGS_FIXTURE_REVISION,
-      },
+      overview: buildOverview(),
       general: cloneGeneralSettings(),
       security: cloneSecuritySettings(),
       notifications: cloneNotificationSettings(),
@@ -125,7 +121,6 @@ export async function getSettingsModule(query: SettingsQuery): Promise<SettingsM
   const security = cloneSecuritySettings();
   const notifications = cloneNotificationSettings();
   const integrations = cloneIntegrationSettings();
-  const validationIssues = validateAllSettings(general, security, notifications, integrations);
 
   return {
     state: "ready",
@@ -135,7 +130,64 @@ export async function getSettingsModule(query: SettingsQuery): Promise<SettingsM
     security,
     notifications,
     integrations,
-    validationIssues,
+    validationIssues: validateAllSettings(general, security, notifications, integrations),
     categoryReadiness: buildCategoryReadiness(),
   };
+}
+
+const settingsService = createReadOnlyService<SettingsQuery, SettingsModuleResult>({
+  module: "settings",
+  fixtureAdapter: {
+    mode: "fixture",
+    async fetch(query, options) {
+      if (query.previewError) {
+        throw new ReadOnlyServiceError({
+          error: {
+            code: "internal_error",
+            message: "Mock settings service returned a recoverable error (preview simulation).",
+            referenceIdSafe: "SET-PREVIEW-SIM-ERR",
+          },
+          meta: { source: "fixture", schemaVersion: "dash-read-only-v1" },
+        });
+      }
+      await new Promise((r) => setTimeout(r, 60));
+      return createReadOnlyEnvelope({ data: buildFixtureResult(query), metadata: options?.metadata });
+    },
+  },
+  laravelAdapter: {
+    mode: "laravelReadOnly",
+    async fetch(query, options) {
+      const [overview, general, security, notifications, integrations] = await Promise.all([
+        fetchDashboardApi<Record<string, unknown>>(DASHBOARD_API_ROUTES.settings, { signal: options?.signal }),
+        fetchDashboardApi<GeneralSettingsValues>(DASHBOARD_API_ROUTES.settingsGeneral, { signal: options?.signal }),
+        fetchDashboardApi<SecuritySettingsValues>(DASHBOARD_API_ROUTES.settingsSecurity, { signal: options?.signal }),
+        fetchDashboardApi<NotificationSettingsValues>(DASHBOARD_API_ROUTES.settingsNotifications, {
+          signal: options?.signal,
+        }),
+        fetchDashboardApi<IntegrationSettingsValues>(DASHBOARD_API_ROUTES.settingsIntegrations, {
+          signal: options?.signal,
+        }),
+      ]);
+      return {
+        ...overview,
+        data: transformSettingsModule(
+          overview.data,
+          general.data,
+          security.data,
+          notifications.data,
+          integrations.data,
+          query,
+        ),
+      };
+    },
+  },
+});
+
+export async function getSettingsModule(query: SettingsQuery, options?: ReadOnlyFetchOptions): Promise<SettingsModuleResult> {
+  try {
+    const envelope = await settingsService.fetchReadOnly(query, options);
+    return envelope.data;
+  } catch (error) {
+    mapReadOnlyError(error);
+  }
 }
