@@ -12,6 +12,7 @@ use App\Models\Agency;
 use App\Models\User;
 use App\Services\Client\ClientPageRenderer;
 use App\Services\Client\ClientRedirectResolver;
+use App\Support\Auth\PublicAuthRedirectAllowlist;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Auth\CheckoutReturnIntent;
 use Illuminate\Auth\Events\Registered;
@@ -51,7 +52,7 @@ class RegisteredUserController extends Controller
         return view(client_view('auth.register', 'frontend'), $viewData);
     }
 
-    public function store(StoreCustomerRegistrationRequest $request): RedirectResponse
+    public function store(StoreCustomerRegistrationRequest $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validated();
         $phone = StoreCustomerRegistrationRequest::formatStoredPhone(
@@ -82,6 +83,20 @@ class RegisteredUserController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
         $this->storeSecurityChallenge($request);
+
+        $redirectPath = PublicAuthRedirectAllowlist::sanitize(
+            $this->clientRedirectResolver->pathForRoute('verification.notice'),
+            '/verify-email',
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'redirect' => $redirectPath,
+                'requires_email_verification' => true,
+                'message' => 'Registration complete. Please verify your email address to continue.',
+            ]);
+        }
 
         return $this->clientRedirectResolver
             ->route('verification.notice')

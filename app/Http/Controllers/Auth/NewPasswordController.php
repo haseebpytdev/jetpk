@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Client\ClientRedirectResolver;
 use App\Services\Security\SecurityEventLogger;
+use App\Support\Auth\PublicAuthRedirectAllowlist;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -37,7 +39,7 @@ class NewPasswordController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $request->validate([
             'token' => ['required'],
@@ -45,9 +47,6 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
@@ -75,9 +74,26 @@ class NewPasswordController extends Controller
             }
         );
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
+        $loginPath = PublicAuthRedirectAllowlist::sanitize(
+            $this->clientRedirectResolver->pathForRoute('login'),
+            '/login',
+        );
+
+        if ($request->expectsJson()) {
+            if ($status == Password::PASSWORD_RESET) {
+                return response()->json([
+                    'ok' => true,
+                    'redirect' => $loginPath,
+                    'message' => __($status),
+                ]);
+            }
+
+            return response()->json([
+                'message' => __($status),
+                'errors' => ['email' => [__($status)]],
+            ], 422);
+        }
+
         return $status == Password::PASSWORD_RESET
                     ? $this->clientRedirectResolver->route('login')->with('status', __($status))
                     : back()->withInput($request->only('email'))

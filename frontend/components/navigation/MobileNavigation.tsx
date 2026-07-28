@@ -80,9 +80,15 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
 
             <div className="space-y-3 border-t border-jp-border px-4 py-4">
               <CurrencySelector className="w-full" />
-              <a href="/login" className="block text-jp-sm font-semibold text-jp-text">
-                Log in / Sign up
-              </a>
+              {session.status === "anonymous" ? (
+                <a href="/login" className="block text-jp-sm font-semibold text-jp-text">
+                  Log in / Sign up
+                </a>
+              ) : (
+                <a href={session.dashboardUrl} className="block text-jp-sm font-semibold text-jp-text">
+                  Dashboard
+                </a>
+              )}
               <a
                 href="/flights"
                 onClick={closeMenu}

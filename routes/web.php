@@ -18,6 +18,8 @@ use App\Http\Controllers\Frontend\GuestBookingCancellationController;
 use App\Http\Controllers\Frontend\GuestBookingLookupController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\RequestDemoController;
+use App\Http\Controllers\Api\PublicAuthController;
+use App\Http\Controllers\Api\PublicSessionController;
 use App\Http\Controllers\Api\PublicContentApiController;
 use App\Http\Controllers\Frontend\SupportController;
 use App\Http\Controllers\Payments\AbhiPayPaymentController;
@@ -48,6 +50,14 @@ Route::prefix('api/public/content')->group(function (): void {
         ->name('api.public.content.managed-page');
     Route::get('/cms/{slug}', [PublicContentApiController::class, 'cmsPage'])->name('api.public.content.cms-page');
     Route::get('/custom/{slug}', [PublicContentApiController::class, 'customPage'])->name('api.public.content.custom-page');
+});
+
+Route::prefix('api/public/auth')->group(function (): void {
+    Route::get('/session', [PublicSessionController::class, 'show'])->name('api.public.auth.session');
+    Route::get('/otp-challenge', [PublicAuthController::class, 'otpChallenge'])->name('api.public.auth.otp-challenge');
+    Route::get('/registration-security-challenge', [PublicAuthController::class, 'registrationSecurityChallenge'])
+        ->middleware('guest')
+        ->name('api.public.auth.registration-security-challenge');
 });
 
 Route::get('/request-demo', RequestDemoController::class)->name('request-demo');

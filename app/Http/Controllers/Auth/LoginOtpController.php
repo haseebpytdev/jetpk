@@ -7,9 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\PersistClientPreviewContext;
 use App\Services\Auth\LoginOtpService;
 use App\Services\Client\ClientRedirectResolver;
+use App\Support\Auth\PublicAuthRedirectAllowlist;
+use App\Support\Auth\PublicSessionBootstrapService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class LoginOtpController extends Controller
 {
@@ -30,31 +35,86 @@ class LoginOtpController extends Controller
         ]);
     }
 
-    public function store(Request $request, AuthenticatedSessionController $sessionController): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        AuthenticatedSessionController $sessionController,
+        PublicSessionBootstrapService $sessionBootstrap,
+    ): RedirectResponse|JsonResponse {
         $this->primeClientSlugFromRequest($request);
 
-        $validated = $request->validate([
-            'otp' => ['required', 'string', 'regex:/^\d{6}$/'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'otp' => ['required', 'string', 'regex:/^\d{6}$/'],
+            ]);
 
-        $result = $this->loginOtpService->verify($request, $validated['otp']);
+            $result = $this->loginOtpService->verify($request, $validated['otp']);
 
-        return $sessionController->completeAuthenticatedLogin(
-            request: $request,
-            user: $result['user'],
-            remember: $result['remember'],
-        );
+            $redirect = $sessionController->completeAuthenticatedLogin(
+                request: $request,
+                user: $result['user'],
+                remember: $result['remember'],
+            );
+
+            if ($request->expectsJson()) {
+                $bootstrap = $sessionBootstrap->forAuthenticatedUser($result['user']);
+                $redirectPath = PublicAuthRedirectAllowlist::sanitize(
+                    $redirect->getTargetUrl(),
+                    (string) ($bootstrap['dashboard_url'] ?? '/'),
+                );
+
+                return response()->json([
+                    'ok' => true,
+                    'redirect' => $redirectPath,
+                    'user' => $bootstrap['user'] ?? null,
+                    'dashboard_url' => $bootstrap['dashboard_url'] ?? $redirectPath,
+                ]);
+            }
+
+            return $redirect;
+        } catch (ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors(),
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            throw $e;
+        }
     }
 
-    public function resend(Request $request): RedirectResponse
+    public function resend(Request $request): RedirectResponse|JsonResponse
     {
         $this->primeClientSlugFromRequest($request);
 
         try {
             $this->loginOtpService->resend($request);
         } catch (LoginOtpDeliveryException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => ['otp' => [$e->getMessage()]],
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
             return back()->withErrors(['otp' => $e->getMessage()]);
+        } catch (ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors(),
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            throw $e;
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'resend_available_in' => $this->loginOtpService->resendAvailableIn($request),
+                'message' => 'A new verification code has been sent.',
+            ]);
         }
 
         return back()->with('status', 'A new verification code has been sent.');

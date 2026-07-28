@@ -13,6 +13,9 @@ export type AnonymousSession = {
 export type AuthenticatedSession = {
   status: "authenticated";
   user: PublicUser;
+  dashboardUrl: string;
+  accountType: string | null;
+  role: string | null;
 };
 
 export type PublicSession = AnonymousSession | AuthenticatedSession;
