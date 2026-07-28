@@ -71,14 +71,13 @@ export function buildFlightSearchQueryParams(input: FlightSearchPayloadInput): U
  * Group ticketing homepage/search contract (`groups-panel.blade.php`,
  * `GroupTicketingSearchRequest`).
  */
-export function buildGroupSearchQueryParams(input: Omit<GroupSearchDraft, "submittedAt" | "passengers" | "origin"> & {
-  sector?: string;
-}): URLSearchParams {
+export function buildGroupSearchQueryParams(
+  input: Pick<GroupSearchDraft, "sector" | "category" | "travelDate">,
+): URLSearchParams {
   const params = new URLSearchParams();
 
-  const sector = input.sector ?? input.destination;
-  if (sector) {
-    params.set("sector", sector);
+  if (input.sector) {
+    params.set("sector", input.sector);
   }
 
   if (input.travelDate) {

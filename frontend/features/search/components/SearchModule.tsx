@@ -52,7 +52,7 @@ export function SearchModule({ className }: SearchModuleProps) {
     createSegment("segment-1"),
     createSegment("segment-2"),
   ]);
-  const [groupDestination, setGroupDestination] = useState("");
+  const [groupSector, setGroupSector] = useState("");
   const [groupCategory, setGroupCategory] = useState("all");
   const [groupTravelDate, setGroupTravelDate] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
@@ -161,11 +161,9 @@ export function SearchModule({ className }: SearchModuleProps) {
 
   const handleGroupSubmit = () => {
     const draftInput = {
-      origin,
-      destination: groupDestination,
+      sector: groupSector,
       category: groupCategory,
       travelDate: groupTravelDate,
-      passengers,
     };
     const result = validateGroupSearch(draftInput);
     if (!result.valid) {
@@ -263,16 +261,12 @@ export function SearchModule({ className }: SearchModuleProps) {
 
         {mode === "group" ? (
           <GroupTicketingForm
-            origin={origin}
-            destination={groupDestination}
+            sector={groupSector}
             category={groupCategory}
             travelDate={groupTravelDate}
-            passengers={passengers}
-            onOriginChange={setOrigin}
-            onDestinationChange={setGroupDestination}
+            onSectorChange={setGroupSector}
             onCategoryChange={setGroupCategory}
             onTravelDateChange={setGroupTravelDate}
-            onPassengersChange={passengerHandlers}
             onSubmit={handleGroupSubmit}
             errors={errors}
             disabled={isSubmitting}

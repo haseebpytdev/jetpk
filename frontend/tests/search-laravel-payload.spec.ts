@@ -113,7 +113,7 @@ test.describe("Laravel flight search payload contract", () => {
 
   test("group ticketing payload maps sector, date_from and category", () => {
     const params = buildGroupSearchQueryParams({
-      destination: "UAE — Dubai",
+      sector: "UAE — Dubai",
       category: "uae",
       travelDate: "2026-09-01",
     });
@@ -121,5 +121,17 @@ test.describe("Laravel flight search payload contract", () => {
     expect(params.get("sector")).toBe("UAE — Dubai");
     expect(params.get("date_from")).toBe("2026-09-01");
     expect(params.get("category")).toBe("uae");
+  });
+
+  test("group ticketing omits category when all is selected", () => {
+    const params = buildGroupSearchQueryParams({
+      sector: "KSA — Jeddah",
+      category: "all",
+      travelDate: "2026-09-01",
+    });
+
+    expect(params.get("sector")).toBe("KSA — Jeddah");
+    expect(params.get("date_from")).toBe("2026-09-01");
+    expect(params.get("category")).toBeNull();
   });
 });

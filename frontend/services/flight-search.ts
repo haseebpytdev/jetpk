@@ -126,7 +126,7 @@ export function handoffToGroupSearch(query: URLSearchParams): void {
 
 export function buildGroupHandoffQuery(draft: Omit<GroupSearchDraft, "submittedAt">): URLSearchParams {
   return buildGroupSearchQueryParams({
-    destination: draft.destination,
+    sector: draft.sector,
     category: draft.category,
     travelDate: draft.travelDate,
   });

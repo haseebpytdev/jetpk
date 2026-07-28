@@ -59,7 +59,7 @@ export function validateFlightSearch(
 
 export function validateGroupSearch(draft: Omit<GroupSearchDraft, "submittedAt">): ValidationResult {
   const errors: string[] = [];
-  if (!draft.destination) errors.push("Destination or sector is required.");
+  if (!draft.sector) errors.push("Sector is required.");
   if (!draft.travelDate) errors.push("Travel date is required.");
   if (!draft.category) errors.push("Category is required.");
   return { valid: errors.length === 0, errors };

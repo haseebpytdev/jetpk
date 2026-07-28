@@ -30,14 +30,14 @@ type SearchDraft = {
 
 ```ts
 type GroupSearchDraft = {
-  origin: Airport | null;
-  destination: string;
+  sector: string;
   category: string;
-  travelDate: string;
-  passengers: PassengerSelection;
+  travelDate: string; // maps to Laravel date_from
   submittedAt: string;
 };
 ```
+
+Passenger counts are not part of `/groups/search` and are not shown on the homepage group search form.
 
 On submit, the UI validates locally and shows an integration preview message. In development, the draft JSON is logged/rendered for inspection.
 

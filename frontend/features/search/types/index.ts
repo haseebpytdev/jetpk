@@ -40,12 +40,11 @@ export type SearchDraft = {
   submittedAt: string;
 };
 
+/** Mirrors Laravel `GroupTicketingSearchRequest` query fields submitted to `/groups/search`. */
 export type GroupSearchDraft = {
-  origin: Airport | null;
-  destination: string;
+  sector: string;
   category: string;
   travelDate: string;
-  passengers: PassengerSelection;
   submittedAt: string;
 };
 

@@ -85,15 +85,19 @@ test("multi-city add and remove segments", async ({ page }) => {
   await expect(page.getByText("Flight 3")).toBeHidden();
 });
 
-test("group ticketing tab renders category filters", async ({ page }) => {
+test("group ticketing tab renders Laravel search fields only", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
   await page.getByRole("tab", { name: "Group Ticketing" }).click();
   await expect(page.getByRole("button", { name: "Search Group Fares" })).toBeVisible();
+  await expect(page.getByLabel("Sector")).toBeVisible();
+  await expect(page.getByLabel("Travel date")).toBeVisible();
   await expect(page.getByLabel("Group category")).toBeVisible();
   await expect(page.getByRole("radio", { name: "KSA" })).toBeVisible();
   await expect(page.getByRole("radio", { name: "UAE" })).toBeVisible();
   await expect(page.getByRole("radio", { name: "Muscat" })).toBeVisible();
+  await expect(page.getByLabel("Origin")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Travelers and cabin" })).toHaveCount(0);
 });
 
 test("airport picker supports keyboard selection", async ({ page }) => {
