@@ -319,8 +319,8 @@ npx playwright test --retries=0
 | `visual-system.foundation.spec.ts` | 34 |
 | **DASH-11 read-only subtotal** | **248** |
 | Prior DASH-01–10 + critical regression | ~769 |
-| **Full suite (expected)** | **~1017** |
-| `DashboardReadOnlyApiTest.php` (PHPUnit) | ~30 |
+| **Full suite (final)** | **1076** |
+| `DashboardReadOnlyApiTest.php` (PHPUnit) | 30 (232 assertions) |
 
 Prompt 04 module smoke subtotal (CMS + Users + Roles + Permissions + Settings + Audit + high-risk): **86** Playwright tests.
 
@@ -381,7 +381,7 @@ Automated screenshots not captured in this documentation pass.
 
 ## Commit SHA
 
-Implementation commit: **TBD**
+Implementation commit: **29e5b70**
 
 Documentation commit: **TBD**
 
