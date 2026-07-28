@@ -18,6 +18,7 @@ use App\Http\Controllers\Frontend\GuestBookingCancellationController;
 use App\Http\Controllers\Frontend\GuestBookingLookupController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\RequestDemoController;
+use App\Http\Controllers\Api\PublicContentApiController;
 use App\Http\Controllers\Frontend\SupportController;
 use App\Http\Controllers\Payments\AbhiPayPaymentController;
 use App\Http\Controllers\ProfileController;
@@ -37,6 +38,17 @@ Route::get('/devcp/{path}', static function (string $path) {
 })->where('path', '.*')->name('devcp.alias');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::prefix('api/public/content')->group(function (): void {
+    Route::get('/csrf-token', [PublicContentApiController::class, 'csrfToken'])->name('api.public.content.csrf');
+    Route::get('/site-contact', [PublicContentApiController::class, 'siteContact'])->name('api.public.content.site-contact');
+    Route::get('/support/categories', [PublicContentApiController::class, 'supportCategories'])->name('api.public.content.support-categories');
+    Route::get('/pages/{pageKey}', [PublicContentApiController::class, 'managedPage'])
+        ->where('pageKey', 'about|support|faq|terms|privacy|global')
+        ->name('api.public.content.managed-page');
+    Route::get('/cms/{slug}', [PublicContentApiController::class, 'cmsPage'])->name('api.public.content.cms-page');
+    Route::get('/custom/{slug}', [PublicContentApiController::class, 'customPage'])->name('api.public.content.custom-page');
+});
 
 Route::get('/request-demo', RequestDemoController::class)->name('request-demo');
 Route::middleware('platform.module:support_system')->group(function (): void {

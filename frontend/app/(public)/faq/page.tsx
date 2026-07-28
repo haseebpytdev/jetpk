@@ -1,0 +1,35 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero } from "@/features/public-content";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await FaqService.getFaqPage();
+  return {
+    title: page.seo.title,
+    description: page.seo.description,
+    robots: page.seo.robots,
+  };
+}
+
+export default async function FaqPage() {
+  const page = await FaqService.getFaqPage();
+
+  return (
+    <PageContainer className="py-jp-4xl">
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "FAQ" }]} />
+      <div className="mt-jp-xl space-y-jp-2xl">
+        <PublicPageHero hero={page.hero} id="faq-page-heading" />
+        <FaqPageClient categories={page.categories} />
+        {page.cta ? (
+          <div>
+            <Link href={page.cta.href}>
+              <PrimaryButton>{page.cta.label}</PrimaryButton>
+            </Link>
+          </div>
+        ) : null}
+      </div>
+    </PageContainer>
+  );
+}
