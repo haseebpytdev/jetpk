@@ -181,9 +181,8 @@ Forms use shared JetPakistan tokens, stacked mobile layouts, full-width buttons,
 
 | Commit | SHA | Description |
 |--------|-----|-------------|
-| Feature | _recorded at merge_ | feat(frontend): add JP-FE-04 authentication and session integration |
-| Docs | _recorded at merge_ | docs(phases): record JP-FE-04 closure |
-| Merge | _recorded at merge_ | merge: complete JP-FE-04 authentication and role routing |
+| Feature | `c4d3d79` | feat(frontend): add JP-FE-04 authentication and session integration |
+| Merge | `bbfa92d` | merge: complete JP-FE-04 authentication and role routing |
 
 ## Next phase
 
