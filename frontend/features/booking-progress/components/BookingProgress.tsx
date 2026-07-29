@@ -33,6 +33,7 @@ export function BookingProgress({
                 step.state === "current" && "border-jp-primary bg-jp-primary-soft font-semibold text-jp-text",
                 step.state === "completed" && "border-jp-border bg-jp-surface text-jp-text",
                 step.state === "upcoming" && "border-jp-border bg-jp-surface-muted text-jp-muted",
+                step.state === "skipped" && "border-jp-border bg-jp-surface-muted text-jp-muted italic",
               )}
             >
               <span

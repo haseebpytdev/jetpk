@@ -37,6 +37,7 @@ use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
 use App\Services\TravelData\AirlineBrandingService;
 use App\Support\Booking\AgentBookingContext;
+use App\Support\Booking\StandardBookingCheckoutJsonResponder;
 use App\Support\Booking\StandardBookingJsonPresenter;
 use App\Support\Bookings\BookingHoldSessionSupplierOfferIdResolver;
 use App\Support\Bookings\BookingSupplierConfirmationNoticeResolver;
@@ -805,9 +806,7 @@ class BookingController extends Controller
 
             if ($this->wantsBookingJson($request)) {
                 return response()->json(
-                    $this->standardBookingJsonPresenter->presentPassengersSuccess(
-                        route('booking.review', absolute: false),
-                    ),
+                    $this->standardBookingJsonPresenter->presentPassengersSuccess('/booking/review'),
                 );
             }
 
@@ -1209,335 +1208,27 @@ class BookingController extends Controller
         return view($resolvedView, $viewData);
     }
 
-    public function review(Request $request): View|RedirectResponse
+    public function review(Request $request): View|RedirectResponse|JsonResponse
     {
         $this->logBookingRouteEntry($request);
 
         if ($request->isMethod('post')) {
-            $validated = $request->validate([
-                'booking_method' => ['required', 'string', 'in:pay_later,bank_transfer,office,pay_later_booking_request,offline_bank_transfer,office_confirmation,online_card'],
-                'confirm_updated_fare' => ['nullable', 'boolean'],
-            ]);
-
-            $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
-            if ($bookingId === null) {
-                return $this->clientRedirect()->route('flights.search');
-            }
-
-            $booking = Booking::query()->find($bookingId);
-            if ($booking === null) {
-                $request->session()->forget(PublicBooking::SESSION_BOOKING_ID);
-
-                return $this->clientRedirect()->route('flights.search');
-            }
-
-            if ($booking->status !== BookingStatus::Draft || $booking->submitted_at !== null) {
-                Log::info('checkout.duplicate_submit_blocked', [
-                    'booking_id' => $booking->id,
-                    'reason_code' => 'already_submitted',
-                ]);
-
-                return $this->clientRedirect()->route('booking.confirmation');
-            }
-
-            $meta = is_array($booking->meta) ? $booking->meta : [];
-
-            $supplierEarly = strtolower(trim((string) ($meta['supplier_provider'] ?? $booking->supplier ?? '')));
-            if ($supplierEarly === SupplierProvider::Sabre->value) {
-                $freshnessSubmitRedirect = $this->guardSabreOfferFreshnessAtBookingSubmit($booking);
-                if ($freshnessSubmitRedirect !== null) {
-                    return $freshnessSubmitRedirect;
-                }
-                $booking->refresh();
-                $meta = is_array($booking->meta) ? $booking->meta : [];
-            }
-
-            $revalidated = $this->revalidateCheckoutBeforeConfirmation($booking);
-            $booking->refresh();
-            $meta = is_array($booking->meta) ? $booking->meta : [];
-
-            $fareChangeState = app(PublicCheckoutFareChangeState::class);
-            $fareChangeState->synchronizeAcceptanceOnReview($booking);
-            $booking->refresh();
-            $meta = is_array($booking->meta) ? $booking->meta : [];
-
-            if (($revalidated['status'] ?? 'ok') === 'hold_expired') {
-                Log::info('checkout.hold_expired', [
-                    'booking_id' => $booking->id,
-                    'reason_code' => 'hold_expired',
-                ]);
-
-                return $this->clientRedirect()->route('booking.review')
-                    ->withErrors(['flight_id' => 'Your airline hold has expired. Please recheck the fare before continuing.'])
-                    ->with('recheck_required', true);
-            }
-            if (($revalidated['status'] ?? 'ok') !== 'ok') {
-                return $this->redirectToBookingPassengers([
-                    'flight_id' => (string) ($meta['original_offer_id'] ?? ''),
-                    'offer_id' => (string) ($meta['original_offer_id'] ?? ''),
-                    'search_id' => (string) ($meta['checkout_search_id'] ?? ''),
-                    'from' => (string) data_get($meta, 'search_criteria.origin', ''),
-                    'to' => (string) data_get($meta, 'search_criteria.destination', ''),
-                    'depart' => (string) data_get($meta, 'search_criteria.depart_date', ''),
-                    'trip_type' => (string) data_get($meta, 'search_criteria.trip_type', 'one_way'),
-                    'return_date' => (string) data_get($meta, 'search_criteria.return_date', ''),
-                    'cabin' => (string) data_get($meta, 'search_criteria.cabin', 'economy'),
-                    'adults' => (int) data_get($meta, 'search_criteria.adults', 1),
-                    'children' => (int) data_get($meta, 'search_criteria.children', 0),
-                    'infants' => (int) data_get($meta, 'search_criteria.infants', 0),
-                ])->withErrors(['flight_id' => 'This fare is no longer available. Please choose another flight.']);
-            }
-
-            if (($revalidated['fare_changed'] ?? false)) {
-                return $this->clientRedirect()->route('booking.review')
-                    ->with('show_offer_refresh_modal', true);
-            }
-
-            $fareChangeState = app(PublicCheckoutFareChangeState::class);
-            if ($fareChangeState->requiresCustomerAcceptance($booking->fresh())) {
-                return $this->clientRedirect()->route('booking.review')
-                    ->with('show_offer_refresh_modal', true)
-                    ->withErrors(['booking' => (string) __('The fare has changed. Please accept the updated fare before continuing.')]);
-            }
-
-            $booking->loadMissing('fareBreakdown');
-            $selectedTotal = (float) ($booking->selected_fare_total ?? 0);
-            $revalidatedTotal = (float) ($booking->revalidated_fare_total ?? 0);
-            if ($fareChangeState->hasActiveFareChangeContext($booking)
-                && $selectedTotal > 0
-                && $revalidatedTotal > 0
-                && abs($selectedTotal - $revalidatedTotal) > 0.009) {
-                return $this->clientRedirect()->route('booking.review')
-                    ->withErrors(['booking' => (string) __('Selected fare totals do not match the revalidated fare. Please review your booking.')]);
-            }
-            if ($fareChangeState->confirmationTotalMismatchBlocksSubmit($booking)) {
-                return $this->clientRedirect()->route('booking.review')
-                    ->withErrors(['booking' => (string) __('Confirmation total does not match the accepted fare. Please review your booking.')]);
-            }
-
-            $method = (string) $validated['booking_method'];
-            $canonical = match ($method) {
-                'pay_later', 'pay_later_booking_request' => 'pay_later_booking_request',
-                'bank_transfer', 'offline_bank_transfer' => 'offline_bank_transfer',
-                'office', 'office_confirmation' => 'office_confirmation',
-                'online_card' => 'online_card',
-                default => $method,
-            };
-            $offlineManual = in_array($canonical, ['offline_bank_transfer', 'pay_later_booking_request', 'office_confirmation'], true);
-
-            $meta['booking_method'] = $canonical;
-            $meta['confirmation_method'] = $canonical;
-            $meta['lifecycle_phase'] = $offlineManual ? 'awaiting_payment' : ($canonical === 'online_card' ? 'pending_online_payment' : 'submitted');
-            if ($offlineManual) {
-                $meta['ticketing_phase'] = 'ticketing_pending';
-            }
-
-            $bookingPatch = [
-                'meta' => $meta,
-                'confirmation_method' => $canonical,
-            ];
-            if ($offlineManual) {
-                $bookingPatch['ticketing_status'] = 'pending';
-            }
-            $booking->forceFill($bookingPatch)->save();
-            $booking->refresh();
-            $meta = is_array($booking->meta) ? $booking->meta : [];
-
-            $supplierForConfirm = strtolower(trim((string) ($meta['supplier_provider'] ?? $booking->supplier ?? '')));
-            $sabreCheckoutNotice = null;
-            $sabreSubmitLock = null;
-            $piaNdcCheckoutNotice = null;
-
-            if ($supplierForConfirm === SupplierProvider::Sabre->value) {
-                $softBlockRedirect = $this->maybeRedirectSabrePreCheckoutSoftBlock($request, $booking);
-                if ($softBlockRedirect !== null) {
-                    return $softBlockRedirect;
-                }
-
-                $snapshot = is_array($meta['flight_offer_snapshot'] ?? null) ? $meta['flight_offer_snapshot'] : [];
-                if ($snapshot !== [] && FlightOfferDisplayPresenter::selectedItineraryTimelineInvalid($snapshot)) {
-                    return $this->clientRedirect()->route('booking.review')
-                        ->withErrors(['booking' => (string) __('Selected itinerary timing could not be verified. Please choose another fare.')]);
-                }
-                if (! (bool) config('suppliers.sabre.booking_enabled', false)) {
-                    return $this->clientRedirect()->route('booking.review')
-                        ->withErrors(['booking' => (string) __('Sabre booking is not enabled yet.')]);
-                }
-
-                $sabreSubmitLock = Cache::lock('public-booking-review-submit:'.$booking->id, 120);
-                if (! $sabreSubmitLock->get()) {
-                    Log::info('checkout.duplicate_submit_blocked', [
-                        'booking_id' => $booking->id,
-                        'reason_code' => 'review_submit_lock_busy',
-                    ]);
-
-                    return $this->clientRedirect()->route('booking.review')
-                        ->withErrors(['booking' => $this->duplicatePublicSabreBookingSubmitMessage()]);
-                }
-            }
-
-            try {
-                if ($supplierForConfirm === SupplierProvider::Sabre->value) {
-                    $booking->refresh();
-
-                    $guardRedirect = $this->maybeAbortDuplicatePublicSabreBookingSubmit($booking);
-                    if ($guardRedirect !== null) {
-                        return $guardRedirect;
-                    }
-
-                    $booking->loadMissing(['passengers', 'contact', 'fareBreakdown']);
-
-                    if (SabreOfferRefreshAcceptance::requiresAcceptance($booking)) {
-                        return $this->clientRedirect()->route('booking.review')
-                            ->with('show_offer_refresh_modal', true);
-                    }
-
-                    $sabreRefreshOutcome = $this->applySabreOfferRefreshBeforePublicPnr($booking);
-                    $booking->refresh();
-                    if (($sabreRefreshOutcome['status'] ?? '') === 'fare_change_pending') {
-                        $this->bookingCommunicationService->notifyFareUpdateRequiresAcceptance($booking);
-
-                        return $this->clientRedirect()->route('booking.review')
-                            ->with('show_offer_refresh_modal', true);
-                    }
-                    if (($sabreRefreshOutcome['status'] ?? '') === 'unavailable') {
-                        return $this->redirectToFlightResultsFromBooking($booking)
-                            ->with('status', (string) __('Please choose another available fare.'))
-                            ->withErrors(['flight_id' => (string) __('This fare is no longer available. Please choose another flight.')]);
-                    }
-
-                    app(SabreBrandedFarePublicAutoPnrEligibility::class)->persistCheckoutEvaluation($booking);
-                    $booking->refresh();
-
-                    $outcome = $this->sabreBookingService->runPublicReviewDryRun($booking);
-                    $booking->refresh();
-                    $metaAfterSabre = is_array($booking->meta) ? $booking->meta : [];
-                    $operationalPnrAttempted = ($metaAfterSabre['operational_auto_pnr_attempted'] ?? false) === true;
-                    $operationalPnrFailed = ($metaAfterSabre['operational_auto_pnr_result'] ?? '') === 'failed';
-                    $statusOut = (string) ($outcome['status'] ?? '');
-
-                    if (! ($outcome['success'] ?? false)) {
-                        $code = (string) ($outcome['error_code'] ?? '');
-                        $hostSellCustomerNotice = SabreHostSellClassifier::customerNoticeForOutcome($outcome);
-                        if ($hostSellCustomerNotice !== null) {
-                            $sabreCheckoutNotice = (string) __($hostSellCustomerNotice);
-                        } elseif ($operationalPnrAttempted && $operationalPnrFailed) {
-                            $sabreCheckoutNotice = (string) __(SabreOperationalPnrReadiness::CUSTOMER_FAILURE_NOTICE);
-                        } elseif ($code === 'sabre_booking_application_error' && $statusOut === 'needs_review') {
-                            $codes = is_array($outcome['response_error_codes'] ?? null) ? $outcome['response_error_codes'] : [];
-                            $codesNorm = array_map(static fn ($c) => strtoupper((string) $c), $codes);
-                            $sabreCheckoutNotice = in_array('MANDATORY_DATA_MISSING', $codesNorm, true)
-                                ? (string) __('Booking request saved. Sabre reported mandatory booking data was missing; staff must complete the record. No PNR or ticket has been issued.')
-                                : (string) __('Booking request saved. Sabre returned a response requiring staff review. No ticket has been issued.');
-                        } elseif ($code === ComplexItineraryPolicy::ERROR_CODE && $statusOut === 'needs_review') {
-                            $sabreCheckoutNotice = ComplexItineraryPolicy::publicCheckoutNotice();
-                        } elseif (in_array($code, [SabreCertifiedRouteSelector::ERROR_CODE_PENDING, SabreCertifiedRouteSelector::ERROR_CODE_NOT_CERTIFIED], true)
-                            && $statusOut === 'needs_review') {
-                            $selection = is_array($outcome['certified_route_selection'] ?? null)
-                                ? $outcome['certified_route_selection']
-                                : [];
-                            $sabreCheckoutNotice = app(SabreCertifiedRouteSelector::class)->publicCheckoutNoticeForSelection($selection);
-                        } elseif ($code === 'sabre_passenger_records_itinerary_guard' && $statusOut === 'needs_review') {
-                            $sabreCheckoutNotice = (string) __('Booking request saved. Passenger Records live create was not attempted for this itinerary; staff must complete supplier booking manually. No PNR or ticket has been issued.');
-                        } elseif ($code === 'sabre_passenger_records_stale_shop_segment' && $statusOut === 'needs_review') {
-                            $sabreCheckoutNotice = (string) __('This flight is no longer available at the selected schedule/class. Please search again or contact staff.');
-                        } elseif (SabrePnrFailureClassifier::isPostDispatchAmbiguousTransportFailure(
-                            $code,
-                            ['live_call_attempted' => ($outcome['live_call_attempted'] ?? false) === true],
-                        ) && $statusOut === 'needs_review') {
-                            $sabreCheckoutNotice = (string) __('Booking request received. Supplier confirmation is pending verification. No ticket has been issued.');
-                        } elseif ($code === SabreOfferRefreshAcceptance::ERROR_CODE_REQUIRES_ACCEPTANCE) {
-                            return $this->clientRedirect()->route('booking.review')
-                                ->with('show_offer_refresh_modal', true);
-                        } elseif (SabreBookingValidationManualRequestPolicy::allowsNonBlockingValidationFailure($booking, $outcome)) {
-                            SabreBookingValidationManualRequestPolicy::logNonBlocking($booking, $outcome);
-                            SabreBookingValidationManualRequestPolicy::persistDeferManualReviewMeta($booking);
-                            $booking->refresh();
-                            $sabreCheckoutNotice = SabreBookingValidationManualRequestPolicy::customerNotice();
-                        } elseif ($operationalPnrAttempted && ($outcome['live_call_attempted'] ?? false)) {
-                            $v25CustomerNotice = SabreBookingPayloadBuilder::v25OptionalQualifierCustomerMessageFromOutcome($outcome);
-                            $sabreCheckoutNotice = $v25CustomerNotice !== null
-                                ? $v25CustomerNotice
-                                : (string) __(SabreOperationalPnrReadiness::CUSTOMER_FAILURE_NOTICE);
-                        } else {
-                            $default = SabreBookingValidationManualRequestPolicy::customerSafeMessage(
-                                (string) ($outcome['message'] ?? __('Sabre booking failed.'))
-                            );
-                            $msg = match (true) {
-                                $statusOut === 'disabled' => (string) __('Sabre booking is not enabled yet.'),
-                                $statusOut === 'validation_failed' => SabreBookingValidationManualRequestPolicy::customerSafeMessage(
-                                    (string) ($outcome['message'] ?? __('This Sabre fare could not be validated for submission.'))
-                                ),
-                                $code === 'sabre_booking_forbidden' => (string) __('Sabre booking endpoint is forbidden for this credential/path. Try configured booking path or contact Sabre/provider.'),
-                                $code === 'sabre_booking_validation_failed' => $default,
-                                default => $default,
-                            };
-
-                            return $this->clientRedirect()->route('booking.review')
-                                ->withErrors(['booking' => $msg]);
-                        }
-                    } elseif (($outcome['success'] ?? false)) {
-                        $resolvedNotice = BookingSupplierConfirmationNoticeResolver::resolveForBooking(
-                            $booking->fresh(),
-                            $outcome,
-                        );
-                        $sabreCheckoutNotice = is_array($resolvedNotice)
-                            ? ($resolvedNotice['notice'] ?? null)
-                            : null;
-                    }
-                } elseif ($supplierForConfirm === SupplierProvider::PiaNdc->value) {
-                    $booking->loadMissing(['passengers', 'contact']);
-                    $this->reconcilePiaNdcBookingFareFamily($booking);
-                    $piaNdcResult = $this->piaNdcOptionPnrService->autoCreateOptionPnrForPublicBooking($booking);
-                    $booking->refresh();
-                    $this->piaNdcSelectedFareReadinessService->persistReadinessMeta($booking, [
-                        'readiness_status' => ($piaNdcResult['success'] ?? false) ? 'ready' : 'not_ready',
-                        'failed_reason_code' => ($piaNdcResult['success'] ?? false)
-                            ? null
-                            : (string) data_get($piaNdcResult, 'summary.error_code', 'order_create_failed'),
-                        'selected_option_key' => trim((string) data_get($meta, 'fare_option_key', '')),
-                        'fare_type_code' => data_get($meta, 'selected_fare_family_option.provider_context.fare_type_code'),
-                        'offer_item_ref_id' => data_get($meta, 'selected_fare_family_option.provider_context.offer_item_ref_id'),
-                        'payment_time_limit' => data_get($meta, 'selected_fare_family_option.provider_context.payment_time_limit'),
-                        'live_offer_price_checked' => false,
-                    ]);
-
-                    if (! ($piaNdcResult['success'] ?? false) || ! $this->piaNdcSelectedFareReadinessService->bookingHasActiveOptionPnr($booking->fresh())) {
-                        return $this->clientRedirect()->route('booking.review')
-                            ->withErrors(['booking' => __(PiaNdcSelectedFareReadinessService::CHECKOUT_PNR_FAILURE_MESSAGE)]);
-                    }
-                }
-
-                $this->bookingService->submitBookingRequest($booking->fresh());
-
-                $redirect = $this->clientRedirect()->route('booking.confirmation');
-                if ($request->user() === null) {
-                    $booking->loadMissing('contact');
-                    $guestAbhiPayToken = $this->guestAccessService->createTokenForBooking(
-                        $booking,
-                        $booking->contact?->email,
-                        $booking->contact?->phone,
-                    );
-                    $request->session()->put($this->guestAbhiPaySessionKey($booking), $guestAbhiPayToken);
-                    $redirect = $redirect->with('guest_abhipay_token', $guestAbhiPayToken);
-                }
-
-                if ($sabreCheckoutNotice !== null) {
-                    return $redirect->with('sabre_checkout_notice', $sabreCheckoutNotice);
-                }
-
-                if ($piaNdcCheckoutNotice !== null) {
-                    return $redirect->with('pia_ndc_checkout_notice', $piaNdcCheckoutNotice);
-                }
-
-                return $redirect;
-            } finally {
-                $sabreSubmitLock?->release();
-            }
+            return $this->reviewJsonOrRedirect($request, $this->processReviewSubmit($request));
         }
 
         $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
         if ($bookingId === null) {
+            if ($this->wantsBookingJson($request)) {
+                return response()->json(
+                    $this->standardBookingJsonPresenter->presentError(
+                        'missing_session',
+                        __('Please search for a flight before continuing to checkout.'),
+                        '/',
+                    ),
+                    404,
+                );
+            }
+
             return $this->clientRedirect()->route('flights.search');
         }
 
@@ -1547,6 +1238,17 @@ class BookingController extends Controller
 
         if ($booking === null) {
             $request->session()->forget(PublicBooking::SESSION_BOOKING_ID);
+
+            if ($this->wantsBookingJson($request)) {
+                return response()->json(
+                    $this->standardBookingJsonPresenter->presentError(
+                        'missing_session',
+                        __('Please search for a flight before continuing to checkout.'),
+                        '/',
+                    ),
+                    404,
+                );
+            }
 
             return $this->clientRedirect()->route('flights.search');
         }
@@ -1710,10 +1412,61 @@ class BookingController extends Controller
             'isPiaNdcReview' => $supplierForReview === SupplierProvider::PiaNdc->value,
         ];
 
+        if ($this->wantsBookingJson($request)) {
+            return response()->json(
+                $this->standardBookingJsonPresenter->presentReviewContext($viewData, $request),
+            );
+        }
+
         return view(client_view('frontend.booking.review', 'frontend'), $viewData);
     }
 
-    public function confirmation(Request $request): View|RedirectResponse
+    public function checkoutState(Request $request): JsonResponse|RedirectResponse
+    {
+        return $this->confirmation($request);
+    }
+
+    public function paymentStatus(Request $request): JsonResponse|RedirectResponse
+    {
+        if (! $this->wantsBookingJson($request)) {
+            return $this->clientRedirect()->route('booking.confirmation');
+        }
+
+        $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
+        $booking = $bookingId !== null ? Booking::query()->find($bookingId) : null;
+        $reference = (string) $request->query('reference', '');
+        $abhiPay = $booking !== null
+            ? $this->publicAbhiPayCheckoutPresenter->forBooking($booking, afterSubmission: true)
+            : [];
+
+        return response()->json(
+            $this->standardBookingJsonPresenter->presentPaymentStatus($booking, $abhiPay, $reference !== '' ? $reference : null),
+            $booking === null ? 404 : 200,
+        );
+    }
+
+    public function invoice(Request $request): JsonResponse|RedirectResponse|View
+    {
+        $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
+        $booking = $bookingId !== null
+            ? Booking::query()->with(['passengers', 'contact', 'fareBreakdown', 'documents'])->find($bookingId)
+            : null;
+
+        if ($this->wantsBookingJson($request)) {
+            return response()->json(
+                $this->standardBookingJsonPresenter->presentInvoice($booking),
+                $booking === null ? 404 : 200,
+            );
+        }
+
+        if ($booking === null) {
+            return $this->clientRedirect()->route('flights.search');
+        }
+
+        return $this->clientRedirect()->route('booking.confirmation');
+    }
+
+    public function confirmation(Request $request): View|RedirectResponse|JsonResponse
     {
         $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
         if ($bookingId === null) {
@@ -1793,6 +1546,12 @@ class BookingController extends Controller
             && ! empty($abhiPayCheckout['show_pay_button'])
         ) {
             $checkoutView = 'frontend.booking.card-payment';
+        }
+
+        if ($this->wantsBookingJson($request)) {
+            return response()->json(
+                $this->standardBookingJsonPresenter->presentCheckoutState($viewData, $request),
+            );
         }
 
         return view(client_view($checkoutView, 'frontend'), $viewData);
@@ -4254,8 +4013,337 @@ class BookingController extends Controller
             ->with('offer_warning', __('Please search for a flight before continuing to checkout.'));
     }
 
+    protected function reviewJsonOrRedirect(Request $request, RedirectResponse $redirect): RedirectResponse|JsonResponse
+    {
+        return app(StandardBookingCheckoutJsonResponder::class)->maybeJson($request, $redirect);
+    }
+
     protected function wantsBookingJson(Request $request): bool
     {
         return $request->wantsJson() || $request->query('format') === 'json';
     }
+    protected function processReviewSubmit(Request $request): RedirectResponse
+    {
+            $validated = $request->validate([
+                'booking_method' => ['required', 'string', 'in:pay_later,bank_transfer,office,pay_later_booking_request,offline_bank_transfer,office_confirmation,online_card'],
+                'confirm_updated_fare' => ['nullable', 'boolean'],
+            ]);
+
+            $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
+            if ($bookingId === null) {
+                return $this->clientRedirect()->route('flights.search');
+            }
+
+            $booking = Booking::query()->find($bookingId);
+            if ($booking === null) {
+                $request->session()->forget(PublicBooking::SESSION_BOOKING_ID);
+
+                return $this->clientRedirect()->route('flights.search');
+            }
+
+            if ($booking->status !== BookingStatus::Draft || $booking->submitted_at !== null) {
+                Log::info('checkout.duplicate_submit_blocked', [
+                    'booking_id' => $booking->id,
+                    'reason_code' => 'already_submitted',
+                ]);
+
+                return $this->clientRedirect()->route('booking.confirmation');
+            }
+
+            $meta = is_array($booking->meta) ? $booking->meta : [];
+
+            $supplierEarly = strtolower(trim((string) ($meta['supplier_provider'] ?? $booking->supplier ?? '')));
+            if ($supplierEarly === SupplierProvider::Sabre->value) {
+                $freshnessSubmitRedirect = $this->guardSabreOfferFreshnessAtBookingSubmit($booking);
+                if ($freshnessSubmitRedirect !== null) {
+                    return $freshnessSubmitRedirect;
+                }
+                $booking->refresh();
+                $meta = is_array($booking->meta) ? $booking->meta : [];
+            }
+
+            $revalidated = $this->revalidateCheckoutBeforeConfirmation($booking);
+            $booking->refresh();
+            $meta = is_array($booking->meta) ? $booking->meta : [];
+
+            $fareChangeState = app(PublicCheckoutFareChangeState::class);
+            $fareChangeState->synchronizeAcceptanceOnReview($booking);
+            $booking->refresh();
+            $meta = is_array($booking->meta) ? $booking->meta : [];
+
+            if (($revalidated['status'] ?? 'ok') === 'hold_expired') {
+                Log::info('checkout.hold_expired', [
+                    'booking_id' => $booking->id,
+                    'reason_code' => 'hold_expired',
+                ]);
+
+                return $this->clientRedirect()->route('booking.review')
+                    ->withErrors(['flight_id' => 'Your airline hold has expired. Please recheck the fare before continuing.'])
+                    ->with('recheck_required', true);
+            }
+            if (($revalidated['status'] ?? 'ok') !== 'ok') {
+                return $this->redirectToBookingPassengers([
+                    'flight_id' => (string) ($meta['original_offer_id'] ?? ''),
+                    'offer_id' => (string) ($meta['original_offer_id'] ?? ''),
+                    'search_id' => (string) ($meta['checkout_search_id'] ?? ''),
+                    'from' => (string) data_get($meta, 'search_criteria.origin', ''),
+                    'to' => (string) data_get($meta, 'search_criteria.destination', ''),
+                    'depart' => (string) data_get($meta, 'search_criteria.depart_date', ''),
+                    'trip_type' => (string) data_get($meta, 'search_criteria.trip_type', 'one_way'),
+                    'return_date' => (string) data_get($meta, 'search_criteria.return_date', ''),
+                    'cabin' => (string) data_get($meta, 'search_criteria.cabin', 'economy'),
+                    'adults' => (int) data_get($meta, 'search_criteria.adults', 1),
+                    'children' => (int) data_get($meta, 'search_criteria.children', 0),
+                    'infants' => (int) data_get($meta, 'search_criteria.infants', 0),
+                ])->withErrors(['flight_id' => 'This fare is no longer available. Please choose another flight.']);
+            }
+
+            if (($revalidated['fare_changed'] ?? false)) {
+                return $this->clientRedirect()->route('booking.review')
+                    ->with('show_offer_refresh_modal', true);
+            }
+
+            $fareChangeState = app(PublicCheckoutFareChangeState::class);
+            if ($fareChangeState->requiresCustomerAcceptance($booking->fresh())) {
+                return $this->clientRedirect()->route('booking.review')
+                    ->with('show_offer_refresh_modal', true)
+                    ->withErrors(['booking' => (string) __('The fare has changed. Please accept the updated fare before continuing.')]);
+            }
+
+            $booking->loadMissing('fareBreakdown');
+            $selectedTotal = (float) ($booking->selected_fare_total ?? 0);
+            $revalidatedTotal = (float) ($booking->revalidated_fare_total ?? 0);
+            if ($fareChangeState->hasActiveFareChangeContext($booking)
+                && $selectedTotal > 0
+                && $revalidatedTotal > 0
+                && abs($selectedTotal - $revalidatedTotal) > 0.009) {
+                return $this->clientRedirect()->route('booking.review')
+                    ->withErrors(['booking' => (string) __('Selected fare totals do not match the revalidated fare. Please review your booking.')]);
+            }
+            if ($fareChangeState->confirmationTotalMismatchBlocksSubmit($booking)) {
+                return $this->clientRedirect()->route('booking.review')
+                    ->withErrors(['booking' => (string) __('Confirmation total does not match the accepted fare. Please review your booking.')]);
+            }
+
+            $method = (string) $validated['booking_method'];
+            $canonical = match ($method) {
+                'pay_later', 'pay_later_booking_request' => 'pay_later_booking_request',
+                'bank_transfer', 'offline_bank_transfer' => 'offline_bank_transfer',
+                'office', 'office_confirmation' => 'office_confirmation',
+                'online_card' => 'online_card',
+                default => $method,
+            };
+            $offlineManual = in_array($canonical, ['offline_bank_transfer', 'pay_later_booking_request', 'office_confirmation'], true);
+
+            $meta['booking_method'] = $canonical;
+            $meta['confirmation_method'] = $canonical;
+            $meta['lifecycle_phase'] = $offlineManual ? 'awaiting_payment' : ($canonical === 'online_card' ? 'pending_online_payment' : 'submitted');
+            if ($offlineManual) {
+                $meta['ticketing_phase'] = 'ticketing_pending';
+            }
+
+            $bookingPatch = [
+                'meta' => $meta,
+                'confirmation_method' => $canonical,
+            ];
+            if ($offlineManual) {
+                $bookingPatch['ticketing_status'] = 'pending';
+            }
+            $booking->forceFill($bookingPatch)->save();
+            $booking->refresh();
+            $meta = is_array($booking->meta) ? $booking->meta : [];
+
+            $supplierForConfirm = strtolower(trim((string) ($meta['supplier_provider'] ?? $booking->supplier ?? '')));
+            $sabreCheckoutNotice = null;
+            $sabreSubmitLock = null;
+            $piaNdcCheckoutNotice = null;
+
+            if ($supplierForConfirm === SupplierProvider::Sabre->value) {
+                $softBlockRedirect = $this->maybeRedirectSabrePreCheckoutSoftBlock($request, $booking);
+                if ($softBlockRedirect !== null) {
+                    return $softBlockRedirect;
+                }
+
+                $snapshot = is_array($meta['flight_offer_snapshot'] ?? null) ? $meta['flight_offer_snapshot'] : [];
+                if ($snapshot !== [] && FlightOfferDisplayPresenter::selectedItineraryTimelineInvalid($snapshot)) {
+                    return $this->clientRedirect()->route('booking.review')
+                        ->withErrors(['booking' => (string) __('Selected itinerary timing could not be verified. Please choose another fare.')]);
+                }
+                if (! (bool) config('suppliers.sabre.booking_enabled', false)) {
+                    return $this->clientRedirect()->route('booking.review')
+                        ->withErrors(['booking' => (string) __('Sabre booking is not enabled yet.')]);
+                }
+
+                $sabreSubmitLock = Cache::lock('public-booking-review-submit:'.$booking->id, 120);
+                if (! $sabreSubmitLock->get()) {
+                    Log::info('checkout.duplicate_submit_blocked', [
+                        'booking_id' => $booking->id,
+                        'reason_code' => 'review_submit_lock_busy',
+                    ]);
+
+                    return $this->clientRedirect()->route('booking.review')
+                        ->withErrors(['booking' => $this->duplicatePublicSabreBookingSubmitMessage()]);
+                }
+            }
+
+            try {
+                if ($supplierForConfirm === SupplierProvider::Sabre->value) {
+                    $booking->refresh();
+
+                    $guardRedirect = $this->maybeAbortDuplicatePublicSabreBookingSubmit($booking);
+                    if ($guardRedirect !== null) {
+                        return $guardRedirect;
+                    }
+
+                    $booking->loadMissing(['passengers', 'contact', 'fareBreakdown']);
+
+                    if (SabreOfferRefreshAcceptance::requiresAcceptance($booking)) {
+                        return $this->clientRedirect()->route('booking.review')
+                            ->with('show_offer_refresh_modal', true);
+                    }
+
+                    $sabreRefreshOutcome = $this->applySabreOfferRefreshBeforePublicPnr($booking);
+                    $booking->refresh();
+                    if (($sabreRefreshOutcome['status'] ?? '') === 'fare_change_pending') {
+                        $this->bookingCommunicationService->notifyFareUpdateRequiresAcceptance($booking);
+
+                        return $this->clientRedirect()->route('booking.review')
+                            ->with('show_offer_refresh_modal', true);
+                    }
+                    if (($sabreRefreshOutcome['status'] ?? '') === 'unavailable') {
+                        return $this->redirectToFlightResultsFromBooking($booking)
+                            ->with('status', (string) __('Please choose another available fare.'))
+                            ->withErrors(['flight_id' => (string) __('This fare is no longer available. Please choose another flight.')]);
+                    }
+
+                    app(SabreBrandedFarePublicAutoPnrEligibility::class)->persistCheckoutEvaluation($booking);
+                    $booking->refresh();
+
+                    $outcome = $this->sabreBookingService->runPublicReviewDryRun($booking);
+                    $booking->refresh();
+                    $metaAfterSabre = is_array($booking->meta) ? $booking->meta : [];
+                    $operationalPnrAttempted = ($metaAfterSabre['operational_auto_pnr_attempted'] ?? false) === true;
+                    $operationalPnrFailed = ($metaAfterSabre['operational_auto_pnr_result'] ?? '') === 'failed';
+                    $statusOut = (string) ($outcome['status'] ?? '');
+
+                    if (! ($outcome['success'] ?? false)) {
+                        $code = (string) ($outcome['error_code'] ?? '');
+                        $hostSellCustomerNotice = SabreHostSellClassifier::customerNoticeForOutcome($outcome);
+                        if ($hostSellCustomerNotice !== null) {
+                            $sabreCheckoutNotice = (string) __($hostSellCustomerNotice);
+                        } elseif ($operationalPnrAttempted && $operationalPnrFailed) {
+                            $sabreCheckoutNotice = (string) __(SabreOperationalPnrReadiness::CUSTOMER_FAILURE_NOTICE);
+                        } elseif ($code === 'sabre_booking_application_error' && $statusOut === 'needs_review') {
+                            $codes = is_array($outcome['response_error_codes'] ?? null) ? $outcome['response_error_codes'] : [];
+                            $codesNorm = array_map(static fn ($c) => strtoupper((string) $c), $codes);
+                            $sabreCheckoutNotice = in_array('MANDATORY_DATA_MISSING', $codesNorm, true)
+                                ? (string) __('Booking request saved. Sabre reported mandatory booking data was missing; staff must complete the record. No PNR or ticket has been issued.')
+                                : (string) __('Booking request saved. Sabre returned a response requiring staff review. No ticket has been issued.');
+                        } elseif ($code === ComplexItineraryPolicy::ERROR_CODE && $statusOut === 'needs_review') {
+                            $sabreCheckoutNotice = ComplexItineraryPolicy::publicCheckoutNotice();
+                        } elseif (in_array($code, [SabreCertifiedRouteSelector::ERROR_CODE_PENDING, SabreCertifiedRouteSelector::ERROR_CODE_NOT_CERTIFIED], true)
+                            && $statusOut === 'needs_review') {
+                            $selection = is_array($outcome['certified_route_selection'] ?? null)
+                                ? $outcome['certified_route_selection']
+                                : [];
+                            $sabreCheckoutNotice = app(SabreCertifiedRouteSelector::class)->publicCheckoutNoticeForSelection($selection);
+                        } elseif ($code === 'sabre_passenger_records_itinerary_guard' && $statusOut === 'needs_review') {
+                            $sabreCheckoutNotice = (string) __('Booking request saved. Passenger Records live create was not attempted for this itinerary; staff must complete supplier booking manually. No PNR or ticket has been issued.');
+                        } elseif ($code === 'sabre_passenger_records_stale_shop_segment' && $statusOut === 'needs_review') {
+                            $sabreCheckoutNotice = (string) __('This flight is no longer available at the selected schedule/class. Please search again or contact staff.');
+                        } elseif (SabrePnrFailureClassifier::isPostDispatchAmbiguousTransportFailure(
+                            $code,
+                            ['live_call_attempted' => ($outcome['live_call_attempted'] ?? false) === true],
+                        ) && $statusOut === 'needs_review') {
+                            $sabreCheckoutNotice = (string) __('Booking request received. Supplier confirmation is pending verification. No ticket has been issued.');
+                        } elseif ($code === SabreOfferRefreshAcceptance::ERROR_CODE_REQUIRES_ACCEPTANCE) {
+                            return $this->clientRedirect()->route('booking.review')
+                                ->with('show_offer_refresh_modal', true);
+                        } elseif (SabreBookingValidationManualRequestPolicy::allowsNonBlockingValidationFailure($booking, $outcome)) {
+                            SabreBookingValidationManualRequestPolicy::logNonBlocking($booking, $outcome);
+                            SabreBookingValidationManualRequestPolicy::persistDeferManualReviewMeta($booking);
+                            $booking->refresh();
+                            $sabreCheckoutNotice = SabreBookingValidationManualRequestPolicy::customerNotice();
+                        } elseif ($operationalPnrAttempted && ($outcome['live_call_attempted'] ?? false)) {
+                            $v25CustomerNotice = SabreBookingPayloadBuilder::v25OptionalQualifierCustomerMessageFromOutcome($outcome);
+                            $sabreCheckoutNotice = $v25CustomerNotice !== null
+                                ? $v25CustomerNotice
+                                : (string) __(SabreOperationalPnrReadiness::CUSTOMER_FAILURE_NOTICE);
+                        } else {
+                            $default = SabreBookingValidationManualRequestPolicy::customerSafeMessage(
+                                (string) ($outcome['message'] ?? __('Sabre booking failed.'))
+                            );
+                            $msg = match (true) {
+                                $statusOut === 'disabled' => (string) __('Sabre booking is not enabled yet.'),
+                                $statusOut === 'validation_failed' => SabreBookingValidationManualRequestPolicy::customerSafeMessage(
+                                    (string) ($outcome['message'] ?? __('This Sabre fare could not be validated for submission.'))
+                                ),
+                                $code === 'sabre_booking_forbidden' => (string) __('Sabre booking endpoint is forbidden for this credential/path. Try configured booking path or contact Sabre/provider.'),
+                                $code === 'sabre_booking_validation_failed' => $default,
+                                default => $default,
+                            };
+
+                            return $this->clientRedirect()->route('booking.review')
+                                ->withErrors(['booking' => $msg]);
+                        }
+                    } elseif (($outcome['success'] ?? false)) {
+                        $resolvedNotice = BookingSupplierConfirmationNoticeResolver::resolveForBooking(
+                            $booking->fresh(),
+                            $outcome,
+                        );
+                        $sabreCheckoutNotice = is_array($resolvedNotice)
+                            ? ($resolvedNotice['notice'] ?? null)
+                            : null;
+                    }
+                } elseif ($supplierForConfirm === SupplierProvider::PiaNdc->value) {
+                    $booking->loadMissing(['passengers', 'contact']);
+                    $this->reconcilePiaNdcBookingFareFamily($booking);
+                    $piaNdcResult = $this->piaNdcOptionPnrService->autoCreateOptionPnrForPublicBooking($booking);
+                    $booking->refresh();
+                    $this->piaNdcSelectedFareReadinessService->persistReadinessMeta($booking, [
+                        'readiness_status' => ($piaNdcResult['success'] ?? false) ? 'ready' : 'not_ready',
+                        'failed_reason_code' => ($piaNdcResult['success'] ?? false)
+                            ? null
+                            : (string) data_get($piaNdcResult, 'summary.error_code', 'order_create_failed'),
+                        'selected_option_key' => trim((string) data_get($meta, 'fare_option_key', '')),
+                        'fare_type_code' => data_get($meta, 'selected_fare_family_option.provider_context.fare_type_code'),
+                        'offer_item_ref_id' => data_get($meta, 'selected_fare_family_option.provider_context.offer_item_ref_id'),
+                        'payment_time_limit' => data_get($meta, 'selected_fare_family_option.provider_context.payment_time_limit'),
+                        'live_offer_price_checked' => false,
+                    ]);
+
+                    if (! ($piaNdcResult['success'] ?? false) || ! $this->piaNdcSelectedFareReadinessService->bookingHasActiveOptionPnr($booking->fresh())) {
+                        return $this->clientRedirect()->route('booking.review')
+                            ->withErrors(['booking' => __(PiaNdcSelectedFareReadinessService::CHECKOUT_PNR_FAILURE_MESSAGE)]);
+                    }
+                }
+
+                $this->bookingService->submitBookingRequest($booking->fresh());
+
+                $redirect = $this->clientRedirect()->route('booking.confirmation');
+                if ($request->user() === null) {
+                    $booking->loadMissing('contact');
+                    $guestAbhiPayToken = $this->guestAccessService->createTokenForBooking(
+                        $booking,
+                        $booking->contact?->email,
+                        $booking->contact?->phone,
+                    );
+                    $request->session()->put($this->guestAbhiPaySessionKey($booking), $guestAbhiPayToken);
+                    $redirect = $redirect->with('guest_abhipay_token', $guestAbhiPayToken);
+                }
+
+                if ($sabreCheckoutNotice !== null) {
+                    return $redirect->with('sabre_checkout_notice', $sabreCheckoutNotice);
+                }
+
+                if ($piaNdcCheckoutNotice !== null) {
+                    return $redirect->with('pia_ndc_checkout_notice', $piaNdcCheckoutNotice);
+                }
+
+                return $redirect;
+            } finally {
+                $sabreSubmitLock?->release();
+            }
+    }
+
 }

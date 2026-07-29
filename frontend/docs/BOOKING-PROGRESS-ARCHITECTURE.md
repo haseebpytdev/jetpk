@@ -21,9 +21,13 @@
 5. Payment
 6. Confirmation
 
-Implemented for standard flight at `/booking/passengers` via `StandardBookingJsonPresenter::progressState()`.
+Implemented for standard flight passengers, review, and payment via `StandardBookingJsonPresenter::progressState()` and `progressStateForCheckout()`.
 
-## Authority
+JP-FE-09: Seat & Extras may be `skipped` when no authoritative seat map exists (not falsely `completed`).
+
+## Step states
+
+`completed` | `current` | `upcoming` | `skipped`
 
 Step state comes from Laravel `progress` arrays in booking JSON payloads. Completed steps require Laravel booking status confirmation—not URL visits alone.
 

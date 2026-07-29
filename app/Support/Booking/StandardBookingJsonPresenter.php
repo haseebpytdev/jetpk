@@ -2,8 +2,17 @@
 
 namespace App\Support\Booking;
 
+use App\Enums\BookingStatus;
+use App\Models\Booking;
+use App\Support\Bookings\BookingPaymentSummaryPresenter;
+use App\Support\Bookings\CheckoutFareBreakdownPresenter;
+use App\Support\Bookings\PublicCheckoutFareChangeState;
+use App\Support\Branding\PublicAgencyContactResolver;
+use App\Support\Payments\PublicAbhiPayCheckoutPresenter;
+use App\Support\PublicBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\ViewErrorBag;
 
 /**
  * Structured JSON payloads for Next.js standard flight passenger checkout (additive; Blade unchanged).
@@ -329,7 +338,631 @@ class StandardBookingJsonPresenter
             'seat_map_available' => false,
             'ancillaries_available' => $oneApiExtras,
             'message' => 'Seat selection and optional extras will be shown when supported for this fare.',
-            'progress_step' => 'upcoming',
+            'progress_step' => 'skipped',
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $viewData
+     * @return array<string, mixed>
+     */
+    public function presentReviewContext(array $viewData, Request $request): array
+    {
+        $booking = $viewData['booking'] ?? null;
+        if (! $booking instanceof Booking) {
+            return $this->presentError('missing_session', __('Please search for a flight before continuing to checkout.'), '/');
+        }
+
+        $booking->loadMissing(['passengers', 'contact', 'fareBreakdown']);
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $criteria = is_array($viewData['criteria'] ?? null) ? $viewData['criteria'] : [];
+        $offer = is_array($viewData['offer'] ?? null) ? $viewData['offer'] : null;
+        $draft = is_array($viewData['draft'] ?? null) ? $viewData['draft'] : [];
+        $checkoutFareBreakdown = is_array($viewData['checkoutFareBreakdown'] ?? null) ? $viewData['checkoutFareBreakdown'] : [];
+        $abhiPay = is_array($viewData['abhiPayCheckout'] ?? null) ? $viewData['abhiPayCheckout'] : [];
+        $searchId = trim((string) data_get($meta, 'checkout_search_id', ''));
+        $offerId = trim((string) ($booking->flight_offer_id ?? ($offer['id'] ?? '')));
+        $holdSessionId = (int) data_get($meta, 'hold_session_id', 0);
+        $expiresAt = (string) ($viewData['fareSessionExpiresAt'] ?? data_get($meta, 'checkout_lock_expires_at', ''));
+
+        return [
+            'ok' => true,
+            'booking_session' => [
+                'id' => $this->opaqueSessionId($searchId, $offerId, $holdSessionId),
+                'status' => 'review',
+                'expires_at' => $expiresAt !== '' ? $expiresAt : null,
+                'server_time' => now()->toIso8601String(),
+                'next_url' => null,
+                'previous_url' => '/booking/passengers',
+                'progress' => $this->progressStateForCheckout('review', $this->seatExtrasCapability($offer)['progress_step'] ?? 'skipped'),
+            ],
+            'booking_reference' => $booking->booking_reference,
+            'itinerary' => $this->presentItineraryFromReview($viewData, $offer, $criteria),
+            'passengers' => $this->presentPassengersSummary($booking),
+            'contact' => $this->presentContactSummary($booking),
+            'documents' => $this->presentDocumentSummary($booking),
+            'pricing' => $this->presentAuthoritativePricing($checkoutFareBreakdown, $booking),
+            'payment_methods' => $this->presentPaymentMethods($abhiPay),
+            'terms' => [
+                'required' => false,
+                'terms_url' => '/terms',
+                'privacy_url' => '/privacy',
+            ],
+            'fare_change' => $this->presentFareChangeState($booking, $viewData),
+            'submit_blocked' => (bool) ($viewData['sabreCheckoutSubmitDisabled'] ?? false) || (bool) ($viewData['offerRefreshPending'] ?? false),
+            'submit_blocked_reason' => $this->reviewSubmitBlockedReason($viewData),
+            'notices' => $this->reviewNotices($viewData),
+            'next_actions' => [
+                'edit_passengers_url' => '/booking/passengers',
+                'accept_fare_url' => filled($booking->booking_reference)
+                    ? '/booking/'.$booking->id.'/accept-updated-fare'
+                    : null,
+                'decline_fare_url' => filled($booking->booking_reference)
+                    ? '/booking/'.$booking->id.'/decline-updated-fare'
+                    : null,
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function presentReviewSubmitSuccess(?Booking $booking, Request $request): array
+    {
+        $meta = is_array($booking?->meta) ? $booking->meta : [];
+        $method = (string) ($meta['booking_method'] ?? 'pay_later_booking_request');
+        $isCard = $method === 'online_card';
+
+        $nextPath = $isCard ? '/booking/payment/card' : '/booking/payment/manual';
+
+        return [
+            'ok' => true,
+            'status' => 'submitted',
+            'booking_method' => $method,
+            'payment_method_code' => $isCard ? 'card' : 'manual',
+            'next_url' => $nextPath,
+            'confirmation_handoff_url' => '/booking/confirmation',
+            'progress' => $this->progressStateForCheckout($isCard ? 'payment' : 'payment'),
+            'guest_abhipay_token' => $request->session()->get('guest_abhipay_token'),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function presentFareChangeRequired(?Booking $booking, ?ViewErrorBag $errors = null): array
+    {
+        $fareChange = $booking !== null ? $this->presentFareChangeState($booking, []) : null;
+
+        return [
+            'ok' => false,
+            'status' => 'fare_changed',
+            'message' => (string) ($errors?->getBag('default')->first('booking') ?? __('The fare has changed. Please accept the updated fare before continuing.')),
+            'fare_change' => $fareChange,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function presentReviewBlocked(?Booking $booking, string $message, string $redirectPath): array
+    {
+        return [
+            'ok' => false,
+            'status' => 'review_blocked',
+            'message' => $message,
+            'redirect_url' => $redirectPath,
+            'fare_change' => $booking !== null ? $this->presentFareChangeState($booking, []) : null,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $viewData
+     * @return array<string, mixed>
+     */
+    public function presentCheckoutState(array $viewData, Request $request): array
+    {
+        $booking = $viewData['booking'] ?? null;
+        if (! $booking instanceof Booking) {
+            return $this->presentError('missing_session', __('Booking session not found.'), '/');
+        }
+
+        $booking->loadMissing(['passengers', 'contact', 'fareBreakdown', 'payments']);
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $draft = is_array($viewData['draft'] ?? null) ? $viewData['draft'] : [];
+        $abhiPay = is_array($viewData['abhiPayCheckout'] ?? null) ? $viewData['abhiPayCheckout'] : [];
+        $criteria = is_array($viewData['criteria'] ?? null) ? $viewData['criteria'] : [];
+        $offer = is_array($viewData['offer'] ?? null) ? $viewData['offer'] : null;
+        $method = (string) ($meta['booking_method'] ?? $draft['booking_method'] ?? 'pay_later');
+        $isCard = $method === 'online_card';
+        $checkoutFareBreakdown = CheckoutFareBreakdownPresenter::present(
+            $offer,
+            $booking->fareBreakdown,
+            [
+                'adults' => (int) $booking->passengers->where('passenger_type', 'adult')->count(),
+                'children' => (int) $booking->passengers->where('passenger_type', 'child')->count(),
+                'infants' => (int) $booking->passengers->where('passenger_type', 'infant')->count(),
+            ],
+        );
+
+        $paymentStatus = $this->mapPaymentStatus($abhiPay);
+        $bookingStatus = $this->mapBookingStatus($booking);
+        $guestToken = $viewData['guestAbhiPayToken'] ?? $request->session()->get('guest_abhipay_token');
+
+        return [
+            'ok' => true,
+            'booking_session' => [
+                'id' => $this->opaqueSessionId(
+                    (string) data_get($meta, 'checkout_search_id', ''),
+                    (string) ($booking->flight_offer_id ?? ''),
+                    (int) data_get($meta, 'hold_session_id', 0),
+                ),
+                'status' => $isCard ? 'payment' : 'awaiting_payment',
+                'server_time' => now()->toIso8601String(),
+                'progress' => $this->progressStateForCheckout('payment'),
+            ],
+            'booking_reference' => $booking->booking_reference,
+            'booking_method' => $method,
+            'payment_method_code' => $isCard ? 'card' : 'manual',
+            'booking_status' => $bookingStatus,
+            'payment_status' => $paymentStatus,
+            'pnr' => filled($booking->pnr) ? strtoupper((string) $booking->pnr) : null,
+            'ticketing_status' => (string) ($booking->ticketing_status ?? ''),
+            'pricing' => $this->presentAuthoritativePricing($checkoutFareBreakdown, $booking),
+            'manual_payment' => $isCard ? null : $this->presentManualPaymentState($booking, $abhiPay),
+            'card_payment' => $isCard ? $this->presentCardPaymentState($booking, $abhiPay, $guestToken) : null,
+            'supplier_notice' => is_array($viewData['supplierConfirmationNotice'] ?? null)
+                ? ($viewData['supplierConfirmationNotice']['notice'] ?? null)
+                : null,
+            'itinerary' => $this->presentItineraryFromReview($viewData, $offer, $criteria),
+            'passengers' => $this->presentPassengersSummary($booking),
+            'contact' => $this->presentContactSummary($booking),
+            'documents_portal' => BookingPaymentSummaryPresenter::documentsForPortal($booking, 'customer'),
+            'support' => $this->supportContacts(),
+            'confirmation_handoff_url' => $bookingStatus['terminal'] ? '/booking/confirmation' : null,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function presentPaymentStatus(?Booking $booking, array $abhiPayCheckout, ?string $transactionReference = null): array
+    {
+        if ($booking === null) {
+            return $this->presentError('missing_session', __('Booking not found.'), '/');
+        }
+
+        $paymentStatus = $this->mapPaymentStatus($abhiPayCheckout);
+        $terminal = in_array($paymentStatus['code'], ['succeeded', 'failed', 'cancelled', 'duplicate'], true);
+
+        return [
+            'ok' => true,
+            'booking_reference' => $booking->booking_reference,
+            'payment_status' => $paymentStatus,
+            'booking_status' => $this->mapBookingStatus($booking),
+            'transaction_reference' => $transactionReference ?? ($abhiPayCheckout['latest_transaction_reference'] ?? null),
+            'poll' => [
+                'should_poll' => ! $terminal && in_array($paymentStatus['code'], ['pending', 'processing', 'unknown'], true),
+                'interval_ms' => 3000,
+                'max_attempts' => 40,
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function presentInvoice(?Booking $booking): array
+    {
+        if ($booking === null) {
+            return $this->presentError('unauthorized', __('Invoice not available.'), '/');
+        }
+
+        $booking->loadMissing(['passengers', 'contact', 'fareBreakdown']);
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $offer = is_array($meta['flight_offer_snapshot'] ?? null) ? $meta['flight_offer_snapshot'] : null;
+        $criteria = is_array($meta['search_criteria'] ?? null) ? $meta['search_criteria'] : [];
+        $checkoutFareBreakdown = CheckoutFareBreakdownPresenter::present(
+            $offer,
+            $booking->fareBreakdown,
+            [
+                'adults' => (int) $booking->passengers->where('passenger_type', 'adult')->count(),
+                'children' => (int) $booking->passengers->where('passenger_type', 'child')->count(),
+                'infants' => (int) $booking->passengers->where('passenger_type', 'infant')->count(),
+            ],
+        );
+        $contact = PublicAgencyContactResolver::resolve(null);
+        $documents = BookingPaymentSummaryPresenter::documentsForPortal($booking, 'customer');
+        $invoiceDoc = collect($documents)->firstWhere('key', 'invoice');
+
+        return [
+            'ok' => true,
+            'invoice_number' => $invoiceDoc !== null
+                ? ($invoiceDoc['document']->document_number ?? $booking->booking_reference)
+                : null,
+            'booking_reference' => $booking->booking_reference,
+            'issue_date' => now()->format('Y-m-d'),
+            'customer' => $this->presentContactSummary($booking),
+            'itinerary_summary' => [
+                'route' => (string) (($criteria['origin'] ?? '').' → '.($criteria['destination'] ?? '')),
+                'depart_date' => (string) ($criteria['depart_date'] ?? ''),
+                'return_date' => (string) ($criteria['return_date'] ?? ''),
+            ],
+            'passenger_count' => $booking->passengers->count(),
+            'line_items' => $checkoutFareBreakdown['rows'] ?? [],
+            'pricing' => $this->presentAuthoritativePricing($checkoutFareBreakdown, $booking),
+            'payment_method' => (string) ($meta['booking_method'] ?? ''),
+            'payment_status' => $this->mapPaymentStatus(app(PublicAbhiPayCheckoutPresenter::class)->forBooking($booking, afterSubmission: true)),
+            'booking_status' => $this->mapBookingStatus($booking),
+            'company' => [
+                'name' => trim(client_branding()->companyName()),
+                'phone' => $contact->phone,
+                'email' => $contact->email,
+                'address' => trim(client_branding()->address()) !== '' ? trim(client_branding()->address()) : $contact->address,
+            ],
+            'pdf_available' => $invoiceDoc !== null,
+            'pdf_download_path' => $invoiceDoc !== null ? '/booking/invoice/download' : null,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $abhiPay
+     * @return list<array<string, mixed>>
+     */
+    private function presentPaymentMethods(array $abhiPay): array
+    {
+        $methods = [
+            [
+                'code' => 'manual',
+                'canonical' => 'pay_later',
+                'label' => 'Manual Payment',
+                'description' => 'Submit your booking request and pay using the instructions on the confirmation page.',
+                'available' => true,
+                'fee' => null,
+                'currency' => (string) ($abhiPay['currency'] ?? 'PKR'),
+            ],
+        ];
+
+        if (($abhiPay['show_review_option'] ?? false) === true) {
+            $methods[] = [
+                'code' => 'card',
+                'canonical' => 'online_card',
+                'label' => 'Pay by Card',
+                'description' => 'Pay securely online by debit or credit card after submitting your booking.',
+                'available' => true,
+                'fee' => null,
+                'currency' => (string) ($abhiPay['currency'] ?? 'PKR'),
+            ];
+        }
+
+        return $methods;
+    }
+
+    /**
+     * @param  array<string, mixed>  $checkoutFareBreakdown
+     * @return array<string, mixed>
+     */
+    private function presentAuthoritativePricing(array $checkoutFareBreakdown, Booking $booking): array
+    {
+        $currency = (string) ($checkoutFareBreakdown['currency'] ?? $booking->currency ?? 'PKR');
+        $total = (float) ($checkoutFareBreakdown['total'] ?? $booking->fareBreakdown?->total ?? 0);
+
+        return [
+            'currency' => $currency,
+            'base_fare' => (float) ($booking->fareBreakdown?->base_fare ?? 0),
+            'taxes' => (float) ($booking->fareBreakdown?->taxes ?? 0),
+            'service_charges' => (float) ($booking->fareBreakdown?->service_fee ?? 0),
+            'total' => $total,
+            'formatted_total' => 'Rs. '.number_format($total, 0),
+            'rows' => $checkoutFareBreakdown['rows'] ?? [],
+            'passenger_mix' => $checkoutFareBreakdown['passenger_mix'] ?? null,
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function presentPassengersSummary(Booking $booking): array
+    {
+        return $booking->passengers
+            ->sortBy('passenger_index')
+            ->values()
+            ->map(fn ($passenger): array => [
+                'passenger_type' => (string) $passenger->passenger_type,
+                'title' => (string) $passenger->title,
+                'first_name' => (string) $passenger->first_name,
+                'last_name' => (string) $passenger->last_name,
+                'gender' => (string) $passenger->gender,
+                'date_of_birth' => $passenger->date_of_birth?->format('Y-m-d'),
+                'nationality' => (string) $passenger->nationality,
+                'document_type' => (string) $passenger->document_type,
+                'passport_number_masked' => $this->maskDocumentNumber((string) $passenger->passport_number),
+                'national_id_masked' => $this->maskDocumentNumber((string) $passenger->national_id_number),
+            ])
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentContactSummary(Booking $booking): array
+    {
+        $contact = $booking->contact;
+
+        return [
+            'name' => trim((string) ($contact?->name ?? '')),
+            'email' => (string) ($contact?->email ?? ''),
+            'phone' => (string) ($contact?->phone ?? ''),
+            'country' => (string) ($contact?->country ?? ''),
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function presentDocumentSummary(Booking $booking): array
+    {
+        return $booking->passengers
+            ->sortBy('passenger_index')
+            ->values()
+            ->map(fn ($passenger): array => [
+                'passenger_label' => trim((string) $passenger->first_name.' '.(string) $passenger->last_name),
+                'document_type' => (string) $passenger->document_type,
+                'passport_number_masked' => $this->maskDocumentNumber((string) $passenger->passport_number),
+                'national_id_masked' => $this->maskDocumentNumber((string) $passenger->national_id_number),
+                'passport_expiry_date' => $passenger->passport_expiry_date?->format('Y-m-d'),
+            ])
+            ->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $viewData
+     * @return array<string, mixed>|null
+     */
+    private function presentFareChangeState(Booking $booking, array $viewData): ?array
+    {
+        $fareChangeState = app(PublicCheckoutFareChangeState::class);
+        if (! $fareChangeState->requiresCustomerAcceptance($booking) && ! $fareChangeState->persistedFareChanged($booking)) {
+            return null;
+        }
+
+        $display = $viewData['offerRefreshDisplay'] ?? null;
+        if (! is_array($display)) {
+            $display = $fareChangeState->customerModalDisplay($booking);
+        }
+
+        if ($display === null) {
+            return ['fare_changed' => true, 'requires_acceptance' => true];
+        }
+
+        return array_merge($display, [
+            'requires_acceptance' => $fareChangeState->requiresCustomerAcceptance($booking),
+            'accept_url' => '/booking/'.$booking->id.'/accept-updated-fare',
+            'decline_url' => '/booking/'.$booking->id.'/decline-updated-fare',
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $offer
+     * @param  array<string, mixed>  $criteria
+     * @param  array<string, mixed>  $viewData
+     * @return array<string, mixed>
+     */
+    private function presentItineraryFromReview(array $viewData, ?array $offer, array $criteria): array
+    {
+        $presentation = is_array($viewData['reviewPresentation'] ?? null)
+            ? $viewData['reviewPresentation']
+            : (is_array($viewData['checkoutPresentation'] ?? null) ? $viewData['checkoutPresentation'] : []);
+
+        return $this->presentItinerary(
+            array_merge($viewData, ['checkoutPresentation' => $presentation, 'checkoutFareBreakdown' => $viewData['checkoutFareBreakdown'] ?? []]),
+            $offer,
+            $criteria,
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $abhiPay
+     * @return array<string, mixed>
+     */
+    private function presentManualPaymentState(Booking $booking, array $abhiPay): array
+    {
+        return [
+            'amount_due' => (float) ($abhiPay['payable_amount'] ?? 0),
+            'currency' => (string) ($abhiPay['currency'] ?? 'PKR'),
+            'formatted_amount' => 'Rs. '.number_format((float) ($abhiPay['payable_amount'] ?? 0), 0),
+            'instructions' => [
+                'Our team will contact you to confirm availability, fare, and payment instructions.',
+                'Include your booking reference in any bank transfer note.',
+                'Ticketing is completed after verification and payment where applicable.',
+            ],
+            'payment_status_label' => (string) ($abhiPay['payment_status_label'] ?? 'Unpaid'),
+            'proof_upload_supported' => false,
+            'payment_reference_supported' => false,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $abhiPay
+     * @return array<string, mixed>
+     */
+    private function presentCardPaymentState(Booking $booking, array $abhiPay, ?string $guestToken): array
+    {
+        $startPath = Auth::check()
+            ? '/payments/abhipay/start/'.$booking->id
+            : ($guestToken !== null && $guestToken !== ''
+                ? '/guest/bookings/'.$booking->id.'/access/'.$guestToken.'/abhipay/start'
+                : null);
+
+        return [
+            'can_start' => (bool) ($abhiPay['can_start'] ?? false),
+            'show_pay_button' => (bool) ($abhiPay['show_pay_button'] ?? false),
+            'payable_amount' => (float) ($abhiPay['payable_amount'] ?? 0),
+            'currency' => (string) ($abhiPay['currency'] ?? 'PKR'),
+            'formatted_amount' => 'Rs. '.number_format((float) ($abhiPay['payable_amount'] ?? 0), 0),
+            'payment_status_label' => (string) ($abhiPay['payment_status_label'] ?? 'Unpaid'),
+            'blocked_message' => $abhiPay['blocked_message'] ?? null,
+            'ticketing_note' => (string) ($abhiPay['ticketing_note'] ?? 'Ticketing will happen after payment verification.'),
+            'start_endpoint' => $startPath,
+            'latest_transaction_reference' => $abhiPay['latest_transaction_reference'] ?? null,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $abhiPay
+     * @return array<string, mixed>
+     */
+    private function mapPaymentStatus(array $abhiPay): array
+    {
+        $label = (string) ($abhiPay['payment_status_label'] ?? 'Unpaid');
+        $code = match ($label) {
+            'Paid' => 'succeeded',
+            'Payment pending' => 'pending',
+            'Payment failed' => 'failed',
+            default => 'not_started',
+        };
+
+        return [
+            'code' => $code,
+            'label' => $label,
+            'terminal' => in_array($code, ['succeeded', 'failed', 'cancelled'], true),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mapBookingStatus(Booking $booking): array
+    {
+        $ticketed = $booking->status === BookingStatus::Ticketed
+            || in_array((string) ($booking->ticketing_status ?? ''), ['ticketed', 'issued'], true)
+            || $booking->ticketed_at !== null;
+
+        $label = match (true) {
+            $ticketed => 'Confirmed',
+            filled($booking->pnr) => 'Pending ticketing',
+            $booking->submitted_at !== null => 'Pending',
+            default => 'Draft',
+        };
+
+        return [
+            'code' => (string) ($booking->status?->value ?? 'draft'),
+            'label' => $label,
+            'terminal' => $ticketed,
+        ];
+    }
+
+    /**
+     * @return list<array{key: string, label: string, state: string, href: ?string}>
+     */
+    public function progressStateForCheckout(string $activeStep, string $seatExtrasState = 'skipped'): array
+    {
+        $steps = [
+            ['key' => 'flight_selected', 'label' => 'Flight Selected'],
+            ['key' => 'passenger_details', 'label' => 'Passenger Details'],
+            ['key' => 'seat_extras', 'label' => 'Seat & Extras'],
+            ['key' => 'review', 'label' => 'Review'],
+            ['key' => 'payment', 'label' => 'Payment'],
+            ['key' => 'confirmation', 'label' => 'Confirmation'],
+        ];
+
+        $order = array_column($steps, 'key');
+        $activeIndex = array_search($activeStep, $order, true);
+        $completedThrough = match ($activeStep) {
+            'review' => 'passenger_details',
+            'payment' => 'review',
+            'confirmation' => 'payment',
+            default => $activeIndex !== false && $activeIndex > 0 ? $order[$activeIndex - 1] : null,
+        };
+        $completedIndex = $completedThrough !== null ? array_search($completedThrough, $order, true) : -1;
+
+        return array_map(function (array $step) use ($activeStep, $completedIndex, $order, $seatExtrasState): array {
+            $index = array_search($step['key'], $order, true);
+            $state = 'upcoming';
+
+            if ($step['key'] === $activeStep) {
+                $state = 'current';
+            } elseif ($step['key'] === 'seat_extras' && $seatExtrasState === 'skipped') {
+                $state = 'skipped';
+            } elseif ($completedIndex !== false && $index !== false && $index <= $completedIndex) {
+                $state = 'completed';
+            }
+
+            $href = null;
+            if ($step['key'] === 'passenger_details' && $state === 'completed') {
+                $href = '/booking/passengers';
+            }
+
+            return [
+                'key' => $step['key'],
+                'label' => $step['label'],
+                'state' => $state,
+                'href' => $href,
+            ];
+        }, $steps);
+    }
+
+    /**
+     * @param  array<string, mixed>  $viewData
+     * @return list<string>
+     */
+    private function reviewNotices(array $viewData): array
+    {
+        $notices = [];
+        if ((bool) ($viewData['complexItineraryNotice'] ?? false)) {
+            $notices[] = (string) __('Your booking request will require staff confirmation before airline hold/PNR.');
+        }
+        if ((bool) ($viewData['timelineSnapshotInvalid'] ?? false)) {
+            $notices[] = (string) __('Selected itinerary timing could not be verified. Please choose another fare.');
+        }
+        if ((bool) ($viewData['recheckRequired'] ?? false)) {
+            $notices[] = (string) __('Your airline hold has expired. Please recheck the fare before continuing.');
+        }
+
+        return $notices;
+    }
+
+    /**
+     * @param  array<string, mixed>  $viewData
+     */
+    private function reviewSubmitBlockedReason(array $viewData): ?string
+    {
+        if ((bool) ($viewData['offerRefreshPending'] ?? false)) {
+            return (string) __('An airline fare update must be accepted before you can continue.');
+        }
+        if ((bool) ($viewData['sabreCheckoutSubmitDisabled'] ?? false)) {
+            return (string) __('Online airline confirmation is not available yet.');
+        }
+
+        return null;
+    }
+
+    private function maskDocumentNumber(string $value): string
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return '';
+        }
+        if (strlen($trimmed) <= 4) {
+            return str_repeat('•', strlen($trimmed));
+        }
+
+        return str_repeat('•', max(0, strlen($trimmed) - 4)).substr($trimmed, -4);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function supportContacts(): array
+    {
+        $contact = PublicAgencyContactResolver::resolve(null);
+
+        return [
+            'phone' => $contact->phone,
+            'email' => $contact->email,
+            'whatsapp_url' => $contact->whatsappUrl(),
+            'support_url' => '/support',
+            'lookup_url' => '/lookup-booking',
         ];
     }
 }
