@@ -104,7 +104,7 @@ Revert merge commit on `main` or reset branch to pre-phase baseline `052f318`.
 |------|-----|
 | Feature commit | `7d08b76bfb28f3ad1d5915ec0fd569ea9a2a9de5` |
 | Merge commit | `dfbadcf5205a35b741bb230a1560232d648ff228` |
-| Docs commit | _see `git log -1` on main after docs push_ |
+| Docs commit | `65cf7e20fcaf86debcf6a2063466ea48c0edc739` |
 
 ## No deployment
 
