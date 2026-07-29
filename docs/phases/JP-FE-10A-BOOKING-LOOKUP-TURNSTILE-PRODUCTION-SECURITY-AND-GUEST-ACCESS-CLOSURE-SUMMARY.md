@@ -7,9 +7,10 @@
 | Phase | JP-FE-10A-BOOKING-LOOKUP-TURNSTILE-PRODUCTION-SECURITY-AND-GUEST-ACCESS-CLOSURE |
 | Branch | `phase/jetpk-fe-10a-booking-lookup-turnstile-closure` |
 | Baseline | `c5446b7` (JP-FE-10) |
-| Feature commit | `b621bd8763f1a09fc47fb7909876007845c284a9e` |
-| Merge commit | `f38c720` |
+| Feature commit | `b621bd82e676654775d76563aee4f7c7e0352a9d` |
+| Merge commit | `f38c7209654897971b5b389fd6468a4f76095f2d` |
 | Docs commit | `d2a0c4763f1a09fc47fb7909876007845c284a9e` |
+| Final SHA documentation | `7ae171a0bbc3df37c4f4e0bffbb6df620ccd8e15` |
 | Final status | COMPLETE |
 
 ## Problem
