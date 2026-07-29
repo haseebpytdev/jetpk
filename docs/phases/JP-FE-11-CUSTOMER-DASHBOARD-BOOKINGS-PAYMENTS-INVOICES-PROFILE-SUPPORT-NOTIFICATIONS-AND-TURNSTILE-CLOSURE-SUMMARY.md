@@ -8,9 +8,9 @@
 | Branch | `phase/jetpk-fe-11-customer-dashboard` |
 | Baseline | `1e244c4` |
 | Feature commit | `fc05518` |
-| Docs commit | _pending_ |
-| Merge commit | _pending_ |
-| Final SHA documentation | _pending_ |
+| Docs commit | `6ffd79f` |
+| Merge commit | `c9d344b` |
+| Final SHA documentation | `c9d344b` |
 | Final status | COMPLETE |
 
 ## Objective
