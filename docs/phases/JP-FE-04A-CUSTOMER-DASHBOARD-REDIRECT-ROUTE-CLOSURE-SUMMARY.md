@@ -76,8 +76,8 @@ Login success (customer)  →  /customer/bookings  →  owned placeholder
 
 | Commit | SHA |
 |--------|-----|
-| Feature | _after merge_ |
-| Merge | _after merge_ |
+| Feature | `5154824` |
+| Merge | `d02a9be` |
 
 ## Rollback
 
