@@ -24,6 +24,8 @@ use App\Http\Controllers\Api\PublicContentApiController;
 use App\Http\Controllers\Frontend\SupportController;
 use App\Http\Controllers\Payments\AbhiPayPaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Models\GroupBooking;
+use App\Models\GroupInventory;
 use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Ui\UiVersionResolver;
 use Illuminate\Support\Facades\Route;
@@ -114,7 +116,45 @@ Route::middleware('platform.module:public_flight_search')->group(function (): vo
 Route::get('/airports/search', AirportSearchController::class)->middleware('throttle:60,1')->name('airports.search');
 
 Route::middleware('platform.module:public_umrah_groups')->group(function (): void {
+    Route::bind('inventory', function (string $value): GroupInventory {
+        $inventory = GroupInventory::query()
+            ->where(function ($query) use ($value): void {
+                $query->where('public_id', $value)
+                    ->orWhere('supplier_package_id', $value);
+
+                if (is_numeric($value)) {
+                    $query->orWhereKey((int) $value);
+                }
+            })
+            ->first();
+
+        if ($inventory === null) {
+            abort(404);
+        }
+
+        return $inventory;
+    });
+
+    Route::bind('groupBooking', function (string $value): GroupBooking {
+        $booking = GroupBooking::query()
+            ->where(function ($query) use ($value): void {
+                $query->where('reference', $value);
+
+                if (is_numeric($value)) {
+                    $query->orWhereKey((int) $value);
+                }
+            })
+            ->first();
+
+        if ($booking === null) {
+            abort(404);
+        }
+
+        return $booking;
+    });
+
     Route::get('/groups/search', [GroupTicketingSearchController::class, 'index'])->name('group-ticketing.search');
+    Route::get('/groups/search/data', [GroupTicketingSearchController::class, 'searchData'])->name('group-ticketing.search.data');
     Route::get('/groups/search/results', [GroupTicketingSearchController::class, 'results'])->name('group-ticketing.search.results');
     Route::get('/groups/facets', [GroupTicketingSearchController::class, 'facets'])->name('group-ticketing.facets');
     Route::get('/groups/package/{inventory}', [GroupTicketingSearchController::class, 'show'])->name('group-ticketing.show');
@@ -126,6 +166,7 @@ Route::middleware('platform.module:public_umrah_groups')->group(function (): voi
         Route::get('/groups/booking/{groupBooking}/payment', [GroupTicketingBookingController::class, 'payment'])->name('group-ticketing.booking.payment');
         Route::post('/groups/booking/{groupBooking}/payment', [GroupTicketingBookingController::class, 'submitPayment'])->name('group-ticketing.booking.payment.submit');
         Route::get('/groups/booking/{groupBooking}/confirmation', [GroupTicketingBookingController::class, 'confirmation'])->name('group-ticketing.booking.confirmation');
+        Route::get('/groups/booking/{groupBooking}/status', [GroupTicketingBookingController::class, 'bookingStatus'])->name('group-ticketing.booking.status');
     });
     Route::get('/umrah-groups', fn () => redirect()->route('group-ticketing.search'))->name('umrah-groups.index');
     Route::get('/umrah-groups/{package}', fn (string $package) => redirect()->route('group-ticketing.show', $package))->name('umrah-groups.show');

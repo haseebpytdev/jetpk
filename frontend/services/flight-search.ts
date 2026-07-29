@@ -127,12 +127,13 @@ export function handoffToLaravelResults(resultsPath: string): void {
   handoffToFlightResults(resultsPath);
 }
 
+/** Navigate to the Next.js operational group search route (JP-FE-07). */
 export function handoffToGroupSearch(query: URLSearchParams): void {
-  const url = absoluteLaravelUrl(buildGroupSearchPagePath(query));
+  const target = buildGroupSearchPagePath(query);
   if (typeof document !== "undefined") {
-    document.body.setAttribute("data-handoff-url", url);
+    document.body.setAttribute("data-handoff-url", target);
   }
-  window.location.assign(url);
+  window.location.assign(target);
 }
 
 export function buildGroupHandoffQuery(draft: Omit<GroupSearchDraft, "submittedAt">): URLSearchParams {
