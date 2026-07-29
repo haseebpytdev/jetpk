@@ -86,7 +86,7 @@ Pending OTP (guest):
 
 | Account type | Dashboard destination |
 |--------------|----------------------|
-| `customer` | `/customer` or `/customer/bookings` (Laravel resolver) |
+| `customer` | `/customer/bookings` (Laravel `customer.bookings.index`; fallback `/customer`) |
 | `agent`, `agent_staff` | `/agent` |
 | `platform_admin` | `/admin/dashboard` |
 | `staff` | `/staff/dashboard` |
@@ -118,11 +118,26 @@ frontend/features/auth/
 
 - `/login`, `/login/otp`, `/register`, `/agent/register`, `/agent/register/submitted`
 - `/forgot-password`, `/reset-password/[token]`
-- Placeholders: `/customer`, `/agent`, `/access-denied`
+- Customer placeholders: `/customer` → `/customer/bookings`, `/customer/bookings`
+- Agent placeholder: `/agent`
+- `/access-denied`
+
+### Customer portal route closure (JP-FE-04A)
+
+Laravel session bootstrap returns `dashboard_url: "/customer/bookings"` for customers. Next.js owns:
+
+- `/customer` — server redirect to `/customer/bookings` (no loop)
+- `/customer/bookings` — guarded placeholder via `requireCustomerPortalAccess()` (Laravel `account_type` must be `customer`)
+
+Unauthenticated users redirect to `/login`. Non-customers redirect to Laravel-provided `dashboard_url` (not client-inferred).
 
 ## Preview mode
 
 `NEXT_PUBLIC_SESSION_PREVIEW=logged-in` enables isolated fixture session for shell QA only (default: `logged-out`).
+
+### SSR smoke fixture cookie (non-production only)
+
+Playwright smoke runs set `OTA_ALLOW_SESSION_FIXTURE=true` and cookie `ota_session_fixture` to `customer`, `agent`, or `anonymous` so SSR portal guards can be exercised without a live Laravel process. This is disabled unless the env flag is set.
 
 ## Local development
 

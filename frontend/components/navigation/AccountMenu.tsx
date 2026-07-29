@@ -34,7 +34,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
   }
 
   const { user, dashboardUrl } = session;
-  const bookingsHref = dashboardUrl.startsWith("/customer") ? "/laravel/customer/bookings" : dashboardUrl;
+  const bookingsHref = dashboardUrl.startsWith("/customer") ? "/customer/bookings" : dashboardUrl;
 
   async function handleLogout() {
     if (loggingOut) return;
