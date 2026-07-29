@@ -147,7 +147,7 @@ Revert merge commit on `main` or restore JP-FE-07 fixture imports in `GroupTicke
 - Feature: `bc0b150`
 - Docs: `e1a36bc`
 - Merge: `c81b1a7`
-- Final SHA doc: _pending_
+- Final SHA doc: `6d00c98`
 
 ## Final status
 
