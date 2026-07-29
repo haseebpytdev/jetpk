@@ -21,6 +21,7 @@ import {
 import { validateFlightSearch, validateGroupSearch } from "../utils/validation";
 import { flattenLaravelFieldErrors } from "../utils/laravel-errors";
 import { GroupTicketingForm } from "./GroupTicketingForm";
+import { useGroupSearchFacets } from "@/features/group-ticketing/hooks/use-group-search-facets";
 import { MultiCityForm } from "./MultiCityForm";
 import { OneWayForm } from "./OneWayForm";
 import { ReturnForm } from "./ReturnForm";
@@ -68,6 +69,9 @@ export function SearchModule({ className }: SearchModuleProps) {
   } = usePassengerSelection();
 
   const isSubmitting = submitState.status === "submitting" || submitState.status === "redirecting";
+  const groupFacets = useGroupSearchFacets(mode === "group");
+  const groupSectorValues = groupFacets.sectors.map((item) => item.value);
+  const groupCategoryValues = groupFacets.categories.map((item) => item.value);
 
   const passengerHandlers = useMemo(
     () => ({
@@ -165,7 +169,10 @@ export function SearchModule({ className }: SearchModuleProps) {
       category: groupCategory,
       travelDate: groupTravelDate,
     };
-    const result = validateGroupSearch(draftInput);
+    const result = validateGroupSearch(draftInput, {
+      sectorValues: groupSectorValues,
+      categoryValues: groupCategoryValues,
+    });
     if (!result.valid) {
       setErrors(result.errors);
       setSubmitState({ status: "idle" });
@@ -264,6 +271,12 @@ export function SearchModule({ className }: SearchModuleProps) {
             sector={groupSector}
             category={groupCategory}
             travelDate={groupTravelDate}
+            facetsState={groupFacets.state}
+            sectors={groupFacets.sectors}
+            categories={groupFacets.categories}
+            dateBounds={groupFacets.dateBounds}
+            facetsError={groupFacets.errorMessage}
+            onRetryFacets={groupFacets.retry}
             onSectorChange={setGroupSector}
             onCategoryChange={setGroupCategory}
             onTravelDateChange={setGroupTravelDate}

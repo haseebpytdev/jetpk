@@ -1,4 +1,5 @@
 export { GroupSearchPage } from "./components/GroupSearchPage";
+export { useGroupSearchFacets } from "./hooks/use-group-search-facets";
 export { GroupPackageDetailsPage } from "./components/GroupPackageDetailsPage";
 export { GroupPassengersPage } from "./components/GroupPassengersPage";
 export { GroupReviewPage } from "./components/GroupReviewPage";

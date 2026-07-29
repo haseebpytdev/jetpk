@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BookingProgress } from "@/features/booking-progress";
+import { useGroupSearchFacets } from "../hooks/use-group-search-facets";
 import { GroupTicketingForm } from "@/features/search/components/GroupTicketingForm";
 import { validateGroupSearch } from "@/features/search/utils/validation";
 import { fetchGroupResultsPage, fetchGroupSearchData } from "../services/group-ticketing-api";
@@ -29,6 +29,10 @@ export function GroupSearchPage() {
   const filters = useMemo(() => parseFilters(params), [params]);
   const hasSearch = Boolean(filters.sector || filters.date_from || filters.category);
 
+  const facets = useGroupSearchFacets();
+  const sectorValues = useMemo(() => facets.sectors.map((item) => item.value), [facets.sectors]);
+  const categoryValues = useMemo(() => facets.categories.map((item) => item.value), [facets.categories]);
+
   const [sector, setSector] = useState(filters.sector ?? "");
   const [category, setCategory] = useState(filters.category ?? "all");
   const [travelDate, setTravelDate] = useState(filters.date_from ?? "");
@@ -42,13 +46,48 @@ export function GroupSearchPage() {
   const [lockedMessage, setLockedMessage] = useState<string | undefined>();
   const [page, setPage] = useState(filters.page ?? 1);
   const [hasMore, setHasMore] = useState(false);
-  const [sectors, setSectors] = useState<string[]>([]);
+
+  const staleFacetErrors = useMemo(() => {
+    if (facets.state !== "loaded") return [];
+    const next: string[] = [];
+    if (filters.sector && !sectorValues.includes(filters.sector)) {
+      next.push("Selected sector is no longer available. Please choose again.");
+    }
+    return next;
+  }, [facets.state, filters.sector, sectorValues]);
+
+  const formErrors = useMemo(() => [...staleFacetErrors, ...errors], [staleFacetErrors, errors]);
+
+  useEffect(() => {
+    if (facets.state !== "loaded") return;
+
+    if (filters.sector && !sectorValues.includes(filters.sector)) {
+      setSector("");
+    } else if (filters.sector && sectorValues.includes(filters.sector)) {
+      setSector(filters.sector);
+    } else if (sector && !sectorValues.includes(sector)) {
+      setSector("");
+    }
+
+    if (filters.category && !categoryValues.includes(filters.category)) {
+      setCategory("all");
+    } else if (category !== "all" && !categoryValues.includes(category)) {
+      setCategory("all");
+    } else if (filters.category && categoryValues.includes(filters.category)) {
+      setCategory(filters.category);
+    }
+  }, [facets.state, filters.sector, filters.category, sector, category, sectorValues, categoryValues]);
+
+  const filtersValid = useMemo(() => {
+    if (facets.state !== "loaded") return false;
+    if (filters.sector && !sectorValues.includes(filters.sector)) return false;
+    if (filters.category && !categoryValues.includes(filters.category)) return false;
+    return true;
+  }, [facets.state, filters.sector, filters.category, sectorValues, categoryValues]);
 
   const loadResults = useCallback(async (nextFilters: GroupSearchFilters, append = false) => {
     setLoading(true);
-    const response = hasSearch || nextFilters.sector || nextFilters.date_from
-      ? await fetchGroupSearchData(nextFilters)
-      : await fetchGroupSearchData({ page: 1 });
+    const response = await fetchGroupSearchData(nextFilters);
 
     if (!response.ok) {
       setErrors([response.message]);
@@ -56,7 +95,6 @@ export function GroupSearchPage() {
       return;
     }
 
-    setSectors(response.data.facets.sectors);
     setCards((current) => (append ? [...current, ...response.data.cards] : response.data.cards));
     setCountLabel(response.data.count_label);
     setStatusMessage(response.data.status_message ?? null);
@@ -66,20 +104,18 @@ export function GroupSearchPage() {
     setPage(response.data.page);
     setHasMore(response.data.has_more);
     setLoading(false);
-  }, [hasSearch]);
+  }, []);
 
   useEffect(() => {
-    if (hasSearch) {
-      void loadResults(filters, false);
-    } else {
-      void fetchGroupSearchData({ page: 1 }).then((response) => {
-        if (response.ok) setSectors(response.data.facets.sectors);
-      });
-    }
-  }, [filters, hasSearch, loadResults]);
+    if (!hasSearch || !filtersValid) return;
+    void loadResults(filters, false);
+  }, [filters, hasSearch, filtersValid, loadResults]);
 
   const handleSubmit = () => {
-    const result = validateGroupSearch({ sector, category, travelDate });
+    const result = validateGroupSearch(
+      { sector, category, travelDate },
+      { sectorValues, categoryValues },
+    );
     if (!result.valid) {
       setErrors(result.errors);
       return;
@@ -125,17 +161,19 @@ export function GroupSearchPage() {
           sector={sector}
           category={category}
           travelDate={travelDate}
-          sectors={sectors}
+          facetsState={facets.state}
+          sectors={facets.sectors}
+          categories={facets.categories}
+          dateBounds={facets.dateBounds}
+          facetsError={facets.errorMessage}
+          onRetryFacets={facets.retry}
           onSectorChange={setSector}
           onCategoryChange={setCategory}
           onTravelDateChange={setTravelDate}
           onSubmit={handleSubmit}
-          errors={errors}
+          errors={formErrors}
           disabled={loading}
         />
-        {sectors.length > 0 ? (
-          <p className="mt-3 text-jp-xs text-jp-muted">Sectors loaded from live inventory ({sectors.length} available).</p>
-        ) : null}
       </div>
 
       {hasSearch ? (
