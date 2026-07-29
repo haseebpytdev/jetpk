@@ -11,6 +11,7 @@ const EXACT_PATHS = new Set([
   "/customer",
   "/customer/dashboard",
   "/agent",
+  "/agent/dashboard",
   "/admin/dashboard",
   "/staff/dashboard",
   "/account/legacy",
@@ -34,5 +35,10 @@ export function sanitizeDashboardUrl(path: string | undefined | null, fallback =
 
 export function isNextJsOwnedPath(path: string): boolean {
   const [pathOnly] = path.split("?");
-  return pathOnly === "/customer" || pathOnly === "/agent" || pathOnly.startsWith("/customer/");
+  return (
+    pathOnly === "/customer" ||
+    pathOnly === "/agent" ||
+    pathOnly.startsWith("/customer/") ||
+    pathOnly.startsWith("/agent/")
+  );
 }

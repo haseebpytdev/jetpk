@@ -5,7 +5,11 @@ use App\Http\Controllers\Agent\AgentAgencyController;
 use App\Http\Controllers\Agent\AgentBookingController;
 use App\Http\Controllers\Agent\AgentCommissionController;
 use App\Http\Controllers\Agent\AgentDepositController;
+use App\Http\Controllers\Agent\AgentInvoiceController;
 use App\Http\Controllers\Agent\AgentLedgerController;
+use App\Http\Controllers\Agent\AgentNotificationController;
+use App\Http\Controllers\Agent\AgentPaymentController;
+use App\Http\Controllers\Agent\AgentProfileController;
 use App\Http\Controllers\Agent\AgentReportsController;
 use App\Http\Controllers\Agent\AgentStaffAgencyRoleController;
 use App\Http\Controllers\Agent\AgentStaffController;
@@ -22,6 +26,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('agent')->name('agent.')->group(function (): void {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [AgentProfileController::class, 'show'])->name('profile.show');
+    Route::get('/notifications', [AgentNotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread-summary', [AgentNotificationController::class, 'unreadSummary'])->name('notifications.unread-summary');
+    Route::post('/notifications/{notification}/read', [AgentNotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [AgentNotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
     Route::middleware('agent.permission:'.AgentPermission::AgencyView)->group(function (): void {
         Route::get('/agency', [AgentAgencyController::class, 'show'])->name('agency.show');
@@ -55,12 +64,12 @@ Route::prefix('agent')->name('agent.')->group(function (): void {
 
     Route::middleware('agent.permission:'.AgentPermission::BookingsView)->group(function (): void {
         Route::get('/bookings', [AgentBookingController::class, 'index'])->name('bookings.index');
-        Route::get('/bookings/{booking}', [AgentBookingController::class, 'show'])->name('bookings.show');
-        Route::post('/bookings/{booking}/cancellations', [BookingCancellationController::class, 'store'])->name('bookings.cancellations.store');
+        Route::get('/bookings/{booking:booking_reference}', [AgentBookingController::class, 'show'])->name('bookings.show');
+        Route::post('/bookings/{booking:booking_reference}/cancellations', [BookingCancellationController::class, 'store'])->name('bookings.cancellations.store');
     });
 
     Route::middleware(['agent.permission:'.AgentPermission::PaymentsUpload, 'platform.module:payment_proofs'])->group(function (): void {
-        Route::post('/bookings/{booking}/payment-proof', [BookingPaymentProofController::class, 'store'])
+        Route::post('/bookings/{booking:booking_reference}/payment-proof', [BookingPaymentProofController::class, 'store'])
             ->middleware('throttle:payment-proof-submit')
             ->name('bookings.payment-proof');
     });
@@ -72,6 +81,8 @@ Route::prefix('agent')->name('agent.')->group(function (): void {
 
     Route::middleware(['agent.permission:'.AgentPermission::WalletView, 'platform.module:agent_wallet'])->group(function (): void {
         Route::get('/wallet', [AgentWalletController::class, 'show'])->name('wallet.show');
+        Route::get('/payments', [AgentPaymentController::class, 'index'])->name('payments.index');
+        Route::get('/invoices', [AgentInvoiceController::class, 'index'])->name('invoices.index');
     });
 
     Route::middleware(['agent.permission:'.AgentPermission::WalletView, 'platform.module:agent_deposits'])->group(function (): void {
@@ -109,7 +120,7 @@ Route::prefix('agent')->name('agent.')->group(function (): void {
         Route::get('/support/tickets', [SupportTicketController::class, 'index'])->name('support.tickets.index');
         Route::get('/support/tickets/create', [SupportTicketController::class, 'create'])->name('support.tickets.create');
         Route::post('/support/tickets', [SupportTicketController::class, 'store'])->name('support.tickets.store');
-        Route::get('/support/tickets/{ticket}', [SupportTicketController::class, 'show'])->name('support.tickets.show');
-        Route::post('/support/tickets/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('support.tickets.reply');
+        Route::get('/support/tickets/{ticket:ticket_reference}', [SupportTicketController::class, 'show'])->name('support.tickets.show');
+        Route::post('/support/tickets/{ticket:ticket_reference}/reply', [SupportTicketController::class, 'reply'])->name('support.tickets.reply');
     });
 });

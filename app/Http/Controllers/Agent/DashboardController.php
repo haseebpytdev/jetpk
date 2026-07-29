@@ -3,27 +3,37 @@
 namespace App\Http\Controllers\Agent;
 
 use App\Enums\BookingStatus;
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Controller;
 use App\Models\AgentCommissionEntry;
 use App\Models\Booking;
 use App\Models\SavedTraveler;
 use App\Services\Agents\AgentCommissionService;
 use App\Services\Agents\AgentWalletService;
+use App\Support\AgentPortal\AgentPortalDashboardPresenter;
 use App\Support\Agents\AgentPermission;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    use RespondsWithAgentPortalJson;
+
     public function __construct(
         protected AgentCommissionService $commissionService,
         protected AgentWalletService $walletService,
+        protected AgentPortalDashboardPresenter $dashboardPresenter,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $user = auth()->user();
         abort_if($user === null || ! $user->isAgentPortalUser(), 403);
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson($this->dashboardPresenter->present($user));
+        }
 
         $agent = $user->agent();
         abort_if($agent === null, 403);
