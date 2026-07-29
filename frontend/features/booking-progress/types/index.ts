@@ -1,4 +1,4 @@
-export type BookingProgressStepState = "completed" | "current" | "upcoming";
+export type BookingProgressStepState = "completed" | "current" | "upcoming" | "skipped";
 
 export type BookingProgressStep = {
   key: string;

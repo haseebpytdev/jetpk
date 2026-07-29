@@ -176,6 +176,9 @@ Route::middleware('platform.module:public_umrah_groups')->group(function (): voi
 Route::middleware('platform.module:customer_checkout')->group(function (): void {
     Route::match(['get', 'post'], '/booking/passengers', [BookingController::class, 'passengers'])->middleware('throttle:public-booking-submit')->name('booking.passengers');
     Route::match(['get', 'post'], '/booking/review', [BookingController::class, 'review'])->middleware('throttle:public-booking-submit')->name('booking.review');
+    Route::get('/booking/checkout-state', [BookingController::class, 'checkoutState'])->name('booking.checkout-state');
+    Route::get('/booking/payment/status', [BookingController::class, 'paymentStatus'])->name('booking.payment.status');
+    Route::get('/booking/invoice', [BookingController::class, 'invoice'])->name('booking.invoice');
     Route::post('/booking/{booking}/accept-updated-fare', [BookingController::class, 'acceptUpdatedFare'])->middleware('throttle:public-booking-submit')->name('booking.accept-updated-fare');
     Route::post('/booking/{booking}/decline-updated-fare', [BookingController::class, 'declineUpdatedFare'])->middleware('throttle:public-booking-submit')->name('booking.decline-updated-fare');
     Route::middleware('auth')->group(function (): void {

@@ -10,6 +10,7 @@ use App\Models\PaymentTransaction;
 use App\Services\Customer\GuestBookingAccessService;
 use App\Services\Payments\PaymentTransactionService;
 use App\Support\PublicBooking;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -23,16 +24,32 @@ class AbhiPayPaymentController extends Controller
         protected GuestBookingAccessService $guestAccessService,
     ) {}
 
-    public function start(Request $request, Booking $booking, ?string $token = null): RedirectResponse
+    public function start(Request $request, Booking $booking, ?string $token = null): RedirectResponse|JsonResponse
     {
         $this->authorizeBookingPaymentStart($request, $booking, $token);
 
         if ($booking->status === BookingStatus::Cancelled) {
+            if ($this->wantsPaymentJson($request)) {
+                return response()->json([
+                    'ok' => false,
+                    'status' => 'cancelled',
+                    'message' => 'This booking is cancelled and cannot be paid online.',
+                ], 422);
+            }
+
             return redirect()->route('booking.confirmation')
                 ->withErrors(['payment' => 'This booking is cancelled and cannot be paid online.']);
         }
 
         if (! $this->paymentTransactionService->isAbhiPayAvailableForBooking($booking)) {
+            if ($this->wantsPaymentJson($request)) {
+                return response()->json([
+                    'ok' => false,
+                    'status' => 'unavailable',
+                    'message' => 'Online card payment is not available right now.',
+                ], 422);
+            }
+
             return $this->paymentStartErrorRedirect($request, $booking, $token, 'Online card payment is not available right now.');
         }
 
@@ -42,10 +59,41 @@ class AbhiPayPaymentController extends Controller
                 $request->user(),
             );
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsPaymentJson($request)) {
+                return response()->json([
+                    'ok' => false,
+                    'status' => 'failed',
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
             return $this->paymentStartErrorRedirect($request, $booking, $token, $e->getMessage());
         }
 
-        return redirect()->away((string) $transaction->gateway_payment_url);
+        $redirectUrl = (string) $transaction->gateway_payment_url;
+        if ($redirectUrl === '' || ! filter_var($redirectUrl, FILTER_VALIDATE_URL)) {
+            if ($this->wantsPaymentJson($request)) {
+                return response()->json([
+                    'ok' => false,
+                    'status' => 'failed',
+                    'message' => 'Payment could not be started.',
+                ], 422);
+            }
+
+            return $this->paymentStartErrorRedirect($request, $booking, $token, 'Payment could not be started.');
+        }
+
+        if ($this->wantsPaymentJson($request)) {
+            return response()->json([
+                'ok' => true,
+                'status' => 'initiated',
+                'redirect_url' => $redirectUrl,
+                'transaction_reference' => $transaction->client_transaction_id,
+                'booking_reference' => $booking->booking_reference,
+            ]);
+        }
+
+        return redirect()->away($redirectUrl);
     }
 
     public function callback(Request $request): RedirectResponse
@@ -177,5 +225,10 @@ class AbhiPayPaymentController extends Controller
         }
 
         return back()->withErrors(['payment' => $message]);
+    }
+
+    protected function wantsPaymentJson(Request $request): bool
+    {
+        return $request->wantsJson() || $request->query('format') === 'json';
     }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { mapFieldErrors } from "@/features/auth/utils/laravel-auth-api";
@@ -30,6 +31,7 @@ type PassengerDetailsPageProps = {
 };
 
 export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps) {
+  const router = useRouter();
   const [context, setContext] = useState<StandardPassengersContext | null>(null);
   const [passengers, setPassengers] = useState<PassengerFormValues[]>([]);
   const [contact, setContact] = useState<ContactFormValues>({ contact_name: "", email: "", phone: "", phone_country_code: "+92", phone_number: "", country: "" });
@@ -138,7 +140,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       return;
     }
 
-    window.location.assign(resolved);
+    router.push(resolved);
   };
 
   if (loading) {
