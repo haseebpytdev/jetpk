@@ -56,10 +56,10 @@ Minimum **4** achieved on homepage, about, support, CMS templates (see `frontend
 
 | Item | SHA |
 |------|-----|
-| Feature commit | _recorded at merge_ |
-| Docs commit | _recorded at merge_ |
-| Merge commit | _recorded at merge_ |
-| Final docs SHA | _recorded at merge_ |
+| Feature commit | `2badb32` |
+| Docs commit | `c864b0f` |
+| Merge commit | `09ded8c` |
+| Final docs SHA | `09ded8c` |
 
 ## Final status
 
