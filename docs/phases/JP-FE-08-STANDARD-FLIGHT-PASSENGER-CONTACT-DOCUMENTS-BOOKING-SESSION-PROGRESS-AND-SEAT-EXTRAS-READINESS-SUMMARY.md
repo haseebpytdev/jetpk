@@ -7,10 +7,10 @@
 | Phase | JP-FE-08-STANDARD-FLIGHT-PASSENGER-CONTACT-DOCUMENTS-BOOKING-SESSION-PROGRESS-AND-SEAT-EXTRAS-READINESS |
 | Branch | `phase/jetpk-fe-08-standard-flight-passenger-flow` |
 | Feature commit | `2a22565` |
-| Docs commit | _pending_ |
-| Merge commit | _pending_ |
+| Docs commit | `a7426f2` |
+| Merge commit | `1dfd9ec` |
 | Final SHA doc commit | _pending_ |
-| Status | Complete (pending merge SHA update) |
+| Status | Complete |
 
 ## Objective
 
