@@ -970,8 +970,12 @@ class FlightController extends Controller
         ]);
     }
 
-    public function resultsOfferDetails(Request $request): View|RedirectResponse
+    public function resultsOfferDetails(Request $request): View|RedirectResponse|JsonResponse
     {
+        if ($request->wantsJson() || $request->query('format') === 'json') {
+            return $this->resultsOfferDetailsJson($request);
+        }
+
         $searchId = trim((string) $request->query('search_id', ''));
 
         if ($searchId !== '' && ! PublicFlightSearchSecurity::isValidSearchId($searchId)) {
@@ -986,6 +990,163 @@ class FlightController extends Controller
         }
 
         return $this->redirectSelectedOfferWarning();
+    }
+
+    /**
+     * Authoritative offer details for Next.js (search_id + offer_id + optional branded fare).
+     */
+    public function resultsOfferDetailsJson(Request $request): JsonResponse
+    {
+        $searchId = trim((string) $request->query('search_id', ''));
+        $offerId = trim((string) $request->query('offer_id', $request->query('flight_id', '')));
+        $fareOptionKey = trim((string) $request->query(
+            'fare_option_key',
+            $request->query('selected_fare_option_id', ''),
+        ));
+        $outboundKey = trim((string) $request->query('outbound_key', ''));
+        $comboId = trim((string) $request->query('combo_id', ''));
+
+        if ($searchId === '' || $offerId === '') {
+            return response()->json([
+                'success' => false,
+                'status' => 'invalid_request',
+                'message' => (string) __('Missing search or offer details.'),
+            ], 422);
+        }
+
+        if (! PublicFlightSearchSecurity::isValidSearchId($searchId)) {
+            return response()->json([
+                'success' => false,
+                'status' => 'invalid_search',
+                'message' => (string) __('This fare search has expired. Please search again.'),
+            ], 410);
+        }
+
+        $payload = $this->searchStore->get($searchId);
+        if ($payload === null) {
+            return response()->json([
+                'success' => false,
+                'status' => 'expired_search',
+                'message' => (string) __('This fare search has expired. Please search again.'),
+            ], 410);
+        }
+
+        $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
+        $resolvedOfferId = $comboId !== '' ? $comboId : $offerId;
+        $offer = $this->searchStore->findOffer($searchId, $resolvedOfferId);
+
+        if ($offer === null) {
+            return response()->json([
+                'success' => false,
+                'status' => 'offer_not_found',
+                'message' => (string) __('We could not load details for this fare. Please refresh your search or choose another option.'),
+            ], 404);
+        }
+
+        $comboMeta = $this->searchStore->findCombo($searchId, $resolvedOfferId);
+        $isReturnCombo = $comboMeta !== null;
+
+        if ($isReturnCombo && $outboundKey !== '' && (string) ($comboMeta['outbound_key'] ?? '') !== $outboundKey) {
+            return response()->json([
+                'success' => false,
+                'status' => 'combo_mismatch',
+                'message' => (string) __('This return combination is no longer available. Please select another option.'),
+            ], 422);
+        }
+
+        if ($fareOptionKey !== '') {
+            $selection = FlightOfferDisplayPresenter::applySelectedFareFamilyOptionToOffer($offer, $fareOptionKey);
+            if ($selection['error_code'] !== null) {
+                return response()->json([
+                    'success' => false,
+                    'status' => 'invalid_fare_option',
+                    'message' => (string) ($selection['error_message'] ?? __('Selected fare option could not be confirmed. Please choose the fare again.')),
+                ], 422);
+            }
+            $offer = $selection['offer'];
+        }
+
+        $offers = $this->searchStore->displayOffersFromPayload($payload);
+        $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
+            AirlineDisplayNameResolver::collectCodesFromOffers($offers)
+        );
+        $iataCodes = [];
+        foreach ($offers as $offRow) {
+            if (is_array($offRow)) {
+                $iataCodes = array_merge($iataCodes, FlightOfferDisplayPresenter::collectIataCodes($offRow));
+            }
+        }
+        $cityMap = FlightOfferDisplayPresenter::airportCityMap($iataCodes);
+        $airlineLogos = $this->airlineBranding->mapLogosForOffers($offers);
+        $debugAllowed = PublicFlightSearchSecurity::allowsDebugFares($request);
+        $sabreUiMismatchCount = 0;
+        $sabreUiMismatchSamples = [];
+
+        $mapped = $this->mapOfferForResultsApi(
+            $offer,
+            $payload,
+            $searchId,
+            $request,
+            $airlineLogos,
+            $cityMap,
+            $airlineNameMap,
+            $sabreUiMismatchCount,
+            $sabreUiMismatchSamples,
+        );
+        $mapped = PublicFlightSearchSecurity::sanitizeResultsOffer($mapped, $debugAllowed);
+
+        $providerLc = strtolower((string) ($offer['supplier_provider'] ?? ''));
+        $revalidationRequired = in_array($providerLc, ['iati', 'sabre'], true);
+
+        $returnCombo = null;
+        if ($isReturnCombo) {
+            $presentation = FlightOfferDisplayPresenter::buildPresentation($offer, $criteria, $cityMap, $airlineNameMap);
+            $journeys = is_array($presentation['journeys_display'] ?? null) ? $presentation['journeys_display'] : [];
+            $index = $this->searchStore->getReturnSplitIndex($searchId);
+            $outboundJourney = null;
+            if (is_array($index) && $outboundKey !== '') {
+                $built = $this->returnSplitComboService->buildReturnOptions(
+                    $index,
+                    $outboundKey,
+                    $offers,
+                    $criteria,
+                    $airlineLogos,
+                    $cityMap,
+                    $airlineNameMap,
+                    $searchId,
+                );
+                $outboundJourney = $built['outbound_journey'] ?? null;
+            }
+
+            $returnCombo = [
+                'combo_id' => $resolvedOfferId,
+                'outbound_key' => (string) ($comboMeta['outbound_key'] ?? $outboundKey),
+                'return_key' => (string) ($comboMeta['return_key'] ?? ''),
+                'outbound_journey' => $outboundJourney ?? ($journeys[0] ?? null),
+                'return_journey' => $journeys[1] ?? null,
+                'total_amount' => $mapped['displayed_price'] ?? $mapped['final_customer_price'] ?? null,
+                'total_display' => $mapped['price_display'] ?? null,
+            ];
+        }
+
+        $freshness = app(SabreOfferFreshness::class);
+
+        return response()->json([
+            'success' => true,
+            'status' => 'ok',
+            'search_id' => $searchId,
+            'offer_id' => (string) ($mapped['offer_id'] ?? $resolvedOfferId),
+            'fare_option_key' => $fareOptionKey !== '' ? $fareOptionKey : null,
+            'flow' => $isReturnCombo ? 'return_combo' : (PublicMulticityInquiryPolicy::blocksAutomaticCheckout($criteria, $offer) ? 'multicity_inquiry' : 'one_way'),
+            'offer' => $mapped,
+            'return_combo' => $returnCombo,
+            'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
+            'revalidation_required' => $revalidationRequired,
+            'multicity_inquiry_only' => PublicMulticityInquiryPolicy::blocksAutomaticCheckout($criteria, $offer),
+            'inquiry_only_notice' => PublicMulticityInquiryPolicy::blocksAutomaticCheckout($criteria, $offer)
+                ? PublicMulticityInquiryPolicy::INQUIRY_NOTICE
+                : null,
+        ]);
     }
 
     /**

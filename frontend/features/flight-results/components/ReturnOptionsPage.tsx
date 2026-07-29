@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { FlightDetailsDrawer, type FlightDetailsContext } from "@/features/flight-details";
 import { fetchReturnOptionsData, submitReturnComboSelection } from "@/features/flight-results/services/flight-results-api";
 import { ResultSkeleton } from "@/features/flight-results/components/ResultSkeleton";
 import { SearchErrorState } from "@/features/flight-results/components/SearchErrorState";
@@ -16,6 +17,8 @@ export function ReturnOptionsPage() {
   const [message, setMessage] = useState("");
   const [options, setOptions] = useState<Array<Record<string, unknown>>>([]);
   const [selectingId, setSelectingId] = useState<string | null>(null);
+  const [detailsContext, setDetailsContext] = useState<FlightDetailsContext | null>(null);
+  const detailsTriggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!searchId || !outboundKey) {
@@ -72,6 +75,22 @@ export function ReturnOptionsPage() {
                       {" → "}
                       {(option.return_journey_display as { arrival_time_display?: string } | undefined)?.arrival_time_display ?? ""}
                     </p>
+                    <button
+                      type="button"
+                      className="mt-2 text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+                      data-testid="return-details-trigger"
+                      onClick={(event) => {
+                        detailsTriggerRef.current = event.currentTarget;
+                        setDetailsContext({
+                          searchId,
+                          offerId: comboId,
+                          comboId,
+                          outboundKey,
+                        });
+                      }}
+                    >
+                      Details
+                    </button>
                   </div>
                   <PriceBlock
                     amount={price}
@@ -85,6 +104,13 @@ export function ReturnOptionsPage() {
           })}
         </div>
       ) : null}
+
+      <FlightDetailsDrawer
+        open={detailsContext !== null}
+        context={detailsContext}
+        onClose={() => setDetailsContext(null)}
+        triggerRef={detailsTriggerRef}
+      />
     </div>
   );
 }

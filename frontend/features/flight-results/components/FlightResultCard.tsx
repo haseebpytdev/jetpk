@@ -17,6 +17,7 @@ type FlightResultCardProps = {
   searchId: string;
   selecting?: boolean;
   onSelect: (offer: FlightOffer, fareOptionKey: string) => void;
+  onOpenDetails?: (offer: FlightOffer, fareOptionKey: string) => void;
 };
 
 function extractViaCodes(offer: FlightOffer): string[] {
@@ -43,7 +44,7 @@ function resolveFareOptions(offer: FlightOffer) {
   return [];
 }
 
-export function FlightResultCard({ offer, selecting, onSelect }: FlightResultCardProps) {
+export function FlightResultCard({ offer, selecting, onSelect, onOpenDetails }: FlightResultCardProps) {
   const fareOptions = useMemo(() => resolveFareOptions(offer), [offer]);
   const hasBranded = fareOptions.length > 1 || (offer.has_branded_fares && fareOptions.length > 0);
   const [selectedFareKey, setSelectedFareKey] = useState(
@@ -109,6 +110,15 @@ export function FlightResultCard({ offer, selecting, onSelect }: FlightResultCar
         </div>
 
         <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+          <button
+            type="button"
+            className="rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+            data-testid="flight-details-trigger"
+            aria-label={`View details for ${offer.airline_name ?? "flight"}`}
+            onClick={() => onOpenDetails?.(offer, selectedFareKey)}
+          >
+            Details
+          </button>
           {!hasBranded ? (
             <PriceBlock
               amount={displayAmount}
