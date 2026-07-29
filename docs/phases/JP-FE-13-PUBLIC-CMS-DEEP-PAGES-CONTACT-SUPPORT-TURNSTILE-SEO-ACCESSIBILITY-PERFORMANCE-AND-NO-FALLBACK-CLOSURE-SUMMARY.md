@@ -10,7 +10,7 @@
 | Feature commit | `dd325c3` |
 | Docs commit | `ac2ea42` |
 | Merge commit | `bbfb4e0` |
-| Final SHA documentation | PENDING |
+| Final SHA documentation | `281e2c3` |
 | Final status | COMPLETE |
 
 ## Objective
