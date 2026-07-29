@@ -125,3 +125,23 @@ npx playwright test tests/visual-audit/jp-ui-01.visual-audit.spec.ts -c playwrig
 - No production deployment
 - No mockup assets in runtime
 - Fixture data uses `audit@example.com`, `Audit Airline`, etc. — never copied from mockup literals
+
+---
+
+## JP-UI-02 foundation capture
+
+Phase: **JP-UI-02**  
+Command: `npm run audit:visual:jp-ui-02` (from `frontend/`)
+
+Captures representative routes in **light** and **dark** themes, desktop and mobile viewports, plus 150% zoom on homepage.
+
+### Output
+
+`frontend/.visual-audit/jp-ui-02/` (gitignored) + `capture-manifest.json`
+
+### Related files
+
+- `tests/visual-audit/jp-ui-02-scenarios.ts`
+- `tests/visual-audit/jp-ui-02-foundation.visual.spec.ts`
+- `scripts/capture-jp-ui-02.mjs`
+

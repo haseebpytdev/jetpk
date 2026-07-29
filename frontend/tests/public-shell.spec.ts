@@ -13,7 +13,7 @@ test("public shell renders header, hero, and footer", async ({ page }) => {
   await expect(page.getByTestId("search-module")).toBeVisible();
   await expect(page.getByRole("link", { name: "JetPakistan home" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
-  await expect(page.getByText("Stay Updated")).toBeVisible();
+  await expect(page.getByTestId("theme-switch")).toBeVisible();
 });
 
 test("mobile menu opens, closes, and locks background scroll", async ({ page }) => {

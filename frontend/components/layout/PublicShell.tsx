@@ -6,16 +6,18 @@ import type { ReactNode } from "react";
 type PublicShellProps = {
   children: ReactNode;
   session: PublicSession;
+  /** Hide public footer for focused flows (e.g. none by default) */
+  hideFooter?: boolean;
 };
 
-export function PublicShell({ children, session }: PublicShellProps) {
+export function PublicShell({ children, session, hideFooter = false }: PublicShellProps) {
   return (
     <div className="flex min-h-screen flex-col bg-jp-page text-jp-text">
       <SiteHeader session={session} />
       <main id="main-content" className="flex-1">
         {children}
       </main>
-      <SiteFooter />
+      {hideFooter ? null : <SiteFooter />}
     </div>
   );
 }

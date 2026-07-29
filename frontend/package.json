@@ -12,7 +12,8 @@
     "test:smoke": "npm run build && playwright test -c playwright.config.ts",
     "test:public-content": "npm run build && playwright test tests/public-content.spec.ts -c playwright.config.ts",
     "test:public-regression": "npm run build && playwright test tests/public-content.spec.ts tests/public-shell.spec.ts tests/booking-lookup-turnstile.spec.ts tests/auth.spec.ts tests/homepage.spec.ts tests/customer-dashboard.spec.ts tests/agent-dashboard.spec.ts tests/group-ticketing.spec.ts tests/search-laravel-handoff.spec.ts -c playwright.config.ts",
-    "audit:visual:jp-ui-01": "node scripts/capture-jp-ui-01.mjs"
+    "audit:visual:jp-ui-01": "node scripts/capture-jp-ui-01.mjs",
+    "audit:visual:jp-ui-02": "node scripts/capture-jp-ui-02.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

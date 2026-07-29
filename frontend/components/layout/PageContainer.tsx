@@ -4,10 +4,24 @@ import type { ReactNode } from "react";
 type PageContainerProps = {
   children: ReactNode;
   className?: string;
+  /** Narrow form layouts */
+  narrow?: boolean;
+  /** Booking/checkout width */
+  booking?: boolean;
+  /** Full-bleed (no max-width) */
+  fullBleed?: boolean;
 };
 
-export function PageContainer({ children, className }: PageContainerProps) {
+export function PageContainer({ children, className, narrow, booking, fullBleed }: PageContainerProps) {
   return (
-    <div className={cn("mx-auto w-full max-w-jp-container px-jp-xl", className)}>{children}</div>
+    <div
+      className={cn(
+        "mx-auto w-full px-jp-xl",
+        !fullBleed && (narrow ? "max-w-jp-narrow" : booking ? "max-w-jp-booking" : "max-w-jp-container"),
+        className,
+      )}
+    >
+      {children}
+    </div>
   );
 }
