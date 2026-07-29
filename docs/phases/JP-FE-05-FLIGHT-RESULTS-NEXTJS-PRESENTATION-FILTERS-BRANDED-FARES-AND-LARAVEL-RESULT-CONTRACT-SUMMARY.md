@@ -108,4 +108,8 @@ Additive consumption of existing Laravel JSON — no parallel TypeScript fare mo
 
 ## Commit SHAs
 
-> Recorded after git workflow completion below.
+| Commit | SHA |
+| --- | --- |
+| Feature | `c8dc5c8` |
+| Docs | `34477b5` |
+| Merge to main | `de5a951` |
