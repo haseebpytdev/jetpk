@@ -9,7 +9,7 @@ import {
 } from "@/features/flight-results/services/flight-results-api";
 import type { RevalidateOfferResponse } from "@/features/flight-results/types";
 import type { RevalidationState } from "../types";
-import { isAllowedInternalHandoffUrl, providerRequiresRevalidation, resolveHandoffUrl } from "../utils/handoff";
+import { isAllowedInternalHandoffUrl, providerRequiresRevalidation, resolvePassengerCheckoutHandoffUrl } from "../utils/handoff";
 
 export type RevalidationParams = {
   searchId: string;
@@ -87,7 +87,9 @@ export function useRevalidation() {
   }, []);
 
   const navigateHandoff = useCallback((url: string) => {
-    const resolved = resolveHandoffUrl(url) ?? (isAllowedInternalHandoffUrl(url) ? absoluteLaravelHandoffUrl(url) : null);
+    const resolved =
+      resolvePassengerCheckoutHandoffUrl(url) ??
+      (isAllowedInternalHandoffUrl(url) ? absoluteLaravelHandoffUrl(url) : null);
     if (!resolved) {
       setState("error");
       setMessage("Unable to continue to checkout. Please try again.");

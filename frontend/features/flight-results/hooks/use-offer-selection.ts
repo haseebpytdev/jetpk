@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { resolvePassengerCheckoutHandoffUrl } from "@/features/flight-details/utils/handoff";
 import {
   absoluteLaravelHandoffUrl,
   buildCheckoutHandoffUrl,
@@ -52,7 +53,8 @@ export function useOfferSelection(searchId: string) {
             return;
           }
 
-          window.location.assign(absoluteLaravelHandoffUrl(passengersUrl));
+          const resolved = resolvePassengerCheckoutHandoffUrl(passengersUrl) ?? absoluteLaravelHandoffUrl(passengersUrl);
+          window.location.assign(resolved);
           return;
         }
 
@@ -62,7 +64,8 @@ export function useOfferSelection(searchId: string) {
           fareOptionKey,
           searchId,
         );
-        window.location.assign(checkoutUrl);
+        const resolvedCheckout = resolvePassengerCheckoutHandoffUrl(checkoutUrl) ?? checkoutUrl;
+        window.location.assign(resolvedCheckout);
       } finally {
         inFlightRef.current = false;
         setSelectingId(null);
