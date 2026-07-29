@@ -9,7 +9,7 @@
 | Feature commit | `ebb8066` |
 | Docs commit | `ebb8066` (included in feature commit) |
 | Merge commit | `a99a2d5` |
-| Final SHA doc commit | _(pending)_ |
+| Final SHA doc commit | `edddc1e` |
 | Status | Complete |
 
 ## Objective
