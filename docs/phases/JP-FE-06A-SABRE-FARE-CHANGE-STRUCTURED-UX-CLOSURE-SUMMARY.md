@@ -107,8 +107,8 @@ Revert merge commit on `main` or reset to pre-phase baseline.
 
 | Item | SHA |
 |------|-----|
-| Feature branch commit | _pending_ |
-| Merge to `main` | _pending_ |
+| Feature branch commit | `672b2b874fe3ef6bf78690170f2313fca06b2953` |
+| Merge to `main` | Fast-forward to `672b2b874fe3ef6bf78690170f2313fca06b2953` (no separate merge commit) |
 
 ## Production
 
