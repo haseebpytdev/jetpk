@@ -155,6 +155,7 @@ Route::middleware('platform.module:public_umrah_groups')->group(function (): voi
 
     Route::get('/groups/search', [GroupTicketingSearchController::class, 'index'])->name('group-ticketing.search');
     Route::get('/groups/search/data', [GroupTicketingSearchController::class, 'searchData'])->name('group-ticketing.search.data');
+    Route::get('/groups/search/facets', [GroupTicketingSearchController::class, 'searchFacets'])->name('group-ticketing.search.facets');
     Route::get('/groups/search/results', [GroupTicketingSearchController::class, 'results'])->name('group-ticketing.search.results');
     Route::get('/groups/facets', [GroupTicketingSearchController::class, 'facets'])->name('group-ticketing.facets');
     Route::get('/groups/package/{inventory}', [GroupTicketingSearchController::class, 'show'])->name('group-ticketing.show');

@@ -1,6 +1,6 @@
 import type { GroupCategory } from "../types";
 
-/** Fixture group categories aligned with JetPakistan group ticketing facets. */
+/** Playwright/unit test fixtures only — not used in operational runtime. */
 export const GROUP_CATEGORY_FIXTURES: GroupCategory[] = [
   { slug: "all", label: "All" },
   { slug: "ksa", label: "KSA" },

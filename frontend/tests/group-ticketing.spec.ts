@@ -21,6 +21,18 @@ const mockPackage = {
 };
 
 test.beforeEach(async ({ page }) => {
+  await page.route("**/laravel/groups/search/facets**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        sectors: [{ value: "SKT-SHJ", label: "SKT-SHJ" }],
+        categories: [],
+        date_bounds: { minimum: "2026-08-01", maximum: "2026-12-31" },
+      }),
+    });
+  });
+
   await page.route("**/laravel/groups/search/data**", async (route) => {
     await route.fulfill({
       status: 200,
@@ -50,7 +62,7 @@ test("group search renders authoritative results", async ({ page }) => {
 
 test("group search category All omits category param on navigation", async ({ page }) => {
   await page.goto("/groups/search");
-  await page.getByLabel("Sector").selectOption({ index: 1 });
+  await page.getByTestId("group-sector-select").selectOption({ index: 1 });
   await page.getByLabel("Travel date").fill("2026-08-15");
   await page.getByRole("button", { name: "Search Group Fares" }).click();
   await page.waitForURL(/\/groups\/search\?/);

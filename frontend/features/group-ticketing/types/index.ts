@@ -11,6 +11,19 @@ export type GroupFacets = {
   categories: GroupCategory[];
 };
 
+export type GroupSearchFacetOption = {
+  value: string;
+  label: string;
+};
+
+export type GroupSearchFacetsResponse = {
+  sectors: GroupSearchFacetOption[];
+  categories: GroupSearchFacetOption[];
+  date_bounds: { minimum: string; maximum: string } | null;
+};
+
+export type GroupSearchFacetsLoadState = "loading" | "loaded" | "empty" | "error";
+
 export type GroupSearchFilters = {
   sector?: string;
   date_from?: string;

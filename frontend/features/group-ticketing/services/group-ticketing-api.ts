@@ -11,6 +11,9 @@ import type {
   GroupSearchFilters,
   GroupPackage,
   GroupLockState,
+  GroupSearchFacetsResponse,
+  GroupSearchFacetsLoadState,
+  GroupSearchFacetOption,
 } from "../types";
 
 const JSON_HEADERS = {
@@ -73,6 +76,10 @@ export async function fetchGroupSearchData(filters: GroupSearchFilters) {
 
 export async function fetchGroupResultsPage(filters: GroupSearchFilters) {
   return groupFetch<GroupResultsPageResponse>(`/groups/search/results?${buildQuery(filters)}`);
+}
+
+export async function fetchGroupSearchFacets() {
+  return groupFetch<GroupSearchFacetsResponse>("/groups/search/facets");
 }
 
 export async function fetchGroupFacets() {

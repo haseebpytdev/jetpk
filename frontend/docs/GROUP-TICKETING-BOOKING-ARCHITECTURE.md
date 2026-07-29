@@ -9,8 +9,9 @@ Laravel owns inventory, holds, booking references, manual payment state, and rep
 | Route | Method | JSON |
 |-------|--------|------|
 | `/groups/search/data` | GET | Search facets + cards |
+| `/groups/search/facets` | GET | Authoritative search sector/category options (JP-FE-07A) |
 | `/groups/search/results` | GET | Cards + legacy HTML |
-| `/groups/facets` | GET | Facets |
+| `/groups/facets` | GET | Legacy facets (Blade/homepage) |
 | `/groups/package/{inventory}` | GET | Package details (`Accept: application/json`) |
 | `/groups/{inventory}/passengers` | GET/POST | Passenger context / draft booking |
 | `/groups/booking/{ref}/review` | GET/POST | Review / confirm hold |
@@ -19,6 +20,16 @@ Laravel owns inventory, holds, booking references, manual payment state, and rep
 | `/groups/booking/{ref}/status` | GET | Hold status polling |
 
 Route binding resolves `{inventory}` by `public_id`, `supplier_package_id`, or numeric id. `{groupBooking}` resolves by `reference` or numeric id.
+
+## Search facets (JP-FE-07A)
+
+`GET /groups/search/facets` returns `GroupInventoryFacetService::forPublicSearch()`:
+
+- `sectors[]` — `{ value, label }` from active bookable inventory (`is_active`, available seats > 0)
+- `categories[]` — `{ value: slug, label: name }` inventory-derived active categories only
+- `date_bounds` — min/max `departure_date` from active inventory when dates exist; otherwise `null`
+
+Next.js `useGroupSearchFacets` loads facets once (in-flight dedupe). No fixture fallback in runtime. Loading disables controls; empty/error blocks submit with retry.
 
 ## Search contract
 

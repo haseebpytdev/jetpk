@@ -194,6 +194,44 @@ class GroupInventoryFacetService
     }
 
     /**
+     * @return array{
+     *     sectors: list<array{value: string, label: string}>,
+     *     categories: list<array{value: string, label: string}>,
+     *     date_bounds: ?array{minimum: string, maximum: string}
+     * }
+     */
+    public function forPublicSearch(): array
+    {
+        $all = $this->all();
+        $departureDates = $all['departure_dates'] ?? [];
+        $dateBounds = null;
+
+        if ($departureDates !== []) {
+            $sorted = $departureDates;
+            sort($sorted);
+            $dateBounds = [
+                'minimum' => $sorted[0],
+                'maximum' => $sorted[array_key_last($sorted)],
+            ];
+        }
+
+        return [
+            'sectors' => array_map(
+                fn (string $sector): array => ['value' => $sector, 'label' => $sector],
+                $all['sectors'] ?? [],
+            ),
+            'categories' => array_map(
+                fn (array $category): array => [
+                    'value' => (string) ($category['slug'] ?? ''),
+                    'label' => (string) ($category['name'] ?? ''),
+                ],
+                $all['categories'] ?? [],
+            ),
+            'date_bounds' => $dateBounds,
+        ];
+    }
+
+    /**
      * @return array{sectors: list<string>, airlines: list<array{name: string}>, departure_dates: list<string>, categories: list<array{slug: string, name: string}>}
      */
     public function all(): array

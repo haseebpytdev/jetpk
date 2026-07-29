@@ -1,5 +1,17 @@
 import { test, expect, type Page } from "@playwright/test";
 
+const mockHandoffFacets = {
+  sectors: [
+    { value: "DXB", label: "UAE — Dubai" },
+    { value: "JED", label: "KSA — Jeddah" },
+  ],
+  categories: [
+    { value: "ksa", label: "KSA" },
+    { value: "uae", label: "UAE" },
+  ],
+  date_bounds: { minimum: "2026-01-01", maximum: "2027-12-31" },
+};
+
 function localTomorrowIso(): string {
   const date = new Date();
   date.setDate(date.getDate() + 1);
@@ -26,8 +38,16 @@ async function interceptGroupHandoff(page: Page): Promise<{ getUrl: () => string
 }
 
 async function openGroupSearchTab(page: Page): Promise<void> {
+  await page.route("**/laravel/groups/search/facets**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(mockHandoffFacets),
+    });
+  });
   await page.goto("/", { waitUntil: "load" });
   await page.getByRole("tab", { name: "Group Ticketing" }).click();
+  await expect(page.getByTestId("group-sector-select")).toBeEnabled();
 }
 
 async function selectGroupSector(page: Page, pattern: RegExp): Promise<void> {
@@ -89,7 +109,7 @@ test("group ticketing handoff includes every actionable visible field", async ({
 
   const handoffUrl = await submitGroupSearch(page, handoff);
   expect(handoffUrl).toContain("/groups/search");
-  expect(handoffUrl).toMatch(/sector=.*Dubai/);
+  expect(handoffUrl).toContain("sector=DXB");
   expect(handoffUrl).toContain(`date_from=${travelDate}`);
   expect(handoffUrl).toContain("category=uae");
 });
@@ -102,7 +122,7 @@ test("group ticketing category all omits category query parameter", async ({ pag
   await fillGroupSearchForm(page, { sectorPattern: /KSA.*Jeddah/, travelDate, category: "All" });
 
   const handoffUrl = await submitGroupSearch(page, handoff);
-  expect(handoffUrl).toContain("sector=");
+  expect(handoffUrl).toContain("sector=JED");
   expect(handoffUrl).toContain(`date_from=${travelDate}`);
   expect(handoffUrl).not.toContain("category=");
 });

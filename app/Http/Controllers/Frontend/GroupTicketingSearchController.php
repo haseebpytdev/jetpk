@@ -187,6 +187,11 @@ class GroupTicketingSearchController extends Controller
         return response()->json($this->facetService->all());
     }
 
+    public function searchFacets(): JsonResponse
+    {
+        return response()->json($this->facetService->forPublicSearch());
+    }
+
     /**
      * @param  array<string, mixed>|null  $inventoryFreshness
      */
