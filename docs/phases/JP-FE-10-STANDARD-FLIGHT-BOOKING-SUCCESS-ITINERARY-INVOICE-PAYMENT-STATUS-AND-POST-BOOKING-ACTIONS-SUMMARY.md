@@ -10,6 +10,7 @@
 | Feature commit | `ed860da597dc687fcdeedca70f4b53cfe3595a0` |
 | Merge commit | `a49809111fc37a1d279b58e0502f62042e9003ed` |
 | Docs commit | `4f0f1701fde05cf610cd89079690fdd5bab20c2c` |
+| Final SHA documentation | `d716630e9627915192bde21893be453f57bae2f6` |
 | Final status | COMPLETE |
 
 ## Objective
