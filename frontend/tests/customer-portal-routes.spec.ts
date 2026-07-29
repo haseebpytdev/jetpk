@@ -17,12 +17,51 @@ async function setSessionFixture(
 }
 
 test.describe("JP-FE-04A customer portal route closure", () => {
-  test("authenticated customer can open /customer/bookings placeholder", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    await page.route("**/laravel/customer?format=json", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          metrics: {
+            upcoming_trips: 0,
+            pending_payment: 0,
+            ticketing_pending: 0,
+            confirmed_bookings: 0,
+            total_bookings: 0,
+            open_support_cases: 0,
+            unread_notifications: 0,
+          },
+          notifications_available: false,
+          recent_bookings: [],
+          upcoming_booking: null,
+          first_pending_payment_booking: null,
+          quick_actions: [],
+        }),
+      });
+    });
+    await page.route("**/laravel/customer/bookings?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          filter: "all",
+          allowed_filters: ["all"],
+          bookings: [],
+          pagination: { current_page: 1, last_page: 1, per_page: 15, total: 0, from: null, to: null },
+        }),
+      });
+    });
+  });
+
+  test("authenticated customer can open /customer/bookings", async ({ page }) => {
     await setSessionFixture(page, "customer");
 
     await page.goto("/customer/bookings");
     await expect(page.getByRole("heading", { name: /my bookings/i })).toBeVisible();
-    await expect(page.getByText(/coming in a later phase/i)).toBeVisible();
+    await expect(page.getByTestId("customer-dashboard-shell")).toBeVisible();
   });
 
   test("unauthenticated user is sent to login from /customer/bookings", async ({ page }) => {
@@ -41,12 +80,12 @@ test.describe("JP-FE-04A customer portal route closure", () => {
     await expect(page.getByRole("heading", { name: /agent portal/i })).toBeVisible();
   });
 
-  test("/customer redirects to /customer/bookings without loop", async ({ page }) => {
+  test("/customer redirects to /customer/dashboard without loop", async ({ page }) => {
     await setSessionFixture(page, "customer");
 
     await page.goto("/customer");
-    await expect(page).toHaveURL(/\/customer\/bookings$/);
-    await expect(page.getByRole("heading", { name: /my bookings/i })).toBeVisible();
+    await expect(page).toHaveURL(/\/customer\/dashboard$/);
+    await expect(page.getByRole("heading", { name: /dashboard overview/i })).toBeVisible();
   });
 
   test("customer login handoff destination /customer/bookings is owned", async ({ page }) => {

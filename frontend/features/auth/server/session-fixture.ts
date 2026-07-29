@@ -12,7 +12,7 @@ const CUSTOMER_BOOTSTRAP: SessionBootstrap = {
   },
   role: "customer",
   permissions: [],
-  dashboard_url: "/customer/bookings",
+  dashboard_url: "/customer/dashboard",
   requires_otp: false,
   requires_password_change: false,
   requires_email_verification: false,

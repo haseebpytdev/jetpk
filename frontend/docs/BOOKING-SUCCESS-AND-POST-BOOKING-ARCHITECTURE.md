@@ -57,3 +57,7 @@ Post-session access uses `/lookup-booking` → Laravel guest token URL (`/guest/
 - No client-side status promotion
 - Post-booking action URLs allowlisted in `utils/allowlist.ts`
 - Document downloads only when Laravel provides paths
+
+## Customer dashboard reuse (JP-FE-11)
+
+Authenticated customers view booking detail at `/customer/bookings/[reference]` using the same JSON confirmation payload and UI components (`ItineraryTimeline`, `PostBookingActions`, status cards). Laravel remains authoritative; allowlist extended for `/customer/*` paths.

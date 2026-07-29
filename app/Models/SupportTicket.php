@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'agency_id',
@@ -31,6 +32,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class SupportTicket extends Model
 {
+    protected static function booted(): void
+    {
+        static::creating(static function (SupportTicket $ticket): void {
+            if (! filled($ticket->ticket_reference)) {
+                $ticket->ticket_reference = 'TKT-'.strtoupper(Str::random(8));
+            }
+        });
+    }
+
     /**
      * @return array<string, string>
      */

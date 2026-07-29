@@ -54,3 +54,7 @@ On failure: generic error — "Booking not found for the provided reference and 
 - No PII in query strings
 - No localStorage/sessionStorage for tokens
 - No token logging
+
+## Customer dashboard boundary (JP-FE-11)
+
+Authenticated customers use `/customer/bookings` (not guest-token flow). Guest lookup and Turnstile behavior unchanged.

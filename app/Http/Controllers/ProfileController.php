@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
 use App\Support\Auth\LoginDestination;
+use App\Support\CustomerPortal\CustomerPortalProfilePresenter;
 use App\Support\Geo\CountryList;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +17,22 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function edit(Request $request): View
+    public function __construct(
+        protected CustomerPortalProfilePresenter $customerProfilePresenter,
+    ) {}
+
+    public function edit(Request $request): View|JsonResponse
     {
         $user = $request->user();
+
+        if ($request->wantsJson() || $request->query('format') === 'json') {
+            if (! $user->isCustomer()) {
+                abort(403);
+            }
+
+            return response()->json($this->customerProfilePresenter->present($user));
+        }
+
         $userProfile = $user->profile()->firstOrCreate([]);
 
         $viewData = [
@@ -40,7 +55,7 @@ class ProfileController extends Controller
         return view($view, $viewData);
     }
 
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request): RedirectResponse|JsonResponse
     {
         $user = $request->user();
         $validated = $request->validated();
@@ -88,6 +103,18 @@ class ProfileController extends Controller
 
         $profile->user_id = $user->id;
         $profile->save();
+
+        if ($request->wantsJson() || $request->query('format') === 'json') {
+            if (! $user->isCustomer()) {
+                abort(403);
+            }
+
+            return response()->json([
+                'ok' => true,
+                'profile' => $this->customerProfilePresenter->present($user->fresh(['profile'])),
+                'message' => 'Profile updated successfully.',
+            ]);
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

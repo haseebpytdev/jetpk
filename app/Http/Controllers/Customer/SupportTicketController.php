@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Enums\SupportTicketCategory;
 use App\Enums\SupportTicketMessageVisibility;
+use App\Http\Controllers\Concerns\RespondsWithCustomerPortalJson;
 use App\Http\Controllers\Concerns\ResolvesSupportTicketBookings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Support\ReplySupportTicketRequest;
@@ -11,7 +12,9 @@ use App\Http\Requests\Support\StoreSupportTicketRequest;
 use App\Models\Agency;
 use App\Models\SupportTicket;
 use App\Services\Support\SupportTicketService;
+use App\Support\CustomerPortal\CustomerPortalSupportPresenter;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -19,9 +22,11 @@ use Illuminate\Support\Facades\Gate;
 class SupportTicketController extends Controller
 {
     use ResolvesSupportTicketBookings;
+    use RespondsWithCustomerPortalJson;
 
     public function __construct(
         protected SupportTicketService $tickets,
+        protected CustomerPortalSupportPresenter $supportPresenter,
     ) {}
 
     public function supportHub(): RedirectResponse
@@ -29,7 +34,7 @@ class SupportTicketController extends Controller
         return redirect()->route('customer.support.tickets.index');
     }
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', SupportTicket::class);
 
@@ -40,12 +45,20 @@ class SupportTicketController extends Controller
             ->orderByDesc('created_at')
             ->paginate(20);
 
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->supportPresenter->presentIndex($tickets));
+        }
+
         return view(client_view('support.tickets.index', 'customer'), compact('tickets'));
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): View|JsonResponse
     {
         Gate::authorize('create', SupportTicket::class);
+
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->supportPresenter->presentCreateForm($request->user()));
+        }
 
         $viewData = [
             'bookings' => $this->bookableOptionsForUser($request->user()),
@@ -55,7 +68,7 @@ class SupportTicketController extends Controller
         return view(client_view('support.tickets.create', 'customer'), $viewData);
     }
 
-    public function store(StoreSupportTicketRequest $request): RedirectResponse
+    public function store(StoreSupportTicketRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', SupportTicket::class);
 
@@ -65,14 +78,26 @@ class SupportTicketController extends Controller
 
         $ticket = $this->tickets->createTicket($user, $agency, $request->validated(), $booking);
 
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson([
+                'ok' => true,
+                'ticket' => $this->supportPresenter->presentListItem($ticket->fresh(['booking'])),
+                'redirect_url' => '/customer/support/'.$ticket->ticket_reference,
+            ], 201);
+        }
+
         return redirect()
             ->route('customer.support.tickets.show', $ticket)
             ->with('status', 'Support ticket #'.$ticket->id.' created.');
     }
 
-    public function show(Request $request, SupportTicket $ticket): View
+    public function show(Request $request, SupportTicket $ticket): View|JsonResponse
     {
         Gate::authorize('view', $ticket);
+
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->supportPresenter->presentDetail($ticket));
+        }
 
         $ticket->load([
             'booking',
@@ -82,7 +107,7 @@ class SupportTicketController extends Controller
         return view(client_view('support.tickets.show', 'customer'), compact('ticket'));
     }
 
-    public function reply(ReplySupportTicketRequest $request, SupportTicket $ticket): RedirectResponse
+    public function reply(ReplySupportTicketRequest $request, SupportTicket $ticket): RedirectResponse|JsonResponse
     {
         Gate::authorize('reply', $ticket);
 
@@ -92,14 +117,22 @@ class SupportTicketController extends Controller
             (string) $request->validated('body'),
         );
 
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->supportPresenter->presentDetail($ticket->fresh()));
+        }
+
         return back()->with('status', 'Reply sent.');
     }
 
-    public function close(Request $request, SupportTicket $ticket): RedirectResponse
+    public function close(Request $request, SupportTicket $ticket): RedirectResponse|JsonResponse
     {
         Gate::authorize('close', $ticket);
 
         $this->tickets->closeByCustomer($ticket, $request->user());
+
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->supportPresenter->presentDetail($ticket->fresh()));
+        }
 
         return back()->with('status', 'Ticket closed.');
     }
