@@ -1,47 +1,112 @@
-/* JetPakistan public frontend design tokens — phase JP-FE-01 */
+/* JetPakistan design tokens — JP-UI-02 shared foundation */
 
-:root {
-  /* Brand greens */
-  --jp-primary: #63b32e;
-  --jp-primary-hover: #4f9423;
-  --jp-primary-active: #3f7820;
-  --jp-primary-soft: #eef6e8;
-  --jp-primary-border: #c5deb3;
-  --jp-footer-bg: #006837;
+:root,
+[data-theme="light"] {
+  color-scheme: light;
 
-  /* Accent */
+  /* Brand */
+  --jp-brand: #63b32e;
+  --jp-brand-hover: #4f9423;
+  --jp-brand-active: #3f7820;
+  --jp-brand-soft: #eef6e8;
+  --jp-brand-border: #c5deb3;
+
+  /* Legacy aliases (JP-FE-01) */
+  --jp-primary: var(--jp-brand);
+  --jp-primary-hover: var(--jp-brand-hover);
+  --jp-primary-active: var(--jp-brand-active);
+  --jp-primary-soft: var(--jp-brand-soft);
+  --jp-primary-border: var(--jp-brand-border);
+
+  /* Accent / info */
   --jp-accent: #19a7a6;
   --jp-accent-hover: #138c8c;
   --jp-accent-soft: #e5f7f7;
+  --jp-info: #0e7490;
+  --jp-info-soft: #e0f2fe;
 
   /* Surfaces */
-  --jp-page-bg: #edf3f7;
+  --jp-bg: #edf3f7;
+  --jp-bg-subtle: #f4f8fb;
+  --jp-page-bg: var(--jp-bg);
   --jp-surface: #ffffff;
+  --jp-surface-raised: #ffffff;
   --jp-surface-muted: #f6fafc;
+  --jp-surface-inverse: #0b1d2a;
+  --jp-footer-bg: #006837;
 
-  /* Typography */
+  /* Typography colors */
   --jp-text: #0b1d2a;
   --jp-text-muted: #62788a;
+  --jp-text-subtle: #8fa3b3;
 
   /* Borders */
   --jp-border: #d7e2e9;
+  --jp-border-strong: #b8cad6;
   --jp-border-soft: #e8f0f5;
 
   /* Focus */
-  --jp-focus-color: var(--jp-primary);
+  --jp-focus: var(--jp-brand);
+  --jp-focus-color: var(--jp-focus);
   --jp-focus-offset: 2px;
-  --jp-focus-ring: 0 0 0 3px color-mix(in srgb, var(--jp-primary) 22%, transparent);
+  --jp-focus-ring: 0 0 0 3px color-mix(in srgb, var(--jp-focus) 22%, transparent);
+
+  /* Status */
+  --jp-success: #2d8a3e;
+  --jp-success-soft: #e8f5ea;
+  --jp-warning: #b45309;
+  --jp-warning-soft: #fef3c7;
+  --jp-danger: #c53030;
+  --jp-danger-soft: #fde8e8;
+
+  /* Overlays & loading */
+  --jp-overlay: rgba(11, 29, 42, 0.45);
+  --jp-skeleton: #e2ecf2;
+  --jp-skeleton-highlight: #f0f6fa;
+
+  /* Typography families */
+  --jp-font-sans: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --jp-font-display: var(--font-display), var(--jp-font-sans);
+  --jp-font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
 
   /* Typography scale */
-  --jp-fs-xs: clamp(10px, calc(0.5625rem + 0.15625vw), 12px);
-  --jp-fs-sm: clamp(12px, calc(0.6875rem + 0.15625vw), 14px);
-  --jp-fs-body: clamp(15px, calc(0.8125rem + 0.15625vw), 17px);
-  --jp-fs-md: clamp(17px, calc(0.9375rem + 0.15625vw), 19px);
-  --jp-fs-lg: clamp(19px, calc(1.0625rem + 0.15625vw), 21px);
-  --jp-fs-xl: clamp(23px, calc(1.3125rem + 0.15625vw), 25px);
-  --jp-fs-h3: clamp(17px, calc(0.9375rem + 0.15625vw), 19px);
-  --jp-fs-h2: clamp(28px, calc(1.5rem + 1.09375vw), 42px);
-  --jp-fs-h1: clamp(36px, calc(2rem + 1.5625vw), 56px);
+  --jp-text-xs: clamp(10px, calc(0.5625rem + 0.15625vw), 12px);
+  --jp-text-sm: clamp(12px, calc(0.6875rem + 0.15625vw), 14px);
+  --jp-text-base: clamp(15px, calc(0.8125rem + 0.15625vw), 17px);
+  --jp-text-lg: clamp(17px, calc(0.9375rem + 0.15625vw), 19px);
+  --jp-text-xl: clamp(19px, calc(1.0625rem + 0.15625vw), 21px);
+  --jp-heading-sm: clamp(17px, calc(0.9375rem + 0.15625vw), 19px);
+  --jp-heading-md: clamp(23px, calc(1.3125rem + 0.15625vw), 25px);
+  --jp-heading-lg: clamp(28px, calc(1.5rem + 1.09375vw), 42px);
+  --jp-heading-xl: clamp(36px, calc(2rem + 1.5625vw), 56px);
+
+  /* Legacy font-size aliases */
+  --jp-fs-xs: var(--jp-text-xs);
+  --jp-fs-sm: var(--jp-text-sm);
+  --jp-fs-body: var(--jp-text-base);
+  --jp-fs-md: var(--jp-text-lg);
+  --jp-fs-lg: var(--jp-text-xl);
+  --jp-fs-xl: var(--jp-heading-md);
+  --jp-fs-h3: var(--jp-heading-sm);
+  --jp-fs-h2: var(--jp-heading-lg);
+  --jp-fs-h1: var(--jp-heading-xl);
+
+  /* Line heights */
+  --jp-leading-tight: 1.2;
+  --jp-leading-snug: 1.35;
+  --jp-leading-normal: 1.5;
+  --jp-leading-relaxed: 1.65;
+
+  /* Letter spacing */
+  --jp-tracking-tight: -0.02em;
+  --jp-tracking-normal: 0;
+  --jp-tracking-wide: 0.04em;
+
+  /* Font weights */
+  --jp-weight-normal: 400;
+  --jp-weight-medium: 500;
+  --jp-weight-semibold: 600;
+  --jp-weight-bold: 700;
 
   /* Spacing scale */
   --jp-space-2xs: clamp(3px, calc(0.1875rem + 0.078125vw), 4px);
@@ -53,8 +118,16 @@
   --jp-space-2xl: clamp(31px, calc(1.9375rem + 0.078125vw), 33px);
   --jp-space-3xl: clamp(39px, calc(2.4375rem + 0.078125vw), 41px);
   --jp-space-4xl: clamp(47px, calc(2.9375rem + 0.078125vw), 49px);
+  --jp-space-5xl: clamp(63px, calc(3.9375rem + 0.078125vw), 65px);
 
-  /* Radius */
+  /* Section spacing */
+  --jp-section-gap: var(--jp-space-3xl);
+  --jp-page-gutter: var(--jp-space-xl);
+  --jp-card-padding: var(--jp-space-lg);
+  --jp-form-gap: var(--jp-space-md);
+  --jp-control-padding-x: var(--jp-space-md);
+
+  /* Geometry */
   --jp-radius-sm: clamp(9px, calc(0.5625rem + 0.078125vw), 11px);
   --jp-radius-md: clamp(13px, calc(0.8125rem + 0.078125vw), 15px);
   --jp-radius-lg: clamp(19px, calc(1.1875rem + 0.078125vw), 21px);
@@ -62,15 +135,79 @@
   --jp-radius-pill: 9999px;
   --jp-button-radius: var(--jp-radius-md);
   --jp-card-radius: var(--jp-radius-lg);
+  --jp-border-width: 1px;
 
-  /* Shadows */
+  /* Shadows — restrained, no glow */
   --jp-shadow-sm: 0 1px 2px rgba(20, 45, 65, 0.06);
   --jp-shadow-md: 0 14px 34px -16px rgba(20, 50, 75, 0.18);
   --jp-shadow-card: 0 4px 20px -8px rgba(20, 50, 75, 0.12);
+  --jp-shadow-raised: 0 2px 8px -2px rgba(20, 50, 75, 0.1);
 
   /* Layout */
-  --jp-nav-height: clamp(68px, calc(4rem + 0.3125vw), 76px);
+  --jp-nav-height: clamp(60px, calc(3.75rem + 0.3125vw), 68px);
+  --jp-nav-height-mobile: clamp(56px, calc(3.5rem + 0.3125vw), 64px);
   --jp-button-height: clamp(42px, calc(2.625rem + 0.15625vw), 46px);
+  --jp-control-height: var(--jp-button-height);
   --jp-maxw: clamp(1160px, calc(71.25rem + 1.5625vw), 1240px);
-  --jp-container-pad-x: var(--jp-space-xl);
+  --jp-maxw-narrow: clamp(480px, calc(30rem + 2vw), 560px);
+  --jp-maxw-booking: clamp(960px, calc(60rem + 2vw), 1080px);
+  --jp-container-pad-x: var(--jp-page-gutter);
+  --jp-sidebar-width: 15rem;
+
+  /* Motion */
+  --jp-motion-fast: 120ms;
+  --jp-motion-standard: 180ms;
+  --jp-motion-slow: 280ms;
+  --jp-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --jp-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --jp-brand: #7cc94a;
+  --jp-brand-hover: #8fd65f;
+  --jp-brand-active: #6ab83e;
+  --jp-brand-soft: #1a2e14;
+  --jp-brand-border: #3d5c2e;
+
+  --jp-accent: #2ec4c3;
+  --jp-accent-hover: #45d4d3;
+  --jp-accent-soft: #0f2e2e;
+  --jp-info: #38bdf8;
+  --jp-info-soft: #0c2a3d;
+
+  --jp-bg: #0d1520;
+  --jp-bg-subtle: #111c28;
+  --jp-surface: #152231;
+  --jp-surface-raised: #1a2a3c;
+  --jp-surface-muted: #121e2c;
+  --jp-surface-inverse: #f0f6fa;
+  --jp-footer-bg: #004d2a;
+
+  --jp-text: #e8f0f5;
+  --jp-text-muted: #9bb0c0;
+  --jp-text-subtle: #6d8496;
+
+  --jp-border: #2a3f52;
+  --jp-border-strong: #3d5568;
+  --jp-border-soft: #1e3040;
+
+  --jp-focus-ring: 0 0 0 3px color-mix(in srgb, var(--jp-focus) 35%, transparent);
+
+  --jp-success: #4ade80;
+  --jp-success-soft: #142a1c;
+  --jp-warning: #fbbf24;
+  --jp-warning-soft: #2a2210;
+  --jp-danger: #f87171;
+  --jp-danger-soft: #2a1414;
+
+  --jp-overlay: rgba(0, 0, 0, 0.6);
+  --jp-skeleton: #1e3040;
+  --jp-skeleton-highlight: #2a4054;
+
+  --jp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --jp-shadow-md: 0 14px 34px -16px rgba(0, 0, 0, 0.45);
+  --jp-shadow-card: 0 4px 20px -8px rgba(0, 0, 0, 0.35);
+  --jp-shadow-raised: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
 }

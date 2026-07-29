@@ -7,6 +7,8 @@ Baseline: `5fad262`
 
 ## JP-UI-02 — SHARED-DESIGN-SYSTEM-DAY-NIGHT-THEME-TYPOGRAPHY-SHELL-HEADER-FOOTER-IMAGE-SLOTS-AND-FOUNDATION
 
+**Status:** Complete (see `docs/phases/JP-UI-02-*-SUMMARY.md`)
+
 **Objective:** Shared visual foundation before page-level parity work.
 
 ### Pages

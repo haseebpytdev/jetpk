@@ -4,10 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
-}
-
 html {
   overflow-x: hidden;
   scroll-behavior: smooth;
@@ -28,7 +24,12 @@ html {
 }
 
 body {
-  @apply bg-jp-page text-jp-text;
+  @apply bg-jp-page text-jp-text font-sans antialiased;
+  font-feature-settings: "tnum" 1;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 .sr-only {
@@ -41,6 +42,24 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+@keyframes jp-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes jp-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes flight-drift {
@@ -78,6 +97,34 @@ body {
   }
 }
 
+.jp-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--jp-skeleton) 0%,
+    var(--jp-skeleton-highlight) 50%,
+    var(--jp-skeleton) 100%
+  );
+  background-size: 200% 100%;
+  animation: jp-shimmer 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-skeleton-shimmer {
+    animation: none;
+    background: var(--jp-skeleton);
+  }
+}
+
+.jp-image-fade-in {
+  animation: jp-fade-in var(--jp-motion-standard) var(--jp-ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-image-fade-in {
+    animation: none;
+  }
+}
+
 .prose-jp p {
   @apply mb-4 leading-relaxed;
 }
@@ -94,5 +141,10 @@ body {
   .jp-print-friendly {
     box-shadow: none !important;
     border: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
   }
 }

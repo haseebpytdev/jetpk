@@ -1,5 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
+import { SkipLink } from "@/components/ui/SkipLink";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,17 +25,24 @@ export const metadata: Metadata = {
   description: "Book flights, hotels, and travel services with JetPakistan.",
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#edf3f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d1520" },
+  ],
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-jp-md focus:bg-jp-surface focus:px-4 focus:py-2 focus:shadow-jp-focus"
-        >
-          Skip to main content
-        </a>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+      </head>
+      <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
+        <ThemeProvider>
+          <SkipLink />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

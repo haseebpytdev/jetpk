@@ -2,13 +2,16 @@
 
 import { AccountMenu } from "@/components/navigation/AccountMenu";
 import { CurrencySelector } from "@/components/navigation/CurrencySelector";
+import { ThemeSwitch } from "@/components/theme/ThemeSwitch";
 import { Badge } from "@/components/ui/Badge";
 import { IconButton } from "@/components/ui/IconButton";
+import { LinkButton } from "@/components/ui/LinkButton";
 import { useBodyScrollLock } from "@/lib/hooks/use-body-scroll-lock";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { primaryNavigation } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
+import Link from "next/link";
 import type { PublicSession } from "@/types/session";
 import { useCallback, useRef, useState } from "react";
 import type { NavItem } from "@/types/navigation";
@@ -52,7 +55,7 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
           <button
             type="button"
             aria-label="Close navigation menu"
-            className="fixed inset-0 z-40 bg-jp-text/40"
+            className="fixed inset-0 z-40 bg-jp-overlay"
             onClick={closeMenu}
           />
           <div
@@ -61,7 +64,7 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation"
-            className="fixed inset-y-0 right-0 z-50 flex w-[min(100vw-3rem,22rem)] flex-col border-l border-jp-border bg-jp-surface shadow-jp-md"
+            className="fixed inset-y-0 right-0 z-50 flex w-[min(100vw-3rem,22rem)] flex-col border-l border-jp-border bg-jp-surface shadow-jp-md transition-transform duration-drawer motion-reduce:transition-none"
           >
             <div className="flex items-center justify-between border-b border-jp-border px-4 py-4">
               <p className="text-jp-sm font-semibold text-jp-text">Menu</p>
@@ -79,23 +82,20 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
             </nav>
 
             <div className="space-y-3 border-t border-jp-border px-4 py-4">
+              <ThemeSwitch compact />
               <CurrencySelector className="w-full" />
               {session.status === "anonymous" ? (
-                <a href="/login" className="block text-jp-sm font-semibold text-jp-text">
+                <Link href="/login" className="block text-jp-sm font-semibold text-jp-text">
                   Log in / Sign up
-                </a>
+                </Link>
               ) : (
                 <a href={session.dashboardUrl} className="block text-jp-sm font-semibold text-jp-text">
                   Dashboard
                 </a>
               )}
-              <a
-                href="/flights"
-                onClick={closeMenu}
-                className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-button bg-jp-primary px-jp-lg text-jp-sm font-semibold text-white shadow-jp-sm transition-colors hover:bg-jp-primary-hover focus-visible:outline-none focus-visible:shadow-jp-focus"
-              >
+              <LinkButton href="/flights" variant="primary" className="w-full" onClick={closeMenu}>
                 Book Now
-              </a>
+              </LinkButton>
             </div>
           </div>
         </>
@@ -117,7 +117,7 @@ function MobileNavItem({
         <a
           href={item.href}
           onClick={onNavigate}
-          className="flex items-center justify-between rounded-jp-md px-3 py-3 text-jp-body font-medium text-jp-text hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+          className="flex items-center justify-between rounded-jp-md px-3 py-3 text-jp-body font-medium text-jp-text hover:bg-jp-brand-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
         >
           <span>{item.label}</span>
           {item.badge ? <Badge variant="new">{item.badge}</Badge> : null}
@@ -137,7 +137,7 @@ function MobileNavItem({
             <a
               href={link.href}
               onClick={onNavigate}
-              className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+              className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text hover:bg-jp-brand-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
             >
               {link.label}
             </a>

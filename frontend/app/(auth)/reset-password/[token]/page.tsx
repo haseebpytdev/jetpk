@@ -1,6 +1,5 @@
 import { AuthShell, ResetPasswordForm } from "@/features/auth";
-import { fetchSessionBootstrapFromCookies, mapBootstrapToPublicSession } from "@/features/auth/services/session-service";
-import { PublicShell } from "@/components/layout/PublicShell";
+import { fetchSessionBootstrapFromCookies } from "@/features/auth/services/session-service";
 import { cookies } from "next/headers";
 
 type ResetPasswordPageProps = {
@@ -12,14 +11,11 @@ export default async function ResetPasswordPage({ params, searchParams }: ResetP
   const { token } = await params;
   const { email } = await searchParams;
   const cookieStore = await cookies();
-  const bootstrap = await fetchSessionBootstrapFromCookies(cookieStore.getAll());
-  const session = mapBootstrapToPublicSession(bootstrap);
+  await fetchSessionBootstrapFromCookies(cookieStore.getAll());
 
   return (
-    <PublicShell session={session}>
-      <AuthShell title="Reset your password" description="Choose a new password for your JetPakistan account.">
-        <ResetPasswordForm token={token} email={email} />
-      </AuthShell>
-    </PublicShell>
+    <AuthShell title="Reset your password" description="Choose a new password for your JetPakistan account.">
+      <ResetPasswordForm token={token} email={email} />
+    </AuthShell>
   );
 }

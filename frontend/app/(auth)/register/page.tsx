@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { AuthShell, CustomerRegistrationForm } from "@/features/auth";
-import { fetchSessionBootstrapFromCookies, mapBootstrapToPublicSession } from "@/features/auth/services/session-service";
-import { PublicShell } from "@/components/layout/PublicShell";
+import { fetchSessionBootstrapFromCookies } from "@/features/auth/services/session-service";
 import { cookies } from "next/headers";
 import { sanitizeDashboardUrl } from "@/features/auth/utils/dashboard-allowlist";
 
@@ -12,13 +11,9 @@ export default async function RegisterPage() {
     redirect(sanitizeDashboardUrl(bootstrap.dashboard_url, "/"));
   }
 
-  const session = mapBootstrapToPublicSession(bootstrap);
-
   return (
-    <PublicShell session={session}>
-      <AuthShell title="Create your account" description="Register as a JetPakistan customer to book and manage trips.">
-        <CustomerRegistrationForm />
-      </AuthShell>
-    </PublicShell>
+    <AuthShell title="Create your account" description="Register as a JetPakistan customer to book and manage trips.">
+      <CustomerRegistrationForm />
+    </AuthShell>
   );
 }
