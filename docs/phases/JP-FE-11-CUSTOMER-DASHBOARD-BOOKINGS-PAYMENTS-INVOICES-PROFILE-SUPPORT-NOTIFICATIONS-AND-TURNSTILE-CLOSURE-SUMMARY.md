@@ -10,7 +10,7 @@
 | Feature commit | `fc05518` |
 | Docs commit | `6ffd79f` |
 | Merge commit | `c9d344b` |
-| Final SHA documentation | `c9d344b` |
+| Final SHA documentation | `daf2dab` |
 | Final status | COMPLETE |
 
 ## Objective
