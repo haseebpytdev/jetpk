@@ -10,7 +10,7 @@
 | Feature commit | `d548c67` |
 | Docs commit | `d548c67` (included in feature commit) |
 | Merge commit | `8dab15b` |
-| Final SHA documentation | `TBD` (this commit) |
+| Final SHA documentation | `333d3e6` |
 | Final status | COMPLETE |
 
 ## Objective
