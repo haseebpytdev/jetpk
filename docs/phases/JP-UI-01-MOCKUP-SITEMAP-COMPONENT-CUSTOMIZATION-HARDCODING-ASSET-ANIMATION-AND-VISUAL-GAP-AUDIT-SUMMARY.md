@@ -10,7 +10,7 @@
 | Feature commit | `fc47444` |
 | Docs commit | `58d5979` |
 | Merge commit | `4614824` |
-| Final SHA documentation | `8772e60` |
+| Final SHA documentation | `2c9a73b` |
 | Final status | COMPLETE |
 
 ## Objective
