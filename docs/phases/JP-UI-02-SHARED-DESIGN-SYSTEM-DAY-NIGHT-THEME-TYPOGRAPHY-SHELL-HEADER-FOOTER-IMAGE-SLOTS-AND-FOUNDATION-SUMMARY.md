@@ -88,11 +88,10 @@ Foundation provides tokens, theme, shell, header/footer, primitives, ImageSlot, 
 
 | Item | SHA |
 |------|-----|
-| Feature commit | _pending_ |
-| Docs commit | _pending_ |
-| Merge commit | _pending_ |
+| Feature commit | `2c8008c` |
+| Merge commit | `de6c6fe` |
 | Final docs SHA | _pending_ |
 
 ## Final status
 
-_PENDING — SHAs recorded after merge_
+**FINAL_PASS** — foundation merged to `main`; production untouched.
