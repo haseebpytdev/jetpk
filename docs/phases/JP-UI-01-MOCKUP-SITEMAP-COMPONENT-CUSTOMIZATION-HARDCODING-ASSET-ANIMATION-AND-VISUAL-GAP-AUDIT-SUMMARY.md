@@ -7,9 +7,9 @@
 | Phase | JP-UI-01-MOCKUP-SITEMAP-COMPONENT-CUSTOMIZATION-HARDCODING-ASSET-ANIMATION-AND-VISUAL-GAP-AUDIT |
 | Branch | `phase/jetpk-ui-01-mockup-sitemap-audit` |
 | Baseline | `5fad262` (JP-FE-13A final SHA documentation) |
-| Feature commit | `TBD` |
-| Docs commit | `TBD` |
-| Merge commit | `TBD` |
+| Feature commit | `fc47444` |
+| Docs commit | `58d5979` |
+| Merge commit | `4614824` |
 | Final SHA documentation | `TBD` |
 | Final status | COMPLETE |
 
