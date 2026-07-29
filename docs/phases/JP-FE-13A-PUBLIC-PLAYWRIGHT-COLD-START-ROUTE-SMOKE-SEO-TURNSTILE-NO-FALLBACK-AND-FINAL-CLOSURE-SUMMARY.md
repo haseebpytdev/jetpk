@@ -7,8 +7,8 @@
 | Phase | JP-FE-13A-PUBLIC-PLAYWRIGHT-COLD-START-ROUTE-SMOKE-SEO-TURNSTILE-NO-FALLBACK-AND-FINAL-CLOSURE |
 | Branch | `phase/jetpk-fe-13a-public-playwright-closure` |
 | Baseline | `6533a36` (JP-FE-13 final SHA documentation) |
-| Feature commit | _pending_ |
-| Docs commit | _pending_ |
+| Feature commit | `8c17319` |
+| Docs commit | `7478ffa` |
 | Merge commit | _pending_ |
 | Final SHA documentation | _pending_ |
 | Final status | COMPLETE |
