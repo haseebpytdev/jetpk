@@ -41,16 +41,11 @@ export function absoluteLaravelUrl(path: string): string {
 }
 
 function resolveResultsPath(data: FlightSearchInitResponse, fallbackQuery: URLSearchParams): string {
-  if (data.results_page_url) {
-    try {
-      const url = new URL(data.results_page_url, appConfig.laravelUrl);
-      return `${url.pathname}${url.search}`;
-    } catch {
-      return buildFlightResultsPagePath(fallbackQuery);
-    }
+  const params = new URLSearchParams(fallbackQuery);
+  if (data.search_id) {
+    params.set("search_id", data.search_id);
   }
-
-  return buildFlightResultsPagePath(fallbackQuery);
+  return buildFlightResultsPagePath(params);
 }
 
 export async function initFlightSearch(
@@ -108,12 +103,28 @@ export async function initFlightSearch(
   }
 }
 
-export function handoffToLaravelResults(resultsPath: string): void {
-  const url = absoluteLaravelUrl(resultsPath);
+/** Navigate to the Next.js operational results route (JP-FE-05). */
+export function handoffToFlightResults(resultsPath: string): void {
+  const target = resultsPath.startsWith("http")
+    ? (() => {
+        try {
+          const url = new URL(resultsPath);
+          return `${url.pathname}${url.search}`;
+        } catch {
+          return resultsPath;
+        }
+      })()
+    : resultsPath;
+
   if (typeof document !== "undefined") {
-    document.body.setAttribute("data-handoff-url", url);
+    document.body.setAttribute("data-handoff-url", target);
   }
-  window.location.assign(url);
+  window.location.assign(target.startsWith("/") ? target : `/${target}`);
+}
+
+/** @deprecated Use handoffToFlightResults — retained for group and legacy callers. */
+export function handoffToLaravelResults(resultsPath: string): void {
+  handoffToFlightResults(resultsPath);
 }
 
 export function handoffToGroupSearch(query: URLSearchParams): void {

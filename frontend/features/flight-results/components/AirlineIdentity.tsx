@@ -1,0 +1,51 @@
+import { cn } from "@/lib/cn";
+import Image from "next/image";
+
+type AirlineIdentityProps = {
+  code?: string;
+  name?: string;
+  logoUrl?: string | null;
+  size?: "sm" | "md" | "lg";
+  className?: string;
+};
+
+const SIZE_MAP = {
+  sm: { box: "h-8 w-8", text: "text-xs", img: 32 },
+  md: { box: "h-10 w-10", text: "text-sm", img: 40 },
+  lg: { box: "h-12 w-12", text: "text-base", img: 48 },
+} as const;
+
+export function AirlineIdentity({ code, name, logoUrl, size = "md", className }: AirlineIdentityProps) {
+  const sizing = SIZE_MAP[size];
+  const initials = (code ?? name ?? "?").slice(0, 2).toUpperCase();
+  const alt = name ? `${name} logo` : code ? `${code} airline logo` : "Airline";
+
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      <div
+        className={cn(
+          "relative flex shrink-0 items-center justify-center overflow-hidden rounded-jp-sm border border-jp-border bg-jp-surface-muted",
+          sizing.box,
+        )}
+        aria-hidden={Boolean(logoUrl)}
+      >
+        {logoUrl ? (
+          <Image
+            src={logoUrl}
+            alt={alt}
+            width={sizing.img}
+            height={sizing.img}
+            className="h-full w-full object-contain p-0.5"
+            unoptimized
+          />
+        ) : (
+          <span className={cn("font-semibold text-jp-text-muted", sizing.text)}>{initials}</span>
+        )}
+      </div>
+      <div className="min-w-0">
+        {name ? <p className="truncate text-sm font-medium text-jp-text">{name}</p> : null}
+        {code ? <p className="text-xs text-jp-text-muted">{code}</p> : null}
+      </div>
+    </div>
+  );
+}
