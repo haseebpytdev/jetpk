@@ -85,7 +85,7 @@ test.describe("JP-FE-11 customer dashboard", () => {
   test("agent is rejected from customer dashboard", async ({ page }) => {
     await setSessionFixture(page, "agent");
     await page.goto("/customer/dashboard");
-    await expect(page).toHaveURL(/\/agent$/);
+    await expect(page).toHaveURL(/\/agent\/dashboard$/);
   });
 
   test("unauthenticated user is redirected to login", async ({ page }) => {

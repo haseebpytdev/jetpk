@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Controller;
 use App\Models\AgentWalletTransaction;
 use App\Services\Agents\AgentWalletService;
+use App\Support\AgentPortal\AgentPortalLedgerPresenter;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -14,11 +17,14 @@ use Illuminate\Support\Facades\Gate;
  */
 class AgentLedgerController extends Controller
 {
+    use RespondsWithAgentPortalJson;
+
     public function __construct(
         protected AgentWalletService $walletService,
+        protected AgentPortalLedgerPresenter $ledgerPresenter,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $user = $request->user();
         $agent = $user?->agent();
@@ -33,7 +39,7 @@ class AgentLedgerController extends Controller
 
         $query = AgentWalletTransaction::query()
             ->where('agency_id', $agent->agency_id)
-            ->with(['depositRequest', 'creator', 'approver', 'user'])
+            ->with(['depositRequest', 'creator', 'user', 'wallet'])
             ->latest('id');
 
         if ($request->filled('date_from')) {
@@ -62,20 +68,26 @@ class AgentLedgerController extends Controller
 
         $transactions = $query->paginate(25)->withQueryString();
 
-        $viewData = [
+        $filters = [
+            'date_from' => $request->string('date_from')->toString(),
+            'date_to' => $request->string('date_to')->toString(),
+            'type' => $request->string('type')->toString(),
+            'status' => $request->string('status')->toString(),
+            'q' => $request->string('q')->toString(),
+        ];
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson(
+                $this->ledgerPresenter->presentIndex($agent, $transactions, $filters),
+            );
+        }
+
+        return view(client_view('ledger.index', 'agent'), [
             'summary' => $this->walletService->summary($agent),
             'agencyBalance' => $this->walletService->agencyBalanceSummary($agent->agency_id),
             'transactions' => $transactions,
             'timezone' => $timezone,
-            'filters' => [
-                'date_from' => $request->string('date_from')->toString(),
-                'date_to' => $request->string('date_to')->toString(),
-                'type' => $request->string('type')->toString(),
-                'status' => $request->string('status')->toString(),
-                'q' => $request->string('q')->toString(),
-            ],
-        ];
-
-        return view(client_view('ledger.index', 'agent'), $viewData);
+            'filters' => $filters,
+        ]);
     }
 }

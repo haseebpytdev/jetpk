@@ -29,7 +29,7 @@ const AGENT_BOOTSTRAP: SessionBootstrap = {
   },
   role: "agent",
   permissions: [],
-  dashboard_url: "/agent",
+  dashboard_url: "/agent/dashboard",
   requires_otp: false,
   requires_password_change: false,
   account_status: "active",

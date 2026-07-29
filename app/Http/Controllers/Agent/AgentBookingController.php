@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Agent;
 
 use App\Enums\BookingStatus;
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Support\AgentPortal\AgentPortalBookingDetailPresenter;
+use App\Support\AgentPortal\AgentPortalBookingsPresenter;
 use App\Support\Booking\AgentBookingContext;
 use App\Support\Bookings\BookingDetailTimelinePresenter;
 use App\Support\Bookings\BookingItineraryOverviewPresenter;
@@ -12,6 +15,7 @@ use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\PaymentOperationalStatus;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Bookings\TicketingOperationalStatus;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -20,7 +24,14 @@ use Illuminate\View\View;
 
 class AgentBookingController extends Controller
 {
-    public function index(Request $request): View
+    use RespondsWithAgentPortalJson;
+
+    public function __construct(
+        protected AgentPortalBookingsPresenter $bookingsPresenter,
+        protected AgentPortalBookingDetailPresenter $bookingDetailPresenter,
+    ) {}
+
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', Booking::class);
 
@@ -65,12 +76,16 @@ class AgentBookingController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $viewData = [
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson(
+                $this->bookingsPresenter->presentIndex($bookings, $filter, $request->user()),
+            );
+        }
+
+        return view(client_view('bookings.index', 'agent'), [
             'bookings' => $bookings,
             'filter' => $filter,
-        ];
-
-        return view(client_view('bookings.index', 'agent'), $viewData);
+        ]);
     }
 
     public function create(Request $request): View
@@ -88,11 +103,9 @@ class AgentBookingController extends Controller
             'Agency booking mode active — bookings will be linked to '.$agencyName.'.'
         );
 
-        $viewData = [
+        return view(client_view('bookings.create', 'agent'), [
             'agencyName' => $agencyName,
-        ];
-
-        return view(client_view('bookings.create', 'agent'), $viewData);
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -120,10 +133,14 @@ class AgentBookingController extends Controller
             ->with('status', 'Agency booking mode ended.');
     }
 
-    public function show(Request $request, Booking $booking): View
+    public function show(Request $request, Booking $booking): View|JsonResponse
     {
         Gate::authorize('view', $booking);
         $this->resolveCurrentAgent();
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson($this->bookingDetailPresenter->present($booking, $request));
+        }
 
         $booking->load([
             'passengers',
@@ -145,7 +162,7 @@ class AgentBookingController extends Controller
             || $booking->supplierBookings->contains(fn ($sb) => filled($sb->pnr));
         $provider = (string) (($meta['supplier_provider'] ?? null) ?: ($booking->supplier ?? ''));
 
-        $viewData = [
+        return view(client_view('bookings.show', 'agent'), [
             'booking' => $booking,
             'itineraryOverview' => BookingItineraryOverviewPresenter::fromBookingMeta($meta, $hasPnr),
             'paymentOperational' => PaymentOperationalStatus::fromValue((string) ($booking->payment_status ?? 'unpaid')),
@@ -170,9 +187,7 @@ class AgentBookingController extends Controller
                 Gate::forUser(auth()->user())->allows('submitPaymentProof', $booking),
                 'agent',
             ),
-        ];
-
-        return view(client_view('bookings.show', 'agent'), $viewData);
+        ]);
     }
 
     protected function resolveCurrentAgent()
