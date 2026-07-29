@@ -27,6 +27,7 @@ import { OneWayForm } from "./OneWayForm";
 import { ReturnForm } from "./ReturnForm";
 import { SearchStatusBanner } from "./SearchStatusBanner";
 import { SearchTabs } from "./SearchTabs";
+import type { SearchLayout } from "./SearchFormErrors";
 
 function createSegment(id: string): FlightSegment {
   return { id, from: null, to: null, departureDate: "" };
@@ -40,9 +41,10 @@ const DEFAULT_OPTIONS: SearchOptions = {
 
 type SearchModuleProps = {
   className?: string;
+  layout?: SearchLayout;
 };
 
-export function SearchModule({ className }: SearchModuleProps) {
+export function SearchModule({ className, layout = "default" }: SearchModuleProps) {
   const [mode, setMode] = useState<SearchMode>("one_way");
   const [origin, setOrigin] = useState(() => findAirportByIata("ISB") ?? null);
   const [destination, setDestination] = useState(() => findAirportByIata("DXB") ?? null);
@@ -205,15 +207,22 @@ export function SearchModule({ className }: SearchModuleProps) {
   return (
     <section
       className={cn(
-        "rounded-jp-card border border-jp-border bg-jp-surface p-jp-lg shadow-jp-card sm:p-jp-xl",
+        "rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
+        layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
         className,
       )}
       aria-label="Flight search"
       data-testid="search-module"
+      data-search-layout={layout}
     >
-      <SearchTabs mode={mode} onModeChange={handleModeChange} />
+      <SearchTabs mode={mode} onModeChange={handleModeChange} compact={layout === "compact"} />
 
-      <div className="mt-jp-md min-h-[18rem] transition-opacity duration-ui">
+      <div
+        className={cn(
+          "mt-jp-md transition-opacity duration-ui",
+          layout === "compact" ? "min-h-0" : "min-h-[18rem]",
+        )}
+      >
         {mode === "one_way" ? (
           <OneWayForm
             origin={origin}
@@ -229,6 +238,7 @@ export function SearchModule({ className }: SearchModuleProps) {
             onSubmit={handleOneWaySubmit}
             errors={errors}
             disabled={isSubmitting}
+            layout={layout}
           />
         ) : null}
 
@@ -249,6 +259,7 @@ export function SearchModule({ className }: SearchModuleProps) {
             onSubmit={handleReturnSubmit}
             errors={errors}
             disabled={isSubmitting}
+            layout={layout}
           />
         ) : null}
 

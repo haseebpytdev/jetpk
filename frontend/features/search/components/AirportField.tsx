@@ -16,6 +16,7 @@ type AirportFieldProps = {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  density?: "default" | "compact";
 };
 
 export function AirportField({
@@ -26,6 +27,7 @@ export function AirportField({
   placeholder = "City or airport",
   disabled = false,
   className,
+  density = "default",
 }: AirportFieldProps) {
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -157,7 +159,8 @@ export function AirportField({
           }}
           onKeyDown={handleKeyDown}
           className={cn(
-            "w-full min-h-jp-tap rounded-jp-md border border-jp-border bg-jp-surface px-3 py-2.5 text-jp-sm text-jp-text",
+            "w-full rounded-jp-md border border-jp-border bg-jp-surface px-3 text-jp-sm text-jp-text",
+            density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
             "placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus",
             value ? "pl-14" : "",
           )}

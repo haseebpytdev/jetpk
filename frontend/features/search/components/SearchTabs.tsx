@@ -7,9 +7,10 @@ import { useSearchTabKeyboard } from "../hooks/use-search-tabs";
 type SearchTabsProps = {
   mode: SearchMode;
   onModeChange: (mode: SearchMode) => void;
+  compact?: boolean;
 };
 
-export function SearchTabs({ mode, onModeChange }: SearchTabsProps) {
+export function SearchTabs({ mode, onModeChange, compact = false }: SearchTabsProps) {
   const { modes, modeLabels, handleKeyDown } = useSearchTabKeyboard(mode, onModeChange);
 
   return (
@@ -31,7 +32,8 @@ export function SearchTabs({ mode, onModeChange }: SearchTabsProps) {
             onClick={() => onModeChange(tabMode)}
             onKeyDown={(event) => handleKeyDown(event, tabMode)}
             className={cn(
-              "shrink-0 rounded-jp-pill px-4 py-2 text-jp-sm font-semibold transition-colors duration-ui",
+              "shrink-0 rounded-jp-pill font-semibold transition-colors duration-ui",
+              compact ? "px-3 py-1.5 text-jp-xs" : "px-4 py-2 text-jp-sm",
               "focus-visible:outline-none focus-visible:shadow-jp-focus",
               selected
                 ? "bg-jp-primary text-white shadow-jp-sm"
