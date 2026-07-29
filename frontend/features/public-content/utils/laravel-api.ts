@@ -7,6 +7,7 @@ import type {
   SupportTicketCategoryOption,
 } from "../types";
 import { SITE_CONTACT_FIXTURE } from "../fixtures/site-contact";
+import { allowContentFixtures } from "./content-policy";
 
 export type LaravelValidationErrors = Record<string, string[]>;
 
@@ -141,7 +142,23 @@ export async function submitSupportOrContactForm(payload: ContactFormPayload): P
 }
 
 export function mergeContactDetails(primary: ContactDetails | null | undefined): ContactDetails {
-  if (!primary) return SITE_CONTACT_FIXTURE;
+  if (!primary) {
+    return allowContentFixtures() ? SITE_CONTACT_FIXTURE : {
+      phone: "",
+      phone_e164: "",
+      email: "",
+      whatsapp: "",
+      website: "",
+      office: "",
+      hours: "",
+      company_legal_name: "",
+    };
+  }
+
+  if (!allowContentFixtures()) {
+    return primary;
+  }
+
   return {
     ...SITE_CONTACT_FIXTURE,
     ...Object.fromEntries(Object.entries(primary).filter(([, value]) => value !== "")),

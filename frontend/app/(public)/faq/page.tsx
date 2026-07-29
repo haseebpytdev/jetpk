@@ -2,15 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero } from "@/features/public-content";
+import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMetadata } from "@/features/public-content";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await FaqService.getFaqPage();
-  return {
-    title: page.seo.title,
-    description: page.seo.description,
-    robots: page.seo.robots,
-  };
+  return publicSeoToMetadata(page.seo, "/faq");
 }
 
 export default async function FaqPage() {

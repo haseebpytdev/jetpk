@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
-import { AboutPageContent, PublicPageService } from "@/features/public-content";
+import { AboutPageContent, PublicPageService, publicSeoToMetadata } from "@/features/public-content";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await PublicPageService.getAboutPage();
-  return {
-    title: page.seo.title,
-    description: page.seo.description,
-    robots: page.seo.robots,
-  };
+  return publicSeoToMetadata(page.seo, "/about-us");
 }
 
 export default async function AboutUsPage() {

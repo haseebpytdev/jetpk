@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Disallow: /customer
+Disallow: /agent
+Disallow: /dashboard
+Disallow: /booking
+Disallow: /testdash
+
+Sitemap: https://www.jetpakistan.com/sitemap.xml

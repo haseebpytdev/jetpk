@@ -17,6 +17,7 @@ use App\Http\Controllers\Frontend\GroupTicketingSearchController;
 use App\Http\Controllers\Frontend\GuestBookingCancellationController;
 use App\Http\Controllers\Frontend\GuestBookingLookupController;
 use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\PublicSitemapController;
 use App\Http\Controllers\Frontend\RequestDemoController;
 use App\Http\Controllers\Api\PublicAuthController;
 use App\Http\Controllers\Api\PublicSessionController;
@@ -53,6 +54,8 @@ Route::prefix('api/public/content')->group(function (): void {
         ->name('api.public.content.managed-page');
     Route::get('/cms/{slug}', [PublicContentApiController::class, 'cmsPage'])->name('api.public.content.cms-page');
     Route::get('/custom/{slug}', [PublicContentApiController::class, 'customPage'])->name('api.public.content.custom-page');
+    Route::get('/config', [PublicContentApiController::class, 'publicConfig'])->name('api.public.content.config');
+    Route::get('/sitemap-routes', [PublicContentApiController::class, 'sitemapRoutes'])->name('api.public.content.sitemap-routes');
 });
 
 Route::prefix('api/public/auth')->group(function (): void {
@@ -63,7 +66,7 @@ Route::prefix('api/public/auth')->group(function (): void {
         ->name('api.public.auth.registration-security-challenge');
 });
 
-Route::get('/request-demo', RequestDemoController::class)->name('request-demo');
+Route::get('/sitemap.xml', [PublicSitemapController::class, 'index'])->name('sitemap');
 Route::middleware('platform.module:support_system')->group(function (): void {
     Route::get('/support', [SupportController::class, 'support'])->name('support');
     Route::post('/support', [SupportController::class, 'store'])

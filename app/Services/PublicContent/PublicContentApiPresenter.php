@@ -7,10 +7,13 @@ use App\Models\ClientPage;
 use App\Models\CmsPage;
 use App\Services\Agencies\AboutUsContentPresenter;
 use App\Services\Client\ClientGlobalContactResolver;
+use App\Services\Client\ClientPageContentResolver;
 use App\Services\Client\ClientPageRenderer;
 use App\Services\Client\ClientPageSeoResolver;
+use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\ClientSafeHtmlSanitizer;
+use App\Support\Client\ReservedPublicPath;
 
 /**
  * Shapes Laravel-managed public content for the Next.js public frontend.
@@ -22,6 +25,7 @@ final class PublicContentApiPresenter
         private readonly ClientPageSeoResolver $seoResolver,
         private readonly ClientGlobalContactResolver $contactResolver,
         private readonly AboutUsContentPresenter $cmsContentPresenter,
+        private readonly ClientPageContentResolver $contentResolver,
     ) {}
 
     /**
@@ -126,5 +130,124 @@ final class PublicContentApiPresenter
             ClientPageKeys::PRIVACY,
             ClientPageKeys::GLOBAL,
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function publicConfig(): array
+    {
+        $contact = $this->contactResolver->contact();
+        $global = $this->contentFor(ClientPageKeys::GLOBAL);
+        $social = is_array($global['social'] ?? null) ? $global['social'] : [];
+
+        return [
+            'brand_name' => (string) config('ota-brand.name', 'JetPakistan'),
+            'domain' => (string) config('client.canonical_client.domain', 'jetpakistan.pk'),
+            'app_url' => rtrim((string) config('app.url'), '/'),
+            'contact' => $contact,
+            'legal_paths' => [
+                'terms' => '/terms',
+                'privacy' => '/privacy',
+            ],
+            'support_path' => '/support',
+            'contact_path' => '/contact',
+            'booking_lookup_path' => '/lookup-booking',
+            'groups_path' => '/groups/search',
+            'social_links' => $this->normalizeSocialLinks($social),
+            'default_seo' => [
+                'title' => 'JetPakistan',
+                'description' => 'Book flights, hotels, and travel services with JetPakistan.',
+                'robots' => 'index,follow',
+            ],
+            'source' => 'laravel',
+        ];
+    }
+
+    /**
+     * @return list<array{path: string, lastmod?: string}>
+     */
+    public function sitemapRoutes(): array
+    {
+        $routes = [
+            ['path' => '/'],
+            ['path' => '/about-us'],
+            ['path' => '/contact'],
+            ['path' => '/support'],
+            ['path' => '/faq'],
+            ['path' => '/terms'],
+            ['path' => '/privacy'],
+            ['path' => '/lookup-booking'],
+            ['path' => '/groups/search'],
+        ];
+
+        CmsPage::query()
+            ->active()
+            ->orderBy('slug')
+            ->get(['slug', 'updated_at'])
+            ->each(function (CmsPage $page): void {
+                $routes[] = [
+                    'path' => '/pages/'.$page->slug,
+                    'lastmod' => $page->updated_at?->toAtomString(),
+                ];
+            });
+
+        ClientPage::query()
+            ->where('enabled', true)
+            ->orderBy('slug')
+            ->get(['slug', 'updated_at'])
+            ->each(function (ClientPage $page): void {
+                $slug = ClientManagedPageReservedSlugs::normalize((string) $page->slug);
+                if ($slug === '' || ReservedPublicPath::isReservedFirstSegment($slug)) {
+                    return;
+                }
+
+                $pageKey = ClientPageKeys::customKey($slug);
+                if ($this->contentResolver->contentFor($pageKey) === []) {
+                    return;
+                }
+
+                $routes[] = [
+                    'path' => '/'.$slug,
+                    'lastmod' => $page->updated_at?->toAtomString(),
+                ];
+            });
+
+        return $routes;
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $social
+     * @return list<array{label: string, href: string}>
+     */
+    private function normalizeSocialLinks(array $social): array
+    {
+        $links = [];
+
+        foreach ($social as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $url = trim((string) ($row['url'] ?? ''));
+            if ($url === '') {
+                continue;
+            }
+
+            $links[] = [
+                'label' => trim((string) ($row['platform'] ?? 'Social')),
+                'href' => $url,
+            ];
+        }
+
+        return $links;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function contentFor(string $pageKey): array
+    {
+        return $this->contentResolver->contentFor($pageKey);
     }
 }
