@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   handoffToGroupSearch,
-  handoffToLaravelResults,
+  handoffToFlightResults,
   initFlightSearch,
   buildGroupHandoffQuery,
   type SearchSubmitState,
@@ -138,7 +138,7 @@ export function SearchModule({ className }: SearchModuleProps) {
       }
 
       setSubmitState({ status: "redirecting", targetUrl: response.resultsPath });
-      handoffToLaravelResults(response.resultsPath);
+      handoffToFlightResults(response.resultsPath);
     },
     [options, passengers],
   );
