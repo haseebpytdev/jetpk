@@ -6,9 +6,9 @@
 |-------|-------|
 | Phase | JP-FE-09-STANDARD-FLIGHT-REVIEW-PAYMENT-MANUAL-CARD-CHECKOUT-STATE-INVOICE-AND-CONFIRMATION-HANDOFF |
 | Branch | `phase/jetpk-fe-09-standard-flight-review-payment` |
-| Feature commit | _(pending)_ |
-| Docs commit | _(pending)_ |
-| Merge commit | _(pending)_ |
+| Feature commit | `ebb8066` |
+| Docs commit | `ebb8066` (included in feature commit) |
+| Merge commit | `a99a2d5` |
 | Final SHA doc commit | _(pending)_ |
 | Status | Complete |
 
