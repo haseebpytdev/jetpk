@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { FlightDetailsDrawer, type FlightDetailsContext } from "@/features/flight-details";
 import { buildSearchSummaryFromParams, useFlightResults } from "../hooks/use-flight-results";
 import { useOfferSelection } from "../hooks/use-offer-selection";
 import { parseFiltersFromSearchParams } from "../utils/filters";
@@ -30,6 +31,8 @@ export function FlightResultsPage() {
   const [filters, setFilters] = useState(() => parseFiltersFromSearchParams(params));
   const [modifyOpen, setModifyOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [detailsContext, setDetailsContext] = useState<FlightDetailsContext | null>(null);
+  const detailsTriggerRef = useRef<HTMLElement | null>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
 
   const summary = useMemo(() => buildSearchSummaryFromParams(params), [params]);
@@ -86,6 +89,26 @@ export function FlightResultsPage() {
     setFilters({});
     syncUrl({}, sort);
   };
+
+  const openDetails = useCallback(
+    (offer: import("../types").FlightOffer, fareOptionKey: string) => {
+      const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
+      if (!resolvedSearchId) return;
+      setDetailsContext({
+        searchId: resolvedSearchId,
+        offerId: offer.offer_id,
+        fareOptionKey,
+        initialOffer: offer,
+        initialFareOptions: offer.branded_fares_display_options ?? offer.fare_family_options_display,
+      });
+    },
+    [results.resolvedSearchId, searchId],
+  );
+
+  const closeDetails = useCallback(() => {
+    setDetailsContext(null);
+    detailsTriggerRef.current?.focus();
+  }, []);
 
   const shownCount = results.isReturnSplit ? results.outboundOptions.length : results.offers.length;
   const isLoading = results.status === "loading" || results.status === "initializing";
@@ -158,6 +181,7 @@ export function FlightResultsPage() {
                         searchId={results.resolvedSearchId ?? ""}
                         selecting={selection.selectingId === offer.offer_id}
                         onSelect={selection.selectOffer}
+                        onOpenDetails={openDetails}
                       />
                     </div>
                   ))}
@@ -193,6 +217,14 @@ export function FlightResultsPage() {
       />
 
       <ModifySearchPanel open={modifyOpen} onClose={() => setModifyOpen(false)} />
+
+      <FlightDetailsDrawer
+        open={detailsContext !== null}
+        context={detailsContext}
+        onClose={closeDetails}
+        triggerRef={detailsTriggerRef}
+        onNewSearch={() => setModifyOpen(true)}
+      />
     </div>
   );
 }

@@ -91,6 +91,22 @@ export type FlightOffer = {
   branded_fares_display_options?: FareFamilyOption[];
   single_direct_fare_on_card?: boolean;
   offer_freshness?: Record<string, unknown>;
+  layovers_display?: Array<{
+    airport_code?: string;
+    city?: string;
+    duration_display?: string;
+    overnight?: boolean;
+    terminal_change?: boolean;
+  }>;
+  baggage_checked_display?: string | null;
+  baggage_cabin_display?: string | null;
+  baggage_summary_display?: string | null;
+  fallback_details?: Record<string, unknown> | null;
+  base_fare?: number;
+  taxes?: number;
+  markup?: number;
+  service_fee?: number;
+  final_customer_price?: number;
 };
 
 export type OutboundOption = {
