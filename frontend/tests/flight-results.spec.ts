@@ -179,6 +179,53 @@ test("sort control is present", async ({ page }) => {
   await expect(page.getByTestId("sort-control")).toBeVisible();
 });
 
+test("recommended sort submits Laravel recommended value", async ({ page }) => {
+  const captured: string[] = [];
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    captured.push(new URL(route.request().url()).searchParams.get("sort") ?? "");
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(mockResultsBody()),
+    });
+  });
+  await page.goto(`/flights/results?${baseResultsQuery()}&sort=recommended`);
+  await expect(page.getByTestId("flight-result-card")).toBeVisible();
+  expect(captured.some((value) => value === "recommended")).toBe(true);
+});
+
+test("lowest price sort submits Laravel cheapest value", async ({ page }) => {
+  const captured: string[] = [];
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    captured.push(new URL(route.request().url()).searchParams.get("sort") ?? "");
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(mockResultsBody()),
+    });
+  });
+  await page.goto(`/flights/results?${baseResultsQuery()}&sort=lowest_price`);
+  await expect(page.getByTestId("flight-result-card")).toBeVisible();
+  expect(captured.some((value) => value === "cheapest")).toBe(true);
+  expect(captured.some((value) => value === "recommended")).toBe(false);
+});
+
+test("changing sort in UI triggers Laravel refetch with mapped value", async ({ page }) => {
+  const captured: string[] = [];
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    captured.push(new URL(route.request().url()).searchParams.get("sort") ?? "");
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(mockResultsBody()),
+    });
+  });
+  await page.goto(`/flights/results?${baseResultsQuery()}&sort=recommended`);
+  await expect(page.getByTestId("flight-result-card")).toBeVisible();
+  await page.getByTestId("sort-control").selectOption("lowest_price");
+  await expect.poll(() => captured.filter((value) => value === "cheapest").length).toBeGreaterThan(0);
+});
+
 test("price button visible text is price only", async ({ page }) => {
   await gotoResults(page);
   const button = page.getByTestId("result-price-button");

@@ -58,6 +58,20 @@ Offer rows are mapped by `mapOfferForResultsApi` — opaque `offer_id`, authorit
 
 No polling — Laravel search is synchronous at init.
 
+## Sorting (UI → Laravel `sort` query)
+
+Next.js never re-sorts offers client-side. Sort changes update the URL `sort` key (UI value) and refetch `flights.results.data` with the mapped Laravel value.
+
+| UI label | URL `sort` (UI key) | Laravel `sort` |
+| --- | --- | --- |
+| Recommended | `recommended` | `recommended` |
+| Lowest Price | `lowest_price` | `cheapest` |
+| Earliest Departure | `earliest_departure` | `earliest_departure` |
+| Latest Departure | `latest_departure` | `latest_departure` |
+| Shortest Duration | `fastest` | `fastest` |
+
+Laravel also accepts `price_desc`, `airline_az`, `arrival_time`, `duration` (Blade-only extras). `cheapest` is the authoritative lowest-price value (`FlightController::sortOffers`, Blade `#ota-filter-sort`, `Phase22CFlightSearchRulesTest`).
+
 ## Selection / handoff
 
 - **One-way / combined RT offers:** `select_url` + `offer_id` + `fare_option_key` + `search_id` → Laravel `/booking/passengers`
