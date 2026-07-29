@@ -9,8 +9,8 @@
 | Baseline | `6533a36` (JP-FE-13 final SHA documentation) |
 | Feature commit | `8c17319` |
 | Docs commit | `7478ffa` |
-| Merge commit | _pending_ |
-| Final SHA documentation | _pending_ |
+| Merge commit | `c31d212` |
+| Final SHA documentation | `pending` |
 | Final status | COMPLETE |
 
 ## Objective
