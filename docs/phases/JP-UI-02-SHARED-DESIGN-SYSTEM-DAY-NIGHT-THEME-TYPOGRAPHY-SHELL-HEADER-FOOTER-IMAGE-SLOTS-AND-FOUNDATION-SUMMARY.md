@@ -90,7 +90,7 @@ Foundation provides tokens, theme, shell, header/footer, primitives, ImageSlot, 
 |------|-----|
 | Feature commit | `2c8008c` |
 | Merge commit | `de6c6fe` |
-| Final docs SHA | _pending_ |
+| Final docs SHA | `2be5251` |
 
 ## Final status
 
