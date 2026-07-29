@@ -53,7 +53,7 @@ Three unpaid timeout releases → lock (`GroupBookingRestrictionService::BLOCK_T
 - Feature: `728d0a0`
 - Docs: `b4f7b7a`
 - Merge: `db6dad1`
-- Final SHA doc: `PENDING`
+- Final SHA doc: `2afcb85`
 
 ## Final status
 
