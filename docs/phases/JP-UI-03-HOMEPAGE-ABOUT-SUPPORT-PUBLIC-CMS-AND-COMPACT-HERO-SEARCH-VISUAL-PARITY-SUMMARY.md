@@ -59,7 +59,7 @@ Minimum **4** achieved on homepage, about, support, CMS templates (see `frontend
 | Feature commit | `2badb32` |
 | Docs commit | `c864b0f` |
 | Merge commit | `09ded8c` |
-| Final docs SHA | `09ded8c` |
+| Final docs SHA | `3e93ad5` |
 
 ## Final status
 
