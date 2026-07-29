@@ -8,6 +8,7 @@ type SearchOptionsBarProps = {
   onChange: (options: SearchOptions) => void;
   showFlexibleDates?: boolean;
   className?: string;
+  compact?: boolean;
 };
 
 function OptionToggle({
@@ -40,11 +41,12 @@ export function SearchOptionsBar({
   onChange,
   showFlexibleDates = true,
   className,
+  compact = false,
 }: SearchOptionsBarProps) {
   const update = (patch: Partial<SearchOptions>) => onChange({ ...options, ...patch });
 
   return (
-    <div className={cn("flex flex-wrap gap-x-5 gap-y-2", className)}>
+    <div className={cn(compact ? "flex flex-wrap gap-x-4 gap-y-1 text-jp-xs" : "flex flex-wrap gap-x-5 gap-y-2", className)}>
       <OptionToggle
         id="search-direct-only"
         label="Direct Flights Only"

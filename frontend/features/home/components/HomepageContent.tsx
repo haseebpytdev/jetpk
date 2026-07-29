@@ -1,19 +1,26 @@
-import { DestinationsSection } from "./DestinationsSection";
-import { FeaturedOffersSection } from "./FeaturedOffersSection";
-import { HomepageHero } from "./HomepageHero";
-import { SupportBanner } from "./SupportBanner";
-import { TravelInspirationSection } from "./TravelInspirationSection";
-import { WhyJetPakistanSection } from "./WhyJetPakistanSection";
+import {
+  FeaturedOffersSection,
+  HomepageContentService,
+  PublicHero,
+  PublicSupportBanner,
+  RoutesSection,
+  WhyJetPakistanSection,
+} from "@/features/public-visual";
 
-export function HomepageContent() {
+export async function HomepageContent() {
+  const content = await HomepageContentService.getHomepage();
+
   return (
     <>
-      <HomepageHero />
-      <DestinationsSection />
-      <FeaturedOffersSection />
-      <WhyJetPakistanSection />
-      <SupportBanner />
-      <TravelInspirationSection />
+      <PublicHero
+        hero={content.hero}
+        trustChips={content.trustChips}
+        fallbackImage={HomepageContentService.heroFallbackImage}
+      />
+      <RoutesSection {...content.routes} />
+      <FeaturedOffersSection {...content.featuredDeals} />
+      <WhyJetPakistanSection {...content.whyBook} />
+      <PublicSupportBanner support={content.supportCta} />
     </>
   );
 }

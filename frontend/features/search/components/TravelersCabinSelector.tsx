@@ -14,6 +14,7 @@ type TravelersCabinSelectorProps = {
   onInfantsChange: (value: number) => void;
   onCabinChange: (cabin: CabinClass) => void;
   className?: string;
+  density?: "default" | "compact";
 };
 
 function CounterRow({
@@ -73,6 +74,7 @@ export function TravelersCabinSelector({
   onInfantsChange,
   onCabinChange,
   className,
+  density = "default",
 }: TravelersCabinSelectorProps) {
   const panelId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -109,7 +111,8 @@ export function TravelersCabinSelector({
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "flex w-full min-h-jp-tap items-center justify-between gap-2 rounded-jp-md border border-jp-border bg-jp-surface px-3 py-2.5 text-left text-jp-sm",
+          "flex w-full items-center justify-between gap-2 rounded-jp-md border border-jp-border bg-jp-surface px-3 text-left text-jp-sm",
+          density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
           "focus-visible:outline-none focus-visible:shadow-jp-focus",
         )}
       >

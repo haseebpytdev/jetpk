@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClientPage;
 use App\Models\CmsPage;
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\PublicContent\HomepagePublicContentPresenter;
 use App\Services\PublicContent\PublicContentApiPresenter;
 use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
@@ -17,6 +18,7 @@ class PublicContentApiController extends Controller
 {
     public function __construct(
         private readonly PublicContentApiPresenter $presenter,
+        private readonly HomepagePublicContentPresenter $homepagePresenter,
         private readonly ClientPageContentResolver $contentResolver,
     ) {}
 
@@ -96,6 +98,11 @@ class PublicContentApiController extends Controller
     public function publicConfig(): JsonResponse
     {
         return response()->json($this->presenter->publicConfig());
+    }
+
+    public function homepage(): JsonResponse
+    {
+        return response()->json($this->homepagePresenter->present());
     }
 
     public function sitemapRoutes(): JsonResponse

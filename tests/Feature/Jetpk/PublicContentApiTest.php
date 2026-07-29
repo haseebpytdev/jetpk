@@ -182,4 +182,29 @@ class PublicContentApiTest extends TestCase
         $this->assertStringContainsString('<urlset', $response->getContent());
         $this->assertStringContainsString('/about-us', $response->getContent());
     }
+
+    public function test_homepage_json_returns_empty_source_without_published_content(): void
+    {
+        $this->makeJetpkProfile();
+
+        $this->getJson(route('api.public.content.homepage'))
+            ->assertOk()
+            ->assertJsonPath('source', 'empty')
+            ->assertJsonPath('routes.enabled', false)
+            ->assertJsonPath('destinations.enabled', false);
+    }
+
+    public function test_homepage_json_returns_published_sections_only(): void
+    {
+        $profile = $this->makeJetpkProfile();
+        $this->seedPublishedHome($profile, $this->representativeThreeCardHomeContent());
+
+        $this->getJson(route('api.public.content.homepage'))
+            ->assertOk()
+            ->assertJsonPath('source', 'cms')
+            ->assertJsonPath('hero.headline', 'Custom headline preserved')
+            ->assertJsonPath('routes.enabled', true)
+            ->assertJsonPath('why_book.enabled', false)
+            ->assertJsonMissing(['fixture', 'sample']);
+    }
 }

@@ -47,6 +47,8 @@ Baseline: `5fad262`
 
 ## JP-UI-03 — HOMEPAGE-ABOUT-SUPPORT-PUBLIC-CMS-AND-COMPACT-HERO-SEARCH-VISUAL-PARITY
 
+**Status:** Complete (see `docs/phases/JP-UI-03-*-SUMMARY.md`)
+
 **Objective:** Public marketing and CMS pages match mockups #1, #2, #3.
 
 ### Pages

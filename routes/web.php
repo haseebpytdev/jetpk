@@ -55,6 +55,7 @@ Route::prefix('api/public/content')->group(function (): void {
     Route::get('/cms/{slug}', [PublicContentApiController::class, 'cmsPage'])->name('api.public.content.cms-page');
     Route::get('/custom/{slug}', [PublicContentApiController::class, 'customPage'])->name('api.public.content.custom-page');
     Route::get('/config', [PublicContentApiController::class, 'publicConfig'])->name('api.public.content.config');
+    Route::get('/homepage', [PublicContentApiController::class, 'homepage'])->name('api.public.content.homepage');
     Route::get('/sitemap-routes', [PublicContentApiController::class, 'sitemapRoutes'])->name('api.public.content.sitemap-routes');
 });
 
