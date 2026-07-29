@@ -7,10 +7,10 @@
 | Phase | JP-FE-12-AGENT-AND-AGENT-STAFF-DASHBOARD-BOOKINGS-WALLET-PAYMENTS-INVOICES-PROFILE-SUPPORT-NOTIFICATIONS-AND-RBAC |
 | Branch | `phase/jetpk-fe-12-agent-dashboard` |
 | Baseline | `416541a` (JP-FE-11) |
-| Feature commit | TBD |
-| Docs commit | TBD |
-| Merge commit | TBD |
-| Final SHA documentation | TBD |
+| Feature commit | `d548c67` |
+| Docs commit | `d548c67` (included in feature commit) |
+| Merge commit | `8dab15b` |
+| Final SHA documentation | `TBD` (this commit) |
 | Final status | COMPLETE |
 
 ## Objective
@@ -247,4 +247,4 @@ Production untouched.
 
 ## Next phase
 
-TBD — Admin/Staff dashboard or agent portal polish as prioritized in master plan.
+JP-FE-13-PUBLIC-CMS-DEEP-PAGES-CONTACT-SUPPORT-TURNSTILE-SEO-ACCESSIBILITY-PERFORMANCE-AND-NO-FALLBACK-CLOSURE
