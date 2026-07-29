@@ -6,10 +6,12 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "start:smoke": "next start -p 3002",
+    "start:smoke": "next start -H 127.0.0.1 -p 3002",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test:smoke": "npm run build && playwright test -c playwright.config.ts"
+    "test:smoke": "npm run build && playwright test -c playwright.config.ts",
+    "test:public-content": "npm run build && playwright test tests/public-content.spec.ts -c playwright.config.ts",
+    "test:public-regression": "npm run build && playwright test tests/public-content.spec.ts tests/public-shell.spec.ts tests/booking-lookup-turnstile.spec.ts tests/auth.spec.ts tests/homepage.spec.ts tests/customer-dashboard.spec.ts tests/agent-dashboard.spec.ts tests/group-ticketing.spec.ts tests/search-laravel-handoff.spec.ts -c playwright.config.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
