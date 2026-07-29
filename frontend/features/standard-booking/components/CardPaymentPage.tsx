@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { fetchCheckoutState, fetchPaymentStatus, startCardPayment } from "../services/booking-checkout-api";
+import { fetchCheckoutState, startCardPayment } from "../services/booking-checkout-api";
+import { useBookingStatusPoll } from "../hooks/useBookingStatusPoll";
 import type { CheckoutState } from "../types/review-payment";
 import { MissingBookingSessionState } from "./BookingStateCards";
 import { ReviewPriceBreakdown } from "./ReviewPriceBreakdown";
@@ -109,50 +110,60 @@ export function CardPaymentPage() {
 }
 
 export function PaymentStatusPage({ reference }: { reference?: string }) {
-  const [message, setMessage] = useState("Verifying payment…");
-  const [statusCode, setStatusCode] = useState("processing");
+  const { data, loading, error } = useBookingStatusPoll({ mode: "payment", reference });
+  const payload = data as import("../types/review-payment").PaymentStatusResponse | null;
 
-  useEffect(() => {
-    let attempts = 0;
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+  if (loading) {
+    return <p className="p-8 text-jp-sm text-jp-muted">Verifying payment…</p>;
+  }
 
-    const poll = async () => {
-      const response = await fetchPaymentStatus(reference);
-      if (cancelled) return;
-
-      if (!response.ok) {
-        setMessage(response.message);
-        setStatusCode("failed");
-        return;
-      }
-
-      const payment = response.data.payment_status;
-      setStatusCode(payment.code);
-      setMessage(payment.label);
-
-      if (response.data.poll?.should_poll && attempts < (response.data.poll.max_attempts ?? 40)) {
-        attempts += 1;
-        timer = setTimeout(() => void poll(), response.data.poll.interval_ms ?? 3000);
-      }
-    };
-
-    void poll();
-
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, [reference]);
+  if (!payload?.ok) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        <MissingBookingSessionState />
+        {error ? <p className="mt-4 text-jp-sm text-red-700" role="alert">{error}</p> : null}
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8" data-testid="payment-status-page" aria-live="polite">
       <h1 className="text-2xl font-semibold text-jp-text">Payment status</h1>
-      <p className="mt-4 text-jp-sm" data-testid="payment-status-label">{message}</p>
-      <p className="mt-2 text-jp-xs text-jp-muted">Status code: {statusCode}</p>
-      {statusCode === "succeeded" ? (
-        <a href="/booking/confirmation" className="mt-4 inline-block text-jp-primary">Continue to confirmation</a>
+      <p className="mt-1 text-jp-sm text-jp-muted">Reference: {payload.booking_reference ?? "—"}</p>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <article className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
+          <h2 className="text-jp-sm font-semibold">Payment</h2>
+          <p className="mt-2 text-jp-sm" data-testid="payment-status-label">{payload.payment_status.label}</p>
+        </article>
+        <article className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
+          <h2 className="text-jp-sm font-semibold">Booking</h2>
+          <p className="mt-2 text-jp-sm">{payload.booking_status.label}</p>
+        </article>
+        {payload.ticketing_status ? (
+          <article className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
+            <h2 className="text-jp-sm font-semibold">Ticketing</h2>
+            <p className="mt-2 text-jp-sm">{payload.ticketing_status.label}</p>
+          </article>
+        ) : null}
+      </div>
+
+      {payload.transaction_reference ? (
+        <p className="mt-4 text-jp-sm text-jp-muted">Transaction reference: {payload.transaction_reference}</p>
       ) : null}
+
+      <div className="mt-6 flex flex-wrap gap-3 print:hidden">
+        {payload.payment_status.code === "succeeded" && payload.confirmation_url ? (
+          <a href={payload.confirmation_url} className="rounded-jp-button bg-jp-primary px-4 py-2 text-jp-sm font-semibold text-white">
+            Continue to confirmation
+          </a>
+        ) : null}
+        {payload.invoice_url ? (
+          <a href={payload.invoice_url} className="rounded-jp-button border border-jp-border px-4 py-2 text-jp-sm font-semibold">
+            View invoice
+          </a>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -9,6 +9,10 @@ const NEXT_BOOKING_PREFIXES = [
   "/booking/payment/return",
   "/booking/invoice",
   "/booking/confirmation",
+  "/booking/status",
+  "/lookup-booking",
+  "/customer/bookings",
+  "/support",
   "/booking/one-api/",
 ] as const;
 

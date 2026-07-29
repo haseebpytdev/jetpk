@@ -3,6 +3,8 @@ export { BookingReviewPage } from "./components/BookingReviewPage";
 export { ManualPaymentPage } from "./components/ManualPaymentPage";
 export { CardPaymentPage, PaymentStatusPage } from "./components/CardPaymentPage";
 export { InvoicePage } from "./components/InvoicePage";
+export { BookingConfirmationPage } from "./success/BookingConfirmationPage";
+export { BookingLookupPage } from "./lookup/BookingLookupPage";
 export { BookingSessionCountdown } from "./components/BookingSessionCountdown";
 export { SelectedFlightSummaryCard } from "./components/SelectedFlightSummaryCard";
 export * from "./types";

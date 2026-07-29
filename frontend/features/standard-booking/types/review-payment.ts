@@ -132,8 +132,12 @@ export type PaymentStatusResponse = {
   booking_reference?: string | null;
   payment_status: StatusPresentation;
   booking_status: StatusPresentation;
+  ticketing_status?: StatusPresentation;
   transaction_reference?: string | null;
-  poll?: { should_poll: boolean; interval_ms: number; max_attempts: number };
+  confirmation_url?: string;
+  invoice_url?: string;
+  poll?: PollConfig;
+  booking_poll?: PollConfig;
   message?: string;
 };
 
@@ -162,5 +166,81 @@ export type InvoicePayload = {
   company: Record<string, string | null>;
   pdf_available: boolean;
   pdf_download_path?: string | null;
+  documents?: PortalDocument[];
   message?: string;
+};
+
+export type PortalDocument = {
+  key: string;
+  label: string;
+  status: string;
+  available: boolean;
+  document_number?: string | null;
+  download_path?: string | null;
+  unavailable_message?: string;
+};
+
+export type SuccessPresentation = {
+  heading: string;
+  subtitle: string;
+  tone: "success" | "pending" | "processing" | "warning" | "neutral";
+  show_celebration: boolean;
+};
+
+export type PnrDetails = {
+  booking_reference?: string | null;
+  airline_locator?: string | null;
+  available: boolean;
+};
+
+export type TicketSummary = {
+  ticket_number?: string | null;
+  passenger_name?: string | null;
+  issued_at?: string | null;
+  status?: string;
+};
+
+export type PostBookingAction = {
+  code: string;
+  label: string;
+  available: boolean;
+  url?: string | null;
+  reason_unavailable?: string | null;
+};
+
+export type PollConfig = {
+  should_poll: boolean;
+  interval_ms: number;
+  max_attempts: number;
+};
+
+export type CancellationEligibility = {
+  eligible: boolean;
+  request_pending: boolean;
+  already_cancelled: boolean;
+  message?: string | null;
+};
+
+export type RefundStatus = {
+  available: boolean;
+  status?: string | null;
+  label?: string | null;
+};
+
+export type BookingConfirmation = CheckoutState & {
+  presentation: SuccessPresentation;
+  pnr_details: PnrDetails;
+  ticketing_status: StatusPresentation;
+  tickets: TicketSummary[];
+  actions: PostBookingAction[];
+  poll: PollConfig;
+  cancellation: CancellationEligibility;
+  refund: RefundStatus;
+};
+
+export type BookingLookupPayload = {
+  booking_reference: string;
+  email: string;
+  phone?: string;
+  "cf-turnstile-response"?: string;
 };

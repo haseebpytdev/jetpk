@@ -7,7 +7,7 @@
 | `/booking/review` | GET | `?format=json` | Review context |
 | `/booking/review` | POST | `?format=json` | Submit review + create booking |
 | `/booking/checkout-state` | GET | `?format=json` | Post-submit checkout state |
-| `/booking/confirmation` | GET | `?format=json` | Same as checkout-state |
+| `/booking/confirmation` | GET | `?format=json` | Post-booking confirmation (`presentConfirmation`) |
 | `/booking/payment/status` | GET | `?format=json` | Payment status polling |
 | `/booking/invoice` | GET | `?format=json` | Invoice presentation |
 | `/payments/abhipay/start/{booking}` | POST | `?format=json` | Card initiation (auth) |
@@ -25,6 +25,11 @@ Blade routes remain unchanged as migration fallback.
 | `/booking/payment/status` | `PaymentStatusPage` |
 | `/booking/payment/return` | Redirect to status |
 | `/booking/invoice` | `InvoicePage` |
+| `/booking/confirmation` | `BookingConfirmationPage` |
+| `/booking/status` | `BookingConfirmationPage` |
+| `/lookup-booking` | `BookingLookupPage` |
+
+JP-FE-10: Confirmation, status alias, lookup, and enhanced invoice/payment-status pages consume `presentConfirmation` and related JSON contracts. See `BOOKING-SUCCESS-AND-POST-BOOKING-ARCHITECTURE.md`.
 
 ## Payment methods (JetPakistan)
 

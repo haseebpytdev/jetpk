@@ -128,4 +128,39 @@ class StandardBookingReviewJsonTest extends TestCase
             ->assertJsonPath('ok', true)
             ->assertJsonStructure(['pricing', 'company', 'booking_reference']);
     }
+
+    public function test_confirmation_json_returns_post_booking_contract(): void
+    {
+        $this->seedPassengerSession();
+
+        $this->postJson('/booking/review?format=json', [
+            'booking_method' => 'pay_later',
+        ]);
+
+        $this->getJson('/booking/confirmation?format=json')
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonStructure([
+                'presentation' => ['heading', 'subtitle', 'tone', 'show_celebration'],
+                'booking_status' => ['code', 'label'],
+                'payment_status' => ['code', 'label'],
+                'ticketing_status' => ['code', 'label'],
+                'pnr_details' => ['available'],
+                'actions',
+                'poll' => ['should_poll', 'interval_ms', 'max_attempts'],
+                'cancellation' => ['eligible', 'request_pending', 'already_cancelled'],
+                'refund' => ['available'],
+            ])
+            ->assertJsonPath('booking_session.status', 'confirmation');
+    }
+
+    public function test_confirmation_json_missing_session_returns_error(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+
+        $this->getJson('/booking/confirmation?format=json')
+            ->assertNotFound()
+            ->assertJsonPath('ok', false)
+            ->assertJsonPath('status', 'missing_session');
+    }
 }
