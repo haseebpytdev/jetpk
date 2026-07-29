@@ -86,6 +86,22 @@ test("multi-city add and remove segments", async ({ page }) => {
 });
 
 test("group ticketing tab renders Laravel search fields only", async ({ page }) => {
+  await page.route("**/laravel/groups/search/facets**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        sectors: [{ value: "JED", label: "KSA — Jeddah" }],
+        categories: [
+          { value: "ksa", label: "KSA" },
+          { value: "uae", label: "UAE" },
+          { value: "muscat", label: "Muscat" },
+        ],
+        date_bounds: { minimum: "2026-01-01", maximum: "2027-12-31" },
+      }),
+    });
+  });
+
   await page.goto("/", { waitUntil: "load" });
 
   await page.getByRole("tab", { name: "Group Ticketing" }).click();

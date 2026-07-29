@@ -53,8 +53,6 @@ export const footerColumns: FooterColumn[] = [
     links: [
       { label: "Terms & Conditions", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
-      { label: "Cookie Policy", href: "/legal/cookies" },
-      { label: "Refund Policy", href: "/legal/refund" },
     ],
   },
 ];

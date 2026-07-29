@@ -11,7 +11,7 @@
 | Docs commit | `ac2ea42` |
 | Merge commit | `bbfb4e0` |
 | Final SHA documentation | `281e2c3` |
-| Final status | COMPLETE |
+| Final status | COMPLETE (Playwright closed in JP-FE-13A) |
 
 ## Objective
 
@@ -91,13 +91,13 @@ Complete JetPakistan public CMS/deep pages, contact/support Turnstile closure, S
 | `npm run lint` | PASS |
 | `npm run build` | PASS (56 routes) |
 | `php artisan test tests/Feature/Jetpk/PublicContentApiTest.php` | PASS (11 tests, 47 assertions) |
-| Playwright `public-content.spec.ts` | BLOCKED locally (webServer cold-start timeout on `next start`; fixture policy fixed for `OTA_ALLOW_SESSION_FIXTURE`) |
+| Playwright `public-content.spec.ts` | PASS (14 tests) — closed in JP-FE-13A |
 
 ## Known limitations
 
-- `/legal/refund` and `/legal/cookies` return 404 until matching custom CMS slugs are published in Laravel
+- `/legal/refund` and `/legal/cookies` return 404 until matching custom CMS slugs are published in Laravel; footer links removed in JP-FE-13A until published
 - No destinations/airlines/offers listing routes (not in Laravel inventory)
-- Playwright smoke requires warm server or extended webServer timeout on cold `next start`
+- Playwright requires `npm run build` before `test:public-content` (see JP-FE-13A summary)
 
 ## Production untouched
 
