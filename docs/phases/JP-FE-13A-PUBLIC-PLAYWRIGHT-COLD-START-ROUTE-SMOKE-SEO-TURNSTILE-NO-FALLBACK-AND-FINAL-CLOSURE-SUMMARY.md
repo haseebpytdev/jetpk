@@ -10,7 +10,7 @@
 | Feature commit | `8c17319` |
 | Docs commit | `7478ffa` |
 | Merge commit | `c31d212` |
-| Final SHA documentation | `pending` |
+| Final SHA documentation | `b0fda58` |
 | Final status | COMPLETE |
 
 ## Objective
