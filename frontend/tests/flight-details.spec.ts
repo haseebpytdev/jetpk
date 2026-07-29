@@ -115,13 +115,32 @@ async function setupResultsAndDetails(
       body: JSON.stringify(
         status === 410
           ? (options?.detailsBody ?? { success: false, message: "Search expired", status: "expired_search" })
-          : mockDetailsBody(),
+          : (options?.detailsBody ?? mockDetailsBody()),
       ),
     });
   });
 
   await page.goto(`/flights/results?${query.toString()}`);
   await expect(page.getByTestId("flight-result-card")).toBeVisible();
+}
+
+async function openSabreRevalidationDrawer(page: import("@playwright/test").Page) {
+  await setupResultsAndDetails(page);
+  await page.unroute("**/laravel/flights/results/offer**");
+  await page.route("**/laravel/flights/results/offer**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        mockDetailsBody({
+          revalidation_required: true,
+          offer: mockOfferWithDetails({ supplier_provider: "sabre", provider: "sabre" }),
+        }),
+      ),
+    });
+  });
+  await page.getByTestId("flight-details-trigger").click();
+  await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
 }
 
 test.describe("JP-FE-06 flight details", () => {
@@ -169,6 +188,25 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
     resolveDetails?.();
     await expect(page.getByTestId("price-breakdown")).toBeVisible();
+  });
+
+  test("shows expired state when details load returns 410", async ({ page }) => {
+    await setupResultsAndDetails(page);
+    await page.unroute("**/laravel/flights/results/offer**");
+    await page.route("**/laravel/flights/results/offer**", async (route) => {
+      await route.fulfill({
+        status: 410,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: false,
+          status: "expired_search",
+          message: "This fare search has expired. Please search again.",
+        }),
+      });
+    });
+    await page.getByTestId("flight-details-trigger").click();
+    await expect(page.getByTestId("offer-expired-state")).toBeVisible();
+    await expect(page.getByText("This fare search has expired. Please search again.")).toBeVisible();
   });
 
   test("shows expired state when revalidation returns 410", async ({ page }) => {
@@ -223,12 +261,15 @@ test.describe("JP-FE-06 flight details", () => {
         contentType: "application/json",
         body: JSON.stringify({
           success: true,
-          status: "success",
+          status: "fare_changed",
+          requires_fare_change_acceptance: true,
           passengers_url: "/booking/passengers?offer_id=offer-1",
           revalidation: {
             price_changed: true,
             original_total: 134047,
             confirmed_total: 139000,
+            old_total: 134047,
+            new_total: 139000,
             currency: "PKR",
             revalidation_status: "changed",
           },
@@ -252,6 +293,173 @@ test.describe("JP-FE-06 flight details", () => {
     await page.getByTestId("continue-to-passengers").click();
     await expect(page.getByTestId("fare-change-dialog")).toBeVisible();
     await expect(page.getByText("Accept new fare")).toBeVisible();
+    await expect(page).toHaveURL(/\/flights\/results/);
+  });
+
+  test("sabre fare-change dialog shows authoritative old and new totals", async ({ page }) => {
+    await openSabreRevalidationDrawer(page);
+    await page.route("**/laravel/flights/results/revalidate-offer**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          status: "fare_changed",
+          requires_fare_change_acceptance: true,
+          passengers_url: "/booking/passengers?offer_id=offer-1",
+          revalidation: {
+            price_changed: true,
+            original_total: 134047,
+            confirmed_total: 141500,
+            old_total: 134047,
+            new_total: 141500,
+            currency: "PKR",
+            revalidation_status: "changed",
+            provider: "sabre",
+          },
+        }),
+      });
+    });
+    await page.getByTestId("continue-to-passengers").click();
+    const dialog = page.getByTestId("fare-change-dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText("134,047 PKR")).toBeVisible();
+    await expect(dialog.getByText("141,500 PKR")).toBeVisible();
+    await expect(page).toHaveURL(/\/flights\/results/);
+  });
+
+  test("sabre fare-change acceptance posts accept_fare_change to Laravel", async ({ page }) => {
+    await openSabreRevalidationDrawer(page);
+    let acceptPosted = false;
+    await page.route("**/laravel/flights/results/revalidate-offer**", async (route) => {
+      const body = route.request().postData() ?? "";
+      if (body.includes("accept_fare_change")) {
+        acceptPosted = true;
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            success: true,
+            status: "success",
+            passengers_url: "/booking/passengers?offer_id=offer-1",
+            revalidation: { price_changed: false, revalidation_status: "valid" },
+          }),
+        });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          status: "fare_changed",
+          requires_fare_change_acceptance: true,
+          passengers_url: "/booking/passengers?offer_id=offer-1",
+          revalidation: {
+            price_changed: true,
+            original_total: 134047,
+            confirmed_total: 141500,
+            currency: "PKR",
+            revalidation_status: "changed",
+          },
+        }),
+      });
+    });
+    await page.getByTestId("continue-to-passengers").click();
+    await expect(page.getByTestId("fare-change-dialog")).toBeVisible();
+    await page.getByText("Accept new fare").click();
+    await expect.poll(() => acceptPosted).toBe(true);
+  });
+
+  test("sabre fare-change acceptance handles second price change", async ({ page }) => {
+    await openSabreRevalidationDrawer(page);
+    await page.route("**/laravel/flights/results/revalidate-offer**", async (route) => {
+      const body = route.request().postData() ?? "";
+      if (body.includes("accept_fare_change")) {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            success: true,
+            status: "fare_changed",
+            requires_fare_change_acceptance: true,
+            passengers_url: "/booking/passengers?offer_id=offer-1",
+            revalidation: {
+              price_changed: true,
+              original_total: 141500,
+              confirmed_total: 145000,
+              currency: "PKR",
+              revalidation_status: "changed",
+            },
+          }),
+        });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          status: "fare_changed",
+          requires_fare_change_acceptance: true,
+          passengers_url: "/booking/passengers?offer_id=offer-1",
+          revalidation: {
+            price_changed: true,
+            original_total: 134047,
+            confirmed_total: 141500,
+            currency: "PKR",
+            revalidation_status: "changed",
+          },
+        }),
+      });
+    });
+    await page.getByTestId("continue-to-passengers").click();
+    await expect(page.getByTestId("fare-change-dialog")).toBeVisible();
+    await page.getByText("Accept new fare").click();
+    await expect(page.getByTestId("fare-change-dialog")).toBeVisible();
+    await expect(page.getByText("145,000 PKR")).toBeVisible();
+    await expect(page).toHaveURL(/\/flights\/results/);
+  });
+
+  test("sabre fare-change acceptance handles second failure", async ({ page }) => {
+    await openSabreRevalidationDrawer(page);
+    await page.route("**/laravel/flights/results/revalidate-offer**", async (route) => {
+      const body = route.request().postData() ?? "";
+      if (body.includes("accept_fare_change")) {
+        await route.fulfill({
+          status: 422,
+          contentType: "application/json",
+          body: JSON.stringify({
+            success: false,
+            status: "failed",
+            message: "We could not confirm this fare with the airline.",
+          }),
+        });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          status: "fare_changed",
+          requires_fare_change_acceptance: true,
+          passengers_url: "/booking/passengers?offer_id=offer-1",
+          revalidation: {
+            price_changed: true,
+            original_total: 134047,
+            confirmed_total: 141500,
+            currency: "PKR",
+            revalidation_status: "changed",
+          },
+        }),
+      });
+    });
+    await page.getByTestId("continue-to-passengers").click();
+    await expect(page.getByTestId("fare-change-dialog")).toBeVisible();
+    await page.getByText("Accept new fare").click();
+    await expect(page.getByTestId("offer-unavailable-state")).toBeVisible();
+    await expect(page).toHaveURL(/\/flights\/results/);
   });
 
   test("mobile viewport renders details without horizontal scroll", async ({ page }) => {

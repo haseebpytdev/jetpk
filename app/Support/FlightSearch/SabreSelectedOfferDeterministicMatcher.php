@@ -66,11 +66,16 @@ final class SabreSelectedOfferDeterministicMatcher
     public function matchArrayOffers(array $offers, array $selectedOffer, array $selectedContext = []): ?array
     {
         $normalized = [];
+        $rawByOfferId = [];
         foreach ($offers as $row) {
             if (! is_array($row)) {
                 continue;
             }
             $normalized[] = NormalizedFlightOfferData::fromArray($row);
+            $offerId = trim((string) ($row['offer_id'] ?? $row['id'] ?? ''));
+            if ($offerId !== '') {
+                $rawByOfferId[$offerId] = $row;
+            }
         }
 
         $source = NormalizedFlightOfferData::fromArray($selectedOffer);
@@ -79,8 +84,26 @@ final class SabreSelectedOfferDeterministicMatcher
             return null;
         }
 
+        $matchedId = trim($match['offer']->offer_id);
+        $rawMatched = $rawByOfferId[$matchedId] ?? [];
+        $pricingFields = [];
+        foreach ([
+            'final_customer_price',
+            'total',
+            'pricing_currency',
+            'currency',
+            'conversion_status',
+            'displayed_price',
+            'markup',
+            'service_fee',
+        ] as $key) {
+            if (array_key_exists($key, $rawMatched) && $rawMatched[$key] !== null && $rawMatched[$key] !== '') {
+                $pricingFields[$key] = $rawMatched[$key];
+            }
+        }
+
         return [
-            'offer' => $match['offer']->toArray(),
+            'offer' => array_merge($match['offer']->toArray(), $pricingFields),
             'match_strategy' => $match['match_strategy'],
         ];
     }

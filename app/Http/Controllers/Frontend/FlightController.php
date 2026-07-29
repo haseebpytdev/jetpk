@@ -27,6 +27,7 @@ use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\FlightSearch\ItineraryFareConsolidator;
 use App\Support\FlightSearch\PublicFlightSearchSecurity;
 use App\Support\FlightSearch\PublicMulticityInquiryPolicy;
+use App\Support\FlightSearch\PublicOfferRevalidationPresenter;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use App\Support\FlightSearch\SabreOfferFreshness;
@@ -270,6 +271,8 @@ class FlightController extends Controller
         }
 
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
+        $acceptFareChange = $request->boolean('accept_fare_change');
+        $oldDisplayTotal = PublicOfferRevalidationPresenter::customerDisplayTotal($offer);
         $refresh = $this->sabreSelectedOfferRevalidationGate->refreshSelectedOffer(
             $agency,
             $offer,
@@ -292,24 +295,55 @@ class FlightController extends Controller
                 $freshness->buildOfferFreshnessMeta($offer, $payload, $metaPatch),
             );
 
+            $newDisplayTotal = PublicOfferRevalidationPresenter::customerDisplayTotal($offer);
+            $fareChangeRevalidation = PublicOfferRevalidationPresenter::priceChanged($oldDisplayTotal, $newDisplayTotal)
+                ? PublicOfferRevalidationPresenter::buildFareChangeRevalidation(
+                    $offer,
+                    $oldDisplayTotal,
+                    $newDisplayTotal,
+                    'sabre',
+                )
+                : null;
+            $requiresAcceptance = $fareChangeRevalidation !== null
+                && PublicOfferRevalidationPresenter::requiresFareChangeAcceptance(
+                    $fareChangeRevalidation,
+                    null,
+                    $acceptFareChange,
+                );
+            $apiStatus = PublicOfferRevalidationPresenter::resolveApiStatus(
+                $fareChangeRevalidation ?? [],
+                $requiresAcceptance,
+            );
+            $passengersUrl = $this->buildCustomerSelectUrl(
+                $this->offerIsCustomerBookable($offer, $criteria),
+                $offer,
+                $searchId,
+                $criteria,
+            );
+
             Log::info('flight_search.selected_offer_refresh.success', [
                 'search_id' => $searchId,
                 'offer_id' => $offerId,
                 'reason' => (string) ($metaPatch['selected_offer_refresh_reason'] ?? ''),
+                'fare_changed' => $fareChangeRevalidation !== null,
+                'requires_acceptance' => $requiresAcceptance,
             ]);
 
             return response()->json([
                 'success' => true,
-                'status' => 'success',
-                'message' => (string) ($refresh['message'] ?? $freshness->customerSafeMessage('refresh_search_success')),
+                'status' => $apiStatus,
+                'message' => $requiresAcceptance
+                    ? (string) ($fareChangeRevalidation['safe_customer_message'] ?? __('The airline fare has changed. Please review the updated price before continuing.'))
+                    : (string) ($refresh['message'] ?? $freshness->customerSafeMessage('refresh_search_success')),
+                'requires_fare_change_acceptance' => $requiresAcceptance,
+                'revalidation' => $fareChangeRevalidation ?? [
+                    'revalidation_status' => 'valid',
+                    'provider' => 'sabre',
+                    'price_changed' => false,
+                ],
                 'offer_freshness' => $freshnessMeta,
                 'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
-                'passengers_url' => $this->buildCustomerSelectUrl(
-                    $this->offerIsCustomerBookable($offer, $criteria),
-                    $offer,
-                    $searchId,
-                    $criteria,
-                ),
+                'passengers_url' => $passengersUrl,
             ]);
         }
 
@@ -360,6 +394,7 @@ class FlightController extends Controller
         }
 
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
+        $acceptFareChange = $request->boolean('accept_fare_change');
         $selectedFareOptionId = trim((string) $request->input('selected_fare_option_id', ''));
         $selectedFareOptionId = $selectedFareOptionId !== '' ? $selectedFareOptionId : null;
 
@@ -396,16 +431,28 @@ class FlightController extends Controller
         $canContinue = in_array($publicStatus, ['valid', 'changed'], true);
 
         if (($refresh['success'] ?? false) === true && $canContinue) {
+            $revalidation = PublicOfferRevalidationPresenter::withFareChangeAliases($revalidation);
+            $requiresAcceptance = PublicOfferRevalidationPresenter::requiresFareChangeAcceptance(
+                $revalidation,
+                null,
+                $acceptFareChange,
+            );
+            $apiStatus = PublicOfferRevalidationPresenter::resolveApiStatus($revalidation, $requiresAcceptance);
+
             Log::info('flight_search.iati_selected_offer_refresh.success', [
                 'search_id' => $searchId,
                 'offer_id' => $offerId,
                 'revalidation_status' => $publicStatus,
+                'requires_acceptance' => $requiresAcceptance,
             ]);
 
             return response()->json([
                 'success' => true,
-                'status' => 'success',
-                'message' => (string) ($refresh['message'] ?? $revalidation['safe_customer_message'] ?? ''),
+                'status' => $apiStatus,
+                'message' => $requiresAcceptance
+                    ? (string) ($revalidation['safe_customer_message'] ?? __('The airline fare has changed. Please review the updated price before continuing.'))
+                    : (string) ($refresh['message'] ?? $revalidation['safe_customer_message'] ?? ''),
+                'requires_fare_change_acceptance' => $requiresAcceptance,
                 'revalidation' => $revalidation,
                 'offer_freshness' => [
                     'provider_label' => 'IATI',

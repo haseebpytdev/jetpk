@@ -195,6 +195,7 @@ export type RevalidateOfferResponse = {
   status?: string;
   message?: string;
   passengers_url?: string;
+  requires_fare_change_acceptance?: boolean;
   offer_freshness?: Record<string, unknown>;
   search_freshness?: SearchFreshness;
   revalidation?: Record<string, unknown>;

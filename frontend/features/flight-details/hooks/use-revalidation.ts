@@ -22,6 +22,10 @@ export type RevalidationParams = {
   outboundKey?: string;
 };
 
+function readTotal(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
 export function useRevalidation() {
   const [state, setState] = useState<RevalidationState>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -33,12 +37,14 @@ export function useRevalidation() {
   } | null>(null);
   const inFlightRef = useRef(false);
   const pendingHandoffRef = useRef<string | null>(null);
+  const lastParamsRef = useRef<RevalidationParams | null>(null);
 
   const reset = useCallback(() => {
     setState("idle");
     setMessage(null);
     setFareChange(null);
     pendingHandoffRef.current = null;
+    lastParamsRef.current = null;
     inFlightRef.current = false;
   }, []);
 
@@ -55,15 +61,26 @@ export function useRevalidation() {
   const extractFareChange = useCallback((body: RevalidateOfferResponse) => {
     const revalidation = body.revalidation ?? {};
     const priceChanged =
+      body.status === "fare_changed" ||
+      body.requires_fare_change_acceptance === true ||
       Boolean(revalidation.price_changed) ||
       revalidation.revalidation_status === "changed" ||
       Boolean(body.offer_freshness?.price_changed);
 
     if (!priceChanged) return null;
 
+    const originalTotal =
+      readTotal(revalidation.original_total) ??
+      readTotal(revalidation.old_total) ??
+      readTotal((revalidation as Record<string, unknown>).previous_total);
+    const confirmedTotal =
+      readTotal(revalidation.confirmed_total) ??
+      readTotal(revalidation.new_total) ??
+      readTotal((revalidation as Record<string, unknown>).updated_total);
+
     return {
-      originalTotal: typeof revalidation.original_total === "number" ? revalidation.original_total : undefined,
-      confirmedTotal: typeof revalidation.confirmed_total === "number" ? revalidation.confirmed_total : undefined,
+      originalTotal,
+      confirmedTotal,
       currency: typeof revalidation.currency === "string" ? revalidation.currency : "PKR",
       passengersUrl: body.passengers_url,
     };
@@ -80,6 +97,18 @@ export function useRevalidation() {
     return true;
   }, []);
 
+  const runRevalidation = useCallback(
+    async (params: RevalidationParams, acceptFareChange = false) => {
+      return revalidateOffer({
+        searchId: params.searchId,
+        offerId: params.offerId,
+        selectedFareOptionId: params.fareOptionKey,
+        acceptFareChange,
+      });
+    },
+    [],
+  );
+
   const continueToPassengers = useCallback(
     async (params: RevalidationParams) => {
       if (inFlightRef.current) return;
@@ -87,6 +116,7 @@ export function useRevalidation() {
       setState("loading");
       setMessage(null);
       setFareChange(null);
+      lastParamsRef.current = params;
 
       try {
         if (params.isReturnCombo && params.comboId && params.outboundKey) {
@@ -102,11 +132,7 @@ export function useRevalidation() {
         const needsRevalidation = providerRequiresRevalidation(params.supplierProvider);
 
         if (needsRevalidation) {
-          const result = await revalidateOffer({
-            searchId: params.searchId,
-            offerId: params.offerId,
-            selectedFareOptionId: params.fareOptionKey,
-          });
+          const result = await runRevalidation(params, false);
 
           if (!result.ok) {
             const failureState = classifyFailure(result.status, result.data);
@@ -120,7 +146,12 @@ export function useRevalidation() {
             pendingHandoffRef.current =
               result.data.passengers_url ??
               (params.selectUrl
-                ? buildCheckoutHandoffUrl(params.selectUrl, params.offerId, params.fareOptionKey ?? params.offerId, params.searchId)
+                ? buildCheckoutHandoffUrl(
+                    params.selectUrl,
+                    params.offerId,
+                    params.fareOptionKey ?? params.offerId,
+                    params.searchId,
+                  )
                 : null);
             setFareChange(change);
             setState("fare_change");
@@ -153,29 +184,62 @@ export function useRevalidation() {
         inFlightRef.current = false;
       }
     },
-    [classifyFailure, extractFareChange, navigateHandoff],
+    [classifyFailure, extractFareChange, navigateHandoff, runRevalidation],
   );
 
   const acceptFareChange = useCallback(async () => {
     if (inFlightRef.current) return;
-    const handoff = pendingHandoffRef.current ?? fareChange?.passengersUrl ?? null;
-    if (!handoff) {
+    const params = lastParamsRef.current;
+    if (!params) {
       setState("error");
       setMessage("Unable to accept the updated fare. Please try again.");
       return;
     }
+
     inFlightRef.current = true;
     setState("loading");
+
     try {
-      if (!navigateHandoff(handoff)) {
+      if (providerRequiresRevalidation(params.supplierProvider)) {
+        const result = await runRevalidation(params, true);
+
+        if (!result.ok) {
+          const failureState = classifyFailure(result.status, result.data);
+          setState(failureState);
+          setMessage(result.message);
+          return;
+        }
+
+        const secondChange = extractFareChange(result.data);
+        if (secondChange) {
+          pendingHandoffRef.current = result.data.passengers_url ?? pendingHandoffRef.current;
+          setFareChange(secondChange);
+          setState("fare_change");
+          setMessage("The fare changed again. Please review the updated price.");
+          return;
+        }
+
+        const passengersUrl = result.data.passengers_url ?? pendingHandoffRef.current;
+        if (!passengersUrl || !navigateHandoff(passengersUrl)) {
+          setState("error");
+          setMessage("Unable to accept the updated fare. Please try again.");
+          return;
+        }
+        setState("success");
+        return;
+      }
+
+      const handoff = pendingHandoffRef.current ?? fareChange?.passengersUrl ?? null;
+      if (!handoff || !navigateHandoff(handoff)) {
         setState("error");
+        setMessage("Unable to accept the updated fare. Please try again.");
       } else {
         setState("success");
       }
     } finally {
       inFlightRef.current = false;
     }
-  }, [fareChange?.passengersUrl, navigateHandoff]);
+  }, [classifyFailure, extractFareChange, fareChange?.passengersUrl, navigateHandoff, runRevalidation]);
 
   return {
     state,

@@ -124,6 +124,7 @@ export async function revalidateOffer(params: {
   searchId: string;
   offerId: string;
   selectedFareOptionId?: string;
+  acceptFareChange?: boolean;
 }): Promise<
   | { ok: true; data: RevalidateOfferResponse }
   | { ok: false; status: number; message: string; data?: RevalidateOfferResponse }
@@ -135,6 +136,9 @@ export async function revalidateOffer(params: {
   form.append("flight_id", params.offerId);
   if (params.selectedFareOptionId) {
     form.append("selected_fare_option_id", params.selectedFareOptionId);
+  }
+  if (params.acceptFareChange) {
+    form.append("accept_fare_change", "1");
   }
 
   try {
