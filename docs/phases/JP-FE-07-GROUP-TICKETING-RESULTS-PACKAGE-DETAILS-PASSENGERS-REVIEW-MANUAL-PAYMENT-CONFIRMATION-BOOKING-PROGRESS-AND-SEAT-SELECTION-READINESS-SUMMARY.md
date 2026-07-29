@@ -50,14 +50,14 @@ Three unpaid timeout releases → lock (`GroupBookingRestrictionService::BLOCK_T
 
 ## Commit SHAs
 
-- Feature: `PENDING`
-- Docs: `PENDING`
-- Merge: `PENDING`
+- Feature: `728d0a0`
+- Docs: `b4f7b7a`
+- Merge: `db6dad1`
 - Final SHA doc: `PENDING`
 
 ## Final status
 
-Implementation complete; awaiting merge SHA recording.
+FINAL_PASS — all targeted tests green; main merged with no-ff.
 
 ## Next phase
 
