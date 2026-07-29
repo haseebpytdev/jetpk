@@ -9,8 +9,8 @@
 | Baseline | `b1e77d8` (JP-FE-09) |
 | Feature commit | `ed860da597dc687fcdeedca70f4b53cfe3595a0` |
 | Merge commit | `a49809111fc37a1d279b58e0502f62042e9003ed` |
-| Docs commit | _pending_ |
-| Final status | COMPLETE (pending docs SHA commit) |
+| Docs commit | `4f0f1701fde05cf610cd89079690fdd5bab20c2c` |
+| Final status | COMPLETE |
 
 ## Objective
 
