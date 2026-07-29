@@ -45,6 +45,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('api/public/content')->group(function (): void {
     Route::get('/csrf-token', [PublicContentApiController::class, 'csrfToken'])->name('api.public.content.csrf');
+    Route::get('/turnstile-config', [PublicContentApiController::class, 'turnstileConfig'])->name('api.public.content.turnstile-config');
     Route::get('/site-contact', [PublicContentApiController::class, 'siteContact'])->name('api.public.content.site-contact');
     Route::get('/support/categories', [PublicContentApiController::class, 'supportCategories'])->name('api.public.content.support-categories');
     Route::get('/pages/{pageKey}', [PublicContentApiController::class, 'managedPage'])

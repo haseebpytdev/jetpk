@@ -22,6 +22,7 @@ Next.js public content pages consume Laravel-managed CMS data through a typed se
 | Route | Purpose |
 |-------|---------|
 | `GET /api/public/content/csrf-token` | Session CSRF for form POST |
+| `GET /api/public/content/turnstile-config` | Public Turnstile site key + response field (JP-FE-10A) |
 | `GET /api/public/content/site-contact` | `ClientGlobalContactResolver` |
 | `GET /api/public/content/support/categories` | `SupportTicketCategory` enum |
 | `GET /api/public/content/pages/{pageKey}` | Managed page CMS payload |

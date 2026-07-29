@@ -49,7 +49,7 @@ frontend/features/standard-booking/
 
 ## Guest access
 
-Post-session access uses `/lookup-booking` → Laravel guest token URL (`/guest/bookings/{id}/access/{token}`). Next.js lookup form POSTs to Laravel with CSRF; Turnstile preserved when enabled server-side.
+Post-session access uses `/lookup-booking` → Laravel guest token URL (`/guest/bookings/{id}/access/{token}`). Next.js lookup form POSTs to Laravel with CSRF and Cloudflare Turnstile when enabled (JP-FE-10A).
 
 ## Security
 
