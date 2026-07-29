@@ -9,6 +9,7 @@ use App\Services\Client\ClientPageContentResolver;
 use App\Services\PublicContent\PublicContentApiPresenter;
 use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Security\TurnstileVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,18 @@ class PublicContentApiController extends Controller
     {
         return response()->json([
             'csrf_token' => csrf_token(),
+        ]);
+    }
+
+    public function turnstileConfig(): JsonResponse
+    {
+        $enabled = TurnstileVerifier::isEnabled();
+        $siteKey = $enabled ? trim((string) config('services.turnstile.site_key', '')) : '';
+
+        return response()->json([
+            'enabled' => $enabled,
+            'site_key' => $enabled && $siteKey !== '' ? $siteKey : null,
+            'response_field' => TurnstileVerifier::RESPONSE_FIELD,
         ]);
     }
 
