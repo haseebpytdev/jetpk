@@ -25,6 +25,8 @@ Implemented for standard flight passengers, review, and payment via `StandardBoo
 
 JP-FE-09: Seat & Extras may be `skipped` when no authoritative seat map exists (not falsely `completed`).
 
+JP-FE-10: Confirmation step is `current` on `/booking/confirmation` only when Laravel `presentConfirmation` reports `booking_session.status = confirmation`. Confirmation is not completed for booking-processing or failed states.
+
 ## Step states
 
 `completed` | `current` | `upcoming` | `skipped`

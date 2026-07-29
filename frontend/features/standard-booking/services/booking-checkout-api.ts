@@ -2,6 +2,7 @@ import { ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
 import type { LaravelValidationErrors } from "@/features/auth/utils/laravel-auth-api";
 import { laravelApiPath } from "@/services/flight-search";
 import type {
+  BookingConfirmation,
   BookingReviewContext,
   CardPaymentStartResponse,
   CheckoutState,
@@ -70,6 +71,10 @@ export async function submitBookingReview(bookingMethod: string) {
 
 export async function fetchCheckoutState() {
   return checkoutFetch<CheckoutState>("/booking/checkout-state?format=json");
+}
+
+export async function fetchConfirmation() {
+  return checkoutFetch<BookingConfirmation>("/booking/confirmation?format=json");
 }
 
 export async function fetchPaymentStatus(reference?: string) {

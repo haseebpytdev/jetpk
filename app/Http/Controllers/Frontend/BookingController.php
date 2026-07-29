@@ -1470,6 +1470,13 @@ class BookingController extends Controller
     {
         $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
         if ($bookingId === null) {
+            if ($this->wantsBookingJson($request)) {
+                return response()->json(
+                    $this->standardBookingJsonPresenter->presentError('missing_session', __('Please search for a flight before continuing to checkout.'), '/'),
+                    404,
+                );
+            }
+
             return $this->clientRedirect()->route('flights.search');
         }
 
@@ -1479,6 +1486,13 @@ class BookingController extends Controller
 
         if ($booking === null) {
             $request->session()->forget(PublicBooking::SESSION_BOOKING_ID);
+
+            if ($this->wantsBookingJson($request)) {
+                return response()->json(
+                    $this->standardBookingJsonPresenter->presentError('missing_session', __('Booking session not found.'), '/'),
+                    404,
+                );
+            }
 
             return $this->clientRedirect()->route('flights.search');
         }
@@ -1550,7 +1564,7 @@ class BookingController extends Controller
 
         if ($this->wantsBookingJson($request)) {
             return response()->json(
-                $this->standardBookingJsonPresenter->presentCheckoutState($viewData, $request),
+                $this->standardBookingJsonPresenter->presentConfirmation($viewData, $request),
             );
         }
 

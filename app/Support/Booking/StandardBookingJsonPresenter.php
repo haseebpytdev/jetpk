@@ -2,8 +2,10 @@
 
 namespace App\Support\Booking;
 
+use App\Enums\BookingCancellationStatus;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\BookingDocument;
 use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\CheckoutFareBreakdownPresenter;
 use App\Support\Bookings\PublicCheckoutFareChangeState;
@@ -517,10 +519,49 @@ class StandardBookingJsonPresenter
             'itinerary' => $this->presentItineraryFromReview($viewData, $offer, $criteria),
             'passengers' => $this->presentPassengersSummary($booking),
             'contact' => $this->presentContactSummary($booking),
-            'documents_portal' => BookingPaymentSummaryPresenter::documentsForPortal($booking, 'customer'),
+            'documents_portal' => $this->presentDocumentsPortalSafe($booking, 'customer'),
             'support' => $this->supportContacts(),
             'confirmation_handoff_url' => $bookingStatus['terminal'] ? '/booking/confirmation' : null,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $viewData
+     * @return array<string, mixed>
+     */
+    public function presentConfirmation(array $viewData, Request $request): array
+    {
+        $base = $this->presentCheckoutState($viewData, $request);
+        if (($base['ok'] ?? false) !== true) {
+            return $base;
+        }
+
+        $booking = $viewData['booking'] ?? null;
+        if (! $booking instanceof Booking) {
+            return $this->presentError('missing_session', __('Booking session not found.'), '/');
+        }
+
+        $booking->loadMissing(['tickets.passenger', 'supplierBookings', 'cancellationRequests', 'refunds']);
+        $paymentStatus = is_array($base['payment_status'] ?? null) ? $base['payment_status'] : [];
+        $bookingStatus = is_array($base['booking_status'] ?? null) ? $base['booking_status'] : [];
+        $method = (string) ($base['booking_method'] ?? 'pay_later');
+        $ticketingStatus = $this->presentTicketingStatus($booking);
+
+        $base['booking_session']['status'] = 'confirmation';
+        $base['booking_session']['progress'] = $this->progressStateForCheckout(
+            'confirmation',
+            $this->seatExtrasCapability(is_array($viewData['offer'] ?? null) ? $viewData['offer'] : null)['progress_step'] ?? 'skipped',
+        );
+        $base['presentation'] = $this->presentSuccessPresentation($booking, $paymentStatus, $bookingStatus, $method, $ticketingStatus);
+        $base['pnr_details'] = $this->presentPnrDetails($booking);
+        $base['ticketing_status'] = $ticketingStatus;
+        $base['tickets'] = $this->presentTicketsSummary($booking);
+        $base['actions'] = $this->presentPostBookingActions($booking, $request);
+        $base['poll'] = $this->presentBookingPollConfig($booking, $paymentStatus, $bookingStatus, $ticketingStatus);
+        $base['cancellation'] = $this->presentCancellationEligibility($booking);
+        $base['refund'] = $this->presentRefundStatus($booking);
+
+        return $base;
     }
 
     /**
@@ -535,17 +576,23 @@ class StandardBookingJsonPresenter
         $paymentStatus = $this->mapPaymentStatus($abhiPayCheckout);
         $terminal = in_array($paymentStatus['code'], ['succeeded', 'failed', 'cancelled', 'duplicate'], true);
 
+        $bookingStatus = $this->mapBookingStatus($booking);
+
         return [
             'ok' => true,
             'booking_reference' => $booking->booking_reference,
             'payment_status' => $paymentStatus,
-            'booking_status' => $this->mapBookingStatus($booking),
+            'booking_status' => $bookingStatus,
+            'ticketing_status' => $this->presentTicketingStatus($booking),
             'transaction_reference' => $transactionReference ?? ($abhiPayCheckout['latest_transaction_reference'] ?? null),
+            'confirmation_url' => '/booking/confirmation',
+            'invoice_url' => '/booking/invoice',
             'poll' => [
                 'should_poll' => ! $terminal && in_array($paymentStatus['code'], ['pending', 'processing', 'unknown'], true),
                 'interval_ms' => 3000,
                 'max_attempts' => 40,
             ],
+            'booking_poll' => $this->presentBookingPollConfig($booking, $paymentStatus, $bookingStatus, $this->presentTicketingStatus($booking)),
         ];
     }
 
@@ -572,13 +619,13 @@ class StandardBookingJsonPresenter
             ],
         );
         $contact = PublicAgencyContactResolver::resolve(null);
-        $documents = BookingPaymentSummaryPresenter::documentsForPortal($booking, 'customer');
+        $documents = $this->presentDocumentsPortalSafe($booking, 'customer');
         $invoiceDoc = collect($documents)->firstWhere('key', 'invoice');
 
         return [
             'ok' => true,
             'invoice_number' => $invoiceDoc !== null
-                ? ($invoiceDoc['document']->document_number ?? $booking->booking_reference)
+                ? ($invoiceDoc['document_number'] ?? $booking->booking_reference)
                 : null,
             'booking_reference' => $booking->booking_reference,
             'issue_date' => now()->format('Y-m-d'),
@@ -600,8 +647,9 @@ class StandardBookingJsonPresenter
                 'email' => $contact->email,
                 'address' => trim(client_branding()->address()) !== '' ? trim(client_branding()->address()) : $contact->address,
             ],
-            'pdf_available' => $invoiceDoc !== null,
-            'pdf_download_path' => $invoiceDoc !== null ? '/booking/invoice/download' : null,
+            'pdf_available' => $invoiceDoc !== null && filled($invoiceDoc['download_path'] ?? null),
+            'pdf_download_path' => $invoiceDoc['download_path'] ?? null,
+            'documents' => $documents,
         ];
     }
 
@@ -964,5 +1012,364 @@ class StandardBookingJsonPresenter
             'support_url' => '/support',
             'lookup_url' => '/lookup-booking',
         ];
+    }
+
+    /**
+     * @return array{code: string, label: string, terminal: bool}
+     */
+    private function presentTicketingStatus(Booking $booking): array
+    {
+        $status = strtolower(trim((string) ($booking->ticketing_status ?? 'not_started')));
+        $hasTickets = $booking->relationLoaded('tickets')
+            ? $booking->tickets->isNotEmpty()
+            : $booking->tickets()->exists();
+        $ticketed = $booking->status === BookingStatus::Ticketed
+            || in_array($status, ['ticketed', 'issued'], true)
+            || $booking->ticketed_at !== null
+            || $hasTickets;
+
+        $label = match (true) {
+            $ticketed => 'Ticketed',
+            in_array($status, ['pending', 'ready'], true) => 'Pending',
+            $status === 'failed' => 'Failed',
+            $status === 'not_supported' => 'Not supported',
+            default => 'Not started',
+        };
+
+        return [
+            'code' => $ticketed ? 'ticketed' : ($status !== '' ? $status : 'not_started'),
+            'label' => $label,
+            'terminal' => $ticketed || in_array($status, ['failed', 'not_supported', 'voided'], true),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $paymentStatus
+     * @param  array<string, mixed>  $bookingStatus
+     * @return array<string, mixed>
+     */
+    private function presentSuccessPresentation(
+        Booking $booking,
+        array $paymentStatus,
+        array $bookingStatus,
+        string $method,
+        array $ticketingStatus,
+    ): array {
+        $paymentCode = (string) ($paymentStatus['code'] ?? 'not_started');
+        $ticketed = (bool) ($ticketingStatus['terminal'] ?? false) && ($ticketingStatus['code'] ?? '') === 'ticketed';
+        $cancelled = $booking->status === BookingStatus::Cancelled;
+        $failed = $booking->status === BookingStatus::Failed;
+        $hasPnr = filled($booking->pnr);
+        $isManual = $method !== 'online_card';
+
+        if ($cancelled) {
+            return [
+                'heading' => 'Booking cancelled',
+                'subtitle' => 'This booking is no longer active.',
+                'tone' => 'neutral',
+                'show_celebration' => false,
+            ];
+        }
+
+        if ($failed) {
+            return [
+                'heading' => 'Booking requires attention',
+                'subtitle' => 'We could not complete this booking automatically. Our team will follow up.',
+                'tone' => 'warning',
+                'show_celebration' => false,
+            ];
+        }
+
+        if ($ticketed) {
+            return [
+                'heading' => 'Booking complete',
+                'subtitle' => 'Your tickets have been issued.',
+                'tone' => 'success',
+                'show_celebration' => true,
+            ];
+        }
+
+        if ($hasPnr) {
+            return [
+                'heading' => 'Booking confirmed',
+                'subtitle' => 'Your reservation is confirmed. Ticketing may still be in progress.',
+                'tone' => 'success',
+                'show_celebration' => false,
+            ];
+        }
+
+        if ($paymentCode === 'succeeded') {
+            return [
+                'heading' => 'Payment received',
+                'subtitle' => 'We are processing your booking with the airline.',
+                'tone' => 'processing',
+                'show_celebration' => false,
+            ];
+        }
+
+        if ($isManual && in_array($paymentCode, ['not_started', 'pending'], true)) {
+            return [
+                'heading' => 'Booking request received',
+                'subtitle' => 'Complete manual payment using the instructions provided.',
+                'tone' => 'pending',
+                'show_celebration' => false,
+            ];
+        }
+
+        return [
+            'heading' => 'Booking request received',
+            'subtitle' => (string) ($bookingStatus['label'] ?? 'We are processing your request.'),
+            'tone' => 'pending',
+            'show_celebration' => false,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentPnrDetails(Booking $booking): array
+    {
+        $airlineLocator = null;
+        if ($booking->relationLoaded('supplierBookings')) {
+            $airlineLocator = $booking->supplierBookings
+                ->pluck('supplier_reference')
+                ->filter(fn ($value) => filled($value))
+                ->first();
+        }
+
+        return [
+            'booking_reference' => filled($booking->pnr) ? strtoupper((string) $booking->pnr) : null,
+            'airline_locator' => filled($airlineLocator) ? strtoupper((string) $airlineLocator) : null,
+            'available' => filled($booking->pnr) || filled($airlineLocator),
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function presentTicketsSummary(Booking $booking): array
+    {
+        if (! $booking->relationLoaded('tickets')) {
+            return [];
+        }
+
+        return $booking->tickets
+            ->sortBy('id')
+            ->values()
+            ->map(function ($ticket): array {
+                $passenger = $ticket->passenger;
+
+                return [
+                    'ticket_number' => filled($ticket->ticket_number) ? (string) $ticket->ticket_number : null,
+                    'passenger_name' => $passenger !== null
+                        ? trim((string) $passenger->first_name.' '.(string) $passenger->last_name)
+                        : null,
+                    'issued_at' => $ticket->issued_at?->toIso8601String(),
+                    'status' => (string) ($ticket->status ?? ''),
+                ];
+            })
+            ->filter(fn (array $row): bool => filled($row['ticket_number']))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function presentPostBookingActions(Booking $booking, Request $request): array
+    {
+        $documents = $this->presentDocumentsPortalSafe($booking, 'customer');
+        $actions = [
+            [
+                'code' => 'view_confirmation',
+                'label' => 'View confirmation',
+                'available' => true,
+                'url' => '/booking/confirmation',
+            ],
+            [
+                'code' => 'view_invoice',
+                'label' => 'View invoice',
+                'available' => true,
+                'url' => '/booking/invoice',
+            ],
+            [
+                'code' => 'contact_support',
+                'label' => 'Contact support',
+                'available' => true,
+                'url' => '/support',
+            ],
+        ];
+
+        foreach ($documents as $document) {
+            if (! ($document['available'] ?? false) || ! filled($document['download_path'] ?? null)) {
+                continue;
+            }
+
+            $actions[] = [
+                'code' => 'download_'.$document['key'],
+                'label' => 'Download '.$document['label'],
+                'available' => true,
+                'url' => (string) $document['download_path'],
+            ];
+        }
+
+        if (Auth::check()) {
+            $actions[] = [
+                'code' => 'my_bookings',
+                'label' => 'My bookings',
+                'available' => true,
+                'url' => '/customer/bookings',
+            ];
+        } else {
+            $actions[] = [
+                'code' => 'lookup_booking',
+                'label' => 'Lookup booking later',
+                'available' => true,
+                'url' => '/lookup-booking',
+            ];
+        }
+
+        if ($booking->status !== BookingStatus::Cancelled) {
+            $openCancellation = $booking->relationLoaded('cancellationRequests')
+                ? $booking->cancellationRequests->contains(
+                    fn ($requestRow) => in_array($requestRow->status->value, [
+                        BookingCancellationStatus::Requested->value,
+                        BookingCancellationStatus::Approved->value,
+                    ], true),
+                )
+                : false;
+
+            $actions[] = [
+                'code' => 'request_cancellation',
+                'label' => 'Request cancellation',
+                'available' => Auth::check() && ! $openCancellation,
+                'url' => Auth::check() ? '/customer/bookings/'.$booking->id : null,
+                'reason_unavailable' => Auth::check()
+                    ? ($openCancellation ? 'A cancellation request is already in progress.' : null)
+                    : 'Sign in or use booking lookup to manage cancellation.',
+            ];
+        }
+
+        return $actions;
+    }
+
+    /**
+     * @param  array<string, mixed>  $paymentStatus
+     * @param  array<string, mixed>  $bookingStatus
+     * @param  array<string, mixed>  $ticketingStatus
+     * @return array<string, mixed>
+     */
+    private function presentBookingPollConfig(
+        Booking $booking,
+        array $paymentStatus,
+        array $bookingStatus,
+        array $ticketingStatus,
+    ): array {
+        $paymentTerminal = (bool) ($paymentStatus['terminal'] ?? false);
+        $bookingTerminal = (bool) ($bookingStatus['terminal'] ?? false)
+            || $booking->status === BookingStatus::Cancelled
+            || $booking->status === BookingStatus::Failed;
+        $ticketingTerminal = (bool) ($ticketingStatus['terminal'] ?? false);
+        $paymentProcessing = in_array((string) ($paymentStatus['code'] ?? ''), ['pending', 'processing'], true);
+        $bookingProcessing = $booking->submitted_at !== null
+            && ! $bookingTerminal
+            && ! filled($booking->pnr)
+            && ($paymentStatus['code'] ?? '') === 'succeeded';
+
+        $shouldPoll = ($paymentProcessing && ! $paymentTerminal)
+            || ($bookingProcessing && ! $ticketingTerminal && ! $bookingTerminal);
+
+        return [
+            'should_poll' => $shouldPoll,
+            'interval_ms' => 4000,
+            'max_attempts' => 45,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentCancellationEligibility(Booking $booking): array
+    {
+        $openCancellation = $booking->relationLoaded('cancellationRequests')
+            ? $booking->cancellationRequests->contains(
+                fn ($requestRow) => in_array($requestRow->status->value, [
+                    BookingCancellationStatus::Requested->value,
+                    BookingCancellationStatus::Approved->value,
+                ], true),
+            )
+            : false;
+
+        return [
+            'eligible' => false,
+            'request_pending' => $openCancellation,
+            'already_cancelled' => $booking->status === BookingStatus::Cancelled,
+            'message' => $booking->status === BookingStatus::Cancelled
+                ? 'This booking has been cancelled.'
+                : ($openCancellation
+                    ? 'A cancellation request is already in progress.'
+                    : 'Use your customer account or booking lookup to request cancellation.'),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentRefundStatus(Booking $booking): array
+    {
+        $latestRefund = $booking->relationLoaded('refunds')
+            ? $booking->refunds->sortByDesc('id')->first()
+            : null;
+
+        if ($latestRefund === null) {
+            return [
+                'available' => false,
+                'status' => null,
+                'label' => null,
+            ];
+        }
+
+        return [
+            'available' => true,
+            'status' => (string) ($latestRefund->status->value ?? ''),
+            'label' => str_replace('_', ' ', ucfirst((string) ($latestRefund->status->value ?? ''))),
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function presentDocumentsPortalSafe(Booking $booking, string $audience = 'customer'): array
+    {
+        return collect(BookingPaymentSummaryPresenter::documentsForPortal($booking, $audience))
+            ->map(function (array $row) use ($audience): array {
+                /** @var BookingDocument|null $document */
+                $document = $row['document'] ?? null;
+
+                return [
+                    'key' => (string) ($row['key'] ?? ''),
+                    'label' => (string) ($row['label'] ?? ''),
+                    'status' => (string) ($row['status'] ?? 'unavailable'),
+                    'available' => (bool) ($row['available'] ?? false),
+                    'document_number' => $document?->document_number,
+                    'download_path' => $this->documentDownloadPath($document, $audience),
+                    'unavailable_message' => (string) ($row['unavailable_message'] ?? ''),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function documentDownloadPath(?BookingDocument $document, string $audience): ?string
+    {
+        if ($document === null || $document->file_path === null) {
+            return null;
+        }
+
+        if ($audience === 'customer' && Auth::check()) {
+            return '/customer/documents/'.$document->id.'/download';
+        }
+
+        return null;
     }
 }
