@@ -37,6 +37,7 @@ use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
 use App\Services\TravelData\AirlineBrandingService;
 use App\Support\Booking\AgentBookingContext;
+use App\Support\Booking\StandardBookingJsonPresenter;
 use App\Support\Bookings\BookingHoldSessionSupplierOfferIdResolver;
 use App\Support\Bookings\BookingSupplierConfirmationNoticeResolver;
 use App\Support\FlightSearch\PublicMulticityInquiryPolicy;
@@ -78,6 +79,7 @@ use App\Support\PublicBooking;
 use App\Support\Sabre\SabreHostSellClassifier;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -115,9 +117,10 @@ class BookingController extends Controller
         protected ReturnSplitComboService $returnSplitComboService,
         protected PiaNdcOptionPnrService $piaNdcOptionPnrService,
         protected PiaNdcSelectedFareReadinessService $piaNdcSelectedFareReadinessService,
+        protected StandardBookingJsonPresenter $standardBookingJsonPresenter,
     ) {}
 
-    public function passengers(StoreBookingPassengersRequest $request): View|RedirectResponse
+    public function passengers(StoreBookingPassengersRequest $request): View|RedirectResponse|JsonResponse
     {
         $checkoutContext = app(ClientCheckoutContextResolver::class);
         $checkoutContext->persist($request);
@@ -800,6 +803,14 @@ class BookingController extends Controller
                 }
             }
 
+            if ($this->wantsBookingJson($request)) {
+                return response()->json(
+                    $this->standardBookingJsonPresenter->presentPassengersSuccess(
+                        route('booking.review', absolute: false),
+                    ),
+                );
+            }
+
             return $this->clientRedirect()->route('booking.review');
         }
 
@@ -845,7 +856,7 @@ class BookingController extends Controller
         $effectiveFlightId = $flightId !== '' ? $flightId : (($draft['offer_id'] ?? '') !== '' ? $draft['offer_id'] : ($draft['flight_id'] ?? ''));
 
         if ($request->isMethod('get') && trim((string) $effectiveFlightId) === '') {
-            return $this->redirectMissingCheckoutSession($request);
+            return $this->passengersMissingSessionResponse($request);
         }
 
         $criteria = $this->resolveCheckoutSearchCriteria($draft, (string) ($draft['search_id'] ?? ''));
@@ -879,7 +890,7 @@ class BookingController extends Controller
         if ($effectiveFlightId !== '' && $offer === null) {
             $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
 
-            return $this->redirectSelectedOfferWarning($criteria);
+            return $this->redirectSelectedOfferWarning($criteria, request: $request);
         }
 
         $fareOptionKey = trim((string) ($draft['fare_option_key'] ?? ''));
@@ -967,7 +978,7 @@ class BookingController extends Controller
                     if ($request->session()->get(self::SESSION_BOOKING_AFTER_STALE_RECOVERY)) {
                         $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
 
-                        return $this->redirectSelectedOfferWarning($criteria);
+                        return $this->redirectSelectedOfferWarning($criteria, request: $request);
                     }
                     $unstablePack = $this->tryCheckoutProviderUnstableTestMode(
                         $agency,
@@ -1026,21 +1037,22 @@ class BookingController extends Controller
 
                     $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
 
-                    return $this->redirectSelectedOfferWarning($criteria);
+                    return $this->redirectSelectedOfferWarning($criteria, request: $request);
                 }
                 if (! $checkoutReady && (string) $validation->status === 'provider_error') {
                     $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
 
                     return $this->redirectSelectedOfferWarning(
                         $criteria,
-                        'Fare validation is temporarily unavailable. Please try again.'
+                        'Fare validation is temporarily unavailable. Please try again.',
+                        $request,
                     );
                 }
 
                 if (! $checkoutReady) {
                     $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
 
-                    return $this->redirectSelectedOfferWarning($criteria);
+                    return $this->redirectSelectedOfferWarning($criteria, request: $request);
                 }
             }
 
@@ -1067,7 +1079,7 @@ class BookingController extends Controller
             if (! $this->departurePolicy->offerMeetsLeadTimeForBooking($offer, $criteria)) {
                 $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
 
-                return $this->redirectSelectedOfferWarning($criteria, FlightDeparturePolicy::SAME_DAY_LEAD_MESSAGE);
+                return $this->redirectSelectedOfferWarning($criteria, FlightDeparturePolicy::SAME_DAY_LEAD_MESSAGE, $request);
             }
         }
 
@@ -1184,6 +1196,12 @@ class BookingController extends Controller
                 $effectiveFlightId,
             ),
         ];
+
+        if ($this->wantsBookingJson($request)) {
+            return response()->json(
+                $this->standardBookingJsonPresenter->presentPassengersContext($viewData, $request),
+            );
+        }
 
         $resolvedView = client_view('frontend.booking.passenger-details', 'frontend');
         $this->logJetpkCheckoutPassengersRender($request, $resolvedView);
@@ -2511,8 +2529,20 @@ class BookingController extends Controller
      */
     protected function redirectSelectedOfferWarning(
         array $criteria,
-        string $message = 'This fare is no longer available. Please refresh results and select again.'
-    ): RedirectResponse {
+        string $message = 'This fare is no longer available. Please refresh results and select again.',
+        ?Request $request = null,
+    ): RedirectResponse|JsonResponse {
+        $redirectUrl = $this->hasResultsSearchContext($criteria)
+            ? route('flights.results', $this->buildFlightsResultsQuery($criteria), absolute: false)
+            : app(ClientCheckoutContextResolver::class)->homeSearchUrl();
+
+        if ($request !== null && $this->wantsBookingJson($request)) {
+            return response()->json(
+                $this->standardBookingJsonPresenter->presentError('offer_expired', __($message), $redirectUrl),
+                410,
+            );
+        }
+
         if ($this->hasResultsSearchContext($criteria)) {
             return $this->clientRedirect()->route('flights.results', $this->buildFlightsResultsQuery($criteria))
                 ->withErrors(['flight_id' => __($message)]);
@@ -4194,6 +4224,22 @@ class BookingController extends Controller
         return app(ClientRedirectResolver::class);
     }
 
+    protected function passengersMissingSessionResponse(Request $request): RedirectResponse|JsonResponse
+    {
+        if ($this->wantsBookingJson($request)) {
+            return response()->json(
+                $this->standardBookingJsonPresenter->presentError(
+                    'missing_session',
+                    __('Please search for a flight before continuing to checkout.'),
+                    '/',
+                ),
+                404,
+            );
+        }
+
+        return $this->redirectMissingCheckoutSession($request);
+    }
+
     protected function redirectMissingCheckoutSession(Request $request): RedirectResponse
     {
         $checkoutContext = app(ClientCheckoutContextResolver::class);
@@ -4206,5 +4252,10 @@ class BookingController extends Controller
 
         return redirect()->to(route('home').'#ota-flight-search')
             ->with('offer_warning', __('Please search for a flight before continuing to checkout.'));
+    }
+
+    protected function wantsBookingJson(Request $request): bool
+    {
+        return $request->wantsJson() || $request->query('format') === 'json';
     }
 }

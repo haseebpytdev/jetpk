@@ -12,7 +12,7 @@
 4. Manual Payment
 5. Confirmation
 
-## Standard supplier steps (future)
+## Standard supplier steps (JP-FE-08)
 
 1. Flight Selected
 2. Passenger Details
@@ -20,6 +20,8 @@
 4. Review
 5. Payment
 6. Confirmation
+
+Implemented for standard flight at `/booking/passengers` via `StandardBookingJsonPresenter::progressState()`.
 
 ## Authority
 

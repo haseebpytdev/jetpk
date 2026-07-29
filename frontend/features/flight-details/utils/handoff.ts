@@ -32,6 +32,32 @@ export function resolveHandoffUrl(pathOrUrl: string): string | null {
   return `${base}${normalized}`;
 }
 
+/**
+ * Passenger checkout handoff prefers the Next.js route when the path is /booking/passengers.
+ */
+export function resolvePassengerCheckoutHandoffUrl(pathOrUrl: string): string | null {
+  if (!isAllowedInternalHandoffUrl(pathOrUrl)) return null;
+
+  const normalized = pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")
+    ? (() => {
+        try {
+          const url = new URL(pathOrUrl);
+          return `${url.pathname}${url.search}`;
+        } catch {
+          return pathOrUrl;
+        }
+      })()
+    : pathOrUrl.startsWith("/")
+      ? pathOrUrl
+      : `/${pathOrUrl}`;
+
+  if (normalized.startsWith("/booking/passengers")) {
+    return normalized;
+  }
+
+  return resolveHandoffUrl(pathOrUrl);
+}
+
 export function providerRequiresRevalidation(provider?: string): boolean {
   const lc = (provider ?? "").toLowerCase();
   return lc === "iati" || lc === "sabre";
