@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Enums\BookingCancellationStatus;
 use App\Enums\BookingPaymentMethod;
 use App\Enums\BookingStatus;
+use App\Http\Controllers\Concerns\RespondsWithCustomerPortalJson;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingDocument;
@@ -16,7 +17,11 @@ use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\PaymentOperationalStatus;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Bookings\TicketingOperationalStatus;
+use App\Support\CustomerPortal\CustomerPortalBookingDetailPresenter;
+use App\Support\CustomerPortal\CustomerPortalBookingsPresenter;
+use App\Support\CustomerPortal\CustomerPortalDashboardPresenter;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -26,12 +31,21 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CustomerBookingController extends Controller
 {
+    use RespondsWithCustomerPortalJson;
+
     public function __construct(
         protected BookingPaymentService $paymentService,
+        protected CustomerPortalDashboardPresenter $dashboardPresenter,
+        protected CustomerPortalBookingsPresenter $bookingsPresenter,
+        protected CustomerPortalBookingDetailPresenter $bookingDetailPresenter,
     ) {}
 
-    public function dashboard(Request $request): View
+    public function dashboard(Request $request): View|JsonResponse
     {
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->dashboardPresenter->present($request->user()));
+        }
+
         $customerId = (int) $request->user()->id;
         $bookings = Booking::query()->where('customer_id', $customerId);
 
@@ -80,7 +94,7 @@ class CustomerBookingController extends Controller
         return view(client_view('dashboard', 'customer'), $viewData);
     }
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $filter = (string) $request->query('filter', 'all');
         $allowed = ['all', 'pending_payment', 'pnr_created', 'needs_action', 'cancelled'];
@@ -90,7 +104,7 @@ class CustomerBookingController extends Controller
 
         $bookings = Booking::query()
             ->where('customer_id', $request->user()->id)
-            ->with(['contact', 'documents'])
+            ->with(['contact', 'documents', 'passengers'])
             ->when($filter === 'pending_payment', function ($q): void {
                 $q->where(function ($inner): void {
                     $inner->whereIn('payment_status', ['unpaid', 'partial'])
@@ -120,6 +134,10 @@ class CustomerBookingController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->bookingsPresenter->presentIndex($bookings, $filter));
+        }
+
         $viewData = [
             'bookings' => $bookings,
             'filter' => $filter,
@@ -128,10 +146,14 @@ class CustomerBookingController extends Controller
         return view(client_view('bookings.index', 'customer'), $viewData);
     }
 
-    public function show(Request $request, Booking $booking): View
+    public function show(Request $request, Booking $booking): View|JsonResponse
     {
         Gate::authorize('view', $booking);
         $this->ensureCustomerOwnsBooking($request, $booking);
+
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->bookingDetailPresenter->present($booking, $request));
+        }
 
         $booking->load([
             'passengers',

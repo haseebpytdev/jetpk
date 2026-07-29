@@ -9,6 +9,7 @@ const EXACT_PATHS = new Set([
   "/verify-email",
   "/password/force-change",
   "/customer",
+  "/customer/dashboard",
   "/agent",
   "/admin/dashboard",
   "/staff/dashboard",

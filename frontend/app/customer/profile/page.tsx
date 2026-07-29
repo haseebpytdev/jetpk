@@ -1,13 +1,13 @@
-import { CustomerBookingsPage } from "@/features/customer-dashboard";
+import { CustomerProfilePage } from "@/features/customer-dashboard";
 import { requireCustomerPortalAccess } from "@/features/auth/server/customer-portal-access";
 import { PublicShell } from "@/components/layout/PublicShell";
 
-export default async function CustomerBookingsRoutePage() {
+export default async function CustomerProfileRoutePage() {
   const { session } = await requireCustomerPortalAccess();
 
   return (
     <PublicShell session={session}>
-      <CustomerBookingsPage session={session} />
+      <CustomerProfilePage session={session} />
     </PublicShell>
   );
 }

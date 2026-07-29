@@ -38,7 +38,7 @@ export async function requireCustomerPortalAccess(): Promise<CustomerPortalAcces
   const accountType = bootstrap.user.account_type ?? bootstrap.role ?? null;
   if (accountType !== CUSTOMER_ACCOUNT_TYPE) {
     const destination = sanitizeDashboardUrl(bootstrap.dashboard_url, "/access-denied");
-    const customerPaths = new Set(["/customer", "/customer/bookings"]);
+    const customerPaths = new Set(["/customer", "/customer/dashboard", "/customer/bookings"]);
 
     if (customerPaths.has(destination.split("?")[0] ?? "")) {
       redirect("/access-denied");

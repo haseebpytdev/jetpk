@@ -12,6 +12,12 @@ const NEXT_BOOKING_PREFIXES = [
   "/booking/status",
   "/lookup-booking",
   "/customer/bookings",
+  "/customer/payments",
+  "/customer/invoices",
+  "/customer/profile",
+  "/customer/security",
+  "/customer/support",
+  "/customer/notifications",
   "/support",
   "/booking/one-api/",
 ] as const;
