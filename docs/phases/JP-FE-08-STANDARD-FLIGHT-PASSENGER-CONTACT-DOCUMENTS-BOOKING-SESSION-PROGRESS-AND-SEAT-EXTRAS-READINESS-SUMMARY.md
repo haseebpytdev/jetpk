@@ -9,7 +9,7 @@
 | Feature commit | `2a22565` |
 | Docs commit | `a7426f2` |
 | Merge commit | `1dfd9ec` |
-| Final SHA doc commit | _pending_ |
+| Final SHA doc commit | `62d9bd2` |
 | Status | Complete |
 
 ## Objective
