@@ -109,6 +109,7 @@ Revert merge commit on `main` or reset to pre-phase baseline.
 |------|-----|
 | Feature branch commit | `672b2b874fe3ef6bf78690170f2313fca06b2953` |
 | Merge to `main` | Fast-forward to `672b2b874fe3ef6bf78690170f2313fca06b2953` (no separate merge commit) |
+| Docs SHA update on `main` | `37060bd909aeea827440092e6ae327b90e3149df` |
 
 ## Production
 
