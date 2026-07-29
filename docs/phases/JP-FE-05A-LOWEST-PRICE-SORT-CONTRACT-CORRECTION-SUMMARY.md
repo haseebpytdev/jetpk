@@ -59,4 +59,7 @@ No client-side price sorting. Sort changes refetch `flights.results.data`.
 
 ## Commit SHAs
 
-> Recorded after git workflow.
+| Commit | SHA |
+| --- | --- |
+| Fix | `00ae405` |
+| Merge to main | `53453c7` |
