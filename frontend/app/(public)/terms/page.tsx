@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
-import { LegalDocumentLayout, LegalPageService } from "@/features/public-content";
+import { LegalDocumentLayout, LegalPageService, publicSeoToMetadata } from "@/features/public-content";
 
 export async function generateMetadata(): Promise<Metadata> {
   const document = await LegalPageService.getTerms();
-  return {
-    title: document.seo.title,
-    description: document.seo.description,
-    robots: document.seo.robots,
-  };
+  return publicSeoToMetadata(document.seo, "/terms");
 }
 
 export default async function TermsPage() {

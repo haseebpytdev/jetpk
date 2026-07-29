@@ -1,6 +1,7 @@
 import { ABOUT_PAGE_FIXTURE } from "../fixtures/about";
 import type { ContentCard, PublicPage, PublicPageHero, PublicSeo } from "../types";
 import { fetchManagedPage } from "../utils/laravel-api";
+import { allowContentFixtures, resolveContentSource } from "../utils/content-policy";
 import { resolveDestination, splitListLines, splitParagraphs } from "../utils/content-mapper";
 
 function mapHero(content: Record<string, unknown>): PublicPageHero {
@@ -44,7 +45,17 @@ export const PublicPageService = {
   async getAboutPage(): Promise<PublicPage> {
     const remote = await fetchManagedPage("about");
     if (!remote || remote.source === "empty" || !remote.content?.hero) {
-      return ABOUT_PAGE_FIXTURE;
+      if (allowContentFixtures()) {
+        return ABOUT_PAGE_FIXTURE;
+      }
+
+      return {
+        pageKey: "about",
+        source: "empty",
+        hero: { title: "About JetPakistan" },
+        sections: [],
+        seo: ABOUT_PAGE_FIXTURE.seo,
+      };
     }
 
     const content = remote.content;
@@ -54,7 +65,7 @@ export const PublicPageService = {
 
     return {
       pageKey: "about",
-      source: "cms",
+      source: resolveContentSource(true),
       hero: mapHero(content),
       sections: [
         ...gridItems.map((item) => ({

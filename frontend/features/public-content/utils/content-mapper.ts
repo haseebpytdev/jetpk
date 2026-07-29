@@ -9,7 +9,7 @@ export function resolveDestination(destination: string): string {
       faq: "/faq",
       terms: "/terms",
       privacy: "/privacy",
-      "booking.lookup": "/manage-booking",
+      "booking.lookup": "/lookup-booking",
       "agent.register": "/agent/register",
       "home#jp-flight-search": "/#main-content",
     };

@@ -146,4 +146,40 @@ class PublicContentApiTest extends TestCase
                 'label' => SupportTicketCategory::Booking->label(),
             ]);
     }
+
+    public function test_public_config_json_returns_brand_and_contact(): void
+    {
+        $this->makeJetpkProfile();
+
+        $this->getJson(route('api.public.content.config'))
+            ->assertOk()
+            ->assertJsonPath('source', 'laravel')
+            ->assertJsonStructure([
+                'brand_name',
+                'domain',
+                'contact' => ['phone', 'email'],
+                'legal_paths' => ['terms', 'privacy'],
+            ]);
+    }
+
+    public function test_sitemap_routes_json_lists_core_public_paths(): void
+    {
+        $this->makeJetpkProfile();
+
+        $this->getJson(route('api.public.content.sitemap-routes'))
+            ->assertOk()
+            ->assertJsonPath('source', 'laravel')
+            ->assertJsonFragment(['path' => '/about-us'])
+            ->assertJsonFragment(['path' => '/contact']);
+    }
+
+    public function test_sitemap_xml_route_returns_valid_xml(): void
+    {
+        $this->makeJetpkProfile();
+
+        $response = $this->get(route('sitemap'));
+        $response->assertOk();
+        $this->assertStringContainsString('<urlset', $response->getContent());
+        $this->assertStringContainsString('/about-us', $response->getContent());
+    }
 }

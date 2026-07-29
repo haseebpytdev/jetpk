@@ -8,15 +8,12 @@ import {
   SupportContentService,
   SupportPageClient,
   fetchSupportCategories,
+  publicSeoToMetadata,
 } from "@/features/public-content";
 
 export async function generateMetadata(): Promise<Metadata> {
   const content = await SupportContentService.getSupportPage();
-  return {
-    title: content.seo.title,
-    description: content.seo.description,
-    robots: content.seo.robots,
-  };
+  return publicSeoToMetadata(content.seo, "/support");
 }
 
 export default async function SupportPage() {

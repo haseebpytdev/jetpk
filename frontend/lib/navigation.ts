@@ -5,23 +5,12 @@ export const primaryNavigation: NavItem[] = [
     type: "dropdown",
     label: "Flights",
     items: [
-      { label: "Search Flights", href: "/flights", description: "Compare fares across airlines" },
-      { label: "Flight Status", href: "/support/flight-status", description: "Track live departures" },
-      { label: "Manage Booking", href: "/manage-booking", description: "Retrieve an existing booking" },
+      { label: "Search Flights", href: "/", description: "Compare fares across airlines" },
+      { label: "Flight Status", href: "/faq", description: "Common booking and travel questions" },
+      { label: "Manage Booking", href: "/lookup-booking", description: "Retrieve an existing booking" },
     ],
   },
-  { type: "link", label: "Hotels", href: "/hotels" },
-  { type: "link", label: "Groups", href: "/groups", badge: "New" },
-  { type: "link", label: "Offers", href: "/offers" },
-  {
-    type: "dropdown",
-    label: "Travel Services",
-    items: [
-      { label: "Visa Assistance", href: "/travel-services/visa", description: "Coming soon" },
-      { label: "Travel Insurance", href: "/travel-services/insurance", description: "Coming soon" },
-      { label: "Airport Transfers", href: "/travel-services/transfers", description: "Coming soon" },
-    ],
-  },
+  { type: "link", label: "Groups", href: "/groups/search", badge: "New" },
   {
     type: "dropdown",
     label: "Support",
@@ -37,20 +26,15 @@ export const footerColumns: FooterColumn[] = [
   {
     title: "Explore",
     links: [
-      { label: "Flights", href: "/flights" },
-      { label: "Hotels", href: "/hotels" },
-      { label: "Groups", href: "/groups" },
-      { label: "Offers", href: "/offers" },
-      { label: "Travel Services", href: "/travel-services" },
+      { label: "Flights", href: "/" },
+      { label: "Groups", href: "/groups/search" },
+      { label: "Manage Booking", href: "/lookup-booking" },
     ],
   },
   {
     title: "Company",
     links: [
       { label: "About Us", href: "/about-us" },
-      { label: "Careers", href: "/careers" },
-      { label: "Press", href: "/press" },
-      { label: "Investor Relations", href: "/investors" },
       { label: "Sitemap", href: "/sitemap" },
     ],
   },
@@ -60,9 +44,8 @@ export const footerColumns: FooterColumn[] = [
       { label: "Help Center", href: "/support" },
       { label: "Contact Us", href: "/contact" },
       { label: "FAQ", href: "/faq" },
-      { label: "Manage Booking", href: "/manage-booking" },
-      { label: "Baggage Information", href: "/support/baggage" },
-      { label: "Flight Status", href: "/support/flight-status" },
+      { label: "Manage Booking", href: "/lookup-booking" },
+      { label: "Baggage Information", href: "/faq" },
     ],
   },
   {
@@ -77,11 +60,8 @@ export const footerColumns: FooterColumn[] = [
 ];
 
 export const socialLinks = [
-  { label: "Facebook", href: "https://facebook.com" },
-  { label: "Instagram", href: "https://instagram.com" },
-  { label: "X", href: "https://x.com" },
-  { label: "YouTube", href: "https://youtube.com" },
-  { label: "LinkedIn", href: "https://linkedin.com" },
+  { label: "Facebook", href: "https://www.facebook.com/jetpakistancom/" },
+  { label: "Instagram", href: "https://www.instagram.com/jetpakistanofficial" },
 ];
 
 export const currencyOptions: CurrencyOption[] = [

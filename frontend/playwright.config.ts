@@ -17,12 +17,13 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run start:smoke",
-    url: baseURL,
+    url: `${baseURL}/robots.txt`,
     reuseExistingServer: false,
     timeout: 180_000,
     env: {
       NEXT_PUBLIC_SESSION_PREVIEW: "logged-out",
       OTA_ALLOW_SESSION_FIXTURE: "true",
+      NEXT_PUBLIC_ALLOW_CONTENT_FIXTURES: "true",
     },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],

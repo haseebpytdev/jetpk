@@ -1,6 +1,7 @@
 import { FAQ_PAGE_FIXTURE } from "../fixtures/faq";
 import type { FaqCategory, FaqPageContent, PublicPageHero, PublicSeo } from "../types";
 import { fetchManagedPage } from "../utils/laravel-api";
+import { allowContentFixtures, resolveContentSource } from "../utils/content-policy";
 import { resolveDestination } from "../utils/content-mapper";
 
 function mapHero(content: Record<string, unknown>): PublicPageHero {
@@ -39,7 +40,16 @@ export const FaqService = {
   async getFaqPage(): Promise<FaqPageContent> {
     const remote = await fetchManagedPage("faq");
     if (!remote || remote.source === "empty") {
-      return FAQ_PAGE_FIXTURE;
+      if (allowContentFixtures()) {
+        return FAQ_PAGE_FIXTURE;
+      }
+
+      return {
+        source: "empty",
+        hero: { title: "Frequently asked questions" },
+        categories: [],
+        seo: FAQ_PAGE_FIXTURE.seo,
+      };
     }
 
     const content = remote.content;
@@ -47,9 +57,9 @@ export const FaqService = {
     const cta = (content.cta ?? {}) as Record<string, string>;
 
     return {
-      source: categories.length ? "cms" : "fixture",
+      source: categories.length ? resolveContentSource(true) : allowContentFixtures() ? "fixture" : "empty",
       hero: mapHero(content),
-      categories: categories.length ? categories : FAQ_PAGE_FIXTURE.categories,
+      categories: categories.length ? categories : allowContentFixtures() ? FAQ_PAGE_FIXTURE.categories : [],
       cta: cta.label
         ? { label: cta.label, href: resolveDestination(cta.url ?? "/support") }
         : FAQ_PAGE_FIXTURE.cta,

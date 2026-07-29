@@ -6,14 +6,18 @@ import {
   ContactForm,
   PublicPageHero,
   SiteContactService,
+  publicSeoToMetadata,
 } from "@/features/public-content";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Contact — JetPakistan",
-    description: "Contact JetPakistan by phone, WhatsApp, email, or secure message form.",
-    robots: "index,follow",
-  };
+  return publicSeoToMetadata(
+    {
+      title: "Contact — JetPakistan",
+      description: "Contact JetPakistan by phone, WhatsApp, email, or secure message form.",
+      robots: "index,follow",
+    },
+    "/contact",
+  );
 }
 
 export default async function ContactPage() {

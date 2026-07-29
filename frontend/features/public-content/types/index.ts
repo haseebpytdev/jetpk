@@ -136,6 +136,7 @@ export type ContactFormPayload = {
   body: string;
   booking_reference?: string;
   website?: string;
+  "cf-turnstile-response"?: string;
 };
 
 export type ContactFormResponse =

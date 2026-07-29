@@ -92,4 +92,17 @@ class PublicContentApiController extends Controller
 
         return response()->json($this->presenter->customClientPage($page, $pageKey));
     }
+
+    public function publicConfig(): JsonResponse
+    {
+        return response()->json($this->presenter->publicConfig());
+    }
+
+    public function sitemapRoutes(): JsonResponse
+    {
+        return response()->json([
+            'routes' => $this->presenter->sitemapRoutes(),
+            'source' => 'laravel',
+        ]);
+    }
 }

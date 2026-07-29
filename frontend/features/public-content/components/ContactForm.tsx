@@ -1,7 +1,13 @@
 "use client";
 
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { useMemo, useState } from "react";
+import {
+  TurnstileUnavailableState,
+  TurnstileValidationMessage,
+  TurnstileWidget,
+  useTurnstileToken,
+} from "@/features/security/turnstile";
+import { useMemo, useRef, useState } from "react";
 import type { ContactFormPayload } from "../types";
 import { submitSupportOrContactForm } from "../services/contact-service";
 
@@ -12,6 +18,8 @@ type ContactFormProps = {
   categories?: Array<{ value: string; label: string }>;
 };
 
+const BLADE_SUPPORT_FALLBACK = "/laravel/support";
+
 const fieldClass =
   "min-h-jp-button w-full rounded-jp-md border border-jp-border bg-jp-surface px-4 text-jp-sm text-jp-text placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus";
 
@@ -21,6 +29,7 @@ export function ContactForm({
   showCategory = false,
   categories = [],
 }: ContactFormProps) {
+  const firstInvalidRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -32,6 +41,30 @@ export function ContactForm({
   const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  const {
+    config: turnstileConfig,
+    loading: turnstileLoading,
+    token,
+    tokenRequired,
+    tokenExpired,
+    tokenError,
+    scriptFailed,
+    resetSignal,
+    setToken,
+    markExpired,
+    markError,
+    markScriptFailed,
+    resetToken,
+  } = useTurnstileToken();
+
+  const turnstileEnabled = tokenRequired && Boolean(turnstileConfig?.site_key);
+  const submitDisabled =
+    status === "submitting" ||
+    turnstileLoading ||
+    (turnstileEnabled && !token) ||
+    tokenExpired ||
+    tokenError;
+
   const consentCopy = useMemo(
     () =>
       formType === "contact"
@@ -42,11 +75,12 @@ export function ContactForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (status === "submitting") return;
+    if (submitDisabled) return;
 
     setStatus("submitting");
     setErrorMessage("");
     setFieldErrors({});
+    firstInvalidRef.current = null;
 
     const payload: ContactFormPayload = {
       form_type: formType,
@@ -56,6 +90,7 @@ export function ContactForm({
       category: category || undefined,
       body: message,
       booking_reference: bookingReference || undefined,
+      ...(turnstileEnabled && token ? { "cf-turnstile-response": token } : {}),
     };
 
     const result = await submitSupportOrContactForm(payload);
@@ -74,6 +109,11 @@ export function ContactForm({
         mapped[key] = messages[0] ?? "Invalid value";
       });
       setFieldErrors(mapped);
+
+      const turnstileField = turnstileConfig?.response_field ?? "cf-turnstile-response";
+      if (mapped[turnstileField]) {
+        resetToken();
+      }
     }
   }
 
@@ -88,10 +128,25 @@ export function ContactForm({
     );
   }
 
+  if (scriptFailed) {
+    return (
+      <TurnstileUnavailableState
+        bladeFallbackHref={BLADE_SUPPORT_FALLBACK}
+        title="Security check unavailable"
+        body="We could not load the security verification widget. You can continue using the secure support form instead."
+        linkLabel="Use secure support form"
+      />
+    );
+  }
+
   return (
     <form className="space-y-4" onSubmit={handleSubmit} noValidate data-testid={`${formType}-form`}>
       {errorMessage ? (
-        <div className="rounded-jp-md border border-red-200 bg-red-50 p-3 text-jp-sm text-red-800" role="alert">
+        <div
+          className="rounded-jp-md border border-red-200 bg-red-50 p-3 text-jp-sm text-red-800"
+          role="alert"
+          aria-live="polite"
+        >
           {errorMessage}
         </div>
       ) : null}
@@ -114,6 +169,9 @@ export function ContactForm({
           value={name}
           onChange={(event) => setName(event.target.value)}
           required
+          ref={(element) => {
+            if (fieldErrors.name && !firstInvalidRef.current) firstInvalidRef.current = element;
+          }}
         />
         {fieldErrors.name ? (
           <p className="mt-1 text-jp-xs text-red-700" id={`${formType}-name-error`}>
@@ -136,6 +194,9 @@ export function ContactForm({
           onChange={(event) => setEmail(event.target.value)}
           required
           aria-describedby={fieldErrors.email ? `${formType}-email-error` : undefined}
+          ref={(element) => {
+            if (fieldErrors.email && !firstInvalidRef.current) firstInvalidRef.current = element;
+          }}
         />
         {fieldErrors.email ? (
           <p className="mt-1 text-jp-xs text-red-700" id={`${formType}-email-error`}>
@@ -220,6 +281,9 @@ export function ContactForm({
           onChange={(event) => setMessage(event.target.value)}
           required
           aria-describedby={fieldErrors.body ? `${formType}-message-error` : undefined}
+          ref={(element) => {
+            if (fieldErrors.body && !firstInvalidRef.current) firstInvalidRef.current = element;
+          }}
         />
         {fieldErrors.body ? (
           <p className="mt-1 text-jp-xs text-red-700" id={`${formType}-message-error`}>
@@ -228,9 +292,29 @@ export function ContactForm({
         ) : null}
       </div>
 
+      {turnstileEnabled && turnstileConfig?.site_key ? (
+        <div className="space-y-2">
+          <TurnstileWidget
+            siteKey={turnstileConfig.site_key}
+            onToken={setToken}
+            onExpire={markExpired}
+            onError={markError}
+            onScriptError={markScriptFailed}
+            resetSignal={resetSignal}
+          />
+          {tokenExpired ? (
+            <TurnstileValidationMessage message="Security check expired. Please complete it again." />
+          ) : null}
+          {tokenError ? <TurnstileValidationMessage message="Security check failed. Please try again." /> : null}
+          {turnstileEnabled && !token && !tokenExpired && !tokenError ? (
+            <TurnstileValidationMessage message="Complete the security check before submitting." />
+          ) : null}
+        </div>
+      ) : null}
+
       <p className="text-jp-xs text-jp-muted">{consentCopy}</p>
 
-      <PrimaryButton type="submit" disabled={status === "submitting"} className="w-full sm:w-auto">
+      <PrimaryButton type="submit" disabled={submitDisabled} className="w-full sm:w-auto">
         {status === "submitting" ? "Submitting…" : formType === "contact" ? "Send message" : "Submit support request"}
       </PrimaryButton>
     </form>
