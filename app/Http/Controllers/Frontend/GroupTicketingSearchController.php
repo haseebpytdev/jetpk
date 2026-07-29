@@ -11,6 +11,7 @@ use App\Services\GroupTicketing\GroupInventorySearchService;
 use App\Services\Client\ClientPageRenderer;
 use App\Support\Client\ClientPageKeys;
 use App\Support\GroupTicketing\GroupInventoryCardPresenter;
+use App\Support\GroupTicketing\GroupTicketingJsonPresenter;
 use App\Support\GroupTicketing\GroupTicketingLivePolicy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -28,7 +29,64 @@ class GroupTicketingSearchController extends Controller
         protected GroupInventoryCardPresenter $cardPresenter,
         protected GroupInventoryFreshnessService $freshnessService,
         protected ClientPageRenderer $pageRenderer,
+        protected GroupTicketingJsonPresenter $jsonPresenter,
     ) {}
+
+    public function searchData(GroupTicketingSearchRequest $request): JsonResponse
+    {
+        $filters = $request->filters();
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $inventoryFreshness = null;
+
+        if ($page <= 1) {
+            $this->freshnessService->clearSessionProviderConfirmed();
+            $inventoryFreshness = $this->freshnessService->ensureFreshForSearch();
+        }
+
+        $facets = $this->facetService->all();
+        $bookable = $this->freshnessService->publicResultsAreBookable($inventoryFreshness, $page);
+        $paginator = $bookable
+            ? $this->searchService->searchPaginated($filters)
+            : $this->emptyPaginator($filters);
+        $results = $paginator->getCollection();
+        $cards = $this->jsonPresenter->presentResultCards($results, $bookable);
+
+        $total = $paginator->total();
+        $shown = min($paginator->currentPage() * $paginator->perPage(), $total);
+        $statusMessage = null;
+
+        if (! $bookable) {
+            $statusMessage = GroupTicketingLivePolicy::PUBLIC_SEARCH_UNAVAILABLE_MESSAGE;
+        } elseif ($results->isEmpty()) {
+            $statusMessage = $facets['sectors'] === [] && $facets['airlines'] === []
+                ? 'Group ticketing inventory is not available yet. Please check back soon.'
+                : 'No group tickets matched your search.';
+        }
+
+        $payload = [
+            'filters' => $filters,
+            'facets' => $facets,
+            'cards' => $cards,
+            'total' => $total,
+            'page' => $paginator->currentPage(),
+            'per_page' => $paginator->perPage(),
+            'has_more' => $paginator->hasMorePages(),
+            'bookable' => $bookable,
+            'count_label' => $this->countLabel($total, $shown, $bookable),
+            'status_message' => $statusMessage,
+            'lock_state' => $this->jsonPresenter->presentLockState($request->user()),
+        ];
+
+        $notice = is_array($inventoryFreshness) ? ($inventoryFreshness['user_notice'] ?? null) : null;
+        if (! $bookable) {
+            $notice = GroupTicketingLivePolicy::PUBLIC_SEARCH_UNAVAILABLE_MESSAGE;
+        }
+        if ($notice !== null && $notice !== '') {
+            $payload['user_notice'] = $notice;
+        }
+
+        return response()->json($payload);
+    }
 
     public function index(GroupTicketingSearchRequest $request): View
     {
@@ -65,6 +123,7 @@ class GroupTicketingSearchController extends Controller
 
         $payload = [
             'html' => $html,
+            'cards' => $this->jsonPresenter->presentResultCards($results, $bookable),
             'total' => $total,
             'page' => $paginator->currentPage(),
             'per_page' => $paginator->perPage(),
@@ -85,18 +144,41 @@ class GroupTicketingSearchController extends Controller
         return response()->json($payload);
     }
 
-    public function show(string $inventory): View
+    public function show(GroupInventory $inventory, GroupTicketingSearchRequest $request): View|JsonResponse
     {
-        $item = $this->searchService->findByPublicId($inventory)
-            ?? GroupInventory::query()->whereKey((int) $inventory)->first();
+        $item = $inventory;
 
-        if ($item === null || ! $item->is_active) {
+        if (! $item->is_active) {
+            if ($request->wantsJson() || $request->query('format') === 'json') {
+                return response()->json([
+                    'success' => false,
+                    'status' => 'not_found',
+                    'message' => 'This group package is not available.',
+                ], 404);
+            }
+
             abort(404);
+        }
+
+        $bookable = GroupTicketingLivePolicy::publicResultsMustBeProviderConfirmed() ? false : true;
+        $card = $this->cardPresenter->present($item, $bookable);
+
+        if ($request->wantsJson() || $request->query('format') === 'json') {
+            $availability = app(\App\Services\GroupTicketing\GroupInventoryAvailabilityService::class)
+                ->revalidate($item, 1);
+
+            return response()->json([
+                'success' => true,
+                'package' => $this->jsonPresenter->presentPackageCard($card, $availability['inventory']),
+                'available' => $availability['ok'],
+                'lock_state' => $this->jsonPresenter->presentLockState($request->user()),
+                'progress' => $this->jsonPresenter->progressState('package'),
+            ]);
         }
 
         return view('frontend.group-ticketing.show', [
             'inventory' => $item,
-            'card' => $this->cardPresenter->present($item, GroupTicketingLivePolicy::publicResultsMustBeProviderConfirmed() ? false : true),
+            'card' => $card,
         ]);
     }
 

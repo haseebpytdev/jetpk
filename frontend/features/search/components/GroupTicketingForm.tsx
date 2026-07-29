@@ -9,6 +9,7 @@ type GroupTicketingFormProps = {
   sector: string;
   category: string;
   travelDate: string;
+  sectors?: readonly string[];
   onSectorChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onTravelDateChange: (value: string) => void;
@@ -27,8 +28,10 @@ export function GroupTicketingForm({
   onSubmit,
   errors,
   disabled = false,
+  sectors,
 }: GroupTicketingFormProps) {
   const id = useId();
+  const sectorOptions = sectors && sectors.length > 0 ? sectors : GROUP_DESTINATION_FIXTURES;
 
   return (
     <form
@@ -55,7 +58,7 @@ export function GroupTicketingForm({
             className="w-full min-h-jp-tap rounded-jp-md border border-jp-border bg-jp-surface px-3 py-2.5 text-jp-sm focus-visible:outline-none focus-visible:shadow-jp-focus"
           >
             <option value="">Select sector</option>
-            {GROUP_DESTINATION_FIXTURES.map((item) => (
+            {sectorOptions.map((item) => (
               <option key={item} value={item}>
                 {item}
               </option>
