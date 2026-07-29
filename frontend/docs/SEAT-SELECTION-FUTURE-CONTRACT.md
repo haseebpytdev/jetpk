@@ -1,8 +1,11 @@
 # Seat Selection Future Contract (JP-FE-07 readiness)
 
-## Audit result
+## JP-FE-08 audit (standard flight)
 
-No complete authoritative seat-map contract exists for Group Ticketing or standard supplier booking in Laravel at JP-FE-07 closure.
+- No complete seat-map contract for standard booking
+- `StandardBookingJsonPresenter::seatExtrasCapability()` returns `seat_map_available: false`
+- One API may expose ancillaries post-auth; not wired in passenger phase
+- Progress step "Seat & Extras" remains `upcoming`
 
 Group inventory is seat-count-based (`total_seats`, `held_seats`, `sold_seats`), not per-seat maps.
 
