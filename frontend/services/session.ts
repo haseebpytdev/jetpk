@@ -23,7 +23,7 @@ export const fixtureSessionAdapter: SessionAdapter = {
       ? {
           status: "authenticated",
           user: fixtureUser,
-          dashboardUrl: "/customer",
+          dashboardUrl: "/customer/bookings",
           accountType: "customer",
           role: "customer",
         }
@@ -51,7 +51,7 @@ export async function getPublicSession(
       ? {
           status: "authenticated",
           user: fixtureUser,
-          dashboardUrl: "/customer",
+          dashboardUrl: "/customer/bookings",
           accountType: "customer",
           role: "customer",
         }

@@ -22,6 +22,7 @@ export default defineConfig({
     timeout: 180_000,
     env: {
       NEXT_PUBLIC_SESSION_PREVIEW: "logged-out",
+      OTA_ALLOW_SESSION_FIXTURE: "true",
     },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],

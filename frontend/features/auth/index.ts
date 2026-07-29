@@ -7,6 +7,7 @@ export { ForgotPasswordForm } from "./components/ForgotPasswordForm";
 export { ResetPasswordForm } from "./components/ResetPasswordForm";
 export { PasswordField } from "./components/PasswordField";
 export { AuthStatusBanner } from "./components/AuthStatusBanner";
+export { CustomerPortalPlaceholder } from "./components/CustomerPortalPlaceholder";
 export * from "./services/auth-service";
 export * from "./services/session-service";
 export * from "./services/registration-service";
