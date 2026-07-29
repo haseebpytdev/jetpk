@@ -7,9 +7,9 @@
 | Phase | JP-FE-13-PUBLIC-CMS-DEEP-PAGES-CONTACT-SUPPORT-TURNSTILE-SEO-ACCESSIBILITY-PERFORMANCE-AND-NO-FALLBACK-CLOSURE |
 | Branch | `phase/jetpk-fe-13-public-cms-closure` |
 | Baseline | `1784542` (JP-FE-12 final SHA documentation) |
-| Feature commit | PENDING |
-| Docs commit | PENDING |
-| Merge commit | PENDING |
+| Feature commit | `dd325c3` |
+| Docs commit | `ac2ea42` |
+| Merge commit | `bbfb4e0` |
 | Final SHA documentation | PENDING |
 | Final status | COMPLETE |
 
