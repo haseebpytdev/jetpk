@@ -102,7 +102,7 @@ See `frontend/docs/visual/JP-UI-03-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`.
 | Feature commit | `4003e72` |
 | Docs commit | `3518b57` |
 | Merge commit | `f815819` |
-| Final docs SHA | _(after SHA correction commit)_ |
+| Final docs SHA | `d9704cc` |
 
 ## Rollback
 
@@ -120,4 +120,4 @@ Public marketing visual parity evidence is complete. Next phase: **JP-UI-04-FLIG
 
 ## Final status
 
-**COMPLETE** — pending Git SHAs after merge.
+**COMPLETE** — `main` = `jetpk/main` = `d9704cc`; merge `f815819`; feature branch preserved.
