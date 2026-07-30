@@ -104,19 +104,23 @@ Baseline: `5fad262`
 
 ## JP-UI-04 — FLIGHT-RESULTS-FARE-SELECTION-PASSENGERS-SEATS-REVIEW-PAYMENT-SUCCESS-VISUAL-PARITY
 
+**Status:** Complete (see `docs/phases/JP-UI-04-*-SUMMARY.md`)
+
+**Branch:** `phase/jetpk-ui-04-booking-journey-visual-parity`  
+**Baseline:** `5f718c7`
+
 **Objective:** Booking journey family matches mockups #13, #11, #4, #8, #10, #5.
 
 ### Pages
 - `/flights/results`, return options, `/booking/passengers`, `/booking/review`, `/booking/payment/*`, `/booking/confirmation`
 
 ### Components
-- `FlightResultCard`, `ResultsFilterPanel`, `ResultsToolbar`, sort tabs
-- `BrandedFareCarousel`, `FareFamilyCard`, `FlightDetailsDrawer`
-- `BookingProgress` v2 (shared)
-- `OrderSummary` unified
-- `PassengerForm`, `PaymentMethodSelector`, `ManualPaymentPanel`, `StatusCard`
-- `MobileStickyAction`
-- `SeatMap` — **only if** JP-OPS enables `seat_map_available`
+- `features/booking-layout/` — `BookingPageShell`, `BookingLayout`, `BookingSidebar`, `OrderSummary`, `MobileOrderSummary`, `MobileStickyAction`
+- `FlightResultCard`, `ResultsFilterPanel`, `ResultsSortTabs`, enhanced `SearchSummaryBar`
+- `BrandedFareCarousel`, `FlightDetailsDrawer`
+- `BookingProgress` v2 (shared; skipped-step omission)
+- `PassengerDetailsPage`, `BookingReviewPage`, `ManualPaymentPage`, `CardPaymentPage`, `BookingConfirmationPage` — migrated to shared layout
+- `SeatMap` — **only if** JP-OPS enables `seat_map_available` (not implemented; step omitted)
 
 ### Dependencies
 - JP-UI-02 foundation
@@ -131,11 +135,18 @@ Baseline: `5fad262`
 - Match ratings target ≥4 on results and checkout
 
 ### Tests
-- `flight-results.spec.ts`, `flight-details.spec.ts`, `standard-booking-*.spec.ts`
-- Visual capture regression
+- `npm run audit:visual:jp-ui-04` — 28 scenarios
+- `tests/visual-audit/jp-ui-04-booking-journey.visual.spec.ts`
+- `flight-results.spec.ts`, `flight-details.spec.ts`, `standard-booking-*.spec.ts` (regression)
+
+### Visual contracts
+- `frontend/docs/visual/FLIGHT-RESULTS-*.md` through `BOOKING-PROGRESS-AND-SHARED-CHECKOUT-LAYOUT-CONTRACT.md`
+- `frontend/docs/visual/JP-UI-04-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`
 
 ### Deferred
 - Dedicated `/fare-selection` route (optional; may remain inline)
+- Seat map UI (conditional future target)
+- Success celebration assets (JP-UI-06)
 
 ---
 

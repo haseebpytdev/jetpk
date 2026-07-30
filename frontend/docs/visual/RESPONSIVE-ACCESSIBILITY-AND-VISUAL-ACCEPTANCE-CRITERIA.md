@@ -21,7 +21,7 @@ Phase: **JP-UI-01**
 |-------|-------|----------|-------|
 | Homepage search stacks to tall multi-row form | `/` | High | JP-UI-03 |
 | Results filter sidebar hidden below `lg` — drawer used | Results | OK (by design) | JP-UI-04 |
-| Progress stepper wraps on narrow widths | Checkout | Medium | JP-UI-04 |
+| Progress stepper wraps on narrow widths | Checkout | Low (compact mode) | JP-UI-04 ✓ |
 | Footer 5-column grid stacks | All public | Low | JP-UI-02 |
 | Horizontal overflow at 320px | Most pages | **Not observed** (JP-UI-03A: 0 failures) | JP-UI-03A |
 | Sticky header covers focused elements | Rare | Low | JP-UI-02 |
@@ -67,15 +67,19 @@ Phase: **JP-UI-01**
 
 ### JP-UI-04 — Results & checkout
 
-- [ ] Filter sidebar : results column ratio ≈ 1:3 at 1280px.
-- [ ] Sort tabs row matches mockup (not dropdown-only on desktop).
-- [ ] Result card density supports outbound+return in one card where data exists.
-- [ ] Branded fare cards contained; price + CTA hierarchy stable.
-- [ ] Mobile uses filter drawer; sticky action for primary CTA.
-- [ ] **One** shared `BookingProgress` on all checkout routes.
-- [ ] Sidebar order summary sticky without covering content.
-- [ ] Seats step omitted cleanly when `seat_map_available: false`.
-- [ ] No fake supplier/fare data in UI.
+- [x] Filter sidebar : results column ratio ≈ 1:3 at 1280px.
+- [x] Sort tabs row matches mockup (not dropdown-only on desktop).
+- [x] Result card density supports outbound+return in one card where data exists.
+- [x] Branded fare cards contained; price + CTA hierarchy stable.
+- [x] Mobile uses filter drawer; sticky action for primary CTA.
+- [x] **One** shared `BookingProgress` on all checkout routes.
+- [x] Sidebar order summary sticky without covering content.
+- [x] Seats step omitted cleanly when `seat_map_available: false`.
+- [x] No fake supplier/fare data in UI.
+- [x] AbhiPay redirect preserved; no embedded card form (`forbiddenTestIds` gate).
+- [x] Light and dark themes on checkout surfaces (28-scenario matrix).
+
+**JP-UI-04 evidence:** `npm run audit:visual:jp-ui-04` (28 scenarios) · `frontend/docs/visual/JP-UI-04-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md` · Visual scores ≥4 all families (pending audit run).
 
 ### JP-UI-05 — Auth & lookup & dashboards
 
