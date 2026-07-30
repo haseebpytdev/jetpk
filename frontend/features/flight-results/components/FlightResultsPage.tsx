@@ -17,6 +17,7 @@ import { OutboundOptionCard } from "./OutboundOptionCard";
 import { PartialResultsNotice } from "./PartialResultsNotice";
 import { ResultSkeleton } from "./ResultSkeleton";
 import { ResultsFilterPanel } from "./ResultsFilterPanel";
+import { ResultsSortTabs } from "./ResultsSortTabs";
 import { ResultsToolbar } from "./ResultsToolbar";
 import { SearchErrorState } from "./SearchErrorState";
 import { SearchProgress } from "./SearchProgress";
@@ -136,7 +137,9 @@ export function FlightResultsPage() {
         total={results.total}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+      <ResultsSortTabs value={sort} onChange={handleSortChange} className="hidden sm:flex" />
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(14rem,16rem)_1fr]">
         <div className="hidden lg:block">
           <ResultsFilterPanel
             facets={results.data?.filters}

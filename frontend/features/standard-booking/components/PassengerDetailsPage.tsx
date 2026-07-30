@@ -3,6 +3,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
+import {
+  BookingLayout,
+  BookingLoadingState,
+  BookingMainColumn,
+  BookingPageHeader,
+  BookingPageShell,
+  BookingSidebar,
+  MobileOrderSummary,
+  OrderSummary,
+} from "@/features/booking-layout";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { mapFieldErrors } from "@/features/auth/utils/laravel-auth-api";
 import { fetchStandardPassengersContext, submitStandardPassengers } from "../services/standard-booking-api";
@@ -15,7 +25,6 @@ import {
 } from "../utils/passenger-form";
 import { isAllowedBookingNextUrl, resolveBookingNextUrl } from "../utils/allowlist";
 import { BookingSessionCountdown } from "./BookingSessionCountdown";
-import { SelectedFlightSummaryCard } from "./SelectedFlightSummaryCard";
 import {
   BookingSessionExpiredState,
   MissingBookingSessionState,
@@ -144,115 +153,130 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   };
 
   if (loading) {
-    return <p className="p-8 text-jp-sm text-jp-muted" data-testid="passengers-loading">Loading passenger form…</p>;
+    return <BookingLoadingState message="Loading passenger form…" testId="passengers-loading" />;
   }
 
   if (errorStatus === "missing_session") {
-    return <div className="mx-auto max-w-3xl p-8"><MissingBookingSessionState /></div>;
+    return <div className="mx-auto max-w-jp-booking p-8"><MissingBookingSessionState /></div>;
   }
 
   if (errorStatus === "offer_expired") {
-    return <div className="mx-auto max-w-3xl p-8"><OfferExpiredState redirectUrl={errorRedirect} /></div>;
+    return <div className="mx-auto max-w-jp-booking p-8"><OfferExpiredState redirectUrl={errorRedirect} /></div>;
   }
 
   if (expired) {
-    return <div className="mx-auto max-w-3xl p-8"><BookingSessionExpiredState /></div>;
+    return <div className="mx-auto max-w-jp-booking p-8"><BookingSessionExpiredState /></div>;
   }
 
   if (!context) {
-    return <div className="mx-auto max-w-3xl p-8"><SupplierRequirementsUnavailableState /></div>;
+    return <div className="mx-auto max-w-jp-booking p-8"><SupplierRequirementsUnavailableState /></div>;
   }
 
   const typeOrdinals: Record<string, number> = { adult: 0, child: 0, infant: 0 };
 
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <BookingProgress steps={context.booking_session.progress} className="mb-6" />
+  const summarySidebar = (
+    <OrderSummary itinerary={context.itinerary} travellerTotal={context.travellers.total} />
+  );
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-jp-text">Passenger details</h1>
-          <p className="mt-1 text-jp-sm text-jp-muted">Enter details exactly as shown on travel documents.</p>
-        </div>
-        <BookingSessionCountdown
-          expiresAt={context.booking_session.expires_at}
-          serverTime={context.booking_session.server_time}
-          onExpired={() => setExpired(true)}
-        />
-      </div>
+  return (
+    <BookingPageShell testId="passenger-details-page">
+      <BookingProgress steps={context.booking_session.progress} className="mb-6" compact />
+
+      <BookingPageHeader
+        title="Traveler information"
+        description="Enter details exactly as shown on travel documents."
+        actions={
+          <BookingSessionCountdown
+            expiresAt={context.booking_session.expires_at}
+            serverTime={context.booking_session.server_time}
+            onExpired={() => setExpired(true)}
+          />
+        }
+      />
 
       {context.validation_alert ? (
-        <p className="mt-4 rounded-jp-md border border-amber-200 bg-amber-50 p-3 text-jp-sm text-amber-900" role="status">
+        <p className="mt-4 rounded-jp-md border border-amber-200 bg-amber-50 p-3 text-jp-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100" role="status">
           {context.validation_alert}
         </p>
       ) : null}
 
       <form
         onSubmit={(event) => void handleSubmit(event)}
-        className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]"
+        className="mt-6"
         data-testid="standard-passengers-form"
         noValidate
       >
-        <div className="space-y-4">
-          {formError || Object.keys(fieldErrors).length > 0 ? (
-            <div
-              ref={errorSummaryRef}
-              tabIndex={-1}
-              className="rounded-jp-md border border-red-200 bg-red-50 p-3 text-jp-sm text-red-800"
-              role="alert"
-              data-testid="passenger-validation-summary"
-            >
-              {formError ?? "Please correct the highlighted fields."}
-            </div>
-          ) : null}
+        <BookingLayout
+          mobileSummary={<MobileOrderSummary>{summarySidebar}</MobileOrderSummary>}
+          main={
+            <BookingMainColumn>
+              {formError || Object.keys(fieldErrors).length > 0 ? (
+                <div
+                  ref={errorSummaryRef}
+                  tabIndex={-1}
+                  className="rounded-jp-md border border-red-200 bg-red-50 p-3 text-jp-sm text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-100"
+                  role="alert"
+                  data-testid="passenger-validation-summary"
+                >
+                  {formError ?? "Please correct the highlighted fields."}
+                </div>
+              ) : null}
 
-          {passengers.map((passenger, index) => {
-            const slot = context.travellers.expected[index];
-            const ordinal = (typeOrdinals[slot.type] ?? 0) + 1;
-            typeOrdinals[slot.type] = ordinal;
-            return (
-              <PassengerCard
-                key={index}
-                index={index}
-                label={passengerLabel(slot, ordinal)}
-                isLead={index === context.travellers.lead_passenger_index}
-                passenger={passenger}
-                documentRequirements={context.document_requirements}
-                nationalIdAllowed={context.document_requirements.national_id_allowed}
+              {passengers.map((passenger, index) => {
+                const slot = context.travellers.expected[index];
+                const ordinal = (typeOrdinals[slot.type] ?? 0) + 1;
+                typeOrdinals[slot.type] = ordinal;
+                return (
+                  <PassengerCard
+                    key={index}
+                    index={index}
+                    label={passengerLabel(slot, ordinal)}
+                    isLead={index === context.travellers.lead_passenger_index}
+                    passenger={passenger}
+                    documentRequirements={context.document_requirements}
+                    nationalIdAllowed={context.document_requirements.national_id_allowed}
+                    fieldErrors={fieldErrors}
+                    onChange={updatePassenger}
+                  />
+                );
+              })}
+
+              <ContactDetailsSection
+                contact={contact}
+                locked={context.auth.agent_contact_locked}
+                canCreateAccount={context.auth.can_create_account}
                 fieldErrors={fieldErrors}
-                onChange={updatePassenger}
+                onChange={updateContact}
               />
-            );
-          })}
 
-          <ContactDetailsSection
-            contact={contact}
-            locked={context.auth.agent_contact_locked}
-            canCreateAccount={context.auth.can_create_account}
-            fieldErrors={fieldErrors}
-            onChange={updateContact}
-          />
+              <SeatExtrasReadinessPanel message={context.seat_extras_capability.message} />
 
-          <SeatExtrasReadinessPanel message={context.seat_extras_capability.message} />
+              <PrimaryButton
+                type="submit"
+                className="hidden w-full sm:w-auto lg:inline-flex"
+                disabled={submitting || expired}
+                aria-busy={submitting}
+                data-testid="save-and-continue"
+              >
+                {submitting ? "Saving…" : "Continue to review"}
+              </PrimaryButton>
+            </BookingMainColumn>
+          }
+          sidebar={<BookingSidebar>{summarySidebar}</BookingSidebar>}
+        />
 
+        <div className="mt-4 lg:hidden">
           <PrimaryButton
             type="submit"
-            className="w-full sm:w-auto"
+            className="w-full"
             disabled={submitting || expired}
             aria-busy={submitting}
-            data-testid="save-and-continue"
+            data-testid="save-and-continue-mobile"
           >
-            {submitting ? "Saving…" : "Save and continue"}
+            {submitting ? "Saving…" : "Continue to review"}
           </PrimaryButton>
         </div>
-
-        <div className="lg:sticky lg:top-4 lg:self-start">
-          <SelectedFlightSummaryCard
-            itinerary={context.itinerary}
-            travellerTotal={context.travellers.total}
-          />
-        </div>
       </form>
-    </div>
+    </BookingPageShell>
   );
 }

@@ -3,9 +3,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
+import {
+  BookingLayout,
+  BookingLoadingState,
+  BookingMainColumn,
+  BookingPageHeader,
+  BookingPageShell,
+  BookingSection,
+  BookingSectionHeader,
+  BookingSidebar,
+  MobileOrderSummary,
+  OrderSummary,
+} from "@/features/booking-layout";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { BookingSessionCountdown } from "./BookingSessionCountdown";
-import { SelectedFlightSummaryCard } from "./SelectedFlightSummaryCard";
 import {
   BookingSessionExpiredState,
   MissingBookingSessionState,
@@ -20,7 +31,6 @@ import {
 import type { BookingReviewContext, PaymentMethodCode, ReviewPaymentMethod } from "../types/review-payment";
 import { resolveBookingNextUrl } from "../utils/allowlist";
 import { ReviewPassengerList } from "./ReviewPassengerList";
-import { ReviewPriceBreakdown } from "./ReviewPriceBreakdown";
 import { PaymentMethodSelector } from "./PaymentMethodSelector";
 
 export function BookingReviewPage() {
@@ -115,23 +125,57 @@ export function BookingReviewPage() {
     router.push("/flights/results");
   };
 
-  if (loading) return <p className="p-8 text-jp-sm text-jp-muted" data-testid="review-loading">Loading review…</p>;
-  if (error === "missing_session") return <div className="mx-auto max-w-3xl p-8"><MissingBookingSessionState /></div>;
-  if (expired) return <div className="mx-auto max-w-3xl p-8"><BookingSessionExpiredState /></div>;
-  if (!context) return <div className="mx-auto max-w-3xl p-8"><OfferExpiredState /></div>;
+  if (loading) return <BookingLoadingState message="Loading review…" testId="review-loading" />;
+  if (error === "missing_session") return <div className="mx-auto max-w-jp-booking p-8"><MissingBookingSessionState /></div>;
+  if (expired) return <div className="mx-auto max-w-jp-booking p-8"><BookingSessionExpiredState /></div>;
+  if (!context) return <div className="mx-auto max-w-jp-booking p-8"><OfferExpiredState /></div>;
 
   const visibleMethods: ReviewPaymentMethod[] = context.payment_methods.filter((m) => m.code === "manual" || m.code === "card");
 
-  return (
-    <div className="mx-auto max-w-5xl px-4 py-8" data-testid="booking-review-page">
-      <BookingProgress steps={context.booking_session.progress} className="mb-6" />
-      <h1 className="text-2xl font-semibold text-jp-text">Review your booking</h1>
-      <p className="mt-1 text-jp-sm text-jp-muted">Confirm itinerary, travellers, and payment option before submitting.</p>
+  const summarySidebar = (
+    <>
+      <OrderSummary
+        itinerary={context.itinerary}
+        travellerTotal={context.passengers.length}
+        pricing={context.pricing}
+      />
+      <PaymentMethodSelector
+        methods={visibleMethods}
+        selected={selectedMethod}
+        onSelect={setSelectedMethod}
+        disabled={context.submit_blocked || submitting}
+      />
+      {context.submit_blocked_reason ? (
+        <p className="text-jp-sm text-amber-800 dark:text-amber-200" role="alert">{context.submit_blocked_reason}</p>
+      ) : null}
+      {error && error !== "missing_session" ? <p className="text-jp-sm text-red-700 dark:text-red-300" role="alert">{error}</p> : null}
+      <PrimaryButton
+        type="button"
+        className="w-full"
+        disabled={submitting || context.submit_blocked || expired}
+        onClick={() => void handleSubmit()}
+        data-testid="review-continue-button"
+      >
+        {submitting ? "Submitting…" : selectedMethod === "card" ? "Continue to payment" : "Confirm booking (manual payment)"}
+      </PrimaryButton>
+      <p className="text-jp-xs text-jp-muted">No payment is taken on this step for manual payment.</p>
+    </>
+  );
 
-      <BookingSessionCountdown
-        expiresAt={context.booking_session.expires_at}
-        serverTime={context.booking_session.server_time}
-        onExpired={() => setExpired(true)}
+  return (
+    <BookingPageShell testId="booking-review-page">
+      <BookingProgress steps={context.booking_session.progress} className="mb-6" compact />
+
+      <BookingPageHeader
+        title="Review & confirm booking"
+        description="Confirm itinerary, travellers, and payment option before submitting."
+        actions={
+          <BookingSessionCountdown
+            expiresAt={context.booking_session.expires_at}
+            serverTime={context.booking_session.server_time}
+            onExpired={() => setExpired(true)}
+          />
+        }
       />
 
       {context.notices.map((notice) => (
@@ -139,7 +183,7 @@ export function BookingReviewPage() {
       ))}
 
       {context.fare_change?.requires_acceptance ? (
-        <div className="mt-4 rounded-jp-lg border border-amber-300 bg-amber-50 p-4" data-testid="fare-change-panel" role="alert">
+        <div className="mt-4 rounded-jp-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30" data-testid="fare-change-panel" role="alert">
           <h2 className="text-jp-base font-semibold">Fare updated</h2>
           <p className="mt-1 text-jp-sm text-jp-muted">
             Previous total: {context.fare_change.old_total_formatted ?? context.fare_change.old_total}
@@ -155,40 +199,27 @@ export function BookingReviewPage() {
         </div>
       ) : null}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="space-y-4">
-          <SelectedFlightSummaryCard itinerary={context.itinerary} travellerTotal={context.passengers.length} />
-          <ReviewPassengerList passengers={context.passengers} documents={context.documents} />
-          <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
-            <h2 className="text-jp-base font-semibold">Contact</h2>
-            <p className="text-jp-sm text-jp-muted">{context.contact.email}</p>
-            <p className="text-jp-sm text-jp-muted">{context.contact.phone}</p>
-          </div>
-        </div>
-
-        <aside className="space-y-4">
-          <ReviewPriceBreakdown pricing={context.pricing} />
-          <PaymentMethodSelector
-            methods={visibleMethods}
-            selected={selectedMethod}
-            onSelect={setSelectedMethod}
-            disabled={context.submit_blocked || submitting}
-          />
-          {context.submit_blocked_reason ? (
-            <p className="text-jp-sm text-amber-800" role="alert">{context.submit_blocked_reason}</p>
-          ) : null}
-          {error && error !== "missing_session" ? <p className="text-jp-sm text-red-700" role="alert">{error}</p> : null}
-          <PrimaryButton
-            type="button"
-            disabled={submitting || context.submit_blocked || expired}
-            onClick={() => void handleSubmit()}
-            data-testid="review-continue-button"
-          >
-            {submitting ? "Submitting…" : selectedMethod === "card" ? "Confirm and pay by card" : "Confirm booking (manual payment)"}
-          </PrimaryButton>
-          <p className="text-jp-xs text-jp-muted">No payment is taken on this step for manual payment.</p>
-        </aside>
-      </div>
-    </div>
+      <BookingLayout
+        mobileSummary={<MobileOrderSummary label="Review summary">{summarySidebar}</MobileOrderSummary>}
+        main={
+          <BookingMainColumn>
+            <BookingSection>
+              <BookingSectionHeader title="Itinerary" />
+              <OrderSummary itinerary={context.itinerary} travellerTotal={context.passengers.length} collapsed />
+            </BookingSection>
+            <BookingSection>
+              <BookingSectionHeader title="Travelers" />
+              <ReviewPassengerList passengers={context.passengers} documents={context.documents} />
+            </BookingSection>
+            <BookingSection>
+              <BookingSectionHeader title="Contact" />
+              <p className="text-jp-sm text-jp-muted">{context.contact.email}</p>
+              <p className="text-jp-sm text-jp-muted">{context.contact.phone}</p>
+            </BookingSection>
+          </BookingMainColumn>
+        }
+        sidebar={<BookingSidebar>{summarySidebar}</BookingSidebar>}
+      />
+    </BookingPageShell>
   );
 }

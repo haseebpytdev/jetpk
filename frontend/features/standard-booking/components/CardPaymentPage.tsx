@@ -3,12 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
+import {
+  BookingLayout,
+  BookingLoadingState,
+  BookingMainColumn,
+  BookingPageHeader,
+  BookingPageShell,
+  BookingSection,
+  BookingSectionHeader,
+  BookingSidebar,
+  OrderSummary,
+} from "@/features/booking-layout";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { fetchCheckoutState, startCardPayment } from "../services/booking-checkout-api";
 import { useBookingStatusPoll } from "../hooks/useBookingStatusPoll";
 import type { CheckoutState } from "../types/review-payment";
 import { MissingBookingSessionState } from "./BookingStateCards";
-import { ReviewPriceBreakdown } from "./ReviewPriceBreakdown";
 import { isAllowedHostedCheckoutUrl, resolveLaravelPostUrl } from "../utils/payment-url";
 
 export function CardPaymentPage() {
@@ -70,42 +80,64 @@ export function CardPaymentPage() {
     window.location.assign(response.data.redirect_url);
   };
 
-  if (loading) return <p className="p-8 text-jp-sm text-jp-muted">Loading card payment…</p>;
-  if (!state?.ok) return <div className="mx-auto max-w-3xl p-8"><MissingBookingSessionState /></div>;
+  if (loading) return <BookingLoadingState message="Loading card payment…" />;
+  if (!state?.ok) return <div className="mx-auto max-w-jp-booking p-8"><MissingBookingSessionState /></div>;
 
   const card = state.card_payment;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8" data-testid="card-payment-page">
-      <BookingProgress steps={state.booking_session.progress} className="mb-6" />
-      <h1 className="text-2xl font-semibold text-jp-text">Pay by card</h1>
-      <p className="mt-1 text-jp-sm text-jp-muted">Reference: {state.booking_reference ?? "—"}</p>
+    <BookingPageShell testId="card-payment-page">
+      <BookingProgress steps={state.booking_session.progress} className="mb-6" compact />
+      <BookingPageHeader
+        title="Pay with AbhiPay"
+        description={`Reference: ${state.booking_reference ?? "—"}`}
+      />
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <article className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
-          <h2 className="text-jp-base font-semibold">Card payment</h2>
-          <p className="mt-2 text-xl font-semibold">{card?.formatted_amount ?? state.pricing.formatted_total}</p>
-          <p className="mt-2 text-jp-sm text-jp-muted">{card?.ticketing_note}</p>
-          <p className="mt-2 text-jp-sm">Payment status: <strong data-testid="card-payment-status">{card?.payment_status_label ?? state.payment_status.label}</strong></p>
-          {card?.blocked_message ? <p className="mt-2 text-jp-sm text-amber-800" role="alert">{card.blocked_message}</p> : null}
-          {card?.show_pay_button ? (
-            <PrimaryButton
-              type="button"
-              className="mt-4"
-              disabled={starting}
-              onClick={() => void handlePay()}
-              data-testid="card-pay-button"
-            >
-              {starting ? "Starting payment…" : "Pay with card"}
-            </PrimaryButton>
-          ) : (
-            <p className="mt-4 text-jp-sm text-jp-muted">Online payment is not available for this booking right now.</p>
-          )}
-        </article>
-        <ReviewPriceBreakdown pricing={state.pricing} />
-      </div>
-      {error ? <p className="mt-4 text-jp-sm text-red-700" role="alert">{error}</p> : null}
-    </div>
+      <BookingLayout
+        main={
+          <BookingMainColumn>
+            <BookingSection>
+              <BookingSectionHeader title="Card payment" />
+              <p className="text-2xl font-semibold text-jp-text">{card?.formatted_amount ?? state.pricing.formatted_total}</p>
+              <p className="mt-2 text-jp-sm text-jp-muted">{card?.ticketing_note}</p>
+              <p className="mt-2 text-jp-sm">
+                Payment status: <strong data-testid="card-payment-status">{card?.payment_status_label ?? state.payment_status.label}</strong>
+              </p>
+              {card?.blocked_message ? (
+                <p className="mt-2 text-jp-sm text-amber-800 dark:text-amber-200" role="alert">{card.blocked_message}</p>
+              ) : null}
+              {card?.show_pay_button ? (
+                <PrimaryButton
+                  type="button"
+                  className="mt-4"
+                  disabled={starting}
+                  onClick={() => void handlePay()}
+                  data-testid="card-pay-button"
+                >
+                  {starting ? "Starting payment…" : "Pay securely with AbhiPay"}
+                </PrimaryButton>
+              ) : (
+                <p className="mt-4 text-jp-sm text-jp-muted">Online payment is not available for this booking right now.</p>
+              )}
+              <p className="mt-3 text-jp-xs text-jp-muted">
+                You will be redirected to the secure AbhiPay checkout. Card details are not collected on this page.
+              </p>
+            </BookingSection>
+          </BookingMainColumn>
+        }
+        sidebar={
+          <BookingSidebar>
+            <OrderSummary
+              itinerary={state.itinerary}
+              travellerTotal={state.passengers.length}
+              pricing={state.pricing}
+              paymentStatus={state.payment_status}
+            />
+          </BookingSidebar>
+        }
+      />
+      {error ? <p className="mt-4 text-jp-sm text-red-700 dark:text-red-300" role="alert">{error}</p> : null}
+    </BookingPageShell>
   );
 }
 
