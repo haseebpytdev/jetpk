@@ -300,7 +300,12 @@ None. Laravel remains authoritative for:
 
 ## Commit SHA
 
-TBD
+| Commit | SHA | Message |
+|--------|-----|---------|
+| Implementation | `ba3ae9e` | feat(frontend): complete JP-UI-05 auth and portal visual parity |
+| Tests | `09904d0` | test(frontend): add JP-UI-05 auth portal dashboard matrix |
+| Documentation | `8c19551` | docs(visual): record JP-UI-05 visual closure |
+| Merge | TBD | merge: complete JP-UI-05 auth portal dashboard visual parity |
 
 ## Final status
 
