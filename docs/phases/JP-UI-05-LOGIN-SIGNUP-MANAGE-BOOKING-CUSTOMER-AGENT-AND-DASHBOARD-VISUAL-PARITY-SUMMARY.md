@@ -305,7 +305,8 @@ None. Laravel remains authoritative for:
 | Implementation | `ba3ae9e` | feat(frontend): complete JP-UI-05 auth and portal visual parity |
 | Tests | `09904d0` | test(frontend): add JP-UI-05 auth portal dashboard matrix |
 | Documentation | `8c19551` | docs(visual): record JP-UI-05 visual closure |
-| Merge | TBD | merge: complete JP-UI-05 auth portal dashboard visual parity |
+| Merge | `eb8c878` | merge: complete JP-UI-05 auth portal dashboard visual parity |
+| Final docs SHA | `2888fea` | docs(phases): set JP-UI-05 closure SHAs in summary |
 
 ## Final status
 
