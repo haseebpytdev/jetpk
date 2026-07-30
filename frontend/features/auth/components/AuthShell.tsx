@@ -1,26 +1,45 @@
-import { PageContainer } from "@/components/layout/PageContainer";
 import type { ReactNode } from "react";
+import type { AuthBenefitItem } from "../config/auth-benefits";
+import { LOGIN_BENEFITS } from "../config/auth-benefits";
+import { AuthFormCard } from "./AuthFormCard";
+import { AuthPageShell } from "./AuthPageShell";
 
 type AuthShellProps = {
   title: string;
   description?: string;
   children: ReactNode;
   footer?: ReactNode;
+  secondaryCard?: ReactNode;
+  eyebrow?: string;
+  headline?: string;
+  headlineHighlight?: string;
+  panelDescription?: string;
+  benefits?: AuthBenefitItem[];
 };
 
-export function AuthShell({ title, description, children, footer }: AuthShellProps) {
+export function AuthShell({
+  title,
+  description,
+  children,
+  footer,
+  secondaryCard,
+  eyebrow = "JetPakistan",
+  headline = "Welcome back to",
+  headlineHighlight = "JetPakistan",
+  panelDescription = "Sign in to manage bookings, payments, and traveler details securely.",
+  benefits = LOGIN_BENEFITS,
+}: AuthShellProps) {
   return (
-    <PageContainer className="py-10 sm:py-14">
-      <div className="mx-auto w-full max-w-lg">
-        <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-6 shadow-jp-sm sm:p-8">
-          <header className="mb-6 space-y-2">
-            <h1 className="text-jp-h2 font-bold text-jp-text">{title}</h1>
-            {description ? <p className="text-jp-sm text-jp-muted">{description}</p> : null}
-          </header>
-          {children}
-        </div>
-        {footer ? <div className="mt-6 text-center text-jp-sm text-jp-muted">{footer}</div> : null}
-      </div>
-    </PageContainer>
+    <AuthPageShell
+      eyebrow={eyebrow}
+      headline={headline}
+      headlineHighlight={headlineHighlight}
+      description={panelDescription}
+      benefits={benefits}
+    >
+      <AuthFormCard title={title} description={description} footer={footer} secondaryCard={secondaryCard}>
+        {children}
+      </AuthFormCard>
+    </AuthPageShell>
   );
 }

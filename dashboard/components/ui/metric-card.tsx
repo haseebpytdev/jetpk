@@ -29,7 +29,7 @@ export function MetricCard({
 export function MetricCardRow({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6", className)}
+      className={cn("grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4", className)}
       {...props}
     />
   );

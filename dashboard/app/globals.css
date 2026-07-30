@@ -6,6 +6,26 @@
   color-scheme: light;
 }
 
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] body {
+  @apply bg-gray-950 text-gray-100;
+}
+
+html[data-theme="dark"] .bg-jp-surface {
+  background-color: #111827;
+}
+
+html[data-theme="dark"] .bg-white {
+  background-color: #1f2937;
+}
+
+html[data-theme="dark"] .text-gray-900 {
+  color: #f3f4f6;
+}
+
 html {
   overflow-x: hidden;
 }
@@ -22,4 +42,6 @@ html {
 
 body {
   @apply bg-jp-surface text-gray-900;
+  overflow-x: hidden;
+  max-width: 100%;
 }

@@ -53,12 +53,12 @@ export function RecentNotificationsPanel({ recentNotifications }: Pick<OverviewD
 
 export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "recentBookings">) {
   return (
-    <Card className="overflow-hidden p-0">
+    <Card className="min-w-0 overflow-hidden p-0">
       <div className="border-b border-jp-border p-4 sm:p-5">
         <CardTitle>Recent bookings</CardTitle>
         <CardDescription className="mt-1">Synthetic preview data</CardDescription>
       </div>
-      <div className="overflow-x-auto">
+      <div className="min-w-0 overflow-x-auto">
         <table className="min-w-[640px] w-full text-left text-sm">
           <thead className="bg-gray-50 text-xs uppercase text-jp-muted">
             <tr>

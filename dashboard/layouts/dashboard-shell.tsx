@@ -16,9 +16,9 @@ export function DashboardShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-jp-surface text-gray-900">
+    <div className="flex min-h-screen min-w-0 overflow-x-hidden bg-jp-page text-jp-text" data-testid="dashboard-shell">
       <DashboardSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} session={session} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} session={session} />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6">
           <Suspense fallback={null}>
@@ -26,7 +26,7 @@ export function DashboardShell({
           </Suspense>
           {children}
         </main>
-        <footer className="flex flex-col gap-2 border-t border-jp-border bg-white px-4 py-4 text-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <footer className="flex flex-col gap-2 border-t border-jp-border bg-jp-surface px-4 py-4 text-jp-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <span>© 2026 JetPakistan.pk — back-office dashboard</span>
           <span>Version 2.0.0</span>
         </footer>

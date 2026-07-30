@@ -114,12 +114,6 @@ export function LoginForm() {
       </PrimaryButton>
 
       <p className="text-center text-jp-sm text-jp-muted">
-        New to JetPakistan?{" "}
-        <a href="/register" className="font-semibold text-jp-primary hover:underline">
-          Create an account
-        </a>
-      </p>
-      <p className="text-center text-jp-sm text-jp-muted">
         Travel agency?{" "}
         <a href="/agent/register" className="font-semibold text-jp-primary hover:underline">
           Apply as an Agent

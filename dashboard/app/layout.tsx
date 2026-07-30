@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DashboardShell } from "@/layouts/dashboard-shell";
+import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
 import { getDashboardSession } from "@/services/session-service";
 import "./globals.css";
 
@@ -17,8 +18,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en">
-      <body className="min-h-screen font-sans antialiased">
+    <html lang="en" data-theme="light" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+      </head>
+      <body className="min-h-screen overflow-x-hidden font-sans antialiased">
         <DashboardShell session={session}>{children}</DashboardShell>
       </body>
     </html>

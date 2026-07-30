@@ -35,6 +35,27 @@ const AGENT_BOOTSTRAP: SessionBootstrap = {
   account_status: "active",
 };
 
+export const AGENT_STAFF_BOOTSTRAP: SessionBootstrap = {
+  authenticated: true,
+  user: {
+    id: "fixture-agent-staff-1",
+    name: "Agency Staff",
+    email: "staff@example.com",
+    account_type: "agent_staff",
+  },
+  role: "agent_staff",
+  permissions: [],
+  dashboard_url: "/agent/dashboard",
+  requires_otp: false,
+  requires_password_change: false,
+  account_status: "active",
+};
+
+const OTP_BOOTSTRAP: SessionBootstrap = {
+  authenticated: false,
+  requires_otp: true,
+};
+
 /**
  * Non-production smoke-test fixture selected via `ota_session_fixture` cookie.
  * Allows Playwright to exercise SSR portal guards without a live Laravel process.
@@ -59,8 +80,16 @@ export function resolveSessionBootstrapFixture(
     return AGENT_BOOTSTRAP;
   }
 
+  if (fixture === "agent_staff") {
+    return AGENT_STAFF_BOOTSTRAP;
+  }
+
   if (fixture === "anonymous") {
     return { authenticated: false };
+  }
+
+  if (fixture === "otp") {
+    return OTP_BOOTSTRAP;
   }
 
   return null;
