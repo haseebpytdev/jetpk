@@ -181,3 +181,45 @@ JP-UI-04 did not add fake PNRs, seat numbers, bank details, or fare prices. Visu
 | New F violations | 0 |
 | Booking D-sourced fields verified | Pass |
 | Seat UI hardcoding | N/A (step omitted) |
+
+---
+
+## JP-UI-05 audit pass (2026-07-30)
+
+Branch: `phase/jetpk-ui-05-auth-portals-dashboard-visual-parity` · Baseline: `6d27f9d`
+
+### Auth illustration asset
+
+| Location | Item | Class | Owner | Notes |
+|----------|------|-------|-------|-------|
+| `frontend/public/images/auth/auth-illustration.svg` | Auth + lookup hero illustration | **A** (design asset slot) | Design system | Shared by `AuthIllustrationPanel` and `BookingLookupPage` hero; production photograph target **C** (JP-UI-06) |
+| `frontend/features/auth/config/auth-benefits.ts` | Benefit titles and descriptions | B | Frontend vocabulary | Generic marketing copy; no invented statistics |
+| `frontend/features/auth/components/LoginSessionNotice.tsx` | Session-expired message | B | Frontend vocabulary | Triggered only by `?reason=session-expired` |
+
+### Portal shells
+
+| Item | Class | Notes |
+|------|-------|-------|
+| `NAV_ITEMS` in `CustomerDashboardShell` | C | Capabilities-driven target; static labels are B |
+| Agent `capabilities.navigation` | D | Laravel-authoritative nav availability |
+| Wallet/ledger amounts in audit fixtures | E | `jp-ui-05-fixtures.ts` only |
+
+### Manage booking
+
+| Item | Class | Notes |
+|------|-------|-------|
+| `LOOKUP_TRUST_CHIPS` labels | B | UI vocabulary |
+| Turnstile site key | C | Laravel/env |
+| Booking lookup results | D | Laravel API |
+
+### Invalid hardcoding (F) — none introduced
+
+JP-UI-05 did not add fake wallet balances, OAuth buttons when unconfigured, or unsupported lookup actions.
+
+### Correction assignment (JP-UI-05)
+
+| Count | Status |
+|------:|--------|
+| New F violations | 0 |
+| Auth illustration documented | Pass |
+| Portal D-sourced nav verified | Pass (agent capabilities) |

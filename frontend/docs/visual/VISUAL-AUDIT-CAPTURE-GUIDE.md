@@ -269,3 +269,75 @@ cd frontend
 rm -rf .visual-audit/jp-ui-04a   # optional clean
 npm run audit:visual:jp-ui-04a
 ```
+
+---
+
+## JP-UI-05 — auth, portal, and dashboard visual matrix (132 scenarios)
+
+Phase: **JP-UI-05**  
+Command: `npm run audit:visual:jp-ui-05` (from `frontend/`)
+
+### What it does
+
+1. Runs `npm run build` (frontend production)
+2. Runs `npm run build` (dashboard production)
+3. Starts frontend Playwright server on port **3002**
+4. Executes **112** frontend scenarios in `tests/visual-audit/jp-ui-05-visual-matrix.spec.ts`
+5. Executes **20** dashboard scenarios via `playwright.jp-ui-05-dashboard.config.ts`
+6. Writes manifests to `frontend/.visual-audit/jp-ui-05/` and `dashboard/.visual-audit/jp-ui-05/` (**gitignored**)
+7. Verifies combined count (132), duplicates, and gates via `scripts/verify-jp-ui-05-manifest.mjs`
+8. Exits non-zero on any failure
+
+### Environment (test-only)
+
+Same as JP-UI-01/02/03A/04 plus:
+
+- `JP_UI_05_EXPECTED_COUNT=132`
+- Frontend expected: 112 · Dashboard expected: 20
+
+### Scenario families
+
+| Family | IDs (prefix) | Count | Application |
+|--------|--------------|------:|-------------|
+| Login | `login-*` | 20 | frontend |
+| Signup | `signup-*` | 20 | frontend |
+| Recovery | `otp-*`, `recovery-*`, `reset-*` | 12 | frontend |
+| Manage booking | `manage-*` | 20 | frontend |
+| Customer portal | `customer-*` | 20 | frontend |
+| Agent portal | `agent-*` | 20 | frontend |
+| Admin dashboard | `admin-*`, `platform-staff-*`, `dashboard-*` | 20 | dashboard |
+| **Total** | | **132** | |
+
+Full ID list: `frontend/docs/visual/JP-UI-05-COMPLETE-AUTH-PORTAL-DASHBOARD-VISUAL-MATRIX.md`
+
+### Special gates
+
+- `login-social-providers-hidden-or-authoritative`: OAuth `forbiddenTestIds` when unconfigured
+- `signup-unsupported-account-types-hidden`: unsupported account type selectors forbidden
+- `manage-restricted-actions-hidden`: fake lookup actions forbidden
+- `manage-action-requires-login`: refund action forbidden for guest lookup
+- `agent-staff-owner-route-forbidden`: permission denied on wallet route
+- `platform-staff-forbidden-route`: staff access denial in dashboard shell
+
+### Related files
+
+- `tests/visual-audit/jp-ui-05-scenarios.ts`
+- `tests/visual-audit/jp-ui-05-fixtures.ts`
+- `tests/visual-audit/jp-ui-05-helpers.ts`
+- `tests/visual-audit/jp-ui-05-visual-matrix.spec.ts`
+- `tests/visual-audit/jp-ui-05-dashboard-visual-matrix.spec.ts`
+- `playwright.jp-ui-05-dashboard.config.ts`
+- `scripts/capture-jp-ui-05.mjs`
+- `scripts/verify-jp-ui-05-manifest.mjs`
+
+### Acceptance report
+
+`frontend/docs/visual/JP-UI-05-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`
+
+### Regeneration
+
+```bash
+cd frontend
+rm -rf .visual-audit/jp-ui-05 ../dashboard/.visual-audit/jp-ui-05   # optional clean
+npm run audit:visual:jp-ui-05
+```

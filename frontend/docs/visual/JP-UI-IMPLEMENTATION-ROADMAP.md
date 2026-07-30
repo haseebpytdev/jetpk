@@ -172,30 +172,62 @@ Baseline: `5fad262`
 
 ## JP-UI-05 — LOGIN-SIGNUP-MANAGE-BOOKING-CUSTOMER-AGENT-AND-DASHBOARD-VISUAL-PARITY
 
-**Objective:** Auth and portal surfaces match mockups #6, #7, #9; dashboard alignment.
+**Status:** Complete (see `docs/phases/JP-UI-05-*-SUMMARY.md`)
+
+**Branch:** `phase/jetpk-ui-05-auth-portals-dashboard-visual-parity`  
+**Baseline:** `6d27f9d`
+
+**Objective:** Auth and portal surfaces match mockups #6, #7, #9; customer/agent portal shell parity; dashboard theme bootstrap and token alignment.
 
 ### Pages
-- `/login`, `/register`, `/forgot-password`, `/lookup-booking`
-- `/customer/*`, `/agent/*` (visual shell)
+- `/login`, `/register`, `/agent/register`, `/forgot-password`, `/login/otp`, `/reset-password/[token]`
+- `/lookup-booking`
+- `/customer/*`, `/agent/*`
+- `/admin/dashboard/*`, `/staff/dashboard/*` (dashboard app)
 
 ### Components
-- Auth split layout + illustration slots
-- `BookingLookupPage` hero and cards
-- Dashboard shell sidebars, cards, tables
+- `AuthPageShell`, `AuthIllustrationPanel`, `AuthFormCard`, `AuthBenefits`, `LoginSessionNotice`
+- `BookingLookupPage` hero band, lookup card, trust chips (Turnstile preserved)
+- `frontend/features/portal/` — `PortalShell`, `PortalSidebar`, `PortalTopbar`, `PortalMobileDrawer`
+- `CustomerDashboardShell`, `AgentDashboardShell` refactored to portal primitives
+- `dashboard/lib/theme/theme-bootstrap-script.ts`, `dashboard-shell` token alignment
 
 ### Dependencies
 - JP-UI-02 theme and typography
+- JP-FE-04 auth/OTP (logic unchanged)
+- JP-FE-10 lookup Turnstile
 
 ### Backend constraints
-- Social login visibility from Laravel
-- OTP demo unchanged
+- Social login visibility from Laravel only
+- OTP logic unchanged
 - Lookup Turnstile authoritative
+- No fake post-lookup actions
+- Agent RBAC from Laravel capabilities
+
+### Acceptance criteria
+- See JP-UI-05 section in `RESPONSIVE-ACCESSIBILITY-AND-VISUAL-ACCEPTANCE-CRITERIA.md`
+- Match ratings target ≥4 on all families (pending audit run)
 
 ### Tests
-- `auth.spec.ts`, `booking-lookup-turnstile.spec.ts`, dashboard specs
+- `npm run audit:visual:jp-ui-05` — **132** scenarios (112 frontend + 20 dashboard)
+- `tests/visual-audit/jp-ui-05-visual-matrix.spec.ts`
+- `tests/visual-audit/jp-ui-05-dashboard-visual-matrix.spec.ts`
+- `tests/auth.spec.ts`, `booking-lookup-turnstile.spec.ts` (regression)
+
+### Visual contracts
+- `frontend/docs/visual/AUTH-LOGIN-OTP-RECOVERY-AND-SESSION-VISUAL-CONTRACT.md`
+- `frontend/docs/visual/SIGNUP-ACCOUNT-TYPES-VALIDATION-AND-APPROVAL-VISUAL-CONTRACT.md`
+- `frontend/docs/visual/MANAGE-BOOKING-TURNSTILE-LOOKUP-AND-ACTION-ELIGIBILITY-VISUAL-CONTRACT.md`
+- `frontend/docs/visual/CUSTOMER-PORTAL-NAVIGATION-BOOKINGS-PROFILE-AND-SUPPORT-VISUAL-CONTRACT.md`
+- `frontend/docs/visual/AGENT-AGENT-STAFF-WALLET-LEDGER-DEPOSITS-AND-RBAC-VISUAL-CONTRACT.md`
+- `frontend/docs/visual/ADMIN-PLATFORM-STAFF-DASHBOARD-SHELL-RBAC-AND-STATE-VISUAL-CONTRACT.md`
+- `frontend/docs/visual/JP-UI-05-COMPLETE-AUTH-PORTAL-DASHBOARD-VISUAL-MATRIX.md`
+- `frontend/docs/visual/JP-UI-05-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`
 
 ### Deferred
-- Full dashboard feature parity (JP-OPS)
+- Production auth photograph illustration (JP-UI-06)
+- Full dashboard operational feature parity (JP-OPS)
+- OAuth provider enablement (JP-OPS)
 
 ---
 

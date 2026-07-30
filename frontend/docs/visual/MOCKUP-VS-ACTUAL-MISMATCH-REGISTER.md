@@ -186,3 +186,36 @@ Branch: `phase/jetpk-ui-04-booking-journey-visual-parity` · Baseline: `5f718c7`
 **Future capability** — UI scaffold only; step omitted from progress when Laravel marks `seat_extras` as `skipped`.
 
 Evidence: `npm run audit:visual:jp-ui-04` → 28 scenarios · `frontend/docs/visual/JP-UI-04-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`
+
+---
+
+## JP-UI-05 auth, lookup, and portal closure (2026-07-30)
+
+Branch: `phase/jetpk-ui-05-auth-portals-dashboard-visual-parity` · Baseline: `6d27f9d`
+
+### Resolved or improved
+
+| Section | Prior severity | JP-UI-05 resolution |
+|---------|----------------|---------------------|
+| Auth split-screen (mockups #6, #7) | High | `AuthPageShell` + `AuthIllustrationPanel` + `AuthFormCard` on login, register, agent register, forgot/reset |
+| Auth benefits panel | High | `AuthBenefits` with `LOGIN_BENEFITS` / `SIGNUP_BENEFITS` per route |
+| Social login row when unconfigured | Informational | Hidden unless Laravel providers configured; `forbiddenTestIds` gate |
+| Session expired notice | Medium | `LoginSessionNotice` for `?reason=session-expired` |
+| OTP flow | Low | Shell parity only; **OTP logic unchanged** |
+| Manage booking hero band (mockup #9) | Medium | Hero band + trust chips on `BookingLookupPage` |
+| Lookup security card | Medium | Trust chips + Turnstile preserved (`lookup-turnstile`) |
+| Post-lookup fake actions | Informational | `lookup-change-flight`, `lookup-add-baggage`, `lookup-live-status` remain forbidden |
+| Customer/agent shell duplication | Medium | Shared `PortalShell` primitives; shells refactored |
+| Dashboard theme flash | Medium | `theme-bootstrap-script.ts` in dashboard app |
+| Dashboard token mismatch | Medium | `globals.css` + `dashboard-shell` aligned to `jp-*` tokens |
+
+### Remaining accepted gaps
+
+| Section | Mockup | Current | Severity | Phase |
+|---------|--------|---------|----------|-------|
+| Auth illustration asset | Photographic hero | Shared SVG (`auth-illustration.svg`) | Low | JP-UI-06 |
+| Role selection on signup | Multiple traveler types | Customer + agent apply routes only | Informational | JP-OPS |
+| Full dashboard feature depth | Rich ops workspaces | Shell/RBAC visual states; some stubs | Medium | JP-OPS |
+| OAuth providers | Google/Apple/Facebook | Hidden until Laravel enables | Informational | JP-OPS |
+
+Evidence: `npm run audit:visual:jp-ui-05` → 132 scenarios · `frontend/docs/visual/JP-UI-05-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`
