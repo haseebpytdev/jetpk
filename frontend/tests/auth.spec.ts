@@ -14,11 +14,11 @@ async function mockCsrf(page: import("@playwright/test").Page) {
 test.describe("JP-FE-04 authentication shell", () => {
   test("login page renders accessible form", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /log in to your account/i })).toBeVisible();
     await expect(page.locator("#main-content").getByLabel(/email or username/i)).toBeVisible();
     await expect(page.locator("#main-content").getByLabel(/^password/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /forgot password/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /create an account/i })).toHaveAttribute("href", "/register");
+    await expect(page.getByTestId("auth-form-card").getByRole("link", { name: /^sign up$/i })).toHaveAttribute("href", "/register");
   });
 
   test("register page renders customer fields", async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe("JP-FE-04 Laravel auth API mocks", () => {
     });
 
     await page.goto("/login");
-    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /log in to your account/i })).toBeVisible();
   });
 
   test("login invalid credentials show generic error", async ({ page }) => {

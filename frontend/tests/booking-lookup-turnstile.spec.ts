@@ -112,6 +112,7 @@ test.describe("booking lookup turnstile", () => {
       const options = (window as Window & { __turnstileOptions?: { callback?: (t: string) => void } }).__turnstileOptions;
       options?.callback?.("mock-turnstile-token");
     });
+    await expect(page.getByTestId("lookup-submit")).toBeEnabled();
     await page.getByTestId("lookup-submit").click();
     await expect(page.getByTestId("lookup-error")).toContainText("Booking not found");
   });
