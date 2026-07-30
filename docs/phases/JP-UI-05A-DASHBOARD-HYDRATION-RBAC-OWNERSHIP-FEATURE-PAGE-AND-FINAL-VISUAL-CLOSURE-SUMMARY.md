@@ -114,7 +114,7 @@ Artifact: `frontend/docs/visual/jp-ui-05-capture-result.json`
 | Tests | `8753e1f` | test(frontend): add JP-UI-05A ownership and RBAC closure tests |
 | Documentation | `2e9af26` | docs(visual): record JP-UI-05A final closure evidence |
 | Merge | `a6f732f` | merge: complete JP-UI-05A dashboard and RBAC closure |
-| Final docs SHA | `a1ed44c` | docs(phases): set JP-UI-05A closure SHAs in summary |
+| Final docs SHA | `fb68234` | docs(phases): correct JP-UI-05A final docs SHA |
 
 ## Remaining limitations
 
