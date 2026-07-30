@@ -1,3 +1,12 @@
+const DISPLAY_TIME_ZONE = "Asia/Karachi";
+
+function parseIsoDate(iso: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    return new Date(`${iso}T12:00:00.000Z`);
+  }
+  return new Date(iso);
+}
+
 export function formatCurrency(amount: number, currency: string): string {
   return new Intl.NumberFormat("en-PK", {
     style: "currency",
@@ -8,18 +17,30 @@ export function formatCurrency(amount: number, currency: string): string {
 }
 
 export function formatDate(iso: string): string {
-  const d = new Date(iso + "T12:00:00");
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const d = parseIsoDate(iso);
+  if (Number.isNaN(d.getTime())) {
+    return iso;
+  }
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: DISPLAY_TIME_ZONE,
+  });
 }
 
 export function formatDateTime(iso: string): string {
   const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) {
+    return iso;
+  }
   return d.toLocaleString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: DISPLAY_TIME_ZONE,
   });
 }
 
