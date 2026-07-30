@@ -251,3 +251,21 @@ rm -rf .visual-audit/jp-ui-04   # optional clean
 npm run audit:visual:jp-ui-04
 ```
 
+## JP-UI-04A — complete booking state matrix (120 scenarios)
+
+Command: `npm run audit:visual:jp-ui-04a` (from `frontend/`)
+
+1. Runs `npm run build` (production)
+2. Starts deterministic Playwright server on port 3002
+3. Executes **120** scenarios in `tests/visual-audit/jp-ui-04a-visual-matrix.spec.ts`
+4. Writes `frontend/.visual-audit/jp-ui-04a/capture-manifest.json` (**gitignored**)
+5. Committed summary: `frontend/docs/visual/jp-ui-04a-capture-result.json`
+6. Verifier enforces expected=120, passed=120, skipped=0, overflow=0
+
+Registry: `tests/visual-audit/jp-ui-04a-scenarios.ts` (Results 38, Fare 16, Passengers 15, Seats 4, Review 14, Payment 17, Success 16)
+
+```bash
+cd frontend
+rm -rf .visual-audit/jp-ui-04a   # optional clean
+npm run audit:visual:jp-ui-04a
+```

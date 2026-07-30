@@ -275,3 +275,5 @@ No database migration or Laravel config to revert.
 ## Final status
 
 **COMPLETE** — 28/28 visual scenarios passed; 57/57 targeted Playwright tests passed; typecheck, lint, and build passed; frontend-only booking journey visual parity merged to `jetpk/main`; Laravel unchanged; seat capability documented as unsupported conditional future target.
+
+> **JP-UI-04A follow-up:** Complete 120-scenario state matrix evidence finalized in JP-UI-04A (`npm run audit:visual:jp-ui-04a` — 120/120 PASS). See `docs/phases/JP-UI-04A-BOOKING-JOURNEY-DARK-SYSTEM-RESPONSIVE-STATE-MATRIX-AND-FINAL-VISUAL-CLOSURE-SUMMARY.md`.

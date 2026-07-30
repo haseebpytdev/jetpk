@@ -150,6 +150,26 @@ Baseline: `5fad262`
 
 ---
 
+## JP-UI-04A — BOOKING-JOURNEY-STATE-MATRIX-AND-FINAL-VISUAL-CLOSURE
+
+**Status:** Complete (see `docs/phases/JP-UI-04A-*-SUMMARY.md`)
+
+**Branch:** `phase/jetpk-ui-04a-booking-state-matrix-closure`  
+**Baseline:** `f558844`
+
+**Objective:** Complete 120-scenario visual/state matrix for booking journey; fix defects exposed by matrix.
+
+### Tests
+- `npm run audit:visual:jp-ui-04a` — **120** scenarios (mandatory gate)
+- `tests/jp-ui-04a-*.spec.ts` (8 targeted spec files)
+- JP-UI-04 regression specs
+
+### Evidence
+- `frontend/docs/visual/JP-UI-04A-COMPLETE-BOOKING-VISUAL-MATRIX.md`
+- `frontend/docs/visual/jp-ui-04a-capture-result.json`
+
+---
+
 ## JP-UI-05 — LOGIN-SIGNUP-MANAGE-BOOKING-CUSTOMER-AGENT-AND-DASHBOARD-VISUAL-PARITY
 
 **Objective:** Auth and portal surfaces match mockups #6, #7, #9; dashboard alignment.

@@ -1,0 +1,16 @@
+{
+  "phase": "JP-UI-04A-BOOKING-JOURNEY-DARK-SYSTEM-RESPONSIVE-STATE-MATRIX-AND-FINAL-VISUAL-CLOSURE",
+  "generatedAt": "2026-07-30T05:59:19.217Z",
+  "command": "npm run audit:visual:jp-ui-04a",
+  "expectedScenarioCount": 120,
+  "actualScenarioCount": 120,
+  "passed": 120,
+  "failed": 0,
+  "skipped": 0,
+  "screenshotCount": 120,
+  "durationSeconds": 387,
+  "manifestPath": "frontend/.visual-audit/jp-ui-04a/capture-manifest.json",
+  "overflowFailures": 0,
+  "hydrationFailures": 0,
+  "pageErrorFailures": 0
+}
