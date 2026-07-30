@@ -1,4 +1,4 @@
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { AccessRiskBadge, AccessValidationBadge, UserStatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/format";
 import type { RoleTableRow } from "@/types/roles";
@@ -14,8 +14,8 @@ export function RoleMobileCard({ roles, onView }: Props) {
       {roles.map((role) => (
         <Card key={role.id} className="p-4">
           <CardTitle className="text-base">{role.name}</CardTitle>
-          <CardDescription className="mt-2 space-y-2 text-sm">
-            <div className="text-jp-muted">{role.description}</div>
+          <div className="mt-2 space-y-2 text-sm text-jp-muted">
+            <div>{role.description}</div>
             <div className="flex flex-wrap gap-2">
               <UserStatusBadge status={role.status} />
               <AccessValidationBadge status={role.validationState} />
@@ -57,7 +57,7 @@ export function RoleMobileCard({ roles, onView }: Props) {
                 <dd>{formatDate(role.updatedAt)}</dd>
               </div>
             </dl>
-          </CardDescription>
+          </div>
           <button
             type="button"
             className="mt-3 min-h-11 w-full rounded-xl border border-jp-border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"

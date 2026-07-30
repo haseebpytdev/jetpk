@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 
+const PREVIEW_REFERENCE_TIMESTAMP = "2026-07-30T12:00:00.000Z";
+
 function Notice({
   tone,
   title,
@@ -98,6 +100,7 @@ export function UnauthorizedState({ onSignIn }: { onSignIn?: () => void }) {
 
 export function ForbiddenState({ resource }: { resource?: string }) {
   return (
+    <div data-testid="dashboard-access-denied">
     <ErrorState
       title="Access denied"
       message={
@@ -107,6 +110,7 @@ export function ForbiddenState({ resource }: { resource?: string }) {
       }
       referenceId="AUTH-FORBIDDEN"
     />
+    </div>
   );
 }
 
@@ -180,7 +184,7 @@ export function DataSourcePreviewStack({ variant }: { variant: DataSourcePreview
     case "live":
       return <LiveReadOnlyNotice />;
     case "stale":
-      return <StaleDataNotice staleAfter={new Date().toISOString()} />;
+      return <StaleDataNotice staleAfter={PREVIEW_REFERENCE_TIMESTAMP} />;
     case "unauthorized":
       return <UnauthorizedState />;
     case "forbidden":
@@ -199,8 +203,8 @@ export function DataSourcePreviewStack({ variant }: { variant: DataSourcePreview
         <DataSourceMetadataSummary
           meta={{
             source: "fixture",
-            fetchedAt: new Date().toISOString(),
-            referenceTime: new Date().toISOString(),
+            fetchedAt: PREVIEW_REFERENCE_TIMESTAMP,
+            referenceTime: PREVIEW_REFERENCE_TIMESTAMP,
             staleAfter: null,
             requestIdSafe: "PREVIEW-SAFE-001",
             recordCount: 42,

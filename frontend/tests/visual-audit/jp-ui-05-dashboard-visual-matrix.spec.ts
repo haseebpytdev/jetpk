@@ -5,6 +5,7 @@ import {
   AUDIT_ROOT,
   applyTheme,
   applyZoom,
+  appendThemeToRoute,
   assertResolvedTheme,
   attachPageMonitors,
   captureRecords,
@@ -43,11 +44,11 @@ for (const scenario of DASHBOARD_SCENARIOS) {
     const startedAt = Date.now();
     await setupJpUi05Scenario(page, scenario);
 
-    const monitors = attachPageMonitors(page);
     const themeInfo = await applyTheme(page, scenario.theme);
     await page.setViewportSize({ width: scenario.viewport.width, height: scenario.viewport.height });
 
-    const route = resolveJpUi05Route(scenario);
+    const monitors = attachPageMonitors(page);
+    const route = appendThemeToRoute(resolveJpUi05Route(scenario), scenario.theme);
     await page.goto(route, { waitUntil: "load", timeout: 60_000 });
     await page.waitForLoadState("domcontentloaded");
 

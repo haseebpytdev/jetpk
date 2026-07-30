@@ -1,6 +1,6 @@
 {
   "phase": "JP-UI-05-LOGIN-SIGNUP-MANAGE-BOOKING-CUSTOMER-AGENT-AND-DASHBOARD-VISUAL-PARITY",
-  "generatedAt": "2026-07-30T12:25:43.478Z",
+  "generatedAt": "2026-07-30T19:22:28.227Z",
   "command": "npm run audit:visual:jp-ui-05",
   "expectedScenarioCount": 132,
   "actualScenarioCount": 132,
@@ -10,7 +10,7 @@
   "failed": 0,
   "skipped": 0,
   "screenshotCount": 132,
-  "durationSeconds": 962,
+  "durationSeconds": 538,
   "manifestPath": "frontend/.visual-audit/jp-ui-05/capture-manifest.json",
   "overflowFailures": 0,
   "hydrationFailures": 0,

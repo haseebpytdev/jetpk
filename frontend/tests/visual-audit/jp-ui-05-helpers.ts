@@ -67,32 +67,25 @@ export function writeManifest(): void {
   writeFileSync(SUMMARY_PATH, JSON.stringify({ ...payload, manifestPath: MANIFEST_PATH }, null, 2), "utf8");
 }
 
+export function appendThemeToRoute(route: string, theme: ThemeMode): string {
+  const { preference } = themeStorageValue(theme);
+  const hasProtocol = route.startsWith("http");
+  const url = hasProtocol ? new URL(route) : new URL(route, "http://127.0.0.1");
+  url.searchParams.set("jpThemePref", preference);
+  url.searchParams.set("jpAuditReset", "1");
+  return hasProtocol ? url.toString() : `${url.pathname}${url.search}`;
+}
+
 export async function applyTheme(page: Page, theme: ThemeMode) {
   const { preference, emulateDark } = themeStorageValue(theme);
   await page.emulateMedia({ colorScheme: emulateDark ? "dark" : "light" });
-  await page.addInitScript((pref) => {
-    localStorage.setItem("jp-theme-preference", pref);
-  }, preference);
   const expectedResolvedTheme = theme === "dark" || theme === "system-dark" ? "dark" : "light";
   return { preference, colorScheme: emulateDark ? "dark" as const : "light" as const, expectedResolvedTheme };
 }
 
 export async function assertResolvedTheme(page: Page, theme: ThemeMode): Promise<string> {
   const expected = theme === "dark" || theme === "system-dark" ? "dark" : "light";
-  const current = await page.locator("html").getAttribute("data-theme");
-  if (current !== expected) {
-    const { preference } = themeStorageValue(theme);
-    await page.waitForLoadState("domcontentloaded");
-    await page.evaluate(
-      ({ pref, resolved }) => {
-        localStorage.setItem("jp-theme-preference", pref);
-        document.documentElement.setAttribute("data-theme", resolved);
-        document.documentElement.style.colorScheme = resolved;
-      },
-      { pref: preference, resolved: expected },
-    );
-  }
-  await expect(page.locator("html")).toHaveAttribute("data-theme", expected);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", expected, { timeout: 10_000 });
   return expected;
 }
 
@@ -155,17 +148,29 @@ export function attachPageMonitors(page: Page) {
   const pageErrors: string[] = [];
   const consoleErrors: string[] = [];
   page.on("console", (msg) => {
-    if (msg.type() === "error" && /hydration/i.test(msg.text())) hydrationWarnings.push(msg.text());
-    if (msg.type() === "error") consoleErrors.push(msg.text());
+    const text = msg.text();
+    if (
+      msg.type() === "error" &&
+      (/hydration/i.test(text) || /Minified React error #418/.test(text) || /recoverable error/i.test(text))
+    ) {
+      hydrationWarnings.push(text);
+    }
+    if (msg.type() === "error") consoleErrors.push(text);
   });
-  page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("pageerror", (error) => {
+    pageErrors.push(error.message);
+    if (/Minified React error #418|hydration/i.test(error.message)) {
+      hydrationWarnings.push(error.message);
+    }
+  });
   return { hydrationWarnings, pageErrors, consoleErrors };
 }
 
 export async function applyZoom(page: Page, zoom: number): Promise<void> {
-  if (zoom === 1) return;
   await page.evaluate((factor) => {
-    document.documentElement.style.zoom = String(factor);
+    const root = document.documentElement;
+    if (!root) return;
+    root.style.zoom = factor === 1 ? "" : String(factor);
   }, zoom);
 }
 
@@ -177,13 +182,6 @@ export async function assertForbiddenControls(page: Page, forbiddenTestIds: stri
   }
   expect(violations, `forbidden controls present: ${violations.join(", ")}`).toEqual([]);
   return violations;
-}
-
-function filterBenignPageErrors(errors: string[], application: CaptureRecord["application"]): string[] {
-  if (application !== "dashboard") {
-    return errors;
-  }
-  return errors.filter((message) => !/Minified React error #418/.test(message));
 }
 
 export async function captureScenario(
@@ -201,17 +199,14 @@ export async function captureScenario(
   await page.screenshot({ path: screenshotPath, fullPage: record.fullPage ?? true });
   const overflowOk = await assertNoHorizontalOverflow(page);
   const forbiddenViolations = await assertForbiddenControls(page, record.forbiddenTestIds ?? []);
-  const pageErrors = filterBenignPageErrors(record.monitors.pageErrors, record.application);
   expect(record.monitors.hydrationWarnings).toEqual([]);
-  if (record.zoom === 1) {
-    expect(pageErrors).toEqual([]);
-  }
+  expect(record.monitors.pageErrors).toEqual([]);
 
   const passed =
     overflowOk &&
     forbiddenViolations.length === 0 &&
     record.monitors.hydrationWarnings.length === 0 &&
-    (record.zoom !== 1 || pageErrors.length === 0) &&
+    record.monitors.pageErrors.length === 0 &&
     record.actualResolvedTheme === record.expectedResolvedTheme;
 
   captureRecords.push({
@@ -234,7 +229,7 @@ export async function captureScenario(
     overflowOk,
     hydrationWarnings: [...record.monitors.hydrationWarnings],
     consoleErrors: [...record.monitors.consoleErrors],
-    pageErrors: [...pageErrors],
+    pageErrors: [...record.monitors.pageErrors],
     forbiddenViolations,
     captureDurationMs: Date.now() - record.startedAt,
     timestamp: new Date().toISOString(),

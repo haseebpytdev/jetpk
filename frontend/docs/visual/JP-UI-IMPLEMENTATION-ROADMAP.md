@@ -172,7 +172,7 @@ Baseline: `5fad262`
 
 ## JP-UI-05 — LOGIN-SIGNUP-MANAGE-BOOKING-CUSTOMER-AGENT-AND-DASHBOARD-VISUAL-PARITY
 
-**Status:** Complete (see `docs/phases/JP-UI-05-*-SUMMARY.md`)
+**Status:** Complete (see `docs/phases/JP-UI-05-*-SUMMARY.md`). Hydration and feature-page closure completed in **JP-UI-05A** (see `docs/phases/JP-UI-05A-*-SUMMARY.md`).
 
 **Branch:** `phase/jetpk-ui-05-auth-portals-dashboard-visual-parity`  
 **Baseline:** `6d27f9d`
@@ -228,6 +228,30 @@ Baseline: `5fad262`
 - Production auth photograph illustration (JP-UI-06)
 - Full dashboard operational feature parity (JP-OPS)
 - OAuth provider enablement (JP-OPS)
+
+---
+
+## JP-UI-05A — DASHBOARD-HYDRATION-RBAC-OWNERSHIP-FEATURE-PAGE-AND-FINAL-VISUAL-CLOSURE
+
+**Status:** Complete (see `docs/phases/JP-UI-05A-*-SUMMARY.md`)
+
+**Branch:** `phase/jetpk-ui-05a-dashboard-hydration-rbac-closure`  
+**Baseline:** `3eb64ec`
+
+**Objective:** Fix dashboard React #418 at source, remove hydration suppression, rerun unfiltered 132-scenario matrix, classify dashboard feature pages, add ownership/RBAC functional evidence.
+
+### Deliverables
+- Dashboard hydration fixes (Card/Table children, valid HTML, theme parity)
+- Removed `filterBenignPageErrors()` React #418 suppression
+- Dashboard feature-state components and route classification matrix
+- 24 targeted Playwright ownership/RBAC/hydration tests
+- Unfiltered 132/132 visual audit (538s, zero hydration warnings)
+
+### Tests
+- `npm run audit:visual:jp-ui-05` — 132/132 PASS
+- `dashboard/tests/jp-ui-05a-hydration.spec.ts` — 9/9 PASS
+- `dashboard/tests/jp-ui-05a-rbac.spec.ts` — 3/3 PASS
+- `frontend/tests/jp-ui-05a-*.spec.ts` — 12/12 PASS
 
 ---
 

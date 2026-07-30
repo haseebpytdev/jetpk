@@ -1,4 +1,4 @@
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { AccessRiskBadge, AccessValidationBadge } from "@/components/ui/status-badge";
 import type { PermissionTableRow } from "@/types/permissions";
 
@@ -24,8 +24,8 @@ export function PermissionMobileCard({ permissions, onView }: Props) {
       {permissions.map((permission) => (
         <Card key={permission.id} className="p-4">
           <CardTitle className="text-base">{permission.label}</CardTitle>
-          <CardDescription className="mt-2 space-y-2 text-sm">
-            <div className="font-mono text-xs text-jp-muted">{permission.key}</div>
+          <div className="mt-2 space-y-2 text-sm text-jp-muted">
+            <div className="font-mono text-xs">{permission.key}</div>
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">{formatActionLabel(permission.risk)}</span>
               {permission.isHighRisk ? <AccessRiskBadge highRisk /> : null}
@@ -65,7 +65,7 @@ export function PermissionMobileCard({ permissions, onView }: Props) {
                 </span>
               ))}
             </div>
-          </CardDescription>
+          </div>
           <button
             type="button"
             className="mt-3 min-h-11 w-full rounded-xl border border-jp-border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"

@@ -89,3 +89,11 @@ Shell spacing, borders, and typography aligned to frontend `jp-*` scale from JP-
 ## Related scenarios
 
 Admin family (20): overview themes/mobile/zoom, action-kpis, bookings, booking-detail-or-stub, deposits, payments, agencies, staff, supplier-pnr-queue, cancellations-refunds, empty-state, platform-staff-permitted, platform-staff-forbidden, dashboard-api-or-preview-error.
+
+## JP-UI-05A updates
+
+- React #418 hydration fixed at source (Card/Table children, valid HTML nesting, theme parity)
+- Hydration suppression removed from visual audit harness
+- Feature-state components: `DashboardPageHeader`, `DashboardAccessDenied`, `DashboardUnavailableState`, etc.
+- Route classification: see `JP-UI-05A-DASHBOARD-FEATURE-PAGE-OPERATIONAL-PREVIEW-STUB-MATRIX.md`
+- Unfiltered visual audit: 20/20 dashboard scenarios PASS, zero hydration warnings

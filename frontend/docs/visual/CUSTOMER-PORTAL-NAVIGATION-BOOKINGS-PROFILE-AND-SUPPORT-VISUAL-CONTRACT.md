@@ -93,3 +93,9 @@ Drawer: `role="dialog"`, `aria-modal="true"`, escape key closes, overlay click c
 ## Related scenarios
 
 Customer family (20): overview themes/mobile/zoom, bookings list/empty/detail/forbidden, payments, invoices available/unavailable, profile/validation, support, session-expired, loading, api-error.
+
+## JP-UI-05A updates
+
+- Customer portal layout: `robots: { index: false, follow: false }`
+- Ownership tests: `frontend/tests/jp-ui-05a-customer-ownership.spec.ts` (4/4 PASS)
+- See `JP-UI-05A-CUSTOMER-OWNERSHIP-AND-PRIVATE-ROUTE-QA.md`

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { DashboardShell } from "@/layouts/dashboard-shell";
 import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
 import { getDashboardSession } from "@/services/session-service";
@@ -7,6 +8,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "JetPakistan Back Office",
   description: "JetPakistan admin and staff back-office dashboard",
+  robots: { index: false, follow: false },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,12 +20,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body className="min-h-screen overflow-x-hidden font-sans antialiased">
-        <DashboardShell session={session}>{children}</DashboardShell>
+        <ThemeProvider>
+          <DashboardShell session={session}>{children}</DashboardShell>
+        </ThemeProvider>
       </body>
     </html>
   );

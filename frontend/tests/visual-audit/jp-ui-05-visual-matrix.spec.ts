@@ -5,6 +5,7 @@ import {
   AUDIT_ROOT,
   applyTheme,
   applyZoom,
+  appendThemeToRoute,
   assertResolvedTheme,
   attachPageMonitors,
   captureRecords,
@@ -32,11 +33,12 @@ for (const scenario of FRONTEND_SCENARIOS) {
     const startedAt = Date.now();
     await setupJpUi05Scenario(page, scenario);
 
-    const monitors = attachPageMonitors(page);
     const themeInfo = await applyTheme(page, scenario.theme);
     await page.setViewportSize({ width: scenario.viewport.width, height: scenario.viewport.height });
 
-    await page.goto(scenario.route, { waitUntil: "load", timeout: 60_000 });
+    const monitors = attachPageMonitors(page);
+
+    await page.goto(appendThemeToRoute(scenario.route, scenario.theme), { waitUntil: "load", timeout: 60_000 });
 
     if (scenario.waitForTestId) {
       const target = page.getByTestId(scenario.waitForTestId).first();

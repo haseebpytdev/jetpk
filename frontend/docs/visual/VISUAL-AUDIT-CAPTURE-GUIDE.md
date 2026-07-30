@@ -341,3 +341,10 @@ cd frontend
 rm -rf .visual-audit/jp-ui-05 ../dashboard/.visual-audit/jp-ui-05   # optional clean
 npm run audit:visual:jp-ui-05
 ```
+
+### JP-UI-05A hydration policy
+
+- **No hydration suppression.** `filterBenignPageErrors()` removed in JP-UI-05A.
+- Verifier fails on any hydration warning, React #418, or page error.
+- Only acceptable `suppressHydrationWarning`: dashboard `<html>` theme attribute from inline bootstrap.
+- See `frontend/docs/visual/JP-UI-05A-DASHBOARD-HYDRATION-ROOT-CAUSE-AND-FIX.md`.

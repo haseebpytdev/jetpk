@@ -279,10 +279,28 @@ None. Laravel remains authoritative for:
 - Auth illustration uses shared SVG asset; production photograph slot deferred to JP-UI-06.
 - Agent approval pending state relies on Laravel messaging; no invented approval timeline copy.
 - Admin booking detail may render list/stub depending on route depth; full ops detail deferred to JP-OPS.
-- Dashboard feature pages beyond shell chrome are not fully redesigned in this phase.
-- Visual audit scores: **132/132 passed** — see `frontend/docs/visual/jp-ui-05-capture-result.json`
+- Dashboard feature pages beyond shell chrome are not fully redesigned in this phase — **completed in JP-UI-05A** (see `docs/phases/JP-UI-05A-*-SUMMARY.md`)
+- Visual audit scores: **132/132 passed** in JP-UI-05 with React #418 filtered for dashboard — **JP-UI-05A reran unfiltered 132/132 with zero hydration warnings** (see `frontend/docs/visual/JP-UI-05A-FINAL-UNFILTERED-132-SCENARIO-VISUAL-REPORT.md`)
 
-## Risks
+## JP-UI-05A closure (2026-07-30)
+
+Implementation completed in JP-UI-05; hydration, RBAC, ownership and dashboard feature-page closure completed in JP-UI-05A.
+
+| Item | JP-UI-05A result |
+|------|------------------|
+| React #418 suppression | Removed (`filterBenignPageErrors`) |
+| Hydration root cause | Card/Table children + invalid HTML nesting + theme parity — fixed |
+| Unfiltered visual matrix | 132/132 PASS, 0 hydration warnings |
+| Ownership/RBAC tests | 24 targeted Playwright specs PASS |
+| Dashboard feature pages | Classified operational/preview/stub/forbidden |
+| Branch | `phase/jetpk-ui-05a-dashboard-hydration-rbac-closure` |
+| Baseline | `3eb64ec` |
+
+## Final status
+
+**PASS (JP-UI-05)** — 132/132 visual scenarios with filtered dashboard hydration; auth, lookup, portal, and dashboard shell parity delivered.
+
+**PASS (JP-UI-05A)** — hydration corrected at source, suppression removed, unfiltered 132/132, ownership/RBAC evidence added. Ready for JP-UI-06.
 
 | Risk | Mitigation |
 |------|------------|
@@ -310,4 +328,4 @@ None. Laravel remains authoritative for:
 
 ## Final status
 
-**PASS** — 132/132 visual scenarios; auth, lookup, portal, and dashboard shell parity delivered. Ready for JP-UI-06.
+**PASS** — 132/132 visual scenarios; auth, lookup, portal, and dashboard shell parity delivered in JP-UI-05. Hydration, RBAC, ownership and dashboard feature-page closure completed in JP-UI-05A. Ready for JP-UI-06.

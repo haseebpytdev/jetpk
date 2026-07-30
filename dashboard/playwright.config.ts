@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const smokePort = process.env.PLAYWRIGHT_PORT ?? "3002";
-const baseURL = `http://127.0.0.1:${smokePort}`;
+const smokePort = process.env.PLAYWRIGHT_PORT ?? "3003";
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${smokePort}`;
 
 export default defineConfig({
   testDir: "./tests",
@@ -16,7 +16,7 @@ export default defineConfig({
     trace: "off",
   },
   webServer: {
-    command: "npm run start:smoke",
+    command: `npm run start -- -p ${smokePort}`,
     url: `${baseURL}/admin/dashboard`,
     reuseExistingServer: false,
     timeout: 180_000,
