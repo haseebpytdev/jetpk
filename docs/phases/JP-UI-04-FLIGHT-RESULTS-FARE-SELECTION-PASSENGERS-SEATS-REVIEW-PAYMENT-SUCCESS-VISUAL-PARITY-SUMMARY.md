@@ -262,9 +262,11 @@ No database migration or Laravel config to revert.
 | Item | SHA |
 |------|-----|
 | Baseline (JP-UI-03A HEAD) | `5f718c7` |
-| Feature commit | Pending |
-| Docs commit | Pending |
-| Merge commit | Pending |
+| Feature commit | `a1c94ce` |
+| Test commit | `4dc465e` |
+| Docs commit | `baa8e3c` |
+| Merge commit | `642a374` |
+| Final main HEAD | `642a374` |
 
 ## Production
 
@@ -272,4 +274,4 @@ No database migration or Laravel config to revert.
 
 ## Final status
 
-**COMPLETE (pending visual audit run and commit)** — frontend-only booking journey visual parity implemented; Laravel unchanged; seat capability documented as unsupported conditional future target.
+**COMPLETE** — 28/28 visual scenarios passed; 57/57 targeted Playwright tests passed; typecheck, lint, and build passed; frontend-only booking journey visual parity merged to `jetpk/main`; Laravel unchanged; seat capability documented as unsupported conditional future target.
