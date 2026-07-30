@@ -101,6 +101,15 @@ See `MOCKUP-VS-ACTUAL-MISMATCH-REGISTER.md` § JP-UI-05 closure — auth split-s
 
 ## Next steps
 
-1. Run `npm run audit:visual:jp-ui-05` and commit `jp-ui-05-capture-result.json` when verifier passes 132/132.
-2. Update scores in this report from capture review.
-3. Proceed to JP-UI-06 for production illustration assets and final closure.
+1. ~~Run `npm run audit:visual:jp-ui-05` and commit `jp-ui-05-capture-result.json` when verifier passes 132/132.~~ **Done in JP-UI-05A** — unfiltered 132/132 PASS.
+2. Proceed to JP-UI-06 for production illustration assets and final closure.
+
+## JP-UI-05A acceptance
+
+| Metric | Result |
+|--------|--------|
+| Visual matrix | 132/132 PASS (unfiltered) |
+| Hydration warnings | 0 |
+| React #418 | 0 |
+| Ownership/RBAC tests | 24/24 PASS |
+| Dashboard hydration regression | 12/12 PASS |

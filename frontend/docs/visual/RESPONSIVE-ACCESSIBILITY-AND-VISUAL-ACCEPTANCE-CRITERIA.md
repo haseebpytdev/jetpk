@@ -95,7 +95,9 @@ Phase: **JP-UI-01**
 - [x] Dashboard theme bootstrap without flash.
 - [x] 132-scenario visual matrix (`npm run audit:visual:jp-ui-05`).
 
-**JP-UI-05 evidence:** `npm run audit:visual:jp-ui-05` (132 scenarios) · `frontend/docs/visual/JP-UI-05-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md` · Visual scores ≥4 all families (pending audit run).
+**JP-UI-05 evidence:** `npm run audit:visual:jp-ui-05` (132 scenarios) · `frontend/docs/visual/JP-UI-05-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`
+
+**JP-UI-05A evidence:** Unfiltered 132/132 with zero hydration warnings · `frontend/docs/visual/JP-UI-05A-FINAL-UNFILTERED-132-SCENARIO-VISUAL-REPORT.md` · 24 ownership/RBAC/hydration Playwright specs PASS
 
 ### JP-UI-06 — Assets, motion, closure
 

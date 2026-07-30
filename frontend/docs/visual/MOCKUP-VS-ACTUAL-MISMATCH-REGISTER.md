@@ -219,3 +219,15 @@ Branch: `phase/jetpk-ui-05-auth-portals-dashboard-visual-parity` · Baseline: `6
 | OAuth providers | Google/Apple/Facebook | Hidden until Laravel enables | Informational | JP-OPS |
 
 Evidence: `npm run audit:visual:jp-ui-05` → 132 scenarios · `frontend/docs/visual/JP-UI-05-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`
+
+## JP-UI-05A dashboard hydration and feature-page closure (2026-07-30)
+
+Branch: `phase/jetpk-ui-05a-dashboard-hydration-rbac-closure` · Baseline: `3eb64ec`
+
+| Section | Prior severity | JP-UI-05A resolution |
+|---------|----------------|---------------------|
+| React #418 filtered as benign | Critical | Suppression removed; root cause fixed |
+| Dashboard shell-only captures | Medium | 20 scenarios show module content |
+| Missing ownership/RBAC tests | Medium | 24 targeted Playwright specs added |
+
+Evidence: `frontend/docs/visual/JP-UI-05A-FINAL-UNFILTERED-132-SCENARIO-VISUAL-REPORT.md` → 132/132 unfiltered PASS

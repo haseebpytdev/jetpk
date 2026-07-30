@@ -231,3 +231,12 @@ Turnstile, lookup, and eligibility (8):
 ## Themes
 
 `light`, `dark`, `system-light`, `system-dark`
+
+## JP-UI-05A unfiltered rerun
+
+- Command: `npm run audit:visual:jp-ui-05`
+- Result: **132/132 PASS** (538s)
+- Hydration warnings: **0**
+- React #418: **0**
+- Suppression removed: `filterBenignPageErrors()` deleted from `jp-ui-05-helpers.ts`
+- Report: `JP-UI-05A-FINAL-UNFILTERED-132-SCENARIO-VISUAL-REPORT.md`

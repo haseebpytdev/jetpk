@@ -94,3 +94,9 @@ Same portal contract as customer:
 ## Related scenarios
 
 Agent family (20): overview themes/mobile/zoom, bookings, booking detail, wallet, wallet-unavailable, ledger, ledger-empty, deposits, deposit-pending, profile, staff-permitted, staff-forbidden, cross-agency, api-error.
+
+## JP-UI-05A updates
+
+- Agent portal layout: `robots: { index: false, follow: false }`
+- Agency isolation tests: `frontend/tests/jp-ui-05a-agent-rbac.spec.ts` (5/5 PASS)
+- See `JP-UI-05A-AGENT-AGENT-STAFF-AGENCY-ISOLATION-AND-RBAC-QA.md`
