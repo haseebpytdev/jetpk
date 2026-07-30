@@ -69,3 +69,13 @@ Production untouched. Backup Safe untouched.
 ## JP-UI-05 readiness
 
 Booking journey visual evidence complete. JP-UI-05 (login/signup/manage booking/dashboard parity) may proceed.
+
+## Git SHAs
+
+| Item | SHA |
+|------|-----|
+| Baseline (JP-UI-04) | `f558844` |
+| Feature (test) | `a5293f7` |
+| Feature (docs) | `6cea268` |
+| Merge | `0c3344b` |
+| Final main HEAD | `0c3344b` |
