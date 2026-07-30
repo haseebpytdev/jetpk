@@ -102,7 +102,7 @@ See `frontend/docs/visual/JP-UI-03-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`.
 | Feature commit | `4003e72` |
 | Docs commit | `3518b57` |
 | Merge commit | `f815819` |
-| Final docs SHA | `d9704cc` |
+| Final docs SHA | `5db8d19` |
 
 ## Rollback
 
