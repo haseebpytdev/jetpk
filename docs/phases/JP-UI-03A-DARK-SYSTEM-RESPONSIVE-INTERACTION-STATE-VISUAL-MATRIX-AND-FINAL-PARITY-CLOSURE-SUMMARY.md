@@ -99,10 +99,10 @@ See `frontend/docs/visual/JP-UI-03-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`.
 
 | Item | SHA |
 |------|-----|
-| Feature commit | _(recorded after commit)_ |
-| Docs commit | _(recorded after commit)_ |
-| Merge commit | _(recorded after merge)_ |
-| Final docs SHA | _(recorded after main push)_ |
+| Feature commit | `4003e72` |
+| Docs commit | `3518b57` |
+| Merge commit | `f815819` |
+| Final docs SHA | _(after SHA correction commit)_ |
 
 ## Rollback
 
