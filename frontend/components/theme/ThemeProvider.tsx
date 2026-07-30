@@ -42,14 +42,8 @@ function applyResolvedTheme(resolved: ResolvedTheme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>(() => {
-    if (typeof window === "undefined") return DEFAULT_THEME_PREFERENCE;
-    return readStoredPreference();
-  });
-  const [systemDark, setSystemDark] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
+  const [preference, setPreferenceState] = useState<ThemePreference>(DEFAULT_THEME_PREFERENCE);
+  const [systemDark, setSystemDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
