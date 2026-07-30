@@ -145,3 +145,48 @@ Captures representative routes in **light** and **dark** themes, desktop and mob
 - `tests/visual-audit/jp-ui-02-foundation.visual.spec.ts`
 - `scripts/capture-jp-ui-02.mjs`
 
+---
+
+## JP-UI-03 public pages capture (partial)
+
+Phase: **JP-UI-03**  
+Command: `npm run audit:visual:jp-ui-03` (from `frontend/`)
+
+**Limitation:** Six light-desktop scenarios only. Superseded by JP-UI-03A for parity evidence.
+
+---
+
+## JP-UI-03A complete visual matrix (authoritative)
+
+Phase: **JP-UI-03A**  
+Command: `npm run audit:visual:jp-ui-03a` (from `frontend/`)
+
+### What it does
+
+1. Runs `npm run build`
+2. Starts production Next.js on port **3002** via Playwright `webServer`
+3. Executes **119** serial scenarios in `tests/visual-audit/jp-ui-03a-visual-matrix.spec.ts`
+4. Writes `frontend/.visual-audit/jp-ui-03a/capture-manifest.json` (**gitignored**)
+5. Verifies manifest count, duplicates, overflow, hydration, and page errors via `scripts/verify-jp-ui-03a-manifest.mjs`
+6. Exits non-zero on any failure
+
+### Environment (test-only)
+
+Same as JP-UI-01/02 plus `JP_UI_03A_EXPECTED_COUNT=119`.
+
+### Committed artifacts
+
+- Scenario registry, fixtures, helpers, spec, capture/verify scripts
+- `frontend/docs/visual/jp-ui-03a-capture-result.json` (lightweight summary)
+- QA docs under `frontend/docs/visual/JP-UI-03A-*.md`
+
+### Related files
+
+- `tests/visual-audit/jp-ui-03a-scenarios.ts`
+- `tests/visual-audit/jp-ui-03a-fixtures.ts`
+- `tests/visual-audit/jp-ui-03a-helpers.ts`
+- `tests/visual-audit/jp-ui-03a-visual-matrix.spec.ts`
+- `tests/jp-ui-03a-theme-matrix.spec.ts`
+- `scripts/capture-jp-ui-03a.mjs`
+- `scripts/verify-jp-ui-03a-manifest.mjs`
+

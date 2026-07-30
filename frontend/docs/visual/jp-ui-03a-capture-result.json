@@ -1,0 +1,17 @@
+{
+  "phase": "JP-UI-03A-DARK-SYSTEM-RESPONSIVE-INTERACTION-STATE-VISUAL-MATRIX-AND-FINAL-PARITY-CLOSURE",
+  "generatedAt": "2026-07-30T00:28:18.834Z",
+  "command": "npm run audit:visual:jp-ui-03a",
+  "expectedScenarioCount": 119,
+  "actualScenarioCount": 119,
+  "passed": 119,
+  "failed": 0,
+  "skipped": 0,
+  "screenshotCount": 119,
+  "durationSeconds": 282,
+  "manifestPath": "frontend/.visual-audit/jp-ui-03a/capture-manifest.json",
+  "overflowFailures": 0,
+  "hydrationFailures": 0,
+  "pageErrorFailures": 0,
+  "baselineSha": "6fd4e93"
+}

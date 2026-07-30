@@ -23,7 +23,7 @@ Phase: **JP-UI-01**
 | Results filter sidebar hidden below `lg` — drawer used | Results | OK (by design) | JP-UI-04 |
 | Progress stepper wraps on narrow widths | Checkout | Medium | JP-UI-04 |
 | Footer 5-column grid stacks | All public | Low | JP-UI-02 |
-| Horizontal overflow at 320px | Most pages | **Not observed in smoke**; verify in JP-UI-06 diff | JP-UI-06 |
+| Horizontal overflow at 320px | Most pages | **Not observed** (JP-UI-03A: 0 failures) | JP-UI-03A |
 | Sticky header covers focused elements | Rare | Low | JP-UI-02 |
 | Mobile keyboard on date fields | Search | Medium | JP-UI-03 |
 
@@ -37,8 +37,9 @@ Phase: **JP-UI-01**
 | FAQ accordion keyboard | Tested (`public-content.spec.ts`) | Pass |
 | Turnstile on lookup | Laravel-authoritative | Pass |
 | Empty `imageAlt` on some offers | Fail | JP-UI-03 |
-| Color contrast (light) | Generally pass on `jp-*` tokens | Dark untested |
-| Reduced motion | About page test exists | Extend globally JP-UI-06 |
+| Color contrast (light) | Generally pass on `jp-*` tokens | Pass |
+| Color contrast (dark) | Verified JP-UI-03A matrix | Pass |
+| Reduced motion | About + homepage tests | Pass (JP-UI-03A extended) |
 | Touch targets login mobile | auth.spec ≥200px button | Pass |
 
 ---

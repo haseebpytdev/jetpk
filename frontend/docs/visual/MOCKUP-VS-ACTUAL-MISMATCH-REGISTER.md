@@ -133,3 +133,20 @@ Severity: **Blocker** · **High** · **Medium** · **Low** · **Informational**
 ## Acceptance criterion linkage
 
 Each High/Blocker row above maps to a measurable criterion in `RESPONSIVE-ACCESSIBILITY-AND-VISUAL-ACCEPTANCE-CRITERIA.md`. Implementation phases assigned in `JP-UI-IMPLEMENTATION-ROADMAP.md`.
+
+---
+
+## JP-UI-03A visual evidence closure (2026-07-30)
+
+| Item | JP-UI-03 status | JP-UI-03A status |
+|------|-----------------|------------------|
+| Visual capture count | 6 light-desktop only | **119** full matrix |
+| Dark theme captures | Not run | Complete |
+| System theme captures | Not run | Complete |
+| Mobile 320/375/390 | Partial | Complete |
+| Zoom 125%/150% | Not run | Complete |
+| Search interaction states | Partial (3 tabs in one test) | Complete (17 scenarios) |
+| Horizontal overflow gate | Not enforced | 0 failures |
+| Hydration gate | Not enforced | Fixed `ThemeProvider` + 0 warnings |
+
+Evidence: `npm run audit:visual:jp-ui-03a` → `frontend/docs/visual/jp-ui-03a-capture-result.json`

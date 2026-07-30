@@ -81,6 +81,27 @@ Baseline: `5fad262`
 
 ---
 
+## JP-UI-03A — DARK-SYSTEM-RESPONSIVE-INTERACTION-STATE-VISUAL-MATRIX-AND-FINAL-PARITY-CLOSURE
+
+**Status:** Complete (see `docs/phases/JP-UI-03A-*-SUMMARY.md`)
+
+**Objective:** Complete JP-UI-03 visual evidence across themes, viewports, zoom, and interaction states; fix evidenced defects only.
+
+### Scope
+- 119-scenario visual matrix (`npm run audit:visual:jp-ui-03a`)
+- Theme/system/dark/mobile/zoom/interaction captures
+- Horizontal overflow + hydration gates
+- `ThemeProvider` hydration fix
+
+### Out of scope
+- JP-UI-04 booking-flow redesign
+
+### Tests
+- `jp-ui-03a-theme-matrix.spec.ts`
+- `homepage.spec.ts`, `public-content.spec.ts`, `jp-ui-02-theme.spec.ts` (regression)
+
+---
+
 ## JP-UI-04 — FLIGHT-RESULTS-FARE-SELECTION-PASSENGERS-SEATS-REVIEW-PAYMENT-SUCCESS-VISUAL-PARITY
 
 **Objective:** Booking journey family matches mockups #13, #11, #4, #8, #10, #5.
