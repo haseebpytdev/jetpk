@@ -109,12 +109,12 @@ Artifact: `frontend/docs/visual/jp-ui-05-capture-result.json`
 
 | Commit | SHA | Message |
 |--------|-----|---------|
-| Hydration fix | _pending_ | fix(dashboard): resolve hydration mismatch without suppression |
-| Feature pages | _pending_ | feat(dashboard): complete role-safe feature page visual states |
-| Tests | _pending_ | test(frontend): add JP-UI-05A ownership and RBAC closure tests |
-| Documentation | _pending_ | docs(visual): record JP-UI-05A final closure evidence |
-| Merge | _pending_ | merge: complete JP-UI-05A dashboard and RBAC closure |
-| Final docs SHA | _pending_ | docs(phases): set JP-UI-05A closure SHAs in summary |
+| Hydration fix | `f70a29f` | fix(dashboard): resolve hydration mismatch without suppression |
+| Feature pages | `b49f496` | feat(dashboard): complete role-safe feature page visual states |
+| Tests | `8753e1f` | test(frontend): add JP-UI-05A ownership and RBAC closure tests |
+| Documentation | `2e9af26` | docs(visual): record JP-UI-05A final closure evidence |
+| Merge | `a6f732f` | merge: complete JP-UI-05A dashboard and RBAC closure |
+| Final docs SHA | `6e73d1c` | docs(phases): set JP-UI-05A closure SHAs in summary |
 
 ## Remaining limitations
 
