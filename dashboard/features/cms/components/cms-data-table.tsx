@@ -1,5 +1,5 @@
 import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Table, Td, Th } from "@/components/ui/table";
 import type { CmsModuleTable } from "@/types/cms";
 
@@ -69,14 +69,14 @@ export function CmsDataTable({ table, onSort, sort, direction, onView, mobileTit
         {table.rows.map((row) => (
           <Card key={row.id} className="p-4">
             <CardTitle className="text-base">{mobileTitle}</CardTitle>
-            <CardDescription className="mt-2 space-y-1">
+            <div className="mt-2 space-y-1 text-sm text-jp-muted">
               {table.columns.map((col) => (
                 <div key={col.key} className="flex justify-between gap-3 text-sm">
                   <span className="text-jp-muted">{col.label}</span>
-                  <span className="max-w-[60%] break-words text-right">{row[col.key]}</span>
+                  <span className="max-w-[60%] break-words text-right text-gray-900">{row[col.key]}</span>
                 </div>
               ))}
-            </CardDescription>
+            </div>
             {onView ? (
               <button
                 type="button"

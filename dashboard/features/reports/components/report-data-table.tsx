@@ -1,5 +1,5 @@
 import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Table, Td, Th } from "@/components/ui/table";
 import type { ReportModuleTable } from "@/types/report";
 
@@ -66,14 +66,14 @@ export function ReportDataTable({ table, onSort, sort, direction, mobileTitle = 
         {table.rows.map((row, index) => (
           <Card key={String(row.id ?? row.transactionId ?? row.reference ?? index)} className="p-4">
             <CardTitle className="text-base">{mobileTitle}</CardTitle>
-            <CardDescription className="mt-2 space-y-1">
+            <div className="mt-2 space-y-1 text-sm text-jp-muted">
               {table.columns.map((col) => (
                 <div key={col.key} className="flex justify-between gap-3 text-sm">
                   <span className="text-jp-muted">{col.label}</span>
-                  <span className="text-right">{row[col.key]}</span>
+                  <span className="text-right text-gray-900">{row[col.key]}</span>
                 </div>
               ))}
-            </CardDescription>
+            </div>
             {row.href ? (
               <Link href={String(row.href)} className="mt-3 inline-block text-sm font-medium text-jp-accent hover:underline">
                 View record

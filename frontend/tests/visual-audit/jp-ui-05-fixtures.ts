@@ -530,6 +530,24 @@ async function mockAuthApis(page: Page, fixtureId: string): Promise<void> {
 
   await page.route("**/laravel/register", async (route) => {
     if (fixtureId === "auth-register-slow") return;
+    if (fixtureId === "auth-register-validation-fail") {
+      await route.fulfill({
+        status: 422,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: "The given data was invalid.",
+          errors: {
+            first_name: ["The first name field is required."],
+            last_name: ["The last name field is required."],
+            email: ["The email field is required."],
+            mobile: ["The mobile field is required."],
+            password: ["The password field is required."],
+            terms: ["You must accept the terms and conditions."],
+          },
+        }),
+      });
+      return;
+    }
     if (fixtureId === "auth-register-consent-fail") {
       await route.fulfill({
         status: 422,
@@ -986,6 +1004,7 @@ export function resolveJpUi05Route(scenario: JpUi05Scenario): string {
 }
 
 export async function setupJpUi05Scenario(page: Page, scenario: JpUi05Scenario): Promise<void> {
+  await page.unrouteAll({ behavior: "ignoreErrors" });
   await mockCsrf(page);
   await mockSessionBootstrap(page, scenario.fixtureId, scenario.role);
   await mockAuthApis(page, scenario.fixtureId);
@@ -1004,6 +1023,7 @@ export async function setupJpUi05Scenario(page: Page, scenario: JpUi05Scenario):
   if (authFamilies.has(scenario.family)) {
     if (
       scenario.fixtureId === "auth-register" ||
+      scenario.fixtureId === "auth-register-validation-fail" ||
       scenario.fixtureId === "auth-register-consent-fail" ||
       scenario.fixtureId === "auth-register-slow" ||
       scenario.fixtureId === "auth-register-success"

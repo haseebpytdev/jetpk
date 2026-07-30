@@ -143,10 +143,11 @@ function buildSignup(): JpUi05Scenario[] {
     ...layoutFamily("frontend", "signup", "signup", "/register", "auth-register", "auth-page-shell"),
     s("frontend", "signup", "signup-customer", "/register", "light", VP.d1440, "customer", "auth-register", { waitForTestId: "auth-form-card" }),
     s("frontend", "signup", "signup-agent", "/agent/register", "light", VP.d1440, "agent", "auth-agent-register", { waitForTestId: "auth-form-card" }),
-    s("frontend", "signup", "signup-validation-errors", "/register", "light", VP.d1440, "validation-errors", "auth-register", {
+    s("frontend", "signup", "signup-validation-errors", "/register", "light", VP.d1440, "validation-errors", "auth-register-validation-fail", {
       waitForTestId: "auth-form-card",
       action: async (page) => {
         await page.getByRole("button", { name: /create account/i }).click();
+        await page.getByRole("alert").first().waitFor({ state: "visible", timeout: 10_000 });
       },
     }),
     s("frontend", "signup", "signup-password-rules", "/register", "light", VP.d1440, "password-rules", "auth-register", {
