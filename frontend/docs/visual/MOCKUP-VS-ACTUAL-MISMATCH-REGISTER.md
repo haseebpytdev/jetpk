@@ -150,3 +150,39 @@ Each High/Blocker row above maps to a measurable criterion in `RESPONSIVE-ACCESS
 | Hydration gate | Not enforced | Fixed `ThemeProvider` + 0 warnings |
 
 Evidence: `npm run audit:visual:jp-ui-03a` → `frontend/docs/visual/jp-ui-03a-capture-result.json`
+
+---
+
+## JP-UI-04 booking journey closure (2026-07-30)
+
+Branch: `phase/jetpk-ui-04-booking-journey-visual-parity` · Baseline: `5f718c7`
+
+### Resolved (High → Low or closed)
+
+| Section | Prior severity | JP-UI-04 resolution |
+|---------|----------------|---------------------|
+| Sort tabs dropdown-only on desktop | High | `ResultsSortTabs` tab row on desktop |
+| Progress stepper duplicated per page | High | Shared `BookingProgress` v2 via `booking-layout` |
+| Order summary not unified | Medium | `OrderSummary` consolidates sidebar across checkout |
+| Review layout flatter density | Medium | `BookingLayout` two-column with sticky sidebar |
+| Payment layout inconsistent | Medium | Shared layout on manual + card routes |
+| Seats step shown when unsupported | Medium | `visibleProgressSteps` omits `skipped` seat step |
+
+### Remaining accepted gaps
+
+| Section | Mockup | Current | Severity | Phase |
+|---------|--------|---------|----------|-------|
+| Page hero on results | “Choose Your Perfect Flight” banner | Functional `SearchSummaryBar` toolbar | Low | Deferred |
+| Edit search bar | Compact inline summary + Edit | `ModifySearchPanel` expandable | Low | Accepted |
+| Filter sidebar width | ~25% fixed | ~25% at `lg+`; proportions tokenized | Low | Accepted |
+| Result card pair density | Outbound+return in one card | Data-dependent; partial support | Medium | Data-dependent |
+| Dedicated fare page | Full-page fare comparison | Inline carousel + drawer | Medium | Deferred |
+| Flexible dates chip | Visible on results bar | Search module only | Low | Deferred |
+| Success celebration | Illustration + confetti | Tone-based hero; no confetti unless ticketed | Low | JP-UI-06 |
+| Seat selection | Mockup #12 | No route; `seat_map_available: false` | Informational | JP-OPS |
+
+### Seat selection status (unchanged classification)
+
+**Future capability** — UI scaffold only; step omitted from progress when Laravel marks `seat_extras` as `skipped`.
+
+Evidence: `npm run audit:visual:jp-ui-04` → 28 scenarios · `frontend/docs/visual/JP-UI-04-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`

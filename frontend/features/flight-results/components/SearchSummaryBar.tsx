@@ -20,6 +20,14 @@ type SearchSummaryBarProps = {
 };
 
 export function SearchSummaryBar({ summary, onModifyClick, className }: SearchSummaryBarProps) {
+  const chips: string[] = [
+    summary.passengersLabel,
+    summary.cabin,
+    summary.directOnly ? "Direct flights only" : "",
+    summary.nearbyAirports ? "Nearby airports" : "",
+    summary.flexibleDates ? "Flexible dates" : "",
+  ].filter(Boolean);
+
   return (
     <div
       className={cn(
@@ -29,29 +37,35 @@ export function SearchSummaryBar({ summary, onModifyClick, className }: SearchSu
       data-testid="search-summary-bar"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <p className="text-sm font-semibold text-jp-text sm:text-base">
-            {summary.origin} → {summary.destination}
-            <span className="ml-2 font-normal text-jp-text-muted">· {summary.tripType}</span>
+        <div className="min-w-0 space-y-1.5">
+          <p className="text-jp-xs font-medium uppercase tracking-wide text-jp-muted">{summary.tripType}</p>
+          <p className="text-jp-base font-semibold text-jp-text sm:text-lg">
+            {summary.origin}
+            <span className="mx-2 font-normal text-jp-muted" aria-hidden="true">→</span>
+            {summary.destination}
           </p>
-          <p className="text-xs text-jp-text-muted sm:text-sm">
+          <p className="text-jp-xs text-jp-muted sm:text-jp-sm">
             {summary.departureDate}
             {summary.returnDate ? ` – ${summary.returnDate}` : ""}
-            {" · "}
-            {summary.passengersLabel}
-            {" · "}
-            <span className="capitalize">{summary.cabin}</span>
-            {summary.directOnly ? " · Direct only" : ""}
-            {summary.nearbyAirports ? " · Nearby airports" : ""}
-            {summary.flexibleDates ? " · Flexible dates" : ""}
           </p>
+          <div className="flex flex-wrap gap-1.5">
+            {chips.map((chip) => (
+              <span
+                key={chip}
+                className="rounded-jp-pill border border-jp-border bg-jp-surface-muted px-2 py-0.5 text-[0.65rem] font-medium text-jp-text sm:text-jp-xs"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
         </div>
         <button
           type="button"
-          className="shrink-0 rounded-jp-md border border-jp-border px-3 py-1.5 text-sm font-medium text-jp-text hover:bg-jp-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+          className="shrink-0 rounded-jp-md border border-jp-primary-border bg-jp-surface px-3 py-1.5 text-jp-sm font-medium text-jp-primary hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
           onClick={onModifyClick}
+          data-testid="edit-search-button"
         >
-          Modify search
+          Edit search
         </button>
       </div>
     </div>

@@ -1,0 +1,21 @@
+import { cn } from "@/lib/cn";
+import type { ReactNode } from "react";
+
+type BookingLayoutProps = {
+  main: ReactNode;
+  sidebar?: ReactNode;
+  mobileSummary?: ReactNode;
+  className?: string;
+};
+
+export function BookingLayout({ main, sidebar, mobileSummary, className }: BookingLayoutProps) {
+  return (
+    <div className={cn("mt-6", className)}>
+      {mobileSummary ? <div className="mb-4 lg:hidden">{mobileSummary}</div> : null}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,22rem)]">
+        {main}
+        {sidebar ? <div className="hidden lg:block">{sidebar}</div> : null}
+      </div>
+    </div>
+  );
+}

@@ -66,3 +66,34 @@ Phase: **JP-UI-01**
 | Support/About decorative | 1 | 2 | Agent character |
 | Booking flow | 2 | 1 | Success illustration |
 | Icons / UI chrome | High | — | — |
+
+---
+
+## JP-UI-04 motion notes (2026-07-30)
+
+Branch: `phase/jetpk-ui-04-booking-journey-visual-parity` · Baseline: `5f718c7`
+
+### Animation updates
+
+| Animation | Location | JP-UI-04 change |
+|-----------|----------|-----------------|
+| Progress step transition | `BookingProgress` v2 | Tokenized `transition-colors`; `motion-reduce:transition-none` |
+| Mobile order summary expand | `MobileOrderSummary` | CSS accordion; no layout shift |
+| Sort tab indicator | `ResultsSortTabs` | Instant state change; no blocking motion |
+| Sticky sidebar | `BookingSidebar` | No animation; `position: sticky` |
+| Loading skeleton | Results, checkout | Existing `ResultSkeleton` / `BookingLoadingState` preserved |
+
+### Image slots (booking journey)
+
+| Route | Component | JP-UI-04 status |
+|-------|-----------|-----------------|
+| Results | Airline logos | Unchanged — Laravel **D** |
+| Checkout sidebar | `OrderSummary` | Text-only; no new image slots |
+| Confirmation | Status hero | Tone-based; no photo (deferred JP-UI-06) |
+| Payment | Manual / AbhiPay | No card brand images added |
+
+### Rules enforced
+
+- No fake operational progress animation during payment redirect
+- No confetti on confirmation unless Laravel `show_celebration` (JP-UI-06)
+- `prefers-reduced-motion` respected on stepper and accordion transitions

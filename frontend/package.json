@@ -15,7 +15,8 @@
     "audit:visual:jp-ui-01": "node scripts/capture-jp-ui-01.mjs",
     "audit:visual:jp-ui-02": "node scripts/capture-jp-ui-02.mjs",
     "audit:visual:jp-ui-03": "node scripts/capture-jp-ui-03.mjs",
-    "audit:visual:jp-ui-03a": "node scripts/capture-jp-ui-03a.mjs"
+    "audit:visual:jp-ui-03a": "node scripts/capture-jp-ui-03a.mjs",
+    "audit:visual:jp-ui-04": "node scripts/capture-jp-ui-04.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

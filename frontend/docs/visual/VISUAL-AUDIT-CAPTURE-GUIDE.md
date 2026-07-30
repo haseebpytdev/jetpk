@@ -190,3 +190,64 @@ Same as JP-UI-01/02 plus `JP_UI_03A_EXPECTED_COUNT=119`.
 - `scripts/capture-jp-ui-03a.mjs`
 - `scripts/verify-jp-ui-03a-manifest.mjs`
 
+---
+
+## JP-UI-04 booking journey capture
+
+Phase: **JP-UI-04**  
+Command: `npm run audit:visual:jp-ui-04` (from `frontend/`)
+
+### What it does
+
+1. Runs `npm run build`
+2. Starts production Next.js on port **3002** via Playwright `webServer`
+3. Executes **28** scenarios in `tests/visual-audit/jp-ui-04-booking-journey.visual.spec.ts`
+4. Writes `frontend/.visual-audit/jp-ui-04/capture-manifest.json` (**gitignored**)
+5. Exits non-zero on capture failure
+
+### Environment (test-only)
+
+Same as JP-UI-01/02/03A plus `JP_UI_04_EXPECTED_COUNT=28`.
+
+### Scenario families
+
+| Family | IDs | Count |
+|--------|-----|------:|
+| Results | res-01 – res-12 | 12 |
+| Passengers | pax-01 – pax-04 | 4 |
+| Review | rev-01 – rev-03 | 3 |
+| Payment | pay-01 – pay-04 | 4 |
+| Success | suc-01 – suc-04 | 4 |
+| Shared progress | prog-01 | 1 |
+| **Total** | | **28** |
+
+### Not captured
+
+- **Seat selection** — no route; `seat_map_available: false`; step omitted from progress
+
+### Special gates
+
+- `pay-03`: asserts `embedded-card-form` is **forbidden** (AbhiPay redirect only)
+- `res-10`: opens mobile filter drawer via `open-mobile-filters`
+- `res-11`: waits for `branded-fare-carousel`
+
+### Related files
+
+- `tests/visual-audit/jp-ui-04-scenarios.ts`
+- `tests/visual-audit/jp-ui-04-fixtures.ts`
+- `tests/visual-audit/jp-ui-04-helpers.ts`
+- `tests/visual-audit/jp-ui-04-booking-journey.visual.spec.ts`
+- `scripts/capture-jp-ui-04.mjs`
+
+### Acceptance report
+
+`frontend/docs/visual/JP-UI-04-MOCKUP-COMPARISON-AND-ACCEPTANCE-REPORT.md`
+
+### Regeneration
+
+```bash
+cd frontend
+rm -rf .visual-audit/jp-ui-04   # optional clean
+npm run audit:visual:jp-ui-04
+```
+

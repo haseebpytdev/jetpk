@@ -134,3 +134,50 @@ Customer/Agent sidebars use static `NAV_ITEMS` in shell components → **C** (ca
 | Invalid fixtures (F) | JP-UI-03 | — |
 
 No broad hardcoding fixes performed in JP-UI-01.
+
+---
+
+## JP-UI-04 audit pass (2026-07-30)
+
+Branch: `phase/jetpk-ui-04-booking-journey-visual-parity` · Baseline: `5f718c7`
+
+### New module: `frontend/features/booking-layout/`
+
+| Item | Class | Owner | Notes |
+|------|-------|-------|-------|
+| `BOOKING_JOURNEY_STEP_LABELS` | B | Frontend vocabulary | Laravel `progress[].label` overrides when present |
+| `visibleProgressSteps` / `progressDisplayIndex` | A | Layout logic | Filters `skipped` steps |
+| `OrderSummary` display labels (Airline, Flight, etc.) | B | Frontend vocabulary | Values from Laravel **D** |
+| Layout spacing, grid ratios | A | Design tokens | — |
+
+### Booking flow (updated)
+
+| Item | Class | JP-UI-04 status |
+|------|-------|-----------------|
+| Progress step labels | D | Correct — Laravel `booking_session.progress` |
+| Payment method labels | D | Correct — Laravel |
+| Manual payment bank details | D | Correct — no invented accounts |
+| AbhiPay redirect | D | Correct — no embedded card form |
+| Order summary pricing | D | Correct — `AuthoritativePricing` only |
+| Seat map layout | — | Not rendered (`seat_map_available: false`) |
+
+### Results flow
+
+| Item | Class | JP-UI-04 status |
+|------|-------|-----------------|
+| Sort tab labels | B | Correct |
+| Filter labels | B | Correct |
+| Prices, airlines, routes | D | Correct — Laravel JSON |
+| Branded fare names | D | Correct — offer payload |
+
+### Invalid hardcoding (F) — none introduced
+
+JP-UI-04 did not add fake PNRs, seat numbers, bank details, or fare prices. Visual audit fixtures remain **E** only (`jp-ui-04-fixtures.ts`).
+
+### Correction assignment (JP-UI-04)
+
+| Count | Status |
+|------:|--------|
+| New F violations | 0 |
+| Booking D-sourced fields verified | Pass |
+| Seat UI hardcoding | N/A (step omitted) |
