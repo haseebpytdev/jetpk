@@ -100,7 +100,9 @@ Baseline SHA: `5f718c7`
 |-------|---------|----------:|
 | JP-UI-04 | `npm run audit:visual:jp-ui-04` | **28** |
 
-Artifacts: `frontend/.visual-audit/jp-ui-04/` (gitignored)  
+Artifacts: `frontend/.visual-audit/jp-ui-04/` (gitignored)
+
+> **JP-UI-04A update:** Complete 120-scenario matrix in `jp-ui-04a/` — see `JP-UI-04A-COMPLETE-BOOKING-VISUAL-MATRIX.md` and `npm run audit:visual:jp-ui-04a`.  
 Spec: `tests/visual-audit/jp-ui-04-booking-journey.visual.spec.ts`
 
 ## Production
