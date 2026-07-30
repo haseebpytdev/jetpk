@@ -49,7 +49,7 @@ Minimum **4** achieved on homepage, about, support, CMS templates (see `frontend
 
 - Travel inspiration hidden without CMS article collection
 - Multi-city/group compact row wraps below xl breakpoint (by design)
-- Dark-theme visual capture subset in harness (light primary matrix captured)
+- **Visual evidence:** implementation completed in JP-UI-03; **complete 119-scenario matrix finalized in JP-UI-03A** (`npm run audit:visual:jp-ui-03a`)
 - Legacy `features/home/components/*` retained for reference; not used in production path
 
 ## Git SHAs
