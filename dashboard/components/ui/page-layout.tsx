@@ -5,7 +5,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export function PageContainer({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("mx-auto w-full min-w-0 max-w-[1600px] space-y-6", className)} {...props} />;
+  return <div className={cn("mx-auto w-full min-w-0 max-w-[1600px] space-y-6 overflow-x-hidden", className)} {...props} />;
 }
 
 export function PageHeader({

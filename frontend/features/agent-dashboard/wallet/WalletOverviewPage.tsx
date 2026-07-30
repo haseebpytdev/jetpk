@@ -7,6 +7,7 @@ import {
   AgentDashboardErrorState,
   AgentDashboardShell,
   AgentEmptyState,
+  PermissionDeniedState,
   StatusBadge,
 } from "../shell/AgentDashboardShell";
 import type { WalletLedgerEntry, WalletSummary } from "../types";
@@ -26,14 +27,17 @@ function formatMoney(amount: number, currency: string) {
 export function WalletOverviewPage({ session }: { session: PublicSession }) {
   const [data, setData] = useState<WalletData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
     setError(null);
+    setErrorStatus(null);
     const result = await fetchAgentWallet();
     if (!result.ok) {
       setError(result.message);
+      setErrorStatus(result.status ?? null);
       setData(null);
     } else {
       setData(result.data as WalletData);
@@ -50,7 +54,8 @@ export function WalletOverviewPage({ session }: { session: PublicSession }) {
   return (
     <AgentDashboardShell session={session} title="Wallet">
       {loading ? <p className="text-jp-sm text-jp-muted">Loading wallet…</p> : null}
-      {error ? <AgentDashboardErrorState message={error} onRetry={load} /> : null}
+      {error && errorStatus === 403 ? <PermissionDeniedState message={error} /> : null}
+      {error && errorStatus !== 403 ? <AgentDashboardErrorState message={error} onRetry={load} /> : null}
       {summary ? (
         <div className="space-y-6" data-testid="agent-wallet-overview">
           <div className="grid gap-4 sm:grid-cols-3">

@@ -1,5 +1,6 @@
 import type { PublicSession } from "@/types/session";
 import type { SessionBootstrap } from "../types";
+import { resolveSessionBootstrapFixture } from "../server/session-fixture";
 import { buildCookieHeader, laravelJsonFetch } from "../utils/laravel-auth-api";
 import { sanitizeDashboardUrl } from "../utils/dashboard-allowlist";
 
@@ -50,6 +51,11 @@ export async function fetchSessionBootstrap(cookieHeader?: string): Promise<Sess
 export async function fetchSessionBootstrapFromCookies(
   cookies: Array<{ name: string; value: string }>,
 ): Promise<SessionBootstrap> {
+  const fixture = resolveSessionBootstrapFixture(cookies);
+  if (fixture !== null) {
+    return fixture;
+  }
+
   if (cookies.length === 0) {
     return { authenticated: false };
   }

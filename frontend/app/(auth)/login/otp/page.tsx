@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { AuthShell, OtpForm } from "@/features/auth";
 import { fetchSessionBootstrapFromCookies } from "@/features/auth/services/session-service";
 import { cookies } from "next/headers";
@@ -17,7 +18,19 @@ export default async function LoginOtpPage() {
   }
 
   return (
-    <AuthShell title="Verify your sign-in" description="Enter the one-time code sent to your email to continue.">
+    <AuthShell
+      eyebrow="Secure sign-in"
+      headline="Verify your"
+      headlineHighlight="one-time code"
+      panelDescription="Enter the code sent to your registered email to complete sign-in."
+      title="Verify your sign-in"
+      description="Enter the one-time code sent to your email to continue."
+      footer={
+        <Link href="/login" className="font-semibold text-jp-primary hover:underline">
+          Back to sign in
+        </Link>
+      }
+    >
       <OtpForm />
     </AuthShell>
   );

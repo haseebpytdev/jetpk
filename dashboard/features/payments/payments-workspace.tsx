@@ -64,7 +64,7 @@ export function PaymentsWorkspace({ query, result, selectedTransaction }: Props)
   const empty = result.total === 0;
 
   return (
-    <>
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden">
       <PaymentsSummary summary={result.summary} />
       <PaymentsFilters query={query} facets={result.facets} />
 
@@ -107,6 +107,6 @@ export function PaymentsWorkspace({ query, result, selectedTransaction }: Props)
       >
         {selectedTransaction ? <PaymentDetailDrawerContent transaction={selectedTransaction} /> : null}
       </Drawer>
-    </>
+    </div>
   );
 }
