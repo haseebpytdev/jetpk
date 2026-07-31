@@ -42,9 +42,10 @@ const DEFAULT_OPTIONS: SearchOptions = {
 type SearchModuleProps = {
   className?: string;
   layout?: SearchLayout;
+  variant?: "default" | "blueprint";
 };
 
-export function SearchModule({ className, layout = "default" }: SearchModuleProps) {
+export function SearchModule({ className, layout = "default", variant = "default" }: SearchModuleProps) {
   const [mode, setMode] = useState<SearchMode>("one_way");
   const [origin, setOrigin] = useState(() => findAirportByIata("ISB") ?? null);
   const [destination, setDestination] = useState(() => findAirportByIata("DXB") ?? null);
@@ -207,15 +208,21 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
   return (
     <section
       className={cn(
-        "rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
+        variant === "blueprint"
+          ? "relative overflow-visible rounded-[1.25rem] border border-jp-border bg-jp-surface shadow-[0_20px_50px_-20px_rgba(20,50,75,0.35)]"
+          : "rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
         layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
+        variant === "blueprint" && "pt-0",
         className,
       )}
       aria-label="Flight search"
       data-testid="search-module"
       data-search-layout={layout}
+      data-search-variant={variant}
     >
-      <SearchTabs mode={mode} onModeChange={handleModeChange} compact={layout === "compact"} />
+      <div className={cn(variant === "blueprint" && "-mx-jp-md -mt-px px-jp-md pt-jp-sm sm:-mx-jp-lg sm:px-jp-lg")}>
+        <SearchTabs mode={mode} onModeChange={handleModeChange} compact={layout === "compact"} variant={variant} />
+      </div>
 
       <div
         className={cn(
