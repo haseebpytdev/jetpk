@@ -25,7 +25,7 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
   };
 
   return (
-    <SectionContainer>
+    <SectionContainer id="homepage-routes">
       <PageContainer>
         <PublicSectionHeader
           eyebrow={eyebrow}

@@ -28,6 +28,24 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
+.public-hero-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.4),
+    rgba(0, 0, 0, 0.25),
+    color-mix(in srgb, var(--jp-page-bg) 90%, transparent)
+  );
+}
+
+[data-theme="dark"] .public-hero-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.4),
+    var(--jp-page-bg)
+  );
+}
+
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }

@@ -5,6 +5,7 @@ export { WhyJetPakistanSection } from "./benefits/WhyJetPakistanSection";
 export { PublicSupportBanner } from "./support/PublicSupportBanner";
 export { PublicSectionHeader } from "./components/PublicSectionHeader";
 export { BenefitStrip } from "./components/BenefitStrip";
+export { ScrollToDiscover } from "./components/ScrollToDiscover";
 export { PublicFaq } from "./components/PublicFaq";
 export type { PublicFaqItem } from "./components/PublicFaq";
 export { HomepageContentService } from "./services/homepage-content-service";

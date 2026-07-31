@@ -17,7 +17,7 @@ type AboutPageContentProps = {
 
 export function AboutPageContent({ page }: AboutPageContentProps) {
   return (
-    <PageContainer className="py-jp-4xl">
+    <PageContainer className="py-jp-4xl" data-testid="about-page">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "About us" }]} />
 
       <div className="mt-jp-xl space-y-jp-3xl">

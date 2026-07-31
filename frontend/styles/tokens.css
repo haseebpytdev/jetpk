@@ -143,15 +143,15 @@
   --jp-shadow-card: 0 4px 20px -8px rgba(20, 50, 75, 0.12);
   --jp-shadow-raised: 0 2px 8px -2px rgba(20, 50, 75, 0.1);
 
-  /* Layout */
-  --jp-nav-height: clamp(60px, calc(3.75rem + 0.3125vw), 68px);
-  --jp-nav-height-mobile: clamp(56px, calc(3.5rem + 0.3125vw), 64px);
+  /* Layout — blueprint canonical viewport 1122px with 80px gutters */
+  --jp-nav-height: 68px;
+  --jp-nav-height-mobile: 60px;
   --jp-button-height: clamp(42px, calc(2.625rem + 0.15625vw), 46px);
   --jp-control-height: var(--jp-button-height);
-  --jp-maxw: clamp(1160px, calc(71.25rem + 1.5625vw), 1240px);
+  --jp-maxw: 1122px;
   --jp-maxw-narrow: clamp(480px, calc(30rem + 2vw), 560px);
   --jp-maxw-booking: clamp(960px, calc(60rem + 2vw), 1080px);
-  --jp-container-pad-x: var(--jp-page-gutter);
+  --jp-container-pad-x: clamp(1rem, 7.13vw, 5rem);
   --jp-sidebar-width: 15rem;
 
   /* Motion */

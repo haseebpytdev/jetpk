@@ -16,7 +16,7 @@ export function SiteHeader({ session }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-jp-border bg-jp-surface/95 backdrop-blur supports-[backdrop-filter]:bg-jp-surface/90">
       <div className="mx-auto flex h-jp-nav w-full max-w-jp-container items-center justify-between gap-jp-md px-jp-xl">
-        <div className="flex min-w-0 items-center gap-jp-lg">
+        <div className="flex min-w-0 items-center gap-jp-md lg:gap-jp-lg">
           <Link
             href="/"
             className="shrink-0 rounded-jp-md focus-visible:outline-none focus-visible:shadow-jp-focus"
@@ -27,11 +27,11 @@ export function SiteHeader({ session }: SiteHeaderProps) {
           <DesktopNavigation />
         </div>
 
-        <div className="hidden items-center gap-jp-sm lg:flex">
+        <div className="hidden items-center gap-jp-xs lg:flex">
           <ThemeSwitch />
           <CurrencySelector />
           <AccountMenu session={session} />
-          <LinkButton href="/flights" variant="primary">
+          <LinkButton href="/flights" variant="primary" className="ml-jp-xs shrink-0">
             Book Now
           </LinkButton>
         </div>

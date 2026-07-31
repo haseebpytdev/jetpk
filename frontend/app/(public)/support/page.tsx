@@ -20,7 +20,7 @@ export default async function SupportPage() {
   ]);
 
   return (
-    <PageContainer className="py-jp-4xl">
+    <PageContainer className="py-jp-4xl" data-testid="support-page">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Support" }]} />
       <div className="mt-jp-xl">
         <SupportPageClient

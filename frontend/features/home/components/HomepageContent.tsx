@@ -4,6 +4,7 @@ import {
   PublicHero,
   PublicSupportBanner,
   RoutesSection,
+  ScrollToDiscover,
   WhyJetPakistanSection,
 } from "@/features/public-visual";
 
@@ -12,15 +13,18 @@ export async function HomepageContent() {
 
   return (
     <>
+      <div data-testid="homepage-content">
       <PublicHero
         hero={content.hero}
         trustChips={content.trustChips}
         fallbackImage={HomepageContentService.heroFallbackImage}
       />
+      <ScrollToDiscover />
       <RoutesSection {...content.routes} />
       <FeaturedOffersSection {...content.featuredDeals} />
       <WhyJetPakistanSection {...content.whyBook} />
       <PublicSupportBanner support={content.supportCta} />
+      </div>
     </>
   );
 }

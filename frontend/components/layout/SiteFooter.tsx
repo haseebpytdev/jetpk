@@ -11,7 +11,7 @@ export function SiteFooter({ className }: SiteFooterProps) {
   return (
     <footer className={cn("bg-jp-footer text-white", className)} role="contentinfo">
       <PageContainer className="py-jp-4xl">
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
+        <div className="grid gap-jp-2xl lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))]">
           <div className="space-y-5">
             <JetPakistanLogo variant="inverse" />
             <p className="max-w-sm text-jp-sm leading-relaxed text-white/80">
