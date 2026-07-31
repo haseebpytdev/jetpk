@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "phase": "JP-UI-06",
+  "canonicalViewport": { "width": 1122, "height": 1330 },
+  "defaultTolerance": 2,
+  "landmarks": [
+    { "page": "homepage", "element": "header", "x": 0, "y": 0, "width": 1122, "height": 68, "relationship": "fixed_top", "tolerance": 3, "notes": "SiteHeader sticky region" },
+    { "page": "homepage", "element": "hero", "x": 0, "y": 68, "width": 1122, "height": 420, "relationship": "below_header", "tolerance": 3, "notes": "Hero image + headline band" },
+    { "page": "homepage", "element": "search-panel", "x": 80, "y": 380, "width": 960, "height": 140, "relationship": "overlaps_hero_content", "tolerance": 2, "notes": "Floating search with integrated tabs" },
+    { "page": "homepage", "element": "search-tabs", "x": 96, "y": 372, "width": 360, "height": 36, "relationship": "integrated_tab_row", "tolerance": 2, "notes": "One Way / Return / Multi-City tabs protruding" },
+    { "page": "homepage", "element": "search-cta", "x": 920, "y": 420, "width": 100, "height": 48, "relationship": "inside_search_panel", "tolerance": 2, "notes": "Search Flights button" },
+    { "page": "homepage", "element": "benefit-strip", "x": 80, "y": 540, "width": 960, "height": 48, "relationship": "below_search_overlap", "tolerance": 2, "notes": "Trust chips row" },
+    { "page": "homepage", "element": "content-max-width", "x": 80, "y": 0, "width": 960, "height": 1330, "relationship": "centered_gutter", "tolerance": 2, "notes": "Main content gutter 80px each side" },
+    { "page": "homepage", "element": "footer", "x": 0, "y": 1100, "width": 1122, "height": 230, "relationship": "page_bottom", "tolerance": 3, "notes": "Dark green footer" },
+
+    { "page": "about", "element": "header", "x": 0, "y": 0, "width": 1122, "height": 68, "relationship": "fixed_top", "tolerance": 3, "notes": "" },
+    { "page": "about", "element": "hero-heading", "x": 80, "y": 120, "width": 480, "height": 80, "relationship": "left_column", "tolerance": 2, "notes": "About JetPakistan headline" },
+    { "page": "about", "element": "animation-area", "x": 560, "y": 100, "width": 480, "height": 280, "relationship": "right_column", "tolerance": 2, "notes": "Scroll-linked animation slot" },
+    { "page": "about", "element": "value-cards-grid", "x": 80, "y": 480, "width": 960, "height": 320, "relationship": "two_by_two_grid", "tolerance": 2, "notes": "Mission & Values cards" },
+
+    { "page": "support", "element": "header", "x": 0, "y": 0, "width": 1122, "height": 68, "relationship": "fixed_top", "tolerance": 3, "notes": "" },
+    { "page": "support", "element": "hero-search", "x": 200, "y": 200, "width": 720, "height": 56, "relationship": "centered", "tolerance": 2, "notes": "Help search bar" },
+    { "page": "support", "element": "topic-grid", "x": 80, "y": 420, "width": 960, "height": 400, "relationship": "three_by_two_grid", "tolerance": 2, "notes": "Support topic cards" },
+
+    { "page": "flight-results", "element": "header", "x": 0, "y": 0, "width": 1122, "height": 68, "relationship": "fixed_top", "tolerance": 3, "notes": "" },
+    { "page": "flight-results", "element": "search-summary", "x": 0, "y": 68, "width": 1122, "height": 200, "relationship": "hero_banner", "tolerance": 3, "notes": "Edit search hero" },
+    { "page": "flight-results", "element": "sidebar", "x": 80, "y": 300, "width": 260, "height": 700, "relationship": "left_column", "tolerance": 2, "notes": "Filter panel ~23%" },
+    { "page": "flight-results", "element": "results-main", "x": 360, "y": 300, "width": 680, "height": 700, "relationship": "right_of_sidebar", "tolerance": 2, "notes": "Results feed ~77%" },
+
+    { "page": "fare-selection", "element": "progress", "x": 80, "y": 100, "width": 960, "height": 56, "relationship": "below_header", "tolerance": 2, "notes": "Pre-session stepper" },
+    { "page": "fare-selection", "element": "main-column", "x": 80, "y": 180, "width": 640, "height": 900, "relationship": "left_two_thirds", "tolerance": 2, "notes": "Itinerary + fare cards" },
+    { "page": "fare-selection", "element": "sidebar", "x": 740, "y": 180, "width": 300, "height": 600, "relationship": "right_third", "tolerance": 2, "notes": "Booking summary" },
+
+    { "page": "passenger-details", "element": "progress", "x": 80, "y": 100, "width": 960, "height": 56, "relationship": "below_header", "tolerance": 2, "notes": "" },
+    { "page": "passenger-details", "element": "main-column", "x": 80, "y": 180, "width": 640, "height": 900, "relationship": "left_two_thirds", "tolerance": 2, "notes": "Traveler forms" },
+    { "page": "passenger-details", "element": "sidebar", "x": 740, "y": 180, "width": 300, "height": 600, "relationship": "right_third", "tolerance": 2, "notes": "Order summary" },
+
+    { "page": "review", "element": "main-column", "x": 80, "y": 180, "width": 640, "height": 900, "relationship": "left_seventy_percent", "tolerance": 2, "notes": "" },
+    { "page": "review", "element": "sidebar", "x": 740, "y": 180, "width": 300, "height": 600, "relationship": "right_thirty_percent", "tolerance": 2, "notes": "" },
+
+    { "page": "payment", "element": "method-selector", "x": 80, "y": 200, "width": 640, "height": 120, "relationship": "main_top", "tolerance": 2, "notes": "Pay by Card / Manual Payment cards" },
+    { "page": "payment", "element": "method-content", "x": 80, "y": 340, "width": 640, "height": 400, "relationship": "below_selector", "tolerance": 2, "notes": "AbhiPay or Manual panel" },
+    { "page": "payment", "element": "sidebar", "x": 740, "y": 180, "width": 300, "height": 600, "relationship": "right_third", "tolerance": 2, "notes": "Order summary" },
+
+    { "page": "booking-success", "element": "confirmation-hero", "x": 0, "y": 68, "width": 1122, "height": 280, "relationship": "hero_band", "tolerance": 3, "notes": "Success hero with checkmark" },
+    { "page": "booking-success", "element": "summary-grid", "x": 80, "y": 380, "width": 960, "height": 300, "relationship": "three_column_cards", "tolerance": 2, "notes": "Booking / Passenger / Itinerary cards" },
+
+    { "page": "login", "element": "split-left", "x": 80, "y": 120, "width": 480, "height": 700, "relationship": "promo_column", "tolerance": 2, "notes": "Illustration + features" },
+    { "page": "login", "element": "split-right", "x": 580, "y": 120, "width": 460, "height": 700, "relationship": "form_column", "tolerance": 2, "notes": "Login form card" },
+
+    { "page": "signup", "element": "split-left", "x": 80, "y": 120, "width": 480, "height": 700, "relationship": "promo_column", "tolerance": 2, "notes": "" },
+    { "page": "signup", "element": "split-right", "x": 580, "y": 120, "width": 460, "height": 700, "relationship": "form_column", "tolerance": 2, "notes": "Signup form card" },
+
+    { "page": "manage-booking", "element": "hero", "x": 0, "y": 68, "width": 1122, "height": 320, "relationship": "hero_band", "tolerance": 3, "notes": "Manage Your Booking hero" },
+    { "page": "manage-booking", "element": "lookup-card", "x": 200, "y": 340, "width": 720, "height": 200, "relationship": "overlaps_hero", "tolerance": 2, "notes": "PNR lookup floating card" }
+  ]
+}

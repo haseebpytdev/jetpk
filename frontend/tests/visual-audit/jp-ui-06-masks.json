@@ -1,0 +1,155 @@
+{
+  "version": "1.0.0",
+  "description": "JP-UI-06 per-page mask manifest for structural comparison",
+  "masks": [
+    {
+      "page": "homepage",
+      "region": "hero-headline-text",
+      "x": 80,
+      "y": 180,
+      "width": 480,
+      "height": 120,
+      "reason": "dynamic_cms_headline",
+      "data_authority": "laravel_cms",
+      "approved_comparison_mode": "exact"
+    },
+    {
+      "page": "homepage",
+      "region": "destination-card-prices",
+      "x": 0,
+      "y": 900,
+      "width": 1122,
+      "height": 200,
+      "reason": "dynamic_prices",
+      "data_authority": "laravel_cms",
+      "approved_comparison_mode": "exact"
+    },
+    {
+      "page": "flight-results",
+      "region": "result-prices",
+      "x": 700,
+      "y": 400,
+      "width": 380,
+      "height": 600,
+      "reason": "dynamic_supplier_prices",
+      "data_authority": "supplier_laravel",
+      "approved_comparison_mode": "exact"
+    },
+    {
+      "page": "fare-selection",
+      "region": "fare-card-prices",
+      "x": 80,
+      "y": 700,
+      "width": 700,
+      "height": 300,
+      "reason": "dynamic_fare_prices",
+      "data_authority": "supplier_laravel",
+      "approved_comparison_mode": "exact_with_operational_substitution"
+    },
+    {
+      "page": "fare-selection",
+      "region": "progress-step-labels",
+      "x": 80,
+      "y": 100,
+      "width": 960,
+      "height": 60,
+      "reason": "operational_step_order_exception_a",
+      "data_authority": "frontend_journey_steps",
+      "approved_comparison_mode": "exact_with_operational_substitution"
+    },
+    {
+      "page": "passenger-details",
+      "region": "passenger-field-values",
+      "x": 80,
+      "y": 300,
+      "width": 700,
+      "height": 500,
+      "reason": "dynamic_passenger_fixture_values",
+      "data_authority": "laravel_fixture",
+      "approved_comparison_mode": "exact"
+    },
+    {
+      "page": "review",
+      "region": "booking-reference",
+      "x": 700,
+      "y": 120,
+      "width": 200,
+      "height": 40,
+      "reason": "dynamic_pnr",
+      "data_authority": "laravel_booking",
+      "approved_comparison_mode": "exact"
+    },
+    {
+      "page": "review",
+      "region": "price-breakdown",
+      "x": 700,
+      "y": 400,
+      "width": 380,
+      "height": 300,
+      "reason": "dynamic_prices",
+      "data_authority": "laravel_booking",
+      "approved_comparison_mode": "exact"
+    },
+    {
+      "page": "payment",
+      "region": "card-details-substitution",
+      "x": 80,
+      "y": 380,
+      "width": 700,
+      "height": 320,
+      "reason": "operational_abhipay_handoff_exception_c",
+      "data_authority": "abhipay_contract",
+      "approved_comparison_mode": "exact_with_operational_substitution"
+    },
+    {
+      "page": "payment",
+      "region": "order-total",
+      "x": 700,
+      "y": 500,
+      "width": 380,
+      "height": 80,
+      "reason": "dynamic_amount",
+      "data_authority": "laravel_checkout",
+      "approved_comparison_mode": "exact_with_operational_substitution"
+    },
+    {
+      "page": "booking-success",
+      "region": "pnr-reference",
+      "x": 200,
+      "y": 280,
+      "width": 300,
+      "height": 60,
+      "reason": "dynamic_pnr",
+      "data_authority": "laravel_booking",
+      "approved_comparison_mode": "exact"
+    },
+    {
+      "page": "booking-success",
+      "region": "passenger-names",
+      "x": 80,
+      "y": 600,
+      "width": 500,
+      "height": 200,
+      "reason": "dynamic_passenger_records",
+      "data_authority": "laravel_booking",
+      "approved_comparison_mode": "exact"
+    }
+  ],
+  "forbidden_mask_targets": [
+    "container_edges",
+    "panel_shapes",
+    "spacing",
+    "section_boundaries",
+    "curves",
+    "overlaps",
+    "card_geometry",
+    "input_geometry",
+    "dividers",
+    "cta_geometry",
+    "headers",
+    "footers",
+    "progress",
+    "order_summaries"
+  ],
+  "max_auto_pass_mask_percent": 20
+}
