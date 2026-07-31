@@ -348,3 +348,33 @@ npm run audit:visual:jp-ui-05
 - Verifier fails on any hydration warning, React #418, or page error.
 - Only acceptable `suppressHydrationWarning`: dashboard `<html>` theme attribute from inline bootstrap.
 - See `frontend/docs/visual/JP-UI-05A-DASHBOARD-HYDRATION-ROOT-CAUSE-AND-FIX.md`.
+
+---
+
+## JP-UI-06 — Canonical blueprint overlay diff (65 scenarios)
+
+Phase: **JP-UI-06**  
+Command: `npm run audit:visual:jp-ui-06` (from `frontend/`)
+
+### What it does
+
+1. Normalizes Backup Safe mockups → `.visual-audit/jp-ui-06/reference/` (synthetic fallback if PNGs missing)
+2. `npm run build` + Playwright matrix (`jp-ui-06-blueprint.spec.ts`) — **65** full-page PNGs
+3. Overflow probes (320×700, 375×812, 768×1024, 1024×900) — no extra PNGs
+4. `compare-jp-ui-06.mjs` — side-by-side, overlay, heatmap, edge, geometry
+5. `verify-jp-ui-06.mjs` — manifest gates
+6. `build-jp-ui-06-index.mjs` — `index.html` + wave contact sheets
+
+### Port
+
+`JP_UI_06_PORT` (default **3002**). Runner probes occupancy and records actual port in manifest.
+
+### Evidence (Windows)
+
+`C:\Users\khadi\ota-jetpk\frontend\.visual-audit\jp-ui-06\index.html`
+
+### Related docs
+
+- `JP-UI-06-CANONICAL-REFERENCE-NORMALIZATION-MANIFEST.md`
+- `JP-UI-06-GEOMETRY-MEASUREMENT-AND-TOLERANCE-CONTRACT.md`
+- `JP-UI-06-COMPARISON-MASK-GOVERNANCE.md`

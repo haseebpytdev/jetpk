@@ -29,6 +29,16 @@ Severity: **Blocker** · **High** · **Medium** · **Low** · **Informational**
 | Newsletter | Functional subscribe | `preventDefault` stub | Informational | SiteFooter | `SiteFooter.tsx` | JP-OPS backend | JP-OPS |
 | Dark mode | Full light/dark parity | Light only | High | Theme provider (missing) | `tailwind.config.ts` | Design system | JP-UI-02 |
 
+## JP-UI-06 closure (canonical blueprint parity)
+
+| Section | Status | Notes | Phase |
+|---------|--------|-------|-------|
+| Overlay/heatmap diff pipeline | **Implemented** | `npm run audit:visual:jp-ui-06` | JP-UI-06 |
+| `/flights/fare-selection` route | **Implemented** | Exception A stepper order | JP-UI-06 |
+| `/booking/payment` canonical shell | **Implemented** | Exception C AbhiPay handoff | JP-UI-06 |
+| Seat map UI | **Correctly absent** | Capability exception B | JP-UI-06 |
+| Backup Safe mockup PNGs on workstation | **Missing** | Synthetic refs; blocking asset gap | JP-UI-06 |
+
 ---
 
 ## Homepage (canonical mockup #1)
