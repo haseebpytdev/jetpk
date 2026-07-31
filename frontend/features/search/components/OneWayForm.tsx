@@ -4,6 +4,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { cn } from "@/lib/cn";
 import { useId } from "react";
 import { AirportField, AirportSwapButton } from "./AirportField";
+import { BlueprintFieldSegment, BlueprintSearchRow } from "./blueprint/BlueprintFieldSegment";
 import { DateField } from "./DateField";
 import { SearchOptionsBar } from "./SearchOptionsBar";
 import { SearchFormErrors, type SearchLayout } from "./SearchFormErrors";
@@ -30,6 +31,7 @@ type OneWayFormProps = {
   errors: string[];
   disabled?: boolean;
   layout?: SearchLayout;
+  variant?: "default" | "blueprint";
 };
 
 export function OneWayForm({
@@ -47,9 +49,93 @@ export function OneWayForm({
   errors,
   disabled = false,
   layout = "default",
+  variant = "default",
 }: OneWayFormProps) {
   const id = useId();
   const compact = layout === "compact";
+  const blueprint = layout === "blueprint" || variant === "blueprint";
+
+  if (blueprint) {
+    return (
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit();
+        }}
+        className="space-y-3"
+        aria-label="One way flight search"
+      >
+        <BlueprintSearchRow>
+          <BlueprintFieldSegment widthClass="flex-[198_1_0]">
+            <AirportField id={`${id}-from`} label="From" value={origin} onChange={onOriginChange} variant="blueprint" />
+          </BlueprintFieldSegment>
+          <BlueprintFieldSegment widthClass="w-8 shrink-0 flex items-center justify-center px-0">
+            <AirportSwapButton
+              variant="blueprint"
+              onSwap={() => {
+                onOriginChange(destination);
+                onDestinationChange(origin);
+              }}
+            />
+          </BlueprintFieldSegment>
+          <BlueprintFieldSegment widthClass="flex-[198_1_0]">
+            <AirportField id={`${id}-to`} label="To" value={destination} onChange={onDestinationChange} variant="blueprint" />
+          </BlueprintFieldSegment>
+          <BlueprintFieldSegment widthClass="flex-[144_1_0]">
+            <DateField
+              id={`${id}-departure`}
+              label="Departure"
+              value={departureDate}
+              onChange={onDepartureDateChange}
+              variant="blueprint"
+            />
+          </BlueprintFieldSegment>
+          <BlueprintFieldSegment widthClass="flex-[192_1_0]">
+            <TravelersCabinSelector
+              passengers={passengers}
+              onAdultsChange={onPassengersChange.adults}
+              onChildrenChange={onPassengersChange.children}
+              onInfantsChange={onPassengersChange.infants}
+              onCabinChange={onPassengersChange.cabin}
+              variant="blueprint"
+            />
+          </BlueprintFieldSegment>
+          <BlueprintFieldSegment widthClass="w-[100px] shrink-0 flex items-end pb-1">
+            <PrimaryButton type="submit" aria-label="Search Flights" className="h-12 w-[100px] shrink-0 px-0 text-jp-sm" disabled={disabled}>
+              {disabled ? "Searching…" : "Search"}
+            </PrimaryButton>
+          </BlueprintFieldSegment>
+        </BlueprintSearchRow>
+
+        <div className="space-y-3 lg:hidden">
+          <AirportField id={`${id}-from-m`} label="From" value={origin} onChange={onOriginChange} density="compact" />
+          <AirportSwapButton
+            onSwap={() => {
+              onOriginChange(destination);
+              onDestinationChange(origin);
+            }}
+            className="mx-auto"
+          />
+          <AirportField id={`${id}-to-m`} label="To" value={destination} onChange={onDestinationChange} density="compact" />
+          <DateField id={`${id}-departure-m`} label="Departure" value={departureDate} onChange={onDepartureDateChange} density="compact" />
+          <TravelersCabinSelector
+            passengers={passengers}
+            onAdultsChange={onPassengersChange.adults}
+            onChildrenChange={onPassengersChange.children}
+            onInfantsChange={onPassengersChange.infants}
+            onCabinChange={onPassengersChange.cabin}
+            density="compact"
+          />
+          <PrimaryButton type="submit" className="w-full" disabled={disabled}>
+            {disabled ? "Searching…" : "Search Flights"}
+          </PrimaryButton>
+        </div>
+
+        <SearchOptionsBar options={options} onChange={onOptionsChange} compact className="lg:hidden" />
+        <SearchFormErrors errors={errors} />
+      </form>
+    );
+  }
 
   if (compact) {
     return (

@@ -1,4 +1,4 @@
-export { PublicHero } from "./hero/PublicHero";
+export { PublicHero, HomepageFlightPathAccent } from "./hero/PublicHero";
 export { RoutesSection } from "./destinations/RoutesSection";
 export { FeaturedOffersSection } from "./offers/FeaturedOffersSection";
 export { WhyJetPakistanSection } from "./benefits/WhyJetPakistanSection";

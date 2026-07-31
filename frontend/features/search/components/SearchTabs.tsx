@@ -18,9 +18,10 @@ export function SearchTabs({ mode, onModeChange, compact = false, variant = "def
     <div
       role="tablist"
       aria-label="Flight search type"
+      data-testid={variant === "blueprint" ? "search-tab-row" : undefined}
       className={cn(
         "flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        variant === "blueprint" && "rounded-t-[1.25rem] border-b border-jp-border bg-jp-surface-muted/80 px-2 pt-2",
+        variant === "blueprint" && "max-h-9 gap-0 overflow-hidden rounded-t-[1.25rem] border-b border-jp-border bg-jp-surface-muted/90 px-1 pt-1",
       )}
     >
       {modes.map((tabMode) => {

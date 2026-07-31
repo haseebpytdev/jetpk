@@ -15,6 +15,7 @@ type TravelersCabinSelectorProps = {
   onCabinChange: (cabin: CabinClass) => void;
   className?: string;
   density?: "default" | "compact";
+  variant?: "default" | "blueprint";
 };
 
 function CounterRow({
@@ -75,6 +76,7 @@ export function TravelersCabinSelector({
   onCabinChange,
   className,
   density = "default",
+  variant = "default",
 }: TravelersCabinSelectorProps) {
   const panelId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -97,9 +99,16 @@ export function TravelersCabinSelector({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [open]);
 
+  const blueprint = variant === "blueprint";
+
   return (
     <div ref={rootRef} className={cn("relative min-w-0", className)}>
-      <span className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
+      <span
+        className={cn(
+          "mb-1 block font-semibold uppercase tracking-wide text-jp-muted",
+          blueprint ? "text-[10px] leading-none" : "text-jp-xs",
+        )}
+      >
         Travelers &amp; Cabin
       </span>
       <button
@@ -111,9 +120,13 @@ export function TravelersCabinSelector({
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "flex w-full items-center justify-between gap-2 rounded-jp-md border border-jp-border bg-jp-surface px-3 text-left text-jp-sm",
-          density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
-          "focus-visible:outline-none focus-visible:shadow-jp-focus",
+          "flex w-full items-center justify-between gap-2 text-left text-jp-sm focus-visible:outline-none",
+          blueprint
+            ? "min-h-[2rem] border-0 bg-transparent py-1 px-0 shadow-none focus-visible:shadow-none"
+            : cn(
+                "rounded-jp-md border border-jp-border bg-jp-surface px-3 focus-visible:shadow-jp-focus",
+                density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
+              ),
         )}
       >
         <span className="truncate text-jp-text">{passengerSummary(passengers, cabinLabel)}</span>

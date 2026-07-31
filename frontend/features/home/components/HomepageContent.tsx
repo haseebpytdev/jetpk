@@ -1,6 +1,7 @@
 import {
   FeaturedOffersSection,
   HomepageContentService,
+  HomepageFlightPathAccent,
   PublicHero,
   PublicSupportBanner,
   RoutesSection,
@@ -14,16 +15,17 @@ export async function HomepageContent() {
   return (
     <>
       <div data-testid="homepage-content">
-      <PublicHero
-        hero={content.hero}
-        trustChips={content.trustChips}
-        fallbackImage={HomepageContentService.heroFallbackImage}
-      />
-      <ScrollToDiscover />
-      <RoutesSection {...content.routes} />
-      <FeaturedOffersSection {...content.featuredDeals} />
-      <WhyJetPakistanSection {...content.whyBook} />
-      <PublicSupportBanner support={content.supportCta} />
+        <PublicHero
+          hero={content.hero}
+          trustChips={content.trustChips}
+          fallbackImage={HomepageContentService.heroFallbackImage}
+        />
+        <ScrollToDiscover />
+        <HomepageFlightPathAccent />
+        <RoutesSection {...content.routes} />
+        <FeaturedOffersSection {...content.featuredDeals} />
+        <WhyJetPakistanSection {...content.whyBook} />
+        <PublicSupportBanner support={content.supportCta} />
       </div>
     </>
   );

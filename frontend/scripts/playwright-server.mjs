@@ -19,7 +19,7 @@ if (!existsSync(buildIdPath)) {
   process.exit(1);
 }
 
-const child = spawn("npm", ["run", "start:smoke"], {
+const child = spawn("npx", ["next", "start", "-H", "127.0.0.1", "-p", port], {
   cwd: frontendRoot,
   stdio: "inherit",
   shell: true,

@@ -14,7 +14,7 @@ export function BenefitStrip({ items, className }: BenefitStripProps) {
   return (
     <div
       className={cn(
-        "grid gap-3 border-t border-jp-border/70 pt-jp-md sm:grid-cols-2 lg:grid-cols-4",
+        "grid gap-3 border-t border-jp-border/70 pt-jp-md sm:grid-cols-2 lg:flex lg:min-h-12 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:border-t-0 lg:py-0",
         className,
       )}
       data-testid="benefit-strip"

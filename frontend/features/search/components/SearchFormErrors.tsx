@@ -28,4 +28,4 @@ export function SearchFormErrors({ errors, className }: SearchFormErrorsProps) {
   );
 }
 
-export type SearchLayout = "default" | "compact";
+export type SearchLayout = "default" | "compact" | "blueprint";

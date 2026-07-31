@@ -13,6 +13,7 @@ type DateFieldProps = {
   disabled?: boolean;
   className?: string;
   density?: "default" | "compact";
+  variant?: "default" | "blueprint";
 };
 
 export function DateField({
@@ -25,12 +26,20 @@ export function DateField({
   disabled = false,
   className,
   density = "default",
+  variant = "default",
 }: DateFieldProps) {
   const compact = density === "compact";
+  const blueprint = variant === "blueprint";
 
   return (
     <div className={cn("min-w-0", className)}>
-      <label htmlFor={id} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
+      <label
+        htmlFor={id}
+        className={cn(
+          "mb-1 block font-semibold uppercase tracking-wide text-jp-muted",
+          blueprint ? "text-[10px] leading-none" : "text-jp-xs",
+        )}
+      >
         {label}
       </label>
       <input
@@ -42,13 +51,17 @@ export function DateField({
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
         className={cn(
-          "w-full rounded-jp-md border border-jp-border bg-jp-surface px-3 text-jp-sm text-jp-text",
-          compact ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
-          "focus-visible:outline-none focus-visible:shadow-jp-focus",
-          "[color-scheme:light] dark:[color-scheme:dark]",
+          "w-full text-jp-sm text-jp-text focus-visible:outline-none",
+          blueprint
+            ? "min-h-[2rem] border-0 bg-transparent py-1 px-0 shadow-none focus-visible:shadow-none"
+            : cn(
+                "rounded-jp-md border border-jp-border bg-jp-surface px-3 focus-visible:shadow-jp-focus",
+                compact ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
+                "[color-scheme:light] dark:[color-scheme:dark]",
+              ),
         )}
       />
-      {value && !compact ? (
+      {value && !compact && !blueprint ? (
         <p className="mt-1 text-jp-xs text-jp-muted" aria-live="polite">
           {formatDisplayDate(value)}
         </p>

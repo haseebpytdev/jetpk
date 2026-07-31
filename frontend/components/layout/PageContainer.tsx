@@ -23,7 +23,7 @@ export function PageContainer({
     <div
       {...rest}
       className={cn(
-        "mx-auto w-full px-jp-xl",
+        "mx-auto w-full px-jp-xl lg:px-20",
         !fullBleed && (narrow ? "max-w-jp-narrow" : booking ? "max-w-jp-booking" : "max-w-jp-container"),
         className,
       )}

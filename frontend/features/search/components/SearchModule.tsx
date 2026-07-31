@@ -209,25 +209,41 @@ export function SearchModule({ className, layout = "default", variant = "default
     <section
       className={cn(
         variant === "blueprint"
-          ? "relative overflow-visible rounded-[1.25rem] border border-jp-border bg-jp-surface shadow-[0_20px_50px_-20px_rgba(20,50,75,0.35)]"
+          ? "relative mx-auto w-full min-h-[140px] max-w-[960px] overflow-x-hidden overflow-y-visible rounded-[1.25rem] border border-jp-border bg-jp-surface pt-9 shadow-[0_20px_50px_-20px_rgba(20,50,75,0.35)]"
           : "rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
-        layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
-        variant === "blueprint" && "pt-0",
+        variant !== "blueprint" && (layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl"),
         className,
       )}
       aria-label="Flight search"
       data-testid="search-module"
-      data-search-layout={layout}
+      data-search-layout={variant === "blueprint" ? "blueprint" : layout}
       data-search-variant={variant}
     >
-      <div className={cn(variant === "blueprint" && "-mx-jp-md -mt-px px-jp-md pt-jp-sm sm:-mx-jp-lg sm:px-jp-lg")}>
-        <SearchTabs mode={mode} onModeChange={handleModeChange} compact={layout === "compact"} variant={variant} />
-      </div>
+      {variant === "blueprint" ? (
+        <div className="absolute left-4 top-0 z-10 w-[360px] -translate-y-2">
+          <SearchTabs
+            mode={mode}
+            onModeChange={handleModeChange}
+            compact={layout === "compact" || variant === "blueprint"}
+            variant={variant}
+          />
+        </div>
+      ) : (
+        <div>
+          <SearchTabs
+            mode={mode}
+            onModeChange={handleModeChange}
+            compact={layout === "compact"}
+            variant={variant}
+          />
+        </div>
+      )}
 
       <div
         className={cn(
-          "mt-jp-md transition-opacity duration-ui",
-          layout === "compact" ? "min-h-0" : "min-h-[18rem]",
+          "transition-opacity duration-ui",
+          variant === "blueprint" ? "px-3 pb-3 pt-2" : "mt-jp-md",
+          layout === "compact" && variant !== "blueprint" ? "min-h-0" : variant === "blueprint" ? "min-h-0" : "min-h-[18rem]",
         )}
       >
         {mode === "one_way" ? (
@@ -245,7 +261,8 @@ export function SearchModule({ className, layout = "default", variant = "default
             onSubmit={handleOneWaySubmit}
             errors={errors}
             disabled={isSubmitting}
-            layout={layout}
+            layout={variant === "blueprint" ? "blueprint" : layout}
+            variant={variant}
           />
         ) : null}
 
@@ -266,7 +283,8 @@ export function SearchModule({ className, layout = "default", variant = "default
             onSubmit={handleReturnSubmit}
             errors={errors}
             disabled={isSubmitting}
-            layout={layout}
+            layout={variant === "blueprint" ? "blueprint" : layout}
+            variant={variant}
           />
         ) : null}
 

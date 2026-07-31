@@ -17,6 +17,7 @@ type AirportFieldProps = {
   disabled?: boolean;
   className?: string;
   density?: "default" | "compact";
+  variant?: "default" | "blueprint";
 };
 
 export function AirportField({
@@ -28,6 +29,7 @@ export function AirportField({
   disabled = false,
   className,
   density = "default",
+  variant = "default",
 }: AirportFieldProps) {
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -126,14 +128,27 @@ export function AirportField({
     }
   };
 
+  const blueprint = variant === "blueprint";
+
   return (
     <div className={cn("relative min-w-0", className)}>
-      <label htmlFor={id} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
+      <label
+        htmlFor={id}
+        className={cn(
+          "mb-1 block font-semibold uppercase tracking-wide text-jp-muted",
+          blueprint ? "text-[10px] leading-none" : "text-jp-xs",
+        )}
+      >
         {label}
       </label>
       <div className="relative">
         {value ? (
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-jp-sm font-bold text-jp-primary">
+          <span
+            className={cn(
+              "pointer-events-none absolute top-1/2 -translate-y-1/2 font-bold text-jp-primary",
+              blueprint ? "left-0 text-jp-xs" : "left-3 text-jp-sm",
+            )}
+          >
             {value.iata}
           </span>
         ) : null}
@@ -159,10 +174,14 @@ export function AirportField({
           }}
           onKeyDown={handleKeyDown}
           className={cn(
-            "w-full rounded-jp-md border border-jp-border bg-jp-surface px-3 text-jp-sm text-jp-text",
-            density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
-            "placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus",
-            value ? "pl-14" : "",
+            "w-full text-jp-sm text-jp-text placeholder:text-jp-muted focus-visible:outline-none",
+            blueprint
+              ? "min-h-[2rem] border-0 bg-transparent py-1 pl-10 pr-0 shadow-none focus-visible:shadow-none"
+              : cn(
+                  "rounded-jp-md border border-jp-border bg-jp-surface px-3 focus-visible:shadow-jp-focus",
+                  density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
+                  value ? "pl-14" : "",
+                ),
           )}
         />
       </div>
@@ -209,15 +228,21 @@ export function AirportField({
 type AirportSwapButtonProps = {
   onSwap: () => void;
   className?: string;
+  variant?: "default" | "blueprint";
 };
 
-export function AirportSwapButton({ onSwap, className }: AirportSwapButtonProps) {
+export function AirportSwapButton({ onSwap, className, variant = "default" }: AirportSwapButtonProps) {
+  const blueprint = variant === "blueprint";
   return (
     <IconButton
       label="Swap origin and destination"
       size="sm"
       onClick={onSwap}
-      className={cn("shrink-0 self-end mb-0.5", className)}
+      className={cn(
+        "shrink-0 self-end mb-0.5",
+        blueprint && "mb-0 h-8 w-8 self-center rounded-full border-jp-border",
+        className,
+      )}
     >
       <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
         <path
