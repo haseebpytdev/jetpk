@@ -32,4 +32,4 @@ Cross-agency booking returns 404/not-found message; no other-agency identity in 
 
 ## Laravel
 
-No Laravel changes in JP-UI-05A.
+JP-UI-05B adds Laravel-authoritative evidence in `tests/Feature/Jetpk/AgentAgencyIsolationTest.php` (5 methods) covering `agent.bookings.show`, `agent.bookings.index`, `agent.wallet.show`, `agent.ledger.index`, `agent.deposits.index`, and `BookingPolicy::view`.

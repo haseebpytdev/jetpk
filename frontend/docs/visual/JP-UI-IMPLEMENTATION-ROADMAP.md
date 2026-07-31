@@ -255,6 +255,30 @@ Baseline: `5fad262`
 
 ---
 
+## JP-UI-05B — LARAVEL-OWNERSHIP-RBAC-LOGOUT-INVOICE-AND-FINAL-EVIDENCE-CLOSURE
+
+**Status:** Complete (see `docs/phases/JP-UI-05B-*-SUMMARY.md`)
+
+**Branch:** `phase/jetpk-ui-05b-ownership-rbac-logout-closure`  
+**Baseline:** `d6698b3`
+
+**Objective:** Close remaining Laravel-authoritative ownership/RBAC evidence gaps and logout stale-session closure without rerunning the 132-scenario visual matrix.
+
+### Deliverables
+- 4 focused Laravel test files (16 methods total)
+- `frontend/tests/jp-ui-05b-logout-session-closure.spec.ts` (4 tests)
+- Hydration documentation correction (root `<html>` theme suppression exception)
+- JP-UI-05A QA doc cross-references to Laravel evidence
+
+### Tests
+- `CustomerBookingOwnershipTest.php` — 3 methods
+- `CustomerInvoiceOwnershipTest.php` — 3 methods
+- `AgentAgencyIsolationTest.php` — 5 methods
+- `PortalPermissionBoundaryTest.php` — 5 methods
+- `jp-ui-05b-logout-session-closure.spec.ts` — 4 tests
+
+---
+
 ## JP-UI-06 — ASSETS-ANIMATIONS-RESPONSIVE-ACCESSIBILITY-SCREENSHOT-DIFF-AND-FINAL-VISUAL-CLOSURE
 
 **Objective:** Production assets, motion, responsive closure, visual diff gate.

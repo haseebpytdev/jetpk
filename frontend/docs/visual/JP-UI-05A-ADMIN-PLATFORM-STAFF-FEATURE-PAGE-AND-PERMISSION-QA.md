@@ -30,6 +30,10 @@ Admin scenarios capture overview, bookings, payments, agents, users, PNR queue, 
 - Forbidden: users module with `dataSourcePreview=forbidden` shows `ForbiddenState` via preview gate
 - Navigation omission is not the security boundary; direct URL shows access denied preview stack
 
+## Laravel
+
+JP-UI-05B adds Laravel-authoritative evidence in `tests/Feature/Jetpk/PortalPermissionBoundaryTest.php` (5 methods) covering `agent.commissions.index` (`agent.admin` middleware), `agent.wallet.show` (`AgentPermission::WalletView`), `staff.bookings.index`, and `/admin/page-settings/home` (`StaffPermission::PageSettingsManage` gate).
+
 ## KPI authority
 
 Overview operational queue cards use fixture KPI names (`pending_deposits`, `payment_review`, `supplier_pnr_pending`, etc.). Charts labelled preview/mock. No invented production KPI values.

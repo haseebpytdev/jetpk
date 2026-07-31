@@ -63,4 +63,12 @@ npx playwright test tests/jp-ui-05a-hydration.spec.ts tests/jp-ui-05a-rbac.spec.
 
 ## `suppressHydrationWarning` on `<html>`
 
-Retained only for `data-theme` / `color-scheme` attribute set by inline bootstrap before paint — not used to hide component-level mismatches.
+**Accurate status (JP-UI-05B):**
+
+- Application-wide hydration-error filtering was removed in JP-UI-05A; React #418 is no longer ignored in visual-audit helpers.
+- The full unfiltered JP-UI-05 matrix (132 scenarios) passed with zero hydration warnings after structural fixes.
+- `suppressHydrationWarning` remains **only** on the root `<html>` element in `dashboard/app/layout.tsx` for the pre-hydration `data-theme` / `color-scheme` attribute set by the inline bootstrap script before paint.
+- It must **not** be used on dashboard content subtrees; component-level mismatches must be fixed at source.
+- Console, `pageerror`, and React #418 gates remain active in visual-audit runs.
+
+Do not claim that all suppression of any kind was removed — only that React #418 filtering and component-level suppression were removed.
