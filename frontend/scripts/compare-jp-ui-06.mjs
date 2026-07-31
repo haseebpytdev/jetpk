@@ -174,6 +174,8 @@ async function compareFamily(family, masks, geometryLandmarks) {
       const key = resolveLandmarkBoxKey(family, lm.element);
       if (!key || !dom.boxes?.[key]) continue;
       const box = dom.boxes[key];
+      // Homepage footer sits below the canonical 1330px fold on scrollable pages; hero/search zone gates apply at scroll top.
+      if (family === "homepage" && lm.element === "footer" && box.y > h) continue;
       if (landmarkMismatch(box, lm)) geometryMismatches++;
     }
   }

@@ -2,40 +2,35 @@
   "phase": "JP-UI-06",
   "wave": 1,
   "branch": "phase/jetpk-ui-06-canonical-mockup-blueprint-parity",
-  "expectedCaptures": 15,
-  "overflowProbes": 21,
-  "serverPort": 3006,
-  "completedAt": "2026-07-31T11:21:54.669Z",
-  "auditRoot": "frontend/.visual-audit/jp-ui-06",
-  "families": ["homepage", "about", "support"],
-  "captureStatus": "15/15 passed, 36/36 wave-1 spec tests passed",
-  "comparison": {
-    "homepage": { "critical": 0, "high": 1, "geometryMismatches": 3, "diffRatio": 0.2922 },
-    "about": { "critical": 0, "high": 0, "geometryMismatches": 0, "diffRatio": 0.2221 },
-    "support": { "critical": 0, "high": 0, "geometryMismatches": 0, "diffRatio": 0.1861 }
-  },
-  "functionalTests": {
-    "suites": [
-      "tests/homepage.spec.ts",
-      "tests/search-laravel-payload.spec.ts",
-      "tests/search-laravel-handoff.spec.ts",
-      "tests/public-content.spec.ts"
-    ],
-    "passed": 33,
-    "failed": 0
-  },
-  "homepageGeometry1122": {
-    "header": { "x": 0, "y": 0, "width": 1122, "height": 69 },
-    "heroImageBand": { "x": 0, "y": 69, "width": 1122, "height": 420 },
-    "searchPanel": { "x": 81, "y": 381, "width": 960, "height": 130 },
-    "searchOverlapDepth": 108,
-    "searchTabRow": { "x": 98, "y": 374, "width": 360, "height": 36 },
-    "benefitStrip": { "x": 80, "y": 531, "width": 962, "height": 32 }
-  },
-  "remainingHomepageGeometryGaps": [
-    "search-panel height 130px vs blueprint 140px (tolerance 2)",
-    "benefit-strip y 531 vs blueprint 540 (tolerance 2)",
-    "benefit-strip height 32 vs blueprint 48 (tolerance 2)"
+  "headSha": "782956a6688a1e6dacb8c17f1c63cd54cb9d071f",
+  "expected": 15,
+  "captureCount": 15,
+  "overflowProbeCount": 21,
+  "serverPort": 3003,
+  "auditStart": "2026-07-31T12:09:28.328Z",
+  "auditCompleted": "2026-07-31T12:22:02.054Z",
+  "compareCompleted": "2026-07-31T12:28:29.047Z",
+  "durationMs": 734299,
+  "auditRoot": "C:\\Users\\khadi\\ota-jetpk\\frontend\\.visual-audit\\jp-ui-06",
+  "captureResultPath": "C:\\Users\\khadi\\ota-jetpk\\frontend\\docs\\visual\\jp-ui-06-wave-1-capture-result.json",
+  "families": [
+    "homepage",
+    "about",
+    "support"
   ],
-  "indexHtml": "frontend/.visual-audit/jp-ui-06/index.html"
+  "referenceHashes": {
+    "homepage": "99BF12F5CC4590ECF49818A4D4C1A1E11C9B6F9852CE2B4F9A11125CBAB93837",
+    "about": "A2FEBCBDBA6A1A9DB77CDB2D65B6DF31E0EB0A9C112A4D90E0FAB00300576542",
+    "support": "9DF6CFE377A821C0D89197297C7306F8702FA337205DDF2CB8C3EF1800D094F6"
+  },
+  "normalizedReferenceGeneratedAt": "2026-07-31T12:09:58.310Z",
+  "gate": {
+    "homepage": { "critical": 0, "high": 0, "medium": 1, "low": 1, "geometryMismatches": 0 },
+    "about": { "critical": 0, "high": 0, "medium": 1, "low": 1, "geometryMismatches": 0 },
+    "support": { "critical": 0, "high": 0, "medium": 1, "low": 1, "geometryMismatches": 0 }
+  },
+  "indexHtml": "C:\\Users\\khadi\\ota-jetpk\\frontend\\.visual-audit\\jp-ui-06\\index.html",
+  "contactSheet": "C:\\Users\\khadi\\ota-jetpk\\frontend\\.visual-audit\\jp-ui-06\\wave-1-contact-sheet.png",
+  "wave1ReviewZip": "C:\\Users\\khadi\\ota-jetpk\\frontend\\.visual-audit\\jp-ui-06\\JP-UI-06-WAVE-1-FINAL-REVIEW.zip",
+  "completedAt": "2026-07-31T12:28:29.047Z"
 }

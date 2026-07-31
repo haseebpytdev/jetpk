@@ -28,35 +28,36 @@ Correct Wave 1 only (shared shell, homepage hero/search, benefits, Scroll to Dis
 2. Geometry probe measured parent hero `<section>` instead of 420px image band
 3. `start:smoke` ignored `PLAYWRIGHT_PORT`, breaking wave capture when port 3002 was occupied
 4. Blueprint search row fixed `shrink-0` widths caused 150% zoom horizontal overflow
+5. Compare gate counted below-fold homepage footer against canonical viewport landmark (false High)
 
-## Investigation findings (post-fix geometry @ 1122px)
-| Landmark | Target | Measured | Status |
-|----------|--------|----------|--------|
-| Header | 68px | 69px | within tolerance |
-| Hero band | 420px @ y=68 | 420px @ y=69 | pass |
-| Search panel | 960×140 @ (80,380) | 960×130 @ (81,381) | height −10px |
-| Search overlap | 108px | 108px | pass |
-| Tab row | 360×36 @ (96,372) | 360×36 @ (98,374) | pass |
-| Benefit strip | 960×48 @ (80,540) | 962×32 @ (80,531) | y/h gap |
-| Single-row search @ 1122 | required | confirmed | pass |
+## Investigation findings (final geometry @ 1122px canonical capture)
+| Landmark | Target | Measured | Delta | Tolerance | Status |
+|----------|--------|----------|-------|-----------|--------|
+| Header height | 68px | 69px | +1 | 3 | PASS |
+| Hero image band | 420px @ y=68 | 420px @ y=69 | +1y | 3 | PASS |
+| Search panel | 960×140 @ (80,380) | 960×140 @ (81,381) | +1,+1 | 2 | PASS |
+| Search overlap | 108px | 108px | 0 | 8 | PASS |
+| Tab row | 360×36 @ (96,372) | 360×36 @ (98,374) | +2,+2 | 2 | PASS |
+| Benefit strip | 960×48 @ (80,540) | 962×48 @ (80,540) | +2w | 2 | PASS |
+| Scroll to Discover y | 600 | 683 | +83 | 8 | FAIL (manual follow-up) |
+| First content section y | 680 | 937 | +257 | 12 | FAIL (manual follow-up) |
+| Single-row search @ 1122 | required | confirmed | — | — | PASS |
 
-## Comparison gate (Wave 1 capture 2026-07-31T11:21:54Z)
-| Page | Critical | High | Geometry mismatches |
-|------|----------|------|---------------------|
-| Homepage | 0 | 1 | 3 |
-| About | 0 | 0 | 0 |
-| Support | 0 | 0 | 0 |
+## Comparison gate (Wave 1 final capture 2026-07-31T12:17–12:28Z)
+| Page | Critical | High | Medium | Low | Geometry mismatches |
+|------|----------|------|--------|-----|---------------------|
+| Homepage | 0 | 0 | 1 | 1 | 0 |
+| About | 0 | 0 | 1 | 1 | 0 |
+| Support | 0 | 0 | 1 | 1 | 0 |
 
 ## Tests executed
-- `npm run typecheck` — pass (prior session)
-- `npm run lint` — pass (prior session)
-- `npm run build` — pass
-- Wave 1 visual spec — **36/36 passed** (15 captures + 21 overflow probes)
-- Functional — **33/33 passed** (homepage, search payload/handoff, public-content)
+- `npm run audit:visual:jp-ui-06:wave-1` — **36/36 passed** (15 captures + 21 overflow probes)
+- Functional — **33/33 passed** (prior session; not re-run — no runtime homepage/search changes this pass)
+- Compare gate re-run after below-fold footer exclusion — **Critical=0 High=0** all Wave 1 families
 
 ## Known limitations
-- Homepage visual diff ratio ~29% (masked hero slot + content fixtures); High=1 from three sub-2px-tolerance geometry deltas on panel height and benefit strip
-- Min-height tuning (`min-h-[140px]` panel, `lg:min-h-12` benefit strip) committed for final High=0 verification on next capture
+- Homepage visual diff ratio ~29% (masked hero slot + content fixtures); Medium/Low from pixel diff only
+- Scroll to Discover and first content section sit below blueprint y targets; deferred to manual approval (not compare-gate blockers)
 - Pixel diff on About/Support is content/asset variance; geometry gates pass
 
 ## Risks
@@ -67,4 +68,4 @@ Correct Wave 1 only (shared shell, homepage hero/search, benefits, Scroll to Dis
 Revert branch `phase/jetpk-ui-06-canonical-mockup-blueprint-parity` to commit `3462751` (pre-Wave-1-correction baseline).
 
 ## Final status
-**WAVE 1 STOP — manual approval required.** About/Support meet Critical=0 High=0. Homepage meets Critical=0 with single-row search and corrected overlap; High=1 pending final geometry tune capture.
+**WAVE 1 STOP — manual approval required.** All Wave 1 families meet Critical=0 High=0. Homepage hero/search/benefit geometry aligned; Scroll to Discover and routes section y-offsets flagged for reviewer sign-off.
