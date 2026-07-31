@@ -1,18 +1,8 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { resolvePassengerCheckoutHandoffUrl } from "@/features/flight-details/utils/handoff";
-import {
-  absoluteLaravelHandoffUrl,
-  buildCheckoutHandoffUrl,
-  revalidateOffer,
-} from "../services/flight-results-api";
+import { buildFareSelectionUrl } from "@/features/fare-selection";
 import type { FlightOffer } from "../types";
-
-function isIatiOffer(offer: FlightOffer): boolean {
-  const provider = (offer.supplier_provider ?? offer.provider ?? "").toLowerCase();
-  return provider === "iati";
-}
 
 export function useOfferSelection(searchId: string) {
   const [selectingId, setSelectingId] = useState<string | null>(null);
@@ -21,7 +11,7 @@ export function useOfferSelection(searchId: string) {
 
   const selectOffer = useCallback(
     async (offer: FlightOffer, fareOptionKey: string) => {
-      if (inFlightRef.current || !offer.offer_id || !offer.select_url) {
+      if (inFlightRef.current || !offer.offer_id) {
         return;
       }
 
@@ -30,42 +20,22 @@ export function useOfferSelection(searchId: string) {
         return;
       }
 
+      if (!searchId) {
+        setError("Search session expired. Please search again.");
+        return;
+      }
+
       inFlightRef.current = true;
       setSelectingId(offer.offer_id);
       setError(null);
 
       try {
-        if (isIatiOffer(offer)) {
-          const revalidation = await revalidateOffer({
-            searchId,
-            offerId: offer.offer_id,
-            selectedFareOptionId: fareOptionKey || undefined,
-          });
-
-          if (!revalidation.ok) {
-            setError(revalidation.message);
-            return;
-          }
-
-          const passengersUrl = revalidation.data.passengers_url;
-          if (!passengersUrl) {
-            setError("Unable to continue to checkout. Please try again.");
-            return;
-          }
-
-          const resolved = resolvePassengerCheckoutHandoffUrl(passengersUrl) ?? absoluteLaravelHandoffUrl(passengersUrl);
-          window.location.assign(resolved);
-          return;
-        }
-
-        const checkoutUrl = buildCheckoutHandoffUrl(
-          offer.select_url,
-          offer.offer_id,
-          fareOptionKey,
+        const fareSelectionUrl = buildFareSelectionUrl({
           searchId,
-        );
-        const resolvedCheckout = resolvePassengerCheckoutHandoffUrl(checkoutUrl) ?? checkoutUrl;
-        window.location.assign(resolvedCheckout);
+          offerId: offer.offer_id,
+          fareOptionKey: fareOptionKey || undefined,
+        });
+        window.location.assign(fareSelectionUrl);
       } finally {
         inFlightRef.current = false;
         setSelectingId(null);

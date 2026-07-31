@@ -1,5 +1,5 @@
-import { ManualPaymentPage } from "@/features/standard-booking/components/ManualPaymentPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <ManualPaymentPage />;
+  redirect("/booking/payment?method=manual");
 }

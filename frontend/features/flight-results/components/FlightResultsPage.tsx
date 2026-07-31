@@ -21,6 +21,7 @@ import { ResultsSortTabs } from "./ResultsSortTabs";
 import { ResultsToolbar } from "./ResultsToolbar";
 import { SearchErrorState } from "./SearchErrorState";
 import { SearchProgress } from "./SearchProgress";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { SearchSummaryBar } from "./SearchSummaryBar";
 
 export function FlightResultsPage() {
@@ -115,7 +116,7 @@ export function FlightResultsPage() {
   const isLoading = results.status === "loading" || results.status === "initializing";
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-6 sm:px-6 lg:px-8">
+    <PageContainer className="space-y-4 py-jp-lg" data-testid="flight-results-page">
       <h1 className="sr-only">Flight search results</h1>
 
       <SearchSummaryBar summary={summary} onModifyClick={() => setModifyOpen(true)} />
@@ -139,7 +140,7 @@ export function FlightResultsPage() {
 
       <ResultsSortTabs value={sort} onChange={handleSortChange} className="hidden sm:flex" />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(14rem,16rem)_1fr]">
+      <div className="grid gap-jp-lg lg:grid-cols-[260px_minmax(0,1fr)]">
         <div className="hidden lg:block">
           <ResultsFilterPanel
             facets={results.data?.filters}
@@ -228,6 +229,6 @@ export function FlightResultsPage() {
         triggerRef={detailsTriggerRef}
         onNewSearch={() => setModifyOpen(true)}
       />
-    </div>
+    </PageContainer>
   );
 }

@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { PaymentPage } from "@/features/standard-booking/components/PaymentPage";
 
 export default function Page() {
-  redirect("/booking/payment/manual");
+  return <PaymentPage />;
 }

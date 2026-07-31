@@ -1,5 +1,5 @@
-import { CardPaymentPage } from "@/features/standard-booking/components/CardPaymentPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <CardPaymentPage />;
+  redirect("/booking/payment?method=card");
 }

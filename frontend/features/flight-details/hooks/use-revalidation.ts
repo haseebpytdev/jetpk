@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { buildFareSelectionUrl } from "@/features/fare-selection";
 import {
   absoluteLaravelHandoffUrl,
   buildCheckoutHandoffUrl,
@@ -131,62 +132,18 @@ export function useRevalidation() {
           return;
         }
 
-        const needsRevalidation = providerRequiresRevalidation(params.supplierProvider);
-
-        if (needsRevalidation) {
-          const result = await runRevalidation(params, false);
-
-          if (!result.ok) {
-            const failureState = classifyFailure(result.status, result.data);
-            setState(failureState);
-            setMessage(result.message);
-            return;
-          }
-
-          const change = extractFareChange(result.data);
-          if (change) {
-            pendingHandoffRef.current =
-              result.data.passengers_url ??
-              (params.selectUrl
-                ? buildCheckoutHandoffUrl(
-                    params.selectUrl,
-                    params.offerId,
-                    params.fareOptionKey ?? params.offerId,
-                    params.searchId,
-                  )
-                : null);
-            setFareChange(change);
-            setState("fare_change");
-            return;
-          }
-
-          const passengersUrl = result.data.passengers_url;
-          if (passengersUrl) {
-            navigateHandoff(passengersUrl);
-            setState("success");
-            return;
-          }
-        }
-
-        if (!params.selectUrl) {
-          setState("error");
-          setMessage("Unable to continue to checkout. Please try again.");
-          return;
-        }
-
-        const checkoutUrl = buildCheckoutHandoffUrl(
-          params.selectUrl,
-          params.offerId,
-          params.fareOptionKey ?? params.offerId,
-          params.searchId,
-        );
-        navigateHandoff(checkoutUrl);
+        const fareSelectionUrl = buildFareSelectionUrl({
+          searchId: params.searchId,
+          offerId: params.offerId,
+          fareOptionKey: params.fareOptionKey,
+        });
+        window.location.assign(fareSelectionUrl);
         setState("success");
       } finally {
         inFlightRef.current = false;
       }
     },
-    [classifyFailure, extractFareChange, navigateHandoff, runRevalidation],
+    [],
   );
 
   const acceptFareChange = useCallback(async () => {
