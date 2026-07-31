@@ -13,9 +13,10 @@ Correct Wave 1 only (shared shell, homepage hero/search, benefits, Scroll to Dis
 - Homepage hero band / search dock / blueprint search row at `lg` (1024px+)
 - Shared shell gutters (`lg:px-20` / 80px)
 - Benefit strip horizontal desktop layout
-- About and Support unchanged structurally; re-captured for evidence
+- Below-search discovery bridge (Scroll to Discover, flight path, routes section)
+- About and Support unchanged structurally
 - Wave 1 capture/compare pipeline (`audit:visual:jp-ui-06:wave-1`)
-- Targeted functional Playwright suites for homepage, search handoff, public content
+- Visible-fold geometry gate enforcement
 
 ## Excluded scope
 - Wave 2 (results, fare, passengers, review, payment)
@@ -28,7 +29,18 @@ Correct Wave 1 only (shared shell, homepage hero/search, benefits, Scroll to Dis
 2. Geometry probe measured parent hero `<section>` instead of 420px image band
 3. `start:smoke` ignored `PLAYWRIGHT_PORT`, breaking wave capture when port 3002 was occupied
 4. Blueprint search row fixed `shrink-0` widths caused 150% zoom horizontal overflow
-5. Compare gate counted below-fold homepage footer against canonical viewport landmark (false High)
+5. Below-search composition stacked flow-blocking spacers between benefit strip and routes
+
+### Below-search vertical offset audit (pre-fix @ 1122px)
+| Source | Contribution | Notes |
+|--------|-------------|-------|
+| `SectionCurve` in document flow | **32px** | `h-8` wave divider after hero section |
+| Post-hero spacer `h-14 lg:h-16` | **64px** | Empty block below curve |
+| `ScrollToDiscover` `py-jp-lg` | **~40px** | Top+bottom padding on affordance |
+| **Scroll total excess** | **~83px** | Benefit bottom 588 → scroll y 683 vs blueprint 600 |
+| `HomepageFlightPathAccent` `mt-jp-md` + `h-24` | **~113px** | Decorative SVG block |
+| `RoutesSection` `py-jp-3xl` top padding | **~41px** | Default section rhythm |
+| **Routes total excess** | **~257px** | Routes y 937 vs blueprint 680 |
 
 ## Investigation findings (final geometry @ 1122px canonical capture)
 | Landmark | Target | Measured | Delta | Tolerance | Status |
@@ -39,11 +51,11 @@ Correct Wave 1 only (shared shell, homepage hero/search, benefits, Scroll to Dis
 | Search overlap | 108px | 108px | 0 | 8 | PASS |
 | Tab row | 360×36 @ (96,372) | 360×36 @ (98,374) | +2,+2 | 2 | PASS |
 | Benefit strip | 960×48 @ (80,540) | 962×48 @ (80,540) | +2w | 2 | PASS |
-| Scroll to Discover y | 600 | 683 | +83 | 8 | FAIL (manual follow-up) |
-| First content section y | 680 | 937 | +257 | 12 | FAIL (manual follow-up) |
+| Scroll to Discover y | 600 | 600 | 0 | 8 | PASS |
+| First content section y | 680 | 683 | +3 | 12 | PASS |
 | Single-row search @ 1122 | required | confirmed | — | — | PASS |
 
-## Comparison gate (Wave 1 final capture 2026-07-31T12:17–12:28Z)
+## Comparison gate (Wave 1 final capture 2026-07-31T13:31Z)
 | Page | Critical | High | Medium | Low | Geometry mismatches |
 |------|----------|------|--------|-----|---------------------|
 | Homepage | 0 | 0 | 1 | 1 | 0 |
@@ -51,13 +63,16 @@ Correct Wave 1 only (shared shell, homepage hero/search, benefits, Scroll to Dis
 | Support | 0 | 0 | 1 | 1 | 0 |
 
 ## Tests executed
-- `npm run audit:visual:jp-ui-06:wave-1` — **36/36 passed** (15 captures + 21 overflow probes)
-- Functional — **33/33 passed** (prior session; not re-run — no runtime homepage/search changes this pass)
-- Compare gate re-run after below-fold footer exclusion — **Critical=0 High=0** all Wave 1 families
+- `npm run typecheck` — pass
+- `npm run lint` — pass
+- `npm run build` — pass
+- Homepage Wave 1 captures — **5/5 passed**
+- Homepage overflow probes — **7/7 passed**
+- Geometry gate spec — **3/3 passed**
+- Functional — **33/33 passed** (homepage, search payload/handoff, public-content)
 
 ## Known limitations
-- Homepage visual diff ratio ~29% (masked hero slot + content fixtures); Medium/Low from pixel diff only
-- Scroll to Discover and first content section sit below blueprint y targets; deferred to manual approval (not compare-gate blockers)
+- Homepage visual diff ratio ~30% (masked hero slot + content fixtures); Medium/Low from pixel diff only
 - Pixel diff on About/Support is content/asset variance; geometry gates pass
 
 ## Risks
@@ -68,4 +83,4 @@ Correct Wave 1 only (shared shell, homepage hero/search, benefits, Scroll to Dis
 Revert branch `phase/jetpk-ui-06-canonical-mockup-blueprint-parity` to commit `3462751` (pre-Wave-1-correction baseline).
 
 ## Final status
-**WAVE 1 STOP — manual approval required.** All Wave 1 families meet Critical=0 High=0. Homepage hero/search/benefit geometry aligned; Scroll to Discover and routes section y-offsets flagged for reviewer sign-off.
+**WAVE 1 STOP — manual approval required.** All Wave 1 families meet Critical=0 High=0 including corrected below-search composition.
