@@ -45,6 +45,9 @@ if (existsSync(comparePath)) {
     if (result.family !== "seat-selection-capability-unavailable" && result.critical > 0) {
       fail(`${result.family} has ${result.critical} critical geometry mismatches`);
     }
+    if (result.family !== "seat-selection-capability-unavailable" && result.high > 0) {
+      fail(`${result.family} has ${result.high} high geometry mismatches`);
+    }
   }
   const requiredArtifacts = ["side-by-side.png", "overlay-50.png", "heatmap.png", "edge-compare.png"];
   for (const result of compare.results ?? []) {

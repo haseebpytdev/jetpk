@@ -83,6 +83,8 @@ function resolveLandmarkBoxKey(page, element) {
       "search-panel": "searchPanel",
       "search-tabs": "searchTabRow",
       "benefit-strip": "benefitStrip",
+      "scroll-to-discover": "scrollToDiscover",
+      "first-content-section": "firstContentSection",
       footer: "footer",
     };
     return map[element] ?? null;
@@ -99,6 +101,9 @@ function resolveLandmarkBoxKey(page, element) {
 
 function landmarkMismatch(box, landmark) {
   const tol = landmark.tolerance ?? 2;
+  if (landmark.compareYOnly) {
+    return Math.abs(box.y - landmark.y) > tol;
+  }
   return (
     Math.abs(box.x - landmark.x) > tol ||
     Math.abs(box.y - landmark.y) > tol ||
@@ -166,7 +171,15 @@ async function compareFamily(family, masks, geometryLandmarks) {
 
   const maskedPct = maskPercent(masks, family, w, h);
   const geomReport = path.join(auditRoot, "geometry", `${family}-canonical-light-desktop-geometry.json`);
+  const visibleFoldLandmarks = new Set([
+    "scroll-to-discover",
+    "first-content-section",
+    "benefit-strip",
+    "search-panel",
+    "search-tabs",
+  ]);
   let geometryMismatches = 0;
+  let visibleFoldMismatches = 0;
   if (existsSync(geomReport)) {
     const dom = JSON.parse(readFileSync(geomReport, "utf8"));
     const landmarks = geometryLandmarks.filter((l) => l.page === family);
@@ -176,13 +189,17 @@ async function compareFamily(family, masks, geometryLandmarks) {
       const box = dom.boxes[key];
       // Homepage footer sits below the canonical 1330px fold on scrollable pages; hero/search zone gates apply at scroll top.
       if (family === "homepage" && lm.element === "footer" && box.y > h) continue;
-      if (landmarkMismatch(box, lm)) geometryMismatches++;
+      const mismatched = landmarkMismatch(box, lm);
+      if (mismatched) {
+        geometryMismatches++;
+        if (visibleFoldLandmarks.has(lm.element)) visibleFoldMismatches++;
+      }
     }
   }
 
   const diffRatio = diffPixels / (w * h);
   const critical = geometryMismatches > 3 ? 1 : 0;
-  const high = diffRatio > 0.35 || geometryMismatches > 0 ? 1 : 0;
+  const high = diffRatio > 0.35 || geometryMismatches > 0 || visibleFoldMismatches > 0 ? 1 : 0;
   const medium = diffRatio > 0.15 ? 1 : 0;
 
   return {

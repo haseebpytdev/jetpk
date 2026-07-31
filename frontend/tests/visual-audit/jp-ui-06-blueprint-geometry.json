@@ -10,6 +10,8 @@
     { "page": "homepage", "element": "search-tabs", "x": 96, "y": 372, "width": 360, "height": 36, "relationship": "integrated_tab_row", "tolerance": 2, "notes": "One Way / Return / Multi-City tabs protruding" },
     { "page": "homepage", "element": "search-cta", "x": 920, "y": 420, "width": 100, "height": 48, "relationship": "inside_search_panel", "tolerance": 2, "notes": "Search Flights button" },
     { "page": "homepage", "element": "benefit-strip", "x": 80, "y": 540, "width": 960, "height": 48, "relationship": "below_search_overlap", "tolerance": 2, "notes": "Trust chips row" },
+    { "page": "homepage", "element": "scroll-to-discover", "x": 0, "y": 600, "width": 1122, "height": 80, "relationship": "below_benefits", "tolerance": 8, "compareYOnly": true, "notes": "Scroll affordance below hero/search overlap" },
+    { "page": "homepage", "element": "first-content-section", "x": 0, "y": 680, "width": 1122, "height": 400, "relationship": "below_discovery_bridge", "tolerance": 12, "compareYOnly": true, "notes": "Routes / destinations section start" },
     { "page": "homepage", "element": "content-max-width", "x": 80, "y": 0, "width": 960, "height": 1330, "relationship": "centered_gutter", "tolerance": 2, "notes": "Main content gutter 80px each side" },
     { "page": "homepage", "element": "footer", "x": 0, "y": 1100, "width": 1122, "height": 230, "relationship": "page_bottom", "tolerance": 3, "notes": "Dark green footer" },
 
