@@ -160,8 +160,8 @@ git push jetpk main
 | Test (frontend logout) commit | `822988b` |
 | Docs commit | `0117ced` |
 | Merge commit | `8a5c9a0` |
-| Final docs SHA | _pending_ |
-| Final main SHA | _pending_ |
+| Final docs SHA | `3ecf101` |
+| Final main SHA | `3ecf101` |
 
 ## Final status
 
