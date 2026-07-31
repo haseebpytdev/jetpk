@@ -30,8 +30,8 @@ npx playwright test tests/jp-ui-05a-customer-ownership.spec.ts -c playwright.con
 
 ## Laravel
 
-No Laravel changes. Laravel remains authoritative for ownership; frontend tests validate presentation and client-side guard behavior with fixtures.
+JP-UI-05B adds Laravel-authoritative evidence in `tests/Feature/Jetpk/CustomerBookingOwnershipTest.php` (3 methods) covering `customer.bookings.show`, `customer.bookings.index`, and `BookingPolicy::view`.
 
 ## Invoice eligibility
 
-Covered in visual matrix (`customer-booking-detail` scenario) and ownership payload includes `view_invoice` action only when `available: true`. Dedicated invoice route tests remain in existing customer portal specs.
+JP-UI-05B adds `tests/Feature/Jetpk/CustomerInvoiceOwnershipTest.php` (3 methods) covering `customer.invoices.show`, `customer.invoices.index`, and `BookingPolicy::view`. Visual matrix (`customer-booking-detail` scenario) and ownership payload `view_invoice` action remain unchanged.
