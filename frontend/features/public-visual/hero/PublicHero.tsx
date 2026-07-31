@@ -74,12 +74,18 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
         </div>
       ) : null}
 
-      <SectionCurve className="relative z-10 -mt-px text-jp-page" />
-      <div className={cn(hero.searchVisible ? "h-14 lg:h-16" : "h-0")} aria-hidden="true" />
+      <SectionCurve className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] text-jp-page" aria-hidden="true" />
     </section>
   );
 }
 
 export function HomepageFlightPathAccent({ className }: { className?: string }) {
-  return <AnimatedFlightPath className={cn("mx-auto mt-jp-md max-w-lg opacity-90", className)} />;
+  return (
+    <AnimatedFlightPath
+      className={cn(
+        "mx-auto w-full max-w-md opacity-90 mt-jp-sm lg:mt-0 [&_svg]:h-16 [&_svg]:sm:h-14 [&_svg]:lg:h-6",
+        className,
+      )}
+    />
+  );
 }

@@ -11,9 +11,19 @@ import { PublicSectionHeader } from "../components/PublicSectionHeader";
 
 type RoutesSectionProps = HomepageSectionHeader & {
   items: HomepageRouteCard[];
+  sectionClassName?: string;
 };
 
-export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaUrl, items }: RoutesSectionProps) {
+export function RoutesSection({
+  enabled,
+  eyebrow,
+  title,
+  subtitle,
+  ctaText,
+  ctaUrl,
+  items,
+  sectionClassName,
+}: RoutesSectionProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   if (!enabled || items.length === 0) return null;
@@ -25,7 +35,7 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
   };
 
   return (
-    <SectionContainer id="homepage-routes">
+    <SectionContainer id="homepage-routes" className={sectionClassName}>
       <PageContainer data-testid="routes-section">
         <PublicSectionHeader
           eyebrow={eyebrow}

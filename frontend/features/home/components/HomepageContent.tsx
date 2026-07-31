@@ -20,9 +20,11 @@ export async function HomepageContent() {
           trustChips={content.trustChips}
           fallbackImage={HomepageContentService.heroFallbackImage}
         />
-        <ScrollToDiscover />
-        <HomepageFlightPathAccent />
-        <RoutesSection {...content.routes} />
+        <div className="flex flex-col" data-testid="homepage-discovery-bridge">
+          <ScrollToDiscover />
+          <HomepageFlightPathAccent />
+        </div>
+        <RoutesSection {...content.routes} sectionClassName="pt-jp-sm pb-jp-3xl sm:pt-jp-md lg:pt-0 lg:pb-jp-3xl" />
         <FeaturedOffersSection {...content.featuredDeals} />
         <WhyJetPakistanSection {...content.whyBook} />
         <PublicSupportBanner support={content.supportCta} />
