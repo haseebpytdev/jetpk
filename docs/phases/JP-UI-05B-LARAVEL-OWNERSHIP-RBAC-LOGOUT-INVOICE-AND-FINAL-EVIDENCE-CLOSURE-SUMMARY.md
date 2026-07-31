@@ -156,10 +156,10 @@ git push jetpk main
 | Item | SHA |
 |------|-----|
 | Baseline | `d6698b3` |
-| Test (authz) commit | _pending_ |
-| Test (frontend logout) commit | _pending_ |
-| Docs commit | _pending_ |
-| Merge commit | _pending_ |
+| Test (authz) commit | `3b0251b` |
+| Test (frontend logout) commit | `822988b` |
+| Docs commit | `0117ced` |
+| Merge commit | `8a5c9a0` |
 | Final docs SHA | _pending_ |
 | Final main SHA | _pending_ |
 
