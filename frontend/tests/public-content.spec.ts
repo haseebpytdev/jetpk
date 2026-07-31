@@ -159,7 +159,7 @@ test("mobile public navigation includes support links", async ({ page }) => {
 test("homepage search regression", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
   await expect(page.getByTestId("search-module")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Search Flights" })).toBeVisible();
+  await expect(page.getByTestId("search-module").getByRole("button", { name: "Search Flights" })).toBeVisible();
 });
 
 test("mobile viewport public page checks", async ({ page }) => {

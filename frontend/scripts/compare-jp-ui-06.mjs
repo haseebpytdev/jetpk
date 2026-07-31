@@ -18,11 +18,14 @@ const manifestPath = path.join(auditRoot, "capture-manifest.json");
 const masksPath = path.join(frontendRoot, "tests", "visual-audit", "jp-ui-06-masks.json");
 const geometryPath = path.join(frontendRoot, "tests", "visual-audit", "jp-ui-06-blueprint-geometry.json");
 
-const FAMILIES = [
+const ALL_FAMILIES = [
   "homepage", "about", "support", "flight-results", "fare-selection",
   "passenger-details", "seat-selection-capability-unavailable", "review",
   "payment", "booking-success", "login", "signup", "manage-booking",
 ];
+
+const WAVE_1_FAMILIES = ["homepage", "about", "support"];
+const FAMILIES = process.env.JP_UI_06_WAVE === "1" ? WAVE_1_FAMILIES : ALL_FAMILIES;
 
 const COMPARISON_MODES = {
   homepage: "exact",
@@ -70,6 +73,38 @@ function maskPercent(masks, page, width, height) {
   let area = 0;
   for (const m of pageMasks) area += m.width * m.height;
   return (area / (width * height)) * 100;
+}
+
+function resolveLandmarkBoxKey(page, element) {
+  if (page === "homepage") {
+    const map = {
+      header: "header",
+      hero: "heroImageBand",
+      "search-panel": "searchPanel",
+      "search-tabs": "searchTabRow",
+      "benefit-strip": "benefitStrip",
+      footer: "footer",
+    };
+    return map[element] ?? null;
+  }
+  const map = {
+    header: "header",
+    footer: "footer",
+    "search-panel": "searchPanel",
+    sidebar: "orderSummary",
+    progress: "progress",
+  };
+  return map[element] ?? null;
+}
+
+function landmarkMismatch(box, landmark) {
+  const tol = landmark.tolerance ?? 2;
+  return (
+    Math.abs(box.x - landmark.x) > tol ||
+    Math.abs(box.y - landmark.y) > tol ||
+    Math.abs(box.width - landmark.width) > tol ||
+    Math.abs(box.height - landmark.height) > tol
+  );
 }
 
 async function sobelEdge(inputPath, outputPath) {
@@ -136,12 +171,10 @@ async function compareFamily(family, masks, geometryLandmarks) {
     const dom = JSON.parse(readFileSync(geomReport, "utf8"));
     const landmarks = geometryLandmarks.filter((l) => l.page === family);
     for (const lm of landmarks) {
-      const key = lm.element === "header" ? "header" : lm.element === "footer" ? "footer" : lm.element === "search-panel" ? "searchPanel" : lm.element === "sidebar" ? "orderSummary" : lm.element === "progress" ? "progress" : null;
+      const key = resolveLandmarkBoxKey(family, lm.element);
       if (!key || !dom.boxes?.[key]) continue;
       const box = dom.boxes[key];
-      if (Math.abs(box.width - lm.width) > lm.tolerance + 2 || Math.abs(box.height - lm.height) > lm.tolerance + 2) {
-        geometryMismatches++;
-      }
+      if (landmarkMismatch(box, lm)) geometryMismatches++;
     }
   }
 

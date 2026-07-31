@@ -134,6 +134,37 @@ export async function waitForFontsAndImages(page: Page): Promise<void> {
 
 export async function captureDomGeometry(page: Page, family: string): Promise<Record<string, unknown>> {
   return page.evaluate((fam) => {
+    const box = (sel: string) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height) };
+    };
+
+    if (fam === "homepage") {
+      const heroBand = box("[data-testid='hero-image-band']");
+      const searchPanel = box("[data-testid='search-module']");
+      const overlapDepth =
+        heroBand && searchPanel ? Math.max(0, heroBand.y + heroBand.height - searchPanel.y) : null;
+      return {
+        family: fam,
+        capturedAt: new Date().toISOString(),
+        boxes: {
+          header: box("header"),
+          heroImageBand: heroBand,
+          heroTextBlock: box("[data-testid='hero-text-block']"),
+          searchDock: box("[data-testid='search-dock']"),
+          searchPanel,
+          searchOverlapDepth: overlapDepth,
+          searchTabRow: box("[data-testid='search-tab-row']"),
+          benefitStrip: box("[data-testid='benefit-strip']"),
+          scrollToDiscover: box("[data-testid='scroll-to-discover']"),
+          firstContentSection: box("[data-testid='routes-section']"),
+          footer: box("footer"),
+        },
+      };
+    }
+
     const selectors: Record<string, string> = {
       header: "header",
       main: "main",
@@ -144,10 +175,7 @@ export async function captureDomGeometry(page: Page, family: string): Promise<Re
     };
     const boxes: Record<string, { x: number; y: number; width: number; height: number } | null> = {};
     for (const [key, sel] of Object.entries(selectors)) {
-      const el = document.querySelector(sel);
-      if (!el) { boxes[key] = null; continue; }
-      const r = el.getBoundingClientRect();
-      boxes[key] = { x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height) };
+      boxes[key] = box(sel);
     }
     return { family: fam, capturedAt: new Date().toISOString(), boxes };
   }, family);

@@ -105,4 +105,6 @@ function buildFamilyScenarios(family: (typeof BLUEPRINT_FAMILIES)[number]): JpUi
 }
 
 export const JP_UI_06_SCENARIOS: JpUi06Scenario[] = BLUEPRINT_FAMILIES.flatMap(buildFamilyScenarios);
+export const JP_UI_06_WAVE_1_SCENARIOS = JP_UI_06_SCENARIOS.filter((s) => s.wave === 1);
 export const EXPECTED_SCENARIO_COUNT = JP_UI_06_SCENARIOS.length;
+export const WAVE_1_SCENARIO_COUNT = JP_UI_06_WAVE_1_SCENARIOS.length;

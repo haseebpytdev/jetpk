@@ -20,8 +20,9 @@ test("Laravel validation errors render on the homepage search form", async ({ pa
 
   await page.goto("/", { waitUntil: "load" });
   await page.getByRole("tab", { name: "One Way" }).click();
-  await page.getByLabel("Departure").fill(tomorrowIso());
-  await page.getByRole("button", { name: "Search Flights" }).click();
+  const searchModule = page.getByTestId("search-module");
+  await searchModule.getByRole("textbox", { name: "Departure" }).filter({ visible: true }).fill(tomorrowIso());
+  await searchModule.getByRole("button", { name: "Search Flights" }).click();
 
   await expect(page.getByTestId("search-submit-status")).toContainText(/invalid/i);
   await expect(page.getByTestId("search-module").getByRole("status")).toContainText(/depart field is required/i);

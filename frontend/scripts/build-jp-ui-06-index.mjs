@@ -48,6 +48,7 @@ async function buildContactSheet(wave, families, compare) {
 }
 
 async function main() {
+  const waveOnly = process.env.JP_UI_06_WAVE === "1" ? 1 : null;
   const compare = existsSync(path.join(auditRoot, "comparison-summary.json"))
     ? JSON.parse(readFileSync(path.join(auditRoot, "comparison-summary.json"), "utf8"))
     : { results: [] };
@@ -55,6 +56,7 @@ async function main() {
 
   let rows = "";
   for (const [wave, families] of Object.entries(WAVE_FAMILIES)) {
+    if (waveOnly && Number(wave) !== waveOnly) continue;
     for (const family of families) {
       const r = compareMap[family] ?? {};
       const shot = path.join(auditRoot, `${family}-canonical-light-desktop.png`);

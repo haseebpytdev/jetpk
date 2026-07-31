@@ -20,7 +20,7 @@ test("homepage loads with full hero and search shell", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
   await expect(page.getByRole("heading", { level: 1, name: /Explore the world with/i })).toBeVisible();
-  await expect(page.getByTestId("search-module")).toHaveAttribute("data-search-layout", "compact");
+  await expect(page.getByTestId("search-module")).toHaveAttribute("data-search-layout", "blueprint");
   await expect(page.getByRole("heading", { name: "Destinations on the Rise" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Why JetPakistan" })).toBeVisible();
   await expect(page.getByRole("banner")).toBeVisible();
@@ -48,8 +48,9 @@ test("one way tab submits to Laravel search-init when departure is set", async (
 
   await page.goto("/", { waitUntil: "load" });
   await page.getByRole("tab", { name: "One Way" }).click();
-  await page.getByLabel("Departure").fill(tomorrowIso());
-  await page.getByRole("button", { name: "Search Flights" }).click();
+  const searchModule = page.getByTestId("search-module");
+  await searchModule.getByRole("textbox", { name: "Departure" }).filter({ visible: true }).fill(tomorrowIso());
+  await searchModule.getByRole("button", { name: "Search Flights" }).click();
 
   await expect.poll(() => initRequested).toBe(true);
 });
@@ -116,6 +117,20 @@ test("group ticketing tab renders Laravel search fields only", async ({ page }) 
   await expect(page.getByRole("button", { name: "Travelers and cabin" })).toHaveCount(0);
 });
 
+test("airport swap exchanges origin and destination", async ({ page }) => {
+  await page.goto("/", { waitUntil: "load" });
+
+  const fromField = page.getByRole("combobox", { name: "From" });
+  const toField = page.getByRole("combobox", { name: "To" });
+  const fromBefore = await fromField.inputValue();
+  const toBefore = await toField.inputValue();
+
+  await page.getByRole("button", { name: "Swap origin and destination" }).click();
+
+  await expect(fromField).not.toHaveValue(fromBefore);
+  await expect(toField).not.toHaveValue(toBefore);
+});
+
 test("airport picker supports keyboard selection", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
@@ -143,7 +158,7 @@ test("mobile homepage search layout remains usable", async ({ page }) => {
   await expect(page.getByTestId("search-module")).toBeVisible();
   await expect(page.getByRole("tab", { name: "One Way" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Group Ticketing" })).toBeVisible();
-  await expect(page.getByLabel("From")).toBeVisible();
+  await expect(page.getByTestId("search-module").locator(".lg\\:hidden").getByLabel("From")).toBeVisible();
 });
 
 test("reduced motion homepage disables flight-path animation", async ({ page }) => {
