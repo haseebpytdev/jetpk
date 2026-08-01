@@ -377,6 +377,7 @@ Architecture §11 requires that each adapted file be recorded. No file has been 
 | `components/OrderSummary.js` | `PublicBookingSummary.tsx` | Sticky summary sidebar layout | Line-item rhythm, total row | Props-only API; no baked-in route/prices | LHE→JED, PKR totals, inert CTA | visual lab screenshots |
 | `components/PageHero.js` | `cms-theme-v2/components/CmsHero.tsx` | Hero anatomy | Eyebrow, title, body, actions | CMS block with URL validation | Hardcoded copy | `jp-public-next-theme-02.spec.ts` |
 | `app/preview/page.js` | `app/dev/jetpk-theme-lab/page.tsx` | Development component catalog | Section organization idea | Fresh implementation; production gate; noindex | Mockup PNG list; fixture PNRs/prices | `jp-public-next-theme-02.visual.spec.ts` |
+| `app/page.js` | `app/dev/jetpk-homepage-v2/page.tsx` | Direct Mock Shell homepage port | Section hierarchy, search dock, card grids | Scoped `homepage-shell.css`; mockup literals in dev fixtures only | Operational links/actions | `jp-public-next-theme-03b.visual.spec.ts` |
 
 ---
 

@@ -42,6 +42,7 @@ Next.js structural facts:
 | Route | Source | Indexing | Notes |
 |---|---|---|---|
 | `/__dev/jetpk-theme-lab` (rewrite → `/dev/jetpk-theme-lab`) | `frontend/app/dev/jetpk-theme-lab/page.tsx` | `noindex,nofollow` | Phase B visual lab; gated by `isThemeLabAllowed()`; not in navigation or sitemap; **not counted** in the planned production target of **65** routes |
+| `/__dev/jetpk-homepage-v2` (rewrite → `/dev/jetpk-homepage-v2`) | `frontend/app/dev/jetpk-homepage-v2/page.tsx` | `noindex,nofollow` | Phase 03B static homepage shell parity; gated; excluded from sitemap/nav |
 
 Command used for Laravel figures:
 

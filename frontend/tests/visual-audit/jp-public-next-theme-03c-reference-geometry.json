@@ -1,0 +1,117 @@
+{
+  "viewport": {
+    "width": 1122,
+    "height": 1330
+  },
+  "tolerances": {
+    "pageHeight": 8,
+    "footer": 8,
+    "search": 8,
+    "headerHero": 8,
+    "remaining": 12
+  },
+  "landmarks": {
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1122,
+      "height": 33,
+      "right": 1122,
+      "bottom": 33
+    },
+    "hero": {
+      "x": 0,
+      "y": 33,
+      "width": 1122,
+      "height": 238,
+      "right": 1122,
+      "bottom": 271
+    },
+    "search": {
+      "x": 79,
+      "y": 215,
+      "width": 965,
+      "height": 107,
+      "right": 1044,
+      "bottom": 322
+    },
+    "benefits": {
+      "x": 79,
+      "y": 339,
+      "width": 965,
+      "height": 33,
+      "right": 1044,
+      "bottom": 372
+    },
+    "discover": {
+      "x": 79,
+      "y": 382,
+      "width": 965,
+      "height": 50,
+      "right": 1044,
+      "bottom": 432
+    },
+    "destinations": {
+      "x": 79,
+      "y": 448,
+      "width": 965,
+      "height": 201,
+      "right": 1044,
+      "bottom": 649
+    },
+    "offers": {
+      "x": 79,
+      "y": 668,
+      "width": 965,
+      "height": 155,
+      "right": 1044,
+      "bottom": 823
+    },
+    "why": {
+      "x": 79,
+      "y": 842,
+      "width": 965,
+      "height": 94,
+      "right": 1044,
+      "bottom": 936
+    },
+    "support": {
+      "x": 79,
+      "y": 943,
+      "width": 965,
+      "height": 65,
+      "right": 1044,
+      "bottom": 1008
+    },
+    "inspiration": {
+      "x": 79,
+      "y": 1021,
+      "width": 965,
+      "height": 174,
+      "right": 1044,
+      "bottom": 1195
+    },
+    "footer": {
+      "x": 0,
+      "y": 1195,
+      "width": 1122,
+      "height": 135,
+      "right": 1122,
+      "bottom": 1330
+    }
+  },
+  "pageHeight": 1330,
+  "sectionOrder": [
+    "header",
+    "hero",
+    "search",
+    "benefits",
+    "discover",
+    "destinations",
+    "offers",
+    "why",
+    "support",
+    "inspiration",
+    "footer"
+  ]
+}
