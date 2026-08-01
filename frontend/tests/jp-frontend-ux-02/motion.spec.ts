@@ -64,7 +64,7 @@ test.describe("JP-FRONTEND-UX-02 motion", () => {
 
     const result = await page.evaluate(() => {
       class BrokenIntersectionObserver {
-        observe() {
+        observe(_target: Element) {
           throw new Error("observer registration failed");
         }
         unobserve() {}
