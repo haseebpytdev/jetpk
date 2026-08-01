@@ -1,7 +1,7 @@
 # JP-PUBLIC-NEXT-FRONTEND-03 — Final Combined Merge Gate
 
-**Phase:** JP-PUBLIC-NEXT-FRONTEND-03  
-**Branch:** `phase/jetpk-public-next-frontend-final-gate`  
+**Phase:** JP-PUBLIC-NEXT-FRONTEND-03
+**Branch:** `phase/jetpk-public-next-frontend-final-gate`
 **Objective:** Release-candidate merge gate verifying accepted frontend + UX work against `jetpk/main` baseline.
 
 ## SHAs
