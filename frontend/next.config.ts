@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: "/__dev/jetpk-theme-lab",
+        destination: "/dev/jetpk-theme-lab",
+      },
+      {
         source: "/laravel/:path*",
         destination: `${laravelProxyTarget}/:path*`,
       },

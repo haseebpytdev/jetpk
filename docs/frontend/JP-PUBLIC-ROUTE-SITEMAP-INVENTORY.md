@@ -37,6 +37,12 @@ Next.js structural facts:
 - Route groups `(public)` and `(auth)` do **not** appear in URLs
 - No catch-all `[...slug]` or optional catch-all segments
 
+### Development-only routes (excluded from production route count)
+
+| Route | Source | Indexing | Notes |
+|---|---|---|---|
+| `/__dev/jetpk-theme-lab` (rewrite → `/dev/jetpk-theme-lab`) | `frontend/app/dev/jetpk-theme-lab/page.tsx` | `noindex,nofollow` | Phase B visual lab; gated by `isThemeLabAllowed()`; not in navigation or sitemap; **not counted** in the planned production target of **65** routes |
+
 Command used for Laravel figures:
 
 ```powershell

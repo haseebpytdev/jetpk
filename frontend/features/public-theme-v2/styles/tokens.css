@@ -1,0 +1,161 @@
+/* JetPakistan public theme V2 — scoped tokens (isolated from global tokens.css) */
+
+.jp-theme-v2,
+.jp-theme-v2[data-jp-theme="light"] {
+  color-scheme: light;
+
+  /* Brand greens */
+  --jp-v2-brand: #0a6b38;
+  --jp-v2-brand-hover: #055a2e;
+  --jp-v2-brand-active: #044a28;
+  --jp-v2-brand-soft: #e8f4ed;
+  --jp-v2-brand-2: #3aad2a;
+  --jp-v2-brand-dark: #055a2e;
+
+  /* Surfaces */
+  --jp-v2-bg: #f3f8f5;
+  --jp-v2-surface: #ffffff;
+  --jp-v2-surface-soft: #edf5f0;
+  --jp-v2-surface-strong: #dcece4;
+  --jp-v2-surface-muted: #f7faf8;
+  --jp-v2-surface-elevated: #ffffff;
+  --jp-v2-input-bg: #ffffff;
+  --jp-v2-footer-bg: #065a32;
+  --jp-v2-footer-bg-end: #044528;
+  --jp-v2-footer-text: #f0faf4;
+  --jp-v2-footer-text-muted: #c5e0d0;
+  --jp-v2-footer-heading: #ffffff;
+
+  /* Text */
+  --jp-v2-text: #0f231c;
+  --jp-v2-text-muted: #4f6b60;
+  --jp-v2-text-subtle: #6b8579;
+  --jp-v2-text-inverse: #ffffff;
+
+  /* Borders */
+  --jp-v2-border: #cdded5;
+  --jp-v2-border-strong: #a8c4b6;
+
+  /* Focus */
+  --jp-v2-focus: var(--jp-v2-brand);
+  --jp-v2-focus-ring: 0 0 0 3px color-mix(in srgb, var(--jp-v2-focus) 32%, transparent);
+
+  /* Status */
+  --jp-v2-success: #1f7a32;
+  --jp-v2-success-soft: #e6f4ea;
+  --jp-v2-warning: #9a4f0a;
+  --jp-v2-warning-soft: #fef3c7;
+  --jp-v2-error: #b91c1c;
+  --jp-v2-error-soft: #fde8e8;
+  --jp-v2-info: #0c6b82;
+  --jp-v2-info-soft: #e0f4fa;
+
+  /* Typography */
+  --jp-v2-font-sans: var(--font-body, system-ui, -apple-system, "Segoe UI", sans-serif);
+  --jp-v2-font-display: var(--font-display, var(--jp-v2-font-sans));
+  --jp-v2-text-xs: 0.8125rem;
+  --jp-v2-text-sm: 0.875rem;
+  --jp-v2-text-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  --jp-v2-text-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --jp-v2-text-xl: clamp(1.1875rem, 1.1rem + 0.4vw, 1.3125rem);
+  --jp-v2-heading-sm: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
+  --jp-v2-heading-md: clamp(1.5rem, 1.25rem + 0.9vw, 1.875rem);
+  --jp-v2-heading-lg: clamp(1.875rem, 1.5rem + 1.4vw, 2.375rem);
+  --jp-v2-heading-xl: clamp(2.25rem, 1.75rem + 2vw, 3.25rem);
+  --jp-v2-card-title: clamp(1.0625rem, 1rem + 0.25vw, 1.25rem);
+  --jp-v2-leading-tight: 1.2;
+  --jp-v2-leading-normal: 1.55;
+  --jp-v2-leading-relaxed: 1.7;
+
+  /* Spacing */
+  --jp-v2-space-xs: 0.25rem;
+  --jp-v2-space-sm: 0.5rem;
+  --jp-v2-space-md: 1rem;
+  --jp-v2-space-lg: 1.5rem;
+  --jp-v2-space-xl: 2rem;
+  --jp-v2-space-2xl: 2.75rem;
+  --jp-v2-space-3xl: 3.5rem;
+  --jp-v2-section-y: clamp(2rem, 3vw, 2.75rem);
+
+  /* Layout */
+  --jp-v2-container: min(75rem, 100% - 2.5rem);
+  --jp-v2-container-narrow: min(44rem, 100% - 2.5rem);
+  --jp-v2-container-wide: min(82rem, 100% - 2.5rem);
+
+  /* Radii */
+  --jp-v2-radius-sm: 0.625rem;
+  --jp-v2-radius: 1rem;
+  --jp-v2-radius-lg: 1.25rem;
+  --jp-v2-radius-full: 9999px;
+
+  /* Shadows */
+  --jp-v2-shadow-sm: 0 1px 3px rgba(15, 35, 28, 0.06), 0 1px 2px rgba(15, 35, 28, 0.04);
+  --jp-v2-shadow: 0 4px 20px rgba(15, 35, 28, 0.08), 0 2px 6px rgba(15, 35, 28, 0.04);
+  --jp-v2-shadow-lg: 0 12px 40px rgba(15, 35, 28, 0.1), 0 4px 12px rgba(15, 35, 28, 0.05);
+
+  /* Controls — 44px minimum touch target */
+  --jp-v2-control-h: 2.75rem;
+  --jp-v2-control-h-sm: 2.75rem;
+  --jp-v2-icon-btn-size: 2.75rem;
+  --jp-v2-header-h: 4.5rem;
+  --jp-v2-header-h-mobile: 3.75rem;
+
+  /* Motion */
+  --jp-v2-duration-fast: 150ms;
+  --jp-v2-duration: 220ms;
+  --jp-v2-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jp-theme-v2[data-jp-theme="dark"] {
+  color-scheme: dark;
+
+  --jp-v2-brand: #5fc947;
+  --jp-v2-brand-hover: #7ad45f;
+  --jp-v2-brand-active: #4db838;
+  --jp-v2-brand-soft: #152a1e;
+  --jp-v2-brand-2: #7ad45f;
+  --jp-v2-brand-dark: #3da832;
+
+  --jp-v2-bg: #07120e;
+  --jp-v2-surface: #0f2119;
+  --jp-v2-surface-soft: #152a20;
+  --jp-v2-surface-strong: #1c3529;
+  --jp-v2-surface-muted: #0c1a14;
+  --jp-v2-surface-elevated: #12261c;
+  --jp-v2-input-bg: #0c1a14;
+  --jp-v2-footer-bg: #043820;
+  --jp-v2-footer-bg-end: #032a18;
+  --jp-v2-footer-text: #e8f5ee;
+  --jp-v2-footer-text-muted: #a8c9b8;
+  --jp-v2-footer-heading: #f5fff9;
+
+  --jp-v2-text: #eef8f2;
+  --jp-v2-text-muted: #a8c0b4;
+  --jp-v2-text-subtle: #7d9a8c;
+  --jp-v2-text-inverse: #07120e;
+
+  --jp-v2-border: #2a4a3a;
+  --jp-v2-border-strong: #3a5f4a;
+
+  --jp-v2-focus-ring: 0 0 0 3px color-mix(in srgb, var(--jp-v2-brand) 40%, transparent);
+
+  --jp-v2-success: #5fd47a;
+  --jp-v2-success-soft: #142a1c;
+  --jp-v2-warning: #f0b429;
+  --jp-v2-warning-soft: #2a2010;
+  --jp-v2-error: #f87171;
+  --jp-v2-error-soft: #2a1414;
+  --jp-v2-info: #5ec8e0;
+  --jp-v2-info-soft: #0f2228;
+
+  --jp-v2-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --jp-v2-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --jp-v2-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-theme-v2 {
+    --jp-v2-duration-fast: 0ms;
+    --jp-v2-duration: 0ms;
+  }
+}

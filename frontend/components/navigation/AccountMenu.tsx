@@ -4,6 +4,7 @@ import { Dropdown } from "@/components/ui/Dropdown";
 import { logout } from "@/features/auth/services/auth-service";
 import { cn } from "@/lib/cn";
 import type { PublicSession } from "@/types/session";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -19,7 +20,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
 
   if (session.status === "anonymous") {
     return (
-      <a
+      <Link
         href="/login"
         className={cn(
           compact ? "text-jp-sm font-semibold text-jp-text" : undefined,
@@ -29,7 +30,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
         )}
       >
         {compact ? "Account" : "Log in / Sign up"}
-      </a>
+      </Link>
     );
   }
 
