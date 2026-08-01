@@ -47,6 +47,25 @@ export function FlightResultsPage() {
 
   const selection = useOfferSelection(results.resolvedSearchId ?? searchId ?? "");
 
+  const handleSelectOffer = useCallback(
+    (offer: import("../types").FlightOffer, fareOptionKey: string) => {
+      const branded = offer.branded_fares_display_options ?? offer.fare_family_options_display ?? [];
+      const hasBranded = branded.length > 1 || (offer.has_branded_fares && branded.length > 0);
+      const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
+      if (hasBranded && resolvedSearchId) {
+        const query = new URLSearchParams({
+          search_id: resolvedSearchId,
+          offer_id: offer.offer_id,
+          fare_option_key: fareOptionKey,
+        });
+        router.push(`/flights/fare-selection?${query.toString()}`);
+        return;
+      }
+      void selection.selectOffer(offer, fareOptionKey);
+    },
+    [results.resolvedSearchId, router, searchId, selection],
+  );
+
   const syncUrl = useCallback(
     (nextFilters: typeof filters, nextSort: UiSortKey) => {
       const next = new URLSearchParams(params);
@@ -183,7 +202,7 @@ export function FlightResultsPage() {
                         offer={offer}
                         searchId={results.resolvedSearchId ?? ""}
                         selecting={selection.selectingId === offer.offer_id}
-                        onSelect={selection.selectOffer}
+                        onSelect={handleSelectOffer}
                         onOpenDetails={openDetails}
                       />
                     </div>

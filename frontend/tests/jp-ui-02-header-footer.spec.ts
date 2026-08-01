@@ -10,7 +10,7 @@ test("header exposes theme switch and authoritative navigation", async ({ page }
 
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
   await expect(page.getByTestId("theme-switch")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Book Now" })).toHaveAttribute("href", "/flights");
+  await expect(page.getByRole("link", { name: "Book Now" })).toHaveAttribute("href", "/#flight-search");
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
 });
 

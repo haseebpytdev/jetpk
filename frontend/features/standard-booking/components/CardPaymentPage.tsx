@@ -142,11 +142,15 @@ export function CardPaymentPage() {
 }
 
 export function PaymentStatusPage({ reference }: { reference?: string }) {
-  const { data, loading, error } = useBookingStatusPoll({ mode: "payment", reference });
+  const { data, loading, error, polling, timedOut, reload } = useBookingStatusPoll({ mode: "payment", reference });
   const payload = data as import("../types/review-payment").PaymentStatusResponse | null;
 
-  if (loading) {
-    return <p className="p-8 text-jp-sm text-jp-muted">Verifying payment…</p>;
+  if (loading && !payload) {
+    return (
+      <div className="p-8" aria-busy="true" aria-label="Verifying payment" role="status">
+        <p className="text-jp-sm text-jp-muted">Verifying payment…</p>
+      </div>
+    );
   }
 
   if (!payload?.ok) {
@@ -159,9 +163,18 @@ export function PaymentStatusPage({ reference }: { reference?: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8" data-testid="payment-status-page" aria-live="polite">
+    <div className="mx-auto max-w-3xl px-4 py-8" data-testid="payment-status-page" aria-live="polite" aria-busy={polling}>
       <h1 className="text-2xl font-semibold text-jp-text">Payment status</h1>
       <p className="mt-1 text-jp-sm text-jp-muted">Reference: {payload.booking_reference ?? "—"}</p>
+      {polling ? <p className="mt-2 text-jp-sm text-jp-muted" role="status">Checking for updates…</p> : null}
+      {timedOut ? (
+        <div className="mt-4 rounded-jp-md border border-amber-300 bg-amber-50 p-3 text-jp-sm text-amber-950" role="alert">
+          <p>{error}</p>
+          <button type="button" className="mt-2 font-semibold underline" onClick={() => void reload()}>
+            Refresh status
+          </button>
+        </div>
+      ) : null}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <article className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">

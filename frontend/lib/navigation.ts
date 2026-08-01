@@ -5,8 +5,7 @@ export const primaryNavigation: NavItem[] = [
     type: "dropdown",
     label: "Flights",
     items: [
-      { label: "Search Flights", href: "/", description: "Compare fares across airlines" },
-      { label: "Flight Status", href: "/faq", description: "Common booking and travel questions" },
+      { label: "Search Flights", href: "/#flight-search", description: "Compare fares across airlines" },
       { label: "Manage Booking", href: "/lookup-booking", description: "Retrieve an existing booking" },
     ],
   },
@@ -45,7 +44,6 @@ export const footerColumns: FooterColumn[] = [
       { label: "Contact Us", href: "/contact" },
       { label: "FAQ", href: "/faq" },
       { label: "Manage Booking", href: "/lookup-booking" },
-      { label: "Baggage Information", href: "/faq" },
     ],
   },
   {

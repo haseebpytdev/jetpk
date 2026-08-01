@@ -10,7 +10,7 @@ type PublicPageHeroProps = {
 
 export function PublicPageHero({ hero, id = "page-hero-heading", className, children }: PublicPageHeroProps) {
   return (
-    <header className={cn("relative overflow-hidden rounded-jp-xl border border-jp-border bg-gradient-to-br from-[#f4f9fd] via-white to-jp-page p-jp-2xl shadow-jp-card", className)}>
+    <header className={cn("jp-page-hero relative overflow-hidden rounded-jp-xl border border-jp-border bg-gradient-to-br from-[#edf7f2] via-white to-jp-page p-jp-2xl shadow-jp-card", className)}>
       <div className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-jp-primary/10 blur-3xl" aria-hidden="true" />
       <div className="relative max-w-3xl">
         {hero.kicker ? (

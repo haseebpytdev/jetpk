@@ -115,7 +115,7 @@ export function BookingProgress({
                   <span
                     aria-hidden="true"
                     className={cn(
-                      "h-0.5 flex-1",
+                      "jp-progress-fill h-0.5 flex-1",
                       step.state === "upcoming" ? "bg-jp-border" : "bg-jp-primary",
                     )}
                   />
@@ -127,7 +127,7 @@ export function BookingProgress({
                   <span
                     aria-hidden="true"
                     className={cn(
-                      "h-0.5 flex-1",
+                      "jp-progress-fill h-0.5 flex-1",
                       visible[index + 1]?.state === "upcoming" ? "bg-jp-border" : "bg-jp-primary",
                     )}
                   />

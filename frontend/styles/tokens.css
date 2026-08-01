@@ -4,12 +4,12 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  /* Brand */
-  --jp-brand: #63b32e;
-  --jp-brand-hover: #4f9423;
-  --jp-brand-active: #3f7820;
-  --jp-brand-soft: #eef6e8;
-  --jp-brand-border: #c5deb3;
+  /* Brand — forest green (UI kit v2.0.1 / mockup authority) */
+  --jp-brand: #08733f;
+  --jp-brand-hover: #075c35;
+  --jp-brand-active: #064a2b;
+  --jp-brand-soft: #eaf7ef;
+  --jp-brand-border: #b8dcc8;
 
   /* Legacy aliases (JP-FE-01) */
   --jp-primary: var(--jp-brand);
@@ -33,7 +33,7 @@
   --jp-surface-raised: #ffffff;
   --jp-surface-muted: #f6fafc;
   --jp-surface-inverse: #0b1d2a;
-  --jp-footer-bg: #006837;
+  --jp-footer-bg: #00562f;
 
   /* Typography colors */
   --jp-text: #0b1d2a;
@@ -155,21 +155,25 @@
   --jp-sidebar-width: 15rem;
 
   /* Motion */
-  --jp-motion-fast: 120ms;
-  --jp-motion-standard: 180ms;
+  --jp-motion-instant: 100ms;
+  --jp-motion-fast: 160ms;
+  --jp-motion-standard: 230ms;
+  --jp-motion-emphasized: 340ms;
+  --jp-motion-route: 240ms;
   --jp-motion-slow: 280ms;
   --jp-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --jp-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --jp-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --jp-brand: #7cc94a;
-  --jp-brand-hover: #8fd65f;
-  --jp-brand-active: #6ab83e;
-  --jp-brand-soft: #1a2e14;
-  --jp-brand-border: #3d5c2e;
+  --jp-brand: #3cb371;
+  --jp-brand-hover: #4fd484;
+  --jp-brand-active: #2e9d5f;
+  --jp-brand-soft: #153a29;
+  --jp-brand-border: #2a5c42;
 
   --jp-accent: #2ec4c3;
   --jp-accent-hover: #45d4d3;
