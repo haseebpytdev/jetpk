@@ -1,8 +1,8 @@
 # JP-FULL-NEXT-FRONTEND — Integration Readiness Summary
 
-**Phase:** JP-FULL-NEXT-FRONTEND-01C  
-**Branch:** `phase/jetpk-full-next-frontend-ui-integration`  
-**Visual status:** MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH  
+**Phase:** JP-FULL-NEXT-FRONTEND-01C
+**Branch:** `phase/jetpk-full-next-frontend-ui-integration`
+**Visual status:** MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH
 **Commit status:** Awaiting authorization — **not committed**
 
 ## Objective

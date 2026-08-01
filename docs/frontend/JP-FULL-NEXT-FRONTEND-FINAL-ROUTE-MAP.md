@@ -1,8 +1,8 @@
 # JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**  
-Visual status: **MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH**  
-Branch: `phase/jetpk-full-next-frontend-ui-integration`  
+Phase: **JP-FULL-NEXT-FRONTEND-01C**
+Visual status: **MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH**
+Branch: `phase/jetpk-full-next-frontend-ui-integration`
 Machine-readable: [JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.json](./JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.json)
 
 ## Why count = 67
@@ -47,5 +47,5 @@ See [JP-FULL-NEXT-FRONTEND-PAGE-COMPOSITION-COVERAGE.md](./JP-FULL-NEXT-FRONTEND
 
 ## Progress stepper (standard booking)
 
-`Search → Results → Fare Selection → Travelers → Review → Payment → Success`  
+`Search → Results → Fare Selection → Travelers → Review → Payment → Success`
 Seats omitted when Laravel marks `seat_extras` skipped.

@@ -1,6 +1,6 @@
 # JP-FULL-NEXT-FRONTEND-VISUAL-ACCEPTANCE-REPORT
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**  
+Phase: **JP-FULL-NEXT-FRONTEND-01C**
 **Status: MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH**
 
 ## Decision
@@ -17,10 +17,10 @@ No further full visual-parity campaign is in scope for 01C.
 
 ## Evidence captured (01B — retained as reference)
 
-Capture root: `frontend/.visual-audit/jp-full-next-frontend/`  
+Capture root: `frontend/.visual-audit/jp-full-next-frontend/`
 Compare root: `frontend/.visual-audit/jp-full-next-frontend/compare/`
 
-12 supported mockup families captured at desktop/tablet/mobile, light/dark (72 screenshots).  
+12 supported mockup families captured at desktop/tablet/mobile, light/dark (72 screenshots).
 Seat Selection (13th reference): **DEFERRED** — `seat_map_available=false`, no production route.
 
 ## 01C safety verification (no pixel-diff)

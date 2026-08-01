@@ -1,7 +1,7 @@
 # JP-FULL-NEXT-FRONTEND — Deferred Visual Polish
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**  
-Status: **MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH**  
+Phase: **JP-FULL-NEXT-FRONTEND-01C**
+Status: **MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH**
 Baseline frozen: forest-green theme, current shell compositions, shared card language
 
 Exact mockup parity is **not** a release blocker for this integration commit. Items below are incremental refinement backlog only.

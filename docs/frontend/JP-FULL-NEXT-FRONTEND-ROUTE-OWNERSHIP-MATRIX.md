@@ -1,6 +1,6 @@
 # JP-FULL-NEXT-FRONTEND-ROUTE-OWNERSHIP-MATRIX
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**  
+Phase: **JP-FULL-NEXT-FRONTEND-01C**
 01C verification: CMS catch-all collision risk mitigated by `isReservedPublicSlug`; payment/booking/auth prefixes reserved; contact canonical at `/contact`.
 
 | Route family | Next owner | Laravel dependency | Blade fallback | CMS collision risk |

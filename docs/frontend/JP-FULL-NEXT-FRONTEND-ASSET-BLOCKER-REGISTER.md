@@ -1,6 +1,6 @@
 # JP-FULL-NEXT-FRONTEND-ASSET-BLOCKER-REGISTER
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**  
+Phase: **JP-FULL-NEXT-FRONTEND-01C**
 Status: **asset backlog** — not blocking integration commit (visual baseline accepted).
 
 | Page | Slot | Needed source | Fallback | Severity |

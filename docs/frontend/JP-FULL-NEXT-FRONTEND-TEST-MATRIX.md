@@ -1,7 +1,7 @@
 # JP-FULL-NEXT-FRONTEND-TEST-MATRIX
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**  
-Branch: `phase/jetpk-full-next-frontend-ui-integration`  
+Phase: **JP-FULL-NEXT-FRONTEND-01C**
+Branch: `phase/jetpk-full-next-frontend-ui-integration`
 Executed: 2026-08-01
 
 ## Build gates

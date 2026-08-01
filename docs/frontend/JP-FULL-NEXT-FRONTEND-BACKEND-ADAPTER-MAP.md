@@ -1,6 +1,6 @@
 # JP-FULL-NEXT-FRONTEND-BACKEND-ADAPTER-MAP
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**  
+Phase: **JP-FULL-NEXT-FRONTEND-01C**
 All adapters verified unchanged; presentation frozen at accepted baseline.
 
 | Domain | Adapter location | Laravel contract |

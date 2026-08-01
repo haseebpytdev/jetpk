@@ -1,6 +1,6 @@
 # JP-FULL-NEXT-FRONTEND-UI-KIT-INTEGRATION-MAP
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**  
+Phase: **JP-FULL-NEXT-FRONTEND-01C**
 Visual status: **MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH** — kit mapping frozen; no further composition rebuild in this phase.
 
 ## Source → target
