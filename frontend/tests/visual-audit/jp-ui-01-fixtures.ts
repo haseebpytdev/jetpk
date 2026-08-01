@@ -357,6 +357,26 @@ export async function setupScenarioMocks(page: Page, setup: VisualAuditScenario[
     case "results-branded":
       await setupResultsMocks(page, true);
       break;
+    case "fare-selection":
+      await page.route("**/laravel/flights/results/offer?**", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            success: true,
+            search_id: MOCK_SEARCH_ID,
+            offer_id: "audit-offer-1",
+            offer: {
+              ...mockOffer(true),
+              branded_fares_display_options: [
+                { option_key: "economy-saver", brand_name: "Economy Saver", price_display: "114,999 PKR" },
+                { option_key: "economy-flex", brand_name: "Economy Flex", price_display: "129,999 PKR" },
+              ],
+            },
+          }),
+        });
+      });
+      break;
     case "passengers":
       await page.route("**/laravel/booking/passengers?**", async (route) => {
         await route.fulfill({

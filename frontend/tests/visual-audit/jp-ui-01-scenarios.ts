@@ -11,7 +11,7 @@ export type VisualAuditScenario = {
   fullPage: boolean;
   waitForTestId?: string;
   zoom?: number;
-  setup?: "public" | "results" | "results-branded" | "passengers" | "review" | "payment" | "confirmation" | "lookup" | "auth";
+  setup?: "public" | "results" | "results-branded" | "fare-selection" | "passengers" | "review" | "payment" | "confirmation" | "lookup" | "auth";
 };
 
 export type ViewportSpec = {

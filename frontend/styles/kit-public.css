@@ -1,0 +1,100 @@
+/* JetPakistan UI kit public layout primitives — adapted from kit v2.0.1 globals.css */
+
+.jp-container {
+  width: min(calc(100% - 32px), var(--jp-maxw));
+  margin-inline: auto;
+}
+
+.jp-page {
+  min-height: 100vh;
+}
+
+.jp-main {
+  min-height: 65vh;
+}
+
+.jp-booking-shell {
+  padding: 28px 0 48px;
+}
+
+.jp-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0 28px;
+}
+
+.jp-booking-grid {
+  display: grid;
+  grid-template-columns: 1fr 330px;
+  gap: 22px;
+}
+
+.jp-summary {
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-card-radius);
+  padding: 18px;
+  height: max-content;
+  position: sticky;
+  top: calc(var(--jp-nav-height) + 1rem);
+}
+
+.jp-results-hero {
+  background: linear-gradient(90deg, var(--jp-brand-soft) 0 37%, transparent 66%);
+  padding: 30px 0 84px;
+}
+
+.jp-page-hero {
+  background: linear-gradient(135deg, var(--jp-brand-soft), color-mix(in srgb, var(--jp-brand-soft) 60%, var(--jp-bg)));
+  padding: 48px 0;
+}
+
+.jp-form-card {
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-card-radius);
+  padding: 24px;
+  box-shadow: var(--jp-shadow-card);
+}
+
+.jp-auth {
+  min-height: calc(100vh - var(--jp-nav-height));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.jp-portal {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  background: var(--jp-bg-subtle);
+}
+
+@media (max-width: 900px) {
+  .jp-booking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .jp-summary {
+    position: static;
+  }
+
+  .jp-auth {
+    grid-template-columns: 1fr;
+  }
+
+  .jp-portal {
+    grid-template-columns: 76px 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .jp-container {
+    width: min(calc(100% - 22px), var(--jp-maxw));
+  }
+
+  .jp-portal {
+    display: block;
+  }
+}

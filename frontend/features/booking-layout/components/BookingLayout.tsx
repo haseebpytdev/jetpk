@@ -10,9 +10,9 @@ type BookingLayoutProps = {
 
 export function BookingLayout({ main, sidebar, mobileSummary, className }: BookingLayoutProps) {
   return (
-    <div className={cn("mt-6", className)}>
+    <div className={cn("jp-booking-shell mt-6", className)}>
       {mobileSummary ? <div className="mb-4 lg:hidden">{mobileSummary}</div> : null}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,22rem)]">
+      <div className="jp-booking-grid grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,22rem)]">
         {main}
         {sidebar ? <div className="hidden lg:block">{sidebar}</div> : null}
       </div>

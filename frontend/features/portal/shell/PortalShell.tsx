@@ -145,7 +145,7 @@ export function PortalShell({
   content: ReactNode;
 }) {
   return (
-    <div className="bg-jp-page" data-testid={testId}>
+    <div className="jp-portal bg-jp-page" data-testid={testId}>
       {topbar}
       {drawer}
       <div className="mx-auto flex max-w-jp-container gap-jp-lg px-jp-xl py-jp-lg">

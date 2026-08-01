@@ -1,13 +1,16 @@
 import { PageContainer } from "@/components/layout/PageContainer";
+import { CmsPageRenderer as CmsV2PageRenderer } from "@/features/cms-theme-v2";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { PublicPageHero } from "./PublicPageHero";
 import type { CmsPublicPage } from "../types";
+import { cmsPublicPageToPayload } from "../utils/cms-v2-bridge";
 
 type CmsPageRendererProps = {
   page: CmsPublicPage;
 };
 
 export function CmsPageRenderer({ page }: CmsPageRendererProps) {
+  const payload = cmsPublicPageToPayload(page);
+
   return (
     <PageContainer className="py-jp-4xl">
       <Breadcrumbs
@@ -16,12 +19,8 @@ export function CmsPageRenderer({ page }: CmsPageRendererProps) {
           { label: page.title },
         ]}
       />
-      <div className="mt-jp-xl space-y-jp-xl">
-        <PublicPageHero hero={{ title: page.title, description: page.subtitle }} />
-        <article
-          className="prose-jp rounded-jp-xl border border-jp-border bg-jp-surface p-jp-2xl text-jp-body text-jp-muted shadow-jp-card"
-          dangerouslySetInnerHTML={{ __html: page.bodyHtml }}
-        />
+      <div className="mt-jp-xl">
+        <CmsV2PageRenderer page={payload} />
       </div>
     </PageContainer>
   );

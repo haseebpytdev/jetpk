@@ -8,6 +8,7 @@ export const BOOKING_JOURNEY_STEP_LABELS: Record<string, string> = {
   search: "Search",
   results: "Results",
   flight_selected: "Results",
+  fare_selection: "Fare Selection",
   passenger_details: "Travelers",
   seat_extras: "Seats",
   review: "Review",

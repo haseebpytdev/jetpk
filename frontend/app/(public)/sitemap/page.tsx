@@ -8,16 +8,21 @@ type SitemapRoute = {
 };
 
 async function fetchRoutes(): Promise<SitemapRoute[]> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3_000);
   try {
     const response = await fetch(laravelApiPath("/api/public/content/sitemap-routes"), {
       headers: { Accept: "application/json" },
       next: { revalidate: 3600 },
+      signal: controller.signal,
     });
     if (!response.ok) return [];
     const body = (await response.json()) as { routes?: SitemapRoute[] };
     return body.routes ?? [];
   } catch {
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

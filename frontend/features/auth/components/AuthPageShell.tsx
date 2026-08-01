@@ -24,7 +24,7 @@ export function AuthPageShell({
   return (
     <PageContainer className="py-jp-lg sm:py-jp-xl">
       <div
-        className="grid items-stretch gap-jp-lg lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-jp-xl"
+        className="jp-auth grid items-stretch gap-jp-lg lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-jp-xl"
         data-testid="auth-page-shell"
       >
         <div className="order-2 lg:order-1">

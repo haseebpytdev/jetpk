@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "start:smoke": "next start -H 127.0.0.1 -p 3002",
+    "start:smoke": "node scripts/start-smoke.mjs",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test:smoke": "npm run build && playwright test -c playwright.config.ts",
@@ -20,7 +20,11 @@
     "audit:visual:jp-ui-04a": "node scripts/capture-jp-ui-04a.mjs",
     "audit:visual:jp-ui-05": "node scripts/capture-jp-ui-05.mjs",
     "test:theme-02": "npm run build && playwright test tests/jp-public-next-theme-02.spec.ts -c playwright.theme-02.config.ts",
-    "audit:visual:jp-public-next-theme-02": "node scripts/capture-jp-public-next-theme-02.mjs"
+    "audit:visual:jp-public-next-theme-02": "node scripts/capture-jp-public-next-theme-02.mjs",
+    "test:jp-full-next-frontend": "npm run build && playwright test -c playwright.jp-full-next-frontend.config.ts",
+    "test:jp-full-next-frontend:routes-01a": "npm run build && playwright test tests/jp-full-next-frontend-routes.spec.ts -c playwright.jp-full-next-frontend.config.ts",
+    "test:jp-full-next-frontend:visual": "npm run build && playwright test tests/jp-full-next-frontend/visual-capture.spec.ts -c playwright.jp-full-next-frontend.config.ts",
+    "audit:jp-full-next-frontend:visual-compare": "node scripts/compare-jp-full-next-visual.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
