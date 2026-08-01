@@ -20,8 +20,8 @@ export function SearchTabs({ mode, onModeChange, compact = false, variant = "def
       aria-label="Flight search type"
       data-testid={variant === "blueprint" ? "search-tab-row" : undefined}
       className={cn(
-        "flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        variant === "blueprint" && "max-h-9 gap-0 overflow-hidden rounded-t-[1.25rem] border-b border-jp-border bg-jp-surface-muted/90 px-1 pt-1",
+        "flex gap-0.5 overflow-x-auto pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        variant === "blueprint" && "max-h-9 gap-0 overflow-hidden rounded-t-[1.15rem] bg-jp-surface-muted/60 px-1 pt-1",
       )}
     >
       {modes.map((tabMode) => {
@@ -48,7 +48,7 @@ export function SearchTabs({ mode, onModeChange, compact = false, variant = "def
               "focus-visible:outline-none focus-visible:shadow-jp-focus",
               selected
                 ? variant === "blueprint"
-                  ? "border border-b-0 border-jp-border bg-jp-surface text-jp-primary shadow-jp-sm"
+                  ? "border border-b-0 border-jp-border bg-jp-surface text-jp-primary shadow-[0_-2px_8px_rgba(0,0,0,0.04)]"
                   : "bg-jp-primary text-white shadow-jp-sm"
                 : variant === "blueprint"
                   ? "bg-transparent text-jp-muted hover:text-jp-text"

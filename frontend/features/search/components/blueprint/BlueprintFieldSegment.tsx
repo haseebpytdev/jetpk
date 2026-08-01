@@ -12,7 +12,7 @@ type BlueprintFieldSegmentProps = {
 /** Interior segment inside the canonical blueprint search row (divider-separated, no outer card). */
 export function BlueprintFieldSegment({ children, className, widthClass }: BlueprintFieldSegmentProps) {
   return (
-    <div className={cn("min-w-0 px-3 py-2", widthClass, className)}>
+    <div className={cn("min-w-0 border-r border-jp-border/80 px-3 py-2 last:border-r-0", widthClass, className)}>
       {children}
     </div>
   );
@@ -22,7 +22,7 @@ export function BlueprintSearchRow({ children, className }: { children: ReactNod
   return (
     <div
       className={cn(
-        "hidden w-full min-w-0 lg:flex lg:min-h-[4.5rem] lg:items-stretch lg:divide-x lg:divide-jp-border",
+        "hidden w-full min-w-0 lg:flex lg:min-h-[4.75rem] lg:items-stretch",
         className,
       )}
       data-testid="blueprint-search-row-desktop"

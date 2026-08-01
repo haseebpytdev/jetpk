@@ -101,9 +101,9 @@ export function ReturnForm({
               variant="blueprint"
             />
           </BlueprintFieldSegment>
-          <BlueprintFieldSegment widthClass="w-[100px] shrink-0 flex items-end pb-1">
-            <PrimaryButton type="submit" aria-label="Search Flights" className="h-12 w-[100px] shrink-0 px-0 text-jp-sm" disabled={disabled}>
-              {disabled ? "Searching…" : "Search"}
+          <BlueprintFieldSegment widthClass="w-[108px] shrink-0 flex items-end pb-1.5">
+            <PrimaryButton type="submit" aria-label="Search Flights" className="h-11 w-full shrink-0 px-2 text-jp-xs font-semibold" disabled={disabled}>
+              {disabled ? "Searching…" : "Search Flights"}
             </PrimaryButton>
           </BlueprintFieldSegment>
         </BlueprintSearchRow>

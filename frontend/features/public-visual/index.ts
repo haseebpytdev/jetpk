@@ -1,11 +1,15 @@
 export { PublicHero, HomepageFlightPathAccent } from "./hero/PublicHero";
 export { RoutesSection } from "./destinations/RoutesSection";
+export { DestinationsOnTheRiseSection } from "./destinations/DestinationsOnTheRiseSection";
 export { FeaturedOffersSection } from "./offers/FeaturedOffersSection";
+export { OfferCard } from "./offers/OfferCard";
 export { WhyJetPakistanSection } from "./benefits/WhyJetPakistanSection";
 export { PublicSupportBanner } from "./support/PublicSupportBanner";
+export { TravelInspirationSection } from "./inspiration/TravelInspirationSection";
 export { PublicSectionHeader } from "./components/PublicSectionHeader";
 export { BenefitStrip } from "./components/BenefitStrip";
 export { ScrollToDiscover } from "./components/ScrollToDiscover";
+export { AssetSlot } from "./components/AssetSlot";
 export { PublicFaq } from "./components/PublicFaq";
 export type { PublicFaqItem } from "./components/PublicFaq";
 export { HomepageContentService } from "./services/homepage-content-service";

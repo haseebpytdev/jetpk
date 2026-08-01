@@ -1,34 +1,38 @@
+import { allowContentFixtures } from "@/features/public-content/utils/content-policy";
 import {
+  DestinationsOnTheRiseSection,
   FeaturedOffersSection,
   HomepageContentService,
   HomepageFlightPathAccent,
   PublicHero,
   PublicSupportBanner,
-  RoutesSection,
   ScrollToDiscover,
+  TravelInspirationSection,
   WhyJetPakistanSection,
 } from "@/features/public-visual";
 
 export async function HomepageContent() {
   const content = await HomepageContentService.getHomepage();
+  const showInspiration =
+    content.source === "fixture" &&
+    allowContentFixtures() &&
+    content.inspiration.enabled &&
+    content.inspiration.items.length > 0;
 
   return (
-    <>
-      <div data-testid="homepage-content">
-        <PublicHero
-          hero={content.hero}
-          trustChips={content.trustChips}
-          fallbackImage={HomepageContentService.heroFallbackImage}
-        />
-        <div className="flex flex-col" data-testid="homepage-discovery-bridge">
-          <ScrollToDiscover />
-          <HomepageFlightPathAccent />
-        </div>
-        <RoutesSection {...content.routes} sectionClassName="pt-jp-sm pb-jp-3xl sm:pt-jp-md lg:pt-0 lg:pb-jp-3xl" />
-        <FeaturedOffersSection {...content.featuredDeals} />
-        <WhyJetPakistanSection {...content.whyBook} />
-        <PublicSupportBanner support={content.supportCta} />
+    <div data-testid="homepage-content">
+      <PublicHero hero={content.hero} trustChips={content.trustChips} />
+
+      <div className="relative">
+        <ScrollToDiscover className="mt-3" />
+        <HomepageFlightPathAccent className="pointer-events-none absolute left-1/2 top-0 h-px w-px -translate-x-1/2 overflow-hidden opacity-0" />
       </div>
-    </>
+
+      <DestinationsOnTheRiseSection {...content.routes} compact sectionClassName="!py-1 !pt-0" />
+      <FeaturedOffersSection {...content.promoOffers} compact />
+      <WhyJetPakistanSection {...content.whyBook} compact />
+      <PublicSupportBanner support={content.supportCta} compact />
+      {showInspiration ? <TravelInspirationSection {...content.inspiration} compact /> : null}
+    </div>
   );
 }

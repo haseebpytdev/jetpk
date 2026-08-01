@@ -10,11 +10,11 @@ type SiteFooterProps = {
 export function SiteFooter({ className }: SiteFooterProps) {
   return (
     <footer className={cn("bg-jp-footer text-white", className)} role="contentinfo">
-      <PageContainer className="py-jp-4xl">
-        <div className="grid gap-jp-2xl lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))]">
-          <div className="space-y-5">
+      <PageContainer className="py-3 lg:py-4">
+        <div className="grid gap-3 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))] lg:gap-5">
+          <div className="space-y-2">
             <JetPakistanLogo variant="inverse" />
-            <p className="max-w-sm text-jp-sm leading-relaxed text-white/80">
+            <p className="max-w-xs text-jp-xs leading-relaxed text-white/80">
               Connecting you to the world with trusted fares, secure booking, and dedicated support for
               travelers across Pakistan and beyond.
             </p>
@@ -26,7 +26,7 @@ export function SiteFooter({ className }: SiteFooterProps) {
                   aria-label={link.label}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-jp-xs font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 text-[10px] font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
                   {link.label.slice(0, 2)}
                 </a>
@@ -36,13 +36,13 @@ export function SiteFooter({ className }: SiteFooterProps) {
 
           {footerColumns.map((column) => (
             <div key={column.title}>
-              <h2 className="text-jp-sm font-semibold uppercase tracking-wide text-white">{column.title}</h2>
-              <ul className="mt-4 space-y-2">
+              <h2 className="text-jp-xs font-semibold uppercase tracking-wide text-white">{column.title}</h2>
+              <ul className="mt-2 space-y-1">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="text-jp-sm text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      className="text-jp-xs text-white/75 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
                       {link.label}
                     </a>
@@ -51,11 +51,18 @@ export function SiteFooter({ className }: SiteFooterProps) {
               </ul>
             </div>
           ))}
+
+          <div>
+            <h2 className="text-jp-xs font-semibold uppercase tracking-wide text-white">Stay Updated</h2>
+            <p className="mt-2 text-jp-xs leading-relaxed text-white/75">
+              Get the latest deals and travel updates delivered to your inbox.
+            </p>
+          </div>
         </div>
       </PageContainer>
 
       <div className="border-t border-white/15">
-        <PageContainer className="flex flex-col gap-3 py-5 text-jp-sm text-white/75 sm:flex-row sm:items-center sm:justify-between">
+        <PageContainer className="flex flex-col gap-1 py-2.5 text-jp-xs text-white/70 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} JetPakistan. All rights reserved.</p>
           <p className="inline-flex items-center gap-1">
             Made with <span aria-label="love">♥</span> in Pakistan

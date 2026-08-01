@@ -1,12 +1,13 @@
-"use client";
-
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import type { HomepageFeaturedDeal, HomepageSectionHeader } from "../types/homepage";
+import { cn } from "@/lib/cn";
+import type { HomepageOfferCard, HomepageSectionHeader } from "../types/homepage";
 import { PublicSectionHeader } from "../components/PublicSectionHeader";
+import { OfferCard } from "./OfferCard";
 
 type FeaturedOffersSectionProps = HomepageSectionHeader & {
-  items: HomepageFeaturedDeal[];
+  items: HomepageOfferCard[];
+  compact?: boolean;
 };
 
 export function FeaturedOffersSection({
@@ -17,36 +18,27 @@ export function FeaturedOffersSection({
   ctaText,
   ctaUrl,
   items,
+  compact = false,
 }: FeaturedOffersSectionProps) {
   if (!enabled || items.length === 0) return null;
 
+  const displayItems = items.slice(0, 3);
+
   return (
-    <SectionContainer className="bg-jp-surface-muted/40">
+    <SectionContainer className={compact ? "bg-jp-surface-muted/30 py-1" : "bg-jp-surface-muted/30 py-4"}>
       <PageContainer>
         <PublicSectionHeader
           eyebrow={eyebrow}
           title={title || "Featured Offers"}
-          subtitle={subtitle}
-          ctaText={ctaText}
-          ctaUrl={ctaUrl}
+          subtitle={subtitle || "Limited time deals on top destinations"}
+          ctaText={ctaText || "View all offers"}
+          ctaUrl={ctaUrl || "/"}
+          compact={compact}
         />
 
-        <div className="mt-jp-lg grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((offer) => (
-            <article
-              key={offer.id}
-              className="flex min-h-[12rem] flex-col justify-between rounded-jp-card border border-jp-border bg-gradient-to-br from-jp-primary to-jp-primary-hover p-jp-lg text-white shadow-jp-card"
-            >
-              <div>
-                {offer.airline ? <p className="text-jp-xs uppercase tracking-wide text-white/80">{offer.airline}</p> : null}
-                <h3 className="mt-2 font-display text-jp-h3 font-bold">
-                  {offer.from}
-                  {offer.to ? ` → ${offer.to}` : ""}
-                </h3>
-                {offer.duration ? <p className="mt-2 text-jp-sm text-white/85">{offer.duration}</p> : null}
-              </div>
-              {offer.priceLabel ? <p className="mt-4 text-jp-md font-semibold">{offer.priceLabel}</p> : null}
-            </article>
+        <div className={cn("grid gap-3 lg:grid-cols-3", compact ? "mt-1 gap-2" : "mt-4")}>
+          {displayItems.map((offer) => (
+            <OfferCard key={offer.id} offer={offer} compact={compact} />
           ))}
         </div>
       </PageContainer>

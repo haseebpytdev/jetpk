@@ -14,24 +14,24 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ session }: SiteHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 border-b border-jp-border bg-jp-surface/95 backdrop-blur supports-[backdrop-filter]:bg-jp-surface/90">
+    <header className="sticky top-0 z-40 border-b border-jp-border/80 bg-jp-surface/98 backdrop-blur supports-[backdrop-filter]:bg-jp-surface/95">
       <div className="mx-auto flex h-jp-nav w-full max-w-jp-container items-center justify-between gap-jp-md px-jp-xl lg:px-20">
-        <div className="flex min-w-0 items-center gap-jp-md lg:gap-jp-lg">
+        <div className="flex min-w-0 flex-1 items-center gap-jp-lg">
           <Link
             href="/"
             className="shrink-0 rounded-jp-md focus-visible:outline-none focus-visible:shadow-jp-focus"
             aria-label="JetPakistan home"
           >
-            <JetPakistanLogo showTagline={false} />
+            <JetPakistanLogo showTagline />
           </Link>
           <DesktopNavigation />
         </div>
 
-        <div className="hidden items-center gap-jp-xs lg:flex">
-          <ThemeSwitch />
+        <div className="hidden items-center gap-jp-sm lg:flex">
           <CurrencySelector />
           <AccountMenu session={session} />
-          <LinkButton href="/flights" variant="primary" className="ml-jp-xs shrink-0">
+          <ThemeSwitch />
+          <LinkButton href="/flights" variant="secondary" className="shrink-0 border-jp-primary text-jp-primary hover:bg-jp-primary-soft">
             Book Now
           </LinkButton>
         </div>

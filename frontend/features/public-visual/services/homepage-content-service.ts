@@ -10,23 +10,25 @@ import type {
   HomepageDestinationCard,
   HomepageFeaturedDeal,
   HomepageHeroContent,
+  HomepageInspirationCard,
+  HomepageOfferCard,
   HomepageRouteCard,
   HomepageSupportCta,
   HomepageTrustChip,
   HomepageWhyCard,
 } from "../types/homepage";
 
-const HERO_FALLBACK_IMAGE = "/images/home/hero-fallback.svg";
-
 type RemoteHomepage = {
   source: "cms" | "empty";
   hero?: Record<string, unknown>;
-  trust_chips?: Array<{ label?: string }>;
+  trust_chips?: Array<{ label?: string; description?: string; icon?: string }>;
   routes?: RemoteSection & { items?: Array<Record<string, unknown>> };
   destinations?: RemoteSection & { items?: Array<Record<string, unknown>> };
   featured_deals?: RemoteSection & { items?: Array<Record<string, unknown>> };
+  promo_offers?: RemoteSection & { items?: Array<Record<string, unknown>> };
   why_book?: RemoteSection & { cards?: Array<Record<string, unknown>> };
   support_cta?: Record<string, unknown>;
+  inspiration?: RemoteSection & { items?: Array<Record<string, unknown>> };
   feature_board?: { enabled?: boolean; items?: Array<Record<string, unknown>> };
 };
 
@@ -80,9 +82,14 @@ function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageRouteCar
     id: String(item.id ?? `route-${index}`),
     from: String(item.from ?? ""),
     to: String(item.to ?? ""),
+    fromCode: item.from_code ? String(item.from_code) : undefined,
+    toCode: item.to_code ? String(item.to_code) : undefined,
     priceLabel: String(item.price_label ?? item.price ?? ""),
     searchUrl: String(item.search_url ?? ""),
     badge: item.badge ? String(item.badge) : undefined,
+    image: item.image ? String(item.image) : null,
+    imageAlt: item.image_alt ? String(item.image_alt) : undefined,
+    airline: item.airline ? String(item.airline) : undefined,
   }));
 }
 
@@ -113,6 +120,34 @@ function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): HomepageF
   }));
 }
 
+function mapPromoOffers(items: Array<Record<string, unknown>> = []): HomepageOfferCard[] {
+  return items.map((item, index) => ({
+    id: String(item.id ?? `offer-${index}`),
+    title: String(item.title ?? ""),
+    subtitle: item.subtitle ? String(item.subtitle) : undefined,
+    discountValue: String(item.discount_value ?? item.discount ?? ""),
+    discountCaption: item.discount_caption ? String(item.discount_caption) : undefined,
+    ctaLabel: String(item.cta_label ?? item.cta ?? "Book Now"),
+    ctaHref: String(item.cta_href ?? item.cta_url ?? "/"),
+    image: item.image ? String(item.image) : null,
+    imageAlt: item.image_alt ? String(item.image_alt) : undefined,
+    theme: item.theme as HomepageOfferCard["theme"],
+  }));
+}
+
+function mapInspiration(items: Array<Record<string, unknown>> = []): HomepageInspirationCard[] {
+  return items.map((item, index) => ({
+    id: String(item.id ?? `inspiration-${index}`),
+    category: String(item.category ?? ""),
+    title: String(item.title ?? ""),
+    publishedAt: item.published_at ? String(item.published_at) : undefined,
+    readingTime: item.reading_time ? String(item.reading_time) : undefined,
+    image: item.image ? String(item.image) : null,
+    imageAlt: item.image_alt ? String(item.image_alt) : undefined,
+    href: item.href ? String(item.href) : null,
+  }));
+}
+
 function mapWhyCards(cards: Array<Record<string, unknown>> = []): HomepageWhyCard[] {
   return cards.map((card, index) => ({
     id: String(card.id ?? `why-${index}`),
@@ -139,9 +174,13 @@ function mapSupportCta(remote?: Record<string, unknown>): HomepageSupportCta {
   };
 }
 
-function mapTrustChips(chips: Array<{ label?: string }> = []): HomepageTrustChip[] {
+function mapTrustChips(chips: Array<{ label?: string; description?: string; icon?: string }> = []): HomepageTrustChip[] {
   return chips
-    .map((chip) => ({ label: String(chip.label ?? "").trim() }))
+    .map((chip) => ({
+      label: String(chip.label ?? "").trim(),
+      description: chip.description ? String(chip.description) : undefined,
+      icon: chip.icon ? String(chip.icon) : undefined,
+    }))
     .filter((chip) => chip.label !== "");
 }
 
@@ -149,28 +188,37 @@ function fixtureHomepage(): HomepageContent {
   return {
     source: "fixture",
     hero: {
-      eyebrow: "Pakistan's trusted OTA",
-      headline: "Explore the world with",
+      eyebrow: "",
+      headline: "Explore the World with",
       headlineHighlight: "JetPakistan",
       subtitle:
-        "Book flights with confidence — secure fares, dedicated support, and routes tailored for travelers across Pakistan and beyond.",
+        "Find the best flight deals to your dream destinations. Book with confidence and fly with ease.",
       searchVisible: true,
       image: null,
     },
-    trustChips: BENEFIT_FIXTURES.map((item) => ({ label: item.title })),
+    trustChips: BENEFIT_FIXTURES.map((item) => ({
+      label: item.title,
+      description: item.description,
+      icon: item.icon,
+    })),
     routes: {
       enabled: true,
       eyebrow: "",
       title: "Destinations on the Rise",
-      subtitle: "",
-      ctaText: "",
-      ctaUrl: "",
+      subtitle: "Popular routes with competitive fares",
+      ctaText: "View all destinations",
+      ctaUrl: "/",
       items: DESTINATION_FIXTURES.map((item) => ({
         id: item.id,
         from: item.city,
         to: item.country,
+        fromCode: item.fromCode,
+        toCode: item.toCode,
         priceLabel: item.label,
         searchUrl: "/flights/results",
+        image: item.image,
+        imageAlt: item.imageAlt,
+        airline: item.airline,
       })),
     },
     destinations: {
@@ -183,28 +231,38 @@ function fixtureHomepage(): HomepageContent {
       items: [],
     },
     featuredDeals: {
-      enabled: true,
+      enabled: false,
       eyebrow: "",
-      title: "Featured Offers",
+      title: "",
       subtitle: "",
       ctaText: "",
       ctaUrl: "",
+      items: [],
+    },
+    promoOffers: {
+      enabled: true,
+      eyebrow: "",
+      title: "Featured Offers",
+      subtitle: "Limited time deals on top destinations",
+      ctaText: "View all offers",
+      ctaUrl: "/",
       items: FEATURED_OFFER_FIXTURES.map((offer) => ({
         id: offer.id,
-        airline: offer.badge ?? "",
-        from: offer.title,
-        to: offer.subtitle,
-        depart: "",
-        arrive: "",
-        duration: "",
-        stops: 0,
-        priceLabel: offer.samplePrice ?? "",
+        title: offer.title,
+        subtitle: offer.subtitle,
+        discountValue: offer.discountValue ?? "",
+        discountCaption: offer.badge,
+        ctaLabel: offer.cta,
+        ctaHref: "/flights/results",
+        image: offer.image,
+        imageAlt: offer.imageAlt,
+        theme: offer.theme,
       })),
     },
     whyBook: {
       enabled: true,
       eyebrow: "",
-      title: "Why JetPakistan",
+      title: "Why JetPakistan?",
       subtitle: "",
       ctaText: "",
       ctaUrl: "",
@@ -219,8 +277,8 @@ function fixtureHomepage(): HomepageContent {
     supportCta: {
       enabled: true,
       eyebrow: "",
-      title: "Need help planning your trip?",
-      subtitle: "Our support team is ready to assist with routes, group fares, and booking questions.",
+      title: "Need Help? We're Here For You",
+      subtitle: "Our support team is available 24/7 to assist with your travel needs.",
       callEnabled: false,
       callLabel: "Contact Support",
       callHref: "/support",
@@ -228,6 +286,24 @@ function fixtureHomepage(): HomepageContent {
       chatLabel: "Contact Support",
       chatHref: "/support",
       image: null,
+    },
+    inspiration: {
+      enabled: true,
+      eyebrow: "",
+      title: "Travel Inspiration",
+      subtitle: "Stories, guides, and tips for your next adventure",
+      ctaText: "View all articles",
+      ctaUrl: "/",
+      items: INSPIRATION_FIXTURES.map((item) => ({
+        id: item.id,
+        category: item.category,
+        title: item.title,
+        publishedAt: item.publishedAt,
+        readingTime: item.readingTime,
+        image: item.image,
+        imageAlt: item.imageAlt,
+        href: null,
+      })),
     },
     featureBoard: { enabled: false, items: [] },
   };
@@ -241,8 +317,10 @@ function emptyHomepage(): HomepageContent {
     routes: { ...mapSectionHeader(), items: [] },
     destinations: { ...mapSectionHeader(), items: [] },
     featuredDeals: { ...mapSectionHeader(), items: [] },
+    promoOffers: { ...mapSectionHeader(), items: [] },
     whyBook: { ...mapSectionHeader(), cards: [] },
     supportCta: mapSupportCta({ enabled: false }),
+    inspiration: { ...mapSectionHeader(), items: [] },
     featureBoard: { enabled: false, items: [] },
   };
 }
@@ -263,11 +341,19 @@ function mapRemote(remote: RemoteHomepage): HomepageContent {
       ...mapSectionHeader(remote.featured_deals),
       items: mapFeaturedDeals(remote.featured_deals?.items),
     },
+    promoOffers: {
+      ...mapSectionHeader(remote.promo_offers),
+      items: mapPromoOffers(remote.promo_offers?.items),
+    },
     whyBook: {
       ...mapSectionHeader(remote.why_book),
       cards: mapWhyCards(remote.why_book?.cards),
     },
     supportCta: mapSupportCta(remote.support_cta),
+    inspiration: {
+      ...mapSectionHeader(remote.inspiration),
+      items: mapInspiration(remote.inspiration?.items),
+    },
     featureBoard: {
       enabled: remote.feature_board?.enabled === true,
       items: (remote.feature_board?.items ?? []).map((item, index) => ({
@@ -280,8 +366,6 @@ function mapRemote(remote: RemoteHomepage): HomepageContent {
 }
 
 export const HomepageContentService = {
-  heroFallbackImage: HERO_FALLBACK_IMAGE,
-
   async getHomepage(): Promise<HomepageContent> {
     try {
       const response = await fetchWithTimeout(laravelApiPath("/api/public/content/homepage"), {

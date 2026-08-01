@@ -209,7 +209,7 @@ export function SearchModule({ className, layout = "default", variant = "default
     <section
       className={cn(
         variant === "blueprint"
-          ? "relative mx-auto w-full min-h-[140px] max-w-[960px] overflow-x-hidden overflow-y-visible rounded-[1.25rem] border border-jp-border bg-jp-surface pt-9 shadow-[0_20px_50px_-20px_rgba(20,50,75,0.35)]"
+          ? "relative mx-auto w-full min-h-[140px] max-w-[960px] overflow-x-hidden overflow-y-visible rounded-[1.15rem] border border-jp-border bg-jp-surface pt-9 shadow-[0_16px_40px_-12px_rgba(11,29,42,0.22)]"
           : "rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
         variant !== "blueprint" && (layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl"),
         className,

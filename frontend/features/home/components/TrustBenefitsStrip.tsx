@@ -11,6 +11,7 @@ function BenefitIcon({ type }: { type: (typeof BENEFIT_FIXTURES)[number]["icon"]
     headset: "M4 14a8 8 0 0 1 16 0v3a3 3 0 0 1-3 3h-1v-6h4M8 17H7a3 3 0 0 1-3-3v-1",
     fare: "M4 7h16v10H4z M8 11h8 M8 15h5",
     pakistan: "M12 3c-4 3-7 7-7 11a7 7 0 0 0 14 0c0-4-3-8-7-11Z",
+    spark: "M12 2l2.2 6.8H21l-5.5 4 2.1 6.7L12 15.8 6.4 19.5l2.1-6.7L3 8.8h6.8L12 2Z",
   };
 
   return (

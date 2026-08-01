@@ -9,15 +9,22 @@ export type HomepageHeroContent = {
 
 export type HomepageTrustChip = {
   label: string;
+  description?: string;
+  icon?: string;
 };
 
 export type HomepageRouteCard = {
   id: string;
   from: string;
   to: string;
+  fromCode?: string;
+  toCode?: string;
   priceLabel: string;
   searchUrl: string;
   badge?: string;
+  image?: string | null;
+  imageAlt?: string;
+  airline?: string;
 };
 
 export type HomepageDestinationCard = {
@@ -43,12 +50,36 @@ export type HomepageFeaturedDeal = {
   priceLabel: string;
 };
 
+export type HomepageOfferCard = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  discountValue: string;
+  discountCaption?: string;
+  ctaLabel: string;
+  ctaHref: string;
+  image: string | null;
+  imageAlt?: string;
+  theme?: "summer" | "weekend" | "family";
+};
+
 export type HomepageWhyCard = {
   id: string;
   num: string;
   title: string;
   text: string;
   icon: string;
+};
+
+export type HomepageInspirationCard = {
+  id: string;
+  category: string;
+  title: string;
+  publishedAt?: string;
+  readingTime?: string;
+  image: string | null;
+  imageAlt?: string;
+  href?: string | null;
 };
 
 export type HomepageSectionHeader = {
@@ -87,7 +118,9 @@ export type HomepageContent = {
   routes: HomepageSectionHeader & { items: HomepageRouteCard[] };
   destinations: HomepageSectionHeader & { items: HomepageDestinationCard[] };
   featuredDeals: HomepageSectionHeader & { items: HomepageFeaturedDeal[] };
+  promoOffers: HomepageSectionHeader & { items: HomepageOfferCard[] };
   whyBook: HomepageSectionHeader & { cards: HomepageWhyCard[] };
   supportCta: HomepageSupportCta;
+  inspiration: HomepageSectionHeader & { items: HomepageInspirationCard[] };
   featureBoard: { enabled: boolean; items: HomepageFeatureStat[] };
 };
