@@ -1,6 +1,6 @@
 # JP-OPS-01 Gap Register (JP-OPS-01A reconciled)
 
-**Gap records:** 15 | **SHA:** `cfd65a76b448ec7fb77fddfb4995f290b5d841b3`  
+**Gap records:** 15 | **SHA:** `cfd65a76b448ec7fb77fddfb4995f290b5d841b3`
 JSON: [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json)
 
 ## Severity counts

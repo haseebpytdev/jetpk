@@ -58,7 +58,7 @@
 
 | ID | Issue | Severity |
 |----|-------|----------|
-| R-01 | Dashboard header shows `mockUser.role` not session roles | P0 |
+| R-01 | Dashboard header shows `mockUser.role` not session roles when session null | P3 |
 | R-02 | Agent staff/reports UI absent — permissions only enforced server-side | P1 |
 | R-03 | Dashboard high-risk permissions (`settings.update`, `users.assignRoles`) defined in catalog but no mutation API | P2 (by design until JP-OPS-05) |
 | R-04 | No GET mutations found on sensitive routes (audit heuristic clean) | — |

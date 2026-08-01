@@ -122,6 +122,8 @@ Do not sum Laravel routes + Next pages to derive contract count.
 
 ## Next phase
 
-**JP-OPS-02** (auth/production OTP) + **JP-OPS-05** (dashboard live-mode gates + mutation API) before three-agency pilot.
+**JP-OPS-02 — AUTHENTICATION, SESSION, AND API-BRIDGE CLOSURE** + **JP-OPS-05** (dashboard live-mode gates + mutation API) before three-agency pilot.
+
+JP-OPS-02 covers production OTP **provider readiness** only. The approved JetPakistan OTP demo patch remains preserved until separately authorized for removal.
 
 Machine-readable metrics: [`JP-OPS-01-FULL-STACK-ROUTE-INVENTORY.json`](JP-OPS-01-FULL-STACK-ROUTE-INVENTORY.json), [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json).

@@ -46,4 +46,4 @@ OC-031 — IATI authentication EXTERNAL_DEPENDENCY_BLOCKED.
 
 ## Contract C-04 (dashboard mutations)
 
-Dashboard visible actions must not imply mutation success without server endpoint — 157 Blade mutations have no Next API equivalent (GAP-001 P1).
+Dashboard visible actions must not imply mutation success without server endpoint — 159 Blade mutations have no Next API equivalent (GAP-001 P1).

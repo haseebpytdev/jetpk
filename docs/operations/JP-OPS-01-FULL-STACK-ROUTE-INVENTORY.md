@@ -70,7 +70,7 @@ Not counted in Agent portal (15) or public/B2C (39).
 | Blade-operational mutations (admin+staff) | 159 |
 | Next-dashboard connected reads | 38 |
 | Next-dashboard connected mutations | 0 |
-| Next-dashboard missing mutations | 157 |
+| Next-dashboard missing mutations | 159 |
 
 Admin/Staff Blade routes include `current_ui_owner: blade_admin_staff`, `blade_binding_status: operational`, `next_binding_status: mutation_missing`.
 

@@ -61,7 +61,7 @@
 
 | ID | Missing test | Priority | Phase |
 |----|-------------|----------|-------|
-| T-01 | Next.js dashboard session identity (non-mock header) | P0 | JP-OPS-05 |
+| T-01 | Next.js dashboard session identity (non-mock header) | P3 | JP-OPS-05 |
 | T-02 | Customer cancellation request E2E | P1 | JP-OPS-03 |
 | T-03 | Agent staff management Next.js route | P1 | JP-OPS-04 |
 | T-04 | Agent booking create from Next.js | P1 | JP-OPS-04 |
