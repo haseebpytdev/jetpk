@@ -2,111 +2,96 @@
 
 ## Phase
 
-JP-FRONTEND-UX-02 — Motion, AJAX, Loading, Popups, Journey Progress  
+JP-FRONTEND-UX-02 — Motion, AJAX, Loading, Popups, Journey Progress
 **Sub-phase UX-02A:** Authority proof, interaction evidence, commit readiness
+**Sub-phase UX-02B:** Scroll-reveal hardening, evidence correction, push readiness
 
 ## Branch
 
 `phase/jetpk-frontend-motion-ajax-ux`
 
-## Starting SHA
+## Commits
 
-`89bc831a0b673f0774f0f4aa02bc01cdd927ea99`
+| SHA | Message |
+|---|---|
+| `89bc831` | Starting baseline |
+| `a0854fd` | feat: add frontend motion and asynchronous UX |
 
-## Objective
+## UX-02B Scroll-Reveal Issue (manual evidence review)
 
-Add consistent motion, AJAX interaction layer, loading states, accessible overlays, and server-validated journey progress without redesign or mockup reopening.
+### Issue found
 
-## Included
+`01-homepage-scroll-reveal.png` showed a large blank region between hero and footer while `02-homepage-reduced-motion.png` showed all marketing sections.
 
-- Motion tokens and scroll-reveal system
-- Route navigation progress (separate from booking progress)
-- Shared Laravel action client and `useAsyncAction`
-- Dialog, Drawer, Toast, Tooltip primitives
-- Representative `loading.tsx` routes
-- Airport autocomplete debounce/cancel/stale protection
-- Fare change dialog migration
-- Payment poll hardening (max duration, manual refresh)
-- Booking progress fill animation
-- UX-02 Playwright suite and documentation
+### Root cause
 
-## UX-02A Authority Proof Summary
+1. CSS hid all `.jp-scroll-reveal` targets with `opacity: 0` whenever `data-revealed="false"`, including immediately after hydration.
+2. Below-fold homepage sections (Destinations, Featured Offers, Why JetPakistan, Support) are wrapped in `ScrollReveal`.
+3. The evidence capture took a full-page screenshot immediately after `page.goto("/")` without scrolling targets into view.
+4. IntersectionObserver never fired for below-fold elements, so they remained invisible in the screenshot.
+5. Reduced-motion screenshot worked because `.jp-scroll-reveal--reduced` bypasses the hidden state.
 
-### Journey authority — PASS (0 blocking)
+This was primarily an **evidence-script timing/scroll omission**, compounded by CSS that hid content before the `--armed` enhancement gate existed.
 
-- **Authoritative progress:** Travelers, Review, Payment, Confirmation use `booking_session.progress` from Laravel JSON APIs.
-- **Fare Selection exception:** Hardcoded `progressSteps` is **display-only** — renders stepper UI only; does not gate access, completion, or server state. Travelers unlocked only via successful `revalidateOffer` handoff.
-- **No journey localStorage/sessionStorage:** Only theme preference uses localStorage.
-- **No `completedSteps` client array** in booking flow.
-- **Seats absent:** `/booking/seats` 404; no Seats step in standard progress arrays.
-- **Payment/Success:** Status from API poll only; `?paid=1` test confirms query cannot create Paid label.
+### Correction
 
-### Duplicate-mutation — PASS
+Production:
+- Content is visible by default (SSR, no-JS, pre-hydration).
+- Hiding applies only after JS arms `.jp-scroll-reveal--armed`.
+- `observeRevealElement()` reveals on intersection, immediately when IO is unavailable, or via a 600ms in-viewport failsafe.
+- Unmount clears failsafe timers.
 
-Locks verified for login, OTP, search (disabled + abort), fare revalidation (`inFlightRef`), passengers (`submitLock`), booking review (`submitLock`), payment refresh (`inFlightRef`). Controls restore after failure. No mutation auto-retry.
-
-### Payment polling — PASS
-
-180s client cap, Laravel-driven interval/attempts, unmount cleanup, visibility pause, manual `reload()`, single in-flight guard.
+Evidence/tests:
+- Scroll each reveal target and assert `data-revealed="true"` before full-page capture.
+- Assert marketing section headings are visible.
+- Separate dark Login (fresh context) from dark Agent dashboard captures.
+- Portal dashboard shots classified as backend-error evidence; loading skeletons captured separately.
 
 ## Interaction evidence (local, not committed)
 
-Captured via `npx playwright test -c playwright.jp-frontend-ux-02-evidence.config.ts`:
+Capture: `npx playwright test -c playwright.jp-frontend-ux-02-evidence.config.ts`
 
-| File | State |
+| File | Classification |
 |---|---|
-| `frontend/.evidence/jp-frontend-ux-02/01-homepage-scroll-reveal.png` | Homepage scroll reveal |
-| `frontend/.evidence/jp-frontend-ux-02/02-homepage-reduced-motion.png` | Reduced motion |
-| `frontend/.evidence/jp-frontend-ux-02/03-route-navigation-about.png` | Post-navigation |
-| `frontend/.evidence/jp-frontend-ux-02/04-results-loading-or-content.png` | Results |
-| `frontend/.evidence/jp-frontend-ux-02/05-fare-selection.png` | Fare Selection |
-| `frontend/.evidence/jp-frontend-ux-02/06-login.png` | Login |
-| `frontend/.evidence/jp-frontend-ux-02/07-payment-status-polling.png` | Payment pending/poll |
-| `frontend/.evidence/jp-frontend-ux-02/08-customer-dashboard.png` | Customer portal |
-| `frontend/.evidence/jp-frontend-ux-02/09-agent-dashboard.png` | Agent portal |
-| `frontend/.evidence/jp-frontend-ux-02/10-dark-theme-login.png` | Dark theme |
+| `01a-homepage-initial-viewport.png` | Initial viewport before scroll reveal |
+| `01-homepage-scroll-reveal.png` | Full homepage after all targets revealed |
+| `02-homepage-reduced-motion.png` | Reduced motion — all sections visible |
+| `03-route-navigation-about.png` | Route navigation |
+| `04-results-loading-or-content.png` | Results |
+| `05-fare-selection.png` | Fare Selection |
+| `06-login.png` | Login |
+| `07-payment-status-polling.png` | Payment pending/poll |
+| `08-customer-dashboard-backend-error.png` | **Backend-unavailable error state** (not successful dashboard content) |
+| `09-agent-dashboard-backend-error.png` | **Backend-unavailable error state** (not successful dashboard content) |
+| `10-dark-theme-login.png` | **Actual dark Login page** (fresh context, no agent session) |
+| `11-dark-theme-agent-dashboard.png` | Dark Agent dashboard (error/unavailable state when backend down) |
+| `12-customer-bookings-loading-skeleton.png` | Customer bookings loading state (route skeleton or client loading text) |
+| `13-agent-bookings-loading-skeleton.png` | Agent bookings loading state (route skeleton or client loading text) |
 
-## Manual browser review checklist (automated + audit)
+## Manual visual review (UX-02B)
 
-| Check | Result |
-|---|---|
-| Subtle animation | PASS (CSS tokens, ≤340ms) |
-| No layout shift on reveal | PASS (content visible by default) |
-| No stuck route progress | PASS (12s failsafe + pathname stop) |
-| Scroll content visible without JS wait | PASS (opacity enhancement only) |
-| Reduced motion | PASS (test + `.jp-scroll-reveal--reduced`) |
-| Dialog focus trap | PASS (`Dialog.tsx` uses `useFocusTrap`) |
-| Drawer close | PASS (`Drawer.tsx` Escape + backdrop) |
-| Loading does not blank unrelated content | PASS (route skeletons; results retain prior on refresh) |
-| Buttons restore after failure | PASS (submit locks released on error paths) |
-| No horizontal overflow | PASS (119-test responsive suite prior) |
-| Dark-mode contrast | PASS (dark-theme-safety suite prior) |
+Manual review of the first evidence set found the scroll-reveal blank-region defect and mislabeled dark Login capture. After UX-02B corrections, automated evidence capture re-run confirms:
+- Homepage marketing sections visible after guided scroll-reveal.
+- Reduced-motion homepage shows all sections without scroll.
+- Dark Login screenshot contains login fields on dark surfaces.
+- Portal dashboard captures honestly labeled as backend-error states.
 
-Routes spot-checked via evidence capture: Homepage, Login, Results, Fare Selection, Payment Status, Customer dashboard, Agent dashboard.
+Automated screenshot existence alone does **not** constitute manual visual approval; the corrected set addresses the defects found during review.
 
-## Tests (UX-02A final)
+## Tests (UX-02B final)
 
 | Command | Result |
 |---|---|
 | `npm run typecheck` | PASS |
 | `npm run lint` | PASS |
 | `npm run build` | PASS |
-| `npm run test:jp-frontend-ux-02` | **12/12 PASS** |
-| Integration regression (prior) | **119/119 PASS** |
+| `npm run test:jp-frontend-ux-02` | **17/17 PASS** |
+| Integration regression (`--grep-invert "capture "`) | **119/119 PASS** |
 
 ## Blocking defects
 
-**0 Critical / 0 High / 0 Medium / 0 Low** for commit readiness.
-
-Non-blocking deferred: Fare Selection could later consume Laravel progress when offer-details API exposes it; portal list AJAX filtering where adapters exist.
-
-## Excluded
-
-- Visual redesign / mockup parity
-- Laravel business logic changes
-- Blade retirement / production cutover
-- OTP demo patch removal
+**0** — ready for correction-commit authorization review.
 
 ## Final status
 
-**STOPPED FOR COMMIT AUTHORIZATION** — do not push/merge/deploy until approved.
+**STOPPED FOR CORRECTION-COMMIT AUTHORIZATION** — do not push/merge/deploy until approved.

@@ -126,26 +126,24 @@ body {
   }
 }
 
-/* Scroll reveal — content visible by default; JS enhances with motion */
+/* Scroll reveal — content visible by default; JS arms enhancement after hydration */
 .jp-scroll-reveal {
   opacity: 1;
   transform: none;
 }
 
-@supports (opacity: 1) {
-  .jp-scroll-reveal:not(.jp-scroll-reveal--reduced):not([data-revealed="true"]) {
-    opacity: 0;
-    transform: translateY(12px);
-    transition:
-      opacity var(--jp-motion-standard) var(--jp-ease-decelerate),
-      transform var(--jp-motion-standard) var(--jp-ease-decelerate);
-  }
+.jp-scroll-reveal.jp-scroll-reveal--armed:not(.jp-scroll-reveal--reduced):not([data-revealed="true"]) {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity var(--jp-motion-standard) var(--jp-ease-decelerate),
+    transform var(--jp-motion-standard) var(--jp-ease-decelerate);
+}
 
-  .jp-scroll-reveal.jp-reveal-visible,
-  .jp-scroll-reveal[data-revealed="true"] {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.jp-scroll-reveal.jp-reveal-visible,
+.jp-scroll-reveal[data-revealed="true"] {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .jp-scroll-reveal--reduced {

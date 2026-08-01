@@ -2,11 +2,12 @@
 
 ## Suite
 
-`frontend/tests/jp-frontend-ux-02/` (12 tests, evidence capture excluded)
+`frontend/tests/jp-frontend-ux-02/` (17 tests, evidence capture excluded)
 
 | File | Coverage |
 |---|---|
-| `motion.spec.ts` | Scroll reveal visible; reduced motion disables translation |
+| `motion.spec.ts` | Pre-arm visibility; scroll activation; reveal-once; reduced motion; no-JS visible; IO unavailable; no layout shift |
+| `scroll-reveal-helpers.ts` | Shared reveal-all + marketing section assertions |
 | `navigation-loading.spec.ts` | Internal nav; external links not intercepted |
 | `api-client.spec.ts` | Error code + field error mapping |
 | `forms-autocomplete.spec.ts` | Login keyboard focus; airport debounce |
@@ -21,6 +22,25 @@ npx playwright test -c playwright.jp-frontend-ux-02-evidence.config.ts
 ```
 
 Output: `frontend/.evidence/jp-frontend-ux-02/*.png`
+
+### UX-02B evidence corrections
+
+- Homepage capture scrolls all `.jp-scroll-reveal` targets and asserts none remain hidden.
+- Portal dashboard shots saved as `08-customer-dashboard-backend-error.png` and `09-agent-dashboard-backend-error.png`.
+- Dark Login captured in a fresh browser context without agent session.
+- Dark Agent dashboard saved separately as `11-dark-theme-agent-dashboard.png`.
+- Loading skeleton captures: `12-customer-bookings-loading-skeleton.png`, `13-agent-bookings-loading-skeleton.png`.
+
+### Scroll-reveal hardening (UX-02B)
+
+| Behavior | Implementation |
+|---|---|
+| SSR / no-JS visible | Default `.jp-scroll-reveal { opacity: 1 }` without `--armed` |
+| Enhancement gate | `.jp-scroll-reveal--armed` added in `observeRevealElement()` after hydration |
+| IO unavailable | Immediate `revealElement()` |
+| In-viewport failsafe | 600ms timeout reveals if still hidden and in viewport |
+| Reduced motion | Immediate reveal; no arming |
+| Unmount cleanup | Clears failsafe timer; disconnects observer |
 
 ## Authority proofs (code audit UX-02A)
 
@@ -67,15 +87,15 @@ npm run test:jp-frontend-ux-02
 npx playwright test -c playwright.jp-full-next-frontend.config.ts --grep-invert "capture "
 ```
 
-## UX-02A final results (2026-08-01)
+## UX-02B final results (2026-08-01)
 
 | Gate | Result |
 |---|---|
 | typecheck | PASS |
 | lint | PASS |
 | build | PASS |
-| test:jp-frontend-ux-02 | 12/12 PASS |
-| Integration regression | 119/119 PASS (prior run) |
+| test:jp-frontend-ux-02 | 17/17 PASS |
+| Integration regression | 119/119 PASS |
 
 ## Regression
 

@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
+import { observeRevealElement } from "./reveal-element";
 import { usePrefersReducedMotion } from "./prefers-reduced-motion";
-import { useSharedIntersectionObserver } from "./use-shared-intersection-observer";
 
 type ScrollRevealProps = {
   children: ReactNode;
@@ -20,12 +20,13 @@ export function ScrollReveal({
   as: Tag = "div",
 }: ScrollRevealProps) {
   const reduced = usePrefersReducedMotion();
-  const ref = useSharedIntersectionObserver((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add("jp-reveal-visible");
-      entry.target.setAttribute("data-revealed", "true");
-    }
-  });
+  const ref = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return undefined;
+    return observeRevealElement(element, { reduced });
+  }, [reduced]);
 
   const staggerStyle =
     staggerIndex > 0 && !reduced
