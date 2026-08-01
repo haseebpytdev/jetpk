@@ -18,7 +18,9 @@
     "audit:visual:jp-ui-03a": "node scripts/capture-jp-ui-03a.mjs",
     "audit:visual:jp-ui-04": "node scripts/capture-jp-ui-04.mjs",
     "audit:visual:jp-ui-04a": "node scripts/capture-jp-ui-04a.mjs",
-    "audit:visual:jp-ui-05": "node scripts/capture-jp-ui-05.mjs"
+    "audit:visual:jp-ui-05": "node scripts/capture-jp-ui-05.mjs",
+    "test:theme-02": "npm run build && playwright test tests/jp-public-next-theme-02.spec.ts -c playwright.theme-02.config.ts",
+    "audit:visual:jp-public-next-theme-02": "node scripts/capture-jp-public-next-theme-02.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

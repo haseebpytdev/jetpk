@@ -367,7 +367,16 @@ Architecture §11 requires that each adapted file be recorded. No file has been 
 
 | Source (shell) | Target (repository) | Visual purpose | Retained logic | Required adaptation | Unsupported content removed | Tests affected |
 |---|---|---|---|---|---|---|
-| *(none — Phase A is inventory only)* | | | | | | |
+| `components/ThemeProvider.js` | `features/public-theme-v2/components/PublicThemeV2Root.tsx` | Local light/dark theme on `.jp-theme-v2` | `data-jp-theme` attribute strategy | Scoped CSS tokens; separate from document `data-theme` | `jp-mock-theme` storage key; no global theme mutation | `jp-public-next-theme-02.spec.ts` |
+| `components/ThemeToggle.js` | `PublicHeaderPrototype` + `PublicIconButton` | Header theme control | Toggle placement in header actions | Wired to V2 context only | — | `jp-public-next-theme-02.spec.ts` |
+| `components/SiteHeader.js` | `PublicHeaderPrototype.tsx` | Sticky header, brand, nav, actions | Layout, sticky behavior, brand placement | TypeScript + scoped CSS; real nav hrefs | `href="#"` Groups link; inert PKR button | visual lab screenshots |
+| `components/SiteFooter.js` | `PublicFooterPrototype.tsx` | Green gradient footer, column grid | Column structure, gradient treatment | Token-based footer colors; no newsletter | Newsletter block; `href="#"` legal links | visual lab screenshots |
+| `components/FormControls.js` | `PublicTextField`, `PublicSelect`, `PublicCheckbox`, `PublicRadio` | Label/control pairing | Field anatomy | Added hint, error, aria-describedby | No validation wiring (lab only) | `jp-public-next-theme-02.spec.ts` |
+| `app/globals.css` button/field rules | `features/public-theme-v2/styles/theme.css` | Button and field visual language | Primary gradient, radii, control heights | Mapped to `--jp-v2-*` tokens under `.jp-theme-v2` | Wholesale `globals.css` import | visual lab screenshots |
+| `components/BookingProgress.js` | `PublicStepper.tsx` | Numbered booking step strip | Step-strip visual language | `includeSeats` prop defaults false | Fixed 8-step fixture array including Seats | `jp-public-next-theme-02.spec.ts` |
+| `components/OrderSummary.js` | `PublicBookingSummary.tsx` | Sticky summary sidebar layout | Line-item rhythm, total row | Props-only API; no baked-in route/prices | LHE→JED, PKR totals, inert CTA | visual lab screenshots |
+| `components/PageHero.js` | `cms-theme-v2/components/CmsHero.tsx` | Hero anatomy | Eyebrow, title, body, actions | CMS block with URL validation | Hardcoded copy | `jp-public-next-theme-02.spec.ts` |
+| `app/preview/page.js` | `app/dev/jetpk-theme-lab/page.tsx` | Development component catalog | Section organization idea | Fresh implementation; production gate; noindex | Mockup PNG list; fixture PNRs/prices | `jp-public-next-theme-02.visual.spec.ts` |
 
 ---
 
