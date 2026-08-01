@@ -62,6 +62,8 @@ export const RESERVED_PUBLIC_FIRST_SEGMENTS = new Set([
   "desktop-view",
   "forgot-password",
   "reset-password",
+  "verify-email",
+  "preview",
   "dev-cp",
   "legal",
   "sitemap",

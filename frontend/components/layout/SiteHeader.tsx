@@ -31,7 +31,7 @@ export function SiteHeader({ session }: SiteHeaderProps) {
           <ThemeSwitch />
           <CurrencySelector />
           <AccountMenu session={session} />
-          <LinkButton href="/flights" variant="primary">
+          <LinkButton href="/#flight-search" variant="primary">
             Book Now
           </LinkButton>
         </div>

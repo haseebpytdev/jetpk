@@ -12,12 +12,20 @@ type UseBookingStatusPollOptions = {
   enabled?: boolean;
 };
 
+const DEFAULT_MAX_DURATION_MS = 180_000;
+
 export function useBookingStatusPoll({ mode, reference, enabled = true }: UseBookingStatusPollOptions) {
   const [data, setData] = useState<BookingConfirmation | PaymentStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [polling, setPolling] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+
   const attemptsRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const startedAtRef = useRef<number | null>(null);
+  const inFlightRef = useRef(false);
+  const cancelledRef = useRef(false);
 
   const resolvePollConfig = useCallback((payload: BookingConfirmation | PaymentStatusResponse): PollConfig | null => {
     if (mode === "payment") {
@@ -35,8 +43,19 @@ export function useBookingStatusPoll({ mode, reference, enabled = true }: UseBoo
     return config ? !config.should_poll : true;
   }, [resolvePollConfig]);
 
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = undefined;
+    }
+  }, []);
+
   const load = useCallback(async () => {
+    if (inFlightRef.current) return null;
+    inFlightRef.current = true;
+
     const response = mode === "payment" ? await fetchPaymentStatus(reference) : await fetchConfirmation();
+    inFlightRef.current = false;
     setLoading(false);
 
     if (!response.ok) {
@@ -49,35 +68,67 @@ export function useBookingStatusPoll({ mode, reference, enabled = true }: UseBoo
     return response.data;
   }, [mode, reference]);
 
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setTimedOut(false);
+    attemptsRef.current = 0;
+    startedAtRef.current = Date.now();
+    return load();
+  }, [load]);
+
   useEffect(() => {
     if (!enabled) return undefined;
 
-    let cancelled = false;
+    cancelledRef.current = false;
     attemptsRef.current = 0;
+    startedAtRef.current = Date.now();
+    setTimedOut(false);
+    setPolling(false);
 
     const schedulePoll = (config: PollConfig) => {
+      clearTimer();
+      setPolling(true);
+
       timerRef.current = setTimeout(async () => {
-        if (cancelled || document.hidden) {
+        if (cancelledRef.current) return;
+
+        if (document.hidden) {
           schedulePoll(config);
+          return;
+        }
+
+        const elapsed = Date.now() - (startedAtRef.current ?? Date.now());
+        if (elapsed >= DEFAULT_MAX_DURATION_MS) {
+          setPolling(false);
+          setTimedOut(true);
+          setError("Payment status is taking longer than expected. You can refresh to check again.");
           return;
         }
 
         attemptsRef.current += 1;
         const nextPayload = await load();
-        if (cancelled || !nextPayload) return;
+        if (cancelledRef.current || !nextPayload) {
+          setPolling(false);
+          return;
+        }
 
         if (!shouldStopPolling(nextPayload) && attemptsRef.current < config.max_attempts) {
           schedulePoll(config);
+          return;
         }
+
+        setPolling(false);
       }, config.interval_ms);
     };
 
     void (async () => {
       const payload = await load();
-      if (cancelled || !payload) return;
+      if (cancelledRef.current || !payload) return;
 
       const config = resolvePollConfig(payload);
       if (!config || shouldStopPolling(payload) || attemptsRef.current >= config.max_attempts) {
+        setPolling(false);
         return;
       }
 
@@ -85,7 +136,7 @@ export function useBookingStatusPoll({ mode, reference, enabled = true }: UseBoo
     })();
 
     const onVisibility = () => {
-      if (!document.hidden) {
+      if (!document.hidden && !cancelledRef.current) {
         void load();
       }
     };
@@ -93,11 +144,12 @@ export function useBookingStatusPoll({ mode, reference, enabled = true }: UseBoo
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      cancelled = true;
-      if (timerRef.current) clearTimeout(timerRef.current);
+      cancelledRef.current = true;
+      clearTimer();
+      setPolling(false);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [enabled, load, resolvePollConfig, shouldStopPolling]);
+  }, [clearTimer, enabled, load, resolvePollConfig, shouldStopPolling]);
 
-  return { data, loading, error, reload: load };
+  return { data, loading, error, polling, timedOut, reload };
 }

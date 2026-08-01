@@ -1,0 +1,502 @@
+{
+  "generatedAt": "2026-08-01T15:09:27.590Z",
+  "phase": "JP-FULL-NEXT-FRONTEND-01B",
+  "classification": {
+    "totalPageFiles": 67,
+    "productionBrowserRoutes": 66,
+    "deployableProductionRoutes": 66,
+    "redirectOnly": 3,
+    "dynamicRoutes": 13,
+    "devOnlyExcluded": 1,
+    "metadataRoutes": [
+      "robots.ts",
+      "sitemap.ts"
+    ],
+    "apiRoutes": [],
+    "excludedLabRoutes": [
+      "/dev/jetpk-theme-lab"
+    ],
+    "forbiddenRoutes": [
+      "/preview",
+      "/booking/seats"
+    ],
+    "statusCounts": {
+      "shared-theme-only": 59,
+      "redirect": 3,
+      "fully-adapted": 4,
+      "intentionally-deferred": 1
+    },
+    "whyCount67": "67 = total app/**/page.tsx files on disk. Production browser routes = 66 excluding /dev/jetpk-theme-lab. Phase reports cite 67 as the full Next App Router page inventory including the dev lab route."
+  },
+  "routes": [
+    {
+      "route": "/agent/register",
+      "family": "Agent registration",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/register/submitted",
+      "family": "Agent registration",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/forgot-password",
+      "family": "forgot/reset",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/login/otp",
+      "family": "OTP",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/login",
+      "family": "Login",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/register",
+      "family": "Register",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/reset-password/[token]",
+      "family": "forgot/reset",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/about-us",
+      "family": "About",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/confirmation",
+      "family": "booking confirmation",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/invoice",
+      "family": "invoice",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/passengers",
+      "family": "Passengers",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/payment/card",
+      "family": "Card handoff",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/payment/manual",
+      "family": "Manual Payment",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/payment",
+      "family": "payment selector",
+      "access": "redirect",
+      "indexing": "noindex",
+      "status": "redirect"
+    },
+    {
+      "route": "/booking/payment/return",
+      "family": "payment return",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/payment/status",
+      "family": "payment status",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/review",
+      "family": "Review",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/booking/status",
+      "family": "booking status",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/contact",
+      "family": "Contact",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/faq",
+      "family": "FAQ/legal/CMS",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/groups/booking/[bookingRef]/confirmation",
+      "family": "authenticated group checkout",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/groups/booking/[bookingRef]/payment",
+      "family": "authenticated group checkout",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/groups/booking/[bookingRef]/review",
+      "family": "authenticated group checkout",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/groups/search",
+      "family": "public groups",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/groups/[packageId]",
+      "family": "public groups",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/groups/[packageId]/passengers",
+      "family": "authenticated group checkout",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/legal/[slug]",
+      "family": "FAQ/legal/CMS",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/lookup-booking",
+      "family": "Manage Booking",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/pages/[slug]",
+      "family": "FAQ/legal/CMS",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "fully-adapted"
+    },
+    {
+      "route": "/privacy",
+      "family": "FAQ/legal/CMS",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/sitemap",
+      "family": "FAQ/legal/CMS",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/support",
+      "family": "Support",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/terms",
+      "family": "FAQ/legal/CMS",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/[slug]",
+      "family": "FAQ/legal/CMS",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "fully-adapted"
+    },
+    {
+      "route": "/access-denied",
+      "family": "access denied",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/bookings",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/bookings/[reference]",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/dashboard",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/deposits/new",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/deposits",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/invoices",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/notifications",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent",
+      "family": "Agent portal",
+      "access": "redirect",
+      "indexing": "noindex",
+      "status": "redirect"
+    },
+    {
+      "route": "/agent/payments",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/profile",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/security",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/support",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/support/[reference]",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/wallet/ledger",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/agent/wallet",
+      "family": "Agent portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/bookings",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/bookings/[reference]",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/dashboard",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/invoices",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/notifications",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer",
+      "family": "Customer portal",
+      "access": "redirect",
+      "indexing": "noindex",
+      "status": "redirect"
+    },
+    {
+      "route": "/customer/payments",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/profile",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/security",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/support",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/customer/support/[reference]",
+      "family": "Customer portal",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/dev/jetpk-theme-lab",
+      "family": "development-only",
+      "access": "dev",
+      "indexing": "indexable",
+      "status": "intentionally-deferred"
+    },
+    {
+      "route": "/flights/fare-selection",
+      "family": "Fare Selection",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "fully-adapted"
+    },
+    {
+      "route": "/flights/results",
+      "family": "Results",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/flights/return-options",
+      "family": "Return Options",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/",
+      "family": "Homepage",
+      "access": "standard",
+      "indexing": "indexable",
+      "status": "shared-theme-only"
+    },
+    {
+      "route": "/verify-email",
+      "family": "verify-email",
+      "access": "standard",
+      "indexing": "noindex",
+      "status": "fully-adapted"
+    }
+  ]
+}

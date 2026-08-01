@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { ScrollReveal } from "@/features/motion";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
@@ -13,7 +14,8 @@ export function PublicSupportBanner({ support }: PublicSupportBannerProps) {
   if (!support.enabled) return null;
 
   return (
-    <section className="border-y border-jp-border bg-gradient-to-r from-jp-primary-soft via-jp-surface to-jp-page">
+    <ScrollReveal as="section">
+      <section className="border-y border-jp-border bg-gradient-to-r from-jp-primary-soft via-jp-surface to-jp-page">
       <PageContainer className="grid items-center gap-jp-lg py-jp-3xl lg:grid-cols-[1fr_auto]">
         <div className="max-w-2xl">
           {support.eyebrow ? (
@@ -45,6 +47,7 @@ export function PublicSupportBanner({ support }: PublicSupportBannerProps) {
           />
         ) : null}
       </PageContainer>
-    </section>
+      </section>
+    </ScrollReveal>
   );
 }

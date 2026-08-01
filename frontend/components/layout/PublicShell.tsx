@@ -12,9 +12,9 @@ type PublicShellProps = {
 
 export function PublicShell({ children, session, hideFooter = false }: PublicShellProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-jp-page text-jp-text">
+    <div className="jp-page flex min-h-screen flex-col bg-jp-page text-jp-text">
       <SiteHeader session={session} />
-      <main id="main-content" className="flex-1">
+      <main id="main-content" className="jp-main flex-1">
         {children}
       </main>
       {hideFooter ? null : <SiteFooter />}

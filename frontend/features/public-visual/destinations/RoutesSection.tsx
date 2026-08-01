@@ -2,6 +2,7 @@
 
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
+import { ScrollReveal } from "@/features/motion";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
 import Link from "next/link";
@@ -25,7 +26,8 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
   };
 
   return (
-    <SectionContainer>
+    <ScrollReveal as="section">
+      <SectionContainer>
       <PageContainer>
         <PublicSectionHeader
           eyebrow={eyebrow}
@@ -80,5 +82,6 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
         </div>
       </PageContainer>
     </SectionContainer>
+    </ScrollReveal>
   );
 }

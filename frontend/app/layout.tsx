@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { AppInteractionProviders } from "@/components/providers/AppInteractionProviders";
 import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
 import { SkipLink } from "@/components/ui/SkipLink";
 import "./globals.css";
@@ -34,14 +35,16 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
         <ThemeProvider>
-          <SkipLink />
-          {children}
+          <AppInteractionProviders>
+            <SkipLink />
+            {children}
+          </AppInteractionProviders>
         </ThemeProvider>
       </body>
     </html>
