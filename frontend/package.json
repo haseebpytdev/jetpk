@@ -20,7 +20,9 @@
     "audit:visual:jp-ui-04a": "node scripts/capture-jp-ui-04a.mjs",
     "audit:visual:jp-ui-05": "node scripts/capture-jp-ui-05.mjs",
     "test:theme-02": "npm run build && playwright test tests/jp-public-next-theme-02.spec.ts -c playwright.theme-02.config.ts",
-    "audit:visual:jp-public-next-theme-02": "node scripts/capture-jp-public-next-theme-02.mjs"
+    "audit:visual:jp-public-next-theme-02": "node scripts/capture-jp-public-next-theme-02.mjs",
+    "test:theme-03": "npm run build && playwright test tests/jp-public-next-theme-03.spec.ts -c playwright.theme-03.config.ts",
+    "audit:visual:jp-public-next-theme-03": "node scripts/capture-jp-public-next-theme-03.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -38,6 +40,8 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.16.0",
     "eslint-config-next": "^15.1.9",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.16",
     "typescript": "^5.7.2"

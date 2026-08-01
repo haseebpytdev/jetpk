@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         destination: "/dev/jetpk-theme-lab",
       },
       {
+        source: "/__dev/jetpk-homepage-v2",
+        destination: "/dev/jetpk-homepage-v2",
+      },
+      {
         source: "/laravel/:path*",
         destination: `${laravelProxyTarget}/:path*`,
       },
