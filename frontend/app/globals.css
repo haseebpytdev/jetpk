@@ -126,6 +126,144 @@ body {
   }
 }
 
+/* Scroll reveal — content visible by default; JS enhances with motion */
+.jp-scroll-reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@supports (opacity: 1) {
+  .jp-scroll-reveal:not(.jp-scroll-reveal--reduced):not([data-revealed="true"]) {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity var(--jp-motion-standard) var(--jp-ease-decelerate),
+      transform var(--jp-motion-standard) var(--jp-ease-decelerate);
+  }
+
+  .jp-scroll-reveal.jp-reveal-visible,
+  .jp-scroll-reveal[data-revealed="true"] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jp-scroll-reveal--reduced {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Route navigation progress */
+@keyframes jp-route-progress {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleX(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(0.95);
+    opacity: 0.8;
+  }
+}
+
+.jp-route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 9999;
+  pointer-events: none;
+  transform-origin: left center;
+  background: var(--jp-brand);
+  animation: jp-route-progress var(--jp-motion-route) var(--jp-ease-standard) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-route-progress {
+    animation: none;
+    transform: scaleX(0.5);
+  }
+}
+
+/* Overlay motion */
+.jp-overlay-backdrop {
+  animation: jp-fade-in var(--jp-motion-fast) var(--jp-ease-standard);
+}
+
+.jp-overlay-panel {
+  animation: jp-overlay-enter var(--jp-motion-standard) var(--jp-ease-decelerate);
+}
+
+@keyframes jp-overlay-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.jp-drawer-panel {
+  animation: jp-drawer-enter var(--jp-motion-emphasized) var(--jp-ease-decelerate);
+}
+
+@keyframes jp-drawer-enter {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-overlay-backdrop,
+  .jp-overlay-panel,
+  .jp-drawer-panel {
+    animation: none;
+  }
+}
+
+/* Toast */
+@keyframes jp-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jp-toast-item {
+  animation: jp-toast-enter var(--jp-motion-fast) var(--jp-ease-decelerate);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-toast-item {
+    animation: none;
+  }
+}
+
+/* Booking progress fill */
+.jp-progress-fill {
+  transition: width var(--jp-motion-standard) var(--jp-ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-progress-fill {
+    transition: none;
+  }
+}
+
 .prose-jp p {
   @apply mb-4 leading-relaxed;
 }

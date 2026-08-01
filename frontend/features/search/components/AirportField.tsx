@@ -2,6 +2,7 @@
 
 import { IconButton } from "@/components/ui/IconButton";
 import { cn } from "@/lib/cn";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AirportSearchService } from "@/services/airports";
@@ -31,10 +32,16 @@ export function AirportField({
 }: AirportFieldProps) {
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value ? `${value.city} (${value.iata})` : "");
   const [activeIndex, setActiveIndex] = useState(0);
   const [results, setResults] = useState<Airport[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const debouncedQuery = useDebouncedValue(query, 280);
 
   const closeList = useCallback(() => {
     setOpen(false);
@@ -53,36 +60,52 @@ export function AirportField({
   }, [value]);
 
   useEffect(() => {
-    if (value && query === `${value.city} (${value.iata})`) {
+    if (value && debouncedQuery === `${value.city} (${value.iata})`) {
       return;
     }
 
-    const localResults = filterAirports(query);
+    const localResults = filterAirports(debouncedQuery);
     setResults(localResults);
     setActiveIndex(0);
+    setError(null);
 
-    let cancelled = false;
-    const normalized = query.trim();
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const requestId = ++requestIdRef.current;
+
+    const normalized = debouncedQuery.trim();
     if (normalized.length < 2) {
-      void AirportSearchService.listPopular().then((popular) => {
-        if (!cancelled && popular.length > 0) setResults(popular);
+      setLoading(true);
+      void AirportSearchService.listPopular(controller.signal).then((result) => {
+        if (requestId !== requestIdRef.current) return;
+        setLoading(false);
+        if (result.ok && result.data.length > 0) {
+          setResults(result.data);
+          setActiveIndex(0);
+        }
+        if (!result.ok && !result.aborted) setError(result.message);
       });
-      return () => {
-        cancelled = true;
-      };
+      return () => controller.abort();
     }
 
-    void AirportSearchService.search(normalized).then((remote) => {
-      if (!cancelled && remote.length > 0) {
-        setResults(remote);
-        setActiveIndex(0);
+    setLoading(true);
+    void AirportSearchService.search(normalized, controller.signal).then((result) => {
+      if (requestId !== requestIdRef.current) return;
+      setLoading(false);
+      if (result.ok) {
+        if (result.data.length > 0) {
+          setResults(result.data);
+          setActiveIndex(0);
+        }
+        setError(null);
+      } else if (!result.aborted) {
+        setError(result.message);
       }
     });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [query]);
+    return () => controller.abort();
+  }, [debouncedQuery, value]);
 
   const selectAirport = (airport: Airport) => {
     onChange(airport);
@@ -95,6 +118,11 @@ export function AirportField({
     setQuery(next);
     setOpen(true);
     if (!next.trim()) onChange(null);
+  };
+
+  const retrySearch = () => {
+    setError(null);
+    setQuery((current) => `${current}`);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -146,6 +174,7 @@ export function AirportField({
           aria-controls={listId}
           aria-autocomplete="list"
           aria-label={label}
+          aria-busy={loading}
           autoComplete="off"
           disabled={disabled}
           value={query}
@@ -174,7 +203,18 @@ export function AirportField({
           aria-label={`${label} suggestions`}
           className="absolute z-40 mt-1 max-h-60 w-full overflow-auto rounded-jp-md border border-jp-border bg-jp-surface py-1 shadow-jp-md"
         >
-          {results.length === 0 ? (
+          {loading ? (
+            <li className="px-3 py-2 text-jp-sm text-jp-muted" role="status" aria-live="polite">
+              Searching airports…
+            </li>
+          ) : error ? (
+            <li className="px-3 py-2 text-jp-sm">
+              <p className="text-jp-danger">{error}</p>
+              <button type="button" className="mt-1 text-jp-primary underline" onMouseDown={(e) => e.preventDefault()} onClick={retrySearch}>
+                Retry
+              </button>
+            </li>
+          ) : results.length === 0 ? (
             <li className="px-3 py-2 text-jp-sm text-jp-muted">No airports found</li>
           ) : (
             results.map((airport, index) => (

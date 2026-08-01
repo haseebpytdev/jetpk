@@ -155,11 +155,15 @@
   --jp-sidebar-width: 15rem;
 
   /* Motion */
-  --jp-motion-fast: 120ms;
-  --jp-motion-standard: 180ms;
+  --jp-motion-instant: 100ms;
+  --jp-motion-fast: 160ms;
+  --jp-motion-standard: 230ms;
+  --jp-motion-emphasized: 340ms;
+  --jp-motion-route: 240ms;
   --jp-motion-slow: 280ms;
   --jp-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --jp-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --jp-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
 }
 
 [data-theme="dark"] {

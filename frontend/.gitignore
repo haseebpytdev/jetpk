@@ -3,8 +3,9 @@ node_modules/
 out/
 .env
 .env.local
-test-results/
+.test-results/
 playwright-report/
 .visual-audit/
+.evidence/
 tsconfig.tsbuildinfo
 .playwright-report/
