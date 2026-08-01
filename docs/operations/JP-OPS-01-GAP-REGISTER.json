@@ -1,0 +1,291 @@
+{
+  "meta": {
+    "phase": "JP-OPS-01A",
+    "generated_at": "2026-08-01T21:00:00+00:00",
+    "baseline_sha": "cfd65a76b448ec7fb77fddfb4995f290b5d841b3",
+    "branch": "phase/jetpk-ops-01-full-stack-operational-audit",
+    "severity_counts": { "P0": 0, "P1": 7, "P2": 6, "P3": 1, "P4": 1 },
+    "gap_record_count": 15
+  },
+  "p0_findings": [],
+  "gaps": [
+    {
+      "gap_id": "JP-OPS-01-GAP-001",
+      "severity": "P1",
+      "surface": "dashboard_next",
+      "user_role": "platform_admin",
+      "route_page": "/{portal}/dashboard",
+      "expected_capability": "Operational mutations from Next.js dashboard",
+      "current_implementation": "GET /api/dashboard/* read-only; Blade admin/staff mutations operational",
+      "missing_connection": "No POST/PATCH dashboard mutation API",
+      "backend_endpoint": "admin/*, staff/*",
+      "frontend_component": "dashboard/features/*",
+      "evidence": {
+        "routes": ["routes/api-dashboard.php (GET only)", "routes/admin.php", "routes/staff.php"],
+        "controllers": ["App\\Http\\Controllers\\Api\\Dashboard\\*"],
+        "frontend": ["dashboard/lib/read-only/read-only-service.ts"],
+        "middleware": ["dashboard.permission", "account.type"],
+        "tests": ["dashboard/tests/read-only-*.smoke.spec.ts"]
+      },
+      "failure_mode": "presentation",
+      "production_reachable": true,
+      "recommended_phase": "JP-OPS-05",
+      "acceptance_criteria": "Each dashboard action maps to server-authoritative mutating endpoint with RBAC"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-002",
+      "severity": "P3",
+      "surface": "dashboard_next",
+      "user_role": "platform_admin",
+      "route_page": "dashboard/components/dashboard/header.tsx",
+      "expected_capability": "Session profile display without mock fallback",
+      "current_implementation": "layout.tsx calls getDashboardSession(); header uses mockUser only when session prop is null",
+      "missing_connection": "Fallback chrome label when session fetch fails",
+      "backend_endpoint": "GET api.dashboard.session",
+      "frontend_component": "dashboard/app/layout.tsx, dashboard/components/dashboard/header.tsx",
+      "evidence": {
+        "routes": ["api/dashboard/session"],
+        "controllers": ["DashboardSessionController@show"],
+        "frontend": ["dashboard/app/layout.tsx:17", "dashboard/components/dashboard/header.tsx:14-19"],
+        "middleware": ["auth", "agency.context"],
+        "tests": ["dashboard/tests/jp-ui-05a-hydration.spec.ts"]
+      },
+      "failure_mode": "presentation_only",
+      "production_reachable": true,
+      "exploit_or_integrity": "Does not affect authorization, ownership, tenant context, or mutation scope",
+      "recommended_phase": "JP-OPS-05",
+      "acceptance_criteria": "Header/sidebar show unavailable state when session fetch fails; no mock identity in live mode"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-003",
+      "severity": "P1",
+      "surface": "agent_next",
+      "user_role": "agent_owner",
+      "route_page": "/agent/staff",
+      "expected_capability": "Agent staff management UI",
+      "current_implementation": "Laravel agent/staff/* operational (Blade-capable); no Next.js page",
+      "missing_connection": "Next.js page and API client",
+      "backend_endpoint": "agent.staff.*",
+      "frontend_component": null,
+      "evidence": {
+        "routes": ["routes/agent.php:44-57"],
+        "controllers": ["AgentStaffController", "AgentStaffPermissionController"],
+        "middleware": ["agent.permission:agent.staff.manage"],
+        "policies": ["AgentStaffPolicy"],
+        "tests": ["tests/Feature/Agent/AgentStaffTest.php"]
+      },
+      "failure_mode": "missing_next_binding",
+      "production_reachable": true,
+      "recommended_phase": "JP-OPS-04",
+      "acceptance_criteria": "Next.js /agent/staff connected with permission gates"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-004",
+      "severity": "P2",
+      "surface": "agent_next",
+      "user_role": "agent_owner",
+      "route_page": "/agent/reports",
+      "expected_capability": "Agent reports dashboard",
+      "current_implementation": "GET /agent/reports behind agent.reports.view",
+      "missing_connection": "Next.js route",
+      "backend_endpoint": "agent.reports.index",
+      "evidence": {
+        "routes": ["routes/agent.php:98-100"],
+        "controllers": ["AgentReportsController@index"],
+        "middleware": ["agent.permission:agent.reports.view"],
+        "tests": ["tests/Feature/Agent/AgentPortalFinanceScenarioTest.php"]
+      },
+      "recommended_phase": "JP-OPS-04",
+      "acceptance_criteria": "Next.js reports page with empty/error states"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-005",
+      "severity": "P2",
+      "surface": "agent_next",
+      "user_role": "agent_owner",
+      "route_page": "/agent/commissions",
+      "expected_capability": "Commission statements UI",
+      "current_implementation": "agent/commissions/* behind agent.admin",
+      "missing_connection": "Next.js route",
+      "backend_endpoint": "agent.commissions.index",
+      "evidence": {
+        "routes": ["routes/agent.php:77-80"],
+        "controllers": ["AgentCommissionController"],
+        "middleware": ["agent.admin"],
+        "tests": ["tests/Feature/AgentCommissionLedgerTest.php"]
+      },
+      "recommended_phase": "JP-OPS-04",
+      "acceptance_criteria": "Agent owner views commissions in Next.js"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-006",
+      "severity": "P1",
+      "surface": "customer_next",
+      "user_role": "customer",
+      "route_page": "/customer/bookings/{reference}",
+      "expected_capability": "Cancellation request UI",
+      "current_implementation": "POST customer.bookings.cancellations.store exists",
+      "missing_connection": "customer-dashboard feature action",
+      "backend_endpoint": "customer.bookings.cancellations.store",
+      "evidence": {
+        "routes": ["routes/customer.php:39"],
+        "controllers": ["BookingCancellationController@store"],
+        "policies": ["BookingCancellationPolicy", "BookingPolicy"],
+        "frontend": ["frontend/features/customer-dashboard/ (no cancellation action)"],
+        "tests": ["tests/Feature/Jetpk/CustomerBookingOwnershipTest.php"]
+      },
+      "recommended_phase": "JP-OPS-03",
+      "acceptance_criteria": "Customer submits cancellation; server validates ownership"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-007",
+      "severity": "P2",
+      "surface": "customer_next",
+      "user_role": "customer",
+      "route_page": "/customer/travelers",
+      "expected_capability": "Saved travelers CRUD",
+      "current_implementation": "customer/travelers/* behind saved_travelers module",
+      "missing_connection": "Next.js page",
+      "backend_endpoint": "customer.travelers.*",
+      "evidence": {
+        "routes": ["routes/customer.php:41-48"],
+        "controllers": ["SavedTravelerController"],
+        "policies": ["SavedTravelerPolicy"],
+        "tests": ["tests/Feature/CustomerPortalAndGuestLookupTest.php"]
+      },
+      "recommended_phase": "JP-OPS-03",
+      "acceptance_criteria": "Next.js saved travelers CRUD with ownership"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-008",
+      "severity": "P4",
+      "surface": "public_b2c_next",
+      "user_role": "guest",
+      "route_page": "/booking/seats",
+      "expected_capability": "Seat selection when seat_map_available=true",
+      "current_implementation": "Intentionally omitted",
+      "missing_connection": "Supplier seat map contract",
+      "recommended_phase": "Deferred",
+      "acceptance_criteria": "Seats step only when Laravel returns seat_map_available=true"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-009",
+      "severity": "P1",
+      "surface": "supplier",
+      "user_role": "platform_admin",
+      "route_page": "IATI adapter",
+      "expected_capability": "Authenticated IATI search/book/ticket",
+      "current_implementation": "IatiFlightSupplierAdapter; auth unresolved",
+      "missing_connection": "Production IATI authentication",
+      "backend_endpoint": "App\\Services\\Suppliers\\Adapters\\IatiFlightSupplierAdapter",
+      "evidence": {
+        "adapters": ["app/Services/Suppliers/Adapters/IatiFlightSupplierAdapter.php"],
+        "commands": ["IatiAuditDocsCommand", "IatiPublicSearchFlowAuditCommand"],
+        "tests": ["tests/Feature/Iati* (audit commands, non-live)"]
+      },
+      "recommended_phase": "JP-OPS-06",
+      "acceptance_criteria": "IATI auth verified in staging without live mutation"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-010",
+      "severity": "P1",
+      "surface": "dashboard_next",
+      "user_role": "platform_admin",
+      "route_page": "/{portal}/dashboard/overview",
+      "expected_capability": "Authoritative KPIs in production",
+      "current_implementation": "resolveDataSourceMode() defaults to fixture when NEXT_PUBLIC_DASHBOARD_MODE!=live",
+      "missing_connection": "Production env gates NEXT_PUBLIC_DASHBOARD_MODE=live and NEXT_PUBLIC_USE_MOCK_DATA=false",
+      "backend_endpoint": "GET api.dashboard.overview",
+      "evidence": {
+        "frontend": ["dashboard/lib/read-only/data-source.ts:5-19", "dashboard/lib/preview.ts:3-6"],
+        "config": ["NEXT_PUBLIC_DASHBOARD_MODE", "NEXT_PUBLIC_USE_MOCK_DATA"],
+        "tests": ["dashboard/tests/jp-ui-05a-rbac.spec.ts (fixture preview)"]
+      },
+      "failure_mode": "misconfiguration_integrity",
+      "production_reachable": "Only if deploy omits live-mode env flags",
+      "exploit_or_integrity": "Fabricated KPIs mistaken for operational data when preview mode active in production",
+      "recommended_phase": "JP-OPS-05",
+      "acceptance_criteria": "Production deploy checklist enforces live mode; fixture path unreachable in production"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-011",
+      "severity": "P2",
+      "surface": "public_b2c_next",
+      "user_role": "guest",
+      "route_page": "/flights/return-options",
+      "expected_capability": "Supplier-validated return pairing",
+      "current_implementation": "POST flights.select-return-combo; supplier-dependent",
+      "evidence": {
+        "routes": ["flights.select-return-combo"],
+        "frontend": ["frontend/features/flight-results/services/flight-results-api.ts"],
+        "tests": ["tests/Feature/Sabre* return pairing tests"]
+      },
+      "recommended_phase": "JP-OPS-06",
+      "acceptance_criteria": "Return UX only when supplier validates pairing"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-012",
+      "severity": "P1",
+      "surface": "agent_next",
+      "user_role": "agent_staff",
+      "route_page": "/agent/bookings/create",
+      "expected_capability": "Agent booking create from Next.js",
+      "current_implementation": "agent.bookings.create/store; no Next.js entry",
+      "evidence": {
+        "routes": ["routes/agent.php:59-63"],
+        "controllers": ["AgentBookingController@create", "@store"],
+        "middleware": ["agent.permission:agent.bookings.create"],
+        "tests": ["tests/Feature/AgentBookingCreationTest.php"]
+      },
+      "recommended_phase": "JP-OPS-04",
+      "acceptance_criteria": "Permitted staff can initiate bookings from Next.js"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-013",
+      "severity": "P1",
+      "surface": "background",
+      "user_role": "platform_admin",
+      "route_page": "queues/scheduler",
+      "expected_capability": "Production queue workers and cron",
+      "current_implementation": "routes/console.php schedules defined",
+      "evidence": {
+        "config": ["routes/console.php", "config/queue.php"],
+        "classification": "CODE_READY_RUNTIME_UNVERIFIED"
+      },
+      "recommended_phase": "JP-OPS-06",
+      "acceptance_criteria": "Deploy checklist resolves REQUIRES_SERVER_CONFIGURATION"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-014",
+      "severity": "P2",
+      "surface": "public_b2c_next",
+      "user_role": "guest",
+      "route_page": "/groups/*",
+      "expected_capability": "Group ticketing E2E",
+      "current_implementation": "CODE_CONNECTED_AND_LOCALLY_VERIFIED; payment reconciliation partial",
+      "evidence": {
+        "routes": ["group-ticketing.booking.*"],
+        "frontend": ["frontend/features/group-ticketing/"],
+        "tests": ["frontend/tests/group-ticketing.spec.ts"]
+      },
+      "recommended_phase": "JP-OPS-06",
+      "acceptance_criteria": "Group payment state machine documented and verified"
+    },
+    {
+      "gap_id": "JP-OPS-01-GAP-015",
+      "severity": "P2",
+      "surface": "auth",
+      "user_role": "all",
+      "route_page": "/login/otp",
+      "expected_capability": "Production OTP channel",
+      "current_implementation": "Demo OTP patch preserved; EXTERNAL_DEPENDENCY_BLOCKED for production SMS/email",
+      "evidence": {
+        "routes": ["login.otp.verify", "login.otp.resend"],
+        "frontend": ["frontend/app/(auth)/login/otp/page.tsx"],
+        "tests": ["frontend/tests/jp-full-next-frontend/route-matrix.spec.ts"]
+      },
+      "recommended_phase": "JP-OPS-02",
+      "acceptance_criteria": "Production OTP provider configured without removing demo patch"
+    }
+  ]
+}
