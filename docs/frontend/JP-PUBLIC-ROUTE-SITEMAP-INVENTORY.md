@@ -294,7 +294,7 @@ All eleven are guarded server-side by `requireCustomerPortalAccess()` in `fronte
 | URL | Source file | Parameters | Backend authority | Fallback risk | Missing dependencies |
 |---|---|---|---|---|---|
 | `/customer` | `frontend/app/customer/page.tsx` | — | redirect only | Low | — |
-| `/customer/dashboard` | `frontend/app/customer/dashboard/page.tsx` | — | `GET /customer?format=json` | **High** — Laravel Blade dashboard | Overview CTA currently links dead `/flights/search` (Finding F3) |
+| `/customer/dashboard` | `frontend/app/customer/dashboard/page.tsx` | — | `GET /customer?format=json` | **High** — Laravel Blade dashboard | Overview CTA must retarget to `/#flight-search` (decision 3) |
 | `/customer/bookings` | `frontend/app/customer/bookings/page.tsx` | filters/paging | `GET /customer/bookings` | High | Approved list/table design |
 | `/customer/bookings/[reference]` | `frontend/app/customer/bookings/[reference]/page.tsx` | `reference` | `GET /customer/bookings/{ref}?format=json` | High | Emitted by `CustomerFacingEmailRenderer::customerBookingCta` |
 | `/customer/payments` | `frontend/app/customer/payments/page.tsx` | filters/paging | `GET /customer/payments` | High | — |
@@ -316,7 +316,7 @@ All fifteen are guarded server-side by `requireAgentPortalAccess()` in `frontend
 | URL | Source file | Parameters | Backend authority | Fallback risk | Missing dependencies |
 |---|---|---|---|---|---|
 | `/agent` | `frontend/app/agent/page.tsx` | — | redirect only | Low | — |
-| `/agent/dashboard` | `frontend/app/agent/dashboard/page.tsx` | — | `GET /agent?format=json` (incl. capabilities/navigation) | **High** — Laravel Blade dashboard | Overview CTA links dead `/flights/search` (Finding F3) |
+| `/agent/dashboard` | `frontend/app/agent/dashboard/page.tsx` | — | `GET /agent?format=json` (incl. capabilities/navigation) | **High** — Laravel Blade dashboard | Overview CTA must retarget to `/#flight-search` (decision 3) |
 | `/agent/bookings` | `frontend/app/agent/bookings/page.tsx` | filters/paging | `GET /agent/bookings` (`agent.bookings.view`) | High | — |
 | `/agent/bookings/[reference]` | `frontend/app/agent/bookings/[reference]/page.tsx` | `reference` | `GET /agent/bookings/{ref}?format=json` | High | — |
 | `/agent/wallet` | `frontend/app/agent/wallet/page.tsx` | — | `GET /agent/wallet?format=json` | High | Wallet behavior must not change during the rebuild |
