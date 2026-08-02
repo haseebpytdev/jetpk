@@ -20,7 +20,7 @@
 | `agent.agency.view` | View agency | ✓ | ✓ | `agent/agency` | — | ✓ | ✗ |
 | `agent.agency.edit` | Edit agency | ✓ | ✗ | `agent/agency/edit` | — | ✓ | ✗ |
 
-\*Staff cannot be granted `staff.manage` or `agency.edit` per `staffSelectable()` filter.
+\*Staff can be granted `staff.manage` via `staffSelectable()`; owner-only financial settings remain enforced by policy.
 
 ## Agency roles (`App\Enums\AgencyRole`)
 

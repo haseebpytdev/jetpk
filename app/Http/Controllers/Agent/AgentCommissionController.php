@@ -2,32 +2,45 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Controller;
 use App\Models\AgentCommissionStatement;
 use App\Services\Agents\AgentCommissionService;
+use App\Support\AgentPortal\AgentPortalCommissionPresenter;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class AgentCommissionController extends Controller
 {
+    use RespondsWithAgentPortalJson;
+
     public function __construct(
         protected AgentCommissionService $commissionService,
+        protected AgentPortalCommissionPresenter $commissionPresenter,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $agent = auth()->user()->agent();
         abort_if($agent === null, 403);
         Gate::authorize('view', $agent);
 
         $agent->load(['commissionEntries.booking', 'commissionStatements']);
-        $entries = $agent->commissionEntries->sortByDesc('created_at');
+        $entries = $agent->commissionEntries;
+        $statements = $agent->commissionStatements;
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson(
+                $this->commissionPresenter->presentIndex($agent, $entries, $statements),
+            );
+        }
 
         $viewData = [
             'agent' => $agent,
-            'entries' => $entries,
-            'statements' => $agent->commissionStatements->sortByDesc('created_at'),
+            'entries' => $entries->sortByDesc('created_at'),
+            'statements' => $statements->sortByDesc('created_at'),
             'balance' => $this->commissionService->calculateBalance($agent),
             'pending' => (float) $entries->where('status', 'pending')->sum('commission_amount'),
             'approved' => (float) $entries->where('status', 'approved')->sum('commission_amount'),
@@ -37,9 +50,14 @@ class AgentCommissionController extends Controller
         return view(client_view('commissions.index', 'agent'), $viewData);
     }
 
-    public function showStatement(Request $request, AgentCommissionStatement $statement): View
+    public function showStatement(Request $request, AgentCommissionStatement $statement): View|JsonResponse
     {
         Gate::authorize('view', $statement);
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson($this->commissionPresenter->presentStatement($statement));
+        }
+
         $statement->load(['agent.user', 'entries.booking']);
 
         $viewData = [

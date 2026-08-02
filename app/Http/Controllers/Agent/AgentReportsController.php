@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Agent;
 
 use App\Enums\BookingStatus;
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Services\Reports\BookingReportService;
+use App\Support\AgentPortal\AgentPortalReportsPresenter;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -15,11 +18,14 @@ use Illuminate\Support\Facades\Gate;
  */
 class AgentReportsController extends Controller
 {
+    use RespondsWithAgentPortalJson;
+
     public function __construct(
         protected BookingReportService $bookingReportService,
+        protected AgentPortalReportsPresenter $reportsPresenter,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAgencyReports', Booking::class);
 
@@ -29,6 +35,10 @@ class AgentReportsController extends Controller
         $allowedTabs = ['overview', 'sales', 'payments', 'bookings', 'routes', 'refunds'];
         if (! in_array($tab, $allowedTabs, true)) {
             $tab = 'overview';
+        }
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson($this->reportsPresenter->present($report, $tab));
         }
 
         $viewData = array_merge($report, [

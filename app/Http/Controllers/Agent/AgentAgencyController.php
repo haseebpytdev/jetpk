@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Agent\UpdateAgentAgencyRequest;
 use App\Models\Agency;
@@ -10,8 +11,10 @@ use App\Models\Agent;
 use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Agents\AgentWalletService;
 use App\Support\Agencies\AgencyPrefixService;
+use App\Support\AgentPortal\AgentPortalAgencyPresenter;
 use App\Support\Agents\AgentPermission;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -22,12 +25,15 @@ use Illuminate\Support\Facades\Storage;
  */
 class AgentAgencyController extends Controller
 {
+    use RespondsWithAgentPortalJson;
+
     public function __construct(
         protected AgencyBrandingService $brandingService,
         protected AgentWalletService $walletService,
+        protected AgentPortalAgencyPresenter $agencyPresenter,
     ) {}
 
-    public function show(Request $request): View
+    public function show(Request $request): View|JsonResponse
     {
         [$agent, $agency] = $this->resolveAgentAgency();
         Gate::authorize('view', $agent);
@@ -36,6 +42,17 @@ class AgentAgencyController extends Controller
         $details = $this->buildDetails($agent, $agency, $settings);
         $canViewWallet = auth()->user()?->hasAgentPermission(AgentPermission::WalletView) ?? false;
         $walletSummary = $canViewWallet ? $this->walletService->summary($agent) : [];
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson(
+                $this->agencyPresenter->presentShow(
+                    $details,
+                    Gate::allows('updateAgency', $agent),
+                    $canViewWallet,
+                    $walletSummary !== [] ? $walletSummary : null,
+                ),
+            );
+        }
 
         $viewData = [
             'details' => $details,
@@ -47,13 +64,19 @@ class AgentAgencyController extends Controller
         return view(client_view('agency', 'agent'), $viewData);
     }
 
-    public function edit(Request $request): View
+    public function edit(Request $request): View|JsonResponse
     {
         [$agent, $agency] = $this->resolveAgentAgency();
         Gate::authorize('updateAgency', $agent);
 
         $settings = $this->brandingService->getSettingsForAgency($agency);
         $details = $this->buildDetails($agent, $agency, $settings);
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson(
+                $this->agencyPresenter->presentEditForm($details, $agency, $agent),
+            );
+        }
 
         $viewData = [
             'details' => $details,
@@ -62,7 +85,7 @@ class AgentAgencyController extends Controller
         return view(client_view('agency-edit', 'agent'), $viewData);
     }
 
-    public function update(UpdateAgentAgencyRequest $request): RedirectResponse
+    public function update(UpdateAgentAgencyRequest $request): RedirectResponse|JsonResponse
     {
         [$agent] = $this->resolveAgentAgency();
         Gate::authorize('updateAgency', $agent);
@@ -103,6 +126,18 @@ class AgentAgencyController extends Controller
             && AgencyPrefixService::canAgentSetPrefix($agency)
         ) {
             AgencyPrefixService::savePrefix($agency, (string) $validated['code_prefix']);
+        }
+
+        if ($this->wantsAgentPortalJson($request)) {
+            $agency = $agent->agency;
+            abort_if($agency === null, 404);
+            $settings = $this->brandingService->getSettingsForAgency($agency);
+
+            return $this->agentPortalJson([
+                'ok' => true,
+                'message' => 'Agency profile updated.',
+                'details' => $this->buildDetails($agent->fresh(), $agency, $settings),
+            ]);
         }
 
         return redirect()

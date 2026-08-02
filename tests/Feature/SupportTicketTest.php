@@ -182,7 +182,7 @@ class SupportTicketTest extends TestCase
         [$customer] = $this->customerUser();
         [$agent] = $this->agentUser();
         $staff = $this->staffUser($customer->current_agency_id);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
 
         $this->actingAs($customer)->get(route('customer.support.tickets.index'))->assertOk();
         $this->actingAs($agent)->get(route('agent.support.tickets.index'))->assertOk();

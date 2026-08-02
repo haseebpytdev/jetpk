@@ -72,7 +72,12 @@
                             <td data-label="Actions"><a href="{{ client_route('agent.bookings.show', ['booking' => $booking]) }}" class="jp-portal-btn jp-portal-btn--ghost jp-portal-btn--sm">Open</a></td>
                         </tr>
                     @empty
-                        <tr><td colspan="9">@include('themes.frontend.jetpakistan.components.portal.empty-state', ['title' => 'No bookings found', 'message' => 'Try another filter or create a new booking.'])</td></tr>
+                        <tr><td colspan="9">@include('themes.frontend.jetpakistan.components.portal.empty-state', [
+                            'title' => 'No bookings found',
+                            'message' => 'Try another filter or create a new booking.',
+                            'actionUrl' => auth()->user()?->hasAgentPermission(\App\Support\Agents\AgentPermission::BookingsCreate) ? client_route('agent.bookings.create') : null,
+                            'actionLabel' => auth()->user()?->hasAgentPermission(\App\Support\Agents\AgentPermission::BookingsCreate) ? 'New booking' : null,
+                        ])</td></tr>
                     @endforelse
                 </tbody>
             </table>

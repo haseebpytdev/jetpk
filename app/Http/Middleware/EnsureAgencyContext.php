@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Enums\AccountType;
+use App\Support\AgentPortal\AgentPortalAccess;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +23,10 @@ class EnsureAgencyContext
         }
 
         if ($user->current_agency_id !== null) {
+            if ($user->isAgentPortalUser()) {
+                AgentPortalAccess::assertUsable($user);
+            }
+
             return $next($request);
         }
 
@@ -32,6 +37,10 @@ class EnsureAgencyContext
         }
 
         $user->forceFill(['current_agency_id' => $agency->id])->save();
+
+        if ($user->isAgentPortalUser()) {
+            AgentPortalAccess::assertUsable($user);
+        }
 
         return $next($request);
     }

@@ -38,23 +38,21 @@ export function AgentDashboardShell({
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [capabilities, setCapabilities] = useState<AgentCapabilities | null>(initialCapabilities);
+  const [capabilitiesLoading, setCapabilitiesLoading] = useState(!initialCapabilities);
 
   const closeDrawer = () => setDrawerOpen(false);
 
   useEffect(() => {
     if (initialCapabilities) return;
     void (async () => {
+      setCapabilitiesLoading(true);
       const result = await fetchAgentCapabilities();
       if (result.ok) setCapabilities(result.data);
+      setCapabilitiesLoading(false);
     })();
   }, [initialCapabilities]);
 
-  const navItems: PortalNavItem[] = (capabilities?.navigation ?? [
-    { code: "overview", label: "Overview", href: "/agent/dashboard", available: true },
-    { code: "bookings", label: "Bookings", href: "/agent/bookings", available: true },
-    { code: "profile", label: "Profile", href: "/agent/profile", available: true },
-    { code: "security", label: "Security", href: "/agent/security", available: true },
-  ] as AgentNavigationItem[])
+  const navItems: PortalNavItem[] = (capabilities?.navigation ?? [])
     .filter((item) => item.available)
     .map((item) => ({
       href: item.href,
@@ -121,6 +119,11 @@ export function AgentDashboardShell({
       content={
         <PortalContent titleId="agent-page-title">
           <PortalPageHeader title={title} id="agent-page-title" />
+          {capabilitiesLoading && !capabilities ? (
+            <p className="text-jp-sm text-jp-muted" data-testid="agent-capabilities-loading">
+              Loading navigation…
+            </p>
+          ) : null}
           {children}
         </PortalContent>
       }

@@ -62,4 +62,13 @@ GAP-004, GAP-005, GAP-007, GAP-011, GAP-014 — see JSON for full evidence block
 | GAP-006 | **CLOSED** | JSON cancellation POST + `BookingCancellationPanel`; request ≠ completed cancellation; live supplier cancel deferred |
 | GAP-007 | **CLOSED** | `CustomerPortalTravelersPresenter` JSON + `/customer/travelers` Next CRUD; ownership enforced; list masks document numbers |
 
-**Markdown/JSON consistency:** GAP-006 and GAP-007 carry matching `jp_ops_03_status: CLOSED` and `closure_notes` in [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json).
+## JP-OPS-04 closures (2026-08-02)
+
+| ID | Status | Notes |
+|----|--------|-------|
+| GAP-003 | **CLOSED** | `/agent/staff` Next + additive JSON; owner/staff RBAC; duplicate staff 409 |
+| GAP-004 | **CLOSED** | `/agent/reports` Next + agency-scoped JSON summary |
+| GAP-005 | **CLOSED** | `/agent/commissions` Next + owner-only JSON read |
+| GAP-012 | **CLOSED** | `/agent/bookings/create` Next entry activates `AgentBookingContext`; search handoff only |
+
+**Markdown/JSON consistency:** GAP-003/004/005/012 carry matching `jp_ops_04_status: CLOSED` in [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json).

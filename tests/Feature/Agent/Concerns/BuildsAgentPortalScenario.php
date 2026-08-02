@@ -12,6 +12,7 @@ use App\Enums\SupportTicketCategory;
 use App\Enums\SupportTicketStatus;
 use App\Enums\UserAccountStatus;
 use App\Models\Agency;
+use App\Models\AgencyUser;
 use App\Models\Agent;
 use App\Models\AgentDepositRequest;
 use App\Models\AgentWallet;
@@ -138,7 +139,7 @@ trait BuildsAgentPortalScenario
      */
     protected function createAgentStaffUser(Agent $agent, string $email, array $permissions, string $name): User
     {
-        return User::query()->create([
+        $staff = User::query()->create([
             'name' => $name,
             'username' => str_replace('@', '-', $email),
             'email' => $email,
@@ -151,6 +152,13 @@ trait BuildsAgentPortalScenario
                 'agent_permissions' => $permissions,
             ],
         ]);
+
+        AgencyUser::query()->updateOrCreate(
+            ['agency_id' => $agent->agency_id, 'user_id' => $staff->id],
+            ['role' => AccountType::AgentStaff->value],
+        );
+
+        return $staff;
     }
 
     protected function createScenarioWallet(Agent $agent, float $balance, ?float $creditLimit): AgentWallet

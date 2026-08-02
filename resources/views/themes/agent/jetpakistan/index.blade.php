@@ -61,8 +61,8 @@
                 @include('themes.frontend.jetpakistan.components.portal.empty-state', [
                     'title' => 'No bookings yet',
                     'message' => 'Create a booking to see it here.',
-                    'actionUrl' => client_route('agent.bookings.create'),
-                    'actionLabel' => 'New booking',
+                    'actionUrl' => ($perm['bookings_create'] ?? false) ? client_route('agent.bookings.create') : null,
+                    'actionLabel' => ($perm['bookings_create'] ?? false) ? 'New booking' : null,
                 ])
             </div>
         @else
