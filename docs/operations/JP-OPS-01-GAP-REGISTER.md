@@ -54,3 +54,12 @@ GAP-004, GAP-005, GAP-007, GAP-011, GAP-014 — see JSON for full evidence block
 |----|----------|---------|
 | GAP-002 | P3 | Dashboard chrome mock fallback when session null |
 | GAP-008 | P4 | Seat selection intentionally unavailable |
+
+## JP-OPS-03 closures (2026-08-02)
+
+| ID | Status | Notes |
+|----|--------|-------|
+| GAP-006 | **CLOSED** | JSON cancellation POST + `BookingCancellationPanel`; request ≠ completed cancellation; live supplier cancel deferred |
+| GAP-007 | **CLOSED** | `CustomerPortalTravelersPresenter` JSON + `/customer/travelers` Next CRUD; ownership enforced; list masks document numbers |
+
+**Markdown/JSON consistency:** GAP-006 and GAP-007 carry matching `jp_ops_03_status: CLOSED` and `closure_notes` in [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json).

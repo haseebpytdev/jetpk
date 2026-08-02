@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import {
+  closeSupportTicket,
   createSupportTicket,
+  customerApiErrorMessage,
   fetchSupportCases,
   fetchSupportCreateForm,
   fetchSupportCaseDetail,
@@ -31,7 +33,7 @@ export function CustomerSupportPage({ session }: { session: PublicSession }) {
   const load = async () => {
     setLoading(true);
     const result = await fetchSupportCases();
-    if (!result.ok) setError(result.message);
+    if (!result.ok) setError(customerApiErrorMessage(result));
     else setTickets(result.data.tickets);
     setLoading(false);
   };
@@ -101,7 +103,7 @@ function NewSupportRequestForm({ onCreated }: { onCreated: () => void }) {
       body: String(form.get("body") ?? ""),
       booking_id: bookingId ? Number(bookingId) : null,
     });
-    if (!result.ok) setError(result.message);
+    if (!result.ok) setError(customerApiErrorMessage(result));
     else onCreated();
     setSubmitting(false);
   };
@@ -152,9 +154,11 @@ export function SupportCaseDetailPage({ session, reference }: { session: PublicS
   const [reply, setReply] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const [closing, setClosing] = useState(false);
+
   const load = async () => {
     const result = await fetchSupportCaseDetail(reference);
-    if (!result.ok) setError(result.message);
+    if (!result.ok) setError(customerApiErrorMessage(result));
     else {
       setTicket(result.data.ticket);
       setConversation(result.data.conversation);
@@ -170,12 +174,21 @@ export function SupportCaseDetailPage({ session, reference }: { session: PublicS
     if (!reply.trim() || submitting) return;
     setSubmitting(true);
     const result = await replySupportTicket(reference, reply.trim());
-    if (!result.ok) setError(result.message);
+    if (!result.ok) setError(customerApiErrorMessage(result));
     else {
       setReply("");
       await load();
     }
     setSubmitting(false);
+  };
+
+  const handleClose = async () => {
+    if (closing || !ticket?.can_close) return;
+    setClosing(true);
+    const result = await closeSupportTicket(reference);
+    if (!result.ok) setError(customerApiErrorMessage(result));
+    else await load();
+    setClosing(false);
   };
 
   return (
@@ -184,7 +197,14 @@ export function SupportCaseDetailPage({ session, reference }: { session: PublicS
       {ticket ? (
         <div data-testid="support-case-detail">
           <h2 className="text-jp-base font-semibold">{ticket.subject}</h2>
-          <StatusBadge status={ticket.status} />
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <StatusBadge status={ticket.status} />
+            {ticket.can_close ? (
+              <PrimaryButton type="button" onClick={() => void handleClose()} disabled={closing} data-testid="close-support-ticket">
+                {closing ? "Closing…" : "Close ticket"}
+              </PrimaryButton>
+            ) : null}
+          </div>
           <div className="mt-6 space-y-3">
             {conversation.map((message) => (
               <article key={message.id} className="rounded-jp-md border border-jp-border bg-jp-surface-muted p-3">

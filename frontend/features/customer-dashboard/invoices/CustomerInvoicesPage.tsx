@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchCustomerInvoices } from "../services/customer-dashboard-api";
+import { customerApiErrorMessage, fetchCustomerInvoices } from "../services/customer-dashboard-api";
 import { CustomerDashboardErrorState, CustomerDashboardShell, CustomerEmptyState } from "../shell/CustomerDashboardShell";
 import type { CustomerInvoice } from "../types";
 import type { PublicSession } from "@/types/session";
@@ -15,7 +15,7 @@ export function CustomerInvoicesPage({ session }: { session: PublicSession }) {
   useEffect(() => {
     void (async () => {
       const result = await fetchCustomerInvoices();
-      if (!result.ok) setError(result.message);
+      if (!result.ok) setError(customerApiErrorMessage(result));
       else setInvoices(result.data.invoices);
       setLoading(false);
     })();

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchDashboardOverview } from "../services/customer-dashboard-api";
+import { customerApiErrorMessage, fetchDashboardOverview } from "../services/customer-dashboard-api";
 import {
   CustomerDashboardErrorState,
   CustomerDashboardShell,
@@ -22,7 +22,7 @@ export function DashboardOverviewPage({ session }: { session: PublicSession }) {
     setError(null);
     const result = await fetchDashboardOverview();
     if (!result.ok) {
-      setError(result.message);
+      setError(customerApiErrorMessage(result));
       setData(null);
     } else {
       setData(result.data);
@@ -35,7 +35,11 @@ export function DashboardOverviewPage({ session }: { session: PublicSession }) {
   }, []);
 
   return (
-    <CustomerDashboardShell session={session} title="Dashboard overview" unreadNotifications={data?.metrics.unread_notifications ?? 0}>
+    <CustomerDashboardShell
+      session={session}
+      title="Dashboard overview"
+      unreadNotifications={data?.notifications_available ? data.metrics.unread_notifications : 0}
+    >
       {loading ? <p className="text-jp-sm text-jp-muted">Loading overview…</p> : null}
       {error ? <CustomerDashboardErrorState message={error} onRetry={load} /> : null}
       {data ? (
@@ -46,7 +50,9 @@ export function DashboardOverviewPage({ session }: { session: PublicSession }) {
               { label: "Pending payment", value: data.metrics.pending_payment },
               { label: "Ticketing pending", value: data.metrics.ticketing_pending },
               { label: "Open support cases", value: data.metrics.open_support_cases },
-              { label: "Unread notifications", value: data.metrics.unread_notifications },
+              ...(data.notifications_available
+                ? [{ label: "Unread notifications", value: data.metrics.unread_notifications }]
+                : []),
             ].map((card) => (
               <div key={card.label} className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm" data-testid="dashboard-metric-card">
                 <p className="text-jp-xs uppercase tracking-wide text-jp-muted">{card.label}</p>

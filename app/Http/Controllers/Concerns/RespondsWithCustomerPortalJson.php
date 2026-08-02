@@ -17,7 +17,10 @@ trait RespondsWithCustomerPortalJson
      */
     protected function customerPortalJson(array $payload, int $status = 200): JsonResponse
     {
-        return response()->json($payload, $status);
+        return response()
+            ->json($payload, $status)
+            ->header('Cache-Control', 'no-store, private')
+            ->header('Pragma', 'no-cache');
     }
 
     /**
@@ -42,6 +45,9 @@ trait RespondsWithCustomerPortalJson
             $payload['errors'] = $errors;
         }
 
-        return response()->json($payload, $status);
+        return response()
+            ->json($payload, $status)
+            ->header('Cache-Control', 'no-store, private')
+            ->header('Pragma', 'no-cache');
     }
 }

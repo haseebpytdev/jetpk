@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { updateCustomerPassword } from "../services/customer-dashboard-api";
+import { customerApiErrorMessage, updateCustomerPassword } from "../services/customer-dashboard-api";
 import { CustomerDashboardErrorState, CustomerDashboardShell } from "../shell/CustomerDashboardShell";
 import type { PublicSession } from "@/types/session";
 
@@ -26,7 +26,7 @@ export function CustomerSecurityPage({ session }: { session: PublicSession }) {
       password: String(form.get("password") ?? ""),
       password_confirmation: String(form.get("password_confirmation") ?? ""),
     });
-    if (!result.ok) setError(result.message);
+    if (!result.ok) setError(customerApiErrorMessage(result));
     else {
       setSuccess("Password updated successfully.");
       event.currentTarget.reset();

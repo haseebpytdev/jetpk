@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchNotifications } from "../services/customer-dashboard-api";
+import { customerApiErrorMessage, fetchNotifications } from "../services/customer-dashboard-api";
 import { CustomerDashboardErrorState, CustomerDashboardShell, CustomerEmptyState } from "../shell/CustomerDashboardShell";
 import type { PublicSession } from "@/types/session";
 
@@ -13,7 +13,7 @@ export function CustomerNotificationsPage({ session }: { session: PublicSession 
   useEffect(() => {
     void (async () => {
       const result = await fetchNotifications();
-      if (!result.ok) setError(result.message);
+      if (!result.ok) setError(customerApiErrorMessage(result));
       else setMessage(result.data.message ?? null);
       setLoading(false);
     })();

@@ -69,15 +69,22 @@ test.describe("JP-FE-04A customer portal route closure", () => {
 
     await page.goto("/customer/bookings");
     await expect(page).toHaveURL(/\/login$/);
-    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /log in to your account/i })).toBeVisible();
   });
 
   test("agent is not treated as customer on /customer/bookings", async ({ page }) => {
+    await page.route("**/laravel/agent?format=json", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, metrics: {}, recent_bookings: [], quick_actions: [] }),
+      });
+    });
     await setSessionFixture(page, "agent");
 
     await page.goto("/customer/bookings");
-    await expect(page).toHaveURL(/\/agent$/);
-    await expect(page.getByRole("heading", { name: /agent portal/i })).toBeVisible();
+    await expect(page).toHaveURL(/\/agent\/dashboard$/);
+    await expect(page.getByTestId("agent-dashboard-shell")).toBeVisible();
   });
 
   test("/customer redirects to /customer/dashboard without loop", async ({ page }) => {
@@ -89,7 +96,7 @@ test.describe("JP-FE-04A customer portal route closure", () => {
   });
 
   test("customer login handoff destination /customer/bookings is owned", async ({ page }) => {
-    await setSessionFixture(page, "customer");
+    await setSessionFixture(page, "anonymous");
     await page.route("**/laravel/api/public/content/csrf-token", async (route) => {
       await route.fulfill({
         status: 200,
@@ -106,11 +113,12 @@ test.describe("JP-FE-04A customer portal route closure", () => {
     });
 
     await page.goto("/login");
-    await page.locator("#main-content").getByLabel(/email or username/i).fill("ayesha@example.com");
-    await page.locator("#main-content").getByLabel(/^password/i).fill("SecretPass1");
+    await page.getByRole("textbox", { name: /email or username/i }).fill("ayesha@example.com");
+    await page.getByLabel(/^password/i).fill("SecretPass1");
     await page.getByRole("button", { name: /sign in/i }).click();
+    await setSessionFixture(page, "customer");
 
     await expect(page).toHaveURL(/\/customer\/bookings$/);
-    await expect(page.getByRole("heading", { name: /my bookings/i })).toBeVisible();
+    await expect(page.getByTestId("customer-dashboard-shell")).toBeVisible();
   });
 });

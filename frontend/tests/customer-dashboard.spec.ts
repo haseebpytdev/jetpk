@@ -98,4 +98,24 @@ test.describe("JP-FE-11 customer dashboard", () => {
     await page.goto("/customer");
     await expect(page).toHaveURL(/\/customer\/dashboard$/);
   });
+
+  test("customer travelers page loads", async ({ page }) => {
+    await page.route("**/laravel/customer/travelers?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          travelers: [],
+          default_traveler: null,
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 0, from: null, to: null },
+          countries: [{ code: "PK", name: "Pakistan" }],
+          create_url: "/laravel/customer/travelers",
+        }),
+      });
+    });
+    await page.goto("/customer/travelers");
+    await expect(page.getByRole("heading", { name: "Saved travelers", exact: true })).toBeVisible();
+    await expect(page.getByTestId("customer-empty-state")).toBeVisible();
+  });
 });

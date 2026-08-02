@@ -14,6 +14,7 @@ const NEXT_BOOKING_PREFIXES = [
   "/customer/bookings",
   "/customer/payments",
   "/customer/invoices",
+  "/customer/travelers",
   "/customer/profile",
   "/customer/security",
   "/customer/support",

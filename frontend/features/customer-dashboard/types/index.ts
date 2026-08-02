@@ -139,3 +139,75 @@ export type CustomerDashboardError = {
   code?: string;
   errors?: Record<string, string[]>;
 };
+
+export type CustomerSavedTraveler = {
+  id: number | null;
+  title: string;
+  first_name: string;
+  last_name: string;
+  gender: string;
+  date_of_birth?: string | null;
+  nationality: string;
+  document_type: string;
+  document_number?: string | null;
+  document_number_masked?: string | null;
+  document_expiry?: string | null;
+  issuing_country?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  is_default: boolean;
+  edit_url?: string;
+  delete_url?: string;
+};
+
+export type CustomerBookingCapabilities = {
+  can_view: boolean;
+  can_download_invoice: boolean;
+  can_download_ticket: boolean;
+  can_request_cancellation: boolean;
+  can_view_cancellation: boolean;
+  can_request_refund: boolean;
+  can_view_refund: boolean;
+  can_retry_payment: boolean;
+  can_contact_support: boolean;
+  reason_codes: Record<string, string | null>;
+  mutation_urls: {
+    request_cancellation?: string | null;
+  };
+  download_urls: {
+    invoice?: string | null;
+    ticket?: string | null;
+  };
+  navigation_urls: {
+    view_invoice?: string;
+    contact_support?: string;
+    back_to_bookings?: string;
+  };
+};
+
+export type CustomerCancellationSummary = {
+  state: string;
+  label: string;
+  message: string;
+  request?: {
+    id: number;
+    status: string;
+    status_label: string;
+    requested_at?: string | null;
+  } | null;
+};
+
+export type CustomerRefundSummary = {
+  state: string;
+  label: string;
+  message: string;
+  can_request: boolean;
+  request?: {
+    id: number;
+    status: string;
+    status_label: string;
+    amount?: number | null;
+    currency?: string | null;
+    updated_at?: string | null;
+  } | null;
+};

@@ -2,19 +2,28 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Http\Controllers\Concerns\RespondsWithCustomerPortalJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Travelers\UpsertSavedTravelerRequest;
 use App\Models\SavedTraveler;
 use App\Models\User;
+use App\Support\CustomerPortal\CustomerPortalTravelersPresenter;
 use App\Support\Geo\CountryList;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class SavedTravelerController extends Controller
 {
-    public function index(Request $request): View
+    use RespondsWithCustomerPortalJson;
+
+    public function __construct(
+        protected CustomerPortalTravelersPresenter $travelersPresenter,
+    ) {}
+
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', SavedTraveler::class);
 
@@ -31,6 +40,12 @@ class SavedTravelerController extends Controller
             ->orderBy('first_name')
             ->paginate(20);
 
+        if ($this->wantsCustomerPortalJson($request)) {
+            $default = $defaultTraveler['source'] === 'saved' ? $defaultTraveler['traveler'] : null;
+
+            return $this->customerPortalJson($this->travelersPresenter->presentIndex($travelers, $default));
+        }
+
         $viewData = [
             'travelers' => $travelers,
             'defaultTraveler' => $defaultTraveler,
@@ -41,9 +56,13 @@ class SavedTravelerController extends Controller
         return view(client_view('travelers.index', 'customer'), $viewData);
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): View|JsonResponse
     {
         Gate::authorize('create', SavedTraveler::class);
+
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->travelersPresenter->presentForm());
+        }
 
         $viewData = [
             'traveler' => new SavedTraveler,
@@ -55,7 +74,7 @@ class SavedTravelerController extends Controller
         return view(client_view('travelers.create', 'customer'), $viewData);
     }
 
-    public function store(UpsertSavedTravelerRequest $request): RedirectResponse
+    public function store(UpsertSavedTravelerRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', SavedTraveler::class);
 
@@ -70,14 +89,22 @@ class SavedTravelerController extends Controller
 
         $this->syncDefaultFlag($user->id, $user->current_agency_id, $traveler);
 
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->travelersPresenter->presentStored($traveler), 201);
+        }
+
         return redirect()
             ->route('customer.travelers.index')
             ->with('status', 'traveler-saved');
     }
 
-    public function edit(Request $request, SavedTraveler $traveler): View
+    public function edit(Request $request, SavedTraveler $traveler): View|JsonResponse
     {
         Gate::authorize('update', $traveler);
+
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->travelersPresenter->presentForm($traveler));
+        }
 
         $viewData = [
             'traveler' => $traveler,
@@ -89,23 +116,35 @@ class SavedTravelerController extends Controller
         return view(client_view('travelers.edit', 'customer'), $viewData);
     }
 
-    public function update(UpsertSavedTravelerRequest $request, SavedTraveler $traveler): RedirectResponse
+    public function update(UpsertSavedTravelerRequest $request, SavedTraveler $traveler): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $traveler);
 
         $traveler->update($request->travelerPayload());
         $this->syncDefaultFlag($traveler->user_id, $traveler->agency_id, $traveler);
 
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson($this->travelersPresenter->presentStored($traveler->fresh()));
+        }
+
         return redirect()
             ->route('customer.travelers.index')
             ->with('status', 'traveler-saved');
     }
 
-    public function destroy(SavedTraveler $traveler): RedirectResponse
+    public function destroy(Request $request, SavedTraveler $traveler): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $traveler);
 
         $traveler->delete();
+
+        if ($this->wantsCustomerPortalJson($request)) {
+            return $this->customerPortalJson([
+                'ok' => true,
+                'message' => 'Traveler removed.',
+                'redirect_url' => '/customer/travelers',
+            ]);
+        }
 
         return redirect()
             ->route('customer.travelers.index')

@@ -90,8 +90,13 @@ class CancellationRefundWorkflowTest extends TestCase
         $this->withoutMiddleware(ValidateCsrfToken::class);
         [, , , $customer] = $this->seededUsers();
         $booking = $this->makeBooking($customer->current_agency_id, BookingStatus::PaymentPending, $customer->id, null);
+        if (blank($booking->booking_reference)) {
+            $booking->forceFill(['booking_reference' => 'BKG-CAN-'.fake()->unique()->numberBetween(1000, 9999)])->save();
+        }
 
-        $this->actingAs($customer)->post(route('customer.bookings.cancellations.store', $booking), [
+        $this->actingAs($customer)->post(route('customer.bookings.cancellations.store', [
+            'booking' => $booking->booking_reference,
+        ]), [
             'cancellation_type' => 'booking_cancel',
             'reason' => 'Need date change',
         ])->assertRedirect();

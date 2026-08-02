@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchCustomerPayments } from "../services/customer-dashboard-api";
+import { customerApiErrorMessage, fetchCustomerPayments } from "../services/customer-dashboard-api";
 import { CustomerDashboardErrorState, CustomerDashboardShell, CustomerEmptyState, StatusBadge } from "../shell/CustomerDashboardShell";
 import type { CustomerPayment } from "../types";
 import type { PublicSession } from "@/types/session";
@@ -15,7 +15,7 @@ export function CustomerPaymentsPage({ session }: { session: PublicSession }) {
   useEffect(() => {
     void (async () => {
       const result = await fetchCustomerPayments({});
-      if (!result.ok) setError(result.message);
+      if (!result.ok) setError(customerApiErrorMessage(result));
       else setPayments(result.data.payments);
       setLoading(false);
     })();
