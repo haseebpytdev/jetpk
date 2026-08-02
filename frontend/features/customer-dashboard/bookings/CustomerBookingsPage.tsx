@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchCustomerBookings } from "../services/customer-dashboard-api";
+import { customerApiErrorMessage, fetchCustomerBookings } from "../services/customer-dashboard-api";
 import {
   CustomerDashboardErrorState,
   CustomerDashboardShell,
   CustomerEmptyState,
   StatusBadge,
 } from "../shell/CustomerDashboardShell";
-import type { CustomerBookingListItem } from "../types";
+import type { CustomerBookingListItem, PaginatedMeta } from "../types";
 import type { PublicSession } from "@/types/session";
 
 const FILTERS = [
@@ -22,26 +22,30 @@ const FILTERS = [
 
 export function CustomerBookingsPage({ session }: { session: PublicSession }) {
   const [bookings, setBookings] = useState<CustomerBookingListItem[]>([]);
+  const [pagination, setPagination] = useState<PaginatedMeta | null>(null);
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = async (nextFilter = filter) => {
+  const load = async (nextFilter = filter, nextPage = page) => {
     setLoading(true);
     setError(null);
-    const result = await fetchCustomerBookings({ filter: nextFilter });
+    const result = await fetchCustomerBookings({ filter: nextFilter, page: nextPage });
     if (!result.ok) {
-      setError(result.message);
+      setError(customerApiErrorMessage(result));
       setBookings([]);
+      setPagination(null);
     } else {
       setBookings(result.data.bookings);
+      setPagination(result.data.pagination);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    void load();
-  }, [filter]);
+    void load(filter, page);
+  }, [filter, page]);
 
   return (
     <CustomerDashboardShell session={session} title="My bookings">
@@ -53,7 +57,10 @@ export function CustomerBookingsPage({ session }: { session: PublicSession }) {
             className={`rounded-jp-button border px-3 py-1.5 text-jp-sm focus-visible:shadow-jp-focus ${
               filter === item.value ? "border-jp-primary bg-jp-primary/10 text-jp-primary" : "border-jp-border"
             }`}
-            onClick={() => setFilter(item.value)}
+            onClick={() => {
+              setFilter(item.value);
+              setPage(1);
+            }}
           >
             {item.label}
           </button>
@@ -93,6 +100,30 @@ export function CustomerBookingsPage({ session }: { session: PublicSession }) {
           </article>
         ))}
       </div>
+
+      {pagination && pagination.last_page > 1 ? (
+        <div className="mt-4 flex items-center justify-between gap-3" data-testid="customer-bookings-pagination">
+          <button
+            type="button"
+            className="rounded-jp-button border border-jp-border px-3 py-1.5 text-jp-sm disabled:opacity-50"
+            disabled={page <= 1}
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+          >
+            Previous
+          </button>
+          <p className="text-jp-sm text-jp-muted">
+            Page {pagination.current_page} of {pagination.last_page}
+          </p>
+          <button
+            type="button"
+            className="rounded-jp-button border border-jp-border px-3 py-1.5 text-jp-sm disabled:opacity-50"
+            disabled={page >= pagination.last_page}
+            onClick={() => setPage((current) => current + 1)}
+          >
+            Next
+          </button>
+        </div>
+      ) : null}
     </CustomerDashboardShell>
   );
 }

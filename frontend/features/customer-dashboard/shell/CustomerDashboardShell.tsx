@@ -23,6 +23,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: "/customer/bookings", label: "My Bookings", code: "bookings" },
   { href: "/customer/payments", label: "Payments", code: "payments" },
   { href: "/customer/invoices", label: "Invoices", code: "invoices" },
+  { href: "/customer/travelers", label: "Saved travelers", code: "travelers" },
   { href: "/customer/profile", label: "Profile", code: "profile" },
   { href: "/customer/security", label: "Security", code: "security" },
   { href: "/customer/support", label: "Support", code: "support" },

@@ -4,6 +4,8 @@ export { CustomerBookingsPage } from "./bookings/CustomerBookingsPage";
 export { CustomerBookingDetailsPage } from "./bookings/CustomerBookingDetailsPage";
 export { CustomerPaymentsPage } from "./payments/CustomerPaymentsPage";
 export { CustomerInvoicesPage } from "./invoices/CustomerInvoicesPage";
+export { CustomerInvoiceDetailPage } from "./invoices/CustomerInvoiceDetailPage";
+export { CustomerTravelersPage } from "./travelers/CustomerTravelersPage";
 export { CustomerProfilePage } from "./profile/CustomerProfilePage";
 export { CustomerSecurityPage } from "./security/CustomerSecurityPage";
 export { CustomerSupportPage, SupportCaseDetailPage } from "./support/CustomerSupportPage";

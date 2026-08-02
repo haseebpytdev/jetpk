@@ -135,7 +135,9 @@
         "tests": ["tests/Feature/Jetpk/CustomerBookingOwnershipTest.php"]
       },
       "recommended_phase": "JP-OPS-03",
-      "acceptance_criteria": "Customer submits cancellation; server validates ownership"
+      "acceptance_criteria": "Customer submits cancellation; server validates ownership",
+      "jp_ops_03_status": "CLOSED",
+      "closure_notes": "Customer cancellation request UI and JSON POST connected via BookingCancellationPanel and requestBookingCancellation; submission records request only (not completed cancellation); live supplier cancellation remains deferred."
     },
     {
       "gap_id": "JP-OPS-01-GAP-007",
@@ -154,7 +156,9 @@
         "tests": ["tests/Feature/CustomerPortalAndGuestLookupTest.php"]
       },
       "recommended_phase": "JP-OPS-03",
-      "acceptance_criteria": "Next.js saved travelers CRUD with ownership"
+      "acceptance_criteria": "Next.js saved travelers CRUD with ownership",
+      "jp_ops_03_status": "CLOSED",
+      "closure_notes": "Saved-traveler Next surface and JSON CRUD connected; customer ownership enforced; historical booking passengers remain immutable; list JSON masks document numbers."
     },
     {
       "gap_id": "JP-OPS-01-GAP-008",

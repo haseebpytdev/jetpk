@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { fetchCustomerProfile, updateCustomerProfile } from "../services/customer-dashboard-api";
+import { customerApiErrorMessage, fetchCustomerProfile, updateCustomerProfile } from "../services/customer-dashboard-api";
 import { CustomerDashboardErrorState, CustomerDashboardShell } from "../shell/CustomerDashboardShell";
 import type { CustomerProfile } from "../types";
 import type { PublicSession } from "@/types/session";
@@ -20,7 +20,7 @@ export function CustomerProfilePage({ session }: { session: PublicSession }) {
   const load = async () => {
     setLoading(true);
     const result = await fetchCustomerProfile();
-    if (!result.ok) setError(result.message);
+    if (!result.ok) setError(customerApiErrorMessage(result));
     else setProfile(result.data);
     setLoading(false);
   };
@@ -38,7 +38,7 @@ export function CustomerProfilePage({ session }: { session: PublicSession }) {
     const formData = new FormData(event.currentTarget);
     const result = await updateCustomerProfile(formData);
     if (!result.ok) {
-      setError(result.message);
+      setError(customerApiErrorMessage(result));
     } else {
       setSuccess("Profile updated successfully.");
       await load();

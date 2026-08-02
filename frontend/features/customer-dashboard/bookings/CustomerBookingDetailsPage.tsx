@@ -15,12 +15,26 @@ import { PostBookingActions } from "@/features/standard-booking/post-booking/Pos
 import { ReviewPriceBreakdown } from "@/features/standard-booking/components/ReviewPriceBreakdown";
 import { statusToneClass } from "@/features/standard-booking/utils/status-presentation";
 import type { BookingConfirmation } from "@/features/standard-booking/types/review-payment";
-import { fetchCustomerBookingDetail } from "../services/customer-dashboard-api";
+import { customerApiErrorMessage, fetchCustomerBookingDetail } from "../services/customer-dashboard-api";
 import { CustomerDashboardErrorState, CustomerDashboardShell } from "../shell/CustomerDashboardShell";
+import type {
+  CustomerBookingCapabilities,
+  CustomerCancellationSummary,
+  CustomerRefundSummary,
+} from "../types";
 import type { PublicSession } from "@/types/session";
+import { BookingCancellationPanel } from "./BookingCancellationPanel";
+import { BookingDocumentsPanel, BookingRefundPanel } from "./BookingDocumentsPanel";
+
+type BookingDetailPayload = BookingConfirmation & {
+  capabilities?: CustomerBookingCapabilities;
+  cancellation?: CustomerCancellationSummary;
+  refund?: CustomerRefundSummary;
+  booking?: { id?: number };
+};
 
 export function CustomerBookingDetailsPage({ session, reference }: { session: PublicSession; reference: string }) {
-  const [data, setData] = useState<BookingConfirmation | null>(null);
+  const [data, setData] = useState<BookingDetailPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,10 +43,10 @@ export function CustomerBookingDetailsPage({ session, reference }: { session: Pu
     setError(null);
     const result = await fetchCustomerBookingDetail(reference);
     if (!result.ok) {
-      setError(result.status === 403 ? "You do not have access to this booking." : result.message);
+      setError(customerApiErrorMessage(result));
       setData(null);
     } else {
-      setData(result.data);
+      setData(result.data as BookingDetailPayload);
     }
     setLoading(false);
   };
@@ -70,6 +84,17 @@ export function CustomerBookingDetailsPage({ session, reference }: { session: Pu
               />
               <ReviewPriceBreakdown pricing={data.pricing} />
               <PostBookingActions actions={data.actions} />
+              <BookingDocumentsPanel capabilities={data.capabilities} />
+              {data.cancellation ? (
+                <BookingCancellationPanel
+                  bookingReference={data.booking_reference ?? reference}
+                  canRequest={data.capabilities?.can_request_cancellation ?? false}
+                  summary={data.cancellation}
+                  submitUrl={data.capabilities?.mutation_urls.request_cancellation ?? null}
+                  onSubmitted={load}
+                />
+              ) : null}
+              <BookingRefundPanel refund={data.refund} />
               <Link href="/customer/bookings" className="text-jp-sm text-jp-primary">
                 Back to bookings
               </Link>
