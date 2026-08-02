@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
-import { getPublicSession } from "@/services/session";
+import { requireCustomerPortalLayoutAccess } from "@/features/auth/server/customer-portal-access";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default async function CustomerLayout({ children }: { children: ReactNode }) {
-  const session = await getPublicSession();
+  const session = await requireCustomerPortalLayoutAccess();
   return <PublicShell session={session}>{children}</PublicShell>;
 }

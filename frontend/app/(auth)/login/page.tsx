@@ -15,7 +15,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const cookieStore = await cookies();
   const bootstrap = await fetchSessionBootstrapFromCookies(cookieStore.getAll());
   if (bootstrap.authenticated) {
-    redirect(sanitizeDashboardUrl(bootstrap.dashboard_url, "/"));
+    redirect(sanitizeDashboardUrl(bootstrap.landing_route ?? bootstrap.dashboard_url, "/"));
   }
 
   return (

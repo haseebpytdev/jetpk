@@ -167,6 +167,111 @@ class PublicSessionBootstrapTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('account_status', UserAccountStatus::Inactive->value);
+        $response->assertJsonPath('session_usable', false);
+    }
+
+    public function test_session_bootstrap_includes_canonical_contract_fields(): void
+    {
+        $user = User::factory()->customer()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->getJson('/api/public/auth/session');
+
+        $response->assertOk();
+        $response->assertHeader('Cache-Control', 'no-store, private');
+        $response->assertJsonPath('authenticated', true);
+        $response->assertJsonPath('portal_type', 'customer');
+        $response->assertJsonPath('agency_role', null);
+        $response->assertJsonPath('email_verified', true);
+        $response->assertJsonPath('session_usable', true);
+        $response->assertJsonPath('csrf_ready', true);
+        $response->assertJsonPath('logout.method', 'POST');
+        $response->assertJsonPath('logout.path', '/logout');
+        $response->assertJsonStructure(['landing_route', 'dashboard_url', 'permissions']);
+        $response->assertJsonMissing(['password', 'otp', 'remember_token']);
+    }
+
+    public function test_agent_owner_session_includes_agency_role_owner(): void
+    {
+        $user = User::factory()->create([
+            'account_type' => AccountType::Agent,
+            'current_agency_id' => null,
+        ]);
+
+        $response = $this->actingAs($user)->getJson('/api/public/auth/session');
+
+        $response->assertOk();
+        $response->assertJsonPath('portal_type', 'agent');
+        $response->assertJsonPath('agency_role', 'owner');
+        $response->assertJsonPath('user.account_type', AccountType::Agent->value);
+    }
+
+    public function test_agent_staff_session_includes_agency_role_staff(): void
+    {
+        $user = User::factory()->create([
+            'account_type' => AccountType::AgentStaff,
+            'current_agency_id' => null,
+        ]);
+
+        $response = $this->actingAs($user)->getJson('/api/public/auth/session');
+
+        $response->assertOk();
+        $response->assertJsonPath('portal_type', 'agent');
+        $response->assertJsonPath('agency_role', 'staff');
+        $response->assertJsonPath('user.account_type', AccountType::AgentStaff->value);
+    }
+
+    public function test_platform_admin_session_maps_portal_type_admin(): void
+    {
+        $user = User::factory()->create([
+            'account_type' => AccountType::PlatformAdmin,
+        ]);
+
+        $response = $this->actingAs($user)->getJson('/api/public/auth/session');
+
+        $response->assertOk();
+        $response->assertJsonPath('portal_type', 'admin');
+    }
+
+    public function test_pending_otp_session_never_exposes_otp_value(): void
+    {
+        Mail::fake();
+        $this->makeJetPkProfile();
+        $user = User::factory()->customer()->create([
+            'email' => 'otp-session@example.test',
+            'password' => Hash::make('SecretPass1'),
+        ]);
+
+        $this->get('/jetpk/login');
+        $this->post('/login', [
+            'login' => $user->email,
+            'password' => 'SecretPass1',
+            'client_slug' => 'jetpk',
+        ]);
+
+        $response = $this->getJson('/api/public/auth/session');
+
+        $response->assertOk();
+        $response->assertJsonPath('authenticated', false);
+        $response->assertJsonPath('requires_otp', true);
+        $response->assertJsonStructure(['otp_challenge' => ['masked_email', 'resend_available_in']]);
+        $body = $response->json();
+        $this->assertArrayNotHasKey('otp', $body);
+        $this->assertArrayNotHasKey('otp_code', $body);
+        if (isset($body['otp_challenge']) && is_array($body['otp_challenge'])) {
+            $this->assertArrayNotHasKey('otp', $body['otp_challenge']);
+            $this->assertArrayNotHasKey('code', $body['otp_challenge']);
+        }
+    }
+
+    public function test_csrf_token_endpoint_is_private_no_store(): void
+    {
+        $response = $this->getJson('/api/public/content/csrf-token');
+
+        $response->assertOk();
+        $response->assertHeader('Cache-Control', 'no-store, private');
+        $response->assertJsonStructure(['csrf_token']);
     }
 
     private function makeJetPkProfile(): ClientProfile

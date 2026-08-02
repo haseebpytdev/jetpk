@@ -23,3 +23,4 @@ export {
 
 export { useAsyncAction } from "./use-async-action";
 export type { AsyncActionState } from "./use-async-action";
+export { recoverFromUnauthorized, resetSessionRecoveryGuard } from "./session-recovery";

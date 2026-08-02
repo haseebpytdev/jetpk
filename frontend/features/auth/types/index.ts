@@ -1,5 +1,9 @@
 export type AccountStatus = "active" | "invited" | "suspended" | "inactive";
 
+export type PortalType = "customer" | "agent" | "admin" | "staff" | "agency_admin" | "none";
+
+export type AgencyRole = "owner" | "staff" | null;
+
 export type AuthenticatedUser = {
   id: string;
   name: string;
@@ -12,16 +16,30 @@ export type OtpChallenge = {
   resend_available_in: number;
 };
 
+export type SessionLogoutContract = {
+  method: "POST";
+  path: string;
+};
+
 export type SessionBootstrap = {
   authenticated: boolean;
   user?: AuthenticatedUser;
   role?: string | null;
+  portal_type?: PortalType;
+  agency_id?: string | null;
+  agency_role?: AgencyRole;
   permissions?: string[];
   dashboard_url?: string;
+  landing_route?: string;
   requires_otp?: boolean;
   requires_password_change?: boolean;
   requires_email_verification?: boolean;
   account_status?: AccountStatus;
+  email_verified?: boolean;
+  session_usable?: boolean;
+  session_expired?: boolean;
+  csrf_ready?: boolean;
+  logout?: SessionLogoutContract;
   otp_challenge?: OtpChallenge;
 };
 

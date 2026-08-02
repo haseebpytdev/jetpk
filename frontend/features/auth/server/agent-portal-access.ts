@@ -1,10 +1,15 @@
 import { fetchSessionBootstrapFromCookies, mapBootstrapToPublicSession } from "@/features/auth/services/session-service";
 import type { SessionBootstrap } from "@/features/auth/types";
 import { resolveSessionBootstrapFixture } from "@/features/auth/server/session-fixture";
-import { sanitizeDashboardUrl } from "@/features/auth/utils/dashboard-allowlist";
+import {
+  assertSessionUsable,
+  redirectPasswordChangeRequired,
+  redirectPendingOtp,
+  redirectUnauthenticated,
+  redirectWrongRole,
+} from "@/features/auth/server/portal-access-shared";
 import type { PublicSession } from "@/types/session";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 const AGENT_ACCOUNT_TYPES = new Set(["agent", "agent_staff"]);
 
@@ -30,18 +35,22 @@ export async function requireAgentPortalAccess(): Promise<AgentPortalAccess> {
   const cookieList = cookieStore.getAll();
   const bootstrap = await loadBootstrap(cookieList);
 
-  if (!bootstrap.authenticated || !bootstrap.user) {
-    redirect("/login");
-  }
-
-  const accountType = bootstrap.user.account_type ?? bootstrap.role ?? null;
-  if (!accountType || !AGENT_ACCOUNT_TYPES.has(accountType)) {
-    const destination = sanitizeDashboardUrl(bootstrap.dashboard_url, "/access-denied");
-    redirect(destination);
-  }
+  redirectPendingOtp(bootstrap);
+  redirectUnauthenticated(bootstrap);
+  assertSessionUsable(bootstrap);
+  redirectPasswordChangeRequired(bootstrap);
+  redirectWrongRole(bootstrap, AGENT_ACCOUNT_TYPES);
 
   return {
     session: mapBootstrapToPublicSession(bootstrap),
     bootstrap,
   };
+}
+
+/**
+ * Layout-level agent portal guard.
+ */
+export async function requireAgentPortalLayoutAccess(): Promise<PublicSession> {
+  const { session } = await requireAgentPortalAccess();
+  return session;
 }

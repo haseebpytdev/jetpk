@@ -9,25 +9,46 @@ const fixtureUser = {
   initials: "AK",
 };
 
+function isPreviewAuthorityAllowed(): boolean {
+  return process.env.NODE_ENV !== "production";
+}
+
 function resolvePreviewMode(override?: SessionPreviewMode): SessionPreviewMode {
   if (override) return override;
   return appConfig.sessionPreview === "logged-in" ? "logged-in" : "logged-out";
 }
 
+function buildPreviewSession(mode: SessionPreviewMode): PublicSession {
+  if (mode !== "logged-in") {
+    return { status: "anonymous" };
+  }
+
+  return {
+    status: "authenticated",
+    user: fixtureUser,
+    dashboardUrl: "/customer/bookings",
+    landingRoute: "/customer/bookings",
+    accountType: "customer",
+    role: "customer",
+    portalType: "customer",
+    agencyId: null,
+    agencyRole: null,
+    permissions: [],
+    accountStatus: "active",
+    emailVerified: true,
+    sessionUsable: true,
+    requiresPasswordChange: false,
+    requiresEmailVerification: false,
+  };
+}
+
 /**
  * Fixture session adapter for isolated UI preview (`NEXT_PUBLIC_SESSION_PREVIEW=logged-in`).
+ * Never authoritative in production builds.
  */
 export const fixtureSessionAdapter: SessionAdapter = {
   async getSession(): Promise<PublicSession> {
-    return resolvePreviewMode() === "logged-in"
-      ? {
-          status: "authenticated",
-          user: fixtureUser,
-          dashboardUrl: "/customer/bookings",
-          accountType: "customer",
-          role: "customer",
-        }
-      : { status: "anonymous" };
+    return buildPreviewSession(resolvePreviewMode());
   },
 };
 
@@ -46,19 +67,11 @@ export async function getPublicSession(
   preview?: SessionPreviewMode,
   adapter?: SessionAdapter,
 ): Promise<PublicSession> {
-  if (preview) {
-    return preview === "logged-in"
-      ? {
-          status: "authenticated",
-          user: fixtureUser,
-          dashboardUrl: "/customer/bookings",
-          accountType: "customer",
-          role: "customer",
-        }
-      : { status: "anonymous" };
+  if (preview && isPreviewAuthorityAllowed()) {
+    return buildPreviewSession(preview);
   }
 
-  if (appConfig.sessionPreview === "logged-in") {
+  if (isPreviewAuthorityAllowed() && appConfig.sessionPreview === "logged-in") {
     return fixtureSessionAdapter.getSession();
   }
 
