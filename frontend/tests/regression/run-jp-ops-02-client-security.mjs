@@ -6,6 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "../..");
 
 const suites = [
+  "tests/regression/jp-ops-02-runtime-linkage.test.mjs",
   "tests/regression/jp-ops-02-api-errors.test.mjs",
   "tests/regression/jp-ops-02-csrf-replay.test.mjs",
 ];

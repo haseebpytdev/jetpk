@@ -18,6 +18,8 @@ Mapped in `frontend/lib/api/errors.ts`.
 | Malformed/empty JSON | `unknown` | Unexpected empty response from server. |
 | HTML body | `unknown` | Uses status default message |
 
+Non-JSON/HTML/malformed payload normalization is enforced by `frontend/lib/api/response-payload-policy.mjs` (`normalizeNonJsonPayload`), imported by `laravel-action-client.ts`.
+
 ## Retry policy
 
 - GET: optional `retryOnNetworkError` (once)

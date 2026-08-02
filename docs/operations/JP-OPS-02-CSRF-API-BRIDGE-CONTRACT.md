@@ -6,6 +6,7 @@
 - `XSRF-TOKEN` cookie (http-readable)
 - `GET /api/public/content/csrf-token` → `{ csrf_token }` with `Cache-Control: no-store, private`
 - Mutations send `X-XSRF-TOKEN` header via `frontend/lib/api/laravel-action-client.ts`
+- CSRF retry eligibility is enforced by `frontend/lib/api/csrf-retry-policy.mjs` (imported by the production client)
 - Token is never stored in `localStorage` or `sessionStorage`
 
 ## 419 handling
@@ -16,7 +17,7 @@
 
 Default mutation policy: **no automatic replay**.
 
-Optional `retryCsrfOnce: true` on `laravelRequest` refreshes CSRF once and retries. Never use for payment or booking mutations.
+Optional `retryCsrfOnce: true` on `laravelRequest` refreshes CSRF once and retries via `shouldRetryAfterCsrfExpired` + `pathAllowsCsrfAutoRetry`. Never use for payment or booking mutations.
 
 ## Proxy
 

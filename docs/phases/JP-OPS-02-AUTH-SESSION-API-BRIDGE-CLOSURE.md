@@ -109,6 +109,12 @@ See `docs/operations/JP-OPS-02-AUTH-SESSION-CONTRACT.md`.
 - `npm run test:jp-ops-02-client-security`: PASS
 - Playwright auth/guards: 24/24 PASS
 
+## JP-OPS-02C runtime linkage
+
+- `laravel-action-client.ts` imports and invokes `csrf-retry-policy.mjs` and `response-payload-policy.mjs`.
+- Colocated `.d.ts` files type the shared policy modules for TypeScript.
+- `jp-ops-02-runtime-linkage.test.mjs` prevents policy/runtime drift.
+
 ## Gaps closed
 
 - OPS02-R1 through OPS02-R8 (see implementation register)

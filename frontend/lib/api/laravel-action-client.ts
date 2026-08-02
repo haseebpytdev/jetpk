@@ -1,4 +1,6 @@
 import { laravelApiPath } from "@/services/flight-search";
+import { pathAllowsCsrfAutoRetry, shouldRetryAfterCsrfExpired } from "./csrf-retry-policy.mjs";
+import { normalizeNonJsonPayload } from "./response-payload-policy.mjs";
 import type { ApiResult, LaravelRequestOptions } from "./types";
 import { defaultErrorMessage, mapStatusToErrorCode } from "./errors";
 
@@ -79,19 +81,8 @@ function withTimeout(signal: AbortSignal | undefined, timeoutMs?: number): {
 
 async function parseResponsePayload(response: Response): Promise<unknown | null> {
   const contentType = response.headers.get("content-type") ?? "";
-  const isJson = contentType.includes("application/json");
-
-  if (!isJson) {
-    const text = await response.text();
-    if (text.trim() === "") return null;
-    return { message: defaultErrorMessage(response.status), _html: true };
-  }
-
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
+  const bodyText = await response.text();
+  return normalizeNonJsonPayload(contentType, bodyText, defaultErrorMessage, response.status);
 }
 
 async function executeRequest<T>(
@@ -187,10 +178,8 @@ export async function laravelRequest<T>(
   }
 
   if (
-    !result.ok &&
-    result.code === "csrf_expired" &&
-    method !== "GET" &&
-    options.retryCsrfOnce
+    shouldRetryAfterCsrfExpired(result, method, options.retryCsrfOnce ?? false) &&
+    pathAllowsCsrfAutoRetry(path)
   ) {
     result = await executeRequest<T>(path, options, true);
   }

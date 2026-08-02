@@ -22,6 +22,12 @@
 - OTP gate isolation assertions in `AuthenticationTest` and `JetPkLoginOtpTest`.
 - Durable client-security regression tests under `frontend/tests/regression/`.
 
+### JP-OPS-02C runtime linkage
+
+- `laravel-action-client.ts` imports `csrf-retry-policy.mjs` and `response-payload-policy.mjs` (not duplicated inline logic).
+- Colocated `.d.ts` files provide TypeScript types for the shared `.mjs` policy modules.
+- `frontend/tests/regression/jp-ops-02-runtime-linkage.test.mjs` asserts production imports remain bound.
+
 ### Coverage
 
 - Anonymous session contract
@@ -49,9 +55,12 @@
 |------|---------|
 | `frontend/tests/regression/jp-ops-02-api-errors.test.mjs` | API error normalization (401/403/419/422/429/5xx/HTML/malformed JSON) |
 | `frontend/tests/regression/jp-ops-02-csrf-replay.test.mjs` | CSRF replay safety (default no-replay, retryCsrfOnce, booking/payment paths) |
-| `frontend/tests/regression/run-jp-ops-02-client-security.mjs` | Runner for both regression suites |
-| `frontend/lib/api/csrf-retry-policy.mjs` | Shared CSRF retry policy module |
-| `frontend/lib/api/response-payload-policy.mjs` | Shared non-JSON/HTML payload policy module |
+| `frontend/tests/regression/jp-ops-02-runtime-linkage.test.mjs` | Production policy import binding assertion |
+| `frontend/tests/regression/run-jp-ops-02-client-security.mjs` | Runner for all regression suites |
+| `frontend/lib/api/csrf-retry-policy.mjs` | Shared CSRF retry policy module (imported by production client) |
+| `frontend/lib/api/csrf-retry-policy.d.ts` | TypeScript declarations for CSRF policy |
+| `frontend/lib/api/response-payload-policy.mjs` | Shared non-JSON/HTML payload policy module (imported by production client) |
+| `frontend/lib/api/response-payload-policy.d.ts` | TypeScript declarations for payload policy |
 
 ### Playwright (auth-related)
 
