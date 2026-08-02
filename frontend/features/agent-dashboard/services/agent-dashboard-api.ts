@@ -1,198 +1,224 @@
-import { ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
-import type { LaravelValidationErrors } from "@/features/auth/utils/laravel-auth-api";
-import { laravelApiPath } from "@/services/flight-search";
+import { laravelRequest } from "@/lib/api/laravel-action-client";
+import type { ApiResult } from "@/lib/api/types";
 import type { BookingConfirmation } from "@/features/standard-booking/types/review-payment";
 import type {
+  AgentAgencyProfile,
   AgentBookingListItem,
   AgentCapabilities,
+  AgentCommissionOverview,
   AgentDashboardOverview,
   AgentInvoice,
   AgentPayment,
   AgentProfile,
+  AgentReportsOverview,
+  AgentStaffDetail,
+  AgentStaffListResponse,
   AgentSupportCase,
   AgentSupportReply,
+  BookingCreateEntry,
   DepositRequest,
   PaginatedMeta,
   WalletLedgerEntry,
   WalletSummary,
 } from "../types";
 
-type JsonResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; status: number; message: string; errors?: LaravelValidationErrors };
+export type AgentApiResult<T> = ApiResult<T>;
 
-async function fetchAgentJson<T>(path: string, init?: RequestInit): Promise<JsonResult<T>> {
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    "X-Requested-With": "XMLHttpRequest",
-    ...(init?.headers as Record<string, string> | undefined),
-  };
-
-  try {
-    const response = await fetch(laravelApiPath(path), {
-      ...init,
-      credentials: "include",
-      headers,
-    });
-
-    const body = (await response.json()) as T & { ok?: boolean; message?: string; errors?: LaravelValidationErrors };
-
-    if (!response.ok || body.ok === false) {
-      return {
-        ok: false,
-        status: response.status,
-        message: (body as { message?: string }).message ?? "Request failed.",
-        errors: (body as { errors?: LaravelValidationErrors }).errors,
-      };
-    }
-
-    return { ok: true, data: body };
-  } catch {
-    return { ok: false, status: 0, message: "We could not load your agent dashboard. Please try again." };
+function unwrapPayload<T>(result: ApiResult<Record<string, unknown>>): AgentApiResult<T> {
+  if (!result.ok) {
+    return result;
   }
+
+  const payload = result.data;
+  if (payload && typeof payload === "object" && "ok" in payload && payload.ok === false) {
+    const message = (payload as { message?: string }).message ?? "Request failed.";
+    return {
+      ok: false,
+      code: ((payload as { code?: string }).code ?? "unknown") as import("@/lib/api/types").ApiErrorCode,
+      status: result.status,
+      message,
+      errors: (payload as { errors?: Record<string, string[]> }).errors,
+      data: payload,
+    };
+  }
+
+  return { ok: true, data: payload as unknown as T, status: result.status };
 }
 
-export async function fetchAgentDashboardOverview(): Promise<JsonResult<AgentDashboardOverview>> {
-  return fetchAgentJson<AgentDashboardOverview>("/agent?format=json");
+async function agentGet<T>(path: string): Promise<AgentApiResult<T>> {
+  const result = await laravelRequest<Record<string, unknown>>(path, {
+    method: "GET",
+    retryOnNetworkError: true,
+  });
+
+  return unwrapPayload<T>(result);
 }
 
-export async function fetchAgentCapabilities(): Promise<JsonResult<AgentCapabilities>> {
+async function agentMutation<T>(
+  path: string,
+  options: {
+    method?: "POST" | "PATCH" | "PUT" | "DELETE";
+    formData?: FormData;
+    json?: unknown;
+  },
+): Promise<AgentApiResult<T>> {
+  const result = await laravelRequest<Record<string, unknown>>(path, {
+    method: options.method ?? "POST",
+    formData: options.formData,
+    json: options.json,
+    retryCsrfOnce: false,
+  });
+
+  return unwrapPayload<T>(result);
+}
+
+export async function fetchAgentDashboardOverview(): Promise<AgentApiResult<AgentDashboardOverview>> {
+  return agentGet<AgentDashboardOverview>("/agent?format=json");
+}
+
+export async function fetchAgentCapabilities(): Promise<AgentApiResult<AgentCapabilities>> {
   const result = await fetchAgentDashboardOverview();
   if (!result.ok) return result;
-  return { ok: true, data: result.data.capabilities };
+  return { ok: true, data: result.data.capabilities, status: result.status };
 }
 
 export async function fetchAgentBookings(params: {
   page?: number;
   filter?: string;
-}): Promise<JsonResult<{ bookings: AgentBookingListItem[]; pagination: PaginatedMeta; filter: string }>> {
+}): Promise<AgentApiResult<{ bookings: AgentBookingListItem[]; pagination: PaginatedMeta; filter: string }>> {
   const search = new URLSearchParams({ format: "json" });
   if (params.page) search.set("page", String(params.page));
   if (params.filter) search.set("filter", params.filter);
-  return fetchAgentJson(`/agent/bookings?${search.toString()}`);
+  return agentGet(`/agent/bookings?${search.toString()}`);
 }
 
-export async function fetchAgentBookingDetail(reference: string): Promise<JsonResult<BookingConfirmation>> {
-  return fetchAgentJson<BookingConfirmation>(`/agent/bookings/${encodeURIComponent(reference)}?format=json`);
+export async function fetchAgentBookingDetail(reference: string): Promise<AgentApiResult<BookingConfirmation>> {
+  return agentGet<BookingConfirmation>(`/agent/bookings/${encodeURIComponent(reference)}?format=json`);
+}
+
+export async function requestAgentBookingCancellation(
+  bookingReference: string,
+  payload: { reason?: string; cancellation_type?: string },
+): Promise<
+  AgentApiResult<{
+    message: string;
+    cancellation_request: {
+      id: number;
+      status: string;
+      status_label: string;
+      message: string;
+    };
+  }>
+> {
+  const formData = new FormData();
+  formData.set("cancellation_type", payload.cancellation_type ?? "booking_cancel");
+  if (payload.reason) formData.set("reason", payload.reason);
+
+  return agentMutation(`/agent/bookings/${encodeURIComponent(bookingReference)}/cancellations?format=json`, {
+    method: "POST",
+    formData,
+  });
+}
+
+export async function fetchAgentBookingCreateEntry(): Promise<AgentApiResult<BookingCreateEntry>> {
+  return agentGet<BookingCreateEntry>("/agent/bookings/create?format=json");
+}
+
+export async function exitAgentBookingMode(): Promise<AgentApiResult<{ message: string; redirect_url: string }>> {
+  return agentGet("/agent/bookings/exit-mode?format=json");
 }
 
 export async function fetchAgentWallet(): Promise<
-  JsonResult<{ summary: WalletSummary; recent_ledger_entries: WalletLedgerEntry[]; capabilities: Record<string, boolean> }>
+  AgentApiResult<{ summary: WalletSummary; recent_ledger_entries: WalletLedgerEntry[]; capabilities: Record<string, boolean> }>
 > {
-  return fetchAgentJson("/agent/wallet?format=json");
+  return agentGet("/agent/wallet?format=json");
 }
 
 export async function fetchAgentLedger(params: {
   page?: number;
   type?: string;
   q?: string;
-}): Promise<JsonResult<{ entries: WalletLedgerEntry[]; pagination: PaginatedMeta; summary: WalletSummary }>> {
+}): Promise<AgentApiResult<{ entries: WalletLedgerEntry[]; pagination: PaginatedMeta; summary: WalletSummary }>> {
   const search = new URLSearchParams({ format: "json" });
   if (params.page) search.set("page", String(params.page));
   if (params.type) search.set("type", params.type);
   if (params.q) search.set("q", params.q);
-  return fetchAgentJson(`/agent/ledger?${search.toString()}`);
+  return agentGet(`/agent/ledger?${search.toString()}`);
 }
 
 export async function fetchAgentDeposits(page = 1): Promise<
-  JsonResult<{ deposits: DepositRequest[]; pagination: PaginatedMeta; summary: WalletSummary }>
+  AgentApiResult<{ deposits: DepositRequest[]; pagination: PaginatedMeta; summary: WalletSummary }>
 > {
-  return fetchAgentJson(`/agent/deposits?format=json&page=${page}`);
+  return agentGet(`/agent/deposits?format=json&page=${page}`);
 }
 
 export async function fetchDepositCreateForm(): Promise<
-  JsonResult<{ fields: Record<string, unknown>; submit_url: string; summary: WalletSummary }>
+  AgentApiResult<{ fields: Record<string, unknown>; submit_url: string; summary: WalletSummary }>
 > {
-  return fetchAgentJson("/agent/deposits/create?format=json");
+  return agentGet("/agent/deposits/create?format=json");
 }
 
-export async function submitAgentDeposit(formData: FormData): Promise<JsonResult<{ redirect_url: string }>> {
-  const csrf = await ensureLaravelCsrfToken();
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    "X-Requested-With": "XMLHttpRequest",
-  };
-  if (csrf) headers["X-XSRF-TOKEN"] = csrf;
-
-  return fetchAgentJson("/agent/deposits", {
-    method: "POST",
-    body: formData,
-    headers,
-  });
+export async function submitAgentDeposit(formData: FormData): Promise<AgentApiResult<{ redirect_url: string; message?: string }>> {
+  return agentMutation("/agent/deposits?format=json", { method: "POST", formData });
 }
 
 export async function fetchAgentPayments(params: {
   page?: number;
   filter?: string;
-}): Promise<JsonResult<{ payments: AgentPayment[]; pagination: PaginatedMeta; filter: string }>> {
+}): Promise<AgentApiResult<{ payments: AgentPayment[]; pagination: PaginatedMeta; filter: string }>> {
   const search = new URLSearchParams({ format: "json" });
   if (params.page) search.set("page", String(params.page));
   if (params.filter) search.set("filter", params.filter);
-  return fetchAgentJson(`/agent/payments?${search.toString()}`);
+  return agentGet(`/agent/payments?${search.toString()}`);
 }
 
-export async function fetchAgentInvoices(page = 1): Promise<JsonResult<{ invoices: AgentInvoice[]; pagination: PaginatedMeta }>> {
-  return fetchAgentJson(`/agent/invoices?format=json&page=${page}`);
+export async function fetchAgentInvoices(page = 1): Promise<AgentApiResult<{ invoices: AgentInvoice[]; pagination: PaginatedMeta }>> {
+  return agentGet(`/agent/invoices?format=json&page=${page}`);
 }
 
-export async function fetchAgentProfile(): Promise<JsonResult<AgentProfile>> {
-  return fetchAgentJson<AgentProfile>("/agent/profile?format=json");
+export async function fetchAgentProfile(): Promise<AgentApiResult<AgentProfile>> {
+  return agentGet<AgentProfile>("/agent/profile?format=json");
 }
 
-export async function updateAgentPersonalProfile(formData: FormData): Promise<JsonResult<{ message: string }>> {
-  const csrf = await ensureLaravelCsrfToken();
+export async function updateAgentPersonalProfile(formData: FormData): Promise<AgentApiResult<{ message: string }>> {
   formData.set("_method", "PATCH");
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    "X-Requested-With": "XMLHttpRequest",
-  };
-  if (csrf) headers["X-XSRF-TOKEN"] = csrf;
-
-  return fetchAgentJson("/profile", { method: "POST", body: formData, headers });
+  return agentMutation("/profile", { method: "POST", formData });
 }
 
 export async function updateAgentPassword(payload: {
   current_password: string;
   password: string;
   password_confirmation: string;
-}): Promise<JsonResult<{ message: string }>> {
-  const csrf = await ensureLaravelCsrfToken();
+}): Promise<AgentApiResult<{ message: string }>> {
   const formData = new FormData();
   formData.set("current_password", payload.current_password);
   formData.set("password", payload.password);
   formData.set("password_confirmation", payload.password_confirmation);
   formData.set("_method", "PUT");
-
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    "X-Requested-With": "XMLHttpRequest",
-  };
-  if (csrf) headers["X-XSRF-TOKEN"] = csrf;
-
-  return fetchAgentJson("/password", { method: "POST", body: formData, headers });
+  return agentMutation("/password", { method: "POST", formData });
 }
 
 export async function fetchAgentSupportCases(page = 1): Promise<
-  JsonResult<{ tickets: AgentSupportCase[]; pagination: PaginatedMeta }>
+  AgentApiResult<{ tickets: AgentSupportCase[]; pagination: PaginatedMeta }>
 > {
-  return fetchAgentJson(`/agent/support/tickets?format=json&page=${page}`);
+  return agentGet(`/agent/support/tickets?format=json&page=${page}`);
 }
 
 export async function fetchAgentSupportCreateForm(): Promise<
-  JsonResult<{
+  AgentApiResult<{
     categories: Array<{ value: string; label: string }>;
     bookings: Array<{ id: number; booking_reference: string; route: string; travel_date?: string | null }>;
     turnstile_required: boolean;
     submit_url: string;
   }>
 > {
-  return fetchAgentJson("/agent/support/tickets/create?format=json");
+  return agentGet("/agent/support/tickets/create?format=json");
 }
 
 export async function fetchAgentSupportCaseDetail(reference: string): Promise<
-  JsonResult<{ ticket: AgentSupportCase; conversation: AgentSupportReply[]; reply_url: string }>
+  AgentApiResult<{ ticket: AgentSupportCase; conversation: AgentSupportReply[]; reply_url: string }>
 > {
-  return fetchAgentJson(`/agent/support/tickets/${encodeURIComponent(reference)}?format=json`);
+  return agentGet(`/agent/support/tickets/${encodeURIComponent(reference)}?format=json`);
 }
 
 export async function createAgentSupportTicket(payload: {
@@ -200,43 +226,26 @@ export async function createAgentSupportTicket(payload: {
   category: string;
   body: string;
   booking_id?: number | null;
-}): Promise<JsonResult<{ redirect_url: string }>> {
-  const csrf = await ensureLaravelCsrfToken();
+}): Promise<AgentApiResult<{ redirect_url: string }>> {
   const formData = new FormData();
   formData.set("subject", payload.subject);
   formData.set("category", payload.category);
   formData.set("body", payload.body);
   if (payload.booking_id) formData.set("booking_id", String(payload.booking_id));
-
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    "X-Requested-With": "XMLHttpRequest",
-  };
-  if (csrf) headers["X-XSRF-TOKEN"] = csrf;
-
-  return fetchAgentJson("/agent/support/tickets", { method: "POST", body: formData, headers });
+  return agentMutation("/agent/support/tickets?format=json", { method: "POST", formData });
 }
 
-export async function replyAgentSupportTicket(reference: string, body: string): Promise<JsonResult<unknown>> {
-  const csrf = await ensureLaravelCsrfToken();
+export async function replyAgentSupportTicket(reference: string, body: string): Promise<AgentApiResult<unknown>> {
   const formData = new FormData();
   formData.set("body", body);
-
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    "X-Requested-With": "XMLHttpRequest",
-  };
-  if (csrf) headers["X-XSRF-TOKEN"] = csrf;
-
-  return fetchAgentJson(`/agent/support/tickets/${encodeURIComponent(reference)}/reply`, {
+  return agentMutation(`/agent/support/tickets/${encodeURIComponent(reference)}/reply?format=json`, {
     method: "POST",
-    body: formData,
-    headers,
+    formData,
   });
 }
 
 export async function fetchAgentNotifications(page = 1): Promise<
-  JsonResult<{
+  AgentApiResult<{
     available: boolean;
     message?: string;
     unread_count: number;
@@ -244,9 +253,123 @@ export async function fetchAgentNotifications(page = 1): Promise<
     pagination: PaginatedMeta;
   }>
 > {
-  return fetchAgentJson(`/agent/notifications?format=json&page=${page}`);
+  return agentGet(`/agent/notifications?format=json&page=${page}`);
 }
 
-export async function fetchAgentNotificationUnreadSummary(): Promise<JsonResult<{ available: boolean; unread_count: number }>> {
-  return fetchAgentJson("/agent/notifications/unread-summary?format=json");
+export async function fetchAgentStaffList(): Promise<AgentApiResult<AgentStaffListResponse>> {
+  return agentGet("/agent/staff?format=json");
+}
+
+export async function fetchAgentStaffCreateForm(): Promise<
+  AgentApiResult<{
+    permission_labels: Record<string, string>;
+    default_permissions: string[];
+    submit_url: string;
+  }>
+> {
+  return agentGet("/agent/staff/create?format=json");
+}
+
+export async function fetchAgentStaffDetail(staffId: number): Promise<AgentApiResult<AgentStaffDetail>> {
+  return agentGet(`/agent/staff/${staffId}/edit?format=json`);
+}
+
+export async function createAgentStaff(payload: {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  permissions: string[];
+}): Promise<AgentApiResult<{ message: string; staff: AgentStaffDetail["staff"]; redirect_url: string }>> {
+  const formData = new FormData();
+  formData.set("name", payload.name);
+  formData.set("email", payload.email);
+  formData.set("password", payload.password);
+  if (payload.phone) formData.set("phone", payload.phone);
+  payload.permissions.forEach((permission) => formData.append("permissions[]", permission));
+  return agentMutation("/agent/staff?format=json", { method: "POST", formData });
+}
+
+export async function updateAgentStaff(
+  staffId: number,
+  payload: {
+    name: string;
+    email: string;
+    phone?: string;
+    status: string;
+    password?: string;
+    permissions?: string[];
+  },
+): Promise<AgentApiResult<{ message: string; staff: AgentStaffDetail["staff"] }>> {
+  const formData = new FormData();
+  formData.set("_method", "PATCH");
+  formData.set("name", payload.name);
+  formData.set("email", payload.email);
+  formData.set("status", payload.status);
+  if (payload.phone) formData.set("phone", payload.phone);
+  if (payload.password) formData.set("password", payload.password);
+  payload.permissions?.forEach((permission) => formData.append("permissions[]", permission));
+  return agentMutation(`/agent/staff/${staffId}?format=json`, { method: "POST", formData });
+}
+
+export async function deactivateAgentStaff(staffId: number): Promise<AgentApiResult<{ message: string }>> {
+  const formData = new FormData();
+  formData.set("_method", "DELETE");
+  return agentMutation(`/agent/staff/${staffId}?format=json`, { method: "POST", formData });
+}
+
+export async function fetchAgentReports(tab = "overview"): Promise<AgentApiResult<AgentReportsOverview>> {
+  return agentGet(`/agent/reports?format=json&tab=${encodeURIComponent(tab)}`);
+}
+
+export async function fetchAgentCommissions(): Promise<AgentApiResult<AgentCommissionOverview>> {
+  return agentGet("/agent/commissions?format=json");
+}
+
+export async function fetchAgentAgency(): Promise<AgentApiResult<AgentAgencyProfile>> {
+  return agentGet("/agent/agency?format=json");
+}
+
+export async function fetchAgentAgencyEditForm(): Promise<
+  AgentApiResult<{
+    details: Record<string, unknown>;
+    supported_fields: string[];
+    can_set_agency_prefix: boolean;
+    update_url: string;
+  }>
+> {
+  return agentGet("/agent/agency/edit?format=json");
+}
+
+export async function updateAgentAgency(formData: FormData): Promise<AgentApiResult<{ message: string; details: Record<string, unknown> }>> {
+  formData.set("_method", "PATCH");
+  return agentMutation("/agent/agency?format=json", { method: "POST", formData });
+}
+
+export function agentApiErrorMessage(result: { ok: false; message: string; code?: string; status: number }): string {
+  if (result.code === "unauthorized" || result.status === 401) {
+    return "Your session has expired. Please sign in again.";
+  }
+  if (result.code === "forbidden" || result.status === 403) {
+    return "You do not have access to this record.";
+  }
+  if (result.code === "not_found" || result.status === 404) {
+    return "This record is unavailable.";
+  }
+  if (result.code === "conflict" || result.status === 409) {
+    return result.message;
+  }
+  if (result.code === "csrf_expired" || result.status === 419) {
+    return result.message || "Your session expired. Please try again.";
+  }
+  if (result.code === "validation" || result.status === 422) {
+    return result.message;
+  }
+  if (result.code === "rate_limit" || result.status === 429) {
+    return result.message;
+  }
+  if (result.code === "server" || result.status >= 500) {
+    return result.message || "Something went wrong. Please try again.";
+  }
+  return result.message;
 }

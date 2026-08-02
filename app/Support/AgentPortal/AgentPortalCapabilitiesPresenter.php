@@ -20,9 +20,11 @@ class AgentPortalCapabilitiesPresenter
      */
     public function present(User $user): array
     {
+        $access = AgentPortalAccess::evaluate($user);
         $isOwner = $user->isAgentAdmin();
         $roleLabel = $isOwner ? 'Agency owner' : 'Agency staff';
         $agencyName = $user->agentDisplayAgencyName();
+        $agent = $user->agent();
 
         $permissions = [
             'bookings_view' => $user->hasAgentPermission(AgentPermission::BookingsView),
@@ -44,24 +46,69 @@ class AgentPortalCapabilitiesPresenter
             'agent_deposits' => $this->platformModules->routeEnabled('agent_deposits'),
             'agent_ledger' => $this->platformModules->routeEnabled('agent_ledger'),
             'agent_support' => $this->platformModules->routeEnabled('agent_support'),
+            'agent_reports' => $this->platformModules->routeEnabled('agent_reports'),
+            'agent_staff' => $this->platformModules->routeEnabled('agent_staff'),
             'payment_proofs' => $this->platformModules->routeEnabled('payment_proofs'),
         ];
 
+        $capabilities = $this->presentCapabilityFlags($user, $permissions, $modules, $isOwner, $access);
+
         return [
-            'ok' => true,
+            'ok' => ($access['ok'] ?? false) === true,
+            'session_usable' => ($access['ok'] ?? false) === true,
+            'denial_reason' => $access['denial_reason'] ?? null,
             'identity' => [
                 'display_name' => $user->name,
                 'email' => $user->email,
                 'role' => $isOwner ? 'agent' : 'agent_staff',
                 'role_label' => $roleLabel,
                 'is_owner' => $isOwner,
+                'status' => $user->status?->value ?? 'active',
             ],
             'agency' => [
                 'name' => $agencyName,
+                'status' => $agent !== null && $agent->is_active ? 'active' : 'inactive',
             ],
             'permissions' => $permissions,
             'modules' => $modules,
-            'navigation' => $this->presentNavigation($permissions, $modules),
+            'capabilities' => $capabilities,
+            'navigation' => $this->presentNavigation($permissions, $modules, $isOwner),
+        ];
+    }
+
+    /**
+     * @param  array<string, bool>  $permissions
+     * @param  array<string, bool>  $modules
+     * @param  array{ok: bool, denial_reason?: string|null}  $access
+     * @return array<string, mixed>
+     */
+    private function presentCapabilityFlags(
+        User $user,
+        array $permissions,
+        array $modules,
+        bool $isOwner,
+        array $access,
+    ): array {
+        $usable = ($access['ok'] ?? false) === true;
+
+        return [
+            'can_view_booking' => $usable && ($permissions['bookings_view'] ?? false),
+            'can_create_booking' => $usable && ($permissions['bookings_create'] ?? false),
+            'can_view_wallet' => $usable && ($permissions['wallet_view'] ?? false) && ($modules['agent_wallet'] ?? false),
+            'can_view_ledger' => $usable && ($permissions['ledger_view'] ?? false) && ($modules['agent_ledger'] ?? false),
+            'can_submit_deposit' => $usable && ($permissions['payments_upload'] ?? false) && ($modules['agent_deposits'] ?? false),
+            'can_view_commission' => $usable && $isOwner,
+            'can_manage_staff' => $usable && ($permissions['staff_manage'] ?? false) && ($modules['agent_staff'] ?? false),
+            'can_manage_staff_permissions' => $usable && $isOwner && ($permissions['staff_manage'] ?? false),
+            'can_view_reports' => $usable && ($permissions['reports_view'] ?? false) && ($modules['agent_reports'] ?? false),
+            'can_export_reports' => $usable && ($permissions['reports_view'] ?? false) && ($modules['agent_reports'] ?? false),
+            'can_contact_support' => $usable && ($permissions['support_manage'] ?? false) && ($modules['agent_support'] ?? false),
+            'can_view_agency' => $usable && ($permissions['agency_view'] ?? false),
+            'can_edit_agency' => $usable && $isOwner,
+            'can_download_document' => $usable && ($permissions['wallet_view'] ?? false),
+            'reason_codes' => $usable ? [] : [
+                'session' => $access['denial_reason'] ?? 'permission_required',
+            ],
         ];
     }
 
@@ -70,7 +117,7 @@ class AgentPortalCapabilitiesPresenter
      * @param  array<string, bool>  $modules
      * @return list<array<string, mixed>>
      */
-    private function presentNavigation(array $permissions, array $modules): array
+    private function presentNavigation(array $permissions, array $modules, bool $isOwner): array
     {
         $items = [
             ['code' => 'overview', 'label' => 'Overview', 'href' => '/agent/dashboard', 'available' => true],
@@ -78,6 +125,10 @@ class AgentPortalCapabilitiesPresenter
 
         if ($permissions['bookings_view']) {
             $items[] = ['code' => 'bookings', 'label' => 'Bookings', 'href' => '/agent/bookings', 'available' => true];
+        }
+
+        if ($permissions['bookings_create']) {
+            $items[] = ['code' => 'booking_create', 'label' => 'New booking', 'href' => '/agent/bookings/create', 'available' => true];
         }
 
         if ($permissions['wallet_view'] && $modules['agent_wallet']) {
@@ -95,6 +146,22 @@ class AgentPortalCapabilitiesPresenter
         if ($permissions['wallet_view']) {
             $items[] = ['code' => 'payments', 'label' => 'Payments', 'href' => '/agent/payments', 'available' => true];
             $items[] = ['code' => 'invoices', 'label' => 'Invoices', 'href' => '/agent/invoices', 'available' => true];
+        }
+
+        if ($permissions['reports_view'] && $modules['agent_reports']) {
+            $items[] = ['code' => 'reports', 'label' => 'Reports', 'href' => '/agent/reports', 'available' => true];
+        }
+
+        if ($isOwner) {
+            $items[] = ['code' => 'commissions', 'label' => 'Commissions', 'href' => '/agent/commissions', 'available' => true];
+        }
+
+        if ($permissions['staff_manage'] && $modules['agent_staff']) {
+            $items[] = ['code' => 'staff', 'label' => 'Staff', 'href' => '/agent/staff', 'available' => true];
+        }
+
+        if ($permissions['agency_view']) {
+            $items[] = ['code' => 'agency', 'label' => 'Agency', 'href' => '/agent/agency', 'available' => true];
         }
 
         $items[] = ['code' => 'profile', 'label' => 'Profile', 'href' => '/agent/profile', 'available' => true];

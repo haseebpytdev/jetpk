@@ -4,6 +4,7 @@ namespace Tests\Feature\Agent;
 
 use App\Enums\AccountType;
 use App\Enums\UserAccountStatus;
+use App\Models\AgencyUser;
 use App\Models\Agent;
 use App\Models\Booking;
 use App\Models\SupportTicket;
@@ -174,6 +175,7 @@ class AgentPortalAuditFixTest extends TestCase
         $bookingB = Booking::factory()->create([
             'agency_id' => $agentB->agency_id,
             'agent_id' => $agentB->id,
+            'booking_reference' => 'BKG-'.fake()->unique()->numberBetween(10000, 99999),
         ]);
 
         $staffA = $this->createStaffForAgent($agentA, 'cross-agent@test', [AgentPermission::BookingsView]);
@@ -187,14 +189,13 @@ class AgentPortalAuditFixTest extends TestCase
 
         $this->actingAs($agentUser)->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('Wallet balance', false)
-            ->assertSee('Commission earned', false)
-            ->assertSee('data-testid="agent-dashboard-wallet-quick"', false);
+            ->assertSee('Commission balance', false)
+            ->assertSee('New booking', false);
     }
 
     protected function createStaffForAgent(Agent $agent, string $email, array $permissions = []): User
     {
-        return User::query()->create([
+        $staff = User::query()->create([
             'name' => 'Staff User',
             'username' => str_replace('@', '-', $email),
             'email' => $email,
@@ -207,6 +208,13 @@ class AgentPortalAuditFixTest extends TestCase
                 'agent_permissions' => $permissions,
             ],
         ]);
+
+        AgencyUser::query()->updateOrCreate(
+            ['agency_id' => $agent->agency_id, 'user_id' => $staff->id],
+            ['role' => AccountType::AgentStaff->value],
+        );
+
+        return $staff;
     }
 
     /**

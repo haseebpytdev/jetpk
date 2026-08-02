@@ -30,13 +30,18 @@ class AgentWalletDepositTest extends TestCase
 
     public function test_approved_agent_sees_wallet_summary_on_dashboard(): void
     {
-        [$agentUser] = $this->seededAgent();
+        [$agentUser, $agent] = $this->seededAgent();
+        $wallet = app(AgentWalletService::class)->walletFor($agent);
+        $wallet->update(['balance' => 25000, 'available_balance' => 24000]);
 
         $this->actingAs($agentUser)->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="agent-dashboard-wallet-balance"', false)
-            ->assertSee('data-testid="agent-wallet-credit-notice"', false)
-            ->assertSee('Booking credit enforcement is not enabled yet', false);
+            ->assertSee('Wallet', false);
+
+        $this->actingAs($agentUser)->get(route('agent.wallet.show'))
+            ->assertOk()
+            ->assertSee('data-testid="agent-wallet-kpis"', false)
+            ->assertSee('25,000.00', false);
     }
 
     public function test_wallet_is_created_lazily_when_missing(): void
@@ -227,9 +232,9 @@ class AgentWalletDepositTest extends TestCase
         $wallet = app(AgentWalletService::class)->walletFor($agent);
         $wallet->update(['balance' => 1200]);
 
-        $this->actingAs($agentUser)->get(route('agent.dashboard'))
+        $this->actingAs($agentUser)->get(route('agent.wallet.show'))
             ->assertOk()
-            ->assertSee('data-testid="account-dropdown-balance"', false)
+            ->assertSee('data-testid="agent-wallet-kpis"', false)
             ->assertSee('1,200.00', false);
     }
 

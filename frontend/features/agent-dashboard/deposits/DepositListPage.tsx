@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchAgentDeposits } from "../services/agent-dashboard-api";
+import { fetchAgentDeposits, fetchAgentCapabilities } from "../services/agent-dashboard-api";
 import {
   AgentDashboardErrorState,
   AgentDashboardShell,
@@ -58,6 +58,7 @@ export function DepositListPage({ session }: { session: PublicSession }) {
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [canCreateDeposit, setCanCreateDeposit] = useState(false);
 
   const load = async (nextPage = page) => {
     setLoading(true);
@@ -75,6 +76,15 @@ export function DepositListPage({ session }: { session: PublicSession }) {
   };
 
   useEffect(() => {
+    void (async () => {
+      const caps = await fetchAgentCapabilities();
+      if (caps.ok) {
+        setCanCreateDeposit(Boolean(caps.data.capabilities?.can_submit_deposit));
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     void load();
   }, [page]);
 
@@ -84,12 +94,15 @@ export function DepositListPage({ session }: { session: PublicSession }) {
         <Link href="/agent/wallet" className="text-jp-sm text-jp-primary focus-visible:shadow-jp-focus">
           Back to wallet
         </Link>
-        <Link
-          href="/agent/deposits/new"
-          className="rounded-jp-button border border-jp-border px-4 py-2 text-jp-sm font-semibold focus-visible:shadow-jp-focus"
-        >
-          New deposit request
-        </Link>
+        {canCreateDeposit ? (
+          <Link
+            href="/agent/deposits/new"
+            className="rounded-jp-button border border-jp-border px-4 py-2 text-jp-sm font-semibold focus-visible:shadow-jp-focus"
+            data-testid="deposit-new-cta"
+          >
+            New deposit request
+          </Link>
+        ) : null}
       </div>
 
       {summary ? (

@@ -18,16 +18,20 @@ export type AgentNavigationItem = {
 
 export type AgentCapabilities = {
   ok: boolean;
+  session_usable?: boolean;
+  denial_reason?: string | null;
   identity: {
     display_name: string;
     email: string;
     role: "agent" | "agent_staff";
     role_label: string;
     is_owner: boolean;
+    status?: string;
   };
-  agency: { name: string };
+  agency: { name: string; status?: string };
   permissions: Record<string, boolean>;
   modules: Record<string, boolean>;
+  capabilities?: Record<string, boolean | Record<string, string>>;
   navigation: AgentNavigationItem[];
 };
 
@@ -210,4 +214,95 @@ export type AgentSupportReply = {
   author_role: "agent" | "staff";
   body: string;
   created_at?: string | null;
+};
+
+export type BookingCreateEntry = {
+  ok: boolean;
+  booking_mode_active: boolean;
+  agency_name: string;
+  message: string;
+  search_url: string;
+  exit_url: string;
+};
+
+export type AgentStaffMember = {
+  id: number;
+  name: string;
+  email: string;
+  status: string;
+  role_label: string;
+  permissions_count: number;
+  edit_url: string;
+};
+
+export type AgentStaffListResponse = {
+  ok: boolean;
+  staff: AgentStaffMember[];
+  capabilities: {
+    can_create: boolean;
+    can_manage_permissions: boolean;
+  };
+  permission_labels: Record<string, string>;
+};
+
+export type AgentStaffDetail = {
+  ok: boolean;
+  staff: AgentStaffMember & {
+    phone?: string | null;
+    permissions: string[];
+    account_type: string;
+  };
+  permission_labels: Record<string, string>;
+  grouped_permissions: Record<string, Record<string, string>>;
+  selected_permissions: string[];
+  capabilities: {
+    can_update: boolean;
+    can_update_permissions: boolean;
+    can_apply_template: boolean;
+    can_deactivate: boolean;
+  };
+};
+
+export type AgentReportsOverview = {
+  ok: boolean;
+  active_tab: string;
+  has_live_data: boolean;
+  summary: Record<string, number>;
+  monthly_sales: Array<{ month: string; bookings: number; gross_sales: number }>;
+  export_url: string;
+  allowed_tabs: string[];
+};
+
+export type AgentCommissionOverview = {
+  ok: boolean;
+  balance: number;
+  totals: { pending: number; approved: number; paid: number; currency: string };
+  entries: Array<{
+    id: number;
+    booking_reference?: string | null;
+    amount: number;
+    currency: string;
+    status: string;
+    created_at?: string | null;
+  }>;
+  statements: Array<{
+    id: number;
+    reference: string;
+    period_start?: string | null;
+    period_end?: string | null;
+    total_amount: number;
+    status: string;
+    detail_url: string;
+  }>;
+};
+
+export type AgentAgencyProfile = {
+  ok: boolean;
+  details: Record<string, unknown>;
+  capabilities: {
+    can_edit_agency: boolean;
+    can_view_wallet: boolean;
+  };
+  wallet_summary?: { balance: number; available_balance: number; currency: string } | null;
+  update_url: string;
 };

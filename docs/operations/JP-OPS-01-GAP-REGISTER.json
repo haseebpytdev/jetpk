@@ -77,7 +77,9 @@
       "failure_mode": "missing_next_binding",
       "production_reachable": true,
       "recommended_phase": "JP-OPS-04",
-      "acceptance_criteria": "Next.js /agent/staff connected with permission gates"
+      "acceptance_criteria": "Next.js /agent/staff connected with permission gates",
+      "jp_ops_04_status": "CLOSED",
+      "closure_notes": "Next /agent/staff routes and additive JSON on AgentStaffController; RBAC and duplicate staff 409; Blade preserved."
     },
     {
       "gap_id": "JP-OPS-01-GAP-004",
@@ -96,7 +98,9 @@
         "tests": ["tests/Feature/Agent/AgentPortalFinanceScenarioTest.php"]
       },
       "recommended_phase": "JP-OPS-04",
-      "acceptance_criteria": "Next.js reports page with empty/error states"
+      "acceptance_criteria": "Next.js reports page with empty/error states",
+      "jp_ops_04_status": "CLOSED",
+      "closure_notes": "Next /agent/reports and AgentPortalReportsPresenter JSON; agency-scoped summary without platform margin fields."
     },
     {
       "gap_id": "JP-OPS-01-GAP-005",
@@ -115,7 +119,9 @@
         "tests": ["tests/Feature/AgentCommissionLedgerTest.php"]
       },
       "recommended_phase": "JP-OPS-04",
-      "acceptance_criteria": "Agent owner views commissions in Next.js"
+      "acceptance_criteria": "Agent owner views commissions in Next.js",
+      "jp_ops_04_status": "CLOSED",
+      "closure_notes": "Next /agent/commissions and owner-only AgentPortalCommissionPresenter JSON read."
     },
     {
       "gap_id": "JP-OPS-01-GAP-006",
@@ -242,7 +248,9 @@
         "tests": ["tests/Feature/AgentBookingCreationTest.php"]
       },
       "recommended_phase": "JP-OPS-04",
-      "acceptance_criteria": "Permitted staff can initiate bookings from Next.js"
+      "acceptance_criteria": "Permitted staff can initiate bookings from Next.js",
+      "jp_ops_04_status": "CLOSED",
+      "closure_notes": "Next /agent/bookings/create activates AgentBookingContext and hands off to /flights/search; no live ticket/payment execution."
     },
     {
       "gap_id": "JP-OPS-01-GAP-013",

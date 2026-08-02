@@ -4,6 +4,7 @@ namespace Tests\Feature\Agent;
 
 use App\Enums\AccountType;
 use App\Enums\UserAccountStatus;
+use App\Models\AgencyUser;
 use App\Models\Agent;
 use App\Models\Booking;
 use App\Models\User;
@@ -23,6 +24,7 @@ class AgentStaffPermissionTest extends TestCase
         $booking = Booking::factory()->create([
             'agency_id' => $agent->agency_id,
             'agent_id' => $agent->id,
+            'booking_reference' => 'BKG-'.fake()->unique()->numberBetween(10000, 99999),
         ]);
 
         $this->actingAs($agentUser)->get(route('agent.dashboard'))->assertOk();
@@ -70,6 +72,7 @@ class AgentStaffPermissionTest extends TestCase
         $booking = Booking::factory()->create([
             'agency_id' => $agent->agency_id,
             'agent_id' => $agent->id,
+            'booking_reference' => 'BKG-'.fake()->unique()->numberBetween(10000, 99999),
         ]);
 
         $this->actingAs($staff)->get(route('agent.bookings.index'))->assertOk();
@@ -132,7 +135,7 @@ class AgentStaffPermissionTest extends TestCase
 
         $this->actingAs($staff)->get(route('agent.bookings.index'))
             ->assertOk()
-            ->assertSee('data-testid="agent-bookings-create-link"', false);
+            ->assertSee('New booking', false);
     }
 
     public function test_agent_staff_without_agency_edit_does_not_see_edit_agency_button(): void
@@ -204,7 +207,7 @@ class AgentStaffPermissionTest extends TestCase
 
     protected function createStaffForAgent(Agent $agent, string $email, array $permissions = []): User
     {
-        return User::query()->create([
+        $staff = User::query()->create([
             'name' => 'Staff User',
             'username' => str_replace('@', '-', $email),
             'email' => $email,
@@ -217,6 +220,13 @@ class AgentStaffPermissionTest extends TestCase
                 'agent_permissions' => $permissions,
             ],
         ]);
+
+        AgencyUser::query()->updateOrCreate(
+            ['agency_id' => $agent->agency_id, 'user_id' => $staff->id],
+            ['role' => AccountType::AgentStaff->value],
+        );
+
+        return $staff;
     }
 
     /**

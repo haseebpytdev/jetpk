@@ -44,6 +44,8 @@ class AgentBookingController extends Controller
 
         $query = Booking::query()
             ->where('agent_id', $agent->id)
+            ->whereNotNull('booking_reference')
+            ->where('booking_reference', '!=', '')
             ->with(['passengers', 'contact', 'fareBreakdown', 'commissionEntries'])
             ->orderByDesc('created_at');
 
@@ -88,7 +90,7 @@ class AgentBookingController extends Controller
         ]);
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): View|JsonResponse
     {
         Gate::authorize('create', Booking::class);
         $this->resolveCurrentAgent();
@@ -97,6 +99,17 @@ class AgentBookingController extends Controller
         AgentBookingContext::activate($request, $user);
 
         $agencyName = $user->agentDisplayAgencyName();
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson([
+                'ok' => true,
+                'booking_mode_active' => true,
+                'agency_name' => $agencyName,
+                'message' => 'Agency booking mode active — bookings will be linked to '.$agencyName.'.',
+                'search_url' => '/flights/search',
+                'exit_url' => '/laravel/agent/bookings/exit-mode',
+            ]);
+        }
 
         session()->flash(
             'agent_booking_mode_notice',
@@ -121,12 +134,20 @@ class AgentBookingController extends Controller
             ->with('status', 'Please use Search flights to start a new agency booking via the main booking flow.');
     }
 
-    public function exitBookingMode(Request $request): RedirectResponse
+    public function exitBookingMode(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', Booking::class);
         $this->resolveCurrentAgent();
 
         AgentBookingContext::clear($request);
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson([
+                'ok' => true,
+                'message' => 'Agency booking mode ended.',
+                'redirect_url' => '/agent/dashboard',
+            ]);
+        }
 
         return redirect()
             ->route('agent.dashboard')

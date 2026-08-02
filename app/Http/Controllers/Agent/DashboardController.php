@@ -51,7 +51,10 @@ class DashboardController extends Controller
         $canManageStaff = $user->hasAgentPermission(AgentPermission::StaffManage);
 
         $bookingQuery = $canViewBookings
-            ? Booking::query()->where('agent_id', $agent->id)
+            ? Booking::query()
+                ->where('agent_id', $agent->id)
+                ->whereNotNull('booking_reference')
+                ->where('booking_reference', '!=', '')
             : Booking::query()->whereRaw('1 = 0');
 
         $pendingPaymentQuery = (clone $bookingQuery)->where(function ($q): void {

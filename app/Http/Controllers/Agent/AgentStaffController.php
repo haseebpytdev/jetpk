@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Agent;
 use App\Enums\AccountType;
 use App\Enums\AgencyRole;
 use App\Enums\UserAccountStatus;
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Agent\StoreAgentStaffRequest;
 use App\Http\Requests\Agent\UpdateAgentStaffRequest;
@@ -16,9 +17,11 @@ use App\Support\Access\RolePermissionMatrix;
 use App\Support\Agencies\AgencyRoleAssignment;
 use App\Support\Agencies\AgencyRolePermissionMatrix;
 use App\Support\Agencies\AgencyRoleResolver;
+use App\Support\AgentPortal\AgentPortalStaffPresenter;
 use App\Support\Agents\AgentPermission;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -29,7 +32,13 @@ use Illuminate\Support\Str;
  */
 class AgentStaffController extends Controller
 {
-    public function index(Request $request): View
+    use RespondsWithAgentPortalJson;
+
+    public function __construct(
+        protected AgentPortalStaffPresenter $staffPresenter,
+    ) {}
+
+    public function index(Request $request): View|JsonResponse
     {
         $this->authorizeStaff('viewAny');
 
@@ -48,6 +57,12 @@ class AgentStaffController extends Controller
         );
         $actor = auth()->user();
 
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson(
+                $this->staffPresenter->presentIndex($ownerAgent, $staffMembers, $actor),
+            );
+        }
+
         $viewData = [
             'staffMembers' => $staffMembers,
             'staffAgencyRoles' => $staffAgencyRoles,
@@ -61,9 +76,13 @@ class AgentStaffController extends Controller
         return view(client_view('staff.index', 'agent'), $viewData);
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): View|JsonResponse
     {
         $this->authorizeStaff('create');
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson($this->staffPresenter->presentCreateForm());
+        }
 
         $viewData = [
             'permissionLabels' => $this->staffPermissionLabels(),
@@ -76,13 +95,26 @@ class AgentStaffController extends Controller
         return view(client_view('staff.create', 'agent'), $viewData);
     }
 
-    public function store(StoreAgentStaffRequest $request): RedirectResponse
+    public function store(StoreAgentStaffRequest $request): RedirectResponse|JsonResponse
     {
         $ownerAgent = $this->ownerAgent();
 
         $permissions = $this->normalizePermissions($request->input('permissions', []));
 
         $email = $request->string('email')->toString();
+
+        $existingStaff = $this->staffQuery($ownerAgent)->where('email', $email)->first();
+        if ($existingStaff !== null) {
+            if ($this->wantsAgentPortalJson($request)) {
+                return $this->agentPortalJsonError(
+                    'A staff member with this email already exists for your agency.',
+                    409,
+                    'staff_already_exists',
+                );
+            }
+
+            return back()->withErrors(['email' => 'A staff member with this email already exists for your agency.']);
+        }
 
         $staff = User::query()->create([
             'name' => $request->string('name')->toString(),
@@ -104,16 +136,32 @@ class AgentStaffController extends Controller
             ['role' => AccountType::AgentStaff->value],
         );
 
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson([
+                'ok' => true,
+                'message' => 'Staff member created.',
+                'staff' => $this->staffPresenter->presentStaffDetail($staff, $ownerAgent),
+                'redirect_url' => '/agent/staff',
+            ], 201);
+        }
+
         return redirect()
             ->route('agent.staff.index')
             ->with('status', 'staff-created');
     }
 
-    public function edit(Request $request, User $staff): View
+    public function edit(Request $request, User $staff): View|JsonResponse
     {
         $this->authorizeStaff('view', $staff);
 
         $ownerAgent = $this->ownerAgent();
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson(
+                $this->staffPresenter->presentEditForm($staff, $ownerAgent, $request->user()),
+            );
+        }
+
         $agencyId = (int) $ownerAgent->agency_id;
         $agencyRole = AgencyRoleResolver::resolve($staff, $agencyId);
 
@@ -133,7 +181,7 @@ class AgentStaffController extends Controller
         return view(client_view('staff.edit', 'agent'), $viewData);
     }
 
-    public function update(UpdateAgentStaffRequest $request, User $staff): RedirectResponse
+    public function update(UpdateAgentStaffRequest $request, User $staff): RedirectResponse|JsonResponse
     {
         $meta = is_array($staff->meta) ? $staff->meta : [];
         $meta['phone'] = $request->string('phone')->toString() ?: null;
@@ -154,16 +202,31 @@ class AgentStaffController extends Controller
 
         $staff->save();
 
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson([
+                'ok' => true,
+                'message' => 'Staff member updated.',
+                'staff' => $this->staffPresenter->presentStaffDetail($staff, $this->ownerAgent()),
+            ]);
+        }
+
         return redirect()
             ->route('agent.staff.index')
             ->with('status', 'staff-updated');
     }
 
-    public function destroy(User $staff): RedirectResponse
+    public function destroy(Request $request, User $staff): RedirectResponse|JsonResponse
     {
         $this->authorizeStaff('delete', $staff);
 
         $staff->forceFill(['status' => UserAccountStatus::Inactive])->save();
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson([
+                'ok' => true,
+                'message' => 'Staff member deactivated.',
+            ]);
+        }
 
         return redirect()
             ->route('agent.staff.index')

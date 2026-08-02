@@ -5,6 +5,7 @@ namespace Tests\Feature\Agent;
 use App\Enums\AccountType;
 use App\Enums\UserAccountStatus;
 use App\Models\Agency;
+use App\Models\AgencyUser;
 use App\Models\Agent;
 use App\Models\User;
 use App\Support\Agents\AgentPermission;
@@ -124,7 +125,7 @@ class AgentStaffTest extends TestCase
 
     protected function createStaffForAgent(Agent $agent, string $email, array $permissions = []): User
     {
-        return User::query()->create([
+        $staff = User::query()->create([
             'name' => 'Staff User',
             'username' => str_replace('@', '-', $email),
             'email' => $email,
@@ -137,6 +138,13 @@ class AgentStaffTest extends TestCase
                 'agent_permissions' => $permissions,
             ],
         ]);
+
+        AgencyUser::query()->updateOrCreate(
+            ['agency_id' => $agent->agency_id, 'user_id' => $staff->id],
+            ['role' => AccountType::AgentStaff->value],
+        );
+
+        return $staff;
     }
 
     /**

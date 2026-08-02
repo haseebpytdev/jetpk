@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Agent\ApplyAgentStaffPermissionTemplateRequest;
 use App\Http\Requests\Agent\UpdateAgentStaffPermissionsRequest;
 use App\Models\Agent;
 use App\Models\User;
 use App\Support\Agencies\AgencyStaffPermissionAssignment;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 
 class AgentStaffPermissionController extends Controller
 {
-    public function update(UpdateAgentStaffPermissionsRequest $request, User $staff): RedirectResponse
+    use RespondsWithAgentPortalJson;
+
+    public function update(UpdateAgentStaffPermissionsRequest $request, User $staff): RedirectResponse|JsonResponse
     {
         $ownerAgent = $this->ownerAgent();
 
@@ -23,12 +27,20 @@ class AgentStaffPermissionController extends Controller
             (int) $ownerAgent->agency_id,
         );
 
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson([
+                'ok' => true,
+                'message' => 'Staff permissions updated.',
+                'permissions' => array_values($staff->fresh()->meta['agent_permissions'] ?? []),
+            ]);
+        }
+
         return redirect()
             ->back()
             ->with('status', 'staff-permissions-updated');
     }
 
-    public function applyTemplate(ApplyAgentStaffPermissionTemplateRequest $request, User $staff): RedirectResponse
+    public function applyTemplate(ApplyAgentStaffPermissionTemplateRequest $request, User $staff): RedirectResponse|JsonResponse
     {
         $ownerAgent = $this->ownerAgent();
 
@@ -37,6 +49,14 @@ class AgentStaffPermissionController extends Controller
             $request->user(),
             (int) $ownerAgent->agency_id,
         );
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson([
+                'ok' => true,
+                'message' => 'Role template applied.',
+                'permissions' => array_values($staff->fresh()->meta['agent_permissions'] ?? []),
+            ]);
+        }
 
         return redirect()
             ->back()

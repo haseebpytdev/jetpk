@@ -16,6 +16,7 @@ import { ReviewPriceBreakdown } from "@/features/standard-booking/components/Rev
 import { statusToneClass } from "@/features/standard-booking/utils/status-presentation";
 import type { BookingConfirmation } from "@/features/standard-booking/types/review-payment";
 import { fetchAgentBookingDetail } from "../services/agent-dashboard-api";
+import { AgentBookingCancellationPanel } from "./AgentBookingCancellationPanel";
 import { AgentDashboardErrorState, AgentDashboardShell } from "../shell/AgentDashboardShell";
 import type { PublicSession } from "@/types/session";
 
@@ -69,6 +70,16 @@ export function AgentBookingDetailsPage({ session, reference }: { session: Publi
                 airlineLocator={data.pnr_details.airline_locator}
               />
               <ReviewPriceBreakdown pricing={data.pricing} />
+              <AgentBookingCancellationPanel
+                bookingReference={data.booking_reference ?? reference}
+                canRequest={Boolean(
+                  data.actions?.find((action) => action.code === "request_cancellation")?.available,
+                )}
+                reasonUnavailable={
+                  data.actions?.find((action) => action.code === "request_cancellation")?.reason_unavailable
+                }
+                onSubmitted={load}
+              />
               <PostBookingActions actions={data.actions} />
               <Link href="/agent/bookings" className="text-jp-sm text-jp-primary focus-visible:shadow-jp-focus">
                 Back to bookings
