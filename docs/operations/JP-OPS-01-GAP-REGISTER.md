@@ -34,7 +34,19 @@ None after JP-OPS-01A reassessment.
 
 ## P2 gaps
 
-GAP-004, GAP-005, GAP-007, GAP-011, GAP-014, GAP-015 — see JSON for full evidence blocks.
+GAP-004, GAP-005, GAP-007, GAP-011, GAP-014 — see JSON for full evidence blocks.
+
+### GAP-015 (JP-OPS-02 partial closure)
+
+| Field | Value |
+|-------|-------|
+| ID | GAP-015 |
+| Severity | P2 |
+| Status | **PARTIALLY_CLOSED** (JP-OPS-02) |
+| Provider contract | `App\Contracts\Auth\LoginOtpChannelProvider` prepared |
+| Live production channel | **EXTERNAL_DEPENDENCY_BLOCKED** / runtime pending |
+| Demo OTP patch | **Preserved** — `OTP_DEMO_*` flags unchanged; removal not part of JP-OPS-02 |
+| Evidence | `config/ota_otp_demo.php`, `DemoFixedLoginOtpGate.php`, `login.otp.*` routes |
 
 ## P3 / P4
 

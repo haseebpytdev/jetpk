@@ -6,11 +6,25 @@ use App\Enums\AccountType;
 use App\Enums\UserAccountStatus;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\Auth\ConfiguresAuthTestEnvironment;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
+    use ConfiguresAuthTestEnvironment;
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutLoginOtpGate();
+    }
+
+    public function test_otp_gate_is_disabled_for_credential_suite(): void
+    {
+        $this->assertFalse(\App\Support\Auth\ClientLoginOtpGate::isRequired());
+    }
 
     public function test_login_screen_can_be_rendered(): void
     {

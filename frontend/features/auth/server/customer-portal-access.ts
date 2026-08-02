@@ -1,7 +1,14 @@
 import { fetchSessionBootstrapFromCookies, mapBootstrapToPublicSession } from "@/features/auth/services/session-service";
 import type { SessionBootstrap } from "@/features/auth/types";
 import { resolveSessionBootstrapFixture } from "@/features/auth/server/session-fixture";
-import { sanitizeDashboardUrl } from "@/features/auth/utils/dashboard-allowlist";
+import {
+  assertSessionUsable,
+  redirectEmailVerificationRequired,
+  redirectPasswordChangeRequired,
+  redirectPendingOtp,
+  redirectUnauthenticated,
+  redirectWrongRole,
+} from "@/features/auth/server/portal-access-shared";
 import type { PublicSession } from "@/types/session";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -24,31 +31,29 @@ async function loadBootstrap(cookieList: Array<{ name: string; value: string }>)
 
 /**
  * Laravel-authoritative guard for temporary Next.js customer portal routes.
- * Redirects unauthenticated users to login and non-customers to their Laravel dashboard_url.
  */
 export async function requireCustomerPortalAccess(): Promise<CustomerPortalAccess> {
   const cookieStore = await cookies();
   const cookieList = cookieStore.getAll();
   const bootstrap = await loadBootstrap(cookieList);
 
-  if (!bootstrap.authenticated || !bootstrap.user) {
-    redirect("/login");
-  }
-
-  const accountType = bootstrap.user.account_type ?? bootstrap.role ?? null;
-  if (accountType !== CUSTOMER_ACCOUNT_TYPE) {
-    const destination = sanitizeDashboardUrl(bootstrap.dashboard_url, "/access-denied");
-    const customerPaths = new Set(["/customer", "/customer/dashboard", "/customer/bookings"]);
-
-    if (customerPaths.has(destination.split("?")[0] ?? "")) {
-      redirect("/access-denied");
-    }
-
-    redirect(destination);
-  }
+  redirectPendingOtp(bootstrap);
+  redirectUnauthenticated(bootstrap);
+  assertSessionUsable(bootstrap);
+  redirectPasswordChangeRequired(bootstrap);
+  redirectEmailVerificationRequired(bootstrap);
+  redirectWrongRole(bootstrap, new Set([CUSTOMER_ACCOUNT_TYPE]));
 
   return {
     session: mapBootstrapToPublicSession(bootstrap),
     bootstrap,
   };
+}
+
+/**
+ * Layout-level customer portal guard: enforces auth without duplicating page data fetches.
+ */
+export async function requireCustomerPortalLayoutAccess(): Promise<PublicSession> {
+  const { session } = await requireCustomerPortalAccess();
+  return session;
 }

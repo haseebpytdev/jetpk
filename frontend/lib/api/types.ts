@@ -8,6 +8,7 @@ export type ApiErrorCode =
   | "forbidden"
   | "not_found"
   | "conflict"
+  | "csrf_expired"
   | "validation"
   | "rate_limit"
   | "server"
@@ -44,4 +45,9 @@ export type LaravelRequestOptions = {
   timeoutMs?: number;
   /** When true, safe GET retries once on network failure. */
   retryOnNetworkError?: boolean;
+  /**
+   * When true, a single CSRF refresh may occur before retrying a failed mutation.
+   * Never use for payment or booking mutations.
+   */
+  retryCsrfOnce?: boolean;
 };

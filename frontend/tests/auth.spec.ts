@@ -140,4 +140,9 @@ test.describe("JP-FE-04 Laravel auth API mocks", () => {
     await page.getByRole("button", { name: /send reset link/i }).click();
     await expect(page.locator("#main-content").getByText(/emailed password reset instructions/i)).toBeVisible();
   });
+
+  test("login session expired notice renders", async ({ page }) => {
+    await page.goto("/login?reason=session-expired");
+    await expect(page.locator("#main-content")).toContainText(/session has expired/i);
+  });
 });

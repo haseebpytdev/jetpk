@@ -13,14 +13,24 @@ function readCookie(name: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-export async function ensureLaravelCsrfToken(): Promise<string | null> {
-  const existing = readCookie("XSRF-TOKEN");
-  if (existing) return existing;
+function clearXsrfCookie(): void {
+  if (typeof document === "undefined") return;
+  document.cookie = "XSRF-TOKEN=; Path=/; Max-Age=0; SameSite=Lax";
+}
+
+export async function ensureLaravelCsrfToken(forceRefresh = false): Promise<string | null> {
+  if (!forceRefresh) {
+    const existing = readCookie("XSRF-TOKEN");
+    if (existing) return existing;
+  } else {
+    clearXsrfCookie();
+  }
 
   try {
     const response = await fetch(laravelApiPath("/api/public/content/csrf-token"), {
       credentials: "include",
       headers: JSON_HEADERS,
+      cache: "no-store",
     });
     if (!response.ok) return null;
     const body = (await response.json()) as { csrf_token?: string };
@@ -67,12 +77,30 @@ function withTimeout(signal: AbortSignal | undefined, timeoutMs?: number): {
   };
 }
 
+async function parseResponsePayload(response: Response): Promise<unknown | null> {
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+
+  if (!isJson) {
+    const text = await response.text();
+    if (text.trim() === "") return null;
+    return { message: defaultErrorMessage(response.status), _html: true };
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 async function executeRequest<T>(
   path: string,
   options: LaravelRequestOptions,
+  csrfForceRefresh = false,
 ): Promise<ApiResult<T>> {
   const method = options.method ?? "GET";
-  const csrf = method !== "GET" ? await ensureLaravelCsrfToken() : null;
+  const csrf = method !== "GET" ? await ensureLaravelCsrfToken(csrfForceRefresh) : null;
   const { signal, cleanup } = withTimeout(options.signal, options.timeoutMs);
 
   const headers: Record<string, string> = {
@@ -89,11 +117,10 @@ async function executeRequest<T>(
       headers,
       body: buildBody(options),
       signal,
+      cache: method === "GET" ? "default" : "no-store",
     });
 
-    const contentType = response.headers.get("content-type") ?? "";
-    const isJson = contentType.includes("application/json");
-    const payload = isJson ? await response.json() : null;
+    const payload = await parseResponsePayload(response);
 
     if (!response.ok) {
       const errors = (payload as { errors?: Record<string, string[]> } | null)?.errors;
@@ -107,6 +134,15 @@ async function executeRequest<T>(
         message,
         errors,
         data: payload,
+      };
+    }
+
+    if (payload === null && response.status !== 204) {
+      return {
+        ok: false,
+        code: "unknown",
+        status: response.status,
+        message: "Unexpected empty response from server.",
       };
     }
 
@@ -139,7 +175,7 @@ export async function laravelRequest<T>(
   options: LaravelRequestOptions = {},
 ): Promise<ApiResult<T>> {
   const method = options.method ?? "GET";
-  const result = await executeRequest<T>(path, options);
+  let result = await executeRequest<T>(path, options);
 
   if (
     !result.ok &&
@@ -147,7 +183,16 @@ export async function laravelRequest<T>(
     method === "GET" &&
     options.retryOnNetworkError
   ) {
-    return executeRequest<T>(path, options);
+    result = await executeRequest<T>(path, options);
+  }
+
+  if (
+    !result.ok &&
+    result.code === "csrf_expired" &&
+    method !== "GET" &&
+    options.retryCsrfOnce
+  ) {
+    result = await executeRequest<T>(path, options, true);
   }
 
   return result;

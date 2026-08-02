@@ -16,6 +16,9 @@ export function mapBootstrapToPublicSession(bootstrap: SessionBootstrap): Public
     return { status: "anonymous" };
   }
 
+  const dashboardUrl = sanitizeDashboardUrl(bootstrap.dashboard_url, "/");
+  const landingRoute = sanitizeDashboardUrl(bootstrap.landing_route ?? bootstrap.dashboard_url, dashboardUrl);
+
   return {
     status: "authenticated",
     user: {
@@ -24,9 +27,19 @@ export function mapBootstrapToPublicSession(bootstrap: SessionBootstrap): Public
       email: bootstrap.user.email,
       initials: initialsFromName(bootstrap.user.name),
     },
-    dashboardUrl: sanitizeDashboardUrl(bootstrap.dashboard_url, "/"),
+    dashboardUrl,
+    landingRoute,
     accountType: bootstrap.user.account_type ?? bootstrap.role ?? null,
     role: bootstrap.role ?? bootstrap.user.account_type ?? null,
+    portalType: bootstrap.portal_type ?? null,
+    agencyId: bootstrap.agency_id ?? null,
+    agencyRole: bootstrap.agency_role ?? null,
+    permissions: bootstrap.permissions ?? [],
+    accountStatus: bootstrap.account_status ?? "active",
+    emailVerified: bootstrap.email_verified ?? true,
+    sessionUsable: bootstrap.session_usable ?? true,
+    requiresPasswordChange: bootstrap.requires_password_change ?? false,
+    requiresEmailVerification: bootstrap.requires_email_verification ?? false,
   };
 }
 

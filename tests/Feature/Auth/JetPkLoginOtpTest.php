@@ -12,11 +12,25 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use Tests\Support\Auth\ConfiguresAuthTestEnvironment;
 use Tests\TestCase;
 
 class JetPkLoginOtpTest extends TestCase
 {
+    use ConfiguresAuthTestEnvironment;
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withJetPkLoginOtpGate();
+    }
+
+    public function test_otp_gate_is_enabled_for_jetpk_otp_suite(): void
+    {
+        $this->assertTrue(\App\Support\Auth\ClientLoginOtpGate::isRequired());
+    }
 
     public function test_jetpk_login_redirects_to_otp_challenge_on_valid_credentials(): void
     {
@@ -34,7 +48,7 @@ class JetPkLoginOtpTest extends TestCase
             'password' => 'SecretPass1',
         ]);
 
-        $response->assertRedirect('/jetpk/login/otp');
+        $response->assertRedirect('/login/otp');
         $this->assertGuest();
         Mail::assertSent(LoginOtpMail::class, function (LoginOtpMail $mail) use ($user): bool {
             return $mail->hasTo($user->email)
@@ -79,7 +93,7 @@ class JetPkLoginOtpTest extends TestCase
         $this->post('/login', [
             'login' => $user->email,
             'password' => 'SecretPass1',
-        ])->assertRedirect('/jetpk/login/otp');
+        ])->assertRedirect('/login/otp');
 
         $sentCode = null;
         Mail::assertSent(LoginOtpMail::class, function (LoginOtpMail $mail) use (&$sentCode): bool {
@@ -121,6 +135,8 @@ class JetPkLoginOtpTest extends TestCase
     public function test_master_login_does_not_require_otp(): void
     {
         Mail::fake();
+        $this->withoutLoginOtpGate();
+
         $user = User::factory()->customer()->create([
             'email' => 'master-user@example.test',
             'password' => Hash::make('SecretPass1'),
@@ -140,8 +156,8 @@ class JetPkLoginOtpTest extends TestCase
     {
         $this->makeJetPkProfile();
 
-        $this->get('/jetpk/login/otp')
-            ->assertRedirect('/jetpk/login');
+        $this->get('/login/otp')
+            ->assertRedirect('/login');
     }
 
     public function test_jetpk_login_otp_with_pending_session_renders_200(): void
@@ -153,13 +169,13 @@ class JetPkLoginOtpTest extends TestCase
             'password' => Hash::make('SecretPass1'),
         ]);
 
-        $this->get('/jetpk/login');
+        $this->get('/login');
         $this->post('/login', [
             'login' => $user->email,
             'password' => 'SecretPass1',
-        ])->assertRedirect('/jetpk/login/otp');
+        ])->assertRedirect('/login/otp');
 
-        $this->get('/jetpk/login/otp')
+        $this->get('/login/otp')
             ->assertOk()
             ->assertSee('Verify your sign-in', false);
     }
@@ -195,12 +211,12 @@ class JetPkLoginOtpTest extends TestCase
         ])->render();
     }
 
-    public function test_login_otp_routes_are_registered_for_client_parity(): void
+    public function test_login_otp_routes_are_registered_for_jetpk_auth_contract(): void
     {
         $this->assertTrue(Route::has('login.otp'));
         $this->assertTrue(Route::has('login.otp.verify'));
         $this->assertTrue(Route::has('login.otp.resend'));
-        $this->assertTrue(Route::has('client.parity.login.otp'));
+        $this->assertSame('/login/otp', route('login.otp', [], false));
     }
 
     public function test_jetpk_platform_admin_can_receive_otp_mail(): void
@@ -219,7 +235,7 @@ class JetPkLoginOtpTest extends TestCase
         $this->post('/login', [
             'login' => $user->email,
             'password' => 'SecretPass1',
-        ])->assertRedirect('/jetpk/login/otp');
+        ])->assertRedirect('/login/otp');
 
         Mail::assertSent(LoginOtpMail::class, function (LoginOtpMail $mail) use ($user): bool {
             return $mail->hasTo($user->email)

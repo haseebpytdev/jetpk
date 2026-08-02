@@ -56,7 +56,7 @@ class LoginOtpController extends Controller
             );
 
             if ($request->expectsJson()) {
-                $bootstrap = $sessionBootstrap->forAuthenticatedUser($result['user']);
+                $bootstrap = $sessionBootstrap->forAuthenticatedUser($result['user'], $request);
                 $redirectPath = PublicAuthRedirectAllowlist::sanitize(
                     $redirect->getTargetUrl(),
                     (string) ($bootstrap['dashboard_url'] ?? '/'),

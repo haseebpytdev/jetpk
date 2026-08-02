@@ -15,6 +15,9 @@ class PublicSessionController extends Controller
 
     public function show(Request $request): JsonResponse
     {
-        return response()->json($this->sessionBootstrap->build($request));
+        return response()
+            ->json($this->sessionBootstrap->build($request))
+            ->header('Cache-Control', 'private, no-store')
+            ->header('Vary', 'Cookie');
     }
 }

@@ -278,14 +278,15 @@
       "user_role": "all",
       "route_page": "/login/otp",
       "expected_capability": "Production OTP channel",
-      "current_implementation": "Demo OTP patch preserved; EXTERNAL_DEPENDENCY_BLOCKED for production SMS/email",
+      "current_implementation": "Demo OTP patch preserved; LoginOtpChannelProvider contract added (JP-OPS-02); live SMS/email channel EXTERNAL_DEPENDENCY_BLOCKED",
       "evidence": {
         "routes": ["login.otp.verify", "login.otp.resend"],
         "frontend": ["frontend/app/(auth)/login/otp/page.tsx"],
-        "tests": ["frontend/tests/jp-full-next-frontend/route-matrix.spec.ts"]
+        "tests": ["frontend/tests/jp-full-next-frontend/route-matrix.spec.ts", "tests/Feature/Auth/PublicSessionBootstrapTest.php"]
       },
-      "recommended_phase": "JP-OPS-02",
-      "acceptance_criteria": "Production OTP provider configured without removing demo patch"
+      "recommended_phase": "JP-OPS-02 (contract prepared) / external runtime for live channel",
+      "acceptance_criteria": "Production OTP provider configured without removing demo patch",
+      "jp_ops_02_status": "PARTIALLY_CLOSED — provider contract documented; demo patch preserved; live channel deferred to external runtime"
     }
   ]
 }
