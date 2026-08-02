@@ -2,8 +2,8 @@
 
 ## Phase
 
-**JP-OPS-03** — Customer portal operational closure  
-**Branch:** `phase/jetpk-ops-03-customer-portal-closure`  
+**JP-OPS-03** — Customer portal operational closure
+**Branch:** `phase/jetpk-ops-03-customer-portal-closure`
 **Baseline:** `770a29c8514bdadab9275e9786a1cf9790a6db0d`
 
 ## Objective
@@ -20,8 +20,8 @@ Close the Customer Next.js portal as a Laravel-authoritative operational surface
 
 ## Changed-file inventory (canonical)
 
-**Tracked diff count (`git diff --name-only 770a29c…`): 24**  
-**Untracked new paths: 25**  
+**Tracked diff count (`git diff --name-only 770a29c…`): 24**
+**Untracked new paths: 25**
 **Working-tree delta: 49 paths**
 
 | Group | Count | Paths |

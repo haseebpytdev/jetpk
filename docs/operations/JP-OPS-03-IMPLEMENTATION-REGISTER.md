@@ -1,7 +1,7 @@
 # JP-OPS-03 Implementation Register
 
-**Phase:** JP-OPS-03 Customer Portal Operational Closure  
-**Branch:** `phase/jetpk-ops-03-customer-portal-closure`  
+**Phase:** JP-OPS-03 Customer Portal Operational Closure
+**Branch:** `phase/jetpk-ops-03-customer-portal-closure`
 **Baseline:** `770a29c8514bdadab9275e9786a1cf9790a6db0d`
 
 ## Customer page × action matrix
