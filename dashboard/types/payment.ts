@@ -51,6 +51,12 @@ export type TransactionRecord = {
   createdAt: string;
   updatedAt: string;
   auditNote: string;
+  laravelPaymentId?: string;
+  capabilities?: {
+    can_verify?: boolean;
+    can_reject?: boolean;
+    already_processed?: boolean;
+  } | null;
 };
 
 export type PaymentSortField =

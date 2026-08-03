@@ -171,6 +171,10 @@ class BookingPaymentService
             throw new InvalidArgumentException('Payment is already verified.');
         }
 
+        if ($payment->status === BookingPaymentStatus::Rejected) {
+            throw new InvalidArgumentException('Payment is already rejected.');
+        }
+
         $booking = $payment->booking()->first() ?? $payment->booking;
         if ($booking !== null && $this->isPiaNdcBooking($booking)) {
             try {
@@ -212,6 +216,10 @@ class BookingPaymentService
 
     public function rejectPayment(BookingPayment $payment, User $actor, string $reason): BookingPayment
     {
+        if (in_array($payment->status, [BookingPaymentStatus::Verified, BookingPaymentStatus::Rejected], true)) {
+            throw new InvalidArgumentException('Payment cannot be rejected in its current state.');
+        }
+
         $payment = DB::transaction(function () use ($payment, $actor, $reason): BookingPayment {
             $payment->forceFill([
                 'status' => BookingPaymentStatus::Rejected,

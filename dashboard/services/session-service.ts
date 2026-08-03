@@ -2,8 +2,16 @@ import { createReadOnlyService, ReadOnlyServiceError, type ReadOnlyFetchOptions 
 import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
 import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
 import { DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
+import { getDashboardMode } from "@/lib/preview";
 import { mockUser } from "@/mocks/overview-fixtures";
 import type { LaravelSessionPayload } from "@/lib/read-only/laravel/types";
+import type { DashboardPortal } from "@/lib/portal-path";
+
+export type DashboardNavItem = {
+  label: string;
+  href: string;
+  key: string;
+};
 
 export type DashboardSessionSummary = {
   id: string;
@@ -13,7 +21,17 @@ export type DashboardSessionSummary = {
   permissions: string[];
   accountType: string;
   accountStatus: string;
+  portalType: DashboardPortal;
+  platformRole: string;
+  sessionUsable: boolean;
+  denialReason: string | null;
+  requiresPasswordChange: boolean;
+  requiresEmailVerification: boolean;
+  landingRoute: string;
+  navigation: DashboardNavItem[];
+  capabilities: Record<string, boolean>;
   initials: string;
+  unavailable?: boolean;
 };
 
 function toInitials(name: string): string {
@@ -23,7 +41,30 @@ function toInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
 }
 
-function fromFixture(): DashboardSessionSummary {
+function unavailableSession(): DashboardSessionSummary {
+  return {
+    id: "unavailable",
+    displayName: "Session unavailable",
+    email: "—",
+    roles: [],
+    permissions: [],
+    accountType: "unknown",
+    accountStatus: "unknown",
+    portalType: "admin",
+    platformRole: "unknown",
+    sessionUsable: false,
+    denialReason: "session_unavailable",
+    requiresPasswordChange: false,
+    requiresEmailVerification: false,
+    landingRoute: "/admin/dashboard",
+    navigation: [],
+    capabilities: {},
+    initials: "??",
+    unavailable: true,
+  };
+}
+
+function fromFixture(portal: DashboardPortal = "admin"): DashboardSessionSummary {
   return {
     id: "fixture-admin",
     displayName: mockUser.name,
@@ -32,11 +73,28 @@ function fromFixture(): DashboardSessionSummary {
     permissions: ["dashboard.view", "bookings.view", "payments.view", "customers.view"],
     accountType: "platform_admin",
     accountStatus: "active",
+    portalType: portal,
+    platformRole: "platform_admin",
+    sessionUsable: true,
+    denialReason: null,
+    requiresPasswordChange: false,
+    requiresEmailVerification: false,
+    landingRoute: `/${portal}/dashboard`,
+    navigation: [
+      { label: "Dashboard", href: "/", key: "dashboard" },
+      { label: "Bookings", href: "/bookings", key: "bookings" },
+      { label: "Payments", href: "/payments", key: "payments" },
+      { label: "Reports", href: "/reports", key: "reports" },
+    ],
+    capabilities: {
+      can_review_payment: true,
+      can_review_deposit: portal === "admin",
+    },
     initials: mockUser.initials,
   };
 }
 
-function fromLaravel(payload: LaravelSessionPayload): DashboardSessionSummary {
+function fromLaravel(payload: LaravelSessionPayload, portal: DashboardPortal): DashboardSessionSummary {
   return {
     id: payload.id,
     displayName: payload.displayName,
@@ -45,32 +103,60 @@ function fromLaravel(payload: LaravelSessionPayload): DashboardSessionSummary {
     permissions: payload.permissions,
     accountType: payload.accountType,
     accountStatus: payload.accountStatus,
+    portalType: (payload.portalType as DashboardPortal) ?? portal,
+    platformRole: payload.platformRole ?? payload.accountType,
+    sessionUsable: payload.sessionUsable ?? true,
+    denialReason: payload.denialReason ?? null,
+    requiresPasswordChange: payload.requiresPasswordChange ?? false,
+    requiresEmailVerification: payload.requiresEmailVerification ?? false,
+    landingRoute: payload.landingRoute ?? `/${portal}/dashboard`,
+    navigation: (payload.navigation as DashboardNavItem[]) ?? [],
+    capabilities: (payload.capabilities as Record<string, boolean>) ?? {},
     initials: toInitials(payload.displayName),
   };
 }
 
-const sessionService = createReadOnlyService<Record<string, never>, DashboardSessionSummary>({
+const sessionService = createReadOnlyService<
+  { portal?: DashboardPortal },
+  DashboardSessionSummary
+>({
   module: "session",
   fixtureAdapter: {
     mode: "fixture",
-    async fetch(_query, options) {
+    async fetch(query, options) {
       await new Promise((r) => setTimeout(r, 40));
-      return createReadOnlyEnvelope({ data: fromFixture(), metadata: options?.metadata });
+      return createReadOnlyEnvelope({
+        data: fromFixture(query.portal ?? "admin"),
+        metadata: options?.metadata,
+      });
     },
   },
   laravelAdapter: {
     mode: "laravelReadOnly",
-    async fetch(_query, options) {
+    async fetch(query, options) {
+      const portal = query.portal ?? "admin";
       const envelope = await fetchDashboardApi<LaravelSessionPayload>(DASHBOARD_API_ROUTES.session, {
         signal: options?.signal,
+        query: { portal },
       });
-      return { ...envelope, data: fromLaravel(envelope.data) };
+      return { ...envelope, data: fromLaravel(envelope.data, portal) };
     },
   },
 });
 
-export async function getDashboardSession(options?: ReadOnlyFetchOptions): Promise<DashboardSessionSummary> {
-  const envelope = await sessionService.fetchReadOnly({}, options);
+export async function getDashboardSession(
+  options?: ReadOnlyFetchOptions & { portal?: DashboardPortal },
+): Promise<DashboardSessionSummary> {
+  if (getDashboardMode() === "live") {
+    try {
+      const envelope = await sessionService.fetchReadOnly({ portal: options?.portal }, options);
+      return envelope.data;
+    } catch {
+      return unavailableSession();
+    }
+  }
+
+  const envelope = await sessionService.fetchReadOnly({ portal: options?.portal }, options);
   return envelope.data;
 }
 

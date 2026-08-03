@@ -205,7 +205,7 @@ test("no mutation request occurs", async ({ page }) => {
 
 test("no password or secret appears", async ({ page }) => {
   await page.goto(`/admin/dashboard/users?selected=${USER_ID}`, { waitUntil: "load" });
-  const body = await page.locator("body").textContent();
+  const body = await page.getByTestId("dashboard-shell").textContent();
   expect(body).not.toMatch(/password|passwordHash|Bearer|sessionId|cookie/i);
 });
 

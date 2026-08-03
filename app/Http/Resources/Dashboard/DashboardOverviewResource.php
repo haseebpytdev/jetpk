@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\BookingPayment;
 use App\Models\User;
 use App\Support\Bookings\BookingListPresenter;
+use App\Support\Staff\StaffPermission;
 use Illuminate\Support\Collection;
 
 final class DashboardOverviewResource
@@ -24,7 +25,7 @@ final class DashboardOverviewResource
             'hasLiveData' => (bool) ($dashboard['hasLiveData'] ?? false),
             'referenceTime' => now()->toIso8601String(),
             'summaryStats' => self::summaryStats($stats),
-            'operationalQueues' => self::operationalQueues($needsAttention),
+            'operationalQueues' => self::operationalQueues($needsAttention, $user),
             'recentBookings' => self::recentBookings($recent),
             'operationalCounts' => is_array($dashboard['commandSummary'] ?? null) ? $dashboard['commandSummary'] : [],
             'failedNotifications' => (int) (($dashboard['commandSummary']['failed_notifications'] ?? 0)),
@@ -53,8 +54,13 @@ final class DashboardOverviewResource
      * @param  array<int, array<string, mixed>>  $needsAttention
      * @return list<array<string, mixed>>
      */
-    protected static function operationalQueues(array $needsAttention): array
+    protected static function operationalQueues(array $needsAttention, User $user): array
     {
+        $filtered = array_values(array_filter(
+            $needsAttention,
+            static fn (array $item): bool => self::canViewOperationalQueue($user, (string) ($item['key'] ?? '')),
+        ));
+
         return array_values(array_map(static function (array $item): array {
             return [
                 'key' => (string) ($item['key'] ?? ''),
@@ -66,7 +72,29 @@ final class DashboardOverviewResource
                 'tone' => self::toneForKey((string) ($item['key'] ?? '')),
                 'cta' => 'Review',
             ];
-        }, $needsAttention));
+        }, $filtered));
+    }
+
+    protected static function canViewOperationalQueue(User $user, string $key): bool
+    {
+        if ($user->isPlatformAdmin()) {
+            return true;
+        }
+
+        if (! $user->isStaff()) {
+            return false;
+        }
+
+        return match ($key) {
+            'pending_deposits' => false,
+            'payment_review' => $user->hasStaffPermission(StaffPermission::PaymentsVerify)
+                || $user->hasStaffPermission(StaffPermission::PaymentsRecord),
+            'supplier_pnr_pending' => false,
+            'refunds_pending' => $user->hasStaffPermission(StaffPermission::RefundsApprove),
+            'cancellations_pending' => $user->hasStaffPermission(StaffPermission::CancellationsApprove),
+            'ticketing_pending' => $user->hasStaffPermission(StaffPermission::TicketingIssue),
+            default => $user->hasStaffPermission(StaffPermission::BookingsView),
+        };
     }
 
     /**

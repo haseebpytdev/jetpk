@@ -3,6 +3,8 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\User;
+use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
+use App\Support\BackOffice\BackOfficePortalAccess;
 use App\Support\Dashboard\DashboardPermissionResolver;
 use App\Support\Dashboard\DashboardReadOnlyEnvelope;
 
@@ -11,8 +13,12 @@ final class DashboardSessionResource
     /**
      * @return array<string, mixed>
      */
-    public static function toArray(User $user): array
+    public static function toArray(User $user, ?string $portalType = null): array
     {
+        $access = BackOfficePortalAccess::evaluate($user);
+        $portal = $portalType ?? ($user->isPlatformAdmin() ? 'admin' : 'staff');
+        $capabilities = app(BackOfficeCapabilitiesPresenter::class)->present($user, $portal);
+
         return [
             'id' => (string) $user->id,
             'displayName' => $user->name,
@@ -22,6 +28,15 @@ final class DashboardSessionResource
             'accountType' => $user->account_type->value,
             'accountStatus' => $user->status->value,
             'staffType' => $user->isStaff() ? 'staff' : ($user->isAgentPortalUser() ? 'agent' : ($user->isPlatformAdmin() ? 'admin' : null)),
+            'portalType' => $portal,
+            'platformRole' => $user->isPlatformAdmin() ? 'platform_admin' : ($user->isStaff() ? 'staff' : $user->account_type->value),
+            'sessionUsable' => ($access['ok'] ?? false) === true,
+            'denialReason' => $access['denial_reason'] ?? null,
+            'requiresPasswordChange' => (bool) data_get($user->meta, 'requires_password_change', false),
+            'requiresEmailVerification' => $user->email_verified_at === null,
+            'landingRoute' => $user->isPlatformAdmin() ? '/admin/dashboard' : '/staff/dashboard',
+            'navigation' => $capabilities['navigation'] ?? [],
+            'capabilities' => $capabilities['capabilities'] ?? [],
             'schemaVersion' => DashboardReadOnlyEnvelope::SCHEMA_VERSION,
             'generatedAt' => now()->toIso8601String(),
         ];

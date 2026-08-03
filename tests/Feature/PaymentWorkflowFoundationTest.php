@@ -12,11 +12,20 @@ use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class PaymentWorkflowFoundationTest extends TestCase
 {
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Artisan::call('view:clear');
+    }
 
     public function test_agency_admin_can_record_manual_payment(): void
     {
@@ -83,7 +92,7 @@ class PaymentWorkflowFoundationTest extends TestCase
             'source_channel' => 'agent_portal',
         ]);
 
-        $this->actingAs($agentUser)->post(route('agent.bookings.payment-proof', $booking), [
+        $this->actingAs($agentUser)->post(route('agent.bookings.payment-proof', ['booking' => $booking->booking_reference]), [
             'method' => 'bank_transfer',
             'amount' => 3000,
             'payment_reference' => 'AGT-PROOF',
@@ -113,7 +122,7 @@ class PaymentWorkflowFoundationTest extends TestCase
             'source_channel' => 'agent_portal',
         ]);
 
-        $this->actingAs($agentUser)->post(route('agent.bookings.payment-proof', $booking), [
+        $this->actingAs($agentUser)->post(route('agent.bookings.payment-proof', ['booking' => $booking->booking_reference]), [
             'method' => 'bank_transfer',
             'amount' => 3000,
         ])->assertForbidden();
@@ -121,12 +130,12 @@ class PaymentWorkflowFoundationTest extends TestCase
 
     public function test_cross_agency_payment_operation_denied(): void
     {
-        [$booking, $admin] = $this->bookingForAgencyAdmin();
         $this->withoutMiddleware(ValidateCsrfToken::class);
+        $legacyAdmin = $this->legacyAgencyAdminFromSeed();
         $other = Agency::factory()->create();
         $foreign = $this->bookingWithFare($other->id, []);
 
-        $this->actingAs($admin)->post(route('admin.bookings.payments.store', $foreign), [
+        $this->actingAs($legacyAdmin)->post(route('admin.bookings.payments.store', $foreign), [
             'method' => 'cash',
             'amount' => 1000,
         ])->assertForbidden();
@@ -307,8 +316,7 @@ class PaymentWorkflowFoundationTest extends TestCase
 
     public function test_dashboard_report_payment_breakdown_still_works(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $this->actingAs($admin)->get('/admin/reports')->assertOk();
     }
 
@@ -318,8 +326,7 @@ class PaymentWorkflowFoundationTest extends TestCase
      */
     protected function bookingForAgencyAdmin(array $overrides = []): array
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = $this->bookingWithFare($admin->current_agency_id, $overrides);
 
         return [$booking, $admin];
@@ -332,6 +339,7 @@ class PaymentWorkflowFoundationTest extends TestCase
     {
         $booking = Booking::factory()->create(array_merge([
             'agency_id' => $agencyId,
+            'booking_reference' => 'BKG-'.fake()->unique()->numerify('######'),
             'status' => BookingStatus::Confirmed,
             'payment_status' => 'unpaid',
             'amount_paid' => 0,

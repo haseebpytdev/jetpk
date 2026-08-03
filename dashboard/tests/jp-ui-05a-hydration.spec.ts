@@ -39,13 +39,21 @@ for (const route of HYDRATION_ROUTES) {
   test(`dashboard hydration clean: ${route}`, async ({ page }) => {
     const monitors = attachHydrationMonitors(page);
     await page.addInitScript(() => {
-      localStorage.setItem("jp-theme-preference", "light");
+      const theme = localStorage.getItem("jp-theme-preference");
+      localStorage.clear();
+      sessionStorage.clear();
+      const nextTheme = theme === "light" || theme === "dark" || theme === "system" ? theme : "light";
+      localStorage.setItem("jp-theme-preference", nextTheme);
     });
     await page.goto(`${route}?dataSourcePreview=fixture&jpui05a=hydration`, {
       waitUntil: "load",
       timeout: 60_000,
     });
     await expect(page.getByTestId("dashboard-shell")).toBeVisible({ timeout: 30_000 });
+    if (route.includes("/payments")) {
+      await expect(page.getByTestId("payments-filters")).toBeVisible({ timeout: 30_000 });
+    }
+    await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => undefined);
     await page.waitForTimeout(500);
     expect(monitors.hydrationWarnings, monitors.hydrationWarnings.join("\n")).toEqual([]);
     expect(monitors.pageErrors, monitors.pageErrors.join("\n")).toEqual([]);

@@ -1,0 +1,186 @@
+import { pathAllowsCsrfAutoRetry, shouldRetryAfterCsrfExpired } from "./csrf-retry-policy";
+import { defaultErrorMessage, mapStatusToErrorCode } from "./errors";
+import { normalizeNonJsonPayload } from "./response-payload-policy";
+import type { ApiResult, LaravelRequestOptions } from "./types";
+
+const JSON_HEADERS = {
+  Accept: "application/json",
+  "X-Requested-With": "XMLHttpRequest",
+} as const;
+
+function readCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function clearXsrfCookie(): void {
+  if (typeof document === "undefined") return;
+  document.cookie = "XSRF-TOKEN=; Path=/; Max-Age=0; SameSite=Lax";
+}
+
+export async function ensureLaravelCsrfToken(forceRefresh = false): Promise<string | null> {
+  if (!forceRefresh) {
+    const existing = readCookie("XSRF-TOKEN");
+    if (existing) return existing;
+  } else {
+    clearXsrfCookie();
+  }
+
+  const base = (process.env.NEXT_PUBLIC_LARAVEL_API_BASE ?? "").replace(/\/$/, "");
+
+  try {
+    const response = await fetch(`${base}/api/public/content/csrf-token`, {
+      credentials: "include",
+      headers: JSON_HEADERS,
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const body = (await response.json()) as { csrf_token?: string };
+    return body.csrf_token ?? readCookie("XSRF-TOKEN");
+  } catch {
+    return null;
+  }
+}
+
+function buildBody(options: LaravelRequestOptions): BodyInit | undefined {
+  if (options.body !== undefined) return options.body;
+  if (options.formData) return options.formData;
+  if (options.formBody) {
+    const formData = new FormData();
+    Object.entries(options.formBody).forEach(([key, value]) => {
+      if (value !== undefined) formData.append(key, value);
+    });
+    return formData;
+  }
+  if (options.json !== undefined) return JSON.stringify(options.json);
+  return undefined;
+}
+
+function withTimeout(signal: AbortSignal | undefined, timeoutMs?: number): {
+  signal: AbortSignal;
+  cleanup: () => void;
+} {
+  if (!timeoutMs) {
+    return { signal: signal ?? new AbortController().signal, cleanup: () => undefined };
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  const onAbort = () => controller.abort();
+  signal?.addEventListener("abort", onAbort);
+
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+    },
+  };
+}
+
+async function parseResponsePayload(response: Response): Promise<unknown | null> {
+  const contentType = response.headers.get("content-type") ?? "";
+  const bodyText = await response.text();
+  return normalizeNonJsonPayload(contentType, bodyText, defaultErrorMessage, response.status);
+}
+
+async function executeRequest<T>(
+  path: string,
+  options: LaravelRequestOptions,
+  csrfForceRefresh = false,
+): Promise<ApiResult<T>> {
+  const method = options.method ?? "GET";
+  const csrf = method !== "GET" ? await ensureLaravelCsrfToken(csrfForceRefresh) : null;
+  const { signal, cleanup } = withTimeout(options.signal, options.timeoutMs);
+
+  const headers: Record<string, string> = {
+    ...JSON_HEADERS,
+    ...(csrf ? { "X-XSRF-TOKEN": csrf } : {}),
+    ...(options.json !== undefined ? { "Content-Type": "application/json" } : {}),
+    ...options.headers,
+  };
+
+  try {
+    const response = await fetch(path, {
+      method,
+      credentials: "include",
+      headers,
+      body: buildBody(options),
+      signal,
+      cache: method === "GET" ? "default" : "no-store",
+    });
+
+    const payload = await parseResponsePayload(response);
+
+    if (!response.ok) {
+      const errors = (payload as { errors?: Record<string, string[]> } | null)?.errors;
+      const message =
+        (payload as { message?: string } | null)?.message ?? defaultErrorMessage(response.status);
+
+      return {
+        ok: false,
+        code: mapStatusToErrorCode(response.status),
+        status: response.status,
+        message,
+        errors,
+        data: payload,
+      };
+    }
+
+    if (payload === null && response.status !== 204) {
+      return {
+        ok: false,
+        code: "unknown",
+        status: response.status,
+        message: "Unexpected empty response from server.",
+      };
+    }
+
+    return { ok: true, data: payload as T, status: response.status };
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return {
+        ok: false,
+        code: "aborted",
+        status: 0,
+        message: "Request cancelled.",
+      };
+    }
+    return {
+      ok: false,
+      code: "network",
+      status: 0,
+      message: "Network error. Check your connection and try again.",
+    };
+  } finally {
+    cleanup();
+  }
+}
+
+export async function laravelRequest<T>(
+  path: string,
+  options: LaravelRequestOptions = {},
+): Promise<ApiResult<T>> {
+  const method = options.method ?? "GET";
+  let result = await executeRequest<T>(path, options);
+
+  if (
+    !result.ok &&
+    result.code === "network" &&
+    method === "GET" &&
+    options.retryOnNetworkError
+  ) {
+    result = await executeRequest<T>(path, options);
+  }
+
+  if (
+    shouldRetryAfterCsrfExpired(result, method, options.retryCsrfOnce ?? false) &&
+    pathAllowsCsrfAutoRetry(path)
+  ) {
+    result = await executeRequest<T>(path, options, true);
+  }
+
+  return result;
+}

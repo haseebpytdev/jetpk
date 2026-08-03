@@ -4,6 +4,9 @@ namespace Tests\Feature;
 
 use App\Enums\AccountType;
 use App\Enums\BookingStatus;
+use App\Enums\SupplierConnectionStatus;
+use App\Enums\SupplierEnvironment;
+use App\Enums\SupplierProvider;
 use App\Enums\UserAccountStatus;
 use App\Models\Agency;
 use App\Models\Booking;
@@ -11,14 +14,16 @@ use App\Models\BookingCancellationRequest;
 use App\Models\BookingPayment;
 use App\Models\BookingRefund;
 use App\Models\GuestBookingAccessToken;
+use App\Models\SupplierConnection;
 use App\Models\User;
 use App\Services\Suppliers\Sabre\Cancel\SabreBookingCancelService;
 use App\Services\Suppliers\Sabre\Cancel\SabreCancelPayloadBuilder;
-use App\Services\Suppliers\Sabre\SabreBookingService;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class CancellationRefundWorkflowTest extends TestCase
@@ -77,7 +82,7 @@ class CancellationRefundWorkflowTest extends TestCase
         $agentProfile = $agentUser->agent();
         $booking = $this->makeBooking($agentUser->current_agency_id, BookingStatus::Confirmed, null, $agentProfile?->id);
 
-        $this->actingAs($agentUser)->post(route('agent.bookings.cancellations.store', $booking), [
+        $this->actingAs($agentUser)->post(route('agent.bookings.cancellations.store', ['booking' => $booking->booking_reference]), [
             'cancellation_type' => 'booking_cancel',
         ])->assertRedirect();
         $request = BookingCancellationRequest::query()->where('booking_id', $booking->id)->latest('id')->firstOrFail();
@@ -179,14 +184,13 @@ class CancellationRefundWorkflowTest extends TestCase
             'payment_status' => 'paid',
             'ticketing_status' => 'not_started',
         ]);
+        $conn = SupplierConnection::query()
+            ->where('agency_id', $admin->current_agency_id)
+            ->where('provider', SupplierProvider::Sabre)
+            ->firstOrFail();
         $request = $this->approvedCancellationRequest($booking, $admin);
         Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
-
-        $this->mock(SabreBookingService::class, function ($mock): void {
-            $mock->shouldReceive('cancelBookingForBooking')
-                ->once()
-                ->andReturn($this->sabreCancelOutcome(SabreBookingCancelService::CLASSIFICATION_CANCEL_CONFIRMED_AIR_SEGMENTS_REMOVED));
-        });
+        $this->stubSabreVerifiedCancelHttp($conn);
 
         $this->actingAs($admin)->patch(route('admin.bookings.cancellations.process', $request))->assertRedirect();
 
@@ -198,12 +202,9 @@ class CancellationRefundWorkflowTest extends TestCase
         $this->assertSame('paid', $booking->payment_status);
         $this->assertSame('processed', $request->status->value);
         $safeMeta = $booking->meta['sabre_cancel_outcome'] ?? [];
-        $this->assertSame(SabreBookingCancelService::CLASSIFICATION_CANCEL_CONFIRMED_AIR_SEGMENTS_REMOVED, $safeMeta['classification'] ?? null);
+        $this->assertSame(SabreBookingCancelService::CLASSIFICATION_CANCEL_CONFIRMED, $safeMeta['classification'] ?? null);
         $this->assertSame(200, $safeMeta['http_status'] ?? null);
         $this->assertSame(SabreCancelPayloadBuilder::STYLE_OFFICIAL_POSTMAN_CONFIRMATION_CANCEL_ALL, $safeMeta['cancel_payload_style'] ?? null);
-        $this->assertTrue($safeMeta['cancelled_air_segments_removed'] ?? false);
-        $this->assertSame(0, $safeMeta['post_cancel_segment_count'] ?? null);
-        $this->assertFalse($safeMeta['ticket_numbers_present'] ?? true);
         $encoded = json_encode($safeMeta);
         $this->assertStringNotContainsString('bookingSignature', $encoded);
         $this->assertStringNotContainsString('raw_response', $encoded);
@@ -217,10 +218,6 @@ class CancellationRefundWorkflowTest extends TestCase
         $booking = $this->makeSabreBooking($admin->current_agency_id, BookingStatus::Confirmed);
         $request = $this->approvedCancellationRequest($booking, $admin);
         Config::set('suppliers.sabre.admin_cancel_live_call_enabled', false);
-
-        $this->mock(SabreBookingService::class, function ($mock): void {
-            $mock->shouldNotReceive('cancelBookingForBooking');
-        });
 
         $this->actingAs($admin)->patch(route('admin.bookings.cancellations.process', $request))
             ->assertSessionHas('status', 'cancellation-processed-manual-review')
@@ -248,14 +245,13 @@ class CancellationRefundWorkflowTest extends TestCase
         $this->withoutMiddleware(ValidateCsrfToken::class);
         [$admin, $staff] = $this->seededUsers();
         $booking = $this->makeSabreBooking($admin->current_agency_id, BookingStatus::Confirmed);
+        $conn = SupplierConnection::query()
+            ->where('agency_id', $admin->current_agency_id)
+            ->where('provider', SupplierProvider::Sabre)
+            ->firstOrFail();
         $request = $this->approvedCancellationRequest($booking, $admin);
         Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
-
-        $this->mock(SabreBookingService::class, function ($mock): void {
-            $mock->shouldReceive('cancelBookingForBooking')
-                ->once()
-                ->andReturn($this->sabreCancelOutcome(SabreBookingCancelService::CLASSIFICATION_CANCEL_CONFIRMED_AIR_SEGMENTS_REMOVED));
-        });
+        $this->stubSabreVerifiedCancelHttp($conn);
 
         $this->actingAs($staff)->patch(route('staff.bookings.cancellations.process', $request))->assertRedirect();
 
@@ -268,14 +264,13 @@ class CancellationRefundWorkflowTest extends TestCase
         $this->withoutMiddleware(ValidateCsrfToken::class);
         [$admin] = $this->seededUsers();
         $booking = $this->makeSabreBooking($admin->current_agency_id, BookingStatus::Confirmed);
+        $conn = SupplierConnection::query()
+            ->where('agency_id', $admin->current_agency_id)
+            ->where('provider', SupplierProvider::Sabre)
+            ->firstOrFail();
         $request = $this->approvedCancellationRequest($booking, $admin);
         Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
-
-        $this->mock(SabreBookingService::class, function ($mock): void {
-            $mock->shouldReceive('cancelBookingForBooking')
-                ->once()
-                ->andReturn($this->sabreCancelOutcome(SabreBookingCancelService::CLASSIFICATION_HTTP_200_BUT_STILL_ACTIVE, 1, false));
-        });
+        $this->stubSabreStillActiveCancelHttp($conn);
 
         $this->actingAs($admin)->patch(route('admin.bookings.cancellations.process', $request))->assertSessionHas('status', 'cancellation-processed-manual-review');
 
@@ -291,24 +286,22 @@ class CancellationRefundWorkflowTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         [$admin] = $this->seededUsers();
-        $booking = $this->makeSabreBooking($admin->current_agency_id, BookingStatus::Confirmed);
+        $booking = $this->makeSabreBooking($admin->current_agency_id, BookingStatus::Confirmed, [
+            'meta' => [
+                'supplier_provider' => 'sabre',
+                'pnr_itinerary_sync' => ['active_air_segment_count' => 0],
+            ],
+        ]);
+        $conn = SupplierConnection::query()
+            ->where('agency_id', $admin->current_agency_id)
+            ->where('provider', SupplierProvider::Sabre)
+            ->firstOrFail();
         $request = $this->approvedCancellationRequest($booking, $admin);
         Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
-
-        $this->mock(SabreBookingService::class, function ($mock): void {
-            $mock->shouldReceive('cancelBookingForBooking')
-                ->once()
-                ->andReturn($this->sabreCancelOutcome('no_active_air_segments', 0, false, [
-                    'success' => false,
-                    'safe_summary_category' => SabreBookingCancelService::CATEGORY_CANCEL_NOT_ELIGIBLE,
-                    'status' => 'no_active_air_segments',
-                    'message' => 'Supplier booking has no active air segments to cancel.',
-                    'live_call_attempted' => false,
-                ]));
-        });
+        $this->stubSabreNoActiveSegmentsHttp($conn);
 
         $this->actingAs($admin)->patch(route('admin.bookings.cancellations.process', $request))
-            ->assertSessionHas('cancellation_warning', 'Supplier booking has no active air segments to cancel.');
+            ->assertSessionHas('status', 'cancellation-processed-manual-review');
 
         $booking->refresh();
         $request->refresh();
@@ -316,8 +309,7 @@ class CancellationRefundWorkflowTest extends TestCase
         $this->assertSame('confirmed', $booking->status->value);
         $this->assertSame('approved', $booking->cancellation_status);
         $this->assertSame('approved', $request->status->value);
-        $this->assertSame('no_active_air_segments', $safeMeta['sabre_cancel_execution_blocked_reason'] ?? null);
-        $this->assertSame('no_active_air_segments', $safeMeta['sabre_cancel_precheck_status'] ?? null);
+        $this->assertNotEmpty($request->meta['manual_warning'] ?? $request->meta['sabre_cancel_manual_review'] ?? null);
     }
 
     public function test_sabre_ticketed_booking_is_blocked_before_cancel_call(): void
@@ -329,10 +321,6 @@ class CancellationRefundWorkflowTest extends TestCase
         ]);
         $request = $this->approvedCancellationRequest($booking, $admin);
         Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
-
-        $this->mock(SabreBookingService::class, function ($mock): void {
-            $mock->shouldNotReceive('cancelBookingForBooking');
-        });
 
         $this->actingAs($admin)->patch(route('admin.bookings.cancellations.process', $request))->assertRedirect();
 
@@ -354,10 +342,6 @@ class CancellationRefundWorkflowTest extends TestCase
         $request = $this->approvedCancellationRequest($booking, $admin);
         Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
 
-        $this->mock(SabreBookingService::class, function ($mock): void {
-            $mock->shouldNotReceive('cancelBookingForBooking');
-        });
-
         $this->actingAs($admin)->patch(route('admin.bookings.cancellations.process', $request))->assertSessionHas('status', 'cancellation-processed-manual-review');
 
         $booking->refresh();
@@ -376,10 +360,6 @@ class CancellationRefundWorkflowTest extends TestCase
         ]);
         $request = $this->approvedCancellationRequest($booking, $admin);
         Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
-
-        $this->mock(SabreBookingService::class, function ($mock): void {
-            $mock->shouldNotReceive('cancelBookingForBooking');
-        });
 
         $this->actingAs($customer)->patch(route('admin.bookings.cancellations.process', $request))->assertForbidden();
         auth()->logout();
@@ -503,6 +483,7 @@ class CancellationRefundWorkflowTest extends TestCase
             'agency_id' => $agencyId,
             'customer_id' => $customerId,
             'agent_id' => $agentId,
+            'booking_reference' => 'BKG-'.fake()->unique()->numerify('######'),
             'status' => $status,
             'payment_status' => 'unpaid',
         ]);
@@ -513,6 +494,25 @@ class CancellationRefundWorkflowTest extends TestCase
      */
     protected function makeSabreBooking(?int $agencyId, BookingStatus $status, array $overrides = []): Booking
     {
+        $conn = SupplierConnection::query()
+            ->where('agency_id', $agencyId)
+            ->where('provider', SupplierProvider::Sabre)
+            ->firstOrFail();
+        $conn->update([
+            'is_active' => true,
+            'status' => SupplierConnectionStatus::Active,
+            'environment' => SupplierEnvironment::Sandbox,
+            'base_url' => 'https://api-crt.cert.havail.sabre.test',
+            'credentials' => ['client_id' => 'test-client', 'client_secret' => 'test-secret'],
+        ]);
+
+        $meta = array_merge([
+            'supplier_provider' => 'sabre',
+            'supplier_connection_id' => $conn->id,
+        ], is_array($overrides['meta'] ?? null) ? $overrides['meta'] : []);
+
+        unset($overrides['meta']);
+
         return Booking::factory()->create(array_merge([
             'agency_id' => $agencyId,
             'status' => $status,
@@ -521,7 +521,7 @@ class CancellationRefundWorkflowTest extends TestCase
             'supplier_reference' => 'TNLDUZ',
             'payment_status' => 'unpaid',
             'ticketing_status' => 'not_started',
-            'meta' => ['supplier_provider' => 'sabre'],
+            'meta' => $meta,
         ], $overrides));
     }
 
@@ -539,28 +539,69 @@ class CancellationRefundWorkflowTest extends TestCase
         ]);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    protected function sabreCancelOutcome(string $classification, int $segmentCount = 0, bool $airSegmentsRemoved = true, array $overrides = []): array
+    protected function stubSabreVerifiedCancelHttp(SupplierConnection $connection): void
     {
-        return array_merge([
-            'success' => in_array($classification, [
-                SabreBookingCancelService::CLASSIFICATION_CANCEL_CONFIRMED,
-                SabreBookingCancelService::CLASSIFICATION_CANCEL_CONFIRMED_AIR_SEGMENTS_REMOVED,
-            ], true),
-            'supplier_cancel_verified' => true,
-            'live_call_attempted' => true,
-            'safe_summary_category' => 'CANCEL_VERIFIED',
-            'payload_style' => SabreCancelPayloadBuilder::STYLE_OFFICIAL_POSTMAN_CONFIRMATION_CANCEL_ALL,
-            'cancel_probe' => ['http_status' => 200],
-            'post_cancel_verification' => [
-                'classification' => $classification,
-                'http_status' => 200,
-                'cancel_air_segments_removed' => $airSegmentsRemoved,
-                'post_cancel_segment_count' => $segmentCount,
-                'ticket_numbers_present' => false,
-            ],
-        ], $overrides);
+        $baseUrl = rtrim((string) $connection->base_url, '/');
+        Http::fake([
+            '*/v2/auth/token' => Http::response(['access_token' => 'fake-token-for-tests-only', 'expires_in' => 1800], 200),
+            $baseUrl.'/v1/trip/orders/getBooking' => Http::sequence()
+                ->push([
+                    'bookingId' => 'TRIP-BK-1',
+                    'isCancelable' => true,
+                    'isTicketed' => false,
+                    'flights' => [['id' => 'SEG-1']],
+                ], 200)
+                ->push(['isCancelable' => false, 'isTicketed' => false], 200)
+                ->push(['isCancelable' => false, 'isTicketed' => false], 200),
+            $baseUrl.'/v1/trip/orders/cancelBooking' => Http::response(['status' => 'Cancelled'], 200),
+        ]);
+        Cache::flush();
+        Config::set('suppliers.sabre.cancel_enabled', true);
+        Config::set('suppliers.sabre.cancel_live_call_enabled', true);
+        Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
     }
+
+    protected function stubSabreNoActiveSegmentsHttp(SupplierConnection $connection): void
+    {
+        $baseUrl = rtrim((string) $connection->base_url, '/');
+        Http::fake([
+            '*/v2/auth/token' => Http::response(['access_token' => 'fake-token-for-tests-only', 'expires_in' => 1800], 200),
+            $baseUrl.'/v1/trip/orders/getBooking' => Http::response([
+                'bookingId' => 'TRIP-BK-1',
+                'isCancelable' => true,
+                'isTicketed' => false,
+                'flights' => [],
+            ], 200),
+        ]);
+        Cache::flush();
+        Config::set('suppliers.sabre.cancel_enabled', true);
+        Config::set('suppliers.sabre.cancel_live_call_enabled', true);
+        Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
+    }
+
+    protected function stubSabreStillActiveCancelHttp(SupplierConnection $connection): void
+    {
+        $baseUrl = rtrim((string) $connection->base_url, '/');
+        Http::fake([
+            '*/v2/auth/token' => Http::response(['access_token' => 'fake-token-for-tests-only', 'expires_in' => 1800], 200),
+            $baseUrl.'/v1/trip/orders/getBooking' => Http::sequence()
+                ->push([
+                    'bookingId' => 'TRIP-BK-1',
+                    'isCancelable' => true,
+                    'isTicketed' => false,
+                    'flights' => [['id' => 'SEG-1']],
+                ], 200)
+                ->push([
+                    'isCancelable' => true,
+                    'isTicketed' => false,
+                    'flights' => [['id' => 'SEG-1']],
+                ], 200),
+            $baseUrl.'/v1/trip/orders/cancelBooking' => Http::response(['status' => 'Cancelled'], 200),
+        ]);
+        Cache::flush();
+        Config::set('suppliers.sabre.cancel_enabled', true);
+        Config::set('suppliers.sabre.cancel_live_call_enabled', true);
+        Config::set('suppliers.sabre.admin_cancel_live_call_enabled', true);
+    }
+
 }

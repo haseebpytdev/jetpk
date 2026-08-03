@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\AgentDepositRequestStatus;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\AgentDepositRequest;
 use App\Models\User;
 use App\Services\Agents\AgentWalletService;
+use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -18,8 +21,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AgentDepositController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AgentWalletService $walletService,
+        protected BackOfficeCapabilitiesPresenter $capabilitiesPresenter,
     ) {}
 
     public function index(Request $request): View
@@ -58,14 +64,27 @@ class AgentDepositController extends Controller
         ]);
     }
 
-    public function approve(Request $request, AgentDepositRequest $deposit): RedirectResponse
+    public function approve(Request $request, AgentDepositRequest $deposit): RedirectResponse|JsonResponse
     {
         Gate::authorize('approve', $deposit);
 
         try {
-            $this->walletService->approveDeposit($deposit, $request->user());
+            $deposit = $this->walletService->approveDeposit($deposit, $request->user());
         } catch (InvalidArgumentException $exception) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($exception->getMessage(), 409, 'already_processed');
+            }
+
             return back()->withErrors(['deposit' => $exception->getMessage()]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Deposit approved and wallet credited.',
+                'deposit' => $this->presentDeposit($deposit),
+                'capabilities' => $this->capabilitiesPresenter->presentDepositCapabilities($request->user(), $deposit),
+            ]);
         }
 
         return redirect()
@@ -73,7 +92,7 @@ class AgentDepositController extends Controller
             ->with('status', 'deposit-approved');
     }
 
-    public function reject(Request $request, AgentDepositRequest $deposit): RedirectResponse
+    public function reject(Request $request, AgentDepositRequest $deposit): RedirectResponse|JsonResponse
     {
         Gate::authorize('reject', $deposit);
         $validated = $request->validate([
@@ -81,9 +100,22 @@ class AgentDepositController extends Controller
         ]);
 
         try {
-            $this->walletService->rejectDeposit($deposit, $request->user(), $validated['admin_note']);
+            $deposit = $this->walletService->rejectDeposit($deposit, $request->user(), $validated['admin_note']);
         } catch (InvalidArgumentException $exception) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($exception->getMessage(), 409, 'already_processed');
+            }
+
             return back()->withErrors(['deposit' => $exception->getMessage()]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Deposit rejected.',
+                'deposit' => $this->presentDeposit($deposit),
+                'capabilities' => $this->capabilitiesPresenter->presentDepositCapabilities($request->user(), $deposit),
+            ]);
         }
 
         return redirect()
@@ -113,5 +145,20 @@ class AgentDepositController extends Controller
         }
 
         return $query;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function presentDeposit(AgentDepositRequest $deposit): array
+    {
+        return [
+            'id' => (string) $deposit->id,
+            'status' => $deposit->status->value,
+            'amount' => (float) $deposit->amount,
+            'currency' => $deposit->currency,
+            'reference' => $deposit->reference,
+            'reviewed_at' => $deposit->reviewed_at?->toIso8601String(),
+        ];
     }
 }

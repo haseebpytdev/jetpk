@@ -20,4 +20,5 @@
 @endsection
 
 @section('content')
+    @include('dashboard.accounting._reconciliation-cards')
 @endsection

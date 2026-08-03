@@ -5,6 +5,8 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${smokePort
 
 export default defineConfig({
   testDir: "./tests",
+  testMatch: "**/*.spec.ts",
+  testIgnore: ["**/regression/**"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
