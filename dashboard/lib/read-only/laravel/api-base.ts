@@ -48,4 +48,6 @@ export const DASHBOARD_API_ROUTES = {
   settingsIntegrations: "/settings/integrations",
   audit: "/audit",
   auditDetail: (id: string) => `/audit/${encodeURIComponent(id)}`,
+  deposits: "/deposits",
+  depositDetail: (id: string) => `/deposits/${encodeURIComponent(id)}`,
 } as const;

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Dashboard\DashboardAuditController;
 use App\Http\Controllers\Api\Dashboard\DashboardBookingsController;
 use App\Http\Controllers\Api\Dashboard\DashboardCmsController;
 use App\Http\Controllers\Api\Dashboard\DashboardCustomersController;
+use App\Http\Controllers\Api\Dashboard\DashboardDepositsController;
 use App\Http\Controllers\Api\Dashboard\DashboardOverviewController;
 use App\Http\Controllers\Api\Dashboard\DashboardPaymentsController;
 use App\Http\Controllers\Api\Dashboard\DashboardPermissionsController;
@@ -75,6 +76,11 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
         Route::get('/agents/{agent}', [DashboardAgentsController::class, 'show'])
             ->where('agent', '[^/]+')
             ->name('agents.show');
+        Route::get('/deposits', [DashboardDepositsController::class, 'index'])
+            ->name('deposits.index');
+        Route::get('/deposits/{deposit}', [DashboardDepositsController::class, 'show'])
+            ->where('deposit', '[^/]+')
+            ->name('deposits.show');
     });
 
     Route::middleware('dashboard.permission:pnrs.view')->group(function (): void {

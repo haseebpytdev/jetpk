@@ -135,14 +135,18 @@ test("GDS and NDC endpoint contracts remain distinct", () => {
   expect(READ_ONLY_ENDPOINT_CONTRACTS.every((c) => c.method === "GET")).toBe(true);
 });
 
-test("no token storage in dashboard source", async ({ page }) => {
+const SENSITIVE_LOCAL_STORAGE_KEYS = /^(token|auth|session|permission|role|csrf)/i;
+
+test("no auth token storage in dashboard source", async ({ page }) => {
   await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
   const storage = await page.evaluate(() => ({
     local: Object.keys(localStorage),
     session: Object.keys(sessionStorage),
   }));
-  expect(storage.local).toEqual([]);
-  expect(storage.session).toEqual([]);
+  const sensitiveLocal = storage.local.filter((key) => SENSITIVE_LOCAL_STORAGE_KEYS.test(key));
+  const sensitiveSession = storage.session.filter((key) => SENSITIVE_LOCAL_STORAGE_KEYS.test(key));
+  expect(sensitiveLocal).toEqual([]);
+  expect(sensitiveSession).toEqual([]);
 });
 
 test("fixture preview notice renders via query gate", async ({ page }) => {

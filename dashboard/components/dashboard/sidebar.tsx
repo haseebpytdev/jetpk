@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navGroups } from "@/lib/nav-config";
+import { getDashboardMode } from "@/lib/preview";
 import { stripDashboardBasePath } from "@/lib/portal-path";
 import { dashboardHref } from "@/lib/portal-path";
 import { useDashboardPortal } from "@/lib/portal-context";
+import { useDashboardNavigation, useDashboardSession } from "@/lib/session-context";
 import { useDashboardPath } from "@/lib/use-dashboard-path";
 import { cn } from "@/lib/utils";
-import { mockUser } from "@/mocks/overview-fixtures";
+import { navGroups } from "@/lib/nav-config";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
 type Props = {
@@ -25,16 +26,21 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === base || pathname.startsWith(`${base}/`);
 }
 
-export function DashboardSidebar({ open, onClose, session }: Props) {
+export function DashboardSidebar({ open, onClose, session: sessionProp }: Props) {
   const pathname = usePathname();
   const homePath = useDashboardPath();
   const relativePathname = stripDashboardBasePath(pathname);
   const portal = useDashboardPortal();
+  const contextSession = useDashboardSession();
+  const navigation = useDashboardNavigation();
+  const session = sessionProp ?? contextSession;
+  const isLive = getDashboardMode() === "live";
+  const useSessionNavigation = isLive && navigation.length > 0;
   const profile = session ?? {
-    displayName: mockUser.name,
-    email: mockUser.email,
-    initials: mockUser.initials,
-    roles: [mockUser.role],
+    displayName: isLive ? "Session unavailable" : "Preview user",
+    email: "—",
+    initials: "??",
+    roles: isLive ? [] : ["Preview"],
   };
 
   return (
@@ -67,47 +73,75 @@ export function DashboardSidebar({ open, onClose, session }: Props) {
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{profile.displayName}</p>
-              <p className="truncate text-xs text-gray-400">{profile.roles?.[0] ?? mockUser.role}</p>
+              <p className="truncate text-xs text-gray-400">{profile.roles?.[0] ?? "User"}</p>
             </div>
             <span className="ml-auto h-2.5 w-2.5 rounded-full bg-jp-accent" title="Online" />
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto p-3">
-          {navGroups.map((group) => (
-            <div key={group.label} className="mb-4 last:mb-0">
-              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
-                {group.label}
-              </p>
-              <ul className="space-y-1">
-                {group.items.map((item) => {
-                  const active = isActive(relativePathname, item.href);
-                  const href = dashboardHref(portal, item.href);
-                  return (
-                    <li key={`${group.label}-${item.label}`}>
-                      <Link
-                        href={href}
-                        onClick={onClose}
-                        className={cn(
-                          "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
-                          active
-                            ? "bg-jp-accent font-medium text-white"
-                            : "text-gray-300 hover:bg-white/10 hover:text-white",
-                        )}
-                        aria-current={active ? "page" : undefined}
-                      >
-                        <span className="flex-1">{item.label}</span>
-                        {item.planned ? (
-                          <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
-                            Planned
-                          </span>
-                        ) : null}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+          {useSessionNavigation ? (
+            <ul className="space-y-1">
+              {navigation.map((item) => {
+                const active = isActive(relativePathname, item.href);
+                const href = dashboardHref(portal, item.href);
+                return (
+                  <li key={item.key}>
+                    <Link
+                      href={href}
+                      onClick={onClose}
+                      className={cn(
+                        "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
+                        active
+                          ? "bg-jp-accent font-medium text-white"
+                          : "text-gray-300 hover:bg-white/10 hover:text-white",
+                      )}
+                      aria-current={active ? "page" : undefined}
+                    >
+                      <span className="flex-1">{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : isLive ? (
+            <p className="px-3 text-sm text-gray-400">Navigation unavailable until session loads.</p>
+          ) : (
+            navGroups.map((group) => (
+              <div key={group.label} className="mb-4 last:mb-0">
+                <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                  {group.label}
+                </p>
+                <ul className="space-y-1">
+                  {group.items.map((item) => {
+                    const active = isActive(relativePathname, item.href);
+                    const href = dashboardHref(portal, item.href);
+                    return (
+                      <li key={`${group.label}-${item.label}`}>
+                        <Link
+                          href={href}
+                          onClick={onClose}
+                          className={cn(
+                            "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
+                            active
+                              ? "bg-jp-accent font-medium text-white"
+                              : "text-gray-300 hover:bg-white/10 hover:text-white",
+                          )}
+                          aria-current={active ? "page" : undefined}
+                        >
+                          <span className="flex-1">{item.label}</span>
+                          {item.planned ? (
+                            <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
+                              Planned
+                            </span>
+                          ) : null}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))
+          )}
         </nav>
         <div className="border-t border-white/10 p-4">
           <div className="rounded-xl bg-white/5 p-4">

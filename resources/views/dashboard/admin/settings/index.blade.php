@@ -13,23 +13,33 @@
 @endsection
 
 @section('content')
-    <div class="row row-cards">
-        @foreach ($cards as $card)
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ route($card['route']) }}" class="card card-link card-link-pop h-100 text-reset text-decoration-none">
-                    <div class="jp-card__body">
-                        <div class="d-flex align-items-start gap-3">
-                            <span class="avatar bg-primary-lt text-primary">
-                                <i class="ti {{ $card['icon'] }}"></i>
-                            </span>
-                            <div>
-                                <h3 class="jp-card__title mb-1">{{ $card['title'] }}</h3>
-                                <p class="text-secondary small mb-0">{{ $card['description'] }}</p>
+    @foreach ($groups as $groupTitle => $cards)
+        <div class="mb-4">
+            <h2 class="h4 mb-3">{{ $groupTitle }}</h2>
+            <div class="row row-cards">
+                @foreach ($cards as $card)
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ route($card['route']) }}" class="card card-link card-link-pop h-100 text-reset text-decoration-none">
+                            <div class="jp-card__body">
+                                <div class="d-flex align-items-start gap-3">
+                                    <span class="avatar bg-primary-lt text-primary">
+                                        <i class="ti ti-settings"></i>
+                                    </span>
+                                    <div>
+                                        <h3 class="jp-card__title mb-1">
+                                            {{ $card['title'] }}
+                                            @if (! empty($card['badge']))
+                                                <span class="badge bg-secondary-lt ms-1">{{ $card['badge'] }}</span>
+                                            @endif
+                                        </h3>
+                                        <p class="text-secondary small mb-0">{{ $card['description'] }}</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
-                </a>
+                @endforeach
             </div>
-        @endforeach
-    </div>
+        </div>
+    @endforeach
 @endsection

@@ -71,4 +71,12 @@ GAP-004, GAP-005, GAP-007, GAP-011, GAP-014 — see JSON for full evidence block
 | GAP-005 | **CLOSED** | `/agent/commissions` Next + owner-only JSON read |
 | GAP-012 | **CLOSED** | `/agent/bookings/create` Next entry activates `AgentBookingContext`; search handoff only |
 
-**Markdown/JSON consistency:** GAP-003/004/005/012 carry matching `jp_ops_04_status: CLOSED` in [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json).
+## JP-OPS-05 closures (2026-08-02)
+
+| ID | Status | Notes |
+|----|--------|-------|
+| GAP-001 | **PARTIALLY_CLOSED** | Session/capabilities JSON + **6** fully Next-connected review mutations + **8** backend-only cancel/refund JSON; **145** deferred; denominator **159** |
+| GAP-002 | **CLOSED** | Live mode uses unavailable session chrome; no `mockUser` fallback |
+| GAP-010 | **CLOSED** | Live mode disables fixture KPI/RBAC authority; preview retains fixtures |
+
+**Markdown/JSON consistency:** GAP-001/002/010 carry matching `jp_ops_05_status` in [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json).

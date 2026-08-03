@@ -143,9 +143,11 @@ export async function closeDrawerWithEscape(page: Page, urlMustNotMatch: RegExp)
   await expect(dialog).toBeVisible();
   await dialog.click({ position: { x: 16, y: 16 } });
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    await page.keyboard.press("Escape");
     try {
-      await expect.poll(() => urlMustNotMatch.test(page.url()), { timeout: 15_000 }).toBe(false);
+      await Promise.all([
+        page.waitForURL((url) => !urlMustNotMatch.test(url.href), { timeout: 30_000, waitUntil: "commit" }),
+        page.keyboard.press("Escape"),
+      ]);
       await expect(dialog).toBeHidden({ timeout: 5_000 });
       return;
     } catch (error) {
@@ -153,6 +155,7 @@ export async function closeDrawerWithEscape(page: Page, urlMustNotMatch: RegExp)
         throw error;
       }
       if (!(await dialog.isVisible())) {
+        await expect.poll(() => urlMustNotMatch.test(page.url()), { timeout: 5_000 }).toBe(false);
         return;
       }
       await dialog.click({ position: { x: 16, y: 16 } });

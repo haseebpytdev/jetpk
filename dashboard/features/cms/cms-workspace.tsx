@@ -63,8 +63,9 @@ export function CmsWorkspace({ result }: Props) {
 
   const onCloseDrawer = useCallback(() => {
     setDrawerDismissed(true);
-    pushQuery({ selected: null });
-  }, [pushQuery]);
+    const next = { ...result.query, selected: null };
+    router.replace(`/cms${modulePath}${cmsQueryToSearchParams(next)}`);
+  }, [modulePath, result.query, router]);
 
   const onPreviewModeChange = (mode: CmsPreviewMode) => {
     pushQuery({ previewMode: mode });

@@ -10,7 +10,9 @@
     "start:smoke": "next start -p 3002",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test:smoke": "npm run build && playwright test -c playwright.config.ts"
+    "test:smoke": "playwright test -c playwright.config.ts",
+    "test:jp-ops-05-admin-staff-regression": "node tests/regression/run-jp-ops-05-admin-staff-regression.mjs",
+    "test:jp-ops-05-admin-staff-operational": "playwright test tests/jp-ops-05-admin-staff-operational.spec.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",

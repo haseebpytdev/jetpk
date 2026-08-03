@@ -3,6 +3,8 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\BookingPayment;
+use App\Models\User;
+use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
 use App\Support\Bookings\BookingListPresenter;
 
 final class DashboardPaymentResource
@@ -10,7 +12,7 @@ final class DashboardPaymentResource
     /**
      * @return array<string, mixed>
      */
-    public static function fromModel(BookingPayment $payment): array
+    public static function fromModel(BookingPayment $payment, ?User $viewer = null): array
     {
         $payment->loadMissing(['booking.passengers', 'booking.contact', 'booking.fareBreakdown', 'booking.agent.user', 'booking.verifiedPayments', 'payer']);
         $booking = $payment->booking;
@@ -23,6 +25,7 @@ final class DashboardPaymentResource
         return [
             'transactionId' => 'TXN-'.$payment->id,
             'paymentId' => 'PAY-'.$payment->id,
+            'laravelPaymentId' => (string) $payment->id,
             'bookingId' => $booking ? DashboardBookingResource::publicId($booking) : (string) $payment->booking_id,
             'pnr' => (string) ($row['pnr'] ?? ''),
             'supplierReference' => (string) ($row['supplier_reference'] ?? '') ?: null,
@@ -51,6 +54,9 @@ final class DashboardPaymentResource
             'createdAt' => $payment->created_at?->toIso8601String() ?? '',
             'updatedAt' => $payment->updated_at?->toIso8601String() ?? '',
             'auditNote' => '',
+            'capabilities' => $viewer !== null
+                ? app(BackOfficeCapabilitiesPresenter::class)->presentBookingPaymentCapabilities($viewer, $payment)
+                : null,
         ];
     }
 

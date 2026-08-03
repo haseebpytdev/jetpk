@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Staff;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingRefund;
 use App\Services\Payments\BookingRefundService;
+use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
+use App\Support\BackOffice\BackOfficeRefundPresenter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -14,8 +18,11 @@ use InvalidArgumentException;
 
 class BookingRefundController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected BookingRefundService $service,
+        protected BackOfficeCapabilitiesPresenter $capabilitiesPresenter,
     ) {}
 
     public function store(Request $request, Booking $booking): RedirectResponse
@@ -30,6 +37,7 @@ class BookingRefundController extends Controller
             'reference' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
+
         try {
             $this->service->createRefund($booking, $request->user(), $validated);
         } catch (InvalidArgumentException $e) {
@@ -39,17 +47,46 @@ class BookingRefundController extends Controller
         return back()->with('status', 'refund-created');
     }
 
-    public function approve(Request $request, BookingRefund $bookingRefund): RedirectResponse
+    public function approve(Request $request, BookingRefund $bookingRefund): RedirectResponse|JsonResponse
     {
         Gate::authorize('approve', $bookingRefund);
-        $this->service->approveRefund($bookingRefund, $request->user());
+
+        try {
+            $bookingRefund = $this->service->approveRefund($bookingRefund, $request->user());
+        } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'already_processed');
+            }
+
+            return back()->withErrors(['refund' => $e->getMessage()]);
+        }
+
+        $bookingRefund->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Refund approved for review. Settlement is not performed from this action.',
+                'refund' => BackOfficeRefundPresenter::present($bookingRefund),
+                'capabilities' => $this->capabilitiesPresenter->presentRefundCapabilities($request->user(), $bookingRefund),
+            ]);
+        }
 
         return back()->with('status', 'refund-approved');
     }
 
-    public function markPaid(Request $request, BookingRefund $bookingRefund): RedirectResponse
+    public function markPaid(Request $request, BookingRefund $bookingRefund): RedirectResponse|JsonResponse
     {
         Gate::authorize('markPaid', $bookingRefund);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJsonError(
+                'Refund settlement is deferred to JP-OPS-06.',
+                403,
+                'external_execution_required',
+            );
+        }
+
         $validated = $request->validate([
             'reference' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
@@ -63,11 +100,33 @@ class BookingRefundController extends Controller
         return back()->with('status', 'refund-paid');
     }
 
-    public function reject(Request $request, BookingRefund $bookingRefund): RedirectResponse
+    public function reject(Request $request, BookingRefund $bookingRefund): RedirectResponse|JsonResponse
     {
         Gate::authorize('reject', $bookingRefund);
-        $validated = $request->validate(['reason' => ['required', 'string', 'max:2000']]);
-        $this->service->rejectRefund($bookingRefund, $request->user(), $validated['reason']);
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:2000'],
+        ]);
+
+        try {
+            $bookingRefund = $this->service->rejectRefund($bookingRefund, $request->user(), $validated['reason']);
+        } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'already_processed');
+            }
+
+            return back()->withErrors(['refund' => $e->getMessage()]);
+        }
+
+        $bookingRefund->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Refund rejected.',
+                'refund' => BackOfficeRefundPresenter::present($bookingRefund),
+                'capabilities' => $this->capabilitiesPresenter->presentRefundCapabilities($request->user(), $bookingRefund),
+            ]);
+        }
 
         return back()->with('status', 'refund-rejected');
     }

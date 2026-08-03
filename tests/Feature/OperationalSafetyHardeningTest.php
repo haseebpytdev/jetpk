@@ -10,6 +10,7 @@ use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
 use App\Models\Booking;
+use App\Models\Agency;
 use App\Models\BookingCancellationRequest;
 use App\Models\BookingContact;
 use App\Models\BookingDocument;
@@ -17,6 +18,7 @@ use App\Models\BookingFareBreakdown;
 use App\Models\BookingPassenger;
 use App\Models\BookingPayment;
 use App\Models\BookingRefund;
+use App\Models\PlatformModuleSetting;
 use App\Models\SupplierBooking;
 use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
@@ -25,19 +27,22 @@ use App\Services\Bookings\BookingCancellationService;
 use App\Services\Documents\BookingDocumentService;
 use App\Services\Payments\BookingPaymentService;
 use App\Services\Payments\BookingRefundService;
+use App\Services\Platform\PlatformModuleSettingsService;
 use App\Services\Suppliers\BookingAdapters\DuffelSupplierBookingAdapter;
 use App\Services\Suppliers\SupplierBookingService;
-use App\Services\Suppliers\TicketingAdapters\PiaNdcSupplierTicketingAdapter;
+use App\Services\Suppliers\TicketingAdapters\DuffelSupplierTicketingAdapter;
 use App\Services\Suppliers\TicketingService;
 use App\Support\Security\SensitiveDataRedactor;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class OperationalSafetyHardeningTest extends TestCase
 {
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     public function test_route_and_policy_audit_commands_run(): void
@@ -49,7 +54,7 @@ class OperationalSafetyHardeningTest extends TestCase
     public function test_mutating_routes_require_auth_and_public_routes_stay_public(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = Booking::factory()->create(['agency_id' => $admin->current_agency_id]);
         $payment = BookingPayment::query()->create([
             'agency_id' => $admin->current_agency_id,
@@ -62,7 +67,7 @@ class OperationalSafetyHardeningTest extends TestCase
 
         $this->post(route('admin.bookings.cancellations.store', $booking), ['cancellation_type' => 'booking_cancel'])->assertRedirectContains('/login');
         $this->patch(route('admin.bookings.payments.verify', $payment))->assertRedirectContains('/login');
-        $this->get(route('flights.search'))->assertOk();
+        $this->get(route('flights.search'))->assertRedirect('/');
         $this->get(route('booking.lookup'))->assertOk();
     }
 
@@ -80,7 +85,7 @@ class OperationalSafetyHardeningTest extends TestCase
     public function test_system_health_and_deployment_checklist_are_admin_only_and_safe(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get(route('admin.system-health'))
@@ -97,10 +102,12 @@ class OperationalSafetyHardeningTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $this->enableOperationalSupplierModules();
+        $admin = $this->platformAdmin();
 
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $conn = SupplierConnection::query()
-            ->where('agency_id', $admin->current_agency_id)
+            ->where('agency_id', $agency->id)
             ->where('provider', SupplierProvider::Duffel)
             ->firstOrFail();
         $conn->update([
@@ -119,7 +126,7 @@ class OperationalSafetyHardeningTest extends TestCase
                 safe_summary: ['mode' => 'sandbox'],
             ));
         });
-        $this->mock(PiaNdcSupplierTicketingAdapter::class, function ($mock): void {
+        $this->mock(DuffelSupplierTicketingAdapter::class, function ($mock): void {
             $mock->shouldReceive('issueTickets')->andReturnUsing(function (Booking $booking, SupplierBooking $supplierBooking, User $actor): TicketingResultData {
                 $tickets = [];
                 foreach ($booking->passengers as $passenger) {
@@ -144,13 +151,13 @@ class OperationalSafetyHardeningTest extends TestCase
         });
 
         $booking = Booking::factory()->create([
-            'agency_id' => $admin->current_agency_id,
+            'agency_id' => $agency->id,
             'status' => BookingStatus::Paid,
             'payment_status' => 'paid',
-            'supplier' => 'duffel',
+            'supplier' => SupplierProvider::Duffel->value,
             'meta' => [
                 'validated_offer_snapshot' => ['offer_id' => 'offer-1'],
-                'supplier_provider' => 'duffel',
+                'supplier_provider' => SupplierProvider::Duffel->value,
                 'supplier_connection_id' => $conn->id,
             ],
         ]);
@@ -177,8 +184,9 @@ class OperationalSafetyHardeningTest extends TestCase
         $paymentService = app(BookingPaymentService::class);
         $documentService = app(BookingDocumentService::class);
 
-        $supplierService->createSupplierBooking($booking, $admin);
-        $supplierService->createSupplierBooking($booking->fresh(), $admin);
+        $supplierService->createSupplierBooking($booking, $admin, true);
+        $firstResult = $supplierService->createSupplierBooking($booking->fresh(), $admin, true);
+        $this->assertTrue($firstResult->success, (string) ($firstResult->error_message ?? 'supplier booking failed'));
         $this->assertSame(1, SupplierBooking::query()->where('booking_id', $booking->id)->count());
 
         $booking->refresh();
@@ -228,7 +236,7 @@ class OperationalSafetyHardeningTest extends TestCase
         $this->assertSame('ok', $redacted['normal']);
 
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
 
         $conn = SupplierConnection::query()
             ->where('agency_id', $admin->current_agency_id)
@@ -262,7 +270,7 @@ class OperationalSafetyHardeningTest extends TestCase
                 'supplier_connection_id' => $conn->id,
             ],
         ]);
-        app(SupplierBookingService::class)->createSupplierBooking($booking, $admin);
+        app(SupplierBookingService::class)->createSupplierBooking($booking, $admin, true);
         $attempt = SupplierBookingAttempt::query()->where('booking_id', $booking->id)->latest('id')->first();
         $this->assertNotNull($attempt);
         $this->assertStringNotContainsString('access_token', json_encode($attempt->request_payload));
@@ -271,7 +279,7 @@ class OperationalSafetyHardeningTest extends TestCase
     public function test_invalid_transition_integrity_rejections_for_cancellation_and_refund_states(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = Booking::factory()->create(['agency_id' => $admin->current_agency_id, 'status' => BookingStatus::Cancelled]);
         $request = BookingCancellationRequest::query()->create([
             'agency_id' => $booking->agency_id,
@@ -289,7 +297,7 @@ class OperationalSafetyHardeningTest extends TestCase
     public function test_invalid_refund_transition_rejected_to_approved_is_blocked(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = Booking::factory()->create(['agency_id' => $admin->current_agency_id, 'status' => BookingStatus::Cancelled]);
         $refund = BookingRefund::query()->create([
             'agency_id' => $booking->agency_id,
@@ -302,5 +310,17 @@ class OperationalSafetyHardeningTest extends TestCase
 
         $this->expectException(\InvalidArgumentException::class);
         app(BookingRefundService::class)->approveRefund($refund, $admin);
+    }
+
+    private function enableOperationalSupplierModules(): void
+    {
+        foreach (['supplier_search', 'supplier_booking', 'ticketing', 'duffel_supplier', 'finance_reports'] as $key) {
+            PlatformModuleSetting::query()->updateOrCreate(
+                ['module_key' => $key],
+                ['enabled' => true],
+            );
+        }
+
+        app(PlatformModuleSettingsService::class)->forgetCache();
     }
 }

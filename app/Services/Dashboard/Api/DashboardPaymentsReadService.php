@@ -29,7 +29,7 @@ class DashboardPaymentsReadService
 
         $paginator = (clone $query)->paginate($pageSize, ['*'], 'page', $page);
         $items = $paginator->getCollection()
-            ->map(static fn (BookingPayment $payment): array => DashboardPaymentResource::fromModel($payment))
+            ->map(fn (BookingPayment $payment): array => DashboardPaymentResource::fromModel($payment, $user))
             ->values()
             ->all();
 

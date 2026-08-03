@@ -2,6 +2,7 @@
 
 import { Divider } from "@/components/ui/divider";
 import { PreviewDataBanner } from "@/components/ui/page-layout";
+import { PaymentReviewActions } from "@/features/payments/payment-review-actions";
 import {
   LedgerPaymentStatusBadge,
   ReconciliationStatusBadge,
@@ -196,12 +197,11 @@ export function PaymentDetailDrawerContent({ transaction }: { transaction: Trans
 
       <section aria-labelledby="audit-heading">
         <h3 id="audit-heading" className="text-sm font-semibold text-gray-900">
-          Audit note
+          Operational review
         </h3>
-        <p className="mt-2 text-sm text-gray-700">{transaction.auditNote}</p>
-        <p className="mt-2 text-xs text-jp-muted">
-          This record is synthetic preview data. No payment actions are available in this module.
-        </p>
+        <div className="mt-3">
+          <PaymentReviewActions transaction={transaction} />
+        </div>
       </section>
     </div>
   );

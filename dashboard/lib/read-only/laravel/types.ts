@@ -12,6 +12,15 @@ export type LaravelSessionPayload = {
   accountType: string;
   accountStatus: string;
   staffType: string | null;
+  portalType?: string;
+  platformRole?: string;
+  sessionUsable?: boolean;
+  denialReason?: string | null;
+  requiresPasswordChange?: boolean;
+  requiresEmailVerification?: boolean;
+  landingRoute?: string;
+  navigation?: Array<{ label: string; href: string; key: string }>;
+  capabilities?: Record<string, boolean>;
   schemaVersion: string;
   generatedAt: string;
 };

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { DashboardShell } from "@/layouts/dashboard-shell";
+import { SessionProvider } from "@/lib/session-context";
 import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
 import { getDashboardSession } from "@/services/session-service";
 import "./globals.css";
@@ -26,7 +27,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen overflow-x-hidden font-sans antialiased">
         <ThemeProvider>
-          <DashboardShell session={session}>{children}</DashboardShell>
+          <SessionProvider session={session}>
+            <DashboardShell session={session}>{children}</DashboardShell>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

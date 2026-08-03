@@ -14,11 +14,14 @@ use App\Models\AgentDepositRequest;
 use App\Models\AgentWallet;
 use App\Models\AgentWalletTransaction;
 use App\Models\LedgerTransaction;
+use App\Models\PlatformModuleSetting;
 use App\Models\User;
 use App\Services\Agents\AgentWalletService;
+use App\Services\Platform\PlatformModuleSettingsService;
 use App\Support\Staff\StaffPermission;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
 use Tests\TestCase;
 
@@ -35,8 +38,22 @@ class FirstRealLedgerEventGateTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Artisan::call('view:clear');
+        $this->enableFinanceModules();
         $this->seed(OtaFoundationSeeder::class);
         $this->seedLedgerInfrastructure();
+    }
+
+    private function enableFinanceModules(): void
+    {
+        foreach (['finance_reports', 'agent_deposits', 'agent_wallet'] as $key) {
+            PlatformModuleSetting::query()->updateOrCreate(
+                ['module_key' => $key],
+                ['enabled' => true],
+            );
+        }
+
+        app(PlatformModuleSettingsService::class)->forgetCache();
     }
 
     public function test_http_deposit_submit_and_admin_approve_creates_single_balanced_ledger_transaction(): void
