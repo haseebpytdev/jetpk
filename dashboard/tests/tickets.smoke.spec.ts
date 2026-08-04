@@ -313,8 +313,8 @@ test("drawer shows informational-only notice", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/admin/dashboard/tickets?id=JP-TK-80001", { waitUntil: "load" });
   const content = page.getByTestId("ticket-drawer-content");
-  await expect(content).toContainText("Informational preview only");
-  await expect(content).toContainText("issue, reissue, exchange, void, and refund actions are not available");
+  await expect(content).toContainText("Ticket queue is read-only here");
+  await expect(content).toContainText("Authoritative issuance controls live under Operations");
 });
 
 test("drawer shows linked booking", async ({ page }) => {

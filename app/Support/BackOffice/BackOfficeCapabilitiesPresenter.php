@@ -85,6 +85,7 @@ class BackOfficeCapabilitiesPresenter
             'can_review_cancellation' => $usable && ($isAdmin || $user->hasStaffPermission(StaffPermission::CancellationsApprove)),
             'can_review_refund' => $usable && ($isAdmin || $user->hasStaffPermission(StaffPermission::RefundsApprove)),
             'can_view_ticketing' => $usable && Gate::forUser($user)->allows('viewAny', Booking::class),
+            'can_issue_ticket' => $usable && ($isAdmin || $user->hasStaffPermission(StaffPermission::TicketingIssue)),
             'can_manage_agency' => $usable && $isAdmin,
             'can_manage_platform_staff' => $usable && $isAdmin,
             'can_view_supplier_health' => $usable && Gate::forUser($user)->allows('viewAny', \App\Models\SupplierConnection::class),
@@ -199,13 +200,22 @@ class BackOfficeCapabilitiesPresenter
         $canReject = Gate::forUser($user)->allows('reject', $request);
         $canProcess = Gate::forUser($user)->allows('process', $request);
         $reviewable = in_array($request->status->value, ['requested', 'approved'], true);
+        $pendingReconciliation = ($request->meta['sabre_cancel_manual_review'] ?? false) === true
+            || filled($request->meta['manual_warning'] ?? null);
+        $alreadyProcessed = in_array($request->status->value, ['processed', 'rejected'], true);
+        $processEligible = $canProcess
+            && $request->status->value === 'approved'
+            && ! $pendingReconciliation;
 
         return [
             'can_approve' => $canApprove && $request->status->value === 'requested',
             'can_reject' => $canReject && $reviewable,
-            'can_process' => false,
-            'external_execution_required' => $canProcess,
-            'denial_reason' => $canProcess ? 'external_execution_required' : null,
+            'can_process' => $processEligible,
+            'already_processed' => $alreadyProcessed,
+            'pending_reconciliation' => $pendingReconciliation,
+            'denial_reason' => $alreadyProcessed
+                ? 'already_processed'
+                : ($pendingReconciliation ? 'pending_reconciliation' : null),
         ];
     }
 
@@ -218,13 +228,31 @@ class BackOfficeCapabilitiesPresenter
         $canReject = Gate::forUser($user)->allows('reject', $refund);
         $canMarkPaid = Gate::forUser($user)->allows('markPaid', $refund);
         $reviewable = in_array($refund->status->value, ['pending', 'approved'], true);
+        $alreadyProcessed = in_array($refund->status->value, ['paid', 'rejected'], true);
+        $markPaidEligible = $canMarkPaid && $refund->status->value === 'approved';
 
         return [
             'can_approve' => $canApprove && in_array($refund->status->value, ['pending'], true),
             'can_reject' => $canReject && $reviewable,
-            'can_mark_paid' => false,
-            'external_execution_required' => $canMarkPaid,
-            'denial_reason' => $canMarkPaid ? 'external_execution_required' : null,
+            'can_mark_paid' => $markPaidEligible,
+            'already_processed' => $alreadyProcessed,
+            'denial_reason' => $alreadyProcessed ? 'already_processed' : null,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function presentBookingTicketingCapabilities(User $user, Booking $booking): array
+    {
+        $canIssue = Gate::forUser($user)->allows('issueTicket', $booking);
+        $alreadyTicketed = $booking->status === \App\Enums\BookingStatus::Ticketed
+            || ($booking->ticketing_status ?? '') === 'ticketed';
+
+        return [
+            'can_issue_ticket' => $canIssue && ! $alreadyTicketed,
+            'already_ticketed' => $alreadyTicketed,
+            'denial_reason' => $alreadyTicketed ? 'already_ticketed' : null,
         ];
     }
 

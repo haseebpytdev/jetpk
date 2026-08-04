@@ -22,3 +22,18 @@ export function depositApprovePath(depositId: string): string {
 export function depositRejectPath(depositId: string): string {
   return laravelPortalPath("admin", `/agent-deposits/${encodeURIComponent(depositId)}/reject?format=json`);
 }
+
+export function cancellationProcessPath(portal: DashboardPortal, cancellationRequestId: string): string {
+  return laravelPortalPath(
+    portal,
+    `/bookings/cancellations/${encodeURIComponent(cancellationRequestId)}/process?format=json`,
+  );
+}
+
+export function refundMarkPaidPath(portal: DashboardPortal, refundId: string): string {
+  return laravelPortalPath(portal, `/bookings/refunds/${encodeURIComponent(refundId)}/mark-paid?format=json`);
+}
+
+export function issueTicketPath(portal: DashboardPortal, bookingId: string): string {
+  return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/issue-ticket?format=json`);
+}

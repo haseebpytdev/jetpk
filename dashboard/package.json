@@ -12,7 +12,9 @@
     "typecheck": "tsc --noEmit",
     "test:smoke": "playwright test -c playwright.config.ts",
     "test:jp-ops-05-admin-staff-regression": "node tests/regression/run-jp-ops-05-admin-staff-regression.mjs",
-    "test:jp-ops-05-admin-staff-operational": "playwright test tests/jp-ops-05-admin-staff-operational.spec.ts"
+    "test:jp-ops-05-admin-staff-operational": "playwright test tests/jp-ops-05-admin-staff-operational.spec.ts",
+    "test:jp-ops-06-admin-staff-regression": "node tests/regression/run-jp-ops-06-admin-staff-regression.mjs",
+    "test:jp-ops-06-admin-staff-operational": "playwright test tests/jp-ops-06-admin-staff-operational.spec.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",

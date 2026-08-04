@@ -140,6 +140,12 @@ class BookingCancellationService
                 throw new InvalidArgumentException('Only requested/approved cancellations can be processed.');
             }
 
+            if ($request->status === BookingCancellationStatus::Approved
+                && (($request->meta['sabre_cancel_manual_review'] ?? false) === true
+                    || filled($request->meta['manual_warning'] ?? null))) {
+                throw new InvalidArgumentException('Cancellation execution is pending supplier reconciliation.');
+            }
+
             $booking = $request->booking()->lockForUpdate()->firstOrFail();
             $isTicketed = $booking->tickets()->exists() || $booking->status === BookingStatus::Ticketed;
 

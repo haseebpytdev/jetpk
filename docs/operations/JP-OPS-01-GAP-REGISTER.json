@@ -55,7 +55,11 @@
             "jp_ops_05_backend_without_next_binding": 8,
             "jp_ops_05_deferred_mutations": 145,
             "jp_ops_05_denominator": 159,
-            "closure_notes": "6 review mutations fully bound in Next dashboard (payment + deposit). 8 cancel/refund review routes have additive Laravel JSON only; no operational-api.ts or production UI. 145 remain Blade/deferred for JP-OPS-06."
+            "jp_ops_06_connected_mutations": 12,
+            "jp_ops_06_backend_without_next_binding": 8,
+            "jp_ops_06_deferred_mutations": 139,
+            "jp_ops_06_denominator": 159,
+            "closure_notes": "12 mutations fully bound (payment, deposit, cancellation process, refund mark-paid, issue-ticket × admin/staff). 8 cancel/refund review routes remain backend-only JSON → JP-OPS-07-CANCEL-REFUND-REVIEW-UI. 139 Blade/deferred."
         },
         {
             "gap_id": "JP-OPS-01-GAP-002",

@@ -79,4 +79,11 @@ GAP-004, GAP-005, GAP-007, GAP-011, GAP-014 — see JSON for full evidence block
 | GAP-002 | **CLOSED** | Live mode uses unavailable session chrome; no `mockUser` fallback |
 | GAP-010 | **CLOSED** | Live mode disables fixture KPI/RBAC authority; preview retains fixtures |
 
+## JP-OPS-06 closures (2026-08-04)
+
+| ID | Status | Notes |
+|----|--------|-------|
+| GAP-001 | **PARTIALLY_CLOSED** | **12** CONNECTED mutations (payment/deposit + execution); **8** backend-only review; **139** deferred; denominator **159** |
+| Commission ticketing (JP-OPS-04 deferral) | **CLOSED** | Four `AgentCommissionLedgerTest` ticketing methods green |
+
 **Markdown/JSON consistency:** GAP-001/002/010 carry matching `jp_ops_05_status` in [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json).
