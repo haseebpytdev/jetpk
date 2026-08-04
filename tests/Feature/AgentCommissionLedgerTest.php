@@ -16,7 +16,7 @@ use App\Models\SupplierBooking;
 use App\Models\SupplierConnection;
 use App\Models\User;
 use App\Services\Agents\AgentCommissionService;
-use App\Services\Suppliers\TicketingAdapters\PiaNdcSupplierTicketingAdapter;
+use App\Services\Suppliers\TicketingAdapters\DuffelSupplierTicketingAdapter;
 use App\Support\Staff\StaffPermission;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -267,7 +267,7 @@ class AgentCommissionLedgerTest extends TestCase
      */
     protected function ticketingReadyBooking(bool $withAgent, bool $withAgentRuleMeta = false): array
     {
-        $this->mock(PiaNdcSupplierTicketingAdapter::class, function ($mock): void {
+        $this->mock(DuffelSupplierTicketingAdapter::class, function ($mock): void {
             $mock->shouldReceive('issueTickets')->andReturnUsing(function (Booking $booking, SupplierBooking $supplierBooking, User $actor): TicketingResultData {
                 $tickets = [];
                 foreach ($booking->passengers as $passenger) {

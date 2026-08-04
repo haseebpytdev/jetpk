@@ -33,9 +33,7 @@ test("page type filter updates URL", async ({ page }) => {
   await page.goto("/admin/dashboard/cms/pages", { waitUntil: "load" });
   await expectFiltersReady(page);
   await selectFilterOption(page.locator("#cms-page-type"), "homepage");
-  const apply = page.getByRole("button", { name: "Apply filters" });
-  await Promise.all([page.waitForURL(/pageType=homepage/, { timeout: 30_000 }), apply.click()]);
-  await expectCmsReady(page);
+  await applyCmsFiltersAndWait(page, /pageType=homepage/);
 });
 
 test("page sorting works", async ({ page }) => {

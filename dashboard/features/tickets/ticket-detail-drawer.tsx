@@ -258,8 +258,8 @@ export function TicketDetailDrawerContent({ ticket }: { ticket: TicketRecord }) 
         </h3>
         <p className="mt-2 text-sm text-gray-700">{ticket.notesSummary}</p>
         <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          Informational preview only — issue, reissue, exchange, void, and refund actions are not
-          available in this module. Eligibility values are synthetic fixture states.
+          Ticket queue is read-only here. Authoritative issuance controls live under Operations → Execution in live
+          dashboard mode.
         </p>
       </section>
     </div>

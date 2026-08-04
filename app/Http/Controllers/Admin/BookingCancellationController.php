@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\BookingCancellationRequest;
 use App\Services\Bookings\BookingCancellationService;
 use App\Support\BackOffice\BackOfficeCancellationPresenter;
+use App\Support\BackOffice\BackOfficeBookingPresenter;
 use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -105,18 +106,38 @@ class BookingCancellationController extends Controller
     {
         Gate::authorize('process', $cancellationRequest);
 
-        if ($this->wantsBackOfficeJson($request)) {
-            return $this->backOfficeJsonError(
-                'Supplier cancellation execution is deferred to JP-OPS-06.',
-                403,
-                'external_execution_required',
-            );
+        try {
+            $processed = $this->service->processCancellation($cancellationRequest, $request->user(), true, 'admin');
+        } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                $code = str_contains(strtolower($e->getMessage()), 'pending supplier reconciliation')
+                    ? 'pending_reconciliation'
+                    : 'already_processed';
+
+                return $this->backOfficeJsonError($e->getMessage(), 409, $code);
+            }
+
+            return back()->withErrors(['cancellation' => $e->getMessage()]);
         }
 
-        $processed = $this->service->processCancellation($cancellationRequest, $request->user(), true, 'admin');
-        $message = 'cancellation-processed';
-        if (($processed->meta['manual_warning'] ?? null) !== null) {
-            $message = 'cancellation-processed-manual-review';
+        $processed->refresh();
+        $booking = $processed->booking()->firstOrFail();
+        $pendingReconciliation = ($processed->meta['sabre_cancel_manual_review'] ?? false) === true
+            || filled($processed->meta['manual_warning'] ?? null);
+        $message = $pendingReconciliation ? 'cancellation-processed-manual-review' : 'cancellation-processed';
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => $pendingReconciliation
+                    ? 'Supplier cancellation requires manual reconciliation. Booking status was not promoted to cancelled.'
+                    : 'Cancellation execution completed.',
+                'execution_state' => $pendingReconciliation ? 'pending_reconciliation' : 'success',
+                'cancellation_request' => BackOfficeCancellationPresenter::present($processed),
+                'booking' => BackOfficeBookingPresenter::present($booking),
+                'capabilities' => $this->capabilitiesPresenter->presentCancellationCapabilities($request->user(), $processed),
+                'manual_warning' => $processed->meta['manual_warning'] ?? null,
+            ]);
         }
 
         return back()

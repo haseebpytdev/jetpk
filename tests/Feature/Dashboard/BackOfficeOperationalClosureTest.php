@@ -160,11 +160,11 @@ class BackOfficeOperationalClosureTest extends TestCase
         $this->assertSame(1500.0, (float) $wallet->balance);
     }
 
-    public function test_cancellation_process_json_blocked_for_jp_ops_06(): void
+    public function test_cancellation_process_json_executes_for_approved_unticketed_booking(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $admin = $this->platformAdmin();
-        $booking = Booking::factory()->create();
+        $booking = Booking::factory()->create(['status' => BookingStatus::Confirmed]);
         $cancellation = BookingCancellationRequest::query()->create([
             'agency_id' => $booking->agency_id,
             'booking_id' => $booking->id,
@@ -176,15 +176,66 @@ class BackOfficeOperationalClosureTest extends TestCase
 
         $this->actingAs($admin)
             ->patchJson(route('admin.bookings.cancellations.process', ['cancellationRequest' => $cancellation]))
-            ->assertForbidden()
-            ->assertJsonPath('code', 'external_execution_required');
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('execution_state', 'success');
+
+        $booking->refresh();
+        $cancellation->refresh();
+        $this->assertSame('cancelled', $booking->status->value);
+        $this->assertSame(BookingCancellationStatus::Processed, $cancellation->status);
     }
 
-    public function test_refund_mark_paid_json_blocked_for_jp_ops_06(): void
+    public function test_refund_mark_paid_json_records_settlement(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $admin = $this->platformAdmin();
         $booking = Booking::factory()->create();
+        BookingPayment::query()->create([
+            'agency_id' => $booking->agency_id,
+            'booking_id' => $booking->id,
+            'method' => 'bank_transfer',
+            'status' => 'verified',
+            'amount' => 1000,
+            'currency' => 'PKR',
+            'verified_at' => now(),
+        ]);
+        $refund = BookingRefund::query()->create([
+            'agency_id' => $booking->agency_id,
+            'booking_id' => $booking->id,
+            'status' => BookingRefundStatus::Approved,
+            'amount' => 500,
+            'currency' => 'PKR',
+            'method' => 'cash',
+        ]);
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.bookings.refunds.mark-paid', ['bookingRefund' => $refund]), [
+                'reference' => 'SETTLE-OPS06',
+            ])
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('execution_state', 'success');
+
+        $refund->refresh();
+        $this->assertSame(BookingRefundStatus::Paid, $refund->status);
+        $this->assertSame('SETTLE-OPS06', $refund->reference);
+    }
+
+    public function test_refund_mark_paid_json_is_idempotent_on_duplicate(): void
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $admin = $this->platformAdmin();
+        $booking = Booking::factory()->create();
+        BookingPayment::query()->create([
+            'agency_id' => $booking->agency_id,
+            'booking_id' => $booking->id,
+            'method' => 'bank_transfer',
+            'status' => 'verified',
+            'amount' => 1000,
+            'currency' => 'PKR',
+            'verified_at' => now(),
+        ]);
         $refund = BookingRefund::query()->create([
             'agency_id' => $booking->agency_id,
             'booking_id' => $booking->id,
@@ -196,8 +247,12 @@ class BackOfficeOperationalClosureTest extends TestCase
 
         $this->actingAs($admin)
             ->patchJson(route('admin.bookings.refunds.mark-paid', ['bookingRefund' => $refund]))
-            ->assertForbidden()
-            ->assertJsonPath('code', 'external_execution_required');
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.bookings.refunds.mark-paid', ['bookingRefund' => $refund]))
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'already_processed');
     }
 
     public function test_admin_payment_reject_requires_reason_and_conflicts_after_verify(): void

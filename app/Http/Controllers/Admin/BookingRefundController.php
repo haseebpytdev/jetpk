@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\BookingRefund;
 use App\Services\Payments\BookingRefundService;
 use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
+use App\Support\BackOffice\BackOfficeBookingPresenter;
 use App\Support\BackOffice\BackOfficeRefundPresenter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -79,22 +80,33 @@ class BookingRefundController extends Controller
     {
         Gate::authorize('markPaid', $bookingRefund);
 
-        if ($this->wantsBackOfficeJson($request)) {
-            return $this->backOfficeJsonError(
-                'Refund settlement is deferred to JP-OPS-06.',
-                403,
-                'external_execution_required',
-            );
-        }
-
         $validated = $request->validate([
             'reference' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
+
         try {
-            $this->service->markRefundPaid($bookingRefund, $request->user(), $validated);
+            $bookingRefund = $this->service->markRefundPaid($bookingRefund, $request->user(), $validated);
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'already_processed');
+            }
+
             return back()->withErrors(['refund' => $e->getMessage()]);
+        }
+
+        $bookingRefund->refresh();
+        $booking = $bookingRefund->booking()->firstOrFail();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Refund settlement recorded.',
+                'execution_state' => 'success',
+                'refund' => BackOfficeRefundPresenter::present($bookingRefund),
+                'booking' => BackOfficeBookingPresenter::present($booking),
+                'capabilities' => $this->capabilitiesPresenter->presentRefundCapabilities($request->user(), $bookingRefund),
+            ]);
         }
 
         return back()->with('status', 'refund-paid');
