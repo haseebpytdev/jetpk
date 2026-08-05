@@ -1,4 +1,5 @@
 import { AgentsWorkspace } from "@/features/agents/agents-workspace";
+import { AgencyOperationalPanel } from "@/features/agents/agency-operational-panel";
 import { AgentsErrorPanel } from "@/features/agents/agents-error-panel";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
@@ -70,6 +71,7 @@ export async function AgentsPageContent({ searchParams }: Props) {
           description="Agent and agency accounts with filters, sorting, and read-only detail."
         />
         <DataSourceNoticeSlot />
+        <AgencyOperationalPanel />
         <AgentsWorkspace query={query} result={result} selectedAgent={selectedAgent} />
       </PageContainer>
     );

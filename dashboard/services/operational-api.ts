@@ -1,13 +1,41 @@
 import type { DashboardPortal } from "@/lib/portal-path";
 import { laravelRequest } from "@/lib/api/laravel-action-client";
 import {
+  agencyPrefixPath,
+  agencyUserPermissionsApplyTemplatePath,
+  agencyUserPermissionsPath,
+  agencyUserRolePath,
+  agentApplicationApprovePath,
+  agentApplicationNeedsMoreInfoPath,
+  agentApplicationRejectPath,
+  bookingAssignStaffPath,
+  bookingNotesPath,
+  cancellationApprovePath,
   cancellationProcessPath,
+  cancellationRejectPath,
+  cancellationStorePath,
+  commissionEntryApprovePath,
+  commissionEntryRejectPath,
   depositApprovePath,
   depositRejectPath,
+  financeAdjustmentReversePath,
+  financeAdjustmentStorePath,
+  groupBookingRejectPaymentPath,
+  groupBookingVerifyPaymentPath,
   issueTicketPath,
   paymentRejectPath,
+  paymentStorePath,
   paymentVerifyPath,
+  refundApprovePath,
   refundMarkPaidPath,
+  refundRejectPath,
+  refundStorePath,
+  supportTicketAssignPath,
+  supportTicketForwardPath,
+  supportTicketReplyPath,
+  supportTicketStatusPath,
+  userActivatePath,
+  userSuspendPath,
 } from "@/lib/api/portal-paths";
 
 type MutationResponse<T> = {
@@ -85,6 +113,308 @@ export async function issueTicketExecution(
   bookingId: string,
 ): Promise<MutationResponse<{ booking?: Record<string, unknown> }>> {
   return laravelRequest(issueTicketPath(portal, bookingId), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function approveCancellationReview(
+  portal: DashboardPortal,
+  cancellationRequestId: string,
+): Promise<MutationResponse<{ cancellation_request?: Record<string, unknown>; capabilities?: Record<string, unknown> }>> {
+  return laravelRequest(cancellationApprovePath(portal, cancellationRequestId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function rejectCancellationReview(
+  portal: DashboardPortal,
+  cancellationRequestId: string,
+  reason: string,
+): Promise<MutationResponse<{ cancellation_request?: Record<string, unknown>; capabilities?: Record<string, unknown> }>> {
+  return laravelRequest(cancellationRejectPath(portal, cancellationRequestId), {
+    method: "PATCH",
+    json: { reason },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function approveRefundReview(
+  portal: DashboardPortal,
+  refundId: string,
+): Promise<MutationResponse<{ refund?: Record<string, unknown>; capabilities?: Record<string, unknown> }>> {
+  return laravelRequest(refundApprovePath(portal, refundId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function rejectRefundReview(
+  portal: DashboardPortal,
+  refundId: string,
+  reason: string,
+): Promise<MutationResponse<{ refund?: Record<string, unknown>; capabilities?: Record<string, unknown> }>> {
+  return laravelRequest(refundRejectPath(portal, refundId), {
+    method: "PATCH",
+    json: { reason },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function storeBookingNote(
+  portal: DashboardPortal,
+  bookingId: string,
+  note: string,
+  isCustomerVisible = false,
+): Promise<MutationResponse<{ booking?: Record<string, unknown> }>> {
+  return laravelRequest(bookingNotesPath(portal, bookingId), {
+    method: "POST",
+    json: { note, is_customer_visible: isCustomerVisible },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function assignBookingStaff(
+  bookingId: string,
+  staffUserId: number | null,
+): Promise<MutationResponse<{ booking?: Record<string, unknown> }>> {
+  return laravelRequest(bookingAssignStaffPath(bookingId), {
+    method: "PATCH",
+    json: { staff_user_id: staffUserId },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function storeCancellationRequest(
+  portal: DashboardPortal,
+  bookingId: string,
+  payload: { reason?: string; cancellation_type: string },
+): Promise<MutationResponse<{ cancellation_request?: Record<string, unknown> }>> {
+  return laravelRequest(cancellationStorePath(portal, bookingId), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function storeRefundRequest(
+  portal: DashboardPortal,
+  bookingId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ refund?: Record<string, unknown> }>> {
+  return laravelRequest(refundStorePath(portal, bookingId), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function storeBookingPayment(
+  portal: DashboardPortal,
+  bookingId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ payment?: Record<string, unknown> }>> {
+  return laravelRequest(paymentStorePath(portal, bookingId), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function activateUser(userId: string): Promise<MutationResponse<{ user?: Record<string, unknown> }>> {
+  return laravelRequest(userActivatePath(userId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function suspendUser(userId: string): Promise<MutationResponse<{ user?: Record<string, unknown> }>> {
+  return laravelRequest(userSuspendPath(userId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateAgencyUserRole(
+  agencyId: string,
+  userId: string,
+  agencyRole: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(agencyUserRolePath(agencyId, userId), {
+    method: "PATCH",
+    json: { agency_role: agencyRole },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateAgencyUserPermissions(
+  agencyId: string,
+  userId: string,
+  permissions: string[],
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(agencyUserPermissionsPath(agencyId, userId), {
+    method: "PATCH",
+    json: { permissions },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function applyAgencyUserPermissionTemplate(
+  agencyId: string,
+  userId: string,
+  templateKey: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(agencyUserPermissionsApplyTemplatePath(agencyId, userId), {
+    method: "POST",
+    json: { template_key: templateKey },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateAgencyPrefix(
+  agencyId: string,
+  prefix: string,
+): Promise<MutationResponse<{ agency?: Record<string, unknown> }>> {
+  return laravelRequest(agencyPrefixPath(agencyId), {
+    method: "PATCH",
+    json: { prefix },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function approveAgentApplication(
+  applicationId: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(agentApplicationApprovePath(applicationId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function rejectAgentApplication(
+  applicationId: string,
+  reason: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(agentApplicationRejectPath(applicationId), {
+    method: "PATCH",
+    json: { reason },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function agentApplicationNeedsMoreInfo(
+  applicationId: string,
+  note: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(agentApplicationNeedsMoreInfoPath(applicationId), {
+    method: "PATCH",
+    json: { note },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function assignSupportTicket(
+  ticketId: string,
+  assignedToUserId: number | null,
+): Promise<MutationResponse<{ ticket?: Record<string, unknown> }>> {
+  return laravelRequest(supportTicketAssignPath(ticketId), {
+    method: "PATCH",
+    json: { assigned_to_user_id: assignedToUserId },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function forwardSupportTicket(
+  ticketId: string,
+  forwardedToAgentId: number | null,
+): Promise<MutationResponse<{ ticket?: Record<string, unknown> }>> {
+  return laravelRequest(supportTicketForwardPath(ticketId), {
+    method: "PATCH",
+    json: { forwarded_to_agent_id: forwardedToAgentId },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function replySupportTicket(
+  portal: DashboardPortal,
+  ticketId: string,
+  body: string,
+  visibility: "internal" | "customer_visible",
+): Promise<MutationResponse<{ ticket?: Record<string, unknown> }>> {
+  return laravelRequest(supportTicketReplyPath(portal, ticketId), {
+    method: "POST",
+    json: { body, visibility },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateSupportTicketStatus(
+  portal: DashboardPortal,
+  ticketId: string,
+  status: string,
+): Promise<MutationResponse<{ ticket?: Record<string, unknown> }>> {
+  return laravelRequest(supportTicketStatusPath(portal, ticketId), {
+    method: "PATCH",
+    json: { status },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function approveCommissionEntry(
+  entryId: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(commissionEntryApprovePath(entryId), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function rejectCommissionEntry(
+  entryId: string,
+  reason: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(commissionEntryRejectPath(entryId), {
+    method: "POST",
+    json: { reason },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function verifyGroupBookingPayment(
+  groupBookingId: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(groupBookingVerifyPaymentPath(groupBookingId), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function rejectGroupBookingPayment(
+  groupBookingId: string,
+  reason: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(groupBookingRejectPaymentPath(groupBookingId), {
+    method: "POST",
+    json: { reason },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function storeFinanceAdjustment(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(financeAdjustmentStorePath(), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function reverseFinanceAdjustment(
+  walletTransactionId: string,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(financeAdjustmentReversePath(walletTransactionId), {
     method: "POST",
     retryCsrfOnce: false,
   });

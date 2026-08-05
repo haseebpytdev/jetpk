@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\AccountType;
 use App\Enums\AgencyRole;
 use App\Enums\AgentDepositRequestStatus;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\Agent;
@@ -20,6 +21,7 @@ use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -33,6 +35,8 @@ use Illuminate\Support\Facades\Schema;
  */
 class AgencyManagementController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AgentWalletService $walletService,
     ) {}
@@ -198,15 +202,26 @@ class AgencyManagementController extends Controller
         ]);
     }
 
-    public function updatePrefix(Request $request, Agency $agency): RedirectResponse
+    public function updatePrefix(Request $request, Agency $agency): RedirectResponse|JsonResponse
     {
         Gate::authorize('view', $agency);
 
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'code_prefix' => ['required', 'string', 'min:2', 'max:4', 'regex:/^[A-Z0-9]+$/'],
         ]);
 
         AgencyPrefixService::savePrefix($agency, $validated['code_prefix']);
+        $agency->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'agency' => [
+                    'id' => (string) $agency->id,
+                    'code_prefix' => AgencyPrefixService::resolvePrefix($agency),
+                ],
+            ]);
+        }
 
         return redirect()
             ->route('admin.agencies.show', ['agency' => $agency, 'tab' => 'overview'])

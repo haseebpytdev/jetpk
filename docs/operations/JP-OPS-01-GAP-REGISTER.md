@@ -86,4 +86,10 @@ GAP-004, GAP-005, GAP-007, GAP-011, GAP-014 — see JSON for full evidence block
 | GAP-001 | **PARTIALLY_CLOSED** | **12** CONNECTED mutations (payment/deposit + execution); **8** backend-only review; **139** deferred; denominator **159** |
 | Commission ticketing (JP-OPS-04 deferral) | **CLOSED** | Four `AgentCommissionLedgerTest` ticketing methods green |
 
+## JP-OPS-07 closures (2026-08-04)
+
+| ID | Status | Notes |
+|----|--------|-------|
+| GAP-001 | **PARTIALLY_CLOSED** | **50** CONNECTED; **0** BACKEND_WITHOUT_NEXT_BINDING; **109** named deferrals/intentional Blade; denominator **159** |
+
 **Markdown/JSON consistency:** GAP-001/002/010 carry matching `jp_ops_05_status` in [`JP-OPS-01-GAP-REGISTER.json`](JP-OPS-01-GAP-REGISTER.json).

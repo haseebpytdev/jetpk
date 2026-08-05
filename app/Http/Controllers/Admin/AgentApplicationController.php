@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\Agent;
@@ -20,6 +21,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AgentApplicationController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AgentApplicationOnboardingService $onboardingService,
         protected AgencyReconciliationService $reconciliationService,
@@ -377,12 +380,22 @@ class AgentApplicationController extends Controller
         return strtolower((string) $application->email);
     }
 
-    public function approve(Request $request, AgentApplication $application): RedirectResponse
+    public function approve(Request $request, AgentApplication $application): RedirectResponse|JsonResponse
     {
         Gate::authorize('platform.admin');
 
-        $request->validate(['internal_note' => ['nullable', 'string', 'max:2000']]);
+        $this->validateBackOffice($request, ['internal_note' => ['nullable', 'string', 'max:2000']]);
         if ($application->status === 'approved') {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson([
+                    'ok' => true,
+                    'application' => [
+                        'id' => (string) $application->id,
+                        'status' => $application->status,
+                    ],
+                ]);
+            }
+
             return back()->with('status', 'already-approved');
         }
 
@@ -393,17 +406,33 @@ class AgentApplicationController extends Controller
                 $request->string('internal_note')->toString() ?: null,
             );
         } catch (\InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'application_blocked');
+            }
+
             return back()->withErrors(['application' => $e->getMessage()]);
+        }
+
+        $application->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'application' => [
+                    'id' => (string) $application->id,
+                    'status' => $application->status,
+                ],
+            ]);
         }
 
         return back()->with('status', 'application-approved');
     }
 
-    public function reject(Request $request, AgentApplication $application): RedirectResponse
+    public function reject(Request $request, AgentApplication $application): RedirectResponse|JsonResponse
     {
         Gate::authorize('platform.admin');
 
-        $request->validate(['internal_note' => ['nullable', 'string', 'max:2000']]);
+        $this->validateBackOffice($request, ['internal_note' => ['nullable', 'string', 'max:2000']]);
         $note = $request->string('internal_note')->toString() ?: null;
 
         $application->forceFill([
@@ -416,14 +445,24 @@ class AgentApplicationController extends Controller
         $agency = $this->notificationAgency($request);
         $this->onboardingService->sendRejectionNotification($application, $agency, $note);
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'application' => [
+                    'id' => (string) $application->id,
+                    'status' => $application->status,
+                ],
+            ]);
+        }
+
         return back()->with('status', 'application-rejected');
     }
 
-    public function needsMoreInfo(Request $request, AgentApplication $application): RedirectResponse
+    public function needsMoreInfo(Request $request, AgentApplication $application): RedirectResponse|JsonResponse
     {
         Gate::authorize('platform.admin');
 
-        $request->validate(['internal_note' => ['nullable', 'string', 'max:2000']]);
+        $this->validateBackOffice($request, ['internal_note' => ['nullable', 'string', 'max:2000']]);
         $note = $request->string('internal_note')->toString() ?: null;
 
         $application->forceFill([
@@ -435,6 +474,16 @@ class AgentApplicationController extends Controller
 
         $agency = $this->notificationAgency($request);
         $this->onboardingService->sendNeedsMoreInfoNotification($application, $agency, $note);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'application' => [
+                    'id' => (string) $application->id,
+                    'status' => $application->status,
+                ],
+            ]);
+        }
 
         return back()->with('status', 'application-needs-info');
     }

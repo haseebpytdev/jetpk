@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { approveDepositReview, rejectDepositReview } from "@/services/operational-api";
-import { getDashboardMode } from "@/lib/preview";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { DepositRecord } from "@/services/deposit-service";
 
 export function DepositsWorkspace({ deposits }: { deposits: DepositRecord[] }) {
   const [rows, setRows] = useState(deposits);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const isLive = getDashboardMode() === "live";
+  const isLive = useDashboardLiveMode();
 
   async function approve(id: string) {
     setBusyId(id);

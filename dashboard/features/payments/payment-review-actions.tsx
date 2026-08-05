@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDashboardPortal } from "@/lib/portal-context";
-import { getDashboardMode } from "@/lib/preview";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { rejectPaymentReview, verifyPaymentReview } from "@/services/operational-api";
 import type { TransactionRecord } from "@/types/payment";
 
@@ -23,7 +23,7 @@ export function PaymentReviewActions({
   const [busy, setBusy] = useState<"verify" | "reject" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
-  const isLive = getDashboardMode() === "live";
+  const isLive = useDashboardLiveMode();
   const capabilities = transaction.capabilities;
   const paymentId = transaction.laravelPaymentId ?? transaction.paymentId.replace(/^PAY-/, "");
 

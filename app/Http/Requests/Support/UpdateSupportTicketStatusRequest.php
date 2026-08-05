@@ -3,11 +3,14 @@
 namespace App\Http\Requests\Support;
 
 use App\Enums\SupportTicketStatus;
+use App\Http\Requests\Concerns\HandlesBackOfficeJsonValidationFailure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateSupportTicketStatusRequest extends FormRequest
 {
+    use HandlesBackOfficeJsonValidationFailure;
+
     public function authorize(): bool
     {
         return true;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getDashboardMode } from "@/lib/preview";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { stripDashboardBasePath } from "@/lib/portal-path";
 import { dashboardHref } from "@/lib/portal-path";
 import { useDashboardPortal } from "@/lib/portal-context";
@@ -34,7 +34,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
   const contextSession = useDashboardSession();
   const navigation = useDashboardNavigation();
   const session = sessionProp ?? contextSession;
-  const isLive = getDashboardMode() === "live";
+  const isLive = useDashboardLiveMode();
   const useSessionNavigation = isLive && navigation.length > 0;
   const profile = session ?? {
     displayName: isLive ? "Session unavailable" : "Preview user",

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Enums\BookingStatus;
 use App\Http\Controllers\Concerns\HandlesSabrePnrItinerarySync;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Booking;
@@ -21,6 +22,7 @@ use App\Support\Bookings\BookingSourceFilter;
 use App\Support\Branding\PlatformBrandingResolver;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +33,7 @@ use InvalidArgumentException;
 class BookingController extends Controller
 {
     use HandlesSabrePnrItinerarySync;
+    use RespondsWithBackOfficeJson;
 
     public function __construct(
         protected BookingService $bookingService,
@@ -225,21 +228,33 @@ class BookingController extends Controller
         return back()->with('status', 'booking-status-updated');
     }
 
-    public function storeNote(Request $request, Booking $booking): RedirectResponse
+    public function storeNote(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('addNote', $booking);
 
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'note' => ['required', 'string', 'max:10000'],
             'is_customer_visible' => ['sometimes', 'boolean'],
         ]);
 
-        $this->bookingService->addInternalNote(
+        $note = $this->bookingService->addInternalNote(
             $booking,
             $request->user(),
             $validated['note'],
             (bool) ($validated['is_customer_visible'] ?? false),
         );
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'note' => [
+                    'id' => (string) $note->id,
+                    'booking_id' => (string) $note->booking_id,
+                    'is_customer_visible' => $note->is_customer_visible,
+                    'created_at' => $note->created_at?->toIso8601String(),
+                ],
+            ]);
+        }
 
         return back()->with('status', 'note-added');
     }

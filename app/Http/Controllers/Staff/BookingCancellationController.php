@@ -27,18 +27,26 @@ class BookingCancellationController extends Controller
         protected BackOfficeCapabilitiesPresenter $capabilitiesPresenter,
     ) {}
 
-    public function store(Request $request, Booking $booking): RedirectResponse
+    public function store(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('request', [BookingCancellationRequest::class, $booking]);
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'reason' => ['nullable', 'string', 'max:5000'],
             'cancellation_type' => ['required', Rule::enum(BookingCancellationType::class)],
         ]);
 
-        $this->service->requestCancellation($booking, $request->user(), [
+        $cancellationRequest = $this->service->requestCancellation($booking, $request->user(), [
             ...$validated,
             'request_source' => 'staff',
         ]);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'cancellation_request' => BackOfficeCancellationPresenter::present($cancellationRequest),
+                'capabilities' => $this->capabilitiesPresenter->presentCancellationCapabilities($request->user(), $cancellationRequest),
+            ]);
+        }
 
         return back()->with('status', 'cancellation-requested');
     }

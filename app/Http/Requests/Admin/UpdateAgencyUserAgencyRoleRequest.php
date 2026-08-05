@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\AccountType;
 use App\Enums\AgencyRole;
+use App\Http\Requests\Concerns\HandlesBackOfficeJsonValidationFailure;
 use App\Models\Agency;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
@@ -11,6 +12,8 @@ use Illuminate\Validation\Rule;
 
 class UpdateAgencyUserAgencyRoleRequest extends FormRequest
 {
+    use HandlesBackOfficeJsonValidationFailure;
+
     public function authorize(): bool
     {
         return $this->user()?->isPlatformAdmin() ?? false;

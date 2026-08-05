@@ -128,7 +128,7 @@ Route::middleware('platform.module:public_umrah_groups')->group(function (): voi
                     ->orWhere('supplier_package_id', $value);
 
                 if (is_numeric($value)) {
-                    $query->orWhereKey((int) $value);
+                    $query->orWhere($query->getModel()->getQualifiedKeyName(), (int) $value);
                 }
             })
             ->first();
@@ -146,7 +146,7 @@ Route::middleware('platform.module:public_umrah_groups')->group(function (): voi
                 $query->where('reference', $value);
 
                 if (is_numeric($value)) {
-                    $query->orWhereKey((int) $value);
+                    $query->orWhere($query->getModel()->getQualifiedKeyName(), (int) $value);
                 }
             })
             ->first();

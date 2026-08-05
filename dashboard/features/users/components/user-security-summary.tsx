@@ -37,8 +37,8 @@ export function UserSecuritySummary({ user }: { user: User }) {
         <p className="mt-2 text-sm text-jp-muted">No security warnings detected.</p>
       ) : (
         <ul className="mt-2 flex flex-wrap gap-2" role="list">
-          {active.map((indicator) => (
-            <li key={indicator.label}>
+          {active.map((indicator, index) => (
+            <li key={`${index}-${indicator.label}`}>
               <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${toneMap[indicator.severity]}`}>
                 {indicator.label}
               </span>

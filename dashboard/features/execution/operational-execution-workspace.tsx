@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDashboardPortal } from "@/lib/portal-context";
-import { getDashboardMode } from "@/lib/preview";
+import { useRuntimeLiveMutationsEnabled } from "@/lib/use-runtime-live-mutations-enabled";
 import {
   issueTicketExecution,
   markRefundPaidExecution,
@@ -22,7 +22,7 @@ type Props = {
 
 export function OperationalExecutionWorkspace({ cancellations, refunds, ticketing }: Props) {
   const portal = useDashboardPortal();
-  const isLive = getDashboardMode() === "live";
+  const isLive = useRuntimeLiveMutationsEnabled();
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmKey, setConfirmKey] = useState<string | null>(null);

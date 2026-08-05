@@ -34,9 +34,13 @@ export const navGroups: NavGroup[] = [
       },
       {
         label: "Cancellations",
-        href: "/planned/bookings?queue=cancellations",
+        href: "/operations/review",
         laravelRoute: "admin.bookings",
-        planned: true,
+      },
+      {
+        label: "Execution",
+        href: "/operations/execution",
+        laravelRoute: "admin.bookings",
       },
     ],
   },
@@ -169,9 +173,8 @@ export const navGroups: NavGroup[] = [
       },
       {
         label: "Support & Help",
-        href: "/planned/support",
+        href: "/support",
         laravelRoute: "admin.support.tickets.index",
-        planned: true,
       },
     ],
   },

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\HandlesBackOfficeJsonValidationFailure;
 use App\Models\Agency;
 use App\Models\AgentWallet;
 use App\Services\Agents\AgentWalletService;
@@ -12,6 +13,8 @@ use Illuminate\Validation\Validator;
 
 class StoreManualWalletAdjustmentRequest extends FormRequest
 {
+    use HandlesBackOfficeJsonValidationFailure;
+
     public function authorize(): bool
     {
         return $this->user()?->isPlatformAdmin() ?? false;

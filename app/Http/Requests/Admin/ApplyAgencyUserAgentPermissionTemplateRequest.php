@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\AccountType;
+use App\Http\Requests\Concerns\HandlesBackOfficeJsonValidationFailure;
 use App\Models\Agency;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ApplyAgencyUserAgentPermissionTemplateRequest extends FormRequest
 {
+    use HandlesBackOfficeJsonValidationFailure;
+
     public function authorize(): bool
     {
         return $this->user()?->isPlatformAdmin() ?? false;

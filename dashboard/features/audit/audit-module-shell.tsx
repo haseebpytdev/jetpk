@@ -3,6 +3,7 @@ import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboa
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { AuditWorkspace } from "@/features/audit/audit-workspace";
+import { FinanceOperationalPanel } from "@/features/finance/finance-operational-panel";
 import type { AuditModuleResult } from "@/types/audit";
 
 type Props = {
@@ -21,6 +22,7 @@ export function AuditModuleShell({ result }: Props) {
         description="Audit event directory with masked network data and read-only Laravel integration."
       />
       <DataSourceNoticeSlot />
+      <FinanceOperationalPanel />
 
       {result.state === "loading" ? (
         <div aria-busy="true" aria-label="Loading audit" data-testid="audit-loading-state">
