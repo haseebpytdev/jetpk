@@ -13,6 +13,7 @@ use App\Http\Controllers\Concerns\HandlesPiaNdcOptionPnrRelease;
 use App\Http\Controllers\Concerns\HandlesPiaNdcStatusRefresh;
 use App\Http\Controllers\Concerns\HandlesPiaNdcTicketing;
 use App\Http\Controllers\Concerns\HandlesSabrePnrItinerarySync;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Mail\ManualBookingCommunicationMail;
 use App\Models\AuditLog;
@@ -38,6 +39,7 @@ use App\Support\Bookings\AdminSabreGdsCancelPanelsPresenter;
 use App\Support\Bookings\AdminSabreGdsTicketingPanelsPresenter;
 use App\Support\Bookings\BookingListPresenter;
 use App\Support\Bookings\SabrePnrCertificationSupport;
+use App\Support\BackOffice\BackOfficeBookingPresenter;
 use App\Support\Branding\PlatformBrandingResolver;
 use App\Support\Emails\ManualBookingCommunicationEmailRenderer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -63,6 +65,7 @@ class BookingManagementController extends Controller
     use HandlesPiaNdcStatusRefresh;
     use HandlesPiaNdcTicketing;
     use HandlesSabrePnrItinerarySync;
+    use RespondsWithBackOfficeJson;
 
     public function __construct(
         protected BookingService $bookingService,
@@ -439,30 +442,42 @@ class BookingManagementController extends Controller
         return back()->with('status', 'booking-status-updated');
     }
 
-    public function storeNote(Request $request, Booking $booking): RedirectResponse
+    public function storeNote(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('addNote', $booking);
 
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'note' => ['required', 'string', 'max:10000'],
             'is_customer_visible' => ['sometimes', 'boolean'],
         ]);
 
-        $this->bookingService->addInternalNote(
+        $note = $this->bookingService->addInternalNote(
             $booking,
             $request->user(),
             $validated['note'],
             (bool) ($validated['is_customer_visible'] ?? false),
         );
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'note' => [
+                    'id' => (string) $note->id,
+                    'booking_id' => (string) $note->booking_id,
+                    'is_customer_visible' => $note->is_customer_visible,
+                    'created_at' => $note->created_at?->toIso8601String(),
+                ],
+            ]);
+        }
+
         return back()->with('status', 'note-added');
     }
 
-    public function assignStaff(Request $request, Booking $booking): RedirectResponse
+    public function assignStaff(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('assignStaff', $booking);
 
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'staff_user_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
@@ -471,9 +486,21 @@ class BookingManagementController extends Controller
             : null;
 
         try {
-            $this->bookingService->assignStaff($booking, $assignee, $request->user());
+            $booking = $this->bookingService->assignStaff($booking, $assignee, $request->user());
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'assignment_blocked');
+            }
+
             return back()->withErrors(['staff_user_id' => $e->getMessage()]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'booking' => BackOfficeBookingPresenter::present($booking),
+                'assigned_staff_id' => $assignee !== null ? (string) $assignee->id : null,
+            ]);
         }
 
         return back()->with('status', 'staff-assigned');

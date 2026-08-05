@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\AccountType;
 use App\Enums\AgencyRole;
 use App\Enums\UserAccountStatus;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\AgencyUser;
@@ -25,6 +26,7 @@ use App\Support\Agencies\AgencyStaffPermissionAssignment;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +38,8 @@ use Illuminate\Validation\ValidationException;
 
 class UserManagementController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected OtaNotificationService $notificationService,
     ) {}
@@ -230,22 +234,42 @@ class UserManagementController extends Controller
         return redirect()->route('admin.users.show', $user)->with('status', 'user-updated');
     }
 
-    public function suspend(Request $request, User $user): RedirectResponse
+    public function suspend(Request $request, User $user): RedirectResponse|JsonResponse
     {
         Gate::authorize('suspend', $user);
         $user->forceFill(['status' => UserAccountStatus::Suspended])->save();
         $this->writeAudit($request->user(), 'user.suspended', ['user_id' => $user->id]);
         $this->notifyUserLifecycleEmail($user, $user->currentAgency, $request->user(), 'suspended');
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'user' => [
+                    'id' => (string) $user->id,
+                    'status' => $user->status->value,
+                ],
+            ]);
+        }
+
         return back()->with('status', 'user-suspended');
     }
 
-    public function activate(Request $request, User $user): RedirectResponse
+    public function activate(Request $request, User $user): RedirectResponse|JsonResponse
     {
         Gate::authorize('activate', $user);
         $user->forceFill(['status' => UserAccountStatus::Active])->save();
         $this->writeAudit($request->user(), 'user.activated', ['user_id' => $user->id]);
         $this->notifyUserLifecycleEmail($user, $user->currentAgency, $request->user(), 'activated');
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'user' => [
+                    'id' => (string) $user->id,
+                    'status' => $user->status->value,
+                ],
+            ]);
+        }
 
         return back()->with('status', 'user-activated');
     }

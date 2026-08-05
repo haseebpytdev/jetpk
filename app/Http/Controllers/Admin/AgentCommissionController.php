@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agent;
 use App\Models\AgentCommissionEntry;
 use App\Services\Agents\AgentCommissionService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class AgentCommissionController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AgentCommissionService $commissionService,
     ) {}
@@ -62,21 +66,37 @@ class AgentCommissionController extends Controller
         ]);
     }
 
-    public function approve(Request $request, AgentCommissionEntry $entry): RedirectResponse
+    public function approve(Request $request, AgentCommissionEntry $entry): RedirectResponse|JsonResponse
     {
         Gate::authorize('approve', $entry);
         $this->commissionService->approveEntry($entry, $request->user());
         $this->commissionService->writeAudit($entry->agent, $request->user(), 'agent.commission_entry_approved', ['entry_id' => $entry->id]);
+        $entry->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'entry' => $this->presentEntry($entry),
+            ]);
+        }
 
         return back()->with('status', 'commission-entry-approved');
     }
 
-    public function reject(Request $request, AgentCommissionEntry $entry): RedirectResponse
+    public function reject(Request $request, AgentCommissionEntry $entry): RedirectResponse|JsonResponse
     {
         Gate::authorize('reject', $entry);
-        $validated = $request->validate(['reason' => ['required', 'string', 'max:255']]);
+        $validated = $this->validateBackOffice($request, ['reason' => ['required', 'string', 'max:255']]);
         $this->commissionService->rejectEntry($entry, $request->user(), $validated['reason']);
         $this->commissionService->writeAudit($entry->agent, $request->user(), 'agent.commission_entry_rejected', ['entry_id' => $entry->id]);
+        $entry->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'entry' => $this->presentEntry($entry),
+            ]);
+        }
 
         return back()->with('status', 'commission-entry-rejected');
     }
@@ -118,5 +138,18 @@ class AgentCommissionController extends Controller
         $this->commissionService->writeAudit($agent, $request->user(), 'agent.commission_statement_generated', ['statement_id' => $statement->id]);
 
         return back()->with('status', 'commission-statement-generated');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentEntry(AgentCommissionEntry $entry): array
+    {
+        return [
+            'id' => (string) $entry->id,
+            'agent_id' => (string) $entry->agent_id,
+            'status' => $entry->status->value,
+            'commission_amount' => (float) $entry->commission_amount,
+        ];
     }
 }

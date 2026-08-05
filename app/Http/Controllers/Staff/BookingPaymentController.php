@@ -26,10 +26,10 @@ class BookingPaymentController extends Controller
         protected BackOfficeCapabilitiesPresenter $capabilitiesPresenter,
     ) {}
 
-    public function store(Request $request, Booking $booking): RedirectResponse
+    public function store(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('recordPayment', $booking);
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'method' => ['required', Rule::enum(BookingPaymentMethod::class)],
             'amount' => ['required', 'numeric', 'min:1'],
             'payment_reference' => ['nullable', 'string', 'max:255'],
@@ -45,9 +45,21 @@ class BookingPaymentController extends Controller
         }
 
         try {
-            $this->paymentService->recordManualPayment($booking, $request->user(), $validated);
+            $payment = $this->paymentService->recordManualPayment($booking, $request->user(), $validated);
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'payment_blocked');
+            }
+
             return back()->withErrors(['payment' => $e->getMessage()]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'payment' => BackOfficePaymentPresenter::present($payment),
+                'capabilities' => $this->capabilitiesPresenter->presentBookingPaymentCapabilities($request->user(), $payment),
+            ]);
         }
 
         return back()->with('status', 'payment-recorded');

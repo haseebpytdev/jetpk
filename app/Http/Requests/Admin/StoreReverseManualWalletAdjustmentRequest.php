@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\HandlesBackOfficeJsonValidationFailure;
 use App\Models\AgentWalletTransaction;
 use App\Services\Finance\Adjustments\ManualWalletAdjustmentService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreReverseManualWalletAdjustmentRequest extends FormRequest
 {
+    use HandlesBackOfficeJsonValidationFailure;
+
     public function authorize(): bool
     {
         if (! ($this->user()?->isPlatformAdmin() ?? false)) {

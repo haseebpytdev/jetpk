@@ -2,7 +2,7 @@
 
 | Dependency | Owner |
 |------------|--------|
-| Cancel/refund review Next UI (8 routes) | `JP-OPS-07-CANCEL-REFUND-REVIEW-UI` |
+| Cancel/refund review Next UI (8 routes) | **CLOSED in JP-OPS-07** |
 | Queue worker production deploy | Ops runtime |
 | CMS/settings/markup mutations | Blade fallback |
 

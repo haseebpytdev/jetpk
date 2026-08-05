@@ -26,10 +26,10 @@ class BookingRefundController extends Controller
         protected BackOfficeCapabilitiesPresenter $capabilitiesPresenter,
     ) {}
 
-    public function store(Request $request, Booking $booking): RedirectResponse
+    public function store(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', [BookingRefund::class, $booking]);
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'booking_payment_id' => ['nullable', 'integer', 'exists:booking_payments,id'],
             'cancellation_request_id' => ['nullable', 'integer', 'exists:booking_cancellation_requests,id'],
             'amount' => ['required', 'numeric', 'min:1'],
@@ -40,9 +40,21 @@ class BookingRefundController extends Controller
         ]);
 
         try {
-            $this->service->createRefund($booking, $request->user(), $validated);
+            $refund = $this->service->createRefund($booking, $request->user(), $validated);
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'refund_blocked');
+            }
+
             return back()->withErrors(['refund' => $e->getMessage()]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'refund' => BackOfficeRefundPresenter::present($refund),
+                'capabilities' => $this->capabilitiesPresenter->presentRefundCapabilities($request->user(), $refund),
+            ]);
         }
 
         return back()->with('status', 'refund-created');

@@ -59,7 +59,12 @@
             "jp_ops_06_backend_without_next_binding": 8,
             "jp_ops_06_deferred_mutations": 139,
             "jp_ops_06_denominator": 159,
-            "closure_notes": "12 mutations fully bound (payment, deposit, cancellation process, refund mark-paid, issue-ticket × admin/staff). 8 cancel/refund review routes remain backend-only JSON → JP-OPS-07-CANCEL-REFUND-REVIEW-UI. 139 Blade/deferred."
+            "jp_ops_07_connected_mutations": 50,
+            "jp_ops_07_intentional_blade_fallback": 25,
+            "jp_ops_07_deferred_ux_cms": 65,
+            "jp_ops_07_deferred_runtime": 19,
+            "jp_ops_07_denominator": 159,
+            "closure_notes": "50 mutations CONNECTED (payment/deposit + execution + cancel/refund review + core ops). 0 BACKEND_WITHOUT_NEXT_BINDING. Remaining 109 classified: 25 INTENTIONAL_BLADE_FALLBACK, 65 DEFERRED_TO_JP-UX-CMS-01, 19 DEFERRED_TO_JP-RUNTIME-01."
         },
         {
             "gap_id": "JP-OPS-01-GAP-002",

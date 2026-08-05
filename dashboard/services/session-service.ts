@@ -84,11 +84,16 @@ function fromFixture(portal: DashboardPortal = "admin"): DashboardSessionSummary
       { label: "Dashboard", href: "/", key: "dashboard" },
       { label: "Bookings", href: "/bookings", key: "bookings" },
       { label: "Payments", href: "/payments", key: "payments" },
+      { label: "Cancellations", href: "/operations/review", key: "cancellations" },
+      { label: "Execution", href: "/operations/execution", key: "execution" },
       { label: "Reports", href: "/reports", key: "reports" },
+      { label: "Support & Help", href: "/support", key: "support" },
     ],
     capabilities: {
       can_review_payment: true,
       can_review_deposit: portal === "admin",
+      can_review_cancellation: true,
+      can_review_refund: true,
     },
     initials: mockUser.initials,
   };

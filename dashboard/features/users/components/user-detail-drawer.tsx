@@ -10,6 +10,7 @@ import type { User } from "@/types/access-control";
 import { AccessValidationSummary } from "@/features/users/components/access-validation-summary";
 import { EffectiveAccessSummaryPanel } from "@/features/users/components/effective-access-summary";
 import { RoleAssignmentPreview } from "@/features/users/components/role-assignment-preview";
+import { UserLifecycleActions } from "@/features/users/components/user-lifecycle-actions";
 import { UserSecuritySummary } from "@/features/users/components/user-security-summary";
 
 export function UserDetailDrawerContent({ user }: { user: User }) {
@@ -125,6 +126,15 @@ export function UserDetailDrawerContent({ user }: { user: User }) {
           </section>
         </>
       ) : null}
+
+      <Divider />
+
+      <section aria-labelledby="user-lifecycle-heading">
+        <h3 id="user-lifecycle-heading" className="text-sm font-semibold text-gray-900">Account lifecycle</h3>
+        <div className="mt-2">
+          <UserLifecycleActions userId={user.id} status={user.security.status} />
+        </div>
+      </section>
 
       <Divider />
 

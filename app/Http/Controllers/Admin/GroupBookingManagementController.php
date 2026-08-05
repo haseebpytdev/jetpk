@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\GroupBookingStatus;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\GroupBooking;
 use App\Models\GroupBookingUserRestriction;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Services\GroupTicketing\GroupBookingRestrictionService;
 use App\Services\GroupTicketing\GroupReservationService;
 use App\Support\GroupTicketing\GroupBookingListPresenter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -20,6 +22,8 @@ use Illuminate\View\View;
  */
 class GroupBookingManagementController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected GroupReservationService $reservationService,
         protected GroupBookingRestrictionService $restrictionService,
@@ -99,31 +103,80 @@ class GroupBookingManagementController extends Controller
         return back()->with('success', 'Group booking restriction reset for '.$user->email.'.');
     }
 
-    public function verifyPayment(GroupBooking $groupBooking): RedirectResponse
+    public function verifyPayment(Request $request, GroupBooking $groupBooking): RedirectResponse|JsonResponse
     {
         Gate::authorize('platform.admin');
 
         try {
             $this->reservationService->verifyPayment($groupBooking, auth()->user());
+        } catch (\InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'payment_blocked');
+            }
+
+            return back()->withErrors(['payment' => $e->getMessage()]);
         } catch (\Throwable $exception) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($exception->getMessage(), 422, 'payment_failed');
+            }
+
             return back()->withErrors(['payment' => $exception->getMessage()]);
+        }
+
+        $groupBooking->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'group_booking' => $this->presentGroupBooking($groupBooking),
+            ]);
         }
 
         return back()->with('success', 'Payment verified and booking confirmed.');
     }
 
-    public function rejectPayment(Request $request, GroupBooking $groupBooking): RedirectResponse
+    public function rejectPayment(Request $request, GroupBooking $groupBooking): RedirectResponse|JsonResponse
     {
         Gate::authorize('platform.admin');
 
-        $request->validate(['rejection_note' => ['nullable', 'string', 'max:500']]);
+        $this->validateBackOffice($request, ['rejection_note' => ['nullable', 'string', 'max:500']]);
 
         try {
             $this->reservationService->rejectPayment($groupBooking, auth()->user(), $request->input('rejection_note'));
+        } catch (\InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 409, 'payment_blocked');
+            }
+
+            return back()->withErrors(['payment' => $e->getMessage()]);
         } catch (\Throwable $exception) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($exception->getMessage(), 422, 'payment_failed');
+            }
+
             return back()->withErrors(['payment' => $exception->getMessage()]);
         }
 
+        $groupBooking->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'group_booking' => $this->presentGroupBooking($groupBooking),
+            ]);
+        }
+
         return back()->with('success', 'Payment rejected and booking released.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentGroupBooking(GroupBooking $groupBooking): array
+    {
+        return [
+            'id' => (string) $groupBooking->id,
+            'status' => $groupBooking->status->value,
+        ];
     }
 }

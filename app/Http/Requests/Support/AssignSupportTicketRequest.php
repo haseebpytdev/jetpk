@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Support;
 
+use App\Http\Requests\Concerns\HandlesBackOfficeJsonValidationFailure;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AssignSupportTicketRequest extends FormRequest
 {
+    use HandlesBackOfficeJsonValidationFailure;
+
     public function authorize(): bool
     {
         return true;

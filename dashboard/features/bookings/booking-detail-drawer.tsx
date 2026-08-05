@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate, formatDateTime, tripTypeLabel } from "@/lib/format";
 import type { BookingRecord } from "@/types/booking";
+import { BookingOperationalActions } from "@/features/bookings/booking-operational-actions";
 
 export function BookingDetailDrawerContent({ booking }: { booking: BookingRecord }) {
   return (
@@ -151,6 +152,10 @@ export function BookingDetailDrawerContent({ booking }: { booking: BookingRecord
         </div>
         <p className="mt-3 text-sm text-jp-muted">Source: {booking.agentOrSource}</p>
       </section>
+
+      <Divider />
+
+      <BookingOperationalActions bookingId={booking.id} />
     </div>
   );
 }
