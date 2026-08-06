@@ -306,3 +306,89 @@ export type AgentAgencyProfile = {
   wallet_summary?: { balance: number; available_balance: number; currency: string } | null;
   update_url: string;
 };
+
+export type AgentSavedTraveler = {
+  id: number | null;
+  title: string;
+  first_name: string;
+  last_name: string;
+  gender: string;
+  date_of_birth?: string | null;
+  nationality: string;
+  document_type: string;
+  document_number?: string | null;
+  document_number_masked?: string | null;
+  document_expiry?: string | null;
+  issuing_country?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  is_default: boolean;
+  edit_url?: string;
+  delete_url?: string;
+};
+
+export type AgentFinanceStatementMovement = {
+  date: string;
+  type: string;
+  description: string;
+  reference: string;
+  booking_reference?: string | null;
+  debit: number;
+  credit: number;
+  running_balance: number;
+  status: string;
+  created_by?: string | null;
+  approved_by?: string | null;
+};
+
+export type AgentFinanceStatement = {
+  ok: boolean;
+  agency: { name: string };
+  period: { from: string; to: string };
+  currency: string;
+  opening_balance: number;
+  closing_balance: number;
+  total_debits: number;
+  total_credits: number;
+  movements: AgentFinanceStatementMovement[];
+  reconciliation: {
+    wallet_balance: number;
+    ledger_liability: number;
+    difference: number;
+    status: string;
+    matches: boolean;
+  };
+  export_url?: string | null;
+  blade_fallback_url: string;
+};
+
+export type AgentAccountingLedgerTransaction = {
+  id: number;
+  transaction_ref: string;
+  transaction_type: string;
+  status: string;
+  currency: string;
+  amount_total: number;
+  debit_total: number;
+  credit_total: number;
+  description: string;
+  occurred_at?: string | null;
+  posted_at?: string | null;
+  booking_reference?: string | null;
+  detail_url: string;
+};
+
+export type AgentAccountingLedgerOverview = {
+  ok: boolean;
+  summary: {
+    wallet_balance: number;
+    ledger_liability: number;
+    difference: number;
+    reconciliation_status: string;
+    currency: string;
+  };
+  filters: Record<string, string>;
+  transactions: AgentAccountingLedgerTransaction[];
+  pagination: PaginatedMeta;
+  blade_fallback_url: string;
+};

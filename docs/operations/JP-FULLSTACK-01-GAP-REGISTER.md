@@ -37,13 +37,13 @@ None identified at audit baseline.
 
 | ID | Area | Summary | Iteration | Status |
 |----|------|---------|-----------|--------|
-| JP-FS01-GAP-005 | Agent | `/agent/travelers` missing — Laravel CRUD exists | 01F | Open |
-| JP-FS01-GAP-006 | Agent | Finance statement / accounting ledger — no Next consumer | 01F | Open |
+| JP-FS01-GAP-005 | Agent | `/agent/travelers` missing — Laravel CRUD exists | 01F | **CONNECTED_AND_VERIFIED** |
+| JP-FS01-GAP-006 | Agent | Finance statement / accounting ledger — no Next consumer | 01F | **CONNECTED_AND_VERIFIED** |
 | JP-FS01-GAP-007 | Search | Nearby-date strip on results (`fetchNearbyDates`) | 01B | **CLOSED** |
 | JP-FS01-GAP-008 | Search | Multicity inquiry form POST on Next | 01B | **CLOSED** |
 | JP-FS01-GAP-009 | Notifications | Stub `available:false` — deferred backend | DEFERRED | Open |
 | JP-FS01-GAP-010 | Flights | Return-options spec + handoff verification | 01B | **CLOSED** |
-| JP-FS01-GAP-011 | Agent | Payments/invoices connected but not verified in Playwright | 01F | Open |
+| JP-FS01-GAP-011 | Agent | Payments/invoices connected but not verified in Playwright | 01F | **CONNECTED_AND_VERIFIED** |
 | JP-FS01-GAP-020 | Checkout | Manual `pay_later` path verified with fixture JSON + Playwright | 01C | **CLOSED** |
 
 ## LOW / DOCUMENTATION
@@ -54,24 +54,24 @@ None identified at audit baseline.
 | JP-FS01-GAP-013 | LOW | Sitemap / dynamic CMS slugs — CNV | 01G | Open |
 | JP-FS01-GAP-014 | LOW | Return-combo Blade handoff — documented + allowlist tests | 01B | **CLOSED** |
 | JP-FS01-GAP-015 | LOW | Customer profile/security — visual tests only | 01E | CONNECTED_AND_VERIFIED |
-| JP-FS01-GAP-016 | LOW | Agent staff RBAC — re-verify on 01F | 01F | Open |
+| JP-FS01-GAP-016 | LOW | Agent staff RBAC — re-verify on 01F | 01F | **CONNECTED_AND_VERIFIED** |
 | JP-FS01-GAP-017 | DOCUMENTATION | Stale route count in FINAL-ROUTE-MAP (67 vs 76) | 01G | Open |
 | JP-FS01-GAP-018 | DOCUMENTATION | JP-OPS-01 inventory predates new portal pages | 01G | Open |
 | JP-FS01-GAP-019 | LOW | Brand leakage audit — expand to checkout Blade views | 01G | Open |
 
-## Connectivity classification totals (76 routes)
+## Connectivity classification totals (81 routes)
 
 | Status | Count |
 |--------|------:|
-| CONNECTED_AND_VERIFIED | 55 |
-| CONNECTED_NOT_VERIFIED | 11 |
+| CONNECTED_AND_VERIFIED | 62 |
+| CONNECTED_NOT_VERIFIED | 9 |
 | STATIC_CONTENT | 4 |
 | INTENTIONAL_BLADE_FALLBACK | 2 |
 | DEFERRED_WITH_REASON | 2 |
 | PLACEHOLDER | 1 |
 | NOT_FOUND_OR_REDIRECT | 5 |
 | MOCK_ONLY | 0 |
-| BACKEND_EXISTS_FRONTEND_DISCONNECTED | 1 |
+| BACKEND_EXISTS_FRONTEND_DISCONNECTED | 0 |
 | FRONTEND_EXISTS_BACKEND_MISSING | 0 |
 
 ## Route classification totals
@@ -84,7 +84,7 @@ None identified at audit baseline.
 | SHARED_AUTH | 9 |
 | CHECKOUT | 16 |
 | CUSTOMER | 12 |
-| AGENT | 21 |
+| AGENT | 26 |
 | AGENT_STAFF | 0 (shared `/agent` tree) |
 | PLACEHOLDER | 1 |
 | NOT_FOUND_OR_REDIRECT | 5 |
@@ -267,3 +267,16 @@ Do not modify payment-provider verification, callback processing, transaction st
 | JP-FS01-GAP-015 | LOW | CONNECTED_AND_VERIFIED | Verification only — no production defect |
 
 Closure record: [`docs/phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md`](../../phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md)
+
+---
+
+## JP-FULLSTACK-01F implementation closure
+
+| Gap | Original | Final | Production changes |
+|-----|----------|-------|-------------------|
+| JP-FS01-GAP-005 | MEDIUM — BACKEND_EXISTS_FRONTEND_DISCONNECTED | CONNECTED_AND_VERIFIED | Agent travelers additive JSON + Next CRUD |
+| JP-FS01-GAP-006 | MEDIUM — BACKEND_EXISTS_FRONTEND_DISCONNECTED | CONNECTED_AND_VERIFIED | Finance statement + accounting ledger read-only JSON and Next surfaces |
+| JP-FS01-GAP-011 | MEDIUM — CONNECTED_NOT_VERIFIED | CONNECTED_AND_VERIFIED | Verification only — no production defect |
+| JP-FS01-GAP-016 | LOW — CONNECTED_NOT_VERIFIED | CONNECTED_AND_VERIFIED | RBAC regression re-verified — no production defect |
+
+Closure record: [`docs/phases/JP-FULLSTACK-01F-AGENT-AGENT-STAFF-RBAC-TRAVELERS-CLOSURE.md`](../../phases/JP-FULLSTACK-01F-AGENT-AGENT-STAFF-RBAC-TRAVELERS-CLOSURE.md)

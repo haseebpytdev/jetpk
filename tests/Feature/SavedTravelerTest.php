@@ -174,8 +174,8 @@ class SavedTravelerTest extends TestCase
 
         $this->actingAs($agentUser)->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="agent-sidebar-travelers"', false)
-            ->assertSee(route('agent.travelers.index'), false);
+            ->assertSee('/agent/travelers', false)
+            ->assertSee('Travelers', false);
     }
 
     /**

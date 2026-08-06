@@ -500,3 +500,29 @@ Closure: [`docs/phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md`
 **Force-password baseline exception:** **REPAIRED on branch `phase/jetpk-fullstack-01a-r1-force-password-regression-repair`** — root cause was static Playwright session fixtures after JSON success; clearance cookie + fixture resolver alignment. `jp-fullstack-01a-force-password.spec.ts` now 9 passed, exit 0. Closure: [`docs/phases/JP-FULLSTACK-01A-R1-FORCE-PASSWORD-REGRESSION-REPAIR-CLOSURE.md`](../../phases/JP-FULLSTACK-01A-R1-FORCE-PASSWORD-REGRESSION-REPAIR-CLOSURE.md). Prior baseline (6 passed, 3 failed) documented in that closure.
 
 **JP-FULLSTACK-01E — READY FOR COMMIT REVIEW WITH VERIFIED PRE-EXISTING FORCE-PASSWORD BASELINE EXCEPTION**
+
+---
+
+## 19. JP-FULLSTACK-01F implementation closure
+
+| Check | Result |
+|-------|--------|
+| Branch | `phase/jetpk-fullstack-01f-agent-agent-staff-rbac-travelers` |
+| Baseline | `94fc86a33d0f091aae1cd9166a49b81b47c1c9bd` |
+| Gaps closed | GAP-005, GAP-006, GAP-011, GAP-016 → CONNECTED_AND_VERIFIED |
+| Laravel tests (01F matrix) | 93 passed, 338 assertions (01F JSON + `AgentStaffPermissionTest` + `SavedTravelerTest` + `AgentPortalPermissionMatrixFinalTest` + `AgentPortalDataScopingTest` + `PublicSessionBootstrapTest`) |
+| Playwright (01F matrix) | 105 passed (01F spec 25 + ops/regressions) |
+| `npm run typecheck` | pass |
+| `npm run lint` | pass |
+| `npm run build` | pass |
+| Commit / push / merge / deploy | None |
+
+**GAP-005:** Agent travelers additive JSON on `SavedTravelerController`; Next `/agent/travelers`, `/new`, `/[id]/edit`; Blade fallback retained.
+
+**GAP-006:** Read-only finance statement and accounting ledger JSON + Next surfaces; CSV export via Laravel URL only; Next export allowlist rejects external URLs.
+
+**GAP-011 / GAP-016:** Route-specific payments/invoices Playwright matrix + explicit client-escalation denial tests; no production defects found.
+
+Closure: [`docs/phases/JP-FULLSTACK-01F-AGENT-AGENT-STAFF-RBAC-TRAVELERS-CLOSURE.md`](../../phases/JP-FULLSTACK-01F-AGENT-AGENT-STAFF-RBAC-TRAVELERS-CLOSURE.md)
+
+**JP-FULLSTACK-01F — READY FOR COMMIT REVIEW**
