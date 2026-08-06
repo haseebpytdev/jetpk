@@ -326,3 +326,51 @@ No production calls, live supplier booking, real payment, or email send during a
 ---
 
 **JP-FULLSTACK-01 AUDIT COMPLETE — READY FOR ITERATION 01A**
+
+---
+
+## 15. JP-FULLSTACK-01B closure (2026-08-06)
+
+**Branch:** `phase/jetpk-fullstack-01b-public-search-results-fare-connectivity`
+**Baseline:** `e40d9c232614d1e7f508d84221f3b8dbefc1c234`
+**Status:** Implementation complete — **not committed** (stop for review)
+
+### Gaps closed
+
+| Gap ID | Severity | Summary |
+|--------|----------|---------|
+| JP-FS01-GAP-007 | MEDIUM | Nearby-date strip wired to Next results |
+| JP-FS01-GAP-008 | MEDIUM | Multicity inquiry form POST from Next |
+| JP-FS01-GAP-010 | MEDIUM | Return-options Playwright coverage |
+| JP-FS01-GAP-014 | LOW | Return-combo Blade handoff documented + allowlist tests |
+
+### Laravel changes
+
+Additive test only: `tests/Feature/NearbyDateFareStripTest.php` — JSON contract for one-way nearby-dates. No controller/route changes.
+
+### Frontend changes
+
+Nearby dates, multicity inquiry actions, return-options spec. See `docs/phases/JP-FULLSTACK-01B-SEARCH-RESULTS-FARE-CONNECTIVITY-CLOSURE.md`.
+
+### Stop-gate tests (01B)
+
+| Command | Exit | Result |
+|---------|-----:|--------|
+| `php artisan test tests/Feature/NearbyDateFareStripTest.php tests/Feature/PublicMulticityFlightResultsTest.php` | 0 | 5 passed, 22 assertions |
+| `npm run typecheck` | 0 | clean |
+| `npm run lint` | 0 | clean |
+| `npm run build` | 0 | Next.js 15.5.22 |
+
+No live supplier, booking, payment, or email calls.
+
+### Confirmations (01B)
+
+| Item | Confirmed |
+|------|-----------|
+| OTP demo patch unchanged | Yes |
+| Blade fallbacks preserved | Yes |
+| No `dashboard/` changes | Yes |
+| No checkout/booking/payment changes | Yes |
+| No commit / push / merge / deploy | Yes |
+
+**JP-FULLSTACK-01B — READY FOR COMMIT REVIEW**

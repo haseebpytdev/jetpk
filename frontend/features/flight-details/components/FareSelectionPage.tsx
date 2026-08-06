@@ -8,6 +8,7 @@ import { ResultSkeleton } from "@/features/flight-results/components/ResultSkele
 import { SearchErrorState } from "@/features/flight-results/components/SearchErrorState";
 import { BaggageDetails } from "@/features/flight-details/components/BaggageDetails";
 import { ContinueToPassengersButton } from "@/features/flight-details/components/ContinueToPassengersButton";
+import { MulticityInquiryActions } from "@/features/flight-results/components/MulticityInquiryActions";
 import { FareChangeDialog } from "@/features/flight-details/components/FareChangeDialog";
 import { FareFamilyDetails } from "@/features/flight-details/components/FareFamilyDetails";
 import { FareRulesAccordion } from "@/features/flight-details/components/FareRulesAccordion";
@@ -123,9 +124,12 @@ export function FareSelectionPage() {
           {details.loadState === "ready" && offer ? (
             <div className="space-y-jp-lg">
               {isInquiry ? (
-                <p className="text-jp-sm text-jp-muted" role="note">
-                  {details.data?.inquiry_only_notice ?? offer.inquiry_only_notice ?? "Multi-city inquiry only."}
-                </p>
+                <MulticityInquiryActions
+                  searchId={context.searchId}
+                  offerId={offer.offer_id}
+                  notice={details.data?.inquiry_only_notice ?? offer.inquiry_only_notice}
+                  inquiryUrl={offer.inquiry_url}
+                />
               ) : null}
 
               <ReturnJourneyDetails returnCombo={details.data?.return_combo} />

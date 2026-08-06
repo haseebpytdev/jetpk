@@ -301,7 +301,8 @@ test("mobile filter drawer at 320px", async ({ page }) => {
   await gotoResults(page);
   await page.getByTestId("open-mobile-filters").click();
   await expect(page.getByTestId("mobile-filter-drawer")).toBeVisible();
-  await page.getByRole("button", { name: "Done" }).click();
+  await page.getByTestId("drawer-panel").getByRole("button", { name: "Close" }).click();
+  await expect(page.getByTestId("mobile-filter-drawer")).not.toBeVisible();
 });
 
 test("reduced motion skeleton has no animation class dependency", async ({ page }) => {

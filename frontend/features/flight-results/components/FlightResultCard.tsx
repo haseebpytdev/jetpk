@@ -9,6 +9,7 @@ import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { FareBadge } from "./FareBadge";
 import { FlightSegmentSummary } from "./FlightSegmentSummary";
 import { PriceBlock } from "./PriceBlock";
+import { MulticityInquiryActions } from "./MulticityInquiryActions";
 import { StopsAndLayover } from "./StopsAndLayover";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 
@@ -44,7 +45,7 @@ function resolveFareOptions(offer: FlightOffer) {
   return [];
 }
 
-export function FlightResultCard({ offer, selecting, onSelect, onOpenDetails }: FlightResultCardProps) {
+export function FlightResultCard({ offer, searchId, selecting, onSelect, onOpenDetails }: FlightResultCardProps) {
   const fareOptions = useMemo(() => resolveFareOptions(offer), [offer]);
   const hasBranded = fareOptions.length > 1 || (offer.has_branded_fares && fareOptions.length > 0);
   const [selectedFareKey, setSelectedFareKey] = useState(
@@ -102,7 +103,12 @@ export function FlightResultCard({ offer, selecting, onSelect, onOpenDetails }: 
           </div>
           <BaggageSummary offer={offer} />
           {offer.multicity_inquiry_only ? (
-            <p className="text-sm text-jp-text-muted">{offer.inquiry_only_notice}</p>
+            <MulticityInquiryActions
+              searchId={searchId}
+              offerId={offer.offer_id}
+              notice={offer.inquiry_only_notice}
+              inquiryUrl={offer.inquiry_url}
+            />
           ) : null}
           {offer.disabled_reason && !offer.can_book ? (
             <p className="text-sm text-amber-700">{offer.disabled_reason}</p>

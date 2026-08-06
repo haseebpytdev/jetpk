@@ -34,6 +34,26 @@ class NearbyDateFareStripTest extends TestCase
             ->assertJsonPath('dates', []);
     }
 
+    public function test_nearby_dates_route_returns_json_for_one_way_search(): void
+    {
+        Agency::factory()->create(['slug' => config('ota.default_agency_slug')]);
+
+        $searchId = app(FlightSearchResultStore::class)->store([
+            'trip_type' => 'one_way',
+            'origin' => 'LHE',
+            'destination' => 'DXB',
+            'depart_date' => now()->addDays(10)->toDateString(),
+            'adults' => 1,
+            'children' => 0,
+            'infants' => 0,
+            'cabin' => 'economy',
+        ], [], []);
+
+        $this->getJson(route('flights.results.nearby-dates', ['search_id' => $searchId]))
+            ->assertOk()
+            ->assertJsonStructure(['available', 'selected_date', 'dates']);
+    }
+
     public function test_nearby_date_strip_service_respects_disabled_config(): void
     {
         Config::set('ota-flights.nearby_date_strip.enabled', false);
