@@ -15,6 +15,7 @@ export { CustomerRegistrationForm } from "./components/CustomerRegistrationForm"
 export { AgentRegistrationForm } from "./components/AgentRegistrationForm";
 export { ForgotPasswordForm } from "./components/ForgotPasswordForm";
 export { ResetPasswordForm } from "./components/ResetPasswordForm";
+export { ForcePasswordChangeForm } from "./components/ForcePasswordChangeForm";
 export { PasswordField } from "./components/PasswordField";
 export { AuthStatusBanner } from "./components/AuthStatusBanner";
 export { CustomerPortalPlaceholder } from "./components/CustomerPortalPlaceholder";
@@ -22,4 +23,5 @@ export * from "./services/auth-service";
 export * from "./services/session-service";
 export * from "./services/registration-service";
 export * from "./services/password-reset-service";
+export * from "./services/force-password-service";
 export * from "./types";

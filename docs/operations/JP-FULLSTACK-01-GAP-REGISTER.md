@@ -26,12 +26,12 @@ None identified at audit baseline.
 
 ## HIGH gaps
 
-| ID | Area | Summary | Iteration |
-|----|------|---------|-----------|
-| JP-FS01-GAP-001 | Auth | Next redirects to Laravel-only `/password/force-change`; no Next page | 01A |
-| JP-FS01-GAP-002 | Guest lookup | Post-lookup guest booking detail remains Laravel Blade | 01E |
-| JP-FS01-GAP-003 | CMS | Content fixture flags could serve demo CMS if misconfigured in prod | 01G |
-| JP-FS01-GAP-004 | Card payment | AbhiPay return lands on Laravel HTML before Next confirmation — verify E2E | 01D |
+| ID | Area | Summary | Iteration | 01A status |
+|----|------|---------|-----------|------------|
+| JP-FS01-GAP-001 | Auth | Next `/password/force-change` + Laravel JSON | 01A | **CLOSED** |
+| JP-FS01-GAP-002 | Guest lookup | Post-lookup guest booking Blade | 01E | Open |
+| JP-FS01-GAP-003 | CMS | Content fixture misconfiguration risk | 01G | Open |
+| JP-FS01-GAP-004 | Card payment | AbhiPay return handoff | 01D | Open |
 
 ## MEDIUM gaps
 

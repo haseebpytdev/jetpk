@@ -139,6 +139,20 @@ export function resolveSessionBootstrapFixture(
     return OTP_BOOTSTRAP;
   }
 
+  if (fixture === "customer_force_password") {
+    return {
+      ...CUSTOMER_BOOTSTRAP,
+      requires_password_change: true,
+    };
+  }
+
+  if (fixture === "agent_force_password") {
+    return {
+      ...AGENT_BOOTSTRAP,
+      requires_password_change: true,
+    };
+  }
+
   return null;
 }
 

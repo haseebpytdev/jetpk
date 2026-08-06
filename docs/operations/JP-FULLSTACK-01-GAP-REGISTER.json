@@ -57,7 +57,9 @@
       "proposed_correction": "Add Next force-change page in 01A wired to POST /password/force-change with session CSRF",
       "dependencies": ["JP-OPS-02 CSRF bridge", "session bootstrap requires_password_change"],
       "target_iteration": "JP-FULLSTACK-01A",
-      "verification_test": "Playwright portal guard + Laravel Auth test for force-change JSON/redirect parity"
+      "verification_test": "Playwright portal guard + Laravel Auth test for force-change JSON/redirect parity",
+      "jp_fullstack_01a_status": "CLOSED",
+      "jp_fullstack_01a_notes": "Next /password/force-change page; additive JSON on ForcePasswordChangeController; EnsurePasswordChanged allows session/csrf APIs"
     },
     {
       "id": "JP-FS01-GAP-002",
