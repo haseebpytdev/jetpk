@@ -1,502 +1,587 @@
 {
-  "generatedAt": "2026-08-01T15:09:27.590Z",
-  "phase": "JP-FULL-NEXT-FRONTEND-01B",
-  "classification": {
-    "totalPageFiles": 67,
-    "productionBrowserRoutes": 66,
-    "deployableProductionRoutes": 66,
-    "redirectOnly": 3,
-    "dynamicRoutes": 13,
-    "devOnlyExcluded": 1,
-    "metadataRoutes": [
-      "robots.ts",
-      "sitemap.ts"
-    ],
-    "apiRoutes": [],
-    "excludedLabRoutes": [
-      "/dev/jetpk-theme-lab"
-    ],
-    "forbiddenRoutes": [
-      "/preview",
-      "/booking/seats"
-    ],
-    "statusCounts": {
-      "shared-theme-only": 59,
-      "redirect": 3,
-      "fully-adapted": 4,
-      "intentionally-deferred": 1
-    },
-    "whyCount67": "67 = total app/**/page.tsx files on disk. Production browser routes = 66 excluding /dev/jetpk-theme-lab. Phase reports cite 67 as the full Next App Router page inventory including the dev lab route."
-  },
+  "generated_at": "2026-08-06",
+  "methodology": "Count every frontend/app/**/page.tsx once; exclude frontend/app/dev/**; dynamic segments count once; route groups omitted from public URLs; dashboard/ excluded; CMS database slugs not expanded.",
+  "production_route_count": 82,
+  "dev_only_route_count": 1,
+  "redirect_only_routes": [
+    "/agent",
+    "/customer",
+    "/booking/payment"
+  ],
   "routes": [
     {
-      "route": "/agent/register",
-      "family": "Agent registration",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/",
+      "app_router_path": "frontend/app/page.tsx",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/register/submitted",
-      "family": "Agent registration",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/[slug]",
+      "app_router_path": "frontend/app/(public)/[slug]",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/forgot-password",
-      "family": "forgot/reset",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/about-us",
+      "app_router_path": "frontend/app/(public)/about-us",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/login/otp",
-      "family": "OTP",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/access-denied",
+      "app_router_path": "frontend/app/access-denied",
+      "category": "utility",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/login",
-      "family": "Login",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent",
+      "app_router_path": "frontend/app/agent",
+      "category": "redirect-only",
+      "redirect_only": true,
+      "dynamic": false
     },
     {
-      "route": "/register",
-      "family": "Register",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/accounting/ledger",
+      "app_router_path": "frontend/app/agent/accounting/ledger",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/reset-password/[token]",
-      "family": "forgot/reset",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/agency",
+      "app_router_path": "frontend/app/agent/agency",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/about-us",
-      "family": "About",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/bookings",
+      "app_router_path": "frontend/app/agent/bookings",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/confirmation",
-      "family": "booking confirmation",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/bookings/[reference]",
+      "app_router_path": "frontend/app/agent/bookings/[reference]",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/booking/invoice",
-      "family": "invoice",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/bookings/create",
+      "app_router_path": "frontend/app/agent/bookings/create",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/passengers",
-      "family": "Passengers",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/commissions",
+      "app_router_path": "frontend/app/agent/commissions",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/payment/card",
-      "family": "Card handoff",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/dashboard",
+      "app_router_path": "frontend/app/agent/dashboard",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/payment/manual",
-      "family": "Manual Payment",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/deposits",
+      "app_router_path": "frontend/app/agent/deposits",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/payment",
-      "family": "payment selector",
-      "access": "redirect",
-      "indexing": "noindex",
-      "status": "redirect"
+      "public_path": "/agent/deposits/new",
+      "app_router_path": "frontend/app/agent/deposits/new",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/payment/return",
-      "family": "payment return",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/finance/statement",
+      "app_router_path": "frontend/app/agent/finance/statement",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/payment/status",
-      "family": "payment status",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/invoices",
+      "app_router_path": "frontend/app/agent/invoices",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/review",
-      "family": "Review",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/notifications",
+      "app_router_path": "frontend/app/agent/notifications",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/booking/status",
-      "family": "booking status",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/agent/payments",
+      "app_router_path": "frontend/app/agent/payments",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/contact",
-      "family": "Contact",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/profile",
+      "app_router_path": "frontend/app/agent/profile",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/faq",
-      "family": "FAQ/legal/CMS",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/register",
+      "app_router_path": "frontend/app/(auth)/agent/register",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/groups/booking/[bookingRef]/confirmation",
-      "family": "authenticated group checkout",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/register/submitted",
+      "app_router_path": "frontend/app/(auth)/agent/register/submitted",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/groups/booking/[bookingRef]/payment",
-      "family": "authenticated group checkout",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/reports",
+      "app_router_path": "frontend/app/agent/reports",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/groups/booking/[bookingRef]/review",
-      "family": "authenticated group checkout",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/security",
+      "app_router_path": "frontend/app/agent/security",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/groups/search",
-      "family": "public groups",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/staff",
+      "app_router_path": "frontend/app/agent/staff",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/groups/[packageId]",
-      "family": "public groups",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/staff/[id]",
+      "app_router_path": "frontend/app/agent/staff/[id]",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/groups/[packageId]/passengers",
-      "family": "authenticated group checkout",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/staff/new",
+      "app_router_path": "frontend/app/agent/staff/new",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/legal/[slug]",
-      "family": "FAQ/legal/CMS",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/support",
+      "app_router_path": "frontend/app/agent/support",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/lookup-booking",
-      "family": "Manage Booking",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/support/[reference]",
+      "app_router_path": "frontend/app/agent/support/[reference]",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/pages/[slug]",
-      "family": "FAQ/legal/CMS",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "fully-adapted"
+      "public_path": "/agent/travelers",
+      "app_router_path": "frontend/app/agent/travelers",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/privacy",
-      "family": "FAQ/legal/CMS",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/travelers/[id]/edit",
+      "app_router_path": "frontend/app/agent/travelers/[id]/edit",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/sitemap",
-      "family": "FAQ/legal/CMS",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/travelers/new",
+      "app_router_path": "frontend/app/agent/travelers/new",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/support",
-      "family": "Support",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/wallet",
+      "app_router_path": "frontend/app/agent/wallet",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/terms",
-      "family": "FAQ/legal/CMS",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/agent/wallet/ledger",
+      "app_router_path": "frontend/app/agent/wallet/ledger",
+      "category": "agent",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/[slug]",
-      "family": "FAQ/legal/CMS",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "fully-adapted"
+      "public_path": "/booking/confirmation",
+      "app_router_path": "frontend/app/(public)/booking/confirmation",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/access-denied",
-      "family": "access denied",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/booking/invoice",
+      "app_router_path": "frontend/app/(public)/booking/invoice",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/bookings",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/booking/passengers",
+      "app_router_path": "frontend/app/(public)/booking/passengers",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/bookings/[reference]",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/booking/payment",
+      "app_router_path": "frontend/app/(public)/booking/payment",
+      "category": "redirect-only",
+      "redirect_only": true,
+      "dynamic": false
     },
     {
-      "route": "/agent/dashboard",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/booking/payment/card",
+      "app_router_path": "frontend/app/(public)/booking/payment/card",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/deposits/new",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/booking/payment/manual",
+      "app_router_path": "frontend/app/(public)/booking/payment/manual",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/deposits",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/booking/payment/return",
+      "app_router_path": "frontend/app/(public)/booking/payment/return",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/invoices",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/booking/payment/status",
+      "app_router_path": "frontend/app/(public)/booking/payment/status",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/notifications",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/booking/review",
+      "app_router_path": "frontend/app/(public)/booking/review",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent",
-      "family": "Agent portal",
-      "access": "redirect",
-      "indexing": "noindex",
-      "status": "redirect"
+      "public_path": "/booking/status",
+      "app_router_path": "frontend/app/(public)/booking/status",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/payments",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/contact",
+      "app_router_path": "frontend/app/(public)/contact",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/profile",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer",
+      "app_router_path": "frontend/app/customer",
+      "category": "redirect-only",
+      "redirect_only": true,
+      "dynamic": false
     },
     {
-      "route": "/agent/security",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/bookings",
+      "app_router_path": "frontend/app/customer/bookings",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/support",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/bookings/[reference]",
+      "app_router_path": "frontend/app/customer/bookings/[reference]",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/agent/support/[reference]",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/dashboard",
+      "app_router_path": "frontend/app/customer/dashboard",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/wallet/ledger",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/invoices",
+      "app_router_path": "frontend/app/customer/invoices",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/agent/wallet",
-      "family": "Agent portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/invoices/[reference]",
+      "app_router_path": "frontend/app/customer/invoices/[reference]",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/customer/bookings",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/notifications",
+      "app_router_path": "frontend/app/customer/notifications",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer/bookings/[reference]",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/payments",
+      "app_router_path": "frontend/app/customer/payments",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer/dashboard",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/profile",
+      "app_router_path": "frontend/app/customer/profile",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer/invoices",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/security",
+      "app_router_path": "frontend/app/customer/security",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer/notifications",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/support",
+      "app_router_path": "frontend/app/customer/support",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer",
-      "family": "Customer portal",
-      "access": "redirect",
-      "indexing": "noindex",
-      "status": "redirect"
+      "public_path": "/customer/support/[reference]",
+      "app_router_path": "frontend/app/customer/support/[reference]",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/customer/payments",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/customer/travelers",
+      "app_router_path": "frontend/app/customer/travelers",
+      "category": "customer",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer/profile",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/faq",
+      "app_router_path": "frontend/app/(public)/faq",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer/security",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/flights/fare-selection",
+      "app_router_path": "frontend/app/flights/fare-selection",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer/support",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/flights/results",
+      "app_router_path": "frontend/app/flights/results",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/customer/support/[reference]",
-      "family": "Customer portal",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "shared-theme-only"
+      "public_path": "/flights/return-options",
+      "app_router_path": "frontend/app/flights/return-options",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/dev/jetpk-theme-lab",
-      "family": "development-only",
-      "access": "dev",
-      "indexing": "indexable",
-      "status": "intentionally-deferred"
+      "public_path": "/forgot-password",
+      "app_router_path": "frontend/app/(auth)/forgot-password",
+      "category": "shared-auth",
+      "redirect_only": false,
+      "dynamic": false
     },
     {
-      "route": "/flights/fare-selection",
-      "family": "Fare Selection",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "fully-adapted"
+      "public_path": "/groups/[packageId]",
+      "app_router_path": "frontend/app/(public)/groups/[packageId]",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/flights/results",
-      "family": "Results",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/groups/[packageId]/passengers",
+      "app_router_path": "frontend/app/(public)/groups/[packageId]/passengers",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/flights/return-options",
-      "family": "Return Options",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/groups/booking/[bookingRef]/confirmation",
+      "app_router_path": "frontend/app/(public)/groups/booking/[bookingRef]/confirmation",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/",
-      "family": "Homepage",
-      "access": "standard",
-      "indexing": "indexable",
-      "status": "shared-theme-only"
+      "public_path": "/groups/booking/[bookingRef]/payment",
+      "app_router_path": "frontend/app/(public)/groups/booking/[bookingRef]/payment",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": true
     },
     {
-      "route": "/verify-email",
-      "family": "verify-email",
-      "access": "standard",
-      "indexing": "noindex",
-      "status": "fully-adapted"
+      "public_path": "/groups/booking/[bookingRef]/review",
+      "app_router_path": "frontend/app/(public)/groups/booking/[bookingRef]/review",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": true
+    },
+    {
+      "public_path": "/groups/search",
+      "app_router_path": "frontend/app/(public)/groups/search",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/guest/bookings/[booking]/access/[token]",
+      "app_router_path": "frontend/app/(public)/guest/bookings/[booking]/access/[token]",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": true
+    },
+    {
+      "public_path": "/legal/[slug]",
+      "app_router_path": "frontend/app/(public)/legal/[slug]",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": true
+    },
+    {
+      "public_path": "/login",
+      "app_router_path": "frontend/app/(auth)/login",
+      "category": "shared-auth",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/login/otp",
+      "app_router_path": "frontend/app/(auth)/login/otp",
+      "category": "shared-auth",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/lookup-booking",
+      "app_router_path": "frontend/app/(public)/lookup-booking",
+      "category": "checkout-booking",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/pages/[slug]",
+      "app_router_path": "frontend/app/(public)/pages/[slug]",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": true
+    },
+    {
+      "public_path": "/password/force-change",
+      "app_router_path": "frontend/app/(auth)/password/force-change",
+      "category": "shared-auth",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/privacy",
+      "app_router_path": "frontend/app/(public)/privacy",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/register",
+      "app_router_path": "frontend/app/(auth)/register",
+      "category": "shared-auth",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/reset-password/[token]",
+      "app_router_path": "frontend/app/(auth)/reset-password/[token]",
+      "category": "shared-auth",
+      "redirect_only": false,
+      "dynamic": true
+    },
+    {
+      "public_path": "/sitemap",
+      "app_router_path": "frontend/app/(public)/sitemap",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/support",
+      "app_router_path": "frontend/app/(public)/support",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/terms",
+      "app_router_path": "frontend/app/(public)/terms",
+      "category": "cms-public-content",
+      "redirect_only": false,
+      "dynamic": false
+    },
+    {
+      "public_path": "/verify-email",
+      "app_router_path": "frontend/app/verify-email",
+      "category": "shared-auth",
+      "redirect_only": false,
+      "dynamic": false
     }
   ]
 }

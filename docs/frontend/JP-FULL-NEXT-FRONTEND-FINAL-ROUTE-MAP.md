@@ -1,51 +1,62 @@
 # JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP
 
-Phase: **JP-FULL-NEXT-FRONTEND-01C**
-Visual status: **MANUALLY ACCEPTED WITH DEFERRED VISUAL POLISH**
-Branch: `phase/jetpk-full-next-frontend-ui-integration`
+Phase: **JP-FULLSTACK-01G** (route inventory parity)
 Machine-readable: [JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.json](./JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.json)
 
-## Why count = 67
+## Counting methodology (authoritative)
+
+| Rule | Value |
+|------|-------|
+| Source | Every `frontend/app/**/page.tsx` counted **once** |
+| Excluded | `frontend/app/dev/**` only |
+| Dynamic segments | Count once per filesystem route (`[slug]`, `[token]`, etc.) |
+| Route groups | Omitted from public URLs (`(public)`, `(auth)`) |
+| Redirect-only pages | **Included** in total; listed separately |
+| Dashboard app | **Excluded** (`dashboard/` is a separate Next application) |
+| CMS DB slugs | **Not** expanded into multiple filesystem routes |
+
+## Production route count
 
 | Classification | Count | Notes |
 |---|---:|---|
-| **Total `app/**/page.tsx` files** | **67** | Authoritative filesystem inventory |
-| Production browser routes | 66 | Excludes `/dev/jetpk-theme-lab` |
-| Dev-only (excluded from deploy) | 1 | `/dev/jetpk-theme-lab` |
+| **Production `page.tsx` routes** | **82** | Authoritative filesystem inventory |
+| Dev-only (excluded) | 1 | `/dev/jetpk-theme-lab` |
 | Redirect-only | 3 | `/agent`, `/customer`, `/booking/payment` |
-| Dynamic routes | 13 | `[slug]`, `[token]`, `[packageId]`, `[bookingRef]`, `[reference]` |
-| Metadata routes (not `page.tsx`) | 2 | `robots.ts`, `sitemap.ts` (+ `sitemap.xml` handler) |
-| Forbidden / absent | 2 | `/preview`, `/booking/seats` → 404 |
-| API/action routes in App Router | 0 | Laravel remains authoritative |
+| Dynamic filesystem routes | 15 | Includes `[slug]`, `[token]`, `[reference]`, etc. |
 
-**Reporting convention:** “67 routes” = full Next.js App Router page inventory on disk (includes dev lab). **66** = deployable production browser pages.
+**Prior stale references superseded:** 64 (theme audit), 67 (01C map), 76 (01 audit executive), 81 (connectivity denominator).
+
+## Redirect-only routes
+
+| Path | Target |
+|------|--------|
+| `/agent` | `/agent/dashboard` |
+| `/customer` | `/customer/dashboard` |
+| `/booking/payment` | `/booking/payment/manual` |
+
+## Category totals (82 production routes)
+
+| Category | Count |
+|----------|------:|
+| cms-public-content | 11 |
+| checkout-booking | 18 |
+| agent | 28 |
+| customer | 12 |
+| shared-auth | 9 |
+| redirect-only | 3 |
+| utility | 1 |
+
+See JSON manifest for the complete per-route inventory with `app_router_path`, `category`, `redirect_only`, and `dynamic` flags.
 
 ## Verified exclusions
 
 | Path | Status |
-|---|---|
+|------|--------|
 | `/preview` | **404** — retired |
 | `/booking/seats` | **404** — `seat_map_available=false` |
 | `/dev/jetpk-theme-lab` | Dev-gated; excluded from production count |
-| `/agent` | **307 → `/agent/dashboard`** |
-| `/customer` | **307 → `/customer/dashboard`** |
 | `/flights/search` | Compat redirect to `/#flight-search` (not a `page.tsx`) |
 
-## Added in integration
+## Parity regression
 
-- `/flights/fare-selection` — branded fare revalidation before passengers
-- `/verify-email` — notice/result; `noindex,nofollow`; reserved from CMS catch-all
-
-## Composition coverage
-
-See [JP-FULL-NEXT-FRONTEND-PAGE-COMPOSITION-COVERAGE.md](./JP-FULL-NEXT-FRONTEND-PAGE-COMPOSITION-COVERAGE.md):
-
-- **Fully adapted:** 4 routes (6% of production)
-- **Shared-theme-only:** 59 routes (tokens + family shells)
-- **Redirect:** 3 routes
-- **Deferred:** 1 dev lab route
-
-## Progress stepper (standard booking)
-
-`Search → Results → Fare Selection → Travelers → Review → Payment → Success`
-Seats omitted when Laravel marks `seat_extras` skipped.
+`frontend/tests/regression/jp-fullstack-01g-route-inventory.test.mjs` enumerates the filesystem and asserts exact parity with this map and JSON manifest.

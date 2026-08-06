@@ -16,7 +16,7 @@
 
 ## Executive summary
 
-The public Next.js frontend (`frontend/`, 76 `page.tsx` routes) is **largely connected** to authoritative Laravel session/CSRF/RBAC and booking JSON contracts established in JP-OPS-01–07. No production `page.tsx` is **MOCK_ONLY** for business data. Remaining work concentrates on **Blade handoff surfaces** (force-password, guest booking detail, AbhiPay return), **agent travelers/finance gaps**, **verification coverage** for connected-but-untested routes, and **production fixture hardening**.
+The public Next.js frontend (`frontend/`, **82** production `page.tsx` routes excluding `dev/`) is **largely connected** to authoritative Laravel session/CSRF/RBAC and booking JSON contracts established in JP-OPS-01–07. No production `page.tsx` is **MOCK_ONLY** for business data. **JP-FULLSTACK-01G** closed CMS fixture hardening, dynamic CMS verification, route inventory parity, branding leakage audits and final representative regression.
 
 OTP demo patch (`OTP_DEMO_*`, `DemoFixedLoginOtpGate`) — **unchanged**.
 
@@ -30,7 +30,7 @@ None identified at audit baseline.
 |----|------|---------|-----------|------------|
 | JP-FS01-GAP-001 | Auth | Next `/password/force-change` + Laravel JSON | 01A | **CLOSED** |
 | JP-FS01-GAP-002 | Guest lookup | Post-lookup Next guest detail + additive Laravel JSON | 01E | CONNECTED_AND_VERIFIED |
-| JP-FS01-GAP-003 | CMS | Content fixture misconfiguration risk | 01G | Open |
+| JP-FS01-GAP-003 | CMS | Content fixture misconfiguration risk | 01G | **CONNECTED_AND_VERIFIED** |
 | JP-FS01-GAP-004 | Card payment | AbhiPay return → Next confirmation handoff | 01D | **CLOSED** |
 
 ## MEDIUM gaps
@@ -51,19 +51,19 @@ None identified at audit baseline.
 | ID | Severity | Summary | Iteration | Status |
 |----|----------|---------|-----------|--------|
 | JP-FS01-GAP-012 | LOW | Customer payments — thin test coverage | 01E | CONNECTED_AND_VERIFIED |
-| JP-FS01-GAP-013 | LOW | Sitemap / dynamic CMS slugs — CNV | 01G | Open |
+| JP-FS01-GAP-013 | LOW | Sitemap / dynamic CMS slugs — CNV | 01G | **CONNECTED_AND_VERIFIED** |
 | JP-FS01-GAP-014 | LOW | Return-combo Blade handoff — documented + allowlist tests | 01B | **CLOSED** |
 | JP-FS01-GAP-015 | LOW | Customer profile/security — visual tests only | 01E | CONNECTED_AND_VERIFIED |
 | JP-FS01-GAP-016 | LOW | Agent staff RBAC — re-verify on 01F | 01F | **CONNECTED_AND_VERIFIED** |
-| JP-FS01-GAP-017 | DOCUMENTATION | Stale route count in FINAL-ROUTE-MAP (67 vs 76) | 01G | Open |
-| JP-FS01-GAP-018 | DOCUMENTATION | JP-OPS-01 inventory predates new portal pages | 01G | Open |
-| JP-FS01-GAP-019 | LOW | Brand leakage audit — expand to checkout Blade views | 01G | Open |
+| JP-FS01-GAP-017 | DOCUMENTATION | Route inventory parity (82 production routes) | 01G | **CONNECTED_AND_VERIFIED** |
+| JP-FS01-GAP-018 | DOCUMENTATION | JP-OPS-01 inventory supersession notice | 01G | **CONNECTED_AND_VERIFIED** |
+| JP-FS01-GAP-019 | LOW | Brand leakage audit — expanded Blade + Playwright | 01G | **CONNECTED_AND_VERIFIED** |
 
-## Connectivity classification totals (81 routes)
+## Connectivity classification totals (82 production routes)
 
 | Status | Count |
 |--------|------:|
-| CONNECTED_AND_VERIFIED | 62 |
+| CONNECTED_AND_VERIFIED | 67 |
 | CONNECTED_NOT_VERIFIED | 9 |
 | STATIC_CONTENT | 4 |
 | INTENTIONAL_BLADE_FALLBACK | 2 |
