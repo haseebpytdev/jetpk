@@ -476,3 +476,27 @@ See `JP-FULLSTACK-01-GAP-REGISTER.md` § JP-FULLSTACK-01E implementation boundar
 Documentation-only scope lock. No application or test code modified.
 
 **JP-FULLSTACK-01E — READY FOR SCOPE-LOCK COMMIT REVIEW**
+
+---
+
+## 12. JP-FULLSTACK-01E implementation closure
+
+| Check | Result |
+|-------|--------|
+| Branch | `phase/jetpk-fullstack-01e-guest-lookup-customer-portal-verification` |
+| Baseline | `b492b60a69bac98c87dbe09d216c2cd20b71e34a` |
+| Gaps closed | GAP-002, GAP-012, GAP-015 → CONNECTED_AND_VERIFIED |
+| Laravel tests (01E) | 9 passed (`GuestBookingDetailJsonTest`, `CustomerPaymentsJsonTest`) |
+| Playwright (01E matrix) | 20 passed |
+| `npm run build` | pass |
+| Commit / push / merge / deploy | None |
+
+**GAP-002:** Canonical Next `/guest/bookings/{booking}/access/{token}`; additive guest JSON; lookup JSON `redirect_url`; Blade fallback for AbhiPay/promo.
+
+**GAP-012 / GAP-015:** Verification-only — no production defects found.
+
+Closure: [`docs/phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md`](../../phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md)
+
+**Force-password baseline exception:** `jp-fullstack-01a-force-password.spec.ts` — 6 passed, 3 failed, exit 1 on both 01E inventory and clean `b492b60a` baseline (identical failed titles: post-submit redirect to customer/agent dashboard). No auth/password production diff in 01E. Queued for separate repair; does not block 01E commit.
+
+**JP-FULLSTACK-01E — READY FOR COMMIT REVIEW WITH VERIFIED PRE-EXISTING FORCE-PASSWORD BASELINE EXCEPTION**

@@ -68,7 +68,7 @@
       "frontend_route": "/lookup-booking → /guest/bookings/{booking}/access/{token}",
       "frontend_file": "frontend/features/standard-booking/lookup/BookingLookupPage.tsx; frontend/app/(public)/guest/bookings/[booking]/access/[token]/page.tsx",
       "laravel_route_controller": "guest.bookings.show → GuestBookingLookupController@showGuestBooking (+ additive ?format=json)",
-      "current_state": "Lookup POST succeeds; guest detail, payment proof and AbhiPay remain on Laravel Blade at /guest/bookings/{id}/access/{token}",
+      "current_state": "CONNECTED_AND_VERIFIED — canonical Next guest-detail at /guest/bookings/{booking}/access/{token}; additive guest.bookings.show JSON; lookup JSON redirect_url for Accept JSON; Blade HTML fallback retained",
       "expected_state": "Canonical Next guest-detail page loads authoritative additive JSON; Blade HTML preserved as intentional fallback",
       "severity": "HIGH",
       "security_impact": "Token-scoped guest access must remain server-authoritative; no client fabrication of booking evidence",
@@ -76,7 +76,9 @@
       "proposed_correction": "01E: additive guest.bookings.show JSON + Next /guest/bookings/{booking}/access/{token}; lookup redirect allowlist; cancellation and payment-proof on Next; AbhiPay/promo Blade handoff",
       "dependencies": ["GuestBookingAccessService", "customer_booking_lookup module"],
       "target_iteration": "JP-FULLSTACK-01E",
-      "verification_test": "GuestBookingLookupRedesignTest + guest-detail JSON contract + booking-lookup-turnstile.spec.ts + guest-detail Playwright"
+      "verification_test": "GuestBookingDetailJsonTest + guest-booking-detail.spec.ts + booking-lookup-turnstile.spec.ts",
+      "jp_fullstack_01e_status": "CONNECTED_AND_VERIFIED",
+      "jp_fullstack_01e_notes": "GuestBookingDetailPresenter JSON; lookup wantsJson redirect_url; Next GuestBookingDetailPage; cancellation/payment-proof JSON mutations; AbhiPay/promo Blade handoff"
     },
     {
       "id": "JP-FS01-GAP-003",
@@ -246,7 +248,7 @@
       "frontend_route": "/customer/payments",
       "frontend_file": "frontend/app/customer/payments/page.tsx",
       "laravel_route_controller": "customer.payments.index",
-      "current_state": "JSON connected; thin automated verification (visual specs only)",
+      "current_state": "CONNECTED_AND_VERIFIED — customer.payments.index ownership isolated; Playwright list/empty/error/session states",
       "expected_state": "CONNECTED_AND_VERIFIED in customer ops regression",
       "severity": "LOW",
       "security_impact": "Customer ownership enforced",
@@ -254,7 +256,9 @@
       "proposed_correction": "01E: jp-ops-03 payments list/empty/error tests + Laravel customer.payments.index ownership contract; no feature change unless defect found",
       "dependencies": ["customer portal JSON presenter"],
       "target_iteration": "JP-FULLSTACK-01E",
-      "verification_test": "jp-ops-03-customer-operational.spec.ts"
+      "verification_test": "CustomerPaymentsJsonTest + jp-ops-03-customer-operational.spec.ts payments",
+      "jp_fullstack_01e_status": "CONNECTED_AND_VERIFIED",
+      "jp_fullstack_01e_notes": "No production defect; Laravel ownership tests + Playwright populated/empty/error/session"
     },
     {
       "id": "JP-FS01-GAP-013",
@@ -299,7 +303,7 @@
       "frontend_route": "/customer/profile, /customer/security",
       "frontend_file": "frontend/features/customer-dashboard/profile/*",
       "laravel_route_controller": "customer.profile.show, PUT /password",
-      "current_state": "Mutations connected; mostly visual-state test coverage",
+      "current_state": "CONNECTED_AND_VERIFIED — profile PATCH and password PUT with CSRF, 422, bounded 419 retry, session recovery tested",
       "expected_state": "CONNECTED_AND_VERIFIED with mutation regression",
       "severity": "LOW",
       "security_impact": "Session CSRF on mutations",
@@ -307,7 +311,9 @@
       "proposed_correction": "01E: profile/security mutation Playwright (PATCH profile, PUT password, 422, CSRF, bounded 419, expired session); no policy or OTP changes",
       "dependencies": ["customer-dashboard-api"],
       "target_iteration": "JP-FULLSTACK-01E",
-      "verification_test": "jp-ui-05a-profile-logout.spec.ts extended"
+      "verification_test": "jp-fullstack-01e-profile-security.spec.ts",
+      "jp_fullstack_01e_status": "CONNECTED_AND_VERIFIED",
+      "jp_fullstack_01e_notes": "No production defect; Playwright profile/password mutation matrix; no credential persistence"
     },
     {
       "id": "JP-FS01-GAP-016",
@@ -513,5 +519,30 @@
       ".env credentials",
       "blade removal"
     ]
+  },
+  "jp_fullstack_01e_implementation": {
+    "branch": "phase/jetpk-fullstack-01e-guest-lookup-customer-portal-verification",
+    "baseline_sha": "b492b60a69bac98c87dbe09d216c2cd20b71e34a",
+    "status": "READY_FOR_COMMIT",
+    "gaps_closed": [
+      {
+        "id": "JP-FS01-GAP-002",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-012",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-015",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      }
+    ],
+    "lookup_json_contract": {
+      "uri": "POST /lookup-booking with Accept application/json",
+      "route_name": "lookup-booking.submit",
+      "response": "{ ok: true, redirect_url: guest.bookings.show }"
+    },
+    "closure_doc": "docs/phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md"
   }
 }

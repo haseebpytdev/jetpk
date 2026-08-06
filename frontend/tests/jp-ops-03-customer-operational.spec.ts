@@ -302,4 +302,57 @@ test.describe("JP-OPS-03 customer operational closure", () => {
     await expect(page).toHaveURL(/\/login/);
     expect(privateRequests.length).toBe(0);
   });
+
+  test("customer payments list loads from Laravel JSON", async ({ page }) => {
+    await page.route("**/laravel/customer/payments?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          filter: "all",
+          payments: [
+            {
+              reference: "PAY-1001",
+              booking_reference: "BKG-PAY1",
+              amount: 45000,
+              currency: "PKR",
+              payment_method_label: "Bank transfer",
+              payment_status: { code: "paid", label: "Paid" },
+            },
+          ],
+          pagination: { current_page: 1, last_page: 1, per_page: 15, total: 1, from: 1, to: 1 },
+        }),
+      });
+    });
+    await page.goto("/customer/payments");
+    await expect(page.getByTestId("customer-payments-list")).toBeVisible();
+    await expect(page.getByText("PAY-1001")).toBeVisible();
+    await expect(page.getByText("BKG-PAY1")).toBeVisible();
+  });
+
+  test("customer payments empty state", async ({ page }) => {
+    await page.route("**/laravel/customer/payments?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          filter: "all",
+          payments: [],
+          pagination: { current_page: 1, last_page: 1, per_page: 15, total: 0, from: null, to: null },
+        }),
+      });
+    });
+    await page.goto("/customer/payments");
+    await expect(page.getByText(/no payments yet/i)).toBeVisible();
+  });
+
+  test("customer payments server error state", async ({ page }) => {
+    await page.route("**/laravel/customer/payments?format=json*", async (route) => {
+      await route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ ok: false, message: "Server error." }) });
+    });
+    await page.goto("/customer/payments");
+    await expect(page.getByText(/server error/i)).toBeVisible();
+  });
 });

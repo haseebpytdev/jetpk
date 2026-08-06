@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+const playwrightBaseUrl = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3002";
+
 const turnstileEnabledConfig = {
   enabled: true,
   site_key: "test-site-key",
@@ -108,6 +110,9 @@ test.describe("booking lookup turnstile", () => {
     await page.goto("/lookup-booking");
     await lookupForm(page).getByRole("textbox", { name: /Booking reference/ }).fill("JPTEST01");
     await lookupForm(page).getByRole("textbox", { name: /Email address/ }).fill("wrong@example.com");
+    await page.waitForFunction(() =>
+      Boolean((window as Window & { __turnstileOptions?: { callback?: (t: string) => void } }).__turnstileOptions),
+    );
     await page.evaluate(() => {
       const options = (window as Window & { __turnstileOptions?: { callback?: (t: string) => void } }).__turnstileOptions;
       options?.callback?.("mock-turnstile-token");
@@ -135,10 +140,14 @@ test.describe("booking lookup turnstile", () => {
     await page.goto("/lookup-booking");
     await lookupForm(page).getByRole("textbox", { name: /Booking reference/ }).fill("JPTEST01");
     await lookupForm(page).getByRole("textbox", { name: /Email address/ }).fill("test@example.com");
+    await page.waitForFunction(() =>
+      Boolean((window as Window & { __turnstileOptions?: { callback?: (t: string) => void } }).__turnstileOptions),
+    );
     await page.evaluate(() => {
       const options = (window as Window & { __turnstileOptions?: { callback?: (t: string) => void } }).__turnstileOptions;
       options?.callback?.("mock-turnstile-token");
     });
+    await expect(page.getByTestId("lookup-submit")).toBeEnabled();
     await page.getByTestId("lookup-submit").click();
     await expect(page.getByTestId("lookup-error")).toContainText("Security check failed");
   });
@@ -162,14 +171,52 @@ test.describe("booking lookup turnstile", () => {
     await expect(page.getByTestId("lookup-submit")).toBeDisabled();
   });
 
+  test("successful lookup redirects to canonical internal guest route", async ({ page }) => {
+    await mockTurnstileConfig(page, turnstileDisabledConfig);
+    await page.route("**/laravel/lookup-booking", async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          redirect_url: `${playwrightBaseUrl}/guest/bookings/1/access/redirect-token`,
+        }),
+      });
+    });
+    await page.route("**/laravel/guest/bookings/1/access/redirect-token?format=json", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, booking_reference: "GUEST01E01" }),
+      });
+    });
+
+    await page.goto("/lookup-booking");
+    await lookupForm(page).getByRole("textbox", { name: /Booking reference/ }).fill("GUEST01E01");
+    await lookupForm(page).getByRole("textbox", { name: /Email address/ }).fill("guest@example.test");
+    await page.getByTestId("lookup-submit").click();
+    await expect(page).toHaveURL(/\/guest\/bookings\/1\/access\/redirect-token/, { timeout: 15000 });
+  });
+
   test("arbitrary success URL is rejected", async ({ page }) => {
     await mockTurnstileConfig(page, turnstileDisabledConfig);
     await page.route("**/laravel/lookup-booking", async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
       await route.fulfill({
-        status: 302,
-        headers: { Location: "https://evil.example/phish" },
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, redirect_url: "https://evil.example/phish" }),
       });
     });
+
+    await page.goto("/lookup-booking");
 
     await page.goto("/lookup-booking");
     await lookupForm(page).getByRole("textbox", { name: /Booking reference/ }).fill("JPTEST01");
