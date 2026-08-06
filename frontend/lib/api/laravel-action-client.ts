@@ -190,10 +190,10 @@ export async function laravelRequest<T>(
 /** @deprecated Use laravelRequest — kept for auth migration compatibility. */
 export async function laravelJsonFetch<T>(
   path: string,
-  init?: RequestInit & { formBody?: Record<string, string | undefined> },
+  init?: RequestInit & { formBody?: Record<string, string | undefined>; retryCsrfOnce?: boolean },
 ): Promise<
   | { ok: true; data: T }
-  | { ok: false; status: number; message: string; errors?: Record<string, string[]> }
+  | { ok: false; status: number; message: string; errors?: Record<string, string[]>; code?: string }
 > {
   const result = await laravelRequest<T>(path, {
     method: (init?.method as LaravelRequestOptions["method"]) ?? "GET",
@@ -201,6 +201,7 @@ export async function laravelJsonFetch<T>(
     formBody: init?.formBody,
     headers: init?.headers as Record<string, string> | undefined,
     signal: init?.signal ?? undefined,
+    retryCsrfOnce: init?.retryCsrfOnce,
   });
 
   if (result.ok) {
@@ -212,6 +213,7 @@ export async function laravelJsonFetch<T>(
     status: result.status,
     message: result.message,
     errors: result.errors,
+    code: result.code,
   };
 }
 

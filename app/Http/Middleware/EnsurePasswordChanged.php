@@ -33,6 +33,8 @@ class EnsurePasswordChanged
             'verification.*',
             'password.confirm',
             'password.confirm.store',
+            'api.public.auth.session',
+            'api.public.content.csrf',
         )) {
             return $next($request);
         }
