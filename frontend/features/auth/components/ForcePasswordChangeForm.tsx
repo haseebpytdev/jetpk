@@ -4,6 +4,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useState } from "react";
 import { logout } from "../services/auth-service";
 import { submitForcePasswordChange } from "../services/force-password-service";
+import { markForcePasswordRequirementCleared } from "../utils/force-password-clearance";
 import { mapFieldErrors } from "../utils/laravel-auth-api";
 import { AuthStatusBanner } from "./AuthStatusBanner";
 import { PasswordField } from "./PasswordField";
@@ -36,6 +37,7 @@ export function ForcePasswordChangeForm() {
       return;
     }
 
+    markForcePasswordRequirementCleared();
     window.location.assign(result.redirect);
   }
 

@@ -497,6 +497,6 @@ Documentation-only scope lock. No application or test code modified.
 
 Closure: [`docs/phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md`](../../phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md)
 
-**Force-password baseline exception:** `jp-fullstack-01a-force-password.spec.ts` — 6 passed, 3 failed, exit 1 on both 01E inventory and clean `b492b60a` baseline (identical failed titles: post-submit redirect to customer/agent dashboard). No auth/password production diff in 01E. Queued for separate repair; does not block 01E commit.
+**Force-password baseline exception:** **REPAIRED on branch `phase/jetpk-fullstack-01a-r1-force-password-regression-repair`** — root cause was static Playwright session fixtures after JSON success; clearance cookie + fixture resolver alignment. `jp-fullstack-01a-force-password.spec.ts` now 9 passed, exit 0. Closure: [`docs/phases/JP-FULLSTACK-01A-R1-FORCE-PASSWORD-REGRESSION-REPAIR-CLOSURE.md`](../../phases/JP-FULLSTACK-01A-R1-FORCE-PASSWORD-REGRESSION-REPAIR-CLOSURE.md). Prior baseline (6 passed, 3 failed) documented in that closure.
 
 **JP-FULLSTACK-01E — READY FOR COMMIT REVIEW WITH VERIFIED PRE-EXISTING FORCE-PASSWORD BASELINE EXCEPTION**
