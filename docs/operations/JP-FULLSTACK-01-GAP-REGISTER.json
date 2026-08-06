@@ -161,7 +161,9 @@
       "proposed_correction": "01B if UI exposes flexible dates; else DOCUMENTATION defer",
       "dependencies": ["FlightSearchFlexibleDatesPhase18FTest"],
       "target_iteration": "JP-FULLSTACK-01B",
-      "verification_test": "FlightSearchFlexibleDatesPhase18FTest + flight-results spec"
+      "verification_test": "NearbyDateFareStripTest + NearbyDateStrip on results page",
+      "jp_fullstack_01b_status": "CLOSED",
+      "jp_fullstack_01b_notes": "NearbyDateStrip component + fetchNearbyDates on one-way results (hidden for return-split)"
     },
     {
       "id": "JP-FS01-GAP-008",
@@ -178,7 +180,9 @@
       "proposed_correction": "Defer or 01B scope decision",
       "dependencies": ["PublicMulticityFlightResultsTest"],
       "target_iteration": "JP-FULLSTACK-01B",
-      "verification_test": "PublicMulticityFlightResultsTest"
+      "verification_test": "PublicMulticityFlightResultsTest + multicity inquiry form POST",
+      "jp_fullstack_01b_status": "CLOSED",
+      "jp_fullstack_01b_notes": "MulticityInquiryActions on results card and fare-selection; Laravel form POST to flights.multicity.inquiry; success lands on Blade support.submitted"
     },
     {
       "id": "JP-FS01-GAP-009",
@@ -212,7 +216,9 @@
       "proposed_correction": "01B: add return-options.spec.ts and verify handoff URL",
       "dependencies": ["flight-results-api submitReturnComboSelection"],
       "target_iteration": "JP-FULLSTACK-01B",
-      "verification_test": "New flight-return-options.spec.ts"
+      "verification_test": "New flight-return-options.spec.ts",
+      "jp_fullstack_01b_status": "CLOSED",
+      "jp_fullstack_01b_notes": "flight-return-options.spec.ts covers data load and select-return-combo form POST"
     },
     {
       "id": "JP-FS01-GAP-011",
@@ -280,7 +286,9 @@
       "proposed_correction": "01B: branding verification on handoff landing",
       "dependencies": ["absoluteLaravelHandoffUrl helper"],
       "target_iteration": "JP-FULLSTACK-01B",
-      "verification_test": "Handoff URL allowlist regression"
+      "verification_test": "Handoff URL allowlist regression",
+      "jp_fullstack_01b_status": "CLOSED",
+      "jp_fullstack_01b_notes": "Documented INTENTIONAL_BLADE_FALLBACK; handoff allowlist tests in flight-return-options.spec.ts"
     },
     {
       "id": "JP-FS01-GAP-015",

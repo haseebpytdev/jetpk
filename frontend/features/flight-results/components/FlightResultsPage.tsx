@@ -9,6 +9,7 @@ import { parseFiltersFromSearchParams } from "../utils/filters";
 import { parseUiSort, type UiSortKey } from "../utils/sorting";
 import { EmptyResultsState } from "./EmptyResultsState";
 import { ExpiredSearchState } from "./ExpiredSearchState";
+import { NearbyDateStrip } from "./NearbyDateStrip";
 import { FlightResultCard } from "./FlightResultCard";
 import { LoadMoreControl } from "./LoadMoreControl";
 import { MobileFilterDrawer } from "./MobileFilterDrawer";
@@ -146,6 +147,10 @@ export function FlightResultsPage() {
       ) : null}
 
       <PartialResultsNotice warnings={results.data?.warnings} />
+
+      {results.status === "ready" && !results.isReturnSplit ? (
+        <NearbyDateStrip searchId={results.resolvedSearchId ?? ""} hidden={results.isReturnSplit} />
+      ) : null}
 
       <ResultsToolbar
         sort={sort}

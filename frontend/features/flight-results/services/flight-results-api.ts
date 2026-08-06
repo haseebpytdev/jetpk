@@ -5,6 +5,7 @@ import type {
   ActiveResultsFilters,
   FlightResultsDataResponse,
   FlightSearchInitFullResponse,
+  NearbyDatesResponse,
   RevalidateOfferResponse,
   ReturnOptionsDataResponse,
 } from "../types";
@@ -219,6 +220,80 @@ export async function submitReturnComboSelection(params: {
   if (params.fareOptionKey) fields.fare_option_key = params.fareOptionKey;
   if (params.outboundFareOptionKey) fields.outbound_fare_option_key = params.outboundFareOptionKey;
   if (params.returnFareOptionKey) fields.return_fare_option_key = params.returnFareOptionKey;
+  if (csrf) {
+    const tokenInput = document.createElement("input");
+    tokenInput.type = "hidden";
+    tokenInput.name = "_token";
+    tokenInput.value = csrf;
+    form.appendChild(tokenInput);
+  }
+
+  Object.entries(fields).forEach(([name, value]) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+export async function fetchNearbyDates(params: {
+  searchId: string;
+  signal?: AbortSignal;
+}): Promise<
+  | { ok: true; data: NearbyDatesResponse }
+  | { ok: false; status: number; message: string }
+> {
+  const query = new URLSearchParams({ search_id: params.searchId });
+
+  try {
+    const response = await fetch(laravelApiPath(`/flights/results/nearby-dates?${query.toString()}`), {
+      method: "GET",
+      headers: JSON_HEADERS,
+      credentials: "include",
+      signal: params.signal,
+    });
+
+    const body = (await response.json()) as NearbyDatesResponse & { message?: string };
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        status: response.status,
+        message: body.message ?? "Unable to load nearby date fares.",
+      };
+    }
+
+    return { ok: true, data: body };
+  } catch {
+    return { ok: false, status: 0, message: "Network error. Check your connection and try again." };
+  }
+}
+
+export async function submitMulticityInquiry(params: {
+  searchId: string;
+  offerId: string;
+  requesterName?: string;
+  requesterEmail?: string;
+  notes?: string;
+}): Promise<void> {
+  const csrf = await ensureLaravelCsrfToken();
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = absoluteLaravelHandoffUrl("/flights/multicity/inquiry");
+  form.style.display = "none";
+
+  const fields: Record<string, string> = {
+    search_id: params.searchId,
+    offer_id: params.offerId,
+  };
+  if (params.requesterName) fields.requester_name = params.requesterName;
+  if (params.requesterEmail) fields.requester_email = params.requesterEmail;
+  if (params.notes) fields.notes = params.notes;
+
   if (csrf) {
     const tokenInput = document.createElement("input");
     tokenInput.type = "hidden";

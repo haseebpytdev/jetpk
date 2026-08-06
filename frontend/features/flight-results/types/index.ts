@@ -179,6 +179,20 @@ export type ReturnOptionsDataResponse = {
   search_freshness?: SearchFreshness;
 };
 
+export type NearbyDateStripRow = {
+  date: string;
+  label: string;
+  cheapest_pkr: number | null;
+  is_selected: boolean;
+  search_url: string;
+};
+
+export type NearbyDatesResponse = {
+  available: boolean;
+  selected_date: string | null;
+  dates: NearbyDateStripRow[];
+};
+
 export type FlightSearchInitFullResponse = {
   search_id: string;
   summary?: { text?: string };

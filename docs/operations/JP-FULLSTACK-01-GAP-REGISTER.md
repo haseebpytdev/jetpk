@@ -35,16 +35,16 @@ None identified at audit baseline.
 
 ## MEDIUM gaps
 
-| ID | Area | Summary | Iteration |
-|----|------|---------|-----------|
-| JP-FS01-GAP-005 | Agent | `/agent/travelers` missing — Laravel CRUD exists | 01F |
-| JP-FS01-GAP-006 | Agent | Finance statement / accounting ledger — no Next consumer | 01F |
-| JP-FS01-GAP-007 | Search | `nearby-dates` API — no Next wiring | 01B |
-| JP-FS01-GAP-008 | Search | Multicity inquiry — no Next consumer | 01B |
-| JP-FS01-GAP-009 | Notifications | Stub `available:false` — deferred backend | DEFERRED |
-| JP-FS01-GAP-010 | Flights | Return-options connected but untested handoff | 01B |
-| JP-FS01-GAP-011 | Agent | Payments/invoices connected but not verified in Playwright | 01F |
-| JP-FS01-GAP-020 | Checkout | Manual `pay_later` path needs live-path verification closure | 01C |
+| ID | Area | Summary | Iteration | Status |
+|----|------|---------|-----------|--------|
+| JP-FS01-GAP-005 | Agent | `/agent/travelers` missing — Laravel CRUD exists | 01F | Open |
+| JP-FS01-GAP-006 | Agent | Finance statement / accounting ledger — no Next consumer | 01F | Open |
+| JP-FS01-GAP-007 | Search | Nearby-date strip on results (`fetchNearbyDates`) | 01B | **CLOSED** |
+| JP-FS01-GAP-008 | Search | Multicity inquiry form POST on Next | 01B | **CLOSED** |
+| JP-FS01-GAP-009 | Notifications | Stub `available:false` — deferred backend | DEFERRED | Open |
+| JP-FS01-GAP-010 | Flights | Return-options spec + handoff verification | 01B | **CLOSED** |
+| JP-FS01-GAP-011 | Agent | Payments/invoices connected but not verified in Playwright | 01F | Open |
+| JP-FS01-GAP-020 | Checkout | Manual `pay_later` path needs live-path verification closure | 01C | Open |
 
 ## LOW / DOCUMENTATION
 
@@ -52,7 +52,7 @@ None identified at audit baseline.
 |----|----------|---------|
 | JP-FS01-GAP-012 | LOW | Customer payments — thin test coverage |
 | JP-FS01-GAP-013 | LOW | Sitemap / dynamic CMS slugs — CNV |
-| JP-FS01-GAP-014 | LOW | Return-combo Blade form handoff — document + brand verify |
+| JP-FS01-GAP-014 | LOW | Return-combo Blade handoff — documented + allowlist tests | 01B **CLOSED** |
 | JP-FS01-GAP-015 | LOW | Customer profile/security — visual tests only |
 | JP-FS01-GAP-016 | LOW | Agent staff RBAC — re-verify on 01F |
 | JP-FS01-GAP-017 | DOCUMENTATION | Stale route count in FINAL-ROUTE-MAP (67 vs 76) |
