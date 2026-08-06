@@ -5,7 +5,7 @@
     "generated_at": "2026-08-06T00:00:00+05:00",
     "baseline_sha": "846add82e0aea36e84e877b067bc2210ef2af467",
     "branch": "phase/jetpk-fullstack-01-public-customer-agent-checkout-connectivity",
-    "frontend_route_count": 76,
+    "frontend_route_count": 81,
     "laravel_contract_count_in_scope": 198,
     "severity_counts": {
       "BLOCKER": 0,
@@ -15,15 +15,15 @@
       "DOCUMENTATION": 2
     },
     "connectivity_totals": {
-      "CONNECTED_AND_VERIFIED": 55,
-      "CONNECTED_NOT_VERIFIED": 11,
+      "CONNECTED_AND_VERIFIED": 62,
+      "CONNECTED_NOT_VERIFIED": 9,
       "STATIC_CONTENT": 4,
       "INTENTIONAL_BLADE_FALLBACK": 2,
       "DEFERRED_WITH_REASON": 2,
       "PLACEHOLDER": 1,
       "NOT_FOUND_OR_REDIRECT": 5,
       "MOCK_ONLY": 0,
-      "BACKEND_EXISTS_FRONTEND_DISCONNECTED": 1,
+      "BACKEND_EXISTS_FRONTEND_DISCONNECTED": 0,
       "FRONTEND_EXISTS_BACKEND_MISSING": 0
     },
     "route_classification_totals": {
@@ -33,7 +33,7 @@
       "SHARED_AUTH": 9,
       "CHECKOUT": 16,
       "CUSTOMER": 12,
-      "AGENT": 21,
+      "AGENT": 26,
       "AGENT_STAFF": 0,
       "PLACEHOLDER": 1,
       "NOT_FOUND_OR_REDIRECT": 5
@@ -123,15 +123,17 @@
       "frontend_route": "missing — no /agent/travelers",
       "frontend_file": "frontend/features/agent-dashboard/services/agent-dashboard-api.ts (no travelers calls)",
       "laravel_route_controller": "agent.travelers.* → SavedTravelerController",
-      "current_state": "Laravel agent travelers CRUD exists with agent.permission:travelers.manage; no Next route or API client",
+      "current_state": "CONNECTED_AND_VERIFIED — Next /agent/travelers CRUD with additive agent.travelers.* JSON; Blade HTML fallback retained",
       "expected_state": "Next agent travelers pages connected to Laravel JSON CRUD with RBAC",
       "severity": "MEDIUM",
       "security_impact": "No leakage if Blade unused; staff without permission denied by Laravel middleware",
-      "booking_payment_impact": "Agents cannot manage saved travelers from Next portal",
+      "booking_payment_impact": "Agents can manage saved travelers from Next portal",
       "proposed_correction": "01F: mirror customer travelers pattern for agent scope",
       "dependencies": ["saved_travelers module", "AgentPermission::TravelersManage"],
       "target_iteration": "JP-FULLSTACK-01F",
-      "verification_test": "Agent portal permission matrix + new Playwright travelers spec"
+      "verification_test": "AgentTravelersJsonTest + jp-fullstack-01f-agent-travelers-finance.spec.ts",
+      "jp_fullstack_01f_status": "CONNECTED_AND_VERIFIED",
+      "jp_fullstack_01f_notes": "AgentPortalTravelersPresenter; SavedTravelerController JSON; Next list/create/edit; capabilities nav item"
     },
     {
       "id": "JP-FS01-GAP-006",
@@ -140,15 +142,17 @@
       "frontend_route": "missing — finance statement / accounting ledger",
       "frontend_file": "frontend/features/agent-dashboard/services/agent-dashboard-api.ts",
       "laravel_route_controller": "agent.finance.statement.*, agent.accounting.ledger.*",
-      "current_state": "Laravel finance statement and accounting ledger routes exist; no Next consumers found",
+      "current_state": "CONNECTED_AND_VERIFIED — read-only Next /agent/finance/statement and /agent/accounting/ledger with additive JSON; Blade fallbacks retained",
       "expected_state": "Connected read surfaces or explicit deferral if out of product scope",
       "severity": "MEDIUM",
       "security_impact": "Agency-scoped data only via Laravel if accessed via Blade",
       "booking_payment_impact": "None for standard booking path",
-      "proposed_correction": "01F or defer with product decision",
+      "proposed_correction": "01F: implement read-only Next finance surfaces",
       "dependencies": ["agent.admin for some exports"],
       "target_iteration": "JP-FULLSTACK-01F",
-      "verification_test": "AgentPortalFinance* Feature tests + agent reports parity"
+      "verification_test": "AgentFinanceStatementJsonTest + AgentAccountingLedgerJsonTest + jp-fullstack-01f-agent-travelers-finance.spec.ts",
+      "jp_fullstack_01f_status": "CONNECTED_AND_VERIFIED",
+      "jp_fullstack_01f_notes": "FinanceStatementController and AccountingLedgerController additive JSON; CSV export via Laravel URL only"
     },
     {
       "id": "JP-FS01-GAP-007",
@@ -231,7 +235,7 @@
       "frontend_route": "/agent/payments, /agent/invoices",
       "frontend_file": "frontend/app/agent/payments/page.tsx, frontend/app/agent/invoices/page.tsx",
       "laravel_route_controller": "agent.payments.index, agent.invoices.index",
-      "current_state": "Laravel JSON connected via agent-dashboard-api; CONNECTED_NOT_VERIFIED — no dedicated Playwright tests",
+      "current_state": "CONNECTED_AND_VERIFIED — Laravel JSON connected; Playwright payments/invoices list/empty/denial coverage in jp-ops-04",
       "expected_state": "CONNECTED_AND_VERIFIED with ops regression coverage",
       "severity": "MEDIUM",
       "security_impact": "Wallet.view permission enforced server-side",
@@ -239,7 +243,9 @@
       "proposed_correction": "01F: extend jp-ops-04-agent-operational.spec.ts",
       "dependencies": ["agent.permission:wallet.view"],
       "target_iteration": "JP-FULLSTACK-01F",
-      "verification_test": "jp-ops-04-agent-operational.spec.ts payments/invoices routes"
+      "verification_test": "AgentPaymentsInvoicesJsonTest + jp-ops-04-agent-operational.spec.ts payments/invoices routes",
+      "jp_fullstack_01f_status": "CONNECTED_AND_VERIFIED",
+      "jp_fullstack_01f_notes": "Verification only — no production defect found"
     },
     {
       "id": "JP-FS01-GAP-012",
@@ -322,15 +328,17 @@
       "frontend_route": "/agent/* (capability-filtered)",
       "frontend_file": "frontend/features/agent-dashboard/shell/AgentDashboardShell.tsx",
       "laravel_route_controller": "agent.permission:* middleware on routes/agent.php",
-      "current_state": "Laravel denies unauthorized API; Next nav filters capabilities JSON; manual URL to restricted routes returns 403 from Laravel",
+      "current_state": "CONNECTED_AND_VERIFIED — Laravel denies unauthorized API; Next nav filters capabilities; jp-ops-04 RBAC regression re-run",
       "expected_state": "No cross-role data leakage; staff denied server-side when permission absent",
       "severity": "LOW",
-      "security_impact": "Verified pattern from JP-OPS-04; re-verify on 01F",
+      "security_impact": "Verified pattern from JP-OPS-04; re-verified on 01F",
       "booking_payment_impact": "Staff booking create/view gated by permissions",
       "proposed_correction": "01F: re-run jp-ops-04 RBAC regression against live JSON",
       "dependencies": ["AgentPortalCapabilitiesPresenter"],
       "target_iteration": "JP-FULLSTACK-01F",
-      "verification_test": "jp-ops-04-agent-operational.spec.ts + AgentStaffPermissionTest"
+      "verification_test": "jp-ops-04-agent-operational.spec.ts + AgentStaffPermissionTest",
+      "jp_fullstack_01f_status": "CONNECTED_AND_VERIFIED",
+      "jp_fullstack_01f_notes": "Verification only — no production RBAC defect found"
     },
     {
       "id": "JP-FS01-GAP-017",
@@ -544,5 +552,17 @@
       "response": "{ ok: true, redirect_url: guest.bookings.show }"
     },
     "closure_doc": "docs/phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md"
+  },
+  "jp_fullstack_01f_implementation": {
+    "branch": "phase/jetpk-fullstack-01f-agent-agent-staff-rbac-travelers",
+    "baseline_sha": "94fc86a33d0f091aae1cd9166a49b81b47c1c9bd",
+    "status": "READY_FOR_COMMIT",
+    "gaps_closed": [
+      { "id": "JP-FS01-GAP-005", "final_classification": "CONNECTED_AND_VERIFIED" },
+      { "id": "JP-FS01-GAP-006", "final_classification": "CONNECTED_AND_VERIFIED" },
+      { "id": "JP-FS01-GAP-011", "final_classification": "CONNECTED_AND_VERIFIED" },
+      { "id": "JP-FS01-GAP-016", "final_classification": "CONNECTED_AND_VERIFIED" }
+    ],
+    "closure_doc": "docs/phases/JP-FULLSTACK-01F-AGENT-AGENT-STAFF-RBAC-TRAVELERS-CLOSURE.md"
   }
 }

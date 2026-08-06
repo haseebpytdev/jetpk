@@ -2,15 +2,18 @@ import { laravelRequest } from "@/lib/api/laravel-action-client";
 import type { ApiResult } from "@/lib/api/types";
 import type { BookingConfirmation } from "@/features/standard-booking/types/review-payment";
 import type {
+  AgentAccountingLedgerOverview,
   AgentAgencyProfile,
   AgentBookingListItem,
   AgentCapabilities,
   AgentCommissionOverview,
   AgentDashboardOverview,
+  AgentFinanceStatement,
   AgentInvoice,
   AgentPayment,
   AgentProfile,
   AgentReportsOverview,
+  AgentSavedTraveler,
   AgentStaffDetail,
   AgentStaffListResponse,
   AgentSupportCase,
@@ -60,13 +63,14 @@ async function agentMutation<T>(
     method?: "POST" | "PATCH" | "PUT" | "DELETE";
     formData?: FormData;
     json?: unknown;
+    retryCsrfOnce?: boolean;
   },
 ): Promise<AgentApiResult<T>> {
   const result = await laravelRequest<Record<string, unknown>>(path, {
     method: options.method ?? "POST",
     formData: options.formData,
     json: options.json,
-    retryCsrfOnce: false,
+    retryCsrfOnce: options.retryCsrfOnce ?? false,
   });
 
   return unwrapPayload<T>(result);
@@ -344,6 +348,90 @@ export async function fetchAgentAgencyEditForm(): Promise<
 export async function updateAgentAgency(formData: FormData): Promise<AgentApiResult<{ message: string; details: Record<string, unknown> }>> {
   formData.set("_method", "PATCH");
   return agentMutation("/agent/agency?format=json", { method: "POST", formData });
+}
+
+export async function fetchAgentTravelers(page = 1): Promise<
+  AgentApiResult<{
+    travelers: AgentSavedTraveler[];
+    pagination: PaginatedMeta;
+    countries: Array<{ code: string; name: string }>;
+    create_url: string;
+  }>
+> {
+  return agentGet(`/agent/travelers?format=json&page=${page}`);
+}
+
+export async function fetchAgentTravelerForm(travelerId?: number): Promise<
+  AgentApiResult<{
+    traveler: AgentSavedTraveler;
+    countries: Array<{ code: string; name: string }>;
+    submit_url: string;
+    method: "POST" | "PATCH";
+  }>
+> {
+  const path = travelerId
+    ? `/agent/travelers/${travelerId}/edit?format=json`
+    : "/agent/travelers/create?format=json";
+  return agentGet(path);
+}
+
+export async function saveAgentTraveler(
+  payload: Record<string, string | boolean>,
+  options: { travelerId?: number; method?: "POST" | "PATCH" },
+): Promise<AgentApiResult<{ redirect_url: string; traveler: AgentSavedTraveler }>> {
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.set(key, typeof value === "boolean" ? (value ? "1" : "0") : value);
+  });
+  if (options.method === "PATCH" && options.travelerId) {
+    formData.set("_method", "PATCH");
+    return agentMutation(`/agent/travelers/${options.travelerId}?format=json`, {
+      method: "POST",
+      formData,
+      retryCsrfOnce: true,
+    });
+  }
+  return agentMutation("/agent/travelers?format=json", { method: "POST", formData, retryCsrfOnce: true });
+}
+
+export async function deleteAgentTraveler(travelerId: number): Promise<AgentApiResult<{ redirect_url: string }>> {
+  const formData = new FormData();
+  formData.set("_method", "DELETE");
+  return agentMutation(`/agent/travelers/${travelerId}?format=json`, {
+    method: "POST",
+    formData,
+    retryCsrfOnce: true,
+  });
+}
+
+export async function fetchAgentFinanceStatement(params: {
+  date_from?: string;
+  date_to?: string;
+}): Promise<AgentApiResult<AgentFinanceStatement>> {
+  const search = new URLSearchParams({ format: "json" });
+  if (params.date_from) search.set("date_from", params.date_from);
+  if (params.date_to) search.set("date_to", params.date_to);
+  return agentGet(`/agent/finance/statement?${search.toString()}`);
+}
+
+export async function fetchAgentAccountingLedger(params: {
+  page?: number;
+  per_page?: number;
+  date_from?: string;
+  date_to?: string;
+  status?: string;
+  transaction_type?: string;
+  q?: string;
+}): Promise<AgentApiResult<AgentAccountingLedgerOverview>> {
+  const search = new URLSearchParams({ format: "json" });
+  if (params.page) search.set("page", String(params.page));
+  if (params.per_page) search.set("per_page", String(params.per_page));
+  if (params.date_from) search.set("date_from", params.date_from);
+  if (params.date_to) search.set("date_to", params.date_to);
+  if (params.status) search.set("status", params.status);
+  if (params.transaction_type) search.set("transaction_type", params.transaction_type);
+  if (params.q) search.set("q", params.q);
+  return agentGet(`/agent/accounting/ledger?${search.toString()}`);
 }
 
 export function agentApiErrorMessage(result: { ok: false; message: string; code?: string; status: number }): string {

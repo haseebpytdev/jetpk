@@ -119,6 +119,37 @@ const capabilitiesStaffRestricted = {
   ],
 };
 
+const capabilitiesStaffWithWallet = {
+  ...capabilitiesOwner,
+  identity: {
+    display_name: "Wallet Staff",
+    email: "wallet-staff@example.com",
+    role: "agent_staff" as const,
+    role_label: "Agent staff",
+    is_owner: false,
+  },
+  permissions: {
+    bookings_view: true,
+    bookings_create: false,
+    wallet_view: true,
+    reports_view: false,
+    staff_manage: false,
+    agency_view: false,
+    support_manage: false,
+  },
+  capabilities: {
+    can_manage_staff: false,
+    can_view_reports: false,
+    can_submit_deposit: false,
+    can_contact_support: false,
+  },
+  navigation: [
+    { code: "overview", label: "Overview", href: "/agent/dashboard", available: true },
+    { code: "bookings", label: "Bookings", href: "/agent/bookings", available: true },
+    { code: "wallet", label: "Wallet", href: "/agent/wallet", available: true },
+  ],
+};
+
 function buildOverviewPayload(caps: typeof capabilitiesOwner | typeof capabilitiesStaffRestricted = capabilitiesOwner) {
   return {
     ok: true,
@@ -562,6 +593,292 @@ test.describe("JP-OPS-04 agent operational closure", () => {
     await page.goto("/agent/bookings/BKG-OPS04");
     await expect(page.getByTestId("agent-booking-detail")).toBeVisible();
     await expect(page.getByText(/proof under review/i)).toBeVisible();
+  });
+
+  test("payments list loads populated state", async ({ page }) => {
+    await page.route("**/laravel/agent/payments?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          payments: [
+            {
+              reference: "PAY-OPS04",
+              booking_reference: "BKG-OPS04",
+              date: "2026-08-01",
+              method: "bank_transfer",
+              method_label: "Bank transfer",
+              amount: 45000,
+              currency: "PKR",
+              payment_status: status("paid", "Paid"),
+              source: "payment_proof",
+              retry_available: false,
+              receipt_available: false,
+              detail_url: "/agent/bookings/BKG-OPS04",
+            },
+          ],
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 1, from: 1, to: 1 },
+          filter: "all",
+        }),
+      });
+    });
+    await setSessionFixture(page, "agent");
+    await page.goto("/agent/payments");
+    await expect(page.getByTestId("agent-payments-list")).toBeVisible();
+    await expect(page.getByText("PAY-OPS04")).toBeVisible();
+  });
+
+  test("payments empty state", async ({ page }) => {
+    await page.route("**/laravel/agent/payments?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          payments: [],
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 0, from: null, to: null },
+          filter: "all",
+        }),
+      });
+    });
+    await setSessionFixture(page, "agent");
+    await page.goto("/agent/payments");
+    await expect(page.getByTestId("agent-dashboard-empty")).toBeVisible();
+  });
+
+  test("staff without wallet permission sees payments denial", async ({ page }) => {
+    await mockAgentDashboard(page, capabilitiesStaffRestricted);
+    await page.route("**/laravel/agent/payments?format=json*", async (route) => {
+      await route.fulfill({ status: 403, contentType: "application/json", body: JSON.stringify({ ok: false, message: "Forbidden" }) });
+    });
+    await setSessionFixture(page, "agent_staff");
+    await page.goto("/agent/payments");
+    await expect(page.getByTestId("agent-dashboard-error")).toBeVisible();
+  });
+
+  test("invoices list loads populated state", async ({ page }) => {
+    await page.route("**/laravel/agent/invoices?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          invoices: [
+            {
+              invoice_number: "INV-OPS04",
+              booking_reference: "BKG-OPS04",
+              issue_date: "2026-08-01",
+              amount: 45000,
+              currency: "PKR",
+              payment_status: status("paid", "Paid"),
+              pdf_available: false,
+            },
+          ],
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 1, from: 1, to: 1 },
+        }),
+      });
+    });
+    await setSessionFixture(page, "agent");
+    await page.goto("/agent/invoices");
+    await expect(page.getByTestId("agent-invoices-list")).toBeVisible();
+    await expect(page.getByText("INV-OPS04")).toBeVisible();
+  });
+
+  test("invoices empty state", async ({ page }) => {
+    await page.route("**/laravel/agent/invoices?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          invoices: [],
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 0, from: null, to: null },
+        }),
+      });
+    });
+    await setSessionFixture(page, "agent");
+    await page.goto("/agent/invoices");
+    await expect(page.getByTestId("agent-dashboard-empty")).toBeVisible();
+  });
+
+  test("payments server error surfaces retry state", async ({ page }) => {
+    await page.route("**/laravel/agent/payments?format=json*", async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: false, message: "Payments unavailable." }),
+      });
+    });
+    await setSessionFixture(page, "agent");
+    await page.goto("/agent/payments");
+    await expect(page.getByTestId("agent-dashboard-error")).toBeVisible();
+    await expect(page.getByText(/payments unavailable/i)).toBeVisible();
+  });
+
+  test("payments expired session redirects to login", async ({ page }) => {
+    await setSessionFixture(page, "expired");
+    await page.goto("/agent/payments");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("staff with wallet permission can load payments list", async ({ page }) => {
+    await mockAgentDashboard(page, capabilitiesStaffWithWallet);
+    await page.route("**/laravel/agent/payments?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          payments: [
+            {
+              reference: "PAY-STAFF",
+              booking_reference: "BKG-OWN",
+              date: "2026-08-01",
+              method: "bank_transfer",
+              method_label: "Bank transfer",
+              amount: 10000,
+              currency: "PKR",
+              payment_status: status("paid", "Paid"),
+              source: "payment_proof",
+              retry_available: false,
+              receipt_available: false,
+              detail_url: "/agent/bookings/BKG-OWN",
+            },
+          ],
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 1, from: 1, to: 1 },
+          filter: "all",
+        }),
+      });
+    });
+    await setSessionFixture(page, "agent_staff");
+    await page.goto("/agent/payments");
+    await expect(page.getByTestId("agent-payments-list")).toBeVisible();
+    await expect(page.getByText("PAY-STAFF")).toBeVisible();
+    await expect(page.getByText("BKG-OTHER-AGENCY")).toHaveCount(0);
+  });
+
+  test("payments list exposes only same-agency rows from Laravel", async ({ page }) => {
+    await page.route("**/laravel/agent/payments?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          payments: [
+            {
+              reference: "PAY-OWN",
+              booking_reference: "BKG-OWN",
+              date: "2026-08-01",
+              method: "bank_transfer",
+              method_label: "Bank transfer",
+              amount: 45000,
+              currency: "PKR",
+              payment_status: status("paid", "Paid"),
+              source: "payment_proof",
+              retry_available: false,
+              receipt_available: false,
+              detail_url: "/agent/bookings/BKG-OWN",
+            },
+          ],
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 1, from: 1, to: 1 },
+          filter: "all",
+        }),
+      });
+    });
+    await setSessionFixture(page, "agent");
+    await page.goto("/agent/payments");
+    await expect(page.getByText("PAY-OWN")).toBeVisible();
+    await expect(page.getByText("PAY-OTHER-AGENCY")).toHaveCount(0);
+    await expect(page.getByText("BKG-OTHER-AGENCY")).toHaveCount(0);
+  });
+
+  test("invoices server error surfaces retry state", async ({ page }) => {
+    await page.route("**/laravel/agent/invoices?format=json*", async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: false, message: "Invoices unavailable." }),
+      });
+    });
+    await setSessionFixture(page, "agent");
+    await page.goto("/agent/invoices");
+    await expect(page.getByTestId("agent-dashboard-error")).toBeVisible();
+    await expect(page.getByText(/invoices unavailable/i)).toBeVisible();
+  });
+
+  test("invoices expired session redirects to login", async ({ page }) => {
+    await setSessionFixture(page, "expired");
+    await page.goto("/agent/invoices");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("staff without wallet permission sees invoices denial", async ({ page }) => {
+    await mockAgentDashboard(page, capabilitiesStaffRestricted);
+    await page.route("**/laravel/agent/invoices?format=json*", async (route) => {
+      await route.fulfill({ status: 403, contentType: "application/json", body: JSON.stringify({ ok: false, message: "Forbidden" }) });
+    });
+    await setSessionFixture(page, "agent_staff");
+    await page.goto("/agent/invoices");
+    await expect(page.getByTestId("agent-dashboard-error")).toBeVisible();
+  });
+
+  test("staff with wallet permission can load invoices list", async ({ page }) => {
+    await mockAgentDashboard(page, capabilitiesStaffWithWallet);
+    await page.route("**/laravel/agent/invoices?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          invoices: [
+            {
+              invoice_number: "INV-STAFF",
+              booking_reference: "BKG-OWN",
+              issue_date: "2026-08-01",
+              amount: 45000,
+              currency: "PKR",
+              payment_status: status("paid", "Paid"),
+              pdf_available: false,
+            },
+          ],
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 1, from: 1, to: 1 },
+        }),
+      });
+    });
+    await setSessionFixture(page, "agent_staff");
+    await page.goto("/agent/invoices");
+    await expect(page.getByTestId("agent-invoices-list")).toBeVisible();
+    await expect(page.getByText("INV-STAFF")).toBeVisible();
+    await expect(page.getByText("INV-OTHER-AGENCY")).toHaveCount(0);
+  });
+
+  test("invoices list exposes only same-agency rows from Laravel", async ({ page }) => {
+    await page.route("**/laravel/agent/invoices?format=json*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          invoices: [
+            {
+              invoice_number: "INV-OWN",
+              booking_reference: "BKG-OWN",
+              issue_date: "2026-08-01",
+              amount: 45000,
+              currency: "PKR",
+              payment_status: status("paid", "Paid"),
+              pdf_available: false,
+            },
+          ],
+          pagination: { current_page: 1, last_page: 1, per_page: 20, total: 1, from: 1, to: 1 },
+        }),
+      });
+    });
+    await setSessionFixture(page, "agent");
+    await page.goto("/agent/invoices");
+    await expect(page.getByText("INV-OWN")).toBeVisible();
+    await expect(page.getByText("INV-OTHER-AGENCY")).toHaveCount(0);
   });
 
   test("support cases list loads", async ({ page }) => {

@@ -71,7 +71,8 @@ class AgentPortalPermissionMatrixFinalTest extends TestCase
 
         $this->actingAs($staff)->get(route('agent.bookings.index'))
             ->assertOk()
-            ->assertSee('data-testid="agent-bookings-create-link"', false);
+            ->assertSee('/agent/bookings/create', false)
+            ->assertSee('New booking', false);
 
         $this->actingAs($staff)->get(route('agent.bookings.create'))->assertOk();
     }

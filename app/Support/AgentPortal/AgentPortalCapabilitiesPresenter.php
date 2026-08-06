@@ -49,6 +49,7 @@ class AgentPortalCapabilitiesPresenter
             'agent_reports' => $this->platformModules->routeEnabled('agent_reports'),
             'agent_staff' => $this->platformModules->routeEnabled('agent_staff'),
             'payment_proofs' => $this->platformModules->routeEnabled('payment_proofs'),
+            'saved_travelers' => $this->platformModules->routeEnabled('saved_travelers'),
         ];
 
         $capabilities = $this->presentCapabilityFlags($user, $permissions, $modules, $isOwner, $access);
@@ -137,6 +138,15 @@ class AgentPortalCapabilitiesPresenter
 
         if ($permissions['ledger_view'] && $modules['agent_ledger']) {
             $items[] = ['code' => 'ledger', 'label' => 'Ledger', 'href' => '/agent/wallet/ledger', 'available' => true];
+            $items[] = ['code' => 'accounting_ledger', 'label' => 'Accounting ledger', 'href' => '/agent/accounting/ledger', 'available' => true];
+        }
+
+        if (($permissions['reports_view'] || $permissions['ledger_view']) && $modules['agent_reports']) {
+            $items[] = ['code' => 'finance_statement', 'label' => 'Statement', 'href' => '/agent/finance/statement', 'available' => true];
+        }
+
+        if ($permissions['travelers_manage'] && $modules['saved_travelers']) {
+            $items[] = ['code' => 'travelers', 'label' => 'Travelers', 'href' => '/agent/travelers', 'available' => true];
         }
 
         if ($permissions['wallet_view'] && $modules['agent_deposits']) {

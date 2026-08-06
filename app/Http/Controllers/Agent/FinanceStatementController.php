@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\Http\Controllers\Concerns\RespondsWithAgentPortalJson;
 use App\Http\Controllers\Concerns\StreamsFinanceStatementCsv;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Policies\FinanceStatementPolicy;
 use App\Services\Finance\Statements\AgentStatementService;
+use App\Support\AgentPortal\AgentPortalFinanceStatementPresenter;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -17,14 +20,16 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class FinanceStatementController extends Controller
 {
+    use RespondsWithAgentPortalJson;
     use StreamsFinanceStatementCsv;
 
     public function __construct(
         protected AgentStatementService $statements,
         protected FinanceStatementPolicy $policy,
+        protected AgentPortalFinanceStatementPresenter $statementPresenter,
     ) {}
 
-    public function show(Request $request): View
+    public function show(Request $request): View|JsonResponse
     {
         $agency = $this->resolveAgency($request);
         abort_unless($this->policy->view($request->user(), $agency), 403);
@@ -32,10 +37,27 @@ class FinanceStatementController extends Controller
         try {
             $period = $this->statements->resolvePeriodFromRequest($request);
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsAgentPortalJson($request)) {
+                return $this->agentPortalJson(
+                    $this->statementPresenter->presentValidationError($e->getMessage()),
+                    422,
+                );
+            }
+
             return back()->withErrors(['date_from' => $e->getMessage()]);
         }
 
         $statement = $this->statements->buildStatement($agency, $period['from'], $period['to']);
+
+        if ($this->wantsAgentPortalJson($request)) {
+            return $this->agentPortalJson(
+                $this->statementPresenter->present(
+                    $statement,
+                    $request,
+                    $this->policy->export($request->user(), $agency),
+                ),
+            );
+        }
 
         $viewData = [
             'agency' => $agency,
