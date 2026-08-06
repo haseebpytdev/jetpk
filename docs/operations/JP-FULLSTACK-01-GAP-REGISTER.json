@@ -110,7 +110,9 @@
       "proposed_correction": "01D: trace and verify AbhiPay return → booking confirmation JSON path; align success deep links",
       "dependencies": ["AbhiPayPaymentController", "PublicAbhiPayCheckoutPresenter", "payment-url allowlist"],
       "target_iteration": "JP-FULLSTACK-01D",
-      "verification_test": "PiaNdcAbhiPayCheckoutTest + standard-booking-post-booking.spec.ts + payment-portal.spec.ts"
+      "verification_test": "PiaNdcAbhiPayCheckoutTest + abhipay-return-confirmation.spec.ts + AbhiPayReturnHandoffTest",
+      "jp_fullstack_01d_status": "CLOSED",
+      "jp_fullstack_01d_notes": "Blade payment result deep links to Next return/status/confirmation; Playwright return→status→confirmation path; card redirect allowlist"
     },
     {
       "id": "JP-FS01-GAP-005",
@@ -392,7 +394,8 @@
       "target_iteration": "JP-FULLSTACK-01C",
       "verification_test": "standard-booking-review-payment.spec.ts + StandardBookingReviewJsonTest",
       "jp_fullstack_01c_status": "CLOSED",
-      "jp_fullstack_01c_notes": "Playwright pay_later path + StandardBookingReviewJsonTest; manual payment shows unpaid/pending only; no fabricated PNR/tickets"
+      "jp_fullstack_01c_notes": "Playwright pay_later path + StandardBookingReviewJsonTest; manual payment shows unpaid/pending only; no fabricated PNR/tickets",
+      "jp_fullstack_01d_notes": "Manual unpaid regression re-verified in abhipay-return-confirmation.spec.ts"
     }
   ],
   "auth_session_csrf_findings": {
@@ -427,8 +430,8 @@
     },
     {
       "id": "JP-FULLSTACK-01D",
-      "focus": "Manual payment closure + AbhiPay card handoff and return URLs",
-      "gaps": ["JP-FS01-GAP-004", "JP-FS01-GAP-020"]
+      "focus": "AbhiPay card return handoff and Next confirmation connectivity",
+      "gaps": ["JP-FS01-GAP-004"]
     },
     {
       "id": "JP-FULLSTACK-01E",

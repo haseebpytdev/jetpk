@@ -270,7 +270,7 @@ See [`JP-FULLSTACK-01-GAP-REGISTER.json`](JP-FULLSTACK-01-GAP-REGISTER.json) for
 | **JP-FULLSTACK-01A** | Auth, session, CSRF, role routing, force-password Next page |
 | **JP-FULLSTACK-01B** | Public search / results / fare-detail / return-options |
 | **JP-FULLSTACK-01C** | Customer checkout, passengers, booking submission |
-| **JP-FULLSTACK-01D** | Manual payment closure + AbhiPay card handoff |
+| **JP-FULLSTACK-01D** | AbhiPay card return handoff and Next confirmation connectivity |
 | **JP-FULLSTACK-01E** | Customer booking history / detail / support / guest lookup |
 | **JP-FULLSTACK-01F** | Agent + Agent Staff portal + RBAC + travelers |
 | **JP-FULLSTACK-01G** | Brand leakage, fixture hardening, CMS verification, regression closure |
@@ -405,3 +405,33 @@ None — existing checkout implementation already authoritative.
 No live supplier, booking, payment, or email calls.
 
 **JP-FULLSTACK-01C — READY FOR COMMIT REVIEW**
+
+---
+
+## 17. JP-FULLSTACK-01D closure (2026-08-06)
+
+**Branch:** `phase/jetpk-fullstack-01d-payment-return-confirmation-connectivity`
+**Baseline:** `05a9370e9ebb3c5928a77c4c38f3fe14cbb458ae`
+
+### Gap closed (01D)
+
+| Gap ID | Summary |
+|--------|---------|
+| JP-FS01-GAP-004 | AbhiPay return Blade → Next handoff + Playwright verification |
+
+### Regression verified (not 01D closure)
+
+| Gap ID | Note |
+|--------|------|
+| JP-FS01-GAP-020 | Closed in 01C; manual unpaid regression re-run in 01D Playwright suite |
+
+### Tests
+
+| Command | Exit | Result |
+|---------|-----:|--------|
+| `php artisan test tests/Feature/Payments/AbhiPayReturnHandoffTest.php` | 0 | 2 passed |
+| `npx playwright test tests/abhipay-return-confirmation.spec.ts …` | 0 | 4 passed |
+
+No live provider calls.
+
+**JP-FULLSTACK-01D — READY FOR COMMIT REVIEW**

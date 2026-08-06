@@ -31,7 +31,7 @@ None identified at audit baseline.
 | JP-FS01-GAP-001 | Auth | Next `/password/force-change` + Laravel JSON | 01A | **CLOSED** |
 | JP-FS01-GAP-002 | Guest lookup | Post-lookup guest booking Blade | 01E | Open |
 | JP-FS01-GAP-003 | CMS | Content fixture misconfiguration risk | 01G | Open |
-| JP-FS01-GAP-004 | Card payment | AbhiPay return handoff | 01D | Open |
+| JP-FS01-GAP-004 | Card payment | AbhiPay return → Next confirmation handoff | 01D | **CLOSED** |
 
 ## MEDIUM gaps
 
