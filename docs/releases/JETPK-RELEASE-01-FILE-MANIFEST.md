@@ -156,27 +156,27 @@ docs/                      # optional
 | Item | Value |
 |------|-------|
 | Framework | Next.js 15 (`frontend/`) |
-| Production start | `next start -p 3000` |
-| Bind | `127.0.0.1:3000` (recommended) |
-| Process manager | PM2 (proposed: `jetpk-public-frontend`) |
+| Production start | `node node_modules/next/dist/bin/next start -p $PUBLIC_NEXT_PORT` |
+| Bind | `127.0.0.1:$PUBLIC_NEXT_PORT` (operator-approved — **not 3000**) |
+| Process manager | PM2 `jetpk-public-frontend` (install during cutover — not pre-installed) |
 | Env at build | `NODE_ENV=production`; **no** fixture flags |
-| Laravel upstream | `LARAVEL_URL` for `/laravel/*` rewrites |
-| Public URL env | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_LARAVEL_URL` |
+| Laravel upstream | `LARAVEL_URL=http://127.0.0.1`; rewrites `/laravel/*` |
+| Public URL env | `NEXT_PUBLIC_APP_URL=https://jetpakistan.pk`, `NEXT_PUBLIC_LARAVEL_URL=https://jetpakistan.pk` |
 
-**Reverse proxy:** vhost must route public B2C traffic to Next :3000 while Laravel serves `/laravel/*` or internal API. Exact nginx/apache config is **server-side** — not in repo.
+**Reverse proxy:** LiteSpeed/CyberPanel must route `jetpakistan.pk` B2C traffic to `127.0.0.1:$PUBLIC_NEXT_PORT` (D-02). Port **3000** is nghttpx — **forbidden** for public Next.
 
 ---
 
-## 7. Dashboard runtime disposition (existing)
+## 7. Dashboard runtime disposition
 
 | Item | Value |
 |------|-------|
-| Process | PM2 `jetpk-dashboard` |
+| Process | PM2 `jetpk-dashboard` (cold start — not pre-installed) |
 | Port | `127.0.0.1:3001` |
-| Env | `DASHBOARD_NEXT_SERVER_URL`, `DASHBOARD_NEXT_PROXY_ENABLED` |
-| Doc | `docs/dashboard/DASHBOARD-PRODUCTION-DEPLOYMENT.md` |
+| Start | `node node_modules/next/dist/bin/next start -p 3001` |
+| Scope | **In scope** for full JP-FULLSTACK cutover (D-03) |
 
-Deploy dashboard only if server copy is behind `8d62db8` dashboard subtree.
+Do **not** use `pm2 restart` — process does not exist pre-deploy.
 
 ---
 
@@ -229,7 +229,7 @@ bootstrap/cache/
 ## 11. Verification commands (post-upload, server)
 
 ```bash
-PHP=/opt/alt/php-fpm83/usr/bin/php
+PHP=/usr/local/lsws/lsphp83/bin/php
 APP=/home/pkjetp/jetpk_app
 cd "$APP"
 
@@ -326,3 +326,17 @@ Per-phase incremental manifests (e.g. PHASE18 11-file deploy) remain valid for *
 | `FinanceStatementController.php` | `f7663793ed02220ac8a68bb69075f1783b68c438c64a06b23119f06e8e86968e` | DIFFER |
 | `AccountingLedgerController.php` | `c97b21cfe1ca2f56944d721200a70ea342b17ddcc6b0c46057e066c382dc4ce7` | DIFFER |
 | `GuestBookingLookupController.php` | `9b2c25a855a3e77d018996f0154312626814c3699618d454672e7c3aca7e9d62` | DIFFER |
+
+### 01C — Asset drift policy (D-06)
+
+| Directory | Pre-deploy | Policy |
+|-----------|------------|--------|
+| `themes` | CONTENT_DRIFT | Controlled copy after dry-run; no `--delete` |
+| `client-assets` | CONTENT_DRIFT | Controlled copy; preserve live uploads |
+| `js` | CONTENT_DRIFT | Controlled copy |
+| `css` | MATCH | Verify only unless baseline changes |
+| `build` | MATCH | Verify only unless baseline changes |
+
+### 01C — Migration policy
+
+Pre-deploy: **104 Ran, 0 pending**. Deploy: `MIGRATION_EXECUTION=SKIPPED_NO_PENDING` unless new migrations appear in final SHA.

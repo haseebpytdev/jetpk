@@ -41,9 +41,11 @@ This release packages the **complete JP-FULLSTACK-01 program** at `8d62db8`: Lar
 | Laravel application root | `/home/pkjetp/jetpk_app` |
 | Live public webroot | `/home/pkjetp/public_html` |
 | Public JS mirror | `/home/pkjetp/public_html/js` |
-| PHP CLI (JetPakistan) | `/opt/alt/php-fpm83/usr/bin/php` |
-| Node (documented) | `/home/pkjetp/.nvm/versions/node/v24.18.0/bin/node` |
-| PM2 (dashboard) | `jetpk-dashboard` → `127.0.0.1:3001` |
+| PHP CLI (JetPakistan) | `/usr/local/lsws/lsphp83/bin/php` |
+| Node (production) | `/usr/local/bin/node` (v22.23.1 pre-deploy) |
+| PM2 | **Not installed** pre-deploy — install during cutover |
+| Public Next port | `PUBLIC_NEXT_PORT=<OPERATOR_APPROVED_PORT>` — **not 3000** (nghttpx) |
+| Dashboard port | `3001` (reserved) |
 | Deploy method | SFTP changed files / controlled full sync — **no `git pull` on production** |
 
 ### Dual-root rule
@@ -53,24 +55,26 @@ This release packages the **complete JP-FULLSTACK-01 program** at `8d62db8`: Lar
 ### Runtime topology
 
 ```
-Browser → public_html (Apache/Nginx vhost)
+Browser → public_html (LiteSpeed vhost on jetpakistan.pk)
               ├─ static: themes/, client-assets/, js/, css/, build/
-              └─ reverse proxy → Next.js public frontend (127.0.0.1:3000) [REQUIRED — see blocker]
-                    └─ /laravel/* rewrite → Laravel (jetpk_app, PHP-FPM)
+              └─ reverse proxy → Next.js public frontend (127.0.0.1:$PUBLIC_NEXT_PORT) [NOT DEPLOYED — D-01/D-02]
+                    └─ /laravel/* rewrite → Laravel (jetpk_app, PHP-FPM via lsphp83)
 
-Laravel jetpk_app ← session, CSRF, API, admin/staff Blade, booking engines
-Dashboard Next    ← 127.0.0.1:3001 (PM2 jetpk-dashboard, documented)
+Laravel jetpk_app ← session, CSRF, API, booking engines (currently Blade-primary)
+Dashboard Next    ← 127.0.0.1:3001 [NOT DEPLOYED — in scope for full cutover]
+Port 3000         ← nghttpx (occupied — do NOT use for public Next)
 ```
 
 ### Next.js public frontend disposition
 
 - **Source:** `frontend/` (781 tracked files at baseline)
 - **Build output:** `frontend/.next/` (generated on server — **do not upload** from local)
-- **Runtime:** `next start -p 3000` (`frontend/package.json`)
+- **Runtime:** `next start -p $PUBLIC_NEXT_PORT` — **do not** use `npm run start` (hardcodes 3000)
 - **Laravel proxy:** `frontend/next.config.ts` rewrites `/laravel/:path*` → `LARAVEL_URL` / `NEXT_PUBLIC_LARAVEL_URL`
+- **Required env:** `NEXT_PUBLIC_APP_URL=https://jetpakistan.pk`, `NEXT_PUBLIC_LARAVEL_URL=https://jetpakistan.pk`, `LARAVEL_URL=http://127.0.0.1`
 - **Production CMS fixtures:** denied when `NODE_ENV=production` (JP-FULLSTACK-01G)
 
-**Ambiguity / blocker:** Repository documents dashboard PM2 (`DASH-13`) but **does not document** an existing production PM2 process or vhost proxy for the **public** Next app on port **3000**. Operator must confirm or create before cutover.
+**Cutover status:** `ARCHITECTURE_DECISION_REQUIRED` — port 3000 occupied by nghttpx; public Next not deployed; PM2 absent.
 
 ### Laravel proxy / rewrite dependencies
 
@@ -87,17 +91,16 @@ Dashboard Next    ← 127.0.0.1:3001 (PM2 jetpk-dashboard, documented)
 | `public/js/**` | Yes | **Yes** (`public_html/js/`) | One-API checkout, flight modals, etc. |
 | `public/css/**` | Yes | **Yes** when referenced by live vhost | `ota-public.css` cache-bust |
 | `public/build/**` | Yes | Per vhost mapping | Vite manifest — **rebuild on server** |
-| `storage/app/public` | Via `storage:link` | Optional media URL | User uploads |
+| `storage/app/public` | Live via `public_html/storage` symlink | Do not auto-run `storage:link` (D-05) |
 
-### storage:link
+### storage:link (pre-deploy state — do not mutate blindly)
 
-Required when `FILESYSTEM_DISK=public` and branded media uses `storage/app/public`. Run once per environment if link missing:
+| Path | State |
+|------|-------|
+| `jetpk_app/public/storage` | **Directory** (not symlink) |
+| `public_html/storage` | **Symlink** → `jetpk_app/storage/app/public` (live authority) |
 
-```bash
-/opt/alt/php-fpm83/usr/bin/php artisan storage:link
-```
-
-Do not overwrite existing `public/storage` symlink without backup.
+Policy: inspect contents; back up before any replacement; **do not** auto-run `artisan storage:link`; preserve `public_html/storage` (D-05).
 
 ### Paths that must NOT be deleted or blind-synced
 
@@ -192,7 +195,7 @@ Secrets (`APP_KEY`, `DB_*`, `MAIL_PASSWORD`, supplier tokens in DB) — **never 
 
 ## 6. Build and runtime commands (reference)
 
-See `JETPK-RELEASE-01-DEPLOYMENT-PLAN.md` for ordered sequence. PHP path: `/opt/alt/php-fpm83/usr/bin/php`.
+See `JETPK-RELEASE-01-DEPLOYMENT-PLAN.md` for ordered sequence. PHP path: `/usr/local/lsws/lsphp83/bin/php`.
 
 ---
 
@@ -203,7 +206,7 @@ See `JETPK-RELEASE-01-DEPLOYMENT-PLAN.md` for ordered sequence. PHP path: `/opt/
 | `APP_KEY` | Yes | Yes | Existing | Never rotate without plan |
 | `APP_ENV` | Yes | No | `production` | |
 | `APP_DEBUG` | Yes | No | `false` | **Forbidden:** `true` |
-| `APP_URL` | Yes | No | `https://www.jetpakistan.com` | |
+| `APP_URL` | Yes | No | `https://jetpakistan.pk` | |
 | `DB_*` | Yes | Yes | Existing | |
 | `SESSION_DRIVER` | Yes | No | `database` | |
 | `SESSION_SECURE_COOKIE` | Yes | No | `true` | HTTPS |
@@ -241,9 +244,9 @@ See `JETPK-RELEASE-01-DEPLOYMENT-PLAN.md` for ordered sequence. PHP path: `/opt/
 
 | Component | Requirement |
 |-----------|-------------|
-| Scheduler cron | `* * * * *` → `php artisan schedule:run` |
-| Queue worker | `database` driver; Supervisor or cron `queue:work --stop-when-empty` |
-| Post-deploy | `php artisan queue:restart` |
+| Scheduler cron | `* * * * *` → `/usr/local/lsws/lsphp83/bin/php artisan schedule:run` |
+| Queue driver (pre-deploy) | `sync` — **no persistent worker** |
+| Post-deploy queue | `QUEUE_RESTART=NOT_APPLICABLE_SYNC_DRIVER` while `sync` |
 | Scheduled tasks | See `routes/console.php` — cleanup, reports, featured fares, group ticketing, branding cleanup |
 
 ---
@@ -309,9 +312,20 @@ Non-destructive checks — see `JETPK-RELEASE-01-DEPLOYMENT-PLAN.md` §Smoke.
 | B-03 | Closed | **RESOLVED_NO_PENDING** | `migrate:status` via `/usr/local/lsws/lsphp83/bin/php`: **104/104 Ran**, **0 pending**. All JP-FULLSTACK candidate migrations already applied. |
 | B-04 | Open | **REQUIRED_FULL_CUTOVER** | `frontend/` absent; partial fingerprint match to pre-`8d62db8` generation; dual-root drift in `themes`/`client-assets`/`js`. Full-release scope required. |
 | B-05 | Open | **MISSING** | `GIT_METADATA_PRESENT=no`; all four deployment-marker JSON candidates **missing** on server; repo `clients/jetpk/deployment.json` still `last_deployed_at: null`. |
-| B-06 | Open | **DRIFT_CAPTURED** | `css` + `build` **MATCH**; `themes`, `client-assets`, `js` show **CONTENT_DRIFT** (file-count and byte deltas). |
+| B-06 | Open | **DRIFT_CAPTURED** | `css` + `build` **MATCH**; `themes`, `client-assets`, `js` **CONTENT_DRIFT**. Controlled copy required (D-06). |
 
-**Operator decisions required:** (1) confirm cutover plan for net-new `frontend/` + Next proxy; (2) reconcile dual-root drift during deploy; (3) create deployment metadata during deploy; (4) update deploy docs to use **`/usr/local/lsws/lsphp83/bin/php`** (documented `/opt/alt/php-fpm83` path **not present**).
+### Architecture decisions (unresolved — 01C)
+
+| ID | Decision | Status |
+|----|----------|--------|
+| D-01 | Public Next localhost port (`PUBLIC_NEXT_PORT`) | **ARCHITECTURE_DECISION_REQUIRED** — not 3000 |
+| D-02 | LiteSpeed/CyberPanel reverse-proxy method to approved port | **ARCHITECTURE_DECISION_REQUIRED** |
+| D-03 | Dashboard in first cutover | **IN SCOPE** — required for full JP-FULLSTACK |
+| D-04 | Non-root PM2 installation (`npm install -g pm2`) | **ARCHITECTURE_DECISION_REQUIRED** |
+| D-05 | `jetpk_app/public/storage` directory vs symlink reconciliation | **ARCHITECTURE_DECISION_REQUIRED** |
+| D-06 | Final asset-drift copy set per directory | **ARCHITECTURE_DECISION_REQUIRED** |
+
+**Operator decisions required:** approve `PUBLIC_NEXT_PORT`; configure LiteSpeed proxy; install PM2; reconcile storage; execute controlled asset copy.
 
 ---
 
@@ -688,3 +702,37 @@ All candidate migrations present and **Ran**:
 | `JETPK-RELEASE-01-ROLLBACK-PLAN.md` | Rollback procedure |
 | `docs/operations/JP-OPS-02-PRODUCTION-RUNTIME-REQUIREMENTS.md` | Runtime authority |
 | `docs/frontend/JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.md` | 82 production routes |
+
+---
+
+## 18. JETPK-RELEASE-01C — Cutover architecture repair
+
+**Repair date:** 2026-08-06
+**Server evidence:** ACCESS-01-R2 baseline (01C SSH agent unloaded — no server mutation)
+
+### Runtime contract (repository — not modified)
+
+| Component | Start command | Port | Notes |
+|-----------|---------------|------|-------|
+| Public Next | `node node_modules/next/dist/bin/next start -p $PUBLIC_NEXT_PORT` | Operator-approved — **not 3000** | `npm run start` hardcodes 3000 — **forbidden** on production |
+| Dashboard Next | `node node_modules/next/dist/bin/next start -p 3001` | 3001 | In scope for full cutover |
+| Laravel rewrite | `/laravel/:path*` → `LARAVEL_URL` | — | `frontend/next.config.ts` |
+| Session origin | `https://jetpakistan.pk` | — | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_LARAVEL_URL` |
+
+### Port 3000 conflict
+
+`127.0.0.1:3000` listener is **nghttpx** (HTTP 404). Public Next cutover: **ARCHITECTURE_DECISION_REQUIRED**.
+
+### PM2 disposition (pre-deploy)
+
+| Item | Value |
+|------|-------|
+| PM2 installed | **No** |
+| Node | `/usr/local/bin/node` v22.23.1 |
+| npm | `/usr/local/bin/npm` 10.9.8 |
+| PM2_HOME | `/home/pkjetp/.pm2` (expected post-install) |
+| Install strategy | `npm install -g pm2`; discover via `command -v pm2` |
+
+### Domain rule
+
+**Operational domain:** `https://jetpakistan.pk` only. `www.jetpakistan.com` is a **different property** — forbidden for this deployment.

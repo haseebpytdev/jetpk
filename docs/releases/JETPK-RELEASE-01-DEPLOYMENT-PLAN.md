@@ -16,16 +16,18 @@ APP=/home/pkjetp/jetpk_app
 PUBLIC=/home/pkjetp/public_html
 NODE=/usr/local/bin/node
 NPM=/usr/local/bin/npm
-# PM2: install during deploy if absent — nvm v24.18.0 not present on server 2026-08-06
-PM2=/usr/local/bin/pm2
+# PUBLIC_NEXT_PORT: operator-approved localhost port — NOT 3000 (nghttpx occupied). See §01C.
+PUBLIC_NEXT_PORT=<OPERATOR_APPROVED_PORT>
+DASHBOARD_PORT=3001
 export HOME=/home/pkjetp
 export PM2_HOME=/home/pkjetp/.pm2
 export PATH="/usr/local/bin:$PATH"
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 BACKUP=/home/pkjetp/backups/jetpk-release-01-${STAMP}
+# PM2: not installed pre-deploy — discover after Step 7e install via: command -v pm2
 ```
 
-> **ACCESS-01-R2 note:** Documented `/opt/alt/php-fpm83/usr/bin/php` is **not present**. Use `/usr/local/lsws/lsphp83/bin/php` (8.3.31, pdo_mysql). `/usr/bin/php` lacks pdo_mysql.
+> **01C architecture:** Use `/usr/local/lsws/lsphp83/bin/php` only. `/opt/alt/php-fpm83` is **not present**. Port **3000** is occupied by **nghttpx** — do **not** bind public Next to 3000. `PUBLIC_NEXT_PORT` requires operator approval before deploy (D-01).
 
 ---
 
@@ -36,10 +38,12 @@ BACKUP=/home/pkjetp/backups/jetpk-release-01-${STAMP}
 | G-01 | Disk free ≥ 2 GB on `/home/pkjetp` |
 | G-02 | Backup archive non-empty and checksum verified |
 | G-03 | `.env` backed up separately |
-| G-04 | `migrate:status` captured pre-deploy |
-| G-05 | Public Next proxy plan confirmed (port 3000) |
+| G-04 | `migrate:status` captured pre-deploy; pending set calculated |
+| G-05 | **`PUBLIC_NEXT_PORT` approved**; port free on localhost; LiteSpeed/CyberPanel proxy plan confirmed for that port |
 | G-06 | Maintenance window communicated |
 | G-07 | No active production incident |
+| G-08 | PM2 installed and `command -v pm2` succeeds (Step 7e) |
+| G-09 | Localhost health on `$PUBLIC_NEXT_PORT` passes **before** public proxy activation |
 
 ---
 
@@ -58,7 +62,7 @@ test -x "$PHP" || { echo "STOP: PHP missing"; exit 1; }
 test -x "$NODE" || { echo "STOP: Node missing"; exit 1; }
 ```
 
-**Stop gate:** PHP 8.3.x and Node 20+ (documented v24.18.0).
+**Stop gate:** PHP 8.3.x (lsphp83) and Node 20+ (`/usr/local/bin/node` — v22.23.1 observed pre-deploy).
 
 ---
 
@@ -156,7 +160,7 @@ composer dump-autoload
 
 ---
 
-## Step 7 — Frontend build and runtime preparation
+## Step 7 — Frontend build, PM2 install, and runtime preparation
 
 ### 7a — Root Vite (Blade/admin assets)
 
@@ -167,21 +171,19 @@ $NPM run build
 if [ $? -ne 0 ]; then echo "STOP: root vite build failed"; exit 1; fi
 ```
 
-### 7b — Public Next.js frontend
+### 7b — Public Next.js frontend (build only)
 
 ```bash
 cd "$APP/frontend"
 
-# Production env — NO fixture flags
 export NODE_ENV=production
 unset NEXT_PUBLIC_ALLOW_CONTENT_FIXTURES
 unset OTA_ALLOW_SESSION_FIXTURE
 unset NEXT_PUBLIC_SESSION_PREVIEW
 
-# Set per server (examples — use actual production values)
-# export NEXT_PUBLIC_APP_URL=https://www.jetpakistan.com
-# export NEXT_PUBLIC_LARAVEL_URL=https://www.jetpakistan.com
-# export LARAVEL_URL=http://127.0.0.1:80
+export NEXT_PUBLIC_APP_URL=https://jetpakistan.pk
+export NEXT_PUBLIC_LARAVEL_URL=https://jetpakistan.pk
+export LARAVEL_URL=http://127.0.0.1
 
 $NPM ci
 $NPM run typecheck
@@ -192,7 +194,36 @@ $NPM run build
 if [ $? -ne 0 ]; then echo "STOP: next build failed"; exit 1; fi
 ```
 
-### 7c — PM2 public frontend (if not already running)
+### 7c — Operator port approval (mandatory before PM2 start)
+
+```bash
+# Abort unless PUBLIC_NEXT_PORT is set and approved (not 3000)
+if [ -z "$PUBLIC_NEXT_PORT" ] || [ "$PUBLIC_NEXT_PORT" = "3000" ]; then
+  echo "STOP: PUBLIC_NEXT_PORT not approved or conflicts with nghttpx on 3000"
+  exit 1
+fi
+ss -ltnp 2>/dev/null | grep -E ":${PUBLIC_NEXT_PORT}\b" && echo "STOP: port in use" && exit 1
+```
+
+**Candidate ports** (not listening pre-deploy; not referenced in account config): `3010`, `3100`, `3002`, `3003`. **Reserved:** `3001` (dashboard). **Forbidden:** `3000` (nghttpx).
+
+### 7d — PM2 installation (separate cutover step — not pre-installed)
+
+```bash
+# Pre-deploy state: PM2 absent; Node /usr/local/bin/node v22.23.1; npm /usr/local/bin/npm
+NPM_PREFIX=$($NPM config get prefix 2>/dev/null)
+echo "NPM_PREFIX=$NPM_PREFIX"
+# Read-only writability check before install (do not create files):
+test -w "$NPM_PREFIX" 2>/dev/null && echo "PREFIX_WRITABLE=yes" || echo "PREFIX_WRITABLE=no — operator must install PM2 to user-writable prefix"
+
+$NPM install -g pm2
+if [ $? -ne 0 ]; then echo "STOP: PM2 install failed"; exit 1; fi
+PM2=$(command -v pm2)
+if [ -z "$PM2" ]; then echo "STOP: pm2 not in PATH"; exit 1; fi
+$PM2 -v
+```
+
+### 7e — PM2 public frontend (operator-approved port)
 
 ```bash
 cd "$APP/frontend"
@@ -201,36 +232,57 @@ $PM2 start "$NPM" \
   --name jetpk-public-frontend \
   --cwd "$APP/frontend" \
   --interpreter none \
-  -- run start
+  -- node node_modules/next/dist/bin/next start -p "$PUBLIC_NEXT_PORT"
 $PM2 status jetpk-public-frontend
-curl -sS -o /dev/null -w "public_next %{http_code}\n" http://127.0.0.1:3000/ || echo "WARN: Next not responding on 3000"
+curl -sS -o /dev/null -w "public_next %{http_code}\n" "http://127.0.0.1:${PUBLIC_NEXT_PORT}/" || echo "STOP: Next not responding"
 ```
 
-**Stop gate:** HTTP 200 from `127.0.0.1:3000/` (or documented proxy health).
+**Stop gate:** HTTP 200 from `http://127.0.0.1:${PUBLIC_NEXT_PORT}/` **before** enabling public LiteSpeed proxy. Do **not** use `npm run start` (hardcodes port 3000 in `package.json`).
 
-### 7d — Dashboard (only if dashboard subtree changed)
+### 7f — Dashboard Next (in scope for full JP-FULLSTACK cutover)
+
+Dashboard deployment is **required** in this release — production has no dashboard Next process.
 
 ```bash
 cd "$APP/dashboard"
 $NPM ci
 $NPM run build
-$PM2 restart jetpk-dashboard || true
-curl -sS -o /dev/null -w "dashboard %{http_code}\n" http://127.0.0.1:3001/admin/dashboard
+if [ $? -ne 0 ]; then echo "STOP: dashboard build failed"; exit 1; fi
+$PM2 delete jetpk-dashboard 2>/dev/null || true
+$PM2 start "$NPM" \
+  --name jetpk-dashboard \
+  --cwd "$APP/dashboard" \
+  --interpreter none \
+  -- node node_modules/next/dist/bin/next start -p "$DASHBOARD_PORT"
+$PM2 status jetpk-dashboard
+curl -sS -o /dev/null -w "dashboard %{http_code}\n" "http://127.0.0.1:${DASHBOARD_PORT}/admin/dashboard"
 ```
+
+Do **not** use `pm2 restart jetpk-dashboard` — the process does not exist pre-deploy.
 
 ---
 
-## Step 8 — Migration execution
+## Step 8 — Migration execution (conditional)
 
 ```bash
 cd "$APP"
-$PHP artisan migrate:status > storage/logs/pre-migrate-${STAMP}.txt
+$PHP artisan migrate:status --no-ansi > storage/logs/pre-migrate-${STAMP}.txt
 
-$PHP artisan migrate --force
-if [ $? -ne 0 ]; then echo "STOP: migration failed — initiate rollback"; exit 1; fi
+PENDING_COUNT=$($PHP artisan migrate:status --no-ansi | grep -c 'Pending' || true)
+echo "PENDING_MIGRATIONS=$PENDING_COUNT"
 
-$PHP artisan migrate:status > storage/logs/post-migrate-${STAMP}.txt
+if [ "$PENDING_COUNT" -eq 0 ]; then
+  echo "MIGRATION_EXECUTION=SKIPPED_NO_PENDING"
+else
+  echo "STOP: unexpected pending migrations — analyze list and require separate authorization"
+  $PHP artisan migrate:status --no-ansi | grep Pending
+  exit 1
+fi
+
+$PHP artisan migrate:status --no-ansi > storage/logs/post-migrate-${STAMP}.txt
 ```
+
+Pre-deploy state (ACCESS-01-R2): **104 completed, 0 pending**. Re-check against final release SHA before deploy. Do **not** run `migrate --force` when pending count is zero.
 
 **Do not run** demo seeders (`OtaFinanceDemoSeeder`, `ResponsiveAgentPortalAuditSeeder`).
 
@@ -242,40 +294,41 @@ Optional reference-data only when explicitly authorized:
 
 ---
 
-## Step 9 — Public asset synchronization
+## Step 9 — Public asset synchronization (controlled — no blind sync)
 
-Mirror built/static assets to `public_html`:
+**Pre-deploy drift (ACCESS-01-R2):** `themes` CONTENT_DRIFT; `client-assets` CONTENT_DRIFT; `js` CONTENT_DRIFT; `css` MATCH; `build` MATCH.
 
-```bash
-# Themes
-rsync -a "$APP/public/themes/" "$PUBLIC/themes/" 2>/dev/null || \
-  cp -a "$APP/public/themes/." "$PUBLIC/themes/"
+Policy:
 
-# Client assets
-rsync -a "$APP/public/client-assets/" "$PUBLIC/client-assets/" 2>/dev/null || \
-  cp -a "$APP/public/client-assets/." "$PUBLIC/client-assets/"
-
-# JS mirror
-rsync -a "$APP/public/js/" "$PUBLIC/js/" 2>/dev/null || \
-  cp -a "$APP/public/js/." "$PUBLIC/js/"
-
-# Vite build
-rsync -a "$APP/public/build/" "$PUBLIC/build/" 2>/dev/null || \
-  cp -a "$APP/public/build/." "$PUBLIC/build/"
-
-# Verify dual-root parity (example)
-sha256sum "$APP/public/themes/frontend/jetpakistan/css/"*.css 2>/dev/null
-sha256sum "$PUBLIC/themes/frontend/jetpakistan/css/"*.css 2>/dev/null
-```
-
-### storage:link (if missing)
+1. `public_html` backed up in Step 2 before any copy.
+2. Produce itemized dry-run per directory (diff file lists + SHA-256).
+3. Copy **only** approved source-of-truth paths from `jetpk_app/public`.
+4. **Do not** use `rsync --delete` or blind full-tree sync.
+5. Preserve unknown live-only files until operator review.
+6. Verify SHA-256 parity per directory after copy.
+7. Rollback from `public_html` backup on failure.
 
 ```bash
-cd "$APP"
-if [ ! -L public/storage ]; then
-  $PHP artisan storage:link
-fi
+# Example: themes (repeat pattern per directory — operator reviews dry-run first)
+# diff -u <(cd "$APP/public/themes" && find . -type f | sort) \
+#         <(cd "$PUBLIC/themes" && find . -type f | sort)
+# cp -a approved-files-only ...
 ```
+
+### storage:link reconciliation (separate stop gate — do not run blindly)
+
+**Pre-deploy state:**
+
+- `/home/pkjetp/jetpk_app/public/storage` — **directory** (not symlink)
+- `/home/pkjetp/public_html/storage` — **symlink** → `jetpk_app/storage/app/public` (live authority)
+
+Policy:
+
+1. Inspect `jetpk_app/public/storage` contents before any change.
+2. Back up the directory if replacement is considered.
+3. **Do not** auto-run `artisan storage:link` or delete the directory.
+4. **Preserve** `public_html/storage` symlink — it serves live media.
+5. Require explicit operator reconciliation decision (D-05) during deploy.
 
 ---
 
@@ -292,14 +345,22 @@ if [ $? -ne 0 ]; then echo "STOP: cache rebuild failed"; exit 1; fi
 
 ---
 
-## Step 11 — Queue restart
+## Step 11 — Queue policy (sync driver)
+
+Pre-deploy: `QUEUE_CONNECTION=sync` — **no persistent queue worker**.
 
 ```bash
 cd "$APP"
-$PHP artisan queue:restart
+QUEUE_DRIVER=$(grep -E '^QUEUE_CONNECTION=' .env | cut -d= -f2)
+if [ "$QUEUE_DRIVER" = "sync" ]; then
+  echo "QUEUE_RESTART=NOT_APPLICABLE_SYNC_DRIVER"
+else
+  echo "STOP: queue driver changed — require separate infrastructure authorization"
+  exit 1
+fi
 ```
 
-Verify worker running (Supervisor or cron per `docs/production-cron-smtp-notifications.md`).
+Do **not** run `queue:restart` under the current sync driver. Queue-worker provisioning requires a separately authorized infrastructure phase if the driver changes to `database`.
 
 ---
 
@@ -313,12 +374,13 @@ $PHP artisan schedule:list
 
 ---
 
-## Step 13 — Service restart
+## Step 13 — Service persistence
 
 ```bash
+PM2=$(command -v pm2)
 $PM2 save
-# Reload PHP-FPM if host panel provides safe reload — operator discretion
-# Confirm reverse proxy routes to 127.0.0.1:3000 for public site
+# Configure LiteSpeed/CyberPanel reverse proxy to 127.0.0.1:$PUBLIC_NEXT_PORT (operator — D-02)
+# Do not stop or reconfigure nghttpx on port 3000
 ```
 
 ---
@@ -354,10 +416,10 @@ $PHP artisan up
 Execute matrix from `JETPK-RELEASE-01-PRE-DEPLOYMENT-READINESS.md` §10.
 
 ```bash
-# Examples (read-only)
-curl -sS -o /dev/null -w "home %{http_code}\n" https://www.jetpakistan.com/
-curl -sS -o /dev/null -w "login %{http_code}\n" https://www.jetpakistan.com/login
-curl -sS -o /dev/null -w "about %{http_code}\n" https://www.jetpakistan.com/about-us
+curl -sS -o /dev/null -w "home %{http_code}\n" https://jetpakistan.pk/
+curl -sS -o /dev/null -w "login %{http_code}\n" https://jetpakistan.pk/login
+curl -sS -o /dev/null -w "about %{http_code}\n" https://jetpakistan.pk/about-us
+```
 
 tail -n 100 "$APP/storage/logs/laravel.log"
 # No new production.ERROR tied to smoke URLs
@@ -376,7 +438,7 @@ Initiate `JETPK-RELEASE-01-ROLLBACK-PLAN.md` if:
 | `ota:route-page-health-audit` fail > 0 | Rollback |
 | Public site 500 on `/`, `/login` | Rollback |
 | Migration failure | Rollback app + DB restore if needed |
-| Next :3000 not serving | Rollback or disable proxy to Blade fallback |
+| Next on approved port not serving | Rollback or disable proxy to Blade fallback |
 | New `production.ERROR` on smoke paths | Rollback |
 | Visible Parwaaz/Master branding | Rollback |
 | Fixture CMS content visible | Rollback + verify `NODE_ENV=production` |
@@ -424,7 +486,7 @@ ssh -F NUL -i "$env:USERPROFILE\.ssh\jetpk_contabo_2026_v2" -p 22 -o IdentitiesO
 | G-NEXT-LIVE | **NOT DEPLOYED** | `frontend/` absent; no PM2; no proxy — Step 7c is **net-new cutover** |
 | G-PHP-CLI | **PASS** | Use `/usr/local/lsws/lsphp83/bin/php` (not `/opt/alt/php-fpm83`) |
 | G-MIGRATIONS | **PASS** | 104/104 Ran — deploy must **not** re-run applied migrations |
-| G-PM2 | **REQUIRES_SETUP** | PM2 not installed; nvm v24.18.0 absent — install during Step 7 |
+| G-PM2 | **REQUIRES_SETUP** | PM2 not installed — `npm install -g pm2` during Step 7d |
 
 ### Step 0 — Read-only production capture (repeat before deploy)
 
@@ -438,13 +500,25 @@ Re-run ACCESS-01 inspection when shell access is restored on **`185.215.166.176`
 
 **Abort deploy** if read-only SSH capture cannot complete on corrected host.
 
-### Cutover note (B-02 resolved NOT_DEPLOYED)
+### Cutover architecture (01C — ARCHITECTURE_DECISION_REQUIRED)
 
-Current production serves **Laravel Blade** on `jetpakistan.pk`. Deploying `8d62db8` requires:
+**Authoritative OTA domain:** `https://jetpakistan.pk` — **not** `www.jetpakistan.com` (different property).
 
-1. Upload `frontend/` + server build
-2. Start PM2 `jetpk-public-frontend` on `127.0.0.1:3000`
-3. **Configure vhost reverse proxy** from `public_html` to Next (operator — config not in repo)
-4. Verify Laravel `/laravel/*` proxy through Next rewrites
+**Port 3000 conflict:** `127.0.0.1:3000` is occupied by **nghttpx** (returns HTTP 404). Do **not** bind public Next to 3000. Do **not** stop or reconfigure nghttpx.
 
-Rollback implication: revert vhost to Blade **and** stop PM2 public process (see rollback plan §11).
+**Public Next cutover status:** `ARCHITECTURE_DECISION_REQUIRED` until:
+
+1. Operator approves `PUBLIC_NEXT_PORT` (candidates: `3010`, `3100`, `3002`, `3003` — recheck immediately before deploy).
+2. LiteSpeed/CyberPanel reverse-proxy method is approved (D-02).
+3. Localhost health passes on approved port before public proxy activation.
+4. Rollback plan restores Laravel Blade authority **without** stopping nghttpx.
+
+Deploying `8d62db8` requires:
+
+1. Upload `frontend/` + server build on **`$PUBLIC_NEXT_PORT`** (not 3000).
+2. Install PM2 (non-root via npm global — Step 7d).
+3. Start PM2 `jetpk-public-frontend` and `jetpk-dashboard` (cold start — no restart).
+4. Configure vhost reverse proxy from `public_html` to `127.0.0.1:$PUBLIC_NEXT_PORT`.
+5. Verify Laravel `/laravel/*` proxy through Next rewrites (`LARAVEL_URL=http://127.0.0.1`).
+
+Rollback: revert vhost to Blade, stop/remove PM2 public process, **leave nghttpx on 3000 unchanged**.

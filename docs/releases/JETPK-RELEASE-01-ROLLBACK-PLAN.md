@@ -45,7 +45,7 @@ Before any deploy, confirm these exist (see deployment plan Step 2):
 ### Step 1 — Enable maintenance
 
 ```bash
-PHP=/opt/alt/php-fpm83/usr/bin/php
+PHP=/usr/local/lsws/lsphp83/bin/php
 APP=/home/pkjetp/jetpk_app
 cd "$APP"
 $PHP artisan down --retry=60
@@ -64,7 +64,7 @@ sha256sum -c "$BACKUP/jetpk_app.tar.gz.sha256" || { echo "ROLLBACK_ABORT: checks
 ```bash
 export HOME=/home/pkjetp
 export PM2_HOME=/home/pkjetp/.pm2
-PM2=/home/pkjetp/.nvm/versions/node/v24.18.0/bin/pm2
+PM2=$(command -v pm2)
 
 $PM2 stop jetpk-public-frontend 2>/dev/null || true
 $PM2 stop jetpk-dashboard 2>/dev/null || true
@@ -127,10 +127,15 @@ $PHP artisan route:cache
 $PHP artisan view:cache
 ```
 
-### Step 9 — Restart queue
+### Step 9 — Restart queue (conditional)
 
 ```bash
-$PHP artisan queue:restart
+QUEUE_DRIVER=$(grep -E '^QUEUE_CONNECTION=' "$APP/.env" | cut -d= -f2)
+if [ "$QUEUE_DRIVER" = "sync" ]; then
+  echo "QUEUE_RESTART=NOT_APPLICABLE_SYNC_DRIVER"
+else
+  $PHP artisan queue:restart
+fi
 ```
 
 ### Step 10 — Restart Node / PM2
@@ -139,15 +144,15 @@ Restore pre-deploy PM2 state:
 
 ```bash
 # If public Next did not exist before deploy:
+PM2=$(command -v pm2)
 $PM2 delete jetpk-public-frontend 2>/dev/null || true
 
-# Restart dashboard if it existed
-cd "$APP/dashboard"
-$PM2 restart jetpk-dashboard 2>/dev/null || true
-$PM2 save
+# Cold-started dashboard during cutover — delete if rollback to pre-deploy (no dashboard Next)
+$PM2 delete jetpk-dashboard 2>/dev/null || true
+$PM2 save 2>/dev/null || true
 ```
 
-If vhost was reconfigured to proxy :3000, **revert proxy** to pre-deploy Blade/Laravel routing.
+If vhost was reconfigured to proxy to `$PUBLIC_NEXT_PORT`, **revert proxy** to pre-deploy Blade/Laravel routing. **Do not** stop or reconfigure nghttpx on port 3000.
 
 ### Step 11 — Disable maintenance
 
@@ -159,7 +164,8 @@ $PHP artisan up
 ### Step 12 — Post-rollback verification
 
 ```bash
-curl -sS -o /dev/null -w "home %{http_code}\n" https://www.jetpakistan.com/
+curl -sS -o /dev/null -w "home %{http_code}\n" https://jetpakistan.pk/
+```
 $PHP artisan ota:route-page-health-audit --all
 tail -n 80 "$APP/storage/logs/laravel.log"
 ```
@@ -175,7 +181,7 @@ For single-file regressions without full archive restore:
 1. Restore specific paths from `$BACKUP/jetpk_app/` mirror (if selective backup)
 2. Mirror matching `public_html` paths
 3. `php artisan optimize:clear` + relevant cache rebuild
-4. `queue:restart`
+4. Queue: `QUEUE_RESTART=NOT_APPLICABLE_SYNC_DRIVER` if driver remains `sync`
 
 Document restored paths in operator log.
 
@@ -262,14 +268,15 @@ Do not delete `$BACKUP` until post-rollback stability confirmed (retain ≥ 7 da
 
 | Surface | Current state | Post-deploy (`8d62db8`) | Rollback action |
 |---------|---------------|-------------------------|-----------------|
-| Public renderer | Laravel Blade (`public_html/index.php`) | Next.js :3000 + proxy | Revert vhost; stop/remove PM2 public process |
+| Public renderer | Laravel Blade (`public_html/index.php`) | Next.js on `$PUBLIC_NEXT_PORT` + proxy | Revert vhost; stop/remove PM2 public process; **do not** stop nghttpx:3000 |
 | `frontend/` | **Absent** | Required | N/A — restore from backup only if created |
 | PM2 | **Not installed** | `jetpk-public-frontend`, `jetpk-dashboard` | Delete PM2 processes if created |
 | Migrations | **104/104 Ran** (0 pending) | No new migrations expected | **Do not** `migrate:rollback`; DB restore if data migration issues |
 | Dual-root assets | Drift in `themes`/`client-assets`/`js` | Full mirror | Restore `public_html` from backup |
 | PHP CLI | `/usr/local/lsws/lsphp83/bin/php` | Same | — |
 | Queue | `sync` driver | May change to `database` | Restore `.env.backup` |
-| Session/cache | `file` drivers | May change | Restore `.env.backup` |
+| `jetpk_app/public/storage` | **Directory** | May become symlink | Inspect + back up before change (D-05) |
+| `public_html/storage` | **Symlink** (live) | Preserve | Do not remove |
 
 ### SSH and backup prerequisites (now verifiable)
 
