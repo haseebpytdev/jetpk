@@ -390,7 +390,9 @@
       "proposed_correction": "01C+01D: standard-booking regression against Laravel JSON with fixture supplier",
       "dependencies": ["StandardBookingJsonPresenter", "PublicCheckoutStabilizationTest"],
       "target_iteration": "JP-FULLSTACK-01C",
-      "verification_test": "standard-booking-review-payment.spec.ts + PublicBookingFlowTest"
+      "verification_test": "standard-booking-review-payment.spec.ts + StandardBookingReviewJsonTest",
+      "jp_fullstack_01c_status": "CLOSED",
+      "jp_fullstack_01c_notes": "Playwright pay_later path + StandardBookingReviewJsonTest; manual payment shows unpaid/pending only; no fabricated PNR/tickets"
     }
   ],
   "auth_session_csrf_findings": {
