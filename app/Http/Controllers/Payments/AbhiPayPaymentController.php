@@ -191,6 +191,11 @@ class AbhiPayPaymentController extends Controller
             default => 'Your payment could not be completed. You may try again or use a manual payment method.',
         });
 
+        $returnQuery = $reference !== '' ? 'reference='.$reference : '';
+        $nextPaymentReturnUrl = client_url('/booking/payment/return'.($returnQuery !== '' ? '?'.$returnQuery : ''));
+        $nextPaymentStatusUrl = client_url('/booking/payment/status'.($returnQuery !== '' ? '?'.$returnQuery : ''));
+        $nextConfirmationUrl = client_url('/booking/confirmation');
+
         return view('frontend.payments.result', [
             'type' => $type,
             'title' => $title,
@@ -202,6 +207,9 @@ class AbhiPayPaymentController extends Controller
             'paymentStatus' => $transaction?->status?->value,
             'gatewayOrderId' => $transaction?->gateway_order_id,
             'paidAt' => $transaction?->paid_at?->format('j M Y, g:i A'),
+            'nextPaymentReturnUrl' => $nextPaymentReturnUrl,
+            'nextPaymentStatusUrl' => $nextPaymentStatusUrl,
+            'nextConfirmationUrl' => $nextConfirmationUrl,
         ]);
     }
 

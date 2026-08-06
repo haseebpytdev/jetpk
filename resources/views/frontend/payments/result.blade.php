@@ -28,7 +28,22 @@
                         @endif
 
                         <div class="d-flex flex-wrap gap-2 justify-content-center">
-                            <a href="{{ client_route('booking.lookup') }}" class="btn btn-primary">Lookup booking</a>
+                            @if (! empty($nextPaymentReturnUrl))
+                                <a href="{{ $nextPaymentReturnUrl }}" class="btn btn-primary" data-testid="next-payment-return-link">
+                                    Continue in JetPakistan
+                                </a>
+                            @endif
+                            @if ($type === 'success' && ! empty($nextConfirmationUrl))
+                                <a href="{{ $nextConfirmationUrl }}" class="btn btn-outline-primary" data-testid="next-confirmation-link">
+                                    View booking confirmation
+                                </a>
+                            @endif
+                            @if ($type !== 'success' && ! empty($nextPaymentStatusUrl))
+                                <a href="{{ $nextPaymentStatusUrl }}" class="btn btn-outline-primary" data-testid="next-payment-status-link">
+                                    Check payment status
+                                </a>
+                            @endif
+                            <a href="{{ client_route('booking.lookup') }}" class="btn btn-outline-secondary">Lookup booking</a>
                             <a href="{{ client_route('home') }}" class="btn btn-outline-secondary">Back to home</a>
                         </div>
                     </div>
