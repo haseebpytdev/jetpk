@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Enums\BookingCancellationStatus;
 use App\Enums\BookingPaymentMethod;
 use App\Enums\BookingStatus;
+use App\Http\Controllers\Concerns\RespondsWithGuestBookingJson;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingDocument;
@@ -18,8 +19,10 @@ use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\PaymentOperationalStatus;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Bookings\TicketingOperationalStatus;
+use App\Support\GuestBooking\GuestBookingDetailPresenter;
 use App\Support\Security\TurnstileVerifier;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -28,10 +31,13 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class GuestBookingLookupController extends Controller
 {
+    use RespondsWithGuestBookingJson;
+
     public function __construct(
         protected GuestBookingAccessService $guestAccessService,
         protected BookingPaymentService $paymentService,
         protected ClientPageRenderer $pageRenderer,
+        protected GuestBookingDetailPresenter $guestDetailPresenter,
     ) {}
 
     public function showLookupForm(Request $request): View
@@ -40,7 +46,7 @@ class GuestBookingLookupController extends Controller
         return view(client_view('frontend.booking.lookup', 'frontend'), $this->pageRenderer->viewModel(ClientPageKeys::BOOKING_LOOKUP));
     }
 
-    public function lookup(Request $request): RedirectResponse
+    public function lookup(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate(array_merge([
             'booking_reference' => ['required', 'string', 'max:255'],
@@ -60,13 +66,30 @@ class GuestBookingLookupController extends Controller
 
         $token = $this->guestAccessService->createTokenForBooking($booking, $validated['email'], $validated['phone'] ?? null);
 
-        return redirect()->to(client_route('guest.bookings.show', ['booking' => $booking, 'token' => $token]));
+        $redirectUrl = client_route('guest.bookings.show', ['booking' => $booking, 'token' => $token]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'ok' => true,
+                'redirect_url' => $redirectUrl,
+            ]);
+        }
+
+        return redirect()->to($redirectUrl);
     }
 
-    public function showGuestBooking(Request $request, Booking $booking, string $token): View
+    public function showGuestBooking(Request $request, Booking $booking, string $token): View|JsonResponse
     {
         if (! $this->guestAccessService->validateToken($booking, $token)) {
+            if ($this->wantsGuestBookingJson($request)) {
+                return $this->guestBookingAccessDenied();
+            }
+
             abort(403);
+        }
+
+        if ($this->wantsGuestBookingJson($request)) {
+            return $this->guestBookingJson($this->guestDetailPresenter->present($booking, $token, $request));
         }
 
         $booking->load([
@@ -149,9 +172,13 @@ class GuestBookingLookupController extends Controller
         return response()->download(Storage::disk('local')->path($bookingDocument->file_path), basename((string) $bookingDocument->file_path));
     }
 
-    public function submitGuestPaymentProof(Request $request, Booking $booking, string $token): RedirectResponse
+    public function submitGuestPaymentProof(Request $request, Booking $booking, string $token): RedirectResponse|JsonResponse
     {
         if (! $this->guestAccessService->validateToken($booking, $token)) {
+            if ($this->wantsGuestBookingJson($request)) {
+                return $this->guestBookingAccessDenied();
+            }
+
             abort(403);
         }
 
@@ -163,6 +190,13 @@ class GuestBookingLookupController extends Controller
         ]);
 
         $this->paymentService->submitPaymentProof($booking, null, $validated);
+
+        if ($this->wantsGuestBookingJson($request)) {
+            return $this->guestBookingJson([
+                'ok' => true,
+                'message' => 'Payment proof submitted. Our team will review it shortly.',
+            ], 201);
+        }
 
         return back()->with('status', 'payment-proof-submitted');
     }

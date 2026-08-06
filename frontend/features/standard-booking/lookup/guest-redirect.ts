@@ -21,6 +21,10 @@ export function resolveSafeGuestLookupRedirect(location: string | null): string 
 
     const laravelOrigin = new URL(appConfig.laravelUrl).origin;
     if (url.origin === laravelOrigin) {
+      if (GUEST_BOOKING_ACCESS_PATH.test(url.pathname)) {
+        return `${url.pathname}${url.search}`;
+      }
+
       return `/laravel${url.pathname}${url.search}`;
     }
 

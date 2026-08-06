@@ -29,7 +29,7 @@ None identified at audit baseline.
 | ID | Area | Summary | Iteration | 01A status |
 |----|------|---------|-----------|------------|
 | JP-FS01-GAP-001 | Auth | Next `/password/force-change` + Laravel JSON | 01A | **CLOSED** |
-| JP-FS01-GAP-002 | Guest lookup | Post-lookup Next guest detail + additive Laravel JSON | 01E | Open |
+| JP-FS01-GAP-002 | Guest lookup | Post-lookup Next guest detail + additive Laravel JSON | 01E | CONNECTED_AND_VERIFIED |
 | JP-FS01-GAP-003 | CMS | Content fixture misconfiguration risk | 01G | Open |
 | JP-FS01-GAP-004 | Card payment | AbhiPay return → Next confirmation handoff | 01D | **CLOSED** |
 
@@ -50,10 +50,10 @@ None identified at audit baseline.
 
 | ID | Severity | Summary | Iteration | Status |
 |----|----------|---------|-----------|--------|
-| JP-FS01-GAP-012 | LOW | Customer payments — thin test coverage | 01E | Open |
+| JP-FS01-GAP-012 | LOW | Customer payments — thin test coverage | 01E | CONNECTED_AND_VERIFIED |
 | JP-FS01-GAP-013 | LOW | Sitemap / dynamic CMS slugs — CNV | 01G | Open |
 | JP-FS01-GAP-014 | LOW | Return-combo Blade handoff — documented + allowlist tests | 01B | **CLOSED** |
-| JP-FS01-GAP-015 | LOW | Customer profile/security — visual tests only | 01E | Open |
+| JP-FS01-GAP-015 | LOW | Customer profile/security — visual tests only | 01E | CONNECTED_AND_VERIFIED |
 | JP-FS01-GAP-016 | LOW | Agent staff RBAC — re-verify on 01F | 01F | Open |
 | JP-FS01-GAP-017 | DOCUMENTATION | Stale route count in FINAL-ROUTE-MAP (67 vs 76) | 01G | Open |
 | JP-FS01-GAP-018 | DOCUMENTATION | JP-OPS-01 inventory predates new portal pages | 01G | Open |
@@ -255,3 +255,15 @@ Do not modify payment-provider verification, callback processing, transaction st
 **GAP-015:** profile load; profile PATCH; profile 422; password PUT; password 422; CSRF; one bounded 419 retry; expired session; no credential persistence.
 
 **Regression only:** customer bookings/detail/support/invoices; force-password; manual payment; AbhiPay return confirmation.
+
+---
+
+## JP-FULLSTACK-01E implementation closure
+
+| Gap | Original | Final | Production changes |
+|-----|----------|-------|-------------------|
+| JP-FS01-GAP-002 | HIGH | CONNECTED_AND_VERIFIED | Guest detail JSON, lookup JSON redirect, Next guest page, mutation JSON |
+| JP-FS01-GAP-012 | LOW | CONNECTED_AND_VERIFIED | Verification only — no production defect |
+| JP-FS01-GAP-015 | LOW | CONNECTED_AND_VERIFIED | Verification only — no production defect |
+
+Closure record: [`docs/phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md`](../../phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md)

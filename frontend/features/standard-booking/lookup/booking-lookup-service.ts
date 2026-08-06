@@ -50,6 +50,24 @@ export async function submitBookingLookup(payload: BookingLookupPayload): Promis
       return { ok: false, status: 429, message: RATE_LIMIT_MESSAGE, rateLimited: true };
     }
 
+    const contentType = response.headers.get("content-type") ?? "";
+    if (response.ok && contentType.includes("application/json")) {
+      const body = (await response.json()) as { ok?: boolean; redirect_url?: string };
+      const redirectUrl = resolveSafeGuestLookupRedirect(body.redirect_url ?? null);
+      if (redirectUrl) {
+        return { ok: true, redirectUrl };
+      }
+      return { ok: false, status: response.status, message: GENERIC_LOOKUP_FAILURE, genericFailure: true };
+    }
+
+    if (response.type === "opaqueredirect") {
+      const redirectUrl = resolveSafeGuestLookupRedirect(response.url);
+      if (redirectUrl) {
+        return { ok: true, redirectUrl };
+      }
+      return { ok: false, status: 0, message: GENERIC_LOOKUP_FAILURE, genericFailure: true };
+    }
+
     if (response.status >= 300 && response.status < 400) {
       const redirectUrl = resolveSafeGuestLookupRedirect(response.headers.get("Location"));
       if (redirectUrl) {
