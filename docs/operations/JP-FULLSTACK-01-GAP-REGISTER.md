@@ -44,7 +44,7 @@ None identified at audit baseline.
 | JP-FS01-GAP-009 | Notifications | Stub `available:false` — deferred backend | DEFERRED | Open |
 | JP-FS01-GAP-010 | Flights | Return-options spec + handoff verification | 01B | **CLOSED** |
 | JP-FS01-GAP-011 | Agent | Payments/invoices connected but not verified in Playwright | 01F | Open |
-| JP-FS01-GAP-020 | Checkout | Manual `pay_later` path needs live-path verification closure | 01C | Open |
+| JP-FS01-GAP-020 | Checkout | Manual `pay_later` path verified with fixture JSON + Playwright | 01C | **CLOSED** |
 
 ## LOW / DOCUMENTATION
 

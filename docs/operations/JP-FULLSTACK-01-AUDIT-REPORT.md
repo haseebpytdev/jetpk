@@ -374,3 +374,34 @@ No live supplier, booking, payment, or email calls.
 | No commit / push / merge / deploy | Yes |
 
 **JP-FULLSTACK-01B — READY FOR COMMIT REVIEW**
+
+---
+
+## 16. JP-FULLSTACK-01C closure (2026-08-06)
+
+**Branch:** `phase/jetpk-fullstack-01c-customer-checkout-passengers-booking`
+**Baseline:** `295828d7d3442c33c017f5323acee4a604197ca3`
+**Status:** Test verification complete — **not committed**
+
+### Gap closed
+
+| Gap ID | Summary |
+|--------|---------|
+| JP-FS01-GAP-020 | Manual `pay_later` path verified via `StandardBookingReviewJsonTest` + extended `standard-booking-review-payment.spec.ts` |
+
+### Application changes
+
+None — existing checkout implementation already authoritative.
+
+### Stop-gate tests
+
+| Command | Exit | Result |
+|---------|-----:|--------|
+| `php artisan test tests/Feature/StandardBookingReviewJsonTest.php` | 0 | 8 passed |
+| `npx playwright test tests/standard-booking-review-payment.spec.ts …` | 0 | 8 passed |
+| `npm run typecheck` | 0 | clean |
+| `npm run lint` | 0 | clean |
+
+No live supplier, booking, payment, or email calls.
+
+**JP-FULLSTACK-01C — READY FOR COMMIT REVIEW**
