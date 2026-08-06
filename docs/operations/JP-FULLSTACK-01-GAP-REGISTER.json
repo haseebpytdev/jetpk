@@ -65,18 +65,18 @@
       "id": "JP-FS01-GAP-002",
       "area": "guest_booking_lookup",
       "role": "guest",
-      "frontend_route": "/lookup-booking → Laravel guest booking",
-      "frontend_file": "frontend/features/standard-booking/lookup/BookingLookupPage.tsx",
-      "laravel_route_controller": "guest.bookings.show → GuestBookingLookupController@showGuestBooking",
-      "current_state": "Lookup POST succeeds but full guest booking detail, payment proof, and AbhiPay start remain Laravel Blade/HTML at /guest/bookings/{id}/access/{token}",
-      "expected_state": "Either full Next guest booking detail connected to Laravel JSON, or documented INTENTIONAL_BLADE_FALLBACK with JetPakistan branding verified on Blade surface",
+      "frontend_route": "/lookup-booking → /guest/bookings/{booking}/access/{token}",
+      "frontend_file": "frontend/features/standard-booking/lookup/BookingLookupPage.tsx; frontend/app/(public)/guest/bookings/[booking]/access/[token]/page.tsx",
+      "laravel_route_controller": "guest.bookings.show → GuestBookingLookupController@showGuestBooking (+ additive ?format=json)",
+      "current_state": "Lookup POST succeeds; guest detail, payment proof and AbhiPay remain on Laravel Blade at /guest/bookings/{id}/access/{token}",
+      "expected_state": "Canonical Next guest-detail page loads authoritative additive JSON; Blade HTML preserved as intentional fallback",
       "severity": "HIGH",
       "security_impact": "Token-scoped guest access must remain server-authoritative; no client fabrication of booking evidence",
-      "booking_payment_impact": "Guest cannot complete payment or view PNR entirely within Next after lookup",
-      "proposed_correction": "01E or 01G: additive JSON for guest booking show or verified Blade fallback branding audit closure",
+      "booking_payment_impact": "Guest views booking detail in Next after lookup; card AbhiPay and promo remain Blade handoff",
+      "proposed_correction": "01E: additive guest.bookings.show JSON + Next /guest/bookings/{booking}/access/{token}; lookup redirect allowlist; cancellation and payment-proof on Next; AbhiPay/promo Blade handoff",
       "dependencies": ["GuestBookingAccessService", "customer_booking_lookup module"],
       "target_iteration": "JP-FULLSTACK-01E",
-      "verification_test": "GuestBookingLookupRedesignTest + booking-lookup-turnstile.spec.ts end-to-end"
+      "verification_test": "GuestBookingLookupRedesignTest + guest-detail JSON contract + booking-lookup-turnstile.spec.ts + guest-detail Playwright"
     },
     {
       "id": "JP-FS01-GAP-003",
@@ -251,7 +251,7 @@
       "severity": "LOW",
       "security_impact": "Customer ownership enforced",
       "booking_payment_impact": "Payment history read-only",
-      "proposed_correction": "01E: extend jp-ops-03-customer-operational.spec.ts",
+      "proposed_correction": "01E: jp-ops-03 payments list/empty/error tests + Laravel customer.payments.index ownership contract; no feature change unless defect found",
       "dependencies": ["customer portal JSON presenter"],
       "target_iteration": "JP-FULLSTACK-01E",
       "verification_test": "jp-ops-03-customer-operational.spec.ts"
@@ -304,7 +304,7 @@
       "severity": "LOW",
       "security_impact": "Session CSRF on mutations",
       "booking_payment_impact": "None",
-      "proposed_correction": "01E: profile/security mutation tests in jp-ops-03",
+      "proposed_correction": "01E: profile/security mutation Playwright (PATCH profile, PUT password, 422, CSRF, bounded 419, expired session); no policy or OTP changes",
       "dependencies": ["customer-dashboard-api"],
       "target_iteration": "JP-FULLSTACK-01E",
       "verification_test": "jp-ui-05a-profile-logout.spec.ts extended"
@@ -435,7 +435,7 @@
     },
     {
       "id": "JP-FULLSTACK-01E",
-      "focus": "Customer booking history/detail/support, guest lookup follow-on",
+      "focus": "Guest lookup follow-on, customer payments and profile/security verification",
       "gaps": ["JP-FS01-GAP-002", "JP-FS01-GAP-012", "JP-FS01-GAP-015"]
     },
     {
@@ -448,5 +448,70 @@
       "focus": "Brand leakage, fixture hardening, CMS verification, final regression",
       "gaps": ["JP-FS01-GAP-003", "JP-FS01-GAP-013", "JP-FS01-GAP-017", "JP-FS01-GAP-018", "JP-FS01-GAP-019"]
     }
-  ]
+  ],
+  "jp_fullstack_01e_scope_lock": {
+    "scope_lock_branch": "phase/jetpk-fullstack-01e-scope-lock",
+    "baseline_sha": "749ae0ae7d70734f53794c79c7f54e4d1f2b8305",
+    "implementation_branch": "phase/jetpk-fullstack-01e-guest-lookup-customer-portal-verification",
+    "gaps": ["JP-FS01-GAP-002", "JP-FS01-GAP-012", "JP-FS01-GAP-015"],
+    "gap_002_decision": "Next guest-detail primary; additive Laravel JSON; Blade fallback retained",
+    "guest_json_contract": {
+      "uri": "GET /guest/bookings/{booking}/access/{token}?format=json",
+      "route_name": "guest.bookings.show",
+      "controller": "GuestBookingLookupController@showGuestBooking",
+      "auth": "GuestBookingAccessService token validation",
+      "csrf": "GET only"
+    },
+    "next_guest_route": {
+      "public_path": "/guest/bookings/{booking}/access/{token}",
+      "app_router_path": "frontend/app/(public)/guest/bookings/[booking]/access/[token]/page.tsx"
+    },
+    "lookup_redirect": "resolveSafeGuestLookupRedirect permits internal Next guest route; external forbidden; /laravel rewrite retained",
+    "mutations_consumed_by_next": [
+      "GET guest.bookings.show JSON",
+      "POST guest.bookings.cancellations.store",
+      "POST guest.bookings.payment-proof",
+      "GET guest.documents.download via JSON download_url"
+    ],
+    "mutations_blade_fallback": [
+      "GET guest.bookings.show HTML",
+      "POST guest.bookings.abhipay.start",
+      "POST guest.bookings.promo.apply",
+      "POST guest.bookings.promo.remove"
+    ],
+    "mutations_outside_gap_002": [
+      "payments.abhipay.callback",
+      "supplier booking and ticketing engines",
+      "cancellation approval workflow"
+    ],
+    "gap_012_boundary": "customer.payments.index verification only; no checkout/provider work",
+    "gap_015_boundary": "profile PATCH and password PUT verification only; no policy/OTP/force-password changes",
+    "permitted_paths": [
+      "app/Http/Controllers/Frontend/GuestBookingLookupController.php",
+      "app/Support/ (guest-detail JSON presenter, additive)",
+      "app/Services/Customer/GuestBookingAccessService.php",
+      "tests/Feature/Guest/",
+      "frontend/app/(public)/guest/bookings/[booking]/access/[token]/",
+      "frontend/features/standard-booking/lookup/",
+      "frontend/features/customer-dashboard/payments|profile|security/",
+      "frontend/tests/booking-lookup-turnstile.spec.ts",
+      "frontend/tests/jp-ops-03-customer-operational.spec.ts",
+      "frontend/tests/jp-ui-05a-profile-logout.spec.ts",
+      "tests/Feature/Customer/",
+      "docs/operations/JP-FULLSTACK-01-*",
+      "docs/phases/JP-FULLSTACK-01E-*"
+    ],
+    "prohibited": [
+      "dashboard/",
+      "agent portal",
+      "cms and branding",
+      "notification backend",
+      "checkout search fare passengers review",
+      "payment-provider callback logic",
+      "supplier ticketing cancellation engines",
+      "otp demo",
+      ".env credentials",
+      "blade removal"
+    ]
+  }
 }

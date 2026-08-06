@@ -29,7 +29,7 @@ None identified at audit baseline.
 | ID | Area | Summary | Iteration | 01A status |
 |----|------|---------|-----------|------------|
 | JP-FS01-GAP-001 | Auth | Next `/password/force-change` + Laravel JSON | 01A | **CLOSED** |
-| JP-FS01-GAP-002 | Guest lookup | Post-lookup guest booking Blade | 01E | Open |
+| JP-FS01-GAP-002 | Guest lookup | Post-lookup Next guest detail + additive Laravel JSON | 01E | Open |
 | JP-FS01-GAP-003 | CMS | Content fixture misconfiguration risk | 01G | Open |
 | JP-FS01-GAP-004 | Card payment | AbhiPay return → Next confirmation handoff | 01D | **CLOSED** |
 
@@ -48,16 +48,16 @@ None identified at audit baseline.
 
 ## LOW / DOCUMENTATION
 
-| ID | Severity | Summary |
-|----|----------|---------|
-| JP-FS01-GAP-012 | LOW | Customer payments — thin test coverage |
-| JP-FS01-GAP-013 | LOW | Sitemap / dynamic CMS slugs — CNV |
-| JP-FS01-GAP-014 | LOW | Return-combo Blade handoff — documented + allowlist tests | 01B **CLOSED** |
-| JP-FS01-GAP-015 | LOW | Customer profile/security — visual tests only |
-| JP-FS01-GAP-016 | LOW | Agent staff RBAC — re-verify on 01F |
-| JP-FS01-GAP-017 | DOCUMENTATION | Stale route count in FINAL-ROUTE-MAP (67 vs 76) |
-| JP-FS01-GAP-018 | DOCUMENTATION | JP-OPS-01 inventory predates new portal pages |
-| JP-FS01-GAP-019 | LOW | Brand leakage audit — expand to checkout Blade views |
+| ID | Severity | Summary | Iteration | Status |
+|----|----------|---------|-----------|--------|
+| JP-FS01-GAP-012 | LOW | Customer payments — thin test coverage | 01E | Open |
+| JP-FS01-GAP-013 | LOW | Sitemap / dynamic CMS slugs — CNV | 01G | Open |
+| JP-FS01-GAP-014 | LOW | Return-combo Blade handoff — documented + allowlist tests | 01B | **CLOSED** |
+| JP-FS01-GAP-015 | LOW | Customer profile/security — visual tests only | 01E | Open |
+| JP-FS01-GAP-016 | LOW | Agent staff RBAC — re-verify on 01F | 01F | Open |
+| JP-FS01-GAP-017 | DOCUMENTATION | Stale route count in FINAL-ROUTE-MAP (67 vs 76) | 01G | Open |
+| JP-FS01-GAP-018 | DOCUMENTATION | JP-OPS-01 inventory predates new portal pages | 01G | Open |
+| JP-FS01-GAP-019 | LOW | Brand leakage audit — expand to checkout Blade views | 01G | Open |
 
 ## Connectivity classification totals (76 routes)
 
@@ -118,3 +118,140 @@ See JSON `proposed_iterations` — bounded **01A–01G**; do not combine into si
 - `docs/operations/JP-FULLSTACK-01-AUDIT-REPORT.md`
 
 No Laravel or `frontend/` implementation files modified.
+
+---
+
+## JP-FULLSTACK-01E implementation boundary (locked)
+
+**Scope-lock branch:** `phase/jetpk-fullstack-01e-scope-lock`
+**Baseline:** `749ae0ae7d70734f53794c79c7f54e4d1f2b8305`
+**Implementation branch (after scope-lock commit):** `phase/jetpk-fullstack-01e-guest-lookup-customer-portal-verification`
+
+### Exact 01E gaps
+
+| Gap ID | Severity | Scope |
+|--------|----------|-------|
+| JP-FS01-GAP-002 | HIGH | Authoritative Next guest-detail page + additive Laravel JSON |
+| JP-FS01-GAP-012 | LOW | Customer payments verification (no new feature work) |
+| JP-FS01-GAP-015 | LOW | Customer profile/security verification (no new feature work) |
+
+Not in 01E: booking history, support, invoices, Agent, CMS, notifications, checkout, force-password, AbhiPay return (01D closed).
+
+### GAP-002 — locked implementation decision
+
+**Primary closure:** canonical Next guest-detail page at `/guest/bookings/{booking}/access/{token}` loading authoritative Laravel JSON. Blade HTML remains an intentional fallback; it is not the primary closure strategy.
+
+#### A. Laravel authoritative guest-detail JSON
+
+- Extend `GuestBookingLookupController@showGuestBooking` with additive `?format=json` on route `guest.bookings.show`.
+- Preserve existing Blade HTML response when JSON is not requested.
+- Reuse `GuestBookingAccessService` for token validation (booking ID + access token server-side).
+- Return only customer-safe booking data; never trust browser-supplied booking, payment, PNR or ticket state.
+- Generic denial on invalid/expired token; no booking-existence leak.
+- Do not expose internal database metadata, supplier payloads, callback secrets or raw provider data.
+- JSON and Blade must present the same authoritative booking for the same token.
+
+**Guest JSON contract (additive):**
+
+| Item | Value |
+|------|--------|
+| URI | `GET /guest/bookings/{booking}/access/{token}?format=json` |
+| Route name | `guest.bookings.show` |
+| Controller | `GuestBookingLookupController@showGuestBooking` |
+| Auth | Token-scoped guest access via `GuestBookingAccessService::validateToken` |
+| CSRF | GET only for detail JSON |
+| Safe fields | `ok`, `booking_reference`, `booking_status`, `payment_status`, `ticketing_status`, masked contact, passengers (safe fields), itinerary overview, `payment_summary` (amounts/status labels only), `capabilities` (mutation URLs + booleans), `documents` (title/status/download_url when ready), `pnr_details` and `tickets` only when Laravel has real data, `presentation` labels |
+| Forbidden in JSON | Supplier payloads, gateway secrets, internal IDs beyond booking reference, fabricated PNR/ticket/paid state |
+
+#### B. Canonical Next guest-detail route
+
+| Public route | App Router path |
+|--------------|-----------------|
+| `/guest/bookings/{booking}/access/{token}` | `frontend/app/(public)/guest/bookings/[booking]/access/[token]/page.tsx` |
+
+Next page requirements:
+
+- Load authoritative Laravel JSON via `/laravel/guest/bookings/{booking}/access/{token}?format=json`.
+- Keep token in path only (existing contract); never persist token in `localStorage` or `sessionStorage`.
+- Display booking, passenger, itinerary, payment, PNR and ticket data only when Laravel returns it.
+- Distinguish unavailable, pending, failed, unpaid, paid, confirmed, cancelled and ticketed states where supported.
+- Safe error states for invalid or expired access.
+- Never fabricate payment, PNR, ticket or invoice data.
+
+#### C. Lookup redirect
+
+- After successful lookup, `resolveSafeGuestLookupRedirect` must permit the canonical internal Next route `/guest/bookings/{id}/access/{token}`.
+- External redirects remain forbidden.
+- Laravel-origin paths may still be rewritten to `/laravel/...`.
+- Blade URL `/laravel/guest/bookings/{id}/access/{token}` remains intentional fallback (link on lookup page retained).
+
+#### D. Guest mutation handoff (locked)
+
+| Mutation | Route | 01E disposition |
+|----------|-------|-----------------|
+| Guest detail read | `GET guest.bookings.show` JSON | **Consumed by Next guest page** |
+| Cancellation request | `POST guest.bookings.cancellations.store` | **Consumed by Next guest page** when JSON `capabilities.can_request_cancellation` |
+| Payment proof upload | `POST guest.bookings.payment-proof` | **Consumed by Next guest page** when JSON `capabilities.can_upload_payment_proof` |
+| Document download | `GET guest.documents.download?token=` | **Consumed by Next guest page** via Laravel download URL in JSON only |
+| Guest AbhiPay card start | `POST guest.bookings.abhipay.start` | **Blade fallback handoff** — link to Blade payment section / Laravel start; no guest AbhiPay redirect logic in 01E Next page |
+| Promo apply/remove | `POST guest.bookings.promo.apply`, `guest.bookings.promo.remove` | **Blade fallback handoff** — promo UI remains Blade; Next links to Blade fallback |
+| Full guest Blade surface | `GET guest.bookings.show` HTML | **Blade fallback handoff** — retained; not primary closure |
+| Payment callback processing | `payments.abhipay.callback` | **Outside GAP-002** |
+| Supplier booking / ticketing engines | internal services | **Outside GAP-002** |
+| Cancellation approval workflow | staff/admin | **Outside GAP-002** |
+
+Do not modify payment-provider verification, callback processing, transaction state, supplier booking or cancellation engines.
+
+### GAP-012 — locked verification boundary
+
+- Existing `/customer/payments` Next page and `customer.payments.index` Laravel JSON only.
+- Add dedicated Laravel customer-ownership contract test if not already adequate.
+- Add Playwright list, empty and error-state verification in `jp-ops-03-customer-operational.spec.ts`.
+- No production implementation change unless tests prove a real defect.
+- Out of scope: payment-provider, checkout, invoice implementation.
+
+### GAP-015 — locked verification boundary
+
+- `/customer/profile` and `/customer/security` only.
+- Authoritative `GET customer.profile.show`, `PATCH profile.update`, `PUT password.update`.
+- CSRF and authenticated-customer enforcement.
+- Playwright: profile load, profile PATCH, profile 422, password PUT, password 422, CSRF, one bounded 419 retry, expired session.
+- No password policy, force-password, Admin/Staff auth or OTP changes.
+- No production implementation change unless tests prove a real defect.
+
+### Permitted path families (implementation branch)
+
+- `app/Http/Controllers/Frontend/GuestBookingLookupController.php` (additive JSON only)
+- `app/Support/` or presenter used for guest-detail JSON (additive)
+- `app/Services/Customer/GuestBookingAccessService.php` (read-only reuse; tests only if needed)
+- `tests/Feature/Guest/GuestBookingLookupRedesignTest.php` and new guest-detail JSON contract tests
+- `frontend/app/(public)/guest/bookings/[booking]/access/[token]/`
+- `frontend/features/standard-booking/lookup/` (redirect allowlist update)
+- `frontend/features/customer-dashboard/payments/`, `profile/`, `security/` (defect fixes only)
+- `frontend/features/customer-dashboard/services/customer-dashboard-api.ts` (defect fixes only)
+- `frontend/tests/booking-lookup-turnstile.spec.ts`, guest-detail Playwright spec
+- `frontend/tests/jp-ops-03-customer-operational.spec.ts`, `jp-ui-05a-profile-logout.spec.ts`
+- `tests/Feature/Customer/` payments/profile contract tests (additive)
+- `docs/operations/JP-FULLSTACK-01-GAP-REGISTER.md`, `.json`, `JP-FULLSTACK-01-AUDIT-REPORT.md`
+- `docs/phases/JP-FULLSTACK-01E-*-CLOSURE.md` (on implementation close)
+
+### Prohibited
+
+- `dashboard/`; Agent and Agent Staff portal; CMS and branding; notification backend
+- Search, fare, passengers, review checkout paths
+- Payment-provider and callback logic changes
+- Supplier booking, ticketing and cancellation engines
+- OTP demo files; `.env` and credential configuration
+- Blade removal
+
+### Test matrix (locked)
+
+**GAP-002 Laravel:** valid token → authoritative JSON; invalid token → generic denial; mismatched booking/token rejected; guest cannot access another booking; Blade HTML still available; JSON and Blade same booking; no fabricated PNR/ticket/paid/invoice; safe response-field contract.
+
+**GAP-002 Playwright:** lookup POST redirects only to internal guest route; guest detail loads Laravel JSON; invalid/expired access; authoritative itinerary/payment rendering; conditional PNR/ticket; no external redirect; no client-inferred status; Blade fallback link valid.
+
+**GAP-012:** Laravel customer ownership + payments JSON; Playwright list, empty, server-error, unauthenticated/expired session.
+
+**GAP-015:** profile load; profile PATCH; profile 422; password PUT; password 422; CSRF; one bounded 419 retry; expired session; no credential persistence.
+
+**Regression only:** customer bookings/detail/support/invoices; force-password; manual payment; AbhiPay return confirmation.

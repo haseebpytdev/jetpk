@@ -87,7 +87,7 @@ Agent Staff uses shared `/agent` routes (0 dedicated Next folders); Laravel `age
 | Manual pay | `/booking/payment/manual` | checkout-state after review | session | Instructions only — no fabricated completion |
 | Card pay | `/booking/payment/card` | AbhiPay start | CSRF on start | Hosted redirect — GAP-004 return handoff |
 | Success | `/booking/confirmation` | `GET /booking/confirmation` | session | Real PNR/status from presenter |
-| Lookup alt | `/lookup-booking` | POST lookup → guest Blade | CSRF | GAP-002 guest detail Blade |
+| Lookup alt | `/lookup-booking` | POST lookup → Next guest detail | CSRF | GAP-002 Next guest detail + JSON |
 
 ### B. Customer journey
 
@@ -163,7 +163,7 @@ flowchart TD
 ### Gaps
 
 - AbhiPay return HTML pages before Next confirmation (GAP-004)
-- Guest booking Blade after lookup (GAP-002)
+- Guest booking Next detail after lookup (GAP-002); Blade retained as fallback
 - Manual path verification closure (GAP-020)
 
 ---
@@ -271,7 +271,7 @@ See [`JP-FULLSTACK-01-GAP-REGISTER.json`](JP-FULLSTACK-01-GAP-REGISTER.json) for
 | **JP-FULLSTACK-01B** | Public search / results / fare-detail / return-options |
 | **JP-FULLSTACK-01C** | Customer checkout, passengers, booking submission |
 | **JP-FULLSTACK-01D** | AbhiPay card return handoff and Next confirmation connectivity |
-| **JP-FULLSTACK-01E** | Customer booking history / detail / support / guest lookup |
+| **JP-FULLSTACK-01E** | Guest lookup follow-on, customer payments and profile/security verification |
 | **JP-FULLSTACK-01F** | Agent + Agent Staff portal + RBAC + travelers |
 | **JP-FULLSTACK-01G** | Brand leakage, fixture hardening, CMS verification, regression closure |
 
@@ -435,3 +435,44 @@ No live supplier, booking, payment, or email calls.
 No live provider calls.
 
 **JP-FULLSTACK-01D — READY FOR COMMIT REVIEW**
+
+---
+
+## 18. JP-FULLSTACK-01E scope lock (2026-08-06)
+
+**Scope-lock branch:** `phase/jetpk-fullstack-01e-scope-lock`
+**Baseline:** `749ae0ae7d70734f53794c79c7f54e4d1f2b8305`
+**Implementation branch (after scope-lock commit):** `phase/jetpk-fullstack-01e-guest-lookup-customer-portal-verification`
+
+### Exact 01E gaps
+
+| Gap ID | Severity | Locked scope |
+|--------|----------|--------------|
+| JP-FS01-GAP-002 | HIGH | Next guest-detail page + additive `guest.bookings.show` JSON; Blade fallback retained |
+| JP-FS01-GAP-012 | LOW | Customer payments verification only |
+| JP-FS01-GAP-015 | LOW | Customer profile/security verification only |
+
+Not in 01E: booking history, support, invoices, Agent, CMS, notifications, checkout, force-password, AbhiPay return.
+
+### GAP-002 locked decision
+
+- **Primary closure:** `/guest/bookings/{booking}/access/{token}` → `frontend/app/(public)/guest/bookings/[booking]/access/[token]/page.tsx`
+- **Laravel JSON:** `GET guest.bookings.show?format=json` via `GuestBookingLookupController` + `GuestBookingAccessService`
+- **Lookup redirect:** internal Next guest route permitted; external forbidden; `/laravel` rewrite retained
+- **Next consumes:** detail JSON, cancellation POST, payment-proof POST, document download URLs
+- **Blade handoff:** HTML guest show, guest AbhiPay start, promo apply/remove
+- **Outside GAP-002:** payment callbacks, supplier/ticketing engines, cancellation approval workflow
+- **No changes to:** payment-provider verification, callback processing, transaction state, supplier booking or cancellation engines
+
+### GAP-012 / GAP-015 locked boundaries
+
+- **012:** `/customer/payments` + `customer.payments.index` verification tests only; no checkout/provider work
+- **015:** profile PATCH + password PUT verification with CSRF, 422, bounded 419, expired session; no policy/OTP/force-password changes
+
+### Test matrix
+
+See `JP-FULLSTACK-01-GAP-REGISTER.md` § JP-FULLSTACK-01E implementation boundary (locked).
+
+Documentation-only scope lock. No application or test code modified.
+
+**JP-FULLSTACK-01E — READY FOR SCOPE-LOCK COMMIT REVIEW**
