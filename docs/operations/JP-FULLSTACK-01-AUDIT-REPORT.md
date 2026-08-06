@@ -526,3 +526,34 @@ Closure: [`docs/phases/JP-FULLSTACK-01E-GUEST-LOOKUP-CUSTOMER-PORTAL-CLOSURE.md`
 Closure: [`docs/phases/JP-FULLSTACK-01F-AGENT-AGENT-STAFF-RBAC-TRAVELERS-CLOSURE.md`](../../phases/JP-FULLSTACK-01F-AGENT-AGENT-STAFF-RBAC-TRAVELERS-CLOSURE.md)
 
 **JP-FULLSTACK-01F — READY FOR COMMIT REVIEW**
+
+---
+
+## 20. JP-FULLSTACK-01G implementation closure
+
+| Check | Result |
+|-------|--------|
+| Branch | `phase/jetpk-fullstack-01g-cms-branding-fixture-hardening-final-regression` |
+| Baseline | `47f7f90c410d88980830eb0e41b5e319f4be0995` |
+| Gaps closed | GAP-003, GAP-013, GAP-017, GAP-018, GAP-019 → CONNECTED_AND_VERIFIED |
+| Production routes | **82** (`frontend/app/**/page.tsx`, excluding `dev/`) |
+| Laravel tests (01G matrix) | 156 passed, 630 assertions |
+| Playwright (01G matrix) | 206 passed, 0 failed |
+| Route inventory regression | `jp-fullstack-01g-route-inventory.test.mjs` pass |
+| Content policy regression | `jp-fullstack-01g-content-policy.test.mjs` pass |
+| `npm run typecheck` | pass |
+| `npm run lint` | pass |
+| `npm run build` | pass (production; no content/session fixture flags) |
+| Commit / push / merge / deploy | None |
+
+**GAP-003:** Production `NODE_ENV` always denies CMS fixtures; `OTA_ALLOW_SESSION_FIXTURE` decoupled from CMS authority.
+
+**GAP-013:** Extended `cms-bridge.spec.ts` for static/dynamic CMS routes, failure states, reserved slugs.
+
+**GAP-017 / GAP-018:** Route map + register parity at 82 routes; JP-OPS-01 supersession notice.
+
+**GAP-019:** No visible legacy branding; expanded Playwright + `PublicBladeBrandingLeakageAuditTest`.
+
+Closure: [`docs/phases/JP-FULLSTACK-01G-CMS-BRANDING-FIXTURE-HARDENING-FINAL-REGRESSION-CLOSURE.md`](../../phases/JP-FULLSTACK-01G-CMS-BRANDING-FIXTURE-HARDENING-FINAL-REGRESSION-CLOSURE.md)
+
+**JP-FULLSTACK-01G — READY FOR COMMIT REVIEW**

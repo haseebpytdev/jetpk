@@ -1,5 +1,14 @@
+import fs from "node:fs";
+import path from "node:path";
 import { expect, test } from "@playwright/test";
 import { attachRuntimeGuards, FORBIDDEN_ROUTES, PRODUCTION_ROUTES, REDIRECT_ROUTES, setSessionFixture } from "./helpers";
+
+const routeManifest = JSON.parse(
+  fs.readFileSync(
+    path.resolve(__dirname, "../../../docs/frontend/JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.json"),
+    "utf8",
+  ),
+) as { production_route_count: number };
 
 test.describe("JP-FULL-NEXT-FRONTEND-01B route matrix", () => {
   test.beforeAll(async ({ request }) => {
@@ -19,11 +28,11 @@ test.describe("JP-FULL-NEXT-FRONTEND-01B route matrix", () => {
   }
 
   for (const route of REDIRECT_ROUTES) {
-    test(`${route.path} redirects to ${route.target}`, async ({ request }) => {
-      const response = await request.get(route.path, { maxRedirects: 0 });
-      expect([301, 302, 303, 307, 308]).toContain(response.status());
-      const location = response.headers().location ?? "";
-      expect(location).toMatch(new RegExp(route.target.replace("/", "\\/")));
+    test(`${route.path} redirects to ${route.target}`, async ({ page }) => {
+      const fixture = route.path === "/agent" ? "agent" : "customer";
+      await setSessionFixture(page, fixture);
+      await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      await expect(page).toHaveURL(new RegExp(`${route.target.replace("/", "\\/")}`));
     });
   }
 
@@ -59,5 +68,9 @@ test.describe("JP-FULL-NEXT-FRONTEND-01B route matrix", () => {
     const response = await page.goto("/agent/dashboard", { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBeLessThan(500);
     await expect(page.getByTestId("agent-dashboard-shell")).toBeVisible({ timeout: 30_000 });
+  });
+
+  test("documented production route count remains 82", () => {
+    expect(routeManifest.production_route_count).toBe(82);
   });
 });

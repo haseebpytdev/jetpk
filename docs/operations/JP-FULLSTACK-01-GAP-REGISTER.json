@@ -5,7 +5,7 @@
     "generated_at": "2026-08-06T00:00:00+05:00",
     "baseline_sha": "846add82e0aea36e84e877b067bc2210ef2af467",
     "branch": "phase/jetpk-fullstack-01-public-customer-agent-checkout-connectivity",
-    "frontend_route_count": 81,
+    "frontend_route_count": 82,
     "laravel_contract_count_in_scope": 198,
     "severity_counts": {
       "BLOCKER": 0,
@@ -15,8 +15,8 @@
       "DOCUMENTATION": 2
     },
     "connectivity_totals": {
-      "CONNECTED_AND_VERIFIED": 62,
-      "CONNECTED_NOT_VERIFIED": 9,
+      "CONNECTED_AND_VERIFIED": 67,
+      "CONNECTED_NOT_VERIFIED": 4,
       "STATIC_CONTENT": 4,
       "INTENTIONAL_BLADE_FALLBACK": 2,
       "DEFERRED_WITH_REASON": 2,
@@ -48,14 +48,17 @@
       "role": "customer|agent|agent_staff",
       "frontend_route": "/password/force-change (redirect target only)",
       "frontend_file": "frontend/features/auth/server/portal-access-shared.ts",
-      "laravel_route_controller": "password.force-change → ForcePasswordChangeController",
+      "laravel_route_controller": "password.force-change \u2192 ForcePasswordChangeController",
       "current_state": "Next portal layouts redirect requires_password_change users to Laravel Blade /password/force-change; no Next page exists under frontend/app",
       "expected_state": "Next-owned force-password page posting to Laravel with CSRF, or documented intentional Blade-only gate with allowlisted handoff",
       "severity": "HIGH",
       "security_impact": "Users with forced password change may leave Next shell and hit unstyled or mis-linked Blade surface",
       "booking_payment_impact": "Blocks portal and checkout continuation for affected accounts until password updated",
       "proposed_correction": "Add Next force-change page in 01A wired to POST /password/force-change with session CSRF",
-      "dependencies": ["JP-OPS-02 CSRF bridge", "session bootstrap requires_password_change"],
+      "dependencies": [
+        "JP-OPS-02 CSRF bridge",
+        "session bootstrap requires_password_change"
+      ],
       "target_iteration": "JP-FULLSTACK-01A",
       "verification_test": "Playwright portal guard + Laravel Auth test for force-change JSON/redirect parity",
       "jp_fullstack_01a_status": "CLOSED",
@@ -65,16 +68,19 @@
       "id": "JP-FS01-GAP-002",
       "area": "guest_booking_lookup",
       "role": "guest",
-      "frontend_route": "/lookup-booking → /guest/bookings/{booking}/access/{token}",
+      "frontend_route": "/lookup-booking \u2192 /guest/bookings/{booking}/access/{token}",
       "frontend_file": "frontend/features/standard-booking/lookup/BookingLookupPage.tsx; frontend/app/(public)/guest/bookings/[booking]/access/[token]/page.tsx",
-      "laravel_route_controller": "guest.bookings.show → GuestBookingLookupController@showGuestBooking (+ additive ?format=json)",
-      "current_state": "CONNECTED_AND_VERIFIED — canonical Next guest-detail at /guest/bookings/{booking}/access/{token}; additive guest.bookings.show JSON; lookup JSON redirect_url for Accept JSON; Blade HTML fallback retained",
+      "laravel_route_controller": "guest.bookings.show \u2192 GuestBookingLookupController@showGuestBooking (+ additive ?format=json)",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 canonical Next guest-detail at /guest/bookings/{booking}/access/{token}; additive guest.bookings.show JSON; lookup JSON redirect_url for Accept JSON; Blade HTML fallback retained",
       "expected_state": "Canonical Next guest-detail page loads authoritative additive JSON; Blade HTML preserved as intentional fallback",
       "severity": "HIGH",
       "security_impact": "Token-scoped guest access must remain server-authoritative; no client fabrication of booking evidence",
       "booking_payment_impact": "Guest views booking detail in Next after lookup; card AbhiPay and promo remain Blade handoff",
       "proposed_correction": "01E: additive guest.bookings.show JSON + Next /guest/bookings/{booking}/access/{token}; lookup redirect allowlist; cancellation and payment-proof on Next; AbhiPay/promo Blade handoff",
-      "dependencies": ["GuestBookingAccessService", "customer_booking_lookup module"],
+      "dependencies": [
+        "GuestBookingAccessService",
+        "customer_booking_lookup module"
+      ],
       "target_iteration": "JP-FULLSTACK-01E",
       "verification_test": "GuestBookingDetailJsonTest + guest-booking-detail.spec.ts + booking-lookup-turnstile.spec.ts",
       "jp_fullstack_01e_status": "CONNECTED_AND_VERIFIED",
@@ -87,15 +93,18 @@
       "frontend_route": "CMS pages (/, /about-us, /faq, etc.)",
       "frontend_file": "frontend/features/public-content/utils/content-policy.ts",
       "laravel_route_controller": "api.public.content.*",
-      "current_state": "Content services fall back to fixtures when allowContentFixtures() true (NODE_ENV=development or NEXT_PUBLIC_ALLOW_CONTENT_FIXTURES or OTA_ALLOW_SESSION_FIXTURE)",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 production NODE_ENV gate denies all CMS fixtures; OTA_ALLOW_SESSION_FIXTURE decoupled; deterministic env matrix regression",
       "expected_state": "Production builds must never serve fixture CMS as authoritative content",
       "severity": "HIGH",
       "security_impact": "Misconfiguration could show stale or demo marketing content on live domain",
-      "booking_payment_impact": "Indirect — wrong support/contact details could misroute customers",
+      "booking_payment_impact": "Indirect \u2014 wrong support/contact details could misroute customers",
       "proposed_correction": "01G: harden production env gate audit + startup warning; document required prod env in runtime requirements",
-      "dependencies": ["JP-OPS-02-PRODUCTION-RUNTIME-REQUIREMENTS.md"],
+      "dependencies": [
+        "JP-OPS-02-PRODUCTION-RUNTIME-REQUIREMENTS.md"
+      ],
       "target_iteration": "JP-FULLSTACK-01G",
-      "verification_test": "cms-bridge.spec.ts with production env simulation"
+      "verification_test": "cms-bridge.spec.ts with production env simulation",
+      "jp_fullstack_01g_status": "CONNECTED_AND_VERIFIED"
     },
     {
       "id": "JP-FS01-GAP-004",
@@ -109,27 +118,34 @@
       "severity": "HIGH",
       "security_impact": "No raw card data in Next (verified); callback CSRF-exempt by design",
       "booking_payment_impact": "Return URL handoff between Laravel HTML and Next confirmation must be verified under production AbhiPay config",
-      "proposed_correction": "01D: trace and verify AbhiPay return → booking confirmation JSON path; align success deep links",
-      "dependencies": ["AbhiPayPaymentController", "PublicAbhiPayCheckoutPresenter", "payment-url allowlist"],
+      "proposed_correction": "01D: trace and verify AbhiPay return \u2192 booking confirmation JSON path; align success deep links",
+      "dependencies": [
+        "AbhiPayPaymentController",
+        "PublicAbhiPayCheckoutPresenter",
+        "payment-url allowlist"
+      ],
       "target_iteration": "JP-FULLSTACK-01D",
       "verification_test": "PiaNdcAbhiPayCheckoutTest + abhipay-return-confirmation.spec.ts + AbhiPayReturnHandoffTest",
       "jp_fullstack_01d_status": "CLOSED",
-      "jp_fullstack_01d_notes": "Blade payment result deep links to Next return/status/confirmation; Playwright return→status→confirmation path; card redirect allowlist"
+      "jp_fullstack_01d_notes": "Blade payment result deep links to Next return/status/confirmation; Playwright return\u2192status\u2192confirmation path; card redirect allowlist"
     },
     {
       "id": "JP-FS01-GAP-005",
       "area": "agent_portal",
       "role": "agent|agent_staff",
-      "frontend_route": "missing — no /agent/travelers",
+      "frontend_route": "missing \u2014 no /agent/travelers",
       "frontend_file": "frontend/features/agent-dashboard/services/agent-dashboard-api.ts (no travelers calls)",
-      "laravel_route_controller": "agent.travelers.* → SavedTravelerController",
-      "current_state": "CONNECTED_AND_VERIFIED — Next /agent/travelers CRUD with additive agent.travelers.* JSON; Blade HTML fallback retained",
+      "laravel_route_controller": "agent.travelers.* \u2192 SavedTravelerController",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 Next /agent/travelers CRUD with additive agent.travelers.* JSON; Blade HTML fallback retained",
       "expected_state": "Next agent travelers pages connected to Laravel JSON CRUD with RBAC",
       "severity": "MEDIUM",
       "security_impact": "No leakage if Blade unused; staff without permission denied by Laravel middleware",
       "booking_payment_impact": "Agents can manage saved travelers from Next portal",
       "proposed_correction": "01F: mirror customer travelers pattern for agent scope",
-      "dependencies": ["saved_travelers module", "AgentPermission::TravelersManage"],
+      "dependencies": [
+        "saved_travelers module",
+        "AgentPermission::TravelersManage"
+      ],
       "target_iteration": "JP-FULLSTACK-01F",
       "verification_test": "AgentTravelersJsonTest + jp-fullstack-01f-agent-travelers-finance.spec.ts",
       "jp_fullstack_01f_status": "CONNECTED_AND_VERIFIED",
@@ -139,16 +155,18 @@
       "id": "JP-FS01-GAP-006",
       "area": "agent_portal",
       "role": "agent",
-      "frontend_route": "missing — finance statement / accounting ledger",
+      "frontend_route": "missing \u2014 finance statement / accounting ledger",
       "frontend_file": "frontend/features/agent-dashboard/services/agent-dashboard-api.ts",
       "laravel_route_controller": "agent.finance.statement.*, agent.accounting.ledger.*",
-      "current_state": "CONNECTED_AND_VERIFIED — read-only Next /agent/finance/statement and /agent/accounting/ledger with additive JSON; Blade fallbacks retained",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 read-only Next /agent/finance/statement and /agent/accounting/ledger with additive JSON; Blade fallbacks retained",
       "expected_state": "Connected read surfaces or explicit deferral if out of product scope",
       "severity": "MEDIUM",
       "security_impact": "Agency-scoped data only via Laravel if accessed via Blade",
       "booking_payment_impact": "None for standard booking path",
       "proposed_correction": "01F: implement read-only Next finance surfaces",
-      "dependencies": ["agent.admin for some exports"],
+      "dependencies": [
+        "agent.admin for some exports"
+      ],
       "target_iteration": "JP-FULLSTACK-01F",
       "verification_test": "AgentFinanceStatementJsonTest + AgentAccountingLedgerJsonTest + jp-fullstack-01f-agent-travelers-finance.spec.ts",
       "jp_fullstack_01f_status": "CONNECTED_AND_VERIFIED",
@@ -167,7 +185,9 @@
       "security_impact": "None",
       "booking_payment_impact": "Optional search enhancement only",
       "proposed_correction": "01B if UI exposes flexible dates; else DOCUMENTATION defer",
-      "dependencies": ["FlightSearchFlexibleDatesPhase18FTest"],
+      "dependencies": [
+        "FlightSearchFlexibleDatesPhase18FTest"
+      ],
       "target_iteration": "JP-FULLSTACK-01B",
       "verification_test": "NearbyDateFareStripTest + NearbyDateStrip on results page",
       "jp_fullstack_01b_status": "CLOSED",
@@ -179,14 +199,16 @@
       "role": "public",
       "frontend_route": "none",
       "frontend_file": "frontend/features/search/*",
-      "laravel_route_controller": "flights.multicity.inquiry → storeMulticityInquiry",
+      "laravel_route_controller": "flights.multicity.inquiry \u2192 storeMulticityInquiry",
       "current_state": "Multicity inquiry POST exists; no Next handoff consumer",
       "expected_state": "Next multicity inquiry form or explicit Blade-only path documented",
       "severity": "MEDIUM",
       "security_impact": "None",
       "booking_payment_impact": "Multicity bookings not in standard Next checkout path",
       "proposed_correction": "Defer or 01B scope decision",
-      "dependencies": ["PublicMulticityFlightResultsTest"],
+      "dependencies": [
+        "PublicMulticityFlightResultsTest"
+      ],
       "target_iteration": "JP-FULLSTACK-01B",
       "verification_test": "PublicMulticityFlightResultsTest + multicity inquiry form POST",
       "jp_fullstack_01b_status": "CLOSED",
@@ -205,7 +227,9 @@
       "security_impact": "No false notification authority",
       "booking_payment_impact": "Users rely on email for booking updates (documented message)",
       "proposed_correction": "Defer until notification backend; keep honest stub",
-      "dependencies": ["notification inbox backend not in scope JP-OPS-03/04"],
+      "dependencies": [
+        "notification inbox backend not in scope JP-OPS-03/04"
+      ],
       "target_iteration": "DEFERRED",
       "verification_test": "CustomerPortalJsonContractTest notifications stub"
     },
@@ -222,7 +246,9 @@
       "security_impact": "Form POST uses CSRF via Laravel session",
       "booking_payment_impact": "Return leg selection required for some itineraries",
       "proposed_correction": "01B: add return-options.spec.ts and verify handoff URL",
-      "dependencies": ["flight-results-api submitReturnComboSelection"],
+      "dependencies": [
+        "flight-results-api submitReturnComboSelection"
+      ],
       "target_iteration": "JP-FULLSTACK-01B",
       "verification_test": "New flight-return-options.spec.ts",
       "jp_fullstack_01b_status": "CLOSED",
@@ -235,17 +261,19 @@
       "frontend_route": "/agent/payments, /agent/invoices",
       "frontend_file": "frontend/app/agent/payments/page.tsx, frontend/app/agent/invoices/page.tsx",
       "laravel_route_controller": "agent.payments.index, agent.invoices.index",
-      "current_state": "CONNECTED_AND_VERIFIED — Laravel JSON connected; Playwright payments/invoices list/empty/denial coverage in jp-ops-04",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 Laravel JSON connected; Playwright payments/invoices list/empty/denial coverage in jp-ops-04",
       "expected_state": "CONNECTED_AND_VERIFIED with ops regression coverage",
       "severity": "MEDIUM",
       "security_impact": "Wallet.view permission enforced server-side",
       "booking_payment_impact": "Read-only payment history visibility",
       "proposed_correction": "01F: extend jp-ops-04-agent-operational.spec.ts",
-      "dependencies": ["agent.permission:wallet.view"],
+      "dependencies": [
+        "agent.permission:wallet.view"
+      ],
       "target_iteration": "JP-FULLSTACK-01F",
       "verification_test": "AgentPaymentsInvoicesJsonTest + jp-ops-04-agent-operational.spec.ts payments/invoices routes",
       "jp_fullstack_01f_status": "CONNECTED_AND_VERIFIED",
-      "jp_fullstack_01f_notes": "Verification only — no production defect found"
+      "jp_fullstack_01f_notes": "Verification only \u2014 no production defect found"
     },
     {
       "id": "JP-FS01-GAP-012",
@@ -254,13 +282,15 @@
       "frontend_route": "/customer/payments",
       "frontend_file": "frontend/app/customer/payments/page.tsx",
       "laravel_route_controller": "customer.payments.index",
-      "current_state": "CONNECTED_AND_VERIFIED — customer.payments.index ownership isolated; Playwright list/empty/error/session states",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 customer.payments.index ownership isolated; Playwright list/empty/error/session states",
       "expected_state": "CONNECTED_AND_VERIFIED in customer ops regression",
       "severity": "LOW",
       "security_impact": "Customer ownership enforced",
       "booking_payment_impact": "Payment history read-only",
       "proposed_correction": "01E: jp-ops-03 payments list/empty/error tests + Laravel customer.payments.index ownership contract; no feature change unless defect found",
-      "dependencies": ["customer portal JSON presenter"],
+      "dependencies": [
+        "customer portal JSON presenter"
+      ],
       "target_iteration": "JP-FULLSTACK-01E",
       "verification_test": "CustomerPaymentsJsonTest + jp-ops-03-customer-operational.spec.ts payments",
       "jp_fullstack_01e_status": "CONNECTED_AND_VERIFIED",
@@ -273,15 +303,18 @@
       "frontend_route": "/sitemap, /[slug], /legal/[slug]",
       "frontend_file": "frontend/app/(public)/sitemap/page.tsx, frontend/app/(public)/[slug]/page.tsx",
       "laravel_route_controller": "api.public.content.sitemap-routes, api.public.content.custom",
-      "current_state": "Laravel wired; CONNECTED_NOT_VERIFIED — limited dedicated tests",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 cms-bridge + route-matrix cover static/dynamic CMS routes, unknown slugs, failure states",
       "expected_state": "Smoke coverage for dynamic CMS routes",
       "severity": "LOW",
       "security_impact": "None",
       "booking_payment_impact": "None",
       "proposed_correction": "01G: cms-bridge extended matrix",
-      "dependencies": ["public-content services"],
+      "dependencies": [
+        "public-content services"
+      ],
       "target_iteration": "JP-FULLSTACK-01G",
-      "verification_test": "cms-bridge.spec.ts + route-matrix.spec.ts"
+      "verification_test": "cms-bridge.spec.ts + route-matrix.spec.ts",
+      "jp_fullstack_01g_status": "CONNECTED_AND_VERIFIED"
     },
     {
       "id": "JP-FS01-GAP-014",
@@ -296,7 +329,9 @@
       "security_impact": "Session-bound form POST",
       "booking_payment_impact": "Required for some return itineraries",
       "proposed_correction": "01B: branding verification on handoff landing",
-      "dependencies": ["absoluteLaravelHandoffUrl helper"],
+      "dependencies": [
+        "absoluteLaravelHandoffUrl helper"
+      ],
       "target_iteration": "JP-FULLSTACK-01B",
       "verification_test": "Handoff URL allowlist regression",
       "jp_fullstack_01b_status": "CLOSED",
@@ -309,13 +344,15 @@
       "frontend_route": "/customer/profile, /customer/security",
       "frontend_file": "frontend/features/customer-dashboard/profile/*",
       "laravel_route_controller": "customer.profile.show, PUT /password",
-      "current_state": "CONNECTED_AND_VERIFIED — profile PATCH and password PUT with CSRF, 422, bounded 419 retry, session recovery tested",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 profile PATCH and password PUT with CSRF, 422, bounded 419 retry, session recovery tested",
       "expected_state": "CONNECTED_AND_VERIFIED with mutation regression",
       "severity": "LOW",
       "security_impact": "Session CSRF on mutations",
       "booking_payment_impact": "None",
       "proposed_correction": "01E: profile/security mutation Playwright (PATCH profile, PUT password, 422, CSRF, bounded 419, expired session); no policy or OTP changes",
-      "dependencies": ["customer-dashboard-api"],
+      "dependencies": [
+        "customer-dashboard-api"
+      ],
       "target_iteration": "JP-FULLSTACK-01E",
       "verification_test": "jp-fullstack-01e-profile-security.spec.ts",
       "jp_fullstack_01e_status": "CONNECTED_AND_VERIFIED",
@@ -328,17 +365,19 @@
       "frontend_route": "/agent/* (capability-filtered)",
       "frontend_file": "frontend/features/agent-dashboard/shell/AgentDashboardShell.tsx",
       "laravel_route_controller": "agent.permission:* middleware on routes/agent.php",
-      "current_state": "CONNECTED_AND_VERIFIED — Laravel denies unauthorized API; Next nav filters capabilities; jp-ops-04 RBAC regression re-run",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 Laravel denies unauthorized API; Next nav filters capabilities; jp-ops-04 RBAC regression re-run",
       "expected_state": "No cross-role data leakage; staff denied server-side when permission absent",
       "severity": "LOW",
       "security_impact": "Verified pattern from JP-OPS-04; re-verified on 01F",
       "booking_payment_impact": "Staff booking create/view gated by permissions",
       "proposed_correction": "01F: re-run jp-ops-04 RBAC regression against live JSON",
-      "dependencies": ["AgentPortalCapabilitiesPresenter"],
+      "dependencies": [
+        "AgentPortalCapabilitiesPresenter"
+      ],
       "target_iteration": "JP-FULLSTACK-01F",
       "verification_test": "jp-ops-04-agent-operational.spec.ts + AgentStaffPermissionTest",
       "jp_fullstack_01f_status": "CONNECTED_AND_VERIFIED",
-      "jp_fullstack_01f_notes": "Verification only — no production RBAC defect found"
+      "jp_fullstack_01f_notes": "Verification only \u2014 no production RBAC defect found"
     },
     {
       "id": "JP-FS01-GAP-017",
@@ -347,15 +386,18 @@
       "frontend_route": "all",
       "frontend_file": "docs/frontend/JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.md",
       "laravel_route_controller": "n/a",
-      "current_state": "Prior inventories cite 64–67 routes; filesystem has 76 page.tsx files",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 82 production page.tsx routes; FINAL-ROUTE-MAP.json parity regression",
       "expected_state": "Route inventory docs aligned with filesystem",
       "severity": "DOCUMENTATION",
       "security_impact": "None",
       "booking_payment_impact": "Planning accuracy",
       "proposed_correction": "Update route map during 01G closure",
-      "dependencies": ["this audit"],
+      "dependencies": [
+        "this audit"
+      ],
       "target_iteration": "JP-FULLSTACK-01G",
-      "verification_test": "route-matrix.spec.ts count parity"
+      "verification_test": "route-matrix.spec.ts count parity",
+      "jp_fullstack_01g_status": "CONNECTED_AND_VERIFIED"
     },
     {
       "id": "JP-FS01-GAP-018",
@@ -364,7 +406,7 @@
       "frontend_route": "n/a",
       "frontend_file": "docs/operations/JP-OPS-01-FULL-STACK-ROUTE-INVENTORY.md",
       "laravel_route_controller": "n/a",
-      "current_state": "JP-OPS-01 inventory predates customer travelers/invoices and agent ops pages",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 JP-OPS-01 preserved with supersession notice; current authority linked",
       "expected_state": "JP-FULLSTACK-01 registers supersede for public/customer/agent connectivity",
       "severity": "DOCUMENTATION",
       "security_impact": "None",
@@ -372,7 +414,8 @@
       "proposed_correction": "Cross-reference JP-FULLSTACK-01 registers in 01G",
       "dependencies": [],
       "target_iteration": "JP-FULLSTACK-01G",
-      "verification_test": "Manual doc review"
+      "verification_test": "Manual doc review",
+      "jp_fullstack_01g_status": "CONNECTED_AND_VERIFIED"
     },
     {
       "id": "JP-FS01-GAP-019",
@@ -381,15 +424,18 @@
       "frontend_route": "all public surfaces",
       "frontend_file": "frontend/tests/jp-full-next-frontend/leakage.spec.ts",
       "laravel_route_controller": "n/a",
-      "current_state": "No Parwaaz/Master OTA strings in frontend production components; dashboard traveler Blade comments reference Parwaaz in legacy comment only (admin/staff dashboard scope)",
+      "current_state": "CONNECTED_AND_VERIFIED \u2014 no visible legacy branding in production surfaces; expanded Playwright + Laravel Blade audits",
       "expected_state": "Zero visible legacy branding on public/customer/agent Next and public Laravel views",
       "severity": "LOW",
       "security_impact": "Brand trust",
       "booking_payment_impact": "Invoice/success page branding",
       "proposed_correction": "01G: run leakage.spec.ts + expand grep to checkout Blade views",
-      "dependencies": ["leakage.spec.ts patterns"],
+      "dependencies": [
+        "leakage.spec.ts patterns"
+      ],
       "target_iteration": "JP-FULLSTACK-01G",
-      "verification_test": "leakage.spec.ts + AgentPortalBrandingDropdownAuditTest"
+      "verification_test": "leakage.spec.ts + AgentPortalBrandingDropdownAuditTest",
+      "jp_fullstack_01g_status": "CONNECTED_AND_VERIFIED"
     },
     {
       "id": "JP-FS01-GAP-020",
@@ -402,9 +448,12 @@
       "expected_state": "Verified end-to-end manual booking success with real backend PNR/status only",
       "severity": "MEDIUM",
       "security_impact": "No synthetic payment confirmation",
-      "booking_payment_impact": "Core manual payment booking path — needs live-path verification in 01C/01D",
+      "booking_payment_impact": "Core manual payment booking path \u2014 needs live-path verification in 01C/01D",
       "proposed_correction": "01C+01D: standard-booking regression against Laravel JSON with fixture supplier",
-      "dependencies": ["StandardBookingJsonPresenter", "PublicCheckoutStabilizationTest"],
+      "dependencies": [
+        "StandardBookingJsonPresenter",
+        "PublicCheckoutStabilizationTest"
+      ],
       "target_iteration": "JP-FULLSTACK-01C",
       "verification_test": "standard-booking-review-payment.spec.ts + StandardBookingReviewJsonTest",
       "jp_fullstack_01c_status": "CLOSED",
@@ -415,14 +464,14 @@
   "auth_session_csrf_findings": {
     "session_bridge": "GET /api/public/auth/session via /laravel proxy; credentials include",
     "csrf": "XSRF-TOKEN cookie + X-XSRF-TOKEN on mutations; 419 mapped to csrf_expired; no auto-replay on payment/booking",
-    "otp_demo": "Preserved — config/ota_otp_demo.php, DemoFixedLoginOtpGate.php unchanged",
-    "invalid_credentials": "LoginRequest uses generic trans(auth.failed) — no email existence leak",
+    "otp_demo": "Preserved \u2014 config/ota_otp_demo.php, DemoFixedLoginOtpGate.php unchanged",
+    "invalid_credentials": "LoginRequest uses generic trans(auth.failed) \u2014 no email existence leak",
     "portal_guards": "SSR layout guards on customer/agent; Laravel account.type middleware on portal routes",
     "agent_staff_rbac": "Laravel agent.permission middleware authoritative; Next capabilities filter nav only"
   },
   "payment_implementation_summary": {
-    "manual_payment": "UI label manual → canonical pay_later; submitBookingReview POST /booking/review?format=json",
-    "pay_by_card": "UI label card → online_card when AbhiPay show_review_option; AbhiPay hosted redirect; callback CSRF-exempt",
+    "manual_payment": "UI label manual \u2192 canonical pay_later; submitBookingReview POST /booking/review?format=json",
+    "pay_by_card": "UI label card \u2192 online_card when AbhiPay show_review_option; AbhiPay hosted redirect; callback CSRF-exempt",
     "no_master_ota_checkout_leak": "No Parwaaz/Master OTA checkout URLs found in frontend production path",
     "no_raw_card_storage": "CardPaymentPage uses startEndpoint redirect only"
   },
@@ -430,44 +479,74 @@
     {
       "id": "JP-FULLSTACK-01A",
       "focus": "Authentication, session, CSRF, role routing, force-password Next page",
-      "gaps": ["JP-FS01-GAP-001"]
+      "gaps": [
+        "JP-FS01-GAP-001"
+      ]
     },
     {
       "id": "JP-FULLSTACK-01B",
       "focus": "Public search, results, fare-detail, return-options handoff",
-      "gaps": ["JP-FS01-GAP-007", "JP-FS01-GAP-008", "JP-FS01-GAP-010", "JP-FS01-GAP-014"]
+      "gaps": [
+        "JP-FS01-GAP-007",
+        "JP-FS01-GAP-008",
+        "JP-FS01-GAP-010",
+        "JP-FS01-GAP-014"
+      ]
     },
     {
       "id": "JP-FULLSTACK-01C",
       "focus": "Customer checkout, passengers, booking submission",
-      "gaps": ["JP-FS01-GAP-020"]
+      "gaps": [
+        "JP-FS01-GAP-020"
+      ]
     },
     {
       "id": "JP-FULLSTACK-01D",
       "focus": "AbhiPay card return handoff and Next confirmation connectivity",
-      "gaps": ["JP-FS01-GAP-004"]
+      "gaps": [
+        "JP-FS01-GAP-004"
+      ]
     },
     {
       "id": "JP-FULLSTACK-01E",
       "focus": "Guest lookup follow-on, customer payments and profile/security verification",
-      "gaps": ["JP-FS01-GAP-002", "JP-FS01-GAP-012", "JP-FS01-GAP-015"]
+      "gaps": [
+        "JP-FS01-GAP-002",
+        "JP-FS01-GAP-012",
+        "JP-FS01-GAP-015"
+      ]
     },
     {
       "id": "JP-FULLSTACK-01F",
       "focus": "Agent and Agent Staff portal connectivity and RBAC",
-      "gaps": ["JP-FS01-GAP-005", "JP-FS01-GAP-006", "JP-FS01-GAP-011", "JP-FS01-GAP-016"]
+      "gaps": [
+        "JP-FS01-GAP-005",
+        "JP-FS01-GAP-006",
+        "JP-FS01-GAP-011",
+        "JP-FS01-GAP-016"
+      ]
     },
     {
       "id": "JP-FULLSTACK-01G",
       "focus": "Brand leakage, fixture hardening, CMS verification, final regression",
-      "gaps": ["JP-FS01-GAP-003", "JP-FS01-GAP-013", "JP-FS01-GAP-017", "JP-FS01-GAP-018", "JP-FS01-GAP-019"]
+      "gaps": [
+        "JP-FS01-GAP-003",
+        "JP-FS01-GAP-013",
+        "JP-FS01-GAP-017",
+        "JP-FS01-GAP-018",
+        "JP-FS01-GAP-019"
+      ]
     }
   ],
   "jp_fullstack_01e_scope_lock": {
     "scope_lock_branch": "phase/jetpk-fullstack-01e-scope-lock",
     "baseline_sha": "749ae0ae7d70734f53794c79c7f54e4d1f2b8305",
     "implementation_branch": "phase/jetpk-fullstack-01e-guest-lookup-customer-portal-verification",
-    "gaps": ["JP-FS01-GAP-002", "JP-FS01-GAP-012", "JP-FS01-GAP-015"],
+    "gaps": [
+      "JP-FS01-GAP-002",
+      "JP-FS01-GAP-012",
+      "JP-FS01-GAP-015"
+    ],
     "gap_002_decision": "Next guest-detail primary; additive Laravel JSON; Blade fallback retained",
     "guest_json_contract": {
       "uri": "GET /guest/bookings/{booking}/access/{token}?format=json",
@@ -558,11 +637,51 @@
     "baseline_sha": "94fc86a33d0f091aae1cd9166a49b81b47c1c9bd",
     "status": "READY_FOR_COMMIT",
     "gaps_closed": [
-      { "id": "JP-FS01-GAP-005", "final_classification": "CONNECTED_AND_VERIFIED" },
-      { "id": "JP-FS01-GAP-006", "final_classification": "CONNECTED_AND_VERIFIED" },
-      { "id": "JP-FS01-GAP-011", "final_classification": "CONNECTED_AND_VERIFIED" },
-      { "id": "JP-FS01-GAP-016", "final_classification": "CONNECTED_AND_VERIFIED" }
+      {
+        "id": "JP-FS01-GAP-005",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-006",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-011",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-016",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      }
     ],
     "closure_doc": "docs/phases/JP-FULLSTACK-01F-AGENT-AGENT-STAFF-RBAC-TRAVELERS-CLOSURE.md"
+  },
+  "jp_fullstack_01g_implementation": {
+    "branch": "phase/jetpk-fullstack-01g-cms-branding-fixture-hardening-final-regression",
+    "baseline_sha": "47f7f90c410d88980830eb0e41b5e319f4be0995",
+    "status": "READY_FOR_COMMIT",
+    "gaps_closed": [
+      {
+        "id": "JP-FS01-GAP-003",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-013",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-017",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-018",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      },
+      {
+        "id": "JP-FS01-GAP-019",
+        "final_classification": "CONNECTED_AND_VERIFIED"
+      }
+    ],
+    "closure_doc": "docs/phases/JP-FULLSTACK-01G-CMS-BRANDING-FIXTURE-HARDENING-FINAL-REGRESSION-CLOSURE.md"
   }
 }

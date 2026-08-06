@@ -1,5 +1,7 @@
 # JP-OPS-01 Full-Stack Route Inventory (JP-OPS-01A reconciled)
 
+> **Supersession notice (JP-FULLSTACK-01G):** This document records the **historical JP-OPS-01 baseline** from its original audit. Public/Customer/Agent Next route counts here predate JP-FULLSTACK-01A–01F portal growth. **Current frontend route authority:** [`docs/frontend/JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.md`](../frontend/JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.md) and [`JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.json`](../frontend/JP-FULL-NEXT-FRONTEND-FINAL-ROUTE-MAP.json) (**82** production `page.tsx` routes, excluding `dev/`). **Current connectivity and gap authority:** [`JP-FULLSTACK-01-GAP-REGISTER.md`](JP-FULLSTACK-01-GAP-REGISTER.md) / [`.json`](JP-FULLSTACK-01-GAP-REGISTER.json). Do not treat the 67-page frontend total below as current.
+
 **JSON:** [`JP-OPS-01-FULL-STACK-ROUTE-INVENTORY.json`](JP-OPS-01-FULL-STACK-ROUTE-INVENTORY.json)
 
 ## Counting models

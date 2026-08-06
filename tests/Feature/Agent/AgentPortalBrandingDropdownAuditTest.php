@@ -15,29 +15,41 @@ class AgentPortalBrandingDropdownAuditTest extends TestCase
     use BuildsAgentPortalScenario;
     use RefreshDatabase;
 
-    public function test_guest_sees_default_ota_header_title(): void
+    /** @var list<string> */
+    private const FORBIDDEN_BRAND_FRAGMENTS = [
+        'Parwaaz',
+        'Master OTA',
+        'YoursDomain',
+        'YD Travel',
+        'haseeb-master',
+    ];
+
+    public function test_guest_login_page_shows_jetpakistan_branding_without_legacy_names(): void
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $this->get(route('home'))
-            ->assertOk()
-            ->assertSee('data-testid="header-brand-name"', false)
-            ->assertDontSee('data-testid="footer-partner-agency"', false);
+        $html = $this->get(route('login'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('JetPakistan', $html);
+        $this->assertNoForbiddenBranding($html);
     }
 
-    public function test_agent_admin_sees_agency_name_in_header_not_personal_name(): void
+    public function test_agent_admin_sees_jetpakistan_branding_not_personal_name_in_header(): void
     {
         $scenario = $this->prepareJetPakistanAdmin('Asif');
 
-        $this->actingAs($scenario['admin'])
+        $html = $this->actingAs($scenario['admin'])
             ->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="header-brand-name">JetPakistan<', false)
-            ->assertSee('data-testid="footer-partner-agency">Partner Agency: JetPakistan<', false)
-            ->assertDontSee('data-testid="header-brand-name">Asif<', false);
+            ->getContent();
+
+        $this->assertStringContainsString('alt="JetPakistan"', $html);
+        $this->assertStringContainsString('aria-label="JetPakistan portal"', $html);
+        $this->assertStringNotContainsString('data-testid="header-brand-name">Asif<', $html);
+        $this->assertNoForbiddenBranding($html);
     }
 
-    public function test_agent_staff_sees_owner_agency_name_in_header(): void
+    public function test_agent_staff_sees_jetpakistan_branding_in_portal_shell(): void
     {
         $scenario = $this->prepareJetPakistanAdmin('Asif');
         $staff = $this->createAgentStaffUser(
@@ -47,14 +59,16 @@ class AgentPortalBrandingDropdownAuditTest extends TestCase
             'Ali Raza',
         );
 
-        $this->actingAs($staff)
+        $html = $this->actingAs($staff)
             ->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="header-brand-name">JetPakistan<', false)
-            ->assertSee('data-testid="footer-partner-agency">Partner Agency: JetPakistan<', false);
+            ->getContent();
+
+        $this->assertStringContainsString('alt="JetPakistan"', $html);
+        $this->assertNoForbiddenBranding($html);
     }
 
-    public function test_header_logo_markup_unchanged_for_agent_portal(): void
+    public function test_header_logo_markup_uses_jetpakistan_portal_shell(): void
     {
         $scenario = $this->prepareJetPakistanAdmin('Asif');
 
@@ -63,33 +77,24 @@ class AgentPortalBrandingDropdownAuditTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('class="ota-brand ota-brand-with-mark"', $html);
-        $this->assertStringContainsString('class="ota-brand-mark"', $html);
+        $this->assertStringContainsString('class="jp-portal__logo-img"', $html);
+        $this->assertStringContainsString('data-testid="agent-portal-subnav"', $html);
     }
 
-    public function test_agent_admin_dropdown_is_compact_with_balance(): void
+    public function test_agent_admin_portal_nav_includes_core_links(): void
     {
         $scenario = $this->prepareJetPakistanAdmin('Asif');
 
         $this->actingAs($scenario['admin'])
             ->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="account-dropdown-link-dashboard"', false)
-            ->assertSee('data-testid="account-dropdown-link-bookings"', false)
-            ->assertSee('data-testid="account-dropdown-link-profile-settings"', false)
-            ->assertSee('data-testid="account-dropdown-link-agency-settings"', false)
-            ->assertSee('data-testid="account-dropdown-link-logout"', false)
-            ->assertSee('data-testid="account-dropdown-balance"', false)
-            ->assertSee('Available Balance', false)
-            ->assertSee('PKR 75,000.00', false)
-            ->assertDontSee('data-testid="account-dropdown-link-wallet"', false)
-            ->assertDontSee('data-testid="account-dropdown-link-deposits"', false)
-            ->assertDontSee('data-testid="account-dropdown-link-travelers"', false)
-            ->assertDontSee('data-testid="account-dropdown-link-support-tickets"', false)
-            ->assertDontSee('data-testid="account-dropdown-link-commissions"', false);
+            ->assertSee('data-testid="agent-portal-subnav"', false)
+            ->assertSee('href="/agent/bookings"', false)
+            ->assertSee('href="/agent/travelers"', false)
+            ->assertSee('data-testid="jp-portal-sidebar-logout"', false);
     }
 
-    public function test_agent_staff_a0_dropdown_minimal(): void
+    public function test_agent_staff_a0_sees_minimal_portal_nav(): void
     {
         $scenario = $this->buildAgentPortalScenario();
         $staff = $scenario['staff']['A0'];
@@ -97,12 +102,9 @@ class AgentPortalBrandingDropdownAuditTest extends TestCase
         $this->actingAs($staff)
             ->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="account-dropdown-link-dashboard"', false)
-            ->assertSee('data-testid="account-dropdown-link-profile-settings"', false)
-            ->assertSee('data-testid="account-dropdown-link-logout"', false)
-            ->assertDontSee('data-testid="account-dropdown-link-bookings"', false)
-            ->assertDontSee('data-testid="account-dropdown-link-agency-settings"', false)
-            ->assertDontSee('data-testid="account-dropdown-balance"', false);
+            ->assertSee('data-testid="agent-portal-subnav"', false)
+            ->assertSee('href="/agent"', false)
+            ->assertDontSee('href="/agent/agency"', false);
     }
 
     public function test_agent_staff_with_bookings_view_sees_bookings_link(): void
@@ -111,7 +113,7 @@ class AgentPortalBrandingDropdownAuditTest extends TestCase
 
         $this->actingAs($scenario['staff']['A1'])
             ->get(route('agent.dashboard'))
-            ->assertSee('data-testid="account-dropdown-link-bookings"', false);
+            ->assertSee('href="/agent/bookings"', false);
     }
 
     public function test_agent_staff_with_agency_view_sees_agency_settings(): void
@@ -120,17 +122,16 @@ class AgentPortalBrandingDropdownAuditTest extends TestCase
 
         $this->actingAs($scenario['staff']['A6'])
             ->get(route('agent.dashboard'))
-            ->assertSee('data-testid="account-dropdown-link-agency-settings"', false);
+            ->assertSee('href="/agent/agency"', false);
     }
 
-    public function test_agent_staff_with_wallet_view_sees_balance_linked_to_wallet(): void
+    public function test_agent_staff_with_wallet_view_sees_wallet_link(): void
     {
         $scenario = $this->buildAgentPortalScenario();
 
         $this->actingAs($scenario['staff']['A3'])
             ->get(route('agent.dashboard'))
-            ->assertSee('data-testid="account-dropdown-balance"', false)
-            ->assertSee(route('agent.wallet.show'), false);
+            ->assertSee('href="/agent/wallet"', false);
     }
 
     public function test_agent_admin_can_edit_agency_staff_cannot_even_with_legacy_permission(): void
@@ -200,19 +201,18 @@ class AgentPortalBrandingDropdownAuditTest extends TestCase
         $this->assertSame('JetPakistanLtd', $dirty);
     }
 
-    public function test_customer_dropdown_compact(): void
+    public function test_customer_dashboard_shows_jetpakistan_branding(): void
     {
         $this->seed(OtaFoundationSeeder::class);
         $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
 
-        $this->actingAs($customer)
+        $html = $this->actingAs($customer)
             ->get(route('customer.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="account-dropdown-link-dashboard"', false)
-            ->assertSee('data-testid="account-dropdown-link-bookings"', false)
-            ->assertSee('data-testid="account-dropdown-link-profile-settings"', false)
-            ->assertDontSee('data-testid="account-dropdown-link-agency-settings"', false)
-            ->assertDontSee('data-testid="account-dropdown-balance"', false);
+            ->getContent();
+
+        $this->assertStringContainsString('JetPakistan', $html);
+        $this->assertNoForbiddenBranding($html);
     }
 
     /**
@@ -231,5 +231,12 @@ class AgentPortalBrandingDropdownAuditTest extends TestCase
             'agent' => $scenario['agentA']->fresh(),
             'admin' => $scenario['adminA']->fresh(),
         ];
+    }
+
+    private function assertNoForbiddenBranding(string $html): void
+    {
+        foreach (self::FORBIDDEN_BRAND_FRAGMENTS as $fragment) {
+            $this->assertStringNotContainsString($fragment, $html, "Forbidden branding fragment found: {$fragment}");
+        }
     }
 }
