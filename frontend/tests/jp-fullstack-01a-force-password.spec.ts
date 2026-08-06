@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { sessionFixtureCookieName } from "../features/auth/server/session-fixture";
+import { FORCE_PASSWORD_CLEARANCE_COOKIE } from "../features/auth/utils/force-password-clearance";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3002";
 
@@ -16,6 +17,13 @@ async function mockCsrf(page: import("@playwright/test").Page) {
 
 async function setFixture(page: import("@playwright/test").Page, fixture: string) {
   await page.context().addCookies([{ name: sessionFixtureCookieName, value: fixture, url: baseURL }]);
+  await page.goto(baseURL);
+  await page.evaluate(
+    ({ name, value }) => {
+      document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Lax`;
+    },
+    { name: sessionFixtureCookieName, value: fixture },
+  );
 }
 
 test.describe("JP-FULLSTACK-01A force-password", () => {
@@ -162,6 +170,97 @@ test.describe("JP-FULLSTACK-01A force-password", () => {
     await page.locator("#main-content").getByLabel(/^new password/i).fill("New-Secure-Pass-1!");
     await page.locator("#main-content").getByLabel(/confirm new password/i).fill("New-Secure-Pass-1!");
     await page.getByRole("button", { name: /save password/i }).click();
-    await expect(page).toHaveURL(/\/agent$/);
+    await expect(page).toHaveURL(/\/agent\/dashboard$/);
+  });
+
+  test("clearance cookie alone cannot authorize customer portal without session", async ({ page }) => {
+    await page.context().addCookies([
+      { name: FORCE_PASSWORD_CLEARANCE_COOKIE, value: "1", url: baseURL },
+    ]);
+    await page.goto("/customer/dashboard");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("422 response does not write clearance cookie", async ({ page }) => {
+    await mockCsrf(page);
+    await setFixture(page, "customer_force_password");
+
+    await page.route("**/laravel/password/force-change?format=json", async (route) => {
+      if (route.request().method() === "POST") {
+        await route.fulfill({
+          status: 422,
+          contentType: "application/json",
+          body: JSON.stringify({
+            message: "Validation failed.",
+            errors: { password: ["Too short."] },
+          }),
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.goto("/password/force-change");
+    await page.locator("#main-content").getByLabel(/^new password/i).fill("short");
+    await page.locator("#main-content").getByLabel(/confirm new password/i).fill("mismatch");
+    await page.getByRole("button", { name: /save password/i }).click();
+    await expect(page).toHaveURL(/\/password\/force-change$/);
+
+    const cookies = await page.context().cookies();
+    expect(cookies.find((cookie) => cookie.name === FORCE_PASSWORD_CLEARANCE_COOKIE)).toBeUndefined();
+  });
+
+  test("failed 419 retry does not write clearance cookie", async ({ page }) => {
+    await mockCsrf(page);
+    await setFixture(page, "customer_force_password");
+
+    await page.route("**/laravel/password/force-change?format=json", async (route) => {
+      if (route.request().method() === "POST") {
+        await route.fulfill({
+          status: 419,
+          contentType: "application/json",
+          body: JSON.stringify({ message: "CSRF token mismatch." }),
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.goto("/password/force-change");
+    await page.locator("#main-content").getByLabel(/^new password/i).fill("New-Secure-Pass-1!");
+    await page.locator("#main-content").getByLabel(/confirm new password/i).fill("New-Secure-Pass-1!");
+    await page.getByRole("button", { name: /save password/i }).click();
+    await expect(page).toHaveURL(/\/password\/force-change$/);
+
+    const cookies = await page.context().cookies();
+    expect(cookies.find((cookie) => cookie.name === FORCE_PASSWORD_CLEARANCE_COOKIE)).toBeUndefined();
+  });
+
+  test("successful fixture mutation writes clearance cookie before navigation", async ({ page }) => {
+    await mockCsrf(page);
+    await setFixture(page, "customer_force_password");
+
+    await page.route("**/laravel/password/force-change?format=json", async (route) => {
+      if (route.request().method() === "POST") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ ok: true, redirect: "/customer/bookings" }),
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.goto("/password/force-change");
+    await page.locator("#main-content").getByLabel(/^new password/i).fill("New-Secure-Pass-1!");
+    await page.locator("#main-content").getByLabel(/confirm new password/i).fill("New-Secure-Pass-1!");
+    await page.getByRole("button", { name: /save password/i }).click();
+
+    const clearanceValue = await page.waitForFunction(() => {
+      const match = document.cookie.match(/(?:^|; )ota_force_password_cleared=([^;]*)/);
+      return match ? decodeURIComponent(match[1]) : null;
+    });
+    expect(await clearanceValue.jsonValue()).toBe("1");
   });
 });

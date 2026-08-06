@@ -1,4 +1,5 @@
 import type { SessionBootstrap } from "@/features/auth/types";
+import { applyForcePasswordFixtureClearance } from "../utils/force-password-clearance";
 
 const FIXTURE_COOKIE = "ota_session_fixture";
 
@@ -107,53 +108,41 @@ export function resolveSessionBootstrapFixture(
     return null;
   }
 
+  let selected: SessionBootstrap | null = null;
+
   if (fixture === "customer") {
-    return CUSTOMER_BOOTSTRAP;
-  }
-
-  if (fixture === "agent") {
-    return AGENT_BOOTSTRAP;
-  }
-
-  if (fixture === "agent_staff") {
-    return AGENT_STAFF_BOOTSTRAP;
-  }
-
-  if (fixture === "anonymous") {
-    return { authenticated: false };
-  }
-
-  if (fixture === "expired") {
-    return EXPIRED_SESSION_BOOTSTRAP;
-  }
-
-  if (fixture === "customer_disabled") {
-    return CUSTOMER_DISABLED_BOOTSTRAP;
-  }
-
-  if (fixture === "agent_disabled") {
-    return AGENT_DISABLED_BOOTSTRAP;
-  }
-
-  if (fixture === "otp") {
-    return OTP_BOOTSTRAP;
-  }
-
-  if (fixture === "customer_force_password") {
-    return {
+    selected = CUSTOMER_BOOTSTRAP;
+  } else if (fixture === "agent") {
+    selected = AGENT_BOOTSTRAP;
+  } else if (fixture === "agent_staff") {
+    selected = AGENT_STAFF_BOOTSTRAP;
+  } else if (fixture === "anonymous") {
+    selected = { authenticated: false };
+  } else if (fixture === "expired") {
+    selected = EXPIRED_SESSION_BOOTSTRAP;
+  } else if (fixture === "customer_disabled") {
+    selected = CUSTOMER_DISABLED_BOOTSTRAP;
+  } else if (fixture === "agent_disabled") {
+    selected = AGENT_DISABLED_BOOTSTRAP;
+  } else if (fixture === "otp") {
+    selected = OTP_BOOTSTRAP;
+  } else if (fixture === "customer_force_password") {
+    selected = {
       ...CUSTOMER_BOOTSTRAP,
       requires_password_change: true,
     };
-  }
-
-  if (fixture === "agent_force_password") {
-    return {
+  } else if (fixture === "agent_force_password") {
+    selected = {
       ...AGENT_BOOTSTRAP,
       requires_password_change: true,
     };
   }
 
-  return null;
+  if (selected === null) {
+    return null;
+  }
+
+  return applyForcePasswordFixtureClearance(cookies, selected, fixture, true);
 }
 
 export const sessionFixtureCookieName = FIXTURE_COOKIE;
