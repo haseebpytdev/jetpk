@@ -65,37 +65,46 @@ function unavailableSession(): DashboardSessionSummary {
 }
 
 function fromFixture(portal: DashboardPortal = "admin"): DashboardSessionSummary {
+  const isStaff = portal === "staff";
   return {
-    id: "fixture-admin",
-    displayName: mockUser.name,
-    email: mockUser.email,
-    roles: [mockUser.role],
-    permissions: ["dashboard.view", "bookings.view", "payments.view", "customers.view"],
-    accountType: "platform_admin",
+    id: isStaff ? "fixture-staff" : "fixture-admin",
+    displayName: isStaff ? "Platform Staff" : mockUser.name,
+    email: isStaff ? "staff@jetpakistan.test" : mockUser.email,
+    roles: [isStaff ? "Platform Staff" : mockUser.role],
+    permissions: isStaff
+      ? ["dashboard.view", "bookings.view"]
+      : ["dashboard.view", "bookings.view", "payments.view", "customers.view"],
+    accountType: isStaff ? "platform_staff" : "platform_admin",
     accountStatus: "active",
     portalType: portal,
-    platformRole: "platform_admin",
+    platformRole: isStaff ? "platform_staff" : "platform_admin",
     sessionUsable: true,
     denialReason: null,
     requiresPasswordChange: false,
     requiresEmailVerification: false,
     landingRoute: `/${portal}/dashboard`,
-    navigation: [
-      { label: "Dashboard", href: "/", key: "dashboard" },
-      { label: "Bookings", href: "/bookings", key: "bookings" },
-      { label: "Payments", href: "/payments", key: "payments" },
-      { label: "Cancellations", href: "/operations/review", key: "cancellations" },
-      { label: "Execution", href: "/operations/execution", key: "execution" },
-      { label: "Reports", href: "/reports", key: "reports" },
-      { label: "Support & Help", href: "/support", key: "support" },
-    ],
+    navigation: isStaff
+      ? [
+          { label: "Dashboard", href: "/", key: "dashboard" },
+          { label: "Bookings", href: "/bookings", key: "bookings" },
+          { label: "Support & Help", href: "/support", key: "support" },
+        ]
+      : [
+          { label: "Dashboard", href: "/", key: "dashboard" },
+          { label: "Bookings", href: "/bookings", key: "bookings" },
+          { label: "Payments", href: "/payments", key: "payments" },
+          { label: "Cancellations", href: "/operations/review", key: "cancellations" },
+          { label: "Execution", href: "/operations/execution", key: "execution" },
+          { label: "Reports", href: "/reports", key: "reports" },
+          { label: "Support & Help", href: "/support", key: "support" },
+        ],
     capabilities: {
-      can_review_payment: true,
+      can_review_payment: !isStaff,
       can_review_deposit: portal === "admin",
       can_review_cancellation: true,
-      can_review_refund: true,
+      can_review_refund: portal === "admin",
     },
-    initials: mockUser.initials,
+    initials: isStaff ? "PS" : mockUser.initials,
   };
 }
 

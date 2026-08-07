@@ -57,18 +57,6 @@ export const navGroups: NavGroup[] = [
         href: "/agents",
         laravelRoute: "admin.agents",
       },
-      {
-        label: "Staff Management",
-        href: "/planned/users",
-        laravelRoute: "admin.staff",
-        planned: true,
-      },
-      {
-        label: "Roles & Permissions",
-        href: "/planned/users",
-        laravelRoute: "admin.roles-permissions",
-        planned: true,
-      },
     ],
   },
   {
@@ -157,18 +145,6 @@ export const navGroups: NavGroup[] = [
         label: "Notifications",
         href: "/planned/communications",
         laravelRoute: "admin.settings.communications.index",
-        planned: true,
-      },
-      {
-        label: "Audit Logs",
-        href: "/planned/diagnostics",
-        laravelRoute: "admin.finance.wallet-audit.index",
-        planned: true,
-      },
-      {
-        label: "System Settings",
-        href: "/planned/settings",
-        laravelRoute: "admin.settings.index",
         planned: true,
       },
       {
