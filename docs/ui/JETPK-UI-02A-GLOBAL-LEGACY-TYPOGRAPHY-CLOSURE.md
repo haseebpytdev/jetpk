@@ -153,3 +153,9 @@ JETPK-UI-001–015, 017–022 — no implementation.
 ## Production
 
 No production connections, mutations, or deployment.
+
+## Scope repair (JETPK-UI-02A-R1)
+
+- **UI-02A supersedes** the sibling branch `phase/jetpk-ui-02-design-system-shared-shell-closure` (`588d28b`); that branch must **not** be merged.
+- `dashboard/playwright.config.ts` was **restored to the UI-01 audit parent** (`6bc4f6d`) because `reuseExistingServer` is dashboard Playwright infrastructure behavior and is outside global typography scope.
+- Targeted typography verification does not depend on committing that config modification; UI-02A typography contract tests and build/typecheck/lint remain the acceptance evidence.
