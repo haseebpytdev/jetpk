@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import { stripDashboardBasePath } from "@/lib/portal-path";
+import { stripDashboardBasePath, detectPortalFromPathname } from "@/lib/portal-path";
 import { dashboardHref } from "@/lib/portal-path";
 import { useDashboardPortal } from "@/lib/portal-context";
 import { useDashboardNavigation, useDashboardSession } from "@/lib/session-context";
@@ -31,6 +31,8 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
   const homePath = useDashboardPath();
   const relativePathname = stripDashboardBasePath(pathname);
   const portal = useDashboardPortal();
+  const portalFromPath = detectPortalFromPathname(pathname);
+  const effectivePortal = portalFromPath ?? portal;
   const contextSession = useDashboardSession();
   const navigation = useDashboardNavigation();
   const session = sessionProp ?? contextSession;
@@ -63,6 +65,12 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
         <div className="border-b border-white/10 p-5">
           <Link href={homePath} className="block" onClick={onClose}>
             <span className="font-display text-lg font-bold tracking-tight">JetPakistan</span>
+            <span
+              className="mt-2 block text-[0.65rem] font-semibold uppercase tracking-widest text-emerald-300/90"
+              data-testid="dashboard-portal-label"
+            >
+              {effectivePortal === "staff" ? "Staff console" : "Admin console"}
+            </span>
             <span className="mt-1 block text-xs uppercase tracking-widest text-emerald-400/90">
               Fly smart, fly easy
             </span>

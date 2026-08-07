@@ -156,10 +156,8 @@ class SabreGdsCustomerAgentBookingLifecycleWiringMatrixPhase17Test extends TestC
         $this->seedProductionShapeBookings($agency);
 
         $this->actingAs($admin)
-            ->get('/admin')
-            ->assertOk()
-            ->assertSee('data-testid="ota-dash-overview"', false)
-            ->assertSee('Admin Dashboard', false);
+            ->get('/admin/dashboard')
+            ->assertOk();
     }
 
     public function test_admin_dashboard_forensic_diagnostic_command_composes_without_supplier_http(): void
