@@ -9,11 +9,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendRoot = path.resolve(__dirname, "..");
 const port = process.env.PLAYWRIGHT_PORT ?? "3002";
 
+const smokeEnv = {
+  ...process.env,
+  NODE_ENV: "production",
+  PLAYWRIGHT_PORT: port,
+};
+
+// Smoke runs only: enable gated SSR session fixtures for portal Playwright suites.
+if (process.env.OTA_ALLOW_SESSION_FIXTURE !== "false") {
+  smokeEnv.OTA_ALLOW_SESSION_FIXTURE = process.env.OTA_ALLOW_SESSION_FIXTURE ?? "true";
+}
+
+// Smoke runs only: allow honest homepage/CMS fixture content when Laravel is unavailable.
+if (process.env.OTA_ALLOW_CONTENT_FIXTURE !== "false") {
+  smokeEnv.OTA_ALLOW_CONTENT_FIXTURE = process.env.OTA_ALLOW_CONTENT_FIXTURE ?? "true";
+}
+
 const child = spawn("npx", ["next", "start", "-H", "127.0.0.1", "-p", port], {
   cwd: frontendRoot,
   stdio: "inherit",
   shell: true,
-  env: { ...process.env, NODE_ENV: "production" },
+  env: smokeEnv,
 });
 
 child.on("exit", (code, signal) => {

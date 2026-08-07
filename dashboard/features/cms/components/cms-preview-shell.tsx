@@ -8,9 +8,10 @@ type Props = {
   label: string;
   children: React.ReactNode;
   warnings?: string[];
+  large?: boolean;
 };
 
-export function CmsPreviewShell({ mode, label, children, warnings = [] }: Props) {
+export function CmsPreviewShell({ mode, label, children, warnings = [], large = false }: Props) {
   const contract = CMS_PREVIEW_MODES.find((m) => m.mode === mode) ?? CMS_PREVIEW_MODES[0];
   const isNight = mode.includes("night");
   const isMobile = mode.includes("mobile");
@@ -33,7 +34,7 @@ export function CmsPreviewShell({ mode, label, children, warnings = [] }: Props)
         data-testid="cms-preview-frame"
       >
         <div
-          className={`min-h-[200px] p-4 ${isNight ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"}`}
+          className={`p-4 ${large ? "min-h-[360px]" : "min-h-[200px]"} ${isNight ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"}`}
           data-theme={isNight ? "night" : "day"}
           data-viewport={mode}
         >

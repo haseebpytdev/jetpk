@@ -18,10 +18,14 @@ export default defineConfig({
     trace: "off",
   },
   webServer: {
-    command: `npm run start -- -p ${smokePort}`,
+    command: "node scripts/playwright-server.mjs",
     url: `${baseURL}/admin/dashboard`,
     reuseExistingServer: false,
     timeout: 180_000,
+    env: {
+      PLAYWRIGHT_PORT: smokePort,
+      NODE_ENV: "production",
+    },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });

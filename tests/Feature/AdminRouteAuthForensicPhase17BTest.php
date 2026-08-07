@@ -32,7 +32,7 @@ class AdminRouteAuthForensicPhase17BTest extends TestCase
         $this->assertContains('GET', $route->methods());
         $this->assertSame('admin', $route->uri());
         $this->assertSame(
-            \App\Http\Controllers\Admin\DashboardController::class.'@index',
+            \App\Http\Controllers\BackOffice\BackOfficeDashboardController::class.'@admin',
             $route->getAction('uses'),
         );
 
@@ -51,7 +51,7 @@ class AdminRouteAuthForensicPhase17BTest extends TestCase
         $response->assertDontSee('Page not found', false);
     }
 
-    public function test_platform_admin_get_admin_returns_200_with_jetpakistan_dashboard(): void
+    public function test_platform_admin_get_admin_redirects_to_next_dashboard(): void
     {
         $admin = User::factory()->create([
             'account_type' => AccountType::PlatformAdmin,
@@ -60,9 +60,7 @@ class AdminRouteAuthForensicPhase17BTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin')
-            ->assertOk()
-            ->assertSee('data-testid="ota-dash-overview"', false)
-            ->assertSee('Admin Dashboard', false);
+            ->assertRedirect('/admin/dashboard');
     }
 
     public function test_customer_and_agent_get_admin_return_forbidden_not_404(): void

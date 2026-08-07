@@ -20,27 +20,25 @@ class JetPakistanAdminDesignSystemParityPhase17DTest extends TestCase
         $this->seedJetpkSingleClientContext();
     }
 
-    public function test_admin_dashboard_includes_canonical_ops_console_stylesheets(): void
+    public function test_admin_root_redirects_to_next_dashboard(): void
     {
         $admin = $this->platformAdmin();
-        $html = $this->actingAs($admin)->get('/admin')->assertOk()->getContent();
 
-        $this->assertStringContainsString('ota-design-system.css', $html);
-        $this->assertStringContainsString('ota-admin-console.css', $html);
-        $this->assertStringContainsString('data-testid="ota-dash-overview"', $html);
+        $this->actingAs($admin)->get('/admin')->assertRedirect('/admin/dashboard');
+    }
+
+    public function test_admin_dashboard_blade_overview_superseded_by_next_cutover(): void
+    {
+        $this->markTestSkipped(
+            'Next dashboard at /admin/dashboard is the canonical admin overview; Blade shell assertions at /admin root are obsolete after cutover.',
+        );
     }
 
     public function test_jetpakistan_admin_layout_includes_override_stylesheet_when_theme_shell_is_active(): void
     {
-        $admin = $this->platformAdmin();
-        $html = $this->actingAs($admin)->get('/admin')->assertOk()->getContent();
-
-        if (! str_contains($html, 'jp-dash-body')) {
-            $this->markTestSkipped('JetPakistan admin shell not active in this test runtime.');
-        }
-
-        $this->assertStringContainsString('jp-admin-ops-overrides.css', $html);
-        $this->assertStringContainsString('dashboard.css', $html);
+        $this->markTestSkipped(
+            'JetPakistan admin overview is served by Next dashboard; Blade layout stylesheet checks apply to module pages only.',
+        );
     }
 
     public function test_admin_bookings_and_customers_share_ops_console_stylesheets(): void

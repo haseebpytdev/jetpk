@@ -36,7 +36,7 @@ export function AirportField({
   const requestIdRef = useRef(0);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value ? `${value.city} (${value.iata})` : "");
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [results, setResults] = useState<Airport[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export function AirportField({
 
   const closeList = useCallback(() => {
     setOpen(false);
-    setActiveIndex(0);
+    setActiveIndex(-1);
   }, []);
 
   useEscapeKey(open, () => {
@@ -66,7 +66,7 @@ export function AirportField({
 
     const localResults = filterAirports(debouncedQuery);
     setResults(localResults);
-    setActiveIndex(0);
+    setActiveIndex(-1);
     setError(null);
 
     abortRef.current?.abort();
@@ -82,7 +82,7 @@ export function AirportField({
         setLoading(false);
         if (result.ok && result.data.length > 0) {
           setResults(result.data);
-          setActiveIndex(0);
+          setActiveIndex(-1);
         }
         if (!result.ok && !result.aborted) setError(result.message);
       });
@@ -96,7 +96,7 @@ export function AirportField({
       if (result.ok) {
         if (result.data.length > 0) {
           setResults(result.data);
-          setActiveIndex(0);
+          setActiveIndex(-1);
         }
         setError(null);
       } else if (!result.aborted) {
@@ -117,6 +117,8 @@ export function AirportField({
   const handleInputChange = (next: string) => {
     setQuery(next);
     setOpen(true);
+    setResults(filterAirports(next));
+    setActiveIndex(-1);
     if (!next.trim()) onChange(null);
   };
 
@@ -135,15 +137,15 @@ export function AirportField({
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setActiveIndex((index) => Math.min(index + 1, Math.max(results.length - 1, 0)));
+      setActiveIndex((index) => (index < 0 ? 0 : Math.min(index + 1, Math.max(results.length - 1, 0))));
     }
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      setActiveIndex((index) => Math.max(index - 1, 0));
+      setActiveIndex((index) => (index <= 0 ? -1 : index - 1));
     }
 
-    if (event.key === "Enter" && results[activeIndex]) {
+    if (event.key === "Enter" && activeIndex >= 0 && results[activeIndex]) {
       event.preventDefault();
       selectAirport(results[activeIndex]);
     }

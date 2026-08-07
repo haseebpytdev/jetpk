@@ -2,13 +2,26 @@
 
 ## Scope
 
-Inline fare comparison, flight details expansion, and offer revalidation on the results journey. Mockup reference: **#11** (inline; no dedicated route).
+Inline fare comparison, flight details expansion, and offer revalidation on the results journey. Mockup reference: **#11**.
+
+## Fare selection authority (JETPK-UI-04)
+
+| Surface | When | Purpose |
+|---------|------|---------|
+| `BrandedFareCarousel` (inline on result card) | Preview on `/flights/results` | Quick fare-family preview; book navigates to dedicated route when branded |
+| `/flights/fare-selection` (`FareSelectionPage`) | `has_branded_fares` with >1 family | Full-page mockup #11 comparison with segment detail and order summary |
+| `FlightDetailsDrawer` | “Details” on result card | Segment timeline, baggage, fare rules; not primary fare comparison |
+
+When more than three fare families are present, use a contained horizontal carousel (chevron navigation) — never wrap a fourth card to a new row.
+
+Authority module: `frontend/lib/fare-selection-authority.ts`
 
 ## Entry points
 
 - `FlightDetailsDrawer` — segment timeline, baggage, fare rules summary
 - `BrandedFareCarousel` — horizontal fare family cards when `has_branded_fares: true`
-- Offer selection via `useOfferSelection` hook
+- `FareSelectionPage` — dedicated branded fare comparison route
+- Offer selection via `useOfferSelection` hook (non-branded direct book)
 
 ## Fare family carousel
 
@@ -58,5 +71,4 @@ Inline fare comparison, flight details expansion, and offer revalidation on the 
 
 ## Deferred
 
-- Full-page fare comparison layout (mockup #11 dedicated page)
-- Always-visible segment timeline without drawer interaction
+- Always-visible segment timeline without drawer interaction on results cards

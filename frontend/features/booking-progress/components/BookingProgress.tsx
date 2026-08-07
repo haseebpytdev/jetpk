@@ -3,14 +3,19 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import type { BookingProgressStep } from "../types";
-import { visibleProgressSteps } from "@/features/booking-layout/constants/journey-steps";
+import { visibleProgressSteps, BOOKING_JOURNEY_STEP_LABELS } from "@/features/booking-layout/constants/journey-steps";
 
 type BookingProgressProps = {
   steps: BookingProgressStep[];
   ariaLabel?: string;
+  /** When true, hides visible labels (mobile-only). Desktop should use full connected labels. */
   compact?: boolean;
   className?: string;
 };
+
+function resolveStepLabel(step: BookingProgressStep): string {
+  return BOOKING_JOURNEY_STEP_LABELS[step.key] ?? step.label;
+}
 
 function StepIndicator({
   step,
@@ -46,24 +51,10 @@ function StepIndicator({
     </span>
   );
 
-  const label = (
-    <span
-      className={cn(
-        "text-center leading-tight",
-        compact ? "max-w-[4.5rem] text-[0.65rem]" : "max-w-[5.5rem] text-jp-xs",
-        isCurrent && "font-semibold text-jp-text",
-        isComplete && "text-jp-text",
-        isUpcoming && "text-jp-muted",
-      )}
-    >
-      {step.label}
-    </span>
-  );
-
   const content = (
     <span className="flex flex-col items-center gap-1">
       {circle}
-      {!compact ? label : <span className="sr-only">{step.label}</span>}
+      {compact ? <span className="sr-only">{resolveStepLabel(step)}</span> : null}
     </span>
   );
 
@@ -72,7 +63,7 @@ function StepIndicator({
       <Link
         href={step.href}
         className="rounded-jp-md focus-visible:outline-none focus-visible:shadow-jp-focus"
-        aria-label={`${step.label}, completed`}
+        aria-label={`${resolveStepLabel(step)}, completed`}
       >
         {content}
       </Link>
@@ -138,13 +129,14 @@ export function BookingProgress({
               {!compact ? (
                 <span
                   className={cn(
-                    "mt-1 hidden text-center text-jp-xs sm:block",
+                    "mt-1 text-center text-jp-xs",
+                    compact ? "sr-only" : "hidden min-[480px]:block",
                     step.state === "current" && "font-semibold text-jp-text",
                     step.state === "completed" && "text-jp-text",
                     step.state === "upcoming" && "text-jp-muted",
                   )}
                 >
-                  {step.label}
+                  {resolveStepLabel(step)}
                 </span>
               ) : null}
             </div>

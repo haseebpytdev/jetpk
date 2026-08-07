@@ -19,7 +19,7 @@ export default defineConfig({
   webServer: {
     command: "node scripts/playwright-server.mjs",
     url: baseURL,
-    reuseExistingServer: !isCi,
+    reuseExistingServer: false,
     timeout: 300_000,
     stdout: "pipe",
     stderr: "pipe",
@@ -28,6 +28,7 @@ export default defineConfig({
       NODE_ENV: "production",
       NEXT_PUBLIC_SESSION_PREVIEW: "logged-out",
       OTA_ALLOW_SESSION_FIXTURE: "true",
+      OTA_ALLOW_CONTENT_FIXTURE: "true",
       NEXT_PUBLIC_ALLOW_CONTENT_FIXTURES: "true",
     },
   },

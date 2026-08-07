@@ -22,6 +22,7 @@ import { ResultsSortTabs } from "./ResultsSortTabs";
 import { ResultsToolbar } from "./ResultsToolbar";
 import { SearchErrorState } from "./SearchErrorState";
 import { SearchProgress } from "./SearchProgress";
+import { ResultsHeroBand } from "./ResultsHeroBand";
 import { SearchSummaryBar } from "./SearchSummaryBar";
 
 export function FlightResultsPage() {
@@ -135,10 +136,17 @@ export function FlightResultsPage() {
   const isLoading = results.status === "loading" || results.status === "initializing";
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full">
       <h1 className="sr-only">Flight search results</h1>
 
-      <SearchSummaryBar summary={summary} onModifyClick={() => setModifyOpen(true)} />
+      <div className="relative">
+        <ResultsHeroBand />
+        <div className="relative z-10 mx-auto -mt-14 max-w-7xl px-4 sm:-mt-16 sm:px-6 lg:px-8">
+          <SearchSummaryBar summary={summary} onModifyClick={() => setModifyOpen(true)} />
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-7xl space-y-4 px-4 pb-6 pt-4 sm:px-6 lg:px-8">
 
       {results.freshness?.expires_display ? (
         <p className="text-xs text-jp-text-muted" data-testid="search-expiry">
@@ -252,6 +260,7 @@ export function FlightResultsPage() {
         triggerRef={detailsTriggerRef}
         onNewSearch={() => setModifyOpen(true)}
       />
+      </div>
     </div>
   );
 }

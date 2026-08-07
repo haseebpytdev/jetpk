@@ -33,3 +33,11 @@ test("planned module stub", async ({ page }) => {
   await expect(page.getByText(/Planned module/i)).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("admin.bookings")).toBeVisible();
 });
+
+test("preview sidebar excludes duplicate planned staff and roles stubs", async ({ page }) => {
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
+  await expect(page.getByTestId("dashboard-portal-label")).toHaveText("Admin console");
+  await expect(page.getByRole("link", { name: "Staff Management" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Roles & Permissions" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Users" })).toBeVisible();
+});

@@ -88,6 +88,7 @@ async function mockCsrf(page: import("@playwright/test").Page) {
 }
 
 test("passenger page loads with authoritative traveller counts", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
   await mockCsrf(page);
   await page.route("**/laravel/booking/passengers?**", async (route) => {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockContext) });
@@ -101,6 +102,25 @@ test("passenger page loads with authoritative traveller counts", async ({ page }
   await expect(page.getByText("Lead passenger")).toBeVisible();
   await expect(page.getByTestId("seat-extras-readiness")).toBeVisible();
   expect(page.url()).not.toMatch(/passport/i);
+});
+
+test("booking progress shows connected stepper with canonical labels", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await mockCsrf(page);
+  await page.route("**/laravel/booking/passengers?**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockContext) });
+  });
+
+  await page.goto("/booking/passengers?search_id=search-1&offer_id=offer-1&from=LHE&to=DXB&depart=2026-08-15&adults=1&children=1");
+
+  const progress = page.getByTestId("booking-progress");
+  await expect(progress).toBeVisible();
+  await expect(progress).toContainText("Results");
+  await expect(progress).toContainText("Travelers");
+  await expect(progress).toContainText("Review");
+  await expect(progress).toContainText("Payment");
+  await expect(progress.locator(".jp-progress-fill").first()).toBeVisible();
+  await expect(progress.locator(".jp-progress-fill")).not.toHaveCount(0);
 });
 
 test("missing booking session shows error state", async ({ page }) => {

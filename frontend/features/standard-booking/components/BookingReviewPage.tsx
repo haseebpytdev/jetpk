@@ -164,7 +164,7 @@ export function BookingReviewPage() {
 
   return (
     <BookingPageShell testId="booking-review-page">
-      <BookingProgress steps={context.booking_session.progress} className="mb-6" compact />
+      <BookingProgress steps={context.booking_session.progress} className="mb-6" />
 
       <BookingPageHeader
         title="Review & confirm booking"

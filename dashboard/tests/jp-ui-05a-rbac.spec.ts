@@ -18,4 +18,12 @@ test.describe("JP-UI-05A dashboard platform staff RBAC", () => {
     await page.goto("/admin/dashboard?dataSourcePreview=fixture&jpui05a=noindex");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/i);
   });
+
+  test("admin and staff consoles show distinct portal labels", async ({ page }) => {
+    await page.goto("/admin/dashboard?dataSourcePreview=fixture");
+    await expect(page.getByTestId("dashboard-portal-label")).toHaveText("Admin console");
+
+    await page.goto("/staff/dashboard?dataSourcePreview=fixture");
+    await expect(page.getByTestId("dashboard-portal-label")).toHaveText("Staff console");
+  });
 });
