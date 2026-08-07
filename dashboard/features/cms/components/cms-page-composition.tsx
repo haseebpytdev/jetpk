@@ -10,9 +10,11 @@ import type { CmsPage } from "@/types/cms";
 
 type Props = {
   page: CmsPage;
+  activeSectionId?: string | null;
+  onActiveSectionChange?: (sectionId: string) => void;
 };
 
-export function CmsPageComposition({ page }: Props) {
+export function CmsPageComposition({ page, activeSectionId, onActiveSectionChange }: Props) {
   const sections = page.sectionIds
     .map((id) => mockCmsSections.find((s) => s.id === id))
     .filter(Boolean)
@@ -23,6 +25,8 @@ export function CmsPageComposition({ page }: Props) {
   const orderedSections = orderedIds
     .map((id) => sections.find((s) => s?.id === id))
     .filter(Boolean);
+
+  const currentActiveId = activeSectionId ?? orderedSections[0]?.id ?? null;
 
   const move = (index: number, direction: -1 | 1) => {
     const next = [...orderedIds];
@@ -41,13 +45,40 @@ export function CmsPageComposition({ page }: Props) {
         </p>
       ) : null}
       <p className="mt-2 font-medium text-gray-900">{page.title}</p>
+
+      <nav className="mt-3 flex flex-wrap gap-2" aria-label="Page sections" data-testid="cms-section-nav">
+        {orderedSections.map((section) => {
+          if (!section) return null;
+          const def = getSectionDefinition(section.sectionType);
+          const isActive = section.id === currentActiveId;
+          return (
+            <button
+              key={section.id}
+              type="button"
+              aria-current={isActive ? "true" : undefined}
+              className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                isActive ? "border-jp-accent bg-jp-accent/10 text-jp-text" : "border-jp-border bg-white text-jp-muted"
+              }`}
+              onClick={() => onActiveSectionChange?.(section.id)}
+            >
+              {def?.label ?? section.sectionType}
+            </button>
+          );
+        })}
+      </nav>
+
       <ul className="mt-3 space-y-2 font-mono text-sm" aria-label="Ordered sections">
         {orderedSections.map((section, index) => {
           if (!section) return null;
           const def = getSectionDefinition(section.sectionType);
           const validation = resolveValidation(section, "section");
+          const isActive = section.id === currentActiveId;
           return (
-            <li key={section.id} className="rounded-lg border border-jp-border px-3 py-2">
+            <li
+              key={section.id}
+              className={`rounded-lg border px-3 py-2 ${isActive ? "border-jp-accent bg-jp-accent/5" : "border-jp-border"}`}
+              data-section-id={section.id}
+            >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                   <span className="text-jp-muted">{index + 1}.</span>{" "}

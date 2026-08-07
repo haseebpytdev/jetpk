@@ -156,3 +156,29 @@ test("no save or publish button", async ({ page }) => {
   await expect(page.getByRole("button", { name: /^save$/i })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /publish/i })).toHaveCount(0);
 });
+
+test("page editor shows section nav and sticky preview panel", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(`/admin/dashboard/cms/pages?selected=${PAGE_ID}`, { waitUntil: "load" });
+  await expect(page.getByTestId("cms-page-editor")).toBeVisible();
+  await expect(page.getByTestId("cms-section-nav")).toBeVisible();
+  await expect(page.getByTestId("cms-page-preview-panel")).toBeVisible();
+});
+
+test("section nav updates active section", async ({ page }) => {
+  await page.goto(`/admin/dashboard/cms/pages?selected=${PAGE_ID}`, { waitUntil: "load" });
+  const nav = page.getByTestId("cms-section-nav");
+  const buttons = nav.getByRole("button");
+  const count = await buttons.count();
+  if (count > 1) {
+    await buttons.nth(1).click();
+    await expect(buttons.nth(1)).toHaveAttribute("aria-current", "true");
+  }
+});
+
+test("media field cards use normalized file controls", async ({ page }) => {
+  await page.goto(`/admin/dashboard/cms/pages?selected=${PAGE_ID}`, { waitUntil: "load" });
+  await expect(page.getByTestId("cms-media-field-cards")).toBeVisible();
+  await expect(page.getByTestId("cms-media-card-preview").first()).toBeVisible();
+  await expect(page.getByTestId("cms-file-control").first()).toBeVisible();
+});

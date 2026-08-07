@@ -11,9 +11,10 @@ type Props = {
   description?: string;
   children: React.ReactNode;
   closeAriaLabel?: string;
+  size?: "default" | "wide";
 };
 
-export function Drawer({ open, onClose, title, description, children, closeAriaLabel = "Close details" }: Props) {
+export function Drawer({ open, onClose, title, description, children, closeAriaLabel = "Close details", size = "default" }: Props) {
   const titleId = useId();
   const descId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -72,7 +73,8 @@ export function Drawer({ open, onClose, title, description, children, closeAriaL
           }
         }}
         className={cn(
-          "relative flex h-full max-h-[100dvh] w-full max-w-lg flex-col border-l border-jp-border bg-white shadow-xl motion-reduce:transition-none sm:max-w-xl",
+          "relative flex h-full max-h-[100dvh] w-full flex-col border-l border-jp-border bg-white shadow-xl motion-reduce:transition-none",
+          size === "wide" ? "max-w-6xl" : "max-w-lg sm:max-w-xl",
         )}
       >
         <header className="flex shrink-0 items-start gap-3 border-b border-jp-border px-4 py-4 sm:px-5">
