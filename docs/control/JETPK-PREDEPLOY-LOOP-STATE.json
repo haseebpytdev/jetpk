@@ -2,43 +2,51 @@
   "schema_version": 1,
   "program": "JETPK-PREDEPLOY-CLOSURE",
   "active_loop": "ENGINEERING_CLOSURE",
-  "status": "IN_PROGRESS",
-  "sequence": 3,
+  "status": "ENGINEERING_CLOSURE_COMPLETE",
+  "sequence": 7,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
-  "observed_main_sha": "b131ae9d6a5988b1b4f11c4919ae80c7fa017005",
-  "last_completed_event": "JETPK-UI-05_MERGED",
-  "current_phase": "JETPK-UI-06",
-  "current_step": "PHASE_START",
+  "observed_main_sha": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a",
+  "last_completed_event": "ENGINEERING_CLOSURE_COMPLETE",
+  "current_phase": null,
+  "current_step": "COMPLETE",
   "current_phase_branch": null,
   "completed_phases": [
     "JETPK-UI-02A",
     "JETPK-UI-03",
     "JETPK-UI-04",
-    "JETPK-UI-05"
+    "JETPK-UI-05",
+    "JETPK-UI-06",
+    "JETPK-UI-07",
+    "JETPK-UI-08",
+    "JETPK-UI-09",
+    "FINAL_ENGINEERING_REGRESSION_GATE"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
     "JETPK-UI-03": "32435ada4e22d846bac40f7d0ce650d69825b7d7",
     "JETPK-UI-04": "5fd1b0732cb57e47551489bb113770c3cdbb73e0",
-    "JETPK-UI-05": "b131ae9d6a5988b1b4f11c4919ae80c7fa017005"
+    "JETPK-UI-05": "b131ae9d6a5988b1b4f11c4919ae80c7fa017005",
+    "JETPK-UI-06": "41344ddd1ca3151385f8edb1ac146fd0a1ce9559",
+    "JETPK-UI-07": "ee766ad36521ff76515f58e42d785a80099e43b0",
+    "JETPK-UI-08": "8e0ce75a5ef4f6ca32078095e921d6d0de5241b5",
+    "JETPK-UI-09": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a"
   },
   "phase_implementation_shas": {
     "JETPK-UI-04": "583b025",
-    "JETPK-UI-05": "b9162a3"
+    "JETPK-UI-05": "b9162a3",
+    "JETPK-UI-06": "e983627",
+    "JETPK-UI-07": "82ed9d6",
+    "JETPK-UI-08": "36534b5",
+    "JETPK-UI-09": "43c6081"
   },
   "closed_gaps": [
+    "JETPK-UI-001",
     "JETPK-UI-002",
     "JETPK-UI-003",
     "JETPK-UI-004",
     "JETPK-UI-005",
     "JETPK-UI-006",
-    "JETPK-UI-014",
-    "JETPK-UI-015",
-    "JETPK-UI-016"
-  ],
-  "open_gaps": [
-    "JETPK-UI-001",
     "JETPK-UI-007",
     "JETPK-UI-008",
     "JETPK-UI-009",
@@ -46,6 +54,9 @@
     "JETPK-UI-011",
     "JETPK-UI-012",
     "JETPK-UI-013",
+    "JETPK-UI-014",
+    "JETPK-UI-015",
+    "JETPK-UI-016",
     "JETPK-UI-017",
     "JETPK-UI-018",
     "JETPK-UI-019",
@@ -53,7 +64,8 @@
     "JETPK-UI-021",
     "JETPK-UI-022"
   ],
-  "remaining_gap_count": 14,
+  "open_gaps": [],
+  "remaining_gap_count": 0,
   "blocked": null,
   "engineering_terminal": "ENGINEERING_CLOSURE_COMPLETE",
   "predeploy_terminal": "JETPK_PREDEPLOY_READY",
@@ -61,14 +73,23 @@
   "production_connections_authorized": false,
   "production_mutations_authorized": false,
   "latest_test_disposition": {
-    "JETPK-UI-04": {
-      "flight-results.spec.ts": "PASS",
-      "jp-ui-04a-fare-states.spec.ts": "PASS",
-      "fare-selection.spec.ts": "PASS"
+    "JETPK-UI-08": {
+      "cms-pages.smoke.spec.ts": "PASS"
     },
-    "JETPK-UI-05": {
-      "standard-booking-passengers.spec.ts": "PASS"
+    "JETPK-UI-09": {
+      "homepage.spec.ts": "PASS",
+      "jetpk-ui-09-final-regression.spec.ts": "PASS",
+      "jetpk-ui-09-regression.spec.ts": "PASS",
+      "overview.smoke.spec.ts": "PASS",
+      "jp-fullstack-01g-content-policy.test.mjs": "PASS",
+      "php artisan test --filter=JetPakistan": "PASS"
+    },
+    "FINAL_ENGINEERING_REGRESSION_GATE": {
+      "frontend_typecheck": "PASS",
+      "frontend_lint": "PASS",
+      "dashboard_typecheck": "PASS",
+      "dashboard_lint": "PASS"
     }
   },
-  "updated_at_utc": "2026-08-07T15:10:00Z"
+  "updated_at_utc": "2026-08-07T19:45:00Z"
 }
