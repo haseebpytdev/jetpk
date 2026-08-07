@@ -4,10 +4,14 @@
  */
 
 /**
- * @param {{ nodeEnv?: string; allowContentFixturesFlag?: string }} env
+ * @param {{ nodeEnv?: string; allowContentFixturesFlag?: string; otaAllowContentFixture?: string }} env
  * @returns {boolean}
  */
 export function evaluateAllowContentFixtures(env) {
+  if (env.otaAllowContentFixture === "true") {
+    return true;
+  }
+
   if (env.nodeEnv === "production") {
     return false;
   }
@@ -21,7 +25,7 @@ export function evaluateAllowContentFixtures(env) {
 
 /**
  * @param {boolean} hasCmsContent
- * @param {{ nodeEnv?: string; allowContentFixturesFlag?: string }} env
+ * @param {{ nodeEnv?: string; allowContentFixturesFlag?: string; otaAllowContentFixture?: string }} env
  * @param {"fixture" | "empty"} [fallbackSource]
  * @returns {"cms" | "fixture" | "empty"}
  */

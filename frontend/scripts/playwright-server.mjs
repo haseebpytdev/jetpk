@@ -23,7 +23,13 @@ const child = spawn("npm", ["run", "start:smoke"], {
   cwd: frontendRoot,
   stdio: "inherit",
   shell: true,
-  env: { ...process.env, NODE_ENV: "production", PLAYWRIGHT_PORT: port },
+  env: {
+    ...process.env,
+    NODE_ENV: "production",
+    PLAYWRIGHT_PORT: port,
+    OTA_ALLOW_SESSION_FIXTURE: process.env.OTA_ALLOW_SESSION_FIXTURE ?? "true",
+    OTA_ALLOW_CONTENT_FIXTURE: process.env.OTA_ALLOW_CONTENT_FIXTURE ?? "true",
+  },
 });
 
 child.on("error", (error) => {
