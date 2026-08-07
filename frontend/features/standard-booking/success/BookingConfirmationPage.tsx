@@ -47,7 +47,7 @@ export function BookingConfirmationPage() {
 
   return (
     <BookingPageShell testId="booking-confirmation-page">
-      <BookingProgress steps={confirmation.booking_session.progress} className="mb-6 print:hidden" compact />
+      <BookingProgress steps={confirmation.booking_session.progress} className="mb-6 print:hidden" />
 
       <div className={`rounded-jp-lg border p-1 ${statusToneClass(presentation.tone)}`}>
         <BookingStatusHero presentation={presentation} bookingReference={confirmation.booking_reference} />

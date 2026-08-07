@@ -46,7 +46,7 @@ export function ManualPaymentPage() {
 
   return (
     <BookingPageShell testId="manual-payment-page">
-      <BookingProgress steps={state.booking_session.progress} className="mb-6" compact />
+      <BookingProgress steps={state.booking_session.progress} className="mb-6" />
       <BookingPageHeader
         title="Manual payment"
         description={`Reference: ${state.booking_reference ?? "—"}`}

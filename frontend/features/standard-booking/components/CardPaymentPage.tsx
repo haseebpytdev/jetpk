@@ -87,7 +87,7 @@ export function CardPaymentPage() {
 
   return (
     <BookingPageShell testId="card-payment-page">
-      <BookingProgress steps={state.booking_session.progress} className="mb-6" compact />
+      <BookingProgress steps={state.booking_session.progress} className="mb-6" />
       <BookingPageHeader
         title="Pay with AbhiPay"
         description={`Reference: ${state.booking_reference ?? "—"}`}
