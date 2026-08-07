@@ -38,6 +38,7 @@
      Required because JetPK portal pages render legacy dashboard/* views (wallet, deposits, staff,
      support, travelers, ...) that use shared <x-dashboard.*> components. --}}
 <link rel="stylesheet" href="{{ ui_asset('css/ota-dashboard-foundation.css') }}">
+<link rel="stylesheet" href="{{ ui_asset('css/jetpk-typography-authority.css') }}">
 @php
     $jpBrandRuntimeCss = [];
     $jpBrandRuntimeCssDay = [];

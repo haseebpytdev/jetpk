@@ -1,4 +1,9 @@
 import type { Config } from "tailwindcss";
+import {
+  JETPK_TAILWIND_FONT_DISPLAY,
+  JETPK_TAILWIND_FONT_MONO,
+  JETPK_TAILWIND_FONT_SANS,
+} from "./lib/theme/typography";
 
 const config: Config = {
   content: [
@@ -21,8 +26,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["Segoe UI", "system-ui", "sans-serif"],
-        display: ["Segoe UI", "system-ui", "sans-serif"],
+        sans: JETPK_TAILWIND_FONT_SANS,
+        display: JETPK_TAILWIND_FONT_DISPLAY,
+        mono: JETPK_TAILWIND_FONT_MONO,
       },
       transitionDuration: {
         ui: "150ms",

@@ -25,3 +25,9 @@ body.ota-admin-console.jp-dash-body .jp-table {
 body.ota-admin-console.jp-dash-body .ota-dash-overview .ota-dash-action-grid {
   gap: var(--sp-4, 16px);
 }
+
+/* JETPK-UI-02A: legacy JetPakistan typography over shared OTA stacks */
+body.jp-dash-body,
+body.ota-admin-console.jp-dash-body {
+  font-family: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+}

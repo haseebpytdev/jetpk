@@ -64,10 +64,10 @@
   --jp-skeleton: #e2ecf2;
   --jp-skeleton-highlight: #f0f6fa;
 
-  /* Typography families */
+  /* Typography families — JETPK-UI-02A legacy authority (Inter + Space Grotesk + IBM Plex Mono) */
   --jp-font-sans: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
   --jp-font-display: var(--font-display), var(--jp-font-sans);
-  --jp-font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
+  --jp-font-mono: var(--font-mono), ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
 
   /* Typography scale */
   --jp-text-xs: clamp(10px, calc(0.5625rem + 0.15625vw), 12px);
@@ -214,4 +214,14 @@
   --jp-shadow-md: 0 14px 34px -16px rgba(0, 0, 0, 0.45);
   --jp-shadow-card: 0 4px 20px -8px rgba(0, 0, 0, 0.35);
   --jp-shadow-raised: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+}
+
+body {
+  --font-jetpk-ui: var(--font-body);
+  --font-jetpk-display: var(--font-display);
+  --font-jetpk-mono: var(--font-mono);
+  --font-jetpk: var(--font-jetpk-ui);
+  --jp-font-sans: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --jp-font-display: var(--font-display), var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --jp-font-mono: var(--font-mono), ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
 }

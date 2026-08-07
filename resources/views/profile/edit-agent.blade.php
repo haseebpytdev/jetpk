@@ -2,6 +2,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/ota-public.css') }}?v=101" />
+    <link rel="stylesheet" href="{{ asset('css/jetpk-typography-authority.css') }}" />
 @endpush
 
 @section('title', 'Profile settings')

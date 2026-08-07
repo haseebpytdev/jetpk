@@ -73,6 +73,40 @@ test("typography uses font-display on page headings", async ({ page }) => {
   await expect(heading).toHaveClass(/font-display/);
 });
 
+test("dashboard shell uses legacy Inter UI font authority", async ({ page }) => {
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
+  await expect(page.locator("body")).toHaveClass(/font-sans/);
+  const sans = await page.evaluate(() =>
+    getComputedStyle(document.body).getPropertyValue("--jp-font-sans").trim(),
+  );
+  expect(sans).toMatch(/var\(--font-body\)|inter/i);
+  const fontFamily = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
+  expect(fontFamily.toLowerCase()).toMatch(/inter/);
+  expect(fontFamily.toLowerCase()).not.toContain("plus jakarta");
+});
+
+test("dashboard semantic legacy font tokens are bound on body", async ({ page }) => {
+  await page.goto("/admin/dashboard/bookings", { waitUntil: "load" });
+  const vars = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    return {
+      bodyVar: body.getPropertyValue("--font-body").trim(),
+      displayVar: body.getPropertyValue("--font-display").trim(),
+      monoVar: body.getPropertyValue("--font-mono").trim(),
+    };
+  });
+  expect(vars.bodyVar.length).toBeGreaterThan(0);
+  expect(vars.displayVar.length).toBeGreaterThan(0);
+  expect(vars.monoVar.length).toBeGreaterThan(0);
+});
+
+test("staff dashboard inherits legacy typography authority", async ({ page }) => {
+  await page.goto("/staff/dashboard", { waitUntil: "load" });
+  await expect(page.locator("body")).toHaveClass(/font-sans/);
+  const fontFamily = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
+  expect(fontFamily.toLowerCase()).toMatch(/inter|system-ui|sans-serif/);
+});
+
 test("heading hierarchy has single h1 per page", async ({ page }) => {
   await page.goto("/admin/dashboard/reports", { waitUntil: "load" });
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
