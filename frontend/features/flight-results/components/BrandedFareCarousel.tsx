@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import { shouldUseFareCarousel } from "@/lib/fare-selection-authority";
 import { useCallback, useRef } from "react";
 import type { FareFamilyOption } from "../types";
 import { formatDisplayPrice } from "../utils/price";
@@ -35,7 +36,7 @@ export function BrandedFareCarousel({
 
   if (!options.length) return null;
 
-  const showNav = options.length > 3;
+  const showNav = shouldUseFareCarousel(options.length);
 
   return (
     <div className="mt-3 border-t border-jp-border-soft pt-3" data-testid="branded-fare-carousel">
