@@ -7,12 +7,13 @@ Canonical layout and interaction patterns for `/flights/results` and return-opti
 ## Page structure
 
 1. Shared public header (JP-UI-02 `SiteHeader`)
-2. `SearchSummaryBar` — compact route, dates, passenger count, Edit affordance
-3. `ModifySearchPanel` — expandable inline search modification (not a separate route)
-4. Two-column body at `lg+`:
+2. `ResultsHeroBand` — “Choose Your Perfect Flight” decorative band (mockup #13)
+3. `SearchSummaryBar` — overlaps hero lower edge; compact route, dates, passenger count, Edit affordance
+4. `ModifySearchPanel` — expandable inline search modification (not a separate route)
+5. Two-column body at `lg+`:
    - Left (~25%): `ResultsFilterPanel` (sticky)
    - Right (~75%): toolbar, sort tabs, result cards, load more
-5. Mobile: filter drawer via `MobileFilterDrawer`; no persistent sidebar
+6. Mobile: filter drawer via `MobileFilterDrawer`; no persistent sidebar
 
 ## Search summary bar
 
@@ -92,6 +93,4 @@ Canonical layout and interaction patterns for `/flights/results` and return-opti
 
 ## Deferred (not in JP-UI-04)
 
-- Decorative results hero band (“Choose Your Perfect Flight”)
 - Flexible dates chip on results toolbar
-- Dedicated `/fare-selection` route

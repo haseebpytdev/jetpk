@@ -27,7 +27,8 @@ test("four fare families use carousel controls", async ({ page }) => {
   await page.goto(RESULTS_ROUTE, { waitUntil: "load" });
   await page.getByTestId("flight-details-trigger").first().click();
   await expect(page.getByTestId("fare-family-details")).toBeVisible();
-  await expect(page.getByTestId("fare-family-details").getByRole("button")).toHaveCount(4);
+  await expect(page.getByTestId("fare-family-details").locator("[data-fare-family-card]")).toHaveCount(4);
+  await expect(page.getByLabel("Next fare options")).toBeVisible();
 });
 
 test("fare revalidation shows busy state", async ({ page }) => {

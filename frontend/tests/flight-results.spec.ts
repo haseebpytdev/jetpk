@@ -107,6 +107,9 @@ test.beforeAll(async ({ request }) => {
 
 test("one-way results load completed search", async ({ page }) => {
   await gotoResults(page);
+  await expect(page.getByTestId("results-hero-band")).toBeVisible();
+  await expect(page.getByTestId("results-hero-band")).toContainText("Choose Your");
+  await expect(page.getByTestId("results-hero-band")).toContainText("Perfect Flight");
   await expect(page.getByTestId("flight-result-card")).toBeVisible();
   await expect(page.getByTestId("search-summary-bar")).toContainText("ISB");
 });
@@ -264,6 +267,60 @@ test("one-stop card and layover keyboard tooltip", async ({ page }) => {
   await page.goto(`/flights/results?${baseResultsQuery()}`);
   await page.getByRole("button", { name: /layover in DXB/i }).click();
   await expect(page.getByRole("tooltip")).toContainText("DXB");
+});
+
+test("branded fare selection navigates to dedicated fare route", async ({ page }) => {
+  const fares = [
+    { option_key: "eco", name: "Economy Saver", displayed_price: 100000, price_display: "100,000 PKR" },
+    { option_key: "flex", name: "Economy Flex", displayed_price: 112000, price_display: "112,000 PKR" },
+  ];
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        mockResultsBody({
+          offers: [
+            mockOffer({
+              has_branded_fares: true,
+              branded_fares_display_options: fares,
+              fare_family_options_display: fares,
+            }),
+          ],
+        }),
+      ),
+    });
+  });
+  await page.goto(`/flights/results?${baseResultsQuery()}`);
+  await page.route("**/laravel/flights/results/offer?**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        search_id: MOCK_SEARCH_ID,
+        offer_id: "offer-1",
+        offer: {
+          offer_id: "offer-1",
+          airline_name: "Emirates",
+          departure_time: "08:30",
+          can_book: true,
+          select_url: "/booking/passengers",
+          segments: [
+            {
+              origin_airport_code: "ISB",
+              destination_airport_code: "DXB",
+              departure_time_display: "08:30",
+            },
+          ],
+          branded_fares_display_options: fares,
+        },
+      }),
+    });
+  });
+  await page.getByTestId("fare-price-eco").click();
+  await page.waitForURL("**/flights/fare-selection**");
+  await expect(page.getByTestId("fare-selection-page")).toBeVisible();
 });
 
 test("branded fare carousel with more than three fares", async ({ page }) => {
