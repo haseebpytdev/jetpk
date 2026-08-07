@@ -20,6 +20,11 @@ if (process.env.OTA_ALLOW_SESSION_FIXTURE !== "false") {
   smokeEnv.OTA_ALLOW_SESSION_FIXTURE = process.env.OTA_ALLOW_SESSION_FIXTURE ?? "true";
 }
 
+// Smoke runs only: allow honest homepage/CMS fixture content when Laravel is unavailable.
+if (process.env.OTA_ALLOW_CONTENT_FIXTURE !== "false") {
+  smokeEnv.OTA_ALLOW_CONTENT_FIXTURE = process.env.OTA_ALLOW_CONTENT_FIXTURE ?? "true";
+}
+
 const child = spawn("npx", ["next", "start", "-H", "127.0.0.1", "-p", port], {
   cwd: frontendRoot,
   stdio: "inherit",

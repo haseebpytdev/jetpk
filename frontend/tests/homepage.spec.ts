@@ -124,6 +124,7 @@ test("airport picker supports keyboard selection", async ({ page }) => {
   const fromField = page.getByRole("combobox", { name: "From" });
   await fromField.click();
   await fromField.fill("Lahore");
+  await expect(page.getByRole("option", { name: /LHE/i })).toBeVisible();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
 

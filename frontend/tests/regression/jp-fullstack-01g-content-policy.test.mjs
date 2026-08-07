@@ -27,10 +27,24 @@ test("production + no flags → false", () => {
   assert.equal(evaluateAllowContentFixtures(production), false);
 });
 
+test("production + OTA_ALLOW_CONTENT_FIXTURE smoke gate → true", () => {
+  assert.equal(
+    evaluateAllowContentFixtures({ ...production, otaAllowContentFixture: "true" }),
+    true,
+  );
+});
+
 test("production + NEXT_PUBLIC flag → false", () => {
   assert.equal(
     evaluateAllowContentFixtures({ ...production, allowContentFixturesFlag: "true" }),
     false,
+  );
+});
+
+test("production + OTA smoke gate resolves to fixture when CMS absent", () => {
+  assert.equal(
+    evaluateResolveContentSource(false, { ...production, otaAllowContentFixture: "true" }),
+    "fixture",
   );
 });
 
