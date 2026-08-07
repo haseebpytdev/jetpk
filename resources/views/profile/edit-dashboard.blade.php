@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/ota-public.css') }}?v=101" />
+    <link rel="stylesheet" href="{{ asset('css/jetpk-typography-authority.css') }}" />
     <style>
         .page .ota-profile-page .ota-profile-wrap,
         .page .ota-profile-page .ota-profile-form,

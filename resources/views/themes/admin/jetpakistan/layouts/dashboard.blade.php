@@ -106,6 +106,7 @@
     <link rel="stylesheet" href="{{ ui_asset('css/ota-design-system.css') }}">
     <link rel="stylesheet" href="{{ ui_asset('css/ota-admin-console.css') }}">
     <link rel="stylesheet" href="{{ $jpAdminThemeBase }}/css/jp-admin-ops-overrides.css?v={{ $jpDashAssetVersion }}">
+    <link rel="stylesheet" href="{{ ui_asset('css/jetpk-typography-authority.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.40.0/dist/tabler-icons.min.css">
     @php
         $paletteCss = app(\App\Services\Branding\ClientThemePaletteService::class)->cssVariablesForProfile();

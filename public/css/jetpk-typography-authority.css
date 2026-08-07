@@ -1,0 +1,28 @@
+/**
+ * JetPakistan global legacy typography authority (JETPK-UI-02A).
+ * Load after shared OTA stylesheets on JetPakistan Blade fallbacks.
+ *
+ * Legacy authority: Inter (UI/body), Space Grotesk (display), IBM Plex Mono (numeric).
+ */
+:root {
+  --font-jetpk-ui: var(--font-body, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
+  --font-jetpk-display: var(--font-display, "Space Grotesk", "Inter", system-ui, sans-serif);
+  --font-jetpk-mono: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  --font-jetpk: var(--font-jetpk-ui);
+}
+
+body {
+  font-family: var(--font-jetpk-ui);
+}
+
+.font-display,
+.jp-pagehead h1,
+.logo {
+  font-family: var(--font-jetpk-display);
+}
+
+.mono,
+.jp-cell-id--mono,
+.font-mono {
+  font-family: var(--font-jetpk-mono);
+}

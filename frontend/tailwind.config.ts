@@ -1,4 +1,9 @@
 import type { Config } from "tailwindcss";
+import {
+  JETPK_TAILWIND_FONT_DISPLAY,
+  JETPK_TAILWIND_FONT_MONO,
+  JETPK_TAILWIND_FONT_SANS,
+} from "./lib/theme/typography";
 
 const config: Config = {
   content: [
@@ -53,9 +58,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--jp-font-sans)"],
-        display: ["var(--jp-font-display)"],
-        mono: ["var(--jp-font-mono)"],
+        sans: JETPK_TAILWIND_FONT_SANS,
+        display: JETPK_TAILWIND_FONT_DISPLAY,
+        mono: JETPK_TAILWIND_FONT_MONO,
       },
       fontSize: {
         "jp-xs": ["var(--jp-text-xs)", { lineHeight: "var(--jp-leading-normal)" }],
