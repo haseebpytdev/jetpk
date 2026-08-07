@@ -192,7 +192,7 @@ export function CmsWorkspace({ result }: Props) {
         )
       ) : null}
 
-      <Drawer open={drawerOpen} onClose={onCloseDrawer} title={drawerTitle} description={drawerDescription} closeAriaLabel={closeLabel}>
+      <Drawer open={drawerOpen} onClose={onCloseDrawer} title={drawerTitle} description={drawerDescription} closeAriaLabel={closeLabel} size={result.selectedPage ? "wide" : "default"}>
         {drawerContent}
       </Drawer>
     </div>
