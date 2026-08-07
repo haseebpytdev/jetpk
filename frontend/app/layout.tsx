@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <ThemeProvider>
           <AppInteractionProviders>
             <SkipLink />

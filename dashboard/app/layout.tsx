@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
+import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { DashboardShell } from "@/layouts/dashboard-shell";
 import { SessionProvider } from "@/lib/session-context";
 import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
 import { getDashboardSession } from "@/services/session-service";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "JetPakistan Back Office",
@@ -25,7 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
-      <body className="min-h-screen overflow-x-hidden font-sans antialiased">
+      <body className={`${inter.variable} ${spaceGrotesk.variable} min-h-screen overflow-x-hidden font-sans antialiased`}>
         <ThemeProvider>
           <SessionProvider session={session}>
             <DashboardShell session={session}>{children}</DashboardShell>

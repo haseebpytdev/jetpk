@@ -1,3 +1,10 @@
+export {
+  JETPK_FONT_BODY_FAMILY,
+  JETPK_FONT_CSS_VARS,
+  JETPK_FONT_DISPLAY_FAMILY,
+  JETPK_TYPOGRAPHY_CONTRACT,
+} from "./typography";
+
 export const THEME_STORAGE_KEY = "jp-theme-preference";
 
 export const THEME_VALUES = ["system", "light", "dark"] as const;

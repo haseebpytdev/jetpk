@@ -73,6 +73,44 @@ test("typography uses font-display on page headings", async ({ page }) => {
   await expect(heading).toHaveClass(/font-display/);
 });
 
+test("dashboard root uses shared JetPakistan UI body font", async ({ page }) => {
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
+  await expect(page.locator("body")).toHaveClass(/font-sans/);
+  const sans = await page.evaluate(() =>
+    getComputedStyle(document.body).getPropertyValue("--jp-font-sans").trim(),
+  );
+  expect(sans).toMatch(/var\(--font-body\)|inter/i);
+});
+
+test("dashboard page heading uses shared display font family", async ({ page }) => {
+  await page.goto("/admin/dashboard/users", { waitUntil: "load" });
+  const heading = page.getByRole("heading", { name: "Users", level: 1 });
+  await expect(heading).toHaveClass(/font-display/);
+});
+
+test("dashboard CSS variables define shared semantic font tokens", async ({ page }) => {
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
+  const vars = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    return {
+      sans: body.getPropertyValue("--jp-font-sans").trim(),
+      display: body.getPropertyValue("--jp-font-display").trim(),
+      bodyVar: body.getPropertyValue("--font-body").trim(),
+      displayVar: body.getPropertyValue("--font-display").trim(),
+    };
+  });
+  expect(vars.bodyVar.length).toBeGreaterThan(0);
+  expect(vars.displayVar.length).toBeGreaterThan(0);
+  expect(vars.sans).toMatch(/var\(--font-body\)|inter/i);
+  expect(vars.display).toMatch(/var\(--font-display\)|space grotesk/i);
+});
+
+test("dashboard sidebar brand uses display font token", async ({ page }) => {
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
+  const brand = page.getByLabel("Dashboard navigation").getByText("JetPakistan");
+  await expect(brand).toHaveClass(/font-display/);
+});
+
 test("heading hierarchy has single h1 per page", async ({ page }) => {
   await page.goto("/admin/dashboard/reports", { waitUntil: "load" });
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);

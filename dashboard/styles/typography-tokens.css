@@ -1,0 +1,23 @@
+/* JetPakistan shared typography tokens — JETPK-UI-02
+ * Font families align with frontend/styles/tokens.css.
+ * Dashboard keeps a denser operational scale than public marketing pages.
+ */
+
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  --jp-leading-tight: 1.25;
+  --jp-leading-snug: 1.375;
+  --jp-leading-normal: 1.5;
+
+  --jp-tracking-tight: -0.02em;
+  --jp-tracking-normal: 0;
+  --jp-tracking-wide: 0.04em;
+}
+
+/* Resolve font stacks on body where next/font binds --font-body / --font-display */
+body {
+  --jp-font-sans: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --jp-font-display: var(--font-display), var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --jp-font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
+}
