@@ -19,7 +19,7 @@ export default defineConfig({
   webServer: {
     command: "node scripts/playwright-server.mjs",
     url: baseURL,
-    reuseExistingServer: !isCi,
+    reuseExistingServer: false,
     timeout: 300_000,
     stdout: "pipe",
     stderr: "pipe",
