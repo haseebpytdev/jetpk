@@ -1,16 +1,21 @@
 {
   "schema_version": 1,
   "program": "JETPK-PREDEPLOY-CLOSURE",
-  "active_loop": "ENGINEERING_CLOSURE",
-  "status": "ENGINEERING_CLOSURE_COMPLETE",
-  "sequence": 7,
+  "active_loop": "PREDEPLOY_READINESS",
+  "status": "BLOCKED",
+  "sequence": 9,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
   "observed_main_sha": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a",
-  "last_completed_event": "ENGINEERING_CLOSURE_COMPLETE",
-  "current_phase": null,
-  "current_step": "COMPLETE",
-  "current_phase_branch": null,
+  "release_candidate_engineering_sha": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a",
+  "release_readiness_branch": "phase/jetpk-release-02-final-predeploy-readiness",
+  "release_docs_commit_sha": "d1f3909ed0a3860cfa49f4b9c1d606fa5f2c99ba",
+  "release_docs_merge_sha": null,
+  "final_release_main_sha": null,
+  "last_completed_event": "BLOCKED",
+  "current_phase": "JETPK-RELEASE-02",
+  "current_step": "PRODUCTION_CAPTURE",
+  "current_phase_branch": "phase/jetpk-release-02-final-predeploy-readiness",
   "completed_phases": [
     "JETPK-UI-02A",
     "JETPK-UI-03",
@@ -21,6 +26,10 @@
     "JETPK-UI-08",
     "JETPK-UI-09",
     "FINAL_ENGINEERING_REGRESSION_GATE"
+  ],
+  "readiness_checkpoints_completed": [
+    "READINESS_BOOTSTRAP",
+    "RELEASE_DOCS_PUSHED"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
@@ -66,16 +75,62 @@
   ],
   "open_gaps": [],
   "remaining_gap_count": 0,
-  "blocked": null,
+  "blocked": {
+    "code": "SSH_AUTH_UNAVAILABLE",
+    "step": "PRODUCTION_CAPTURE",
+    "reason": "pkjetp@185.215.166.176 rejected jetpk_contabo_2026_v2 public key in BatchMode (Permission denied). Non-interactive SSH cannot complete read-only production audit.",
+    "resume_condition": "Unlock SSH key in agent session or restore authorized_keys for pkjetp@185.215.166.176, then resume Loop B from PRODUCTION_CAPTURE."
+  },
   "engineering_terminal": "ENGINEERING_CLOSURE_COMPLETE",
   "predeploy_terminal": "JETPK_PREDEPLOY_READY",
   "deployment_authorized": false,
-  "production_connections_authorized": false,
+  "production_read_only_connections_authorized": true,
+  "production_connections_authorized": true,
   "production_mutations_authorized": false,
-  "latest_test_disposition": {
-    "JETPK-UI-08": {
-      "cms-pages.smoke.spec.ts": "PASS"
+  "production_mutations_performed": 0,
+  "deployment_performed": false,
+  "readiness_decisions": {
+    "D-01_PUBLIC_NEXT_PORT": "PROVISIONAL_3010_RECHECK_REQUIRED",
+    "D-01B_DASHBOARD_NEXT_PORT": "PROVISIONAL_3001_RECHECK_REQUIRED",
+    "D-02_REVERSE_PROXY": "PROVISIONAL_LITESPEED_PROXY_RECHECK_REQUIRED",
+    "D-03_DASHBOARD_CUTOVER": "LOCKED_IN_SCOPE",
+    "D-04_PROCESS_MANAGER": "PROVISIONAL_PM2_USER_INSTALL",
+    "D-05_STORAGE": "PROVISIONAL_PRESERVE_PUBLIC_HTML_STORAGE_SYMLINK",
+    "D-06_ASSET_COPY_SET": "DRAFT_PENDING_SSH_DRIFT",
+    "D-07_FIXTURE_FLAGS": "LOCKED_REPO_POLICY_HOST_UNVERIFIED",
+    "D-08_DEVELOPER_CP": "PROVISIONAL_SAFE_PROTECTED_IF_ENABLED_HOST_UNVERIFIED",
+    "D-09_DB_BACKUP": "DRAFT_UNPROVEN",
+    "D-10_FILESYSTEM_BACKUP": "DRAFT_UNPROVEN",
+    "D-11_BUILD_STRATEGY": "LOCKED_BUILD_ON_SERVER"
+  },
+  "production_capture": {
+    "status": "PARTIAL",
+    "timestamp_utc": "2026-08-07T20:15:00Z",
+    "host": "185.215.166.176",
+    "user": "pkjetp",
+    "ssh_result": "PERMISSION_DENIED_PUBLICKEY",
+    "http_external": {
+      "jetpakistan_pk": "BLADE_PRIMARY_NO_PUBLIC_NEXT_CUTOVER"
     },
+    "git_sha_on_host": "UNKNOWN"
+  },
+  "runtime_summary": {
+    "php_path": "UNVERIFIED_HISTORICAL_/usr/local/lsws/lsphp83/bin/php",
+    "migration_disposition": "UNVERIFIED",
+    "queue_disposition": "UNVERIFIED"
+  },
+  "planned_public_next_port": 3010,
+  "planned_dashboard_next_port": 3001,
+  "proxy_method": "PROVISIONAL_LITESPEED_TO_LOCALHOST",
+  "process_manager_plan": "PROVISIONAL_PM2_USER_LOCAL",
+  "storage_disposition": "PROVISIONAL_PRESERVE_PUBLIC_HTML_STORAGE_SYMLINK",
+  "fixture_flag_disposition": "HOST_UNVERIFIED_REPO_POLICY_LOCKED",
+  "developer_cp_disposition": "PROVISIONAL_SAFE_PROTECTED_PENDING_HOST_FLAG",
+  "db_backup_disposition": "UNPROVEN",
+  "filesystem_backup_disposition": "UNPROVEN",
+  "build_strategy": "BUILD_ON_SERVER_NPM_CI_NEXT_START",
+  "rollback_readiness": "NOT_READY_PENDING_BACKUP_PROOF",
+  "latest_test_disposition": {
     "JETPK-UI-09": {
       "homepage.spec.ts": "PASS",
       "jetpk-ui-09-final-regression.spec.ts": "PASS",
@@ -91,5 +146,5 @@
       "dashboard_lint": "PASS"
     }
   },
-  "updated_at_utc": "2026-08-07T19:45:00Z"
+  "updated_at_utc": "2026-08-07T20:20:00Z"
 }
