@@ -1,5 +1,72 @@
 import type { CurrencyOption, FooterColumn, NavItem } from "@/types/navigation";
 
+export type PublicModuleStatus =
+  | "ENABLED_REAL_ROUTE"
+  | "CMS_REAL_ROUTE"
+  | "DISABLED"
+  | "PLANNED"
+  | "NONEXISTENT";
+
+export type PublicNavigationModule = {
+  label: string;
+  status: PublicModuleStatus;
+  href?: string;
+  notes: string;
+};
+
+/** Authoritative enabled-module contract for the public header (JETPK-UI-003). */
+export const publicNavigationAuthority: PublicNavigationModule[] = [
+  {
+    label: "Flights",
+    status: "ENABLED_REAL_ROUTE",
+    href: "/#flight-search",
+    notes: "Dropdown: search flights and manage booking",
+  },
+  {
+    label: "Groups",
+    status: "ENABLED_REAL_ROUTE",
+    href: "/groups/search",
+    notes: "Operational group ticketing search",
+  },
+  {
+    label: "Support",
+    status: "ENABLED_REAL_ROUTE",
+    href: "/support",
+    notes: "Dropdown: help center, contact, FAQ",
+  },
+  {
+    label: "Hotels",
+    status: "NONEXISTENT",
+    notes: "No operational hotels module; intentionally hidden from navigation",
+  },
+  {
+    label: "Offers",
+    status: "NONEXISTENT",
+    notes: "No standalone offers route; homepage promos are presentation-only",
+  },
+  {
+    label: "Travel Services",
+    status: "NONEXISTENT",
+    notes: "No travel services hub route; intentionally hidden from navigation",
+  },
+];
+
+export const intentionallyHiddenNavigationModules = publicNavigationAuthority
+  .filter((module) => module.status === "NONEXISTENT" || module.status === "DISABLED" || module.status === "PLANNED")
+  .map((module) => module.label);
+
+export type FooterNewsletterDisposition = {
+  supported: boolean;
+  disposition: string;
+};
+
+function collectNavHrefs(items: NavItem[]): string[] {
+  return items.flatMap((item) => {
+    if (item.type === "link") return [item.href];
+    return item.items.map((child) => child.href);
+  });
+}
+
 export const primaryNavigation: NavItem[] = [
   {
     type: "dropdown",
@@ -54,6 +121,21 @@ export const footerColumns: FooterColumn[] = [
     ],
   },
 ];
+
+/** Authoritative footer information architecture (JETPK-UI-014). */
+export const footerInformationArchitecture = {
+  contentColumnCount: footerColumns.length,
+  columns: footerColumns.map((column) => ({
+    title: column.title,
+    links: column.links.map((link) => ({ label: link.label, href: link.href })),
+  })),
+  newsletter: {
+    supported: false,
+    disposition: "No newsletter subscription endpoint; interactive subscribe UI is not rendered",
+  } satisfies FooterNewsletterDisposition,
+};
+
+export const authoritativePrimaryNavigationHrefs = collectNavHrefs(primaryNavigation);
 
 export const socialLinks = [
   { label: "Facebook", href: "https://www.facebook.com/jetpakistancom/" },

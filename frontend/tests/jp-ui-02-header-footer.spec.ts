@@ -12,6 +12,9 @@ test("header exposes theme switch and authoritative navigation", async ({ page }
   await expect(page.getByTestId("theme-switch")).toBeVisible();
   await expect(page.getByRole("link", { name: "Book Now" })).toHaveAttribute("href", "/#flight-search");
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /^Hotels$/i })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /^Offers$/i })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /^Travel Services$/i })).toHaveCount(0);
 });
 
 test("footer has authoritative columns without newsletter stub", async ({ page }) => {

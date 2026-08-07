@@ -7,8 +7,8 @@ export const FEATURED_OFFER_FIXTURES: FeaturedOffer[] = [
     subtitle: "Explore popular Gulf connections from Pakistan.",
     badge: "Seasonal inspiration",
     cta: "Explore offer",
-    image: "/images/home/offer-gcc.svg",
-    imageAlt: "",
+    image: "/images/home/offer-gcc.jpg",
+    imageAlt: "Gulf city skyline at dusk",
   },
   {
     id: "uk-summer",
@@ -16,8 +16,8 @@ export const FEATURED_OFFER_FIXTURES: FeaturedOffer[] = [
     subtitle: "Plan ahead for Manchester and London routes.",
     badge: "View route",
     cta: "View route",
-    image: "/images/home/offer-uk.svg",
-    imageAlt: "",
+    image: "/images/home/offer-uk.jpg",
+    imageAlt: "United Kingdom travel destination",
     samplePrice: "Sample from PKR 175,000",
   },
   {
@@ -25,7 +25,7 @@ export const FEATURED_OFFER_FIXTURES: FeaturedOffer[] = [
     title: "Domestic Discoveries",
     subtitle: "Lahore, Karachi, and Islamabad connections.",
     cta: "Explore offer",
-    image: "/images/home/offer-domestic.svg",
-    imageAlt: "",
+    image: "/images/home/offer-domestic.jpg",
+    imageAlt: "Pakistan domestic travel scenery",
   },
 ];

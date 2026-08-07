@@ -24,7 +24,7 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
   return (
     <section className="relative overflow-hidden border-b border-jp-border bg-jp-page">
       <div className="relative min-h-[clamp(22rem,48vh,34rem)]">
-        <div className="absolute inset-0">
+        <div className="absolute inset-0" data-testid="homepage-hero-image">
           <ImageSlot
             src={hero.image?.url ?? fallbackImage}
             alt={hero.image?.alt ?? "JetPakistan flights"}

@@ -20,6 +20,8 @@ test("homepage loads with full hero and search shell", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
   await expect(page.getByRole("heading", { level: 1, name: /Explore the world with/i })).toBeVisible();
+  await expect(page.getByTestId("homepage-hero-image")).toBeVisible();
+  await expect(page.getByTestId("homepage-hero-image").locator("img")).toHaveAttribute("src", /hero-pakistan/);
   await expect(page.getByTestId("search-module")).toHaveAttribute("data-search-layout", "compact");
   await expect(page.getByRole("heading", { name: "Destinations on the Rise" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Why JetPakistan" })).toBeVisible();
