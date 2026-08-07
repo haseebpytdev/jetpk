@@ -3,39 +3,42 @@
   "program": "JETPK-PREDEPLOY-CLOSURE",
   "active_loop": "ENGINEERING_CLOSURE",
   "status": "IN_PROGRESS",
-  "sequence": 2,
+  "sequence": 3,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
-  "observed_main_sha": "5fd1b0732cb57e47551489bb113770c3cdbb73e0",
-  "last_completed_event": "JETPK-UI-04_MERGED",
-  "current_phase": "JETPK-UI-05",
+  "observed_main_sha": "b131ae9d6a5988b1b4f11c4919ae80c7fa017005",
+  "last_completed_event": "JETPK-UI-05_MERGED",
+  "current_phase": "JETPK-UI-06",
   "current_step": "PHASE_START",
   "current_phase_branch": null,
   "completed_phases": [
     "JETPK-UI-02A",
     "JETPK-UI-03",
-    "JETPK-UI-04"
+    "JETPK-UI-04",
+    "JETPK-UI-05"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
     "JETPK-UI-03": "32435ada4e22d846bac40f7d0ce650d69825b7d7",
-    "JETPK-UI-04": "5fd1b0732cb57e47551489bb113770c3cdbb73e0"
+    "JETPK-UI-04": "5fd1b0732cb57e47551489bb113770c3cdbb73e0",
+    "JETPK-UI-05": "b131ae9d6a5988b1b4f11c4919ae80c7fa017005"
   },
   "phase_implementation_shas": {
-    "JETPK-UI-04": "583b025"
+    "JETPK-UI-04": "583b025",
+    "JETPK-UI-05": "b9162a3"
   },
   "closed_gaps": [
     "JETPK-UI-002",
     "JETPK-UI-003",
     "JETPK-UI-004",
     "JETPK-UI-005",
+    "JETPK-UI-006",
     "JETPK-UI-014",
     "JETPK-UI-015",
     "JETPK-UI-016"
   ],
   "open_gaps": [
     "JETPK-UI-001",
-    "JETPK-UI-006",
     "JETPK-UI-007",
     "JETPK-UI-008",
     "JETPK-UI-009",
@@ -50,7 +53,7 @@
     "JETPK-UI-021",
     "JETPK-UI-022"
   ],
-  "remaining_gap_count": 15,
+  "remaining_gap_count": 14,
   "blocked": null,
   "engineering_terminal": "ENGINEERING_CLOSURE_COMPLETE",
   "predeploy_terminal": "JETPK_PREDEPLOY_READY",
@@ -62,7 +65,10 @@
       "flight-results.spec.ts": "PASS",
       "jp-ui-04a-fare-states.spec.ts": "PASS",
       "fare-selection.spec.ts": "PASS"
+    },
+    "JETPK-UI-05": {
+      "standard-booking-passengers.spec.ts": "PASS"
     }
   },
-  "updated_at_utc": "2026-08-07T14:45:00Z"
+  "updated_at_utc": "2026-08-07T15:10:00Z"
 }
