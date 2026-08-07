@@ -180,7 +180,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
   return (
     <BookingPageShell testId="passenger-details-page">
-      <BookingProgress steps={context.booking_session.progress} className="mb-6" compact />
+      <BookingProgress steps={context.booking_session.progress} className="mb-6" />
 
       <BookingPageHeader
         title="Traveler information"
