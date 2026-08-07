@@ -5,6 +5,7 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { ScrollReveal } from "@/features/motion";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
+import { resolveRouteMedia } from "@/lib/homepage-media";
 import Link from "next/link";
 import { useRef } from "react";
 import type { HomepageSectionHeader, HomepageRouteCard } from "../types/homepage";
@@ -47,17 +48,21 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
             role="region"
             aria-label="Trending route cards"
           >
-            {items.map((route) => (
+            {items.map((route, index) => {
+              const media = resolveRouteMedia(route, index);
+
+              return (
               <article
                 key={route.id}
                 className="w-[min(85vw,17rem)] shrink-0 snap-start overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card"
               >
                 <div className="relative aspect-[4/3] bg-jp-surface-muted">
                   <ImageSlot
-                    src={null}
-                    alt={`${route.from} to ${route.to}`}
+                    src={media.image}
+                    alt={media.imageAlt}
                     width={272}
                     height={204}
+                    sizes="(max-width: 768px) 85vw, 272px"
                     className="!max-w-none h-full w-full !rounded-none"
                     fallbackLabel={`${route.from} to ${route.to}`}
                   />
@@ -74,7 +79,8 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
                   ) : null}
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
           <SecondaryButton type="button" aria-label="Scroll routes right" className="hidden sm:inline-flex" onClick={() => scrollBy(1)}>
             →

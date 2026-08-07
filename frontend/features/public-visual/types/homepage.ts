@@ -18,6 +18,8 @@ export type HomepageRouteCard = {
   priceLabel: string;
   searchUrl: string;
   badge?: string;
+  image?: string | null;
+  imageAlt?: string;
 };
 
 export type HomepageDestinationCard = {
@@ -41,6 +43,8 @@ export type HomepageFeaturedDeal = {
   duration: string;
   stops: number;
   priceLabel: string;
+  image?: string | null;
+  imageAlt?: string;
 };
 
 export type HomepageWhyCard = {

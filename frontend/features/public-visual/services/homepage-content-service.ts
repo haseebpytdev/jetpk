@@ -5,6 +5,7 @@ import { FEATURED_OFFER_FIXTURES } from "@/features/home/fixtures/offers";
 import { laravelApiPath } from "@/services/flight-search";
 import { allowContentFixtures, resolveContentSource } from "@/features/public-content/utils/content-policy";
 import { fetchWithTimeout } from "@/features/public-content/utils/laravel-api";
+import { approvedHeroMedia } from "@/lib/homepage-media";
 import type {
   HomepageContent,
   HomepageDestinationCard,
@@ -16,7 +17,8 @@ import type {
   HomepageWhyCard,
 } from "../types/homepage";
 
-const HERO_FALLBACK_IMAGE = "/images/home/hero-fallback.svg";
+const HERO_FALLBACK_IMAGE = approvedHeroMedia.url;
+const HERO_FALLBACK_ALT = approvedHeroMedia.alt;
 
 type RemoteHomepage = {
   source: "cms" | "empty";
@@ -83,6 +85,8 @@ function mapRoutes(items: Array<Record<string, unknown>> = []): HomepageRouteCar
     priceLabel: String(item.price_label ?? item.price ?? ""),
     searchUrl: String(item.search_url ?? ""),
     badge: item.badge ? String(item.badge) : undefined,
+    image: item.image ? String(item.image) : null,
+    imageAlt: item.image_alt ? String(item.image_alt) : undefined,
   }));
 }
 
@@ -110,6 +114,8 @@ function mapFeaturedDeals(items: Array<Record<string, unknown>> = []): HomepageF
     duration: String(item.duration ?? ""),
     stops: Number(item.stops ?? 0),
     priceLabel: String(item.price_label ?? ""),
+    image: item.image ? String(item.image) : null,
+    imageAlt: item.image_alt ? String(item.image_alt) : undefined,
   }));
 }
 
@@ -155,7 +161,7 @@ function fixtureHomepage(): HomepageContent {
       subtitle:
         "Book flights with confidence — secure fares, dedicated support, and routes tailored for travelers across Pakistan and beyond.",
       searchVisible: true,
-      image: null,
+      image: { url: HERO_FALLBACK_IMAGE, alt: HERO_FALLBACK_ALT },
     },
     trustChips: BENEFIT_FIXTURES.map((item) => ({ label: item.title })),
     routes: {
@@ -171,6 +177,8 @@ function fixtureHomepage(): HomepageContent {
         to: item.country,
         priceLabel: item.label,
         searchUrl: "/flights/results",
+        image: item.image,
+        imageAlt: item.imageAlt,
       })),
     },
     destinations: {
@@ -199,6 +207,8 @@ function fixtureHomepage(): HomepageContent {
         duration: "",
         stops: 0,
         priceLabel: offer.samplePrice ?? "",
+        image: offer.image,
+        imageAlt: offer.imageAlt,
       })),
     },
     whyBook: {
@@ -281,6 +291,7 @@ function mapRemote(remote: RemoteHomepage): HomepageContent {
 
 export const HomepageContentService = {
   heroFallbackImage: HERO_FALLBACK_IMAGE,
+  heroFallbackAlt: HERO_FALLBACK_ALT,
 
   async getHomepage(): Promise<HomepageContent> {
     try {
