@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "program": "JETPK-PREDEPLOY-CLOSURE",
-  "active_loop": "PREDEPLOY_READINESS",
-  "status": "JETPK_PREDEPLOY_READY",
-  "sequence": 15,
+  "active_loop": "PRODUCTION_DEPLOYMENT",
+  "status": "IN_PROGRESS",
+  "sequence": 16,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
   "observed_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
@@ -12,9 +12,9 @@
   "release_docs_commit_sha": "8827949224f9c03519c0060de1d54475e4b66d9d",
   "release_docs_merge_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
   "final_release_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
-  "last_completed_event": "JETPK_PREDEPLOY_READY",
-  "current_phase": null,
-  "current_step": "AWAITING_EXPLICIT_DEPLOYMENT_AUTHORIZATION",
+  "last_completed_event": "DEPLOYMENT_AUTHORIZED",
+  "current_phase": "JETPK-PRODUCTION-CUTOVER",
+  "current_step": "DEPLOYMENT_PREFLIGHT",
   "current_phase_branch": null,
   "completed_phases": [
     "JETPK-UI-02A",
@@ -36,6 +36,9 @@
     "RELEASE_DOCS_PUSHED",
     "RELEASE_DOCS_MERGED",
     "JETPK_PREDEPLOY_READY"
+  ],
+  "deployment_checkpoints_completed": [
+    "DEPLOYMENT_AUTHORIZED"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
@@ -86,10 +89,10 @@
   "blocked": null,
   "engineering_terminal": "ENGINEERING_CLOSURE_COMPLETE",
   "predeploy_terminal": "JETPK_PREDEPLOY_READY",
-  "deployment_authorized": false,
+  "deployment_authorized": true,
   "production_read_only_connections_authorized": true,
   "production_connections_authorized": true,
-  "production_mutations_authorized": false,
+  "production_mutations_authorized": true,
   "production_mutations_performed": 0,
   "deployment_performed": false,
   "readiness_decisions": {
@@ -155,5 +158,10 @@
       "dashboard_lint": "PASS"
     }
   },
-  "updated_at_utc": "2026-08-08T04:15:00Z"
+  "deployment_authorization": {
+    "timestamp_utc": "2026-08-08T04:25:00Z",
+    "operator_explicit": true,
+    "scope": "JETPK-RELEASE-02_CONTROLLED_CUTOVER"
+  },
+  "updated_at_utc": "2026-08-08T04:25:00Z"
 }
