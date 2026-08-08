@@ -17,7 +17,10 @@
     "test:jp-ops-06-admin-staff-operational": "playwright test tests/jp-ops-06-admin-staff-operational.spec.ts",
     "test:jp-ops-07-admin-staff-regression": "node tests/regression/run-jp-ops-07-admin-staff-regression.mjs",
     "test:jp-ops-07-admin-staff-operational": "playwright test tests/jp-ops-07-admin-staff-operational.spec.ts",
-    "test:jp-ops-07-connected-mutations": "playwright test tests/jp-ops-07-connected-mutations.spec.ts"
+    "test:jp-ops-07-connected-mutations": "playwright test tests/jp-ops-07-connected-mutations.spec.ts",
+    "test:release-02a-asset-namespace": "node scripts/run-release-02a-asset-namespace-test.mjs",
+    "proof:release-02a-two-next": "node scripts/local-two-next-proof.mjs",
+    "proof:release-02a-proxy-sim": "node scripts/local-proxy-simulation.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
