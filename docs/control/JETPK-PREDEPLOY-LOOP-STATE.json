@@ -3,7 +3,7 @@
   "program": "JETPK-PREDEPLOY-CLOSURE",
   "active_loop": "PRODUCTION_DEPLOYMENT",
   "status": "IN_PROGRESS",
-  "sequence": 16,
+  "sequence": 17,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
   "observed_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
@@ -12,9 +12,9 @@
   "release_docs_commit_sha": "8827949224f9c03519c0060de1d54475e4b66d9d",
   "release_docs_merge_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
   "final_release_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
-  "last_completed_event": "DEPLOYMENT_AUTHORIZED",
+  "last_completed_event": "DEPLOYMENT_PREFLIGHT_PASS",
   "current_phase": "JETPK-PRODUCTION-CUTOVER",
-  "current_step": "DEPLOYMENT_PREFLIGHT",
+  "current_step": "BACKUPS_VERIFIED",
   "current_phase_branch": null,
   "completed_phases": [
     "JETPK-UI-02A",
@@ -38,7 +38,8 @@
     "JETPK_PREDEPLOY_READY"
   ],
   "deployment_checkpoints_completed": [
-    "DEPLOYMENT_AUTHORIZED"
+    "DEPLOYMENT_AUTHORIZED",
+    "DEPLOYMENT_PREFLIGHT_PASS"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
@@ -163,5 +164,22 @@
     "operator_explicit": true,
     "scope": "JETPK-RELEASE-02_CONTROLLED_CUTOVER"
   },
-  "updated_at_utc": "2026-08-08T04:25:00Z"
+  "deployment_preflight": {
+    "timestamp_utc": "2026-08-08T04:28:00Z",
+    "main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
+    "hostname": "vmi3400777",
+    "user": "pkjetp",
+    "disk_free_gb": 80,
+    "port_3000": "nghttpx_OCCUPIED",
+    "port_3010": "FREE",
+    "port_3001": "FREE",
+    "fixture_flags": "SAFE_ALL_UNSET",
+    "migrations_ran": 104,
+    "migrations_pending": 0,
+    "migration_action": "SKIP",
+    "live_routing": "BLADE_LARAVEL_PRIMARY",
+    "live_https_home": 200,
+    "storage_symlink": "INTACT"
+  },
+  "updated_at_utc": "2026-08-08T04:28:00Z"
 }
