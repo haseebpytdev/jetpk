@@ -2,20 +2,20 @@
   "schema_version": 1,
   "program": "JETPK-PREDEPLOY-CLOSURE",
   "active_loop": "PREDEPLOY_READINESS",
-  "status": "BLOCKED",
-  "sequence": 9,
+  "status": "JETPK_PREDEPLOY_READY",
+  "sequence": 15,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
-  "observed_main_sha": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a",
+  "observed_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
   "release_candidate_engineering_sha": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a",
   "release_readiness_branch": "phase/jetpk-release-02-final-predeploy-readiness",
-  "release_docs_commit_sha": "d1f3909ed0a3860cfa49f4b9c1d606fa5f2c99ba",
-  "release_docs_merge_sha": null,
-  "final_release_main_sha": null,
-  "last_completed_event": "BLOCKED",
-  "current_phase": "JETPK-RELEASE-02",
-  "current_step": "PRODUCTION_CAPTURE",
-  "current_phase_branch": "phase/jetpk-release-02-final-predeploy-readiness",
+  "release_docs_commit_sha": "8827949224f9c03519c0060de1d54475e4b66d9d",
+  "release_docs_merge_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
+  "final_release_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
+  "last_completed_event": "JETPK_PREDEPLOY_READY",
+  "current_phase": null,
+  "current_step": "AWAITING_EXPLICIT_DEPLOYMENT_AUTHORIZATION",
+  "current_phase_branch": null,
   "completed_phases": [
     "JETPK-UI-02A",
     "JETPK-UI-03",
@@ -25,11 +25,17 @@
     "JETPK-UI-07",
     "JETPK-UI-08",
     "JETPK-UI-09",
-    "FINAL_ENGINEERING_REGRESSION_GATE"
+    "FINAL_ENGINEERING_REGRESSION_GATE",
+    "JETPK-RELEASE-02"
   ],
   "readiness_checkpoints_completed": [
     "READINESS_BOOTSTRAP",
-    "RELEASE_DOCS_PUSHED"
+    "PRODUCTION_CAPTURE_COMPLETE",
+    "RUNTIME_AND_ENV_GATE_COMPLETE",
+    "CUTOVER_DECISIONS_RESOLVED",
+    "RELEASE_DOCS_PUSHED",
+    "RELEASE_DOCS_MERGED",
+    "JETPK_PREDEPLOY_READY"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
@@ -39,7 +45,8 @@
     "JETPK-UI-06": "41344ddd1ca3151385f8edb1ac146fd0a1ce9559",
     "JETPK-UI-07": "ee766ad36521ff76515f58e42d785a80099e43b0",
     "JETPK-UI-08": "8e0ce75a5ef4f6ca32078095e921d6d0de5241b5",
-    "JETPK-UI-09": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a"
+    "JETPK-UI-09": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a",
+    "JETPK-RELEASE-02": "f311d07b183c38c0217b5f3132b88a1e4b1fd752"
   },
   "phase_implementation_shas": {
     "JETPK-UI-04": "583b025",
@@ -47,7 +54,8 @@
     "JETPK-UI-06": "e983627",
     "JETPK-UI-07": "82ed9d6",
     "JETPK-UI-08": "36534b5",
-    "JETPK-UI-09": "43c6081"
+    "JETPK-UI-09": "43c6081",
+    "JETPK-RELEASE-02": "8827949"
   },
   "closed_gaps": [
     "JETPK-UI-001",
@@ -75,12 +83,7 @@
   ],
   "open_gaps": [],
   "remaining_gap_count": 0,
-  "blocked": {
-    "code": "SSH_AUTH_UNAVAILABLE",
-    "step": "PRODUCTION_CAPTURE",
-    "reason": "pkjetp@185.215.166.176 rejected jetpk_contabo_2026_v2 public key in BatchMode (Permission denied). Non-interactive SSH cannot complete read-only production audit.",
-    "resume_condition": "Unlock SSH key in agent session or restore authorized_keys for pkjetp@185.215.166.176, then resume Loop B from PRODUCTION_CAPTURE."
-  },
+  "blocked": null,
   "engineering_terminal": "ENGINEERING_CLOSURE_COMPLETE",
   "predeploy_terminal": "JETPK_PREDEPLOY_READY",
   "deployment_authorized": false,
@@ -90,46 +93,52 @@
   "production_mutations_performed": 0,
   "deployment_performed": false,
   "readiness_decisions": {
-    "D-01_PUBLIC_NEXT_PORT": "PROVISIONAL_3010_RECHECK_REQUIRED",
-    "D-01B_DASHBOARD_NEXT_PORT": "PROVISIONAL_3001_RECHECK_REQUIRED",
-    "D-02_REVERSE_PROXY": "PROVISIONAL_LITESPEED_PROXY_RECHECK_REQUIRED",
+    "D-01_PUBLIC_NEXT_PORT": "LOCKED_3010",
+    "D-01B_DASHBOARD_NEXT_PORT": "LOCKED_3001",
+    "D-02_REVERSE_PROXY": "LOCKED_CYBERPANEL_LITESPEED_EXTERNAL_APP",
     "D-03_DASHBOARD_CUTOVER": "LOCKED_IN_SCOPE",
-    "D-04_PROCESS_MANAGER": "PROVISIONAL_PM2_USER_INSTALL",
-    "D-05_STORAGE": "PROVISIONAL_PRESERVE_PUBLIC_HTML_STORAGE_SYMLINK",
-    "D-06_ASSET_COPY_SET": "DRAFT_PENDING_SSH_DRIFT",
-    "D-07_FIXTURE_FLAGS": "LOCKED_REPO_POLICY_HOST_UNVERIFIED",
-    "D-08_DEVELOPER_CP": "PROVISIONAL_SAFE_PROTECTED_IF_ENABLED_HOST_UNVERIFIED",
-    "D-09_DB_BACKUP": "DRAFT_UNPROVEN",
-    "D-10_FILESYSTEM_BACKUP": "DRAFT_UNPROVEN",
+    "D-04_PROCESS_MANAGER": "LOCKED_PM2_USER_LOCAL",
+    "D-05_STORAGE": "LOCKED_PRESERVE_PUBLIC_HTML_STORAGE_SYMLINK",
+    "D-06_ASSET_COPY_SET": "LOCKED_PER_MANIFEST",
+    "D-07_FIXTURE_FLAGS": "LOCKED_SAFE_UNSET_ON_HOST",
+    "D-08_DEVELOPER_CP": "LOCKED_SAFE_PROTECTED",
+    "D-09_DB_BACKUP": "LOCKED_MYSQLDUMP_READY",
+    "D-10_FILESYSTEM_BACKUP": "LOCKED_TAR_READY",
     "D-11_BUILD_STRATEGY": "LOCKED_BUILD_ON_SERVER"
   },
   "production_capture": {
-    "status": "PARTIAL",
-    "timestamp_utc": "2026-08-07T20:15:00Z",
+    "status": "COMPLETE",
+    "timestamp_utc": "2026-08-08T03:56:00Z",
     "host": "185.215.166.176",
     "user": "pkjetp",
-    "ssh_result": "PERMISSION_DENIED_PUBLICKEY",
-    "http_external": {
-      "jetpakistan_pk": "BLADE_PRIMARY_NO_PUBLIC_NEXT_CUTOVER"
-    },
-    "git_sha_on_host": "UNKNOWN"
+    "hostname": "vmi3400777",
+    "ssh_result": "SUCCESS",
+    "git_sha_on_host": "UNKNOWN",
+    "http_routing": "BLADE_LARAVEL_PRIMARY",
+    "migrations_pending": 0,
+    "migrations_total": 104
   },
   "runtime_summary": {
-    "php_path": "UNVERIFIED_HISTORICAL_/usr/local/lsws/lsphp83/bin/php",
-    "migration_disposition": "UNVERIFIED",
-    "queue_disposition": "UNVERIFIED"
+    "php_path": "/usr/local/lsws/lsphp83/bin/php",
+    "php_version": "8.3.31",
+    "laravel_version": "13.7.0",
+    "node_version": "22.23.1",
+    "npm_version": "10.9.8",
+    "pm2_installed": false,
+    "migration_disposition": "SKIP_RECHECK_AT_DEPLOY",
+    "queue_disposition": "SYNC_WITH_CRON_SCHEDULER"
   },
   "planned_public_next_port": 3010,
   "planned_dashboard_next_port": 3001,
-  "proxy_method": "PROVISIONAL_LITESPEED_TO_LOCALHOST",
-  "process_manager_plan": "PROVISIONAL_PM2_USER_LOCAL",
-  "storage_disposition": "PROVISIONAL_PRESERVE_PUBLIC_HTML_STORAGE_SYMLINK",
-  "fixture_flag_disposition": "HOST_UNVERIFIED_REPO_POLICY_LOCKED",
-  "developer_cp_disposition": "PROVISIONAL_SAFE_PROTECTED_PENDING_HOST_FLAG",
-  "db_backup_disposition": "UNPROVEN",
-  "filesystem_backup_disposition": "UNPROVEN",
+  "proxy_method": "CYBERPANEL_LITESPEED_EXTERNAL_APP_CONTEXT",
+  "process_manager_plan": "PM2_USER_LOCAL_NPM_GLOBAL",
+  "storage_disposition": "PRESERVE_PUBLIC_HTML_STORAGE_SYMLINK",
+  "fixture_flag_disposition": "SAFE_ALL_UNSET",
+  "developer_cp_disposition": "SAFE_PROTECTED_ENABLED_TRUE",
+  "db_backup_disposition": "MYSQLDUMP_GZIP_READY",
+  "filesystem_backup_disposition": "TAR_TO_HOME_BACKUPS_READY",
   "build_strategy": "BUILD_ON_SERVER_NPM_CI_NEXT_START",
-  "rollback_readiness": "NOT_READY_PENDING_BACKUP_PROOF",
+  "rollback_readiness": "READY_CONTINGENT_ON_DEPLOY_BACKUPS",
   "latest_test_disposition": {
     "JETPK-UI-09": {
       "homepage.spec.ts": "PASS",
@@ -146,5 +155,5 @@
       "dashboard_lint": "PASS"
     }
   },
-  "updated_at_utc": "2026-08-07T20:20:00Z"
+  "updated_at_utc": "2026-08-08T04:15:00Z"
 }
