@@ -2,8 +2,8 @@
   "schema_version": 1,
   "program": "JETPK-PREDEPLOY-CLOSURE",
   "active_loop": "PRODUCTION_DEPLOYMENT",
-  "status": "IN_PROGRESS",
-  "sequence": 20,
+  "status": "BLOCKED",
+  "sequence": 24,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
   "observed_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
@@ -12,9 +12,9 @@
   "release_docs_commit_sha": "8827949224f9c03519c0060de1d54475e4b66d9d",
   "release_docs_merge_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
   "final_release_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
-  "last_completed_event": "LARAVEL_DEPLOYED",
+  "last_completed_event": "BLOCKED",
   "current_phase": "JETPK-PRODUCTION-CUTOVER",
-  "current_step": "PUBLIC_NEXT_LOCAL_HEALTH_PASS",
+  "current_step": "PROXY_CUTOVER",
   "current_phase_branch": null,
   "completed_phases": [
     "JETPK-UI-02A",
@@ -42,7 +42,10 @@
     "DEPLOYMENT_PREFLIGHT_PASS",
     "BACKUPS_VERIFIED",
     "RELEASE_STAGED",
-    "LARAVEL_DEPLOYED"
+    "LARAVEL_DEPLOYED",
+    "PUBLIC_NEXT_LOCAL_HEALTH_PASS",
+    "DASHBOARD_NEXT_LOCAL_HEALTH_PASS",
+    "PRE_PROXY_GATE_PASS"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
@@ -90,7 +93,23 @@
   ],
   "open_gaps": [],
   "remaining_gap_count": 0,
-  "blocked": null,
+  "blocked": {
+    "step": "PROXY_CUTOVER",
+    "reason": "PROXY_MUTATION_AUTHORITY_UNAVAILABLE",
+    "timestamp_utc": "2026-08-08T05:15:00Z",
+    "detail": "pkjetp cannot read or write /usr/local/lsws/conf/vhosts/ — CyberPanel operator action required for LiteSpeed External Application + Context cutover",
+    "live_traffic_changed": false,
+    "resume_condition": "CyberPanel operator completes vhost backup + proxy cutover per JETPK-RELEASE-02-DEPLOYMENT-PLAN Phase F; then resume at POST_CUTOVER_SMOKE",
+    "completed_stages": [
+      "DEPLOYMENT_PREFLIGHT_PASS",
+      "BACKUPS_VERIFIED",
+      "RELEASE_STAGED",
+      "LARAVEL_DEPLOYED",
+      "PUBLIC_NEXT_LOCAL_HEALTH_PASS",
+      "DASHBOARD_NEXT_LOCAL_HEALTH_PASS",
+      "PRE_PROXY_GATE_PASS"
+    ]
+  },
   "engineering_terminal": "ENGINEERING_CLOSURE_COMPLETE",
   "predeploy_terminal": "JETPK_PREDEPLOY_READY",
   "deployment_authorized": true,
@@ -124,7 +143,40 @@
     "storage_symlink": "INTACT",
     "php_binary": "/usr/local/lsws/lsphp83/bin/php"
   },
-  "production_mutations_performed": 3,
+  "deployment_next": {
+    "pm2_path": "/home/pkjetp/.npm-global/bin/pm2",
+    "pm2_installed": true,
+    "public_process": "jetpk-public-frontend",
+    "public_port": 3010,
+    "public_localhost": {
+      "/": 200,
+      "/login": 200,
+      "/about-us": 200,
+      "/faq": 200,
+      "laravel_bridge_session": 200
+    },
+    "dashboard_process": "jetpk-dashboard",
+    "dashboard_port": 3001,
+    "dashboard_localhost": {
+      "/admin/dashboard": 200,
+      "/staff/dashboard": 200
+    },
+    "laravel_url_production": "https://jetpakistan.pk",
+    "fixture_flags": "SAFE_ALL_UNSET"
+  },
+  "pre_proxy_gate": {
+    "timestamp_utc": "2026-08-08T05:14:00Z",
+    "result": "PASS",
+    "live_https_still_blade": true,
+    "live_https_home": 200,
+    "port_3000": "nghttpx_UNTOUCHED",
+    "port_3010": "PUBLIC_NEXT_ONLINE",
+    "port_3001": "DASHBOARD_NEXT_ONLINE",
+    "pm2_both_online": true,
+    "storage_symlink": "INTACT",
+    "migrations_pending": 0
+  },
+  "production_mutations_performed": 5,
   "deployment_performed": false,
   "readiness_decisions": {
     "D-01_PUBLIC_NEXT_PORT": "LOCKED_3010",
@@ -158,8 +210,8 @@
     "laravel_version": "13.7.0",
     "node_version": "22.23.1",
     "npm_version": "10.9.8",
-    "pm2_installed": false,
-    "migration_disposition": "SKIP_RECHECK_AT_DEPLOY",
+    "pm2_installed": true,
+    "migration_disposition": "SKIP",
     "queue_disposition": "SYNC_WITH_CRON_SCHEDULER"
   },
   "planned_public_next_port": 3010,
@@ -172,23 +224,7 @@
   "db_backup_disposition": "MYSQLDUMP_GZIP_READY",
   "filesystem_backup_disposition": "TAR_TO_HOME_BACKUPS_READY",
   "build_strategy": "BUILD_ON_SERVER_NPM_CI_NEXT_START",
-  "rollback_readiness": "READY_CONTINGENT_ON_DEPLOY_BACKUPS",
-  "latest_test_disposition": {
-    "JETPK-UI-09": {
-      "homepage.spec.ts": "PASS",
-      "jetpk-ui-09-final-regression.spec.ts": "PASS",
-      "jetpk-ui-09-regression.spec.ts": "PASS",
-      "overview.smoke.spec.ts": "PASS",
-      "jp-fullstack-01g-content-policy.test.mjs": "PASS",
-      "php artisan test --filter=JetPakistan": "PASS"
-    },
-    "FINAL_ENGINEERING_REGRESSION_GATE": {
-      "frontend_typecheck": "PASS",
-      "frontend_lint": "PASS",
-      "dashboard_typecheck": "PASS",
-      "dashboard_lint": "PASS"
-    }
-  },
+  "rollback_readiness": "READY_BACKUPS_VERIFIED",
   "deployment_authorization": {
     "timestamp_utc": "2026-08-08T04:25:00Z",
     "operator_explicit": true,
@@ -211,5 +247,5 @@
     "live_https_home": 200,
     "storage_symlink": "INTACT"
   },
-  "updated_at_utc": "2026-08-08T04:45:00Z"
+  "updated_at_utc": "2026-08-08T05:15:00Z"
 }
