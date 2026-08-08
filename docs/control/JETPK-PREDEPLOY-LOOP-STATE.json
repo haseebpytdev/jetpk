@@ -3,7 +3,7 @@
   "program": "JETPK-PREDEPLOY-CLOSURE",
   "active_loop": "PRODUCTION_DEPLOYMENT",
   "status": "IN_PROGRESS",
-  "sequence": 17,
+  "sequence": 18,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
   "observed_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
@@ -12,9 +12,9 @@
   "release_docs_commit_sha": "8827949224f9c03519c0060de1d54475e4b66d9d",
   "release_docs_merge_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
   "final_release_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
-  "last_completed_event": "DEPLOYMENT_PREFLIGHT_PASS",
+  "last_completed_event": "BACKUPS_VERIFIED",
   "current_phase": "JETPK-PRODUCTION-CUTOVER",
-  "current_step": "BACKUPS_VERIFIED",
+  "current_step": "RELEASE_STAGED",
   "current_phase_branch": null,
   "completed_phases": [
     "JETPK-UI-02A",
@@ -39,7 +39,8 @@
   ],
   "deployment_checkpoints_completed": [
     "DEPLOYMENT_AUTHORIZED",
-    "DEPLOYMENT_PREFLIGHT_PASS"
+    "DEPLOYMENT_PREFLIGHT_PASS",
+    "BACKUPS_VERIFIED"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
@@ -94,7 +95,19 @@
   "production_read_only_connections_authorized": true,
   "production_connections_authorized": true,
   "production_mutations_authorized": true,
-  "production_mutations_performed": 0,
+  "deployment_backups": {
+    "timestamp_utc": "2026-08-08T04:43:39Z",
+    "backup_ts": "20260808T044339Z",
+    "db_backup": "/home/pkjetp/backups/jetpk-db-20260808T044339Z.sql.gz",
+    "db_backup_bytes": 841984,
+    "db_gzip_test": "PASS",
+    "app_backup": "/home/pkjetp/backups/jetpk_app-20260808T044339Z.tar.gz",
+    "app_backup_bytes": 342146474,
+    "public_html_backup": "/home/pkjetp/backups/public_html-20260808T044339Z.tar.gz",
+    "public_html_backup_bytes": 1874736,
+    "proxy_vhost_backup": "PENDING_CYBERPANEL_OPERATOR_AT_CUTOVER"
+  },
+  "production_mutations_performed": 1,
   "deployment_performed": false,
   "readiness_decisions": {
     "D-01_PUBLIC_NEXT_PORT": "LOCKED_3010",
@@ -181,5 +194,5 @@
     "live_https_home": 200,
     "storage_symlink": "INTACT"
   },
-  "updated_at_utc": "2026-08-08T04:28:00Z"
+  "updated_at_utc": "2026-08-08T04:45:00Z"
 }
