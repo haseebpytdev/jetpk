@@ -3,7 +3,7 @@
   "program": "JETPK-PREDEPLOY-CLOSURE",
   "active_loop": "PRODUCTION_DEPLOYMENT",
   "status": "IN_PROGRESS",
-  "sequence": 18,
+  "sequence": 19,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
   "observed_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
