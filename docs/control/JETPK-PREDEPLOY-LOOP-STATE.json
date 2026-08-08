@@ -3,7 +3,7 @@
   "program": "JETPK-PREDEPLOY-CLOSURE",
   "active_loop": "PRODUCTION_DEPLOYMENT",
   "status": "IN_PROGRESS",
-  "sequence": 19,
+  "sequence": 20,
   "control_branch": "control/jetpk-predeploy-loop",
   "state_path": "docs/control/JETPK-PREDEPLOY-LOOP-STATE.json",
   "observed_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
@@ -12,9 +12,9 @@
   "release_docs_commit_sha": "8827949224f9c03519c0060de1d54475e4b66d9d",
   "release_docs_merge_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
   "final_release_main_sha": "f311d07b183c38c0217b5f3132b88a1e4b1fd752",
-  "last_completed_event": "BACKUPS_VERIFIED",
+  "last_completed_event": "LARAVEL_DEPLOYED",
   "current_phase": "JETPK-PRODUCTION-CUTOVER",
-  "current_step": "RELEASE_STAGED",
+  "current_step": "PUBLIC_NEXT_LOCAL_HEALTH_PASS",
   "current_phase_branch": null,
   "completed_phases": [
     "JETPK-UI-02A",
@@ -40,7 +40,9 @@
   "deployment_checkpoints_completed": [
     "DEPLOYMENT_AUTHORIZED",
     "DEPLOYMENT_PREFLIGHT_PASS",
-    "BACKUPS_VERIFIED"
+    "BACKUPS_VERIFIED",
+    "RELEASE_STAGED",
+    "LARAVEL_DEPLOYED"
   ],
   "completed_merge_shas": {
     "JETPK-UI-02A": "44053c09b14f86a29da3215ae1e62be9543adc09",
@@ -107,7 +109,22 @@
     "public_html_backup_bytes": 1874736,
     "proxy_vhost_backup": "PENDING_CYBERPANEL_OPERATOR_AT_CUTOVER"
   },
-  "production_mutations_performed": 1,
+  "deployment_release": {
+    "engineering_sha": "b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a",
+    "artifact_bytes": 261218346,
+    "staging_path": "/home/pkjetp/releases/jetpk-20260808T044339Z",
+    "archive_path": "/home/pkjetp/releases/jetpk-release-b95efd4.tar.gz",
+    "verified_dirs": ["app", "frontend", "dashboard", "composer.json", "composer.lock", "artisan"]
+  },
+  "deployment_laravel": {
+    "composer": "PASS",
+    "root_vite_build": "PASS",
+    "migrations_pending": 0,
+    "migration_action": "SKIP",
+    "storage_symlink": "INTACT",
+    "php_binary": "/usr/local/lsws/lsphp83/bin/php"
+  },
+  "production_mutations_performed": 3,
   "deployment_performed": false,
   "readiness_decisions": {
     "D-01_PUBLIC_NEXT_PORT": "LOCKED_3010",
