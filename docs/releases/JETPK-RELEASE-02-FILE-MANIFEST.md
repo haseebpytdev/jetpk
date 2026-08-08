@@ -99,6 +99,15 @@
 
 ---
 
-## Drift status
+## Drift status (verified 2026-08-08)
 
-**INCOMPLETE** — targeted hash comparison vs live `public_html` and `jetpk_app/public` requires SSH (D-06).
+| Asset | Production state |
+|-------|------------------|
+| `css/ota-public.css` | MATCH (jetpk_app ↔ public_html) |
+| `build/manifest.json` | MATCH |
+| `themes/` | Minor delta: `login.js` in app only |
+| `js/` | Minor delta: `ota-one-api-checkout.js` in public_html only |
+| `frontend/` | **Absent** on server — full upload + build required |
+| `dashboard/.next` | Present but **stale** — rebuild required |
+
+**Disposition:** Full-release COPY + mirror. No `--delete` wildcard sync.

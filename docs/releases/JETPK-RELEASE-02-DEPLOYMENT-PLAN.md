@@ -1,97 +1,117 @@
 # JETPK-RELEASE-02 — Deployment Plan
 
 **Engineering SHA:** `b95efd47cd2fb531c90743cf2e1d4a3de1ebc79a`  
-**Status:** DRAFT — **not executable until Loop B unblocks and operator authorizes deployment**
+**Status:** LOCKED — executable at explicit deployment authorization
 
-**PHP CLI (verified historical — recheck at window):** `/usr/local/lsws/lsphp83/bin/php`  
-**Never use:** `/opt/alt/php-fpm83/usr/bin/php`
+**PHP CLI:** `/usr/local/lsws/lsphp83/bin/php` (8.3.31)  
+**Public Next port:** `3010`  
+**Dashboard Next port:** `3001`  
+**Forbidden port:** `3000` (nghttpx)
 
 ---
 
 ## Pre-flight gates (deployment window)
 
-1. Confirm `main` / deployed tree = `b95efd4` (or newer engineering-approved SHA).
-2. Recheck `PUBLIC_NEXT_PORT` (candidate **3010**) and `DASHBOARD_PORT` (candidate **3001**) with `ss -ltnp`.
+1. Confirm deployed tree matches engineering SHA `b95efd4` (or newer authorized SHA).
+2. Recheck ports **3010** and **3001** free (`ss -ltn`).
 3. Confirm port **3000** still nghttpx — do not bind Next there.
-4. DB backup completed and verified (see Rollback plan).
-5. Filesystem + `.htaccess` backup completed.
-6. `php artisan migrate:status` — if pending = 0 → **MIGRATION ACTION: SKIP** (recheck only).
-7. Fixture flags: `OTA_ALLOW_CONTENT_FIXTURE`, `OTA_ALLOW_SESSION_FIXTURE` = UNSET/FALSE.
-8. PM2 installed to user prefix; `command -v pm2` succeeds.
+4. DB backup completed and gzip verified.
+5. Filesystem + `.htaccess` + CyberPanel vhost backup completed.
+6. `php artisan migrate:status` — if pending = 0 → **SKIP migrations**.
+7. Fixture flags remain UNSET/FALSE on server and in Next env.
+8. PM2 installed to `$HOME/.npm-global/bin`.
 
 ---
 
-## Ordered deployment sequence
+## Ordered sequence
 
-### Phase A — Backup (mandatory)
+### Phase A — Backups (mandatory)
 
-| Step | Action |
-|------|--------|
-| A1 | `mysqldump` full DB → `/home/pkjetp/backups/jetpk-db-<TIMESTAMP>.sql.gz` |
-| A2 | `tar czf` `jetpk_app` (excl. `vendor`, `node_modules`, `storage/logs`) |
-| A3 | `tar czf` `public_html` critical paths + `.htaccess` |
-| A4 | Record backup sizes and verify gzip integrity |
+```bash
+TS=$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p /home/pkjetp/backups
+# DB — credentials from .env at deploy (never log password)
+mysqldump -h127.0.0.1 -u"$DB_USER" -p"$DB_PASS" "$DB_DATABASE" | gzip > /home/pkjetp/backups/jetpk-db-$TS.sql.gz
+gzip -t /home/pkjetp/backups/jetpk-db-$TS.sql.gz
+
+tar czf /home/pkjetp/backups/jetpk_app-$TS.tar.gz -C /home/pkjetp jetpk_app
+tar czf /home/pkjetp/backups/public_html-$TS.tar.gz -C /home/pkjetp public_html
+# Export CyberPanel vhost config for jetpakistan.pk before proxy change
+```
 
 ### Phase B — Laravel + public assets
 
-| Step | Action |
-|------|--------|
-| B1 | SFTP sync Laravel code per manifest (changed files or controlled full sync) |
-| B2 | `composer install --no-dev --optimize-autoloader` in `jetpk_app` |
-| B3 | `npm ci && npm run build` at Laravel root (Vite) if manifest changed |
-| B4 | Mirror `public/themes`, `public/js`, `public/css`, `client-assets` → `public_html` |
-| B5 | **Conditional migrations:** only if `migrate:status` shows pending safe migrations |
-| B6 | `php artisan config:cache` / `route:cache` / `view:cache` **only if** standard for this deploy |
+```bash
+PHP=/usr/local/lsws/lsphp83/bin/php
+cd /home/pkjetp/jetpk_app
+composer install --no-dev --optimize-autoloader
+npm ci && npm run build   # root Vite if manifest changed
+# SFTP sync per FILE-MANIFEST
+# Mirror public/themes, public/css, public/js, public/build, client-assets → public_html
+# MIGRATION ACTION: SKIP unless migrate:status shows new pending
+```
 
-### Phase C — Public Next (localhost first)
+### Phase C — PM2 install (user-local)
 
-| Step | Action |
-|------|--------|
-| C1 | SFTP `frontend/` source (no `node_modules`, `.next`) |
-| C2 | `cd frontend && npm ci && npm run build` with production env (no fixture flags) |
-| C3 | PM2 start: `next start -p $PUBLIC_NEXT_PORT` (not `start-smoke.mjs`) |
-| C4 | `curl -sS -o /dev/null -w "%{http_code}" http://127.0.0.1:$PUBLIC_NEXT_PORT/` → expect 200 |
-| C5 | Verify `/laravel/*` proxy from Next to Laravel |
+```bash
+export NPM_CONFIG_PREFIX=$HOME/.npm-global
+export PATH=$HOME/.npm-global/bin:$PATH
+mkdir -p $HOME/.npm-global
+npm install -g pm2
+command -v pm2   # must succeed
+```
 
-### Phase D — Dashboard Next (localhost first)
+### Phase D — Public Next (localhost first)
 
-| Step | Action |
-|------|--------|
-| D1 | SFTP `dashboard/` source |
-| D2 | `cd dashboard && npm ci && npm run build` |
-| D3 | PM2 start: `next start -p $DASHBOARD_PORT` |
-| D4 | `curl` admin/staff dashboard routes on localhost |
+```bash
+cd /home/pkjetp/jetpk_app/frontend
+npm ci
+# Production env — NO OTA_ALLOW_CONTENT_FIXTURE, NO OTA_ALLOW_SESSION_FIXTURE
+# NEXT_PUBLIC_ALLOW_CONTENT_FIXTURES unset/false
+# LARAVEL_URL=http://127.0.0.1
+npm run build
+pm2 delete jetpk-public-frontend 2>/dev/null || true
+pm2 start node --name jetpk-public-frontend -- node_modules/next/dist/bin/next start -p 3010
+curl -sS -o /dev/null -w "%{http_code}" http://127.0.0.1:3010/   # expect 200
+```
 
-### Phase E — Proxy cutover (operator / panel)
+**Never use:** `start-smoke.mjs`, `playwright-server.mjs`, `npm run start:smoke`, `npm run test:smoke`.
 
-| Step | Action |
-|------|--------|
-| E1 | Configure LiteSpeed reverse proxy: public vhost → `127.0.0.1:$PUBLIC_NEXT_PORT` |
-| E2 | Configure admin/staff paths → dashboard Next (exact path map per D-02 resolution) |
-| E3 | Preserve Laravel API/session routes not handled by Next |
-| E4 | **Do not** stop nghttpx on 3000 |
+### Phase E — Dashboard Next (localhost first)
 
-### Phase F — Post-cutover verification
+```bash
+cd /home/pkjetp/jetpk_app/dashboard
+npm ci && npm run build
+pm2 delete jetpk-dashboard 2>/dev/null || true
+pm2 start node --name jetpk-dashboard -- node_modules/next/dist/bin/next start -p 3001
+curl -sS -o /dev/null -w "%{http_code}" http://127.0.0.1:3001/admin/dashboard   # expect 200
+pm2 save
+```
 
-| Step | Action |
-|------|--------|
-| F1 | Public routes: `/`, `/login`, `/about-us`, `/faq` — HTTP 200, no client exception |
-| F2 | Protected Laravel/API routes respond (no 500) |
-| F3 | Admin `/admin/dashboard`, Staff `/staff/dashboard` smoke |
-| F4 | `public_html/storage` symlink intact |
-| F5 | Scheduler/cron: `schedule:run` evidence in logs |
-| F6 | Queue: if `sync`, **no** `queue:restart` required |
-| F7 | Manual browser QA handoff (desktop/tablet/mobile) |
+### Phase F — Proxy cutover (CyberPanel operator)
 
-**Not required:** live booking, payment, supplier search, ticketing.
+**D-02 locked method:**
+
+1. CyberPanel → Websites → `jetpakistan.pk` → **Backup current vhost config**.
+2. Create LiteSpeed **External Application** `jetpk-public-next` → `127.0.0.1:3010`.
+3. Add **Context** `/` → proxy handler → `jetpk-public-next` (preserve static file handling where applicable).
+4. Route admin/staff dashboard traffic to External App `jetpk-dashboard` → `127.0.0.1:3001` (exact path map per panel).
+5. Ensure Laravel routes not absorbed by Next remain reachable via `/laravel/*` through Next rewrite.
+6. **Do not** stop or reconfigure nghttpx on port 3000.
+
+### Phase G — Post-cutover verification
+
+| Check | Expected |
+|-------|----------|
+| `https://jetpakistan.pk/` | 200, no client exception |
+| `/login`, `/about-us`, `/faq` | 200 |
+| `/laravel/*` API/session | Functional |
+| `/admin/dashboard`, `/staff/dashboard` | Dashboard Next shell |
+| `public_html/storage` symlink | Intact |
+| Cron `schedule:run` | Running (no queue worker needed) |
 
 ---
 
 ## Rollback triggers
-
-- Public Next localhost health fails before proxy activation → abort cutover.
-- Proxy enabled but homepage 500 / client exception → disable proxy, restore `.htaccess` backup.
-- Migration failure → stop, restore DB from A1 if data affected.
-- Dashboard unreachable → stop dashboard PM2, retain Blade admin fallback if applicable.
 
 See [JETPK-RELEASE-02-ROLLBACK-PLAN.md](./JETPK-RELEASE-02-ROLLBACK-PLAN.md).
