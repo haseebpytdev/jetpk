@@ -35,8 +35,7 @@ export async function ensureLaravelCsrfToken(forceRefresh = false): Promise<stri
       cache: "no-store",
     });
     if (!response.ok) return null;
-    const body = (await response.json()) as { csrf_token?: string };
-    return body.csrf_token ?? readCookie("XSRF-TOKEN");
+    return readCookie("XSRF-TOKEN");
   } catch {
     return null;
   }

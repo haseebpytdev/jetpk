@@ -5,6 +5,7 @@ import { sanitizeDashboardUrl } from "../utils/dashboard-allowlist";
 export async function requestPasswordReset(payload: PasswordResetRequestPayload) {
   const result = await laravelJsonFetch<{ ok: boolean; message: string }>("/forgot-password", {
     method: "POST",
+    retryCsrfOnce: true,
     formBody: { email: payload.email },
   });
 

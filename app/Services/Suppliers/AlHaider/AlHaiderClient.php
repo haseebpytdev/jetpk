@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Log;
 /**
  * Read-only HTTP client for Al-Haider group flight inventory API.
  *
- * Dynamic session tokens are cached in Laravel cache with a login lock — not stored in .env.
+ * Bearer tokens are persisted in encrypted server-side storage with optional
+ * performance cache — never in browser, URLs, logs, or .env (except optional static override).
  */
 class AlHaiderClient
 {
@@ -22,6 +23,11 @@ class AlHaiderClient
     private const TOKEN_LIMIT_BLOCK_KEY = 'alhaider:auth_token:limit_blocked';
 
     private const LOGIN_LOCK_KEY = 'alhaider:auth_token:login';
+
+    public function __construct(
+        private readonly AlHaiderTokenStore $tokenStore,
+        private readonly AlHaiderTokenExpiryResolver $tokenExpiryResolver,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $filters
@@ -127,6 +133,16 @@ class AlHaiderClient
         return Cache::has(self::TOKEN_LIMIT_BLOCK_KEY);
     }
 
+    public function isTokenGenerationEnabled(): bool
+    {
+        return (bool) config('suppliers.al_haider.token_generation_enabled', false);
+    }
+
+    public function hasPersistedToken(): bool
+    {
+        return $this->tokenStore->hasValidToken();
+    }
+
     public function isConfigured(): bool
     {
         if (! (bool) config('suppliers.al_haider.enabled')) {
@@ -145,7 +161,7 @@ class AlHaiderClient
     }
 
     /**
-     * Safe auth probe for diagnostics — never returns token value.
+     * Safe auth probe for diagnostics — never returns token value or calls login when generation is disabled.
      *
      * @return array{http_status: int, reason_code: string, token_obtained: bool}
      */
@@ -155,6 +171,41 @@ class AlHaiderClient
             return [
                 'http_status' => 429,
                 'reason_code' => 'supplier_auth_token_limit',
+                'token_obtained' => false,
+            ];
+        }
+
+        $staticToken = trim((string) config('suppliers.al_haider.token'));
+        if ($staticToken !== '') {
+            return [
+                'http_status' => 200,
+                'reason_code' => 'ok',
+                'token_obtained' => true,
+            ];
+        }
+
+        $cached = Cache::get(self::TOKEN_CACHE_KEY);
+        if (is_string($cached) && $cached !== '') {
+            return [
+                'http_status' => 200,
+                'reason_code' => 'ok',
+                'token_obtained' => true,
+            ];
+        }
+
+        $durable = $this->tokenStore->load();
+        if ($durable !== null && $durable->isValid(time(), $this->tokenStore->expiryMarginSeconds())) {
+            return [
+                'http_status' => 200,
+                'reason_code' => 'ok',
+                'token_obtained' => true,
+            ];
+        }
+
+        if (! $this->isTokenGenerationEnabled()) {
+            return [
+                'http_status' => 503,
+                'reason_code' => 'supplier_auth_token_missing',
                 'token_obtained' => false,
             ];
         }
@@ -225,7 +276,13 @@ class AlHaiderClient
             }
 
             $this->clearTokenCache();
-            $token = $this->resolveToken(true);
+            $this->tokenStore->markInvalidated($this->tokenStore->load());
+
+            if (! $this->isTokenGenerationEnabled()) {
+                throw $exception;
+            }
+
+            $token = $this->resolveToken(forceRefresh: true);
 
             return $this->send($method, $path, $token, $payload, $query, $context);
         }
@@ -328,6 +385,30 @@ class AlHaiderClient
 
                 return $cached;
             }
+
+            $durable = $this->tokenStore->load();
+            if ($durable !== null && $durable->isValid(time(), $this->tokenStore->expiryMarginSeconds())) {
+                $this->populatePerformanceCache($durable);
+                Log::info('alhaider.auth.durable_hit', [
+                    'supplier' => 'alhaider',
+                    'expires_at' => $durable->expiresAt,
+                ]);
+
+                return $durable->token;
+            }
+        }
+
+        if (! $this->isTokenGenerationEnabled()) {
+            Log::warning('alhaider.auth.token_missing', [
+                'supplier' => 'alhaider',
+                'reason' => 'generation_disabled',
+            ]);
+
+            throw new AlHaiderProviderException(
+                'supplier_auth_token_missing',
+                503,
+                'Al-Haider authentication requires a persisted bearer token.'
+            );
         }
 
         Log::info('alhaider.auth.token_cache_miss', [
@@ -362,6 +443,13 @@ class AlHaiderClient
                 return $cached;
             }
 
+            $durable = $this->tokenStore->load();
+            if ($durable !== null && $durable->isValid(time(), $this->tokenStore->expiryMarginSeconds())) {
+                $this->populatePerformanceCache($durable);
+
+                return $durable->token;
+            }
+
             throw new AlHaiderProviderException(
                 'supplier_auth_busy',
                 503,
@@ -379,6 +467,13 @@ class AlHaiderClient
                 ]);
 
                 return $cached;
+            }
+
+            $durable = $this->tokenStore->load();
+            if ($durable !== null && $durable->isValid(time(), $this->tokenStore->expiryMarginSeconds())) {
+                $this->populatePerformanceCache($durable);
+
+                return $durable->token;
             }
 
             return $this->performLogin();
@@ -434,31 +529,6 @@ class AlHaiderClient
             );
         }
 
-        if ($token === '' && $response->status() !== 200) {
-            try {
-                $response = $this->http(null)
-                    ->post($this->url($this->path('login_path')), $loginPayload);
-                $token = $this->extractToken($response);
-            } catch (ConnectionException $exception) {
-                throw new AlHaiderProviderException(
-                    'supplier_transport_failed',
-                    503,
-                    'Al-Haider is temporarily unavailable. Please try again.',
-                    $exception
-                );
-            }
-
-            if ($token === '' && $this->responseIndicatesTokenLimit($response)) {
-                $this->handleTokenLimitResponse($response);
-
-                throw new AlHaiderProviderException(
-                    'supplier_auth_token_limit',
-                    $response->status() ?: 429,
-                    'Al-Haider authentication is temporarily unavailable.'
-                );
-            }
-        }
-
         if ($token === '') {
             Log::warning('alhaider.login_failed', [
                 'supplier' => 'alhaider',
@@ -473,17 +543,45 @@ class AlHaiderClient
             );
         }
 
-        $ttl = max(60, (int) config('suppliers.al_haider.token_cache_ttl_seconds', 82800));
-        Cache::put(self::TOKEN_CACHE_KEY, $token, $ttl);
+        $issuedAt = time();
+        $expiresAt = $this->tokenExpiryResolver->resolveExpiresAt($response, $issuedAt);
+        $record = new AlHaiderTokenRecord(
+            token: $token,
+            issuedAt: $issuedAt,
+            expiresAt: $expiresAt,
+            source: 'login',
+        );
+
+        $this->tokenStore->save($record);
+        $this->populatePerformanceCache($record);
 
         Log::info('alhaider.auth.login_succeeded', [
             'supplier' => 'alhaider',
             'endpoint' => $this->path('login_path'),
             'http_status' => $response->status(),
-            'cache_ttl_seconds' => $ttl,
+            'expires_at' => $expiresAt,
         ]);
 
         return $token;
+    }
+
+    private function populatePerformanceCache(AlHaiderTokenRecord $record): void
+    {
+        Cache::put(self::TOKEN_CACHE_KEY, $record->token, $this->performanceCacheTtlSeconds($record));
+    }
+
+    private function performanceCacheTtlSeconds(AlHaiderTokenRecord $record): int
+    {
+        $maxSeconds = max(
+            60,
+            (int) config(
+                'suppliers.al_haider.token_performance_cache_max_seconds',
+                (int) config('suppliers.al_haider.token_cache_ttl_seconds', 3600),
+            ),
+        );
+        $remaining = $record->expiresAt - time() - $this->tokenStore->expiryMarginSeconds();
+
+        return max(60, min($maxSeconds, $remaining));
     }
 
     private function extractToken(Response $response): string

@@ -14,6 +14,8 @@ use App\Support\Client\ClientManagedPageReservedSlugs;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\ClientSafeHtmlSanitizer;
 use App\Support\Client\ReservedPublicPath;
+use App\Support\Branding\JetpkCompanyBrandingResolver;
+use App\Support\Media\PublicMediaUrl;
 
 /**
  * Shapes Laravel-managed public content for the Next.js public frontend.
@@ -140,11 +142,15 @@ final class PublicContentApiPresenter
         $contact = $this->contactResolver->contact();
         $global = $this->contentFor(ClientPageKeys::GLOBAL);
         $social = is_array($global['social'] ?? null) ? $global['social'] : [];
+        $branding = app(JetpkCompanyBrandingResolver::class);
 
         return [
             'brand_name' => (string) config('ota-brand.name', 'JetPakistan'),
             'domain' => (string) config('client.canonical_client.domain', 'jetpakistan.pk'),
             'app_url' => rtrim((string) config('app.url'), '/'),
+            'logo_url' => PublicMediaUrl::normalize($branding->logoUrl()),
+            'favicon_url' => PublicMediaUrl::normalize($branding->faviconUrl()),
+            'header_logo_height' => $branding->headerLogoHeight(),
             'contact' => $contact,
             'legal_paths' => [
                 'terms' => '/terms',

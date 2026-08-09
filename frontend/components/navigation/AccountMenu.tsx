@@ -3,7 +3,7 @@
 import { Dropdown } from "@/components/ui/Dropdown";
 import { logout } from "@/features/auth/services/auth-service";
 import { cn } from "@/lib/cn";
-import type { PublicSession } from "@/types/session";
+import type { AuthenticatedSession, PublicSession } from "@/types/session";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +14,32 @@ type AccountMenuProps = {
   compact?: boolean;
 };
 
+type AccountMenuLink = {
+  href: string;
+  label: string;
+};
+
+function accountMenuLinks(session: AuthenticatedSession): AccountMenuLink[] {
+  if (session.accountType === "customer") {
+    return [
+      { href: "/customer/dashboard", label: "Dashboard" },
+      { href: "/customer/bookings", label: "My Bookings" },
+      { href: "/customer/profile", label: "Profile" },
+    ];
+  }
+
+  if (session.accountType === "agent") {
+    return [
+      { href: "/agent/dashboard", label: "Dashboard" },
+      { href: "/agent/bookings", label: "Bookings" },
+      { href: "/agent/wallet", label: "Wallet" },
+      { href: "/agent/profile", label: "Profile" },
+    ];
+  }
+
+  return [{ href: session.dashboardUrl, label: "Dashboard" }];
+}
+
 export function AccountMenu({ session, className, compact = false }: AccountMenuProps) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -22,6 +48,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
     return (
       <Link
         href="/login"
+        data-testid={compact ? "account-menu-anonymous-compact" : "account-menu-anonymous-desktop"}
         className={cn(
           compact ? "text-jp-sm font-semibold text-jp-text" : undefined,
           !compact &&
@@ -34,8 +61,8 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
     );
   }
 
-  const { user, dashboardUrl } = session;
-  const bookingsHref = dashboardUrl.startsWith("/customer") ? "/customer/bookings" : dashboardUrl;
+  const { user } = session;
+  const menuLinks = accountMenuLinks(session);
 
   async function handleLogout() {
     if (loggingOut) return;
@@ -53,10 +80,13 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
     <Dropdown
       className={className}
       align="end"
+      portal={compact}
+      panelTestId={compact ? "account-menu-panel-compact" : "account-menu-panel-desktop"}
       panelClassName="min-w-[12.5rem]"
       trigger={({ id, expanded, onToggle, onKeyDown }) => (
         <button
           type="button"
+          data-testid={compact ? "account-menu-trigger-compact" : "account-menu-trigger-desktop"}
           aria-haspopup="menu"
           aria-expanded={expanded}
           aria-controls={id}
@@ -68,12 +98,21 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
             "focus-visible:outline-none focus-visible:shadow-jp-focus",
           )}
         >
-          <span
-            aria-hidden="true"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-jp-primary text-xs font-bold text-white"
-          >
-            {user.initials}
-          </span>
+          {user.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.avatarUrl}
+              alt=""
+              className="h-8 w-8 rounded-full object-cover"
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-jp-primary text-xs font-bold text-white"
+            >
+              {user.initials}
+            </span>
+          )}
           {!compact ? <span className="max-w-[8rem] truncate">{user.displayName}</span> : null}
           <ChevronDownIcon className={cn("h-4 w-4", expanded && "rotate-180")} />
         </button>
@@ -83,22 +122,16 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
         <p className="truncate text-jp-sm font-semibold text-jp-text">{user.displayName}</p>
         <p className="truncate text-jp-xs text-jp-muted">{user.email}</p>
       </div>
-      <a
-        href={dashboardUrl}
-        role="menuitem"
-        className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
-      >
-        Dashboard
-      </a>
-      {session.accountType === "customer" ? (
+      {menuLinks.map((link) => (
         <a
-          href={bookingsHref}
+          key={link.href}
+          href={link.href}
           role="menuitem"
           className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
         >
-          Bookings
+          {link.label}
         </a>
-      ) : null}
+      ))}
       <button
         type="button"
         role="menuitem"

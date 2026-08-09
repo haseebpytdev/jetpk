@@ -1,4 +1,6 @@
 @php
+    use App\Services\Homepage\JetpkHomepageAssetService;
+
     $routeItems = collect(data_get($content, 'routes.items', []))->values();
     if ($routeItems->count() < 4) {
         $routeItems = $routeItems->pad(4, []);
@@ -51,9 +53,11 @@
             @php
                 $item = is_array($item) ? $item : [];
                 $routeId = data_get($item, 'id') ?: 'route-'.$i;
+                $assetKey = data_get($item, 'image_asset_key') ?: JetpkHomepageAssetService::routeAssetKey($routeId);
+                $existingAsset = $assets->firstWhere('asset_key', $assetKey);
                 $cache = is_array($fareCache[$routeId] ?? null) ? $fareCache[$routeId] : [];
             @endphp
-            <div class="jp-repeatable-card" data-jp-repeatable-row data-index="{{ $i }}">
+            <div class="jp-repeatable-card" data-jp-repeatable-row data-index="{{ $i }}" data-item-id="{{ $routeId }}">
                 <div class="jp-between">
                     <p class="jp-muted" style="margin:0;">Route {{ $i + 1 }}</p>
                     <div class="jp-toggle">
@@ -63,6 +67,7 @@
                     </div>
                 </div>
                 <input type="hidden" name="content[routes][items][{{ $i }}][id]" value="{{ $routeId }}">
+                <input type="hidden" name="content[routes][items][{{ $i }}][image_asset_key]" value="{{ $assetKey }}">
                 <div class="jp-field jp-field--inline" style="max-width:140px;">
                     <label class="jp-field__label">Order</label>
                     <input aria-label="Order" type="number" min="0" class="jp-control" name="content[routes][items][{{ $i }}][sort_order]" value="{{ data_get($item, 'sort_order', $i) }}">
@@ -118,6 +123,25 @@
                 @if ($cache !== [])
                     <p class="jp-field__help">Last refresh: {{ data_get($cache, 'fare_refreshed_at', '—') }} · Status: {{ data_get($cache, 'fare_status', '—') }} · Fare: {{ data_get($cache, 'resolved_fare') ? 'PKR '.number_format((int) data_get($cache, 'resolved_fare')) : '—' }}</p>
                 @endif
+                <div class="jp-field">
+                    <label class="jp-field__label">Image alt text</label>
+                    <input aria-label="Image alt text" class="jp-control" name="content[routes][items][{{ $i }}][image_alt]" value="{{ data_get($item, 'image_alt', data_get($item, 'alt')) }}">
+                </div>
+                <div class="jp-media-inline">
+                    @if ($existingAsset?->public_url)
+                        <img src="{{ $existingAsset->public_url }}" alt="" class="jp-media-inline__preview" loading="lazy">
+                    @endif
+                    <div class="jp-field">
+                        <label class="jp-field__label">Upload image (JPEG/PNG/WebP, max 5 MB)</label>
+                        <input aria-label="Upload route image (JPEG/PNG/WebP, max 5 MB)" type="file" name="route_files[{{ $routeId }}]" accept="image/jpeg,image/png,image/webp" class="jp-control">
+                    </div>
+                    @if ($existingAsset)
+                        <label class="jp-toggle">
+                            <input type="checkbox" name="route_remove[{{ $routeId }}]" value="1">
+                            Remove current image on save
+                        </label>
+                    @endif
+                </div>
                 <button type="button" class="jp-btn jp-btn--sm jp-btn--ghost" data-jp-repeatable-remove>Remove route</button>
             </div>
         @endforeach

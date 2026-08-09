@@ -33,6 +33,30 @@ final class JetpkHomepageAssetService
         return 'destination_'.($slug !== '' ? $slug : 'item');
     }
 
+    public static function routeAssetKey(string $itemId): string
+    {
+        $slug = Str::slug($itemId, '_');
+
+        return 'route_'.($slug !== '' ? $slug : 'item');
+    }
+
+    public function storeRouteImage(
+        ClientProfile $profile,
+        string $itemId,
+        UploadedFile $file,
+        ?int $userId = null,
+        ?string $altText = null,
+    ): ClientPageAsset {
+        return $this->storeScopedImage(
+            $profile,
+            self::routeAssetKey($itemId),
+            $file,
+            (string) config('jetpk_homepage.route_storage_prefix', 'jetpk/homepage/trending-routes'),
+            $userId,
+            $altText,
+        );
+    }
+
     public function storeDestinationImage(
         ClientProfile $profile,
         string $itemId,

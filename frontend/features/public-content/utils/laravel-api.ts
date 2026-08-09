@@ -43,8 +43,7 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
       headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
     });
     if (!response.ok) return null;
-    const body = (await response.json()) as { csrf_token?: string };
-    return body.csrf_token ?? readCookie("XSRF-TOKEN");
+    return readCookie("XSRF-TOKEN");
   } catch {
     return null;
   }

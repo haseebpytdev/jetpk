@@ -119,6 +119,9 @@ class ClientPageSettingsController extends Controller
             'destination_files' => ['nullable', 'array'],
             'destination_files.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'destination_remove' => ['nullable', 'array'],
+            'route_files' => ['nullable', 'array'],
+            'route_files.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'route_remove' => ['nullable', 'array'],
             'support_cta_background_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'support_cta_background_mobile_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'submitted_sections' => ['nullable', 'array'],
@@ -506,6 +509,36 @@ class ClientPageSettingsController extends Controller
 
         if ($request->boolean('support_cta_background_mobile_remove')) {
             $this->destroyHomeAssetByKey($profile, 'support_cta_background_mobile');
+        }
+
+        $routeItems = is_array($content['routes']['items'] ?? null) ? $content['routes']['items'] : [];
+        foreach ($routeItems as $index => $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $itemId = (string) ($item['id'] ?? 'route-'.$index);
+            if ($request->hasFile('route_files.'.$itemId)) {
+                $asset = $this->homepageAssetService->storeRouteImage(
+                    $profile,
+                    $itemId,
+                    $request->file('route_files.'.$itemId),
+                    auth()->id(),
+                    $item['image_alt'] ?? ($item['alt'] ?? null),
+                );
+                $content['routes']['items'][$index]['image_asset_key'] = $asset->asset_key;
+            }
+
+            if ($request->boolean('route_remove.'.$itemId)) {
+                $assetKey = (string) ($item['image_asset_key'] ?? JetpkHomepageAssetService::routeAssetKey($itemId));
+                $existing = ClientPageAsset::query()
+                    ->where('client_profile_id', $profile->id)
+                    ->where('page_key', ClientPageKeys::HOME)
+                    ->where('asset_key', $assetKey)
+                    ->first();
+                if ($existing !== null) {
+                    $this->homepageAssetService->destroyAsset($existing);
+                }
+            }
         }
 
         return $content;

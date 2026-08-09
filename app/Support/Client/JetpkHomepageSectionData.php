@@ -5,6 +5,7 @@ namespace App\Support\Client;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Homepage\JetpkHomepageAssetService;
 use App\Support\Client\Homepage\JetpkHomepageHeroSizing;
+use App\Support\Media\PublicMediaUrl;
 use Illuminate\Support\Str;
 
 /**
@@ -82,6 +83,7 @@ final class JetpkHomepageSectionData
             $routeId = (string) ($item['id'] ?? '');
             $fare = JetpkHomepageFareDisplay::resolve($item, $fareCache[$routeId] ?? null);
             $priceLabel = $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel();
+            $image = PublicMediaUrl::normalize($this->routeImageUrl($item, $routeId)) ?? '';
 
             $routes[] = array_merge($item, [
                 'from' => $from,
@@ -91,6 +93,8 @@ final class JetpkHomepageSectionData
                 'airlines' => $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel(),
                 'fare_source' => $fare['source'] ?? 'none',
                 'search_url' => $this->routeSearchUrl($item),
+                'image' => $image !== '' ? $image : null,
+                'image_alt' => trim((string) ($item['image_alt'] ?? $item['alt'] ?? "{$from} to {$to}")),
             ]);
         }
 
@@ -122,7 +126,7 @@ final class JetpkHomepageSectionData
             }
 
             $fare = JetpkHomepageFareDisplay::resolve($item, null);
-            $image = $this->destinationImageUrl($item, $index);
+            $image = PublicMediaUrl::normalize($this->destinationImageUrl($item, $index)) ?? '';
             $link = trim((string) ($item['link'] ?? $item['cta_url'] ?? ''));
 
             $destinations[] = array_merge($item, [
@@ -264,6 +268,32 @@ final class JetpkHomepageSectionData
     /**
      * @param  array<string, mixed>  $item
      */
+    private function routeImageUrl(array $item, string $routeId): ?string
+    {
+        $candidates = [];
+
+        $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
+        if ($assetKey !== '') {
+            $candidates[] = $assetKey;
+        }
+
+        if ($routeId !== '') {
+            $candidates[] = JetpkHomepageAssetService::routeAssetKey($routeId);
+        }
+
+        foreach (array_unique($candidates) as $key) {
+            $url = $this->assetUrl($key);
+            if ($url !== null) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
     private function destinationImageUrl(array $item, int $index): string
     {
         $candidates = [];
@@ -290,10 +320,10 @@ final class JetpkHomepageSectionData
 
         $fallback = (string) config('jetpk_homepage.destination_fallback_image', '');
         if ($fallback !== '' && is_file(public_path($fallback))) {
-            return asset($fallback);
+            return PublicMediaUrl::normalize(asset($fallback)) ?? '/'.ltrim($fallback, '/');
         }
 
-        return asset('themes/frontend/jetpakistan/images/homepage-destination-fallback.svg');
+        return '/themes/frontend/jetpakistan/images/homepage-destination-fallback.svg';
     }
 
     /**

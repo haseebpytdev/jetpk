@@ -29,31 +29,37 @@ export function LoginForm() {
     setFormError("");
     setFieldErrors({});
 
-    const result = await login({ login: loginValue.trim(), password, remember });
+    try {
+      const result = await login({ login: loginValue.trim(), password, remember });
 
-    if (!result.ok) {
-      setSubmitting(false);
-      if (result.status === 429) {
-        setFormError("Too many login attempts. Please wait a moment and try again.");
+      if (!result.ok) {
+        setSubmitting(false);
+        if (result.status === 429) {
+          setFormError("Too many login attempts. Please wait a moment and try again.");
+          return;
+        }
+        setFieldErrors(mapFieldErrors(result.fieldErrors));
+        setFormError(result.fieldErrors?.login?.[0] ?? result.message);
         return;
       }
-      setFieldErrors(mapFieldErrors(result.fieldErrors));
-      setFormError(result.fieldErrors?.login?.[0] ?? result.message);
-      return;
-    }
 
-    if (result.requires_otp) {
-      router.push("/login/otp");
-      return;
-    }
+      if (result.requires_otp) {
+        setSubmitting(false);
+        window.location.assign("/login/otp");
+        return;
+      }
 
-    if (isNextJsOwnedPath(result.redirect)) {
-      router.push(result.redirect);
-      router.refresh();
-      return;
-    }
+      if (isNextJsOwnedPath(result.redirect)) {
+        router.push(result.redirect);
+        router.refresh();
+        return;
+      }
 
-    window.location.assign(result.redirect);
+      window.location.assign(result.redirect);
+    } catch {
+      setSubmitting(false);
+      setFormError("Something went wrong. Please try again.");
+    }
   }
 
   return (

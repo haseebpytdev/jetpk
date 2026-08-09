@@ -120,6 +120,8 @@ final class JetpkHomepageContentValidator
                 'cta_label' => $this->sanitize($raw['cta_label'] ?? ''),
                 'cta_url' => $this->sanitizeUrl($raw['cta_url'] ?? ''),
                 'badge' => $this->sanitize($raw['badge'] ?? ''),
+                'image_asset_key' => $this->sanitize($raw['image_asset_key'] ?? ''),
+                'image_alt' => $this->sanitize($raw['image_alt'] ?? ($raw['alt'] ?? '')),
             ];
         }
 

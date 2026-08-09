@@ -10,7 +10,18 @@ export default async function PublicGroupLayout({ children }: { children: ReactN
   const config = await PublicConfigService.getConfig();
 
   return (
-    <PublicShell session={session}>
+    <PublicShell
+      session={session}
+      branding={
+        config
+          ? {
+              brand_name: config.brand_name,
+              logo_url: config.logo_url,
+              header_logo_height: config.header_logo_height,
+            }
+          : null
+      }
+    >
       <SeoJsonLd config={config} />
       {children}
     </PublicShell>

@@ -1,17 +1,50 @@
 import { cn } from "@/lib/cn";
+import Image from "next/image";
 
 type JetPakistanLogoProps = {
   className?: string;
   variant?: "default" | "inverse";
   showTagline?: boolean;
+  logoUrl?: string | null;
+  brandName?: string;
+  logoHeight?: number;
 };
+
+function shouldUseUnoptimizedLogo(src: string): boolean {
+  return (
+    src.startsWith("http://") ||
+    src.startsWith("https://") ||
+    src.startsWith("/storage/") ||
+    src.startsWith("/client-assets/")
+  );
+}
 
 export function JetPakistanLogo({
   className,
   variant = "default",
   showTagline = true,
+  logoUrl,
+  brandName = "JetPakistan",
+  logoHeight = 36,
 }: JetPakistanLogoProps) {
   const isInverse = variant === "inverse";
+  const resolvedLogo = logoUrl?.trim() ?? "";
+
+  if (resolvedLogo !== "") {
+    return (
+      <div className={cn("flex min-w-0 items-center", className)}>
+        <Image
+          src={resolvedLogo}
+          alt={brandName}
+          width={Math.max(120, logoHeight * 4)}
+          height={logoHeight}
+          unoptimized={shouldUseUnoptimizedLogo(resolvedLogo)}
+          className="h-auto w-auto max-h-[var(--jp-header-logo-height,36px)] max-w-[min(180px,42vw)] object-contain object-left"
+          style={{ maxHeight: `${logoHeight}px` }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
@@ -49,7 +82,7 @@ export function JetPakistanLogo({
             isInverse ? "text-white" : "text-jp-text",
           )}
         >
-          JetPakistan
+          {brandName}
         </span>
         {showTagline ? (
           <span

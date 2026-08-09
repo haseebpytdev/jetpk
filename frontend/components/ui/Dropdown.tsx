@@ -3,6 +3,7 @@
 import { cn } from "@/lib/cn";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 type DropdownProps = {
   trigger: (props: {
@@ -15,6 +16,8 @@ type DropdownProps = {
   align?: "start" | "end";
   className?: string;
   panelClassName?: string;
+  portal?: boolean;
+  panelTestId?: string;
 };
 
 export function Dropdown({
@@ -23,11 +26,15 @@ export function Dropdown({
   align = "start",
   className,
   panelClassName,
+  portal = false,
+  panelTestId,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
   const id = useId();
   const panelId = `${id}-panel`;
   const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEscapeKey(open, () => {
@@ -39,16 +46,55 @@ export function Dropdown({
     if (!open) return;
 
     const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
+      const target = event.target as Node;
+      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) {
+        return;
       }
+      setOpen(false);
     };
 
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [open]);
 
-  const handleToggle = () => setOpen((value) => !value);
+  useEffect(() => {
+    if (!open || !portal) return;
+
+    const updatePosition = () => {
+      updatePortalPosition();
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [align, open, portal]);
+
+  const updatePortalPosition = () => {
+    const rect = rootRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    setPanelStyle({
+      position: "fixed",
+      top: rect.bottom + 8,
+      left: align === "end" ? undefined : rect.left,
+      right: align === "end" ? Math.max(16, window.innerWidth - rect.right) : undefined,
+      zIndex: 60,
+    });
+  };
+
+  const handleToggle = () => {
+    setOpen((value) => {
+      const next = !value;
+      if (next && portal) {
+        updatePortalPosition();
+      }
+      return next;
+    });
+  };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
@@ -56,6 +102,25 @@ export function Dropdown({
       setOpen(true);
     }
   };
+
+  const panel =
+    open ? (
+      <div
+        ref={panelRef}
+        id={panelId}
+        role="menu"
+        data-testid={panelTestId}
+        style={portal ? panelStyle : undefined}
+        className={cn(
+          "min-w-[12rem] rounded-jp-md border border-jp-border bg-jp-surface p-2 shadow-jp-md",
+          portal ? undefined : "absolute z-50 mt-2",
+          !portal && (align === "end" ? "right-0" : "left-0"),
+          panelClassName,
+        )}
+      >
+        {children}
+      </div>
+    ) : null;
 
   return (
     <div ref={rootRef} className={cn("relative", className)}>
@@ -65,19 +130,7 @@ export function Dropdown({
         onToggle: handleToggle,
         onKeyDown: handleKeyDown,
       })}
-      {open ? (
-        <div
-          id={panelId}
-          role="menu"
-          className={cn(
-            "absolute z-50 mt-2 min-w-[12rem] rounded-jp-md border border-jp-border bg-jp-surface p-2 shadow-jp-md",
-            align === "end" ? "right-0" : "left-0",
-            panelClassName,
-          )}
-        >
-          {children}
-        </div>
-      ) : null}
+      {portal && typeof document !== "undefined" ? createPortal(panel, document.body) : panel}
     </div>
   );
 }

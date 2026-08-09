@@ -526,7 +526,14 @@ return [
         'timeout_seconds' => (int) env('ALHAIDER_API_TIMEOUT', 20),
         'connect_timeout_seconds' => 10,
         'cache_ttl_seconds' => (int) env('ALHAIDER_CACHE_TTL_SECONDS', 600),
-        'token_cache_ttl_seconds' => (int) env('ALHAIDER_TOKEN_CACHE_TTL_SECONDS', 82800),
+        // Performance-layer cache only (not authoritative token lifetime).
+        'token_cache_ttl_seconds' => (int) env('ALHAIDER_TOKEN_CACHE_TTL_SECONDS', 3600),
+        'token_performance_cache_max_seconds' => (int) env('ALHAIDER_TOKEN_PERFORMANCE_CACHE_MAX_SECONDS', 3600),
+        // Business/supplier contract when login response omits expiry metadata (~1 year).
+        'token_validity_seconds' => (int) env('ALHAIDER_TOKEN_VALIDITY_SECONDS', 31_536_000),
+        'token_expiry_margin_seconds' => (int) env('ALHAIDER_TOKEN_EXPIRY_MARGIN_SECONDS', 86_400),
+        // Human-gated: must be explicitly enabled before any supplier login/token issuance.
+        'token_generation_enabled' => (bool) env('ALHAIDER_TOKEN_GENERATION_ENABLED', false),
         'login_lock_seconds' => (int) env('ALHAIDER_LOGIN_LOCK_SECONDS', 15),
         'login_lock_wait_seconds' => (int) env('ALHAIDER_LOGIN_LOCK_WAIT_SECONDS', 10),
         'token_limit_block_seconds' => (int) env('ALHAIDER_TOKEN_LIMIT_BLOCK_SECONDS', 300),

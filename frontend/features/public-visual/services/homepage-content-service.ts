@@ -289,13 +289,27 @@ function mapRemote(remote: RemoteHomepage): HomepageContent {
   };
 }
 
+function resolveHomepageApiUrl(): string {
+  if (typeof window !== "undefined") {
+    return laravelApiPath("/api/public/content/homepage");
+  }
+
+  const laravelBase = (
+    process.env.LARAVEL_URL ??
+    process.env.NEXT_PUBLIC_LARAVEL_URL ??
+    "http://127.0.0.1:8000"
+  ).replace(/\/$/, "");
+
+  return `${laravelBase}/api/public/content/homepage`;
+}
+
 export const HomepageContentService = {
   heroFallbackImage: HERO_FALLBACK_IMAGE,
   heroFallbackAlt: HERO_FALLBACK_ALT,
 
   async getHomepage(): Promise<HomepageContent> {
     try {
-      const response = await fetchWithTimeout(laravelApiPath("/api/public/content/homepage"), {
+      const response = await fetchWithTimeout(resolveHomepageApiUrl(), {
         headers: { Accept: "application/json" },
         next: { revalidate: 120 },
       });

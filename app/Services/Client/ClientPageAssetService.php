@@ -6,6 +6,7 @@ use App\Models\ClientPageAsset;
 use App\Models\ClientProfile;
 use App\Services\Homepage\JetpkHeroImageOptimizer;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Media\PublicMediaUrl;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -174,7 +175,7 @@ final class ClientPageAssetService
             $url = $asset->public_url ?: null;
         }
 
-        return $this->versionedPublicUrl($url, $asset);
+        return PublicMediaUrl::normalize($this->versionedPublicUrl($url, $asset));
     }
 
     public function versionedPublicUrl(?string $url, ClientPageAsset $asset): ?string
@@ -186,7 +187,7 @@ final class ClientPageAssetService
         $version = $asset->updated_at?->getTimestamp() ?? $asset->id;
         $separator = str_contains($url, '?') ? '&' : '?';
 
-        return $url.$separator.'v='.$version;
+        return PublicMediaUrl::normalize($url.$separator.'v='.$version);
     }
 
     public function absolutePathFor(ClientPageAsset $asset): ?string

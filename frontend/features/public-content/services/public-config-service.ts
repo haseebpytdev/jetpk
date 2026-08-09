@@ -6,6 +6,9 @@ export type PublicConfig = {
   brand_name: string;
   domain: string;
   app_url: string;
+  logo_url?: string | null;
+  favicon_url?: string | null;
+  header_logo_height?: number;
   contact: ContactDetails;
   legal_paths: {
     terms: string;

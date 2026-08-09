@@ -44,9 +44,44 @@ export function mapBootstrapToPublicSession(bootstrap: SessionBootstrap): Public
 }
 
 export async function fetchSessionBootstrap(cookieHeader?: string): Promise<SessionBootstrap> {
-  const headers: HeadersInit = {};
+  const headers: HeadersInit = {
+    Accept: "application/json",
+    "X-Requested-With": "XMLHttpRequest",
+  };
+
   if (cookieHeader) {
     headers.Cookie = cookieHeader;
+  }
+
+  /*
+   * Browser requests use the same-origin /laravel bridge.
+   *
+   * Next.js server components cannot fetch that relative browser URL.
+   * During SSR, call Laravel's private server origin directly while
+   * forwarding the incoming browser Cookie header unchanged.
+   */
+  if (typeof window === "undefined") {
+    const laravelBase = (
+      process.env.LARAVEL_URL ??
+      process.env.NEXT_PUBLIC_LARAVEL_URL ??
+      "http://127.0.0.1:8000"
+    ).replace(/\/$/, "");
+
+    try {
+      const response = await fetch(`${laravelBase}/api/public/auth/session`, {
+        method: "GET",
+        headers,
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        return { authenticated: false };
+      }
+
+      return (await response.json()) as SessionBootstrap;
+    } catch {
+      return { authenticated: false };
+    }
   }
 
   const result = await laravelJsonFetch<SessionBootstrap>("/api/public/auth/session", {
@@ -60,7 +95,6 @@ export async function fetchSessionBootstrap(cookieHeader?: string): Promise<Sess
 
   return result.data;
 }
-
 export async function fetchSessionBootstrapFromCookies(
   cookies: Array<{ name: string; value: string }>,
 ): Promise<SessionBootstrap> {

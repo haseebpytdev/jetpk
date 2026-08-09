@@ -139,4 +139,45 @@ class JetpkHomepageMediaTest extends TestCase
         $this->assertStringContainsString('homepage-destination-fallback.svg', $destinations[0]['image']);
         $this->assertFileExists(public_path('themes/frontend/jetpakistan/images/homepage-destination-fallback.svg'));
     }
+
+    public function test_route_image_upload_and_api_resolution(): void
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $profile = $this->makeJetpkProfile();
+        $admin = \App\Models\User::factory()->create([
+            'account_type' => \App\Enums\AccountType::PlatformAdmin,
+            'current_agency_id' => null,
+        ]);
+        $routeId = 'route-khi-dxb';
+
+        $this->actingAs($admin)->patch('/admin/page-settings/home', [
+            'content' => [
+                'destinations' => ['enabled' => '1', 'items' => []],
+                'routes' => [
+                    'enabled' => '1',
+                    'items' => [[
+                        'id' => $routeId,
+                        'from' => 'KHI',
+                        'to' => 'DXB',
+                        'enabled' => '1',
+                        'trip_type' => 'one_way',
+                    ]],
+                ],
+                'support_cta' => ['enabled' => '0'],
+            ],
+            'route_files' => [
+                $routeId => UploadedFile::fake()->image('route.jpg'),
+            ],
+        ])->assertRedirect();
+
+        $asset = ClientPageAsset::query()->where('asset_key', JetpkHomepageAssetService::routeAssetKey($routeId))->first();
+        $this->assertNotNull($asset);
+
+        app(\App\Services\Client\ClientPageContentResolver::class)
+            ->publish($profile, \App\Support\Client\ClientPageKeys::HOME, $admin->id);
+        $presented = app(\App\Services\PublicContent\HomepagePublicContentPresenter::class)->present();
+        $route = $presented['routes']['items'][0] ?? null;
+        $this->assertIsArray($route);
+        $this->assertNotEmpty($route['image'] ?? null);
+    }
 }

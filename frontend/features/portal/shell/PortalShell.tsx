@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { IconButton } from "@/components/ui/IconButton";
+import { logout } from "@/features/auth/services/auth-service";
 import { useBodyScrollLock } from "@/lib/hooks/use-body-scroll-lock";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 
@@ -188,14 +189,44 @@ export function buildPortalNav(
 }
 
 export function PortalSidebarFooter() {
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+
+  async function handleLogout() {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+    setLogoutError("");
+
+    const result = await logout();
+
+    if (!result.ok) {
+      setLoggingOut(false);
+      setLogoutError(result.message);
+      return;
+    }
+
+    window.location.assign(result.redirect);
+  }
+
   return (
     <>
       <Link href="/" className="text-jp-brand focus-visible:shadow-jp-focus">
         Return to site
       </Link>
-      <Link href="/laravel/logout" className="mt-2 block text-jp-muted focus-visible:shadow-jp-focus">
-        Sign out
-      </Link>
+      <button
+        type="button"
+        onClick={handleLogout}
+        disabled={loggingOut}
+        className="mt-2 block text-left text-jp-muted focus-visible:shadow-jp-focus disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {loggingOut ? "Signing out…" : "Sign out"}
+      </button>
+      {logoutError ? (
+        <p role="alert" className="mt-2 text-jp-xs text-jp-danger">
+          {logoutError}
+        </p>
+      ) : null}
     </>
   );
 }

@@ -5,24 +5,31 @@ import { MobileNavigation } from "@/components/navigation/MobileNavigation";
 import { JetPakistanLogo } from "@/components/layout/JetPakistanLogo";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { ThemeSwitch } from "@/components/theme/ThemeSwitch";
+import type { PublicConfig } from "@/features/public-content/services/public-config-service";
 import type { PublicSession } from "@/types/session";
 import Link from "next/link";
 
 type SiteHeaderProps = {
   session: PublicSession;
+  branding?: Pick<PublicConfig, "brand_name" | "logo_url" | "header_logo_height"> | null;
 };
 
-export function SiteHeader({ session }: SiteHeaderProps) {
+export function SiteHeader({ session, branding = null }: SiteHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 border-b border-jp-border bg-jp-surface/95 backdrop-blur supports-[backdrop-filter]:bg-jp-surface/90">
-      <div className="mx-auto flex h-jp-nav w-full max-w-jp-container items-center justify-between gap-jp-md px-jp-xl">
+    <header className="sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface">
+      <div className="mx-auto flex h-jp-nav w-full max-w-jp-container items-center justify-between gap-jp-md overflow-visible px-jp-xl">
         <div className="flex min-w-0 items-center gap-jp-lg">
           <Link
             href="/"
             className="shrink-0 rounded-jp-md focus-visible:outline-none focus-visible:shadow-jp-focus"
             aria-label="JetPakistan home"
           >
-            <JetPakistanLogo showTagline={false} />
+            <JetPakistanLogo
+              showTagline={false}
+              logoUrl={branding?.logo_url}
+              brandName={branding?.brand_name}
+              logoHeight={branding?.header_logo_height}
+            />
           </Link>
           <DesktopNavigation />
         </div>

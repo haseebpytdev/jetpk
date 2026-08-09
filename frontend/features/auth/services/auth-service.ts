@@ -7,6 +7,7 @@ const CLIENT_SLUG = "jetpk";
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
   const result = await laravelJsonFetch<{ ok: boolean; redirect: string; requires_otp?: boolean }>("/login", {
     method: "POST",
+    retryCsrfOnce: true,
     formBody: {
       login: payload.login,
       password: payload.password,

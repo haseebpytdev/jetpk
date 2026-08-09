@@ -69,6 +69,19 @@ const destinationMediaFallbacks: ApprovedMedia[] = [
   routeMediaByKey.istanbul,
 ];
 
+function isPublicHomepageMediaUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  if (trimmed.startsWith("/")) return true;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.hostname === "127.0.0.1" || parsed.hostname === "localhost") return false;
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 export function resolveRouteMedia(
   route: {
     id: string;
@@ -79,7 +92,7 @@ export function resolveRouteMedia(
   },
   index = 0,
 ): ApprovedMedia {
-  if (route.image) {
+  if (route.image && isPublicHomepageMediaUrl(route.image)) {
     return {
       image: route.image,
       imageAlt: route.imageAlt ?? `${route.from} to ${route.to}`,
@@ -94,11 +107,36 @@ export function resolveRouteMedia(
   return destinationMediaFallbacks[index % destinationMediaFallbacks.length];
 }
 
+export function resolveDestinationMedia(
+  destination: {
+    id: string;
+    code: string;
+    title: string;
+    image?: string | null;
+    imageAlt?: string;
+  },
+  index = 0,
+): ApprovedMedia {
+  if (destination.image && isPublicHomepageMediaUrl(destination.image)) {
+    return {
+      image: destination.image,
+      imageAlt: destination.imageAlt ?? destination.title,
+    };
+  }
+
+  for (const key of [destination.code, destination.id, destination.title]) {
+    const match = routeMediaByKey[normalizeMediaKey(key)];
+    if (match) return match;
+  }
+
+  return destinationMediaFallbacks[index % destinationMediaFallbacks.length];
+}
+
 export function resolveOfferMedia(
   offer: { id: string; from: string; image?: string | null; imageAlt?: string },
   index: number,
 ): ApprovedMedia {
-  if (offer.image) {
+  if (offer.image && isPublicHomepageMediaUrl(offer.image)) {
     return {
       image: offer.image,
       imageAlt: offer.imageAlt ?? offer.from,

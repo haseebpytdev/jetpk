@@ -1,19 +1,26 @@
 import { JetPakistanLogo } from "@/components/layout/JetPakistanLogo";
 import { PageContainer } from "@/components/layout/PageContainer";
+import type { PublicConfig } from "@/features/public-content/services/public-config-service";
 import { footerColumns, socialLinks } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
 
 type SiteFooterProps = {
   className?: string;
+  branding?: Pick<PublicConfig, "brand_name" | "logo_url" | "header_logo_height"> | null;
 };
 
-export function SiteFooter({ className }: SiteFooterProps) {
+export function SiteFooter({ className, branding = null }: SiteFooterProps) {
   return (
     <footer className={cn("bg-jp-footer text-white", className)} role="contentinfo">
       <PageContainer className="py-jp-4xl">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
           <div className="space-y-5">
-            <JetPakistanLogo variant="inverse" />
+            <JetPakistanLogo
+              variant="inverse"
+              logoUrl={branding?.logo_url}
+              brandName={branding?.brand_name}
+              logoHeight={branding?.header_logo_height}
+            />
             <p className="max-w-sm text-jp-sm leading-relaxed text-white/80">
               Connecting you to the world with trusted fares, secure booking, and dedicated support for
               travelers across Pakistan and beyond.

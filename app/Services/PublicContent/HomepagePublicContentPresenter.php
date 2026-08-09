@@ -5,6 +5,7 @@ namespace App\Services\PublicContent;
 use App\Services\Client\ClientPageContentResolver;
 use App\Support\Client\ClientPageKeys;
 use App\Support\Client\JetpkHomepageSectionData;
+use App\Support\Media\PublicMediaUrl;
 
 /**
  * Shapes published homepage CMS content for the Next.js public frontend.
@@ -56,7 +57,7 @@ final class HomepagePublicContentPresenter
             'subtitle' => $hasCms ? trim((string) ($hero['subtitle'] ?? '')) : '',
             'search_visible' => ($hero['search_visible'] ?? '1') !== '0',
             'image' => $imageUrl !== null && $imageUrl !== ''
-                ? ['url' => $imageUrl, 'alt' => trim((string) ($hero['image_alt'] ?? 'JetPakistan flights'))]
+                ? ['url' => PublicMediaUrl::normalize($imageUrl), 'alt' => trim((string) ($hero['image_alt'] ?? 'JetPakistan flights'))]
                 : null,
         ];
     }
@@ -223,7 +224,7 @@ final class HomepagePublicContentPresenter
             'chat_enabled' => ($support['chat_enabled'] ?? '1') === '1',
             'chat_label' => trim((string) $this->homepage->field('support_cta.chat_label', 'Get support')),
             'chat_href' => $this->resolveActionHref($chatUrlRaw, ''),
-            'image' => $this->homepage->assetUrl('support_cta_background'),
+            'image' => PublicMediaUrl::normalize($this->homepage->assetUrl('support_cta_background')),
         ];
     }
 

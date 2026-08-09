@@ -5,6 +5,16 @@ import Image from "next/image";
 import { useState } from "react";
 import { Skeleton } from "./Skeleton";
 
+function shouldBypassNextOptimizer(src: string): boolean {
+  return (
+    src.startsWith("http://") ||
+    src.startsWith("https://") ||
+    src.startsWith("/storage/") ||
+    src.startsWith("/client-assets/") ||
+    src.startsWith("/themes/")
+  );
+}
+
 type ImageSlotProps = {
   src?: string | null;
   alt: string;
@@ -71,6 +81,7 @@ export function ImageSlot({
         height={height}
         sizes={sizes}
         priority={priority}
+        unoptimized={shouldBypassNextOptimizer(src)}
         loading={priority ? undefined : "lazy"}
         className={cn(
           "jp-image-fade-in h-full w-full",

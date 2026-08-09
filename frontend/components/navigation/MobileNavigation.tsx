@@ -36,7 +36,7 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
   useFocusTrap(open, panelRef);
 
   return (
-    <div className={cn("lg:hidden", className)}>
+    <div className={cn("relative overflow-visible lg:hidden", className)}>
       <div className="flex items-center gap-2">
         <AccountMenu session={session} compact />
         <IconButton
@@ -73,7 +73,7 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
               </IconButton>
             </div>
 
-            <nav aria-label="Mobile primary" className="flex-1 overflow-y-auto px-4 py-4">
+            <nav aria-label="Mobile primary" className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
               <ul className="space-y-1">
                 {primaryNavigation.map((item) => (
                   <MobileNavItem key={item.label} item={item} onNavigate={closeMenu} />
