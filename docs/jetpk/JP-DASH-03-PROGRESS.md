@@ -10,21 +10,41 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-09T20:15:00Z
+2026-08-09T21:25:00Z
 
 ## CURRENT_COMMIT
 
-`pending-checkpoint-1`
+`a86c89e` — fix(dashboard): restore authenticated production rendering
 
 ## PRODUCTION_DEPLOYED
 
-no
+yes — checkpoint 1 dashboard + Laravel proxy deploy
 
-## CURRENT_PRODUCTION_BUILD_IDS
+## DEPLOYMENT_BACKUPS
 
-Not yet deployed in this phase.
+`/home/pkjetp/jetpk-dash-03-20260809231801`
 
-## CURRENT_OLS_HASHES
+## TEST_RESULTS
+
+- `php artisan test --filter=BackOfficeSessionContractTest`: 10 passed, 27 assertions
+- `dashboard npm run typecheck`: pass
+- `dashboard npm run build`: pass (local + production server)
+- Production `curl http://127.0.0.1:3001/admin/dashboard`: HTTP 200
+- Production HTML includes DB logo preload (`/storage/agencies/.../branding/...png`)
+- No `Preview` string in unauthenticated dashboard HTML sample
+
+## REMOTE_PHASE_PROGRESS
+
+Push failed: no `origin` remote configured locally. Commit `a86c89e` on branch `phase/jetpk-dash-03-operational-backoffice`.
+
+## CURRENT_BLOCKERS
+
+- Git remote not configured for push from this workspace
+- Authenticated production acceptance requires live admin session (human or fixture cookies)
+
+## NEXT_AUTONOMOUS_ACTION
+
+Checkpoint 2: global search, notification state, nav operationalization, expanded KPI/summary API, staff RBAC verification, Inter typography platform pass.
 
 | Scope | SHA256 |
 |-------|--------|
