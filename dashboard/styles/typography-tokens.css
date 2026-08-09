@@ -3,6 +3,8 @@
 :root,
 [data-theme="light"],
 [data-theme="dark"] {
+  --font-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
   --jp-leading-tight: 1.25;
   --jp-leading-snug: 1.375;
   --jp-leading-normal: 1.5;
@@ -13,10 +15,10 @@
 
 body {
   --font-jetpk-ui: var(--font-body);
-  --font-jetpk-display: var(--font-display);
+  --font-jetpk-display: var(--font-body);
   --font-jetpk-mono: var(--font-mono);
   --font-jetpk: var(--font-jetpk-ui);
   --jp-font-sans: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --jp-font-display: var(--font-display), var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --jp-font-display: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
   --jp-font-mono: var(--font-mono), ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
 }

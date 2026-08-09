@@ -4,7 +4,7 @@
  */
 export const JETPK_LEGACY_FONT_BODY_FAMILY = "Inter";
 
-export const JETPK_LEGACY_FONT_DISPLAY_FAMILY = "Space Grotesk";
+export const JETPK_LEGACY_FONT_DISPLAY_FAMILY = "Inter";
 
 export const JETPK_LEGACY_FONT_MONO_FAMILY = "IBM Plex Mono";
 
@@ -53,7 +53,6 @@ export const JETPK_TAILWIND_FONT_SANS = [
 ];
 
 export const JETPK_TAILWIND_FONT_DISPLAY = [
-  "var(--font-display)",
   "var(--font-body)",
   "system-ui",
   "-apple-system",

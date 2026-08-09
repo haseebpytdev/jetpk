@@ -92,8 +92,18 @@ class BackOfficeDashboardController extends Controller
             : "{$base}/{$portal}/dashboard/{$normalized}";
 
         try {
+            $forwardHeaders = [
+                'Accept' => 'text/html,application/xhtml+xml',
+                'X-Dashboard-Portal' => $portal,
+            ];
+
+            $cookie = request()->headers->get('Cookie');
+            if (is_string($cookie) && $cookie !== '') {
+                $forwardHeaders['Cookie'] = $cookie;
+            }
+
             $upstream = Http::timeout(30)
-                ->withHeaders(['Accept' => 'text/html,application/xhtml+xml'])
+                ->withHeaders($forwardHeaders)
                 ->get($target, request()->query());
 
             if (! $upstream->successful()) {

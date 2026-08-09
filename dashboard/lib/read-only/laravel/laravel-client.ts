@@ -1,5 +1,6 @@
 import { createReadOnlyErrorEnvelope, mapHttpStatusToErrorCode, sanitizeErrorMessage } from "@/lib/read-only/error-envelope";
 import { dashboardApiUrl } from "@/lib/read-only/laravel/api-base";
+import { fetchLaravelServer, getLaravelServerBase } from "@/lib/laravel-server-fetch";
 import type {
   DataSourceMetadata,
   ReadOnlyErrorEnvelope,
@@ -13,12 +14,18 @@ export type LaravelFetchOptions = {
 };
 
 function serializeQuery(query?: LaravelFetchOptions["query"]): string {
-  if (!query) return "";
+  if (!query) {
+    return "";
+  }
+
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
-    if (value === null || value === undefined || value === "") continue;
+    if (value === null || value === undefined || value === "") {
+      continue;
+    }
     params.set(key, String(value));
   }
+
   const serialized = params.toString();
   return serialized ? `?${serialized}` : "";
 }
@@ -60,25 +67,45 @@ function parseLaravelError(body: Record<string, unknown>, status: number): ReadO
   return createReadOnlyErrorEnvelope({
     code: typeof errorBlock?.code === "string" ? (errorBlock.code as ReadOnlyErrorEnvelope["error"]["code"]) : code,
     referenceIdSafe:
-      typeof errorBlock?.referenceIdSafe === "string"
-        ? errorBlock.referenceIdSafe
-        : `HTTP-${status}`,
+      typeof errorBlock?.referenceIdSafe === "string" ? errorBlock.referenceIdSafe : `HTTP-${status}`,
     message,
   });
+}
+
+function resolveDashboardApiPath(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `/api/dashboard${normalized}`;
+}
+
+function resolveDashboardApiUrl(path: string, query?: LaravelFetchOptions["query"]): string {
+  const apiPath = resolveDashboardApiPath(path);
+  const queryString = serializeQuery(query);
+
+  if (typeof window === "undefined") {
+    return `${getLaravelServerBase()}${apiPath}${queryString}`;
+  }
+
+  return `${dashboardApiUrl(path)}${queryString}`;
 }
 
 export async function fetchDashboardApi<T>(
   path: string,
   options?: LaravelFetchOptions,
 ): Promise<ReadOnlyResponseEnvelope<T>> {
-  const url = `${dashboardApiUrl(path)}${serializeQuery(options?.query)}`;
-  const response = await fetch(url, {
-    method: "GET",
-    credentials: "same-origin",
-    headers: { Accept: "application/json" },
-    signal: options?.signal,
-    cache: "no-store",
-  });
+  const url = resolveDashboardApiUrl(path, options?.query);
+
+  const response =
+    typeof window === "undefined"
+      ? await fetchLaravelServer(resolveDashboardApiPath(path) + serializeQuery(options?.query), {
+          signal: options?.signal,
+        })
+      : await fetch(url, {
+          method: "GET",
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+          signal: options?.signal,
+          cache: "no-store",
+        });
 
   if (!response.ok) {
     let body: Record<string, unknown> = {};

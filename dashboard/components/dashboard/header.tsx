@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { mockUser } from "@/mocks/overview-fixtures";
+import { postLaravelLogout } from "@/lib/laravel-auth-api";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
 type Props = {
@@ -11,14 +12,11 @@ type Props = {
 };
 
 export function DashboardHeader({ onMenuClick, session }: Props) {
-  const profile = session ?? {
-    displayName: mockUser.name,
-    email: mockUser.email,
-    initials: mockUser.initials,
-    roles: [mockUser.role],
-  };
+  const isLive = useDashboardLiveMode();
+  const profile = session ?? null;
   const [profileOpen, setProfileOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,6 +24,21 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
     document.addEventListener("fullscreenchange", onFs);
     return () => document.removeEventListener("fullscreenchange", onFs);
   }, []);
+
+  useEffect(() => {
+    if (!profileOpen) {
+      return undefined;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [profileOpen]);
 
   const toggleFullscreen = async () => {
     try {
@@ -37,6 +50,22 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
     } catch {
       /* ignore */
     }
+  };
+
+  const handleLogout = async () => {
+    if (!isLive || logoutPending) {
+      return;
+    }
+
+    setLogoutPending(true);
+    const result = await postLaravelLogout();
+    if (result.ok) {
+      window.location.assign(result.redirect);
+      return;
+    }
+
+    setLogoutPending(false);
+    alert(result.message);
   };
 
   return (
@@ -51,10 +80,10 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
         <input
           id="global-search"
           type="search"
-          disabled
+          disabled={!isLive}
           placeholder="Search bookings, PNR, customers, agents…"
-          className="w-full rounded-xl border border-jp-border bg-gray-50 px-4 py-2.5 text-sm text-gray-500"
-          title="Preview: search is not connected"
+          className="w-full rounded-xl border border-jp-border bg-gray-50 px-4 py-2.5 text-sm text-gray-500 disabled:cursor-not-allowed"
+          title={isLive ? "Global search" : "Sign in to search"}
         />
         <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border bg-white px-1.5 text-[10px] text-gray-500 sm:inline">
           Ctrl+K
@@ -64,13 +93,11 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
         <button
           type="button"
           className="flex min-h-11 items-center gap-2 rounded-xl border border-jp-border px-3 text-sm text-gray-700"
-          title="Mock currency selector"
-          aria-label="Currency PKR (preview)"
+          title="Display currency"
+          aria-label="Currency PKR"
         >
           <span aria-hidden>🇵🇰</span> PKR
         </button>
-        <IconButton label="Notifications (preview)" badge={7} onClick={() => alert("Preview notifications — mock only.")} />
-        <IconButton label="Messages (preview)" badge={3} onClick={() => alert("Preview messages — mock only.")} />
         <IconButton label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"} onClick={toggleFullscreen} />
         <div className="relative" ref={menuRef}>
           <button
@@ -78,12 +105,14 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
             className="flex min-h-11 items-center gap-2 rounded-xl border border-jp-border px-2 py-1.5 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
             aria-expanded={profileOpen}
             aria-haspopup="menu"
-            onClick={() => setProfileOpen((v) => !v)}
+            onClick={() => setProfileOpen((value) => !value)}
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-jp-accent/15 text-xs font-semibold text-jp-accent-muted">
-              {profile.initials}
+              {profile?.initials ?? "??"}
             </span>
-            <span className="hidden max-w-[120px] truncate sm:inline">{profile.displayName}</span>
+            <span className="hidden max-w-[120px] truncate sm:inline">
+              {profile?.displayName ?? (isLive ? "Session unavailable" : "Preview user")}
+            </span>
           </button>
           {profileOpen ? (
             <div
@@ -91,21 +120,18 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
               className="absolute right-0 mt-2 w-56 rounded-xl border border-jp-border bg-white py-2 shadow-lg"
             >
               <div className="border-b px-4 pb-2">
-                <p className="text-sm font-semibold">{profile.displayName}</p>
-                <p className="text-xs text-jp-muted">{profile.email}</p>
-                {profile.roles?.[0] ? <p className="mt-1 text-xs text-jp-muted">{profile.roles[0]}</p> : null}
+                <p className="text-sm font-semibold">{profile?.displayName ?? "Signed out"}</p>
+                <p className="text-xs text-jp-muted">{profile?.email ?? "—"}</p>
+                {profile?.roles?.[0] ? <p className="mt-1 text-xs text-jp-muted">{profile.roles[0]}</p> : null}
               </div>
-              <button type="button" className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50" role="menuitem">
-                Profile (preview)
-              </button>
               <button
                 type="button"
-                className="block w-full px-4 py-2 text-left text-sm text-gray-400"
+                className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50 disabled:text-gray-400"
                 role="menuitem"
-                disabled
-                title="Logout not connected in preview"
+                disabled={!isLive || logoutPending}
+                onClick={handleLogout}
               >
-                Log out (disabled)
+                {logoutPending ? "Signing out…" : "Log out"}
               </button>
             </div>
           ) : null}

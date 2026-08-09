@@ -10,12 +10,14 @@ import { useDashboardNavigation, useDashboardSession } from "@/lib/session-conte
 import { useDashboardPath } from "@/lib/use-dashboard-path";
 import { cn } from "@/lib/utils";
 import { navGroups } from "@/lib/nav-config";
+import type { DashboardBranding } from "@/services/branding-service";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   session?: DashboardSessionSummary | null;
+  branding?: DashboardBranding | null;
 };
 
 function isActive(pathname: string, href: string): boolean {
@@ -26,7 +28,7 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === base || pathname.startsWith(`${base}/`);
 }
 
-export function DashboardSidebar({ open, onClose, session: sessionProp }: Props) {
+export function DashboardSidebar({ open, onClose, session: sessionProp, branding }: Props) {
   const pathname = usePathname();
   const homePath = useDashboardPath();
   const relativePathname = stripDashboardBasePath(pathname);
@@ -64,7 +66,16 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
       >
         <div className="border-b border-white/10 p-5">
           <Link href={homePath} className="block" onClick={onClose}>
-            <span className="font-display text-lg font-bold tracking-tight">JetPakistan</span>
+            {branding?.logoUrl ? (
+              <img
+                src={branding.logoUrl}
+                alt={branding.brandName}
+                className="h-9 w-auto max-w-[180px] object-contain object-left"
+                data-testid="dashboard-brand-logo"
+              />
+            ) : (
+              <span className="font-display text-lg font-bold tracking-tight">{branding?.brandName ?? "JetPakistan"}</span>
+            )}
             <span
               className="mt-2 block text-[0.65rem] font-semibold uppercase tracking-widest text-emerald-300/90"
               data-testid="dashboard-portal-label"
@@ -153,15 +164,25 @@ export function DashboardSidebar({ open, onClose, session: sessionProp }: Props)
         </nav>
         <div className="border-t border-white/10 p-4">
           <div className="rounded-xl bg-white/5 p-4">
-            <p className="text-sm font-semibold">Need Help?</p>
-            <p className="mt-1 text-xs text-gray-400">Preview support callout — no live ticket created.</p>
-            <button
-              type="button"
-              className="mt-3 min-h-11 w-full rounded-xl bg-jp-accent px-3 py-2 text-sm font-medium text-white hover:bg-jp-accent-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              onClick={() => alert("Preview only — contact support is not connected.")}
-            >
-              Contact Support
-            </button>
+            <p className="text-sm font-semibold">Need help?</p>
+            <p className="mt-1 text-xs text-gray-400">Contact platform support for operational assistance.</p>
+            {useSessionNavigation ? (
+              <Link
+                href={dashboardHref(portal, "/support")}
+                onClick={onClose}
+                className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-jp-accent px-3 py-2 text-sm font-medium text-white hover:bg-jp-accent-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Contact Support
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="mt-3 min-h-11 w-full rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-gray-300"
+                disabled
+              >
+                Support unavailable
+              </button>
+            )}
           </div>
         </div>
       </aside>

@@ -4,20 +4,28 @@ import { Suspense, useState, type ReactNode } from "react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DataSourcePreviewGate } from "@/components/dashboard/data-source-preview-gate";
+import type { DashboardBranding } from "@/services/branding-service";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
 export function DashboardShell({
   children,
   session,
+  branding,
 }: {
   children: ReactNode;
   session?: DashboardSessionSummary | null;
+  branding?: DashboardBranding | null;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen min-w-0 overflow-x-hidden bg-jp-page text-jp-text" data-testid="dashboard-shell">
-      <DashboardSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} session={session} />
+      <DashboardSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        session={session}
+        branding={branding}
+      />
       <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} session={session} />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6">

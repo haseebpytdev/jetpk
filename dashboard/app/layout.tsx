@@ -1,30 +1,14 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { DashboardShell } from "@/layouts/dashboard-shell";
+import { resolveDashboardPortalFromRequest } from "@/lib/dashboard-portal-server";
 import { SessionProvider } from "@/lib/session-context";
 import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
+import { getDashboardBranding } from "@/services/branding-service";
 import { getDashboardSession } from "@/services/session-service";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-mono",
-  display: "swap",
-});
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "JetPakistan Back Office",
@@ -33,11 +17,15 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const portal = await resolveDashboardPortalFromRequest();
   let session = null;
+  let branding = null;
   try {
-    session = await getDashboardSession();
+    session = await getDashboardSession({ portal });
+    branding = await getDashboardBranding();
   } catch {
     session = null;
+    branding = null;
   }
 
   return (
@@ -45,12 +33,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
-      <body
-        className={`${inter.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} min-h-screen overflow-x-hidden font-sans antialiased`}
-      >
+      <body className="min-h-screen overflow-x-hidden font-sans antialiased">
         <ThemeProvider>
           <SessionProvider session={session}>
-            <DashboardShell session={session}>{children}</DashboardShell>
+            <DashboardShell session={session} branding={branding}>{children}</DashboardShell>
           </SessionProvider>
         </ThemeProvider>
       </body>

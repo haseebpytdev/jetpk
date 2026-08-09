@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { laravelRouteUrl } from "@/lib/laravel-route-url";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { OverviewData } from "@/types/dashboard";
 
 export function SummaryStatsRow({ summaryStats }: Pick<OverviewData, "summaryStats">) {
@@ -52,11 +55,15 @@ export function RecentNotificationsPanel({ recentNotifications }: Pick<OverviewD
 }
 
 export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "recentBookings">) {
+  const isLive = useDashboardLiveMode();
+
   return (
     <Card className="min-w-0 overflow-hidden p-0">
       <div className="border-b border-jp-border p-4 sm:p-5">
         <CardTitle>Recent bookings</CardTitle>
-        <CardDescription className="mt-1">Synthetic preview data</CardDescription>
+        <CardDescription className="mt-1">
+          {isLive ? "Latest operational bookings" : "Synthetic preview data"}
+        </CardDescription>
       </div>
       <div className="min-w-0 overflow-x-auto">
         <table className="min-w-[640px] w-full text-left text-sm">
@@ -100,7 +107,9 @@ export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "rece
         </table>
       </div>
       <div className="flex flex-col gap-2 border-t border-jp-border p-4 text-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between">
-        <span>Showing 1 to {recentBookings.length} of {recentBookings.length} (mock)</span>
+        <span>
+          Showing {recentBookings.length} recent booking{recentBookings.length === 1 ? "" : "s"}
+        </span>
       </div>
     </Card>
   );
@@ -156,19 +165,33 @@ export function QuickActionsBar({
 }: {
   actions: OverviewData["shortcutActions"];
 }) {
+  const isLive = useDashboardLiveMode();
+
   return (
     <Card className="flex flex-wrap gap-2">
-      {actions.map((a) => (
-        <Button
-          key={a.label}
-          variant="secondary"
-          size="sm"
-          type="button"
-          onClick={() => alert(`Preview — ${a.laravelRoute}${a.queue ? `?queue=${a.queue}` : ""}`)}
-        >
-          {a.label}
-        </Button>
-      ))}
+      {actions.map((action) => {
+        const href = laravelRouteUrl(action.laravelRoute, action.queue ? { queue: action.queue } : undefined);
+
+        return isLive ? (
+          <Link
+            key={action.label}
+            href={href}
+            className="inline-flex min-h-9 items-center rounded-xl border border-jp-border bg-white px-3 py-1.5 text-sm font-medium text-jp-text hover:bg-gray-50"
+          >
+            {action.label}
+          </Link>
+        ) : (
+          <Button
+            key={action.label}
+            variant="secondary"
+            size="sm"
+            type="button"
+            onClick={() => alert(`Preview — ${href}`)}
+          >
+            {action.label}
+          </Button>
+        );
+      })}
     </Card>
   );
 }

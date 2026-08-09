@@ -17,7 +17,7 @@ export default function GlobalError({
       <body className="p-6">
         <ErrorState
           title="Dashboard unavailable"
-          message={error.message || "Something went wrong loading the preview dashboard."}
+          message="Dashboard temporarily unavailable. Try again."
           referenceId={ref}
           onRetry={reset}
         />
