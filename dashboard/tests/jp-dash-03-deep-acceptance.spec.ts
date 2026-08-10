@@ -154,15 +154,15 @@ test.describe("JP-DASH-03 deep acceptance", () => {
     expect(body).not.toMatch(PREVIEW_RESIDUE);
   });
 
-  test("bookings detail drawer opens for first row when present", async ({ page }) => {
-    await page.goto("/admin/dashboard/bookings", { waitUntil: "domcontentloaded", timeout: 120_000 });
+  test("bookings detail drawer opens for known production reference", async ({ page }) => {
+    const ref = "WL96PKN9";
+    await page.goto(`/admin/dashboard/bookings?q=${ref}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
     const viewButton = page.getByRole("button", { name: /^View$/i }).first();
-    if (await viewButton.count() === 0) {
-      test.skip(true, "No booking rows to open");
-    }
+    await expect(viewButton).toBeVisible({ timeout: 30_000 });
     await viewButton.click();
     await expect(page.getByTestId("booking-drawer-content")).toBeVisible({ timeout: 15_000 });
     const drawerText = await page.getByTestId("booking-drawer-content").innerText();
+    expect(drawerText).toContain(ref);
     expect(drawerText).not.toMatch(PREVIEW_RESIDUE);
   });
 

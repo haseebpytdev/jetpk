@@ -1,0 +1,773 @@
+{
+  "generatedAtUtc": "2026-08-10T15:19:46.558Z",
+  "rows": [
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/suppliers",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/suppliers",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/suppliers",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/suppliers",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/suppliers",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/suppliers",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/suppliers",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/suppliers",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/payments",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/pnrs",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/tickets",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/tickets",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/tickets",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/tickets",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/tickets",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/tickets",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/tickets",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/tickets",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/staff",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/staff",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/staff",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/staff",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/staff",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/staff",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/staff",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/staff",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/api-settings",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/api-settings",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/api-settings",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/api-settings",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/api-settings",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/api-settings",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/api-settings",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/api-settings",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/settings",
+      "viewportWidth": 768,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/settings",
+      "viewportWidth": 935,
+      "scrollWidth": 935,
+      "clientWidth": 935,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/settings",
+      "viewportWidth": 1024,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/settings",
+      "viewportWidth": 1280,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/settings",
+      "viewportWidth": 1366,
+      "scrollWidth": 1366,
+      "clientWidth": 1366,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/settings",
+      "viewportWidth": 1440,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/settings",
+      "viewportWidth": 1600,
+      "scrollWidth": 1600,
+      "clientWidth": 1600,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/settings",
+      "viewportWidth": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflow": false,
+      "status": "PASS"
+    }
+  ]
+}

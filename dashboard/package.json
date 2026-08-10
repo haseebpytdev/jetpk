@@ -25,7 +25,8 @@
     "acceptance:production-crawl": "node scripts/jp-dash-03-production-crawl.mjs",
     "acceptance:source-parity": "node scripts/jp-dash-03-source-parity.mjs",
     "test:production-acceptance": "playwright test -c playwright.production-acceptance.config.mjs",
-    "test:deep-acceptance": "playwright test -c playwright.production-acceptance.config.mjs tests/jp-dash-03-deep-acceptance.spec.ts"
+    "test:deep-acceptance": "playwright test -c playwright.production-acceptance.config.mjs tests/jp-dash-03-deep-acceptance.spec.ts",
+    "test:checkpoint-11": "playwright test -c playwright.production-acceptance.config.mjs tests/jp-dash-03-checkpoint-11.spec.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",

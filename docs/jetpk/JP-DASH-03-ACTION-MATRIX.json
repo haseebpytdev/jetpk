@@ -1,0 +1,95 @@
+{
+  "generatedAtUtc": "2026-08-10T20:30:00Z",
+  "note": "Production-visible Admin safe controls — exhaustive enumeration in progress. Mutation/commercial rows use backend tests only.",
+  "rows": [
+    {
+      "module": "Dashboard",
+      "page": "/admin/dashboard",
+      "label": "Queue review CTA links",
+      "type": "link",
+      "side_effect_class": "SAFE_NAV",
+      "browser_test": "jp-dash-03-checkpoint-11 review matrix",
+      "backend_test": null,
+      "result": "PASS",
+      "status": "PASS"
+    },
+    {
+      "module": "Bookings",
+      "page": "/admin/dashboard/bookings",
+      "label": "Search by reference",
+      "type": "filter",
+      "side_effect_class": "SAFE_FILTER",
+      "browser_test": "checkpoint-11 bookings search",
+      "backend_test": "DashboardReadOnlyApiTest bookings index",
+      "result": "PARTIAL",
+      "status": "PARTIAL"
+    },
+    {
+      "module": "Bookings",
+      "page": "/admin/dashboard/bookings",
+      "label": "View row / detail drawer",
+      "type": "drawer",
+      "side_effect_class": "SAFE_VIEW",
+      "browser_test": "deterministic WL96PKN9 (requires valid session)",
+      "backend_test": "DashboardReadOnlyApiTest booking detail",
+      "result": "PENDING_SESSION",
+      "status": "PARTIAL"
+    },
+    {
+      "module": "Customers",
+      "page": "/admin/dashboard/customers",
+      "label": "List search",
+      "type": "filter",
+      "side_effect_class": "SAFE_FILTER",
+      "browser_test": "deep-acceptance customers",
+      "backend_test": "DashboardReadOnlyApiTest customers index",
+      "result": "PASS",
+      "status": "PASS"
+    },
+    {
+      "module": "Settings",
+      "page": "/admin/settings",
+      "label": "Laravel settings hub",
+      "type": "handoff",
+      "side_effect_class": "SAFE_NAV",
+      "browser_test": "deep matrix handoff",
+      "backend_test": "AdminSettingsHubTest",
+      "result": "PASS",
+      "status": "PASS"
+    },
+    {
+      "module": "API Settings",
+      "page": "/admin/api-settings",
+      "label": "Masked credential read",
+      "type": "page",
+      "side_effect_class": "SAFE_CONFIG_READ",
+      "browser_test": "deep matrix handoff",
+      "backend_test": "AdminSettingsHubTest route exists",
+      "result": "PARTIAL",
+      "status": "PARTIAL"
+    },
+    {
+      "module": "Agents",
+      "page": "/admin/agent-applications",
+      "label": "Approve application",
+      "type": "mutation",
+      "side_effect_class": "MUTATION_TEST_ONLY",
+      "browser_test": "not executed in production",
+      "backend_test": "JpDash03AgentActionMatrixTest",
+      "result": "PASS",
+      "status": "PASS"
+    },
+    {
+      "module": "Booking intake",
+      "page": "Laravel admin booking",
+      "label": "Record payment",
+      "type": "mutation",
+      "side_effect_class": "MUTATION_TEST_ONLY",
+      "browser_test": "not executed in production",
+      "backend_test": "BackOfficeBookingIntakeMutationsTest",
+      "result": "PASS",
+      "status": "PASS"
+    }
+  ],
+  "actionMatrixGate": "PARTIAL — core safe nav/filter/view + backend mutation matrix started; full per-page enumeration continues"
+}

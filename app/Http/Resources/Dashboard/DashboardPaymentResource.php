@@ -22,13 +22,16 @@ final class DashboardPaymentResource
 
         $method = strtolower((string) ($payment->method?->value ?? 'cash'));
         $status = strtolower((string) ($payment->status?->value ?? 'pending'));
-        $paymentCurrency = DashboardMoneyPresenter::normalizeIsoCurrency(
-            $payment->currency ?? $booking?->fareBreakdown?->currency ?? $booking?->currency,
-        );
+        $storedPaymentCurrency = DashboardMoneyPresenter::normalizeIsoCurrency($payment->currency);
+        $fareCurrency = DashboardMoneyPresenter::normalizeIsoCurrency($booking?->fareBreakdown?->currency);
+        $bookingCurrency = DashboardMoneyPresenter::normalizeIsoCurrency($booking?->currency);
+        $paymentCurrency = $storedPaymentCurrency !== ''
+            ? $storedPaymentCurrency
+            : ($fareCurrency !== '' ? $fareCurrency : $bookingCurrency);
         $currencySource = match (true) {
-            DashboardMoneyPresenter::normalizeIsoCurrency($payment->currency) !== '' => 'payment.currency',
-            DashboardMoneyPresenter::normalizeIsoCurrency($booking?->fareBreakdown?->currency) !== '' => 'fareBreakdown.currency',
-            DashboardMoneyPresenter::normalizeIsoCurrency($booking?->currency) !== '' => 'booking.currency',
+            $storedPaymentCurrency !== '' => 'payment.currency',
+            $fareCurrency !== '' => 'fareBreakdown.currency',
+            $bookingCurrency !== '' => 'booking.currency',
             default => null,
         };
         $grossMinor = (int) round((float) $payment->amount);

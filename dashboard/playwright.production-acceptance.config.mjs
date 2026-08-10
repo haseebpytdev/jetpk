@@ -14,7 +14,11 @@ const hasStorage = fs.existsSync(storagePath);
 
 export default defineConfig({
   testDir: "./tests",
-  testMatch: ["jp-dash-03-production-acceptance.spec.ts", "jp-dash-03-deep-acceptance.spec.ts"],
+  testMatch: [
+    "jp-dash-03-production-acceptance.spec.ts",
+    "jp-dash-03-deep-acceptance.spec.ts",
+    "jp-dash-03-checkpoint-11.spec.ts",
+  ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,

@@ -1,0 +1,27 @@
+{
+  "generatedAtUtc": "2026-08-10T20:00:00Z",
+  "note": "Reconciles deep matrix (21) vs baseline crawl (50) vs nav matrix (22). No route appears in both NEXT_PAGES and LARAVEL_HANDOFFS — categories are disjoint by URL namespace.",
+  "UNIQUE_PAGES": 50,
+  "NEXT_PAGES": 13,
+  "LARAVEL_HANDOFFS": 8,
+  "DEEP_MATRIX_TOTAL": 21,
+  "DEEP_MATRIX_PASS": 21,
+  "DEEP_MATRIX_FAIL": 0,
+  "DEEP_MATRIX_SKIP": 0,
+  "BASELINE_CRAWL_TOTAL": 50,
+  "BASELINE_CRAWL_PASS": 50,
+  "NAV_MATRIX_TOTAL": 22,
+  "NAV_MATRIX_PASS": 22,
+  "DUPLICATES": {
+    "betweenNextAndHandoff": 0,
+    "reason": "Next routes use /admin/dashboard/*; handoffs use /admin/* Laravel URLs (settings, staff, api-settings, etc.)"
+  },
+  "baselineCrawlComposition": {
+    "nextAdminPagesFromScript": 15,
+    "laravelHandoffsFromScript": 13,
+    "sidebarNavLinks": 22,
+    "overlapExplanation": "50 crawl rows = 15 direct Next pages + 13 Laravel handoff URLs + 22 sidebar link audits (sidebar overlaps Next pages but audited separately with sourcePage context)"
+  },
+  "PAGE_MATRIX_STATUS": "PASS_RECONCILED",
+  "checkpoint10CountingError": "Report said 20/20; actual DEEP_MATRIX rows = 21 (13+8). Corrected in checkpoint 11."
+}
