@@ -8,15 +8,37 @@ use Tests\TestCase;
 
 class DashboardMoneyPresenterTest extends TestCase
 {
-    public function test_resolve_booking_currency_prefers_booking_and_fare_breakdown(): void
+    public function test_resolve_booking_currency_prefers_supplier_and_fare_provenance(): void
     {
         $booking = new Booking([
             'currency' => 'usd',
-            'meta' => ['offer_currency' => 'EUR'],
+            'meta' => ['offer_currency' => 'EUR', 'original_currency' => 'GBP'],
         ]);
-        $booking->setRelation('fareBreakdown', (object) ['currency' => 'GBP']);
+        $booking->setRelation('fareBreakdown', (object) ['currency' => 'CHF']);
 
-        $this->assertSame('USD', DashboardMoneyPresenter::resolveBookingCurrency($booking));
+        $this->assertSame('GBP', DashboardMoneyPresenter::resolveBookingCurrency($booking));
+    }
+
+    public function test_resolve_booking_currency_prefers_fare_over_booking_default_pkr(): void
+    {
+        $booking = new Booking(['currency' => 'PKR']);
+        $booking->setRelation('fareBreakdown', (object) ['currency' => 'USD']);
+
+        $resolved = DashboardMoneyPresenter::resolveBookingCurrencyWithSource($booking);
+
+        $this->assertSame('USD', $resolved['currency']);
+        $this->assertSame('fareBreakdown.currency', $resolved['source']);
+    }
+
+    public function test_present_booking_total_flags_currency_conflict_for_review(): void
+    {
+        $booking = new Booking(['currency' => 'PKR']);
+        $booking->setRelation('fareBreakdown', (object) ['currency' => 'USD', 'total' => 624]);
+
+        $presented = DashboardMoneyPresenter::presentBookingTotal($booking, 624);
+
+        $this->assertSame('USD', $presented['currency']);
+        $this->assertTrue($presented['needsReview']);
     }
 
     public function test_resolve_booking_currency_returns_empty_when_unknown(): void

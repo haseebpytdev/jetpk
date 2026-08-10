@@ -1,0 +1,155 @@
+{
+  "generatedAtUtc": "2026-08-10T11:57:15.647Z",
+  "remoteHost": "pkjetp@185.215.166.176",
+  "remoteRoot": "/home/pkjetp/jetpk_app",
+  "total": 24,
+  "match": 24,
+  "mismatch": 0,
+  "jpDash03SourceParity": "PASS",
+  "rows": [
+    {
+      "path": "app/Support/BackOffice/BackOfficeLaravelRoutePaths.php",
+      "localSha256": "195c5e62d8ef573dbf7b711df91cec921d1d24a86e7c2872952fa84c33eeaf3c",
+      "productionSha256": "195c5e62d8ef573dbf7b711df91cec921d1d24a86e7c2872952fa84c33eeaf3c",
+      "match": "yes"
+    },
+    {
+      "path": "app/Support/BackOffice/BackOfficeCapabilitiesPresenter.php",
+      "localSha256": "8ffef5c3483fd6e915b686c5fe733f4351176e92f0a2d24a59fa255c51295e14",
+      "productionSha256": "8ffef5c3483fd6e915b686c5fe733f4351176e92f0a2d24a59fa255c51295e14",
+      "match": "yes"
+    },
+    {
+      "path": "app/Support/Dashboard/DashboardMoneyPresenter.php",
+      "localSha256": "7279930a0073db0d44f5cda8ae288c7ac9f2dc1835f6d6b862f3dabc03946142",
+      "productionSha256": "7279930a0073db0d44f5cda8ae288c7ac9f2dc1835f6d6b862f3dabc03946142",
+      "match": "yes"
+    },
+    {
+      "path": "app/Http/Resources/Dashboard/DashboardBookingResource.php",
+      "localSha256": "b5fe054721b7ce6b969dd675457f9112bb91f908b5b0fdb03923a9dcbb670291",
+      "productionSha256": "b5fe054721b7ce6b969dd675457f9112bb91f908b5b0fdb03923a9dcbb670291",
+      "match": "yes"
+    },
+    {
+      "path": "app/Http/Resources/Dashboard/DashboardBookingDetailResource.php",
+      "localSha256": "9b8cd8f4a27e18646bdbbbb1569b43d7e44934b0cb5ecf0a0959696cdc26dd67",
+      "productionSha256": "9b8cd8f4a27e18646bdbbbb1569b43d7e44934b0cb5ecf0a0959696cdc26dd67",
+      "match": "yes"
+    },
+    {
+      "path": "app/Http/Resources/Dashboard/DashboardOverviewResource.php",
+      "localSha256": "34dd54582c2cc77974a4fb13f5bce1cdd5707d24979eb2b1c7f7569a32a1d329",
+      "productionSha256": "34dd54582c2cc77974a4fb13f5bce1cdd5707d24979eb2b1c7f7569a32a1d329",
+      "match": "yes"
+    },
+    {
+      "path": "app/Http/Resources/Dashboard/DashboardPaymentResource.php",
+      "localSha256": "94f9d7ca954a362cc2fef63ff6eb7c6b4ee667c4e33e6f088d7a8aaec726da24",
+      "productionSha256": "94f9d7ca954a362cc2fef63ff6eb7c6b4ee667c4e33e6f088d7a8aaec726da24",
+      "match": "yes"
+    },
+    {
+      "path": "app/Services/Dashboard/Api/DashboardCustomersReadService.php",
+      "localSha256": "b3f28e9f37c9ab4a762937b4f05f11a39f693c32b75bc384572bd44068fd293f",
+      "productionSha256": "b3f28e9f37c9ab4a762937b4f05f11a39f693c32b75bc384572bd44068fd293f",
+      "match": "yes"
+    },
+    {
+      "path": "app/Console/Commands/JetpkDash03MoneyTraceCommand.php",
+      "localSha256": "2f5f3f560d0f673c846ea75d325fe5473f882a5ab7155efd30a9bb20f166b2c8",
+      "productionSha256": "2f5f3f560d0f673c846ea75d325fe5473f882a5ab7155efd30a9bb20f166b2c8",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/overview/operational-queue.tsx",
+      "localSha256": "ea08d02fa674fa276108b369d0ae47e7c91969e3ffb8f325eba9eb56249e0663",
+      "productionSha256": "ea08d02fa674fa276108b369d0ae47e7c91969e3ffb8f325eba9eb56249e0663",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/overview/overview-charts.tsx",
+      "localSha256": "6d27150b8c4c3f02a677e8e85890d5ade003062d8ef1e2ad73f2f856587ee8cc",
+      "productionSha256": "6d27150b8c4c3f02a677e8e85890d5ade003062d8ef1e2ad73f2f856587ee8cc",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/overview/overview-panels.tsx",
+      "localSha256": "e1689bed12bcf67e5ccc26fbe61a5366ad09808b7cc517596c8e83fdca4d9e74",
+      "productionSha256": "e1689bed12bcf67e5ccc26fbe61a5366ad09808b7cc517596c8e83fdca4d9e74",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/lib/money.ts",
+      "localSha256": "93543474e86c63e13935a23001adcedf0c8946d6caca947ef365afc40164c3f2",
+      "productionSha256": "93543474e86c63e13935a23001adcedf0c8946d6caca947ef365afc40164c3f2",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/lib/format.ts",
+      "localSha256": "567e078944db0e9e091d233e8c184cb784b4298e5f76e89240295a74acca9888",
+      "productionSha256": "567e078944db0e9e091d233e8c184cb784b4298e5f76e89240295a74acca9888",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/components/ui/money-display.tsx",
+      "localSha256": "c9498a3423f84d357bc5fddade974298cc99ac7867783fc905257c99786a62be",
+      "productionSha256": "c9498a3423f84d357bc5fddade974298cc99ac7867783fc905257c99786a62be",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/components/ui/detail-drawer-source-notice.tsx",
+      "localSha256": "608536dd119249e57758e0d2e407fcbc2079643f8fccdd34692e5e604d33cf83",
+      "productionSha256": "608536dd119249e57758e0d2e407fcbc2079643f8fccdd34692e5e604d33cf83",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/bookings/booking-detail-drawer.tsx",
+      "localSha256": "ad65dfc1240e7332cbd7baf30b7c906f690f2f7442f05e7d55af77ff9bf155b7",
+      "productionSha256": "ad65dfc1240e7332cbd7baf30b7c906f690f2f7442f05e7d55af77ff9bf155b7",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/bookings/bookings-mobile-cards.tsx",
+      "localSha256": "b676b84d4bd8959bfc93a270c10bcdaad4cb091e2a151d3ac0fa46b41b70611e",
+      "productionSha256": "b676b84d4bd8959bfc93a270c10bcdaad4cb091e2a151d3ac0fa46b41b70611e",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/bookings/bookings-table.tsx",
+      "localSha256": "a6e41a616691af91d6b6c0b203c7a359d1ec4819c95ad18359183d5659a377be",
+      "productionSha256": "a6e41a616691af91d6b6c0b203c7a359d1ec4819c95ad18359183d5659a377be",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/customers/customers-workspace.tsx",
+      "localSha256": "d2048be40f494337c57a01a0c3e4577690da73aabed4e43187e2e35712112b87",
+      "productionSha256": "d2048be40f494337c57a01a0c3e4577690da73aabed4e43187e2e35712112b87",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/customers/customer-detail-drawer.tsx",
+      "localSha256": "5e909da961deb09a2291e638ac53753713acf3047cd4216191d71d84e34b10c5",
+      "productionSha256": "5e909da961deb09a2291e638ac53753713acf3047cd4216191d71d84e34b10c5",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/settings/components/settings-live-gate.tsx",
+      "localSha256": "f7e86df4b4f87c61d00e030e4a28413ae5a07c0c9f9295eb8f1fe67660d44df4",
+      "productionSha256": "f7e86df4b4f87c61d00e030e4a28413ae5a07c0c9f9295eb8f1fe67660d44df4",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/lib/read-only/laravel/transformers/customers.ts",
+      "localSha256": "48155e15d28162595a8e4ec6307bfafa5f774c869c2c820d2b7516e0c6b8feda",
+      "productionSha256": "48155e15d28162595a8e4ec6307bfafa5f774c869c2c820d2b7516e0c6b8feda",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/types/booking.ts",
+      "localSha256": "9d6916928d299379cbdf59c1c6bf6700fcd1ac0e9dddd92730efb4d3a03f6dec",
+      "productionSha256": "9d6916928d299379cbdf59c1c6bf6700fcd1ac0e9dddd92730efb4d3a03f6dec",
+      "match": "yes"
+    }
+  ]
+}

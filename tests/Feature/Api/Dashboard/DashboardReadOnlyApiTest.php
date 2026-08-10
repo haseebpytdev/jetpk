@@ -175,6 +175,12 @@ class DashboardReadOnlyApiTest extends TestCase
         $bookings = $response->json('data.bookings') ?? [];
         if ($bookings !== []) {
             $this->assertArrayHasKey('currency', $bookings[0]);
+            $this->assertArrayHasKey('currencyStatus', $bookings[0]);
+            $this->assertArrayHasKey('totalMoney', $bookings[0]);
+            $this->assertContains($bookings[0]['currencyStatus'], ['resolved', 'unresolved']);
+            if ($bookings[0]['currencyStatus'] === 'unresolved') {
+                $this->assertSame('Amount unavailable', $bookings[0]['totalMoney']['displayLabel'] ?? '');
+            }
         }
     }
 

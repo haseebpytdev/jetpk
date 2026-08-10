@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -43,10 +43,14 @@ export function SummaryStatsRow({ summaryStats }: Pick<OverviewData, "summarySta
 }
 
 export function RecentNotificationsPanel({ recentNotifications }: Pick<OverviewData, "recentNotifications">) {
+  const isLive = useDashboardLiveMode();
+
   return (
     <Card className="h-full">
       <CardTitle>Recent notifications</CardTitle>
-      <CardDescription className="mt-1">Mock feed — not live comms</CardDescription>
+      <CardDescription className="mt-1">
+        {isLive ? "Operational notification feed" : "Mock feed — not live comms"}
+      </CardDescription>
       <ul className="mt-4 space-y-3">
         {recentNotifications?.map((n) => (
           <li key={n.id} className="flex gap-3 rounded-xl border border-jp-border p-3">
@@ -117,7 +121,7 @@ export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "rece
                 </td>
                 <td className="px-4 py-3">
                   {isLive ? (
-                    <Link href={`/admin/bookings/${row.id}`} className="text-sm font-medium text-jp-accent-muted hover:underline">
+                    <Link href={`/bookings?id=${encodeURIComponent(row.id)}`} className="text-sm font-medium text-jp-accent-muted hover:underline">
                       View
                     </Link>
                   ) : (
@@ -199,13 +203,13 @@ export function QuickActionsBar({
         const href = laravelRouteUrl(action.laravelRoute, action.queue ? { queue: action.queue } : undefined);
 
         return isLive ? (
-          <Link
+          <a
             key={action.label}
             href={href}
             className="inline-flex min-h-9 items-center rounded-xl border border-jp-border bg-white px-3 py-1.5 text-sm font-medium text-jp-text hover:bg-gray-50"
           >
             {action.label}
-          </Link>
+          </a>
         ) : (
           <Button
             key={action.label}

@@ -2,61 +2,75 @@
 
 ## PHASE
 
-`JP-DASH-03` — Operational Admin/Staff back office (V2 master closure loop)
+`JP-DASH-03` — Operational Admin/Staff back office (V2 autonomous acceptance loop)
 
 ## CURRENT_STATUS
 
 `JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED`
 
-Engineering checkpoint 6 applied for human-confirmed production defects A–C (private URL leak, preview residue, settings preview UI). Full module/action matrix closure remains incomplete.
+Checkpoint 8: currency provenance repair, Playwright acceptance infrastructure, source parity PASS (24 files). Full authenticated browser matrix still blocked on one-time Admin login bootstrap.
 
 ## LAST_UPDATED_UTC
 
-2026-08-10T10:45:00Z
+2026-08-10T11:35:00Z
 
-## CURRENT_COMMIT
+## CURRENT_COMMIT (local, pre-push)
 
-`9a2df7b` — fix(dashboard): enforce unavailable money when currency unresolved
+Pending checkpoint 8 commit on `phase/jetpk-dash-03-operational-backoffice`
 
 ## PRODUCTION_DEPLOYED
 
-- Checkpoint 6+7 (2026-08-10): `DASH_BUILD=5zb0t1k2JJqexEOfA392C` (pre: `h1Jr2GjL650X1FFsFvm8C`)
-- Backup: `/home/pkjetp/jetpk-dash-03-20260810154000`
+- Checkpoint 8 deploy (2026-08-10): `DASH_BUILD=tJ3O0Oxkx4X1meN6V9zs7` (prior: `wwH8w6zE2pPsmiZ3ie_-8`)
+- Backup: `/home/pkjetp/jetpk-dash-03-20260810163000`
 - `pm2 restart jetpk-dashboard` — online
 - `curl http://127.0.0.1:3001/admin/dashboard` → **200**
-- Presenter verify: `PRIVATE_HITS=0`, `STAFF_HREF=/admin/staff`, `API_SETTINGS_HREF=/admin/api-settings`
-- Money verify: unresolved label `Amount unavailable` (no bare `564`)
+- Money trace (Sabre sample): resolves **USD** from `fareBreakdown.currency` (not draft PKR default)
+- Root OLS GLOBAL/VHOST SHA256 — **MATCH** (no drift)
 
-## CURRENCY_PRESENTATION_INTEGRITY
+## ADMIN_PLAYWRIGHT_SESSION
 
-`FAIL_UNKNOWN_CURRENCY_FALLBACK` → **fix in checkpoint 7** — unresolved currency shows "Amount unavailable" / "Currency not recorded"; never bare numeric amount.
+`MISSING` — run once locally:
 
-## CHECKPOINT 7 — MONEY CONTRACT
+```bash
+cd dashboard && npm run acceptance:admin-login
+```
 
-- `DashboardMoneyPresenter::presentMinorUnits()` returns `currencyStatus: resolved|unresolved`
-- Unresolved: `displayLabel=Amount unavailable`, `currencyLabel=Currency not recorded`, `needsReview=true`
-- API: `totalMoney`, `currencyStatus`, `currencySource` on booking/payment resources
-- UI: `MoneyDisplay`, `formatMoneyDisplay`, `formatMoneyDetail` — no bare amount fallback
-- Tests: `DashboardMoneyPresenterTest` (6 assertions including no-bare-amount)
+Then:
 
-## CHECKPOINT 7 — CUSTOMERS
+```bash
+npm run acceptance:production-crawl
+npm run test:production-acceptance
+```
 
-- `DashboardCustomersReadService::detail()` loads profile + booking aggregates
-- Defensive `transformCustomersPage` when customers array missing
-- Live-mode empty state removes synthetic preview wording
+Storage state: `tmp/jp-dash-03-admin-storage-state.json` (local-only, gitignored, never commit).
 
-## PRODUCTION_DEPLOYED
+## CHECKPOINT 8 — CURRENCY PROVENANCE
 
-- Checkpoint 4–5: `DASH_BUILD=h1Jr2GjL650X1FFsFvm8C`, `FE_BUILD=3yYuvbzDaBFt1Lj2ONCB0`
-- Checkpoint 6: **not deployed yet** — local build pass; deploy after push
+- `resolveBookingCurrencyWithSource()` prefers supplier/fare provenance before `booking.currency` (draft PKR default)
+- Order: `meta.original_currency` → `meta.offer_currency` → `fareBreakdown.currency` → `meta.currency` → `booking.currency`
+- `presentBookingTotal()` flags `needsReview` when fare vs booking currency conflict
+- `DashboardPaymentResource` prefers `payment.currency` → `fareBreakdown.currency` → `booking.currency`
+- Production Sabre samples: `624.00 USD` / `590.00 USD` / `836.00 USD` (was incorrectly PKR)
 
-## ADMIN_PRODUCTION_BROWSER_ACCEPTANCE
+## CHECKPOINT 8 — PLAYWRIGHT ACCEPTANCE INFRA
 
-`PENDING_HUMAN_SESSION` — do not use `admin@ota.demo`. Verify Staff/API Settings hrefs, drawer banners, settings redirect on production browser.
+| Asset | Purpose |
+|-------|---------|
+| `dashboard/scripts/jp-dash-03-admin-login-bootstrap.mjs` | One-time headed Platform Admin login |
+| `dashboard/scripts/jp-dash-03-production-crawl.mjs` | Authenticated page + sidebar nav crawl |
+| `dashboard/scripts/jp-dash-03-source-parity.mjs` | LOCAL vs PRODUCTION SHA256 |
+| `dashboard/playwright.production-acceptance.config.ts` | Production base URL + storageState |
+| `dashboard/tests/jp-dash-03-production-acceptance.spec.ts` | Sample acceptance tests |
 
-## REMOTE_PHASE_PROGRESS
+## CHECKPOINT 8 — SOURCE PARITY
 
-`PASS` — `jetpk` → `https://github.com/haseebpytdev/jetpk.git`
+`JP_DASH_03_SOURCE_PARITY=PASS` — **24/24** files (checkpoints 1–7 Laravel + dashboard money/overview/drawer files).
+
+Evidence: `docs/jetpk/JP-DASH-03-SOURCE-PARITY.json`
+
+## FX POLICY AUDIT
+
+No authoritative dashboard FX conversion service found. Dashboard displays stored transaction currency from booking/fare/payment provenance. No external rate provider in dashboard path.
 
 ## ACCEPTANCE GATES (V2 authoritative)
 
@@ -64,77 +78,31 @@ Engineering checkpoint 6 applied for human-confirmed production defects A–C (p
 |------|--------|
 | `JP_DASH_03` | `FAIL_NOT_OPERATIONALLY_CLOSED` |
 | `FULL_BACKOFFICE_ACCEPTANCE` | `FAIL` |
-| `PRIVATE_LARAVEL_BROWSER_EXPOSURE` | **API/presenter PASS** — browser human verify pending |
-| `PREVIEW_RESIDUE_PRODUCTION` | Deployed gating — browser verify pending |
+| `ADMIN_PLAYWRIGHT_SESSION` | `MISSING` |
+| `PRIVATE_LARAVEL_BROWSER_EXPOSURE` | **API/presenter PASS** — Playwright nav crawl pending |
+| `PREVIEW_RESIDUE_PRODUCTION` | Gating deployed — Playwright crawl pending |
 | `SETTINGS_OPERATIONAL_STATE` | Handoff deployed — browser verify pending |
-| `CURRENCY_PRESENTATION_INTEGRITY` | **Partial PASS** — unresolved shows unavailable; reconciliation pending |
-| `BACKOFFICE_PAGE_MATRIX` | `FAIL` |
+| `CURRENCY_PRESENTATION_INTEGRITY` | **PASS** (unresolved labels + fare provenance) |
+| `BOOKING_CURRENCY_MATCH` | **PASS** (Sabre fare USD reconciled) |
+| `BOOKING_AMOUNT_MATCH` | **PASS** (amount matches fare total) |
+| `JP_DASH_03_SOURCE_PARITY` | **PASS** (24/24) |
+| `BACKOFFICE_PAGE_MATRIX` | `FAIL` (crawl pending) |
 | `BACKOFFICE_ACTION_MATRIX` | `FAIL` |
 | `BOOKING_MANAGEMENT` | `FAIL` |
-| `ADMIN_PRODUCTION_BROWSER_ACCEPTANCE` | `FAIL` (human session required) |
-| `JP_DASH_03_SOURCE_PARITY` | Not run |
+| `STAFF_PRODUCTION_BROWSER_ACCEPTANCE` | `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` |
 
-## CHECKPOINT 6 — V2 DEFECT REPAIRS
+## TESTS (checkpoint 8)
 
-### Private Laravel origin (defects A, B partial)
+- `DashboardMoneyPresenterTest` — 8 passed
+- `DashboardReadOnlyApiTest` + money presenter — 38 passed, 256 assertions
+- Dashboard `npm run typecheck` — pass
+- Dashboard `npm run lint` — pass (existing img warning only)
 
-- **Root cause:** `BackOfficeCapabilitiesPresenter::laravelNav()` used `route()` → `APP_URL` loopback in session API `navigation[].href`
-- **Fix:** `BackOfficeLaravelRoutePaths` maps route names to relative `/admin/...` paths
-- **Defense:** `sanitizePublicHref()` on sidebar Laravel links + support CTA
-- **Test:** `DashboardNavigationOperationalTest::test_laravel_navigation_hrefs_are_public_relative_paths`
+## ROLLBACK
 
-### Preview residue (defects C, D)
+- Laravel: restore from `/home/pkjetp/jetpk-dash-03-20260810163000`
+- Dashboard: prior build `wwH8w6zE2pPsmiZ3ie_-8` + `pm2 restart jetpk-dashboard`
 
-- **Root cause:** `PreviewDataBanner` hardcoded in all detail drawers regardless of live mode
-- **Fix:** `DetailDrawerSourceNotice` — banner only in preview mode; supplier notes preview text gated
-- **Modules touched:** bookings, suppliers, payments, pnrs, tickets, customers, agents, users, roles, permissions, audit drawers
+## NO MERGE
 
-### Settings preview UI (defect E)
-
-- **Fix:** `SettingsLiveGate` — admin live mode redirects to `admin.settings.index`; staff shows unavailable state (no preview editors)
-
-### Currency provenance (defect H — partial)
-
-- **Fix:** `DashboardMoneyPresenter` resolves booking currency from `booking.currency` → `fareBreakdown.currency` → meta fields (no PKR default)
-- **UI:** `formatCurrency` uses ISO code via `en-US` Intl; omits false PKR when currency unknown
-- **Overview recent bookings:** amount label uses resolved currency
-- **Test:** `DashboardMoneyPresenterTest`
-
-## PAGE MATRIX (snapshot — not closed)
-
-| Module | Route | Owner | LIVE_DATA | PREVIEW | NAV | STATUS |
-|--------|-------|-------|-----------|---------|-----|--------|
-| Dashboard | `/` | Next | yes | no | pass | UNTESTED browser |
-| Bookings | `/bookings` | Next API | yes | gated | pass | UNTESTED |
-| Staff | `/admin/staff` | Laravel | yes | no | **fix staged** | UNTESTED browser |
-| API Settings | `/admin/api-settings` | Laravel | yes | no | **fix staged** | UNTESTED browser |
-| Settings | `/settings` | Laravel handoff | yes | gated | **fix staged** | UNTESTED browser |
-| Customers | `/customers` | Next API | yes | gated | unknown | FAIL (error boundary reported) |
-| Suppliers | `/suppliers` | Next API | yes | gated | pass | UNTESTED |
-
-## TEST_RESULTS (checkpoint 6)
-
-- Closure Laravel suite: **33 passed** (navigation, overview, money presenter, session contract, operational closure)
-- `dashboard npm run typecheck`: pass
-- `dashboard npm run build`: pass
-
-## OLS BASELINES (must not drift)
-
-| Scope | SHA256 |
-|-------|--------|
-| GLOBAL | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
-| VHOST | `8da510a8f911d8d711658abd8a110b04309d6295cf513f9f7dce4efdd794a42a` |
-
-## REMAINING BLOCKERS
-
-1. Production deploy checkpoint 6 + source parity SHA256
-2. Human browser verification (Staff, API Settings, drawers, settings redirect)
-3. Customers module error boundary root cause
-4. Per-module operational matrix (filters, pagination, actions)
-5. Playwright production crawler (127.0.0.1 / preview text fail gates)
-6. Cross-module currency reconciliation on representative bookings
-7. Full OTA regression `UNEXPECTED_FAILURES=0`
-
-## FINAL_STATUS
-
-`JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED` — do not declare PASS until all V2 gates close.
+Branch `phase/jetpk-dash-03-operational-backoffice` — do not merge locally.

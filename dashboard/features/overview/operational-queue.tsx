@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { laravelRouteUrl } from "@/lib/laravel-route-url";
@@ -46,12 +45,12 @@ export function OperationalQueueGrid({ cards }: { cards: ActionCard[] }) {
                 <p className="mt-1 font-display text-2xl font-bold tabular-nums text-gray-900">{card.count}</p>
                 <CardDescription className="mt-1 text-xs">{card.helper}</CardDescription>
                 {isLive ? (
-                  <Link
+                  <a
                     href={href}
                     className="mt-3 inline-flex min-h-9 w-full items-center justify-center rounded-lg border border-jp-border bg-white px-3 py-1.5 text-sm font-medium text-jp-text hover:bg-gray-50 sm:w-auto"
                   >
                     {card.cta}
-                  </Link>
+                  </a>
                 ) : (
                   <Button
                     className="mt-3 w-full sm:w-auto"

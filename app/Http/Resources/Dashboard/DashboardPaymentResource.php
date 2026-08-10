@@ -23,11 +23,14 @@ final class DashboardPaymentResource
         $method = strtolower((string) ($payment->method?->value ?? 'cash'));
         $status = strtolower((string) ($payment->status?->value ?? 'pending'));
         $paymentCurrency = DashboardMoneyPresenter::normalizeIsoCurrency(
-            $payment->currency ?? $booking?->currency ?? $booking?->fareBreakdown?->currency,
+            $payment->currency ?? $booking?->fareBreakdown?->currency ?? $booking?->currency,
         );
-        $currencySource = $paymentCurrency !== ''
-            ? ($payment->currency ? 'payment.currency' : 'booking.currency')
-            : null;
+        $currencySource = match (true) {
+            DashboardMoneyPresenter::normalizeIsoCurrency($payment->currency) !== '' => 'payment.currency',
+            DashboardMoneyPresenter::normalizeIsoCurrency($booking?->fareBreakdown?->currency) !== '' => 'fareBreakdown.currency',
+            DashboardMoneyPresenter::normalizeIsoCurrency($booking?->currency) !== '' => 'booking.currency',
+            default => null,
+        };
         $grossMinor = (int) round((float) $payment->amount);
         $grossMoney = DashboardMoneyPresenter::presentMinorUnits($grossMinor, $paymentCurrency ?: null, $currencySource);
         $paidMinor = $status === 'verified' ? $grossMinor : 0;

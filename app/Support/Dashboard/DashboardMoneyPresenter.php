@@ -20,12 +20,13 @@ final class DashboardMoneyPresenter
     {
         $booking->loadMissing('fareBreakdown');
 
+        // Supplier/fare provenance precedes booking.currency — drafts default to PKR before fare attach.
         $candidates = [
-            ['source' => 'booking.currency', 'value' => $booking->currency],
+            ['source' => 'meta.original_currency', 'value' => data_get($booking->meta, 'original_currency')],
+            ['source' => 'meta.offer_currency', 'value' => data_get($booking->meta, 'offer_currency')],
             ['source' => 'fareBreakdown.currency', 'value' => $booking->fareBreakdown?->currency],
             ['source' => 'meta.currency', 'value' => data_get($booking->meta, 'currency')],
-            ['source' => 'meta.offer_currency', 'value' => data_get($booking->meta, 'offer_currency')],
-            ['source' => 'meta.original_currency', 'value' => data_get($booking->meta, 'original_currency')],
+            ['source' => 'booking.currency', 'value' => $booking->currency],
         ];
 
         foreach ($candidates as $candidate) {
@@ -118,8 +119,15 @@ final class DashboardMoneyPresenter
     public static function presentBookingTotal(Booking $booking, int $amountMinor): array
     {
         $resolved = self::resolveBookingCurrencyWithSource($booking);
+        $presented = self::presentMinorUnits($amountMinor, $resolved['currency'], $resolved['source']);
 
-        return self::presentMinorUnits($amountMinor, $resolved['currency'], $resolved['source']);
+        $fareCurrency = self::normalizeIsoCurrency($booking->fareBreakdown?->currency);
+        $bookingCurrency = self::normalizeIsoCurrency($booking->currency);
+        if ($fareCurrency !== '' && $bookingCurrency !== '' && $fareCurrency !== $bookingCurrency) {
+            $presented['needsReview'] = true;
+        }
+
+        return $presented;
     }
 
     /**

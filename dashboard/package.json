@@ -20,7 +20,11 @@
     "test:jp-ops-07-connected-mutations": "playwright test tests/jp-ops-07-connected-mutations.spec.ts",
     "test:release-02a-asset-namespace": "node scripts/run-release-02a-asset-namespace-test.mjs",
     "proof:release-02a-two-next": "node scripts/local-two-next-proof.mjs",
-    "proof:release-02a-proxy-sim": "node scripts/local-proxy-simulation.mjs"
+    "proof:release-02a-proxy-sim": "node scripts/local-proxy-simulation.mjs",
+    "acceptance:admin-login": "node scripts/jp-dash-03-admin-login-bootstrap.mjs",
+    "acceptance:production-crawl": "node scripts/jp-dash-03-production-crawl.mjs",
+    "acceptance:source-parity": "node scripts/jp-dash-03-source-parity.mjs",
+    "test:production-acceptance": "playwright test -c playwright.production-acceptance.config.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",

@@ -160,7 +160,9 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/tsconfig.tsbuildinfo
 
-# Local workspace artifacts (kept outside repository)
-/UI_test/
+# JP-DASH-03 local-only Playwright session (never commit)
+tmp/jp-dash-03-admin-storage-state.json
+tmp/jp-dash-03-staff-storage-state.json
+dashboard-src.tgz
 /deployment_packages/
 /_dash12-reviewed-untracked-backup/
