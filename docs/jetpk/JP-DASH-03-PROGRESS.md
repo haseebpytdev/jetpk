@@ -14,13 +14,18 @@
 
 ## CURRENT_COMMIT
 
-Pending checkpoint 4 commit (post `5d54b6f`)
+`0948200` — feat(dashboard): operationalize navigation search and notifications
 
 ## PRODUCTION_DEPLOYED
 
-- Checkpoint 1: `/home/pkjetp/jetpk-dash-03-20260809231801`
 - Checkpoint 3: `BUILD_ID=kp0jtZ0m_y1LxmxYIr1LG`
-- Checkpoint 4–5 deploy: pending this session
+- Checkpoint 4–5 (2026-08-10): `DASH_BUILD=h1Jr2GjL650X1FFsFvm8C`, `FE_BUILD=3yYuvbzDaBFt1Lj2ONCB0`
+- `pm2 restart jetpk-dashboard` + `jetpk-public-frontend` — online
+- Backup attempted `/root/jetpk-dash-03-20260810045000` (permission denied; prior home backups remain)
+
+## ADMIN_PRODUCTION_BROWSER_ACCEPTANCE
+
+`PENDING_HUMAN_SESSION` — do not use `admin@ota.demo` (not on production). Use real Platform Admin browser session.
 
 ## REMOTE_PHASE_PROGRESS
 
