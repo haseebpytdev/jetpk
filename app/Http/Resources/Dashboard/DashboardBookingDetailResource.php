@@ -24,6 +24,13 @@ final class DashboardBookingDetailResource
             ->all();
 
         $fare = $booking->fareBreakdown;
+        $totalMinor = (int) round((float) ($fare?->total ?? 0));
+        $totalMoney = DashboardMoneyPresenter::presentBookingTotal($booking, $totalMinor);
+        $baseMoney = DashboardMoneyPresenter::presentMinorUnits(
+            (int) round((float) ($fare?->base_fare ?? 0)),
+            $totalMoney['currency'],
+            $totalMoney['currencySource'],
+        );
 
         return [
             'summary' => $summary,
@@ -35,18 +42,25 @@ final class DashboardBookingDetailResource
             ],
             'passengers' => $passengers,
             'fareSummary' => [
-                'currency' => DashboardMoneyPresenter::resolveBookingCurrency($booking),
-                'baseFare' => (int) round((float) ($fare?->base_fare ?? 0)),
+                'currency' => $totalMoney['currency'],
+                'currencyStatus' => $totalMoney['currencyStatus'],
+                'currencySource' => $totalMoney['currencySource'],
+                'baseFare' => $baseMoney['amountMinor'],
+                'baseFareMoney' => $baseMoney,
                 'taxes' => (int) round((float) ($fare?->taxes ?? 0)),
                 'fees' => (int) round((float) ($fare?->fees ?? 0)),
                 'markup' => (int) round((float) ($fare?->markup ?? 0)),
-                'total' => (int) round((float) ($fare?->total ?? 0)),
+                'total' => $totalMoney['amountMinor'],
+                'totalMoney' => $totalMoney,
             ],
             'paymentSummary' => [
                 'status' => $summary['paymentStatus'],
                 'amountPaid' => $summary['amountPaid'],
+                'amountPaidMoney' => $summary['amountPaidMoney'],
                 'totalAmount' => $summary['totalAmount'],
+                'totalMoney' => $summary['totalMoney'],
                 'currency' => $summary['currency'],
+                'currencyStatus' => $summary['currencyStatus'],
             ],
             'pnrSummary' => [
                 'pnr' => $summary['pnr'] ?: null,

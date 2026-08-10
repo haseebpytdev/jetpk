@@ -7,7 +7,8 @@ import {
   TicketingStatusBadge,
 } from "@/components/ui/status-badge";
 import { Table, TableBody, TableHead, TableRow, Td, Th } from "@/components/ui/table";
-import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
+import { formatMoneyDisplay } from "@/lib/money";
 import type { BookingRecord, BookingSortField, BookingsQuery } from "@/types/booking";
 
 type Props = {
@@ -120,7 +121,7 @@ export function BookingsTable({ bookings, query, onSort, onView }: Props) {
                 <div className="text-xs text-jp-muted">{b.supplier}</div>
               </Td>
               <Td className="text-right tabular-nums font-medium">
-                {formatCurrency(b.totalAmount, b.currency)}
+                {formatMoneyDisplay(b.totalAmount, b.currency, b.currencyStatus)}
               </Td>
               <Td>
                 <BookingStatusBadge status={b.bookingStatus} />

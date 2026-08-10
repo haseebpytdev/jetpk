@@ -1,5 +1,8 @@
 const DISPLAY_TIME_ZONE = "Asia/Karachi";
 
+export const MONEY_UNAVAILABLE_LABEL = "Amount unavailable";
+export const CURRENCY_NOT_RECORDED_LABEL = "Currency not recorded";
+
 function parseIsoDate(iso: string): Date {
   if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
     return new Date(`${iso}T12:00:00.000Z`);
@@ -10,10 +13,7 @@ function parseIsoDate(iso: string): Date {
 export function formatCurrency(amount: number, currency: string): string {
   const normalized = currency?.trim().toUpperCase();
   if (!normalized || !/^[A-Z]{3}$/.test(normalized)) {
-    return new Intl.NumberFormat("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount);
+    return MONEY_UNAVAILABLE_LABEL;
   }
 
   return new Intl.NumberFormat("en-US", {

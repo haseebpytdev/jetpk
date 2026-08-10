@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function CustomersWorkspace({ query, result, selectedCustomer }: Props) {
+  const isLive = useDashboardLiveMode();
   const router = useDashboardRouter();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
@@ -64,7 +66,11 @@ export function CustomersWorkspace({ query, result, selectedCustomer }: Props) {
       {empty ? (
         <EmptyState
           title="No customers match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={
+            isLive
+              ? "Try clearing filters or broadening your search."
+              : "Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          }
         />
       ) : (
         <>

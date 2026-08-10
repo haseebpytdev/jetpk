@@ -16,7 +16,25 @@ Engineering checkpoint 6 applied for human-confirmed production defects A–C (p
 
 ## CURRENT_COMMIT
 
-pending push — checkpoint 6 V2 closure repairs
+pending push — checkpoint 7 currency contract + customer hardening
+
+## CURRENCY_PRESENTATION_INTEGRITY
+
+`FAIL_UNKNOWN_CURRENCY_FALLBACK` → **fix in checkpoint 7** — unresolved currency shows "Amount unavailable" / "Currency not recorded"; never bare numeric amount.
+
+## CHECKPOINT 7 — MONEY CONTRACT
+
+- `DashboardMoneyPresenter::presentMinorUnits()` returns `currencyStatus: resolved|unresolved`
+- Unresolved: `displayLabel=Amount unavailable`, `currencyLabel=Currency not recorded`, `needsReview=true`
+- API: `totalMoney`, `currencyStatus`, `currencySource` on booking/payment resources
+- UI: `MoneyDisplay`, `formatMoneyDisplay`, `formatMoneyDetail` — no bare amount fallback
+- Tests: `DashboardMoneyPresenterTest` (6 assertions including no-bare-amount)
+
+## CHECKPOINT 7 — CUSTOMERS
+
+- `DashboardCustomersReadService::detail()` loads profile + booking aggregates
+- Defensive `transformCustomersPage` when customers array missing
+- Live-mode empty state removes synthetic preview wording
 
 ## PRODUCTION_DEPLOYED
 

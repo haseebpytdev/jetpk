@@ -27,9 +27,37 @@ class DashboardMoneyPresenterTest extends TestCase
         $this->assertSame('', DashboardMoneyPresenter::resolveBookingCurrency($booking));
     }
 
-    public function test_format_amount_label_without_currency(): void
+    public function test_present_minor_units_without_currency_never_returns_bare_amount(): void
     {
-        $this->assertSame('564.00', DashboardMoneyPresenter::formatAmountLabel(564, ''));
-        $this->assertSame('564.00 USD', DashboardMoneyPresenter::formatAmountLabel(564, 'USD'));
+        $presented = DashboardMoneyPresenter::presentMinorUnits(564, null);
+
+        $this->assertSame('unresolved', $presented['currencyStatus']);
+        $this->assertNull($presented['currency']);
+        $this->assertSame('Amount unavailable', $presented['displayLabel']);
+        $this->assertSame('Currency not recorded', $presented['currencyLabel']);
+        $this->assertStringNotContainsString('564', $presented['displayLabel']);
+        $this->assertTrue($presented['needsReview']);
+    }
+
+    public function test_present_minor_units_with_pkr_currency(): void
+    {
+        $presented = DashboardMoneyPresenter::presentMinorUnits(564, 'PKR', 'booking.currency');
+
+        $this->assertSame('resolved', $presented['currencyStatus']);
+        $this->assertSame('PKR', $presented['currency']);
+        $this->assertSame('564.00 PKR', $presented['displayLabel']);
+    }
+
+    public function test_present_minor_units_with_usd_currency(): void
+    {
+        $presented = DashboardMoneyPresenter::presentMinorUnits(590, 'USD', 'fareBreakdown.currency');
+
+        $this->assertSame('590.00 USD', $presented['displayLabel']);
+    }
+
+    public function test_format_amount_label_without_currency_is_unavailable(): void
+    {
+        $this->assertSame('Amount unavailable', DashboardMoneyPresenter::formatAmountLabel(564, ''));
+        $this->assertStringNotContainsString('564', DashboardMoneyPresenter::formatAmountLabel(564, ''));
     }
 }

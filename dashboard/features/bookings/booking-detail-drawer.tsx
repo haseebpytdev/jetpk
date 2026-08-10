@@ -8,7 +8,8 @@ import {
   PaymentStatusBadge,
   TicketingStatusBadge,
 } from "@/components/ui/status-badge";
-import { formatCurrency, formatDate, formatDateTime, tripTypeLabel } from "@/lib/format";
+import { MoneyDisplay } from "@/components/ui/money-display";
+import { formatDate, formatDateTime, tripTypeLabel } from "@/lib/format";
 import type { BookingRecord } from "@/types/booking";
 import { BookingOperationalActions } from "@/features/bookings/booking-operational-actions";
 
@@ -122,18 +123,32 @@ export function BookingDetailDrawerContent({ booking }: { booking: BookingRecord
         <dl className="mt-2 grid gap-2 text-sm">
           <div className="flex justify-between gap-4">
             <dt className="text-jp-muted">Total</dt>
-            <dd className="font-semibold tabular-nums">
-              {formatCurrency(booking.totalAmount, booking.currency)}
+            <dd className="font-semibold">
+              <MoneyDisplay
+                amount={booking.totalAmount}
+                currency={booking.currency}
+                currencyStatus={booking.currencyStatus}
+              />
             </dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-jp-muted">Paid</dt>
-            <dd className="tabular-nums">{formatCurrency(booking.amountPaid, booking.currency)}</dd>
+            <dd>
+              <MoneyDisplay
+                amount={booking.amountPaid}
+                currency={booking.currency}
+                currencyStatus={booking.currencyStatus}
+              />
+            </dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-jp-muted">Balance</dt>
-            <dd className="tabular-nums">
-              {formatCurrency(Math.max(0, booking.totalAmount - booking.amountPaid), booking.currency)}
+            <dd>
+              <MoneyDisplay
+                amount={Math.max(0, booking.totalAmount - booking.amountPaid)}
+                currency={booking.currency}
+                currencyStatus={booking.currencyStatus}
+              />
             </dd>
           </div>
         </dl>

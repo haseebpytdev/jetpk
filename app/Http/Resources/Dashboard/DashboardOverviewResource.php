@@ -247,7 +247,7 @@ final class DashboardOverviewResource
                 if ($booking instanceof Booking) {
                     $row = BookingListPresenter::toListRow($booking);
 
-                    $currency = DashboardMoneyPresenter::resolveBookingCurrency($booking);
+                    $totalMoney = DashboardMoneyPresenter::presentBookingTotal($booking, (int) ($row['total_fare'] ?? 0));
 
                     return [
                         'id' => DashboardBookingResource::publicId($booking),
@@ -257,8 +257,9 @@ final class DashboardOverviewResource
                         'route' => (string) ($row['route'] ?? ''),
                         'date' => (string) ($row['travel_date'] ?? ''),
                         'status' => (string) ($row['status_display'] ?? ''),
-                        'amount' => DashboardMoneyPresenter::formatAmountLabel((int) ($row['total_fare'] ?? 0), $currency),
-                        'currency' => $currency,
+                        'amount' => $totalMoney['displayLabel'],
+                        'currency' => $totalMoney['currency'],
+                        'currencyStatus' => $totalMoney['currencyStatus'],
                         'payment' => (string) ($row['payment_status_display'] ?? ''),
                     ];
                 }

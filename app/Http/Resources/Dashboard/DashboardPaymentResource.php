@@ -22,6 +22,18 @@ final class DashboardPaymentResource
 
         $method = strtolower((string) ($payment->method?->value ?? 'cash'));
         $status = strtolower((string) ($payment->status?->value ?? 'pending'));
+        $paymentCurrency = DashboardMoneyPresenter::normalizeIsoCurrency(
+            $payment->currency ?? $booking?->currency ?? $booking?->fareBreakdown?->currency,
+        );
+        $currencySource = $paymentCurrency !== ''
+            ? ($payment->currency ? 'payment.currency' : 'booking.currency')
+            : null;
+        $grossMinor = (int) round((float) $payment->amount);
+        $grossMoney = DashboardMoneyPresenter::presentMinorUnits($grossMinor, $paymentCurrency ?: null, $currencySource);
+        $paidMinor = $status === 'verified' ? $grossMinor : 0;
+        $paidMoney = DashboardMoneyPresenter::presentMinorUnits($paidMinor, $paymentCurrency ?: null, $currencySource);
+        $outstandingMinor = $status === 'verified' ? 0 : $grossMinor;
+        $outstandingMoney = DashboardMoneyPresenter::presentMinorUnits($outstandingMinor, $paymentCurrency ?: null, $currencySource);
 
         return [
             'transactionId' => 'TXN-'.$payment->id,
@@ -35,15 +47,19 @@ final class DashboardPaymentResource
             'customerPhone' => $bookingSummary['customerPhone'] ?? '—',
             'transactionDate' => ($payment->submitted_at ?? $payment->created_at)?->toIso8601String() ?? '',
             'bookingDate' => $booking?->created_at?->format('Y-m-d') ?? '',
-            'currency' => DashboardMoneyPresenter::normalizeIsoCurrency(
-                $payment->currency ?? $booking?->currency ?? $booking?->fareBreakdown?->currency,
-            ),
-            'grossAmount' => (int) round((float) $payment->amount),
-            'paidAmount' => $status === 'verified' ? (int) round((float) $payment->amount) : 0,
-            'outstandingAmount' => $status === 'verified' ? 0 : (int) round((float) $payment->amount),
+            'currency' => $grossMoney['currency'] ?? '',
+            'currencyStatus' => $grossMoney['currencyStatus'],
+            'currencySource' => $grossMoney['currencySource'],
+            'grossAmount' => $grossMoney['amountMinor'],
+            'grossMoney' => $grossMoney,
+            'paidAmount' => $paidMoney['amountMinor'],
+            'paidMoney' => $paidMoney,
+            'outstandingAmount' => $outstandingMoney['amountMinor'],
+            'outstandingMoney' => $outstandingMoney,
             'refundedAmount' => 0,
             'feeAmount' => 0,
-            'netAmount' => (int) round((float) $payment->amount),
+            'netAmount' => $grossMoney['amountMinor'],
+            'netMoney' => $grossMoney,
             'paymentMethod' => self::mapMethod($method),
             'paymentChannel' => self::mapChannel($booking),
             'transactionType' => 'payment',

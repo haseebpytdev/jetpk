@@ -26,6 +26,8 @@ export type BookingRecord = {
   paymentStatus: PaymentStatus;
   ticketingStatus: TicketingStatus;
   currency: string;
+  currencyStatus?: "resolved" | "unresolved";
+  currencySource?: string | null;
   totalAmount: number;
   amountPaid: number;
   agentOrSource: string;

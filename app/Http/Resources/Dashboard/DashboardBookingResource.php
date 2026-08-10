@@ -17,6 +17,12 @@ final class DashboardBookingResource
         $route = (string) ($row['route'] ?? '');
         [$origin, $destination] = self::splitRoute($route);
         $supplier = (string) ($row['supplier_provider'] ?? '');
+        $totalMoney = DashboardMoneyPresenter::presentBookingTotal($booking, (int) ($row['total_fare'] ?? 0));
+        $paidMoney = DashboardMoneyPresenter::presentMinorUnits(
+            self::paidAmount($booking),
+            $totalMoney['currency'],
+            $totalMoney['currencySource'],
+        );
 
         return [
             'id' => self::publicId($booking),
@@ -38,9 +44,13 @@ final class DashboardBookingResource
             'bookingStatus' => self::mapBookingStatus((string) ($row['status'] ?? '')),
             'paymentStatus' => self::mapPaymentStatus((string) ($row['payment_status'] ?? 'unpaid')),
             'ticketingStatus' => self::mapTicketingStatus((string) ($row['ticketing_status'] ?? 'not_started')),
-            'currency' => DashboardMoneyPresenter::resolveBookingCurrency($booking),
-            'totalAmount' => (int) ($row['total_fare'] ?? 0),
-            'amountPaid' => self::paidAmount($booking),
+            'currency' => $totalMoney['currency'] ?? '',
+            'currencyStatus' => $totalMoney['currencyStatus'],
+            'currencySource' => $totalMoney['currencySource'],
+            'totalAmount' => $totalMoney['amountMinor'],
+            'totalMoney' => $totalMoney,
+            'amountPaid' => $paidMoney['amountMinor'],
+            'amountPaidMoney' => $paidMoney,
             'agentOrSource' => self::agentOrSource($row),
             'lastUpdated' => $booking->updated_at?->toIso8601String() ?? '',
             'reviewFlags' => [

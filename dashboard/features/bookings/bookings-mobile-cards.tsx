@@ -7,7 +7,8 @@ import {
   PaymentStatusBadge,
   TicketingStatusBadge,
 } from "@/components/ui/status-badge";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatDate } from "@/lib/format";
+import { formatMoneyDisplay } from "@/lib/money";
 import type { BookingRecord } from "@/types/booking";
 
 type Props = {
@@ -27,7 +28,7 @@ export function BookingsMobileCards({ bookings, onView }: Props) {
                 <p className="text-xs text-jp-muted">PNR {b.pnr}</p>
               </div>
               <p className="shrink-0 font-semibold tabular-nums">
-                {formatCurrency(b.totalAmount, b.currency)}
+                {formatMoneyDisplay(b.totalAmount, b.currency, b.currencyStatus)}
               </p>
             </div>
             <p className="text-sm text-gray-800">{b.customerName}</p>

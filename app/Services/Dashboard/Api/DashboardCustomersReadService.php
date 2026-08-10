@@ -56,7 +56,12 @@ class DashboardCustomersReadService
         Gate::authorize('viewAny', User::class);
 
         $customerId = str_starts_with(strtoupper($id), 'CU-') ? (int) substr($id, 3) : (int) $id;
-        $customer = $this->scopedQuery($user)->whereKey($customerId)->first();
+        $customer = $this->scopedQuery($user)
+            ->with(['profile:id,user_id,phone,whatsapp,city,country,nationality'])
+            ->withCount('bookings')
+            ->withMax('bookings as last_booking_at', 'created_at')
+            ->whereKey($customerId)
+            ->first();
         if ($customer === null) {
             return null;
         }
