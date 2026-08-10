@@ -1,22 +1,26 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Card } from "@/components/ui/card";
 import {
   BookingStatusBadge,
   PaymentStatusBadge,
   TicketingStatusBadge,
 } from "@/components/ui/status-badge";
+import { bookingsQueryToSearchParams } from "@/lib/bookings-query";
 import { formatDate } from "@/lib/format";
 import { formatMoneyDisplay } from "@/lib/money";
-import type { BookingRecord } from "@/types/booking";
+import type { BookingRecord, BookingsQuery } from "@/types/booking";
+
+const viewLinkClassName =
+  "inline-flex min-h-11 w-full items-center justify-center rounded-xl font-medium transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent border border-jp-border bg-white px-3 py-2 text-sm text-gray-900 hover:bg-gray-50";
 
 type Props = {
   bookings: BookingRecord[];
-  onView: (id: string) => void;
+  query: BookingsQuery;
 };
 
-export function BookingsMobileCards({ bookings, onView }: Props) {
+export function BookingsMobileCards({ bookings, query }: Props) {
   return (
     <ul className="space-y-3 lg:hidden" data-testid="bookings-mobile-cards">
       {bookings.map((b) => (
@@ -40,16 +44,14 @@ export function BookingsMobileCards({ bookings, onView }: Props) {
               <PaymentStatusBadge status={b.paymentStatus} />
               <TicketingStatusBadge status={b.ticketingStatus} />
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="w-full"
+            <Link
+              href={`/bookings${bookingsQueryToSearchParams({ ...query, selectedId: b.id })}`}
+              className={viewLinkClassName}
               aria-label={`View booking ${b.id}`}
               data-testid="booking-view-button"
-              onClick={() => onView(b.id)}
             >
               View
-            </Button>
+            </Link>
           </Card>
         </li>
       ))}

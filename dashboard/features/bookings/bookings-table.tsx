@@ -1,21 +1,24 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import {
   BookingStatusBadge,
   PaymentStatusBadge,
   TicketingStatusBadge,
 } from "@/components/ui/status-badge";
 import { Table, TableBody, TableHead, TableRow, Td, Th } from "@/components/ui/table";
+import { bookingsQueryToSearchParams } from "@/lib/bookings-query";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { formatMoneyDisplay } from "@/lib/money";
 import type { BookingRecord, BookingSortField, BookingsQuery } from "@/types/booking";
+
+const viewLinkClassName =
+  "inline-flex min-h-11 items-center justify-center rounded-xl font-medium transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent border border-jp-border bg-white px-3 py-2 text-sm text-gray-900 hover:bg-gray-50";
 
 type Props = {
   bookings: BookingRecord[];
   query: BookingsQuery;
   onSort: (field: BookingSortField) => void;
-  onView: (id: string) => void;
 };
 
 function sortIndicator(active: boolean, direction: BookingsQuery["direction"]) {
@@ -23,7 +26,7 @@ function sortIndicator(active: boolean, direction: BookingsQuery["direction"]) {
   return direction === "asc" ? " ↑" : " ↓";
 }
 
-export function BookingsTable({ bookings, query, onSort, onView }: Props) {
+export function BookingsTable({ bookings, query, onSort }: Props) {
   return (
     <div className="hidden lg:block min-w-0 w-full max-w-full" data-testid="bookings-table">
       <Table>
@@ -134,15 +137,14 @@ export function BookingsTable({ bookings, query, onSort, onView }: Props) {
               </Td>
               <Td className="text-xs text-jp-muted">{formatDateTime(b.lastUpdated)}</Td>
               <Td>
-                <Button
-                  variant="secondary"
-                  size="sm"
+                <Link
+                  href={`/bookings${bookingsQueryToSearchParams({ ...query, selectedId: b.id })}`}
+                  className={viewLinkClassName}
                   aria-label={`View booking ${b.id}`}
                   data-testid="booking-view-button"
-                  onClick={() => onView(b.id)}
                 >
                   View
-                </Button>
+                </Link>
               </Td>
             </TableRow>
           ))}

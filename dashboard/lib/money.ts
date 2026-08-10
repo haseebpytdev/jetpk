@@ -64,7 +64,11 @@ export function formatMoneyDetail(
     }
 
     const minor = amountOrMoney.amountMinor ?? Number.parseFloat(amountOrMoney.amount);
-    return { primary: formatCurrency(minor, amountOrMoney.currency ?? "") };
+    const iso = (amountOrMoney.currency ?? "").trim().toUpperCase();
+    return {
+      primary: formatCurrency(minor, iso),
+      secondary: iso,
+    };
   }
 
   if (!isResolvedMoney(currency, currencyStatus)) {
@@ -74,5 +78,9 @@ export function formatMoneyDetail(
     };
   }
 
-  return { primary: formatCurrency(amountOrMoney, currency ?? "") };
+  const iso = currency?.trim().toUpperCase() ?? "";
+  return {
+    primary: formatCurrency(amountOrMoney, iso),
+    secondary: iso,
+  };
 }

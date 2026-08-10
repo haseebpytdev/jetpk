@@ -147,11 +147,10 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
       expect(body).not.toMatch(PREVIEW_RESIDUE);
       expect(body).toContain(ref);
 
-      const viewButton = page
-        .getByRole("button", { name: new RegExp(`View booking ${ref}|^${ref}$`, "i") })
-        .first();
+      const viewButton = page.getByTestId("booking-view-button").first();
       await expect(viewButton).toBeVisible({ timeout: 15_000 });
       await viewButton.click();
+      await page.waitForURL(new RegExp(`[?&]id=${ref}`), { timeout: 30_000 });
 
       const drawer = page.getByTestId("booking-drawer-content");
       await expect(drawer).toBeVisible({ timeout: 30_000 });
@@ -290,7 +289,7 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
           await search.fill(entry.openViaSearch);
           await page.waitForTimeout(1000);
         }
-        const view = page.getByRole("button", { name: /^View$/i }).first();
+        const view = page.getByTestId("booking-view-button").first();
         if ((await view.count()) === 0) {
           rows.push({ module: entry.module, status: "NO_REPRESENTATIVE_PRODUCTION_RECORD", result: "PASS" });
           continue;
@@ -465,9 +464,7 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
 
   test("suppliers domain audit on production surface", async ({ page }) => {
     await page.goto("/admin/dashboard/suppliers", { waitUntil: "domcontentloaded", timeout: 120_000 });
-    await expect(page.getByTestId("suppliers-table").or(page.getByTestId("suppliers-filters"))).toBeVisible({
-      timeout: 30_000,
-    });
+    await expect(page.getByTestId("suppliers-filters")).toBeVisible({ timeout: 30_000 });
     const suppliersBody = await page.locator("body").innerText();
     expect(suppliersBody).not.toMatch(PREVIEW_RESIDUE);
     expect(suppliersBody).toMatch(/Sabre/i);

@@ -1,7 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
+import { useDashboardPortal } from "@/lib/portal-context";
+import { dashboardHref, type DashboardPortal } from "@/lib/portal-path";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
@@ -19,23 +22,31 @@ type Props = {
   selectedBooking: BookingRecord | null;
 };
 
+function syncBookingsUrl(portal: DashboardPortal, query: BookingsQuery) {
+  const href = dashboardHref(portal, `/bookings${bookingsQueryToSearchParams(query)}`);
+  window.history.replaceState(window.history.state, "", href);
+}
+
 export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
   const router = useDashboardRouter();
-  const [, startTransition] = useTransition();
+  const portal = useDashboardPortal();
+  const searchParams = useSearchParams();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
-  const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
+  const [pendingDrawerId, setPendingDrawerId] = useState<string | null>(null);
+
+  const urlSelectedId = searchParams.get("id")?.trim() || null;
+  const resolvedBookingId = pendingDrawerId ?? urlSelectedId ?? query.selectedId;
 
   useEffect(() => {
-    setDrawerDismissed(false);
-    setActiveBookingId(query.selectedId);
-  }, [query.selectedId]);
+    if (query.selectedId || urlSelectedId) {
+      setDrawerDismissed(false);
+    }
+  }, [query.selectedId, urlSelectedId]);
 
   const pushQuery = useCallback(
     (overrides: Partial<BookingsQuery>) => {
       const next = { ...query, ...overrides };
-      startTransition(() => {
-        router.push(`/bookings${bookingsQueryToSearchParams(next)}`);
-      });
+      router.push(`/bookings${bookingsQueryToSearchParams(next)}`);
     },
     [query, router],
   );
@@ -46,23 +57,16 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
     pushQuery({ sort: field, direction, page: 1 });
   };
 
-  const onView = (id: string) => {
-    setDrawerDismissed(false);
-    setActiveBookingId(id);
-    pushQuery({ selectedId: id });
-  };
-
   const onCloseDrawer = useCallback(() => {
     setDrawerDismissed(true);
-    setActiveBookingId(null);
-    pushQuery({ selectedId: null });
-  }, [pushQuery]);
+    setPendingDrawerId(null);
+    syncBookingsUrl(portal, { ...query, selectedId: null });
+  }, [portal, query]);
 
-  const resolvedBookingId = query.selectedId ?? activeBookingId;
-  const drawerBooking =
-    selectedBooking ??
-    result.bookings.find((booking) => booking.id === resolvedBookingId) ??
-    null;
+  const listBooking = resolvedBookingId
+    ? result.bookings.find((booking) => booking.id === resolvedBookingId)
+    : null;
+  const drawerBooking = selectedBooking ?? listBooking ?? null;
   const drawerOpen = !drawerDismissed && Boolean(resolvedBookingId && drawerBooking);
 
   const empty = result.total === 0;
@@ -79,13 +83,8 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
         />
       ) : (
         <>
-          <BookingsTable
-            bookings={result.bookings}
-            query={query}
-            onSort={onSort}
-            onView={onView}
-          />
-          <BookingsMobileCards bookings={result.bookings} onView={onView} />
+          <BookingsTable bookings={result.bookings} query={query} onSort={onSort} />
+          <BookingsMobileCards bookings={result.bookings} query={query} />
           <Pagination
             page={result.page}
             pageCount={result.pageCount}

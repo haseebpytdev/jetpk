@@ -1,35 +1,35 @@
 {
-  "generatedAtUtc": "2026-08-10T17:13:23.643Z",
+  "generatedAtUtc": "2026-08-10T18:14:57.531Z",
   "performanceMatrix": "PASS",
   "rows": [
     {
       "route": "/admin/dashboard",
       "httpStatus": 200,
-      "durationMsApprox": 3448,
+      "durationMsApprox": 898,
       "result": "PASS"
     },
     {
       "route": "/admin/dashboard/bookings",
       "httpStatus": 200,
-      "durationMsApprox": 817,
+      "durationMsApprox": 1770,
       "result": "PASS"
     },
     {
       "route": "/admin/dashboard/customers",
       "httpStatus": 200,
-      "durationMsApprox": 1108,
+      "durationMsApprox": 690,
       "result": "PASS"
     },
     {
       "route": "/admin/dashboard/agents",
       "httpStatus": 200,
-      "durationMsApprox": 627,
+      "durationMsApprox": 621,
       "result": "PASS"
     },
     {
       "route": "/admin/dashboard/suppliers",
       "httpStatus": 200,
-      "durationMsApprox": 976,
+      "durationMsApprox": 882,
       "result": "PASS"
     }
   ]
