@@ -12,11 +12,20 @@ Engineering checkpoint 6 applied for human-confirmed production defects A–C (p
 
 ## LAST_UPDATED_UTC
 
-2026-08-10T06:35:00Z
+2026-08-10T10:45:00Z
 
 ## CURRENT_COMMIT
 
-pending push — checkpoint 7 currency contract + customer hardening
+`9a2df7b` — fix(dashboard): enforce unavailable money when currency unresolved
+
+## PRODUCTION_DEPLOYED
+
+- Checkpoint 6+7 (2026-08-10): `DASH_BUILD=5zb0t1k2JJqexEOfA392C` (pre: `h1Jr2GjL650X1FFsFvm8C`)
+- Backup: `/home/pkjetp/jetpk-dash-03-20260810154000`
+- `pm2 restart jetpk-dashboard` — online
+- `curl http://127.0.0.1:3001/admin/dashboard` → **200**
+- Presenter verify: `PRIVATE_HITS=0`, `STAFF_HREF=/admin/staff`, `API_SETTINGS_HREF=/admin/api-settings`
+- Money verify: unresolved label `Amount unavailable` (no bare `564`)
 
 ## CURRENCY_PRESENTATION_INTEGRITY
 
@@ -55,10 +64,10 @@ pending push — checkpoint 7 currency contract + customer hardening
 |------|--------|
 | `JP_DASH_03` | `FAIL_NOT_OPERATIONALLY_CLOSED` |
 | `FULL_BACKOFFICE_ACCEPTANCE` | `FAIL` |
-| `PRIVATE_LARAVEL_BROWSER_EXPOSURE` | `FAIL` → **fix staged** (relative Laravel nav paths + client sanitize) |
-| `PREVIEW_RESIDUE_PRODUCTION` | `FAIL` → **fix staged** (live-mode drawer banners removed) |
-| `SETTINGS_OPERATIONAL_STATE` | `FAIL` → **fix staged** (admin live redirect to Laravel settings) |
-| `CURRENCY_PRESENTATION_INTEGRITY` | `UNVERIFIED` → partial (authoritative booking/payment currency chain; reconciliation pending) |
+| `PRIVATE_LARAVEL_BROWSER_EXPOSURE` | **API/presenter PASS** — browser human verify pending |
+| `PREVIEW_RESIDUE_PRODUCTION` | Deployed gating — browser verify pending |
+| `SETTINGS_OPERATIONAL_STATE` | Handoff deployed — browser verify pending |
+| `CURRENCY_PRESENTATION_INTEGRITY` | **Partial PASS** — unresolved shows unavailable; reconciliation pending |
 | `BACKOFFICE_PAGE_MATRIX` | `FAIL` |
 | `BACKOFFICE_ACTION_MATRIX` | `FAIL` |
 | `BOOKING_MANAGEMENT` | `FAIL` |
