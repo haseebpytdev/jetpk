@@ -1,7 +1,7 @@
 import { AgentsPageContent } from "@/features/agents/agents-page-content";
 
 export const metadata = {
-  title: "Agents — JetPakistan Admin Preview",
+  title: "Agents — JetPakistan Dashboard",
 };
 
 export default function AgentsPage({

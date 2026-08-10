@@ -170,7 +170,7 @@ export function BookingDetailDrawerContent({ booking }: { booking: BookingRecord
 
       <Divider />
 
-      <BookingOperationalActions bookingId={booking.id} />
+      <BookingOperationalActions bookingId={booking.id} defaultCurrency={booking.currency} />
     </div>
   );
 }

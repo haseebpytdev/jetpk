@@ -5,9 +5,16 @@ import { useDashboardPortal } from "@/lib/portal-context";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { storeBookingNote, storeCancellationRequest, storeRefundRequest, storeBookingPayment, assignBookingStaff } from "@/services/operational-api";
 
-export function BookingOperationalActions({ bookingId }: { bookingId: string }) {
+export function BookingOperationalActions({
+  bookingId,
+  defaultCurrency = "",
+}: {
+  bookingId: string;
+  defaultCurrency?: string;
+}) {
   const portal = useDashboardPortal();
   const isLive = useDashboardLiveMode();
+  const moneyCurrency = defaultCurrency?.trim() || "PKR";
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +96,7 @@ export function BookingOperationalActions({ bookingId }: { bookingId: string }) 
           setError(null);
           const result = await storeRefundRequest(portal, bookingId, {
             amount: 100,
-            currency: "PKR",
+            currency: moneyCurrency,
             method: "cash",
             reason: "Operator refund request",
           });
@@ -111,7 +118,7 @@ export function BookingOperationalActions({ bookingId }: { bookingId: string }) 
           const result = await storeBookingPayment(portal, bookingId, {
             method: "bank_transfer",
             amount: 100,
-            currency: "PKR",
+            currency: moneyCurrency,
           });
           setBusy(false);
           if (!result.ok) setError(result.message ?? "Request failed");

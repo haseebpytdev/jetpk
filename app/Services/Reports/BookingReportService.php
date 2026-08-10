@@ -69,6 +69,7 @@ class BookingReportService
             'supplier_pnr_pending' => $this->countSupplierPnrPending($baseQuery),
             'ticketing_pending' => $this->countTicketingPending($baseQuery),
             'unpaid_partial_bookings' => (clone $baseQuery)->whereIn('payment_status', ['unpaid', 'partial'])->count(),
+            'fare_currency_count' => $this->countDistinctFareCurrencies($grossSalesQuery),
         ];
 
         $monthExpr = $this->monthExpression('bookings.created_at');
@@ -317,6 +318,16 @@ class BookingReportService
     protected function grossSalesBookingsQuery(Builder $baseQuery): Builder
     {
         return (clone $baseQuery)->where('bookings.status', '!=', BookingStatus::Cancelled);
+    }
+
+    protected function countDistinctFareCurrencies(Builder $baseQuery): int
+    {
+        $count = $this->grossSalesBookingsQuery($baseQuery)
+            ->leftJoin('booking_fare_breakdowns as fare', 'fare.booking_id', '=', 'bookings.id')
+            ->selectRaw('COUNT(DISTINCT COALESCE(NULLIF(fare.currency, ""), bookings.currency)) as currency_count')
+            ->value('currency_count');
+
+        return (int) $count;
     }
 
     protected function sumFare(Builder $query, string $column): float

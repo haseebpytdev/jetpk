@@ -1,7 +1,7 @@
 import { PaymentsPageContent } from "@/features/payments/payments-page-content";
 
 export const metadata = {
-  title: "Payments — JetPakistan Admin Preview",
+  title: "Payments — JetPakistan Dashboard",
 };
 
 export default function PaymentsPage({

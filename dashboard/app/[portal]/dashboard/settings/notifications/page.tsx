@@ -1,6 +1,6 @@
 import { SettingsPageContent } from "@/features/settings/settings-page-content";
 
-export const metadata = { title: "Notification Settings — JetPakistan Admin Preview" };
+export const metadata = { title: "Notification Settings — JetPakistan Dashboard" };
 
 export default function SettingsNotificationsPage({
   searchParams,

@@ -1,6 +1,6 @@
 import { CmsPageContent } from "@/features/cms/cms-page-content";
 
-export const metadata = { title: "CMS Notices — JetPakistan Admin Preview" };
+export const metadata = { title: "CMS Notices — JetPakistan Dashboard" };
 
 export default function CmsNoticesRoute({
   searchParams,

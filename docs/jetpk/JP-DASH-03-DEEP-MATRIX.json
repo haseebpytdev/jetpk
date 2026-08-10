@@ -1,0 +1,215 @@
+{
+  "generatedAtUtc": "2026-08-10T14:43:28.885Z",
+  "rows": [
+    {
+      "module": "Dashboard",
+      "route": "/admin/dashboard",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Bookings",
+      "route": "/admin/dashboard/bookings",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Payments",
+      "route": "/admin/dashboard/payments",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/payments",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "PNRs",
+      "route": "/admin/dashboard/pnrs",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/pnrs",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Tickets",
+      "route": "/admin/dashboard/tickets",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/tickets",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Deposits",
+      "route": "/admin/dashboard/deposits",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/deposits",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Customers",
+      "route": "/admin/dashboard/customers",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/customers",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Agents",
+      "route": "/admin/dashboard/agents",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/agents",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Suppliers",
+      "route": "/admin/dashboard/suppliers",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/suppliers",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Users",
+      "route": "/admin/dashboard/users",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/users",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "CMS",
+      "route": "/admin/dashboard/cms",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/cms",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Reports",
+      "route": "/admin/dashboard/reports",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/reports",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Audit",
+      "route": "/admin/dashboard/audit",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/audit",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Settings",
+      "route": "/admin/settings",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/settings",
+      "handoff": true,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Support",
+      "route": "/admin/support/tickets",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/support/tickets",
+      "handoff": true,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Staff",
+      "route": "/admin/staff",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/staff",
+      "handoff": true,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "API Settings",
+      "route": "/admin/api-settings",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/api-settings",
+      "handoff": true,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Page Settings",
+      "route": "/admin/page-settings",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/page-settings",
+      "handoff": true,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Branding",
+      "route": "/admin/settings/branding",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/settings/branding",
+      "handoff": true,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Markups",
+      "route": "/admin/markups",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/markups",
+      "handoff": true,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Go-live",
+      "route": "/admin/go-live-checklist",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/go-live-checklist",
+      "handoff": true,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    }
+  ]
+}

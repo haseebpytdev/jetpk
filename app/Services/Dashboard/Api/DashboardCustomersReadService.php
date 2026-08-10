@@ -20,7 +20,7 @@ class DashboardCustomersReadService
 
         $query = $this->scopedQuery($user)
             ->select(['id', 'name', 'email', 'status', 'created_at', 'meta', 'email_verified_at'])
-            ->with(['profile:id,user_id,phone,whatsapp,city,country,nationality'])
+            ->with(['profile:id,user_id,phone,whatsapp,city,country_code,nationality'])
             ->withCount('bookings')
             ->withMax('bookings as last_booking_at', 'created_at');
 
@@ -57,7 +57,7 @@ class DashboardCustomersReadService
 
         $customerId = str_starts_with(strtoupper($id), 'CU-') ? (int) substr($id, 3) : (int) $id;
         $customer = $this->scopedQuery($user)
-            ->with(['profile:id,user_id,phone,whatsapp,city,country,nationality'])
+            ->with(['profile:id,user_id,phone,whatsapp,city,country_code,nationality'])
             ->withCount('bookings')
             ->withMax('bookings as last_booking_at', 'created_at')
             ->whereKey($customerId)

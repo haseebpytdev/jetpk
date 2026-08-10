@@ -78,6 +78,7 @@ class AgencyDashboardService
             'ticketed_bookings' => (clone $baseQuery)->where('status', BookingStatus::Ticketed)->count(),
             'unpaid_partial_bookings' => (clone $baseQuery)->whereIn('payment_status', ['unpaid', 'partial'])->count(),
             'gross_sales' => $this->sumFareColumn($this->grossSalesBookingsQuery($baseQuery), 'total'),
+            'gross_sales_currency_meta' => $this->grossSalesCurrencyMeta($baseQuery),
             'paid_sales' => $this->sumFareColumn($this->paidSalesBookingsQuery($baseQuery), 'total'),
             'ticketed_sales' => $this->sumFareColumn($this->ticketedSalesBookingsQuery($baseQuery), 'total'),
             'markup_revenue' => $this->sumFareColumn($this->grossSalesBookingsQuery($baseQuery), 'markup'),
@@ -593,6 +594,10 @@ class AgencyDashboardService
      */
     protected function buildCommandSummary(array $counts, array $stats): array
     {
+        $currencyMeta = is_array($stats['gross_sales_currency_meta'] ?? null)
+            ? $stats['gross_sales_currency_meta']
+            : [];
+
         return [
             'needs_action' => $counts['needs_action'],
             'payment_review' => $counts['payment_review'],
@@ -600,7 +605,38 @@ class AgencyDashboardService
             'today_departures' => $counts['today_departures'],
             'pending_deposits' => $counts['pending_deposits'] ?? 0,
             'gross_sales' => (float) ($stats['gross_sales'] ?? 0),
+            'gross_sales_currency' => $currencyMeta['currency'] ?? null,
+            'gross_sales_multi_currency' => (bool) ($currencyMeta['multi'] ?? false),
+            'gross_sales_currency_label' => (string) ($currencyMeta['label'] ?? ''),
         ];
+    }
+
+    /**
+     * @return array{currency: ?string, multi: bool, label: string}
+     */
+    protected function grossSalesCurrencyMeta(Builder $baseQuery): array
+    {
+        $currencies = $this->grossSalesBookingsQuery($baseQuery)
+            ->leftJoin('booking_fare_breakdowns as fare', 'fare.booking_id', '=', 'bookings.id')
+            ->toBase()
+            ->selectRaw('DISTINCT COALESCE(NULLIF(fare.currency, ""), bookings.currency) as currency')
+            ->pluck('currency')
+            ->map(static fn ($currency): string => strtoupper(trim((string) $currency)))
+            ->filter(static fn (string $currency): bool => strlen($currency) === 3)
+            ->unique()
+            ->values();
+
+        if ($currencies->isEmpty()) {
+            return ['currency' => null, 'multi' => false, 'label' => '—'];
+        }
+
+        if ($currencies->count() > 1) {
+            return ['currency' => null, 'multi' => true, 'label' => 'Multiple currencies'];
+        }
+
+        $currency = (string) $currencies->first();
+
+        return ['currency' => $currency, 'multi' => false, 'label' => $currency];
     }
 
     protected function countPendingAgentDeposits(User $user): int

@@ -1,7 +1,7 @@
 import { CustomersPageContent } from "@/features/customers/customers-page-content";
 
 export const metadata = {
-  title: "Customers — JetPakistan Admin Preview",
+  title: "Customers — JetPakistan Dashboard",
 };
 
 export default function CustomersPage({

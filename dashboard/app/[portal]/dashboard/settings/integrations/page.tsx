@@ -1,6 +1,6 @@
 import { SettingsPageContent } from "@/features/settings/settings-page-content";
 
-export const metadata = { title: "Integration Settings — JetPakistan Admin Preview" };
+export const metadata = { title: "Integration Settings — JetPakistan Dashboard" };
 
 export default function SettingsIntegrationsPage({
   searchParams,

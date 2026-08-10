@@ -1,7 +1,7 @@
 import { PnrsPageContent } from "@/features/pnrs/pnrs-page-content";
 
 export const metadata = {
-  title: "PNRs & Orders — JetPakistan Admin Preview",
+  title: "PNRs & Orders — JetPakistan Dashboard",
 };
 
 export default function PnrsPage({

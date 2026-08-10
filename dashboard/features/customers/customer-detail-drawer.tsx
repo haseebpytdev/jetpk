@@ -5,9 +5,11 @@ import { Divider } from "@/components/ui/divider";
 import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
 import { AccountStatusBadge, VerificationStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { CustomerRecord } from "@/types/customer";
 
 export function CustomerDetailDrawerContent({ customer }: { customer: CustomerRecord }) {
+  const isLive = useDashboardLiveMode();
   const recentBookings = customer.linkedBookingIds.slice(0, 5);
   const recentTransactions = customer.linkedTransactionIds.slice(0, 5);
 
@@ -223,9 +225,11 @@ export function CustomerDetailDrawerContent({ customer }: { customer: CustomerRe
           Notes
         </h3>
         <p className="mt-2 text-sm text-gray-700">{customer.notesSummary}</p>
-        <p className="mt-2 text-xs text-jp-muted">
-          Read-only preview — no customer actions are available in this module.
-        </p>
+        {!isLive ? (
+          <p className="mt-2 text-xs text-jp-muted">
+            Read-only preview — no customer actions are available in this module.
+          </p>
+        ) : null}
       </section>
     </div>
   );

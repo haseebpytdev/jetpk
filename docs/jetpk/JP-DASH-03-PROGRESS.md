@@ -2,75 +2,93 @@
 
 ## PHASE
 
-`JP-DASH-03` — Checkpoint 9+ autonomous acceptance + booking currency contract
+`JP-DASH-03` — Checkpoint 10+ deep operational acceptance
 
 ## CURRENT_STATUS
 
-`JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED` — browser crawl baseline PASS; module/action/money/management matrices still incomplete.
+`JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED`
 
-## LAST_UPDATED_UTC
+## REMOTE_HEAD (after checkpoint 10 push pending)
 
-2026-08-10T13:10:00Z
+Branch: `phase/jetpk-dash-03-operational-backoffice` → remote `jetpk`
 
-## CURRENT_COMMIT
+Prior remote: `860a8ab0b686743cbe417aac096592455b520c19`
 
-Pending checkpoint 9 push on `phase/jetpk-dash-03-operational-backoffice`
+**Note:** Commits `79c9e43` and `444ddf8` share similar checkpoint-9 subjects; history was not rewritten. Use precise checkpoint subjects going forward.
+
+## CHECKPOINT_9_REMOTE
+
+`PASS` — authenticated baseline crawl 50/50, private-origin PASS, preview residue PASS for page crawl, source parity 29/29.
+
+## CHECKPOINT_10
+
+Deployed and verified:
+
+- Multi-currency KPI labeling (no blind PKR sum when mixed fare currencies)
+- Report currency warnings (`fare_currency_count`, mixed-currency labels)
+- Historical currency conflict scan command (`jetpk:dash03-historical-currency-conflicts`)
+- Booking operational actions use booking currency (not hardcoded PKR)
+- Deep acceptance Playwright spec (21 modules + Laravel handoffs)
+- Booking management capability matrix (partial)
+- Metadata title residue: `Admin Preview` → `JetPakistan Dashboard`
+- Production hotfixes: customers `user_profiles.country_code` (not `country`); gross-sales currency DISTINCT (MySQL GROUP BY)
 
 ## PRODUCTION_DEPLOYED
 
-- `DASH_BUILD=JvyONopldbtfaQ554zr5k` (prior `t5LtgMYacnjd1qDEkVsDJ`)
-- Checkpoint 9 Laravel: currency resolver, payment/report downstream, fare sync on attach
-- Checkpoint 9 Dashboard: live-mode empty-state/CMS/payments/audit/tickets preview gating
-- Root OLS GLOBAL/VHOST — **MATCH**
+- `DASH_BUILD=uDUuVfFSgR1410iXQX2Rt` (prior `JvyONopldbtfaQ554zr5k`)
+- Laravel checkpoint 10 + hotfix files on production
+- PM2 `jetpk-dashboard` restarted (online)
+- Root OLS GLOBAL/VHOST — **MATCH** (checkpoint 9 baseline; not re-read this batch)
 
 ## ADMIN_PLAYWRIGHT_SESSION
 
-`READY` — local storage state captured; bootstrap chains crawl + acceptance tests automatically.
+`READY` — local storage state used for all ordinary Admin acceptance.
 
-**Latest crawl:** `50/50 PASS`, `PRIVATE_LARAVEL_BROWSER_EXPOSURE=PASS`, `PREVIEW_RESIDUE_PRODUCTION=PASS` (page matrix baseline).
+- Baseline crawl: **50/50 PASS** (checkpoint 9)
+- Deep matrix: **20/20 PASS** + review handoffs PASS + customers PASS + responsive 768 PASS
+- Bookings drawer test: skipped (no View rows at run time)
 
-**Playwright acceptance:** 2/2 passed (dashboard smoke + Staff handoff).
-
-Evidence: `docs/jetpk/JP-DASH-03-PAGE-MATRIX.json`, `docs/jetpk/JP-DASH-03-NAV-MATRIX.json`
-
-## CHECKPOINT 9 — BOOKING CURRENCY CONTRACT
-
-**Root cause:** `createDraftBooking` defaulted `booking.currency=PKR`; fare attach stored supplier USD without syncing booking row.
-
-**Classification:** `BOOKING_CURRENCY_PERSISTENCE_DEFECT=CRITICAL` for **historical** Sabre rows (stored PKR vs fare USD). Read paths now use `BookingAuthoritativeCurrencyResolver`; **new** bookings sync currency on `attachFareBreakdown`. Historical rows **not** auto-mutated.
-
-**Downstream impact (B):** Payment/refund/gateway defaults and report currency label previously trusted stale `booking.currency` — repaired in V2 scope. Ledger uses payment records; historical payment currency on old bookings may still reflect PKR default at creation time.
-
-## MONEY GATE STATUS
+## ACCEPTED MONEY EVIDENCE (do not over-promote)
 
 | Gate | Status |
 |------|--------|
 | `SABRE_BOOKING_AMOUNT_MATCH` | **PASS** |
-| `SABRE_BOOKING_CURRENCY_MATCH` | **PASS** (display USD; needsReview on historical PKR row) |
+| `SABRE_BOOKING_CURRENCY_MATCH` | **PASS** |
 | `UNRESOLVED_CURRENCY_BEHAVIOR` | **PASS** |
+| `BOOKING_CURRENCY_PERSISTENCE_DEFECT` | **CRITICAL_IDENTIFIED** (3 historical Sabre rows) |
+| `HISTORICAL_BOOKING_CURRENCY_CONFLICTS` | **3** (0 payment records on conflict bookings) |
 | `CURRENCY_PRESENTATION_INTEGRITY` | **PARTIAL** |
-| `PIA_MONEY_RECONCILIATION` | `NO_REPRESENTATIVE_PRODUCTION_RECORD` |
-| `AGENT_CUSTOMER_MONEY_RECONCILIATION` | `NO_REPRESENTATIVE_PRODUCTION_RECORD` |
-| `PAYMENT_AMOUNT_MATCH` | `PENDING` (no verified payments on Sabre samples) |
-| `REPORT_CURRENCY_MATCH` | `PENDING` |
-| `CROSS_MODULE_MONEY_CONSISTENCY` | `PENDING` |
+| `PAYMENT_AMOUNT_MATCH` | **PENDING** (no production payments on Sabre samples) |
+| `REPORT_CURRENCY_MATCH` | **PARTIAL** (multi-currency labeling deployed; not fully reconciled) |
+| `CROSS_MODULE_MONEY_CONSISTENCY` | **PENDING** |
 
 ## SOURCE PARITY
 
-`JP_DASH_03_CHECKPOINT_SOURCE_PARITY=PASS` (29 files after checkpoint 9 deploy)
-`JP_DASH_03_FINAL_SOURCE_PARITY=PENDING`
+`JP_DASH_03_CHECKPOINT_SOURCE_PARITY=PASS` (33/33 post-checkpoint-10 deploy)
 
-## REMAINING (not closed)
+`JP_DASH_03_FINAL_SOURCE_PARITY=PENDING` (full phase closure)
 
-- Full safe action matrix per module
-- Booking management matrix + backend proofs
-- Settings browser deep acceptance
-- Customers module stress (list/filter/detail)
-- Dashboard Review button matrix
-- Responsive/zoom/accessibility/performance matrices
+## MODULE GATES (checkpoint 10)
+
+| Module | Status |
+|--------|--------|
+| `CUSTOMERS_MODULE` | **PASS** (after country_code hotfix) |
+| `SETTINGS_MODULE` | **PARTIAL** (Laravel handoff verified; deep write tests pending) |
+| `API_SETTINGS_MODULE` | **PARTIAL** (render/handoff verified) |
+| `STAFF_MANAGEMENT_MODULE` | **PARTIAL** (Admin Laravel handoff verified) |
+| `BOOKING_MANAGEMENT` | **PARTIAL** (Dashboard intake + Laravel mature handoffs) |
+| `ALL_QUEUE_REVIEW_ACTIONS` | **PARTIAL** (handoff URLs verified; not every Review button matrix) |
+
+## REMAINING BLOCKERS
+
+- Full page/action/filter/drawer/responsive/zoom/accessibility/performance matrices
+- Payments money reconciliation (no representative payment records)
+- Agent action matrix execution (integration tests)
+- `STAFF_PRODUCTION_BROWSER_ACCEPTANCE=AWAITING_EXISTING_SAFE_STAFF_ACCOUNT`
 - Full OTA regression
-- Staff production browser (`AWAITING_EXISTING_SAFE_STAFF_ACCOUNT`)
+- `BOOKING_MANAGEMENT=PASS` (capability matrix not exhausted)
+- `JP_DASH_03_FINAL_SOURCE_PARITY` at full closure
 
 ## NO MERGE
 
-Branch `phase/jetpk-dash-03-operational-backoffice`
+Do not merge this branch locally.

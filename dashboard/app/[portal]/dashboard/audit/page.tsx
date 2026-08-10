@@ -1,6 +1,6 @@
 import { AuditPageContent } from "@/features/audit/audit-page-content";
 
-export const metadata = { title: "Audit — JetPakistan Admin Preview" };
+export const metadata = { title: "Audit — JetPakistan Dashboard" };
 
 export default function AuditPage({
   searchParams,

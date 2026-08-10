@@ -1,7 +1,7 @@
 import { BookingsPageContent } from "@/features/bookings/bookings-page-content";
 
 export const metadata = {
-  title: "Bookings — JetPakistan Admin Preview",
+  title: "Bookings — JetPakistan Dashboard",
 };
 
 export default function BookingsPage({

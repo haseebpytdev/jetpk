@@ -1,6 +1,6 @@
 import { CmsPageContent } from "@/features/cms/cms-page-content";
 
-export const metadata = { title: "CMS Banners — JetPakistan Admin Preview" };
+export const metadata = { title: "CMS Banners — JetPakistan Dashboard" };
 
 export default function CmsBannersRoute({
   searchParams,

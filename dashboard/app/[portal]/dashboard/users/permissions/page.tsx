@@ -1,6 +1,6 @@
 import { PermissionsPageContent } from "@/features/permissions/permissions-page-content";
 
-export const metadata = { title: "Permissions — JetPakistan Admin Preview" };
+export const metadata = { title: "Permissions — JetPakistan Dashboard" };
 
 export default function UsersPermissionsPage({
   searchParams,

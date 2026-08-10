@@ -1,7 +1,7 @@
 import { TicketsPageContent } from "@/features/tickets/tickets-page-content";
 
 export const metadata = {
-  title: "Tickets & Documents — JetPakistan Admin Preview",
+  title: "Tickets & Documents — JetPakistan Dashboard",
 };
 
 export default function TicketsPage({

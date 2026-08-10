@@ -1,6 +1,6 @@
 import { UsersPageContent } from "@/features/users/users-page-content";
 
-export const metadata = { title: "Users — JetPakistan Admin Preview" };
+export const metadata = { title: "Users — JetPakistan Dashboard" };
 
 export default function UsersDirectoryPage({
   searchParams,

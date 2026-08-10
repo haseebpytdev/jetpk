@@ -1,6 +1,6 @@
 import { ReportsPageContent } from "@/features/reports/reports-page-content";
 
-export const metadata = { title: "Operations Reports — JetPakistan Admin Preview" };
+export const metadata = { title: "Operations Reports — JetPakistan Dashboard" };
 
 export default function ReportsOperationsPage({
   searchParams,

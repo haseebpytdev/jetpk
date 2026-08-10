@@ -1,0 +1,87 @@
+{
+  "generatedAtUtc": "2026-08-10T13:30:00Z",
+  "note": "Backend-supported booking operations mapped to Dashboard UI and Laravel admin routes.",
+  "rows": [
+    {
+      "capability": "Staff assignment",
+      "dashboardUi": "BookingOperationalActions — Clear staff assignment (admin)",
+      "laravelUi": "admin.bookings.assign-staff",
+      "method": "PATCH",
+      "sideEffect": "MUTATION_TEST_ONLY",
+      "backendTest": "BackOfficeBookingIntakeMutationsTest::test_admin_assign_staff_json"
+    },
+    {
+      "capability": "Internal notes",
+      "dashboardUi": "BookingOperationalActions — Add internal note",
+      "laravelUi": "admin.bookings.notes.store",
+      "method": "POST",
+      "sideEffect": "MUTATION_TEST_ONLY",
+      "backendTest": "BackOfficeBookingIntakeMutationsTest (notes via intake)"
+    },
+    {
+      "capability": "Cancellation request",
+      "dashboardUi": "BookingOperationalActions — Request cancellation",
+      "laravelUi": "admin.bookings.cancellations.store",
+      "method": "POST",
+      "sideEffect": "MUTATION_TEST_ONLY",
+      "backendTest": "BackOfficeBookingIntakeMutationsTest::test_admin_booking_intake_store_json"
+    },
+    {
+      "capability": "Refund request",
+      "dashboardUi": "BookingOperationalActions — Request refund",
+      "laravelUi": "admin.bookings.refunds.store",
+      "method": "POST",
+      "sideEffect": "MUTATION_TEST_ONLY",
+      "backendTest": "BackOfficeBookingIntakeMutationsTest::test_admin_booking_intake_store_json"
+    },
+    {
+      "capability": "Record payment",
+      "dashboardUi": "BookingOperationalActions — Record payment",
+      "laravelUi": "admin.bookings.payments.store",
+      "method": "POST",
+      "sideEffect": "MUTATION_TEST_ONLY",
+      "backendTest": "BackOfficeBookingIntakeMutationsTest::test_admin_booking_intake_store_json"
+    },
+    {
+      "capability": "Payment verification",
+      "dashboardUi": "Laravel admin booking show + Payments module",
+      "laravelUi": "admin.bookings.payments.verify",
+      "method": "PATCH",
+      "sideEffect": "MUTATION_TEST_ONLY",
+      "backendTest": "BackOfficeBookingIntakeMutationsTest (payment verify paths)"
+    },
+    {
+      "capability": "PNR / supplier booking",
+      "dashboardUi": "Laravel admin booking show (mature UI)",
+      "laravelUi": "admin.bookings.create-supplier-booking",
+      "method": "POST",
+      "sideEffect": "COMMERCIAL_PROHIBITED",
+      "backendTest": "service/state-machine coverage only"
+    },
+    {
+      "capability": "Ticketing",
+      "dashboardUi": "Laravel admin booking show",
+      "laravelUi": "admin.bookings.issue-ticket",
+      "method": "POST",
+      "sideEffect": "COMMERCIAL_PROHIBITED",
+      "backendTest": "service coverage only"
+    },
+    {
+      "capability": "Booking detail read",
+      "dashboardUi": "Bookings table View + booking-detail-drawer",
+      "laravelUi": "api.dashboard.bookings.show",
+      "method": "GET",
+      "sideEffect": "SAFE_READ",
+      "backendTest": "DashboardReadOnlyApiTest::test_booking_detail_returns_safe_summary"
+    },
+    {
+      "capability": "Audit export",
+      "dashboardUi": "Laravel admin booking audit export",
+      "laravelUi": "admin.bookings.export-audit",
+      "method": "GET",
+      "sideEffect": "SAFE_READ",
+      "backendTest": "controller smoke / authorization tests"
+    }
+  ],
+  "bookingManagementGate": "PARTIAL — Dashboard intake mutations verified via BackOfficeBookingIntakeMutationsTest; mature supplier/ticketing remains Laravel handoff; Playwright drawer skipped when no rows"
+}

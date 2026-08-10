@@ -73,11 +73,15 @@ final class DashboardOverviewResource
             $cards[] = ['key' => 'unpaid_partial', 'label' => 'Unpaid / partial', 'value' => (string) ((int) $stats['unpaid_partial_bookings']), 'delta' => '', 'tone' => 'warn'];
         }
         if (isset($commandSummary['gross_sales'])) {
+            $multiCurrency = (bool) ($commandSummary['gross_sales_multi_currency'] ?? false);
+            $currencyLabel = trim((string) ($commandSummary['gross_sales_currency_label'] ?? ''));
             $cards[] = [
                 'key' => 'gross_sales',
                 'label' => 'Gross booking value',
-                'value' => number_format((float) $commandSummary['gross_sales']).' PKR',
-                'delta' => '',
+                'value' => $multiCurrency
+                    ? 'Multiple currencies'
+                    : number_format((float) $commandSummary['gross_sales']).($currencyLabel !== '' && $currencyLabel !== '—' ? ' '.$currencyLabel : ''),
+                'delta' => $multiCurrency ? 'Not combined without FX policy' : '',
                 'tone' => 'up',
             ];
         }

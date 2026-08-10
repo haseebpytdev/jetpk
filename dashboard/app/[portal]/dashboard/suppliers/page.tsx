@@ -1,7 +1,7 @@
 import { SuppliersPageContent } from "@/features/suppliers/suppliers-page-content";
 
 export const metadata = {
-  title: "Suppliers — JetPakistan Admin Preview",
+  title: "Suppliers — JetPakistan Dashboard",
 };
 
 export default function SuppliersPage({

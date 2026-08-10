@@ -14,15 +14,16 @@ final class DashboardReportResource
     {
         $summary = is_array($reportPayload['summary'] ?? null) ? $reportPayload['summary'] : [];
         $financial = is_array($reportPayload['financialKpis'] ?? null) ? $reportPayload['financialKpis'] : [];
+        $currencyCount = (int) ($summary['fare_currency_count'] ?? 1);
 
         return [
             'section' => $section,
             'currency' => $currency,
             'referenceTime' => Carbon::now()->toIso8601String(),
             'hasLiveData' => (bool) ($reportPayload['hasLiveData'] ?? false),
-            'metrics' => self::metricsForSection($section, $summary, $financial, $currency),
+            'metrics' => self::metricsForSection($section, $summary, $financial, $currency, $currencyCount),
             'tableRows' => self::tableRowsForSection($section, $reportPayload),
-            'warnings' => self::warnings($currency),
+            'warnings' => self::warnings($currency, $currencyCount),
             'supplierPerformance' => $reportPayload['supplierPerformance'] ?? [],
             'agentPerformance' => $reportPayload['agentPerformance'] ?? $reportPayload['topAgents'] ?? [],
             'monthlySales' => $reportPayload['monthlySales'] ?? [],
@@ -36,8 +37,14 @@ final class DashboardReportResource
      * @param  array<string, mixed>  $financial
      * @return list<array<string, mixed>>
      */
-    protected static function metricsForSection(string $section, array $summary, array $financial, string $currency): array
+    protected static function metricsForSection(string $section, array $summary, array $financial, string $currency, int $currencyCount = 1): array
     {
+        $multiCurrency = $currencyCount > 1;
+        $grossLabel = $multiCurrency ? 'Gross booking value (mixed currencies)' : 'Gross booking value';
+        $grossFormatted = $multiCurrency
+            ? 'Multiple currencies'
+            : number_format((int) round((float) ($financial['gross_sales'] ?? $summary['gross_sales'] ?? 0))).' '.$currency;
+
         $base = [
             [
                 'key' => 'booking_count',
@@ -49,10 +56,10 @@ final class DashboardReportResource
             ],
             [
                 'key' => 'gross_booking_value',
-                'label' => 'Gross booking value',
+                'label' => $grossLabel,
                 'value' => (int) round((float) ($financial['gross_sales'] ?? $summary['gross_sales'] ?? 0)),
-                'formattedValue' => number_format((int) round((float) ($financial['gross_sales'] ?? $summary['gross_sales'] ?? 0))).' '.$currency,
-                'currency' => $currency,
+                'formattedValue' => $grossFormatted,
+                'currency' => $multiCurrency ? null : $currency,
                 'trend' => 'neutral',
             ],
         ];
@@ -115,13 +122,22 @@ final class DashboardReportResource
     /**
      * @return list<array{code: string, message: string}>
      */
-    protected static function warnings(string $currency): array
+    protected static function warnings(string $currency, int $currencyCount = 1): array
     {
-        return [
+        $warnings = [
             [
                 'code' => 'currency_explicit',
                 'message' => 'Monetary values are reported in '.$currency.' unless otherwise noted. Cross-currency totals are not merged.',
             ],
         ];
+
+        if ($currencyCount > 1) {
+            $warnings[] = [
+                'code' => 'multi_currency_totals',
+                'message' => 'This report period contains multiple fare currencies; monetary totals are not combined across currencies.',
+            ];
+        }
+
+        return $warnings;
     }
 }

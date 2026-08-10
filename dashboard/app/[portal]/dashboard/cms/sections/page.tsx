@@ -1,6 +1,6 @@
 import { CmsPageContent } from "@/features/cms/cms-page-content";
 
-export const metadata = { title: "CMS Sections — JetPakistan Admin Preview" };
+export const metadata = { title: "CMS Sections — JetPakistan Dashboard" };
 
 export default function CmsSectionsRoute({
   searchParams,

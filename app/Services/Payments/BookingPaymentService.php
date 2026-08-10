@@ -17,6 +17,7 @@ use App\Services\Suppliers\PiaNdc\Exceptions\PiaNdcValidationException;
 use App\Services\Suppliers\PiaNdc\PiaNdcBookingStatusRefreshService;
 use App\Support\Payments\BookingPayableResolver;
 use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
+use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;

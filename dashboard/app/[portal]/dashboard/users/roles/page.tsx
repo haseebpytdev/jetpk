@@ -1,6 +1,6 @@
 import { RolesPageContent } from "@/features/roles/roles-page-content";
 
-export const metadata = { title: "Roles — JetPakistan Admin Preview" };
+export const metadata = { title: "Roles — JetPakistan Dashboard" };
 
 export default function UsersRolesPage({
   searchParams,

@@ -1,6 +1,6 @@
 import { SettingsPageContent } from "@/features/settings/settings-page-content";
 
-export const metadata = { title: "Security Settings — JetPakistan Admin Preview" };
+export const metadata = { title: "Security Settings — JetPakistan Dashboard" };
 
 export default function SettingsSecurityPage({
   searchParams,
