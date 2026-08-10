@@ -14,11 +14,9 @@
 
 ## CURRENT_COMMIT
 
-`b731396` — feat(dashboard): add operational OTA summary and attention queues
+`944fab6` — docs(jetpk): update JP-DASH-03 checkpoint 3 progress and remote push status
 
-## REMOTE_PHASE_PROGRESS
-
-`jetpk` remote: `https://github.com/haseebpytdev/jetpk.git` — push attempted after `b731396`.
+Prior: `b731396` feat(dashboard): add operational OTA summary and attention queues
 
 ## CURRENT_BLOCKERS
 
