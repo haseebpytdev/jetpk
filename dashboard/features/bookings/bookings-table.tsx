@@ -25,7 +25,7 @@ function sortIndicator(active: boolean, direction: BookingsQuery["direction"]) {
 
 export function BookingsTable({ bookings, query, onSort, onView }: Props) {
   return (
-    <div className="hidden xl:block min-w-0 w-full max-w-full" data-testid="bookings-table">
+    <div className="hidden lg:block min-w-0 w-full max-w-full" data-testid="bookings-table">
       <Table>
         <TableHead>
           <TableRow>
@@ -134,7 +134,13 @@ export function BookingsTable({ bookings, query, onSort, onView }: Props) {
               </Td>
               <Td className="text-xs text-jp-muted">{formatDateTime(b.lastUpdated)}</Td>
               <Td>
-                <Button variant="secondary" size="sm" aria-label={b.id} onClick={() => onView(b.id)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  aria-label={`View booking ${b.id}`}
+                  data-testid="booking-view-button"
+                  onClick={() => onView(b.id)}
+                >
                   View
                 </Button>
               </Td>

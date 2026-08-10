@@ -15,6 +15,10 @@ import {
   PRIVATE_ORIGIN_PATTERNS,
   scanTextForHits,
 } from "./jp-dash-03-acceptance/forbidden-patterns.mjs";
+import {
+  checkAdminSessionHealth,
+  startAcceptanceSessionKeepalive,
+} from "./jp-dash-03-acceptance/session-keepalive.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../../");
@@ -129,6 +133,14 @@ async function main() {
     console.error("ADMIN_PLAYWRIGHT_SESSION=MISSING — run jp-dash-03-admin-login-bootstrap.mjs first.");
     process.exit(1);
   }
+
+  const sessionStatus = await checkAdminSessionHealth();
+  if (sessionStatus !== "READY") {
+    console.error(`ADMIN_PLAYWRIGHT_SESSION=${sessionStatus}`);
+    process.exit(1);
+  }
+
+  startAcceptanceSessionKeepalive();
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ storageState: storagePath });

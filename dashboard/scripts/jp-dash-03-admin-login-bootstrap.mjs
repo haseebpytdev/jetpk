@@ -11,6 +11,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { startAcceptanceSessionKeepalive } from "./jp-dash-03-acceptance/session-keepalive.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dashboardRoot = path.resolve(__dirname, "../");
@@ -24,6 +25,7 @@ const INTERACTIVE_TIMEOUT_MS = Number(process.env.JP_ADMIN_LOGIN_TIMEOUT_MS ?? 3
 
 function runAcceptanceChain() {
   console.log("ACCEPTANCE_CHAIN_START");
+  startAcceptanceSessionKeepalive();
 
   const crawl = spawnSync("node", ["scripts/jp-dash-03-production-crawl.mjs"], {
     cwd: dashboardRoot,
@@ -34,6 +36,17 @@ function runAcceptanceChain() {
   if (crawl.status !== 0) {
     console.error("ACCEPTANCE_CHAIN_CRAWL_FAIL");
     process.exit(crawl.status ?? 1);
+  }
+
+  const checkpoint12 = spawnSync("npm", ["run", "test:checkpoint-12"], {
+    cwd: dashboardRoot,
+    stdio: "inherit",
+    shell: true,
+  });
+
+  if (checkpoint12.status !== 0) {
+    console.error("ACCEPTANCE_CHAIN_CHECKPOINT_12_FAIL");
+    process.exit(checkpoint12.status ?? 1);
   }
 
   const tests = spawnSync("npm", ["run", "test:production-acceptance"], {

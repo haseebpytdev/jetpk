@@ -18,7 +18,7 @@ type Props = {
 
 export function BookingsMobileCards({ bookings, onView }: Props) {
   return (
-    <ul className="space-y-3 xl:hidden" data-testid="bookings-mobile-cards">
+    <ul className="space-y-3 lg:hidden" data-testid="bookings-mobile-cards">
       {bookings.map((b) => (
         <li key={b.id}>
           <Card className="space-y-3">
@@ -40,8 +40,15 @@ export function BookingsMobileCards({ bookings, onView }: Props) {
               <PaymentStatusBadge status={b.paymentStatus} />
               <TicketingStatusBadge status={b.ticketingStatus} />
             </div>
-            <Button variant="secondary" size="sm" className="w-full" onClick={() => onView(b.id)}>
-              View details
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              aria-label={`View booking ${b.id}`}
+              data-testid="booking-view-button"
+              onClick={() => onView(b.id)}
+            >
+              View
             </Button>
           </Card>
         </li>

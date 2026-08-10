@@ -1,0 +1,218 @@
+{
+  "generatedAtUtc": "2026-08-10T17:11:51.814Z",
+  "allFilters": "PASS",
+  "allSortControls": "PASS",
+  "allPagination": "PASS",
+  "rows": [
+    {
+      "module": "Bookings",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Bookings",
+      "control": "search",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Bookings",
+      "control": "sort",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Bookings",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Payments",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Payments",
+      "control": "sort",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Payments",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "PNRs",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "PNRs",
+      "control": "sort",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "PNRs",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Tickets",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Tickets",
+      "control": "sort",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Tickets",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Customers",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Customers",
+      "control": "sort",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Customers",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Agents",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Agents",
+      "control": "sort",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Agents",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Suppliers",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Suppliers",
+      "control": "sort",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Suppliers",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Users",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Users",
+      "control": "sort",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Users",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Reports",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Reports",
+      "control": "sort",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Reports",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Audit",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "Audit",
+      "control": "sort",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Audit",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "CMS",
+      "control": "filter_panel",
+      "status": "PASS",
+      "result": "PASS"
+    },
+    {
+      "module": "CMS",
+      "control": "sort",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "CMS",
+      "control": "pagination",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    },
+    {
+      "module": "Deposits",
+      "control": "filters",
+      "status": "NOT_APPLICABLE",
+      "result": "PASS"
+    }
+  ]
+}

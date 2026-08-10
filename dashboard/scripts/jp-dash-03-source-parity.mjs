@@ -23,7 +23,6 @@ const relativeFiles = [
   "app/Http/Resources/Dashboard/DashboardBookingResource.php",
   "app/Http/Resources/Dashboard/DashboardBookingDetailResource.php",
   "app/Http/Resources/Dashboard/DashboardPaymentResource.php",
-  "app/Http/Resources/Dashboard/DashboardPaymentResource.php",
   "app/Services/Dashboard/Api/DashboardCustomersReadService.php",
   "app/Http/Resources/Dashboard/DashboardCustomerResource.php",
   "app/Support/Bookings/BookingAuthoritativeCurrencyResolver.php",

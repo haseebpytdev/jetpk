@@ -1,103 +1,77 @@
-# JP-DASH-03 — Operational Back Office Progress
+# JP-DASH-03 — Continuous Closure Loop Ledger
 
-## PHASE
+## LAST_UPDATED_UTC
 
-`JP-DASH-03` — Checkpoint 11+ exhaust remaining operational gates
-
-## CURRENT_STATUS
-
-`JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED`
+2026-08-10T22:15:00Z
 
 ## GIT
 
-| Field | SHA |
-|-------|-----|
-| `CHECKPOINT_10_IMPLEMENTATION_SHA` | `b658a44c1d67426b41347c525c08ff99b7fb858a` |
-| `REMOTE_HEAD_AT_REPORT_TIME` | `57299f2` (checkpoint 11 — verify with `git ls-remote`) |
+| Field | Value |
+|-------|-------|
+| `LOCAL_HEAD` | pending commit (see `git rev-parse HEAD` after push) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `03774c89a809825f7e034b085c43eefb00aad796` |
+| `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
-Branch: `phase/jetpk-dash-03-operational-backoffice` → remote `jetpk`
+## PRODUCTION_BUILD_ID
 
-## CHECKPOINT_10 (accepted partial)
+`uDUuVfFSgR1410iXQX2Rt` (pending redeploy after booking drawer fix)
 
-- Customers module PASS, Sabre money PASS, 3 historical currency conflicts
-- Deep matrix **21/21 PASS** (13 Next + 8 Laravel handoffs — not 20)
-- Source parity 33/33, `BUILD_ID=uDUuVfFSgR1410iXQX2Rt`
+## CURRENT_GATE
 
-## CHECKPOINT_11 (in progress)
+`BOOKING_DETAIL_BROWSER_PROOF`
 
-- Page count reconciliation documented (`JP-DASH-03-PAGE-RECONCILIATION.json`)
-- Root OLS **re-read as root** — `ROOT_OLS_CURRENT=PASS`
-- Money contract tests (report/KPI/payment currency fallback)
-- Agent action route/RBAC matrix tests
-- Booking detail API contract test (fixture Sabre shape)
-- Playwright checkpoint 11: review matrix PASS, responsive matrix PASS (96 width×page checks)
-- Payment resource empty-currency → fare fallback deployed to production
-- Action matrix JSON started (`JP-DASH-03-ACTION-MATRIX.json`)
+## CURRENT_GATE_STATUS
 
-## ROOT OLS
+`IN_PROGRESS` — workspace drawer opens from list row; deploy required for production proof
 
-| Gate | Status |
-|------|--------|
-| `ROOT_OLS_CHECKPOINT_9_BASELINE` | **PASS** |
-| `ROOT_OLS_CURRENT` | **PASS** (root `sha256sum` 2026-08-10) |
+## LAST_COMPLETED_GATE
 
-GLOBAL: `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`  
-VHOST: `8da510a8f911d8d711658abd8a110b04309d6295cf513f9f7dce4efdd794a42a`
+Checkpoint-12 Playwright **8/9** (overflow, suppliers catalog, filters, drawers, zoom, a11y, perf, settings, staff)
 
-## ADMIN_PLAYWRIGHT_SESSION
+## LAST_TEST_RESULT
 
-`STALE` — production session expired during checkpoint 11 run (`Session unavailable` / API 401).  
-Re-bootstrap required: `cd dashboard && npm run acceptance:admin-login`  
-Until refresh: `BOOKING_DETAIL_BROWSER_PROOF=BLOCKED_ON_SESSION`
+- `JpDash03Checkpoint12ModulesTest` → **5/5 PASS**
+- `npm run test:checkpoint-12` → **8/9 PASS** (booking detail pending deploy)
 
-## PAGE MATRIX RECONCILIATION
+## LAST_DEPLOY_RESULT
 
-| Metric | Count |
-|--------|-------|
-| `DEEP_MATRIX_TOTAL` | 21 |
-| `NEXT_PAGES` | 13 |
-| `LARAVEL_HANDOFFS` | 8 |
-| `DEEP_MATRIX_PASS` | 21 |
-| `BASELINE_CRAWL` | 50/50 (checkpoint 9 — rerun pending) |
-| `DUPLICATES next∩handoff` | 0 |
+Pending — booking workspace + table accessibility fixes staged locally
 
-See `docs/jetpk/JP-DASH-03-PAGE-RECONCILIATION.json`.
-
-## MONEY GATES (checkpoint 11)
+## GATE STATUS SUMMARY
 
 | Gate | Status |
 |------|--------|
-| `PAYMENT_CURRENCY_CONTRACT` | **PASS** (fixture tests + empty→fare fallback) |
-| `REPORT_CURRENCY_CONTRACT` | **PASS** (fixture mixed USD/PKR) |
-| `KPI_MONEY_CONTRACT` | **PASS** (fixture mixed currencies label) |
-| `PRODUCTION_PAYMENT_SAMPLE` | **NO_REPRESENTATIVE_RECORD** |
-| `HISTORICAL_BOOKING_CURRENCY_CONFLICTS` | **3** (0 payments on conflict bookings) |
-| `CURRENCY_PRESENTATION_INTEGRITY` | **PARTIAL** |
-
-## MODULE GATES
-
-| Module | Status |
-|--------|--------|
-| `CUSTOMERS_MODULE` | **PASS** |
-| `SETTINGS_MODULE` | **PARTIAL** (AdminSettingsHubTest; browser handoff only) |
-| `API_SETTINGS_MODULE` | **PARTIAL** |
-| `STAFF_MANAGEMENT_MODULE` | **PARTIAL** |
-| `AGENT_ACTION_MATRIX` | **PASS** (route/RBAC fixture tests) |
-| `BOOKING_MANAGEMENT` | **PARTIAL** |
-| `BOOKING_DETAIL_BROWSER_PROOF` | **BLOCKED_ON_SESSION** |
-| `BOOKING_DETAIL_API_CONTRACT` | **PASS** (fixture) |
-| `ALL_QUEUE_REVIEW_ACTIONS` | **PASS** (ops queue link crawl) |
-| `RESPONSIVE_MATRIX` | **PASS** (checkpoint 11 widths) |
+| `PAGE_MATRIX` | **PASS** (50/50 post-login crawl) |
 | `ACTION_MATRIX` | **PARTIAL** |
+| `BOOKING_MANAGEMENT` | **PARTIAL** (matrix complete; browser proof pending) |
+| `BOOKING_DETAIL_BROWSER_PROOF` | **IN_PROGRESS** |
+| `MONEY_STATUS` | **PARTIAL** (contracts PASS; cross-module pending) |
+| `FILTER_STATUS` | **PASS** (checkpoint-12 matrix) |
+| `DRAWER_STATUS` | **PASS** (checkpoint-12 matrix) |
+| `SEARCH_STATUS` | **PARTIAL** |
+| `RESPONSIVE_STATUS` | **PASS** (baseline) |
+| `ZOOM_STATUS` | **PASS** (checkpoint-12 matrix) |
+| `ACCESSIBILITY_STATUS` | **PARTIAL** (keyboard smoke PASS) |
+| `PERFORMANCE_STATUS` | **PASS** (sampling matrix) |
+| `FINAL_CRAWL_STATUS` | **PARTIAL** |
+| `OTA_REGRESSION_STATUS` | **PENDING** |
+| `SOURCE_PARITY_STATUS` | **PENDING** |
+| `OLS_STATUS` | **PASS** |
+| `STAFF_BROWSER_STATUS` | `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` |
 
-## REMAINING BLOCKERS
+## CURRENT_BLOCKERS
 
-- Admin Playwright session refresh (booking drawer browser proof)
-- Full action/filter/drawer/zoom/accessibility/performance matrices
-- Final production crawl (post-checkpoint-11)
-- Full OTA regression
-- `JP_DASH_03_FINAL_SOURCE_PARITY`
-- `STAFF_PRODUCTION_BROWSER_ACCEPTANCE=AWAITING_EXISTING_SAFE_STAFF_ACCOUNT`
+1. Deploy dashboard booking drawer + table fixes to production
+2. Green booking detail browser proof (≥2 refs)
+3. Full action matrix + OTA regression + source parity
+
+## NEXT_AUTONOMOUS_TARGET
+
+Deploy → re-run checkpoint-12 → booking management matrix closure → action matrix
+
+## JP_DASH_03_STATUS
+
+`FAIL_NOT_OPERATIONALLY_CLOSED`
 
 ## NO MERGE
 

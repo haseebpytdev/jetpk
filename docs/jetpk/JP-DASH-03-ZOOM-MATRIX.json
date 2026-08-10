@@ -1,0 +1,321 @@
+{
+  "generatedAtUtc": "2026-08-10T17:13:01.497Z",
+  "zoomMatrix": "PASS",
+  "rows": [
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1280,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1280,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1280,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1440,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1440,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1440,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1920,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1920,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard",
+      "viewportWidth": 1920,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1280,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1280,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1280,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1440,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1440,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1440,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1920,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1920,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/bookings",
+      "viewportWidth": 1920,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1280,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1280,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1280,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1440,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1440,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1440,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1920,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1920,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/customers",
+      "viewportWidth": 1920,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1280,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1280,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1280,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1440,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1440,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1440,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1920,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1920,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/agents",
+      "viewportWidth": 1920,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1280,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1280,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1280,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1440,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1440,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1440,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1920,
+      "zoom": 0.9,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1920,
+      "zoom": 1,
+      "overflow": false,
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/dashboard/reports",
+      "viewportWidth": 1920,
+      "zoom": 1.1,
+      "overflow": false,
+      "status": "PASS"
+    }
+  ]
+}

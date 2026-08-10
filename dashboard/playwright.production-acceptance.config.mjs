@@ -18,6 +18,7 @@ export default defineConfig({
     "jp-dash-03-production-acceptance.spec.ts",
     "jp-dash-03-deep-acceptance.spec.ts",
     "jp-dash-03-checkpoint-11.spec.ts",
+    "jp-dash-03-checkpoint-12.spec.ts",
   ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,

@@ -1,0 +1,51 @@
+{
+  "generatedAtUtc": "2026-08-10T17:12:11.799Z",
+  "drawerModalMatrix": "PASS",
+  "rows": [
+    {
+      "module": "Bookings",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    },
+    {
+      "module": "Customers",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    },
+    {
+      "module": "Agents",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    },
+    {
+      "module": "Suppliers",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    },
+    {
+      "module": "Users",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    },
+    {
+      "module": "Payments",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    },
+    {
+      "module": "PNRs",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    },
+    {
+      "module": "Tickets",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    },
+    {
+      "module": "Audit",
+      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "result": "PASS"
+    }
+  ]
+}

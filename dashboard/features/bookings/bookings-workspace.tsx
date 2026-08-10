@@ -23,9 +23,11 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
   const router = useDashboardRouter();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
+  const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
 
   useEffect(() => {
     setDrawerDismissed(false);
+    setActiveBookingId(query.selectedId);
   }, [query.selectedId]);
 
   const pushQuery = useCallback(
@@ -45,15 +47,23 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
   };
 
   const onView = (id: string) => {
+    setDrawerDismissed(false);
+    setActiveBookingId(id);
     pushQuery({ selectedId: id });
   };
 
   const onCloseDrawer = useCallback(() => {
     setDrawerDismissed(true);
+    setActiveBookingId(null);
     pushQuery({ selectedId: null });
   }, [pushQuery]);
 
-  const drawerOpen = !drawerDismissed && Boolean(query.selectedId && selectedBooking);
+  const resolvedBookingId = query.selectedId ?? activeBookingId;
+  const drawerBooking =
+    selectedBooking ??
+    result.bookings.find((booking) => booking.id === resolvedBookingId) ??
+    null;
+  const drawerOpen = !drawerDismissed && Boolean(resolvedBookingId && drawerBooking);
 
   const empty = result.total === 0;
 
@@ -90,11 +100,11 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
       <Drawer
         open={drawerOpen}
         onClose={onCloseDrawer}
-        title={selectedBooking ? selectedBooking.id : "Booking details"}
-        description={selectedBooking ? `PNR ${selectedBooking.pnr}` : undefined}
+        title={drawerBooking ? drawerBooking.id : "Booking details"}
+        description={drawerBooking ? `PNR ${drawerBooking.pnr}` : undefined}
         closeAriaLabel="Close booking details"
       >
-        {selectedBooking ? <BookingDetailDrawerContent booking={selectedBooking} /> : null}
+        {drawerBooking ? <BookingDetailDrawerContent booking={drawerBooking} /> : null}
       </Drawer>
     </>
   );
