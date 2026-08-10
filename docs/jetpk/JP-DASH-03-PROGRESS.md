@@ -6,41 +6,42 @@
 
 ## CURRENT_STATUS
 
-`JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED`
+`JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED` — browser crawl baseline PASS; module/action/money/management matrices still incomplete.
 
 ## LAST_UPDATED_UTC
 
-2026-08-10T12:30:00Z
+2026-08-10T13:10:00Z
 
-## CURRENT_COMMIT (pending push)
+## CURRENT_COMMIT
 
-Checkpoint 9 — booking currency contract + robust Playwright bootstrap
+Pending checkpoint 9 push on `phase/jetpk-dash-03-operational-backoffice`
 
 ## PRODUCTION_DEPLOYED
 
-- `DASH_BUILD=tJ3O0Oxkx4X1meN6V9zs7`
-- Checkpoint 9 Laravel deploy: currency resolver, payment/report downstream reads, money matrix command
+- `DASH_BUILD=JvyONopldbtfaQ554zr5k` (prior `t5LtgMYacnjd1qDEkVsDJ`)
+- Checkpoint 9 Laravel: currency resolver, payment/report downstream, fare sync on attach
+- Checkpoint 9 Dashboard: live-mode empty-state/CMS/payments/audit/tickets preview gating
 - Root OLS GLOBAL/VHOST — **MATCH**
 
 ## ADMIN_PLAYWRIGHT_SESSION
 
-Bootstrap relaunched with **30-minute** interactive timeout + automatic crawl chain after login.
-Storage state still **MISSING** until human completes headed login.
+`READY` — local storage state captured; bootstrap chains crawl + acceptance tests automatically.
+
+**Latest crawl:** `50/50 PASS`, `PRIVATE_LARAVEL_BROWSER_EXPOSURE=PASS`, `PREVIEW_RESIDUE_PRODUCTION=PASS` (page matrix baseline).
+
+**Playwright acceptance:** 2/2 passed (dashboard smoke + Staff handoff).
+
+Evidence: `docs/jetpk/JP-DASH-03-PAGE-MATRIX.json`, `docs/jetpk/JP-DASH-03-NAV-MATRIX.json`
 
 ## CHECKPOINT 9 — BOOKING CURRENCY CONTRACT
 
-**Root cause:** `createDraftBooking` set `booking.currency=PKR`; fare attach stored supplier USD without syncing booking row.
+**Root cause:** `createDraftBooking` defaulted `booking.currency=PKR`; fare attach stored supplier USD without syncing booking row.
 
-**Classification:** `BOOKING_CURRENCY_PERSISTENCE_DEFECT=CRITICAL` for **historical** Sabre rows (PKR stored vs USD fare). Dashboard/payments now use authoritative fare provenance; **new** bookings sync currency on `attachFareBreakdown`.
+**Classification:** `BOOKING_CURRENCY_PERSISTENCE_DEFECT=CRITICAL` for **historical** Sabre rows (stored PKR vs fare USD). Read paths now use `BookingAuthoritativeCurrencyResolver`; **new** bookings sync currency on `attachFareBreakdown`. Historical rows **not** auto-mutated.
 
-**Changes:**
-- `BookingAuthoritativeCurrencyResolver` — shared fare/supplier provenance
-- `BookingService::attachFareBreakdown` — syncs `booking.currency` from fare
-- `BookingPaymentService`, `BookingRefundService`, `PaymentTransactionService` — payment default uses resolver
-- `BookingReportService` — report currency label prefers fare breakdown via COALESCE join
-- `JetpkDash03MoneyTraceCommand --matrix` — representative sampling
+**Downstream impact (B):** Payment/refund/gateway defaults and report currency label previously trusted stale `booking.currency` — repaired in V2 scope. Ledger uses payment records; historical payment currency on old bookings may still reflect PKR default at creation time.
 
-## MONEY GATE STATUS (evidence-qualified)
+## MONEY GATE STATUS
 
 | Gate | Status |
 |------|--------|
@@ -51,28 +52,24 @@ Storage state still **MISSING** until human completes headed login.
 | `PIA_MONEY_RECONCILIATION` | `NO_REPRESENTATIVE_PRODUCTION_RECORD` |
 | `AGENT_CUSTOMER_MONEY_RECONCILIATION` | `NO_REPRESENTATIVE_PRODUCTION_RECORD` |
 | `PAYMENT_AMOUNT_MATCH` | `PENDING` (no verified payments on Sabre samples) |
-| `REPORT_CURRENCY_MATCH` | `PENDING` (browser + report API verify) |
+| `REPORT_CURRENCY_MATCH` | `PENDING` |
 | `CROSS_MODULE_MONEY_CONSISTENCY` | `PENDING` |
-
-Production matrix (`--matrix`): Sabre WL96PKN9 reconciled; PIA/agent/customer — no qualifying production records.
-
-## CHECKPOINT 9 — PLAYWRIGHT BOOTSTRAP
-
-- 30 min interactive timeout (`JP_ADMIN_LOGIN_TIMEOUT_MS` override)
-- Safe status logs only
-- Auto-chains production crawl + acceptance tests on `ADMIN_PLAYWRIGHT_SESSION=READY`
 
 ## SOURCE PARITY
 
-`JP_DASH_03_CHECKPOINT_SOURCE_PARITY=PASS` (expanded file list after deploy)
+`JP_DASH_03_CHECKPOINT_SOURCE_PARITY=PASS` (29 files after checkpoint 9 deploy)
 `JP_DASH_03_FINAL_SOURCE_PARITY=PENDING`
 
-## TESTS (checkpoint 9)
+## REMAINING (not closed)
 
-- `BookingAuthoritativeCurrencyResolverTest` — 3 passed
-- `BookingServiceFareCurrencySyncTest` — 1 passed
-- `DashboardMoneyPresenterTest` — 8 passed
-- Total currency cluster — 12 passed
+- Full safe action matrix per module
+- Booking management matrix + backend proofs
+- Settings browser deep acceptance
+- Customers module stress (list/filter/detail)
+- Dashboard Review button matrix
+- Responsive/zoom/accessibility/performance matrices
+- Full OTA regression
+- Staff production browser (`AWAITING_EXISTING_SAFE_STAFF_ACCOUNT`)
 
 ## NO MERGE
 
