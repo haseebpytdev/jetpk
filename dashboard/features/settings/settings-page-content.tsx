@@ -1,4 +1,5 @@
 import { SettingsErrorShell, SettingsModuleShell } from "@/features/settings/settings-module-shell";
+import { SettingsLiveGate } from "@/features/settings/components/settings-live-gate";
 import { parseSettingsQuery } from "@/lib/settings-query";
 import { getSettingsModule, SettingsServiceError } from "@/services/settings-service";
 import {
@@ -22,7 +23,11 @@ export async function SettingsPageContent({ searchParams, section }: Props) {
 
   try {
     const result = await getSettingsModule(query);
-    return <SettingsModuleShell section={section} result={result} />;
+    return (
+      <SettingsLiveGate>
+        <SettingsModuleShell section={section} result={result} />
+      </SettingsLiveGate>
+    );
   } catch (e) {
     return (
       <PageContainer>

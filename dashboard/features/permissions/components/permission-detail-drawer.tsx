@@ -1,7 +1,7 @@
 "use client";
 
 import { Divider } from "@/components/ui/divider";
-import { PreviewDataBanner } from "@/components/ui/page-layout";
+import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
 import { AccessRiskBadge, AccessValidationBadge } from "@/components/ui/status-badge";
 import { PERMISSION_GROUP_LABELS } from "@/lib/access-control/permission-catalog";
 import { AccessValidationSummary } from "@/features/users/components/access-validation-summary";
@@ -27,7 +27,7 @@ function formatScopeLabel(scope: string): string {
 export function PermissionDetailDrawerContent({ permission, assignedRoles, validationIssues }: Props) {
   return (
     <div className="space-y-5" data-testid="permission-detail-drawer">
-      <PreviewDataBanner className="text-xs" />
+      <DetailDrawerSourceNotice className="text-xs" />
 
       <div role="status" className="rounded-xl border border-amber-200 bg-amber-50/80 px-3 py-2 text-xs text-amber-900">
         This dashboard preview does not enforce production authorization.

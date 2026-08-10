@@ -9,6 +9,7 @@ import { useDashboardPortal } from "@/lib/portal-context";
 import { useDashboardNavigation, useDashboardSession } from "@/lib/session-context";
 import { useDashboardPath } from "@/lib/use-dashboard-path";
 import { cn } from "@/lib/utils";
+import { sanitizePublicHref } from "@/lib/sanitize-public-href";
 import { laravelRouteUrl } from "@/lib/laravel-route-url";
 import { navGroups } from "@/lib/nav-config";
 import type { DashboardBranding } from "@/services/branding-service";
@@ -104,7 +105,9 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
               {navigation.map((item) => {
                 const active = item.target !== "laravel" && isActive(relativePathname, item.href);
                 const href =
-                  item.target === "laravel" ? item.href : dashboardHref(portal, item.href);
+                  item.target === "laravel"
+                    ? sanitizePublicHref(item.href)
+                    : dashboardHref(portal, item.href);
                 const linkClass = cn(
                   "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
                   active
@@ -178,8 +181,10 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
             <p className="mt-1 text-xs text-gray-400">Contact platform support for operational assistance.</p>
             {useSessionNavigation ? (
               <a
-                href={laravelRouteUrl(
-                  effectivePortal === "staff" ? "staff.support.tickets.index" : "admin.support.tickets.index",
+                href={sanitizePublicHref(
+                  laravelRouteUrl(
+                    effectivePortal === "staff" ? "staff.support.tickets.index" : "admin.support.tickets.index",
+                  ),
                 )}
                 onClick={onClose}
                 className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-jp-accent px-3 py-2 text-sm font-medium text-white hover:bg-jp-accent-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"

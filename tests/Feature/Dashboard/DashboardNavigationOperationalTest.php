@@ -45,6 +45,38 @@ class DashboardNavigationOperationalTest extends TestCase
         $this->assertStringContainsString('/admin/support/tickets', $support['href'] ?? '');
     }
 
+    public function test_laravel_navigation_hrefs_are_public_relative_paths(): void
+    {
+        $admin = $this->platformAdmin();
+
+        $response = $this->actingAs($admin)
+            ->getJson(route('api.dashboard.session', ['portal' => 'admin']))
+            ->assertOk();
+
+        $navigation = $response->json('data.navigation');
+        $this->assertIsArray($navigation);
+
+        foreach ($navigation as $item) {
+            if (($item['target'] ?? '') !== 'laravel') {
+                continue;
+            }
+
+            $href = (string) ($item['href'] ?? '');
+            $this->assertStringStartsWith('/', $href, "Laravel nav href must be relative: {$href}");
+            $this->assertStringNotContainsString('127.0.0.1', $href);
+            $this->assertStringNotContainsString('localhost', strtolower($href));
+            $this->assertStringNotContainsString(':8088', $href);
+        }
+
+        $staff = collect($navigation)->firstWhere('key', 'staff');
+        $this->assertNotNull($staff);
+        $this->assertSame('/admin/staff', $staff['href']);
+
+        $apiSettings = collect($navigation)->firstWhere('key', 'api-settings');
+        $this->assertNotNull($apiSettings);
+        $this->assertSame('/admin/api-settings', $apiSettings['href']);
+    }
+
     public function test_staff_navigation_omits_admin_only_laravel_modules(): void
     {
         $staff = \App\Models\User::query()->where('email', 'staff@ota.demo')->firstOrFail();

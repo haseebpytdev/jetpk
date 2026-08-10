@@ -2,7 +2,7 @@
 
 import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Divider } from "@/components/ui/divider";
-import { PreviewDataBanner } from "@/components/ui/page-layout";
+import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
 import { AccountStatusBadge, VerificationStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { CustomerRecord } from "@/types/customer";
@@ -13,7 +13,7 @@ export function CustomerDetailDrawerContent({ customer }: { customer: CustomerRe
 
   return (
     <div className="space-y-5" data-testid="customer-drawer-content">
-      <PreviewDataBanner className="text-xs" />
+      <DetailDrawerSourceNotice className="text-xs" />
 
       <section aria-labelledby="customer-overview-heading">
         <h3 id="customer-overview-heading" className="text-sm font-semibold text-gray-900">

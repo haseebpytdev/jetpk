@@ -2,7 +2,7 @@
 
 import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Divider } from "@/components/ui/divider";
-import { PreviewDataBanner } from "@/components/ui/page-layout";
+import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
 import { AccessRiskBadge, AccessValidationBadge } from "@/components/ui/status-badge";
 import { evaluateAccessDecision } from "@/lib/access-control/access-decision";
 import { getAuditActorHref, getAuditTargetHref } from "@/lib/audit/target-links";
@@ -28,7 +28,7 @@ export function AuditEventDetailDrawer({ event }: { event: AuditEvent }) {
 
   return (
     <div className="space-y-5" data-testid="audit-event-detail-drawer">
-      <PreviewDataBanner className="text-xs" />
+      <DetailDrawerSourceNotice className="text-xs" />
 
       {event.metadata.previewOnly ? (
         <p className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-900" role="status">

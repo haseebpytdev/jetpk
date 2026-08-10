@@ -5,6 +5,7 @@ namespace App\Http\Resources\Dashboard;
 use App\Models\Booking;
 use App\Models\User;
 use App\Support\Bookings\BookingListPresenter;
+use App\Support\Dashboard\DashboardMoneyPresenter;
 use App\Support\Staff\StaffPermission;
 use Illuminate\Support\Collection;
 
@@ -246,6 +247,8 @@ final class DashboardOverviewResource
                 if ($booking instanceof Booking) {
                     $row = BookingListPresenter::toListRow($booking);
 
+                    $currency = DashboardMoneyPresenter::resolveBookingCurrency($booking);
+
                     return [
                         'id' => DashboardBookingResource::publicId($booking),
                         'pnr' => (string) ($row['pnr'] ?? ''),
@@ -254,7 +257,8 @@ final class DashboardOverviewResource
                         'route' => (string) ($row['route'] ?? ''),
                         'date' => (string) ($row['travel_date'] ?? ''),
                         'status' => (string) ($row['status_display'] ?? ''),
-                        'amount' => number_format((int) ($row['total_fare'] ?? 0)).' PKR',
+                        'amount' => DashboardMoneyPresenter::formatAmountLabel((int) ($row['total_fare'] ?? 0), $currency),
+                        'currency' => $currency,
                         'payment' => (string) ($row['payment_status_display'] ?? ''),
                     ];
                 }
@@ -268,7 +272,10 @@ final class DashboardOverviewResource
                         'route' => (string) ($booking['route'] ?? ''),
                         'date' => (string) ($booking['created_at'] ?? ''),
                         'status' => (string) ($booking['status'] ?? ''),
-                        'amount' => number_format((float) ($booking['amount_pkr'] ?? 0)).' PKR',
+                        'amount' => DashboardMoneyPresenter::formatAmountLabel(
+                            (float) ($booking['amount_pkr'] ?? 0),
+                            DashboardMoneyPresenter::normalizeIsoCurrency($booking['currency'] ?? ''),
+                        ),
                         'payment' => (string) ($booking['payment_status'] ?? ''),
                     ];
                 }

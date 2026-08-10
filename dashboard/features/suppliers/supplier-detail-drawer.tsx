@@ -2,7 +2,7 @@
 
 import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Divider } from "@/components/ui/divider";
-import { PreviewDataBanner } from "@/components/ui/page-layout";
+import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
 import {
   CredentialStatusBadge,
   IntegrationStatusBadge,
@@ -10,15 +10,17 @@ import {
   SettlementStatusBadge,
 } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { SupplierRecord } from "@/types/supplier";
 
 export function SupplierDetailDrawerContent({ supplier }: { supplier: SupplierRecord }) {
+  const isLive = useDashboardLiveMode();
   const recentBookings = supplier.linkedBookingIds.slice(0, 5);
   const recentTransactions = supplier.linkedTransactionIds.slice(0, 5);
 
   return (
     <div className="space-y-5" data-testid="supplier-drawer-content">
-      <PreviewDataBanner className="text-xs" />
+      <DetailDrawerSourceNotice className="text-xs" />
 
       <section aria-labelledby="supplier-overview-heading">
         <h3 id="supplier-overview-heading" className="text-sm font-semibold text-gray-900">
@@ -224,9 +226,11 @@ export function SupplierDetailDrawerContent({ supplier }: { supplier: SupplierRe
           Notes
         </h3>
         <p className="mt-2 text-sm text-gray-700">{supplier.notesSummary}</p>
-        <p className="mt-2 text-xs text-jp-muted">
-          Read-only preview — no supplier actions, credential editing, or live API tests are available.
-        </p>
+        {!isLive ? (
+          <p className="mt-2 text-xs text-jp-muted">
+            Read-only preview — no supplier actions, credential editing, or live API tests are available.
+          </p>
+        ) : null}
       </section>
     </div>
   );

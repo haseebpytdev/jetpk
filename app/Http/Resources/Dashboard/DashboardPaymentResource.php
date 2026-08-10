@@ -5,6 +5,7 @@ namespace App\Http\Resources\Dashboard;
 use App\Models\BookingPayment;
 use App\Models\User;
 use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
+use App\Support\Dashboard\DashboardMoneyPresenter;
 use App\Support\Bookings\BookingListPresenter;
 
 final class DashboardPaymentResource
@@ -34,7 +35,9 @@ final class DashboardPaymentResource
             'customerPhone' => $bookingSummary['customerPhone'] ?? '—',
             'transactionDate' => ($payment->submitted_at ?? $payment->created_at)?->toIso8601String() ?? '',
             'bookingDate' => $booking?->created_at?->format('Y-m-d') ?? '',
-            'currency' => strtoupper((string) ($payment->currency ?? 'PKR')),
+            'currency' => DashboardMoneyPresenter::normalizeIsoCurrency(
+                $payment->currency ?? $booking?->currency ?? $booking?->fareBreakdown?->currency,
+            ),
             'grossAmount' => (int) round((float) $payment->amount),
             'paidAmount' => $status === 'verified' ? (int) round((float) $payment->amount) : 0,
             'outstandingAmount' => $status === 'verified' ? 0 : (int) round((float) $payment->amount),

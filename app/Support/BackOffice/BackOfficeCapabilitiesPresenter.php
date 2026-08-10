@@ -210,10 +210,9 @@ class BackOfficeCapabilitiesPresenter
      */
     private function laravelNav(string $label, string $key, string $routeName, array $params = []): ?array
     {
-        try {
-            $filtered = array_filter($params, static fn ($value) => $value !== null && $value !== '');
-            $href = route($routeName, $filtered);
-        } catch (\Throwable) {
+        $filtered = array_filter($params, static fn ($value) => $value !== null && $value !== '');
+        $href = BackOfficeLaravelRoutePaths::publicPathFromRoute($routeName, $filtered);
+        if ($href === null) {
             return null;
         }
 

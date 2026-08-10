@@ -1,7 +1,7 @@
 "use client";
 
 import { Divider } from "@/components/ui/divider";
-import { PreviewDataBanner } from "@/components/ui/page-layout";
+import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
 import { PaymentReviewActions } from "@/features/payments/payment-review-actions";
 import {
   LedgerPaymentStatusBadge,
@@ -19,7 +19,7 @@ function refOrDash(value: string | null): string {
 export function PaymentDetailDrawerContent({ transaction }: { transaction: TransactionRecord }) {
   return (
     <div className="space-y-5" data-testid="payment-drawer-content">
-      <PreviewDataBanner className="text-xs" />
+      <DetailDrawerSourceNotice className="text-xs" />
 
       <section aria-labelledby="payment-id-heading">
         <h3 id="payment-id-heading" className="text-sm font-semibold text-gray-900">

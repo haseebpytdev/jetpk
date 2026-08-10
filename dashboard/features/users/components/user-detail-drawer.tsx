@@ -1,7 +1,7 @@
 "use client";
 
 import { Divider } from "@/components/ui/divider";
-import { PreviewDataBanner } from "@/components/ui/page-layout";
+import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
 import { AccessValidationBadge, MfaStatusBadge, UserStatusBadge } from "@/components/ui/status-badge";
 import { getRoleName } from "@/lib/access-control/effective-access";
 import { formatDate } from "@/lib/format";
@@ -16,7 +16,7 @@ import { UserSecuritySummary } from "@/features/users/components/user-security-s
 export function UserDetailDrawerContent({ user }: { user: User }) {
   return (
     <div className="space-y-5" data-testid="user-detail-drawer">
-      <PreviewDataBanner className="text-xs" />
+      <DetailDrawerSourceNotice className="text-xs" />
 
       <section aria-labelledby="user-identity-heading">
         <h3 id="user-identity-heading" className="text-sm font-semibold text-gray-900">Identity</h3>

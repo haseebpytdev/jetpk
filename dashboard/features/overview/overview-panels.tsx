@@ -9,22 +9,36 @@ import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { OverviewData } from "@/types/dashboard";
 
 export function SummaryStatsRow({ summaryStats }: Pick<OverviewData, "summaryStats">) {
+  if (summaryStats.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-      {summaryStats.map((stat) => (
-        <Card key={stat.key} className="p-4">
-          <CardDescription>{stat.label}</CardDescription>
-          <p className="mt-2 font-display text-xl font-bold tabular-nums sm:text-2xl">{stat.value}</p>
-          <p
-            className={`mt-1 text-xs font-medium ${
-              stat.tone === "down" ? "text-red-600" : stat.tone === "warn" ? "text-amber-600" : "text-emerald-600"
-            }`}
+    <section aria-labelledby="kpi-strip-heading">
+      <h2 id="kpi-strip-heading" className="mb-2 text-xs font-semibold uppercase tracking-wide text-jp-muted">
+        Critical KPIs
+      </h2>
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        {summaryStats.map((stat) => (
+          <Card
+            key={stat.key}
+            className={`p-3 ${stat.tone === "warn" ? "border-amber-200 bg-amber-50/40" : ""}`}
           >
-            {stat.delta} vs yesterday
-          </p>
-        </Card>
-      ))}
-    </div>
+            <CardDescription className="text-xs">{stat.label}</CardDescription>
+            <p className="mt-1 font-display text-lg font-bold tabular-nums sm:text-xl">{stat.value}</p>
+            {stat.delta ? (
+              <p
+                className={`mt-0.5 text-xs font-medium ${
+                  stat.tone === "down" ? "text-red-600" : stat.tone === "warn" ? "text-amber-700" : "text-emerald-600"
+                }`}
+              >
+                {stat.delta}
+              </p>
+            ) : null}
+          </Card>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -66,8 +80,13 @@ export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "rece
         </CardDescription>
       </div>
       <div className="min-w-0 overflow-x-auto">
+        {recentBookings.length === 0 ? (
+          <p className="px-4 py-6 text-sm text-jp-muted sm:px-5">
+            {isLive ? "No recent bookings to display." : "No preview bookings."}
+          </p>
+        ) : (
         <table className="min-w-[640px] w-full text-left text-sm">
-          <thead className="bg-gray-50 text-xs uppercase text-jp-muted">
+          <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase text-jp-muted">
             <tr>
               <th className="px-4 py-3">PNR / ID</th>
               <th className="px-4 py-3">Customer</th>
@@ -111,6 +130,7 @@ export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "rece
             ))}
           </tbody>
         </table>
+        )}
       </div>
       <div className="flex flex-col gap-2 border-t border-jp-border p-4 text-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between">
         <span>

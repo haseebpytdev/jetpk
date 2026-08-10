@@ -131,7 +131,7 @@ export function SystemHealthPanel({ items }: { items: OverviewData["systemHealth
                 }`}
                 aria-hidden
               />
-              {item.status}
+              <span aria-label={`${item.name}: ${item.status}`}>{item.status}</span>
             </span>
           </li>
         ))}

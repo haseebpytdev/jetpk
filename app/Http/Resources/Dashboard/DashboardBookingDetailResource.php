@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\Booking;
+use App\Support\Dashboard\DashboardMoneyPresenter;
 
 final class DashboardBookingDetailResource
 {
@@ -34,7 +35,7 @@ final class DashboardBookingDetailResource
             ],
             'passengers' => $passengers,
             'fareSummary' => [
-                'currency' => strtoupper((string) ($booking->currency ?? 'PKR')),
+                'currency' => DashboardMoneyPresenter::resolveBookingCurrency($booking),
                 'baseFare' => (int) round((float) ($fare?->base_fare ?? 0)),
                 'taxes' => (int) round((float) ($fare?->taxes ?? 0)),
                 'fees' => (int) round((float) ($fare?->fees ?? 0)),

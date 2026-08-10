@@ -34,12 +34,12 @@ export async function OverviewPageContent() {
 
         <SummaryStatsRow summaryStats={data.summaryStats} />
 
-        <div className="grid gap-4 xl:grid-cols-3">
-          <div className="space-y-4 xl:col-span-2">
+        <div className="grid gap-3 xl:grid-cols-3">
+          <div className="space-y-3 xl:col-span-2">
             <OperationalQueueGrid cards={data.operationalActionCards} />
             <RecentBookingsTable recentBookings={data.recentBookings} />
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Suspense fallback={null}>
               <BookingPipelinePanel stages={data.bookingPipeline} />
             </Suspense>
@@ -48,7 +48,7 @@ export async function OverviewPageContent() {
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2">
           <SupplierStatusPanel items={data.supplierStatus} />
           <SystemHealthPanel items={data.systemHealth} />
         </div>

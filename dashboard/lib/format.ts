@@ -8,11 +8,19 @@ function parseIsoDate(iso: string): Date {
 }
 
 export function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat("en-PK", {
+  const normalized = currency?.trim().toUpperCase();
+  if (!normalized || !/^[A-Z]{3}$/.test(normalized)) {
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  }
+
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency,
+    currency: normalized,
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 

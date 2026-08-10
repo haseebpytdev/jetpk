@@ -4,6 +4,7 @@ namespace App\Http\Resources\Dashboard;
 
 use App\Models\Booking;
 use App\Support\Bookings\BookingListPresenter;
+use App\Support\Dashboard\DashboardMoneyPresenter;
 
 final class DashboardBookingResource
 {
@@ -37,7 +38,7 @@ final class DashboardBookingResource
             'bookingStatus' => self::mapBookingStatus((string) ($row['status'] ?? '')),
             'paymentStatus' => self::mapPaymentStatus((string) ($row['payment_status'] ?? 'unpaid')),
             'ticketingStatus' => self::mapTicketingStatus((string) ($row['ticketing_status'] ?? 'not_started')),
-            'currency' => strtoupper((string) ($booking->currency ?? 'PKR')),
+            'currency' => DashboardMoneyPresenter::resolveBookingCurrency($booking),
             'totalAmount' => (int) ($row['total_fare'] ?? 0),
             'amountPaid' => self::paidAmount($booking),
             'agentOrSource' => self::agentOrSource($row),

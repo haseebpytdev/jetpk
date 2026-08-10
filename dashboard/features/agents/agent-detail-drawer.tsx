@@ -2,7 +2,7 @@
 
 import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Divider } from "@/components/ui/divider";
-import { PreviewDataBanner } from "@/components/ui/page-layout";
+import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
 import {
   AccountStatusBadge,
   CommercialStatusBadge,
@@ -21,7 +21,7 @@ export function AgentDetailDrawerContent({ agent }: { agent: AgentRecord }) {
 
   return (
     <div className="space-y-5" data-testid="agent-drawer-content">
-      <PreviewDataBanner className="text-xs" />
+      <DetailDrawerSourceNotice className="text-xs" />
 
       <section aria-labelledby="agent-overview-heading">
         <h3 id="agent-overview-heading" className="text-sm font-semibold text-gray-900">

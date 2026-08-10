@@ -2,84 +2,94 @@
 
 ## PHASE
 
-`JP-DASH-03` — Operational Admin/Staff back office
+`JP-DASH-03` — Operational Admin/Staff back office (V2 master closure loop)
 
 ## CURRENT_STATUS
 
-`ENGINEERING_COMPLETE_HUMAN_BROWSER_ACCEPTANCE_PENDING`
+`JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED`
+
+Engineering checkpoint 6 applied for human-confirmed production defects A–C (private URL leak, preview residue, settings preview UI). Full module/action matrix closure remains incomplete.
 
 ## LAST_UPDATED_UTC
 
-2026-08-10T04:45:00Z
+2026-08-10T06:35:00Z
 
 ## CURRENT_COMMIT
 
-`0948200` — feat(dashboard): operationalize navigation search and notifications
+pending push — checkpoint 6 V2 closure repairs
 
 ## PRODUCTION_DEPLOYED
 
-- Checkpoint 3: `BUILD_ID=kp0jtZ0m_y1LxmxYIr1LG`
-- Checkpoint 4–5 (2026-08-10): `DASH_BUILD=h1Jr2GjL650X1FFsFvm8C`, `FE_BUILD=3yYuvbzDaBFt1Lj2ONCB0`
-- `pm2 restart jetpk-dashboard` + `jetpk-public-frontend` — online
-- Backup attempted `/root/jetpk-dash-03-20260810045000` (permission denied; prior home backups remain)
+- Checkpoint 4–5: `DASH_BUILD=h1Jr2GjL650X1FFsFvm8C`, `FE_BUILD=3yYuvbzDaBFt1Lj2ONCB0`
+- Checkpoint 6: **not deployed yet** — local build pass; deploy after push
 
 ## ADMIN_PRODUCTION_BROWSER_ACCEPTANCE
 
-`PENDING_HUMAN_SESSION` — do not use `admin@ota.demo` (not on production). Use real Platform Admin browser session.
+`PENDING_HUMAN_SESSION` — do not use `admin@ota.demo`. Verify Staff/API Settings hrefs, drawer banners, settings redirect on production browser.
 
 ## REMOTE_PHASE_PROGRESS
 
 `PASS` — `jetpk` → `https://github.com/haseebpytdev/jetpk.git`
 
-## ACCEPTANCE GATES
+## ACCEPTANCE GATES (V2 authoritative)
 
 | Gate | Status |
 |------|--------|
-| `DASHBOARD_SIDEBAR_OPERATIONAL` | PASS (API nav matrix + Laravel handoff) |
-| `DASHBOARD_NOTIFICATION_STATE` | PASS (no fixture topbar badges) |
-| `DASHBOARD_GLOBAL_SEARCH` | PASS (API + UI; click-outside/Escape) |
-| `GLOBAL_INTER_TYPOGRAPHY` | PASS (frontend build; Space Grotesk removed) |
-| `STAFF_DASHBOARD_RBAC` | PASS (5 tests) |
-| `ADMIN_PRODUCTION_BROWSER_ACCEPTANCE` | `PENDING_HUMAN_SESSION` |
-| `STAFF_PRODUCTION_BROWSER_ACCEPTANCE` | `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` |
-| `PREVIEW_AUTH_UI_REMOVED` | Live path + Laravel redirects; DOM proof pending |
+| `JP_DASH_03` | `FAIL_NOT_OPERATIONALLY_CLOSED` |
+| `FULL_BACKOFFICE_ACCEPTANCE` | `FAIL` |
+| `PRIVATE_LARAVEL_BROWSER_EXPOSURE` | `FAIL` → **fix staged** (relative Laravel nav paths + client sanitize) |
+| `PREVIEW_RESIDUE_PRODUCTION` | `FAIL` → **fix staged** (live-mode drawer banners removed) |
+| `SETTINGS_OPERATIONAL_STATE` | `FAIL` → **fix staged** (admin live redirect to Laravel settings) |
+| `CURRENCY_PRESENTATION_INTEGRITY` | `UNVERIFIED` → partial (authoritative booking/payment currency chain; reconciliation pending) |
+| `BACKOFFICE_PAGE_MATRIX` | `FAIL` |
+| `BACKOFFICE_ACTION_MATRIX` | `FAIL` |
+| `BOOKING_MANAGEMENT` | `FAIL` |
+| `ADMIN_PRODUCTION_BROWSER_ACCEPTANCE` | `FAIL` (human session required) |
 | `JP_DASH_03_SOURCE_PARITY` | Not run |
-| `DASHBOARD_ZOOM_RESILIENCE` | Not matrix-tested (engineering deferred) |
-| `DASHBOARD_ACCESSIBILITY` | Partial (keyboard/Escape on search/profile) |
 
-## CHECKPOINT_COMMITS
+## CHECKPOINT 6 — V2 DEFECT REPAIRS
 
-| Checkpoint | Commit | Notes |
-|------------|--------|-------|
-| 1 | `a86c89e` | SSR/session fix |
-| 2–3 | `b731396` | Operational summary + search |
-| 3 docs | `5d54b6f` | Deploy status |
-| 4 | `0948200` feat(dashboard): operationalize navigation search and notifications | pushed |
-| 5 | `b731396` + frontend build this pass | Inter typography |
-| 6 | pending | Visual polish if separate commit |
+### Private Laravel origin (defects A, B partial)
 
-## CHECKPOINT 4 — SIDEBAR / NAV
+- **Root cause:** `BackOfficeCapabilitiesPresenter::laravelNav()` used `route()` → `APP_URL` loopback in session API `navigation[].href`
+- **Fix:** `BackOfficeLaravelRoutePaths` maps route names to relative `/admin/...` paths
+- **Defense:** `sanitizePublicHref()` on sidebar Laravel links + support CTA
+- **Test:** `DashboardNavigationOperationalTest::test_laravel_navigation_hrefs_are_public_relative_paths`
 
-- `BackOfficeCapabilitiesPresenter::presentNavigation` expanded with permission-gated Next + Laravel targets
-- Live nav: bookings/payments/pnrs/tickets/customers/agents/suppliers/users/cms/reports/audit/settings (Next)
-- Laravel handoff: cancellations, execution queue, staff, branding, page settings, markups (module-gated), API settings, communications, go-live, flight search, support
-- Sidebar renders `target=laravel` as full Laravel URLs
-- Mock Next pages (support/operations) redirect to Laravel in live mode via `LaravelLiveRedirect`
-- Support sidebar CTA links Laravel support tickets
+### Preview residue (defects C, D)
 
-## CHECKPOINT 5 — INTER
+- **Root cause:** `PreviewDataBanner` hardcoded in all detail drawers regardless of live mode
+- **Fix:** `DetailDrawerSourceNotice` — banner only in preview mode; supplier notes preview text gated
+- **Modules touched:** bookings, suppliers, payments, pnrs, tickets, customers, agents, users, roles, permissions, audit drawers
 
-- Frontend `layout.tsx`: Space Grotesk removed; `--font-display: var(--font-body)`
-- `frontend npm run typecheck`: pass
-- `frontend npm run lint`: pass (1 pre-existing hook warning)
-- `frontend npm run build`: pass
+### Settings preview UI (defect E)
 
-## TEST_RESULTS (latest)
+- **Fix:** `SettingsLiveGate` — admin live mode redirects to `admin.settings.index`; staff shows unavailable state (no preview editors)
 
-- `DashboardNavigationOperationalTest`: 2 passed
-- `DashboardStaffRbacTest`: 3 passed
-- `dashboard npm run typecheck/build`: pass
-- `frontend npm run typecheck/lint/build`: pass
+### Currency provenance (defect H — partial)
+
+- **Fix:** `DashboardMoneyPresenter` resolves booking currency from `booking.currency` → `fareBreakdown.currency` → meta fields (no PKR default)
+- **UI:** `formatCurrency` uses ISO code via `en-US` Intl; omits false PKR when currency unknown
+- **Overview recent bookings:** amount label uses resolved currency
+- **Test:** `DashboardMoneyPresenterTest`
+
+## PAGE MATRIX (snapshot — not closed)
+
+| Module | Route | Owner | LIVE_DATA | PREVIEW | NAV | STATUS |
+|--------|-------|-------|-----------|---------|-----|--------|
+| Dashboard | `/` | Next | yes | no | pass | UNTESTED browser |
+| Bookings | `/bookings` | Next API | yes | gated | pass | UNTESTED |
+| Staff | `/admin/staff` | Laravel | yes | no | **fix staged** | UNTESTED browser |
+| API Settings | `/admin/api-settings` | Laravel | yes | no | **fix staged** | UNTESTED browser |
+| Settings | `/settings` | Laravel handoff | yes | gated | **fix staged** | UNTESTED browser |
+| Customers | `/customers` | Next API | yes | gated | unknown | FAIL (error boundary reported) |
+| Suppliers | `/suppliers` | Next API | yes | gated | pass | UNTESTED |
+
+## TEST_RESULTS (checkpoint 6)
+
+- Closure Laravel suite: **33 passed** (navigation, overview, money presenter, session contract, operational closure)
+- `dashboard npm run typecheck`: pass
+- `dashboard npm run build`: pass
 
 ## OLS BASELINES (must not drift)
 
@@ -88,8 +98,16 @@
 | GLOBAL | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
 | VHOST | `8da510a8f911d8d711658abd8a110b04309d6295cf513f9f7dce4efdd794a42a` |
 
+## REMAINING BLOCKERS
+
+1. Production deploy checkpoint 6 + source parity SHA256
+2. Human browser verification (Staff, API Settings, drawers, settings redirect)
+3. Customers module error boundary root cause
+4. Per-module operational matrix (filters, pagination, actions)
+5. Playwright production crawler (127.0.0.1 / preview text fail gates)
+6. Cross-module currency reconciliation on representative bookings
+7. Full OTA regression `UNEXPECTED_FAILURES=0`
+
 ## FINAL_STATUS
 
-`ENGINEERING_COMPLETE_HUMAN_BROWSER_ACCEPTANCE_PENDING`
-
-Staff browser: `COMPLETE_WITH_STAFF_BROWSER_ACCEPTANCE_PENDING` when all other gates pass.
+`JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED` — do not declare PASS until all V2 gates close.
