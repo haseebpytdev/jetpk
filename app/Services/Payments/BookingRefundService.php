@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Services\Communication\BookingEmailPayloadFactory;
 use App\Services\Communication\OtaNotificationService;
 use App\Services\Finance\Ledger\LedgerEventRecorder;
+use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -39,7 +40,7 @@ class BookingRefundService
                 'booking_payment_id' => $data['booking_payment_id'] ?? null,
                 'cancellation_request_id' => $data['cancellation_request_id'] ?? null,
                 'amount' => (float) $data['amount'],
-                'currency' => $data['currency'] ?? $booking->currency ?? 'PKR',
+                'currency' => BookingAuthoritativeCurrencyResolver::resolvePaymentDefault($booking, $data['currency'] ?? null),
                 'method' => $data['method'],
                 'status' => BookingRefundStatus::Pending,
                 'reference' => filled($data['reference'] ?? null)
@@ -191,7 +192,7 @@ class BookingRefundService
 
         $refundEventKey = $event->value;
         $refundAmount = isset($payload['amount']) ? (float) $payload['amount'] : null;
-        $currency = (string) ($booking->currency ?? 'PKR');
+        $currency = BookingAuthoritativeCurrencyResolver::resolvePaymentDefault($booking);
         $emailContext = array_merge(
             ['booking_reference' => $booking->reference_code],
             $payload,

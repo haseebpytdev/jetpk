@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -35,6 +36,7 @@ type Props = {
 };
 
 export function CmsWorkspace({ result }: Props) {
+  const isLive = useDashboardLiveMode();
   const router = useDashboardRouter();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
   const previewMode = result.query.previewMode;
@@ -117,13 +119,25 @@ export function CmsWorkspace({ result }: Props) {
       ) : null}
 
       <p className="text-sm text-jp-muted">
-        CMS content is structured, fixture-backed preview data. Brand: <strong>{result.brand.label}</strong> (fixed).
+        {isLive ? (
+          <>
+            Managed CMS content for brand <strong>{result.brand.label}</strong>.
+          </>
+        ) : (
+          <>
+            CMS content is structured, fixture-backed preview data. Brand: <strong>{result.brand.label}</strong> (fixed).
+          </>
+        )}
       </p>
 
       {result.state === "empty" ? (
         <EmptyState
           title="No CMS records match filters"
-          description="Adjust filters or reset to view preview content. This does not imply the live site has no content."
+          description={
+            isLive
+              ? "Adjust filters or reset to view CMS records."
+              : "Adjust filters or reset to view preview content. This does not imply the live site has no content."
+          }
         />
       ) : null}
 

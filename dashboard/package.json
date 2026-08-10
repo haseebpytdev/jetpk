@@ -24,7 +24,7 @@
     "acceptance:admin-login": "node scripts/jp-dash-03-admin-login-bootstrap.mjs",
     "acceptance:production-crawl": "node scripts/jp-dash-03-production-crawl.mjs",
     "acceptance:source-parity": "node scripts/jp-dash-03-source-parity.mjs",
-    "test:production-acceptance": "playwright test -c playwright.production-acceptance.config.ts"
+    "test:production-acceptance": "playwright test -c playwright.production-acceptance.config.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

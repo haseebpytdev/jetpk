@@ -1,11 +1,11 @@
 {
-  "generatedAtUtc": "2026-08-10T11:57:15.647Z",
+  "generatedAtUtc": "2026-08-10T12:54:13.590Z",
   "remoteHost": "pkjetp@185.215.166.176",
   "remoteRoot": "/home/pkjetp/jetpk_app",
-  "total": 24,
-  "match": 24,
-  "mismatch": 0,
-  "jpDash03SourceParity": "PASS",
+  "total": 29,
+  "match": 28,
+  "mismatch": 1,
+  "jpDash03SourceParity": "FAIL",
   "rows": [
     {
       "path": "app/Support/BackOffice/BackOfficeLaravelRoutePaths.php",
@@ -21,8 +21,8 @@
     },
     {
       "path": "app/Support/Dashboard/DashboardMoneyPresenter.php",
-      "localSha256": "7279930a0073db0d44f5cda8ae288c7ac9f2dc1835f6d6b862f3dabc03946142",
-      "productionSha256": "7279930a0073db0d44f5cda8ae288c7ac9f2dc1835f6d6b862f3dabc03946142",
+      "localSha256": "958a753c83ce7459ef0fa7a017eda0cf55a95b4ed22310fa32cd6f10cf9bcc29",
+      "productionSha256": "958a753c83ce7459ef0fa7a017eda0cf55a95b4ed22310fa32cd6f10cf9bcc29",
       "match": "yes"
     },
     {
@@ -56,10 +56,40 @@
       "match": "yes"
     },
     {
-      "path": "app/Console/Commands/JetpkDash03MoneyTraceCommand.php",
-      "localSha256": "2f5f3f560d0f673c846ea75d325fe5473f882a5ab7155efd30a9bb20f166b2c8",
-      "productionSha256": "2f5f3f560d0f673c846ea75d325fe5473f882a5ab7155efd30a9bb20f166b2c8",
+      "path": "app/Support/Bookings/BookingAuthoritativeCurrencyResolver.php",
+      "localSha256": "a56cd71db8cd22d46cc32eaf1f829daee5b1b692cbf954dd2f9eb2a890539963",
+      "productionSha256": "a56cd71db8cd22d46cc32eaf1f829daee5b1b692cbf954dd2f9eb2a890539963",
       "match": "yes"
+    },
+    {
+      "path": "app/Services/Booking/BookingService.php",
+      "localSha256": "06b1952e1587a5f9516cc99256ffe95cd4dfb95c7d3215701c70bd9254871adc",
+      "productionSha256": "06b1952e1587a5f9516cc99256ffe95cd4dfb95c7d3215701c70bd9254871adc",
+      "match": "yes"
+    },
+    {
+      "path": "app/Services/Payments/BookingPaymentService.php",
+      "localSha256": "0e4138a5ac25ea53c8b1854eb6c7993c6f227e78ff2a7bda6b3c871bcc165a9c",
+      "productionSha256": "0e4138a5ac25ea53c8b1854eb6c7993c6f227e78ff2a7bda6b3c871bcc165a9c",
+      "match": "yes"
+    },
+    {
+      "path": "app/Services/Payments/BookingRefundService.php",
+      "localSha256": "1300490d9f38dda51f9b11542b3c819a9986e1c4235e746e29e1d6bd9ebedcaa",
+      "productionSha256": "1300490d9f38dda51f9b11542b3c819a9986e1c4235e746e29e1d6bd9ebedcaa",
+      "match": "yes"
+    },
+    {
+      "path": "app/Services/Payments/PaymentTransactionService.php",
+      "localSha256": "4c7dd4d5b4eee26240fd1d2da9690751e990b4979f9fe8a60b0348f6d3e867af",
+      "productionSha256": "4c7dd4d5b4eee26240fd1d2da9690751e990b4979f9fe8a60b0348f6d3e867af",
+      "match": "yes"
+    },
+    {
+      "path": "app/Services/Reports/BookingReportService.php",
+      "localSha256": "d7414676b60096a1a3dda30d858e20d6be9ba297682ddedace753f8e79868448",
+      "productionSha256": "b2ef1801aab3b6653e848e9ada55b4be4da2ef2c131fcdae3ddb2c4f497944d7",
+      "match": "no"
     },
     {
       "path": "dashboard/features/overview/operational-queue.tsx",

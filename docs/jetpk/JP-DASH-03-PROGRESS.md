@@ -2,107 +2,78 @@
 
 ## PHASE
 
-`JP-DASH-03` — Operational Admin/Staff back office (V2 autonomous acceptance loop)
+`JP-DASH-03` — Checkpoint 9+ autonomous acceptance + booking currency contract
 
 ## CURRENT_STATUS
 
 `JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED`
 
-Checkpoint 8: currency provenance repair, Playwright acceptance infrastructure, source parity PASS (24 files). Full authenticated browser matrix still blocked on one-time Admin login bootstrap.
-
 ## LAST_UPDATED_UTC
 
-2026-08-10T11:35:00Z
+2026-08-10T12:30:00Z
 
-## CURRENT_COMMIT (local, pre-push)
+## CURRENT_COMMIT (pending push)
 
-Pending checkpoint 8 commit on `phase/jetpk-dash-03-operational-backoffice`
+Checkpoint 9 — booking currency contract + robust Playwright bootstrap
 
 ## PRODUCTION_DEPLOYED
 
-- Checkpoint 8 deploy (2026-08-10): `DASH_BUILD=tJ3O0Oxkx4X1meN6V9zs7` (prior: `wwH8w6zE2pPsmiZ3ie_-8`)
-- Backup: `/home/pkjetp/jetpk-dash-03-20260810163000`
-- `pm2 restart jetpk-dashboard` — online
-- `curl http://127.0.0.1:3001/admin/dashboard` → **200**
-- Money trace (Sabre sample): resolves **USD** from `fareBreakdown.currency` (not draft PKR default)
-- Root OLS GLOBAL/VHOST SHA256 — **MATCH** (no drift)
+- `DASH_BUILD=tJ3O0Oxkx4X1meN6V9zs7`
+- Checkpoint 9 Laravel deploy: currency resolver, payment/report downstream reads, money matrix command
+- Root OLS GLOBAL/VHOST — **MATCH**
 
 ## ADMIN_PLAYWRIGHT_SESSION
 
-`MISSING` — run once locally:
+Bootstrap relaunched with **30-minute** interactive timeout + automatic crawl chain after login.
+Storage state still **MISSING** until human completes headed login.
 
-```bash
-cd dashboard && npm run acceptance:admin-login
-```
+## CHECKPOINT 9 — BOOKING CURRENCY CONTRACT
 
-Then:
+**Root cause:** `createDraftBooking` set `booking.currency=PKR`; fare attach stored supplier USD without syncing booking row.
 
-```bash
-npm run acceptance:production-crawl
-npm run test:production-acceptance
-```
+**Classification:** `BOOKING_CURRENCY_PERSISTENCE_DEFECT=CRITICAL` for **historical** Sabre rows (PKR stored vs USD fare). Dashboard/payments now use authoritative fare provenance; **new** bookings sync currency on `attachFareBreakdown`.
 
-Storage state: `tmp/jp-dash-03-admin-storage-state.json` (local-only, gitignored, never commit).
+**Changes:**
+- `BookingAuthoritativeCurrencyResolver` — shared fare/supplier provenance
+- `BookingService::attachFareBreakdown` — syncs `booking.currency` from fare
+- `BookingPaymentService`, `BookingRefundService`, `PaymentTransactionService` — payment default uses resolver
+- `BookingReportService` — report currency label prefers fare breakdown via COALESCE join
+- `JetpkDash03MoneyTraceCommand --matrix` — representative sampling
 
-## CHECKPOINT 8 — CURRENCY PROVENANCE
-
-- `resolveBookingCurrencyWithSource()` prefers supplier/fare provenance before `booking.currency` (draft PKR default)
-- Order: `meta.original_currency` → `meta.offer_currency` → `fareBreakdown.currency` → `meta.currency` → `booking.currency`
-- `presentBookingTotal()` flags `needsReview` when fare vs booking currency conflict
-- `DashboardPaymentResource` prefers `payment.currency` → `fareBreakdown.currency` → `booking.currency`
-- Production Sabre samples: `624.00 USD` / `590.00 USD` / `836.00 USD` (was incorrectly PKR)
-
-## CHECKPOINT 8 — PLAYWRIGHT ACCEPTANCE INFRA
-
-| Asset | Purpose |
-|-------|---------|
-| `dashboard/scripts/jp-dash-03-admin-login-bootstrap.mjs` | One-time headed Platform Admin login |
-| `dashboard/scripts/jp-dash-03-production-crawl.mjs` | Authenticated page + sidebar nav crawl |
-| `dashboard/scripts/jp-dash-03-source-parity.mjs` | LOCAL vs PRODUCTION SHA256 |
-| `dashboard/playwright.production-acceptance.config.ts` | Production base URL + storageState |
-| `dashboard/tests/jp-dash-03-production-acceptance.spec.ts` | Sample acceptance tests |
-
-## CHECKPOINT 8 — SOURCE PARITY
-
-`JP_DASH_03_SOURCE_PARITY=PASS` — **24/24** files (checkpoints 1–7 Laravel + dashboard money/overview/drawer files).
-
-Evidence: `docs/jetpk/JP-DASH-03-SOURCE-PARITY.json`
-
-## FX POLICY AUDIT
-
-No authoritative dashboard FX conversion service found. Dashboard displays stored transaction currency from booking/fare/payment provenance. No external rate provider in dashboard path.
-
-## ACCEPTANCE GATES (V2 authoritative)
+## MONEY GATE STATUS (evidence-qualified)
 
 | Gate | Status |
 |------|--------|
-| `JP_DASH_03` | `FAIL_NOT_OPERATIONALLY_CLOSED` |
-| `FULL_BACKOFFICE_ACCEPTANCE` | `FAIL` |
-| `ADMIN_PLAYWRIGHT_SESSION` | `MISSING` |
-| `PRIVATE_LARAVEL_BROWSER_EXPOSURE` | **API/presenter PASS** — Playwright nav crawl pending |
-| `PREVIEW_RESIDUE_PRODUCTION` | Gating deployed — Playwright crawl pending |
-| `SETTINGS_OPERATIONAL_STATE` | Handoff deployed — browser verify pending |
-| `CURRENCY_PRESENTATION_INTEGRITY` | **PASS** (unresolved labels + fare provenance) |
-| `BOOKING_CURRENCY_MATCH` | **PASS** (Sabre fare USD reconciled) |
-| `BOOKING_AMOUNT_MATCH` | **PASS** (amount matches fare total) |
-| `JP_DASH_03_SOURCE_PARITY` | **PASS** (24/24) |
-| `BACKOFFICE_PAGE_MATRIX` | `FAIL` (crawl pending) |
-| `BACKOFFICE_ACTION_MATRIX` | `FAIL` |
-| `BOOKING_MANAGEMENT` | `FAIL` |
-| `STAFF_PRODUCTION_BROWSER_ACCEPTANCE` | `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` |
+| `SABRE_BOOKING_AMOUNT_MATCH` | **PASS** |
+| `SABRE_BOOKING_CURRENCY_MATCH` | **PASS** (display USD; needsReview on historical PKR row) |
+| `UNRESOLVED_CURRENCY_BEHAVIOR` | **PASS** |
+| `CURRENCY_PRESENTATION_INTEGRITY` | **PARTIAL** |
+| `PIA_MONEY_RECONCILIATION` | `NO_REPRESENTATIVE_PRODUCTION_RECORD` |
+| `AGENT_CUSTOMER_MONEY_RECONCILIATION` | `NO_REPRESENTATIVE_PRODUCTION_RECORD` |
+| `PAYMENT_AMOUNT_MATCH` | `PENDING` (no verified payments on Sabre samples) |
+| `REPORT_CURRENCY_MATCH` | `PENDING` (browser + report API verify) |
+| `CROSS_MODULE_MONEY_CONSISTENCY` | `PENDING` |
 
-## TESTS (checkpoint 8)
+Production matrix (`--matrix`): Sabre WL96PKN9 reconciled; PIA/agent/customer — no qualifying production records.
 
+## CHECKPOINT 9 — PLAYWRIGHT BOOTSTRAP
+
+- 30 min interactive timeout (`JP_ADMIN_LOGIN_TIMEOUT_MS` override)
+- Safe status logs only
+- Auto-chains production crawl + acceptance tests on `ADMIN_PLAYWRIGHT_SESSION=READY`
+
+## SOURCE PARITY
+
+`JP_DASH_03_CHECKPOINT_SOURCE_PARITY=PASS` (expanded file list after deploy)
+`JP_DASH_03_FINAL_SOURCE_PARITY=PENDING`
+
+## TESTS (checkpoint 9)
+
+- `BookingAuthoritativeCurrencyResolverTest` — 3 passed
+- `BookingServiceFareCurrencySyncTest` — 1 passed
 - `DashboardMoneyPresenterTest` — 8 passed
-- `DashboardReadOnlyApiTest` + money presenter — 38 passed, 256 assertions
-- Dashboard `npm run typecheck` — pass
-- Dashboard `npm run lint` — pass (existing img warning only)
-
-## ROLLBACK
-
-- Laravel: restore from `/home/pkjetp/jetpk-dash-03-20260810163000`
-- Dashboard: prior build `wwH8w6zE2pPsmiZ3ie_-8` + `pm2 restart jetpk-dashboard`
+- Total currency cluster — 12 passed
 
 ## NO MERGE
 
-Branch `phase/jetpk-dash-03-operational-backoffice` — do not merge locally.
+Branch `phase/jetpk-dash-03-operational-backoffice`

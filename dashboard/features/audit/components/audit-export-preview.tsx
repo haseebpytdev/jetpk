@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { downloadAuditExportCsv } from "@/lib/audit/export-preview";
 import type { AuditEvent } from "@/types/access-control";
 import type { AuditExportManifest } from "@/types/audit";
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function AuditExportPreview({ manifest, events, filteredCount }: Props) {
+  const isLive = useDashboardLiveMode();
   const [open, setOpen] = useState(false);
 
   return (
@@ -25,14 +27,18 @@ export function AuditExportPreview({ manifest, events, filteredCount }: Props) {
         onClick={() => setOpen(true)}
         data-testid="audit-export-button"
       >
-        Export preview CSV
+        {isLive ? "Export CSV" : "Export preview CSV"}
       </Button>
       <Drawer
         open={open}
         onClose={() => setOpen(false)}
-        title="Audit export preview"
-        description="Fixture-backed CSV export for the current filtered view. Approved columns only."
-        closeAriaLabel="Close audit export preview"
+        title={isLive ? "Audit export" : "Audit export preview"}
+        description={
+          isLive
+            ? "CSV export for the current filtered view. Approved columns only."
+            : "Fixture-backed CSV export for the current filtered view. Approved columns only."
+        }
+        closeAriaLabel="Close audit export"
       >
         <div className="space-y-4 text-sm" data-testid="audit-export-preview">
           <p>
@@ -41,9 +47,15 @@ export function AuditExportPreview({ manifest, events, filteredCount }: Props) {
           <p className="text-jp-muted">Filtered events: {filteredCount}</p>
           <p className="text-jp-muted">Export rows: {manifest.rowCount}</p>
           <p className="text-jp-muted">Filename: {manifest.filename}</p>
-          <p className="text-jp-muted">
-            Preview data only — no session identifiers, tokens, cookies, or complete IP addresses are included.
-          </p>
+          {isLive ? (
+            <p className="text-jp-muted">
+              Sensitive session identifiers, tokens, cookies, and complete IP addresses are excluded.
+            </p>
+          ) : (
+            <p className="text-jp-muted">
+              Preview data only — no session identifiers, tokens, cookies, or complete IP addresses are included.
+            </p>
+          )}
           <div>
             <p className="font-medium">Manifest columns</p>
             <ul className="mt-1 list-disc pl-5 text-xs text-jp-muted">

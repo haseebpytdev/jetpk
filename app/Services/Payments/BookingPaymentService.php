@@ -16,7 +16,7 @@ use App\Services\Promos\PromoCodeService;
 use App\Services\Suppliers\PiaNdc\Exceptions\PiaNdcValidationException;
 use App\Services\Suppliers\PiaNdc\PiaNdcBookingStatusRefreshService;
 use App\Support\Payments\BookingPayableResolver;
-use App\Support\Platform\PlatformModuleEnforcer;
+use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -51,7 +51,7 @@ class BookingPaymentService
                 'method' => $data['method'],
                 'status' => $status,
                 'amount' => $data['amount'],
-                'currency' => $data['currency'] ?? $booking->currency ?? 'PKR',
+                'currency' => BookingAuthoritativeCurrencyResolver::resolvePaymentDefault($booking, $data['currency'] ?? null),
                 'proof_path' => $data['proof_path'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'submitted_at' => now(),
@@ -98,7 +98,7 @@ class BookingPaymentService
                 'method' => $data['method'],
                 'status' => BookingPaymentStatus::Submitted,
                 'amount' => $data['amount'],
-                'currency' => $data['currency'] ?? $booking->currency ?? 'PKR',
+                'currency' => BookingAuthoritativeCurrencyResolver::resolvePaymentDefault($booking, $data['currency'] ?? null),
                 'proof_path' => $data['proof_path'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'submitted_at' => now(),
@@ -127,7 +127,7 @@ class BookingPaymentService
                 'method' => $data['method'],
                 'status' => BookingPaymentStatus::Verified,
                 'amount' => $data['amount'],
-                'currency' => $data['currency'] ?? $booking->currency ?? 'PKR',
+                'currency' => BookingAuthoritativeCurrencyResolver::resolvePaymentDefault($booking, $data['currency'] ?? null),
                 'proof_path' => null,
                 'notes' => $data['notes'] ?? 'Online gateway payment verified.',
                 'submitted_at' => now(),

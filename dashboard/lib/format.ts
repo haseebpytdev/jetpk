@@ -3,6 +3,12 @@ const DISPLAY_TIME_ZONE = "Asia/Karachi";
 export const MONEY_UNAVAILABLE_LABEL = "Amount unavailable";
 export const CURRENCY_NOT_RECORDED_LABEL = "Currency not recorded";
 
+export function filteredResultsEmptyDescription(isLive: boolean): string {
+  return isLive
+    ? "Try clearing filters or broadening your search."
+    : "Try clearing filters or broadening your search. All data shown is synthetic preview data.";
+}
+
 function parseIsoDate(iso: string): Date {
   if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
     return new Date(`${iso}T12:00:00.000Z`);

@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
+import { filteredResultsEmptyDescription } from "@/lib/format";
 import { Drawer } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
@@ -25,6 +27,7 @@ type Props = {
 };
 
 export function PaymentsWorkspace({ query, result, selectedTransaction }: Props) {
+  const isLive = useDashboardLiveMode();
   const router = useDashboardRouter();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
@@ -71,7 +74,7 @@ export function PaymentsWorkspace({ query, result, selectedTransaction }: Props)
       {empty ? (
         <EmptyState
           title="No transactions match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={filteredResultsEmptyDescription(isLive)}
         />
       ) : (
         <>

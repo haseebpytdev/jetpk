@@ -16,6 +16,7 @@ use App\Models\BookingStatusLog;
 use App\Models\User;
 use App\Services\Communication\BookingCommunicationService;
 use App\Services\Finance\Ledger\LedgerEventRecorder;
+use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -86,10 +87,17 @@ class BookingService
      */
     public function attachFareBreakdown(Booking $booking, array $attributes): BookingFareBreakdown
     {
-        return $booking->fareBreakdown()->updateOrCreate(
+        $fareBreakdown = $booking->fareBreakdown()->updateOrCreate(
             ['booking_id' => $booking->id],
             $attributes
         );
+
+        $fareCurrency = BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency($attributes['currency'] ?? null);
+        if ($fareCurrency !== '') {
+            $booking->forceFill(['currency' => $fareCurrency])->save();
+        }
+
+        return $fareBreakdown;
     }
 
     public function submitBookingRequest(Booking $booking, ?User $actor = null): Booking

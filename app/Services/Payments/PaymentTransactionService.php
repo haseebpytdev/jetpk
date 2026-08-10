@@ -18,7 +18,7 @@ use App\Services\Payments\DTO\PaymentGatewayVerifyResult;
 use App\Services\Promos\PromoCodeService;
 use App\Services\Suppliers\PiaNdc\Exceptions\PiaNdcValidationException;
 use App\Services\Suppliers\PiaNdc\PiaNdcBookingStatusRefreshService;
-use App\Support\Payments\BookingPayableResolver;
+use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
 use App\Support\Payments\PaymentGatewayPayloadRedactor;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Http\Request;
@@ -260,7 +260,7 @@ class PaymentTransactionService
             'gateway' => PaymentGateway::CODE_ABHIPAY,
             'environment' => $gateway->environment,
             'amount' => $amount,
-            'currency' => (string) ($booking->currency ?? 'PKR'),
+            'currency' => BookingAuthoritativeCurrencyResolver::resolvePaymentDefault($booking),
             'client_transaction_id' => $this->buildClientTransactionId($booking),
             'status' => PaymentTransactionStatus::Initiated,
             'gateway_message' => filled($booking->promo_code)

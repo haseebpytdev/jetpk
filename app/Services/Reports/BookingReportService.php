@@ -1200,10 +1200,9 @@ class BookingReportService
         $totalBookingValue = $this->sumFare(clone $baseQuery, 'fare.total');
 
         $currencyRow = (clone $baseQuery)
-            ->whereNotNull('currency')
-            ->where('currency', '<>', '')
-            ->select('currency')
-            ->groupBy('currency')
+            ->leftJoin('booking_fare_breakdowns as report_fb', 'bookings.id', '=', 'report_fb.booking_id')
+            ->selectRaw('COALESCE(NULLIF(report_fb.currency, ""), bookings.currency) as currency')
+            ->groupByRaw('COALESCE(NULLIF(report_fb.currency, ""), bookings.currency)')
             ->orderByRaw('COUNT(*) DESC')
             ->first();
         $currency = trim((string) ($currencyRow?->currency ?? 'PKR'));

@@ -1,11 +1,10 @@
 import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "../../");
-const storagePath = path.join(repoRoot, "tmp/jp-dash-03-admin-storage-state.json");
+const storagePath = path.resolve(
+  process.env.JP_ADMIN_STORAGE_STATE ?? path.join(process.cwd(), "..", "tmp/jp-dash-03-admin-storage-state.json"),
+);
 
 test.describe("JP-DASH-03 production acceptance", () => {
   test.beforeAll(() => {

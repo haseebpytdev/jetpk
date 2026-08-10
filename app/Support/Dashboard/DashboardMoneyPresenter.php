@@ -3,6 +3,7 @@
 namespace App\Support\Dashboard;
 
 use App\Models\Booking;
+use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
 
 /**
  * Authoritative money presentation for dashboard API payloads.
@@ -18,43 +19,17 @@ final class DashboardMoneyPresenter
      */
     public static function resolveBookingCurrencyWithSource(Booking $booking): array
     {
-        $booking->loadMissing('fareBreakdown');
-
-        // Supplier/fare provenance precedes booking.currency — drafts default to PKR before fare attach.
-        $candidates = [
-            ['source' => 'meta.original_currency', 'value' => data_get($booking->meta, 'original_currency')],
-            ['source' => 'meta.offer_currency', 'value' => data_get($booking->meta, 'offer_currency')],
-            ['source' => 'fareBreakdown.currency', 'value' => $booking->fareBreakdown?->currency],
-            ['source' => 'meta.currency', 'value' => data_get($booking->meta, 'currency')],
-            ['source' => 'booking.currency', 'value' => $booking->currency],
-        ];
-
-        foreach ($candidates as $candidate) {
-            $normalized = self::normalizeIsoCurrency($candidate['value']);
-            if ($normalized !== '') {
-                return ['currency' => $normalized, 'source' => $candidate['source']];
-            }
-        }
-
-        return ['currency' => null, 'source' => null];
+        return BookingAuthoritativeCurrencyResolver::resolveWithSource($booking);
     }
 
     public static function resolveBookingCurrency(Booking $booking): string
     {
-        $resolved = self::resolveBookingCurrencyWithSource($booking);
-
-        return $resolved['currency'] ?? '';
+        return BookingAuthoritativeCurrencyResolver::resolve($booking);
     }
 
     public static function normalizeIsoCurrency(mixed $value): string
     {
-        $normalized = strtoupper(trim((string) $value));
-
-        if ($normalized === '' || strlen($normalized) !== 3 || ! ctype_alpha($normalized)) {
-            return '';
-        }
-
-        return $normalized;
+        return BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency($value);
     }
 
     /**
@@ -104,7 +79,7 @@ final class DashboardMoneyPresenter
         ];
     }
 
-  /**
+    /**
      * @return array{
      *     amount: string,
      *     amountMinor: int,
@@ -118,6 +93,7 @@ final class DashboardMoneyPresenter
      */
     public static function presentBookingTotal(Booking $booking, int $amountMinor): array
     {
+        $booking->loadMissing('fareBreakdown');
         $resolved = self::resolveBookingCurrencyWithSource($booking);
         $presented = self::presentMinorUnits($amountMinor, $resolved['currency'], $resolved['source']);
 
