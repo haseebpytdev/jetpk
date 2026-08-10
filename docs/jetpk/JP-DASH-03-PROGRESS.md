@@ -8,11 +8,13 @@
 
 `JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED`
 
-## REMOTE_HEAD (after checkpoint 10 push pending)
+## REMOTE_HEAD
+
+`b658a44c1d67426b41347c525c08ff99b7fb858a`
 
 Branch: `phase/jetpk-dash-03-operational-backoffice` → remote `jetpk`
 
-Prior remote: `860a8ab0b686743cbe417aac096592455b520c19`
+Prior checkpoint 9 remote: `860a8ab0b686743cbe417aac096592455b520c19`
 
 **Note:** Commits `79c9e43` and `444ddf8` share similar checkpoint-9 subjects; history was not rewritten. Use precise checkpoint subjects going forward.
 
