@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DashboardGlobalSearch } from "@/components/dashboard/global-search";
 import { postLaravelLogout } from "@/lib/laravel-auth-api";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { DashboardSessionSummary } from "@/services/session-service";
@@ -73,22 +74,7 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
       <Button variant="ghost" size="sm" className="lg:hidden" onClick={onMenuClick} aria-label="Open navigation menu">
         ☰
       </Button>
-      <div className="relative hidden min-w-[200px] flex-1 md:block md:max-w-xl">
-        <label className="sr-only" htmlFor="global-search">
-          Quick search
-        </label>
-        <input
-          id="global-search"
-          type="search"
-          disabled={!isLive}
-          placeholder="Search bookings, PNR, customers, agents…"
-          className="w-full rounded-xl border border-jp-border bg-gray-50 px-4 py-2.5 text-sm text-gray-500 disabled:cursor-not-allowed"
-          title={isLive ? "Global search" : "Sign in to search"}
-        />
-        <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border bg-white px-1.5 text-[10px] text-gray-500 sm:inline">
-          Ctrl+K
-        </kbd>
-      </div>
+      <DashboardGlobalSearch />
       <div className="ml-auto flex flex-wrap items-center gap-2">
         <button
           type="button"

@@ -3,14 +3,11 @@ import {
   bookingTrend,
   operationalActionCards,
   recentBookings,
-  recentNotifications,
   shortcutActions,
   statusBreakdown,
   summaryStats,
   systemHealth,
-  topRoutes,
 } from "@/mocks/overview-fixtures";
-import { buildBookingsPage } from "@/lib/bookings-filter";
 import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
 import { createReadOnlyService, ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
@@ -30,11 +27,27 @@ const overviewService = createReadOnlyService<Record<string, never>, OverviewDat
           summaryStats,
           operationalActionCards,
           shortcutActions,
-          bookingTrend,
-          statusBreakdown,
-          recentNotifications,
+          bookingPipeline: operationalActionCards.slice(0, 5).map((card) => ({
+            key: card.key,
+            label: card.label,
+            count: card.count,
+            laravelRoute: card.laravelRoute,
+            queue: card.queue,
+          })),
           recentBookings,
-          topRoutes,
+          paymentOperations: operationalActionCards
+            .filter((card) => card.key === "payment_review" || card.key === "pending_deposits")
+            .map((card) => ({
+              key: card.key,
+              label: card.label,
+              count: card.count,
+              laravelRoute: card.laravelRoute,
+              queue: card.queue,
+            })),
+          supportOperations: [],
+          supplierStatus: [
+            { key: "sabre", label: "Sabre GDS", status: "operational", detail: "Fixture preview" },
+          ],
           systemHealth,
         },
         metadata: options?.metadata,

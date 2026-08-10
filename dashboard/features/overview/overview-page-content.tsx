@@ -1,16 +1,15 @@
 import { Suspense } from "react";
 import { OperationalQueueGrid } from "@/features/overview/operational-queue";
-import { OverviewChartsLazy } from "@/features/overview/overview-charts-lazy";
 import {
-  QuickActionsBar,
-  RecentBookingsTable,
-  RecentNotificationsPanel,
-  SidePanels,
-  SummaryStatsRow,
-} from "@/features/overview/overview-panels";
+  BookingPipelinePanel,
+  PaymentOperationsPanel,
+  SupplierStatusPanel,
+  SupportOperationsPanel,
+  SystemHealthPanel,
+} from "@/features/overview/operational-dashboard-panels";
+import { RecentBookingsTable, SummaryStatsRow } from "@/features/overview/overview-panels";
 import { getOverviewData, OverviewServiceError } from "@/services/overview-service";
 import { OverviewToolbarActions } from "@/components/dashboard/overview-toolbar";
-import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import {
   ForbiddenState,
@@ -18,7 +17,6 @@ import {
   ServiceUnavailableState,
   UnauthorizedState,
 } from "@/components/ui/data-source-status";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 
 export async function OverviewPageContent() {
@@ -27,40 +25,33 @@ export async function OverviewPageContent() {
 
     return (
       <PageContainer>
-        <PreviewModeBadgeSlot />
         <PageHeader
           breadcrumb={<Breadcrumb items={[{ label: "Home" }, { label: "Dashboard" }]} />}
-          title="Dashboard"
-          description="Operational overview with live platform data."
+          title="Operations dashboard"
+          description="Live workload, booking pipeline, and supplier posture."
           actions={<OverviewToolbarActions />}
         />
-        <DataSourceNoticeSlot />
 
         <SummaryStatsRow summaryStats={data.summaryStats} />
 
-        <OperationalQueueGrid cards={data.operationalActionCards} />
-
         <div className="grid gap-4 xl:grid-cols-3">
           <div className="space-y-4 xl:col-span-2">
-            <Suspense
-              fallback={
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <Skeleton className="h-72" />
-                  <Skeleton className="h-72" />
-                </div>
-              }
-            >
-              <OverviewChartsLazy bookingTrend={data.bookingTrend} statusBreakdown={data.statusBreakdown} />
-            </Suspense>
+            <OperationalQueueGrid cards={data.operationalActionCards} />
             <RecentBookingsTable recentBookings={data.recentBookings} />
           </div>
           <div className="space-y-4">
-            <RecentNotificationsPanel recentNotifications={data.recentNotifications} />
-            <SidePanels topRoutes={data.topRoutes} systemHealth={data.systemHealth} />
+            <Suspense fallback={null}>
+              <BookingPipelinePanel stages={data.bookingPipeline} />
+            </Suspense>
+            <PaymentOperationsPanel items={data.paymentOperations} />
+            <SupportOperationsPanel items={data.supportOperations} />
           </div>
         </div>
 
-        <QuickActionsBar actions={data.shortcutActions} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <SupplierStatusPanel items={data.supplierStatus} />
+          <SystemHealthPanel items={data.systemHealth} />
+        </div>
       </PageContainer>
     );
   } catch (error) {

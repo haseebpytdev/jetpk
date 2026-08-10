@@ -34,7 +34,7 @@ export function RecentNotificationsPanel({ recentNotifications }: Pick<OverviewD
       <CardTitle>Recent notifications</CardTitle>
       <CardDescription className="mt-1">Mock feed — not live comms</CardDescription>
       <ul className="mt-4 space-y-3">
-        {recentNotifications.map((n) => (
+        {recentNotifications?.map((n) => (
           <li key={n.id} className="flex gap-3 rounded-xl border border-jp-border p-3">
             <span
               className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
@@ -97,9 +97,15 @@ export function RecentBookingsTable({ recentBookings }: Pick<OverviewData, "rece
                   <Badge label={row.payment} />
                 </td>
                 <td className="px-4 py-3">
-                  <Button variant="ghost" size="sm" type="button" onClick={() => alert("Preview only — view booking")}>
-                    View
-                  </Button>
+                  {isLive ? (
+                    <Link href={`/admin/bookings/${row.id}`} className="text-sm font-medium text-jp-accent-muted hover:underline">
+                      View
+                    </Link>
+                  ) : (
+                    <Button variant="ghost" size="sm" type="button" onClick={() => alert("Preview only — view booking")}>
+                      View
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -124,7 +130,7 @@ export function SidePanels({
       <Card>
         <CardTitle>Top selling routes</CardTitle>
         <ul className="mt-4 space-y-3">
-          {topRoutes.map((r) => (
+          {topRoutes?.map((r) => (
             <li key={r.route}>
               <div className="flex justify-between text-sm">
                 <span>{r.route}</span>

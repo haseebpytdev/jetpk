@@ -25,6 +25,7 @@ html {
 }
 
 body {
+  --font-display: var(--font-body);
   @apply bg-jp-page text-jp-text font-sans antialiased;
   font-feature-settings: "tnum" 1;
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\Booking;
-use App\Models\BookingPayment;
 use App\Models\User;
 use App\Support\Bookings\BookingListPresenter;
 use App\Support\Staff\StaffPermission;
@@ -13,22 +12,36 @@ final class DashboardOverviewResource
 {
     /**
      * @param  array<string, mixed>  $dashboard
+     * @param  list<array<string, mixed>>  $supportAlerts
+     * @param  list<array<string, string>>  $supplierStatus
      * @return array<string, mixed>
      */
-    public static function fromAgencyDashboard(array $dashboard, User $user): array
-    {
+    public static function fromAgencyDashboard(
+        array $dashboard,
+        User $user,
+        string $portal = 'admin',
+        array $supportAlerts = [],
+        array $supplierStatus = [],
+    ): array {
         $stats = is_array($dashboard['stats'] ?? null) ? $dashboard['stats'] : [];
         $needsAttention = is_array($dashboard['needsAttention'] ?? null) ? $dashboard['needsAttention'] : [];
         $recent = $dashboard['recentBookings'] ?? collect();
+        $operationalKpis = is_array($dashboard['operationalKpis'] ?? null) ? $dashboard['operationalKpis'] : [];
+        $commandSummary = is_array($dashboard['commandSummary'] ?? null) ? $dashboard['commandSummary'] : [];
 
         return [
             'hasLiveData' => (bool) ($dashboard['hasLiveData'] ?? false),
             'referenceTime' => now()->toIso8601String(),
-            'summaryStats' => self::summaryStats($stats),
+            'summaryStats' => self::summaryStats($stats, $commandSummary),
             'operationalQueues' => self::operationalQueues($needsAttention, $user),
+            'bookingPipeline' => self::bookingPipeline($stats, $operationalKpis),
             'recentBookings' => self::recentBookings($recent),
-            'operationalCounts' => is_array($dashboard['commandSummary'] ?? null) ? $dashboard['commandSummary'] : [],
-            'failedNotifications' => (int) (($dashboard['commandSummary']['failed_notifications'] ?? 0)),
+            'paymentOperations' => self::paymentOperations($commandSummary, $portal),
+            'supportOperations' => self::supportOperations($supportAlerts),
+            'supplierStatus' => $supplierStatus,
+            'systemHealth' => self::systemHealth((bool) ($dashboard['hasLiveData'] ?? false)),
+            'operationalCounts' => $commandSummary,
+            'failedNotifications' => (int) ($commandSummary['failed_notifications'] ?? 0),
             'supplierFailures' => self::supplierFailureCount($dashboard),
             'accountType' => $user->account_type->value,
         ];
@@ -36,17 +49,139 @@ final class DashboardOverviewResource
 
     /**
      * @param  array<string, mixed>  $stats
+     * @param  array<string, mixed>  $commandSummary
      * @return list<array<string, mixed>>
      */
-    protected static function summaryStats(array $stats): array
+    protected static function summaryStats(array $stats, array $commandSummary): array
+    {
+        $cards = [];
+
+        if (isset($stats['total_bookings'])) {
+            $cards[] = ['key' => 'total_bookings', 'label' => 'Bookings', 'value' => (string) ((int) $stats['total_bookings']), 'delta' => '', 'tone' => 'up'];
+        }
+        if (isset($commandSummary['needs_action'])) {
+            $cards[] = ['key' => 'needs_action', 'label' => 'Needs action', 'value' => (string) ((int) $commandSummary['needs_action']), 'delta' => '', 'tone' => 'warn'];
+        }
+        if (isset($stats['pending_bookings']) && (int) $stats['pending_bookings'] > 0) {
+            $cards[] = ['key' => 'pending_bookings', 'label' => 'Pending', 'value' => (string) ((int) $stats['pending_bookings']), 'delta' => '', 'tone' => 'warn'];
+        }
+        if (isset($stats['ticketed_bookings'])) {
+            $cards[] = ['key' => 'ticketed_bookings', 'label' => 'Ticketed', 'value' => (string) ((int) $stats['ticketed_bookings']), 'delta' => '', 'tone' => 'up'];
+        }
+        if (isset($stats['unpaid_partial_bookings']) && (int) $stats['unpaid_partial_bookings'] > 0) {
+            $cards[] = ['key' => 'unpaid_partial', 'label' => 'Unpaid / partial', 'value' => (string) ((int) $stats['unpaid_partial_bookings']), 'delta' => '', 'tone' => 'warn'];
+        }
+        if (isset($commandSummary['gross_sales'])) {
+            $cards[] = [
+                'key' => 'gross_sales',
+                'label' => 'Gross booking value',
+                'value' => number_format((float) $commandSummary['gross_sales']).' PKR',
+                'delta' => '',
+                'tone' => 'up',
+            ];
+        }
+
+        return $cards;
+    }
+
+    /**
+     * @param  array<string, mixed>  $stats
+     * @param  list<array<string, mixed>>  $operationalKpis
+     * @return list<array<string, mixed>>
+     */
+    protected static function bookingPipeline(array $stats, array $operationalKpis): array
+    {
+        $pipeline = [];
+
+        if (isset($stats['total_bookings'])) {
+            $pipeline[] = [
+                'key' => 'bookings',
+                'label' => 'Bookings',
+                'count' => (int) $stats['total_bookings'],
+                'laravelRoute' => 'admin.bookings',
+            ];
+        }
+
+        foreach ($operationalKpis as $kpi) {
+            $key = (string) ($kpi['key'] ?? '');
+            if (! in_array($key, ['supplier_pnr_pending', 'payment_review', 'ticketing_pending'], true)) {
+                continue;
+            }
+
+            $pipeline[] = [
+                'key' => $key,
+                'label' => (string) ($kpi['label'] ?? $key),
+                'count' => (int) ($kpi['count'] ?? 0),
+                'laravelRoute' => (string) ($kpi['route'] ?? 'admin.bookings'),
+                'queue' => isset($kpi['route_params']['queue']) ? (string) $kpi['route_params']['queue'] : null,
+            ];
+        }
+
+        if (isset($stats['ticketed_bookings'])) {
+            $pipeline[] = [
+                'key' => 'ticketed',
+                'label' => 'Ticketed',
+                'count' => (int) $stats['ticketed_bookings'],
+                'laravelRoute' => 'admin.bookings',
+                'queue' => 'ticketed',
+            ];
+        }
+
+        return $pipeline;
+    }
+
+    /**
+     * @param  array<string, mixed>  $commandSummary
+     * @return list<array<string, mixed>>
+     */
+    protected static function paymentOperations(array $commandSummary, string $portal): array
+    {
+        $routePrefix = $portal === 'staff' ? 'staff' : 'admin';
+
+        return array_values(array_filter([
+            isset($commandSummary['payment_review']) ? [
+                'key' => 'payment_review',
+                'label' => 'Payment review',
+                'count' => (int) $commandSummary['payment_review'],
+                'laravelRoute' => $routePrefix.'.bookings',
+                'queue' => 'payment_review',
+            ] : null,
+            isset($commandSummary['pending_deposits']) && (int) $commandSummary['pending_deposits'] > 0 ? [
+                'key' => 'pending_deposits',
+                'label' => 'Pending deposits',
+                'count' => (int) $commandSummary['pending_deposits'],
+                'laravelRoute' => 'admin.agent-deposits.index',
+            ] : null,
+        ]));
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $supportAlerts
+     * @return list<array<string, mixed>>
+     */
+    protected static function supportOperations(array $supportAlerts): array
+    {
+        return array_values(array_map(static function (array $alert): array {
+            return [
+                'key' => (string) ($alert['key'] ?? ''),
+                'label' => (string) ($alert['label'] ?? ''),
+                'count' => (int) ($alert['count'] ?? 0),
+                'helper' => (string) ($alert['helper'] ?? ''),
+                'laravelRoute' => (string) ($alert['route'] ?? 'admin.support.tickets.index'),
+                'queue' => isset($alert['route_params']['queue']) ? (string) $alert['route_params']['queue'] : null,
+            ];
+        }, $supportAlerts));
+    }
+
+    /**
+     * @return list<array<string, string>>
+     */
+    protected static function systemHealth(bool $hasLiveData): array
     {
         return [
-            ['key' => 'total_bookings', 'label' => 'Total Bookings', 'value' => (string) ((int) ($stats['total_bookings'] ?? 0)), 'delta' => '', 'tone' => 'up'],
-            ['key' => 'pending_bookings', 'label' => 'Pending Bookings', 'value' => (string) ((int) ($stats['pending_bookings'] ?? 0)), 'delta' => '', 'tone' => 'warn'],
-            ['key' => 'unpaid_partial', 'label' => 'Unpaid / Partial', 'value' => (string) ((int) ($stats['unpaid_partial_bookings'] ?? 0)), 'delta' => '', 'tone' => 'warn'],
-            ['key' => 'ticketed_bookings', 'label' => 'Ticketed', 'value' => (string) ((int) ($stats['ticketed_bookings'] ?? 0)), 'delta' => '', 'tone' => 'up'],
-            ['key' => 'pending_refunds', 'label' => 'Pending Refunds', 'value' => (string) ((int) ($stats['pending_refund_count'] ?? 0)), 'delta' => '', 'tone' => 'warn'],
-            ['key' => 'cancellations', 'label' => 'Cancellations', 'value' => (string) ((int) ($stats['cancellation_count'] ?? 0)), 'delta' => '', 'tone' => 'down'],
+            ['name' => 'Dashboard Next', 'status' => 'operational'],
+            ['name' => 'Laravel API', 'status' => 'operational'],
+            ['name' => 'Booking data', 'status' => $hasLiveData ? 'operational' : 'degraded'],
         ];
     }
 
@@ -124,14 +259,28 @@ final class DashboardOverviewResource
                     ];
                 }
 
-                return is_array($booking) ? $booking : [];
+                if (is_array($booking)) {
+                    return [
+                        'id' => (string) ($booking['id'] ?? ''),
+                        'pnr' => (string) ($booking['ref'] ?? $booking['pnr'] ?? ''),
+                        'customer' => (string) ($booking['customer'] ?? 'Guest'),
+                        'phone' => '—',
+                        'route' => (string) ($booking['route'] ?? ''),
+                        'date' => (string) ($booking['created_at'] ?? ''),
+                        'status' => (string) ($booking['status'] ?? ''),
+                        'amount' => number_format((float) ($booking['amount_pkr'] ?? 0)).' PKR',
+                        'payment' => (string) ($booking['payment_status'] ?? ''),
+                    ];
+                }
+
+                return [];
             })
             ->filter(static fn (array $row): bool => $row !== [])
             ->values()
             ->all();
     }
 
-  /**
+    /**
      * @param  array<string, mixed>  $dashboard
      */
     protected static function supplierFailureCount(array $dashboard): int

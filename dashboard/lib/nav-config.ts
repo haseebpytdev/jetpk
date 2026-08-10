@@ -96,9 +96,8 @@ export const navGroups: NavGroup[] = [
     items: [
       {
         label: "Flights & Search",
-        href: "/planned/flights",
+        href: "/",
         laravelRoute: "flights.search",
-        planned: true,
       },
       {
         label: "Suppliers",
@@ -107,9 +106,8 @@ export const navGroups: NavGroup[] = [
       },
       {
         label: "Markups & Settings",
-        href: "/planned/markups",
+        href: "/",
         laravelRoute: "admin.markups",
-        planned: true,
       },
       {
         label: "CMS",
@@ -142,10 +140,9 @@ export const navGroups: NavGroup[] = [
         ],
       },
       {
-        label: "Notifications",
-        href: "/planned/communications",
+        label: "Communications",
+        href: "/settings",
         laravelRoute: "admin.settings.communications.index",
-        planned: true,
       },
       {
         label: "Support & Help",

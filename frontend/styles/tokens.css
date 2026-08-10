@@ -64,9 +64,9 @@
   --jp-skeleton: #e2ecf2;
   --jp-skeleton-highlight: #f0f6fa;
 
-  /* Typography families — JETPK-UI-02A legacy authority (Inter + Space Grotesk + IBM Plex Mono) */
+  /* Typography families — Inter platform UI + IBM Plex Mono for machine values */
   --jp-font-sans: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --jp-font-display: var(--font-display), var(--jp-font-sans);
+  --jp-font-display: var(--font-body), var(--jp-font-sans);
   --jp-font-mono: var(--font-mono), ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
 
   /* Typography scale */

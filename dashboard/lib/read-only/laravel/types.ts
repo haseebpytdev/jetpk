@@ -40,6 +40,30 @@ export type LaravelOverviewPayload = {
     cta: string;
   }>;
   recentBookings: OverviewData["recentBookings"];
+  bookingPipeline: Array<{
+    key: string;
+    label: string;
+    count: number;
+    laravelRoute: string;
+    queue: string | null;
+  }>;
+  paymentOperations: Array<{
+    key: string;
+    label: string;
+    count: number;
+    laravelRoute: string;
+    queue?: string | null;
+  }>;
+  supportOperations: Array<{
+    key: string;
+    label: string;
+    count: number;
+    laravelRoute: string;
+    queue?: string | null;
+    helper?: string;
+  }>;
+  supplierStatus: OverviewData["supplierStatus"];
+  systemHealth: OverviewData["systemHealth"];
   operationalCounts: Record<string, number>;
   failedNotifications: number;
   supplierFailures: number;

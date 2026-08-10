@@ -17,12 +17,28 @@ export type ActionCard = {
   cta: string;
 };
 
-export type NotificationItem = {
-  id: string;
-  title: string;
+export type PipelineStage = {
+  key: string;
+  label: string;
+  count: number;
+  laravelRoute: string;
+  queue?: string;
+};
+
+export type SupplierStatusItem = {
+  key: string;
+  label: string;
+  status: string;
   detail: string;
-  time: string;
-  tone: "info" | "success" | "warn";
+};
+
+export type OperationalSummaryItem = {
+  key: string;
+  label: string;
+  count: number;
+  laravelRoute: string;
+  queue?: string;
+  helper?: string;
 };
 
 export type BookingRow = {
@@ -42,14 +58,35 @@ export type SystemHealthItem = {
   status: "operational" | "degraded" | "down";
 };
 
+/** Preview-only notification row (fixture/dev). */
+export type NotificationItem = {
+  id: string;
+  title: string;
+  detail: string;
+  time: string;
+  tone: "info" | "success" | "warn";
+};
+
 export type OverviewData = {
   summaryStats: StatCard[];
   operationalActionCards: ActionCard[];
+  bookingPipeline: PipelineStage[];
   shortcutActions: { label: string; laravelRoute: string; queue?: string }[];
-  bookingTrend: { day: string; bookings: number; revenue: number }[];
-  statusBreakdown: { name: string; value: number; color: string }[];
-  recentNotifications: NotificationItem[];
   recentBookings: BookingRow[];
-  topRoutes: { route: string; share: number }[];
+  paymentOperations: OperationalSummaryItem[];
+  supportOperations: OperationalSummaryItem[];
+  supplierStatus: SupplierStatusItem[];
   systemHealth: SystemHealthItem[];
+  /** Legacy preview chart payloads — omitted in live operational responses. */
+  bookingTrend?: { day: string; bookings: number; revenue: number }[];
+  statusBreakdown?: { name: string; value: number; color: string }[];
+  recentNotifications?: NotificationItem[];
+  topRoutes?: { route: string; share: number }[];
+};
+
+export type DashboardSearchResult = {
+  type: string;
+  label: string;
+  detail: string;
+  href: string;
 };

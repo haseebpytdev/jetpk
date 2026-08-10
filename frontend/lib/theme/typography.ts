@@ -1,16 +1,12 @@
 /**
- * JetPakistan global legacy typography authority (JETPK-UI-02A).
+ * JetPakistan global typography authority (JP-DASH-03).
  *
- * Evidence: public/themes/frontend/jetpakistan/css/tokens.css,
- * JetPakistan Blade layouts, JP-FE-01 / JP-MOCK-SHELL-INTEGRATION-MAP.
- *
- * Display: Space Grotesk — hero, page titles, section headings, brand marks.
- * UI/body: Inter — navigation, body, controls, tables, forms, metadata.
- * Numeric/mono: IBM Plex Mono — fares, codes, KPI emphasis, labels.
+ * UI/display: Inter — all normal JetPakistan text including headings and brand marks.
+ * Numeric/mono: IBM Plex Mono — fares, codes, KPI machine values.
  */
 export const JETPK_LEGACY_FONT_BODY_FAMILY = "Inter";
 
-export const JETPK_LEGACY_FONT_DISPLAY_FAMILY = "Space Grotesk";
+export const JETPK_LEGACY_FONT_DISPLAY_FAMILY = "Inter";
 
 export const JETPK_LEGACY_FONT_MONO_FAMILY = "IBM Plex Mono";
 
@@ -60,7 +56,6 @@ export const JETPK_TAILWIND_FONT_SANS = [
 ];
 
 export const JETPK_TAILWIND_FONT_DISPLAY = [
-  "var(--font-display)",
   "var(--font-body)",
   "system-ui",
   "-apple-system",

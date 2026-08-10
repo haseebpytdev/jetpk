@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { getDashboardMode } from "@/lib/preview";
 import { resolveDataSourceMode } from "@/lib/read-only/data-source";
 import { FixtureDataNotice, LiveReadOnlyNotice, StaleDataNotice } from "@/components/ui/data-source-status";
 import type { DataSourceMetadata } from "@/types/read-only-integration";
@@ -10,7 +11,7 @@ import { isStaleMetadata } from "@/lib/read-only/data-source";
 /** Renders module-level source notice unless the shell preview gate is active. */
 export function DataSourceNotice({ meta }: { meta?: DataSourceMetadata | null }) {
   const searchParams = useSearchParams();
-  if (searchParams.get("dataSourcePreview")) {
+  if (getDashboardMode() === "live" || searchParams.get("dataSourcePreview")) {
     return null;
   }
 

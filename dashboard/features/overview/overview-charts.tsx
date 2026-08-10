@@ -55,8 +55,8 @@ export function OverviewCharts({
         <div className="mt-4 h-64 w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={statusBreakdown} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
-                {statusBreakdown.map((entry) => (
+              <Pie data={statusBreakdown ?? []} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+                {(statusBreakdown ?? []).map((entry) => (
                   <Cell key={entry.name} fill={entry.color} />
                 ))}
               </Pie>

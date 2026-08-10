@@ -20,18 +20,35 @@ export function transformOverviewPayload(payload: LaravelOverviewPayload): Overv
       tone: card.tone,
       cta: card.cta,
     })),
+    bookingPipeline: payload.bookingPipeline.map((stage) => ({
+      key: stage.key,
+      label: stage.label,
+      count: stage.count,
+      laravelRoute: stage.laravelRoute,
+      queue: stage.queue ?? undefined,
+    })),
     shortcutActions: payload.operationalQueues.slice(0, 4).map((card) => ({
       label: card.label,
       laravelRoute: card.laravelRoute,
       queue: card.queue ?? undefined,
     })),
-    bookingTrend: [],
-    statusBreakdown: [],
-    recentNotifications: [],
     recentBookings: payload.recentBookings,
-    topRoutes: [],
-    systemHealth: payload.hasLiveData
-      ? [{ name: "Laravel read-only", status: "operational" as const }]
-      : [{ name: "No live bookings", status: "degraded" as const }],
+    paymentOperations: (payload.paymentOperations ?? []).map((item) => ({
+      key: item.key,
+      label: item.label,
+      count: item.count,
+      laravelRoute: item.laravelRoute,
+      queue: item.queue ?? undefined,
+    })),
+    supportOperations: (payload.supportOperations ?? []).map((item) => ({
+      key: item.key,
+      label: item.label,
+      count: item.count,
+      laravelRoute: item.laravelRoute,
+      queue: item.queue ?? undefined,
+      helper: item.helper,
+    })),
+    supplierStatus: payload.supplierStatus ?? [],
+    systemHealth: payload.systemHealth ?? [],
   };
 }

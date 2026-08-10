@@ -12,6 +12,7 @@ export function dashboardApiUrl(path: string): string {
 export const DASHBOARD_API_ROUTES = {
   session: "/session",
   overview: "/overview",
+  search: "/search",
   bookings: "/bookings",
   bookingDetail: (id: string) => `/bookings/${encodeURIComponent(id)}`,
   payments: "/payments",

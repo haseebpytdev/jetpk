@@ -1,19 +1,14 @@
 import { createReadOnlyErrorEnvelope, mapHttpStatusToErrorCode, sanitizeErrorMessage } from "@/lib/read-only/error-envelope";
 import { dashboardApiUrl } from "@/lib/read-only/laravel/api-base";
-import { getLaravelServerBase } from "@/lib/laravel-origin";
-import type {
-  DataSourceMetadata,
-  ReadOnlyErrorEnvelope,
-  ReadOnlyResponseEnvelope,
-} from "@/types/read-only-integration";
+import type { ReadOnlyErrorEnvelope, ReadOnlyResponseEnvelope } from "@/types/read-only-integration";
 import { READ_ONLY_SCHEMA_VERSION } from "@/types/read-only-integration";
 
-export type LaravelFetchOptions = {
+export type LaravelBrowserFetchOptions = {
   signal?: AbortSignal;
   query?: Record<string, string | number | boolean | null | undefined>;
 };
 
-function serializeQuery(query?: LaravelFetchOptions["query"]): string {
+function serializeQuery(query?: LaravelBrowserFetchOptions["query"]): string {
   if (!query) {
     return "";
   }
@@ -31,7 +26,7 @@ function serializeQuery(query?: LaravelFetchOptions["query"]): string {
 }
 
 function normalizeLaravelEnvelope<T>(payload: Record<string, unknown>): ReadOnlyResponseEnvelope<T> {
-  const meta = (payload.meta ?? {}) as DataSourceMetadata;
+  const meta = (payload.meta ?? {}) as Record<string, unknown>;
   return {
     data: payload.data as T,
     meta: {
@@ -72,43 +67,20 @@ function parseLaravelError(body: Record<string, unknown>, status: number): ReadO
   });
 }
 
-function resolveDashboardApiPath(path: string): string {
-  const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `/api/dashboard${normalized}`;
-}
-
-function resolveDashboardApiUrl(path: string, query?: LaravelFetchOptions["query"]): string {
-  const apiPath = resolveDashboardApiPath(path);
-  const queryString = serializeQuery(query);
-
-  if (typeof window === "undefined") {
-    return `${getLaravelServerBase()}${apiPath}${queryString}`;
-  }
-
-  return `${dashboardApiUrl(path)}${queryString}`;
-}
-
-export async function fetchDashboardApi<T>(
+/** Browser-only dashboard API fetch — safe for client components (same-origin session cookies). */
+export async function fetchDashboardApiBrowser<T>(
   path: string,
-  options?: LaravelFetchOptions,
+  options?: LaravelBrowserFetchOptions,
 ): Promise<ReadOnlyResponseEnvelope<T>> {
-  const url = resolveDashboardApiUrl(path, options?.query);
+  const url = `${dashboardApiUrl(path)}${serializeQuery(options?.query)}`;
 
-  const response =
-    typeof window === "undefined"
-      ? await (async () => {
-          const { fetchLaravelServer } = await import("@/lib/laravel-server-fetch");
-          return fetchLaravelServer(resolveDashboardApiPath(path) + serializeQuery(options?.query), {
-            signal: options?.signal,
-          });
-        })()
-      : await fetch(url, {
-          method: "GET",
-          credentials: "same-origin",
-          headers: { Accept: "application/json" },
-          signal: options?.signal,
-          cache: "no-store",
-        });
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+    signal: options?.signal,
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     let body: Record<string, unknown> = {};

@@ -6,45 +6,38 @@
 
 ## CURRENT_STATUS
 
-`IN_PROGRESS` — Checkpoint 1: SSR session repair and preview mode correction
+`IN_PROGRESS` — Checkpoint 2–3 operational dashboard + Checkpoint 5 Inter typography (local)
 
 ## LAST_UPDATED_UTC
 
-2026-08-09T21:25:00Z
+2026-08-10T00:10:00Z
 
 ## CURRENT_COMMIT
 
-`a86c89e` — fix(dashboard): restore authenticated production rendering
+Pending local checkpoint commit (post `c6cece9`)
 
 ## PRODUCTION_DEPLOYED
 
-yes — checkpoint 1 dashboard + Laravel proxy deploy
+yes — checkpoint 1 dashboard + Laravel proxy deploy (`/home/pkjetp/jetpk-dash-03-20260809231801`)
+
+Checkpoint 2–3 Laravel + dashboard batch: **pending deploy**
 
 ## DEPLOYMENT_BACKUPS
 
-`/home/pkjetp/jetpk-dash-03-20260809231801`
-
-## TEST_RESULTS
-
-- `php artisan test --filter=BackOfficeSessionContractTest`: 10 passed, 27 assertions
-- `dashboard npm run typecheck`: pass
-- `dashboard npm run build`: pass (local + production server)
-- Production `curl http://127.0.0.1:3001/admin/dashboard`: HTTP 200
-- Production HTML includes DB logo preload (`/storage/agencies/.../branding/...png`)
-- No `Preview` string in unauthenticated dashboard HTML sample
+- `/home/pkjetp/jetpk-dash-03-20260809231801` (checkpoint 1)
 
 ## REMOTE_PHASE_PROGRESS
 
-Push failed: no `origin` remote configured locally. Commit `a86c89e` on branch `phase/jetpk-dash-03-operational-backoffice`.
+`jetpk` remote verified: `https://github.com/haseebpytdev/jetpk.git` — fetch OK; push pending after local checkpoint commit.
 
 ## CURRENT_BLOCKERS
 
-- Git remote not configured for push from this workspace
-- Authenticated production acceptance requires live admin session (human or fixture cookies)
+- Authenticated production browser acceptance requires live admin session (API/RBAC tests pass locally)
+- Staff production browser: `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` (seeded `staff@ota.demo` used for API/RBAC only)
 
 ## NEXT_AUTONOMOUS_ACTION
 
-Checkpoint 2: global search, notification state, nav operationalization, expanded KPI/summary API, staff RBAC verification, Inter typography platform pass.
+Deploy checkpoint 2–3 batch; production authenticated admin DOM proof; sidebar/notification audit (checkpoint 4); visual/responsive matrix (checkpoint 6).
 
 | Scope | SHA256 |
 |-------|--------|
@@ -53,73 +46,108 @@ Checkpoint 2: global search, notification state, nav operationalization, expande
 
 ## COMPLETED_GATES
 
-- Phase branch created from closure baseline `959e190a`
-- Root cause identified for preview/live mismatch and SSR cookie gap
+- Phase branch from baseline `959e190a`
+- Checkpoint 1 SSR/session/preview mode repair (accepted)
+- `NEXT_PUBLIC_DASHBOARD_MODE=production` → live mode
+- Laravel private origin + cookie forwarding (SSR + proxy)
+- POST logout path
+- Dashboard production build (local)
+- Operational overview API structure (`DashboardOverviewResource` expansion)
+- Global search API + debounced UI (`/api/dashboard/search`)
+- Supplier status presenter (sanitized operational posture)
+- Dashboard browser/client fetch split (build-safe)
+- Inter typography: dashboard + frontend + `jetpk-typography-authority.css`
 
 ## ACTIVE_GATES
 
-- `ADMIN_DASHBOARD_SERVER_RENDER`
-- `DASHBOARD_REAL_SESSION_IDENTITY`
-- `DASHBOARD_DATABASE_LOGO_BINDING`
-- `PREVIEW_AUTH_UI_REMOVED`
+| Gate | Status |
+|------|--------|
+| `ADMIN_DASHBOARD_SERVER_RENDER` | API PASS; production browser pending |
+| `DASHBOARD_REAL_SESSION_IDENTITY` | API PASS (`admin.name` not Preview) |
+| `PREVIEW_AUTH_UI_REMOVED` | Live path clean; preview infra gated by mode |
+| `DASHBOARD_DATABASE_LOGO_BINDING` | Checkpoint 1 preload; DOM proof pending |
+| `ADMIN_OPERATIONAL_DASHBOARD` | Local build PASS; production pending |
+| `STAFF_PRODUCTION_BROWSER_ACCEPTANCE` | `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` |
+| `DASHBOARD_NOTIFICATION_STATE` | Not audited (no fixture badges in header) |
+| `JP_DASH_03_SOURCE_PARITY` | Not run |
+| `PUBLIC_DATABASE_LOGO_LIVE_DOM` | Not re-verified this pass |
 
 ## FAILED_GATES
 
-None at checkpoint start.
+None.
 
-## CURRENT_ROOT_CAUSES
+## CHECKPOINT_COMMITS
 
-1. `NEXT_PUBLIC_DASHBOARD_MODE=production` was treated as preview (`live` only matched exact string `live`).
-2. Dashboard Laravel client SSR fetches did not forward session cookies to private Laravel (`127.0.0.1:8088`).
-3. Laravel `BackOfficeDashboardController` proxy to Next did not forward `Cookie` header.
-4. Preview header/sidebar UI remained active in production builds.
+| Checkpoint | Commit | Remote push |
+|------------|--------|-------------|
+| 1 | `a86c89e` fix(dashboard): restore authenticated production rendering | PENDING |
+| 1 docs | `c6cece9` docs(jetpk): update JP-DASH-03 checkpoint 1 production deploy status | PENDING |
+| 2–3 | pending | PENDING |
+| 5 typography | pending (same or follow-up commit) | PENDING |
 
-## CHANGED_FILES
+## ROOT_CAUSES (CHECKPOINT 1 — ACCEPTED)
 
-- `dashboard/lib/preview.ts`
-- `dashboard/lib/laravel-server-fetch.ts`
-- `dashboard/lib/laravel-auth-api.ts`
-- `dashboard/lib/dashboard-portal-server.ts`
-- `dashboard/lib/read-only/laravel/laravel-client.ts`
-- `dashboard/middleware.ts`
-- `dashboard/services/branding-service.ts`
-- `dashboard/app/layout.tsx`
-- `dashboard/app/error.tsx`
-- `dashboard/layouts/dashboard-shell.tsx`
-- `dashboard/components/dashboard/header.tsx`
-- `dashboard/components/dashboard/sidebar.tsx`
-- `app/Http/Controllers/BackOffice/BackOfficeDashboardController.php`
-- `dashboard/.env.example`
-- `docs/jetpk/JP-DASH-03-PROGRESS.md`
+1. `NEXT_PUBLIC_DASHBOARD_MODE=production` treated as preview.
+2. Dashboard SSR did not forward cookies to private Laravel.
+3. `BackOfficeDashboardController` did not forward `Cookie` to Next.
+4. Preview header/sidebar active in production builds.
+
+## CHECKPOINT 2–3 IMPLEMENTATION
+
+### Laravel
+
+- `DashboardOverviewResource` — booking pipeline, payment ops, support ops, supplier status, system health, bounded KPIs
+- `DashboardOverviewController` — support alerts + supplier status injection
+- `DashboardSearchService` + `DashboardSearchController` — RBAC search (bookings, customers, agents)
+- `DashboardSupplierStatusPresenter` — Sabre live, PIA NDC configured, Al Haider pending, IATI inactive, One API deferred
+- `routes/api-dashboard.php` — `GET /search`
+
+### Dashboard Next
+
+- Operational layout (`overview-page-content.tsx`) — KPI strip, attention queue, pipeline, recent bookings, payments, suppliers, system health
+- `operational-dashboard-panels.tsx`, `global-search.tsx`
+- `laravel-origin.ts`, `laravel-browser-client.ts` — client/server fetch separation (fixes build)
+- Nav: removed misleading `PLANNED` badges on mature modules
+- Preview gated to `preview` mode only (`dashboard-shell`, `data-source-notice`)
+
+### Typography (Checkpoint 5 — partial)
+
+- Frontend: removed Space Grotesk; Inter for all display via `--font-display: var(--font-body)`
+- `public/css/jetpk-typography-authority.css` — Inter-only display stack
+- Dashboard already Inter-only in `typography-tokens.css`
+
+## WIDGET / SOURCE MATRIX (OPERATIONAL OVERVIEW)
+
+| Widget | Source | Query / endpoint | Admin | Staff |
+|--------|--------|------------------|-------|-------|
+| Summary KPIs | Agency dashboard stats + command summary | `DashboardOverviewController` → agency dashboard service | permitted | staff-scoped |
+| Needs attention | `needsAttention` queues | existing agency dashboard | permitted | staff RBAC |
+| Booking pipeline | stats + operational KPIs | `DashboardOverviewResource::bookingPipeline` | permitted | staff-scoped |
+| Recent bookings | `recentBookings` | bounded agency query | permitted | staff-scoped |
+| Payment ops | `commandSummary` | payment_review, pending_deposits | permitted | staff-scoped |
+| Support ops | support alerts service | open tickets backlog | permitted | staff-scoped |
+| Supplier status | `DashboardSupplierStatusPresenter` | config + connection state | permitted | permitted |
+| System health | `hasLiveData` + scheduler meta | read-only flags | permitted | permitted |
+| Global search | `DashboardSearchService` | limited LIKE on bookings/customers/agents | permitted | staff-scoped |
 
 ## TEST_RESULTS
 
-Pending local typecheck/build and Laravel session contract tests.
-
-## VISUAL_ACCEPTANCE
-
-Pending production verification.
-
-## OPERATIONAL_ACCEPTANCE
-
-Pending.
-
-## DEPLOYMENT_BACKUPS
-
-None yet.
+- `php artisan test tests/Feature/Dashboard/BackOfficeSessionContractTest.php tests/Feature/Dashboard/DashboardOverviewOperationalTest.php`: **14 passed, 45 assertions**
+- `dashboard npm run typecheck`: pass
+- `dashboard npm run build`: pass (after browser-client split)
 
 ## KNOWN_DEFERRED_ITEMS
 
-- Global Inter typography platform pass
-- Global search implementation
-- Full operational dashboard KPI expansion
-- Staff RBAC production verification
-- Source parity audit
+- Production authenticated admin browser proof
+- Staff production browser (`staff@ota.demo` exists in seeds for API only)
+- Checkpoint 4: notification badge audit, full sidebar route matrix verification
+- Checkpoint 6: responsive/zoom/a11y matrix, source parity, full OTA regression
+- Frontend `npm run build` not run this pass
 
-## CURRENT_BLOCKERS
+## ROLLBACK
 
-None — implementing checkpoint 1 fixes.
+Restore checkpoint 1 backup on server; redeploy prior dashboard `.next` + Laravel files from backup path.
 
-## NEXT_AUTONOMOUS_ACTION
+## FINAL_STATUS
 
-Run dashboard typecheck/build, Laravel tests, commit checkpoint 1, push phase branch, deploy dashboard to production, verify `/admin/dashboard` SSR with real session.
+`IN_PROGRESS` — not `COMPLETE`

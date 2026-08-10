@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Dashboard\DashboardPermissionsController;
 use App\Http\Controllers\Api\Dashboard\DashboardPnrOrdersController;
 use App\Http\Controllers\Api\Dashboard\DashboardReportsController;
 use App\Http\Controllers\Api\Dashboard\DashboardRolesController;
+use App\Http\Controllers\Api\Dashboard\DashboardSearchController;
 use App\Http\Controllers\Api\Dashboard\DashboardSessionController;
 use App\Http\Controllers\Api\Dashboard\DashboardSettingsController;
 use App\Http\Controllers\Api\Dashboard\DashboardSuppliersController;
@@ -36,6 +37,8 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
     Route::middleware('dashboard.permission:dashboard.view')->group(function (): void {
         Route::get('/overview', [DashboardOverviewController::class, 'show'])
             ->name('overview');
+        Route::get('/search', [DashboardSearchController::class, 'index'])
+            ->name('search');
     });
 
     Route::middleware('dashboard.permission:bookings.view')->group(function (): void {

@@ -1,16 +1,7 @@
+import "server-only";
+
 import { cookies } from "next/headers";
-
-export function buildCookieHeader(cookieList: Array<{ name: string; value: string }>): string {
-  return cookieList.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
-}
-
-export function getLaravelServerBase(): string {
-  return (
-    process.env.LARAVEL_URL ??
-    process.env.NEXT_PUBLIC_LARAVEL_URL ??
-    "http://127.0.0.1:8088"
-  ).replace(/\/$/, "");
-}
+import { buildCookieHeader, getLaravelServerBase } from "@/lib/laravel-origin";
 
 export async function getServerCookieHeader(): Promise<string | undefined> {
   const cookieStore = await cookies();

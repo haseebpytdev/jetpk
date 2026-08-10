@@ -16,7 +16,7 @@ async function readLegacyFontTokens(page: import("@playwright/test").Page) {
   });
 }
 
-test("frontend root binds legacy Inter, Space Grotesk, and IBM Plex Mono variables", async ({ page }) => {
+test("frontend root binds Inter body, display alias, and IBM Plex Mono variables", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
   const tokens = await readLegacyFontTokens(page);
   expect(tokens.bodyVar.length).toBeGreaterThan(0);
