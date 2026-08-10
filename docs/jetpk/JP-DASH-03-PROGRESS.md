@@ -13,7 +13,7 @@
 | Field | SHA |
 |-------|-----|
 | `CHECKPOINT_10_IMPLEMENTATION_SHA` | `b658a44c1d67426b41347c525c08ff99b7fb858a` |
-| `REMOTE_HEAD_AT_REPORT_TIME` | `3bbcae448ba9a63facdaccc90b449e9efbb38775` (pending checkpoint 11 push) |
+| `REMOTE_HEAD_AT_REPORT_TIME` | `57299f2` (checkpoint 11 — verify with `git ls-remote`) |
 
 Branch: `phase/jetpk-dash-03-operational-backoffice` → remote `jetpk`
 
