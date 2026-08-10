@@ -30,10 +30,10 @@
       "label": "View row / detail drawer",
       "type": "drawer",
       "side_effect_class": "SAFE_VIEW",
-      "browser_test": "deterministic WL96PKN9 (requires valid session)",
+      "browser_test": "checkpoint-12 deterministic booking detail (WL96PKN9, FTRN9ULV, KXZ5N65J)",
       "backend_test": "DashboardReadOnlyApiTest booking detail",
-      "result": "PENDING_SESSION",
-      "status": "PARTIAL"
+      "result": "PASS",
+      "status": "PASS"
     },
     {
       "module": "Customers",

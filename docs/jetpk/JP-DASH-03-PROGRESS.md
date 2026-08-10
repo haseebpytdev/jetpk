@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending commit after booking detail closure |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `5f88bde` |
+| `LOCAL_HEAD` | `589f137` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `589f137` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
