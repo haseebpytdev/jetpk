@@ -14,21 +14,11 @@
 
 ## CURRENT_COMMIT
 
-Pending local checkpoint commit (post `c6cece9`)
-
-## PRODUCTION_DEPLOYED
-
-yes — checkpoint 1 dashboard + Laravel proxy deploy (`/home/pkjetp/jetpk-dash-03-20260809231801`)
-
-Checkpoint 2–3 Laravel + dashboard batch: **pending deploy**
-
-## DEPLOYMENT_BACKUPS
-
-- `/home/pkjetp/jetpk-dash-03-20260809231801` (checkpoint 1)
+`b731396` — feat(dashboard): add operational OTA summary and attention queues
 
 ## REMOTE_PHASE_PROGRESS
 
-`jetpk` remote verified: `https://github.com/haseebpytdev/jetpk.git` — fetch OK; push pending after local checkpoint commit.
+`jetpk` remote: `https://github.com/haseebpytdev/jetpk.git` — push attempted after `b731396`.
 
 ## CURRENT_BLOCKERS
 
@@ -82,8 +72,8 @@ None.
 |------------|--------|-------------|
 | 1 | `a86c89e` fix(dashboard): restore authenticated production rendering | PENDING |
 | 1 docs | `c6cece9` docs(jetpk): update JP-DASH-03 checkpoint 1 production deploy status | PENDING |
-| 2–3 | pending | PENDING |
-| 5 typography | pending (same or follow-up commit) | PENDING |
+| 2–3 | `b731396` feat(dashboard): add operational OTA summary and attention queues | see REMOTE_PHASE_PROGRESS |
+| 5 typography | included in `b731396` | see REMOTE_PHASE_PROGRESS |
 
 ## ROOT_CAUSES (CHECKPOINT 1 — ACCEPTED)
 
