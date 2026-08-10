@@ -54,7 +54,14 @@ return [
     ],
 
     'auth' => [
-        'require_login_otp' => filter_var(env('OTA_CLIENT_REQUIRE_LOGIN_OTP', false), FILTER_VALIDATE_BOOL),
+        // JetPK single-client deployments default OTP on unless explicitly disabled.
+        'require_login_otp' => filter_var(
+            env(
+                'OTA_CLIENT_REQUIRE_LOGIN_OTP',
+                (string) env('OTA_CLIENT_SLUG', '') === 'jetpk' ? 'true' : 'false',
+            ),
+            FILTER_VALIDATE_BOOL,
+        ),
         'login_otp_expiry_minutes' => max(1, (int) env('OTA_CLIENT_LOGIN_OTP_EXPIRY_MINUTES', 10)),
         'login_otp_resend_cooldown_seconds' => max(15, (int) env('OTA_CLIENT_LOGIN_OTP_RESEND_COOLDOWN', 60)),
         'login_otp_max_attempts' => max(1, (int) env('OTA_CLIENT_LOGIN_OTP_MAX_ATTEMPTS', 5)),

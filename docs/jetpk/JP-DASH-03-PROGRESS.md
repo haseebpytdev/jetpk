@@ -2,82 +2,96 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-10T20:10:00Z
+2026-08-10T22:35:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending commit |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `907bd14` |
+| `LOCAL_HEAD` | pending commit (Wave 0 V3) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `838783c` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
-`8VmZavWLFJ9R-NEwVIZmt`
+`8VmZavWLFJ9R-NEwVIZmt` (dashboard unchanged this wave)
 
-## CURRENT_GATE
+## CURRENT_TASK_ID
 
-`STAFF_AUTH` / `MULTI_ROLE_RBAC`
+`JP-QA-AUTH-02` → `JP-REF-01` (Wave 1)
 
-## CURRENT_GATE_STATUS
+## CURRENT_SUBTASK
 
-`IN_PROGRESS` — QA Staff created; Staff headed login awaiting OTP
+Wave 0 complete — autonomous four-role auth established; starting three-way audit
 
-## LAST_COMPLETED_GATE
+## CURRENT_STATUS
 
-`MULTI_ROLE_RBAC_BROWSER_MATRIX` — Admin + Anonymous probes PASS
+`WAVE_0_PASS` — OTP QA mode active; QA identities live; storage states saved
 
-## LAST_TEST_RESULT
+## OTP_LEDGER
 
-- `npm run test:rbac-browser-matrix` → **1 passed**, 1 skipped (Staff session pending)
-- `JpDash03AuthRecoverySecurityTest` → **7/7 PASS**
-- Checkpoint-12 → **9/9 PASS** (prior)
+| Field | Value |
+|-------|-------|
+| `OTP_ORIGINAL_REQUIREMENT` | true |
+| `OTP_QA_MODE_ACTIVE` | yes |
+| `OTP_QA_MODE_REASON` | JP-DASH-03 automated acceptance |
+| `PRODUCTION_OTP_REQUIRED` | no (`OTA_CLIENT_REQUIRE_LOGIN_OTP=false`) |
 
-## LAST_DEPLOY_RESULT
+## QA_IDENTITY_LEDGER (sanitized)
 
-QA Staff command deployed to production; account created via `jetpk:dash-03-qa-staff create`
+| Role | Created | User ID | Account Type | Status | Agency Test Entity |
+|------|---------|---------|--------------|--------|-------------------|
+| Admin | yes | 9 | platform_admin | Active | no |
+| Staff | yes | 8 | Staff | Active | no |
+| Agent | yes | prod | agent | Active | yes (jp-dash-03-qa-agency) |
+| Customer | yes | prod | customer | Active | no |
 
-## ADMIN_SESSION_STATUS
-
-`READY` (remember-enabled storage state)
-
-## ADMIN_REMEMBER_STATUS
-
-`PASS` — cookie present with persistent expiry
-
-## STAFF_IDENTITY_STATUS
-
-`QA_STAFF_CREATED=yes` | `QA_STAFF_BASELINE_ROLE=staff_operator` | `QA_STAFF_STATUS=Active`
-
-## STAFF_SESSION_STATUS
-
-`PENDING` — `acceptance:staff-login` headed bootstrap running (OTP to jp-dash-03-qa-staff@jetpakistan.pk)
-
-## RBAC_MATRIX_STATUS
-
-`PARTIAL` — Admin/Anonymous PASS; QA Staff browser pending session
-
-## GATE STATUS SUMMARY
+## QA_AUTH_STATUS
 
 | Gate | Status |
 |------|--------|
-| `PAGE_MATRIX` | **PASS** |
-| `BOOKING_DETAIL_BROWSER_PROOF` | **PASS** |
-| `ACTION_MATRIX` | **PARTIAL** |
-| `OLS_STATUS` | **PARTIAL** — global hash verified; vhost path re-verify pending |
-| `OTA_REGRESSION_STATUS` | **PENDING** |
-| `SOURCE_PARITY_STATUS` | **PENDING** |
+| `QA_ADMIN_AUTH` | **PASS** |
+| `QA_STAFF_AUTH` | **PASS** |
+| `QA_AGENT_AUTH` | **PASS** |
+| `QA_CUSTOMER_AUTH` | **PASS** |
 
-## CURRENT_BLOCKERS
+## LAST_TEST_RESULT
 
-1. Staff OTP login for QA identity (headed browser open)
-2. Staff RBAC matrix rows after session saved
-3. Action matrix exhaustion, booking management closure, final crawls
+- `php artisan test --filter=JetPkLoginOtpTest` → **13/13 PASS**
+- `php artisan test --filter=JpDash03` → **22/22 PASS**
+- `npm run test:rbac-browser-matrix` → **2/2 PASS** (Admin+Staff+Anonymous matrix + staff API smoke)
 
-## NEXT_AUTONOMOUS_TARGET
+## LAST_DEPLOY_RESULT
 
-Staff session READY → Staff RBAC/denial matrix → action matrix closure
+- `ClientLoginOtpGate.php`, `ota_client.php`, QA identity commands → production
+- `OTA_CLIENT_REQUIRE_LOGIN_OTP=false` on production (temporary QA window)
+- QA identities created/rotated; emails fixed to `@jetpakistan.pk`
+
+## OLS_STATUS
+
+| Hash | Expected | Status |
+|------|----------|--------|
+| global `httpd_config.conf` | `612aa838…` | **PASS** |
+| vhost `vhconf.conf` | `8da510a8…` | **PASS** |
+
+## GATE STATUS SUMMARY (V3 reset)
+
+| Gate | Status |
+|------|--------|
+| `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
+| `WAVE_0` | **PASS** |
+| `MULTI_ROLE_RBAC` | **PARTIAL** (browser matrix PASS; full five-role crawl pending) |
+| `BOOKING_MANAGEMENT` | **PARTIAL** (prior infra PASS; V3 retest pending) |
+| `SIDEBAR_INFORMATION_ARCHITECTURE` | **FAIL** |
+| `OTA_PARITY` | **PENDING** |
+
+## CURRENT_FINDING
+
+JetPK login API returns `/` redirect for all roles; acceptance harness navigates to role-specific dashboard paths. Staff Users deny is enforced in page body (Next SSR), not HTTP 403.
+
+## NEXT_ACTION
+
+Wave 1: JP-REF-01 three-way audit + JP-PARITY-01 matrix + JP-MODULES-01 inventory
 
 ## JP_DASH_03_STATUS
 

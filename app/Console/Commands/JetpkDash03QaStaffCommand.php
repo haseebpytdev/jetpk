@@ -24,7 +24,7 @@ class JetpkDash03QaStaffCommand extends Command
     private const QA_MARKER = 'jp-dash-03-qa-staff';
 
     protected $signature = 'jetpk:dash-03-qa-staff
-        {action=status : create|deactivate|restore-baseline|status}
+        {action=status : create|deactivate|restore-baseline|rotate-password|status}
         {--preset=staff_operator : Canonical staff permission preset key}';
 
     protected $description = 'JP-DASH-03 controlled temporary QA Staff identity (sanitized output only)';
@@ -37,6 +37,7 @@ class JetpkDash03QaStaffCommand extends Command
             'create' => $this->createQaStaff(),
             'deactivate' => $this->deactivateQaStaff(),
             'restore-baseline' => $this->restoreBaseline(),
+            'rotate-password' => $this->rotatePassword(),
             'status' => $this->reportStatus(),
             default => $this->invalidAction($action),
         };
@@ -184,6 +185,28 @@ class JetpkDash03QaStaffCommand extends Command
         $this->line('QA_STAFF_PERMISSION_DRIFT=0');
         $this->line('QA_STAFF_BASELINE_ROLE='.$preset);
         $this->line('QA_STAFF_STATUS=Active');
+
+        return self::SUCCESS;
+    }
+
+    private function rotatePassword(): int
+    {
+        $user = $this->qaUserQuery()->first();
+        if ($user === null) {
+            $this->line('QA_STAFF_STATUS=missing');
+
+            return self::FAILURE;
+        }
+
+        $password = (string) env('JP_DASH_03_QA_STAFF_PASSWORD', '');
+        if ($password === '') {
+            $this->line('QA_STAFF_PASSWORD_REQUIRED=YES');
+
+            return self::FAILURE;
+        }
+
+        $user->forceFill(['password' => Hash::make($password)])->save();
+        $this->line('QA_STAFF_PASSWORD_ROTATED=yes');
 
         return self::SUCCESS;
     }

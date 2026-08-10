@@ -124,6 +124,40 @@ function classifyHttpStatus(status: number, expected: AccessExpectation): string
   return status === 401 || status === 403 || status === 302 || status === 404 ? "PASS" : "FAIL";
 }
 
+function isStaffSurfaceDenied(status: number, body: string): boolean {
+  if (status === 401 || status === 403 || status === 404 || status === 302) {
+    return true;
+  }
+
+  const showsOperationalUsers =
+    body.includes("users-filters") ||
+    body.includes("data-testid=\"users-table\"") ||
+    body.includes("data-testid=\"users-filters\"");
+
+  return /access denied|permission denied|forbidden/i.test(body) && !showsOperationalUsers;
+}
+
+function classifyPageAccess(
+  status: number,
+  body: string,
+  expected: AccessExpectation,
+  role: "STAFF" | "ANONYMOUS" | "ADMIN",
+): string {
+  if (expected === "allow") {
+    return status >= 200 && status < 400 && !PREVIEW_RESIDUE.test(body) ? "PASS" : "FAIL";
+  }
+
+  if (role === "ANONYMOUS") {
+    return isAnonymousSurfaceDenied(status, body) ? "PASS" : "FAIL";
+  }
+
+  if (role === "STAFF") {
+    return isStaffSurfaceDenied(status, body) ? "PASS" : "FAIL";
+  }
+
+  return classifyHttpStatus(status, expected);
+}
+
 function isAnonymousSurfaceDenied(status: number, body: string): boolean {
   if (status === 401 || status === 403 || status === 404 || status === 302) {
     return true;
@@ -203,7 +237,7 @@ test.describe("JP-DASH-03 RBAC browser matrix", () => {
           route: probe.adminRoute,
           control: "direct_url",
           expected_access: "allow",
-          result: pageProbe.status < 400 && pageProbe.bodyOk ? "PASS" : "FAIL",
+          result: classifyPageAccess(pageProbe.status, pageProbe.body, "allow", "ADMIN"),
         });
       }
 
@@ -240,7 +274,7 @@ test.describe("JP-DASH-03 RBAC browser matrix", () => {
           route: probe.staffRoute,
           control: "direct_url",
           expected_access: expected,
-          result: classifyHttpStatus(pageProbe.status, expected),
+          result: classifyPageAccess(pageProbe.status, pageProbe.body, expected, "STAFF"),
         });
       }
 

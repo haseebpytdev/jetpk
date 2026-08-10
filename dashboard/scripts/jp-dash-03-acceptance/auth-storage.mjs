@@ -11,6 +11,7 @@ const repoRoot = path.resolve(__dirname, "../../../");
 
 export const baseUrl = process.env.JP_ACCEPTANCE_BASE_URL ?? "https://jetpakistan.pk";
 
+/** @type {Record<string, { storageEnv: string, defaultPath: string, dashboardPattern: RegExp, dashboardPath: string, portalLabelPattern: RegExp, loginUrl: string, qaLogin: string }>} */
 export const AUTH_ROLES = {
   admin: {
     storageEnv: "JP_ADMIN_STORAGE_STATE",
@@ -19,6 +20,7 @@ export const AUTH_ROLES = {
     dashboardPath: "/admin/dashboard",
     portalLabelPattern: /admin/i,
     loginUrl: `${baseUrl}/login`,
+    qaLogin: "jp-dash-03-qa-admin@jetpakistan.pk",
   },
   staff: {
     storageEnv: "JP_STAFF_STORAGE_STATE",
@@ -27,6 +29,25 @@ export const AUTH_ROLES = {
     dashboardPath: "/staff/dashboard",
     portalLabelPattern: /staff/i,
     loginUrl: `${baseUrl}/login`,
+    qaLogin: "jp-dash-03-qa-staff@jetpakistan.pk",
+  },
+  agent: {
+    storageEnv: "JP_AGENT_STORAGE_STATE",
+    defaultPath: path.join(repoRoot, "tmp/jp-dash-03-agent-storage-state.json"),
+    dashboardPattern: /\/agent\/dashboard/,
+    dashboardPath: "/agent/dashboard",
+    portalLabelPattern: /agent/i,
+    loginUrl: `${baseUrl}/login`,
+    qaLogin: "jp-dash-03-qa-agent@jetpakistan.pk",
+  },
+  customer: {
+    storageEnv: "JP_CUSTOMER_STORAGE_STATE",
+    defaultPath: path.join(repoRoot, "tmp/jp-dash-03-customer-storage-state.json"),
+    dashboardPattern: /\/customer\/dashboard/,
+    dashboardPath: "/customer/dashboard",
+    portalLabelPattern: /customer/i,
+    loginUrl: `${baseUrl}/login`,
+    qaLogin: "jp-dash-03-qa-customer@jetpakistan.pk",
   },
 };
 

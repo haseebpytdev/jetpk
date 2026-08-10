@@ -1,6 +1,6 @@
 {
-  "generatedAtUtc": "2026-08-10T20:08:05.094Z",
-  "staffSessionAvailable": false,
+  "generatedAtUtc": "2026-08-10T22:55:30.404Z",
+  "staffSessionAvailable": true,
   "multiRoleRbacBrowserMatrix": "PASS",
   "rows": [
     {
@@ -16,6 +16,14 @@
       "role": "ADMIN",
       "route": "/api/dashboard/overview",
       "control": "api",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Dashboard",
+      "role": "STAFF",
+      "route": "/staff/dashboard",
+      "control": "direct_url",
       "expected_access": "allow",
       "result": "PASS"
     },
@@ -45,6 +53,14 @@
     },
     {
       "module": "Bookings",
+      "role": "STAFF",
+      "route": "/staff/dashboard/bookings",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Bookings",
       "role": "ANONYMOUS",
       "route": "/api/dashboard/bookings",
       "control": "api",
@@ -64,6 +80,14 @@
       "role": "ADMIN",
       "route": "/api/dashboard/payments",
       "control": "api",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Payments",
+      "role": "STAFF",
+      "route": "/staff/dashboard/payments",
+      "control": "direct_url",
       "expected_access": "allow",
       "result": "PASS"
     },
@@ -93,6 +117,14 @@
     },
     {
       "module": "Customers",
+      "role": "STAFF",
+      "route": "/staff/dashboard/customers",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Customers",
       "role": "ANONYMOUS",
       "route": "/api/dashboard/customers",
       "control": "api",
@@ -108,9 +140,25 @@
       "result": "PASS"
     },
     {
+      "module": "Agents",
+      "role": "STAFF",
+      "route": "/staff/dashboard/agents",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
       "module": "Suppliers",
       "role": "ADMIN",
       "route": "/admin/dashboard/suppliers",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Suppliers",
+      "role": "STAFF",
+      "route": "/staff/dashboard/suppliers",
       "control": "direct_url",
       "expected_access": "allow",
       "result": "PASS"
@@ -121,6 +169,14 @@
       "route": "/admin/dashboard/users",
       "control": "direct_url",
       "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Users",
+      "role": "STAFF",
+      "route": "/staff/dashboard/users",
+      "control": "direct_url",
+      "expected_access": "deny",
       "result": "PASS"
     },
     {
@@ -173,6 +229,14 @@
     },
     {
       "module": "Settings",
+      "role": "STAFF",
+      "route": "/staff/dashboard/settings",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Settings",
       "role": "ANONYMOUS",
       "route": "/admin/settings",
       "control": "direct_url",
@@ -183,6 +247,14 @@
       "module": "CMS",
       "role": "ADMIN",
       "route": "/admin/dashboard/cms/pages",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "CMS",
+      "role": "STAFF",
+      "route": "/staff/dashboard/cms/pages",
       "control": "direct_url",
       "expected_access": "allow",
       "result": "PASS"
@@ -205,6 +277,14 @@
     },
     {
       "module": "Reports",
+      "role": "STAFF",
+      "route": "/staff/dashboard/reports",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Reports",
       "role": "ANONYMOUS",
       "route": "/api/dashboard/reports/bookings",
       "control": "api",
@@ -215,6 +295,14 @@
       "module": "Audit",
       "role": "ADMIN",
       "route": "/admin/dashboard/audit",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Audit",
+      "role": "STAFF",
+      "route": "/staff/dashboard/audit",
       "control": "direct_url",
       "expected_access": "allow",
       "result": "PASS"

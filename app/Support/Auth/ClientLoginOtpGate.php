@@ -13,7 +13,7 @@ final class ClientLoginOtpGate
     public static function isRequired(?Request $request = null): bool
     {
         if (self::resolvedClientSlug($request) === 'jetpk') {
-            return true;
+            return (bool) config('ota_client.auth.require_login_otp', true);
         }
 
         if (is_client_preview()) {

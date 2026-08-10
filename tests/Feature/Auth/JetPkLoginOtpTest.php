@@ -152,6 +152,29 @@ class JetPkLoginOtpTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_jetpk_otp_can_be_disabled_via_config_for_qa_window(): void
+    {
+        Mail::fake();
+        config(['ota_client.auth.require_login_otp' => false]);
+        $this->makeJetPkProfile();
+
+        $user = User::factory()->customer()->create([
+            'email' => 'jetpk-qa@example.test',
+            'password' => Hash::make('SecretPass1'),
+            'email_verified_at' => now(),
+        ]);
+
+        $this->assertFalse(\App\Support\Auth\ClientLoginOtpGate::isRequired());
+
+        $this->post('/login', [
+            'login' => $user->email,
+            'password' => 'SecretPass1',
+        ])->assertRedirect();
+
+        $this->assertAuthenticatedAs($user);
+        Mail::assertNothingSent();
+    }
+
     public function test_jetpk_login_otp_without_pending_session_redirects_to_login(): void
     {
         $this->makeJetPkProfile();
