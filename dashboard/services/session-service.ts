@@ -11,6 +11,7 @@ export type DashboardNavItem = {
   label: string;
   href: string;
   key: string;
+  target?: "dashboard" | "laravel";
 };
 
 export type DashboardSessionSummary = {

@@ -1,3 +1,4 @@
+import { LaravelLiveRedirect } from "@/components/dashboard/laravel-live-redirect";
 import { OperationalReviewWorkspace } from "@/features/review/operational-review-workspace";
 import { PageHeader } from "@/components/ui/page-layout";
 import { mockCancellationReviews, mockRefundReviews } from "@/mocks/review-fixtures";
@@ -9,6 +10,11 @@ export const metadata = {
 export default function OperationalReviewPage() {
   return (
     <div className="space-y-6">
+      <LaravelLiveRedirect
+        route="admin.bookings"
+        params={{ queue: "cancellations" }}
+        label="Cancellation review"
+      />
       <PageHeader
         title="Operational review"
         description="Approve or reject cancellation and refund requests before execution or settlement."

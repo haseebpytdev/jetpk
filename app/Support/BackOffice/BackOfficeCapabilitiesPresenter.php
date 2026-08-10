@@ -109,51 +109,120 @@ class BackOfficeCapabilitiesPresenter
     {
         $items = [];
         $has = static fn (string $key): bool => in_array($key, $effectivePermissions, true);
+        $bookingsRoute = $isAdmin ? 'admin.bookings' : 'staff.bookings.index';
+        $supportRoute = $isAdmin ? 'admin.support.tickets.index' : 'staff.support.tickets.index';
 
         if ($has('dashboard.view')) {
-            $items[] = ['label' => 'Dashboard', 'href' => '/', 'key' => 'dashboard'];
+            $items[] = $this->dashboardNav('Dashboard', 'dashboard', '/');
         }
         if ($has('bookings.view')) {
-            $items[] = ['label' => 'Bookings', 'href' => '/bookings', 'key' => 'bookings'];
+            $items[] = $this->dashboardNav('Bookings', 'bookings', '/bookings');
+            if ($isAdmin || $user->hasStaffPermission(StaffPermission::CancellationsApprove)) {
+                $items[] = $this->laravelNav('Cancellations', 'cancellations', $bookingsRoute, ['queue' => 'cancellations']);
+            }
+            if ($isAdmin || $user->hasStaffPermission(StaffPermission::BookingsUpdateStatus)) {
+                $items[] = $this->laravelNav('Execution queue', 'execution', $bookingsRoute, ['queue' => 'needs_action']);
+            }
         }
         if ($has('payments.view')) {
-            $items[] = ['label' => 'Payments', 'href' => '/payments', 'key' => 'payments'];
+            $items[] = $this->dashboardNav('Payments', 'payments', '/payments');
         }
         if ($has('pnrs.view')) {
-            $items[] = ['label' => 'PNRs', 'href' => '/pnrs', 'key' => 'pnrs'];
+            $items[] = $this->dashboardNav('PNRs', 'pnrs', '/pnrs');
         }
         if ($has('tickets.view')) {
-            $items[] = ['label' => 'Tickets', 'href' => '/tickets', 'key' => 'tickets'];
+            $items[] = $this->dashboardNav('Tickets', 'tickets', '/tickets');
         }
         if ($isAdmin && ($modules['agent_deposits'] ?? false)) {
-            $items[] = ['label' => 'Deposits', 'href' => '/deposits', 'key' => 'deposits'];
+            $items[] = $this->dashboardNav('Deposits', 'deposits', '/deposits');
         }
         if ($has('customers.view')) {
-            $items[] = ['label' => 'Customers', 'href' => '/customers', 'key' => 'customers'];
+            $items[] = $this->dashboardNav('Customers', 'customers', '/customers');
         }
         if ($has('agents.view')) {
-            $items[] = ['label' => 'Agents', 'href' => '/agents', 'key' => 'agents'];
+            $items[] = $this->dashboardNav('Agents', 'agents', '/agents');
         }
         if ($has('suppliers.view')) {
-            $items[] = ['label' => 'Suppliers', 'href' => '/suppliers', 'key' => 'suppliers'];
+            $items[] = $this->dashboardNav('Suppliers', 'suppliers', '/suppliers');
+            if ($isAdmin) {
+                $items[] = $this->laravelNav('API settings', 'api-settings', 'admin.api-settings');
+            }
         }
         if ($has('users.view')) {
-            $items[] = ['label' => 'Users', 'href' => '/users', 'key' => 'users'];
+            $items[] = $this->dashboardNav('Users', 'users', '/users');
+        }
+        if ($isAdmin) {
+            $items[] = $this->laravelNav('Staff', 'staff', 'admin.staff');
+        }
+        if ($has('cms.view')) {
+            $items[] = $this->dashboardNav('CMS', 'cms', '/cms');
         }
         if ($has('reports.view')) {
-            $items[] = ['label' => 'Reports', 'href' => '/reports', 'key' => 'reports'];
+            $items[] = $this->dashboardNav('Reports', 'reports', '/reports');
         }
         if ($has('audit.view')) {
-            $items[] = ['label' => 'Audit', 'href' => '/audit', 'key' => 'audit'];
+            $items[] = $this->dashboardNav('Audit', 'audit', '/audit');
         }
         if ($has('settings.view')) {
-            $items[] = ['label' => 'Settings', 'href' => '/settings', 'key' => 'settings'];
+            $items[] = $this->dashboardNav('Settings', 'settings', '/settings');
+            if ($isAdmin && ($modules['branding_settings'] ?? false)) {
+                $items[] = $this->laravelNav('Branding', 'branding', 'admin.settings.branding.edit');
+            }
+            if ($isAdmin) {
+                $items[] = $this->laravelNav('Page settings', 'page-settings', 'admin.page-settings.index');
+            }
+            if ($isAdmin && $this->platformModules->routeEnabled('markups')) {
+                $items[] = $this->laravelNav('Markups', 'markups', 'admin.markups');
+            }
+            if ($isAdmin && ($modules['notifications'] ?? false)) {
+                $items[] = $this->laravelNav('Communications', 'communications', 'admin.settings.communications.index');
+            }
+            if ($isAdmin) {
+                $items[] = $this->laravelNav('Go-live checklist', 'go-live', 'admin.go-live-checklist');
+            }
+        }
+        if ($isAdmin) {
+            $items[] = $this->laravelNav('Flight search', 'flights-search', 'flights.search');
         }
         if (($isAdmin || $user->hasStaffPermission(StaffPermission::SupportView)) && ($modules['agent_support'] ?? false)) {
-            $items[] = ['label' => 'Support', 'href' => '/support', 'key' => 'support'];
+            $items[] = $this->laravelNav('Support', 'support', $supportRoute);
         }
 
-        return $items;
+        return array_values(array_filter($items));
+    }
+
+    /**
+     * @return array{label: string, href: string, key: string, target: string}
+     */
+    private function dashboardNav(string $label, string $key, string $href): array
+    {
+        return [
+            'label' => $label,
+            'href' => $href,
+            'key' => $key,
+            'target' => 'dashboard',
+        ];
+    }
+
+    /**
+     * @param  array<string, string|null>  $params
+     * @return array{label: string, href: string, key: string, target: string}|null
+     */
+    private function laravelNav(string $label, string $key, string $routeName, array $params = []): ?array
+    {
+        try {
+            $filtered = array_filter($params, static fn ($value) => $value !== null && $value !== '');
+            $href = route($routeName, $filtered);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        return [
+            'label' => $label,
+            'href' => $href,
+            'key' => $key,
+            'target' => 'laravel',
+        ];
     }
 
     /**

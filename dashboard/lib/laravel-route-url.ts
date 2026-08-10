@@ -14,9 +14,12 @@ const ADMIN_ROUTE_PATHS: Record<string, string> = {
   "admin.support.tickets.index": "/admin/support/tickets",
   "admin.finance.wallet-audit.index": "/admin/finance/wallet-audit",
   "admin.agent-deposits.index": "/admin/agent-deposits",
-  "flights.search": "/flights/search",
-  "staff.dashboard": "/staff/dashboard",
-  "staff.bookings": "/staff/bookings",
+  "admin.settings.branding.edit": "/admin/settings/branding",
+  "admin.branding": "/admin/branding",
+  "admin.go-live-checklist": "/admin/go-live-checklist",
+  "staff.bookings.index": "/staff/bookings",
+  "staff.support.tickets.index": "/staff/support/tickets",
+  "flights.search": "/",
 };
 
 export function laravelRouteUrl(

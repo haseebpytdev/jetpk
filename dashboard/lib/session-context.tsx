@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import type { DashboardSessionSummary } from "@/services/session-service";
+import type { DashboardSessionSummary, DashboardNavItem } from "@/services/session-service";
 
 const SessionContext = createContext<DashboardSessionSummary | null>(null);
 
@@ -24,7 +24,7 @@ export function useDashboardCapabilities(): Record<string, boolean> {
   return session?.capabilities ?? {};
 }
 
-export function useDashboardNavigation(): Array<{ label: string; href: string; key: string }> {
+export function useDashboardNavigation(): DashboardNavItem[] {
   const session = useDashboardSession();
   return session?.navigation ?? [];
 }

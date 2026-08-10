@@ -9,6 +9,7 @@ import { useDashboardPortal } from "@/lib/portal-context";
 import { useDashboardNavigation, useDashboardSession } from "@/lib/session-context";
 import { useDashboardPath } from "@/lib/use-dashboard-path";
 import { cn } from "@/lib/utils";
+import { laravelRouteUrl } from "@/lib/laravel-route-url";
 import { navGroups } from "@/lib/nav-config";
 import type { DashboardBranding } from "@/services/branding-service";
 import type { DashboardSessionSummary } from "@/services/session-service";
@@ -101,23 +102,32 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
           {useSessionNavigation ? (
             <ul className="space-y-1">
               {navigation.map((item) => {
-                const active = isActive(relativePathname, item.href);
-                const href = dashboardHref(portal, item.href);
+                const active = item.target !== "laravel" && isActive(relativePathname, item.href);
+                const href =
+                  item.target === "laravel" ? item.href : dashboardHref(portal, item.href);
+                const linkClass = cn(
+                  "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
+                  active
+                    ? "bg-jp-accent font-medium text-white"
+                    : "text-gray-300 hover:bg-white/10 hover:text-white",
+                );
+
                 return (
                   <li key={item.key}>
-                    <Link
-                      href={href}
-                      onClick={onClose}
-                      className={cn(
-                        "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
-                        active
-                          ? "bg-jp-accent font-medium text-white"
-                          : "text-gray-300 hover:bg-white/10 hover:text-white",
-                      )}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <span className="flex-1">{item.label}</span>
-                    </Link>
+                    {item.target === "laravel" ? (
+                      <a href={href} onClick={onClose} className={linkClass}>
+                        <span className="flex-1">{item.label}</span>
+                      </a>
+                    ) : (
+                      <Link
+                        href={href}
+                        onClick={onClose}
+                        className={linkClass}
+                        aria-current={active ? "page" : undefined}
+                      >
+                        <span className="flex-1">{item.label}</span>
+                      </Link>
+                    )}
                   </li>
                 );
               })}
@@ -167,13 +177,15 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
             <p className="text-sm font-semibold">Need help?</p>
             <p className="mt-1 text-xs text-gray-400">Contact platform support for operational assistance.</p>
             {useSessionNavigation ? (
-              <Link
-                href={dashboardHref(portal, "/support")}
+              <a
+                href={laravelRouteUrl(
+                  effectivePortal === "staff" ? "staff.support.tickets.index" : "admin.support.tickets.index",
+                )}
                 onClick={onClose}
                 className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-jp-accent px-3 py-2 text-sm font-medium text-white hover:bg-jp-accent-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Contact Support
-              </Link>
+              </a>
             ) : (
               <button
                 type="button"

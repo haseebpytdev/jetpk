@@ -68,6 +68,21 @@ export function DashboardGlobalSearch() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [open]);
+
   return (
     <div ref={containerRef} className="relative hidden min-w-[200px] flex-1 md:block md:max-w-xl">
       <label className="sr-only" htmlFor="global-search">

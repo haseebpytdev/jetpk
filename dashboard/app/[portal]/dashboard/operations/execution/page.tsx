@@ -1,3 +1,4 @@
+import { LaravelLiveRedirect } from "@/components/dashboard/laravel-live-redirect";
 import { OperationalExecutionWorkspace } from "@/features/execution/operational-execution-workspace";
 import { PageHeader } from "@/components/ui/page-layout";
 import {
@@ -13,6 +14,11 @@ export const metadata = {
 export default function OperationalExecutionPage() {
   return (
     <div className="space-y-6">
+      <LaravelLiveRedirect
+        route="admin.bookings"
+        params={{ queue: "needs_action" }}
+        label="Execution queue"
+      />
       <PageHeader
         title="Operational execution"
         description="Authoritative cancellation, refund settlement, and ticket issuance controls."

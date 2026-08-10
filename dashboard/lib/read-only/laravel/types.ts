@@ -19,7 +19,7 @@ export type LaravelSessionPayload = {
   requiresPasswordChange?: boolean;
   requiresEmailVerification?: boolean;
   landingRoute?: string;
-  navigation?: Array<{ label: string; href: string; key: string }>;
+  navigation?: Array<{ label: string; href: string; key: string; target?: "dashboard" | "laravel" }>;
   capabilities?: Record<string, boolean>;
   schemaVersion: string;
   generatedAt: string;
