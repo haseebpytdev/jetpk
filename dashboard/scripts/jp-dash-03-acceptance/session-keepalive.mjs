@@ -3,61 +3,34 @@
  * Read-only pings — never logs cookies, credentials, or storageState contents.
  */
 import { request } from "@playwright/test";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import {
+  baseUrl,
+  getStoragePath,
+  storageStateExists,
+} from "./auth-storage.mjs";
+import { checkOrRecoverSession, checkSessionHealth } from "./remember-recovery.mjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "../../../");
-const defaultStoragePath = path.join(repoRoot, "tmp/jp-dash-03-admin-storage-state.json");
-
-const baseUrl = process.env.JP_ACCEPTANCE_BASE_URL ?? "https://jetpakistan.pk";
 const KEEPALIVE_PATH = "/api/dashboard/overview";
 const KEEPALIVE_INTERVAL_MS = Number(process.env.JP_ACCEPTANCE_KEEPALIVE_MS ?? 4 * 60 * 1000);
 
 let keepaliveTimer = null;
-let keepaliveContext = null;
 let staleDetected = false;
 
-export function getStoragePath() {
-  return process.env.JP_ADMIN_STORAGE_STATE ?? defaultStoragePath;
-}
+export { getStoragePath, storageStateExists, baseUrl };
 
-export function storageStateExists() {
-  return fs.existsSync(getStoragePath());
+/**
+ * @returns {Promise<"READY"|"STALE"|"MISSING"|"RECOVERED_FROM_REMEMBER"|"REAUTH_REQUIRED">}
+ */
+export async function checkAdminSessionHealth() {
+  return checkSessionHealth("admin");
 }
 
 /**
- * @returns {Promise<"READY"|"STALE"|"MISSING">}
+ * Attempt remember recovery when stale.
+ * @returns {Promise<"READY"|"RECOVERED_FROM_REMEMBER"|"REAUTH_REQUIRED"|"MISSING">}
  */
-export async function checkAdminSessionHealth() {
-  if (!storageStateExists()) {
-    return "MISSING";
-  }
-
-  const ctx = await request.newContext({
-    baseURL: baseUrl,
-    storageState: getStoragePath(),
-  });
-
-  try {
-    const response = await ctx.get(KEEPALIVE_PATH, {
-      timeout: 60_000,
-      headers: {
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      },
-    });
-    if (response.status() === 401 || response.status() === 403) {
-      return "STALE";
-    }
-    if (!response.ok()) {
-      return "STALE";
-    }
-    return "READY";
-  } finally {
-    await ctx.dispose();
-  }
+export async function checkOrRecoverAdminSession() {
+  return checkOrRecoverSession("admin");
 }
 
 export async function pingAdminSession() {
@@ -75,7 +48,7 @@ export function startAcceptanceSessionKeepalive() {
   if (keepaliveTimer || staleDetected) {
     return;
   }
-  if (!storageStateExists()) {
+  if (!storageStateExists("admin")) {
     return;
   }
 
@@ -96,10 +69,6 @@ export function stopAcceptanceSessionKeepalive() {
   if (keepaliveTimer) {
     clearInterval(keepaliveTimer);
     keepaliveTimer = null;
-  }
-  if (keepaliveContext) {
-    keepaliveContext.dispose().catch(() => undefined);
-    keepaliveContext = null;
   }
 }
 

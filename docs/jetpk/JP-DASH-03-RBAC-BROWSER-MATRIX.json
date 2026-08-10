@@ -1,0 +1,7 @@
+{
+  "generatedAtUtc": null,
+  "note": "Populated by npm run test:rbac-browser-matrix when Admin session is READY.",
+  "staffSessionAvailable": false,
+  "multiRoleRbacBrowserMatrix": "PENDING",
+  "rows": []
+}

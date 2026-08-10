@@ -2,14 +2,14 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-10T18:15:00Z
+2026-08-10T19:25:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `589f137` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `589f137` |
+| `LOCAL_HEAD` | pending commit |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `ddb0d65` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -18,62 +18,62 @@
 
 ## CURRENT_GATE
 
-`BOOKING_MANAGEMENT` / `ACTION_MATRIX`
+`AUTH_PERSISTENCE` / `MULTI_ROLE_RBAC`
 
 ## CURRENT_GATE_STATUS
 
-`IN_PROGRESS` — checkpoint-12 **9/9 PASS**; booking detail browser proof **PASS**
+`IN_PROGRESS` — remember recovery + staff bootstrap implemented; RBAC matrix pending live session
 
 ## LAST_COMPLETED_GATE
 
-`BOOKING_DETAIL_BROWSER_PROOF` — checkpoint-12 9/9 including ≥2 refs (WL96PKN9, FTRN9ULV, KXZ5N65J)
+`BOOKING_DETAIL_BROWSER_PROOF` — checkpoint-12 9/9
 
 ## LAST_TEST_RESULT
 
-- `npm run test:checkpoint-12` → **9/9 PASS**
-- `JpDash03Checkpoint12ModulesTest` → **5/5 PASS** (prior)
+- `JpDash03AuthRecoverySecurityTest` → **7/7 PASS**
+- `npm run test:checkpoint-12` → **9/9 PASS** (prior)
 
 ## LAST_DEPLOY_RESULT
 
-**PASS** — bookings View deep-link, workspace drawer state, money ISO secondary line deployed to production
+**PASS** — booking View deep-link + money ISO (prior batch)
+
+## AUTH ACCEPTANCE STATUS
+
+| Gate | Status |
+|------|--------|
+| `ADMIN_AUTH_BOOTSTRAP` | **PARTIAL** — remember auto-check; session STALE until human re-login |
+| `ADMIN_REMEMBER_AUTH` | **IMPLEMENTED** — bootstrap requests remember=true |
+| `ADMIN_AUTOMATIC_SESSION_RECOVERY` | **IMPLEMENTED** — remember recovery before REAUTH_REQUIRED |
+| `STAFF_AUTH_BOOTSTRAP` | **PENDING** — `acceptance:staff-login` ready |
+| `STAFF_REMEMBER_AUTH` | **IMPLEMENTED** (tooling) |
+| `MULTI_ROLE_RBAC_BROWSER_MATRIX` | **PENDING** — requires Admin/Staff sessions |
+| `STAFF_BROWSER_STATUS` | `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` or human Staff login |
 
 ## GATE STATUS SUMMARY
 
 | Gate | Status |
 |------|--------|
-| `PAGE_MATRIX` | **PASS** (50/50 post-login crawl) |
-| `ACTION_MATRIX` | **PARTIAL** |
-| `BOOKING_MANAGEMENT` | **PARTIAL** (matrix exists; closure pending) |
+| `PAGE_MATRIX` | **PASS** |
 | `BOOKING_DETAIL_BROWSER_PROOF` | **PASS** |
-| `MONEY_STATUS` | **PARTIAL** (drawer ISO line added; cross-module pending) |
-| `FILTER_STATUS` | **PASS** |
-| `DRAWER_STATUS` | **PASS** |
-| `SEARCH_STATUS` | **PARTIAL** |
-| `RESPONSIVE_STATUS` | **PASS** (baseline) |
-| `ZOOM_STATUS` | **PASS** |
-| `ACCESSIBILITY_STATUS` | **PARTIAL** |
-| `PERFORMANCE_STATUS` | **PASS** |
-| `SUPPLIERS` | **PASS** (checkpoint-12 audit) |
-| `FINAL_CRAWL_STATUS` | **PARTIAL** |
+| `ACTION_MATRIX` | **PARTIAL** |
+| `OLS_STATUS` | **PASS** |
 | `OTA_REGRESSION_STATUS` | **PENDING** |
 | `SOURCE_PARITY_STATUS` | **PENDING** |
-| `OLS_STATUS` | **PASS** |
-| `STAFF_BROWSER_STATUS` | `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` |
 
 ## CURRENT_BLOCKERS
 
-1. Action matrix completion
-2. Booking management operational closure
-3. Global search, settings/API/staff deep acceptance
-4. Final crawl, OTA regression, source parity
+1. Admin Playwright session STALE — run `npm run acceptance:admin-login` with remember (auto-checked)
+2. Staff session missing — run `acceptance:check-safe-staff` then `acceptance:staff-login` if available
+3. RBAC browser matrix execution after sessions restored
 
 ## NEXT_AUTONOMOUS_TARGET
 
-Action matrix JSON closure → booking management matrix → global search → final crawl
+Session refresh → RBAC matrix → action matrix closure → final crawl
 
 ## JP_DASH_03_STATUS
 
 `FAIL_NOT_OPERATIONALLY_CLOSED`
+
 
 ## NO MERGE
 

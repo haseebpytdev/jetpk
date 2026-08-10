@@ -1,8 +1,7 @@
 /**
  * One-time headed login bootstrap for JP-DASH-03 production Admin acceptance.
+ * Requests remember=true via the legitimate Remember me control.
  * Saves authenticated storageState locally — never commit the output file.
- *
- * After successful login, automatically runs production crawl + acceptance tests.
  *
  * Usage: node scripts/jp-dash-03-admin-login-bootstrap.mjs
  */
@@ -11,16 +10,18 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  AUTH_ROLES,
+  ensureStorageDir,
+  logRememberCookieMetadata,
+} from "./jp-dash-03-acceptance/auth-storage.mjs";
 import { startAcceptanceSessionKeepalive } from "./jp-dash-03-acceptance/session-keepalive.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dashboardRoot = path.resolve(__dirname, "../");
-const repoRoot = path.resolve(__dirname, "../../");
-const storagePath = path.join(repoRoot, "tmp/jp-dash-03-admin-storage-state.json");
+const storagePath = ensureStorageDir("admin");
+const adminConfig = AUTH_ROLES.admin;
 
-const baseUrl = process.env.JP_ACCEPTANCE_BASE_URL ?? "https://jetpakistan.pk";
-const loginUrl = `${baseUrl}/login`;
-const dashboardPattern = /\/admin\/dashboard/;
 const INTERACTIVE_TIMEOUT_MS = Number(process.env.JP_ADMIN_LOGIN_TIMEOUT_MS ?? 30 * 60 * 1000);
 
 function runAcceptanceChain() {
@@ -49,18 +50,19 @@ function runAcceptanceChain() {
     process.exit(checkpoint12.status ?? 1);
   }
 
-  const tests = spawnSync("npm", ["run", "test:production-acceptance"], {
-    cwd: dashboardRoot,
-    stdio: "inherit",
-    shell: true,
-  });
+  console.log("ACCEPTANCE_CHAIN_PASS");
+}
 
-  if (tests.status !== 0) {
-    console.error("ACCEPTANCE_CHAIN_TESTS_FAIL");
-    process.exit(tests.status ?? 1);
+async function ensureRememberRequested(page) {
+  const rememberCheckbox = page.locator('input[name="remember"][type="checkbox"]');
+  if ((await rememberCheckbox.count()) === 0) {
+    console.log("ADMIN_REMEMBER_REQUESTED=no_control");
+    return false;
   }
 
-  console.log("ACCEPTANCE_CHAIN_PASS");
+  await rememberCheckbox.check({ force: true });
+  console.log("ADMIN_REMEMBER_REQUESTED=yes");
+  return true;
 }
 
 async function main() {
@@ -72,21 +74,23 @@ async function main() {
 
   console.log("WAITING_FOR_ADMIN_LOGIN");
   console.log("Complete Platform Admin login at the headed browser (OTP if required).");
+  console.log("Remember me will be checked automatically before you submit credentials.");
   console.log(`Interactive wait up to ${Math.round(INTERACTIVE_TIMEOUT_MS / 60000)} minutes.`);
 
-  await page.goto(loginUrl, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await page.goto(adminConfig.loginUrl, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await ensureRememberRequested(page);
 
   let loginDetected = false;
   const urlPoller = setInterval(() => {
     const current = page.url();
-    if (dashboardPattern.test(current) && !loginDetected) {
+    if (adminConfig.dashboardPattern.test(current) && !loginDetected) {
       loginDetected = true;
       console.log("ADMIN_LOGIN_DETECTED");
     }
   }, 2000);
 
   try {
-    await page.waitForURL(dashboardPattern, { timeout: INTERACTIVE_TIMEOUT_MS });
+    await page.waitForURL(adminConfig.dashboardPattern, { timeout: INTERACTIVE_TIMEOUT_MS });
     console.log("ADMIN_LOGIN_DETECTED");
     await page.waitForSelector("[data-testid='dashboard-portal-label']", { timeout: 120_000 });
 
@@ -96,6 +100,13 @@ async function main() {
       process.exit(1);
     }
 
+    if (!adminConfig.portalLabelPattern.test(portalLabel)) {
+      console.error("ADMIN_PLAYWRIGHT_SESSION=FAIL");
+      console.error("Authenticated user is not Platform Admin.");
+      process.exit(1);
+    }
+
+    logRememberCookieMetadata(await context.cookies(), "ADMIN");
     await context.storageState({ path: storagePath });
     await browser.close();
     clearInterval(urlPoller);

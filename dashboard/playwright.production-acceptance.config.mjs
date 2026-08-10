@@ -19,6 +19,7 @@ export default defineConfig({
     "jp-dash-03-deep-acceptance.spec.ts",
     "jp-dash-03-checkpoint-11.spec.ts",
     "jp-dash-03-checkpoint-12.spec.ts",
+    "jp-dash-03-rbac-browser-matrix.spec.ts",
   ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,

@@ -22,13 +22,17 @@
     "proof:release-02a-two-next": "node scripts/local-two-next-proof.mjs",
     "proof:release-02a-proxy-sim": "node scripts/local-proxy-simulation.mjs",
     "acceptance:admin-login": "node scripts/jp-dash-03-admin-login-bootstrap.mjs",
+    "acceptance:staff-login": "node scripts/jp-dash-03-staff-login-bootstrap.mjs",
     "acceptance:production-crawl": "node scripts/jp-dash-03-production-crawl.mjs",
     "acceptance:source-parity": "node scripts/jp-dash-03-source-parity.mjs",
     "test:production-acceptance": "playwright test -c playwright.production-acceptance.config.mjs",
     "test:deep-acceptance": "playwright test -c playwright.production-acceptance.config.mjs tests/jp-dash-03-deep-acceptance.spec.ts",
     "test:checkpoint-11": "playwright test -c playwright.production-acceptance.config.mjs tests/jp-dash-03-checkpoint-11.spec.ts",
     "test:checkpoint-12": "playwright test -c playwright.production-acceptance.config.mjs tests/jp-dash-03-checkpoint-12.spec.ts",
-    "acceptance:session-health": "node scripts/jp-dash-03-session-health.mjs"
+    "test:rbac-browser-matrix": "playwright test -c playwright.production-acceptance.config.mjs tests/jp-dash-03-rbac-browser-matrix.spec.ts",
+    "acceptance:session-health": "node scripts/jp-dash-03-session-health.mjs",
+    "acceptance:staff-session-health": "node scripts/jp-dash-03-staff-session-health.mjs",
+    "acceptance:check-safe-staff": "node scripts/jp-dash-03-check-safe-staff.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
