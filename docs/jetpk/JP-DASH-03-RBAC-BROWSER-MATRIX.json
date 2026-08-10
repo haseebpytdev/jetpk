@@ -1,7 +1,255 @@
 {
-  "generatedAtUtc": null,
-  "note": "Populated by npm run test:rbac-browser-matrix when Admin session is READY.",
+  "generatedAtUtc": "2026-08-10T20:08:05.094Z",
   "staffSessionAvailable": false,
-  "multiRoleRbacBrowserMatrix": "PENDING",
-  "rows": []
+  "multiRoleRbacBrowserMatrix": "PASS",
+  "rows": [
+    {
+      "module": "Dashboard",
+      "role": "ADMIN",
+      "route": "/admin/dashboard",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Dashboard",
+      "role": "ADMIN",
+      "route": "/api/dashboard/overview",
+      "control": "api",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Dashboard",
+      "role": "ANONYMOUS",
+      "route": "/api/dashboard/overview",
+      "control": "api",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "Bookings",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/bookings",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Bookings",
+      "role": "ADMIN",
+      "route": "/api/dashboard/bookings",
+      "control": "api",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Bookings",
+      "role": "ANONYMOUS",
+      "route": "/api/dashboard/bookings",
+      "control": "api",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "Payments",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/payments",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Payments",
+      "role": "ADMIN",
+      "route": "/api/dashboard/payments",
+      "control": "api",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Payments",
+      "role": "ANONYMOUS",
+      "route": "/api/dashboard/payments",
+      "control": "api",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "Customers",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/customers",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Customers",
+      "role": "ADMIN",
+      "route": "/api/dashboard/customers",
+      "control": "api",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Customers",
+      "role": "ANONYMOUS",
+      "route": "/api/dashboard/customers",
+      "control": "api",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "Agents",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/agents",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Suppliers",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/suppliers",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Users",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/users",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Staff management",
+      "role": "ADMIN",
+      "route": "/admin/staff",
+      "control": "laravel_page",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Staff management",
+      "role": "ANONYMOUS",
+      "route": "/admin/staff",
+      "control": "direct_url",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "API Settings",
+      "role": "ADMIN",
+      "route": "/admin/api-settings",
+      "control": "laravel_page",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "API Settings",
+      "role": "ANONYMOUS",
+      "route": "/admin/api-settings",
+      "control": "direct_url",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "Settings",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/settings",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Settings",
+      "role": "ADMIN",
+      "route": "/admin/settings",
+      "control": "laravel_page",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Settings",
+      "role": "ANONYMOUS",
+      "route": "/admin/settings",
+      "control": "direct_url",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "CMS",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/cms/pages",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Reports",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/reports",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Reports",
+      "role": "ADMIN",
+      "route": "/api/dashboard/reports/bookings",
+      "control": "api",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Reports",
+      "role": "ANONYMOUS",
+      "route": "/api/dashboard/reports/bookings",
+      "control": "api",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "Audit",
+      "role": "ADMIN",
+      "route": "/admin/dashboard/audit",
+      "control": "direct_url",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Page Settings",
+      "role": "ADMIN",
+      "route": "/admin/page-settings",
+      "control": "laravel_page",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Page Settings",
+      "role": "ANONYMOUS",
+      "route": "/admin/page-settings",
+      "control": "direct_url",
+      "expected_access": "deny",
+      "result": "PASS"
+    },
+    {
+      "module": "Go-live checklist",
+      "role": "ADMIN",
+      "route": "/admin/go-live-checklist",
+      "control": "laravel_page",
+      "expected_access": "allow",
+      "result": "PASS"
+    },
+    {
+      "module": "Go-live checklist",
+      "role": "ANONYMOUS",
+      "route": "/admin/go-live-checklist",
+      "control": "direct_url",
+      "expected_access": "deny",
+      "result": "PASS"
+    }
+  ]
 }

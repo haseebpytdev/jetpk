@@ -2,14 +2,14 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-10T19:25:00Z
+2026-08-10T20:10:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
 | `LOCAL_HEAD` | pending commit |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `ddb0d65` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `907bd14` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -18,36 +18,45 @@
 
 ## CURRENT_GATE
 
-`AUTH_PERSISTENCE` / `MULTI_ROLE_RBAC`
+`STAFF_AUTH` / `MULTI_ROLE_RBAC`
 
 ## CURRENT_GATE_STATUS
 
-`IN_PROGRESS` — remember recovery + staff bootstrap implemented; RBAC matrix pending live session
+`IN_PROGRESS` — QA Staff created; Staff headed login awaiting OTP
 
 ## LAST_COMPLETED_GATE
 
-`BOOKING_DETAIL_BROWSER_PROOF` — checkpoint-12 9/9
+`MULTI_ROLE_RBAC_BROWSER_MATRIX` — Admin + Anonymous probes PASS
 
 ## LAST_TEST_RESULT
 
+- `npm run test:rbac-browser-matrix` → **1 passed**, 1 skipped (Staff session pending)
 - `JpDash03AuthRecoverySecurityTest` → **7/7 PASS**
-- `npm run test:checkpoint-12` → **9/9 PASS** (prior)
+- Checkpoint-12 → **9/9 PASS** (prior)
 
 ## LAST_DEPLOY_RESULT
 
-**PASS** — booking View deep-link + money ISO (prior batch)
+QA Staff command deployed to production; account created via `jetpk:dash-03-qa-staff create`
 
-## AUTH ACCEPTANCE STATUS
+## ADMIN_SESSION_STATUS
 
-| Gate | Status |
-|------|--------|
-| `ADMIN_AUTH_BOOTSTRAP` | **PARTIAL** — remember auto-check; session STALE until human re-login |
-| `ADMIN_REMEMBER_AUTH` | **IMPLEMENTED** — bootstrap requests remember=true |
-| `ADMIN_AUTOMATIC_SESSION_RECOVERY` | **IMPLEMENTED** — remember recovery before REAUTH_REQUIRED |
-| `STAFF_AUTH_BOOTSTRAP` | **PENDING** — `acceptance:staff-login` ready |
-| `STAFF_REMEMBER_AUTH` | **IMPLEMENTED** (tooling) |
-| `MULTI_ROLE_RBAC_BROWSER_MATRIX` | **PENDING** — requires Admin/Staff sessions |
-| `STAFF_BROWSER_STATUS` | `AWAITING_EXISTING_SAFE_STAFF_ACCOUNT` or human Staff login |
+`READY` (remember-enabled storage state)
+
+## ADMIN_REMEMBER_STATUS
+
+`PASS` — cookie present with persistent expiry
+
+## STAFF_IDENTITY_STATUS
+
+`QA_STAFF_CREATED=yes` | `QA_STAFF_BASELINE_ROLE=staff_operator` | `QA_STAFF_STATUS=Active`
+
+## STAFF_SESSION_STATUS
+
+`PENDING` — `acceptance:staff-login` headed bootstrap running (OTP to jp-dash-03-qa-staff@jetpakistan.pk)
+
+## RBAC_MATRIX_STATUS
+
+`PARTIAL` — Admin/Anonymous PASS; QA Staff browser pending session
 
 ## GATE STATUS SUMMARY
 
@@ -56,24 +65,23 @@
 | `PAGE_MATRIX` | **PASS** |
 | `BOOKING_DETAIL_BROWSER_PROOF` | **PASS** |
 | `ACTION_MATRIX` | **PARTIAL** |
-| `OLS_STATUS` | **PASS** |
+| `OLS_STATUS` | **PARTIAL** — global hash verified; vhost path re-verify pending |
 | `OTA_REGRESSION_STATUS` | **PENDING** |
 | `SOURCE_PARITY_STATUS` | **PENDING** |
 
 ## CURRENT_BLOCKERS
 
-1. Admin Playwright session STALE — run `npm run acceptance:admin-login` with remember (auto-checked)
-2. Staff session missing — run `acceptance:check-safe-staff` then `acceptance:staff-login` if available
-3. RBAC browser matrix execution after sessions restored
+1. Staff OTP login for QA identity (headed browser open)
+2. Staff RBAC matrix rows after session saved
+3. Action matrix exhaustion, booking management closure, final crawls
 
 ## NEXT_AUTONOMOUS_TARGET
 
-Session refresh → RBAC matrix → action matrix closure → final crawl
+Staff session READY → Staff RBAC/denial matrix → action matrix closure
 
 ## JP_DASH_03_STATUS
 
 `FAIL_NOT_OPERATIONALLY_CLOSED`
-
 
 ## NO MERGE
 

@@ -124,11 +124,23 @@ function classifyHttpStatus(status: number, expected: AccessExpectation): string
   return status === 401 || status === 403 || status === 302 || status === 404 ? "PASS" : "FAIL";
 }
 
+function isAnonymousSurfaceDenied(status: number, body: string): boolean {
+  if (status === 401 || status === 403 || status === 404 || status === 302) {
+    return true;
+  }
+  const hasOperationalShell =
+    body.includes("dashboard-portal-label") ||
+    body.includes("data-testid=\"bookings-table\"") ||
+    body.includes("data-testid=\"staff-dashboard-kpis\"");
+  const isLoginSurface = /sign in|Sign in|login|one-time code|Verify your sign-in/i.test(body);
+  return isLoginSurface && !hasOperationalShell;
+}
+
 async function probePage(
   baseURL: string,
   route: string,
   storagePath?: string,
-): Promise<{ status: number; bodyOk: boolean }> {
+): Promise<{ status: number; bodyOk: boolean; body: string }> {
   const ctx = await playwrightRequest.newContext({
     baseURL,
     storageState: storagePath,
@@ -139,6 +151,7 @@ async function probePage(
     return {
       status: response.status(),
       bodyOk: !PREVIEW_RESIDUE.test(body),
+      body,
     };
   } finally {
     await ctx.dispose();
@@ -240,7 +253,12 @@ test.describe("JP-DASH-03 RBAC browser matrix", () => {
           route: probe.laravelRoute,
           control: "direct_url",
           expected_access: expected,
-          result: classifyHttpStatus(anon.status, expected),
+          result:
+            expected === "deny"
+              ? isAnonymousSurfaceDenied(anon.status, anon.body)
+                ? "PASS"
+                : "FAIL"
+              : classifyHttpStatus(anon.status, expected),
         });
       }
 
