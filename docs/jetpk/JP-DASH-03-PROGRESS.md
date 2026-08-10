@@ -54,7 +54,7 @@
 | 1 | `a86c89e` | SSR/session fix |
 | 2–3 | `b731396` | Operational summary + search |
 | 3 docs | `5d54b6f` | Deploy status |
-| 4 | pending | Navigation + notifications + search finalize |
+| 4 | `0948200` feat(dashboard): operationalize navigation search and notifications | pushed |
 | 5 | `b731396` + frontend build this pass | Inter typography |
 | 6 | pending | Visual polish if separate commit |
 
