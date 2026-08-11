@@ -181,6 +181,7 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
     const rows: Array<Record<string, string | boolean>> = [];
 
     for (const entry of FILTER_MODULES) {
+      await page.setViewportSize({ width: 1536, height: 900 });
       await page.goto(entry.route, { waitUntil: "domcontentloaded", timeout: 120_000 });
       const body = await page.locator("body").innerText();
       const pageOk = !PREVIEW_RESIDUE.test(body);

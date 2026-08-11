@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T11:43:05.618Z",
+  "generatedAtUtc": "2026-08-11T12:11:49.931Z",
   "rows": [
     {
       "route": "/admin/dashboard",
@@ -84,10 +84,10 @@
     {
       "route": "/admin/dashboard/bookings",
       "viewportWidth": 1024,
-      "scrollWidth": 1280,
+      "scrollWidth": 1024,
       "clientWidth": 1024,
-      "overflow": true,
-      "status": "FAIL"
+      "overflow": false,
+      "status": "PASS"
     },
     {
       "route": "/admin/dashboard/bookings",
@@ -132,34 +132,34 @@
     {
       "route": "/admin/dashboard/customers",
       "viewportWidth": 768,
-      "scrollWidth": 1031,
+      "scrollWidth": 768,
       "clientWidth": 768,
-      "overflow": true,
-      "status": "FAIL"
+      "overflow": false,
+      "status": "PASS"
     },
     {
       "route": "/admin/dashboard/customers",
       "viewportWidth": 935,
-      "scrollWidth": 1031,
+      "scrollWidth": 935,
       "clientWidth": 935,
-      "overflow": true,
-      "status": "FAIL"
+      "overflow": false,
+      "status": "PASS"
     },
     {
       "route": "/admin/dashboard/customers",
       "viewportWidth": 1024,
-      "scrollWidth": 1311,
+      "scrollWidth": 1024,
       "clientWidth": 1024,
-      "overflow": true,
-      "status": "FAIL"
+      "overflow": false,
+      "status": "PASS"
     },
     {
       "route": "/admin/dashboard/customers",
       "viewportWidth": 1280,
-      "scrollWidth": 1311,
+      "scrollWidth": 1280,
       "clientWidth": 1280,
-      "overflow": true,
-      "status": "FAIL"
+      "overflow": false,
+      "status": "PASS"
     },
     {
       "route": "/admin/dashboard/customers",
@@ -220,10 +220,10 @@
     {
       "route": "/admin/dashboard/agents",
       "viewportWidth": 1280,
-      "scrollWidth": 1355,
+      "scrollWidth": 1280,
       "clientWidth": 1280,
-      "overflow": true,
-      "status": "FAIL"
+      "overflow": false,
+      "status": "PASS"
     },
     {
       "route": "/admin/dashboard/agents",
@@ -284,18 +284,18 @@
     {
       "route": "/admin/dashboard/suppliers",
       "viewportWidth": 1280,
-      "scrollWidth": 1402,
+      "scrollWidth": 1280,
       "clientWidth": 1280,
-      "overflow": true,
-      "status": "FAIL"
+      "overflow": false,
+      "status": "PASS"
     },
     {
       "route": "/admin/dashboard/suppliers",
       "viewportWidth": 1366,
-      "scrollWidth": 1402,
+      "scrollWidth": 1366,
       "clientWidth": 1366,
-      "overflow": true,
-      "status": "FAIL"
+      "overflow": false,
+      "status": "PASS"
     },
     {
       "route": "/admin/dashboard/suppliers",
