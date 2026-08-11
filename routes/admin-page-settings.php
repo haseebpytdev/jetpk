@@ -1,18 +1,19 @@
 <?php
 
 use App\Http\Controllers\Admin\ClientPageSettingsController;
+use App\Http\Controllers\BackOffice\BackOfficeLegacyViewRedirectController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::prefix('page-settings')->name('page-settings.')->group(function (): void {
-        Route::get('/', [ClientPageSettingsController::class, 'index'])->name('index');
-        Route::get('/palette', [ClientPageSettingsController::class, 'palette'])->name('palette');
+        Route::get('/', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('index');
+        Route::get('/palette', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('palette');
         Route::post('/palette/generate', [ClientPageSettingsController::class, 'generatePalette'])->name('palette.generate');
         Route::post('/palette/apply', [ClientPageSettingsController::class, 'applyPalette'])->name('palette.apply');
-        Route::get('/custom-pages', [\App\Http\Controllers\Admin\ClientCustomPageController::class, 'index'])->name('custom-pages.index');
-        Route::get('/custom-pages/create', [\App\Http\Controllers\Admin\ClientCustomPageController::class, 'create'])->name('custom-pages.create');
+        Route::get('/custom-pages', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('custom-pages.index');
+        Route::get('/custom-pages/create', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('custom-pages.create');
         Route::post('/custom-pages', [\App\Http\Controllers\Admin\ClientCustomPageController::class, 'store'])->name('custom-pages.store');
-        Route::get('/{pageKey}', [ClientPageSettingsController::class, 'edit'])->name('edit');
+        Route::get('/{pageKey}', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('edit');
         Route::patch('/{pageKey}', [ClientPageSettingsController::class, 'update'])->name('update');
         Route::post('/home/refresh-fares', [ClientPageSettingsController::class, 'refreshHomeRouteFares'])->name('home.refresh-fares');
         Route::post('/{pageKey}/publish', [ClientPageSettingsController::class, 'publish'])->name('publish');

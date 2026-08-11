@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { laravelRouteUrl } from "@/lib/laravel-route-url";
+import { resolveOverviewDashboardHref } from "@/lib/overview-dashboard-href";
+import { useDashboardPortal } from "@/lib/portal-context";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { ActionCard } from "@/types/dashboard";
 
@@ -16,6 +17,7 @@ const toneRing: Record<string, string> = {
 
 export function OperationalQueueGrid({ cards }: { cards: ActionCard[] }) {
   const isLive = useDashboardLiveMode();
+  const portal = useDashboardPortal();
 
   return (
     <section aria-labelledby="ops-queue-heading">
@@ -34,10 +36,10 @@ export function OperationalQueueGrid({ cards }: { cards: ActionCard[] }) {
       ) : (
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {cards.map((card) => {
-            const href = laravelRouteUrl(
-              card.laravelRoute,
-              card.queue ? { queue: card.queue } : undefined,
-            );
+            const href = resolveOverviewDashboardHref(portal, {
+              laravelRoute: card.laravelRoute,
+              queue: card.queue,
+            });
 
             return (
               <Card key={card.key} className={`border-l-4 p-3 ${toneRing[card.tone] ?? "border-l-gray-300"}`}>

@@ -4,7 +4,8 @@ import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { laravelRouteUrl } from "@/lib/laravel-route-url";
+import { resolveOverviewDashboardHref } from "@/lib/overview-dashboard-href";
+import { useDashboardPortal } from "@/lib/portal-context";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { OverviewData } from "@/types/dashboard";
 
@@ -196,11 +197,15 @@ export function QuickActionsBar({
   actions: OverviewData["shortcutActions"];
 }) {
   const isLive = useDashboardLiveMode();
+  const portal = useDashboardPortal();
 
   return (
     <Card className="flex flex-wrap gap-2">
       {actions.map((action) => {
-        const href = laravelRouteUrl(action.laravelRoute, action.queue ? { queue: action.queue } : undefined);
+        const href = resolveOverviewDashboardHref(portal, {
+          laravelRoute: action.laravelRoute,
+          queue: action.queue,
+        });
 
         return isLive ? (
           <a

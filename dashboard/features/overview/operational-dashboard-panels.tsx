@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { laravelRouteUrl } from "@/lib/laravel-route-url";
+import { resolveOverviewDashboardHref } from "@/lib/overview-dashboard-href";
+import { useDashboardPortal } from "@/lib/portal-context";
 import type { OverviewData, PipelineStage, SupplierStatusItem } from "@/types/dashboard";
 
 export function BookingPipelinePanel({ stages }: { stages: PipelineStage[] }) {
+  const portal = useDashboardPortal();
+
   if (stages.length === 0) {
     return null;
   }
@@ -16,7 +19,10 @@ export function BookingPipelinePanel({ stages }: { stages: PipelineStage[] }) {
       <CardDescription className="mt-1">Counts from live booking workflow states.</CardDescription>
       <ul className="mt-4 space-y-2">
         {stages.map((stage) => {
-          const href = laravelRouteUrl(stage.laravelRoute, stage.queue ? { queue: stage.queue } : undefined);
+          const href = resolveOverviewDashboardHref(portal, {
+            laravelRoute: stage.laravelRoute,
+            queue: stage.queue,
+          });
           return (
             <li key={stage.key} className="flex items-center justify-between gap-3 rounded-lg border border-jp-border px-3 py-2">
               <span className="text-sm font-medium">{stage.label}</span>
@@ -60,6 +66,8 @@ export function PaymentOperationsPanel({
 }: {
   items: OverviewData["paymentOperations"];
 }) {
+  const portal = useDashboardPortal();
+
   if (items.length === 0) {
     return null;
   }
@@ -69,7 +77,10 @@ export function PaymentOperationsPanel({
       <CardTitle>Payment operations</CardTitle>
       <ul className="mt-4 space-y-2">
         {items.map((item) => {
-          const href = laravelRouteUrl(item.laravelRoute, item.queue ? { queue: item.queue } : undefined);
+          const href = resolveOverviewDashboardHref(portal, {
+            laravelRoute: item.laravelRoute,
+            queue: item.queue,
+          });
           return (
             <li key={item.key} className="flex items-center justify-between gap-3 rounded-lg border border-jp-border px-3 py-2">
               <span className="text-sm">{item.label}</span>
@@ -89,6 +100,8 @@ export function SupportOperationsPanel({
 }: {
   items: OverviewData["supportOperations"];
 }) {
+  const portal = useDashboardPortal();
+
   if (items.length === 0) {
     return null;
   }
@@ -98,7 +111,10 @@ export function SupportOperationsPanel({
       <CardTitle>Support workload</CardTitle>
       <ul className="mt-4 space-y-2">
         {items.map((item) => {
-          const href = laravelRouteUrl(item.laravelRoute, item.queue ? { queue: item.queue } : undefined);
+          const href = resolveOverviewDashboardHref(portal, {
+            laravelRoute: item.laravelRoute,
+            queue: item.queue,
+          });
           return (
             <li key={item.key} className="rounded-lg border border-jp-border px-3 py-2">
               <div className="flex items-center justify-between gap-3">
@@ -122,17 +138,9 @@ export function SystemHealthPanel({ items }: { items: OverviewData["systemHealth
       <CardTitle>System health</CardTitle>
       <ul className="mt-4 space-y-2">
         {items.map((item) => (
-          <li key={item.name} className="flex items-center justify-between text-sm">
+          <li key={item.name} className="flex items-center justify-between gap-3 rounded-lg border border-jp-border px-3 py-2 text-sm">
             <span>{item.name}</span>
-            <span className="flex items-center gap-2 capitalize text-jp-muted">
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  item.status === "operational" ? "bg-emerald-500" : item.status === "degraded" ? "bg-amber-500" : "bg-red-500"
-                }`}
-                aria-hidden
-              />
-              <span aria-label={`${item.name}: ${item.status}`}>{item.status}</span>
-            </span>
+            <span className="font-medium uppercase tracking-wide text-jp-muted">{item.status}</span>
           </li>
         ))}
       </ul>

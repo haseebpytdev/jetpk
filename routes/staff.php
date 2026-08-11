@@ -81,17 +81,17 @@ Route::prefix('staff')->name('staff.')->group(function (): void {
 
     Route::middleware('platform.module:finance_reports')->group(function (): void {
         Route::middleware('staff.permission:'.StaffPermission::LedgerView)->group(function (): void {
-            Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
-            Route::get('/ledger/{transaction}', [LedgerController::class, 'show'])->name('ledger.show');
-            Route::get('/accounting/ledger', [AccountingLedgerController::class, 'index'])->name('accounting.ledger.index');
-            Route::get('/accounting/ledger/{ledgerTransaction}', [AccountingLedgerController::class, 'show'])->name('accounting.ledger.show');
-            Route::get('/accounting/reconciliation', [AccountingReconciliationController::class, 'index'])->name('accounting.reconciliation.index');
+            Route::get('/ledger', [BackOfficeLegacyViewRedirectController::class, 'staffAccountingIndex'])->name('ledger.index');
+            Route::get('/ledger/{transaction}', [BackOfficeLegacyViewRedirectController::class, 'staffAccountingIndex'])->name('ledger.show');
+            Route::get('/accounting/ledger', [BackOfficeLegacyViewRedirectController::class, 'staffAccountingIndex'])->name('accounting.ledger.index');
+            Route::get('/accounting/ledger/{ledgerTransaction}', [BackOfficeLegacyViewRedirectController::class, 'staffAccountingIndex'])->name('accounting.ledger.show');
+            Route::get('/accounting/reconciliation', [BackOfficeLegacyViewRedirectController::class, 'staffAccountingIndex'])->name('accounting.reconciliation.index');
         });
 
         Route::middleware('staff.permission:'.StaffPermission::ReportsView)->group(function (): void {
-            Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
-            Route::get('/finance/statements', [FinanceStatementController::class, 'index'])->name('finance.statements.index');
-            Route::get('/finance/statements/{agency}', [FinanceStatementController::class, 'show'])->name('finance.statements.show');
+            Route::get('/reports', [BackOfficeLegacyViewRedirectController::class, 'staffReportsIndex'])->name('reports.index');
+            Route::get('/finance/statements', [BackOfficeLegacyViewRedirectController::class, 'staffAccountingIndex'])->name('finance.statements.index');
+            Route::get('/finance/statements/{agency}', [BackOfficeLegacyViewRedirectController::class, 'staffAccountingIndex'])->name('finance.statements.show');
         });
 
         Route::get('/finance/statements/{agency}/export', [FinanceStatementController::class, 'export'])

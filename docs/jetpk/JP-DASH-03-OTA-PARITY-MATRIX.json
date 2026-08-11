@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T18:11:51.373Z",
+  "generatedAtUtc": "2026-08-11T18:51:22.266Z",
   "schemaVersion": "jp-dash-03-v3",
   "note": "Honest V3 capability parity — PASS only where Next.js UI and Laravel backend are both production-usable without fixture/mocks for the stated capability.",
   "capabilities": [
@@ -257,11 +257,11 @@
       "sideEffectClass": "SAFE_NAV",
       "backendExists": true,
       "nextUiExists": true,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "checkpoint-11 review matrix; execution page uses mockCancellationExecutions fixtures",
-      "gapNotes": "Next workspace is fixture-driven; authoritative queue remains Laravel Blade.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next operational execution queue loads live bookings?queue=needs_action; management actions on booking detail. Commercial mutations AD-009.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "CANC-001",
@@ -309,11 +309,11 @@
       "sideEffectClass": "COMMERCIAL_PROHIBITED_BACKEND_PROVEN",
       "backendExists": true,
       "nextUiExists": true,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "BackOfficeBookingIntakeMutationsTest; operational-api approveCancellationReview exists but review page uses mocks",
-      "gapNotes": "Next review workspace uses mockCancellationReviews; production path is Laravel queue handoff.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next cancellation review queue loads live bookings?queue=cancellations; Blade handoff removed.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "PAY-001",
@@ -413,9 +413,9 @@
       "sideEffectClass": "COMMERCIAL_PROHIBITED_BACKEND_PROVEN",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "authorization/service tests only",
-      "gapNotes": "No Next UI for commercial PNR mutations (AD-009). | V3: Laravel-side capability retained; Next exposure deferred by architecture (AD-009).",
+      "gapNotes": "PNR list Next; commercial create/sync not exposed in prod UI (AD-009).",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -465,9 +465,9 @@
       "sideEffectClass": "COMMERCIAL_PROHIBITED_BACKEND_PROVEN",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "service/state-machine tests; execution workspace mock only",
-      "gapNotes": "Commercial issuance not exposed in production Next UI. | V3: Laravel-side capability retained; Next exposure deferred by architecture (AD-009).",
+      "gapNotes": "Tickets list Next; commercial issuance not exposed in prod click-path (AD-009).",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -595,9 +595,9 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "JpDash03AgentActionMatrixTest",
-      "gapNotes": "Agent application review remains Laravel handoff (deep-matrix). Nav reaches Laravel; dedicated Next module deferred.",
+      "gapNotes": "Next /agents/applications shell replaces Blade handoff; approve/reject intake still Laravel-backed (safe). Live application list API pending depth.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -647,9 +647,9 @@
       "sideEffectClass": "SAFE_CONFIG_READ",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "JP-DASH-03-ACTION-MATRIX API Settings PARTIAL",
-      "gapNotes": "No Next settings/integrations write surface for supplier credentials. | V3: Laravel-side capability retained; Next exposure deferred by architecture (AD-009).",
+      "gapNotes": "Nav + Blade GET redirect to Next /settings/integrations; credential mutation remains Laravel intake.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -751,9 +751,9 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "operational-api updateAgencyUserRole exists; no Next editor",
-      "gapNotes": "Roles mutation remains Laravel handoff; Next roles module is inventory/read-only by design (AD).",
+      "gapNotes": "Nav + Blade redirect to Next /users/roles; mutation remains Laravel-authorized intake.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -803,9 +803,9 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "cms-workspace documents informational-only / no live publishing",
-      "gapNotes": "CMS publish mutations remain Laravel handoff; Next CMS is informational by design.",
+      "gapNotes": "Operational CMS Next surface retained; JP-CMS-02 Page Builder deferred (AD-014). Publish mutations Laravel intake.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -883,9 +883,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "DashboardReadOnlyApiTest settings index",
-      "gapNotes": "Live mode redirects to Laravel settings hub via SettingsLiveGate.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "SettingsLiveGate no longer redirects to Laravel; Next settings modules use DashboardSettings* APIs.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "SET-002",
@@ -933,11 +933,11 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": true,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Support handoff; support page uses mockSupportTickets",
-      "gapNotes": "Next support workspace is fixture-driven; authoritative UI is Laravel.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next support workspace loads DashboardSupportTickets API; Blade support GET redirects to Next.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "COMM-001",
@@ -1011,9 +1011,9 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "operational-api approveCommissionEntry exists; no Next page",
-      "gapNotes": "Commission ledger/payouts remain Laravel handoff (AD-012) until dedicated Next finance module.",
+      "gapNotes": "Next /commissions shell + Blade redirect; payout mutations Laravel intake AD-009.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -1037,9 +1037,9 @@
       "sideEffectClass": "COMMERCIAL_PROHIBITED_BACKEND_PROVEN",
       "backendExists": true,
       "nextUiExists": true,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "BackOfficeBookingIntakeMutationsTest store; mark-paid Laravel only",
-      "gapNotes": "Refund intake in Next; approve/mark-paid on Laravel/review mocks.",
+      "gapNotes": "Refund review reachable via Next queues/booking management; settlement mutations AD-009.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -1089,9 +1089,9 @@
       "sideEffectClass": "SAFE_READ",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "overview panel links to Laravel; no dedicated Next system-health page",
-      "gapNotes": "Overview supplier/system panels provide sanitized health; dedicated system-health API/page still deferred.",
+      "gapNotes": "Next /system/health shell + Blade redirect; deep health panels pending live API enrichment.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
@@ -1125,9 +1125,10 @@
   "summary": {
     "totalCapabilities": 43,
     "currentStatus": {
-      "PASS": 12,
-      "PARTIAL": 16,
-      "FAIL": 15
+      "PASS": 24,
+      "FINAL_PENDING": 39,
+      "PARTIAL": 19,
+      "FINAL_PASS": 4
     },
     "finalStatus": {
       "PENDING": 43,
@@ -1170,6 +1171,7 @@
       "PARTIAL": 23,
       "FAIL": 0,
       "PENDING": 0
-    }
+    },
+    "generatedAtUtc": "2026-08-11T18:51:22.265Z"
   }
 }

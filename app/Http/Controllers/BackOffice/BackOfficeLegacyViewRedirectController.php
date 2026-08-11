@@ -173,6 +173,102 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         return redirect()->to($this->pathWithQuery('/admin/dashboard/system/go-live', $request->query()));
     }
 
+    public function adminUsersIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/users', $request->query()));
+    }
+
+    public function adminUserShow(Request $request, string $user): RedirectResponse
+    {
+        $query = $request->query();
+        $query['selected'] = $user;
+
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/users', $query));
+    }
+
+    public function adminDepositsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/deposits', $request->query()));
+    }
+
+    public function adminDepositShow(Request $request, string $deposit): RedirectResponse
+    {
+        $query = $request->query();
+        $query['id'] = $deposit;
+
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/deposits', $query));
+    }
+
+    public function adminCmsPagesIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/cms/pages', $request->query()));
+    }
+
+    public function adminReportsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/reports', $request->query()));
+    }
+
+    public function staffReportsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/staff/dashboard/reports', $request->query()));
+    }
+
+    public function adminAccountingIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/accounting', $request->query()));
+    }
+
+    public function staffAccountingIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/staff/dashboard/accounting', $request->query()));
+    }
+
+    public function adminGroupTicketingIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/group-ticketing', $request->query()));
+    }
+
+    public function adminPageSettingsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/cms', $request->query()));
+    }
+
+    public function adminBrandingSettings(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/general', $request->query()));
+    }
+
+    public function adminCommunicationsSettings(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/notifications', $request->query()));
+    }
+
+    public function adminDeploymentChecklist(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/system/go-live', $request->query()));
+    }
+
+    public function adminGuestCustomerShow(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/customers', $request->query()));
+    }
+
+    public function adminPromoCodesIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/cms', $request->query()));
+    }
+
+    public function adminAgenciesIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/agents', $request->query()));
+    }
+
+    public function adminGroupBookingsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/group-ticketing', $request->query()));
+    }
+
     private function agentsIndexPath(string $portal, Request $request): string
     {
         return $this->pathWithQuery("/{$portal}/dashboard/agents", $this->remapAgentsQuery($request->query()));
