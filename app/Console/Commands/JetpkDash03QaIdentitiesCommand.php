@@ -51,7 +51,7 @@ class JetpkDash03QaIdentitiesCommand extends Command
 
   protected $signature = 'jetpk:dash-03-qa-identities
         {role : admin|agent|customer|all}
-        {action=status : create|deactivate|rotate-password|fix-emails|verify-email|status}';
+        {action=status : create|activate|deactivate|rotate-password|fix-emails|verify-email|status}';
 
   protected $description = 'JP-DASH-03 controlled temporary QA Admin/Agent/Customer identities';
 
@@ -86,6 +86,7 @@ class JetpkDash03QaIdentitiesCommand extends Command
   {
     return match ($action) {
       'create' => $this->createIdentity($role, $walletService),
+      'activate' => $this->activateIdentity($role),
       'deactivate' => $this->deactivateIdentity($role),
       'rotate-password' => $this->rotatePassword($role),
       'fix-emails' => $this->fixEmails($role),
@@ -243,6 +244,30 @@ class JetpkDash03QaIdentitiesCommand extends Command
     $this->line('QA_'.$role.'_STATUS=Inactive');
     $this->line('QA_'.$role.'_SESSIONS_INVALIDATED=yes');
     $this->line('QA_'.$role.'_REMEMBER_TOKEN_INVALIDATED=yes');
+
+    return self::SUCCESS;
+  }
+
+  private function activateIdentity(string $role): int
+  {
+    $user = $this->qaUserQuery($role)->first();
+    if ($user === null) {
+      $this->line('QA_'.$role.'_STATUS=missing');
+
+      return self::FAILURE;
+    }
+
+    $user->forceFill([
+      'status' => UserAccountStatus::Active,
+      'email_verified_at' => $user->email_verified_at ?? now(),
+    ])->save();
+
+    if ($role === 'agent') {
+      Agent::query()->where('user_id', $user->id)->update(['is_active' => true]);
+    }
+
+    $this->line('QA_'.$role.'_STATUS=Active');
+    $this->line('QA_'.$role.'_ACTIVATED=yes');
 
     return self::SUCCESS;
   }
