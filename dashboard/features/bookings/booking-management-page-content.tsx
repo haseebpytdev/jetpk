@@ -1,5 +1,6 @@
 import { BookingDetailDrawerContent } from "@/features/bookings/booking-detail-drawer";
 import { BookingManagementPanels } from "@/features/bookings/booking-management-panels";
+import { BookingOperationalActions } from "@/features/bookings/booking-operational-actions";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import {
@@ -109,10 +110,9 @@ export async function BookingManagementPageContent({ bookingId }: Props) {
             </section>
             <section className="rounded-2xl border border-jp-border bg-white p-4 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-900">Operational actions</h2>
-              <p className="mt-2 text-xs text-jp-muted">
-                Payment, refund, cancellation, and note controls use authoritative Laravel intake routes.
-                Commercial supplier mutations remain server-gated.
-              </p>
+              <div className="mt-3">
+                <BookingOperationalActions bookingId={booking.id} defaultCurrency={booking.currency} />
+              </div>
             </section>
           </aside>
         </div>

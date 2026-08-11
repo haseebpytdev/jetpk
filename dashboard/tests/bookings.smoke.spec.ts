@@ -183,4 +183,5 @@ test("booking management page renders lifecycle panels", async ({ page }) => {
   await expect(page.getByTestId("booking-management-page")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("booking-management-panels")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lifecycle" })).toBeVisible();
+  await expect(page.getByTestId("booking-ops-preview")).toBeVisible();
 });

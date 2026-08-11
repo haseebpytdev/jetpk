@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending (Wave 4 BOOK-003 batch) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `368b5f3` |
+| `LOCAL_HEAD` | `bc7c8de` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `bc7c8de` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
