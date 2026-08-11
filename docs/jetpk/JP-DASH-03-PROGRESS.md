@@ -2,14 +2,14 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T15:40:00Z
+2026-08-11T17:12:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `aeb9b6c` (+ uncommitted public logo SSR fix) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `aeb9b6c` |
+| `LOCAL_HEAD` | `35077e1` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `35077e1` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -17,7 +17,7 @@
 | App | BUILD_ID |
 |-----|----------|
 | Dashboard (`jetpk-dashboard`) | `9TK_JywfvrGhRpRkegOF0` |
-| Public (`jetpk-public-frontend`) | `3yYuvbzDaBFt1Lj2ONCB0` (pre logo SSR fix) |
+| Public (`jetpk-public-frontend`) | `N1kUr8ZFdIJv1OIi9YjE0` |
 
 ## DEPLOYMENT
 
@@ -26,26 +26,24 @@
 | `SSH_KEY_EXISTS` | yes |
 | `SSH_CONNECTION` | PASS (`root@185.215.166.176` / `vmi3400777`) |
 | `JP_DEPLOY_01_BLOCKED_EXTERNAL_AUTH` | **FALSE** |
-| `SOURCE_PARITY` | **PASS** (40/40 dashboard manifest) |
+| `SOURCE_PARITY` | Dashboard 40/40 prior; public logo files MATCH (`page.tsx`, `public-config-service.ts`) |
 | `OLS_HASH` | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
 
 ## PRODUCTION_ACCEPTANCE
 
 | Run | Result |
 |-----|--------|
-| **Latest full suite (2026-08-11T13:48Z post staff-nav deploy)** | **33 PASS / 1 SKIP / 1 FAIL** |
-| Pass | Staff grouped nav, admin grouped nav, dashboard DB logo, lifecycle panels, legacy redirects, checkpoints |
-| Fail | `PUBLIC_DB_LOGO_PRODUCTION_RENDER` — Next SSR used text fallback; API has `logo_url` |
-| Skip | Payments drawer — `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
-| Fix in flight | `PublicConfigService` server fetch via `absoluteLaravelUrl`; public frontend redeploy pending |
+| **Pre-verify (2026-08-11T17:11Z)** | Homepage HTML contains DB logo `img[alt=JetPakistan]` + storage branding path |
+| **Full suite** | In progress after logo fix deploy |
+| Skip expected | Payments drawer — `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
 
 ## CURRENT_TASK_ID
 
-`JP-FRONTEND-BRAND-01` / `JP-NFR-01`
+`JP-NFR-01` / `JP-FRONTEND-BRAND-01` → verify; then `JP-PARITY-01` / `JP-BOOK-01` evidence gaps
 
 ## CURRENT_STATUS
 
-`PUBLIC_LOGO_SSR_FIX_DEPLOY_PENDING`
+`PUBLIC_DB_LOGO_DEPLOYED_VERIFYING`
 
 ## GATE STATUS SUMMARY
 
@@ -55,20 +53,20 @@
 | `STAFF_GROUPED_NAV_PRODUCTION` | **PASS** |
 | `ADMIN_GROUPED_NAV_PRODUCTION` | **PASS** |
 | `DASHBOARD_DB_LOGO_RENDER` | **PASS** |
-| `PUBLIC_DB_LOGO_PRODUCTION_RENDER` | **FAIL** → SSR config fetch fix pending deploy |
+| `PUBLIC_DB_LOGO_PRODUCTION_RENDER` | **PASS** (live HTML evidence; suite re-run pending) |
 | `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PASS** (WL96PKN9) |
 | `BOOKING_COMMUNICATIONS_PRODUCTION` | **PASS** (WL96PKN9) |
 | `BOOKING_INTERNAL_NOTES_PRODUCTION` | **EVIDENCE_GAP** |
 | `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **EVIDENCE_GAP** |
 | `PAYMENT_REVIEW_UI_PRODUCTION` | **BLOCKED_EVIDENCE** |
-| `JP-NFR-01` | **PARTIAL** (33/35) |
+| `JP-NFR-01` | **PARTIAL** (acceptance re-run in progress) |
 | `JP-DEPLOY-01` | **IN_PROGRESS** |
 
 ## NEXT_ACTION
 
-- Commit + push public logo SSR fix
-- Deploy `frontend/features/public-content/services/public-config-service.ts`; rebuild `jetpk-public-frontend`
-- Re-run full `npm run test:production-acceptance` (target 34 PASS / 1 SKIP)
+- Run full `npm run test:production-acceptance` (target 34 PASS / 1 SKIP)
+- Heartbeat commit matrix + ledger
+- Advance next non-green: JP-PARITY-01 / notes-docs evidence / private-origin probe
 
 ## JP_DASH_03_STATUS
 
