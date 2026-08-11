@@ -1,6 +1,6 @@
 import type { BookingsPageResult, BookingsQuery, BookingRecord, BookingManagementDetail } from "@/types/booking";
 import { buildBookingsPage } from "@/lib/bookings-filter";
-import { getBookingById, mockBookings } from "@/mocks/booking-fixtures";
+import { buildBookingManagementFixture, getBookingById, mockBookings } from "@/mocks/booking-fixtures";
 import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
 import { createReadOnlyService, ReadOnlyServiceError, type ReadOnlyFetchOptions } from "@/lib/read-only/read-only-service";
 import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
@@ -105,7 +105,7 @@ export async function getBookingManagementDetail(
     if (!summary) {
       return null;
     }
-    return transformBookingManagementDetail(summary);
+    return buildBookingManagementFixture(summary);
   }
 
   try {

@@ -8,7 +8,7 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending Wave 5 commit |
+| `LOCAL_HEAD` | `9101d89` (Wave 5a) — pending Wave 5b commit |
 | `REMOTE_HEAD_AT_LAST_VERIFY` | `81f6a9e` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
@@ -18,11 +18,11 @@
 
 ## CURRENT_TASK_ID
 
-`JP-STAFF-01` / `JP-FRONTEND-BRAND-01` / `JP-DEPLOY-01`
+`JP-BOOK-01` / `JP-STAFF-01` / `JP-DEPLOY-01`
 
 ## CURRENT_SUBTASK
 
-Staff portal-scoped preview IA; DB logo public config contract; deploy blocked externally
+Booking management preview fixture depth; staff portal IA; deploy blocked externally
 
 ## CURRENT_STATUS
 

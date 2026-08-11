@@ -1,4 +1,4 @@
-import type { BookingRecord } from "@/types/booking";
+import type { BookingManagementDetail, BookingRecord } from "@/types/booking";
 
 /** Deterministic preview bookings — not production data. */
 export const mockBookings: BookingRecord[] = [
@@ -631,4 +631,91 @@ export const mockBookings: BookingRecord[] = [
 
 export function getBookingById(id: string): BookingRecord | undefined {
   return mockBookings.find((b) => b.id === id);
+}
+
+/** Deterministic preview management detail — supplements list fixtures with lifecycle depth. */
+export function buildBookingManagementFixture(summary: BookingRecord): BookingManagementDetail {
+  return {
+    summary,
+    passengers: [
+      {
+        displayName: summary.customerName,
+        type: "adult",
+      },
+    ],
+    fareSummary: {
+      currency: summary.currency,
+      currencyStatus: summary.currencyStatus ?? "resolved",
+      currencySource: summary.currencySource ?? "fixture",
+      baseFare: summary.totalAmount * 0.82,
+      taxes: summary.totalAmount * 0.12,
+      fees: summary.totalAmount * 0.04,
+      markup: 0,
+      total: summary.totalAmount,
+    },
+    pnrSummary: {
+      pnr: summary.pnr || null,
+      supplierReference: summary.supplierReference,
+      supplier: summary.supplier,
+      supplierStatus: summary.ticketingStatus === "ticketed" ? "ticketed" : "active",
+    },
+    ticketReadiness: {
+      ticketingStatus: summary.ticketingStatus,
+      ticketCount: summary.ticketingStatus === "ticketed" ? summary.passengerCount : 0,
+    },
+    auditMetadata: {
+      createdAt: summary.bookingDate,
+      updatedAt: summary.lastUpdated,
+      bookingStatus: summary.bookingStatus,
+    },
+    statusTimeline: [
+      {
+        occurredAt: `${summary.bookingDate}T10:00:00Z`,
+        eventType: "status_change",
+        actorName: "Platform Staff",
+        fromStatus: "pending",
+        toStatus: summary.bookingStatus,
+        summary: "Booking confirmed after payment verification",
+        note: null,
+      },
+      {
+        occurredAt: summary.lastUpdated,
+        eventType: "ticketing",
+        actorName: "Ticketing Queue",
+        fromStatus: summary.bookingStatus,
+        toStatus: summary.ticketingStatus,
+        summary: "Ticketing status updated for preview fixture",
+        note: null,
+      },
+    ],
+    internalNotes: [
+      {
+        createdAt: summary.lastUpdated,
+        authorName: "Ops Review",
+        noteType: "internal",
+        note: "Preview fixture note — supplier hold cleared.",
+        customerVisible: false,
+      },
+    ],
+    communications: [
+      {
+        sentAt: summary.lastUpdated,
+        channel: "email",
+        event: "booking_confirmation",
+        status: "delivered",
+        recipient: summary.customerEmail,
+        subject: "Booking confirmation",
+      },
+    ],
+    documents: [
+      {
+        documentId: `DOC-${summary.id}`,
+        documentType: "itinerary",
+        title: "Passenger itinerary",
+        status: "available",
+        generatedAt: summary.lastUpdated,
+        generatedBy: "System",
+      },
+    ],
+  };
 }

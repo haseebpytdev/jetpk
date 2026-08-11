@@ -181,7 +181,9 @@ test("booking management page renders lifecycle panels", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/admin/dashboard/bookings/JP-BK-10001", { waitUntil: "load" });
   await expect(page.getByTestId("booking-management-page")).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByTestId("booking-management-panels")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Lifecycle" })).toBeVisible();
-  await expect(page.getByTestId("booking-ops-preview")).toBeVisible();
+  const management = page.getByTestId("booking-management-page");
+  await expect(management.getByTestId("booking-management-panels")).toBeVisible();
+  await expect(management.getByRole("heading", { name: "Lifecycle" })).toBeVisible();
+  await expect(management.getByTestId("booking-communications")).toBeVisible();
+  await expect(management.getByTestId("booking-documents")).toBeVisible();
 });
