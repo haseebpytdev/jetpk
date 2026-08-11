@@ -17,7 +17,7 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED** — prior ENGINEERI
 | JP-REFUND-01 | Cancellation/refund/ticketing | yes | yes | yes | yes | yes | yes | PASS | Intake surfaces + live Laravel handoffs; prod mutation prohibited (AD-009) | bbf3c7f | Q9gDD14STBDOrQYmGc6Su | — | Wave 6 |
 | JP-MODULES-01 | Full module inventory | yes | yes | in_progress | no | no | no | FAIL | Inventory incomplete vs active Admin/Staff Blade surface | f608265 | — | Blade modules without Next UI | Reopened |
 | JP-STAFF-01 | Staff Next back office | yes | yes | yes | yes | yes | yes | PASS | Staff grouped nav `/staff/dashboard/*` PASS prod | aeb9b6c | 9TK_JywfvrGhRpRkegOF0 | — | Wave 6 |
-| JP-LEGACY-01 | Legacy UI retirement | yes | yes | in_progress | no | no | no | FAIL | Matrix incomplete; admin.dashboard PENDING; many Blade GETs still renderable | 020e652 | — | Exhaustive matrix rebuild required | Reopened |
+| JP-LEGACY-01 | Legacy UI retirement | yes | yes | yes | yes | pending | pending | IN_PROGRESS | Exhaustive matrix 97 PASS redirects; production crawl retest pending | 198fe88 | pc7uZChXDchEU826tC7zg | Crawl pending | Reopened |
 | JP-RBAC-01 | Five-role RBAC | yes | yes | yes | yes | yes | yes | PASS | RBAC browser 2/2 + portal agent/customer shells PASS | b220b84 | Q9gDD14STBDOrQYmGc6Su | — | Wave 6 |
 | JP-FRONTEND-BRAND-01 | DB logo production | yes | yes | yes | yes | yes | yes | PASS | Public+dashboard logo probes PASS; private-origin CTA fix deployed | 8aa0dd2 | c0xypkFCCtmbYpFTsmMbQ | — | Wave 6 |
 | JP-TYPE-01 | Project-wide Inter | yes | yes | yes | yes | yes | yes | PASS | Inter on tokens.css + ota-public.css verified prod | 8d0d0f3 | Gm3AAwOXzrNewLFGnfIMF | — | Wave 6 |
