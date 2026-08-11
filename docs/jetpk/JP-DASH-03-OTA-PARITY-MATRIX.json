@@ -76,9 +76,9 @@
       "backendExists": true,
       "nextUiExists": true,
       "laravelHandoff": true,
-      "testMethod": "JP-DASH-03-NAV-MATRIX (22/22 PASS prior); JP-IA-01 task FAIL V3",
-      "gapNotes": "Staff preview nav groups scoped (Wave 5); cancellations/execution still hand off to Laravel queues; prod live-session verify pending deploy.",
-      "CURRENT_STATUS": "PARTIAL",
+      "testMethod": "production-acceptance admin/staff grouped nav probes PASS 2026-08-11",
+      "gapNotes": "Staff portal hrefs fixed (PortalProvider wraps shell); cancellations/execution still hand off to Laravel queues.",
+      "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -1116,9 +1116,9 @@
       "backendExists": true,
       "nextUiExists": false,
       "laravelHandoff": true,
-      "testMethod": "JP-DASH-03-DEEP-MATRIX Branding handoff PASS; JP-FRONTEND-BRAND-01 PENDING",
-      "gapNotes": "Dashboard shell reads branding for display; mutations Laravel-only.",
-      "CURRENT_STATUS": "FAIL",
+      "testMethod": "production-acceptance DASHBOARD_DB_LOGO + PUBLIC_DB_LOGO PASS 2026-08-11",
+      "gapNotes": "Dashboard shell reads branding for display; mutations remain Laravel-only. Private APP_URL stripped from support CTA hrefs.",
+      "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PENDING"
     }
   ],

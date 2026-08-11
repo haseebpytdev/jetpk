@@ -1,10 +1,15 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type APIResponse } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
 
 const storagePath = path.resolve(
   process.env.JP_ADMIN_STORAGE_STATE ?? path.join(process.cwd(), "..", "tmp/jp-dash-03-admin-storage-state.json"),
 );
+
+async function readJson<T>(response: APIResponse): Promise<T> {
+  const text = await response.text();
+  return JSON.parse(text.replace(/^\uFEFF/, "")) as T;
+}
 
 test.describe("JP-DASH-03 production acceptance", () => {
   test.beforeAll(() => {
@@ -88,7 +93,7 @@ test.describe("JP-DASH-03 production acceptance", () => {
   test("dashboard branding logo renders from public config on production", async ({ page }) => {
     const configResponse = await page.request.get("/api/public/content/config");
     expect(configResponse.ok()).toBeTruthy();
-    const config = (await configResponse.json()) as { logo_url?: string | null; brand_name?: string };
+    const config = await readJson<{ logo_url?: string | null; brand_name?: string }>(configResponse);
     const brandName = (config.brand_name ?? "JetPakistan").trim() || "JetPakistan";
     const logoUrl = config.logo_url?.trim() ?? "";
 
@@ -112,7 +117,7 @@ test.describe("JP-DASH-03 production acceptance", () => {
     try {
       const configResponse = await page.request.get("/api/public/content/config");
       expect(configResponse.ok()).toBeTruthy();
-      const config = (await configResponse.json()) as { logo_url?: string | null; brand_name?: string };
+      const config = await readJson<{ logo_url?: string | null; brand_name?: string }>(configResponse);
       const brandName = (config.brand_name ?? "JetPakistan").trim() || "JetPakistan";
       const logoUrl = config.logo_url?.trim() ?? "";
 
@@ -174,14 +179,14 @@ test.describe("JP-DASH-03 production acceptance", () => {
     const apiResponse = await page.request.get(`/api/dashboard/bookings/${encodeURIComponent(ref)}`);
     test.skip(!apiResponse.ok(), `booking API unavailable for ${ref}`);
 
-    const apiPayload = (await apiResponse.json()) as {
+    const apiPayload = await readJson<{
       data?: {
         statusTimeline?: unknown[];
         internalNotes?: unknown[];
         communications?: unknown[];
         documents?: unknown[];
       };
-    };
+    }>(apiResponse);
     const detail = apiPayload.data ?? {};
 
     await page.goto(`/admin/dashboard/bookings/${ref}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
@@ -222,9 +227,9 @@ test.describe("JP-DASH-03 production acceptance", () => {
     if (!listResponse.ok()) {
       test.skip(true, "payments API unavailable on production");
     }
-    const listPayload = (await listResponse.json()) as {
+    const listPayload = await readJson<{
       data?: { transactions?: Array<{ transactionId: string }> };
-    };
+    }>(listResponse);
     const representative = listPayload.data?.transactions?.[0]?.transactionId;
     if (!representative) {
       test.skip(true, "NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD");
