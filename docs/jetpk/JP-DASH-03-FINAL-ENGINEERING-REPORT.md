@@ -11,7 +11,7 @@
 | Field | Value |
 |-------|-------|
 | Branch | `phase/jetpk-dash-03-operational-backoffice` |
-| Final HEAD | `e57748a` |
+| Final HEAD | `0b38f11` |
 | Remote | `jetpk` |
 
 ## Production builds
