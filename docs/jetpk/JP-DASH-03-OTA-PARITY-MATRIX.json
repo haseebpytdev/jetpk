@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T18:51:22.266Z",
+  "generatedAtUtc": "2026-08-11T19:04:50.530Z",
   "schemaVersion": "jp-dash-03-v3",
   "note": "Honest V3 capability parity — PASS only where Next.js UI and Laravel backend are both production-usable without fixture/mocks for the stated capability.",
   "capabilities": [
@@ -597,9 +597,9 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "JpDash03AgentActionMatrixTest",
-      "gapNotes": "Next /agents/applications shell replaces Blade handoff; approve/reject intake still Laravel-backed (safe). Live application list API pending depth.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next /agents/applications loads DashboardAgentApplications API; Blade GET redirects; approve/reject remain Laravel intake.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "SUPP-001",
@@ -649,7 +649,7 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "JP-DASH-03-ACTION-MATRIX API Settings PARTIAL",
-      "gapNotes": "Nav + Blade GET redirect to Next /settings/integrations; credential mutation remains Laravel intake.",
+      "gapNotes": "Next settings/integrations + suppliers surfaces; Blade api-settings GET redirects; credential mutation Laravel intake.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },

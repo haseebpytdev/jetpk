@@ -2,21 +2,21 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T18:40:00Z
+2026-08-11T19:05:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `02018d9` (pre-reopen) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `02018d9` |
+| `LOCAL_HEAD` | `b486728` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `b486728` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
 | App | BUILD_ID |
 |-----|----------|
-| Dashboard (`jetpk-dashboard`) | `Q9gDD14STBDOrQYmGc6Su` (stale until redeploy) |
+| Dashboard (`jetpk-dashboard`) | `vnw8cJSK8Q4CQ1-w1uVFK` |
 | Public (`jetpk-public-frontend`) | `c0xypkFCCtmbYpFTsmMbQ` |
 
 ## DEPLOYMENT
@@ -64,10 +64,9 @@
 
 ## NEXT_ACTION
 
-1. Remove unauthorized live Laravel UI handoffs (nav + LiveRedirect + Blade public render)
-2. Rebuild exhaustive legacy retirement matrix (no UNKNOWN/PENDING)
-3. Re-audit every PARTIAL/PENDING parity row to real Next presentation where V3 requires it
-4. Retest → deploy intended files → prove gates → only then final SEC cleanup (keep OTP required + authorized demo OTP)
+1. Continue closing remaining PARTIAL parity rows with real Next read/operator UX + Laravel intake (not EmptyState-only shells)
+2. Run focused Laravel/Next tests, typecheck, lint, builds, production acceptance, RBAC, NFR, legacy crawl, source parity
+3. Only after engineering + unattended QA: final SEC cleanup (keep OTP required + authorized demo OTP; deactivate QA identities)
 
 ## JP_DASH_03_STATUS
 

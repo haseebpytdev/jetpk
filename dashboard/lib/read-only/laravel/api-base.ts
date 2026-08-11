@@ -53,4 +53,6 @@ export const DASHBOARD_API_ROUTES = {
   depositDetail: (id: string) => `/deposits/${encodeURIComponent(id)}`,
   supportTickets: "/support/tickets",
   supportTicketDetail: (id: string) => `/support/tickets/${encodeURIComponent(id)}`,
+  markups: "/markups",
+  agentApplications: "/agent-applications",
 } as const;

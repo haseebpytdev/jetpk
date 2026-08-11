@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\Dashboard\DashboardAgentsController;
+use App\Http\Controllers\Api\Dashboard\DashboardAgentApplicationsController;
 use App\Http\Controllers\Api\Dashboard\DashboardAuditController;
 use App\Http\Controllers\Api\Dashboard\DashboardBookingsController;
 use App\Http\Controllers\Api\Dashboard\DashboardCmsController;
 use App\Http\Controllers\Api\Dashboard\DashboardCustomersController;
 use App\Http\Controllers\Api\Dashboard\DashboardDepositsController;
+use App\Http\Controllers\Api\Dashboard\DashboardMarkupsController;
 use App\Http\Controllers\Api\Dashboard\DashboardOverviewController;
 use App\Http\Controllers\Api\Dashboard\DashboardPaymentsController;
 use App\Http\Controllers\Api\Dashboard\DashboardPermissionsController;
@@ -85,6 +87,8 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
         Route::get('/deposits/{deposit}', [DashboardDepositsController::class, 'show'])
             ->where('deposit', '[^/]+')
             ->name('deposits.show');
+        Route::get('/agent-applications', [DashboardAgentApplicationsController::class, 'index'])
+            ->name('agent-applications.index');
     });
 
     Route::middleware('dashboard.permission:pnrs.view')->group(function (): void {
@@ -172,6 +176,8 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
             ->name('settings.notifications');
         Route::get('/settings/integrations', [DashboardSettingsController::class, 'integrations'])
             ->name('settings.integrations');
+        Route::get('/markups', [DashboardMarkupsController::class, 'index'])
+            ->name('markups.index');
     });
 
     Route::middleware('dashboard.permission:audit.view')->group(function (): void {
