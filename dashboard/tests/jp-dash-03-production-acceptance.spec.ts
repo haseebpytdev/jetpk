@@ -106,25 +106,49 @@ test.describe("JP-DASH-03 production acceptance", () => {
     }
   });
 
-  test("public homepage renders configured brand logo on production", async ({ page }) => {
-    const configResponse = await page.request.get("/api/public/content/config");
-    expect(configResponse.ok()).toBeTruthy();
-    const config = (await configResponse.json()) as { logo_url?: string | null; brand_name?: string };
-    const brandName = (config.brand_name ?? "JetPakistan").trim() || "JetPakistan";
-    const logoUrl = config.logo_url?.trim() ?? "";
+  test("public homepage renders configured brand logo on production", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    try {
+      const configResponse = await page.request.get("/api/public/content/config");
+      expect(configResponse.ok()).toBeTruthy();
+      const config = (await configResponse.json()) as { logo_url?: string | null; brand_name?: string };
+      const brandName = (config.brand_name ?? "JetPakistan").trim() || "JetPakistan";
+      const logoUrl = config.logo_url?.trim() ?? "";
 
-    await page.goto("/", { waitUntil: "domcontentloaded", timeout: 120_000 });
-    const homeBrand = page.getByRole("link", { name: "JetPakistan home" });
-    await expect(homeBrand).toBeVisible({ timeout: 60_000 });
+      await page.goto("/", { waitUntil: "domcontentloaded", timeout: 120_000 });
+      await page.setViewportSize({ width: 1440, height: 900 });
+      const homeBrand = page.getByRole("link", { name: "JetPakistan home" }).first();
+      await expect(homeBrand).toBeVisible({ timeout: 60_000 });
 
-    if (logoUrl !== "") {
-      const logo = homeBrand.locator("img").first();
-      await expect(logo).toBeVisible({ timeout: 60_000 });
-      const src = await logo.getAttribute("src");
-      expect(src).toBeTruthy();
-      expect(src).toMatch(/branding|storage|logo/i);
-    } else {
-      await expect(homeBrand.getByText(brandName, { exact: true })).toBeVisible();
+      if (logoUrl !== "") {
+        const logo = homeBrand.locator("img").first();
+        await expect(logo).toBeVisible({ timeout: 60_000 });
+        const src = await logo.getAttribute("src");
+        expect(src).toBeTruthy();
+        expect(src).toMatch(/branding|storage|logo/i);
+      } else {
+        await expect(homeBrand.getByText(brandName, { exact: true })).toBeVisible();
+      }
+    } finally {
+      await context.close();
+    }
+  });
+
+  test("public homepage has no private-origin hrefs", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    try {
+      await page.goto("/", { waitUntil: "domcontentloaded", timeout: 120_000 });
+      const hrefs = await page.locator("a[href]").evaluateAll((els) =>
+        els.map((el) => el.getAttribute("href") ?? "").filter(Boolean),
+      );
+      const privateOrigins = hrefs.filter((href) =>
+        /127\.0\.0\.1|localhost|:8088|:8000/i.test(href),
+      );
+      expect(privateOrigins, `private origins found: ${privateOrigins.join(", ")}`).toEqual([]);
+    } finally {
+      await context.close();
     }
   });
 

@@ -2,14 +2,14 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T17:12:00Z
+2026-08-11T17:30:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `35077e1` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `35077e1` |
+| `LOCAL_HEAD` | `fc779c7` (+ private-origin fix in flight) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `fc779c7` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -26,47 +26,33 @@
 | `SSH_KEY_EXISTS` | yes |
 | `SSH_CONNECTION` | PASS (`root@185.215.166.176` / `vmi3400777`) |
 | `JP_DEPLOY_01_BLOCKED_EXTERNAL_AUTH` | **FALSE** |
-| `SOURCE_PARITY` | Dashboard 40/40 prior; public logo files MATCH (`page.tsx`, `public-config-service.ts`) |
 | `OLS_HASH` | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
 
 ## PRODUCTION_ACCEPTANCE
 
 | Run | Result |
 |-----|--------|
-| **Pre-verify (2026-08-11T17:11Z)** | Homepage HTML contains DB logo `img[alt=JetPakistan]` + storage branding path |
-| **Full suite** | In progress after logo fix deploy |
-| Skip expected | Payments drawer — `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
+| Full suite (2026-08-11T17:21Z) | **33 PASS / 1 SKIP / 1 FAIL** (logo probe hidden under admin storage) |
+| Logo probe fix | **PASS** (clean context, 2026-08-11T17:23Z) |
+| New defect | `PRIVATE_ORIGIN_EXPOSURE` — homepage support CTAs `http://127.0.0.1:8088/...` |
 
 ## CURRENT_TASK_ID
 
-`JP-NFR-01` / `JP-FRONTEND-BRAND-01` → verify; then `JP-PARITY-01` / `JP-BOOK-01` evidence gaps
+`PRIVATE_ORIGIN_EXPOSURE` / `JP-FRONTEND-BRAND-01` / `JP-NFR-01`
 
 ## CURRENT_STATUS
 
-`PUBLIC_DB_LOGO_DEPLOYED_VERIFYING`
+`PRIVATE_ORIGIN_FIX_IN_FLIGHT`
 
-## GATE STATUS SUMMARY
+## ROOT_CAUSE
 
-| Gate | Status |
-|------|--------|
-| `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
-| `STAFF_GROUPED_NAV_PRODUCTION` | **PASS** |
-| `ADMIN_GROUPED_NAV_PRODUCTION` | **PASS** |
-| `DASHBOARD_DB_LOGO_RENDER` | **PASS** |
-| `PUBLIC_DB_LOGO_PRODUCTION_RENDER` | **PASS** (live HTML evidence; suite re-run pending) |
-| `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PASS** (WL96PKN9) |
-| `BOOKING_COMMUNICATIONS_PRODUCTION` | **PASS** (WL96PKN9) |
-| `BOOKING_INTERNAL_NOTES_PRODUCTION` | **EVIDENCE_GAP** |
-| `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **EVIDENCE_GAP** |
-| `PAYMENT_REVIEW_UI_PRODUCTION` | **BLOCKED_EVIDENCE** |
-| `JP-NFR-01` | **PARTIAL** (acceptance re-run in progress) |
-| `JP-DEPLOY-01` | **IN_PROGRESS** |
+`HomepagePublicContentPresenter::resolveActionHref` used `client_url()` which absolute-izes `/support` and `tel:` against private `APP_URL` (`127.0.0.1:8088`).
 
 ## NEXT_ACTION
 
-- Run full `npm run test:production-acceptance` (target 34 PASS / 1 SKIP)
-- Heartbeat commit matrix + ledger
-- Advance next non-green: JP-PARITY-01 / notes-docs evidence / private-origin probe
+- Deploy Laravel presenter fix + frontend sanitizer
+- Verify homepage private-origin count = 0
+- Re-run production acceptance (target 35 PASS / 1 SKIP)
 
 ## JP_DASH_03_STATUS
 

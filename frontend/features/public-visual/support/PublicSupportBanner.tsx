@@ -25,14 +25,26 @@ export function PublicSupportBanner({ support }: PublicSupportBannerProps) {
           {support.subtitle ? <p className="mt-2 text-jp-body text-jp-muted">{support.subtitle}</p> : null}
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             {support.chatEnabled && support.chatHref ? (
-              <Link href={support.chatHref}>
-                <PrimaryButton>{support.chatLabel}</PrimaryButton>
-              </Link>
+              support.chatHref.startsWith("http") || support.chatHref.startsWith("tel:") || support.chatHref.startsWith("mailto:") ? (
+                <a href={support.chatHref}>
+                  <PrimaryButton>{support.chatLabel}</PrimaryButton>
+                </a>
+              ) : (
+                <Link href={support.chatHref}>
+                  <PrimaryButton>{support.chatLabel}</PrimaryButton>
+                </Link>
+              )
             ) : null}
             {support.callEnabled && support.callHref ? (
-              <Link href={support.callHref}>
-                <SecondaryButton>{support.callLabel}</SecondaryButton>
-              </Link>
+              support.callHref.startsWith("http") || support.callHref.startsWith("tel:") || support.callHref.startsWith("mailto:") ? (
+                <a href={support.callHref}>
+                  <SecondaryButton>{support.callLabel}</SecondaryButton>
+                </a>
+              ) : (
+                <Link href={support.callHref}>
+                  <SecondaryButton>{support.callLabel}</SecondaryButton>
+                </Link>
+              )
             ) : null}
           </div>
         </div>

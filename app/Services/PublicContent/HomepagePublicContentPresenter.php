@@ -262,8 +262,43 @@ final class HomepagePublicContentPresenter
 
     private function resolveActionHref(string $rawUrl, string $phoneValue): ?string
     {
-        if ($rawUrl !== '' && $rawUrl !== '#' && ! str_starts_with(strtolower($rawUrl), 'javascript:')) {
-            return str_starts_with($rawUrl, 'http') ? $rawUrl : client_url($rawUrl);
+        $rawUrl = trim($rawUrl);
+        $lower = strtolower($rawUrl);
+
+        if ($rawUrl !== '' && $rawUrl !== '#' && ! str_starts_with($lower, 'javascript:')) {
+            if (str_starts_with($lower, 'tel:') || str_starts_with($lower, 'mailto:')) {
+                return $rawUrl;
+            }
+
+            if (str_starts_with($rawUrl, '/')) {
+                return $rawUrl;
+            }
+
+            if (str_starts_with($lower, 'http://') || str_starts_with($lower, 'https://')) {
+                $parts = parse_url($rawUrl);
+                $host = strtolower((string) ($parts['host'] ?? ''));
+                $isPrivateHost = $host === '127.0.0.1'
+                    || $host === 'localhost'
+                    || str_ends_with($host, '.local');
+
+                if ($isPrivateHost) {
+                    $path = (string) ($parts['path'] ?? '/');
+                    $query = isset($parts['query']) && $parts['query'] !== '' ? '?'.$parts['query'] : '';
+                    $fragment = isset($parts['fragment']) && $parts['fragment'] !== '' ? '#'.$parts['fragment'] : '';
+
+                    // Preserve mis-joined scheme targets such as /tel:+92...
+                    if (str_starts_with(strtolower($path), '/tel:') || str_starts_with(strtolower($path), '/mailto:')) {
+                        return ltrim($path, '/').$query.$fragment;
+                    }
+
+                    return ($path === '' ? '/' : $path).$query.$fragment;
+                }
+
+                return $rawUrl;
+            }
+
+            // Relative non-root path: keep public-origin relative (do not absolute via APP_URL).
+            return '/'.ltrim($rawUrl, '/');
         }
 
         if ($phoneValue !== '') {

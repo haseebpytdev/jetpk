@@ -137,12 +137,39 @@ function mapSupportCta(remote?: Record<string, unknown>): HomepageSupportCta {
     subtitle: String(remote?.subtitle ?? ""),
     callEnabled: remote?.call_enabled !== false,
     callLabel: String(remote?.call_label ?? "Call support"),
-    callHref: remote?.call_href ? String(remote.call_href) : null,
+    callHref: sanitizePublicActionHref(remote?.call_href ? String(remote.call_href) : null),
     chatEnabled: remote?.chat_enabled !== false,
     chatLabel: String(remote?.chat_label ?? "Get support"),
-    chatHref: remote?.chat_href ? String(remote.chat_href) : null,
+    chatHref: sanitizePublicActionHref(remote?.chat_href ? String(remote.chat_href) : null),
     image: remote?.image ? String(remote.image) : null,
   };
+}
+
+function sanitizePublicActionHref(href: string | null): string | null {
+  if (!href) return null;
+  const trimmed = href.trim();
+  if (trimmed === "" || trimmed === "#") return null;
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith("javascript:")) return null;
+  if (lower.startsWith("tel:") || lower.startsWith("mailto:") || trimmed.startsWith("/")) {
+    return trimmed;
+  }
+  try {
+    const url = new URL(trimmed);
+    const host = url.hostname.toLowerCase();
+    const isPrivate =
+      host === "127.0.0.1" || host === "localhost" || host.endsWith(".local");
+    if (isPrivate) {
+      const path = url.pathname || "/";
+      if (path.toLowerCase().startsWith("/tel:") || path.toLowerCase().startsWith("/mailto:")) {
+        return path.slice(1) + url.search + url.hash;
+      }
+      return path + url.search + url.hash;
+    }
+    return trimmed;
+  } catch {
+    return trimmed.startsWith("/") ? trimmed : `/${trimmed.replace(/^\/+/, "")}`;
+  }
 }
 
 function mapTrustChips(chips: Array<{ label?: string }> = []): HomepageTrustChip[] {
