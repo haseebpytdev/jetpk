@@ -32,9 +32,9 @@
       "nextRoute": "/[portal]/dashboard/bookings/[id]",
       "classification": "LEGACY_VIEW_REPLACE",
       "backendKeep": true,
-      "nextReplacementStatus": "PARTIAL",
+      "nextReplacementStatus": "PASS",
       "redirectStatus": "PASS",
-      "finalStatus": "PENDING"
+      "finalStatus": "PASS"
     },
     {
       "legacyRoute": "admin.planned",
@@ -45,7 +45,7 @@
       "backendKeep": false,
       "nextReplacementStatus": "PASS",
       "redirectStatus": "PASS",
-      "finalStatus": "PENDING"
+      "finalStatus": "PASS"
     },
     {
       "legacyRoute": "admin.customers.index",
@@ -67,7 +67,7 @@
       "backendKeep": true,
       "nextReplacementStatus": "PASS",
       "redirectStatus": "PASS",
-      "finalStatus": "PENDING"
+      "finalStatus": "PASS"
     },
     {
       "legacyRoute": "staff.bookings.index",

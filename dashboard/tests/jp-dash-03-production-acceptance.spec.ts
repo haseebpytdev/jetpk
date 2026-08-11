@@ -195,6 +195,16 @@ test.describe("JP-DASH-03 production acceptance", () => {
     expect(body).not.toMatch(/Preview data|synthetic records|Dashboard unavailable/i);
   });
 
+  test("payments list surface renders without preview residue when ledger empty", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/admin/dashboard/payments", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await expect(page.getByTestId("dashboard-portal-label")).toBeVisible({ timeout: 60_000 });
+    const body = await page.locator("body").innerText();
+    expect(body).not.toMatch(/Preview data|synthetic records|Dashboard unavailable/i);
+    expect(body).not.toMatch(/127\.0\.0\.1|localhost|:8088/i);
+    await expect(page.getByRole("heading", { name: /payment/i }).first()).toBeVisible();
+  });
+
   test("payments drawer shows operational review section", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
 

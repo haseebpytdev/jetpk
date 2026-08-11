@@ -25,7 +25,7 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-DATA-01 | Preview/stub sweep | partial | yes | yes | yes | partial | no | IN_PROGRESS | Planned dynamic redirect; shared empty-state copy | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 2 |
 | JP-MONEY-01 | Money integrity | partial | partial | partial | partial | partial | no | PARTIAL | Currency on payment forms | pending | — | — | Wave 6 |
 | JP-UX-01 | Operator UX | partial | partial | partial | partial | partial | partial | IN_PROGRESS | Admin grouped nav PASS prod; staff nav bug found + fixed pending deploy | pending | Gm3AAwOXzrNewLFGnfIMF | — | Wave 6 |
-| JP-NFR-01 | Nonfunctional revalidation | partial | no | partial | partial | partial | partial | IN_PROGRESS | production-acceptance.spec 12 PASS / 1 SKIP after private-origin fix | 8aa0dd2 | c0xypkFCCtmbYpFTsmMbQ | — | Wave 6 |
+| JP-NFR-01 | Nonfunctional revalidation | yes | yes | yes | yes | yes | yes | PASS | Full prod acceptance 35 PASS / 1 SKIP 2026-08-11 | bf137da | jvgqNcEQge5FMFmBXC1Oa | — | Wave 6 |
 | JP-SAFE-QA-01 | QA data cleanliness | yes | yes | partial | partial | partial | no | IN_PROGRESS | Four QA identities only | b220b84 | — | — | — |
 | JP-DEPLOY-01 | Production deployment loop | yes | yes | yes | yes | partial | partial | IN_PROGRESS | SSH PASS; public BUILD c0xypkFCCtmbYpFTsmMbQ; OLS unchanged | 8aa0dd2 | c0xypkFCCtmbYpFTsmMbQ | — | Not blocked |
 | JP-GIT-HEARTBEAT-01 | Remote progress | yes | yes | in_progress | n/a | n/a | n/a | IN_PROGRESS | Heartbeat active on phase branch | 8aa0dd2 | — | — | — |

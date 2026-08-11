@@ -2,14 +2,14 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T17:55:00Z
+2026-08-11T18:00:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `a34fb2a` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `a34fb2a` |
+| `LOCAL_HEAD` | `bf137da` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `bf137da` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -32,17 +32,16 @@
 
 | Run | Result |
 |-----|--------|
-| Focused gate suite (2026-08-11T17:53Z) | **6/6 PASS** (nav, logos, private-origin, lifecycle panels) |
-| Prior full suite | **34 PASS / 1 SKIP / 1 FAIL** (transient socket hang on config; not reproduced) |
+| **Full suite (2026-08-11T17:58Z)** | **35 PASS / 1 SKIP / 0 FAIL** |
 | Skip | Payments drawer — `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
 
 ## CURRENT_TASK_ID
 
-`JP-BOOK-01` / `JP-NFR-01` / `JP-PARITY-01`
+`JP-PAY-01` (evidence-blocked) → `JP-PARITY-01` / `JP-LEGACY-01` / `JP-DATA-01`
 
 ## CURRENT_STATUS
 
-`LIFECYCLE_PANELS_ALWAYS_VISIBLE_PRODUCTION_VERIFIED`
+`FULL_ACCEPTANCE_SUITE_GREEN_EXCEPT_PAYMENTS_EVIDENCE`
 
 ## GATE STATUS SUMMARY
 
@@ -54,19 +53,20 @@
 | `DASHBOARD_DB_LOGO_RENDER` | **PASS** |
 | `STAFF_GROUPED_NAV_PRODUCTION` | **PASS** |
 | `ADMIN_GROUPED_NAV_PRODUCTION` | **PASS** |
-| `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PASS** (always rendered) |
-| `BOOKING_INTERNAL_NOTES_PRODUCTION` | **PASS** (empty-state render) |
+| `BOOKING_MANAGEMENT_FULL_PAGE_PRODUCTION` | **PASS** |
+| `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PASS** |
+| `BOOKING_INTERNAL_NOTES_PRODUCTION` | **PASS** |
 | `BOOKING_COMMUNICATIONS_PRODUCTION` | **PASS** |
-| `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **PASS** (empty-state render) |
+| `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **PASS** |
 | `PAYMENT_REVIEW_UI_PRODUCTION` | **BLOCKED_EVIDENCE** |
-| `JP-NFR-01` | **PARTIAL** (focused green; full suite reconfirm pending) |
+| `JP-NFR-01` | **PASS** (35/36 acceptance; 1 evidence skip) |
 | `JP-DEPLOY-01` | **IN_PROGRESS** |
 
 ## NEXT_ACTION
 
-- Heartbeat ledger commit
-- Full `npm run test:production-acceptance`
-- Advance remaining PARTIAL/FAIL parity rows (JP-PARITY-01) without commercial mutations
+- Heartbeat ledger for 35/1 green
+- Add empty-ledger payments page acceptance (no commercial mutation)
+- Close remaining JP-LEGACY-01 / JP-PARITY-01 FAIL rows that are actionable
 
 ## JP_DASH_03_STATUS
 

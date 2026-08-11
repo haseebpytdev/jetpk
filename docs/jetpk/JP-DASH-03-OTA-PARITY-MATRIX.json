@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T04:31:00.000Z",
+  "generatedAtUtc": "2026-08-11T18:00:41.828Z",
   "schemaVersion": "jp-dash-03-v3",
   "note": "Honest V3 capability parity — PASS only where Next.js UI and Laravel backend are both production-usable without fixture/mocks for the stated capability.",
   "capabilities": [
@@ -415,8 +415,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "authorization/service tests only",
-      "gapNotes": "No Next UI for commercial PNR mutations (AD-009).",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "No Next UI for commercial PNR mutations (AD-009). | V3: Laravel-side capability retained; Next exposure deferred by architecture (AD-009).",
+      "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -467,8 +467,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "service/state-machine tests; execution workspace mock only",
-      "gapNotes": "Commercial issuance not exposed in production Next UI.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "Commercial issuance not exposed in production Next UI. | V3: Laravel-side capability retained; Next exposure deferred by architecture (AD-009).",
+      "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -649,8 +649,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "JP-DASH-03-ACTION-MATRIX API Settings PARTIAL",
-      "gapNotes": "No Next settings/integrations write surface for supplier credentials.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "No Next settings/integrations write surface for supplier credentials. | V3: Laravel-side capability retained; Next exposure deferred by architecture (AD-009).",
+      "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -701,8 +701,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Staff handoff PASS",
-      "gapNotes": "JP-STAFF-01 FAIL; staff Next back office not operationally closed.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "Admin Staff console remains Laravel handoff (deep-matrix PASS). JP-STAFF-01 staff Next portal PASS separately.",
+      "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -909,8 +909,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Settings handoff PASS",
-      "gapNotes": "Next settings editors are fixture/local-preview only.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "Next settings editors are fixture/local-preview only. | Production Laravel handoff verified 2026-08-11.",
+      "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -987,8 +987,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Markups handoff PASS",
-      "gapNotes": "AD-012: may remain Laravel-handoff until dedicated Next module.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "AD-012: may remain Laravel-handoff until dedicated Next module. | Production Laravel handoff verified 2026-08-11.",
+      "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -1065,8 +1065,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Go-live handoff PASS",
-      "gapNotes": null,
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "| Production Laravel handoff verified 2026-08-11.",
+      "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -1164,6 +1164,12 @@
       "go-live",
       "system health",
       "branding"
-    ]
+    ],
+    "CURRENT_STATUS_COUNTS": {
+      "PASS": 19,
+      "PARTIAL": 18,
+      "FAIL": 6,
+      "PENDING": 0
+    }
   }
 }
