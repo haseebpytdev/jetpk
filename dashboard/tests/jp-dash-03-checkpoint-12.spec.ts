@@ -119,12 +119,23 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
   });
 
   test("deterministic booking detail browser proof with API cross-check", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setViewportSize({ width: 1536, height: 900 });
     const proved: string[] = [];
 
     for (const ref of KNOWN_BOOKING_REFS) {
-      const apiResponse = await page.request.get(`/api/dashboard/bookings/${encodeURIComponent(ref)}`);
-      if (!apiResponse.ok()) {
+      let apiResponse = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          apiResponse = await page.request.get(`/api/dashboard/bookings/${encodeURIComponent(ref)}`);
+          break;
+        } catch {
+          if (attempt === 2) {
+            throw new Error(`booking API unavailable for ${ref} after retries`);
+          }
+          await page.waitForTimeout(1500);
+        }
+      }
+      if (!apiResponse?.ok()) {
         continue;
       }
 
@@ -221,7 +232,7 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
       }
 
       const sortHeader = page.locator("th button, th[role='button']").first();
-      if ((await sortHeader.count()) > 0) {
+      if ((await sortHeader.count()) > 0 && (await sortHeader.isVisible())) {
         await sortHeader.click();
         await page.waitForTimeout(600);
         rows.push({
@@ -283,7 +294,7 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
     const rows: Array<Record<string, string>> = [];
 
     for (const entry of DRAWER_MODULES) {
-      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.setViewportSize({ width: 1536, height: 900 });
       await page.goto(entry.route, { waitUntil: "domcontentloaded", timeout: 120_000 });
 
       if (entry.openViaSearch) {
@@ -298,6 +309,13 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
           continue;
         }
         await manage.click();
+        await page.waitForURL(
+          new RegExp(`/admin/dashboard/bookings/${entry.openViaSearch}`),
+          { timeout: 30_000 },
+        );
+        await expect(page.getByTestId("booking-management-page")).toBeVisible({ timeout: 15_000 });
+        rows.push({ module: entry.module, status: "MANAGEMENT_PAGE", result: "PASS" });
+        continue;
       } else if (entry.tableTestId) {
         const table = page.getByTestId(entry.tableTestId);
         if ((await table.count()) === 0) {
