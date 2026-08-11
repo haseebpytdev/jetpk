@@ -45,12 +45,12 @@ export function BookingsMobileCards({ bookings, query }: Props) {
               <TicketingStatusBadge status={b.ticketingStatus} />
             </div>
             <Link
-              href={`/bookings${bookingsQueryToSearchParams({ ...query, selectedId: b.id })}`}
+              href={`/bookings/${encodeURIComponent(b.id)}`}
               className={viewLinkClassName}
-              aria-label={`View booking ${b.id}`}
-              data-testid="booking-view-button"
+              aria-label={`Manage booking ${b.id}`}
+              data-testid="booking-manage-button"
             >
-              View
+              Manage
             </Link>
           </Card>
         </li>

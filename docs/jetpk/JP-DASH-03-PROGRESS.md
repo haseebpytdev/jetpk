@@ -2,31 +2,61 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-10T22:35:00Z
+2026-08-11T05:00:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending commit (Wave 0 V3) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `838783c` |
+| `LOCAL_HEAD` | pending commit (Wave 1 V3) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `b220b84` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
-`8VmZavWLFJ9R-NEwVIZmt` (dashboard unchanged this wave)
+`4aoyjPfUavZmJ87lRcqWC` (Wave 1 — grouped nav + booking management route)
 
 ## CURRENT_TASK_ID
 
-`JP-QA-AUTH-02` → `JP-REF-01` (Wave 1)
+`JP-IA-01` / `JP-BOOK-01` / `JP-PAY-01` (Wave 1–3 overlap)
 
 ## CURRENT_SUBTASK
 
-Wave 0 complete — autonomous four-role auth established; starting three-way audit
+Wave 1 IA + payment form fix + booking full page deployed; parity matrix created
 
 ## CURRENT_STATUS
 
-`WAVE_0_PASS` — OTP QA mode active; QA identities live; storage states saved
+`WAVE_1_IN_PROGRESS` — grouped sidebar live; `/bookings/[id]` route built on production
+
+## CURRENT_FINDING
+
+- Laravel `navigation_groups` now drives Next sidebar section labels in live mode
+- Hardcoded payment amount `100` removed; operator must enter amount + uses booking currency
+- Canonical booking management page at `/admin/dashboard/bookings/[id]` (and staff equivalent)
+
+## ROOT_CAUSE_SO_FAR
+
+Flat noisy nav came from rendering flat `navigation` array; drawer-only booking detail insufficient for JP-BOOK-01
+
+## FILES_BEING_INVESTIGATED
+
+`BackOfficeCapabilitiesPresenter.php`, `sidebar.tsx`, `booking-management-page-content.tsx`, `JP-DASH-03-OTA-PARITY-MATRIX.json`
+
+## LAST_TEST
+
+- `npx tsc --noEmit` (dashboard) → **PASS**
+- Production `next build` → **PASS** (includes `bookings/[id]` route)
+
+## LAST_DEPLOY
+
+- Wave 1 batch: presenter navigation groups, sidebar groups, payment forms, booking management page
+- PM2 `jetpk-dashboard` restarted
+
+## NEXT_ACTION
+
+- Production verify grouped nav (Admin + Staff QA)
+- Commit + push Wave 1 heartbeat
+- Continue JP-BOOK-01 lifecycle panels and JP-PAY-01 verify/reject UI
 
 ## OTP_LEDGER
 

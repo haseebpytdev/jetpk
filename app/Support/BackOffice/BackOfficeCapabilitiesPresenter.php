@@ -64,7 +64,8 @@ class BackOfficeCapabilitiesPresenter
             ],
             'modules' => $modules,
             'capabilities' => $capabilities,
-            'navigation' => $this->presentNavigation($user, $effectivePermissions, $modules, $isAdmin),
+            'navigation' => $this->presentNavigationFlat($user, $effectivePermissions, $modules, $isAdmin),
+            'navigation_groups' => $this->presentNavigationGroups($user, $effectivePermissions, $modules, $isAdmin),
         ];
     }
 
@@ -105,90 +106,166 @@ class BackOfficeCapabilitiesPresenter
      * @param  array<string, bool>  $modules
      * @return list<array<string, mixed>>
      */
-    private function presentNavigation(User $user, array $effectivePermissions, array $modules, bool $isAdmin): array
+    private function presentNavigationFlat(User $user, array $effectivePermissions, array $modules, bool $isAdmin): array
     {
-        $items = [];
+        $groups = $this->presentNavigationGroups($user, $effectivePermissions, $modules, $isAdmin);
+        $flat = [];
+        foreach ($groups as $group) {
+            foreach ($group['items'] as $item) {
+                $flat[] = $item;
+            }
+        }
+
+        return $flat;
+    }
+
+    /**
+     * @param  list<string>  $effectivePermissions
+     * @param  array<string, bool>  $modules
+     * @return list<array{label: string, items: list<array<string, mixed>>}>
+     */
+    private function presentNavigationGroups(User $user, array $effectivePermissions, array $modules, bool $isAdmin): array
+    {
         $has = static fn (string $key): bool => in_array($key, $effectivePermissions, true);
-        $bookingsRoute = $isAdmin ? 'admin.bookings' : 'staff.bookings.index';
         $supportRoute = $isAdmin ? 'admin.support.tickets.index' : 'staff.support.tickets.index';
 
+        $groups = [];
+
+        $overview = [];
         if ($has('dashboard.view')) {
-            $items[] = $this->dashboardNav('Dashboard', 'dashboard', '/');
+            $overview[] = $this->dashboardNav('Dashboard', 'dashboard', '/');
         }
-        if ($has('bookings.view')) {
-            $items[] = $this->dashboardNav('Bookings', 'bookings', '/bookings');
-            if ($isAdmin || $user->hasStaffPermission(StaffPermission::CancellationsApprove)) {
-                $items[] = $this->laravelNav('Cancellations', 'cancellations', $bookingsRoute, ['queue' => 'cancellations']);
-            }
-            if ($isAdmin || $user->hasStaffPermission(StaffPermission::BookingsUpdateStatus)) {
-                $items[] = $this->laravelNav('Execution queue', 'execution', $bookingsRoute, ['queue' => 'needs_action']);
-            }
-        }
-        if ($has('payments.view')) {
-            $items[] = $this->dashboardNav('Payments', 'payments', '/payments');
-        }
-        if ($has('pnrs.view')) {
-            $items[] = $this->dashboardNav('PNRs', 'pnrs', '/pnrs');
-        }
-        if ($has('tickets.view')) {
-            $items[] = $this->dashboardNav('Tickets', 'tickets', '/tickets');
-        }
-        if ($isAdmin && ($modules['agent_deposits'] ?? false)) {
-            $items[] = $this->dashboardNav('Deposits', 'deposits', '/deposits');
-        }
-        if ($has('customers.view')) {
-            $items[] = $this->dashboardNav('Customers', 'customers', '/customers');
-        }
-        if ($has('agents.view')) {
-            $items[] = $this->dashboardNav('Agents', 'agents', '/agents');
-        }
-        if ($has('suppliers.view')) {
-            $items[] = $this->dashboardNav('Suppliers', 'suppliers', '/suppliers');
-            if ($isAdmin) {
-                $items[] = $this->laravelNav('API settings', 'api-settings', 'admin.api-settings');
-            }
-        }
-        if ($has('users.view')) {
-            $items[] = $this->dashboardNav('Users', 'users', '/users');
-        }
-        if ($isAdmin) {
-            $items[] = $this->laravelNav('Staff', 'staff', 'admin.staff');
-        }
-        if ($has('cms.view')) {
-            $items[] = $this->dashboardNav('CMS', 'cms', '/cms');
-        }
-        if ($has('reports.view')) {
-            $items[] = $this->dashboardNav('Reports', 'reports', '/reports');
-        }
-        if ($has('audit.view')) {
-            $items[] = $this->dashboardNav('Audit', 'audit', '/audit');
-        }
-        if ($has('settings.view')) {
-            $items[] = $this->dashboardNav('Settings', 'settings', '/settings');
-            if ($isAdmin && ($modules['branding_settings'] ?? false)) {
-                $items[] = $this->laravelNav('Branding', 'branding', 'admin.settings.branding.edit');
-            }
-            if ($isAdmin) {
-                $items[] = $this->laravelNav('Page settings', 'page-settings', 'admin.page-settings.index');
-            }
-            if ($isAdmin && $this->platformModules->routeEnabled('markups')) {
-                $items[] = $this->laravelNav('Markups', 'markups', 'admin.markups');
-            }
-            if ($isAdmin && ($modules['notifications'] ?? false)) {
-                $items[] = $this->laravelNav('Communications', 'communications', 'admin.settings.communications.index');
-            }
-            if ($isAdmin) {
-                $items[] = $this->laravelNav('Go-live checklist', 'go-live', 'admin.go-live-checklist');
-            }
-        }
-        if ($isAdmin) {
-            $items[] = $this->laravelNav('Flight search', 'flights-search', 'flights.search');
-        }
-        if (($isAdmin || $user->hasStaffPermission(StaffPermission::SupportView)) && ($modules['agent_support'] ?? false)) {
-            $items[] = $this->laravelNav('Support', 'support', $supportRoute);
+        if ($overview !== []) {
+            $groups[] = ['label' => 'Overview', 'items' => $overview];
         }
 
-        return array_values(array_filter($items));
+        $bookingOps = [];
+        if ($has('bookings.view')) {
+            $bookingOps[] = $this->dashboardNav('Bookings', 'bookings', '/bookings');
+            if ($isAdmin || $user->hasStaffPermission(StaffPermission::BookingsUpdateStatus)) {
+                $bookingOps[] = $this->dashboardNav('Execution', 'execution', '/operations/execution');
+            }
+            if ($isAdmin || $user->hasStaffPermission(StaffPermission::CancellationsApprove)) {
+                $bookingOps[] = $this->dashboardNav('Cancellations', 'cancellations', '/operations/review');
+            }
+        }
+        if ($has('pnrs.view')) {
+            $bookingOps[] = $this->dashboardNav('PNRs', 'pnrs', '/pnrs');
+        }
+        if ($has('tickets.view')) {
+            $bookingOps[] = $this->dashboardNav('Tickets', 'tickets', '/tickets');
+        }
+        if ($bookingOps !== []) {
+            $groups[] = ['label' => 'Booking operations', 'items' => array_values(array_filter($bookingOps))];
+        }
+
+        $finance = [];
+        if ($has('payments.view')) {
+            $finance[] = $this->dashboardNav('Payments', 'payments', '/payments');
+        }
+        if ($isAdmin && ($modules['agent_deposits'] ?? false)) {
+            $finance[] = $this->dashboardNav('Deposits', 'deposits', '/deposits');
+        }
+        if ($isAdmin && $this->platformModules->routeEnabled('markups')) {
+            $finance[] = $this->laravelNav('Markups', 'markups', 'admin.markups');
+        }
+        if ($isAdmin) {
+            $finance[] = $this->laravelNav('Commissions', 'commissions', 'admin.commissions.index');
+        }
+        if ($finance !== []) {
+            $groups[] = ['label' => 'Finance', 'items' => array_values(array_filter($finance))];
+        }
+
+        $customers = [];
+        if ($has('customers.view')) {
+            $customers[] = $this->dashboardNav('Customers', 'customers', '/customers');
+        }
+        if ($has('agents.view')) {
+            $customers[] = $this->dashboardNav('Agents', 'agents', '/agents');
+        }
+        if ($isAdmin) {
+            $customers[] = $this->laravelNav('Agent applications', 'agent-applications', 'admin.agent-applications.index');
+        }
+        if ($customers !== []) {
+            $groups[] = ['label' => 'Customers & distribution', 'items' => array_values(array_filter($customers))];
+        }
+
+        $suppliers = [];
+        if ($has('suppliers.view')) {
+            $suppliers[] = $this->dashboardNav('Suppliers', 'suppliers', '/suppliers');
+            if ($isAdmin) {
+                $suppliers[] = $this->laravelNav('API connections', 'api-settings', 'admin.api-settings');
+            }
+        }
+        if ($suppliers !== []) {
+            $groups[] = ['label' => 'Suppliers', 'items' => array_values(array_filter($suppliers))];
+        }
+
+        $content = [];
+        if ($has('cms.view')) {
+            $content[] = $this->dashboardNav('CMS', 'cms', '/cms');
+        }
+        if ($isAdmin && ($modules['branding_settings'] ?? false)) {
+            $content[] = $this->laravelNav('Branding', 'branding', 'admin.settings.branding.edit');
+        }
+        if ($isAdmin) {
+            $content[] = $this->laravelNav('Homepage', 'homepage', 'admin.settings.homepage.index');
+            $content[] = $this->laravelNav('Media library', 'media', 'admin.settings.media.index');
+            $content[] = $this->laravelNav('Page settings', 'page-settings', 'admin.page-settings.index');
+        }
+        if ($content !== []) {
+            $groups[] = ['label' => 'Content & website', 'items' => array_values(array_filter($content))];
+        }
+
+        $communications = [];
+        if (($isAdmin || $user->hasStaffPermission(StaffPermission::SupportView)) && ($modules['agent_support'] ?? false)) {
+            $communications[] = $this->dashboardNav('Support', 'support', '/support');
+            $communications[] = $this->laravelNav('Support tickets', 'support-tickets', $supportRoute);
+        }
+        if ($isAdmin && ($modules['notifications'] ?? false)) {
+            $communications[] = $this->laravelNav('Communications', 'communications', 'admin.settings.communications.index');
+        }
+        if ($communications !== []) {
+            $groups[] = ['label' => 'Communications', 'items' => array_values(array_filter($communications))];
+        }
+
+        $administration = [];
+        if ($has('users.view')) {
+            $administration[] = $this->dashboardNav('Users', 'users', '/users');
+        }
+        if ($isAdmin) {
+            $administration[] = $this->laravelNav('Staff', 'staff', 'admin.staff');
+            $administration[] = $this->laravelNav('Roles & permissions', 'roles-permissions', 'admin.roles-permissions');
+        }
+        if ($administration !== []) {
+            $groups[] = ['label' => 'Administration', 'items' => array_values(array_filter($administration))];
+        }
+
+        $reporting = [];
+        if ($has('reports.view')) {
+            $reporting[] = $this->dashboardNav('Reports', 'reports', '/reports');
+        }
+        if ($has('audit.view')) {
+            $reporting[] = $this->dashboardNav('Audit', 'audit', '/audit');
+        }
+        if ($reporting !== []) {
+            $groups[] = ['label' => 'Reporting', 'items' => array_values(array_filter($reporting))];
+        }
+
+        $system = [];
+        if ($has('settings.view')) {
+            $system[] = $this->dashboardNav('Settings', 'settings', '/settings');
+        }
+        if ($isAdmin) {
+            $system[] = $this->laravelNav('Go-live checklist', 'go-live', 'admin.go-live-checklist');
+            $system[] = $this->laravelNav('System health', 'system-health', 'admin.system-health');
+            $system[] = $this->laravelNav('Flight search', 'flights-search', 'flights.search');
+        }
+        if ($system !== []) {
+            $groups[] = ['label' => 'System', 'items' => array_values(array_filter($system))];
+        }
+
+        return array_values(array_filter($groups, static fn (array $group): bool => ($group['items'] ?? []) !== []));
     }
 
     /**

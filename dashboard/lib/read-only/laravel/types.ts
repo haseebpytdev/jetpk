@@ -20,6 +20,10 @@ export type LaravelSessionPayload = {
   requiresEmailVerification?: boolean;
   landingRoute?: string;
   navigation?: Array<{ label: string; href: string; key: string; target?: "dashboard" | "laravel" }>;
+  navigationGroups?: Array<{
+    label: string;
+    items: Array<{ label: string; href: string; key: string; target?: "dashboard" | "laravel" }>;
+  }>;
   capabilities?: Record<string, boolean>;
   schemaVersion: string;
   generatedAt: string;

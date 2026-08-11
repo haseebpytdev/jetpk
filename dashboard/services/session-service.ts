@@ -14,6 +14,11 @@ export type DashboardNavItem = {
   target?: "dashboard" | "laravel";
 };
 
+export type DashboardNavGroup = {
+  label: string;
+  items: DashboardNavItem[];
+};
+
 export type DashboardSessionSummary = {
   id: string;
   displayName: string;
@@ -30,6 +35,7 @@ export type DashboardSessionSummary = {
   requiresEmailVerification: boolean;
   landingRoute: string;
   navigation: DashboardNavItem[];
+  navigationGroups: DashboardNavGroup[];
   capabilities: Record<string, boolean>;
   initials: string;
   unavailable?: boolean;
@@ -59,6 +65,7 @@ function unavailableSession(): DashboardSessionSummary {
     requiresEmailVerification: false,
     landingRoute: "/admin/dashboard",
     navigation: [],
+    navigationGroups: [],
     capabilities: {},
     initials: "??",
     unavailable: true,
@@ -88,16 +95,31 @@ function fromFixture(portal: DashboardPortal = "admin"): DashboardSessionSummary
       ? [
           { label: "Dashboard", href: "/", key: "dashboard" },
           { label: "Bookings", href: "/bookings", key: "bookings" },
-          { label: "Support & Help", href: "/support", key: "support" },
+          { label: "Support", href: "/support", key: "support" },
         ]
       : [
           { label: "Dashboard", href: "/", key: "dashboard" },
           { label: "Bookings", href: "/bookings", key: "bookings" },
           { label: "Payments", href: "/payments", key: "payments" },
-          { label: "Cancellations", href: "/operations/review", key: "cancellations" },
-          { label: "Execution", href: "/operations/execution", key: "execution" },
           { label: "Reports", href: "/reports", key: "reports" },
-          { label: "Support & Help", href: "/support", key: "support" },
+        ],
+    navigationGroups: isStaff
+      ? [
+          { label: "Overview", items: [{ label: "Dashboard", href: "/", key: "dashboard" }] },
+          {
+            label: "Booking operations",
+            items: [{ label: "Bookings", href: "/bookings", key: "bookings" }],
+          },
+          { label: "Communications", items: [{ label: "Support", href: "/support", key: "support" }] },
+        ]
+      : [
+          { label: "Overview", items: [{ label: "Dashboard", href: "/", key: "dashboard" }] },
+          {
+            label: "Booking operations",
+            items: [{ label: "Bookings", href: "/bookings", key: "bookings" }],
+          },
+          { label: "Finance", items: [{ label: "Payments", href: "/payments", key: "payments" }] },
+          { label: "Reporting", items: [{ label: "Reports", href: "/reports", key: "reports" }] },
         ],
     capabilities: {
       can_review_payment: !isStaff,
@@ -126,6 +148,7 @@ function fromLaravel(payload: LaravelSessionPayload, portal: DashboardPortal): D
     requiresEmailVerification: payload.requiresEmailVerification ?? false,
     landingRoute: payload.landingRoute ?? `/${portal}/dashboard`,
     navigation: (payload.navigation as DashboardNavItem[]) ?? [],
+    navigationGroups: (payload.navigationGroups as DashboardNavGroup[]) ?? [],
     capabilities: (payload.capabilities as Record<string, boolean>) ?? {},
     initials: toInitials(payload.displayName),
   };

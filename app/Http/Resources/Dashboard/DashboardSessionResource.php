@@ -36,6 +36,7 @@ final class DashboardSessionResource
             'requiresEmailVerification' => $user->email_verified_at === null,
             'landingRoute' => $user->isPlatformAdmin() ? '/admin/dashboard' : '/staff/dashboard',
             'navigation' => $capabilities['navigation'] ?? [],
+            'navigationGroups' => $capabilities['navigation_groups'] ?? [],
             'capabilities' => $capabilities['capabilities'] ?? [],
             'schemaVersion' => DashboardReadOnlyEnvelope::SCHEMA_VERSION,
             'generatedAt' => now()->toIso8601String(),

@@ -138,12 +138,12 @@ export function BookingsTable({ bookings, query, onSort }: Props) {
               <Td className="text-xs text-jp-muted">{formatDateTime(b.lastUpdated)}</Td>
               <Td>
                 <Link
-                  href={`/bookings${bookingsQueryToSearchParams({ ...query, selectedId: b.id })}`}
+                  href={`/bookings/${encodeURIComponent(b.id)}`}
                   className={viewLinkClassName}
-                  aria-label={`View booking ${b.id}`}
-                  data-testid="booking-view-button"
+                  aria-label={`Manage booking ${b.id}`}
+                  data-testid="booking-manage-button"
                 >
-                  View
+                  Manage
                 </Link>
               </Td>
             </TableRow>

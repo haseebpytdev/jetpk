@@ -6,7 +6,7 @@ import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { stripDashboardBasePath, detectPortalFromPathname } from "@/lib/portal-path";
 import { dashboardHref } from "@/lib/portal-path";
 import { useDashboardPortal } from "@/lib/portal-context";
-import { useDashboardNavigation, useDashboardSession } from "@/lib/session-context";
+import { useDashboardNavigationGroups, useDashboardSession } from "@/lib/session-context";
 import { useDashboardPath } from "@/lib/use-dashboard-path";
 import { cn } from "@/lib/utils";
 import { sanitizePublicHref } from "@/lib/sanitize-public-href";
@@ -38,10 +38,10 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
   const portalFromPath = detectPortalFromPathname(pathname);
   const effectivePortal = portalFromPath ?? portal;
   const contextSession = useDashboardSession();
-  const navigation = useDashboardNavigation();
+  const navigationGroups = useDashboardNavigationGroups();
   const session = sessionProp ?? contextSession;
   const isLive = useDashboardLiveMode();
-  const useSessionNavigation = isLive && navigation.length > 0;
+  const useSessionNavigation = isLive && navigationGroups.length > 0;
   const profile = session ?? {
     displayName: isLive ? "Session unavailable" : "Preview user",
     email: "—",
@@ -101,40 +101,47 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
         </div>
         <nav className="flex-1 overflow-y-auto p-3">
           {useSessionNavigation ? (
-            <ul className="space-y-1">
-              {navigation.map((item) => {
-                const active = item.target !== "laravel" && isActive(relativePathname, item.href);
-                const href =
-                  item.target === "laravel"
-                    ? sanitizePublicHref(item.href)
-                    : dashboardHref(portal, item.href);
-                const linkClass = cn(
-                  "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
-                  active
-                    ? "bg-jp-accent font-medium text-white"
-                    : "text-gray-300 hover:bg-white/10 hover:text-white",
-                );
+            navigationGroups.map((group) => (
+              <div key={group.label} className="mb-4 last:mb-0">
+                <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                  {group.label}
+                </p>
+                <ul className="space-y-1">
+                  {group.items.map((item) => {
+                    const active = item.target !== "laravel" && isActive(relativePathname, item.href);
+                    const href =
+                      item.target === "laravel"
+                        ? sanitizePublicHref(item.href)
+                        : dashboardHref(portal, item.href);
+                    const linkClass = cn(
+                      "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
+                      active
+                        ? "bg-jp-accent font-medium text-white"
+                        : "text-gray-300 hover:bg-white/10 hover:text-white",
+                    );
 
-                return (
-                  <li key={item.key}>
-                    {item.target === "laravel" ? (
-                      <a href={href} onClick={onClose} className={linkClass}>
-                        <span className="flex-1">{item.label}</span>
-                      </a>
-                    ) : (
-                      <Link
-                        href={href}
-                        onClick={onClose}
-                        className={linkClass}
-                        aria-current={active ? "page" : undefined}
-                      >
-                        <span className="flex-1">{item.label}</span>
-                      </Link>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                    return (
+                      <li key={item.key}>
+                        {item.target === "laravel" ? (
+                          <a href={href} onClick={onClose} className={linkClass}>
+                            <span className="flex-1">{item.label}</span>
+                          </a>
+                        ) : (
+                          <Link
+                            href={href}
+                            onClick={onClose}
+                            className={linkClass}
+                            aria-current={active ? "page" : undefined}
+                          >
+                            <span className="flex-1">{item.label}</span>
+                          </Link>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))
           ) : isLive ? (
             <p className="px-3 text-sm text-gray-400">Navigation unavailable until session loads.</p>
           ) : (
@@ -161,11 +168,6 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
                           aria-current={active ? "page" : undefined}
                         >
                           <span className="flex-1">{item.label}</span>
-                          {item.planned ? (
-                            <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
-                              Planned
-                            </span>
-                          ) : null}
                         </Link>
                       </li>
                     );
