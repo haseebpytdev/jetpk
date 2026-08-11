@@ -21,9 +21,7 @@ Concise decision log for Next back-office migration. Laravel remains authoritati
 
 ## Open items (blocking ENGINEERING_ACCEPTANCE)
 
-- Exhaustive legacy retirement matrix with no PENDING/UNKNOWN; prove sole Next Admin/Staff UI gates.
-- Convert remaining PARTIAL parity rows that require Next presentation (not Laravel handoff).
-- Remove all active Next nav / LiveRedirect paths to Blade back-office presentation.
+- Complete reopen production acceptance matrices (NFR/zoom/responsive, deep acceptance, secret scan, OLS hash) and document results.
 - Final SEC cleanup + QA identity deactivate only after engineering + unattended browser QA complete.
 
 ## Explicit non-exception
