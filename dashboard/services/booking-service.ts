@@ -37,6 +37,7 @@ function toLaravelQuery(query: BookingsQuery): Record<string, string | number> {
     status: query.status,
     payment: query.payment,
     supplier: query.supplier,
+    queue: query.queue,
     bookingDateFrom: query.bookingDateFrom,
     bookingDateTo: query.bookingDateTo,
     departureDateFrom: query.departureDateFrom,

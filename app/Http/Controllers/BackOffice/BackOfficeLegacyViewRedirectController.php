@@ -86,6 +86,93 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         return redirect()->to($this->agentsIndexPath('admin', $request));
     }
 
+    public function adminSupportTicketsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/support', $request->query()));
+    }
+
+    public function adminSupportTicketShow(Request $request, string $ticket): RedirectResponse
+    {
+        $query = $request->query();
+        $query['id'] = $ticket;
+
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/support', $query));
+    }
+
+    public function staffSupportTicketsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/staff/dashboard/support', $request->query()));
+    }
+
+    public function staffSupportTicketShow(Request $request, string $ticket): RedirectResponse
+    {
+        $query = $request->query();
+        $query['id'] = $ticket;
+
+        return redirect()->to($this->pathWithQuery('/staff/dashboard/support', $query));
+    }
+
+    public function adminSettingsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/settings', $request->query()));
+    }
+
+    public function adminMarkupsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/markups', $request->query()));
+    }
+
+    public function adminCommissionsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/commissions', $request->query()));
+    }
+
+    public function adminCommissionShow(Request $request, string $agent): RedirectResponse
+    {
+        $query = $request->query();
+        $query['agent'] = $agent;
+
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/commissions', $query));
+    }
+
+    public function adminAgentApplicationsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/agents/applications', $request->query()));
+    }
+
+    public function adminAgentApplicationShow(Request $request, string $application): RedirectResponse
+    {
+        $query = $request->query();
+        $query['id'] = $application;
+
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/agents/applications', $query));
+    }
+
+    public function adminApiSettingsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/integrations', $request->query()));
+    }
+
+    public function adminStaffIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/users', $request->query()));
+    }
+
+    public function adminRolesPermissions(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/users/roles', $request->query()));
+    }
+
+    public function adminSystemHealth(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/system/health', $request->query()));
+    }
+
+    public function adminGoLiveChecklist(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/system/go-live', $request->query()));
+    }
+
     private function agentsIndexPath(string $portal, Request $request): string
     {
         return $this->pathWithQuery("/{$portal}/dashboard/agents", $this->remapAgentsQuery($request->query()));

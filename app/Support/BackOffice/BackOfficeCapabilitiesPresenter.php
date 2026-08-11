@@ -127,7 +127,6 @@ class BackOfficeCapabilitiesPresenter
     private function presentNavigationGroups(User $user, array $effectivePermissions, array $modules, bool $isAdmin): array
     {
         $has = static fn (string $key): bool => in_array($key, $effectivePermissions, true);
-        $supportRoute = $isAdmin ? 'admin.support.tickets.index' : 'staff.support.tickets.index';
 
         $groups = [];
 
@@ -167,10 +166,10 @@ class BackOfficeCapabilitiesPresenter
             $finance[] = $this->dashboardNav('Deposits', 'deposits', '/deposits');
         }
         if ($isAdmin && $this->platformModules->routeEnabled('markups')) {
-            $finance[] = $this->laravelNav('Markups', 'markups', 'admin.markups');
+            $finance[] = $this->dashboardNav('Markups', 'markups', '/markups');
         }
         if ($isAdmin) {
-            $finance[] = $this->laravelNav('Commissions', 'commissions', 'admin.commissions.index');
+            $finance[] = $this->dashboardNav('Commissions', 'commissions', '/commissions');
         }
         if ($finance !== []) {
             $groups[] = ['label' => 'Finance', 'items' => array_values(array_filter($finance))];
@@ -184,7 +183,7 @@ class BackOfficeCapabilitiesPresenter
             $customers[] = $this->dashboardNav('Agents', 'agents', '/agents');
         }
         if ($isAdmin) {
-            $customers[] = $this->laravelNav('Agent applications', 'agent-applications', 'admin.agent-applications.index');
+            $customers[] = $this->dashboardNav('Agent applications', 'agent-applications', '/agents/applications');
         }
         if ($customers !== []) {
             $groups[] = ['label' => 'Customers & distribution', 'items' => array_values(array_filter($customers))];
@@ -194,7 +193,7 @@ class BackOfficeCapabilitiesPresenter
         if ($has('suppliers.view')) {
             $suppliers[] = $this->dashboardNav('Suppliers', 'suppliers', '/suppliers');
             if ($isAdmin) {
-                $suppliers[] = $this->laravelNav('API connections', 'api-settings', 'admin.api-settings');
+                $suppliers[] = $this->dashboardNav('API connections', 'api-settings', '/settings/integrations');
             }
         }
         if ($suppliers !== []) {
@@ -206,12 +205,12 @@ class BackOfficeCapabilitiesPresenter
             $content[] = $this->dashboardNav('CMS', 'cms', '/cms');
         }
         if ($isAdmin && ($modules['branding_settings'] ?? false)) {
-            $content[] = $this->laravelNav('Branding', 'branding', 'admin.settings.branding.edit');
+            $content[] = $this->dashboardNav('Branding', 'branding', '/settings/general');
         }
         if ($isAdmin) {
-            $content[] = $this->laravelNav('Homepage', 'homepage', 'admin.settings.homepage.index');
-            $content[] = $this->laravelNav('Media library', 'media', 'admin.settings.media.index');
-            $content[] = $this->laravelNav('Page settings', 'page-settings', 'admin.page-settings.index');
+            $content[] = $this->dashboardNav('Homepage', 'homepage', '/cms');
+            $content[] = $this->dashboardNav('Media library', 'media', '/cms/assets');
+            $content[] = $this->dashboardNav('Page settings', 'page-settings', '/cms');
         }
         if ($content !== []) {
             $groups[] = ['label' => 'Content & website', 'items' => array_values(array_filter($content))];
@@ -220,10 +219,9 @@ class BackOfficeCapabilitiesPresenter
         $communications = [];
         if (($isAdmin || $user->hasStaffPermission(StaffPermission::SupportView)) && ($modules['agent_support'] ?? false)) {
             $communications[] = $this->dashboardNav('Support', 'support', '/support');
-            $communications[] = $this->laravelNav('Support tickets', 'support-tickets', $supportRoute);
         }
         if ($isAdmin && ($modules['notifications'] ?? false)) {
-            $communications[] = $this->laravelNav('Communications', 'communications', 'admin.settings.communications.index');
+            $communications[] = $this->dashboardNav('Communications', 'communications', '/settings/notifications');
         }
         if ($communications !== []) {
             $groups[] = ['label' => 'Communications', 'items' => array_values(array_filter($communications))];
@@ -234,8 +232,8 @@ class BackOfficeCapabilitiesPresenter
             $administration[] = $this->dashboardNav('Users', 'users', '/users');
         }
         if ($isAdmin) {
-            $administration[] = $this->laravelNav('Staff', 'staff', 'admin.staff');
-            $administration[] = $this->laravelNav('Roles & permissions', 'roles-permissions', 'admin.roles-permissions');
+            $administration[] = $this->dashboardNav('Staff', 'staff', '/users');
+            $administration[] = $this->dashboardNav('Roles & permissions', 'roles-permissions', '/users/roles');
         }
         if ($administration !== []) {
             $groups[] = ['label' => 'Administration', 'items' => array_values(array_filter($administration))];
@@ -257,9 +255,8 @@ class BackOfficeCapabilitiesPresenter
             $system[] = $this->dashboardNav('Settings', 'settings', '/settings');
         }
         if ($isAdmin) {
-            $system[] = $this->laravelNav('Go-live checklist', 'go-live', 'admin.go-live-checklist');
-            $system[] = $this->laravelNav('System health', 'system-health', 'admin.system-health');
-            $system[] = $this->laravelNav('Flight search', 'flights-search', 'flights.search');
+            $system[] = $this->dashboardNav('Go-live checklist', 'go-live', '/system/go-live');
+            $system[] = $this->dashboardNav('System health', 'system-health', '/system/health');
         }
         if ($system !== []) {
             $groups[] = ['label' => 'System', 'items' => array_values(array_filter($system))];

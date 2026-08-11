@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Dashboard\DashboardSearchController;
 use App\Http\Controllers\Api\Dashboard\DashboardSessionController;
 use App\Http\Controllers\Api\Dashboard\DashboardSettingsController;
 use App\Http\Controllers\Api\Dashboard\DashboardSuppliersController;
+use App\Http\Controllers\Api\Dashboard\DashboardSupportTicketsController;
 use App\Http\Controllers\Api\Dashboard\DashboardTicketsController;
 use App\Http\Controllers\Api\Dashboard\DashboardUsersController;
 use Illuminate\Support\Facades\Route;
@@ -100,6 +101,14 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
         Route::get('/tickets/{ticket}', [DashboardTicketsController::class, 'show'])
             ->where('ticket', '[^/]+')
             ->name('tickets.show');
+    });
+
+    Route::middleware('dashboard.permission:support.view')->group(function (): void {
+        Route::get('/support/tickets', [DashboardSupportTicketsController::class, 'index'])
+            ->name('support.tickets.index');
+        Route::get('/support/tickets/{ticket}', [DashboardSupportTicketsController::class, 'show'])
+            ->where('ticket', '[^/]+')
+            ->name('support.tickets.show');
     });
 
     Route::middleware('dashboard.permission:reports.view')->group(function (): void {

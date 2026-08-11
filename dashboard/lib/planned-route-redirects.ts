@@ -1,11 +1,8 @@
+/** Legacy `/planned/[slug]` bookmarks → canonical Next paths only (no Blade handoff). */
 import { dashboardHref, type DashboardPortal } from "@/lib/portal-path";
-import { sanitizePublicHref } from "@/lib/sanitize-public-href";
 
-type RedirectTarget =
-  | { kind: "next"; path: string }
-  | { kind: "laravel"; path: string };
+type RedirectTarget = { kind: "next"; path: string };
 
-/** Legacy `/planned/[slug]` bookmarks → canonical Next or Laravel handoff. */
 const PLANNED_REDIRECTS: Record<string, RedirectTarget> = {
   bookings: { kind: "next", path: "/bookings" },
   customers: { kind: "next", path: "/customers" },
@@ -16,20 +13,17 @@ const PLANNED_REDIRECTS: Record<string, RedirectTarget> = {
   settings: { kind: "next", path: "/settings" },
   support: { kind: "next", path: "/support" },
   "page-settings": { kind: "next", path: "/cms" },
-  markups: { kind: "laravel", path: "/admin/markups" },
-  flights: { kind: "laravel", path: "/flights/search" },
-  communications: { kind: "laravel", path: "/admin/settings/communications" },
-  diagnostics: { kind: "laravel", path: "/admin/system-health" },
-  "group-ticketing": { kind: "laravel", path: "/admin/group-ticketing" },
-  accounting: { kind: "laravel", path: "/admin/ledger" },
+  markups: { kind: "next", path: "/markups" },
+  communications: { kind: "next", path: "/settings/notifications" },
+  diagnostics: { kind: "next", path: "/system/health" },
+  "group-ticketing": { kind: "next", path: "/group-ticketing" },
+  accounting: { kind: "next", path: "/accounting" },
+  flights: { kind: "next", path: "/" },
 };
 
 export function resolvePlannedRedirect(portal: DashboardPortal, slug: string): string {
   const target = PLANNED_REDIRECTS[slug] ?? { kind: "next", path: "/" };
-  if (target.kind === "next") {
-    return dashboardHref(portal, target.path);
-  }
-  return sanitizePublicHref(target.path);
+  return dashboardHref(portal, target.path);
 }
 
 export const plannedRedirectSlugs = Object.keys(PLANNED_REDIRECTS);

@@ -6,6 +6,7 @@ use App\Models\Agent;
 use App\Models\Booking;
 use App\Models\CmsPage;
 use App\Models\SupplierConnection;
+use App\Models\SupportTicket;
 use App\Models\User;
 use App\Support\Agents\AgentPermission;
 use App\Support\Staff\StaffPermission;
@@ -45,6 +46,9 @@ final class DashboardPermissionResolver
         if (Gate::forUser($user)->allows('viewAny', Booking::class)) {
             $keys[] = 'pnrs.view';
             $keys[] = 'tickets.view';
+        }
+        if (Gate::forUser($user)->allows('viewAny', SupportTicket::class) && ! $user->isCustomer() && ! $user->isAgentPortalUser()) {
+            $keys[] = 'support.view';
         }
         if ($user->hasStaffPermission(StaffPermission::ReportsView) || $user->isPlatformAdmin()) {
             $keys[] = 'reports.view';
@@ -199,6 +203,9 @@ final class DashboardPermissionResolver
             'agents.view' => Gate::forUser($user)->allows('viewAny', Agent::class),
             'pnrs.view' => Gate::forUser($user)->allows('viewAny', Booking::class),
             'tickets.view' => self::canViewTickets($user),
+            'support.view' => Gate::forUser($user)->allows('viewAny', SupportTicket::class)
+                && ! $user->isCustomer()
+                && ! $user->isAgentPortalUser(),
             'reports.view' => self::canViewReports($user),
             'cms.view' => self::canViewCms($user),
             'users.view' => self::canViewUsers($user),

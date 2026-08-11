@@ -1,6 +1,7 @@
 import type {
   BookingSortField,
   BookingsQuery,
+  BookingsQueue,
   BookingStatus,
   PaymentStatus,
   SortDirection,
@@ -14,6 +15,14 @@ const BOOKING_STATUSES: BookingStatus[] = ["confirmed", "pending", "failed", "ca
 const PAYMENT_STATUSES: PaymentStatus[] = ["paid", "unpaid", "partial", "pending"];
 const TICKETING_STATUSES: TicketingStatus[] = ["ticketed", "unticketed", "pending"];
 const TRIP_TYPES: TripType[] = ["one_way", "return"];
+const BOOKING_QUEUES: BookingsQueue[] = [
+  "needs_action",
+  "cancellations",
+  "refunds",
+  "ticketing",
+  "payment_review",
+  "supplier_pnr",
+];
 const SORT_FIELDS: BookingSortField[] = [
   "bookingDate",
   "departureDate",
@@ -63,6 +72,11 @@ export function parseBookingsQuery(
   const sortRaw = first(searchParams.sort);
   const directionRaw = first(searchParams.direction);
 
+  const queueRaw = first(searchParams.queue);
+  const queue = (BOOKING_QUEUES as readonly string[]).includes(queueRaw)
+    ? (queueRaw as BookingsQueue)
+    : "all";
+
   return {
     q: first(searchParams.q).trim(),
     status: parseEnum(first(searchParams.status), BOOKING_STATUSES, "all"),
@@ -71,6 +85,7 @@ export function parseBookingsQuery(
     supplier: first(searchParams.supplier),
     airline: first(searchParams.airline),
     tripType: parseEnum(first(searchParams.tripType), TRIP_TYPES, "all"),
+    queue,
     bookingDateFrom: first(searchParams.bookingDateFrom),
     bookingDateTo: first(searchParams.bookingDateTo),
     departureDateFrom: first(searchParams.departureDateFrom),
@@ -97,6 +112,7 @@ export function bookingsQueryToSearchParams(query: BookingsQuery, overrides?: Pa
   if (merged.supplier) params.set("supplier", merged.supplier);
   if (merged.airline) params.set("airline", merged.airline);
   if (merged.tripType !== "all") params.set("tripType", merged.tripType);
+  if (merged.queue !== "all") params.set("queue", merged.queue);
   if (merged.bookingDateFrom) params.set("bookingDateFrom", merged.bookingDateFrom);
   if (merged.bookingDateTo) params.set("bookingDateTo", merged.bookingDateTo);
   if (merged.departureDateFrom) params.set("departureDateFrom", merged.departureDateFrom);

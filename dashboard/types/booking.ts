@@ -45,6 +45,15 @@ export type BookingSortField =
 
 export type SortDirection = "asc" | "desc";
 
+export type BookingsQueue =
+  | "needs_action"
+  | "cancellations"
+  | "refunds"
+  | "ticketing"
+  | "payment_review"
+  | "supplier_pnr"
+  | "all";
+
 export type BookingsQuery = {
   q: string;
   status: BookingStatus | "all";
@@ -53,6 +62,7 @@ export type BookingsQuery = {
   supplier: string;
   airline: string;
   tripType: TripType | "all";
+  queue: BookingsQueue;
   bookingDateFrom: string;
   bookingDateTo: string;
   departureDateFrom: string;

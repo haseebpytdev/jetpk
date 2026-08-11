@@ -105,8 +105,8 @@ Route::prefix('staff')->name('staff.')->group(function (): void {
     });
 
     Route::middleware('platform.module:support_system')->group(function (): void {
-        Route::get('/support/tickets', [SupportTicketController::class, 'index'])->name('support.tickets.index');
-        Route::get('/support/tickets/{ticket}', [SupportTicketController::class, 'show'])->name('support.tickets.show');
+        Route::get('/support/tickets', [BackOfficeLegacyViewRedirectController::class, 'staffSupportTicketsIndex'])->name('support.tickets.index');
+        Route::get('/support/tickets/{ticket}', [BackOfficeLegacyViewRedirectController::class, 'staffSupportTicketShow'])->name('support.tickets.show');
         Route::post('/support/tickets/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('support.tickets.reply');
         Route::patch('/support/tickets/{ticket}/status', [SupportTicketController::class, 'updateStatus'])->name('support.tickets.status');
     });

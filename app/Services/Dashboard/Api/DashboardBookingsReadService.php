@@ -179,6 +179,73 @@ class DashboardBookingsReadService
                     });
             });
         }
+
+        $queue = (string) $request->query('queue', '');
+        if ($queue !== '' && $queue !== 'all') {
+            $this->applyQueueFilter($query, $queue);
+        }
+    }
+
+    /**
+     * Mirror of BookingManagementController::applyQueueFilter for Next operator queues.
+     *
+     * @param  Builder<Booking>  $q
+     */
+    protected function applyQueueFilter(Builder $q, string $queue): void
+    {
+        match ($queue) {
+            'needs_action' => $q->where(function (Builder $inner): void {
+                $inner->whereIn('payment_status', ['unpaid', 'partial'])
+                    ->orWhereHas('payments', function (Builder $p): void {
+                        $p->whereIn('status', ['submitted', 'pending']);
+                    })
+                    ->orWhereIn('supplier_booking_status', ['failed', 'manual_review'])
+                    ->orWhere(function (Builder $pnr): void {
+                        $pnr->where('payment_status', 'paid')
+                            ->where(function (Builder $missingPnr): void {
+                                $missingPnr->whereNull('pnr')
+                                    ->orWhere('pnr', '');
+                            });
+                    })
+                    ->orWhereIn('ticketing_status', ['pending', 'not_started', 'failed'])
+                    ->orWhereHas('cancellationRequests', function (Builder $c): void {
+                        $c->whereIn('status', ['requested', 'approved']);
+                    })
+                    ->orWhereHas('refunds', function (Builder $r): void {
+                        $r->whereIn('status', ['pending', 'approved']);
+                    });
+            }),
+            'payment_review' => $q->whereIn('payment_status', ['unpaid', 'partial']),
+            'supplier_pnr' => $q->where(function (Builder $inner): void {
+                $inner->where(function (Builder $paidNoPnr): void {
+                    $paidNoPnr->where('payment_status', 'paid')
+                        ->where(function (Builder $missingPnr): void {
+                            $missingPnr->whereNull('pnr')
+                                ->orWhere('pnr', '');
+                        });
+                })->orWhereIn('supplier_booking_status', ['failed', 'manual_review']);
+            }),
+            'ticketing' => $q->where(function (Builder $inner): void {
+                $inner->where('payment_status', 'paid')
+                    ->where(function (Builder $pnr): void {
+                        $pnr->whereNotNull('pnr')->where('pnr', '<>', '');
+                    })
+                    ->where(function (Builder $notTicketed): void {
+                        $notTicketed->whereNull('ticketed_at')
+                            ->orWhereIn('ticketing_status', ['pending', 'not_started', 'failed']);
+                    });
+            }),
+            'cancellations' => $q->whereHas('cancellationRequests', function (Builder $c): void {
+                $c->whereIn('status', ['requested', 'approved']);
+            }),
+            'refunds' => $q->whereHas('refunds', function (Builder $r): void {
+                $r->whereIn('status', ['pending', 'approved'])
+                    ->orWhere(function (Builder $unpaid): void {
+                        $unpaid->where('status', 'paid')->whereNull('paid_at');
+                    });
+            }),
+            default => null,
+        };
     }
 
     /**
@@ -213,6 +280,7 @@ class DashboardBookingsReadService
             'payment' => $request->query('payment', $request->query('paymentStatus')),
             'supplier' => $request->query('supplier'),
             'channel' => $request->query('channel'),
+            'queue' => $request->query('queue'),
             'bookingDateFrom' => $request->query('bookingDateFrom'),
             'bookingDateTo' => $request->query('bookingDateTo'),
             'departureDateFrom' => $request->query('departureDateFrom'),

@@ -115,8 +115,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::post('/bookings/{booking}/documents/cancellation-confirmation', [BookingDocumentController::class, 'cancellationConfirmation'])->name('bookings.documents.cancellation-confirmation');
     Route::post('/bookings/payments/{bookingPayment}/documents/receipt', [BookingDocumentController::class, 'paymentReceipt'])->name('bookings.payments.documents.receipt');
     Route::get('/bookings/documents/{bookingDocument}/download', [BookingDocumentController::class, 'download'])->name('bookings.documents.download');
-    Route::get('/commissions', [AgentCommissionController::class, 'index'])->name('commissions.index');
-    Route::get('/commissions/{agent}', [AgentCommissionController::class, 'show'])->name('commissions.show');
+    Route::get('/commissions', [BackOfficeLegacyViewRedirectController::class, 'adminCommissionsIndex'])->name('commissions.index');
+    Route::get('/commissions/{agent}', [BackOfficeLegacyViewRedirectController::class, 'adminCommissionShow'])->name('commissions.show');
     Route::post('/commissions/entries/{entry}/approve', [AgentCommissionController::class, 'approve'])->name('commissions.entries.approve');
     Route::post('/commissions/entries/{entry}/reject', [AgentCommissionController::class, 'reject'])->name('commissions.entries.reject');
     Route::post('/commissions/{agent}/adjustments', [AgentCommissionController::class, 'adjustment'])->name('commissions.adjustments.store');
@@ -161,14 +161,14 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::middleware('platform.module:agent_applications')->group(function (): void {
         Route::get('/agent-applications/data', [AgentApplicationController::class, 'data'])->name('agent-applications.data');
         Route::get('/agent-applications/suggestions', [AgentApplicationController::class, 'suggestions'])->name('agent-applications.suggestions');
-        Route::get('/agent-applications', [AgentApplicationController::class, 'index'])->name('agent-applications.index');
+        Route::get('/agent-applications', [BackOfficeLegacyViewRedirectController::class, 'adminAgentApplicationsIndex'])->name('agent-applications.index');
         Route::get('/agent-applications/export', [AgentApplicationController::class, 'export'])->name('agent-applications.export');
-        Route::get('/agent-applications/{application}', [AgentApplicationController::class, 'show'])->name('agent-applications.show');
+        Route::get('/agent-applications/{application}', [BackOfficeLegacyViewRedirectController::class, 'adminAgentApplicationShow'])->name('agent-applications.show');
         Route::patch('/agent-applications/{application}/approve', [AgentApplicationController::class, 'approve'])->name('agent-applications.approve');
         Route::patch('/agent-applications/{application}/reject', [AgentApplicationController::class, 'reject'])->name('agent-applications.reject');
         Route::patch('/agent-applications/{application}/needs-more-info', [AgentApplicationController::class, 'needsMoreInfo'])->name('agent-applications.needs-more-info');
     });
-    Route::get('/staff', [AdminSectionController::class, 'staff'])->name('staff');
+    Route::get('/staff', [BackOfficeLegacyViewRedirectController::class, 'adminStaffIndex'])->name('staff');
     Route::get('/cms-pages', [CmsPageController::class, 'index'])->name('cms-pages.index');
     Route::get('/cms-pages/create', [CmsPageController::class, 'create'])->name('cms-pages.create');
     Route::post('/cms-pages', [CmsPageController::class, 'store'])->name('cms-pages.store');
@@ -184,25 +184,25 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::patch('/promo-codes/{promoCode}', [PromoCodeController::class, 'update'])->name('promo-codes.update');
     Route::patch('/promo-codes/{promoCode}/toggle-status', [PromoCodeController::class, 'toggleStatus'])->name('promo-codes.toggle-status');
     Route::middleware('platform.module:markup_settings')->group(function (): void {
-        Route::get('/markups', [MarkupRuleController::class, 'index'])->name('markups');
-        Route::get('/markups/create', [MarkupRuleController::class, 'create'])->name('markups.create');
+        Route::get('/markups', [BackOfficeLegacyViewRedirectController::class, 'adminMarkupsIndex'])->name('markups');
+        Route::get('/markups/create', [BackOfficeLegacyViewRedirectController::class, 'adminMarkupsIndex'])->name('markups.create');
         Route::post('/markups', [MarkupRuleController::class, 'store'])->name('markups.store');
-        Route::get('/markups/{markupRule}/edit', [MarkupRuleController::class, 'edit'])->name('markups.edit');
+        Route::get('/markups/{markupRule}/edit', [BackOfficeLegacyViewRedirectController::class, 'adminMarkupsIndex'])->name('markups.edit');
         Route::patch('/markups/{markupRule}', [MarkupRuleController::class, 'update'])->name('markups.update');
         Route::patch('/markups/{markupRule}/toggle-status', [MarkupRuleController::class, 'toggleStatus'])->name('markups.toggle-status');
         Route::delete('/markups/{markupRule}', [MarkupRuleController::class, 'destroy'])->name('markups.destroy');
     });
     Route::middleware('platform.module:api_settings')->group(function (): void {
-        Route::get('/api-settings', [SupplierConnectionController::class, 'index'])->name('api-settings');
-        Route::get('/api-settings/create', [SupplierConnectionController::class, 'create'])->name('api-settings.create');
+        Route::get('/api-settings', [BackOfficeLegacyViewRedirectController::class, 'adminApiSettingsIndex'])->name('api-settings');
+        Route::get('/api-settings/create', [BackOfficeLegacyViewRedirectController::class, 'adminApiSettingsIndex'])->name('api-settings.create');
         Route::post('/api-settings', [SupplierConnectionController::class, 'store'])->name('api-settings.store');
-        Route::get('/api-settings/{supplierConnection}/edit', [SupplierConnectionController::class, 'edit'])->name('api-settings.edit');
+        Route::get('/api-settings/{supplierConnection}/edit', [BackOfficeLegacyViewRedirectController::class, 'adminApiSettingsIndex'])->name('api-settings.edit');
         Route::patch('/api-settings/{supplierConnection}', [SupplierConnectionController::class, 'update'])->name('api-settings.update');
         Route::delete('/api-settings/{supplierConnection}', [SupplierConnectionController::class, 'destroy'])->name('api-settings.destroy');
         Route::patch('/api-settings/{supplierConnection}/test', [SupplierConnectionController::class, 'test'])->name('api-settings.test');
         Route::patch('/api-settings/{supplierConnection}/toggle-status', [SupplierConnectionController::class, 'toggleStatus'])->name('api-settings.toggle-status');
     });
-    Route::get('/roles-permissions', [AdminSectionController::class, 'rolesPermissions'])->name('roles-permissions');
+    Route::get('/roles-permissions', [BackOfficeLegacyViewRedirectController::class, 'adminRolesPermissions'])->name('roles-permissions');
     Route::middleware('platform.module:finance_reports')->group(function (): void {
         Route::get('/ledger', [AdminLedgerController::class, 'index'])->name('ledger.index');
         Route::get('/ledger/{transaction}', [AdminLedgerController::class, 'show'])->name('ledger.show');
@@ -233,7 +233,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             ->where('type', 'sales|payments|bookings|agents|refunds|supplier_diagnostics|documents')
             ->name('reports.export');
     });
-    Route::get('/settings', [AdminSettingsHubController::class, 'index'])->name('settings.index');
+    Route::get('/settings', [BackOfficeLegacyViewRedirectController::class, 'adminSettingsIndex'])->name('settings.index');
 
     Route::get('/settings/payments', [AgencyPaymentSettingsController::class, 'index'])->name('settings.payments.index');
     Route::patch('/settings/payments/abhipay', [AgencyPaymentSettingsController::class, 'updateAbhiPay'])->name('settings.payments.abhipay.update');
@@ -293,9 +293,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             ->middleware('throttle:communication-resend')
             ->name('settings.communications.delivery-log.resend');
     });
-    Route::get('/system-health', [SystemSafetyController::class, 'systemHealth'])->name('system-health');
+    Route::get('/system-health', [BackOfficeLegacyViewRedirectController::class, 'adminSystemHealth'])->name('system-health');
     Route::get('/deployment-checklist', [SystemSafetyController::class, 'deploymentChecklist'])->name('deployment-checklist');
-    Route::get('/go-live-checklist', [AdminSectionController::class, 'goLiveChecklist'])->name('go-live-checklist');
+    Route::get('/go-live-checklist', [BackOfficeLegacyViewRedirectController::class, 'adminGoLiveChecklist'])->name('go-live-checklist');
 
     Route::prefix('group-ticketing')->name('group-ticketing.')->group(function (): void {
         Route::get('/', [AdminGroupTicketingController::class, 'index'])->name('index');
@@ -325,8 +325,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     });
 
     Route::middleware('platform.module:support_system')->group(function (): void {
-        Route::get('/support/tickets', [SupportTicketController::class, 'index'])->name('support.tickets.index');
-        Route::get('/support/tickets/{ticket}', [SupportTicketController::class, 'show'])->name('support.tickets.show');
+        Route::get('/support/tickets', [BackOfficeLegacyViewRedirectController::class, 'adminSupportTicketsIndex'])->name('support.tickets.index');
+        Route::get('/support/tickets/{ticket}', [BackOfficeLegacyViewRedirectController::class, 'adminSupportTicketShow'])->name('support.tickets.show');
         Route::post('/support/tickets/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('support.tickets.reply');
         Route::patch('/support/tickets/{ticket}/status', [SupportTicketController::class, 'updateStatus'])->name('support.tickets.status');
         Route::patch('/support/tickets/{ticket}/assign', [SupportTicketController::class, 'assign'])->name('support.tickets.assign');
