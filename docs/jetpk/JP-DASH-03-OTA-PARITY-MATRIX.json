@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T19:13:20.277Z",
+  "generatedAtUtc": "2026-08-11T19:14:06.082Z",
   "schemaVersion": "jp-dash-03-v3",
   "note": "Honest V3 capability parity — PASS only where Next.js UI and Laravel backend are both production-usable without fixture/mocks for the stated capability.",
   "capabilities": [
@@ -75,9 +75,9 @@
       "sideEffectClass": "SAFE_NAV",
       "backendExists": true,
       "nextUiExists": true,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "production-acceptance admin/staff grouped nav probes PASS 2026-08-11",
-      "gapNotes": "Staff portal hrefs fixed (PortalProvider wraps shell); cancellations/execution still hand off to Laravel queues.",
+      "gapNotes": "Staff portal hrefs fixed (PortalProvider wraps shell); cancellations/execution still hand off to Laravel queues. | V3 reopen: Blade presentation retired; Next owns operator shell.",
       "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PASS"
     },
@@ -699,9 +699,9 @@
       "sideEffectClass": "SAFE_NAV",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Staff handoff PASS",
-      "gapNotes": "Admin Staff console remains Laravel handoff (deep-matrix PASS). JP-STAFF-01 staff Next portal PASS separately.",
+      "gapNotes": "Admin Staff console remains Laravel handoff (deep-matrix PASS). JP-STAFF-01 staff Next portal PASS separately. | V3 reopen: Blade presentation retired; Next owns operator shell.",
       "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PASS"
     },
@@ -907,9 +907,9 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Settings handoff PASS",
-      "gapNotes": "Next settings editors are fixture/local-preview only. | Production Laravel handoff verified 2026-08-11.",
+      "gapNotes": "Next settings editors are fixture/local-preview only. | Production Laravel handoff verified 2026-08-11. | V3 reopen: Blade presentation retired; Next owns operator shell.",
       "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PASS"
     },
@@ -959,9 +959,9 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": true,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "route exists; no dashboard API route",
-      "gapNotes": "Booking communications panel always rendered on management page (production PASS). Template/editor mutations remain Laravel handoff.",
+      "gapNotes": "Booking communications panel always rendered on management page (production PASS). Template/editor mutations remain Laravel handoff. | V3 reopen: Blade presentation retired; Next owns operator shell.",
       "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PASS"
     },
@@ -985,9 +985,9 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Markups handoff PASS",
-      "gapNotes": "AD-012: may remain Laravel-handoff until dedicated Next module. | Production Laravel handoff verified 2026-08-11.",
+      "gapNotes": "AD-012: may remain Laravel-handoff until dedicated Next module. | Production Laravel handoff verified 2026-08-11. | V3 reopen: Blade presentation retired; Next owns operator shell.",
       "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PASS"
     },
@@ -1063,9 +1063,9 @@
       "sideEffectClass": "SAFE_NAV",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "JP-DASH-03-DEEP-MATRIX Go-live handoff PASS",
-      "gapNotes": "| Production Laravel handoff verified 2026-08-11.",
+      "gapNotes": "| Production Laravel handoff verified 2026-08-11. | V3 reopen: Blade presentation retired; Next owns operator shell.",
       "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PASS"
     },
@@ -1115,9 +1115,9 @@
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
       "nextUiExists": false,
-      "laravelHandoff": true,
+      "laravelHandoff": false,
       "testMethod": "production-acceptance DASHBOARD_DB_LOGO + PUBLIC_DB_LOGO PASS 2026-08-11",
-      "gapNotes": "Dashboard shell reads branding for display; mutations remain Laravel-only. Private APP_URL stripped from support CTA hrefs.",
+      "gapNotes": "Dashboard shell reads branding for display; mutations remain Laravel-only. Private APP_URL stripped from support CTA hrefs. | V3 reopen: Blade presentation retired; Next owns operator shell.",
       "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PASS"
     }
