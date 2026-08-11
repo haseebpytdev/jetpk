@@ -24,7 +24,7 @@ class JetpkDash03QaStaffCommand extends Command
     private const QA_MARKER = 'jp-dash-03-qa-staff';
 
     protected $signature = 'jetpk:dash-03-qa-staff
-        {action=status : create|deactivate|restore-baseline|rotate-password|status}
+        {action=status : create|activate|deactivate|restore-baseline|rotate-password|status}
         {--preset=staff_operator : Canonical staff permission preset key}';
 
     protected $description = 'JP-DASH-03 controlled temporary QA Staff identity (sanitized output only)';
@@ -35,6 +35,7 @@ class JetpkDash03QaStaffCommand extends Command
 
         return match ($action) {
             'create' => $this->createQaStaff(),
+            'activate' => $this->activateQaStaff(),
             'deactivate' => $this->deactivateQaStaff(),
             'restore-baseline' => $this->restoreBaseline(),
             'rotate-password' => $this->rotatePassword(),
@@ -135,6 +136,45 @@ class JetpkDash03QaStaffCommand extends Command
         $this->line('QA_STAFF_BASELINE_ROLE='.$preset);
         $this->line('QA_STAFF_STATUS=Active');
         $this->line('QA_STAFF_EMAIL_CHANNEL_REQUIRED=YES');
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * Reactivate QA staff for OPS-08 with operator ∪ support permissions so
+     * assignment + ticket reply flows are exercisable without inventing a new identity.
+     */
+    private function activateQaStaff(): int
+    {
+        $user = $this->qaUserQuery()->first();
+        if ($user === null) {
+            $this->line('QA_STAFF_STATUS=missing');
+
+            return self::FAILURE;
+        }
+
+        $permissions = array_values(array_unique(array_merge(
+            StaffPermission::presetPermissions(StaffPermission::PresetOperator),
+            StaffPermission::presetPermissions(StaffPermission::PresetSupport),
+        )));
+
+        $meta = $user->meta ?? [];
+        $meta['staff_permissions'] = RolePermissionMatrix::normalizeStaffPermissions($permissions);
+        $meta['permission_group'] = 'staff_operator+staff_support';
+        $meta['jp_ops_08_qa'] = true;
+
+        $user->forceFill([
+            'meta' => $meta,
+            'status' => UserAccountStatus::Active,
+        ])->save();
+
+        StaffProfile::query()
+            ->where('user_id', $user->id)
+            ->update(['is_active' => true]);
+
+        $this->line('QA_STAFF_STATUS=Active');
+        $this->line('QA_STAFF_BASELINE_ROLE=staff_operator+staff_support');
+        $this->line('QA_STAFF_SUPPORT_REPLY=yes');
 
         return self::SUCCESS;
     }

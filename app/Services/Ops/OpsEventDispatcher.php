@@ -123,7 +123,7 @@ class OpsEventDispatcher
             agencyId: $booking->agency_id,
             deepLink: 'bookings/'.rawurlencode($ref),
             category: 'bookings',
-            eventKey: 'booking.staff_assigned:'.$booking->id.':'.$assignee->id.':'.(string) ($booking->assigned_at?->timestamp ?? time()),
+            eventKey: 'booking.staff_assigned:'.$booking->id.':'.$assignee->id,
         );
     }
 
@@ -207,11 +207,11 @@ class OpsEventDispatcher
             agencyId: $ticket->agency_id,
             deepLink: 'support?ticket='.rawurlencode($ref),
             category: 'support',
-            eventKey: 'support.ticket_assigned:'.$ticket->id.':'.$assignee->id.':'.now()->timestamp,
+            eventKey: 'support.ticket_assigned:'.$ticket->id.':'.$assignee->id,
             writeAudit: true,
             auditableType: SupportTicket::class,
             properties: [
-                'dedupe_token' => 'assigned-'.$ticket->id.'-'.$assignee->id.'-'.now()->timestamp,
+                'dedupe_token' => 'assigned-'.$ticket->id.'-'.$assignee->id,
                 'assigned_to_user_id' => $assignee->id,
             ],
         );
