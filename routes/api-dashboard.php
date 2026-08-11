@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Dashboard\DashboardCustomersController;
 use App\Http\Controllers\Api\Dashboard\DashboardDepositsController;
 use App\Http\Controllers\Api\Dashboard\DashboardMarkupsController;
 use App\Http\Controllers\Api\Dashboard\DashboardOverviewController;
+use App\Http\Controllers\Api\Dashboard\DashboardOpsController;
 use App\Http\Controllers\Api\Dashboard\DashboardPaymentsController;
 use App\Http\Controllers\Api\Dashboard\DashboardPermissionsController;
 use App\Http\Controllers\Api\Dashboard\DashboardPnrOrdersController;
@@ -44,6 +45,20 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
             ->name('overview');
         Route::get('/search', [DashboardSearchController::class, 'index'])
             ->name('search');
+
+        // JP-OPS-08 cross-portal ops surfaces (EVENT_POLLING)
+        Route::get('/ops/inbox', [DashboardOpsController::class, 'inbox'])
+            ->name('ops.inbox');
+        Route::get('/ops/inbox/unread-summary', [DashboardOpsController::class, 'unreadSummary'])
+            ->name('ops.inbox.unread');
+        Route::post('/ops/inbox/read', [DashboardOpsController::class, 'markRead'])
+            ->name('ops.inbox.read');
+        Route::post('/ops/inbox/read-all', [DashboardOpsController::class, 'markAllRead'])
+            ->name('ops.inbox.read-all');
+        Route::get('/ops/events', [DashboardOpsController::class, 'events'])
+            ->name('ops.events');
+        Route::get('/ops/work-queue', [DashboardOpsController::class, 'workQueue'])
+            ->name('ops.work-queue');
     });
 
     Route::middleware('dashboard.permission:bookings.view')->group(function (): void {

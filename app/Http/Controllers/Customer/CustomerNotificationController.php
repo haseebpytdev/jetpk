@@ -45,7 +45,9 @@ class CustomerNotificationController extends Controller
             abort(404);
         }
 
-        return $this->customerPortalJson($this->presenter->markReadUnavailable(), 501);
+        return $this->customerPortalJson(
+            $this->presenter->markRead($request->user(), $notification),
+        );
     }
 
     public function markAllRead(Request $request): JsonResponse
@@ -54,6 +56,8 @@ class CustomerNotificationController extends Controller
             abort(404);
         }
 
-        return $this->customerPortalJson($this->presenter->markReadUnavailable(), 501);
+        return $this->customerPortalJson(
+            $this->presenter->markAllRead($request->user()),
+        );
     }
 }

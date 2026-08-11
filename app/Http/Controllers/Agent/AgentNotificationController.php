@@ -45,7 +45,9 @@ class AgentNotificationController extends Controller
             abort(404);
         }
 
-        return $this->agentPortalJson($this->presenter->markReadUnavailable(), 501);
+        return $this->agentPortalJson(
+            $this->presenter->markRead($request->user(), $notification),
+        );
     }
 
     public function markAllRead(Request $request): JsonResponse
@@ -54,6 +56,8 @@ class AgentNotificationController extends Controller
             abort(404);
         }
 
-        return $this->agentPortalJson($this->presenter->markReadUnavailable(), 501);
+        return $this->agentPortalJson(
+            $this->presenter->markAllRead($request->user()),
+        );
     }
 }

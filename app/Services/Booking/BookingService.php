@@ -16,6 +16,7 @@ use App\Models\BookingStatusLog;
 use App\Models\User;
 use App\Services\Communication\BookingCommunicationService;
 use App\Services\Finance\Ledger\LedgerEventRecorder;
+use App\Services\Ops\OpsEventDispatcher;
 use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Database\Eloquent\Collection;
@@ -30,6 +31,7 @@ class BookingService
     public function __construct(
         protected BookingCommunicationService $communicationService,
         protected CompactReferenceGenerator $referenceGenerator,
+        protected OpsEventDispatcher $opsEvents,
     ) {}
 
     public function createDraftBooking(Agency $agency, ?User $customer = null, ?Agent $agent = null): Booking
@@ -228,6 +230,15 @@ class BookingService
                 'is_customer_visible' => $customerVisible,
             ]);
 
+            try {
+                $this->opsEvents->bookingNoteAdded($booking->fresh(), $user, $customerVisible);
+            } catch (Throwable $e) {
+                Log::warning('ops.booking_note_fanout_failed', [
+                    'booking_id' => $booking->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
             return $bookingNote;
         });
     }
@@ -259,6 +270,15 @@ class BookingService
             $fresh = $booking->fresh();
             $fresh->loadMissing('assignedStaff');
             $this->communicationService->sendStaffAssigned($fresh, $fresh->assignedStaff);
+
+            try {
+                $this->opsEvents->bookingAssigned($fresh, $actor, $fresh->assignedStaff);
+            } catch (Throwable $e) {
+                Log::warning('ops.booking_assign_fanout_failed', [
+                    'booking_id' => $booking->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
 
             return $fresh;
         });

@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-07-16 (JETPK portal customer/agent/agent-staff parity closure)
+**Last updated:** 2026-08-11 (JP-OPS-08 cross-portal ops inbox / EVENT_POLLING)
 
 ---
 
@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-08-11 | JP-OPS-08 | **Cross-portal ops inbox:** `OpsInboxService` + `OpsEventDispatcher` persist recipient notifications in `users.meta.ops_inbox` (no migration). Wired from `BookingService::assignStaff` / notes and `SupportTicketService` create/assign/reply. Dashboard `GET/POST /api/dashboard/ops/*` + Live Operations panel (`EVENT_POLLING`). Customer/Agent notification presenters now available. Tests: `JpOps08CrossPortalOpsInboxTest`. |
 | 2026-07-26 | SABRE-GDS-SEARCH-CACHE-18C | **Stale search cache safety:** `FlightSearchResultStore` validates payload schema, rejects version mismatch/malformed rows, attaches `offer_freshness` on read, blocks `findOffer` / return-split selection when stale. Tests: **`FlightSearchResultStoreStaleOfferTest`**. |
 | 2026-07-26 | SABRE-GDS-SEARCH-CACHE-18B | **Search cache-key isolation:** `FlightSearchCriteriaCacheKey` deterministic fingerprint for all offer-changing dimensions; `FlightSearchSupplierResultCache` criteria-keyed supplier result lane (`ota-flights.search_result_cache`); `NearbyDateFareStripService` + `FlightSearchResultStore` wired; `FlightSearchService` cache hit/miss with connection scope. Tests: **`FlightSearchCriteriaCacheKeyTest`**, **`FlightSearchSupplierResultCacheTest`**. |
 | 2026-07-25 | SABRE-GDS-PUBLIC-CREATE-17F | **Post-dispatch ambiguous timeout:** `SabreBookingService::createBooking()` maps live `ConnectionException` to `needs_review` + `manual_reconciliation_required` (not definitive `failed`); `SabrePnrFailureClassifier::isPostDispatchAmbiguousTransportFailure()` → `retry_allowed=false`; public checkout confirmation notice pending verification; duplicate POST blocked. Tests: **`SabrePublicCreateFailureAmbiguityPhase17ETest`** (Phase 17E gate). |

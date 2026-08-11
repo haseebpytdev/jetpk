@@ -2,7 +2,6 @@
 
 namespace App\Services\Support;
 
-use App\Enums\AccountType;
 use App\Enums\OtaNotificationEvent;
 use App\Enums\SupportTicketMessageVisibility;
 use App\Enums\SupportTicketStatus;
@@ -13,10 +12,13 @@ use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Models\User;
 use App\Services\Communication\OtaNotificationService;
+use App\Services\Ops\OpsEventDispatcher;
 use App\Support\Agents\AgentPermission;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Throwable;
 
 /**
  * Support ticket lifecycle: create, reply, status, assign, forward, and E6 notifications.
@@ -26,6 +28,7 @@ class SupportTicketService
     public function __construct(
         protected OtaNotificationService $notifications,
         protected CompactReferenceGenerator $referenceGenerator,
+        protected OpsEventDispatcher $opsEvents,
     ) {}
 
     /**
@@ -59,6 +62,15 @@ class SupportTicketService
             $ticket = $ticket->fresh(['createdBy', 'assignedTo', 'booking']);
 
             $this->notifyCreated($ticket);
+
+            try {
+                $this->opsEvents->supportTicketCreated($ticket, $creator);
+            } catch (Throwable $e) {
+                Log::warning('ops.support_created_fanout_failed', [
+                    'ticket_id' => $ticket->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
 
             return $ticket;
         });
@@ -101,6 +113,15 @@ class SupportTicketService
             $ticket = $ticket->fresh(['createdBy', 'assignedTo', 'booking']);
 
             $this->notifyCreated($ticket);
+
+            try {
+                $this->opsEvents->supportTicketCreated($ticket, $creator);
+            } catch (Throwable $e) {
+                Log::warning('ops.support_public_created_fanout_failed', [
+                    'ticket_id' => $ticket->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
 
             return $ticket;
         });
@@ -179,6 +200,19 @@ class SupportTicketService
             $this->notifyReplied($ticket->fresh(['createdBy', 'assignedTo', 'booking']), $author);
         }
 
+        try {
+            $this->opsEvents->supportMessagePosted(
+                $ticket->fresh(['createdBy', 'assignedTo', 'booking']),
+                $author,
+                $visibility === SupportTicketMessageVisibility::CustomerVisible,
+            );
+        } catch (Throwable $e) {
+            Log::warning('ops.support_message_fanout_failed', [
+                'ticket_id' => $ticket->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
         return $message;
     }
 
@@ -213,6 +247,15 @@ class SupportTicketService
             && (int) $previousAssigneeId !== (int) $assignee->id
         ) {
             $this->notifyAssigned($fresh, $actor);
+        }
+
+        try {
+            $this->opsEvents->supportTicketAssigned($fresh, $assignee, $actor);
+        } catch (Throwable $e) {
+            Log::warning('ops.support_assign_fanout_failed', [
+                'ticket_id' => $ticket->id,
+                'message' => $e->getMessage(),
+            ]);
         }
 
         return $fresh;

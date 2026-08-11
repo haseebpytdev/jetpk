@@ -14,6 +14,7 @@ import { AuditFilterBar } from "@/features/audit/components/audit-filter-bar";
 import { AuditMobileCard } from "@/features/audit/components/audit-mobile-card";
 import { AuditSecurityPanel } from "@/features/audit/components/audit-security-panel";
 import { AuditSummaryMetrics } from "@/features/audit/components/audit-summary-metrics";
+import { LiveOperationsPanel } from "@/features/ops/live-operations-panel";
 import { auditQueryToSearchParams } from "@/lib/audit-query";
 import type { AuditModuleResult, AuditSortField } from "@/types/audit";
 
@@ -63,6 +64,7 @@ export function AuditWorkspace({ result }: Props) {
   return (
     <div data-testid="audit-workspace">
       <AuditSummaryMetrics summary={result.summary} invalidDate={invalidDate} />
+      <LiveOperationsPanel />
       <div className="mt-4 space-y-3">
         <AuditFilterBar query={result.query} facets={result.facets} dateRange={result.dateRange} />
         <AuditActiveFilters query={result.query} dateRange={result.dateRange} />

@@ -75,7 +75,7 @@ class CustomerPortalJsonContractTest extends TestCase
             ->assertJsonPath('ticket.reference', $ticket->ticket_reference);
     }
 
-    public function test_customer_notifications_json_returns_honest_unavailable_state(): void
+    public function test_customer_notifications_json_returns_available_inbox(): void
     {
         [$customer] = $this->customerWithBooking();
 
@@ -83,7 +83,8 @@ class CustomerPortalJsonContractTest extends TestCase
             ->getJson(route('customer.notifications.index'))
             ->assertOk()
             ->assertJsonPath('ok', true)
-            ->assertJsonPath('available', false)
+            ->assertJsonPath('available', true)
+            ->assertJsonPath('transport', 'EVENT_POLLING')
             ->assertJsonPath('unread_count', 0);
     }
 
