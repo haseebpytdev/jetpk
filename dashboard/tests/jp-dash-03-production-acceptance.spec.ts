@@ -114,15 +114,17 @@ test.describe("JP-DASH-03 production acceptance", () => {
     const logoUrl = config.logo_url?.trim() ?? "";
 
     await page.goto("/", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    const homeBrand = page.getByRole("link", { name: "JetPakistan home" });
+    await expect(homeBrand).toBeVisible({ timeout: 60_000 });
+
     if (logoUrl !== "") {
-      const logo = page.locator(
-        `img.ota-brand-logo-img, img[alt="${brandName}"], img[alt="${brandName} logo"]`,
-      ).first();
+      const logo = homeBrand.locator("img").first();
       await expect(logo).toBeVisible({ timeout: 60_000 });
       const src = await logo.getAttribute("src");
       expect(src).toBeTruthy();
+      expect(src).toMatch(/branding|storage|logo/i);
     } else {
-      await expect(page.getByText(brandName, { exact: true }).first()).toBeVisible();
+      await expect(homeBrand.getByText(brandName, { exact: true })).toBeVisible();
     }
   });
 

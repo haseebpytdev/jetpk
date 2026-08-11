@@ -1,4 +1,4 @@
-import { laravelApiPath } from "@/services/flight-search";
+import { absoluteLaravelUrl, laravelApiPath } from "@/services/flight-search";
 import type { ContactDetails } from "../types";
 import { fetchWithTimeout } from "../utils/laravel-api";
 
@@ -27,10 +27,18 @@ export type PublicConfig = {
   source: "laravel";
 };
 
+function publicConfigEndpoint(): string {
+  if (typeof window !== "undefined") {
+    return laravelApiPath("/api/public/content/config");
+  }
+
+  return absoluteLaravelUrl("/api/public/content/config");
+}
+
 export const PublicConfigService = {
   async getConfig(): Promise<PublicConfig | null> {
     try {
-      const response = await fetchWithTimeout(laravelApiPath("/api/public/content/config"), {
+      const response = await fetchWithTimeout(publicConfigEndpoint(), {
         headers: { Accept: "application/json" },
         next: { revalidate: 300 },
       });
