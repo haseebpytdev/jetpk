@@ -53,6 +53,7 @@ const relativeFiles = [
   "routes/staff.php",
   "public/themes/frontend/jetpakistan/css/tokens.css",
   "dashboard/components/dashboard/sidebar.tsx",
+  "dashboard/app/layout.tsx",
   "dashboard/lib/nav-config.ts",
   "dashboard/lib/dashboard-navigation.ts",
   "dashboard/types/booking.ts",

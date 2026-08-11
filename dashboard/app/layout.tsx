@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { DashboardShell } from "@/layouts/dashboard-shell";
 import { resolveDashboardPortalFromRequest } from "@/lib/dashboard-portal-server";
+import { PortalProvider } from "@/lib/portal-context";
 import { SessionProvider } from "@/lib/session-context";
 import { themeBootstrapScript } from "@/lib/theme/theme-bootstrap-script";
 import { getDashboardBranding } from "@/services/branding-service";
@@ -34,11 +35,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body className="min-h-screen overflow-x-hidden font-sans antialiased">
-        <ThemeProvider>
-          <SessionProvider session={session}>
-            <DashboardShell session={session} branding={branding}>{children}</DashboardShell>
-          </SessionProvider>
-        </ThemeProvider>
+        <PortalProvider portal={portal}>
+          <ThemeProvider>
+            <SessionProvider session={session}>
+              <DashboardShell session={session} branding={branding}>{children}</DashboardShell>
+            </SessionProvider>
+          </ThemeProvider>
+        </PortalProvider>
       </body>
     </html>
   );

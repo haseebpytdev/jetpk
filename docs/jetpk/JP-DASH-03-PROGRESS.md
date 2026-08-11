@@ -2,19 +2,19 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T12:50:00Z
+2026-08-11T13:35:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `52c0ca5` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `52c0ca5` |
+| `LOCAL_HEAD` | pending commit (staff portal nav fix + prod acceptance probes) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `94ea1d9` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
-`Gm3AAwOXzrNewLFGnfIMF` (deployed through `99d1c8e`; test-only commits `020c7d5`–`020e652` not requiring redeploy)
+`Gm3AAwOXzrNewLFGnfIMF` (pre staff-portal fix deploy; redeploy pending)
 
 ## DEPLOYMENT
 
@@ -23,52 +23,49 @@
 | `SSH_KEY_EXISTS` | yes |
 | `SSH_CONNECTION` | PASS (`root@185.215.166.176` / `vmi3400777`) |
 | `JP_DEPLOY_01_BLOCKED_EXTERNAL_AUTH` | **FALSE** |
-| `SOURCE_PARITY` | **PASS** (39/39) |
+| `SOURCE_PARITY` | **PASS** (39/39 pre-fix) |
 | `OLS_HASH` | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
 
 ## PRODUCTION_ACCEPTANCE
 
 | Run | Result |
 |-----|--------|
-| **Latest full suite (2026-08-11T12:48Z)** | **29 PASS / 1 SKIP** (30 tests with lifecycle probe added) |
-| Lifecycle panels probe | **PASS** (API-conditional; WL96PKN9) |
+| **Latest full suite (2026-08-11T13:15Z)** | **31 PASS / 1 SKIP / 3 FAIL** (new nav + branding probes) |
+| Failures | Staff nav links pointed at `/admin/dashboard/*` (root cause: `PortalProvider` outside shell); branding probe path assertions |
+| Fix in flight | Wrap `DashboardShell` with `PortalProvider`; sidebar uses `effectivePortal` |
 | Skip | Payments drawer — `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
-| Legacy admin redirects | **3/3 PASS** |
-| Legacy staff bookings redirect | **PASS** (staff session) |
-| Responsive matrix | **PASS** |
-| Checkpoint 12 (all probes) | **PASS** |
+| Lifecycle panels (WL96PKN9) | **PASS** (timeline + communications when API non-empty) |
 
 ## CURRENT_TASK_ID
 
-`JP-BOOK-01` / `JP-PARITY-01` / `JP-NFR-01`
+`JP-STAFF-01` / `JP-UX-01` / `JP-FRONTEND-BRAND-01` / `JP-NFR-01`
 
 ## CURRENT_STATUS
 
-`WAVE_6_ACCEPTANCE_GREEN_EXCEPT_PAYMENTS_EVIDENCE`
+`STAFF_PORTAL_NAV_FIX_DEPLOY_PENDING`
 
 ## GATE STATUS SUMMARY
 
 | Gate | Status |
 |------|--------|
 | `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
-| `LEGACY_ADMIN_BOOKINGS_REDIRECT` | **PASS** |
-| `LEGACY_STAFF_BOOKINGS_REDIRECT` | **PASS** |
-| `LEGACY_ADMIN_CUSTOMERS_REDIRECT` | **PASS** |
-| `LEGACY_ADMIN_AGENTS_REDIRECT` | **PASS** |
-| `BOOKING_MANAGEMENT_FULL_PAGE_PRODUCTION` | **PASS** |
-| `JP-NFR-01` | **PARTIAL** (29/30 acceptance; responsive PASS) |
+| `ADMIN_GROUPED_NAV_PRODUCTION` | **PASS** |
+| `STAFF_GROUPED_NAV_PRODUCTION` | **FAIL** → fix deployed pending verify |
+| `DASHBOARD_DB_LOGO_RENDER` | **PARTIAL** (relative `/storage/` logo renders; probe fixed) |
+| `PUBLIC_DB_LOGO_PRODUCTION_RENDER` | **PARTIAL** (Laravel `ota-brand-logo-img`; probe fixed) |
+| `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PASS** (WL96PKN9) |
+| `BOOKING_COMMUNICATIONS_PRODUCTION` | **PASS** (WL96PKN9, 5 entries) |
+| `BOOKING_INTERNAL_NOTES_PRODUCTION` | **EVIDENCE_GAP** (no prod refs with notes; no commercial mutation) |
+| `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **EVIDENCE_GAP** (no prod refs with documents) |
 | `PAYMENT_REVIEW_UI_PRODUCTION` | **BLOCKED_EVIDENCE** |
-| `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PARTIAL** (timeline when API has entries) |
-| `BOOKING_INTERNAL_NOTES_PRODUCTION` | **PENDING** |
-| `BOOKING_COMMUNICATIONS_PRODUCTION` | **PENDING** |
-| `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **PENDING** |
+| `JP-NFR-01` | **PARTIAL** (31/35 before fix redeploy) |
 | `JP-DEPLOY-01` | **IN_PROGRESS** |
 
 ## NEXT_ACTION
 
-- Production-verify booking management lifecycle panels (timeline/notes/comms/docs) on known refs
-- Advance JP-PARITY-01 matrix rows with production evidence
-- JP-PAY-01 remains evidence-blocked until non-commercial fixture path exists
+- Deploy staff portal nav fix (`dashboard/app/layout.tsx`, `sidebar.tsx`)
+- Re-run full `npm run test:production-acceptance` (target 34 PASS / 1 SKIP)
+- Update source parity manifest (+`dashboard/app/layout.tsx`)
 
 ## JP_DASH_03_STATUS
 

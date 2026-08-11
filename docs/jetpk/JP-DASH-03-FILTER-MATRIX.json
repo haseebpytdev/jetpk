@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T12:20:20.921Z",
+  "generatedAtUtc": "2026-08-11T13:09:21.049Z",
   "allFilters": "PASS",
   "allSortControls": "PASS",
   "allPagination": "PASS",
@@ -109,7 +109,7 @@
     {
       "module": "Agents",
       "control": "sort",
-      "status": "PASS",
+      "status": "NOT_APPLICABLE",
       "result": "PASS"
     },
     {
@@ -145,7 +145,7 @@
     {
       "module": "Users",
       "control": "sort",
-      "status": "PASS",
+      "status": "NOT_APPLICABLE",
       "result": "PASS"
     },
     {

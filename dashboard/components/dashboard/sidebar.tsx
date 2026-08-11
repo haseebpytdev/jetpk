@@ -113,7 +113,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
                     const href =
                       item.target === "laravel"
                         ? sanitizePublicHref(item.href)
-                        : dashboardHref(portal, item.href);
+                        : dashboardHref(effectivePortal, item.href);
                     const linkClass = cn(
                       "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-ui focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent",
                       active
@@ -154,7 +154,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
                 <ul className="space-y-1">
                   {group.items.map((item) => {
                     const active = isActive(relativePathname, item.href);
-                    const href = dashboardHref(portal, item.href);
+                    const href = dashboardHref(effectivePortal, item.href);
                     return (
                       <li key={`${group.label}-${item.label}`}>
                         <Link

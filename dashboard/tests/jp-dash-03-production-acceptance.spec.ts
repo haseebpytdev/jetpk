@@ -55,6 +55,77 @@ test.describe("JP-DASH-03 production acceptance", () => {
     await expect(page).toHaveURL(/\/admin\/dashboard\/agents\/?/);
   });
 
+  test("admin grouped navigation renders production IA sections", async ({ page }) => {
+    await page.goto("/admin/dashboard", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    const nav = page.getByLabel("Dashboard navigation");
+    await expect(nav.getByText("Booking operations", { exact: true }).first()).toBeVisible({ timeout: 60_000 });
+    await expect(nav.getByText("Finance", { exact: true }).first()).toBeVisible();
+    await expect(nav.locator('a[href*="/admin/dashboard/bookings"]').first()).toBeVisible();
+    await expect(nav.locator('a[href*="/admin/dashboard/payments"]').first()).toBeVisible();
+  });
+
+  test("staff grouped navigation renders scoped production IA", async ({ browser }) => {
+    const staffStoragePath = path.resolve(
+      process.env.JP_STAFF_STORAGE_STATE ??
+        path.join(process.cwd(), "..", "tmp/jp-dash-03-staff-storage-state.json"),
+    );
+    test.skip(!fs.existsSync(staffStoragePath), "Staff storageState missing — run jp-dash-03-automated-login.mjs staff");
+
+    const context = await browser.newContext({ storageState: staffStoragePath });
+    const page = await context.newPage();
+    try {
+      await page.goto("/staff/dashboard", { waitUntil: "domcontentloaded", timeout: 120_000 });
+      const nav = page.getByLabel("Dashboard navigation");
+      await expect(nav.getByText("Booking operations", { exact: true }).first()).toBeVisible({ timeout: 60_000 });
+      await expect(nav.getByText("Finance", { exact: true }).first()).toBeVisible();
+      await expect(nav.locator('a[href*="/staff/dashboard/bookings"]').first()).toBeVisible();
+      await expect(nav.getByRole("link", { name: "Markups" })).toHaveCount(0);
+    } finally {
+      await context.close();
+    }
+  });
+
+  test("dashboard branding logo renders from public config on production", async ({ page }) => {
+    const configResponse = await page.request.get("/api/public/content/config");
+    expect(configResponse.ok()).toBeTruthy();
+    const config = (await configResponse.json()) as { logo_url?: string | null; brand_name?: string };
+    const brandName = (config.brand_name ?? "JetPakistan").trim() || "JetPakistan";
+    const logoUrl = config.logo_url?.trim() ?? "";
+
+    await page.goto("/admin/dashboard", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    const nav = page.getByLabel("Dashboard navigation");
+
+    if (logoUrl !== "") {
+      const logo = nav.getByTestId("dashboard-brand-logo");
+      await expect(logo).toBeVisible({ timeout: 60_000 });
+      const src = await logo.getAttribute("src");
+      expect(src).toBeTruthy();
+      expect(src).toMatch(/^(\/|https?:\/\/)/);
+    } else {
+      await expect(nav.getByText(brandName, { exact: true }).first()).toBeVisible();
+    }
+  });
+
+  test("public homepage renders configured brand logo on production", async ({ page }) => {
+    const configResponse = await page.request.get("/api/public/content/config");
+    expect(configResponse.ok()).toBeTruthy();
+    const config = (await configResponse.json()) as { logo_url?: string | null; brand_name?: string };
+    const brandName = (config.brand_name ?? "JetPakistan").trim() || "JetPakistan";
+    const logoUrl = config.logo_url?.trim() ?? "";
+
+    await page.goto("/", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    if (logoUrl !== "") {
+      const logo = page.locator(
+        `img.ota-brand-logo-img, img[alt="${brandName}"], img[alt="${brandName} logo"]`,
+      ).first();
+      await expect(logo).toBeVisible({ timeout: 60_000 });
+      const src = await logo.getAttribute("src");
+      expect(src).toBeTruthy();
+    } else {
+      await expect(page.getByText(brandName, { exact: true }).first()).toBeVisible();
+    }
+  });
+
   test("legacy staff bookings bookmark redirects to Next list", async ({ browser }) => {
     const staffStoragePath = path.resolve(
       process.env.JP_STAFF_STORAGE_STATE ??

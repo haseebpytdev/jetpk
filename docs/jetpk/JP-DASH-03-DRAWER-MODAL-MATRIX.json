@@ -1,10 +1,10 @@
 {
-  "generatedAtUtc": "2026-08-11T12:15:40.323Z",
+  "generatedAtUtc": "2026-08-11T13:09:32.027Z",
   "drawerModalMatrix": "PASS",
   "rows": [
     {
       "module": "Bookings",
-      "status": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "status": "MANAGEMENT_PAGE",
       "result": "PASS"
     },
     {

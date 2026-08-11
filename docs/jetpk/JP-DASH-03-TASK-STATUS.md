@@ -16,7 +16,7 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-PAY-01 | Payment management | yes | yes | yes | yes | yes | partial | IN_PROGRESS | Payment verify/reject in drawer; prod acceptance reverify | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 3 |
 | JP-REFUND-01 | Cancellation/refund/ticketing | partial | no | partial | partial | partial | no | PARTIAL | Intake forms; no prod mutation | — | — | — | Wave 3 |
 | JP-MODULES-01 | Full module inventory | partial | partial | partial | no | no | no | IN_PROGRESS | Covered in parity matrix | pending | — | — | Wave 1 |
-| JP-STAFF-01 | Staff Next back office | yes | yes | yes | yes | yes | partial | IN_PROGRESS | Staff preview nav groups deployed | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 5 |
+| JP-STAFF-01 | Staff Next back office | yes | yes | yes | yes | yes | partial | IN_PROGRESS | Staff nav pointed at admin paths — portal context fix in flight | pending | Gm3AAwOXzrNewLFGnfIMF | — | Wave 6 |
 | JP-LEGACY-01 | Legacy UI retirement | yes | yes | partial | yes | yes | partial | IN_PROGRESS | Admin + staff bookings redirect PASS prod 2026-08-11 | 020e652 | Gm3AAwOXzrNewLFGnfIMF | — | Wave 6 |
 | JP-RBAC-01 | Five-role RBAC | partial | partial | partial | partial | yes | partial | PARTIAL | RBAC browser matrix 2/2 PASS | b220b84 | — | Full crawl pending | — |
 | JP-FRONTEND-BRAND-01 | DB logo production | yes | yes | partial | yes | yes | partial | IN_PROGRESS | Public config logo_url contract + dashboard sidebar | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 5 |
@@ -24,8 +24,8 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-PORTAL-01 | Agent + customer acceptance | yes | yes | partial | partial | yes | yes | IN_PROGRESS | portal-acceptance 2/2 PASS prod 2026-08-11 | e84b608 | — | — | Wave 6 |
 | JP-DATA-01 | Preview/stub sweep | partial | yes | yes | yes | partial | no | IN_PROGRESS | Planned dynamic redirect; shared empty-state copy | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 2 |
 | JP-MONEY-01 | Money integrity | partial | partial | partial | partial | partial | no | PARTIAL | Currency on payment forms | pending | — | — | Wave 6 |
-| JP-UX-01 | Operator UX | partial | partial | partial | partial | partial | no | IN_PROGRESS | Staff grouped nav + portal acceptance evidence | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 6 |
-| JP-NFR-01 | Nonfunctional revalidation | partial | no | partial | partial | partial | partial | IN_PROGRESS | 29 PASS / 1 SKIP full prod acceptance 2026-08-11 | 020e652 | Gm3AAwOXzrNewLFGnfIMF | — | Wave 6 |
+| JP-UX-01 | Operator UX | partial | partial | partial | partial | partial | partial | IN_PROGRESS | Admin grouped nav PASS prod; staff nav bug found + fixed pending deploy | pending | Gm3AAwOXzrNewLFGnfIMF | — | Wave 6 |
+| JP-NFR-01 | Nonfunctional revalidation | partial | no | partial | partial | partial | partial | IN_PROGRESS | 31 PASS / 1 SKIP / 3 FAIL before staff nav fix redeploy | pending | Gm3AAwOXzrNewLFGnfIMF | — | Wave 6 |
 | JP-SAFE-QA-01 | QA data cleanliness | yes | yes | partial | partial | partial | no | IN_PROGRESS | Four QA identities only | b220b84 | — | — | — |
 | JP-DEPLOY-01 | Production deployment loop | yes | yes | yes | yes | partial | partial | IN_PROGRESS | SSH PASS; BUILD Gm3AAwOXzrNewLFGnfIMF; parity 39/39 | b4be36f | Gm3AAwOXzrNewLFGnfIMF | — | Not blocked |
 | JP-GIT-HEARTBEAT-01 | Remote progress | yes | yes | in_progress | n/a | n/a | n/a | IN_PROGRESS | Heartbeat pending checkpoint-12 fix | b4be36f | — | — | — |
