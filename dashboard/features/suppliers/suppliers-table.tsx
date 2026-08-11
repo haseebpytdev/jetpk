@@ -25,7 +25,7 @@ function sortIndicator(active: boolean, direction: SuppliersQuery["direction"]) 
 
 export function SuppliersTable({ suppliers, query, onSort, onView }: Props) {
   return (
-    <div className="hidden xl:block min-w-0 w-full max-w-full" data-testid="suppliers-table">
+    <div className="hidden 2xl:block min-w-0 w-full max-w-full" data-testid="suppliers-table">
       <Table>
         <TableHead>
           <TableRow>

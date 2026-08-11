@@ -17,7 +17,7 @@ type Props = {
 
 export function SuppliersMobileCards({ suppliers, onView }: Props) {
   return (
-    <ul className="space-y-3 xl:hidden" data-testid="suppliers-mobile-cards">
+    <ul className="space-y-3 2xl:hidden" data-testid="suppliers-mobile-cards">
       {suppliers.map((supplier) => (
         <li key={supplier.id}>
           <Card className="space-y-3">
