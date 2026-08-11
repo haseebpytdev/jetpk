@@ -48,6 +48,15 @@ class BackOfficeLegacyCustomerRedirectTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_legacy_admin_agents_index_redirects_to_next_dashboard(): void
+    {
+        $admin = $this->platformAdmin();
+
+        $this->actingAs($admin)
+            ->get('/admin/agents?search=asif')
+            ->assertRedirect('/admin/dashboard/agents?q=asif');
+    }
+
     public function test_guest_customer_show_route_remains_on_laravel(): void
     {
         $admin = $this->platformAdmin();

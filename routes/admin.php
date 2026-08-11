@@ -150,7 +150,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::post('/agencies/{agency}/users/{user}/agent-permissions/apply-template', [AgencyUserAgentPermissionController::class, 'applyTemplate'])
         ->name('agencies.users.agent-permissions.apply-template');
 
-    Route::get('/agents', [AdminSectionController::class, 'agents'])->name('agents');
+    Route::get('/agents', [BackOfficeLegacyViewRedirectController::class, 'adminAgentsIndex'])->name('agents');
     Route::get('/agents/data', [AdminSectionController::class, 'agentsData'])->name('agents.data');
     Route::get('/agents/suggestions', [AdminSectionController::class, 'agentsSuggestions'])->name('agents.suggestions');
     // Phase 23B.7.1 — alias matching the documented endpoint name (admin.agents.search).

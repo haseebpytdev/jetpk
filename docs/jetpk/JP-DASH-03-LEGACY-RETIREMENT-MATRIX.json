@@ -68,6 +68,17 @@
       "nextReplacementStatus": "PASS",
       "redirectStatus": "PASS",
       "finalStatus": "PENDING"
+    },
+    {
+      "legacyRoute": "admin.agents",
+      "legacyPath": "/admin/agents",
+      "capability": "Agents list",
+      "nextRoute": "/[portal]/dashboard/agents",
+      "classification": "LEGACY_VIEW_REPLACE",
+      "backendKeep": true,
+      "nextReplacementStatus": "PASS",
+      "redirectStatus": "PASS",
+      "finalStatus": "PENDING"
     }
   ]
 }

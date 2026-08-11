@@ -4,6 +4,7 @@ namespace App\Http\Controllers\BackOffice;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Dashboard\DashboardBookingResource;
+use App\Models\Agent;
 use App\Models\Booking;
 use App\Models\User;
 use App\Support\Branding\PlatformBrandingResolver;
@@ -76,6 +77,32 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         Gate::authorize('view', $customer);
 
         return redirect()->to($this->customerShowPath('admin', $customer, $request));
+    }
+
+    public function adminAgentsIndex(Request $request): RedirectResponse
+    {
+        Gate::authorize('viewAny', Agent::class);
+
+        return redirect()->to($this->agentsIndexPath('admin', $request));
+    }
+
+    private function agentsIndexPath(string $portal, Request $request): string
+    {
+        return $this->pathWithQuery("/{$portal}/dashboard/agents", $this->remapAgentsQuery($request->query()));
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    private function remapAgentsQuery(array $query): array
+    {
+        if (isset($query['search']) && ! isset($query['q'])) {
+            $query['q'] = $query['search'];
+            unset($query['search']);
+        }
+
+        return $query;
     }
 
     private function assertCustomerAccount(User $user): void
