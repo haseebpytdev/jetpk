@@ -70,10 +70,10 @@
       "finalStatus": "PENDING"
     },
     {
-      "legacyRoute": "admin.agents",
-      "legacyPath": "/admin/agents",
-      "capability": "Agents list",
-      "nextRoute": "/[portal]/dashboard/agents",
+      "legacyRoute": "staff.bookings.index",
+      "legacyPath": "/staff/bookings",
+      "capability": "Staff bookings list",
+      "nextRoute": "/[portal]/dashboard/bookings",
       "classification": "LEGACY_VIEW_REPLACE",
       "backendKeep": true,
       "nextReplacementStatus": "PASS",

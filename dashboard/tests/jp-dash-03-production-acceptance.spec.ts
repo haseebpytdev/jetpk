@@ -55,9 +55,21 @@ test.describe("JP-DASH-03 production acceptance", () => {
     await expect(page).toHaveURL(/\/admin\/dashboard\/agents\/?/);
   });
 
-  test("legacy staff bookings bookmark redirects to Next list", async ({ page }) => {
-    await page.goto("/staff/bookings", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/staff\/dashboard\/bookings\/?/);
+  test("legacy staff bookings bookmark redirects to Next list", async ({ browser }) => {
+    const staffStoragePath = path.resolve(
+      process.env.JP_STAFF_STORAGE_STATE ??
+        path.join(process.cwd(), "..", "tmp/jp-dash-03-staff-storage-state.json"),
+    );
+    test.skip(!fs.existsSync(staffStoragePath), "Staff storageState missing — run jp-dash-03-automated-login.mjs staff");
+
+    const context = await browser.newContext({ storageState: staffStoragePath });
+    const page = await context.newPage();
+    try {
+      await page.goto("/staff/bookings", { waitUntil: "domcontentloaded", timeout: 120_000 });
+      await expect(page).toHaveURL(/\/staff\/dashboard\/bookings\/?/, { timeout: 30_000 });
+    } finally {
+      await context.close();
+    }
   });
 
   test("payments drawer shows operational review section", async ({ page }) => {

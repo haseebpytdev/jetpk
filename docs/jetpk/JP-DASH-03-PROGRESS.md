@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `b4be36f` (test fix pending commit) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `b4be36f` |
+| `LOCAL_HEAD` | `020c7d5` (staff redirect fix pending commit) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `020c7d5` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -32,17 +32,18 @@
 
 | Run | Result | Notes |
 |-----|--------|-------|
-| Latest full suite (2026-08-11T12:20Z) | **26 PASS / 2 FAIL / 1 SKIP** | Transient API + bookings drawer probe mismatch |
-| Prior stable run | **28 PASS / 1 SKIP** | After filter-matrix + responsive fixes |
+| Latest full suite (2026-08-11T12:20Z) | **26 PASS / 2 FAIL / 1 SKIP** | Pre cp-12 stabilization |
+| Post cp-12 fix (focused) | **cp-12 2/2 PASS** | API retry + management-page probe |
+| Staff legacy redirect | **PASS** | Requires staff storage state (not admin) |
+| Expected full suite | **28 PASS / 1 SKIP** | Re-run pending after staff probe fix |
 | Legacy admin redirects | **3/3 PASS** | bookings, customers, agents |
 | Responsive matrix (cp-11) | **PASS** | After xl/2xl table deferrals |
 | Filter sort pagination (cp-12) | **PASS** | 1536 viewport + isVisible guard |
 | Payments drawer | **SKIP** | `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
 
-### Remaining failure root causes
-
-1. **cp-12 API cross-check** — `socket hang up` on `GET /api/dashboard/bookings/FTRN9ULV` (transient; retry fix staged)
-2. **cp-12 drawer modal matrix** — Bookings uses full management page (`booking-manage-button` → `/bookings/{id}`), not list drawer; probe updated to management-page path
+1. ~~**cp-12 API cross-check**~~ — fixed with retry (PASS)
+2. ~~**cp-12 drawer modal matrix**~~ — bookings uses management page (PASS)
+3. ~~**Staff redirect probe**~~ — admin session shows Access restricted; staff session required (fixed)
 
 ## CURRENT_TASK_ID
 
@@ -58,7 +59,7 @@
 |------|--------|
 | `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
 | `LEGACY_ADMIN_BOOKINGS_REDIRECT` | **PASS** |
-| `LEGACY_STAFF_BOOKINGS_REDIRECT` | **PARTIAL** (code deployed; prod probe pending) |
+| `LEGACY_STAFF_BOOKINGS_REDIRECT` | **PASS** (staff session prod 2026-08-11) |
 | `BOOKING_MANAGEMENT_FULL_PAGE_PRODUCTION` | **PASS** |
 | `JP-NFR-01` | **PARTIAL** (responsive PASS; cp-12 stabilization in progress) |
 | `JP-TYPE-01` | **PARTIAL** (`ota-public.css` Inter deployed) |
@@ -67,10 +68,9 @@
 
 ## NEXT_ACTION
 
-- Commit checkpoint-12 stabilization + heartbeat ledger
-- Re-run `npm run test:production-acceptance`
-- Add production probe for `LEGACY_STAFF_BOOKINGS_REDIRECT`
-- Continue JP-PARITY-01 / JP-BOOK-01 lifecycle panel production evidence
+- Commit staff redirect probe fix + ledger refresh
+- Re-run full `npm run test:production-acceptance` (target 28 PASS / 1 SKIP)
+- Continue JP-BOOK-01 booking lifecycle production evidence (timeline/notes/comms/docs gates)
 
 ## JP_DASH_03_STATUS
 
