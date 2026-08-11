@@ -3,6 +3,7 @@
 namespace App\Services\Ops;
 
 use App\Enums\AccountType;
+use App\Models\AgentDepositRequest;
 use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\SupportTicket;
@@ -285,5 +286,32 @@ class OpsEventDispatcher
             ->pluck('id')
             ->map(static fn ($id): int => (int) $id)
             ->all();
+    }
+
+    public function agentDepositSubmitted(AgentDepositRequest $deposit, User $actor): void
+    {
+        $ref = (string) ($deposit->reference ?? $deposit->id);
+        $recipients = $this->agencyOpsRecipients((int) $deposit->agency_id);
+
+        $this->dispatch(
+            recipients: $recipients,
+            eventType: 'agent.deposit_submitted',
+            entityType: 'agent_deposit',
+            entityId: $deposit->id,
+            entityRef: $ref,
+            summary: 'Agent deposit request '.$ref.' submitted for review',
+            actor: $actor,
+            agencyId: $deposit->agency_id,
+            deepLink: 'agents/deposits',
+            category: 'payments',
+            eventKey: 'agent.deposit_submitted:'.$deposit->id,
+            writeAudit: true,
+            auditableType: AgentDepositRequest::class,
+            properties: [
+                'dedupe_token' => 'deposit-'.$deposit->id,
+                'amount' => (string) $deposit->amount,
+                'currency' => (string) $deposit->currency,
+            ],
+        );
     }
 }

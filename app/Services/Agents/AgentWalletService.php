@@ -18,11 +18,14 @@ use App\Models\User;
 use App\Services\Communication\BookingEmailPayloadFactory;
 use App\Services\Communication\OtaNotificationService;
 use App\Services\Finance\Ledger\LedgerEventRecorder;
+use App\Services\Ops\OpsEventDispatcher;
 use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Throwable;
 
 /**
  * Agent prepaid wallet: canonical agency wallet resolution, deposit requests, and balance posting on admin approval.
@@ -37,6 +40,7 @@ class AgentWalletService
         protected PlatformModuleEnforcer $platformModuleEnforcer,
         protected BookingEmailPayloadFactory $bookingEmailPayloadFactory,
         protected CompactReferenceGenerator $referenceGenerator,
+        protected OpsEventDispatcher $opsEvents,
     ) {}
 
     /**
@@ -424,6 +428,15 @@ class AgentWalletService
                 'applicant_email' => $agent->user?->email,
             ],
         );
+
+        try {
+            $this->opsEvents->agentDepositSubmitted($deposit->fresh(), $actor);
+        } catch (Throwable $e) {
+            Log::warning('ops.agent_deposit_fanout_failed', [
+                'deposit_id' => $deposit->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         return $deposit;
     }

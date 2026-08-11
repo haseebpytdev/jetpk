@@ -1,5 +1,4 @@
-import { DASHBOARD_API_ROUTES, dashboardApiUrl } from "@/lib/read-only/laravel/api-base";
-import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
+import { dashboardApiUrl, DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
 import { laravelRequest } from "@/lib/api/laravel-action-client";
 
 export type OpsInboxItem = {
@@ -50,47 +49,49 @@ export type OpsWorkQueuePayload = {
   }>;
 };
 
-type InboxPayload = {
-  unreadCount?: number;
-  items?: OpsInboxItem[];
-  available?: boolean;
-  transport?: string;
-};
+type Envelope<T> = { data?: T };
 
-type EventsPayload = {
-  cursor?: number;
-  items?: OpsActivityEvent[];
-  transport?: string;
-  sinceId?: number;
-};
+async function browserGetJson<T>(path: string): Promise<T> {
+  const response = await fetch(dashboardApiUrl(path), {
+    method: "GET",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(`Ops API failed (${response.status})`);
+  }
+  return (await response.json()) as T;
+}
 
 export async function fetchOpsUnreadCount(): Promise<number> {
-  const envelope = await fetchDashboardApi<{ unreadCount?: number }>(DASHBOARD_API_ROUTES.opsInboxUnread);
-  return Number(envelope.data?.unreadCount ?? 0);
+  const json = await browserGetJson<Envelope<{ unreadCount?: number }>>(DASHBOARD_API_ROUTES.opsInboxUnread);
+  return Number(json.data?.unreadCount ?? 0);
 }
 
 export async function fetchOpsInbox(): Promise<{ unreadCount: number; items: OpsInboxItem[] }> {
-  const envelope = await fetchDashboardApi<InboxPayload>(DASHBOARD_API_ROUTES.opsInbox);
+  const json = await browserGetJson<Envelope<{ unreadCount?: number; items?: OpsInboxItem[] }>>(
+    DASHBOARD_API_ROUTES.opsInbox,
+  );
   return {
-    unreadCount: Number(envelope.data?.unreadCount ?? 0),
-    items: envelope.data?.items ?? [],
+    unreadCount: Number(json.data?.unreadCount ?? 0),
+    items: json.data?.items ?? [],
   };
 }
 
 export async function fetchOpsEvents(sinceId: number): Promise<{ cursor: number; items: OpsActivityEvent[] }> {
-  const envelope = await fetchDashboardApi<EventsPayload>(DASHBOARD_API_ROUTES.opsEvents, {
-    query: { since_id: sinceId, limit: 50 },
-  });
+  const path = `${DASHBOARD_API_ROUTES.opsEvents}?since_id=${encodeURIComponent(String(sinceId))}&limit=50`;
+  const json = await browserGetJson<Envelope<{ cursor?: number; items?: OpsActivityEvent[] }>>(path);
   return {
-    cursor: Number(envelope.data?.cursor ?? sinceId),
-    items: envelope.data?.items ?? [],
+    cursor: Number(json.data?.cursor ?? sinceId),
+    items: json.data?.items ?? [],
   };
 }
 
 export async function fetchOpsWorkQueue(): Promise<OpsWorkQueuePayload> {
-  const envelope = await fetchDashboardApi<OpsWorkQueuePayload>(DASHBOARD_API_ROUTES.opsWorkQueue);
+  const json = await browserGetJson<Envelope<OpsWorkQueuePayload>>(DASHBOARD_API_ROUTES.opsWorkQueue);
   return (
-    envelope.data ?? {
+    json.data ?? {
       transport: "EVENT_POLLING",
       bookings: [],
       supportTickets: [],
