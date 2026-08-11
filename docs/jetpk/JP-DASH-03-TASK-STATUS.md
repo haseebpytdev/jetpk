@@ -21,7 +21,7 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-RBAC-01 | Five-role RBAC | partial | partial | partial | partial | yes | partial | PARTIAL | RBAC browser matrix 2/2 PASS | b220b84 | — | Full crawl pending | — |
 | JP-FRONTEND-BRAND-01 | DB logo production | yes | yes | partial | no | yes | no | IN_PROGRESS | Public config logo_url contract + dashboard sidebar fallback smoke | pending | — | Prod DB logo verify pending | Wave 5 |
 | JP-TYPE-01 | Project-wide Inter | yes | yes | partial | no | yes | no | IN_PROGRESS | tokens.css display=Inter; authority CSS test green | pending | — | ota-public.css legacy stack remains | Wave 6 |
-| JP-PORTAL-01 | Agent + customer acceptance | no | no | no | no | no | no | PENDING | — | — | — | — | Wave 4 |
+| JP-PORTAL-01 | Agent + customer acceptance | yes | yes | partial | partial | yes | yes | IN_PROGRESS | jp-dash-03-portal-acceptance.spec.ts 2/2 PASS prod 2026-08-11 | e84b608 | — | — | Wave 6 |
 | JP-DATA-01 | Preview/stub sweep | partial | yes | yes | no | partial | no | IN_PROGRESS | Planned dynamic redirect; shared empty-state copy | pending | — | — | Wave 2 |
 | JP-MONEY-01 | Money integrity | partial | partial | partial | partial | partial | no | PARTIAL | Currency on payment forms | pending | — | — | Wave 6 |
 | JP-UX-01 | Operator UX | partial | partial | partial | partial | partial | no | FAIL | Grouped IA in progress | — | — | — | Wave 5 |

@@ -77,7 +77,7 @@
       "nextUiExists": true,
       "laravelHandoff": true,
       "testMethod": "JP-DASH-03-NAV-MATRIX (22/22 PASS prior); JP-IA-01 task FAIL V3",
-      "gapNotes": "Cancellations/execution nav items still hand off to Laravel queues; preview nav-config can drift; JP-IA-01 not closed.",
+      "gapNotes": "Staff preview nav groups scoped (Wave 5); cancellations/execution still hand off to Laravel queues; prod live-session verify pending deploy.",
       "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },

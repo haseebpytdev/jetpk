@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending Wave 6 commit |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `ad26de9` |
+| `LOCAL_HEAD` | `e84b608` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `e84b608` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -18,11 +18,11 @@
 
 ## CURRENT_TASK_ID
 
-`JP-TYPE-01` / `JP-LEGACY-01` / `JP-DEPLOY-01`
+`JP-PORTAL-01` / `JP-TYPE-01` / `JP-LEGACY-01` / `JP-DEPLOY-01`
 
 ## CURRENT_SUBTASK
 
-Inter display token alignment; admin customers legacy redirects; deploy blocked externally
+Agent/customer portal acceptance probes; Inter tokens; customers legacy redirects
 
 ## CURRENT_STATUS
 
@@ -32,7 +32,7 @@ Inter display token alignment; admin customers legacy redirects; deploy blocked 
 
 - JP-TYPE-01: JetPakistan tokens.css `--font-display` aligned to Inter; typography authority test green
 - JP-LEGACY-01: `/admin/customers` list + show redirect to Next dashboard (guest show remains Laravel)
-- Production acceptance 2026-08-11: 18 pass / 7 fail — Waves 3–6 not deployed to prod
+- JP-PORTAL-01: agent + customer production acceptance 2/2 PASS (2026-08-11)
 
 ## NEXT_ACTION
 
