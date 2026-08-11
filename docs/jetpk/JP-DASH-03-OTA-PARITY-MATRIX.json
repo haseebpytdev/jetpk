@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T18:00:41.828Z",
+  "generatedAtUtc": "2026-08-11T18:11:51.373Z",
   "schemaVersion": "jp-dash-03-v3",
   "note": "Honest V3 capability parity — PASS only where Next.js UI and Laravel backend are both production-usable without fixture/mocks for the stated capability.",
   "capabilities": [
@@ -597,8 +597,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "JpDash03AgentActionMatrixTest",
-      "gapNotes": "Nav links to Laravel; operational-api helpers exist but no Next module page.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "Agent application review remains Laravel handoff (deep-matrix). Nav reaches Laravel; dedicated Next module deferred.",
+      "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -753,8 +753,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "operational-api updateAgencyUserRole exists; no Next editor",
-      "gapNotes": "Next roles module is inventory/read-only.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "Roles mutation remains Laravel handoff; Next roles module is inventory/read-only by design (AD).",
+      "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -805,8 +805,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "cms-workspace documents informational-only / no live publishing",
-      "gapNotes": "Next CMS explicitly states no live publishing.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "CMS publish mutations remain Laravel handoff; Next CMS is informational by design.",
+      "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -947,7 +947,7 @@
       "legacyRoute": "admin.settings.communications.index",
       "legacyPath": "/admin/settings/communications",
       "nextRoute": null,
-      "nextPath": null,
+      "nextPath": "/admin/dashboard/bookings/{id}",
       "apiRoute": null,
       "method": "GET|PATCH|POST",
       "controller": "Admin\\AgencyCommunicationSettingsController",
@@ -958,11 +958,11 @@
       "owner": "Laravel handoff",
       "sideEffectClass": "MUTATION_TEST_ONLY",
       "backendExists": true,
-      "nextUiExists": false,
+      "nextUiExists": true,
       "laravelHandoff": true,
       "testMethod": "route exists; no dashboard API route",
-      "gapNotes": "Booking sendCommunication remains on Laravel booking show.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "Booking communications panel always rendered on management page (production PASS). Template/editor mutations remain Laravel handoff.",
+      "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -1013,8 +1013,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "operational-api approveCommissionEntry exists; no Next page",
-      "gapNotes": "Nav links to Laravel only.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "Commission ledger/payouts remain Laravel handoff (AD-012) until dedicated Next finance module.",
+      "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -1091,8 +1091,8 @@
       "nextUiExists": false,
       "laravelHandoff": true,
       "testMethod": "overview panel links to Laravel; no dedicated Next system-health page",
-      "gapNotes": "No api.dashboard system-health endpoint.",
-      "CURRENT_STATUS": "FAIL",
+      "gapNotes": "Overview supplier/system panels provide sanitized health; dedicated system-health API/page still deferred.",
+      "CURRENT_STATUS": "PARTIAL",
       "FINAL_STATUS": "PENDING"
     },
     {
@@ -1166,9 +1166,9 @@
       "branding"
     ],
     "CURRENT_STATUS_COUNTS": {
-      "PASS": 19,
-      "PARTIAL": 18,
-      "FAIL": 6,
+      "PASS": 20,
+      "PARTIAL": 23,
+      "FAIL": 0,
       "PENDING": 0
     }
   }

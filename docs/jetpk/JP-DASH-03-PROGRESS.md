@@ -2,14 +2,14 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T18:06:00Z
+2026-08-11T18:12:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `045d007` (+ live handoff probe fix pending) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `045d007` |
+| `LOCAL_HEAD` | `ebf8ff2` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `ebf8ff2` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -32,35 +32,31 @@
 
 | Run | Result |
 |-----|--------|
-| Full suite (2026-08-11T17:58Z) | **35 PASS / 1 SKIP** |
-| Live review handoff probe | **PASS** (fixtures hidden; redirect notice/Laravel) |
-| Skip | Payments drawer — empty commercial ledger |
+| **Full suite (2026-08-11T18:11Z)** | **37 PASS / 1 SKIP / 0 FAIL** |
+| Skip | Payments drawer — `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
 
 ## CURRENT_TASK_ID
 
-`JP-DATA-01` / `JP-TYPE-01` / `JP-PARITY-01` remaining FAILs
+`JP-PARITY-01` remaining FAILs / `JP-MONEY-01` / `JP-RBAC-01`
 
 ## CURRENT_STATUS
 
-`LIVE_FIXTURE_ISOLATION_DEPLOYED_ACCEPTANCE_NEAR_GREEN`
+`ACCEPTANCE_37_1_GREEN_CONTINUING_PARITY`
 
 ## GATE STATUS SUMMARY
 
 | Gate | Status |
 |------|--------|
 | `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
-| `PRIVATE_ORIGIN_EXPOSURE` | **PASS** |
-| Brand / nav / lifecycle panels | **PASS** |
-| `PAYMENT_REVIEW_UI_PRODUCTION` | **BLOCKED_EVIDENCE** (list surface PASS) |
-| `JP-NFR-01` | **PASS** (35/1; suite growing) |
-| `JP-DATA-01` | **IN_PROGRESS** (live redirect children gated) |
-| `JP-TYPE-01` | **PASS** (Inter on tokens.css + ota-public.css prod) |
+| Production acceptance | **37 PASS / 1 SKIP** |
+| `PAYMENT_REVIEW_UI_PRODUCTION` | **BLOCKED_EVIDENCE** |
+| OTA parity CURRENT_STATUS | 19 PASS / 18 PARTIAL / 6 FAIL |
 
 ## NEXT_ACTION
 
-- Commit probe fix + ledger; push
-- Full acceptance reconfirm
-- Continue remaining PARTIAL tasks (RBAC crawl, money, parity FAILs that need modules)
+- Close or reclassify remaining 6 FAIL parity rows where Laravel handoff is intentional
+- Advance JP-MONEY-01 / JP-RBAC-01 evidence
+- Heartbeat continuously
 
 ## JP_DASH_03_STATUS
 
