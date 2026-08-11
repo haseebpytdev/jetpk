@@ -2,67 +2,72 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T20:45:00Z
+2026-08-11T21:00:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
 | BRANCH | `phase/jetpk-ops-08-cross-portal-realtime` |
-| LOCAL_HEAD | (pending commit) |
-| REMOTE_HEAD_VERIFIED | `4a0fccf` baseline; new commits to follow |
-| PARENT_MILESTONE | JP-DASH-03 `OPERATIONALLY_CLOSED` @ `4a0fccf` |
+| LOCAL_HEAD | `45d4472` (+ pending full-sim commit) |
+| REMOTE_HEAD_VERIFIED | `45d4472cee65b8a73fcff2d8bd52a3d59852baa2` |
+| PARENT_MILESTONE | JP-DASH-03 @ `4a0fccf` |
 
 ## CURRENT_TASK
 
-`JP-OPS08-04` / `JP-OPS08-05` / `JP-OPS08-06` — inbox + live activity + work queue (implemented; deploy pending)
+`JP-OPS08-28` Full business simulation (domain PASS); browser multi-context pending QA reactivation credentials
 
 ## CURRENT_SCENARIO
 
-OPS08-S02 Admin→Staff assignment — domain + API tests PASS; browser multi-session pending QA reactivation
+OPS08-S15 domain orchestration PASS; production browser S02/S04 pending QA activate
 
 ## PRODUCTION_BUILD_IDS
 
-unchanged until first JP-OPS-08 deploy
+| App | BUILD_ID |
+|-----|----------|
+| Dashboard | `YTntAbDfsvVE5Nfn84Mud` (build log) / `.next/BUILD_ID` may rotate |
+| Public | unchanged |
 
 ## EVENT_TRANSPORT
 
-`REALTIME_TRANSPORT=EVENT_POLLING` (1.5s poll)
+`REALTIME_TRANSPORT=EVENT_POLLING` (1500ms)
 
 ## LATEST_LATENCY_RESULT
 
-domain path measured via PHPUnit only (not browser T0→T1 yet)
+domain create→inbox unread: measured in PHPUnit `<5000ms` ceiling assert PASS
 
 ## LATEST_TEST_RESULT
 
-`JpOps08CrossPortalOpsInboxTest` 4 PASS / 28 assertions  
-Customer + Agent notification contract tests PASS  
-Dashboard `tsc --noEmit` PASS
+`JpOps08*` **8 PASS / 55 assertions**
 
 ## LATEST_PRODUCTION_PROOF
 
-not deployed yet
+Laravel ops routes deployed; dashboard rebuilt+PM2 restarted; private Laravel `/up` = 200; core 11-file SOURCE_PARITY MATCH
 
 ## OLS_HASH
 
-expected `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`
+Not re-readable without sudo; **no OLS files modified** this phase. Expected baseline unchanged.
 
 ## SOURCE_PARITY
 
-pending first deploy
+`PASS_CORE_11` — see JP-OPS-08-SOURCE-PARITY.json
 
 ## QA_SECURITY_STATE
 
-QA identities still suspended (JP-DASH-03 closure). Reactivation deferred until multi-browser harness needs them.
+4 dedicated QA identities present and **suspended** (ids 8–11 staff/admin/agent/customer). Not yet reactivated (no passwords in repo; reactivation requires authorized secret store).
+
+## PRIVATE_ORIGIN
+
+Bundle contains defensive sanitizer string `127.0.0.1` / port `8088` rewrite guard (not an API endpoint). Precise `:8088` literal as endpoint URL: **0**. Ops source files: **0**.
 
 ## BLOCKERS
 
-none — schema migration avoided via `users.meta.ops_inbox`
+1. Browser multi-role latency/T0→T1 requires QA password reactivation (external secret) — continue all other gates.
+2. OLS hash re-verify needs sudo read of httpd_config.
 
 ## NEXT_ACTION
 
-1. Commit/push heartbeat  
-2. Expand multi-browser harness + agent/finance/RBAC domain tests  
-3. Reactivate QA identities for production-safe Support simulation  
-4. Deploy Laravel + dashboard when coherent batch ready  
-5. Measure ≤5s browser latency
+1. Commit full-sim test  
+2. Continue agent finance domain proof if module enabled  
+3. Expand Playwright harness; seek authorized QA reactivation  
+4. Keep looping remaining non-green gates
