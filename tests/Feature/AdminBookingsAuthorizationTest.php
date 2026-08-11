@@ -9,26 +9,22 @@ use App\Models\Booking;
 use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminBookingsAuthorizationTest extends TestCase
 {
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
-    public function test_agency_admin_can_access_admin_bookings(): void
+    public function test_platform_admin_can_access_admin_bookings_redirect(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $this->actingAs($admin);
 
         $this->get('/admin/bookings')
-            ->assertOk()
-            ->assertSee('data-bookings-page', false)
-            ->assertSee('data-bookings-kpis', false)
-            ->assertSee('data-bookings-tabs', false)
-            ->assertSee('data-bookings-filter-bar', false)
-            ->assertSee('data-bookings-list', false)
-            ->assertSee('data-bookings-preview', false);
+            ->assertRedirect('/admin/dashboard/bookings');
         $this->getJson('/admin/bookings/data')->assertOk()->assertJsonStructure(['rows', 'pagination']);
         $this->getJson('/admin/bookings/suggestions?q=OT')->assertOk()->assertJsonStructure(['suggestions']);
     }
@@ -53,10 +49,10 @@ class AdminBookingsAuthorizationTest extends TestCase
         $this->get('/admin/bookings')->assertForbidden();
     }
 
-    public function test_agency_admin_can_access_admin_agents_section(): void
+    public function test_platform_admin_can_access_admin_agents_section(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $this->actingAs($admin);
 
         $this->get('/admin/agents')->assertOk();
@@ -72,7 +68,7 @@ class AdminBookingsAuthorizationTest extends TestCase
         $this->get('/')->assertOk();
     }
 
-    public function test_agency_admin_sees_only_own_agency_bookings(): void
+    public function test_staff_scoped_booking_preview_redirects_for_own_agency_only(): void
     {
         $this->seed(OtaFoundationSeeder::class);
 
@@ -96,17 +92,18 @@ class AdminBookingsAuthorizationTest extends TestCase
             'route' => 'KHI → DXB',
         ]);
 
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $this->actingAs($admin);
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
+        $this->actingAs($staff);
 
-        $this->get('/admin/bookings')->assertOk()->assertSee('OTA-AURORA-ONLY', false)->assertDontSee('OTA-OTHER-ONLY', false);
+        $this->get('/staff/bookings?preview=OTA-AURORA-ONLY')
+            ->assertRedirect('/staff/dashboard/bookings?q=OTA-AURORA-ONLY');
+        $this->get('/staff/bookings?preview=OTA-OTHER-ONLY')->assertForbidden();
     }
 
-    public function test_agency_admin_cannot_preview_other_agency_booking(): void
+    public function test_staff_cannot_preview_other_agency_booking(): void
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $aurora = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $other = Agency::query()->create([
             'name' => 'Other Travel',
             'slug' => 'other-travel-'.uniqid(),
@@ -118,11 +115,11 @@ class AdminBookingsAuthorizationTest extends TestCase
             'status' => BookingStatus::Pending,
         ]);
 
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $this->actingAs($admin);
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
+        $this->actingAs($staff);
 
-        $this->get('/admin/bookings?preview=OTA-FOREIGN')->assertForbidden();
-        $this->get('/admin/bookings?preview='.$foreign->id)->assertForbidden();
+        $this->get('/staff/bookings?preview=OTA-FOREIGN')->assertForbidden();
+        $this->get('/staff/bookings?preview='.$foreign->id)->assertForbidden();
     }
 
     public function test_platform_admin_can_see_bookings_from_multiple_agencies(): void
@@ -151,6 +148,10 @@ class AdminBookingsAuthorizationTest extends TestCase
         ]);
         $this->actingAs($platform);
 
-        $this->get('/admin/bookings')->assertOk()->assertSee('OTA-PLAT-A', false)->assertSee('OTA-PLAT-B', false);
+        $response = $this->getJson('/admin/bookings/data');
+        $response->assertOk();
+        $references = collect($response->json('rows') ?? [])->pluck('booking_ref')->filter()->all();
+        $this->assertContains('OTA-PLAT-A', $references);
+        $this->assertContains('OTA-PLAT-B', $references);
     }
 }

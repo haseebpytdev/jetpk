@@ -16,7 +16,13 @@ function refOrDash(value: string | null): string {
   return value ?? "—";
 }
 
-export function PaymentDetailDrawerContent({ transaction }: { transaction: TransactionRecord }) {
+export function PaymentDetailDrawerContent({
+  transaction,
+  onPaymentUpdated,
+}: {
+  transaction: TransactionRecord;
+  onPaymentUpdated?: () => void;
+}) {
   return (
     <div className="space-y-5" data-testid="payment-drawer-content">
       <DetailDrawerSourceNotice className="text-xs" />
@@ -200,7 +206,7 @@ export function PaymentDetailDrawerContent({ transaction }: { transaction: Trans
           Operational review
         </h3>
         <div className="mt-3">
-          <PaymentReviewActions transaction={transaction} />
+          <PaymentReviewActions transaction={transaction} onUpdated={onPaymentUpdated} />
         </div>
       </section>
     </div>

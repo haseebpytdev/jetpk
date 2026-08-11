@@ -172,4 +172,60 @@ class JpDash03MoneyContractTest extends TestCase
         $this->assertSame('USD', $row['currency']);
         $this->assertSame('resolved', $row['paidMoney']['currencyStatus'] ?? null);
     }
+
+    public function test_payment_resource_includes_review_capabilities_for_viewer(): void
+    {
+        $agency = Agency::factory()->create();
+        $admin = $this->platformAdmin();
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'status' => BookingStatus::PaymentPending,
+            'currency' => 'PKR',
+        ]);
+        BookingFareBreakdown::query()->create([
+            'booking_id' => $booking->id,
+            'total' => 50_000,
+            'currency' => 'PKR',
+        ]);
+
+        $payment = BookingPayment::query()->create([
+            'agency_id' => $agency->id,
+            'booking_id' => $booking->id,
+            'amount' => 50_000,
+            'currency' => 'PKR',
+            'status' => 'submitted',
+            'method' => 'bank_transfer',
+        ]);
+
+        $payment->load('booking.fareBreakdown');
+        $row = DashboardPaymentResource::fromModel($payment, $admin);
+
+        $this->assertArrayHasKey('capabilities', $row);
+        $this->assertTrue($row['capabilities']['can_verify'] ?? false);
+        $this->assertTrue($row['capabilities']['can_reject'] ?? false);
+        $this->assertFalse($row['capabilities']['already_processed'] ?? true);
+        $this->assertSame((string) $payment->id, $row['laravelPaymentId'] ?? null);
+    }
+
+    public function test_payment_resource_hides_capabilities_without_viewer(): void
+    {
+        $agency = Agency::factory()->create();
+        $booking = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'status' => BookingStatus::PaymentPending,
+            'currency' => 'PKR',
+        ]);
+        $payment = BookingPayment::query()->create([
+            'agency_id' => $agency->id,
+            'booking_id' => $booking->id,
+            'amount' => 10_000,
+            'currency' => 'PKR',
+            'status' => 'submitted',
+            'method' => 'cash',
+        ]);
+
+        $row = DashboardPaymentResource::fromModel($payment);
+
+        $this->assertNull($row['capabilities'] ?? null);
+    }
 }

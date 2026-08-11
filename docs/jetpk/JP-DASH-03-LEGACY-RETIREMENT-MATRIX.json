@@ -22,7 +22,7 @@
       "classification": "LEGACY_VIEW_REPLACE",
       "backendKeep": true,
       "nextReplacementStatus": "PASS",
-      "redirectStatus": "PENDING",
+      "redirectStatus": "PASS",
       "finalStatus": "PENDING"
     },
     {
@@ -33,7 +33,7 @@
       "classification": "LEGACY_VIEW_REPLACE",
       "backendKeep": true,
       "nextReplacementStatus": "PARTIAL",
-      "redirectStatus": "PENDING",
+      "redirectStatus": "PASS",
       "finalStatus": "PENDING"
     },
     {

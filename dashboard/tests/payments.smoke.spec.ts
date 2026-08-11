@@ -187,6 +187,14 @@ test("drawer shows linked booking or PNR", async ({ page }) => {
   await expect(content).toContainText("ABC123");
 });
 
+test("drawer shows operational review section in preview mode", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/admin/dashboard/payments?transactionId=JP-TX-20001", { waitUntil: "load" });
+  const content = page.getByTestId("payment-drawer-content");
+  await expect(content.getByRole("heading", { name: "Operational review" })).toBeVisible();
+  await expect(page.getByTestId("payment-actions-preview")).toBeVisible();
+});
+
 test("drawer closes through close control", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/admin/dashboard/payments?transactionId=JP-TX-20001", { waitUntil: "load" });

@@ -10,6 +10,7 @@ use App\Http\Controllers\Staff\BookingController;
 use App\Http\Controllers\Staff\BookingPaymentController;
 use App\Http\Controllers\Staff\BookingRefundController;
 use App\Http\Controllers\BackOffice\BackOfficeDashboardController;
+use App\Http\Controllers\BackOffice\BackOfficeLegacyViewRedirectController;
 use App\Http\Controllers\Staff\FinanceStatementController;
 use App\Http\Controllers\Staff\LedgerController;
 use App\Http\Controllers\Staff\ReportsController;
@@ -24,8 +25,8 @@ Route::prefix('staff')->name('staff.')->group(function (): void {
         ->where('path', '.*')
         ->name('dashboard');
 
-    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
-    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings', [BackOfficeLegacyViewRedirectController::class, 'staffBookingsIndex'])->name('bookings.index');
+    Route::get('/bookings/{booking}', [BackOfficeLegacyViewRedirectController::class, 'staffBookingShow'])->name('bookings.show');
     Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{booking}/notes', [BookingController::class, 'storeNote'])->name('bookings.notes');
     Route::middleware([

@@ -14,6 +14,7 @@ import { BookingsMobileCards } from "@/features/bookings/bookings-mobile-cards";
 import { BookingsSummary } from "@/features/bookings/bookings-summary";
 import { BookingsTable } from "@/features/bookings/bookings-table";
 import { bookingsQueryToSearchParams } from "@/lib/bookings-query";
+import { filteredResultsEmptyDescription } from "@/lib/format";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { BookingRecord, BookingSortField, BookingsQuery, BookingsPageResult } from "@/types/booking";
 
@@ -81,11 +82,7 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
       {empty ? (
         <EmptyState
           title="No bookings match your filters"
-          description={
-            isLive
-              ? "Try clearing filters or broadening your search."
-              : "Try clearing filters or broadening your search. Preview mode uses fixture data."
-          }
+          description={filteredResultsEmptyDescription(isLive)}
         />
       ) : (
         <>

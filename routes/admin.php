@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\CmsPageController;
 use App\Http\Controllers\Admin\CommunicationDeliveryLogController;
 use App\Http\Controllers\Admin\CustomerManagementController;
 use App\Http\Controllers\BackOffice\BackOfficeDashboardController;
+use App\Http\Controllers\BackOffice\BackOfficeLegacyViewRedirectController;
 use App\Http\Controllers\Admin\FinanceAdjustmentController;
 use App\Http\Controllers\Admin\FinanceDashboardController;
 use App\Http\Controllers\Admin\FinanceStatementController;
@@ -67,11 +68,11 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/customers/guests/show', [CustomerManagementController::class, 'showGuest'])->name('customers.guests.show');
     Route::get('/customers/{customer}', [CustomerManagementController::class, 'show'])->name('customers.show');
 
-    Route::get('/bookings', [BookingManagementController::class, 'index'])->name('bookings');
+    Route::get('/bookings', [BackOfficeLegacyViewRedirectController::class, 'adminBookingsIndex'])->name('bookings');
     Route::get('/bookings/data', [BookingManagementController::class, 'data'])->name('bookings.data');
     Route::get('/bookings/suggestions', [BookingManagementController::class, 'suggestions'])->name('bookings.suggestions');
     Route::get('/bookings/{booking}/preview', [BookingManagementController::class, 'preview'])->name('bookings.preview');
-    Route::get('/bookings/{booking}', [BookingManagementController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}', [BackOfficeLegacyViewRedirectController::class, 'adminBookingShow'])->name('bookings.show');
     Route::patch('/bookings/{booking}/status', [BookingManagementController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{booking}/notes', [BookingManagementController::class, 'storeNote'])->name('bookings.notes');
     Route::patch('/bookings/{booking}/assign-staff', [BookingManagementController::class, 'assignStaff'])->name('bookings.assign-staff');

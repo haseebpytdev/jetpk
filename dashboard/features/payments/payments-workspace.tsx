@@ -108,7 +108,12 @@ export function PaymentsWorkspace({ query, result, selectedTransaction }: Props)
         }
         closeAriaLabel="Close payment details"
       >
-        {selectedTransaction ? <PaymentDetailDrawerContent transaction={selectedTransaction} /> : null}
+        {selectedTransaction ? (
+          <PaymentDetailDrawerContent
+            transaction={selectedTransaction}
+            onPaymentUpdated={() => router.refresh()}
+          />
+        ) : null}
       </Drawer>
     </div>
   );

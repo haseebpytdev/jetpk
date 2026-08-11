@@ -2,43 +2,45 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T06:25:00Z
+2026-08-11T07:45:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending (Wave 2 batch) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `8adb4aa` |
+| `LOCAL_HEAD` | pending (Wave 3 batch) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `fddabbc` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
-`WdsRJ8FbNwR8TxGvVTCUh` (Wave 2 — planned redirects + booking detail panels)
+`WdsRJ8FbNwR8TxGvVTCUh` (Wave 2 — pending Wave 3 deploy)
 
 ## CURRENT_TASK_ID
 
-`JP-DATA-01` / `JP-BOOK-01` / `JP-LEGACY-01`
+`JP-DEPLOY-01` / `JP-PAY-01` / `JP-LEGACY-01`
 
 ## CURRENT_SUBTASK
 
-Retire `/planned/[slug]` stubs via redirects; enrich booking management from Laravel detail API
+Deploy Wave 3: payment verify/reject drawer + legacy booking redirects
 
 ## CURRENT_STATUS
 
-`WAVE_2_IN_PROGRESS`
+`WAVE_3_READY_FOR_DEPLOY`
 
 ## CURRENT_FINDING
 
-- `/planned/*` routes now server-redirect to canonical Next or Laravel handoff (no "Planned module" UI)
-- Booking management page consumes full `DashboardBookingDetailResource` payload (passengers, fare, PNR, ticketing, audit)
-- Bookings empty state no longer claims synthetic data in live mode
+- Payment drawer verify/reject wired with post-mutation refresh
+- Legacy `/admin/bookings` and `/staff/bookings` GET routes redirect to Next dashboard (auth preserved)
+- Legacy booking show redirects to `/dashboard/bookings/{publicId}`
+- Preview query maps to dashboard `q` search param
+- PAY-002 PARTIAL; legacy retirement matrix admin.bookings redirect PASS
 
 ## NEXT_ACTION
 
-- Deploy Wave 2 batch + production verify
-- Continue JP-PAY-01 payment list verify/reject refresh
-- JP-LEGACY-01 Laravel Blade redirects for `/admin/bookings`
+- Push Wave 3 batch + deploy dashboard build
+- Production verify PAY-002 and legacy booking redirects
+- JP-IA-01 / JP-STAFF-01 production nav verify
 
 ## OTP_LEDGER
 
@@ -61,9 +63,11 @@ All four roles **PASS** (storage states local-only)
 | Gate | Status |
 |------|--------|
 | `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
-| `PREVIEW_STUB_SWEEP` | **PARTIAL** (planned routes fixed) |
-| `FULL_BOOKING_MANAGEMENT` | **PARTIAL** (enriched detail page) |
-| `SIDEBAR_INFORMATION_ARCHITECTURE` | **PARTIAL** (deployed; prod verify pending) |
+| `PREVIEW_STUB_SWEEP` | **PARTIAL** |
+| `FULL_BOOKING_MANAGEMENT` | **PARTIAL** |
+| `PAYMENT_REVIEW_UI` | **PARTIAL** (implemented; prod verify pending) |
+| `LEGACY_BOOKING_REDIRECT` | **PARTIAL** (implemented; prod verify pending) |
+| `SIDEBAR_INFORMATION_ARCHITECTURE` | **PARTIAL** |
 
 ## JP_DASH_03_STATUS
 

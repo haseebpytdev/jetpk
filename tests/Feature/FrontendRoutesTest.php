@@ -47,11 +47,11 @@ class FrontendRoutesTest extends TestCase
         $this->get('/booking/confirmation')->assertRedirect(route('flights.search'));
 
         $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $this->actingAs($admin);
+        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
+        $this->actingAs($admin->fresh());
 
         foreach ([
             '/admin',
-            '/admin/bookings',
             '/admin/agents',
             '/admin/staff',
             '/admin/markups',
@@ -63,6 +63,8 @@ class FrontendRoutesTest extends TestCase
         ] as $path) {
             $this->get($path)->assertOk();
         }
+
+        $this->get('/admin/bookings')->assertRedirect('/admin/dashboard/bookings');
 
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
@@ -121,10 +123,10 @@ class FrontendRoutesTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $this->actingAs($admin);
+        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
+        $this->actingAs($admin->fresh());
 
         foreach ([
-            '/admin/bookings',
             '/admin/agents',
             '/admin/staff',
             '/admin/markups',
@@ -136,6 +138,8 @@ class FrontendRoutesTest extends TestCase
         ] as $path) {
             $this->get($path)->assertOk();
         }
+
+        $this->get('/admin/bookings')->assertRedirect('/admin/dashboard/bookings');
     }
 
     public function test_admin_preview_query_routes_respond(): void
@@ -153,9 +157,11 @@ class FrontendRoutesTest extends TestCase
         ]);
 
         $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $this->actingAs($admin);
+        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
+        $this->actingAs($admin->fresh());
 
-        $this->get('/admin/bookings?preview=OTA-99214')->assertOk()->assertSee('OTA-99214', false);
+        $this->get('/admin/bookings?preview=OTA-99214')
+            ->assertRedirect('/admin/dashboard/bookings?q=OTA-99214');
         $agent = Agent::factory()->create([
             'agency_id' => $agency->id,
             'user_id' => User::factory()->create(['current_agency_id' => $agency->id, 'account_type' => AccountType::Agent])->id,
