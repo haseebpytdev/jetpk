@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `bc7c8de` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `bc7c8de` |
+| `LOCAL_HEAD` | `325a0bc` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `325a0bc` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -31,9 +31,8 @@ Enrich booking management detail API + panels; deploy Wave 3+4 batch
 ## CURRENT_FINDING
 
 - Production acceptance 2026-08-11: 18 pass / 7 fail — Wave 3 not on prod (`/admin/bookings` still Blade; payments table missing on prod session)
-- BOOK-003: `DashboardBookingDetailResource` now exposes statusTimeline, internalNotes, communications, documents
-- Next booking management panels render timeline/notes/comms/docs read-only
-- Local tests: JpDash03BookingDetailContractTest 2/2, bookings management smoke PASS
+- BOOK-003 panels + operational actions wired on full booking management page
+- Production acceptance 2026-08-11: 18 pass / 7 fail — Wave 3+4 not deployed to prod yet
 
 ## NEXT_ACTION
 
