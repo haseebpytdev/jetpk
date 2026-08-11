@@ -195,6 +195,18 @@ test.describe("JP-DASH-03 production acceptance", () => {
     expect(body).not.toMatch(/Preview data|synthetic records|Dashboard unavailable/i);
   });
 
+  test("live operations review handoff does not expose fixture workspace", async ({ page }) => {
+    await page.goto("/admin/dashboard/operations/review", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await expect(page.getByTestId("laravel-live-redirect").or(page.locator("body"))).toBeVisible({
+      timeout: 60_000,
+    });
+    const body = await page.locator("body").innerText();
+    expect(body).not.toMatch(/Preview data|synthetic records|fixture workspace/i);
+    // Either redirected to Laravel bookings queue or still showing redirect notice.
+    const url = page.url();
+    expect(url).toMatch(/\/admin\/(dashboard\/operations\/review|bookings)/);
+  });
+
   test("payments list surface renders without preview residue when ledger empty", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/admin/dashboard/payments", { waitUntil: "domcontentloaded", timeout: 120_000 });

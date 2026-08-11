@@ -13,21 +13,22 @@ export const metadata = {
 
 export default function OperationalExecutionPage() {
   return (
-    <div className="space-y-6">
-      <LaravelLiveRedirect
-        route="admin.bookings"
-        params={{ queue: "needs_action" }}
-        label="Execution queue"
-      />
-      <PageHeader
-        title="Operational execution"
-        description="Authoritative cancellation, refund settlement, and ticket issuance controls."
-      />
-      <OperationalExecutionWorkspace
-        cancellations={mockCancellationExecutions}
-        refunds={mockRefundExecutions}
-        ticketing={mockTicketingExecutions}
-      />
-    </div>
+    <LaravelLiveRedirect
+      route="admin.bookings"
+      params={{ queue: "needs_action" }}
+      label="Execution queue"
+    >
+      <div className="space-y-6">
+        <PageHeader
+          title="Operational execution"
+          description="Authoritative cancellation, refund settlement, and ticket issuance controls."
+        />
+        <OperationalExecutionWorkspace
+          cancellations={mockCancellationExecutions}
+          refunds={mockRefundExecutions}
+          ticketing={mockTicketingExecutions}
+        />
+      </div>
+    </LaravelLiveRedirect>
   );
 }

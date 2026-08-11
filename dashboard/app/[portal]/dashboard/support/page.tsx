@@ -9,10 +9,11 @@ export const metadata = {
 
 export default function SupportPage() {
   return (
-    <div className="space-y-6">
-      <SupportLiveRedirect />
-      <PageHeader title="Support tickets" description="Assign, reply, and resolve support cases." />
-      <SupportOperationalWorkspace tickets={mockSupportTickets} />
-    </div>
+    <SupportLiveRedirect>
+      <div className="space-y-6">
+        <PageHeader title="Support tickets" description="Assign, reply, and resolve support cases." />
+        <SupportOperationalWorkspace tickets={mockSupportTickets} />
+      </div>
+    </SupportLiveRedirect>
   );
 }

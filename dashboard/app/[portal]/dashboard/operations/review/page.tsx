@@ -9,17 +9,18 @@ export const metadata = {
 
 export default function OperationalReviewPage() {
   return (
-    <div className="space-y-6">
-      <LaravelLiveRedirect
-        route="admin.bookings"
-        params={{ queue: "cancellations" }}
-        label="Cancellation review"
-      />
-      <PageHeader
-        title="Operational review"
-        description="Approve or reject cancellation and refund requests before execution or settlement."
-      />
-      <OperationalReviewWorkspace cancellations={mockCancellationReviews} refunds={mockRefundReviews} />
-    </div>
+    <LaravelLiveRedirect
+      route="admin.bookings"
+      params={{ queue: "cancellations" }}
+      label="Cancellation review"
+    >
+      <div className="space-y-6">
+        <PageHeader
+          title="Operational review"
+          description="Approve or reject cancellation and refund requests before execution or settlement."
+        />
+        <OperationalReviewWorkspace cancellations={mockCancellationReviews} refunds={mockRefundReviews} />
+      </div>
+    </LaravelLiveRedirect>
   );
 }
