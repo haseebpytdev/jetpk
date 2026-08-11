@@ -1,4 +1,5 @@
-import { absoluteLaravelUrl, laravelApiPath } from "@/services/flight-search";
+import { laravelApiPath } from "@/services/flight-search";
+import { appConfig } from "@/lib/config";
 import type { ContactDetails } from "../types";
 import { fetchWithTimeout } from "../utils/laravel-api";
 
@@ -32,7 +33,8 @@ function publicConfigEndpoint(): string {
     return laravelApiPath("/api/public/content/config");
   }
 
-  return absoluteLaravelUrl("/api/public/content/config");
+  const appBase = appConfig.appUrl.replace(/\/$/, "");
+  return `${appBase}/laravel/api/public/content/config`;
 }
 
 export const PublicConfigService = {
