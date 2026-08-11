@@ -2,43 +2,58 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T10:00:00Z
+2026-08-11T11:20:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `a8b6713` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `a8b6713` |
+| `LOCAL_HEAD` | `263f36e` (pre-test-fix batch pending) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `263f36e` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
-`WdsRJ8FbNwR8TxGvVTCUh` (Wave 2 on prod — Wave 3–6 not deployed)
+`gg-05dScK-s1gj1j4lIJo` (Wave 3–6 deploy 2026-08-11)
+
+## DEPLOYMENT
+
+| Field | Value |
+|-------|-------|
+| `JP_DEPLOY_01_BLOCKED_EXTERNAL_AUTH` | **FALSE** |
+| `SSH_KEY_EXISTS` | yes (`~/.ssh/jetpk_contabo_2026_v2`) |
+| `SSH_CONNECTION` | PASS (`root@185.215.166.176` / `vmi3400777`) |
+| `DEPLOY_BATCH` | git archive HEAD → `/home/pkjetp/jetpk_app` |
+| `PM2_RESTART` | PASS (`jetpk-dashboard` via pkjetp `.npm-global` PM2) |
+| `LARAVEL_OPTIMIZE` | PASS (`/usr/local/lsws/lsphp83/bin/lsphp artisan optimize`) |
+| `OLS_HASH` | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` (unchanged) |
 
 ## CURRENT_TASK_ID
 
-`JP-PORTAL-01` / `JP-TYPE-01` / `JP-LEGACY-01` / `JP-DEPLOY-01`
+`JP-DEPLOY-01` / `JP-NFR-01` / `JP-TYPE-01` / `JP-BOOK-01`
 
 ## CURRENT_SUBTASK
 
-Agent/customer portal acceptance probes; Inter tokens; customers legacy redirects
+Production acceptance revalidation after deploy; align acceptance probes with booking management page IA
 
 ## CURRENT_STATUS
 
-`WAVE_6_IN_PROGRESS`
+`WAVE_6_DEPLOYED_VERIFY_IN_PROGRESS`
 
 ## CURRENT_FINDING
 
-- JP-TYPE-01: JetPakistan tokens.css `--font-display` aligned to Inter; typography authority test green
-- JP-LEGACY-01: `/admin/customers` list + show redirect to Next dashboard (guest show remains Laravel)
-- JP-PORTAL-01: agent + customer production acceptance 2/2 PASS (2026-08-11)
+- JP-DEPLOY-01: Wave 3–6 batch deployed; PM2 restarted; BUILD_ID `gg-05dScK-s1gj1j4lIJo`
+- Legacy redirects production-verified: `/admin/bookings`, `/admin/customers`, `/admin/agents` → Next dashboard (3/3 PASS)
+- Production acceptance: **23/29 PASS** pre test-fix; failures traced to stale `booking-view-button` / drawer probes and payments viewport
+- JP-STAFF-01 / JP-LEGACY-01: code deployed; legacy gates PASS on production
+- JP-TYPE-01: tokens.css deployed; `ota-public.css` Plus Jakarta stack remains
 
 ## NEXT_ACTION
 
-- Commit + push Wave 6 batch
-- Continue portal acceptance / NFR matrix revalidation without deploy
-- Post-deploy: SFTP Laravel + dashboard build, then `npm run test:production-acceptance`
+- Push acceptance test alignment batch
+- Re-run `npm run test:production-acceptance`
+- Run `node dashboard/scripts/jp-dash-03-source-parity.mjs` with production SSH identity
+- Continue JP-TYPE-01 (`ota-public.css` Inter stack)
 
 ## OTP_LEDGER
 
@@ -50,20 +65,26 @@ Agent/customer portal acceptance probes; Inter tokens; customers legacy redirect
 
 ## QA_AUTH_STATUS
 
-All four roles **PASS** (automated login refreshed 2026-08-11)
+All four roles **PASS** (automated login; admin storage state present)
 
 ## OLS_STATUS
 
-**PASS** (verified 2026-08-11)
+**PASS** (verified 2026-08-11 post-deploy)
 
 ## GATE STATUS SUMMARY
 
 | Gate | Status |
 |------|--------|
 | `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
-| `PROJECT_WIDE_INTER` | **PARTIAL** (JetPakistan tokens + authority CSS; ota-public.css legacy stack remains) |
-| `LEGACY_CUSTOMER_REDIRECT` | **PARTIAL** (code + tests; prod verify blocked on deploy) |
-| `JP-DEPLOY-01` | **BLOCKED** (SFTP/deploy unavailable in agent environment — not a termination condition) |
+| `LEGACY_ADMIN_BOOKINGS_REDIRECT` | **PASS** (prod 2026-08-11) |
+| `LEGACY_ADMIN_CUSTOMERS_REDIRECT` | **PASS** (prod 2026-08-11) |
+| `LEGACY_ADMIN_AGENTS_REDIRECT` | **PASS** (prod 2026-08-11) |
+| `ADMIN_GROUPED_NAV_PRODUCTION` | **PARTIAL** (deployed; full crawl pending) |
+| `STAFF_GROUPED_NAV_PRODUCTION` | **PARTIAL** (deployed; full crawl pending) |
+| `PAYMENT_REVIEW_UI_PRODUCTION` | **PARTIAL** (test fix + reverify) |
+| `BOOKING_MANAGEMENT_FULL_PAGE_PRODUCTION` | **PARTIAL** (deployed; acceptance probe update) |
+| `JP-DEPLOY-01` | **IN_PROGRESS** (deploy complete; source parity + full acceptance pending) |
+| `PROJECT_WIDE_INTER` | **PARTIAL** (tokens.css; ota-public.css remains) |
 
 ## JP_DASH_03_STATUS
 

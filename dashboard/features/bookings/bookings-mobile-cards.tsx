@@ -22,7 +22,7 @@ type Props = {
 
 export function BookingsMobileCards({ bookings, query }: Props) {
   return (
-    <ul className="space-y-3 lg:hidden" data-testid="bookings-mobile-cards">
+    <ul className="space-y-3 xl:hidden" data-testid="bookings-mobile-cards">
       {bookings.map((b) => (
         <li key={b.id}>
           <Card className="space-y-3">

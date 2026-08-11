@@ -17,7 +17,7 @@ type Props = {
 
 export function AgentsMobileCards({ agents, onView }: Props) {
   return (
-    <ul className="space-y-3 xl:hidden" data-testid="agents-mobile-cards">
+    <ul className="space-y-3 2xl:hidden" data-testid="agents-mobile-cards">
       {agents.map((agent) => (
         <li key={agent.id}>
           <Card className="space-y-3">

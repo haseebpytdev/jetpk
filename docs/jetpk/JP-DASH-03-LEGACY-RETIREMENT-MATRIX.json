@@ -23,7 +23,7 @@
       "backendKeep": true,
       "nextReplacementStatus": "PASS",
       "redirectStatus": "PASS",
-      "finalStatus": "PENDING"
+      "finalStatus": "PASS"
     },
     {
       "legacyRoute": "admin.bookings.show",
@@ -56,7 +56,7 @@
       "backendKeep": true,
       "nextReplacementStatus": "PASS",
       "redirectStatus": "PASS",
-      "finalStatus": "PENDING"
+      "finalStatus": "PASS"
     },
     {
       "legacyRoute": "admin.customers.show",
@@ -78,7 +78,7 @@
       "backendKeep": true,
       "nextReplacementStatus": "PASS",
       "redirectStatus": "PASS",
-      "finalStatus": "PENDING"
+      "finalStatus": "PASS"
     }
   ]
 }

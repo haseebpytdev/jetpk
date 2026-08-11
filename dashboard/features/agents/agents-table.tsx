@@ -25,7 +25,7 @@ function sortIndicator(active: boolean, direction: AgentsQuery["direction"]) {
 
 export function AgentsTable({ agents, query, onSort, onView }: Props) {
   return (
-    <div className="hidden xl:block min-w-0 w-full max-w-full" data-testid="agents-table">
+    <div className="hidden 2xl:block min-w-0 w-full max-w-full" data-testid="agents-table">
       <Table>
         <TableHead>
           <TableRow>

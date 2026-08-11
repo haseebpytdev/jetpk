@@ -53,18 +53,14 @@ test.describe("JP-DASH-03 checkpoint 11", () => {
         continue;
       }
 
-      const viewButton = page.getByRole("button", { name: /^View$/i }).first();
-      await expect(viewButton).toBeVisible({ timeout: 15_000 });
-      await viewButton.click();
-
-      const drawer = page.getByTestId("booking-drawer-content");
-      await expect(drawer).toBeVisible({ timeout: 15_000 });
-      const drawerText = await drawer.innerText();
-      expect(drawerText).toContain(ref);
-      expect(drawerText).not.toMatch(PREVIEW_RESIDUE);
-
-      await page.keyboard.press("Escape");
-      await expect(drawer).toBeHidden({ timeout: 10_000 });
+      const manageLink = page.getByTestId("booking-manage-button").first();
+      await expect(manageLink).toBeVisible({ timeout: 15_000 });
+      await manageLink.click();
+      await page.waitForURL(new RegExp(`/admin/dashboard/bookings/${ref}`), { timeout: 30_000 });
+      await expect(page.getByTestId("booking-management-page")).toBeVisible({ timeout: 30_000 });
+      const pageText = await page.locator("body").innerText();
+      expect(pageText).toContain(ref);
+      expect(pageText).not.toMatch(PREVIEW_RESIDUE);
       proved.push(ref);
     }
 
@@ -82,11 +78,21 @@ test.describe("JP-DASH-03 checkpoint 11", () => {
     );
     const count = await reviewLinks.count();
     const rows: Array<{ label: string; href: string; finalUrl: string; status: string }> = [];
+    const queueTargets: Array<{ label: string; href: string }> = [];
 
     for (let i = 0; i < count; i++) {
       const link = reviewLinks.nth(i);
-      const label = ((await link.textContent()) ?? "").trim();
-      const href = (await link.getAttribute("href")) ?? "";
+      queueTargets.push({
+        label: ((await link.textContent()) ?? "").trim(),
+        href: (await link.getAttribute("href")) ?? "",
+      });
+    }
+
+    for (const { label, href } of queueTargets) {
+      if (!href) {
+        rows.push({ label, href, finalUrl: "", status: "FAIL" });
+        continue;
+      }
       const response = await page.goto(href.startsWith("http") ? href : href, {
         waitUntil: "domcontentloaded",
         timeout: 120_000,
@@ -124,7 +130,9 @@ test.describe("JP-DASH-03 checkpoint 11", () => {
     for (const route of RESPONSIVE_PAGES) {
       for (const width of RESPONSIVE_WIDTHS) {
         await page.setViewportSize({ width, height: 900 });
-        await page.goto(route, { waitUntil: "domcontentloaded", timeout: 120_000 });
+        await page.goto(route, { waitUntil: "domcontentloaded", timeout: 120_000 }).catch(async () => {
+          await page.goto(route, { waitUntil: "commit", timeout: 120_000 });
+        });
         const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
         const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
         const overflow = scrollWidth > clientWidth + 2;

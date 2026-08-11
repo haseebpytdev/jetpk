@@ -147,28 +147,30 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
       expect(body).not.toMatch(PREVIEW_RESIDUE);
       expect(body).toContain(ref);
 
-      const viewButton = page.getByTestId("booking-view-button").first();
-      await expect(viewButton).toBeVisible({ timeout: 15_000 });
-      await viewButton.click();
-      await page.waitForURL(new RegExp(`[?&]id=${ref}`), { timeout: 30_000 });
+      const manageLink = page.getByTestId("booking-manage-button").first();
+      await expect(manageLink).toBeVisible({ timeout: 15_000 });
+      await manageLink.click();
+      await page.waitForURL(new RegExp(`/admin/dashboard/bookings/${ref}`), { timeout: 30_000 });
 
-      const drawer = page.getByTestId("booking-drawer-content");
-      await expect(drawer).toBeVisible({ timeout: 30_000 });
-      const drawerText = await drawer.innerText();
+      const managementPage = page.getByTestId("booking-management-page");
+      await expect(managementPage).toBeVisible({ timeout: 30_000 });
+      const pageText = await managementPage.innerText();
 
-      expect(drawerText).toContain(ref);
+      expect(pageText).toContain(ref);
       if (summary.id) {
-        expect(drawerText).toContain(summary.id);
+        expect(pageText).toContain(summary.id);
       }
       if (fare.currency) {
-        expect(drawerText).toContain(fare.currency);
+        expect(pageText).toContain(fare.currency);
       }
       if (fare.total != null) {
-        expect(drawerText).toMatch(new RegExp(String(fare.total).replace(".", "\\.")));
+        expect(pageText).toMatch(new RegExp(String(fare.total).replace(".", "\\.")));
       }
 
-      await page.keyboard.press("Escape");
-      await expect(drawer).toBeHidden({ timeout: 10_000 });
+      await page.goto(`/admin/dashboard/bookings?q=${encodeURIComponent(ref)}`, {
+        waitUntil: "domcontentloaded",
+        timeout: 120_000,
+      });
       proved.push(ref);
     }
 
@@ -289,12 +291,12 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
           await search.fill(entry.openViaSearch);
           await page.waitForTimeout(1000);
         }
-        const view = page.getByTestId("booking-view-button").first();
-        if ((await view.count()) === 0) {
+        const manage = page.getByTestId("booking-manage-button").first();
+        if ((await manage.count()) === 0) {
           rows.push({ module: entry.module, status: "NO_REPRESENTATIVE_PRODUCTION_RECORD", result: "PASS" });
           continue;
         }
-        await view.click();
+        await manage.click();
       } else if (entry.tableTestId) {
         const table = page.getByTestId(entry.tableTestId);
         if ((await table.count()) === 0) {

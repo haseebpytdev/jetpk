@@ -48,6 +48,13 @@ const relativeFiles = [
   "dashboard/features/customers/customer-detail-drawer.tsx",
   "dashboard/features/settings/components/settings-live-gate.tsx",
   "dashboard/lib/read-only/laravel/transformers/customers.ts",
+  "app/Http/Controllers/BackOffice/BackOfficeLegacyViewRedirectController.php",
+  "routes/admin.php",
+  "routes/staff.php",
+  "public/themes/frontend/jetpakistan/css/tokens.css",
+  "dashboard/components/dashboard/sidebar.tsx",
+  "dashboard/lib/nav-config.ts",
+  "dashboard/lib/dashboard-navigation.ts",
   "dashboard/types/booking.ts",
 ];
 

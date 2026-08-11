@@ -154,16 +154,17 @@ test.describe("JP-DASH-03 deep acceptance", () => {
     expect(body).not.toMatch(PREVIEW_RESIDUE);
   });
 
-  test("bookings detail drawer opens for known production reference", async ({ page }) => {
+  test("bookings management page opens for known production reference", async ({ page }) => {
     const ref = "WL96PKN9";
     await page.goto(`/admin/dashboard/bookings?q=${ref}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
-    const viewButton = page.getByRole("button", { name: /^View$/i }).first();
-    await expect(viewButton).toBeVisible({ timeout: 30_000 });
-    await viewButton.click();
-    await expect(page.getByTestId("booking-drawer-content")).toBeVisible({ timeout: 15_000 });
-    const drawerText = await page.getByTestId("booking-drawer-content").innerText();
-    expect(drawerText).toContain(ref);
-    expect(drawerText).not.toMatch(PREVIEW_RESIDUE);
+    const manageLink = page.getByTestId("booking-manage-button").first();
+    await expect(manageLink).toBeVisible({ timeout: 30_000 });
+    await manageLink.click();
+    await page.waitForURL(new RegExp(`/admin/dashboard/bookings/${ref}`), { timeout: 30_000 });
+    await expect(page.getByTestId("booking-management-page")).toBeVisible({ timeout: 15_000 });
+    const pageText = await page.locator("body").innerText();
+    expect(pageText).toContain(ref);
+    expect(pageText).not.toMatch(PREVIEW_RESIDUE);
   });
 
   test("responsive dashboard layout at 768px", async ({ page }) => {

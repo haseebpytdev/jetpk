@@ -28,7 +28,7 @@ function sortIndicator(active: boolean, direction: BookingsQuery["direction"]) {
 
 export function BookingsTable({ bookings, query, onSort }: Props) {
   return (
-    <div className="hidden lg:block min-w-0 w-full max-w-full" data-testid="bookings-table">
+    <div className="hidden xl:block min-w-0 w-full max-w-full" data-testid="bookings-table">
       <Table>
         <TableHead>
           <TableRow>

@@ -20,7 +20,7 @@ function sortIndicator(active: boolean, direction: CustomersQuery["direction"]) 
 
 export function CustomersTable({ customers, query, onSort, onView }: Props) {
   return (
-    <div className="hidden md:block min-w-0 w-full max-w-full" data-testid="customers-table">
+    <div className="hidden lg:block min-w-0 w-full max-w-full" data-testid="customers-table">
       <Table>
         <TableHead>
           <TableRow>

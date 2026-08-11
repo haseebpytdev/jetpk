@@ -1,9 +1,9 @@
 {
-  "generatedAtUtc": "2026-08-10T14:46:58.252Z",
-  "remoteHost": "pkjetp@185.215.166.176",
+  "generatedAtUtc": "2026-08-11T11:26:58.660Z",
+  "remoteHost": "-i C:\\Users\\khadi\\.ssh\\jetpk_contabo_2026_v2 root@185.215.166.176",
   "remoteRoot": "/home/pkjetp/jetpk_app",
-  "total": 33,
-  "match": 33,
+  "total": 39,
+  "match": 39,
   "mismatch": 0,
   "jpDash03SourceParity": "PASS",
   "rows": [
@@ -15,8 +15,8 @@
     },
     {
       "path": "app/Support/BackOffice/BackOfficeCapabilitiesPresenter.php",
-      "localSha256": "8ffef5c3483fd6e915b686c5fe733f4351176e92f0a2d24a59fa255c51295e14",
-      "productionSha256": "8ffef5c3483fd6e915b686c5fe733f4351176e92f0a2d24a59fa255c51295e14",
+      "localSha256": "1c7409f58839b99e391e4b2b7be7d31055af471801ec404a8a2a363480006d8c",
+      "productionSha256": "1c7409f58839b99e391e4b2b7be7d31055af471801ec404a8a2a363480006d8c",
       "match": "yes"
     },
     {
@@ -33,20 +33,14 @@
     },
     {
       "path": "app/Http/Resources/Dashboard/DashboardBookingDetailResource.php",
-      "localSha256": "9b8cd8f4a27e18646bdbbbb1569b43d7e44934b0cb5ecf0a0959696cdc26dd67",
-      "productionSha256": "9b8cd8f4a27e18646bdbbbb1569b43d7e44934b0cb5ecf0a0959696cdc26dd67",
-      "match": "yes"
-    },
-    {
-      "path": "app/Http/Resources/Dashboard/DashboardOverviewResource.php",
-      "localSha256": "c90978ee7ca24e77b69c423dc3c2f15be0b8eba7dd196f2e0c7c747f4673f045",
-      "productionSha256": "c90978ee7ca24e77b69c423dc3c2f15be0b8eba7dd196f2e0c7c747f4673f045",
+      "localSha256": "6c7247d9a8c3307c1d49150ee968d6df13aee2c8f696ac09a3af53e6813625ec",
+      "productionSha256": "6c7247d9a8c3307c1d49150ee968d6df13aee2c8f696ac09a3af53e6813625ec",
       "match": "yes"
     },
     {
       "path": "app/Http/Resources/Dashboard/DashboardPaymentResource.php",
-      "localSha256": "94f9d7ca954a362cc2fef63ff6eb7c6b4ee667c4e33e6f088d7a8aaec726da24",
-      "productionSha256": "94f9d7ca954a362cc2fef63ff6eb7c6b4ee667c4e33e6f088d7a8aaec726da24",
+      "localSha256": "313cb8648754abf5e9c407417d495f9b59e2a303d038589f9d57f599682e6099",
+      "productionSha256": "313cb8648754abf5e9c407417d495f9b59e2a303d038589f9d57f599682e6099",
       "match": "yes"
     },
     {
@@ -117,8 +111,8 @@
     },
     {
       "path": "dashboard/features/bookings/booking-operational-actions.tsx",
-      "localSha256": "761268df8f2d81ff4cc889cd4ff61f1efb45a99862d9dea10547ce5b3d0cba57",
-      "productionSha256": "761268df8f2d81ff4cc889cd4ff61f1efb45a99862d9dea10547ce5b3d0cba57",
+      "localSha256": "37940168399363dfc8801cce4fe32ae0edecdfd8249ee50cc6e54a66d0242105",
+      "productionSha256": "37940168399363dfc8801cce4fe32ae0edecdfd8249ee50cc6e54a66d0242105",
       "match": "yes"
     },
     {
@@ -135,8 +129,8 @@
     },
     {
       "path": "dashboard/lib/money.ts",
-      "localSha256": "93543474e86c63e13935a23001adcedf0c8946d6caca947ef365afc40164c3f2",
-      "productionSha256": "93543474e86c63e13935a23001adcedf0c8946d6caca947ef365afc40164c3f2",
+      "localSha256": "936d7ad44fb6efac6bfb41f63e6243949e55fc805893cfbf38c6acee004e0c07",
+      "productionSha256": "936d7ad44fb6efac6bfb41f63e6243949e55fc805893cfbf38c6acee004e0c07",
       "match": "yes"
     },
     {
@@ -165,14 +159,14 @@
     },
     {
       "path": "dashboard/features/bookings/bookings-mobile-cards.tsx",
-      "localSha256": "b676b84d4bd8959bfc93a270c10bcdaad4cb091e2a151d3ac0fa46b41b70611e",
-      "productionSha256": "b676b84d4bd8959bfc93a270c10bcdaad4cb091e2a151d3ac0fa46b41b70611e",
+      "localSha256": "98506c15c996a2b70f0567452ddff8fd224adba4e3e7863ec5a508f012618407",
+      "productionSha256": "98506c15c996a2b70f0567452ddff8fd224adba4e3e7863ec5a508f012618407",
       "match": "yes"
     },
     {
       "path": "dashboard/features/bookings/bookings-table.tsx",
-      "localSha256": "a6e41a616691af91d6b6c0b203c7a359d1ec4819c95ad18359183d5659a377be",
-      "productionSha256": "a6e41a616691af91d6b6c0b203c7a359d1ec4819c95ad18359183d5659a377be",
+      "localSha256": "c4f3758224bf38efc37bcffe70547f52298f915316e14fa7b2adedde478f2499",
+      "productionSha256": "c4f3758224bf38efc37bcffe70547f52298f915316e14fa7b2adedde478f2499",
       "match": "yes"
     },
     {
@@ -200,9 +194,51 @@
       "match": "yes"
     },
     {
+      "path": "app/Http/Controllers/BackOffice/BackOfficeLegacyViewRedirectController.php",
+      "localSha256": "802523e6b552da9206849428d103741da3249c3e12ba470e97b66ed42981673b",
+      "productionSha256": "802523e6b552da9206849428d103741da3249c3e12ba470e97b66ed42981673b",
+      "match": "yes"
+    },
+    {
+      "path": "routes/admin.php",
+      "localSha256": "d7980a445f43d0945ba3dceb89f7746c18720ffdfda6de656c105e8ec41ff763",
+      "productionSha256": "d7980a445f43d0945ba3dceb89f7746c18720ffdfda6de656c105e8ec41ff763",
+      "match": "yes"
+    },
+    {
+      "path": "routes/staff.php",
+      "localSha256": "940221743db4a1144d06cccb02044148f20ae2262b3c6b350363fe73156414fe",
+      "productionSha256": "940221743db4a1144d06cccb02044148f20ae2262b3c6b350363fe73156414fe",
+      "match": "yes"
+    },
+    {
+      "path": "public/themes/frontend/jetpakistan/css/tokens.css",
+      "localSha256": "5f98d546c5f99b017115bfa99a912984b2992bb931057f0fddb72f323b25424b",
+      "productionSha256": "5f98d546c5f99b017115bfa99a912984b2992bb931057f0fddb72f323b25424b",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/components/dashboard/sidebar.tsx",
+      "localSha256": "3877c657953404bd4a544e999c60501e3511e46584c73eb5d05fadfcb11a4be5",
+      "productionSha256": "3877c657953404bd4a544e999c60501e3511e46584c73eb5d05fadfcb11a4be5",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/lib/nav-config.ts",
+      "localSha256": "22997c4f329b2ffb6a47b5f24535d7aa5685b346fc4ec435abf29f2be0f90b55",
+      "productionSha256": "22997c4f329b2ffb6a47b5f24535d7aa5685b346fc4ec435abf29f2be0f90b55",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/lib/dashboard-navigation.ts",
+      "localSha256": "9be7298f65e458c6356eddc1772f017bae87c749694d57f06a27438e3fcd9475",
+      "productionSha256": "9be7298f65e458c6356eddc1772f017bae87c749694d57f06a27438e3fcd9475",
+      "match": "yes"
+    },
+    {
       "path": "dashboard/types/booking.ts",
-      "localSha256": "9d6916928d299379cbdf59c1c6bf6700fcd1ac0e9dddd92730efb4d3a03f6dec",
-      "productionSha256": "9d6916928d299379cbdf59c1c6bf6700fcd1ac0e9dddd92730efb4d3a03f6dec",
+      "localSha256": "ff77d85fb5a3b4afa99457ffcde14c4ef32c8a872c55283f91ae13a03546b5ed",
+      "productionSha256": "ff77d85fb5a3b4afa99457ffcde14c4ef32c8a872c55283f91ae13a03546b5ed",
       "match": "yes"
     }
   ]
