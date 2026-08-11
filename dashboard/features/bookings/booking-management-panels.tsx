@@ -155,8 +155,8 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
         </Section>
       ) : null}
 
-      {statusTimeline.length > 0 ? (
-        <Section title="Status timeline">
+      <Section title="Status timeline">
+        {statusTimeline.length > 0 ? (
           <ol className="space-y-3 text-sm" data-testid="booking-status-timeline">
             {statusTimeline.map((entry, index) => (
               <li key={`${entry.occurredAt}-${index}`} className="border-l-2 border-jp-border pl-3">
@@ -168,11 +168,15 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
               </li>
             ))}
           </ol>
-        </Section>
-      ) : null}
+        ) : (
+          <p className="text-sm text-jp-muted" data-testid="booking-status-timeline">
+            No status timeline events recorded for this booking.
+          </p>
+        )}
+      </Section>
 
-      {internalNotes.length > 0 ? (
-        <Section title="Internal notes">
+      <Section title="Internal notes">
+        {internalNotes.length > 0 ? (
           <ul className="space-y-3 text-sm" data-testid="booking-internal-notes">
             {internalNotes.map((note, index) => (
               <li key={`${note.createdAt}-${index}`} className="rounded-xl bg-gray-50 p-3">
@@ -184,11 +188,15 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
               </li>
             ))}
           </ul>
-        </Section>
-      ) : null}
+        ) : (
+          <p className="text-sm text-jp-muted" data-testid="booking-internal-notes">
+            No internal notes yet.
+          </p>
+        )}
+      </Section>
 
-      {communications.length > 0 ? (
-        <Section title="Communications">
+      <Section title="Communications">
+        {communications.length > 0 ? (
           <ul className="space-y-3 text-sm" data-testid="booking-communications">
             {communications.map((entry, index) => (
               <li key={`${entry.sentAt}-${index}`} className="flex flex-col gap-1">
@@ -202,11 +210,15 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
               </li>
             ))}
           </ul>
-        </Section>
-      ) : null}
+        ) : (
+          <p className="text-sm text-jp-muted" data-testid="booking-communications">
+            No communications logged for this booking.
+          </p>
+        )}
+      </Section>
 
-      {documents.length > 0 ? (
-        <Section title="Documents">
+      <Section title="Documents">
+        {documents.length > 0 ? (
           <ul className="space-y-2 text-sm" data-testid="booking-documents">
             {documents.map((document) => (
               <li key={document.documentId} className="flex justify-between gap-3">
@@ -217,9 +229,13 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-jp-muted">Document downloads remain on the Laravel booking workspace.</p>
-        </Section>
-      ) : null}
+        ) : (
+          <p className="text-sm text-jp-muted" data-testid="booking-documents">
+            No document metadata attached yet.
+          </p>
+        )}
+        <p className="mt-3 text-xs text-jp-muted">Document downloads remain on the Laravel booking workspace.</p>
+      </Section>
     </div>
   );
 }

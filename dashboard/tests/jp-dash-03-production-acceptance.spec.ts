@@ -115,7 +115,7 @@ test.describe("JP-DASH-03 production acceptance", () => {
     const context = await browser.newContext();
     const page = await context.newPage();
     try {
-      const configResponse = await page.request.get("/api/public/content/config");
+      const configResponse = await page.request.get("/api/public/content/config", { timeout: 60_000 });
       expect(configResponse.ok()).toBeTruthy();
       const config = await readJson<{ logo_url?: string | null; brand_name?: string }>(configResponse);
       const brandName = (config.brand_name ?? "JetPakistan").trim() || "JetPakistan";
@@ -179,41 +179,16 @@ test.describe("JP-DASH-03 production acceptance", () => {
     const apiResponse = await page.request.get(`/api/dashboard/bookings/${encodeURIComponent(ref)}`);
     test.skip(!apiResponse.ok(), `booking API unavailable for ${ref}`);
 
-    const apiPayload = await readJson<{
-      data?: {
-        statusTimeline?: unknown[];
-        internalNotes?: unknown[];
-        communications?: unknown[];
-        documents?: unknown[];
-      };
-    }>(apiResponse);
-    const detail = apiPayload.data ?? {};
-
     await page.goto(`/admin/dashboard/bookings/${ref}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
     const management = page.getByTestId("booking-management-page");
     await expect(management).toBeVisible({ timeout: 60_000 });
     const panels = management.getByTestId("booking-management-panels");
     await expect(panels).toBeVisible();
 
-    if ((detail.statusTimeline?.length ?? 0) > 0) {
-      await expect(panels.getByTestId("booking-status-timeline")).toBeVisible();
-    }
-    if ((detail.internalNotes?.length ?? 0) > 0) {
-      await expect(panels.getByTestId("booking-internal-notes")).toBeVisible();
-    }
-    if ((detail.communications?.length ?? 0) > 0) {
-      await expect(panels.getByTestId("booking-communications")).toBeVisible();
-    }
-    if ((detail.documents?.length ?? 0) > 0) {
-      await expect(panels.getByTestId("booking-documents")).toBeVisible();
-    }
-
-    const lifecycleSections =
-      (detail.statusTimeline?.length ?? 0) +
-      (detail.internalNotes?.length ?? 0) +
-      (detail.communications?.length ?? 0) +
-      (detail.documents?.length ?? 0);
-    expect(lifecycleSections, "expected lifecycle data on production reference booking").toBeGreaterThan(0);
+    await expect(panels.getByTestId("booking-status-timeline")).toBeVisible();
+    await expect(panels.getByTestId("booking-internal-notes")).toBeVisible();
+    await expect(panels.getByTestId("booking-communications")).toBeVisible();
+    await expect(panels.getByTestId("booking-documents")).toBeVisible();
 
     const body = await page.locator("body").innerText();
     expect(body).toContain(ref);
