@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { validateSecuritySettings } from "@/lib/access-control/settings-validation";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
+import { useMockData } from "@/lib/preview";
 import type { SecuritySettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 const SECURITY_FIELDS: SettingsPreviewField[] = [
@@ -69,27 +70,30 @@ type Props = {
 };
 
 export function SecuritySettingsWorkspace({ result }: Props) {
+  const allowLocalPreview = useMockData();
   const [previewValues, setPreviewValues] = useState<SecuritySettingsValues | null>(null);
   const baseline = result.security;
-  const active = previewValues ?? baseline;
+  const active = allowLocalPreview ? (previewValues ?? baseline) : baseline;
   const issues = useMemo(() => validateSecuritySettings(active), [active]);
-  const dirty = previewValues !== null;
+  const dirty = allowLocalPreview && previewValues !== null;
 
   return (
     <div className="space-y-4" data-testid="security-settings-workspace">
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
 
-      <SettingsLocalPreviewForm
-        fields={SECURITY_FIELDS}
-        baselineValues={baseline as unknown as Record<string, unknown>}
-        onApply={(values) => setPreviewValues(values as unknown as SecuritySettingsValues)}
-        onReset={() => setPreviewValues(null)}
-        dirty={dirty}
-      />
+      {allowLocalPreview ? (
+        <SettingsLocalPreviewForm
+          fields={SECURITY_FIELDS}
+          baselineValues={baseline as unknown as Record<string, unknown>}
+          onApply={(values) => setPreviewValues(values as unknown as SecuritySettingsValues)}
+          onReset={() => setPreviewValues(null)}
+          dirty={dirty}
+        />
+      ) : null}
 
-      <section className="rounded-xl border border-jp-border bg-white p-4" aria-labelledby="security-preview-values-heading">
-        <h3 id="security-preview-values-heading" className="text-sm font-semibold text-gray-900">
-          Active preview values
+      <section className="rounded-xl border border-jp-border bg-white p-4" aria-labelledby="security-current-values-heading">
+        <h3 id="security-current-values-heading" className="text-sm font-semibold text-gray-900">
+          {allowLocalPreview ? "Active preview values" : "Current values"}
         </h3>
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
           {SECURITY_FIELDS.map((field) => (

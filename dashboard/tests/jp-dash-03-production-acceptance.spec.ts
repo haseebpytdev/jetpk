@@ -226,6 +226,7 @@ test.describe("JP-DASH-03 production acceptance", () => {
     const representative = listPayload.data?.transactions?.[0]?.transactionId;
     if (!representative) {
       test.skip(true, "NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD");
+      return;
     }
 
     await page.goto(

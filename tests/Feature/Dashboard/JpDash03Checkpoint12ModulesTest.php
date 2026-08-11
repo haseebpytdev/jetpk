@@ -11,7 +11,6 @@ use App\Models\SupplierConnection;
 use App\Models\User;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use Database\Seeders\OtaFoundationSeeder;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Tests\Support\PlatformAdminTestHelpers;
@@ -19,39 +18,39 @@ use Tests\TestCase;
 
 /**
  * JP-DASH-03 checkpoint 12 — Settings, API settings, staff, suppliers module closure (fixtures).
+ * Legacy Blade GETs redirect to Next; mutations/API remain Laravel-owned.
  */
 class JpDash03Checkpoint12ModulesTest extends TestCase
 {
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
-    public function test_settings_module_admin_allowed_staff_denied(): void
+    public function test_settings_module_admin_redirects_staff_denied(): void
     {
         $this->seed(OtaFoundationSeeder::class);
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($this->platformAdmin())
             ->get(route('admin.settings.index'))
-            ->assertOk();
+            ->assertRedirect('/admin/dashboard/settings');
 
         $this->actingAs($staff)->get(route('admin.settings.index'))->assertForbidden();
     }
 
-    public function test_api_settings_admin_allowed_masked_read_staff_denied(): void
+    public function test_api_settings_admin_redirects_staff_denied(): void
     {
         $this->seed(OtaFoundationSeeder::class);
         $admin = $this->platformAdmin();
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
-        $response = $this->actingAs($admin)->get(route('admin.api-settings'));
-        $response->assertOk();
-        $content = strtolower($response->getContent() ?? '');
-        $this->assertStringNotContainsString('smtp_password', $content);
+        $this->actingAs($admin)
+            ->get(route('admin.api-settings'))
+            ->assertRedirect('/admin/dashboard/settings/integrations');
 
         $this->actingAs($staff)->get(route('admin.api-settings'))->assertForbidden();
     }
 
-    public function test_api_settings_edit_form_loads_without_leaking_secrets(): void
+    public function test_api_settings_edit_form_redirects_to_next_integrations(): void
     {
         $admin = $this->platformAdmin();
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
@@ -62,12 +61,9 @@ class JpDash03Checkpoint12ModulesTest extends TestCase
             'credentials' => ['client_id' => 'tp_ci', 'client_secret' => 'tp_cs'],
         ]);
 
-        $response = $this->actingAs($admin)
+        $this->actingAs($admin)
             ->get(route('admin.api-settings.edit', $connection))
-            ->assertOk();
-
-        $content = strtolower($response->getContent() ?? '');
-        $this->assertStringNotContainsString('tp_cs', $content);
+            ->assertRedirect('/admin/dashboard/settings/integrations');
     }
 
     public function test_staff_management_module_routes_and_rbac(): void
@@ -78,7 +74,9 @@ class JpDash03Checkpoint12ModulesTest extends TestCase
         $this->assertNotNull($customer);
 
         $this->assertTrue(Route::has('admin.staff'));
-        $this->actingAs($admin)->get(route('admin.staff'))->assertOk();
+        $this->actingAs($admin)
+            ->get(route('admin.staff'))
+            ->assertRedirect('/admin/dashboard/users');
         $this->actingAs($customer)->get(route('admin.staff'))->assertForbidden();
     }
 

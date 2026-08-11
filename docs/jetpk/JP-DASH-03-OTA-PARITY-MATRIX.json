@@ -25,7 +25,7 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "DashboardReadOnlyApiTest::test_overview; JP-DASH-03-PAGE-MATRIX",
-      "gapNotes": "Pipeline deep-links still route to Laravel booking queues.",
+      "gapNotes": "Live overview + Next queue deep-links; no Laravel Blade handoffs.",
       "CURRENT_STATUS": "PASS",
       "FINAL_STATUS": "PASS"
     },

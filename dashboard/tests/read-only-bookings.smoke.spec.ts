@@ -19,6 +19,7 @@ test("fixture bookings page loads", async () => {
     bookingDateTo: "",
     departureDateFrom: "",
     departureDateTo: "",
+    queue: "all",
     page: 1,
     pageSize: 25,
     sort: "bookingDate",

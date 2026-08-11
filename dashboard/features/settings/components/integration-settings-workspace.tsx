@@ -6,6 +6,7 @@ import { formatDateTime } from "@/lib/format";
 import { validateIntegrationSettings } from "@/lib/access-control/settings-validation";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
+import { useMockData } from "@/lib/preview";
 import type { IntegrationRecord, IntegrationSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 const INTEGRATION_FIELDS: SettingsPreviewField[] = [
@@ -69,11 +70,12 @@ type Props = {
 };
 
 export function IntegrationSettingsWorkspace({ result }: Props) {
+  const allowLocalPreview = useMockData();
   const baseline = result.integrations;
   const [previewValues, setPreviewValues] = useState<IntegrationSettingsValues | null>(null);
-  const active = previewValues ?? baseline;
+  const active = allowLocalPreview ? (previewValues ?? baseline) : baseline;
   const issues = useMemo(() => validateIntegrationSettings(active), [active]);
-  const dirty = previewValues !== null;
+  const dirty = allowLocalPreview && previewValues !== null;
   const initialIntegration = baseline.integrations[0];
   const fields = useMemo(
     () =>
@@ -96,7 +98,7 @@ export function IntegrationSettingsWorkspace({ result }: Props) {
     <div className="space-y-4" data-testid="integration-settings-workspace">
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
 
-      {initialIntegration ? (
+      {allowLocalPreview && initialIntegration ? (
         <SettingsLocalPreviewForm
           fields={fields}
           baselineValues={formBaseline}
@@ -151,7 +153,7 @@ export function IntegrationSettingsWorkspace({ result }: Props) {
               </p>
               {integration.warningState ? (
                 <p className="mt-2 text-xs font-medium text-amber-800" role="status">
-                  Warning state flagged in fixture metadata.
+                  Warning state flagged in integration metadata.
                 </p>
               ) : null}
             </li>

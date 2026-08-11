@@ -1,52 +1,52 @@
 {
-  "generatedAtUtc": "2026-08-11T18:06:31.798Z",
+  "generatedAtUtc": "2026-08-11T19:42:15.652Z",
   "rows": [
     {
       "label": "Review",
-      "href": "/admin/agent-deposits",
-      "finalUrl": "https://jetpakistan.pk/admin/agent-deposits",
+      "href": "/admin/dashboard/deposits",
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/deposits",
       "status": "PASS"
     },
     {
       "label": "Review",
-      "href": "/admin/bookings?queue=all",
-      "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings?queue=all",
+      "href": "/admin/dashboard/bookings",
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings",
       "status": "PASS"
     },
     {
       "label": "Review",
-      "href": "/admin/bookings?queue=payment_review",
+      "href": "/admin/dashboard/bookings?queue=payment_review",
       "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings?queue=payment_review",
       "status": "PASS"
     },
     {
       "label": "Review",
-      "href": "/admin/bookings?queue=supplier_pnr",
+      "href": "/admin/dashboard/bookings?queue=supplier_pnr",
       "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings?queue=supplier_pnr",
       "status": "PASS"
     },
     {
       "label": "Review",
-      "href": "/admin/bookings?queue=ticketing",
+      "href": "/admin/dashboard/bookings?queue=ticketing",
       "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings?queue=ticketing",
       "status": "PASS"
     },
     {
       "label": "Review",
-      "href": "/admin/bookings?queue=cancellations",
-      "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings?queue=cancellations",
+      "href": "/admin/dashboard/operations/review",
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/operations/review",
       "status": "PASS"
     },
     {
       "label": "Review",
-      "href": "/admin/bookings?queue=refunds",
+      "href": "/admin/dashboard/bookings?queue=refunds",
       "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings?queue=refunds",
       "status": "PASS"
     },
     {
       "label": "Review",
-      "href": "/admin/bookings?queue=all",
-      "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings?queue=all",
+      "href": "/admin/dashboard/bookings",
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/bookings",
       "status": "PASS"
     }
   ]

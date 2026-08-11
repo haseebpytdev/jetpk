@@ -5,6 +5,7 @@ import { CmsStatusBadge } from "@/components/ui/status-badge";
 import { validateNotificationSettings } from "@/lib/access-control/settings-validation";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
+import { useMockData } from "@/lib/preview";
 import type { NotificationCategoryConfig, NotificationSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 function buildCategoryFields(categories: NotificationCategoryConfig[]): SettingsPreviewField[] {
@@ -81,11 +82,12 @@ type Props = {
 };
 
 export function NotificationSettingsWorkspace({ result }: Props) {
+  const allowLocalPreview = useMockData();
   const baseline = result.notifications;
   const [previewValues, setPreviewValues] = useState<NotificationSettingsValues | null>(null);
-  const active = previewValues ?? baseline;
+  const active = allowLocalPreview ? (previewValues ?? baseline) : baseline;
   const issues = useMemo(() => validateNotificationSettings(active), [active]);
-  const dirty = previewValues !== null;
+  const dirty = allowLocalPreview && previewValues !== null;
   const fields = useMemo(() => buildCategoryFields(baseline.categories), [baseline.categories]);
   const initialCategory = baseline.categories[0];
   const formBaseline = initialCategory ? categoryToFormValues(initialCategory) : {};
@@ -94,7 +96,7 @@ export function NotificationSettingsWorkspace({ result }: Props) {
     <div className="space-y-4" data-testid="notification-settings-workspace">
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
 
-      {initialCategory ? (
+      {allowLocalPreview && initialCategory ? (
         <SettingsLocalPreviewForm
           fields={fields}
           baselineValues={formBaseline}

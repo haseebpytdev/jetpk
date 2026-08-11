@@ -57,12 +57,12 @@ class BackOfficeLegacyCustomerRedirectTest extends TestCase
             ->assertRedirect('/admin/dashboard/agents?q=asif');
     }
 
-    public function test_guest_customer_show_route_remains_on_laravel(): void
+    public function test_guest_customer_show_route_redirects_to_next_customers(): void
     {
         $admin = $this->platformAdmin();
 
         $this->actingAs($admin)
             ->get('/admin/customers/guests/show?email=guest@example.com')
-            ->assertOk();
+            ->assertRedirect('/admin/dashboard/customers?email=guest%40example.com');
     }
 }

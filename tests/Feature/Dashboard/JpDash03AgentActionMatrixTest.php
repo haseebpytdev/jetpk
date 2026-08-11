@@ -63,7 +63,7 @@ class JpDash03AgentActionMatrixTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_platform_admin_can_open_agent_applications_review_queue(): void
+    public function test_platform_admin_agent_applications_index_redirects_to_next(): void
     {
         $admin = $this->platformAdmin();
         AgentApplication::query()->create([
@@ -82,8 +82,7 @@ class JpDash03AgentActionMatrixTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agent-applications.index'))
-            ->assertOk()
-            ->assertSee('Agent applications', false);
+            ->assertRedirect('/admin/dashboard/agents/applications');
     }
 
     public function test_customer_cannot_access_agent_admin_routes(): void

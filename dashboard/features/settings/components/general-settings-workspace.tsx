@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { validateGeneralSettings } from "@/lib/access-control/settings-validation";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
+import { useMockData } from "@/lib/preview";
 import type { GeneralSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 const GENERAL_FIELDS: SettingsPreviewField[] = [
@@ -63,27 +64,30 @@ type Props = {
 };
 
 export function GeneralSettingsWorkspace({ result }: Props) {
+  const allowLocalPreview = useMockData();
   const [previewValues, setPreviewValues] = useState<GeneralSettingsValues | null>(null);
   const baseline = result.general;
-  const active = previewValues ?? baseline;
+  const active = allowLocalPreview ? (previewValues ?? baseline) : baseline;
   const issues = useMemo(() => validateGeneralSettings(active), [active]);
-  const dirty = previewValues !== null;
+  const dirty = allowLocalPreview && previewValues !== null;
 
   return (
     <div className="space-y-4" data-testid="general-settings-workspace">
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
 
-      <SettingsLocalPreviewForm
-        fields={GENERAL_FIELDS}
-        baselineValues={baseline as unknown as Record<string, unknown>}
-        onApply={(values) => setPreviewValues(values as unknown as GeneralSettingsValues)}
-        onReset={() => setPreviewValues(null)}
-        dirty={dirty}
-      />
+      {allowLocalPreview ? (
+        <SettingsLocalPreviewForm
+          fields={GENERAL_FIELDS}
+          baselineValues={baseline as unknown as Record<string, unknown>}
+          onApply={(values) => setPreviewValues(values as unknown as GeneralSettingsValues)}
+          onReset={() => setPreviewValues(null)}
+          dirty={dirty}
+        />
+      ) : null}
 
-      <section className="rounded-xl border border-jp-border bg-white p-4" aria-labelledby="general-preview-values-heading">
-        <h3 id="general-preview-values-heading" className="text-sm font-semibold text-gray-900">
-          Active preview values
+      <section className="rounded-xl border border-jp-border bg-white p-4" aria-labelledby="general-current-values-heading">
+        <h3 id="general-current-values-heading" className="text-sm font-semibold text-gray-900">
+          {allowLocalPreview ? "Active preview values" : "Current values"}
         </h3>
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
           {GENERAL_FIELDS.map((field) => (
