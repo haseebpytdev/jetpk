@@ -164,7 +164,7 @@
   --fs-display:var(--jp-fs-hero);--fs-section:var(--jp-fs-h2);
   --maxw:var(--jp-maxw);--header-h:var(--jp-nav-height);
 
-  --font-display:'Space Grotesk','Inter',system-ui,sans-serif;
+  --font-display:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   --font-body:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   --font-mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
   --ease:cubic-bezier(.4,0,.2,1);--ease-out:cubic-bezier(.16,1,.3,1);

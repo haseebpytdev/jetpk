@@ -64,9 +64,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         ->where('path', '.*')
         ->name('dashboard');
 
-    Route::get('/customers', [CustomerManagementController::class, 'index'])->name('customers.index');
+    Route::get('/customers', [BackOfficeLegacyViewRedirectController::class, 'adminCustomersIndex'])->name('customers.index');
     Route::get('/customers/guests/show', [CustomerManagementController::class, 'showGuest'])->name('customers.guests.show');
-    Route::get('/customers/{customer}', [CustomerManagementController::class, 'show'])->name('customers.show');
+    Route::get('/customers/{customer}', [BackOfficeLegacyViewRedirectController::class, 'adminCustomerShow'])->name('customers.show');
 
     Route::get('/bookings', [BackOfficeLegacyViewRedirectController::class, 'adminBookingsIndex'])->name('bookings');
     Route::get('/bookings/data', [BookingManagementController::class, 'data'])->name('bookings.data');

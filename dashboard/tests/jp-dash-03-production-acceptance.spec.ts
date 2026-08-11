@@ -45,6 +45,11 @@ test.describe("JP-DASH-03 production acceptance", () => {
     await expect(page).toHaveURL(/\/admin\/dashboard\/bookings\/?/);
   });
 
+  test("legacy admin customers bookmark redirects to Next list", async ({ page }) => {
+    await page.goto("/admin/customers", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/admin\/dashboard\/customers\/?/);
+  });
+
   test("payments drawer shows operational review section", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/admin/dashboard/payments", { waitUntil: "domcontentloaded" });

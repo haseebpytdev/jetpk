@@ -17,10 +17,10 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-REFUND-01 | Cancellation/refund/ticketing | partial | no | partial | partial | partial | no | PARTIAL | Intake forms; no prod mutation | — | — | — | Wave 3 |
 | JP-MODULES-01 | Full module inventory | partial | partial | partial | no | no | no | IN_PROGRESS | Covered in parity matrix | pending | — | — | Wave 1 |
 | JP-STAFF-01 | Staff Next back office | yes | yes | yes | partial | yes | no | IN_PROGRESS | Staff preview nav groups + session navigationGroups contract | pending | — | Deploy verify pending | Wave 5 |
-| JP-LEGACY-01 | Legacy UI retirement | partial | yes | partial | no | yes | no | IN_PROGRESS | Admin/staff booking list+show redirect to Next | pending | — | Prod verify pending | Wave 3 |
+| JP-LEGACY-01 | Legacy UI retirement | partial | yes | partial | no | yes | no | IN_PROGRESS | Bookings + customers list/show redirect to Next | pending | — | Prod verify pending | Wave 6 |
 | JP-RBAC-01 | Five-role RBAC | partial | partial | partial | partial | yes | partial | PARTIAL | RBAC browser matrix 2/2 PASS | b220b84 | — | Full crawl pending | — |
 | JP-FRONTEND-BRAND-01 | DB logo production | yes | yes | partial | no | yes | no | IN_PROGRESS | Public config logo_url contract + dashboard sidebar fallback smoke | pending | — | Prod DB logo verify pending | Wave 5 |
-| JP-TYPE-01 | Project-wide Inter | partial | partial | partial | partial | partial | no | FAIL | — | — | — | — | Wave 5 |
+| JP-TYPE-01 | Project-wide Inter | yes | yes | partial | no | yes | no | IN_PROGRESS | tokens.css display=Inter; authority CSS test green | pending | — | ota-public.css legacy stack remains | Wave 6 |
 | JP-PORTAL-01 | Agent + customer acceptance | no | no | no | no | no | no | PENDING | — | — | — | — | Wave 4 |
 | JP-DATA-01 | Preview/stub sweep | partial | yes | yes | no | partial | no | IN_PROGRESS | Planned dynamic redirect; shared empty-state copy | pending | — | — | Wave 2 |
 | JP-MONEY-01 | Money integrity | partial | partial | partial | partial | partial | no | PARTIAL | Currency on payment forms | pending | — | — | Wave 6 |

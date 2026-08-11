@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 /**
- * Retires legacy Blade booking list/show GET routes in favour of the Next dashboard shell.
+ * Retires legacy Blade list/show GET routes in favour of the Next dashboard shell.
  * Mutation and JSON data routes remain on Laravel controllers.
  */
 final class BackOfficeLegacyViewRedirectController extends Controller
@@ -61,6 +61,55 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         Gate::authorize('view', $booking);
 
         return redirect()->to($this->bookingShowPath('staff', $booking, $request));
+    }
+
+    public function adminCustomersIndex(Request $request): RedirectResponse
+    {
+        Gate::authorize('viewAny', User::class);
+
+        return redirect()->to($this->customersIndexPath('admin', $request));
+    }
+
+    public function adminCustomerShow(Request $request, User $customer): RedirectResponse
+    {
+        $this->assertCustomerAccount($customer);
+        Gate::authorize('view', $customer);
+
+        return redirect()->to($this->customerShowPath('admin', $customer, $request));
+    }
+
+    private function assertCustomerAccount(User $user): void
+    {
+        if (! $user->isCustomer()) {
+            abort(404);
+        }
+    }
+
+    private function customersIndexPath(string $portal, Request $request): string
+    {
+        return $this->pathWithQuery("/{$portal}/dashboard/customers", $this->remapCustomersQuery($request->query()));
+    }
+
+    private function customerShowPath(string $portal, User $customer, Request $request): string
+    {
+        $query = $this->remapCustomersQuery($request->query());
+        $query['id'] = 'CU-'.$customer->id;
+
+        return $this->pathWithQuery("/{$portal}/dashboard/customers", $query);
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    private function remapCustomersQuery(array $query): array
+    {
+        if (isset($query['search']) && ! isset($query['q'])) {
+            $query['q'] = $query['search'];
+            unset($query['search']);
+        }
+
+        return $query;
     }
 
     private function assertPreviewBookingAccessible(?User $user, string $previewParam): void

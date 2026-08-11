@@ -16,7 +16,7 @@ class JetPakistanLegacyTypographyAuthorityTest extends TestCase
         $normalized = str_replace([' ', "'", '"'], '', $css);
 
         $this->assertStringContainsString('--font-body:Inter', $normalized);
-        $this->assertStringContainsString('--font-display:SpaceGrotesk', $normalized);
+        $this->assertStringContainsString('--font-display:Inter', $normalized);
         $this->assertStringContainsString('--font-mono:IBMPlexMono', $normalized);
     }
 
@@ -29,6 +29,7 @@ class JetPakistanLegacyTypographyAuthorityTest extends TestCase
         $this->assertStringContainsString('--font-jetpk-ui', $css);
         $this->assertStringContainsString('--font-jetpk-display', $css);
         $this->assertStringContainsString('Inter', $css);
-        $this->assertStringContainsString('Space Grotesk', $css);
+        $this->assertStringNotContainsString('Space Grotesk', $css);
+        $this->assertStringNotContainsString('Plus Jakarta', $css);
     }
 }

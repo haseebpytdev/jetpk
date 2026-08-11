@@ -46,6 +46,28 @@
       "nextReplacementStatus": "PASS",
       "redirectStatus": "PASS",
       "finalStatus": "PENDING"
+    },
+    {
+      "legacyRoute": "admin.customers.index",
+      "legacyPath": "/admin/customers",
+      "capability": "Customers list",
+      "nextRoute": "/[portal]/dashboard/customers",
+      "classification": "LEGACY_VIEW_REPLACE",
+      "backendKeep": true,
+      "nextReplacementStatus": "PASS",
+      "redirectStatus": "PASS",
+      "finalStatus": "PENDING"
+    },
+    {
+      "legacyRoute": "admin.customers.show",
+      "legacyPath": "/admin/customers/{id}",
+      "capability": "Customer detail drawer",
+      "nextRoute": "/[portal]/dashboard/customers?id=CU-{id}",
+      "classification": "LEGACY_VIEW_REPLACE",
+      "backendKeep": true,
+      "nextReplacementStatus": "PASS",
+      "redirectStatus": "PASS",
+      "finalStatus": "PENDING"
     }
   ]
 }
