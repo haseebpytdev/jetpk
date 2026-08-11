@@ -24,7 +24,7 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-PORTAL-01 | Agent + customer acceptance | yes | yes | partial | partial | yes | yes | IN_PROGRESS | jp-dash-03-portal-acceptance.spec.ts 2/2 PASS prod 2026-08-11 | e84b608 | — | — | Wave 6 |
 | JP-DATA-01 | Preview/stub sweep | partial | yes | yes | no | partial | no | IN_PROGRESS | Planned dynamic redirect; shared empty-state copy | pending | — | — | Wave 2 |
 | JP-MONEY-01 | Money integrity | partial | partial | partial | partial | partial | no | PARTIAL | Currency on payment forms | pending | — | — | Wave 6 |
-| JP-UX-01 | Operator UX | partial | partial | partial | partial | partial | no | FAIL | Grouped IA in progress | — | — | — | Wave 5 |
+| JP-UX-01 | Operator UX | partial | partial | partial | partial | partial | no | IN_PROGRESS | Staff grouped nav + portal acceptance evidence | a8b6713 | — | — | Wave 6 |
 | JP-NFR-01 | Nonfunctional revalidation | partial | no | partial | partial | partial | no | FAIL | Prior matrices invalidated | — | — | — | Wave 6 |
 | JP-SAFE-QA-01 | QA data cleanliness | yes | yes | partial | partial | partial | no | IN_PROGRESS | Four QA identities only | b220b84 | — | — | — |
 | JP-DEPLOY-01 | Production deployment loop | yes | yes | partial | blocked | partial | partial | BLOCKED | Wave 3–5 code ready; SFTP/deploy unavailable in agent env | pending | WdsRJ8FbNwR8TxGvVTCUh | External deploy auth required | Not a V3 termination condition |

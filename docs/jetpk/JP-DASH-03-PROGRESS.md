@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `f48db39` (pending agents redirect commit) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `f48db39` |
+| `LOCAL_HEAD` | `a8b6713` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `a8b6713` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
