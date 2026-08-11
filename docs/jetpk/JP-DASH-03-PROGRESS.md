@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `020e652` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `020e652` |
+| `LOCAL_HEAD` | `52c0ca5` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `52c0ca5` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -30,7 +30,8 @@
 
 | Run | Result |
 |-----|--------|
-| **Latest full suite (2026-08-11T12:48Z)** | **29 PASS / 1 SKIP** |
+| **Latest full suite (2026-08-11T12:48Z)** | **29 PASS / 1 SKIP** (30 tests with lifecycle probe added) |
+| Lifecycle panels probe | **PASS** (API-conditional; WL96PKN9) |
 | Skip | Payments drawer — `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
 | Legacy admin redirects | **3/3 PASS** |
 | Legacy staff bookings redirect | **PASS** (staff session) |
@@ -57,7 +58,7 @@
 | `BOOKING_MANAGEMENT_FULL_PAGE_PRODUCTION` | **PASS** |
 | `JP-NFR-01` | **PARTIAL** (29/30 acceptance; responsive PASS) |
 | `PAYMENT_REVIEW_UI_PRODUCTION` | **BLOCKED_EVIDENCE** |
-| `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PENDING** |
+| `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PARTIAL** (timeline when API has entries) |
 | `BOOKING_INTERNAL_NOTES_PRODUCTION` | **PENDING** |
 | `BOOKING_COMMUNICATIONS_PRODUCTION` | **PENDING** |
 | `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **PENDING** |
