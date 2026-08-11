@@ -69,12 +69,14 @@ const PROBES: RbacProbe[] = [
   },
   {
     module: "Staff management",
+    adminRoute: "/admin/dashboard/users",
     laravelRoute: "/admin/staff",
     staffApiExpected: "deny",
     anonymousExpected: "deny",
   },
   {
     module: "API Settings",
+    adminRoute: "/admin/dashboard/settings/integrations",
     laravelRoute: "/admin/api-settings",
     staffApiExpected: "deny",
     anonymousExpected: "deny",
@@ -103,12 +105,14 @@ const PROBES: RbacProbe[] = [
   },
   {
     module: "Page Settings",
+    adminRoute: "/admin/dashboard/cms",
     laravelRoute: "/admin/page-settings",
     staffApiExpected: "deny",
     anonymousExpected: "deny",
   },
   {
     module: "Go-live checklist",
+    adminRoute: "/admin/dashboard/system/go-live",
     laravelRoute: "/admin/go-live-checklist",
     staffApiExpected: "deny",
     anonymousExpected: "deny",

@@ -34,15 +34,12 @@ test.describe("JP-DASH-03 production acceptance", () => {
     expect(consoleErrors.length).toBe(0);
   });
 
-  test("laravel staff handoff stays on public origin", async ({ page }) => {
-    await page.goto("/admin/dashboard", { waitUntil: "domcontentloaded" });
-    const staff = page.locator("aside a[href='/admin/staff']").first();
-    await expect(staff).toBeVisible();
-    await staff.click();
-    await page.waitForLoadState("domcontentloaded");
-    const url = page.url();
-    expect(url).toMatch(/^https:\/\/jetpakistan\.pk\/admin\/staff/);
-    expect(url).not.toMatch(/127\.0\.0\.1|localhost|:8088/);
+  test("admin staff management stays on Next dashboard origin", async ({ page }) => {
+    await page.goto("/admin/dashboard/users", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/^https:\/\/jetpakistan\.pk\/admin\/dashboard\/users/);
+    const nav = page.getByLabel("Dashboard navigation");
+    await expect(nav.getByRole("link", { name: "Staff" }).or(nav.getByRole("link", { name: "Users" })).first()).toBeVisible();
+    expect(page.url()).not.toMatch(/127\.0\.0\.1|localhost|:8088/);
   });
 
   test("legacy admin bookings bookmark redirects to Next list", async ({ page }) => {
@@ -195,22 +192,15 @@ test.describe("JP-DASH-03 production acceptance", () => {
     expect(body).not.toMatch(/Preview data|synthetic records|Dashboard unavailable/i);
   });
 
-  test("live operations review handoff does not expose fixture workspace", async ({ page }) => {
+  test("live operations review queue does not expose fixture workspace", async ({ page }) => {
     await page.goto("/admin/dashboard/operations/review", { waitUntil: "domcontentloaded", timeout: 120_000 });
-    await Promise.race([
-      page.getByTestId("laravel-live-redirect").waitFor({ state: "visible", timeout: 30_000 }),
-      page.waitForURL(/\/admin\/bookings/, { timeout: 30_000 }),
-    ]).catch(() => undefined);
+    await expect(page.getByTestId("operational-review-queue")).toBeVisible({ timeout: 60_000 });
 
     const body = await page.locator("body").innerText();
     expect(body).not.toMatch(/Preview data|synthetic records|fixture workspace/i);
     // Fixture workspace heading must not remain as the live surface.
     expect(body).not.toMatch(/Approve or reject cancellation and refund requests before execution/i);
-
-    const url = page.url();
-    const redirected = /\/admin\/bookings/.test(url);
-    const redirectNotice = await page.getByTestId("laravel-live-redirect").count();
-    expect(redirected || redirectNotice > 0).toBeTruthy();
+    expect(await page.getByTestId("laravel-live-redirect").count()).toBe(0);
   });
 
   test("payments list surface renders without preview residue when ledger empty", async ({ page }) => {
