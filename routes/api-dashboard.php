@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Dashboard\DashboardSessionController;
 use App\Http\Controllers\Api\Dashboard\DashboardSettingsController;
 use App\Http\Controllers\Api\Dashboard\DashboardSuppliersController;
 use App\Http\Controllers\Api\Dashboard\DashboardSupportTicketsController;
+use App\Http\Controllers\Api\Dashboard\DashboardSystemHealthController;
 use App\Http\Controllers\Api\Dashboard\DashboardTicketsController;
 use App\Http\Controllers\Api\Dashboard\DashboardUsersController;
 use Illuminate\Support\Facades\Route;
@@ -181,6 +182,8 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
             ->name('settings.integrations');
         Route::get('/markups', [DashboardMarkupsController::class, 'index'])
             ->name('markups.index');
+        Route::get('/system/health', [DashboardSystemHealthController::class, 'show'])
+            ->name('system.health');
     });
 
     Route::middleware('dashboard.permission:audit.view')->group(function (): void {

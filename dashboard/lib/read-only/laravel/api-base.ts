@@ -56,4 +56,5 @@ export const DASHBOARD_API_ROUTES = {
   markups: "/markups",
   agentApplications: "/agent-applications",
   commissions: "/commissions",
+  systemHealth: "/system/health",
 } as const;

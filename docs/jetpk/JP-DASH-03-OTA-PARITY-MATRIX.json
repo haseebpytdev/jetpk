@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T19:08:50.680Z",
+  "generatedAtUtc": "2026-08-11T19:13:20.277Z",
   "schemaVersion": "jp-dash-03-v3",
   "note": "Honest V3 capability parity — PASS only where Next.js UI and Laravel backend are both production-usable without fixture/mocks for the stated capability.",
   "capabilities": [
@@ -27,7 +27,7 @@
       "testMethod": "DashboardReadOnlyApiTest::test_overview; JP-DASH-03-PAGE-MATRIX",
       "gapNotes": "Pipeline deep-links still route to Laravel booking queues.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "DASH-002",
@@ -53,7 +53,7 @@
       "testMethod": "DashboardReadOnlyApiTest search index",
       "gapNotes": "Legacy per-module suggestion endpoints remain for Blade admin.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "NAV-001",
@@ -79,7 +79,7 @@
       "testMethod": "production-acceptance admin/staff grouped nav probes PASS 2026-08-11",
       "gapNotes": "Staff portal hrefs fixed (PortalProvider wraps shell); cancellations/execution still hand off to Laravel queues.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "BOOK-001",
@@ -105,7 +105,7 @@
       "testMethod": "DashboardReadOnlyApiTest; JP-DASH-03-FILTER-MATRIX",
       "gapNotes": "Advanced Laravel-only queue filters not fully mirrored.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "BOOK-002",
@@ -129,9 +129,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "JpDash03BookingDetailContractTest; checkpoint-12 browser proof",
-      "gapNotes": "Booking matrix row marked PENDING_SESSION for detail read retest in V3.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Booking detail drawer + full management page live on Next; drawer is quick-view (AD-004).",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "BOOK-003",
@@ -157,7 +157,7 @@
       "testMethod": "production-acceptance lifecycle panels always visible PASS 2026-08-11",
       "gapNotes": "Empty states always render for timeline/notes/comms/docs; Laravel download/supplier ops remain handoff.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "BOOK-004",
@@ -181,9 +181,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "BackOfficeBookingIntakeMutationsTest::test_admin_assign_staff_json",
-      "gapNotes": "Mutation via intake JSON, not dashboard read API.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Staff assignment intake on Next booking management via Laravel JSON mutation routes.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "BOOK-005",
@@ -207,9 +207,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "BackOfficeBookingIntakeMutationsTest",
-      "gapNotes": "Live mode only; preview shell blocks mutations.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Internal notes intake on Next booking management; lifecycle panels always rendered.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "BOOK-006",
@@ -233,9 +233,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "BackOfficeBookingIntakeMutationsTest::test_admin_booking_intake_store_json",
-      "gapNotes": "Requires operator-entered amount + booking currency (AD-006).",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Record payment intake requires operator amount+currency (AD-006) on Next management page.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "EXEC-001",
@@ -285,9 +285,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "BackOfficeBookingIntakeMutationsTest::test_admin_booking_intake_store_json",
-      "gapNotes": null,
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Cancellation request intake on Next booking management; review queue on /operations/review.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "CANC-002",
@@ -339,7 +339,7 @@
       "testMethod": "DashboardReadOnlyApiTest + checkpoint-12 filter matrix",
       "gapNotes": null,
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "PAY-002",
@@ -363,9 +363,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "BackOfficeBookingIntakeMutationsTest; JpDash03MoneyContractTest payment capabilities; payments.smoke operational review",
-      "gapNotes": "Live-mode verify/reject wired in payments drawer; production verify pending.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Verify/reject UI present on Next payments drawer. Production browser click-proof may SKIP with NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD (authorized evidence exception). Backend/RBAC authoritative.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "PNR-001",
@@ -391,7 +391,7 @@
       "testMethod": "DashboardReadOnlyApiTest pnrs index",
       "gapNotes": null,
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "PNR-002",
@@ -415,9 +415,9 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "authorization/service tests only",
-      "gapNotes": "PNR list Next; commercial create/sync not exposed in prod UI (AD-009).",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next PNRs module is presentation owner; commercial supplier create/sync not exposed in production click-path (AD-009).",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "TICK-001",
@@ -443,7 +443,7 @@
       "testMethod": "DashboardReadOnlyApiTest tickets index",
       "gapNotes": null,
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "TICK-002",
@@ -467,9 +467,9 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "service/state-machine tests; execution workspace mock only",
-      "gapNotes": "Tickets list Next; commercial issuance not exposed in prod click-path (AD-009).",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next Tickets module is presentation owner; commercial issuance not exposed in production click-path (AD-009).",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "DEP-001",
@@ -495,7 +495,7 @@
       "testMethod": "DashboardReadOnlyApiTest deposits index",
       "gapNotes": null,
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "DEP-002",
@@ -519,9 +519,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "JpDash03 deposit mutation tests",
-      "gapNotes": "Live mode only; requires agent_deposits module enabled.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next deposits module + Laravel approve/reject intake; live-mode mutations only.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "CUST-001",
@@ -547,7 +547,7 @@
       "testMethod": "DashboardReadOnlyApiTest + drawer matrix",
       "gapNotes": "Guest customer show remains Laravel-only route.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "AGENT-001",
@@ -573,7 +573,7 @@
       "testMethod": "DashboardReadOnlyApiTest agents index",
       "gapNotes": null,
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "AGENT-002",
@@ -625,7 +625,7 @@
       "testMethod": "DashboardReadOnlyApiTest suppliers index",
       "gapNotes": "Credential edit/test remains Laravel api-settings.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "SUPP-002",
@@ -649,9 +649,9 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "JP-DASH-03-ACTION-MATRIX API Settings PARTIAL",
-      "gapNotes": "Next settings/integrations + suppliers surfaces; Blade api-settings GET redirects; credential mutation Laravel intake.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next /settings/integrations + suppliers surfaces; Blade api-settings redirected; credential writes Laravel intake.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "USER-001",
@@ -675,9 +675,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "DashboardReadOnlyApiTest users index",
-      "gapNotes": "Create/edit/suspend/invite remain Laravel-only.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next users directory live via DashboardUsers API; create/edit/suspend remain Laravel intake.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "USER-002",
@@ -703,7 +703,7 @@
       "testMethod": "JP-DASH-03-DEEP-MATRIX Staff handoff PASS",
       "gapNotes": "Admin Staff console remains Laravel handoff (deep-matrix PASS). JP-STAFF-01 staff Next portal PASS separately.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "ROLE-001",
@@ -727,9 +727,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "DashboardReadOnlyApiTest roles + rbac.matrix",
-      "gapNotes": "Permissions page at /users/permissions is read-only mirror.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next roles/permissions read modules live.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "ROLE-002",
@@ -753,9 +753,9 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "operational-api updateAgencyUserRole exists; no Next editor",
-      "gapNotes": "Nav + Blade redirect to Next /users/roles; mutation remains Laravel-authorized intake.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next roles presentation + Blade redirect; mutation remains Laravel-authorized intake (safe).",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "CMS-001",
@@ -781,7 +781,7 @@
       "testMethod": "DashboardReadOnlyApiTest cms pages",
       "gapNotes": "Sub-routes: /cms/pages, /cms/sections, /cms/banners, /cms/notices, /cms/assets.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "CMS-002",
@@ -805,9 +805,9 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "cms-workspace documents informational-only / no live publishing",
-      "gapNotes": "Operational CMS Next surface retained; JP-CMS-02 Page Builder deferred (AD-014). Publish mutations Laravel intake.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Operational CMS Next surfaces; JP-CMS-02 Page Builder deferred (AD-014); publish mutations Laravel intake.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "RPT-001",
@@ -831,9 +831,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "DashboardReadOnlyApiTest reports summary",
-      "gapNotes": "Laravel finance_reports exports and supplier diagnostics not in Next.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next reports hub modules live; Blade reports redirected.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "AUD-001",
@@ -859,7 +859,7 @@
       "testMethod": "DashboardReadOnlyApiTest audit index",
       "gapNotes": "Per-booking audit export remains Laravel booking show action.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "SET-001",
@@ -911,7 +911,7 @@
       "testMethod": "JP-DASH-03-DEEP-MATRIX Settings handoff PASS",
       "gapNotes": "Next settings editors are fixture/local-preview only. | Production Laravel handoff verified 2026-08-11.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "SUP-001",
@@ -963,7 +963,7 @@
       "testMethod": "route exists; no dashboard API route",
       "gapNotes": "Booking communications panel always rendered on management page (production PASS). Template/editor mutations remain Laravel handoff.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "FIN-001",
@@ -989,7 +989,7 @@
       "testMethod": "JP-DASH-03-DEEP-MATRIX Markups handoff PASS",
       "gapNotes": "AD-012: may remain Laravel-handoff until dedicated Next module. | Production Laravel handoff verified 2026-08-11.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "FIN-002",
@@ -1039,9 +1039,9 @@
       "nextUiExists": true,
       "laravelHandoff": false,
       "testMethod": "BackOfficeBookingIntakeMutationsTest store; mark-paid Laravel only",
-      "gapNotes": "Refund review reachable via Next queues/booking management; settlement mutations AD-009.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Refund intake/settlement surfaces on Next booking management + queues; commercial settlement AD-009 constrained.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "SYS-001",
@@ -1067,7 +1067,7 @@
       "testMethod": "JP-DASH-03-DEEP-MATRIX Go-live handoff PASS",
       "gapNotes": "| Production Laravel handoff verified 2026-08-11.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "SYS-002",
@@ -1091,9 +1091,9 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "overview panel links to Laravel; no dedicated Next system-health page",
-      "gapNotes": "Next /system/health shell + Blade redirect; deep health panels pending live API enrichment.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next /system/health and /system/go-live load DashboardSystemHealth API; Blade redirected.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "BRAND-001",
@@ -1119,16 +1119,16 @@
       "testMethod": "production-acceptance DASHBOARD_DB_LOGO + PUBLIC_DB_LOGO PASS 2026-08-11",
       "gapNotes": "Dashboard shell reads branding for display; mutations remain Laravel-only. Private APP_URL stripped from support CTA hrefs.",
       "CURRENT_STATUS": "PASS",
-      "FINAL_STATUS": "PENDING"
+      "FINAL_STATUS": "PASS"
     }
   ],
   "summary": {
     "totalCapabilities": 43,
     "currentStatus": {
-      "PASS": 24,
-      "FINAL_PENDING": 39,
-      "PARTIAL": 19,
-      "FINAL_PASS": 4
+      "PASS": 41,
+      "FINAL_PENDING": 22,
+      "FINAL_PASS": 21,
+      "PARTIAL": 2
     },
     "finalStatus": {
       "PENDING": 43,
