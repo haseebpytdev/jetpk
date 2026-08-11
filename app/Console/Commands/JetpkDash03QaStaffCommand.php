@@ -148,12 +148,19 @@ class JetpkDash03QaStaffCommand extends Command
             return self::SUCCESS;
         }
 
-        $user->forceFill(['status' => UserAccountStatus::Suspended])->save();
+        $user->forceFill([
+            'status' => UserAccountStatus::Suspended,
+            'remember_token' => null,
+        ])->save();
         StaffProfile::query()
             ->where('user_id', $user->id)
             ->update(['is_active' => false]);
 
+        DB::table('sessions')->where('user_id', $user->id)->delete();
+
         $this->line('QA_STAFF_STATUS=Inactive');
+        $this->line('QA_STAFF_SESSIONS_INVALIDATED=yes');
+        $this->line('QA_STAFF_REMEMBER_TOKEN_INVALIDATED=yes');
 
         return self::SUCCESS;
     }

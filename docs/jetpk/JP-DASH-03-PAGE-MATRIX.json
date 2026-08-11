@@ -1,9 +1,9 @@
 {
-  "generatedAtUtc": "2026-08-11T19:47:00.926Z",
+  "generatedAtUtc": "2026-08-11T19:55:54.514Z",
   "baseUrl": "https://jetpakistan.pk",
   "total": 55,
-  "pass": 51,
-  "fail": 4,
+  "pass": 55,
+  "fail": 0,
   "rows": [
     {
       "label": "/admin/dashboard",
@@ -213,7 +213,7 @@
       "pageTitle": "Reports — JetPakistan Dashboard",
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "requestFailedCount": 0,
+      "requestFailedCount": 4,
       "privateOriginHit": "no",
       "previewResidueHit": "no",
       "errorBoundaryHit": "no",
@@ -305,14 +305,10 @@
       "pageErrorCount": 0,
       "requestFailedCount": 0,
       "privateOriginHit": "no",
-      "previewResidueHit": "yes",
+      "previewResidueHit": "no",
       "errorBoundaryHit": "no",
-      "status": "FAIL",
-      "previewPatterns": [
-        "Local preview editing",
-        "Apply to preview",
-        "Reset preview"
-      ],
+      "status": "PASS",
+      "previewPatterns": [],
       "privatePatterns": []
     },
     {
@@ -345,15 +341,10 @@
       "pageErrorCount": 0,
       "requestFailedCount": 0,
       "privateOriginHit": "no",
-      "previewResidueHit": "yes",
+      "previewResidueHit": "no",
       "errorBoundaryHit": "no",
-      "status": "FAIL",
-      "previewPatterns": [
-        "Local preview editing",
-        "Active preview values",
-        "Apply to preview",
-        "Reset preview"
-      ],
+      "status": "PASS",
+      "previewPatterns": [],
       "privatePatterns": []
     },
     {
@@ -494,14 +485,10 @@
       "pageErrorCount": 0,
       "requestFailedCount": 0,
       "privateOriginHit": "no",
-      "previewResidueHit": "yes",
+      "previewResidueHit": "no",
       "errorBoundaryHit": "no",
-      "status": "FAIL",
-      "previewPatterns": [
-        "Local preview editing",
-        "Apply to preview",
-        "Reset preview"
-      ],
+      "status": "PASS",
+      "previewPatterns": [],
       "privatePatterns": []
     },
     {
@@ -768,14 +755,10 @@
       "pageErrorCount": 0,
       "requestFailedCount": 0,
       "privateOriginHit": "no",
-      "previewResidueHit": "yes",
+      "previewResidueHit": "no",
       "errorBoundaryHit": "no",
-      "status": "FAIL",
-      "previewPatterns": [
-        "Local preview editing",
-        "Apply to preview",
-        "Reset preview"
-      ],
+      "status": "PASS",
+      "previewPatterns": [],
       "privatePatterns": []
     },
     {
@@ -932,7 +915,7 @@
       "pageTitle": "Reports — JetPakistan Dashboard",
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "requestFailedCount": 0,
+      "requestFailedCount": 2,
       "privateOriginHit": "no",
       "previewResidueHit": "no",
       "errorBoundaryHit": "no",
