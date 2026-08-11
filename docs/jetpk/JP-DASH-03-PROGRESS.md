@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending final docs commit |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `daf9113` |
+| `LOCAL_HEAD` | `e1e0430` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `e1e0430` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
