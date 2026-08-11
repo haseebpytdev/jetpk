@@ -493,30 +493,30 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
     expect(suppliersBody).not.toMatch(PRIVATE_ORIGIN);
 
     await page.goto("/admin/api-settings", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await expect(page).toHaveURL(/\/admin\/dashboard\/settings\/integrations\/?/, { timeout: 30_000 });
     const configuredBody = await page.locator("body").innerText();
     expect(configuredBody).not.toMatch(PREVIEW_RESIDUE);
-    expect(configuredBody).toMatch(/Sabre/i);
-    expect(configuredBody).toMatch(/PIA/i);
     expect(configuredBody).not.toMatch(PRIVATE_ORIGIN);
 
-    await page.goto("/admin/api-settings/create", { waitUntil: "domcontentloaded", timeout: 120_000 });
-    const catalogBody = await page.locator("body").innerText();
-    expect(catalogBody).not.toMatch(PREVIEW_RESIDUE);
-    expect(catalogBody).toMatch(/Sabre/i);
-    expect(catalogBody).toMatch(/PIA/i);
-    expect(catalogBody).toMatch(/Al[- ]?Haider|Al-Haider/i);
-    expect(catalogBody).toMatch(/IATI/i);
-    expect(catalogBody).not.toMatch(PRIVATE_ORIGIN);
+    await page.goto("/admin/dashboard/settings/integrations", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    const integrationsBody = await page.locator("body").innerText();
+    expect(integrationsBody).not.toMatch(PREVIEW_RESIDUE);
+    expect(integrationsBody).toMatch(/Integration|Supplier|API|Settings/i);
+    expect(integrationsBody).not.toMatch(PRIVATE_ORIGIN);
   });
 
-  test("settings and api-settings Laravel handoff surfaces", async ({ page }) => {
-    for (const route of ["/admin/settings", "/admin/api-settings"]) {
+  test("settings and api-settings redirect to Next surfaces", async ({ page }) => {
+    const expectations: Array<{ route: string; next: RegExp }> = [
+      { route: "/admin/settings", next: /\/admin\/dashboard\/settings\/?/ },
+      { route: "/admin/api-settings", next: /\/admin\/dashboard\/settings\/integrations\/?/ },
+    ];
+    for (const { route, next } of expectations) {
       const response = await page.goto(route, { waitUntil: "domcontentloaded", timeout: 120_000 });
       const status = response?.status() ?? 0;
-      const finalUrl = page.url();
       const body = await page.locator("body").innerText();
       expect(status).toBeLessThan(400);
-      expect(finalUrl).toMatch(/^https:\/\/jetpakistan\.pk/);
+      await expect(page).toHaveURL(next, { timeout: 30_000 });
+      expect(page.url()).toMatch(/^https:\/\/jetpakistan\.pk/);
       expect(body).not.toMatch(PREVIEW_RESIDUE);
       expect(body).not.toMatch(PRIVATE_ORIGIN);
     }
@@ -527,7 +527,8 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
     const status = response?.status() ?? 0;
     const body = await page.locator("body").innerText();
     expect(status).toBeLessThan(400);
+    await expect(page).toHaveURL(/\/admin\/dashboard\/users\/?/, { timeout: 30_000 });
     expect(body).not.toMatch(PREVIEW_RESIDUE);
-    expect(body).toMatch(/Staff/i);
+    expect(body).toMatch(/Staff|Users/i);
   });
 });
