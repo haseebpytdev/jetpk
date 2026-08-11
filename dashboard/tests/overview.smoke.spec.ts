@@ -28,10 +28,9 @@ for (const viewport of viewports) {
   });
 }
 
-test("planned module stub", async ({ page }) => {
+test("legacy planned bookings bookmark redirects to bookings list", async ({ page }) => {
   await page.goto("/admin/dashboard/planned/bookings", { waitUntil: "load" });
-  await expect(page.getByText(/Planned module/i)).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText("admin.bookings")).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/dashboard\/bookings\/?$/);
 });
 
 test("preview sidebar excludes duplicate planned staff and roles stubs", async ({ page }) => {

@@ -1,11 +1,15 @@
-import type { BookingsPageResult, BookingsQuery, BookingRecord } from "@/types/booking";
+import type { BookingsPageResult, BookingsQuery, BookingRecord, BookingManagementDetail } from "@/types/booking";
 import { buildBookingsPage } from "@/lib/bookings-filter";
 import { getBookingById, mockBookings } from "@/mocks/booking-fixtures";
 import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
 import { createReadOnlyService, ReadOnlyServiceError, type ReadOnlyFetchOptions } from "@/lib/read-only/read-only-service";
 import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
 import { DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
-import { transformBookingDetail, transformBookingsPage } from "@/lib/read-only/laravel/transformers/bookings";
+import {
+  transformBookingDetail,
+  transformBookingManagementDetail,
+  transformBookingsPage,
+} from "@/lib/read-only/laravel/transformers/bookings";
 import type { LaravelBookingsListPayload } from "@/lib/read-only/laravel/types";
 
 export class BookingsServiceError extends Error {
@@ -84,20 +88,32 @@ export async function getBookingsPage(query: BookingsQuery, options?: ReadOnlyFe
 }
 
 export async function getBookingDetail(id: string, options?: ReadOnlyFetchOptions): Promise<BookingRecord | null> {
+  const detail = await getBookingManagementDetail(id, options);
+  return detail?.summary ?? null;
+}
+
+export async function getBookingManagementDetail(
+  id: string,
+  options?: ReadOnlyFetchOptions,
+): Promise<BookingManagementDetail | null> {
   const { resolveDataSourceMode } = await import("@/lib/read-only/data-source");
   const mode = resolveDataSourceMode();
 
   if (mode === "fixture") {
     await new Promise((r) => setTimeout(r, 40));
-    return getBookingById(id) ?? null;
+    const summary = getBookingById(id);
+    if (!summary) {
+      return null;
+    }
+    return transformBookingManagementDetail(summary);
   }
 
   try {
-    const envelope = await fetchDashboardApi<{ summary: BookingRecord } | BookingRecord>(
+    const envelope = await fetchDashboardApi<BookingManagementDetail>(
       DASHBOARD_API_ROUTES.bookingDetail(id),
       { signal: options?.signal },
     );
-    return transformBookingDetail(envelope.data);
+    return transformBookingManagementDetail(envelope.data);
   } catch (error) {
     if (error instanceof ReadOnlyServiceError && error.envelope.error.code === "not_found") {
       return null;

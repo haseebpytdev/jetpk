@@ -87,3 +87,41 @@ export type BookingsPageResult = {
     airlines: string[];
   };
 };
+
+export type BookingPassengerSummary = {
+  displayName: string;
+  type: string;
+};
+
+export type BookingFareSummary = {
+  currency: string;
+  currencyStatus?: "resolved" | "unresolved";
+  currencySource?: string | null;
+  baseFare: number;
+  taxes: number;
+  fees: number;
+  markup: number;
+  total: number;
+};
+
+export type BookingManagementDetail = {
+  summary: BookingRecord;
+  passengers: BookingPassengerSummary[];
+  fareSummary: BookingFareSummary | null;
+  pnrSummary: {
+    pnr: string | null;
+    supplierReference: string | null;
+    supplier: string;
+    supplierStatus: string;
+    channel?: string;
+  } | null;
+  ticketReadiness: {
+    ticketingStatus: BookingRecord["ticketingStatus"];
+    ticketCount: number;
+  } | null;
+  auditMetadata: {
+    createdAt: string | null;
+    updatedAt: string | null;
+    bookingStatus: BookingRecord["bookingStatus"];
+  } | null;
+};

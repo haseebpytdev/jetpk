@@ -14,6 +14,7 @@ import { BookingsMobileCards } from "@/features/bookings/bookings-mobile-cards";
 import { BookingsSummary } from "@/features/bookings/bookings-summary";
 import { BookingsTable } from "@/features/bookings/bookings-table";
 import { bookingsQueryToSearchParams } from "@/lib/bookings-query";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { BookingRecord, BookingSortField, BookingsQuery, BookingsPageResult } from "@/types/booking";
 
 type Props = {
@@ -69,6 +70,7 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
   const drawerBooking = selectedBooking ?? listBooking ?? null;
   const drawerOpen = !drawerDismissed && Boolean(resolvedBookingId && drawerBooking);
 
+  const isLive = useDashboardLiveMode();
   const empty = result.total === 0;
 
   return (
@@ -79,7 +81,11 @@ export function BookingsWorkspace({ query, result, selectedBooking }: Props) {
       {empty ? (
         <EmptyState
           title="No bookings match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          description={
+            isLive
+              ? "Try clearing filters or broadening your search."
+              : "Try clearing filters or broadening your search. Preview mode uses fixture data."
+          }
         />
       ) : (
         <>

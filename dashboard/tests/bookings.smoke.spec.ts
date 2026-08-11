@@ -27,10 +27,10 @@ test("overview page from DASH-01 still works", async ({ page }) => {
   await expect(page.getByText(/Preview mode/i)).toBeVisible();
 });
 
-test("planned module route from DASH-01 still works", async ({ page }) => {
+test("legacy planned bookings bookmark redirects to bookings list", async ({ page }) => {
   await page.goto("/admin/dashboard/planned/bookings", { waitUntil: "load" });
-  await expect(page.getByText(/Planned module/i)).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText("admin.bookings")).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/dashboard\/bookings\/?$/);
+  await expect(page.getByRole("heading", { name: "Bookings", level: 1 })).toBeVisible({ timeout: 30_000 });
 });
 
 for (const viewport of viewports.filter((v) => v.width >= 1280)) {

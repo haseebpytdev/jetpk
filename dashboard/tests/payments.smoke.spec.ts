@@ -252,8 +252,8 @@ test("overview route remains functional", async ({ page }) => {
   });
 });
 
-test("planned route remains functional", async ({ page }) => {
+test("legacy planned bookings bookmark redirects to bookings list", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/admin/dashboard/planned/bookings", { waitUntil: "load" });
-  await expect(page.getByText(/Planned module/i)).toBeVisible({ timeout: 30_000 });
+  await expect(page).toHaveURL(/\/admin\/dashboard\/bookings\/?$/);
 });

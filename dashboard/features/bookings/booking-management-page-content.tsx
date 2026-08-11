@@ -1,4 +1,5 @@
 import { BookingDetailDrawerContent } from "@/features/bookings/booking-detail-drawer";
+import { BookingManagementPanels } from "@/features/bookings/booking-management-panels";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import {
@@ -6,7 +7,7 @@ import {
   PaymentStatusBadge,
   TicketingStatusBadge,
 } from "@/components/ui/status-badge";
-import { BookingsServiceError, getBookingDetail } from "@/services/booking-service";
+import { BookingsServiceError, getBookingManagementDetail } from "@/services/booking-service";
 import { BookingsErrorPanel } from "@/features/bookings/bookings-error-panel";
 import {
   ForbiddenState,
@@ -24,8 +25,8 @@ type Props = {
 
 export async function BookingManagementPageContent({ bookingId }: Props) {
   try {
-    const booking = await getBookingDetail(bookingId);
-    if (!booking) {
+    const detail = await getBookingManagementDetail(bookingId);
+    if (!detail) {
       return (
         <PageContainer>
           <PageHeader title="Booking not found" />
@@ -33,6 +34,8 @@ export async function BookingManagementPageContent({ bookingId }: Props) {
         </PageContainer>
       );
     }
+
+    const booking = detail.summary;
 
     return (
       <PageContainer data-testid="booking-management-page">
@@ -72,6 +75,7 @@ export async function BookingManagementPageContent({ bookingId }: Props) {
             <BookingDetailDrawerContent booking={booking} />
           </div>
           <aside className="space-y-4">
+            <BookingManagementPanels detail={detail} />
             <section className="rounded-2xl border border-jp-border bg-white p-4 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-900">Lifecycle</h2>
               <dl className="mt-3 space-y-2 text-sm">

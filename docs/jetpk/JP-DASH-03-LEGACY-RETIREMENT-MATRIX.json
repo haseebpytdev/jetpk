@@ -1,0 +1,51 @@
+{
+  "generatedAtUtc": "2026-08-11T06:20:00.000Z",
+  "schemaVersion": "jp-dash-03-v3",
+  "note": "Legacy Admin/Staff Blade presentation retirement tracker. Backend services preserved.",
+  "rows": [
+    {
+      "legacyRoute": "admin.dashboard",
+      "legacyPath": "/admin/dashboard",
+      "capability": "Dashboard overview",
+      "nextRoute": "/[portal]/dashboard",
+      "classification": "LEGACY_VIEW_REPLACE",
+      "backendKeep": true,
+      "nextReplacementStatus": "PASS",
+      "redirectStatus": "PARTIAL",
+      "finalStatus": "PENDING"
+    },
+    {
+      "legacyRoute": "admin.bookings",
+      "legacyPath": "/admin/bookings",
+      "capability": "Bookings list",
+      "nextRoute": "/[portal]/dashboard/bookings",
+      "classification": "LEGACY_VIEW_REPLACE",
+      "backendKeep": true,
+      "nextReplacementStatus": "PASS",
+      "redirectStatus": "PENDING",
+      "finalStatus": "PENDING"
+    },
+    {
+      "legacyRoute": "admin.bookings.show",
+      "legacyPath": "/admin/bookings/{id}",
+      "capability": "Booking management",
+      "nextRoute": "/[portal]/dashboard/bookings/[id]",
+      "classification": "LEGACY_VIEW_REPLACE",
+      "backendKeep": true,
+      "nextReplacementStatus": "PARTIAL",
+      "redirectStatus": "PENDING",
+      "finalStatus": "PENDING"
+    },
+    {
+      "legacyRoute": "admin.planned",
+      "legacyPath": "/admin/dashboard/planned/*",
+      "capability": "Planned stub pages",
+      "nextRoute": "canonical module routes",
+      "classification": "LEGACY_ROUTE_REDIRECT",
+      "backendKeep": false,
+      "nextReplacementStatus": "PASS",
+      "redirectStatus": "PASS",
+      "finalStatus": "PENDING"
+    }
+  ]
+}
