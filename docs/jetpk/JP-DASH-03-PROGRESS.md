@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending final report + SEC-CLEANUP ledger |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `f608265` |
+| `LOCAL_HEAD` | `e57748a` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `e57748a` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID

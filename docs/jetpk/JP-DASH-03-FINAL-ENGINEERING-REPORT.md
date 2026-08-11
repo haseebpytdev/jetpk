@@ -11,7 +11,7 @@
 | Field | Value |
 |-------|-------|
 | Branch | `phase/jetpk-dash-03-operational-backoffice` |
-| Final HEAD | `f608265` (plus SEC-CLEANUP + this report commit) |
+| Final HEAD | `e57748a` |
 | Remote | `jetpk` |
 
 ## Production builds
