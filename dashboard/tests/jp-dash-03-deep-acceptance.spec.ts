@@ -1,14 +1,14 @@
-import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
+import {
+  adminStorageStateExists,
+  expect,
+  test,
+} from "./jp-dash-03-acceptance-session";
 
-const storagePath = path.resolve(
-  process.env.JP_ADMIN_STORAGE_STATE ??
-    path.join(process.cwd(), "..", "tmp/jp-dash-03-admin-storage-state.json"),
-);
 const matrixPath = path.resolve(process.cwd(), "..", "docs/jetpk/JP-DASH-03-DEEP-MATRIX.json");
 
-/** Next dashboard pages that render in-place (no live Laravel redirect). */
+/** Next dashboard pages that render in-place. */
 const NEXT_MODULE_PAGES = [
   { module: "Dashboard", route: "/admin/dashboard" },
   { module: "Bookings", route: "/admin/dashboard/bookings" },
@@ -23,18 +23,22 @@ const NEXT_MODULE_PAGES = [
   { module: "CMS", route: "/admin/dashboard/cms" },
   { module: "Reports", route: "/admin/dashboard/reports" },
   { module: "Audit", route: "/admin/dashboard/audit" },
+  { module: "Settings", route: "/admin/dashboard/settings" },
+  { module: "Support", route: "/admin/dashboard/support" },
+  { module: "Markups", route: "/admin/dashboard/markups" },
+  { module: "Go-live", route: "/admin/dashboard/system/go-live" },
 ];
 
-/** Live mode hands off to mature Laravel modules — test final public URLs. */
-const LARAVEL_HANDOFF_PAGES = [
-  { module: "Settings", route: "/admin/settings" },
-  { module: "Support", route: "/admin/support/tickets" },
-  { module: "Staff", route: "/admin/staff" },
-  { module: "API Settings", route: "/admin/api-settings" },
-  { module: "Page Settings", route: "/admin/page-settings" },
-  { module: "Branding", route: "/admin/settings/branding" },
-  { module: "Markups", route: "/admin/markups" },
-  { module: "Go-live", route: "/admin/go-live-checklist" },
+/** Legacy Blade bookmarks must redirect onto Next dashboard surfaces. */
+const LEGACY_REDIRECT_PAGES = [
+  { module: "Legacy Settings", route: "/admin/settings", expectPath: "/admin/dashboard/settings" },
+  { module: "Legacy Support", route: "/admin/support/tickets", expectPath: "/admin/dashboard/support" },
+  { module: "Legacy Staff", route: "/admin/staff", expectPath: "/admin/dashboard/users" },
+  { module: "Legacy API Settings", route: "/admin/api-settings", expectPath: "/admin/dashboard/settings/integrations" },
+  { module: "Legacy Page Settings", route: "/admin/page-settings", expectPath: "/admin/dashboard/cms" },
+  { module: "Legacy Branding", route: "/admin/settings/branding", expectPath: "/admin/dashboard/settings/general" },
+  { module: "Legacy Markups", route: "/admin/markups", expectPath: "/admin/dashboard/markups" },
+  { module: "Legacy Go-live", route: "/admin/go-live-checklist", expectPath: "/admin/dashboard/system/go-live" },
 ];
 
 const PREVIEW_RESIDUE = /Preview data|synthetic preview data|Dashboard unavailable|Admin Preview/i;
@@ -58,7 +62,7 @@ function assertPublicOrigin(url: string) {
 
 test.describe("JP-DASH-03 deep acceptance", () => {
   test.beforeAll(() => {
-    if (!fs.existsSync(storagePath)) {
+    if (!adminStorageStateExists()) {
       test.skip(true, "Admin storageState missing");
     }
   });
@@ -73,7 +77,8 @@ test.describe("JP-DASH-03 deep acceptance", () => {
       const body = await page.locator("body").innerText();
       const previewResidue = PREVIEW_RESIDUE.test(body);
       const privateOrigin = PRIVATE_ORIGIN.test(body + finalUrl);
-      const pass = status < 400 && !previewResidue && !privateOrigin;
+      const onNext = finalUrl.includes("/admin/dashboard");
+      const pass = status < 400 && !previewResidue && !privateOrigin && onNext;
 
       rows.push({
         module: entry.module,
@@ -87,21 +92,22 @@ test.describe("JP-DASH-03 deep acceptance", () => {
       });
     }
 
-    for (const entry of LARAVEL_HANDOFF_PAGES) {
+    for (const entry of LEGACY_REDIRECT_PAGES) {
       const response = await page.goto(entry.route, { waitUntil: "domcontentloaded", timeout: 120_000 });
       const status = response?.status() ?? 0;
       const finalUrl = page.url();
       const body = await page.locator("body").innerText();
       const previewResidue = PREVIEW_RESIDUE.test(body);
       const privateOrigin = PRIVATE_ORIGIN.test(body + finalUrl);
-      const pass = status < 400 && !previewResidue && !privateOrigin;
+      const redirected = finalUrl.includes(entry.expectPath);
+      const pass = status < 400 && !previewResidue && !privateOrigin && redirected;
 
       rows.push({
         module: entry.module,
         route: entry.route,
         httpStatus: status,
         finalUrl,
-        handoff: true,
+        handoff: false,
         previewResidue,
         privateOrigin,
         status: pass ? "PASS" : "FAIL",
@@ -118,23 +124,24 @@ test.describe("JP-DASH-03 deep acceptance", () => {
     expect(failures, JSON.stringify(failures)).toHaveLength(0);
   });
 
-  test("dashboard review handoffs stay on public origin", async ({ page }) => {
+  test("dashboard review redirects stay on public Next origin", async ({ page }) => {
     await page.goto("/admin/dashboard", { waitUntil: "domcontentloaded" });
 
-    const handoffs = [
-      { label: "Staff", href: "/admin/staff" },
-      { label: "API Settings", href: "/admin/api-settings" },
-      { label: "Laravel Settings", href: "/admin/settings" },
-      { label: "Cancellations queue", href: "/admin/bookings?queue=cancellations" },
-      { label: "Execution queue", href: "/admin/bookings?queue=needs_action" },
-      { label: "Go-live", href: "/admin/go-live-checklist" },
-      { label: "Support tickets", href: "/admin/support/tickets" },
+    const redirects = [
+      { label: "Staff", href: "/admin/staff", expectPath: "/admin/dashboard/users" },
+      { label: "API Settings", href: "/admin/api-settings", expectPath: "/admin/dashboard/settings/integrations" },
+      { label: "Laravel Settings", href: "/admin/settings", expectPath: "/admin/dashboard/settings" },
+      { label: "Cancellations queue", href: "/admin/bookings?queue=cancellations", expectPath: "/admin/dashboard/bookings" },
+      { label: "Execution queue", href: "/admin/bookings?queue=needs_action", expectPath: "/admin/dashboard/bookings" },
+      { label: "Go-live", href: "/admin/go-live-checklist", expectPath: "/admin/dashboard/system/go-live" },
+      { label: "Support tickets", href: "/admin/support/tickets", expectPath: "/admin/dashboard/support" },
     ];
 
-    for (const handoff of handoffs) {
-      const response = await page.goto(handoff.href, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    for (const item of redirects) {
+      const response = await page.goto(item.href, { waitUntil: "domcontentloaded", timeout: 120_000 });
       expect(response?.status() ?? 0).toBeLessThan(400);
       assertPublicOrigin(page.url());
+      expect(page.url()).toContain(item.expectPath);
       const body = await page.locator("body").innerText();
       expect(body).not.toMatch(PREVIEW_RESIDUE);
     }
@@ -145,7 +152,7 @@ test.describe("JP-DASH-03 deep acceptance", () => {
     await expect(page.getByRole("heading", { name: /^Customers$/i })).toBeVisible({ timeout: 30_000 });
 
     const search = page.locator("input[type='search'], input[placeholder*='Search']").first();
-    if (await search.count() > 0) {
+    if ((await search.count()) > 0) {
       await search.fill("test");
       await page.waitForTimeout(800);
     }

@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T19:37:26.216Z",
+  "generatedAtUtc": "2026-08-11T20:06:56.043Z",
   "rows": [
     {
       "module": "Dashboard",
@@ -133,80 +133,120 @@
     },
     {
       "module": "Settings",
-      "route": "/admin/settings",
+      "route": "/admin/dashboard/settings",
       "httpStatus": 200,
       "finalUrl": "https://jetpakistan.pk/admin/dashboard/settings",
-      "handoff": true,
+      "handoff": false,
       "previewResidue": false,
       "privateOrigin": false,
       "status": "PASS"
     },
     {
       "module": "Support",
-      "route": "/admin/support/tickets",
+      "route": "/admin/dashboard/support",
       "httpStatus": 200,
       "finalUrl": "https://jetpakistan.pk/admin/dashboard/support",
-      "handoff": true,
-      "previewResidue": false,
-      "privateOrigin": false,
-      "status": "PASS"
-    },
-    {
-      "module": "Staff",
-      "route": "/admin/staff",
-      "httpStatus": 200,
-      "finalUrl": "https://jetpakistan.pk/admin/dashboard/users",
-      "handoff": true,
-      "previewResidue": false,
-      "privateOrigin": false,
-      "status": "PASS"
-    },
-    {
-      "module": "API Settings",
-      "route": "/admin/api-settings",
-      "httpStatus": 200,
-      "finalUrl": "https://jetpakistan.pk/admin/dashboard/settings/integrations",
-      "handoff": true,
-      "previewResidue": false,
-      "privateOrigin": false,
-      "status": "PASS"
-    },
-    {
-      "module": "Page Settings",
-      "route": "/admin/page-settings",
-      "httpStatus": 200,
-      "finalUrl": "https://jetpakistan.pk/admin/dashboard/cms",
-      "handoff": true,
-      "previewResidue": false,
-      "privateOrigin": false,
-      "status": "PASS"
-    },
-    {
-      "module": "Branding",
-      "route": "/admin/settings/branding",
-      "httpStatus": 200,
-      "finalUrl": "https://jetpakistan.pk/admin/dashboard/settings/general",
-      "handoff": true,
+      "handoff": false,
       "previewResidue": false,
       "privateOrigin": false,
       "status": "PASS"
     },
     {
       "module": "Markups",
-      "route": "/admin/markups",
+      "route": "/admin/dashboard/markups",
       "httpStatus": 200,
       "finalUrl": "https://jetpakistan.pk/admin/dashboard/markups",
-      "handoff": true,
+      "handoff": false,
       "previewResidue": false,
       "privateOrigin": false,
       "status": "PASS"
     },
     {
       "module": "Go-live",
+      "route": "/admin/dashboard/system/go-live",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/system/go-live",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Legacy Settings",
+      "route": "/admin/settings",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/settings",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Legacy Support",
+      "route": "/admin/support/tickets",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/support",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Legacy Staff",
+      "route": "/admin/staff",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/users",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Legacy API Settings",
+      "route": "/admin/api-settings",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/settings/integrations",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Legacy Page Settings",
+      "route": "/admin/page-settings",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/cms",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Legacy Branding",
+      "route": "/admin/settings/branding",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/settings/general",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Legacy Markups",
+      "route": "/admin/markups",
+      "httpStatus": 200,
+      "finalUrl": "https://jetpakistan.pk/admin/dashboard/markups",
+      "handoff": false,
+      "previewResidue": false,
+      "privateOrigin": false,
+      "status": "PASS"
+    },
+    {
+      "module": "Legacy Go-live",
       "route": "/admin/go-live-checklist",
       "httpStatus": 200,
       "finalUrl": "https://jetpakistan.pk/admin/dashboard/system/go-live",
-      "handoff": true,
+      "handoff": false,
       "previewResidue": false,
       "privateOrigin": false,
       "status": "PASS"
