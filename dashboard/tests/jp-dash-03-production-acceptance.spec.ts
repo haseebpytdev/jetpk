@@ -197,14 +197,20 @@ test.describe("JP-DASH-03 production acceptance", () => {
 
   test("live operations review handoff does not expose fixture workspace", async ({ page }) => {
     await page.goto("/admin/dashboard/operations/review", { waitUntil: "domcontentloaded", timeout: 120_000 });
-    await expect(page.getByTestId("laravel-live-redirect").or(page.locator("body"))).toBeVisible({
-      timeout: 60_000,
-    });
+    await Promise.race([
+      page.getByTestId("laravel-live-redirect").waitFor({ state: "visible", timeout: 30_000 }),
+      page.waitForURL(/\/admin\/bookings/, { timeout: 30_000 }),
+    ]).catch(() => undefined);
+
     const body = await page.locator("body").innerText();
     expect(body).not.toMatch(/Preview data|synthetic records|fixture workspace/i);
-    // Either redirected to Laravel bookings queue or still showing redirect notice.
+    // Fixture workspace heading must not remain as the live surface.
+    expect(body).not.toMatch(/Approve or reject cancellation and refund requests before execution/i);
+
     const url = page.url();
-    expect(url).toMatch(/\/admin\/(dashboard\/operations\/review|bookings)/);
+    const redirected = /\/admin\/bookings/.test(url);
+    const redirectNotice = await page.getByTestId("laravel-live-redirect").count();
+    expect(redirected || redirectNotice > 0).toBeTruthy();
   });
 
   test("payments list surface renders without preview residue when ledger empty", async ({ page }) => {
