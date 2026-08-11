@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | pending (Wave 3 batch) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `fddabbc` |
+| `LOCAL_HEAD` | `b49ad1a` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `b49ad1a` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
@@ -30,16 +30,15 @@ Deploy Wave 3: payment verify/reject drawer + legacy booking redirects
 
 ## CURRENT_FINDING
 
-- Payment drawer verify/reject wired with post-mutation refresh
-- Legacy `/admin/bookings` and `/staff/bookings` GET routes redirect to Next dashboard (auth preserved)
-- Legacy booking show redirects to `/dashboard/bookings/{publicId}`
-- Preview query maps to dashboard `q` search param
-- PAY-002 PARTIAL; legacy retirement matrix admin.bookings redirect PASS
+- Wave 3 pushed at `b49ad1a` (payment review UI + legacy booking redirects)
+- Local `npm run build:production` PASS (Next.js 15.5.21)
+- QA auth all roles PASS (automated login 2026-08-11)
+- Production acceptance tests added for post-deploy verify (legacy redirect + payment review drawer)
 
 ## NEXT_ACTION
 
-- Push Wave 3 batch + deploy dashboard build
-- Production verify PAY-002 and legacy booking redirects
+- SFTP/deploy Laravel routes + dashboard build to production
+- Run `npm run test:production-acceptance` after deploy
 - JP-IA-01 / JP-STAFF-01 production nav verify
 
 ## OTP_LEDGER

@@ -39,4 +39,23 @@ test.describe("JP-DASH-03 production acceptance", () => {
     expect(url).toMatch(/^https:\/\/jetpakistan\.pk\/admin\/staff/);
     expect(url).not.toMatch(/127\.0\.0\.1|localhost|:8088/);
   });
+
+  test("legacy admin bookings bookmark redirects to Next list", async ({ page }) => {
+    await page.goto("/admin/bookings", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/admin\/dashboard\/bookings\/?/);
+  });
+
+  test("payments drawer shows operational review section", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto("/admin/dashboard/payments", { waitUntil: "domcontentloaded" });
+    const table = page.getByTestId("payments-table");
+    await expect(table).toBeVisible({ timeout: 60_000 });
+    await table.getByRole("button", { name: "View" }).first().click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    const content = page.getByTestId("payment-drawer-content");
+    await expect(content.getByRole("heading", { name: "Operational review" })).toBeVisible();
+    await expect(
+      content.getByTestId(/payment-actions-preview|payment-review-actions|payment-actions-unavailable/),
+    ).toBeVisible();
+  });
 });
