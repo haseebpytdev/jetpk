@@ -107,6 +107,22 @@ test("staff dashboard inherits legacy typography authority", async ({ page }) =>
   expect(fontFamily.toLowerCase()).toMatch(/inter|system-ui|sans-serif/);
 });
 
+test("staff preview sidebar uses staff-scoped grouped navigation", async ({ page }) => {
+  await page.goto("/staff/dashboard", { waitUntil: "load" });
+  const nav = page.getByLabel("Dashboard navigation");
+  await expect(nav.getByText("Booking operations", { exact: true })).toBeVisible();
+  await expect(nav.getByText("Finance", { exact: true })).toBeVisible();
+  await expect(nav.getByText("Markups", { exact: true })).toHaveCount(0);
+  await expect(nav.getByText("Go-live checklist", { exact: true })).toHaveCount(0);
+});
+
+test("admin preview sidebar exposes full grouped navigation", async ({ page }) => {
+  await page.goto("/admin/dashboard", { waitUntil: "load" });
+  const nav = page.getByLabel("Dashboard navigation");
+  await expect(nav.getByText("Booking operations", { exact: true })).toBeVisible();
+  await expect(nav.getByText("Finance", { exact: true })).toBeVisible();
+});
+
 test("heading hierarchy has single h1 per page", async ({ page }) => {
   await page.goto("/admin/dashboard/reports", { waitUntil: "load" });
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);

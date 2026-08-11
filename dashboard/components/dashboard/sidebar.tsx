@@ -11,7 +11,7 @@ import { useDashboardPath } from "@/lib/use-dashboard-path";
 import { cn } from "@/lib/utils";
 import { sanitizePublicHref } from "@/lib/sanitize-public-href";
 import { laravelRouteUrl } from "@/lib/laravel-route-url";
-import { navGroups } from "@/lib/nav-config";
+import { previewNavGroupsForPortal } from "@/lib/nav-config";
 import type { DashboardBranding } from "@/services/branding-service";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
@@ -42,6 +42,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
   const session = sessionProp ?? contextSession;
   const isLive = useDashboardLiveMode();
   const useSessionNavigation = isLive && navigationGroups.length > 0;
+  const previewNavGroups = previewNavGroupsForPortal(effectivePortal);
   const profile = session ?? {
     displayName: isLive ? "Session unavailable" : "Preview user",
     email: "—",
@@ -145,7 +146,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
           ) : isLive ? (
             <p className="px-3 text-sm text-gray-400">Navigation unavailable until session loads.</p>
           ) : (
-            navGroups.map((group) => (
+            previewNavGroups.map((group) => (
               <div key={group.label} className="mb-4 last:mb-0">
                 <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
                   {group.label}

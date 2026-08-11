@@ -47,6 +47,47 @@ class BackOfficeSessionContractTest extends TestCase
             ->assertJsonPath('data.sessionUsable', true);
     }
 
+    public function test_staff_session_includes_grouped_navigation_without_admin_only_items(): void
+    {
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
+
+        $response = $this->actingAs($staff)
+            ->getJson(route('api.dashboard.session', ['portal' => 'staff']))
+            ->assertOk();
+
+        $groups = $response->json('data.navigationGroups') ?? [];
+        $this->assertNotEmpty($groups);
+
+        $groupLabels = collect($groups)->pluck('label')->all();
+        $this->assertContains('Overview', $groupLabels);
+        $this->assertContains('Booking operations', $groupLabels);
+
+        $itemLabels = collect($groups)
+            ->flatMap(static fn (array $group): array => collect($group['items'] ?? [])->pluck('label')->all())
+            ->all();
+
+        $this->assertContains('Bookings', $itemLabels);
+        $this->assertNotContains('Markups', $itemLabels);
+        $this->assertNotContains('Go-live checklist', $itemLabels);
+        $this->assertNotContains('Staff', $itemLabels);
+    }
+
+    public function test_admin_session_includes_grouped_navigation(): void
+    {
+        $admin = $this->platformAdmin();
+
+        $response = $this->actingAs($admin)
+            ->getJson(route('api.dashboard.session', ['portal' => 'admin']))
+            ->assertOk();
+
+        $groups = $response->json('data.navigationGroups') ?? [];
+        $this->assertNotEmpty($groups);
+
+        $groupLabels = collect($groups)->pluck('label')->all();
+        $this->assertContains('Finance', $groupLabels);
+        $this->assertContains('Booking operations', $groupLabels);
+    }
+
     public function test_customer_is_denied_dashboard_session(): void
     {
         $customer = User::factory()->create([

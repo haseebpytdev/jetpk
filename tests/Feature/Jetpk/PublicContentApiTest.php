@@ -162,6 +162,54 @@ class PublicContentApiTest extends TestCase
             ]);
     }
 
+    public function test_public_config_json_includes_logo_url_when_agency_branding_configured(): void
+    {
+        $agency = $this->seedJetpkAgency();
+        $this->makeJetpkProfile();
+
+        $logoPath = 'agencies/'.$agency->id.'/branding/jp-dash-03-logo.png';
+        \Illuminate\Support\Facades\Storage::disk('public')->put(
+            $logoPath,
+            $this->makeOpaquePngBytes(120, 48),
+        );
+
+        \App\Models\AgencySetting::query()->updateOrCreate(
+            ['agency_id' => $agency->id],
+            [
+                'display_name' => 'JetPakistan',
+                'timezone' => 'Asia/Karachi',
+                'country' => 'Pakistan',
+                'currency' => 'PKR',
+                'primary_color' => '#0f766e',
+                'secondary_color' => '#134e4a',
+                'accent_color' => '#14b8a6',
+                'logo_path' => $logoPath,
+            ],
+        );
+
+        $response = $this->getJson(route('api.public.content.config'))
+            ->assertOk()
+            ->assertJsonPath('source', 'laravel');
+
+        $logoUrl = $response->json('logo_url');
+        $this->assertIsString($logoUrl);
+        $this->assertNotSame('', $logoUrl);
+        $this->assertStringContainsString('jp-dash-03-logo.png', $logoUrl);
+    }
+
+    protected function makeOpaquePngBytes(int $width = 64, int $height = 64): string
+    {
+        $img = imagecreatetruecolor($width, $height);
+        $blue = imagecolorallocate($img, 20, 60, 180);
+        imagefill($img, 0, 0, $blue);
+        ob_start();
+        imagepng($img);
+        $bytes = (string) ob_get_clean();
+        imagedestroy($img);
+
+        return $bytes;
+    }
+
     public function test_sitemap_routes_json_lists_core_public_paths(): void
     {
         $this->makeJetpkProfile();

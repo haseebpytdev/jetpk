@@ -10,7 +10,9 @@ export type NavGroup = {
   items: NavItem[];
 };
 
-/** Preview-mode fallback IA — mirrors Laravel BackOfficeCapabilitiesPresenter groups. */
+export type DashboardPreviewPortal = "admin" | "staff";
+
+/** Preview-mode fallback IA — mirrors Laravel BackOfficeCapabilitiesPresenter groups (admin portal). */
 export const navGroups: NavGroup[] = [
   {
     label: "Overview",
@@ -100,5 +102,65 @@ export const navGroups: NavGroup[] = [
     ],
   },
 ];
+
+/** Preview-mode staff IA — excludes admin-only Laravel destinations (markups, staff console, go-live, etc.). */
+export const staffNavGroups: NavGroup[] = [
+  {
+    label: "Overview",
+    items: [{ label: "Dashboard", href: "/", laravelRoute: "staff.dashboard" }],
+  },
+  {
+    label: "Booking operations",
+    items: [
+      { label: "Bookings", href: "/bookings", laravelRoute: "staff.bookings" },
+      { label: "Execution", href: "/operations/execution", laravelRoute: "staff.bookings" },
+      { label: "Cancellations", href: "/operations/review", laravelRoute: "staff.bookings" },
+      { label: "PNRs", href: "/pnrs", laravelRoute: "staff.bookings" },
+      { label: "Tickets", href: "/tickets", laravelRoute: "staff.bookings" },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [{ label: "Payments", href: "/payments", laravelRoute: "staff.payments" }],
+  },
+  {
+    label: "Customers & distribution",
+    items: [
+      { label: "Customers", href: "/customers", laravelRoute: "staff.customers.index" },
+      { label: "Agents", href: "/agents", laravelRoute: "staff.agents" },
+    ],
+  },
+  {
+    label: "Suppliers",
+    items: [{ label: "Suppliers", href: "/suppliers", laravelRoute: "staff.api-settings" }],
+  },
+  {
+    label: "Content & website",
+    items: [{ label: "CMS", href: "/cms", laravelRoute: "staff.page-settings.index" }],
+  },
+  {
+    label: "Communications",
+    items: [{ label: "Support", href: "/support", laravelRoute: "staff.support.tickets.index" }],
+  },
+  {
+    label: "Administration",
+    items: [{ label: "Users", href: "/users", laravelRoute: "staff.staff" }],
+  },
+  {
+    label: "Reporting",
+    items: [
+      { label: "Reports", href: "/reports", laravelRoute: "staff.reports" },
+      { label: "Audit", href: "/audit", laravelRoute: "staff.finance.wallet-audit.index" },
+    ],
+  },
+  {
+    label: "System",
+    items: [{ label: "Settings", href: "/settings", laravelRoute: "staff.settings.index" }],
+  },
+];
+
+export function previewNavGroupsForPortal(portal: DashboardPreviewPortal): NavGroup[] {
+  return portal === "staff" ? staffNavGroups : navGroups;
+}
 
 export const primaryNav: NavItem[] = navGroups.flatMap((g) => g.items);

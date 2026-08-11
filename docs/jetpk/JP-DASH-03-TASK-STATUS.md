@@ -16,10 +16,10 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-PAY-01 | Payment management | yes | yes | yes | no | yes | no | IN_PROGRESS | Payment verify/reject in drawer; refresh after mutation | pending | — | Prod verify pending | Wave 3 |
 | JP-REFUND-01 | Cancellation/refund/ticketing | partial | no | partial | partial | partial | no | PARTIAL | Intake forms; no prod mutation | — | — | — | Wave 3 |
 | JP-MODULES-01 | Full module inventory | partial | partial | partial | no | no | no | IN_PROGRESS | Covered in parity matrix | pending | — | — | Wave 1 |
-| JP-STAFF-01 | Staff Next back office | partial | partial | partial | partial | partial | no | FAIL | Staff session + grouped nav pending deploy | — | — | — | Wave 2 |
+| JP-STAFF-01 | Staff Next back office | yes | yes | yes | partial | yes | no | IN_PROGRESS | Staff preview nav groups + session navigationGroups contract | pending | — | Deploy verify pending | Wave 5 |
 | JP-LEGACY-01 | Legacy UI retirement | partial | yes | partial | no | yes | no | IN_PROGRESS | Admin/staff booking list+show redirect to Next | pending | — | Prod verify pending | Wave 3 |
 | JP-RBAC-01 | Five-role RBAC | partial | partial | partial | partial | yes | partial | PARTIAL | RBAC browser matrix 2/2 PASS | b220b84 | — | Full crawl pending | — |
-| JP-FRONTEND-BRAND-01 | DB logo production | no | no | no | no | no | no | PENDING | — | — | — | — | Wave 5 |
+| JP-FRONTEND-BRAND-01 | DB logo production | yes | yes | partial | no | yes | no | IN_PROGRESS | Public config logo_url contract + dashboard sidebar fallback smoke | pending | — | Prod DB logo verify pending | Wave 5 |
 | JP-TYPE-01 | Project-wide Inter | partial | partial | partial | partial | partial | no | FAIL | — | — | — | — | Wave 5 |
 | JP-PORTAL-01 | Agent + customer acceptance | no | no | no | no | no | no | PENDING | — | — | — | — | Wave 4 |
 | JP-DATA-01 | Preview/stub sweep | partial | yes | yes | no | partial | no | IN_PROGRESS | Planned dynamic redirect; shared empty-state copy | pending | — | — | Wave 2 |
@@ -27,7 +27,7 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-UX-01 | Operator UX | partial | partial | partial | partial | partial | no | FAIL | Grouped IA in progress | — | — | — | Wave 5 |
 | JP-NFR-01 | Nonfunctional revalidation | partial | no | partial | partial | partial | no | FAIL | Prior matrices invalidated | — | — | — | Wave 6 |
 | JP-SAFE-QA-01 | QA data cleanliness | yes | yes | partial | partial | partial | no | IN_PROGRESS | Four QA identities only | b220b84 | — | — | — |
-| JP-DEPLOY-01 | Production deployment loop | yes | yes | partial | in_progress | partial | partial | IN_PROGRESS | Wave 1 batch deploying | pending | — | — | — |
+| JP-DEPLOY-01 | Production deployment loop | yes | yes | partial | blocked | partial | partial | BLOCKED | Wave 3–5 code ready; SFTP/deploy unavailable in agent env | pending | WdsRJ8FbNwR8TxGvVTCUh | External deploy auth required | Not a V3 termination condition |
 | JP-GIT-HEARTBEAT-01 | Remote progress | yes | yes | in_progress | n/a | n/a | n/a | IN_PROGRESS | This commit | pending | — | — | — |
 | JP-REPORT-01 | Final engineering report | no | no | no | no | no | no | PENDING | — | — | — | — | — |
 | JP-SEC-CLEANUP-01 | Restore auth security | no | no | no | no | no | no | PENDING | — | — | — | End of phase | — |

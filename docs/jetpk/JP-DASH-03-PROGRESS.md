@@ -2,43 +2,45 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T09:00:00Z
+2026-08-11T09:45:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `325a0bc` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `325a0bc` |
+| `LOCAL_HEAD` | pending Wave 5 commit |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `81f6a9e` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
-`WdsRJ8FbNwR8TxGvVTCUh` (Wave 2 on prod — Wave 3/4 not deployed)
+`WdsRJ8FbNwR8TxGvVTCUh` (Wave 2 on prod — Wave 3/4/5 not deployed)
 
 ## CURRENT_TASK_ID
 
-`JP-BOOK-01` / `JP-DEPLOY-01`
+`JP-STAFF-01` / `JP-FRONTEND-BRAND-01` / `JP-DEPLOY-01`
 
 ## CURRENT_SUBTASK
 
-Enrich booking management detail API + panels; deploy Wave 3+4 batch
+Staff portal-scoped preview IA; DB logo public config contract; deploy blocked externally
 
 ## CURRENT_STATUS
 
-`WAVE_4_IN_PROGRESS`
+`WAVE_5_IN_PROGRESS`
 
 ## CURRENT_FINDING
 
-- Production acceptance 2026-08-11: 18 pass / 7 fail — Wave 3 not on prod (`/admin/bookings` still Blade; payments table missing on prod session)
-- BOOK-003 panels + operational actions wired on full booking management page
-- Production acceptance 2026-08-11: 18 pass / 7 fail — Wave 3+4 not deployed to prod yet
+- Staff preview sidebar incorrectly showed admin-only nav items (Markups, go-live) — fixed via `staffNavGroups`
+- Staff session API contract now asserts grouped navigation without admin-only items
+- Public `/api/public/content/config` logo_url contract test added for agency branding pipeline
+- Dashboard branding smoke tests verify JetPakistan fallback in admin + staff sidebars
+- Production acceptance 2026-08-11: 18 pass / 7 fail — Waves 3–5 not deployed to prod
 
 ## NEXT_ACTION
 
-- Commit + push Wave 4 BOOK-003 batch
-- SFTP/deploy Laravel + dashboard (Wave 3 legacy redirect + payment review + BOOK-003 panels)
-- Re-run `npm run test:production-acceptance` post-deploy
+- Commit + push Wave 5 batch (staff IA + branding contracts)
+- Continue legacy retirement / portal acceptance tasks without deploy
+- Post-deploy: SFTP Laravel + dashboard build, then `npm run test:production-acceptance`
 
 ## OTP_LEDGER
 
@@ -61,9 +63,9 @@ All four roles **PASS** (automated login refreshed 2026-08-11)
 | Gate | Status |
 |------|--------|
 | `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
-| `FULL_BOOKING_MANAGEMENT` | **PARTIAL** (timeline/notes/comms/docs panels added) |
-| `PAYMENT_REVIEW_UI` | **PARTIAL** (code ready; prod verify blocked on deploy) |
-| `LEGACY_BOOKING_REDIRECT` | **PARTIAL** (code ready; prod verify blocked on deploy) |
+| `STAFF_GROUPED_NAV` | **PARTIAL** (preview + session contract; prod verify blocked on deploy) |
+| `DB_LOGO_PIPELINE` | **PARTIAL** (API contract + sidebar fallback; prod DB logo verify pending) |
+| `JP-DEPLOY-01` | **BLOCKED** (SFTP/deploy unavailable in agent environment — not a termination condition) |
 
 ## JP_DASH_03_STATUS
 
