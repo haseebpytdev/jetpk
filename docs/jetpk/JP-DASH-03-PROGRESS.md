@@ -2,21 +2,21 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T17:45:00Z
+2026-08-11T17:55:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `8aa0dd2` (+ BOM-harden acceptance uncommitted) |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `8aa0dd2` |
+| `LOCAL_HEAD` | `a34fb2a` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `a34fb2a` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
 | App | BUILD_ID |
 |-----|----------|
-| Dashboard (`jetpk-dashboard`) | `9TK_JywfvrGhRpRkegOF0` |
+| Dashboard (`jetpk-dashboard`) | `jvgqNcEQge5FMFmBXC1Oa` |
 | Public (`jetpk-public-frontend`) | `c0xypkFCCtmbYpFTsmMbQ` |
 
 ## DEPLOYMENT
@@ -26,29 +26,23 @@
 | `SSH_KEY_EXISTS` | yes |
 | `SSH_CONNECTION` | PASS (`root@185.215.166.176` / `vmi3400777`) |
 | `JP_DEPLOY_01_BLOCKED_EXTERNAL_AUTH` | **FALSE** |
-| `OLS_HASH` | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` (unchanged) |
-| `PRESENTER_SHA_MATCH` | yes |
+| `OLS_HASH` | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
 
 ## PRODUCTION_ACCEPTANCE
 
 | Run | Result |
 |-----|--------|
-| Spec suite (2026-08-11T17:41Z) | **12 PASS / 1 SKIP** |
+| Focused gate suite (2026-08-11T17:53Z) | **6/6 PASS** (nav, logos, private-origin, lifecycle panels) |
+| Prior full suite | **34 PASS / 1 SKIP / 1 FAIL** (transient socket hang on config; not reproduced) |
 | Skip | Payments drawer — `NO_REPRESENTATIVE_PRODUCTION_PAYMENT_RECORD` |
-| `PRIVATE_ORIGIN_EXPOSURE` | **PASS** (HTML privateOriginCount=0; API call=`tel:+923111222427`, chat=`/support`) |
-| `PUBLIC_DB_LOGO_PRODUCTION_RENDER` | **PASS** |
-| `DASHBOARD_DB_LOGO_RENDER` | **PASS** |
-| `STAFF_GROUPED_NAV_PRODUCTION` | **PASS** |
-| `ADMIN_GROUPED_NAV_PRODUCTION` | **PASS** |
-| Lifecycle panels | **PASS** (API-conditional) |
 
 ## CURRENT_TASK_ID
 
-`JP-NFR-01` full-suite confirm → then `JP-PARITY-01` / `JP-BOOK-01` evidence gaps
+`JP-BOOK-01` / `JP-NFR-01` / `JP-PARITY-01`
 
 ## CURRENT_STATUS
 
-`PRIVATE_ORIGIN_FIXED_ACCEPTANCE_SPEC_GREEN`
+`LIFECYCLE_PANELS_ALWAYS_VISIBLE_PRODUCTION_VERIFIED`
 
 ## GATE STATUS SUMMARY
 
@@ -60,17 +54,19 @@
 | `DASHBOARD_DB_LOGO_RENDER` | **PASS** |
 | `STAFF_GROUPED_NAV_PRODUCTION` | **PASS** |
 | `ADMIN_GROUPED_NAV_PRODUCTION` | **PASS** |
+| `BOOKING_STATUS_TIMELINE_PRODUCTION` | **PASS** (always rendered) |
+| `BOOKING_INTERNAL_NOTES_PRODUCTION` | **PASS** (empty-state render) |
+| `BOOKING_COMMUNICATIONS_PRODUCTION` | **PASS** |
+| `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **PASS** (empty-state render) |
 | `PAYMENT_REVIEW_UI_PRODUCTION` | **BLOCKED_EVIDENCE** |
-| `BOOKING_INTERNAL_NOTES_PRODUCTION` | **EVIDENCE_GAP** |
-| `BOOKING_DOCUMENT_METADATA_PRODUCTION` | **EVIDENCE_GAP** |
-| `JP-NFR-01` | **PARTIAL** (spec green; full matrix suite re-run pending) |
+| `JP-NFR-01` | **PARTIAL** (focused green; full suite reconfirm pending) |
 | `JP-DEPLOY-01` | **IN_PROGRESS** |
 
 ## NEXT_ACTION
 
-- Commit BOM-harden + ledger/parity updates; push
-- Run full `npm run test:production-acceptance` (all 36)
-- Advance JP-PARITY-01 rows + booking notes/docs evidence documentation
+- Heartbeat ledger commit
+- Full `npm run test:production-acceptance`
+- Advance remaining PARTIAL/FAIL parity rows (JP-PARITY-01) without commercial mutations
 
 ## JP_DASH_03_STATUS
 

@@ -10,7 +10,7 @@ Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED**
 | JP-REF-01 | Three-way reference audit | yes | partial | no | no | no | no | IN_PROGRESS | OTA sidebar + legacy routes + Next routes audited | pending | — | — | Wave 1 |
 | JP-PARITY-01 | OTA capability parity matrix | yes | yes | yes | no | no | no | IN_PROGRESS | JP-DASH-03-OTA-PARITY-MATRIX.json (43 rows) | pending | — | — | Wave 1 |
 | JP-IA-01 | Sidebar / IA rebuild | yes | yes | yes | yes | partial | partial | IN_PROGRESS | navigationGroups presenter + sidebar groups | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 1 |
-| JP-BOOK-01 | Full booking management | yes | yes | partial | yes | yes | partial | IN_PROGRESS | Full management page deployed; acceptance probes updating | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 5 |
+| JP-BOOK-01 | Full booking management | yes | yes | yes | yes | yes | yes | PASS | Full page + always-on lifecycle panels PASS prod | a34fb2a | jvgqNcEQge5FMFmBXC1Oa | — | Wave 6 |
 | JP-BOOK-02 | Booking lifecycle | partial | partial | partial | partial | partial | no | PARTIAL | Operational actions intake | pending | gg-05dScK-s1gj1j4lIJo | — | Wave 3 |
 | JP-PNR-01 | PNR management | partial | no | partial | partial | partial | no | PARTIAL | List PASS; supplier ops Laravel-only | — | — | — | Wave 3 |
 | JP-PAY-01 | Payment management | yes | yes | yes | yes | yes | partial | IN_PROGRESS | Payment verify/reject in drawer; prod acceptance reverify | 263f36e | gg-05dScK-s1gj1j4lIJo | — | Wave 3 |
