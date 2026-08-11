@@ -72,6 +72,52 @@ test.describe("JP-DASH-03 production acceptance", () => {
     }
   });
 
+  test("booking management lifecycle panels render on production reference", async ({ page }) => {
+    const ref = "WL96PKN9";
+    const apiResponse = await page.request.get(`/api/dashboard/bookings/${encodeURIComponent(ref)}`);
+    test.skip(!apiResponse.ok(), `booking API unavailable for ${ref}`);
+
+    const apiPayload = (await apiResponse.json()) as {
+      data?: {
+        statusTimeline?: unknown[];
+        internalNotes?: unknown[];
+        communications?: unknown[];
+        documents?: unknown[];
+      };
+    };
+    const detail = apiPayload.data ?? {};
+
+    await page.goto(`/admin/dashboard/bookings/${ref}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    const management = page.getByTestId("booking-management-page");
+    await expect(management).toBeVisible({ timeout: 60_000 });
+    const panels = management.getByTestId("booking-management-panels");
+    await expect(panels).toBeVisible();
+
+    if ((detail.statusTimeline?.length ?? 0) > 0) {
+      await expect(panels.getByTestId("booking-status-timeline")).toBeVisible();
+    }
+    if ((detail.internalNotes?.length ?? 0) > 0) {
+      await expect(panels.getByTestId("booking-internal-notes")).toBeVisible();
+    }
+    if ((detail.communications?.length ?? 0) > 0) {
+      await expect(panels.getByTestId("booking-communications")).toBeVisible();
+    }
+    if ((detail.documents?.length ?? 0) > 0) {
+      await expect(panels.getByTestId("booking-documents")).toBeVisible();
+    }
+
+    const lifecycleSections =
+      (detail.statusTimeline?.length ?? 0) +
+      (detail.internalNotes?.length ?? 0) +
+      (detail.communications?.length ?? 0) +
+      (detail.documents?.length ?? 0);
+    expect(lifecycleSections, "expected lifecycle data on production reference booking").toBeGreaterThan(0);
+
+    const body = await page.locator("body").innerText();
+    expect(body).toContain(ref);
+    expect(body).not.toMatch(/Preview data|synthetic records|Dashboard unavailable/i);
+  });
+
   test("payments drawer shows operational review section", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
 
