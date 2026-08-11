@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `b49ad1a` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `b49ad1a` |
+| `LOCAL_HEAD` | `abb86be` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `abb86be` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
