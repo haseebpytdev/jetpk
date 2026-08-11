@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `e1e0430` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `e1e0430` |
+| `LOCAL_HEAD` | `e24fac8` |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `e24fac8` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
