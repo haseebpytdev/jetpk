@@ -2,44 +2,44 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T07:45:00Z
+2026-08-11T09:00:00Z
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
-| `LOCAL_HEAD` | `abb86be` |
-| `REMOTE_HEAD_AT_LAST_VERIFY` | `abb86be` |
+| `LOCAL_HEAD` | pending (Wave 4 BOOK-003 batch) |
+| `REMOTE_HEAD_AT_LAST_VERIFY` | `368b5f3` |
 | `BRANCH` | `phase/jetpk-dash-03-operational-backoffice` |
 
 ## PRODUCTION_BUILD_ID
 
-`WdsRJ8FbNwR8TxGvVTCUh` (Wave 2 — pending Wave 3 deploy)
+`WdsRJ8FbNwR8TxGvVTCUh` (Wave 2 on prod — Wave 3/4 not deployed)
 
 ## CURRENT_TASK_ID
 
-`JP-DEPLOY-01` / `JP-PAY-01` / `JP-LEGACY-01`
+`JP-BOOK-01` / `JP-DEPLOY-01`
 
 ## CURRENT_SUBTASK
 
-Deploy Wave 3: payment verify/reject drawer + legacy booking redirects
+Enrich booking management detail API + panels; deploy Wave 3+4 batch
 
 ## CURRENT_STATUS
 
-`WAVE_3_READY_FOR_DEPLOY`
+`WAVE_4_IN_PROGRESS`
 
 ## CURRENT_FINDING
 
-- Wave 3 pushed at `b49ad1a` (payment review UI + legacy booking redirects)
-- Local `npm run build:production` PASS (Next.js 15.5.21)
-- QA auth all roles PASS (automated login 2026-08-11)
-- Production acceptance tests added for post-deploy verify (legacy redirect + payment review drawer)
+- Production acceptance 2026-08-11: 18 pass / 7 fail — Wave 3 not on prod (`/admin/bookings` still Blade; payments table missing on prod session)
+- BOOK-003: `DashboardBookingDetailResource` now exposes statusTimeline, internalNotes, communications, documents
+- Next booking management panels render timeline/notes/comms/docs read-only
+- Local tests: JpDash03BookingDetailContractTest 2/2, bookings management smoke PASS
 
 ## NEXT_ACTION
 
-- SFTP/deploy Laravel routes + dashboard build to production
-- Run `npm run test:production-acceptance` after deploy
-- JP-IA-01 / JP-STAFF-01 production nav verify
+- Commit + push Wave 4 BOOK-003 batch
+- SFTP/deploy Laravel + dashboard (Wave 3 legacy redirect + payment review + BOOK-003 panels)
+- Re-run `npm run test:production-acceptance` post-deploy
 
 ## OTP_LEDGER
 
@@ -51,7 +51,7 @@ Deploy Wave 3: payment verify/reject drawer + legacy booking redirects
 
 ## QA_AUTH_STATUS
 
-All four roles **PASS** (storage states local-only)
+All four roles **PASS** (automated login refreshed 2026-08-11)
 
 ## OLS_STATUS
 
@@ -62,11 +62,9 @@ All four roles **PASS** (storage states local-only)
 | Gate | Status |
 |------|--------|
 | `JP_DASH_03` | **FAIL_NOT_OPERATIONALLY_CLOSED** |
-| `PREVIEW_STUB_SWEEP` | **PARTIAL** |
-| `FULL_BOOKING_MANAGEMENT` | **PARTIAL** |
-| `PAYMENT_REVIEW_UI` | **PARTIAL** (implemented; prod verify pending) |
-| `LEGACY_BOOKING_REDIRECT` | **PARTIAL** (implemented; prod verify pending) |
-| `SIDEBAR_INFORMATION_ARCHITECTURE` | **PARTIAL** |
+| `FULL_BOOKING_MANAGEMENT` | **PARTIAL** (timeline/notes/comms/docs panels added) |
+| `PAYMENT_REVIEW_UI` | **PARTIAL** (code ready; prod verify blocked on deploy) |
+| `LEGACY_BOOKING_REDIRECT` | **PARTIAL** (code ready; prod verify blocked on deploy) |
 
 ## JP_DASH_03_STATUS
 

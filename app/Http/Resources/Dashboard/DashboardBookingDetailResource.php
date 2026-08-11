@@ -13,7 +13,17 @@ final class DashboardBookingDetailResource
     public static function fromModel(Booking $booking): array
     {
         $summary = DashboardBookingResource::fromModel($booking);
-        $booking->loadMissing(['passengers', 'fareBreakdown', 'payments', 'latestSupplierBooking', 'tickets']);
+        $booking->loadMissing([
+            'passengers',
+            'fareBreakdown',
+            'payments',
+            'latestSupplierBooking',
+            'tickets',
+            'statusLogs.user',
+            'bookingNotes.user',
+            'communicationLogs.user',
+            'documents.generatedBy',
+        ]);
 
         $passengers = $booking->passengers
             ->map(static fn ($p): array => [
@@ -78,6 +88,58 @@ final class DashboardBookingDetailResource
                 'updatedAt' => $booking->updated_at?->toIso8601String(),
                 'bookingStatus' => $summary['bookingStatus'],
             ],
+            'statusTimeline' => $booking->statusLogs
+                ->sortByDesc('created_at')
+                ->take(50)
+                ->values()
+                ->map(static fn ($log): array => [
+                    'occurredAt' => $log->created_at?->toIso8601String() ?? '',
+                    'eventType' => 'status_changed',
+                    'actorName' => (string) ($log->user?->name ?? 'System'),
+                    'fromStatus' => (string) ($log->from_status ?? ''),
+                    'toStatus' => (string) ($log->to_status ?? ''),
+                    'summary' => trim(((string) $log->from_status).' → '.((string) $log->to_status)),
+                    'note' => filled($log->note) ? (string) $log->note : null,
+                ])
+                ->all(),
+            'internalNotes' => $booking->bookingNotes
+                ->sortByDesc('created_at')
+                ->take(30)
+                ->values()
+                ->map(static fn ($note): array => [
+                    'createdAt' => $note->created_at?->toIso8601String() ?? '',
+                    'authorName' => (string) ($note->user?->name ?? 'Staff'),
+                    'noteType' => (string) ($note->note_type ?? 'internal'),
+                    'note' => (string) $note->note,
+                    'customerVisible' => (bool) $note->is_customer_visible,
+                ])
+                ->all(),
+            'communications' => $booking->communicationLogs
+                ->sortByDesc(fn ($log) => $log->sent_at ?? $log->created_at)
+                ->take(30)
+                ->values()
+                ->map(static fn ($log): array => [
+                    'sentAt' => ($log->sent_at ?? $log->created_at)?->toIso8601String() ?? '',
+                    'channel' => (string) ($log->channel ?? ''),
+                    'event' => (string) ($log->event ?? ''),
+                    'status' => (string) ($log->status ?? ''),
+                    'recipient' => (string) ($log->recipient_email ?: $log->recipient_phone ?: $log->recipient_name ?: '—'),
+                    'subject' => filled($log->subject) ? (string) $log->subject : null,
+                ])
+                ->all(),
+            'documents' => $booking->documents
+                ->sortByDesc('generated_at')
+                ->take(30)
+                ->values()
+                ->map(static fn ($document): array => [
+                    'documentId' => (string) $document->id,
+                    'documentType' => (string) ($document->document_type?->value ?? $document->document_type ?? 'document'),
+                    'title' => (string) ($document->title ?: $document->document_number ?: 'Document'),
+                    'status' => (string) ($document->status?->value ?? $document->status ?? 'generated'),
+                    'generatedAt' => $document->generated_at?->toIso8601String(),
+                    'generatedBy' => (string) ($document->generatedBy?->name ?? 'System'),
+                ])
+                ->all(),
         ];
     }
 }

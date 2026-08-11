@@ -124,4 +124,44 @@ export type BookingManagementDetail = {
     updatedAt: string | null;
     bookingStatus: BookingRecord["bookingStatus"];
   } | null;
+  statusTimeline: BookingStatusTimelineEntry[];
+  internalNotes: BookingInternalNote[];
+  communications: BookingCommunicationEntry[];
+  documents: BookingDocumentEntry[];
+};
+
+export type BookingStatusTimelineEntry = {
+  occurredAt: string;
+  eventType: string;
+  actorName: string;
+  fromStatus: string;
+  toStatus: string;
+  summary: string;
+  note: string | null;
+};
+
+export type BookingInternalNote = {
+  createdAt: string;
+  authorName: string;
+  noteType: string;
+  note: string;
+  customerVisible: boolean;
+};
+
+export type BookingCommunicationEntry = {
+  sentAt: string;
+  channel: string;
+  event: string;
+  status: string;
+  recipient: string;
+  subject: string | null;
+};
+
+export type BookingDocumentEntry = {
+  documentId: string;
+  documentType: string;
+  title: string;
+  status: string;
+  generatedAt: string | null;
+  generatedBy: string;
 };

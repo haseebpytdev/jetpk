@@ -6,6 +6,9 @@ use App\Enums\BookingStatus;
 use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\BookingFareBreakdown;
+use App\Models\BookingNote;
+use App\Models\BookingStatusLog;
+use App\Models\CommunicationLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
@@ -57,5 +60,57 @@ class JpDash03BookingDetailContractTest extends TestCase
         $this->assertSame('USD', $fare['currency'] ?? null);
         $this->assertSame('USD', $listRow['currency'] ?? null);
         $this->assertSame(624, (int) ($fare['total'] ?? 0));
+    }
+
+    public function test_booking_detail_includes_timeline_notes_and_communications(): void
+    {
+        $agency = Agency::factory()->create();
+        $admin = $this->platformAdmin();
+
+        $booking = Booking::factory()->for($agency)->create([
+            'booking_reference' => 'BK-TIMELINE-01',
+            'status' => BookingStatus::Confirmed,
+        ]);
+
+        BookingStatusLog::query()->create([
+            'booking_id' => $booking->id,
+            'from_status' => 'pending',
+            'to_status' => 'confirmed',
+            'user_id' => $admin->id,
+            'note' => 'Payment verified',
+        ]);
+
+        BookingNote::query()->create([
+            'booking_id' => $booking->id,
+            'agency_id' => $agency->id,
+            'user_id' => $admin->id,
+            'note_type' => 'internal',
+            'note' => 'Follow up with customer',
+            'is_customer_visible' => false,
+        ]);
+
+        CommunicationLog::query()->create([
+            'agency_id' => $agency->id,
+            'booking_id' => $booking->id,
+            'user_id' => $admin->id,
+            'channel' => 'email',
+            'event' => 'booking_confirmation',
+            'recipient_email' => 'guest@example.com',
+            'status' => 'sent',
+            'subject' => 'Booking confirmed',
+        ]);
+
+        $detail = $this->actingAs($admin)
+            ->getJson(route('api.dashboard.bookings.show', ['booking' => 'BK-TIMELINE-01']))
+            ->assertOk()
+            ->json('data');
+
+        $this->assertCount(1, $detail['statusTimeline'] ?? []);
+        $this->assertSame('pending → confirmed', $detail['statusTimeline'][0]['summary'] ?? null);
+        $this->assertCount(1, $detail['internalNotes'] ?? []);
+        $this->assertSame('Follow up with customer', $detail['internalNotes'][0]['note'] ?? null);
+        $this->assertCount(1, $detail['communications'] ?? []);
+        $this->assertSame('booking_confirmation', $detail['communications'][0]['event'] ?? null);
+        $this->assertArrayHasKey('documents', $detail);
     }
 }

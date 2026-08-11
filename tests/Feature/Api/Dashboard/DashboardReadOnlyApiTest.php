@@ -122,7 +122,7 @@ class DashboardReadOnlyApiTest extends TestCase
         $this->actingAs($admin)
             ->getJson(route('api.dashboard.bookings.show', ['booking' => $booking->booking_reference ?? $booking->id]))
             ->assertOk()
-            ->assertJsonStructure(['data' => ['summary', 'itinerary', 'passengers', 'fareSummary', 'paymentSummary']]);
+            ->assertJsonStructure(['data' => ['summary', 'itinerary', 'passengers', 'fareSummary', 'paymentSummary', 'statusTimeline', 'internalNotes', 'communications', 'documents']]);
     }
 
     public function test_payments_index_requires_permission(): void

@@ -13,7 +13,18 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function BookingManagementPanels({ detail }: { detail: BookingManagementDetail }) {
-  const { summary, passengers, fareSummary, pnrSummary, ticketReadiness, auditMetadata } = detail;
+  const {
+    summary,
+    passengers,
+    fareSummary,
+    pnrSummary,
+    ticketReadiness,
+    auditMetadata,
+    statusTimeline,
+    internalNotes,
+    communications,
+    documents,
+  } = detail;
 
   return (
     <div className="space-y-4" data-testid="booking-management-panels">
@@ -141,6 +152,72 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
               <dd className="font-mono text-xs">{summary.id}</dd>
             </div>
           </dl>
+        </Section>
+      ) : null}
+
+      {statusTimeline.length > 0 ? (
+        <Section title="Status timeline">
+          <ol className="space-y-3 text-sm" data-testid="booking-status-timeline">
+            {statusTimeline.map((entry, index) => (
+              <li key={`${entry.occurredAt}-${index}`} className="border-l-2 border-jp-border pl-3">
+                <p className="font-medium capitalize">{entry.summary || entry.eventType.replace(/_/g, " ")}</p>
+                <p className="text-xs text-jp-muted">
+                  {entry.occurredAt ? formatDateTime(entry.occurredAt) : "—"} · {entry.actorName}
+                </p>
+                {entry.note ? <p className="mt-1 text-jp-muted">{entry.note}</p> : null}
+              </li>
+            ))}
+          </ol>
+        </Section>
+      ) : null}
+
+      {internalNotes.length > 0 ? (
+        <Section title="Internal notes">
+          <ul className="space-y-3 text-sm" data-testid="booking-internal-notes">
+            {internalNotes.map((note, index) => (
+              <li key={`${note.createdAt}-${index}`} className="rounded-xl bg-gray-50 p-3">
+                <p className="text-xs text-jp-muted">
+                  {note.createdAt ? formatDateTime(note.createdAt) : "—"} · {note.authorName}
+                  {note.customerVisible ? " · customer visible" : ""}
+                </p>
+                <p className="mt-1 whitespace-pre-wrap">{note.note}</p>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
+      {communications.length > 0 ? (
+        <Section title="Communications">
+          <ul className="space-y-3 text-sm" data-testid="booking-communications">
+            {communications.map((entry, index) => (
+              <li key={`${entry.sentAt}-${index}`} className="flex flex-col gap-1">
+                <p className="font-medium capitalize">
+                  {entry.event.replace(/_/g, " ")} via {entry.channel}
+                </p>
+                <p className="text-xs text-jp-muted">
+                  {entry.sentAt ? formatDateTime(entry.sentAt) : "—"} · {entry.status} · {entry.recipient}
+                </p>
+                {entry.subject ? <p className="text-jp-muted">{entry.subject}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <Section title="Documents">
+          <ul className="space-y-2 text-sm" data-testid="booking-documents">
+            {documents.map((document) => (
+              <li key={document.documentId} className="flex justify-between gap-3">
+                <span>{document.title}</span>
+                <span className="text-xs text-jp-muted capitalize">
+                  {document.documentType.replace(/_/g, " ")} · {document.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-jp-muted">Document downloads remain on the Laravel booking workspace.</p>
         </Section>
       ) : null}
     </div>

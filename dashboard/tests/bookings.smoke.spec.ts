@@ -176,3 +176,11 @@ test("empty filter state renders", async ({ page }) => {
   await page.goto("/admin/dashboard/bookings?q=zzznomatchzzz", { waitUntil: "load" });
   await expect(page.getByText("No bookings match your filters")).toBeVisible();
 });
+
+test("booking management page renders lifecycle panels", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/admin/dashboard/bookings/JP-BK-10001", { waitUntil: "load" });
+  await expect(page.getByTestId("booking-management-page")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("booking-management-panels")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lifecycle" })).toBeVisible();
+});

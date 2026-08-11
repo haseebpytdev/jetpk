@@ -60,5 +60,9 @@ export function transformBookingManagementDetail(
       updatedAt: summary.lastUpdated,
       bookingStatus: summary.bookingStatus,
     },
+    statusTimeline: [],
+    internalNotes: [],
+    communications: [],
+    documents: [],
   };
 }
