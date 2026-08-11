@@ -13,7 +13,7 @@ type Props = {
 
 export function CustomersMobileCards({ customers, onView }: Props) {
   return (
-    <ul className="space-y-3 xl:hidden" data-testid="customers-mobile-cards">
+    <ul className="space-y-3 2xl:hidden" data-testid="customers-mobile-cards">
       {customers.map((customer) => (
         <li key={customer.id}>
           <Card className="space-y-3">
