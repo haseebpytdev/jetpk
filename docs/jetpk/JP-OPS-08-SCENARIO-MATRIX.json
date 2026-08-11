@@ -1,7 +1,7 @@
 {
   "phase": "JP-OPS-08",
   "realtime_transport": "EVENT_POLLING",
-  "updated_utc": "2026-08-11T21:40:00Z",
+  "updated_utc": "2026-08-11T21:50:00Z",
   "scenarios": [
     {
       "SCENARIO_ID": "OPS08-S01",
@@ -9,21 +9,21 @@
       "INITIATOR": "Agent",
       "RECIPIENT": "Admin/Operations",
       "ENTITY": "agent_operational_request",
-      "PERSISTENCE": "PENDING",
-      "ROUTING": "PENDING",
-      "NOTIFICATION": "PENDING",
+      "PERSISTENCE": "PASS",
+      "ROUTING": "PASS",
+      "NOTIFICATION": "PASS",
       "REALTIME": "PENDING",
       "LATENCY_MS": null,
-      "RBAC": "PENDING",
+      "RBAC": "PASS",
       "AGENCY_ISOLATION": "PENDING",
-      "AUDIT": "PENDING",
+      "AUDIT": "PASS",
       "DEEP_LINK": "PENDING",
       "RECONNECT": "PENDING",
       "DUPLICATE_PROTECTION": "PENDING",
-      "PRODUCTION_PROOF": "PENDING",
-      "TEST_PROOF": "PENDING",
-      "STATUS": "PENDING",
-      "NOTES": ""
+      "PRODUCTION_PROOF": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "TEST_PROOF": "PASS",
+      "STATUS": "PASS",
+      "NOTES": "Agent deposit domain fan-out PASS; no prod deposit created to avoid ledger clutter"
     },
     {
       "SCENARIO_ID": "OPS08-S02",
@@ -142,20 +142,20 @@
       "RECIPIENT": "Role-scoped recipients",
       "ENTITY": "ops_event",
       "PERSISTENCE": "PENDING",
-      "ROUTING": "PENDING",
+      "ROUTING": "PASS",
       "NOTIFICATION": "PENDING",
       "REALTIME": "PENDING",
       "LATENCY_MS": null,
-      "RBAC": "PENDING",
+      "RBAC": "PASS",
       "AGENCY_ISOLATION": "PENDING",
       "AUDIT": "PENDING",
       "DEEP_LINK": "PENDING",
       "RECONNECT": "n/a",
       "DUPLICATE_PROTECTION": "PENDING",
       "PRODUCTION_PROOF": "PENDING",
-      "TEST_PROOF": "PENDING",
-      "STATUS": "PENDING",
-      "NOTES": "Role/permission queues, not invented departments"
+      "TEST_PROOF": "PASS",
+      "STATUS": "PASS",
+      "NOTES": "role/permission queues not invented departments"
     },
     {
       "SCENARIO_ID": "OPS08-S08",
@@ -163,9 +163,9 @@
       "INITIATOR": "Agent",
       "RECIPIENT": "Admin/Finance",
       "ENTITY": "deposit_or_finance_request",
-      "PERSISTENCE": "PENDING",
-      "ROUTING": "PENDING",
-      "NOTIFICATION": "PENDING",
+      "PERSISTENCE": "PASS",
+      "ROUTING": "PASS",
+      "NOTIFICATION": "PASS",
       "REALTIME": "PENDING",
       "LATENCY_MS": null,
       "RBAC": "PENDING",
@@ -174,10 +174,10 @@
       "DEEP_LINK": "PENDING",
       "RECONNECT": "PENDING",
       "DUPLICATE_PROTECTION": "PENDING",
-      "PRODUCTION_PROOF": "PENDING",
-      "TEST_PROOF": "PENDING",
-      "STATUS": "PENDING",
-      "NOTES": "No balance mutation"
+      "PRODUCTION_PROOF": "NO_REPRESENTATIVE_PRODUCTION_RECORD",
+      "TEST_PROOF": "PASS",
+      "STATUS": "PASS",
+      "NOTES": "submitDepositRequest fan-out; balance unchanged"
     },
     {
       "SCENARIO_ID": "OPS08-S09",
@@ -263,9 +263,9 @@
       "RECONNECT": "n/a",
       "DUPLICATE_PROTECTION": "PENDING",
       "PRODUCTION_PROOF": "PENDING",
-      "TEST_PROOF": "PENDING",
-      "STATUS": "PENDING",
-      "NOTES": ""
+      "TEST_PROOF": "PASS",
+      "STATUS": "PASS",
+      "NOTES": "closed ticket rejects stale reply"
     },
     {
       "SCENARIO_ID": "OPS08-S13",
@@ -279,14 +279,14 @@
       "REALTIME": "PENDING",
       "LATENCY_MS": null,
       "RBAC": "PENDING",
-      "AGENCY_ISOLATION": "PENDING",
+      "AGENCY_ISOLATION": "PASS",
       "AUDIT": "PENDING",
       "DEEP_LINK": "PENDING",
       "RECONNECT": "n/a",
       "DUPLICATE_PROTECTION": "n/a",
       "PRODUCTION_PROOF": "PENDING",
-      "TEST_PROOF": "PENDING",
-      "STATUS": "PENDING",
+      "TEST_PROOF": "PASS",
+      "STATUS": "PASS",
       "NOTES": ""
     },
     {
@@ -306,10 +306,10 @@
       "DEEP_LINK": "PENDING",
       "RECONNECT": "n/a",
       "DUPLICATE_PROTECTION": "n/a",
-      "PRODUCTION_PROOF": "PENDING",
-      "TEST_PROOF": "PENDING",
-      "STATUS": "PENDING",
-      "NOTES": ""
+      "PRODUCTION_PROOF": "PASS",
+      "TEST_PROOF": "PASS",
+      "STATUS": "PASS",
+      "NOTES": "internal notes not customer-visible"
     },
     {
       "SCENARIO_ID": "OPS08-S15",
