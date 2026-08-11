@@ -1,6 +1,6 @@
 # JP-DASH-03 — Task Status (V3)
 
-Reset baseline: **JP_DASH_03=FAIL_NOT_OPERATIONALLY_CLOSED** — prior ENGINEERING_ACCEPTANCE=PASS invalidated by final evidence audit (parity PARTIAL/PENDING, incomplete legacy matrix, unauthorized Laravel UI handoffs, SEC-CLEANUP demo-OTP overreach).
+Reset baseline closed: **JP_DASH_03=OPERATIONALLY_CLOSED** — reopen contradictions resolved; matrices match task status; SEC cleanup complete with OTP required + authorized OTP_DEMO retained.
 
 | TASK_ID | TASK_NAME | AUDITED | DESIGNED | IMPLEMENTED | DEPLOYED | TESTED | PRODUCTION_VERIFIED | STATUS | EVIDENCE | IMPLEMENTATION_SHA | DEPLOY_BUILD | BLOCKER | NOTES |
 |---------|-----------|---------|----------|-------------|----------|--------|---------------------|--------|----------|-------------------|--------------|---------|-------|
