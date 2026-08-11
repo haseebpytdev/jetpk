@@ -26,9 +26,9 @@ Reset baseline: **JP_DASH_03=PASS** (payment drawer evidence exception documente
 | JP-MONEY-01 | Money integrity | yes | yes | yes | yes | yes | yes | PASS | Booking management shows currency; no Amount unavailable flood | f608265 | Q9gDD14STBDOrQYmGc6Su | — | Wave 6 |
 | JP-UX-01 | Operator UX | yes | yes | yes | yes | yes | yes | PASS | Grouped nav + lifecycle panels + live handoffs | aeb9b6c | Q9gDD14STBDOrQYmGc6Su | — | Wave 6 |
 | JP-NFR-01 | Nonfunctional revalidation | yes | yes | yes | yes | yes | yes | PASS | Full prod acceptance 35 PASS / 1 SKIP 2026-08-11 | bf137da | jvgqNcEQge5FMFmBXC1Oa | — | Wave 6 |
-| JP-SAFE-QA-01 | QA data cleanliness | yes | yes | yes | yes | yes | yes | PASS | Four QA identities only; OTP-off temporary | b220b84 | — | — | — |
+| JP-SAFE-QA-01 | QA data cleanliness | yes | yes | yes | yes | yes | yes | PASS | Four QA identities only; OTP restored at closure | b220b84 | — | — | — |
 | JP-DEPLOY-01 | Production deployment loop | yes | yes | yes | yes | yes | yes | PASS | SSH PASS; dashboard BUILD Q9gDD14STBDOrQYmGc6Su; OLS unchanged | 045d007 | Q9gDD14STBDOrQYmGc6Su | — | Not blocked |
 | JP-GIT-HEARTBEAT-01 | Remote progress | yes | yes | yes | n/a | n/a | n/a | PASS | Phase branch heartbeats continuous | 045d007 | — | — | — |
-| JP-REPORT-01 | Final engineering report | no | no | no | no | no | no | PENDING | — | — | — | — | — |
-| JP-SEC-CLEANUP-01 | Restore auth security | no | no | no | no | no | no | PENDING | — | — | — | End of phase | — |
-| JP-FINAL-01 | Engineering pass | no | no | no | no | no | no | FAIL | — | — | — | — | — |
+| JP-REPORT-01 | Final engineering report | yes | yes | yes | n/a | n/a | n/a | PASS | docs/jetpk/JP-DASH-03-FINAL-ENGINEERING-REPORT.md | pending | — | — | — |
+| JP-SEC-CLEANUP-01 | Restore auth security | yes | yes | yes | yes | yes | yes | PASS | OTP required=true; demo OTP production disabled | — | — | — | Done |
+| JP-FINAL-01 | Engineering pass | yes | yes | yes | yes | yes | yes | PASS | 37/1 acceptance; SEC-CLEANUP done; report pushed | pending | Q9gDD14STBDOrQYmGc6Su | payment drawer evidence skip only | — |

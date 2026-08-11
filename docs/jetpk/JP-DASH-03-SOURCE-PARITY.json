@@ -1,9 +1,9 @@
 {
-  "generatedAtUtc": "2026-08-11T13:43:01.754Z",
-  "remoteHost": "-i C:\\Users\\khadi\\.ssh\\jetpk_contabo_2026_v2 root@185.215.166.176",
+  "generatedAtUtc": "2026-08-11T18:14:32.535Z",
+  "remoteHost": "pkjetp@185.215.166.176",
   "remoteRoot": "/home/pkjetp/jetpk_app",
-  "total": 40,
-  "match": 40,
+  "total": 41,
+  "match": 41,
   "mismatch": 0,
   "jpDash03SourceParity": "PASS",
   "rows": [
@@ -215,6 +215,12 @@
       "path": "public/themes/frontend/jetpakistan/css/tokens.css",
       "localSha256": "5f98d546c5f99b017115bfa99a912984b2992bb931057f0fddb72f323b25424b",
       "productionSha256": "5f98d546c5f99b017115bfa99a912984b2992bb931057f0fddb72f323b25424b",
+      "match": "yes"
+    },
+    {
+      "path": "dashboard/features/bookings/booking-management-panels.tsx",
+      "localSha256": "6bdfe778f52661416cd92e7d62d0f971141995ec921144e5d024a863ec86c565",
+      "productionSha256": "6bdfe778f52661416cd92e7d62d0f971141995ec921144e5d024a863ec86c565",
       "match": "yes"
     },
     {
