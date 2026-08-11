@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-08-11T19:04:50.530Z",
+  "generatedAtUtc": "2026-08-11T19:08:50.680Z",
   "schemaVersion": "jp-dash-03-v3",
   "note": "Honest V3 capability parity — PASS only where Next.js UI and Laravel backend are both production-usable without fixture/mocks for the stated capability.",
   "capabilities": [
@@ -1013,9 +1013,9 @@
       "nextUiExists": false,
       "laravelHandoff": false,
       "testMethod": "operational-api approveCommissionEntry exists; no Next page",
-      "gapNotes": "Next /commissions shell + Blade redirect; payout mutations Laravel intake AD-009.",
-      "CURRENT_STATUS": "PARTIAL",
-      "FINAL_STATUS": "PENDING"
+      "gapNotes": "Next /commissions loads DashboardCommissions API KPIs+agents; Blade GET redirects; payout mutations Laravel intake AD-009.",
+      "CURRENT_STATUS": "PASS",
+      "FINAL_STATUS": "PASS"
     },
     {
       "capabilityId": "REF-001",

@@ -23,6 +23,21 @@ export type AgentApplicationRecord = {
   submittedAt: string;
 };
 
+export type CommissionsOverview = {
+  kpis: {
+    pending: number;
+    approvedUnpaid: number;
+    paidThisMonth: number;
+    activeAgents: number;
+  };
+  agents: Array<{
+    id: string;
+    code: string;
+    name: string;
+    balance: Record<string, unknown>;
+  }>;
+};
+
 const mockMarkups: MarkupRecord[] = [
   {
     id: "1",
@@ -93,6 +108,37 @@ const applicationsService = createReadOnlyService<Record<string, never>, AgentAp
   },
 });
 
+const commissionsService = createReadOnlyService<Record<string, never>, CommissionsOverview>({
+  module: "commissions",
+  fixtureAdapter: {
+    mode: "fixture",
+    async fetch(_q, options) {
+      return createReadOnlyEnvelope({
+        data: {
+          kpis: { pending: 0, approvedUnpaid: 0, paidThisMonth: 0, activeAgents: 1 },
+          agents: [{ id: "1", code: "AG-PREVIEW", name: "Preview Agent", balance: { available: 0 } }],
+        },
+        metadata: options?.metadata,
+      });
+    },
+  },
+  laravelAdapter: {
+    mode: "laravelReadOnly",
+    async fetch(_q, options) {
+      const envelope = await fetchDashboardApi<CommissionsOverview>(DASHBOARD_API_ROUTES.commissions, {
+        signal: options?.signal,
+      });
+      return {
+        ...envelope,
+        data: {
+          kpis: envelope.data?.kpis ?? { pending: 0, approvedUnpaid: 0, paidThisMonth: 0, activeAgents: 0 },
+          agents: envelope.data?.agents ?? [],
+        },
+      };
+    },
+  },
+});
+
 export async function getMarkups(options?: ReadOnlyFetchOptions): Promise<MarkupRecord[]> {
   try {
     return (await markupsService.fetchReadOnly({}, options)).data;
@@ -104,6 +150,14 @@ export async function getMarkups(options?: ReadOnlyFetchOptions): Promise<Markup
 export async function getAgentApplications(options?: ReadOnlyFetchOptions): Promise<AgentApplicationRecord[]> {
   try {
     return (await applicationsService.fetchReadOnly({}, options)).data;
+  } catch (error) {
+    mapError(error);
+  }
+}
+
+export async function getCommissionsOverview(options?: ReadOnlyFetchOptions): Promise<CommissionsOverview> {
+  try {
+    return (await commissionsService.fetchReadOnly({}, options)).data;
   } catch (error) {
     mapError(error);
   }
