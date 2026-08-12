@@ -22,6 +22,7 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
       message: result.message,
       fieldErrors: result.errors,
       status: result.status,
+      code: result.code,
     };
   }
 
@@ -51,6 +52,7 @@ export async function verifyOtp(payload: OtpVerifyPayload): Promise<OtpVerifyRes
       message: result.message,
       fieldErrors: result.errors,
       status: result.status,
+      code: result.code,
     };
   }
 

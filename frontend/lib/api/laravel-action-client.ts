@@ -35,7 +35,13 @@ export async function ensureLaravelCsrfToken(forceRefresh = false): Promise<stri
       cache: "no-store",
     });
     if (!response.ok) return null;
-    return readCookie("XSRF-TOKEN");
+
+    const fromCookie = readCookie("XSRF-TOKEN");
+    if (fromCookie) return fromCookie;
+
+    const payload = (await response.json()) as { csrf_token?: string };
+    const fromBody = typeof payload.csrf_token === "string" ? payload.csrf_token.trim() : "";
+    return fromBody !== "" ? fromBody : null;
   } catch {
     return null;
   }
@@ -91,6 +97,14 @@ async function executeRequest<T>(
 ): Promise<ApiResult<T>> {
   const method = options.method ?? "GET";
   const csrf = method !== "GET" ? await ensureLaravelCsrfToken(csrfForceRefresh) : null;
+  if (method !== "GET" && !csrf) {
+    return {
+      ok: false,
+      code: "csrf_expired",
+      status: 419,
+      message: "Unable to prepare secure sign-in. Please refresh and try again.",
+    };
+  }
   const { signal, cleanup } = withTimeout(options.signal, options.timeoutMs);
 
   const headers: Record<string, string> = {

@@ -52,7 +52,13 @@ export type LoginPayload = {
 
 export type LoginResponse =
   | { ok: true; redirect: string; requires_otp?: boolean }
-  | { ok: false; message: string; fieldErrors?: Record<string, string[]>; status?: number };
+  | {
+      ok: false;
+      message: string;
+      fieldErrors?: Record<string, string[]>;
+      status?: number;
+      code?: string;
+    };
 
 export type OtpVerifyPayload = {
   otp: string;
@@ -61,7 +67,13 @@ export type OtpVerifyPayload = {
 
 export type OtpVerifyResponse =
   | { ok: true; redirect: string; dashboard_url?: string }
-  | { ok: false; message: string; fieldErrors?: Record<string, string[]>; status?: number };
+  | {
+      ok: false;
+      message: string;
+      fieldErrors?: Record<string, string[]>;
+      status?: number;
+      code?: string;
+    };
 
 export type CustomerRegistrationPayload = {
   first_name: string;

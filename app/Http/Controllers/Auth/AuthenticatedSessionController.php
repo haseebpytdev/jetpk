@@ -14,6 +14,7 @@ use App\Services\Client\ClientRedirectResolver;
 use App\Services\Communication\AuthSecurityEmailNotificationService;
 use App\Support\Client\ClientPageKeys;
 use App\Services\Security\SecurityEventLogger;
+use App\Support\Auth\AuthPostLoginRedirectResolver;
 use App\Support\Auth\ClientLoginOtpGate;
 use App\Support\Auth\CheckoutReturnIntent;
 use App\Support\Auth\PublicAuthRedirectAllowlist;
@@ -86,7 +87,7 @@ class AuthenticatedSessionController extends Controller
 
         if ($request->expectsJson()) {
             return $this->jsonLoginSuccess(
-                $this->safeLoginRedirectPath($redirect->getTargetUrl()),
+                app(AuthPostLoginRedirectResolver::class)->resolvePath($user, $request),
             );
         }
 

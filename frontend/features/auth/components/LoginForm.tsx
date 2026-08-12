@@ -3,6 +3,7 @@
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuthSubmissionReady } from "../hooks/useAuthSubmissionReady";
 import { login } from "../services/auth-service";
 import { mapFieldErrors } from "../utils/laravel-auth-api";
 import { isNextJsOwnedPath } from "../utils/dashboard-allowlist";
@@ -12,8 +13,22 @@ import { PasswordField } from "./PasswordField";
 const fieldClass =
   "min-h-jp-button w-full rounded-jp-md border border-jp-border bg-jp-surface px-4 text-jp-sm text-jp-text placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus";
 
+function resolveLoginErrorMessage(result: Extract<Awaited<ReturnType<typeof login>>, { ok: false }>): string {
+  if (result.code === "network") {
+    return "Network error. Check your connection and try again.";
+  }
+  if (result.code === "csrf_expired") {
+    return "Your session expired. Please try again.";
+  }
+  if (result.status === 429 || result.code === "rate_limit") {
+    return "Too many login attempts. Please wait a moment and try again.";
+  }
+  return result.fieldErrors?.login?.[0] ?? result.message;
+}
+
 export function LoginForm() {
   const router = useRouter();
+  const { ready, error: readinessError } = useAuthSubmissionReady();
   const [loginValue, setLoginValue] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -23,7 +38,7 @@ export function LoginForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting) return;
+    if (!ready || submitting) return;
 
     setSubmitting(true);
     setFormError("");
@@ -34,12 +49,8 @@ export function LoginForm() {
 
       if (!result.ok) {
         setSubmitting(false);
-        if (result.status === 429) {
-          setFormError("Too many login attempts. Please wait a moment and try again.");
-          return;
-        }
         setFieldErrors(mapFieldErrors(result.fieldErrors));
-        setFormError(result.fieldErrors?.login?.[0] ?? result.message);
+        setFormError(resolveLoginErrorMessage(result));
         return;
       }
 
@@ -58,13 +69,19 @@ export function LoginForm() {
       window.location.assign(result.redirect);
     } catch {
       setSubmitting(false);
-      setFormError("Something went wrong. Please try again.");
+      setFormError("Network error. Check your connection and try again.");
     }
   }
 
+  const bannerError = readinessError ?? formError;
+  const controlsDisabled = !ready || submitting;
+
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
-      {formError ? <AuthStatusBanner tone="error" message={formError} live /> : null}
+      {bannerError ? <AuthStatusBanner tone="error" message={bannerError} live /> : null}
+      {!ready && !readinessError ? (
+        <AuthStatusBanner tone="info" message="Preparing secure sign-in…" live />
+      ) : null}
 
       <div>
         <label htmlFor="login" className="mb-1.5 block text-jp-sm font-medium text-jp-text">
@@ -76,7 +93,7 @@ export function LoginForm() {
           type="text"
           autoComplete="username"
           required
-          disabled={submitting}
+          disabled={controlsDisabled}
           value={loginValue}
           onChange={(event) => setLoginValue(event.target.value)}
           aria-invalid={fieldErrors.login ? true : undefined}
@@ -94,7 +111,7 @@ export function LoginForm() {
         label="Password"
         value={password}
         onChange={setPassword}
-        disabled={submitting}
+        disabled={controlsDisabled}
         error={fieldErrors.password}
       />
 
@@ -104,7 +121,7 @@ export function LoginForm() {
             type="checkbox"
             name="remember"
             checked={remember}
-            disabled={submitting}
+            disabled={controlsDisabled}
             onChange={(event) => setRemember(event.target.checked)}
             className="h-4 w-4 rounded border-jp-border text-jp-primary focus-visible:shadow-jp-focus"
           />
@@ -115,8 +132,8 @@ export function LoginForm() {
         </a>
       </div>
 
-      <PrimaryButton type="submit" className="w-full" disabled={submitting}>
-        {submitting ? "Signing in…" : "Sign in"}
+      <PrimaryButton type="submit" className="w-full" disabled={controlsDisabled}>
+        {!ready ? "Preparing secure sign-in…" : submitting ? "Signing in…" : "Sign in"}
       </PrimaryButton>
 
       <p className="text-center text-jp-sm text-jp-muted">

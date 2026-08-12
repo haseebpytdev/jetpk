@@ -3,6 +3,7 @@
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useAuthSubmissionReady } from "../hooks/useAuthSubmissionReady";
 import { fetchOtpChallenge, resendOtp, verifyOtp } from "../services/auth-service";
 import { mapFieldErrors } from "../utils/laravel-auth-api";
 import { isNextJsOwnedPath } from "../utils/dashboard-allowlist";
@@ -11,8 +12,22 @@ import { AuthStatusBanner } from "./AuthStatusBanner";
 const fieldClass =
   "min-h-jp-button w-full rounded-jp-md border border-jp-border bg-jp-surface px-4 text-center text-2xl tracking-[0.35em] text-jp-text placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus";
 
+function resolveOtpErrorMessage(result: Extract<Awaited<ReturnType<typeof verifyOtp>>, { ok: false }>): string {
+  if (result.code === "network") {
+    return "Network error. Check your connection and try again.";
+  }
+  if (result.code === "csrf_expired") {
+    return "Your session expired. Please try again.";
+  }
+  if (result.status === 429 || result.code === "rate_limit") {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+  return result.fieldErrors?.otp?.[0] ?? result.message;
+}
+
 export function OtpForm() {
   const router = useRouter();
+  const { ready, error: readinessError } = useAuthSubmissionReady();
   const [otp, setOtp] = useState("");
   const [maskedEmail, setMaskedEmail] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
@@ -33,8 +48,9 @@ export function OtpForm() {
   }, [router]);
 
   useEffect(() => {
+    if (!ready) return;
     void loadChallenge();
-  }, [loadChallenge]);
+  }, [loadChallenge, ready]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -46,7 +62,7 @@ export function OtpForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting) return;
+    if (!ready || submitting) return;
 
     setSubmitting(true);
     setFormError("");
@@ -58,7 +74,7 @@ export function OtpForm() {
     if (!result.ok) {
       setSubmitting(false);
       setFieldErrors(mapFieldErrors(result.fieldErrors));
-      const otpError = result.fieldErrors?.otp?.[0] ?? result.message;
+      const otpError = resolveOtpErrorMessage(result);
       setFormError(otpError);
       if (otpError.toLowerCase().includes("expired") || otpError.toLowerCase().includes("sign in again")) {
         setTimeout(() => router.replace("/login"), 1500);
@@ -77,7 +93,7 @@ export function OtpForm() {
   }
 
   async function handleResend() {
-    if (resending || cooldown > 0) return;
+    if (!ready || resending || cooldown > 0) return;
     setResending(true);
     setFormError("");
     const result = await resendOtp();
@@ -95,10 +111,16 @@ export function OtpForm() {
     setOtp(digits);
   }
 
+  const bannerError = readinessError ?? formError;
+  const controlsDisabled = !ready || submitting;
+
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       {statusMessage ? <AuthStatusBanner tone="success" message={statusMessage} live /> : null}
-      {formError ? <AuthStatusBanner tone="error" message={formError} live /> : null}
+      {bannerError ? <AuthStatusBanner tone="error" message={bannerError} live /> : null}
+      {!ready && !readinessError ? (
+        <AuthStatusBanner tone="info" message="Preparing secure sign-in…" live />
+      ) : null}
 
       <p className="text-jp-sm text-jp-muted">
         {maskedEmail
@@ -118,7 +140,7 @@ export function OtpForm() {
           pattern="\d{6}"
           maxLength={6}
           required
-          disabled={submitting}
+          disabled={controlsDisabled}
           value={otp}
           onChange={(event) => handleOtpChange(event.target.value)}
           aria-invalid={fieldErrors.otp ? true : undefined}
@@ -132,15 +154,15 @@ export function OtpForm() {
         ) : null}
       </div>
 
-      <PrimaryButton type="submit" className="w-full" disabled={submitting || otp.length !== 6}>
-        {submitting ? "Verifying…" : "Verify and continue"}
+      <PrimaryButton type="submit" className="w-full" disabled={controlsDisabled || otp.length !== 6}>
+        {!ready ? "Preparing secure sign-in…" : submitting ? "Verifying…" : "Verify and continue"}
       </PrimaryButton>
 
       <div className="flex items-center justify-between gap-3 text-jp-sm">
         <button
           type="button"
           onClick={() => void handleResend()}
-          disabled={resending || cooldown > 0}
+          disabled={!ready || resending || cooldown > 0}
           className="font-semibold text-jp-primary hover:underline disabled:cursor-not-allowed disabled:text-jp-muted"
         >
           {cooldown > 0 ? `Resend in ${cooldown}s` : resending ? "Sending…" : "Resend code"}

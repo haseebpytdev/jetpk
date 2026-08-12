@@ -70,6 +70,37 @@ class LoginAjaxUxTest extends TestCase
         Mail::assertSent(LoginOtpMail::class);
     }
 
+    public function test_json_login_without_otp_returns_role_dashboard_redirect(): void
+    {
+        $this->makeJetPkProfile();
+        config(['ota_client.auth.require_login_otp' => false]);
+
+        $user = User::factory()->create([
+            'email' => 'staff-ajax@example.test',
+            'password' => Hash::make('SecretPass1'),
+            'account_type' => \App\Enums\AccountType::Staff,
+            'email_verified_at' => now(),
+        ]);
+
+        $this->get('/jetpk/login');
+
+        $response = $this->withHeaders([
+            'Accept' => 'application/json',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->post('/login', [
+            'login' => $user->email,
+            'password' => 'SecretPass1',
+            'client_slug' => 'jetpk',
+        ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'ok' => true,
+            'redirect' => '/staff/dashboard',
+        ]);
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_json_invalid_credentials_return_422_with_generic_login_error(): void
     {
         $this->makeJetPkProfile();

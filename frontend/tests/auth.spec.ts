@@ -76,6 +76,26 @@ test.describe("JP-FE-04 Laravel auth API mocks", () => {
     await expect(page.getByRole("heading", { name: /log in to your account/i })).toBeVisible();
   });
 
+  test("login submit stays disabled until secure sign-in is ready", async ({ page }) => {
+    let csrfResolved = false;
+    await page.route("**/laravel/api/public/content/csrf-token", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      csrfResolved = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ csrf_token: "test-csrf-token" }),
+        headers: { "set-cookie": "XSRF-TOKEN=test-csrf-token; Path=/" },
+      });
+    });
+
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("button", { name: /preparing secure sign-in/i })).toBeDisabled();
+    await expect(page.getByText(/preparing secure sign-in/i).first()).toBeVisible();
+    await expect.poll(() => csrfResolved).toBe(true);
+    await expect(page.getByRole("button", { name: /^sign in$/i })).toBeEnabled();
+  });
+
   test("login invalid credentials show generic error", async ({ page }) => {
     await mockCsrf(page);
     await page.route("**/laravel/login", async (route) => {
@@ -92,7 +112,9 @@ test.describe("JP-FE-04 Laravel auth API mocks", () => {
     await page.goto("/login");
     await page.locator("#main-content").getByLabel(/email or username/i).fill("unknown@example.test");
     await page.locator("#main-content").getByLabel(/^password/i).fill("WrongPassword1");
-    await page.getByRole("button", { name: /sign in/i }).click();
+    const signInButton = page.getByRole("button", { name: /sign in/i });
+    await expect(signInButton).toBeEnabled();
+    await signInButton.click();
     await expect(page.locator("#main-content").getByRole("alert").first()).toContainText(
       /these credentials do not match our records/i,
     );
@@ -107,6 +129,13 @@ test.describe("JP-FE-04 Laravel auth API mocks", () => {
         body: JSON.stringify({ ok: true, requires_otp: true, redirect: "/login/otp" }),
       });
     });
+    await page.route("**/login/otp", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/html",
+        body: "<html><body><h1>Verify your sign-in</h1></body></html>",
+      });
+    });
     await page.route("**/laravel/api/public/auth/otp-challenge", async (route) => {
       await route.fulfill({
         status: 200,
@@ -118,7 +147,9 @@ test.describe("JP-FE-04 Laravel auth API mocks", () => {
     await page.goto("/login");
     await page.locator("#main-content").getByLabel(/email or username/i).fill("user@example.test");
     await page.locator("#main-content").getByLabel(/^password/i).fill("SecretPass1");
-    await page.getByRole("button", { name: /sign in/i }).click();
+    const signInButton = page.getByRole("button", { name: /sign in/i });
+    await expect(signInButton).toBeEnabled();
+    await signInButton.click();
     await expect(page).toHaveURL(/\/login\/otp$/);
   });
 

@@ -67,4 +67,15 @@ class AuthPostLoginRedirectResolverTest extends TestCase
 
         $this->assertSame('/admin/dashboard', $path);
     }
+
+    public function test_staff_lands_on_staff_dashboard(): void
+    {
+        $user = User::factory()->create([
+            'account_type' => AccountType::Staff,
+        ]);
+
+        $path = app(AuthPostLoginRedirectResolver::class)->resolvePath($user);
+
+        $this->assertSame('/staff/dashboard', $path);
+    }
 }
