@@ -1,37 +1,26 @@
 {
   "phase": "JP-OPS-08",
-  "updated_utc": "2026-08-11T21:55:00Z",
+  "updated_utc": "2026-08-12T04:30:00Z",
   "result": "SOURCE_PARITY=PASS",
+  "notes": "Complete intended JP-OPS-08 deployment manifest (Laravel ops + dashboard ops surfaces + wired domain callers/routes).",
   "files": [
-    {
-      "PATH": "app/Services/Ops/OpsInboxService.php",
-      "LOCAL_SHA256": "4d52d0368e9d7d9e92b62cf348bc1453301c8f526a195a136cc62eb9df893931",
-      "PRODUCTION_SHA256": "4d52d0368e9d7d9e92b62cf348bc1453301c8f526a195a136cc62eb9df893931",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "app/Services/Ops/OpsEventDispatcher.php",
-      "LOCAL_SHA256": "fa599ad676211e4fcaf9ec4bfa5c59ec4913be71f8401b03f63460eca399b336",
-      "PRODUCTION_SHA256": "fa599ad676211e4fcaf9ec4bfa5c59ec4913be71f8401b03f63460eca399b336",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "app/Http/Controllers/Api/Dashboard/DashboardOpsController.php",
-      "LOCAL_SHA256": "0c2dee322b179f8a117c11d3489f5d937ba63b39255ccd4d5a26b7725afee45e",
-      "PRODUCTION_SHA256": "0c2dee322b179f8a117c11d3489f5d937ba63b39255ccd4d5a26b7725afee45e",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "app/Services/Dashboard/Api/DashboardOpsReadService.php",
-      "LOCAL_SHA256": "fd576230e2e8b1307b59a9e143975b8281105964acda75968e7b9cc3fadda6ae",
-      "PRODUCTION_SHA256": "fd576230e2e8b1307b59a9e143975b8281105964acda75968e7b9cc3fadda6ae",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "app/Console/Commands/JetpkDash03QaStaffCommand.php",
-      "LOCAL_SHA256": "6344048a5634a9489e0a0fd904a7ed8447e4af230589a76fd11f4aa7d1797c22",
-      "PRODUCTION_SHA256": "6344048a5634a9489e0a0fd904a7ed8447e4af230589a76fd11f4aa7d1797c22",
-      "MATCH": "yes"
-    }
+    {"PATH": "app/Exceptions/StaleOperationalStateException.php", "LOCAL_SHA256": "42c201fc6a5c33e468117cf98d5f7c3e1f424f7825f162b503d8774ca9329787", "PRODUCTION_SHA256": "42c201fc6a5c33e468117cf98d5f7c3e1f424f7825f162b503d8774ca9329787", "MATCH": "yes"},
+    {"PATH": "app/Services/Support/SupportTicketService.php", "LOCAL_SHA256": "09d6a89521cea6c3c8148f5634cb988d405946b57f0dc4f39eb8580304da2341", "PRODUCTION_SHA256": "09d6a89521cea6c3c8148f5634cb988d405946b57f0dc4f39eb8580304da2341", "MATCH": "yes"},
+    {"PATH": "app/Services/Ops/OpsEventDispatcher.php", "LOCAL_SHA256": "d5b29f834dd468f50ab75af031bf5274d7ab44a386866ea4e4baba9fdf8cf649", "PRODUCTION_SHA256": "d5b29f834dd468f50ab75af031bf5274d7ab44a386866ea4e4baba9fdf8cf649", "MATCH": "yes"},
+    {"PATH": "app/Services/Ops/OpsInboxService.php", "LOCAL_SHA256": "4d52d0368e9d7d9e92b62cf348bc1453301c8f526a195a136cc62eb9df893931", "PRODUCTION_SHA256": "4d52d0368e9d7d9e92b62cf348bc1453301c8f526a195a136cc62eb9df893931", "MATCH": "yes"},
+    {"PATH": "app/Http/Controllers/Admin/SupportTicketController.php", "LOCAL_SHA256": "b4ea9ab9a709ddb38459ba3b53882734f881882770db0e2b9a07a4577401b8a0", "PRODUCTION_SHA256": "b4ea9ab9a709ddb38459ba3b53882734f881882770db0e2b9a07a4577401b8a0", "MATCH": "yes"},
+    {"PATH": "app/Http/Controllers/Staff/SupportTicketController.php", "LOCAL_SHA256": "46771230e7f86d44ef7234e99c041ff0d3da049d1ca37b2f618d76408991375b", "PRODUCTION_SHA256": "46771230e7f86d44ef7234e99c041ff0d3da049d1ca37b2f618d76408991375b", "MATCH": "yes"},
+    {"PATH": "app/Http/Requests/Support/AssignSupportTicketRequest.php", "LOCAL_SHA256": "db5a32a9e9a5023b287a41082547fd822685e25bd0a7ef302a534539f325c0ac", "PRODUCTION_SHA256": "db5a32a9e9a5023b287a41082547fd822685e25bd0a7ef302a534539f325c0ac", "MATCH": "yes"},
+    {"PATH": "app/Http/Requests/Support/UpdateSupportTicketStatusRequest.php", "LOCAL_SHA256": "cae508ac99b7a460c9d0d997cf02a7b761a0f3429ddd1e3bdc6f6b27811dff85", "PRODUCTION_SHA256": "cae508ac99b7a460c9d0d997cf02a7b761a0f3429ddd1e3bdc6f6b27811dff85", "MATCH": "yes"},
+    {"PATH": "app/Http/Controllers/Api/Dashboard/DashboardOpsController.php", "LOCAL_SHA256": "0c2dee322b179f8a117c11d3489f5d937ba63b39255ccd4d5a26b7725afee45e", "PRODUCTION_SHA256": "0c2dee322b179f8a117c11d3489f5d937ba63b39255ccd4d5a26b7725afee45e", "MATCH": "yes"},
+    {"PATH": "app/Services/Dashboard/Api/DashboardOpsReadService.php", "LOCAL_SHA256": "fd576230e2e8b1307b59a9e143975b8281105964acda75968e7b9cc3fadda6ae", "PRODUCTION_SHA256": "fd576230e2e8b1307b59a9e143975b8281105964acda75968e7b9cc3fadda6ae", "MATCH": "yes"},
+    {"PATH": "app/Console/Commands/JetpkDash03QaStaffCommand.php", "LOCAL_SHA256": "6344048a5634a9489e0a0fd904a7ed8447e4af230589a76fd11f4aa7d1797c22", "PRODUCTION_SHA256": "6344048a5634a9489e0a0fd904a7ed8447e4af230589a76fd11f4aa7d1797c22", "MATCH": "yes"},
+    {"PATH": "app/Services/Booking/BookingService.php", "LOCAL_SHA256": "348414dae2800e047c9470f74d76b0fbd562d3b450b0ad8893df83a8b8f6de61", "PRODUCTION_SHA256": "348414dae2800e047c9470f74d76b0fbd562d3b450b0ad8893df83a8b8f6de61", "MATCH": "yes"},
+    {"PATH": "app/Services/Agents/AgentWalletService.php", "LOCAL_SHA256": "e4c9cd7ef80e19b27297e270d14f2a584adc8b7ba6ecad5640335ebf39653280", "PRODUCTION_SHA256": "e4c9cd7ef80e19b27297e270d14f2a584adc8b7ba6ecad5640335ebf39653280", "MATCH": "yes"},
+    {"PATH": "routes/api-dashboard.php", "LOCAL_SHA256": "7afb21c44aa25cf7146dfbae754edda77ee388f7b20c65aae43858c14ab29443", "PRODUCTION_SHA256": "7afb21c44aa25cf7146dfbae754edda77ee388f7b20c65aae43858c14ab29443", "MATCH": "yes"},
+    {"PATH": "dashboard/features/ops/live-operations-panel.tsx", "LOCAL_SHA256": "246eb707e907a5b82085bd36fe876f7a32a59dce6c25d2aea035b8a0c399ebfe", "PRODUCTION_SHA256": "246eb707e907a5b82085bd36fe876f7a32a59dce6c25d2aea035b8a0c399ebfe", "MATCH": "yes"},
+    {"PATH": "dashboard/services/ops-service.ts", "LOCAL_SHA256": "42c5f2b68fc5a15c519a5f8dbe5b943483cc8948192a6b2e83f3737ec2dc67ab", "PRODUCTION_SHA256": "42c5f2b68fc5a15c519a5f8dbe5b943483cc8948192a6b2e83f3737ec2dc67ab", "MATCH": "yes"},
+    {"PATH": "dashboard/lib/read-only/laravel/api-base.ts", "LOCAL_SHA256": "03e3148d0a8642b53a6b229b5cbca932630e17dedbc50be28f130deb605daa0d", "PRODUCTION_SHA256": "03e3148d0a8642b53a6b229b5cbca932630e17dedbc50be28f130deb605daa0d", "MATCH": "yes"},
+    {"PATH": "dashboard/features/audit/audit-workspace.tsx", "LOCAL_SHA256": "36908a08bb8ae277e50c9f1f248b9a0a25eaec6066f19b48a18e662ce157f38d", "PRODUCTION_SHA256": "36908a08bb8ae277e50c9f1f248b9a0a25eaec6066f19b48a18e662ce157f38d", "MATCH": "yes"}
   ]
 }
