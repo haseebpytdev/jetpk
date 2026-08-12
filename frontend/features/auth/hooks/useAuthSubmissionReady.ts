@@ -23,8 +23,12 @@ export function useAuthSubmissionReady(): AuthSubmissionReadyState {
   useEffect(() => {
     let cancelled = false;
 
-    void ensureLaravelCsrfToken()
-      .then((token) => {
+    async function prepare() {
+      try {
+        let token = await ensureLaravelCsrfToken();
+        if (!token) {
+          token = await ensureLaravelCsrfToken(true);
+        }
         if (cancelled) return;
         if (!token) {
           setState({
@@ -36,15 +40,28 @@ export function useAuthSubmissionReady(): AuthSubmissionReadyState {
         }
 
         setState({ ready: true, csrfReady: true, error: null });
-      })
-      .catch(() => {
+      } catch {
+        if (cancelled) return;
+        try {
+          const token = await ensureLaravelCsrfToken(true);
+          if (cancelled) return;
+          if (token) {
+            setState({ ready: true, csrfReady: true, error: null });
+            return;
+          }
+        } catch {
+          // fall through
+        }
         if (cancelled) return;
         setState({
           ready: false,
           csrfReady: false,
           error: "Network error. Check your connection and try again.",
         });
-      });
+      }
+    }
+
+    void prepare();
 
     return () => {
       cancelled = true;

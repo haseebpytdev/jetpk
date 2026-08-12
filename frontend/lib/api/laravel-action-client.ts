@@ -201,8 +201,9 @@ export async function laravelRequest<T>(
   if (
     !result.ok &&
     result.code === "network" &&
-    method === "GET" &&
-    options.retryOnNetworkError
+    (options.retryOnNetworkError ||
+      (method !== "GET" &&
+        (path === "/login" || path === "/login/otp" || path === "/login/otp/resend" || path === "/logout")))
   ) {
     result = await executeRequest<T>(path, options);
   }

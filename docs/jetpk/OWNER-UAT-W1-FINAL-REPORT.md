@@ -4,6 +4,8 @@
 
 `OWNER_UAT_WAVE_1=PASS_READY_FOR_OWNER_RETEST`
 
+Auth browser gate reopened and re-proven after owner Network-error report. See `OWNER-UAT-W1-AUTH-BROWSER-EVIDENCE.md`.
+
 ## Branch / baseline
 
 | Item | Value |

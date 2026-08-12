@@ -1,12 +1,11 @@
 "use client";
 
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { useRouter } from "next/navigation";
+import { ensureLaravelCsrfToken } from "@/lib/api";
 import { useState } from "react";
 import { useAuthSubmissionReady } from "../hooks/useAuthSubmissionReady";
 import { login } from "../services/auth-service";
 import { mapFieldErrors } from "../utils/laravel-auth-api";
-import { isNextJsOwnedPath } from "../utils/dashboard-allowlist";
 import { AuthStatusBanner } from "./AuthStatusBanner";
 import { PasswordField } from "./PasswordField";
 
@@ -27,7 +26,6 @@ function resolveLoginErrorMessage(result: Extract<Awaited<ReturnType<typeof logi
 }
 
 export function LoginForm() {
-  const router = useRouter();
   const { ready, error: readinessError } = useAuthSubmissionReady();
   const [loginValue, setLoginValue] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +43,15 @@ export function LoginForm() {
     setFieldErrors({});
 
     try {
+      // Refresh CSRF immediately before credential POST so cookie/body token
+      // stay aligned with the Laravel session established through /laravel rewrite.
+      const csrf = await ensureLaravelCsrfToken(true);
+      if (!csrf) {
+        setSubmitting(false);
+        setFormError("Unable to prepare secure sign-in. Please refresh and try again.");
+        return;
+      }
+
       const result = await login({ login: loginValue.trim(), password, remember });
 
       if (!result.ok) {
@@ -55,17 +62,13 @@ export function LoginForm() {
       }
 
       if (result.requires_otp) {
-        setSubmitting(false);
         window.location.assign("/login/otp");
         return;
       }
 
-      if (isNextJsOwnedPath(result.redirect)) {
-        router.push(result.redirect);
-        router.refresh();
-        return;
-      }
-
+      // Hard navigation after session establishment — soft App Router transitions
+      // can race the Set-Cookie from /laravel/login and surface as a false
+      // client "network" failure while the session cookie is already valid.
       window.location.assign(result.redirect);
     } catch {
       setSubmitting(false);

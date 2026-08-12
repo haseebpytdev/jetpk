@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuthSubmissionReady } from "../hooks/useAuthSubmissionReady";
 import { fetchOtpChallenge, resendOtp, verifyOtp } from "../services/auth-service";
 import { mapFieldErrors } from "../utils/laravel-auth-api";
-import { isNextJsOwnedPath } from "../utils/dashboard-allowlist";
 import { AuthStatusBanner } from "./AuthStatusBanner";
 
 const fieldClass =
@@ -83,12 +82,8 @@ export function OtpForm() {
     }
 
     const destination = result.dashboard_url ?? result.redirect;
-    if (isNextJsOwnedPath(destination)) {
-      router.push(destination);
-      router.refresh();
-      return;
-    }
-
+    // Hard navigation after OTP verifies the session cookie across the
+    // /laravel rewrite boundary (same rationale as LoginForm).
     window.location.assign(destination);
   }
 
