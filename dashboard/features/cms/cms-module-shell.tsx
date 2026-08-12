@@ -31,7 +31,11 @@ export function CmsModuleShell({ module, result }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Inventory & pricing" }, { label: "CMS" }, { label: current.label }]} />
         }
         title="CMS"
-        description="Theme-aware structured content metadata with read-only Laravel integration for pages."
+        description={
+          module === "pages"
+            ? "Operational cms_pages: list, view, and local edit/archive via Laravel JSON. No Page Builder."
+            : "Baseline CMS modules. Pages are operational; banners/notices/assets remain read-only until a Laravel write domain exists (no migration in Wave 2)."
+        }
       />
       <DataSourceNoticeSlot />
 
