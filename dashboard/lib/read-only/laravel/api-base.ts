@@ -54,6 +54,7 @@ export const DASHBOARD_API_ROUTES = {
   supportTickets: "/support/tickets",
   supportTicketDetail: (id: string) => `/support/tickets/${encodeURIComponent(id)}`,
   markups: "/markups",
+  communicationsFailures: "/communications/failures",
   agentApplications: "/agent-applications",
   commissions: "/commissions",
   systemHealth: "/system/health",

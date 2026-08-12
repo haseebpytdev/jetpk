@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Support\Bookings\BookingListPresenter;
 use App\Support\Dashboard\DashboardMoneyPresenter;
+use App\Support\Dashboard\DashboardPermissionResolver;
 use App\Support\Staff\StaffPermission;
 use Illuminate\Support\Collection;
 
@@ -237,6 +238,7 @@ final class DashboardOverviewResource
             'refunds_pending' => $user->hasStaffPermission(StaffPermission::RefundsApprove),
             'cancellations_pending' => $user->hasStaffPermission(StaffPermission::CancellationsApprove),
             'ticketing_pending' => $user->hasStaffPermission(StaffPermission::TicketingIssue),
+            'failed_notifications' => DashboardPermissionResolver::canViewSettings($user),
             default => $user->hasStaffPermission(StaffPermission::BookingsView),
         };
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Dashboard\DashboardAuditController;
 use App\Http\Controllers\Api\Dashboard\DashboardBookingsController;
 use App\Http\Controllers\Api\Dashboard\DashboardCmsController;
 use App\Http\Controllers\Api\Dashboard\DashboardCommissionsController;
+use App\Http\Controllers\Api\Dashboard\DashboardCommunicationsController;
 use App\Http\Controllers\Api\Dashboard\DashboardCustomersController;
 use App\Http\Controllers\Api\Dashboard\DashboardDepositsController;
 use App\Http\Controllers\Api\Dashboard\DashboardMarkupsController;
@@ -195,6 +196,8 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
             ->name('settings.notifications');
         Route::get('/settings/integrations', [DashboardSettingsController::class, 'integrations'])
             ->name('settings.integrations');
+        Route::get('/communications/failures', [DashboardCommunicationsController::class, 'index'])
+            ->name('communications.failures');
         Route::get('/markups', [DashboardMarkupsController::class, 'index'])
             ->name('markups.index');
         Route::get('/system/health', [DashboardSystemHealthController::class, 'show'])

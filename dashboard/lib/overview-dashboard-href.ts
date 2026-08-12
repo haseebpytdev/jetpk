@@ -21,6 +21,10 @@ export function resolveOverviewDashboardHref(
   const route = input.laravelRoute ?? "";
   const queue = input.queue ?? "";
 
+  if (route.includes("communication") || route.includes("delivery-log") || route.includes("notification")) {
+    return dashboardHref(portal, "/notifications/failures");
+  }
+
   if (route.includes("support")) {
     return dashboardHref(portal, "/support");
   }

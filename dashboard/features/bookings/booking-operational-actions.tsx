@@ -10,15 +10,22 @@ import {
   storeBookingPayment,
   assignBookingStaff,
 } from "@/services/operational-api";
+import type { BookingStatus, PaymentStatus } from "@/types/booking";
 
 const PAYMENT_METHODS = ["bank_transfer", "cash", "card", "wallet", "office"] as const;
 
 export function BookingOperationalActions({
   bookingId,
   defaultCurrency = "",
+  bookingStatus = "pending",
+  paymentStatus = "unpaid",
+  amountPaid = 0,
 }: {
   bookingId: string;
   defaultCurrency?: string;
+  bookingStatus?: BookingStatus;
+  paymentStatus?: PaymentStatus;
+  amountPaid?: number;
 }) {
   const portal = useDashboardPortal();
   const isLive = useDashboardLiveMode();
@@ -32,6 +39,13 @@ export function BookingOperationalActions({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const isCancelled = bookingStatus === "cancelled";
+  const isFailed = bookingStatus === "failed";
+  const canRecordPayment =
+    !isCancelled && !isFailed && (paymentStatus === "unpaid" || paymentStatus === "partial" || paymentStatus === "pending");
+  const canRequestRefund = !isFailed && amountPaid > 0 && (paymentStatus === "paid" || paymentStatus === "partial");
+  const canRequestCancellation = !isCancelled && !isFailed;
 
   if (!isLive) {
     return (
@@ -155,120 +169,130 @@ export function BookingOperationalActions({
         </button>
       </div>
 
-      <div className="space-y-2 border-t border-jp-border pt-4">
-        <h3 className="text-sm font-semibold text-gray-900">Record payment</h3>
-        <div className="grid gap-2 sm:grid-cols-3">
-          <label className="block text-xs font-medium text-jp-muted">
-            Amount {moneyCurrency ? `(${moneyCurrency})` : ""}
-            <input
-              type="text"
-              inputMode="decimal"
-              className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
-              value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value)}
-              data-testid="booking-payment-amount"
-            />
-          </label>
-          <label className="block text-xs font-medium text-jp-muted">
-            Method
-            <select
-              className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value as (typeof PAYMENT_METHODS)[number])}
-              data-testid="booking-payment-method"
-            >
-              {PAYMENT_METHODS.map((method) => (
-                <option key={method} value={method}>
-                  {method.replace(/_/g, " ")}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="flex items-end">
-            <button
-              type="button"
-              className="min-h-11 w-full rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
-              disabled={busy}
-              onClick={handleRecordPayment}
-              data-testid="booking-payment-store"
-            >
-              Record payment
-            </button>
+      {canRecordPayment ? (
+        <div className="space-y-2 border-t border-jp-border pt-4">
+          <h3 className="text-sm font-semibold text-gray-900">Record payment</h3>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <label className="block text-xs font-medium text-jp-muted">
+              Amount {moneyCurrency ? `(${moneyCurrency})` : ""}
+              <input
+                type="text"
+                inputMode="decimal"
+                className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                data-testid="booking-payment-amount"
+              />
+            </label>
+            <label className="block text-xs font-medium text-jp-muted">
+              Method
+              <select
+                className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value as (typeof PAYMENT_METHODS)[number])}
+                data-testid="booking-payment-method"
+              >
+                {PAYMENT_METHODS.map((method) => (
+                  <option key={method} value={method}>
+                    {method.replace(/_/g, " ")}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex items-end">
+              <button
+                type="button"
+                className="min-h-11 w-full rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
+                disabled={busy}
+                onClick={handleRecordPayment}
+                data-testid="booking-payment-store"
+              >
+                Record payment
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
-      <div className="space-y-2 border-t border-jp-border pt-4">
-        <h3 className="text-sm font-semibold text-gray-900">Request refund</h3>
-        <div className="grid gap-2 sm:grid-cols-2">
+      {canRequestRefund ? (
+        <div className="space-y-2 border-t border-jp-border pt-4">
+          <h3 className="text-sm font-semibold text-gray-900">Request refund</h3>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="block text-xs font-medium text-jp-muted">
+              Amount {moneyCurrency ? `(${moneyCurrency})` : ""}
+              <input
+                type="text"
+                inputMode="decimal"
+                className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                data-testid="booking-refund-amount"
+              />
+            </label>
+            <label className="block text-xs font-medium text-jp-muted">
+              Method
+              <select
+                className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
+                value={refundMethod}
+                onChange={(e) => setRefundMethod(e.target.value as (typeof PAYMENT_METHODS)[number])}
+                data-testid="booking-refund-method"
+              >
+                {PAYMENT_METHODS.map((method) => (
+                  <option key={method} value={method}>
+                    {method.replace(/_/g, " ")}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <label className="block text-xs font-medium text-jp-muted">
-            Amount {moneyCurrency ? `(${moneyCurrency})` : ""}
+            Reason
             <input
               type="text"
-              inputMode="decimal"
               className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
-              value={refundAmount}
-              onChange={(e) => setRefundAmount(e.target.value)}
-              data-testid="booking-refund-amount"
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+              data-testid="booking-refund-reason"
             />
           </label>
-          <label className="block text-xs font-medium text-jp-muted">
-            Method
-            <select
-              className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
-              value={refundMethod}
-              onChange={(e) => setRefundMethod(e.target.value as (typeof PAYMENT_METHODS)[number])}
-              data-testid="booking-refund-method"
-            >
-              {PAYMENT_METHODS.map((method) => (
-                <option key={method} value={method}>
-                  {method.replace(/_/g, " ")}
-                </option>
-              ))}
-            </select>
-          </label>
+          <button
+            type="button"
+            className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
+            disabled={busy}
+            onClick={handleRequestRefund}
+            data-testid="booking-refund-store"
+          >
+            Request refund
+          </button>
         </div>
-        <label className="block text-xs font-medium text-jp-muted">
-          Reason
-          <input
-            type="text"
-            className="mt-1 w-full rounded-lg border border-jp-border p-2 text-sm"
-            value={refundReason}
-            onChange={(e) => setRefundReason(e.target.value)}
-            data-testid="booking-refund-reason"
-          />
-        </label>
-        <button
-          type="button"
-          className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
-          disabled={busy}
-          onClick={handleRequestRefund}
-          data-testid="booking-refund-store"
-        >
-          Request refund
-        </button>
-      </div>
+      ) : null}
 
       <div className="flex flex-wrap gap-2 border-t border-jp-border pt-4">
-        <button
-          type="button"
-          className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            setError(null);
-            const result = await storeCancellationRequest(portal, bookingId, {
-              cancellation_type: "booking_cancel",
-              reason: "Operator requested cancellation",
-            });
-            setBusy(false);
-            if (!result.ok) setError(result.message ?? "Request failed");
-            else setSuccess("Cancellation request created.");
-          }}
-          data-testid="booking-cancellation-store"
-        >
-          Request cancellation
-        </button>
+        {canRequestCancellation ? (
+          <button
+            type="button"
+            className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setError(null);
+              const result = await storeCancellationRequest(portal, bookingId, {
+                cancellation_type: "booking_cancel",
+                reason: "Operator requested cancellation",
+              });
+              setBusy(false);
+              if (!result.ok) setError(result.message ?? "Request failed");
+              else setSuccess("Cancellation request created.");
+            }}
+            data-testid="booking-cancellation-store"
+          >
+            Request cancellation
+          </button>
+        ) : (
+          <p className="text-xs text-jp-muted" data-testid="booking-cancellation-ineligible">
+            Cancellation request is not available for {bookingStatus} bookings.
+          </p>
+        )}
         {portal === "admin" ? (
           <button
             type="button"

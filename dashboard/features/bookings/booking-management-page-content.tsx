@@ -111,7 +111,13 @@ export async function BookingManagementPageContent({ bookingId }: Props) {
             <section className="rounded-2xl border border-jp-border bg-white p-4 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-900">Operational actions</h2>
               <div className="mt-3">
-                <BookingOperationalActions bookingId={booking.id} defaultCurrency={booking.currency} />
+                <BookingOperationalActions
+                  bookingId={booking.id}
+                  defaultCurrency={booking.currency}
+                  bookingStatus={booking.bookingStatus}
+                  paymentStatus={booking.paymentStatus}
+                  amountPaid={booking.amountPaid}
+                />
               </div>
             </section>
           </aside>

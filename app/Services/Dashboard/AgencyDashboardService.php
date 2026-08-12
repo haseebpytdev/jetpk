@@ -580,9 +580,9 @@ class AgencyDashboardService
                 'key' => 'failed_notifications',
                 'label' => 'Failed notifications',
                 'count' => $counts['failed_notifications'],
-                'helper' => 'Communications that need a retry.',
-                'route' => 'admin.bookings',
-                'route_params' => ['queue' => 'all'],
+                'helper' => 'Communication delivery failures needing review (no blind retry).',
+                'route' => 'admin.settings.communications.delivery-log.index',
+                'route_params' => ['status' => 'failed'],
             ],
         ];
     }

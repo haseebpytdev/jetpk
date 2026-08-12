@@ -177,7 +177,13 @@ export function BookingDetailDrawerContent({
       <Divider />
 
       {showOperationalActions ? (
-        <BookingOperationalActions bookingId={booking.id} defaultCurrency={booking.currency} />
+        <BookingOperationalActions
+          bookingId={booking.id}
+          defaultCurrency={booking.currency}
+          bookingStatus={booking.bookingStatus}
+          paymentStatus={booking.paymentStatus}
+          amountPaid={booking.amountPaid}
+        />
       ) : null}
     </div>
   );
