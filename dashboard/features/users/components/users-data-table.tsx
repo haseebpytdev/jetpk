@@ -11,31 +11,42 @@ type Props = {
   pageSize: number;
   onSort: (field: UserSortField) => void;
   onView: (id: string) => void;
+  mode?: "users" | "staff";
 };
-
-const COLUMNS: { key: string; label: string; sortable?: boolean; sortField?: UserSortField }[] = [
-  { key: "serial", label: "#" },
-  { key: "fullName", label: "User", sortable: true, sortField: "fullName" },
-  { key: "email", label: "Email", sortable: true, sortField: "email" },
-  { key: "userType", label: "User type", sortable: true, sortField: "userType" },
-  { key: "jobRole", label: "Job title / Role" },
-  { key: "department", label: "Department / Agency", sortable: true, sortField: "department" },
-  { key: "status", label: "Status", sortable: true, sortField: "status" },
-  { key: "actions", label: "Actions" },
-];
 
 function serialLabel(page: number, pageSize: number, index: number): string {
   const n = (page - 1) * pageSize + index + 1;
   return String(n).padStart(2, "0");
 }
 
-export function UsersDataTable({ rows, sort, direction, page, pageSize, onSort, onView }: Props) {
+export function UsersDataTable({
+  rows,
+  sort,
+  direction,
+  page,
+  pageSize,
+  onSort,
+  onView,
+  mode = "users",
+}: Props) {
+  const orgLabel = mode === "staff" ? "Department" : "Department / Agency";
+  const columns: { key: string; label: string; sortable?: boolean; sortField?: UserSortField }[] = [
+    { key: "serial", label: "#" },
+    { key: "fullName", label: mode === "staff" ? "Staff" : "User", sortable: true, sortField: "fullName" },
+    { key: "email", label: "Email", sortable: true, sortField: "email" },
+    { key: "userType", label: "Type", sortable: true, sortField: "userType" },
+    { key: "jobRole", label: "Job title / Role" },
+    { key: "department", label: orgLabel, sortable: true, sortField: "department" },
+    { key: "status", label: "Status", sortable: true, sortField: "status" },
+    { key: "actions", label: "Actions" },
+  ];
+
   return (
-    <div className="hidden md:block" data-testid="users-table">
+    <div className="hidden md:block" data-testid={mode === "staff" ? "staff-table" : "users-table"}>
       <Table>
         <thead>
           <tr>
-            {COLUMNS.map((col) => (
+            {columns.map((col) => (
               <Th key={col.key}>
                 {col.sortable && col.sortField ? (
                   <button
@@ -71,16 +82,16 @@ export function UsersDataTable({ rows, sort, direction, page, pageSize, onSort, 
                   {row.assignedRoleNames.length > 0 ? row.assignedRoleNames.join(", ") : "No roles"}
                 </div>
               </Td>
-              <Td>{row.department || "—"}</Td>
+              <Td>{row.orgLabel || row.department || row.agencyName || "—"}</Td>
               <Td>
                 <UserStatusBadge status={row.status} />
               </Td>
               <Td>
                 <button
                   type="button"
-                  className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
+                  className="text-sm font-medium text-jp-accent hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
                   onClick={() => onView(row.id)}
-                  aria-label={`View user ${row.fullName}`}
+                  data-testid="user-view-button"
                 >
                   View
                 </button>
@@ -89,9 +100,6 @@ export function UsersDataTable({ rows, sort, direction, page, pageSize, onSort, 
           ))}
         </tbody>
       </Table>
-      <p className="mt-2 text-xs text-jp-muted">
-        Internal user ID, MFA, last sign-in, sessions, and validation details remain in View user.
-      </p>
     </div>
   );
 }

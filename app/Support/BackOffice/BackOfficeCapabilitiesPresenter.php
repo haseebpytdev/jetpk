@@ -232,7 +232,7 @@ class BackOfficeCapabilitiesPresenter
             $administration[] = $this->dashboardNav('Users', 'users', '/users');
         }
         if ($isAdmin) {
-            $administration[] = $this->dashboardNav('Staff', 'staff', '/users');
+            $administration[] = $this->dashboardNav('Staff', 'staff', '/staff');
             $administration[] = $this->dashboardNav('Roles & permissions', 'roles-permissions', '/users/roles');
         }
         if ($administration !== []) {

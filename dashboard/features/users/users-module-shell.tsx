@@ -16,9 +16,11 @@ type Props = {
   module: UsersModuleKey;
   result?: UsersModuleResult;
   children?: React.ReactNode;
+  directoryScope?: "users" | "staff";
 };
 
-export function UsersModuleShell({ module, result, children }: Props) {
+export function UsersModuleShell({ module, result, children, directoryScope = "users" }: Props) {
+  const isStaff = directoryScope === "staff";
   const current = SUBROUTES.find((r) => r.key === module) ?? SUBROUTES[0];
 
   return (
@@ -26,40 +28,53 @@ export function UsersModuleShell({ module, result, children }: Props) {
       <PreviewModeBadgeSlot />
       <PageHeader
         breadcrumb={
-          <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Users" }, { label: current.label }]} />
+          <Breadcrumb
+            items={[
+              { label: "Home" },
+              { label: "Administration" },
+              { label: isStaff ? "Staff" : "Users" },
+              ...(isStaff ? [] : [{ label: current.label }]),
+            ]}
+          />
         }
-        title="Users"
-        description="Dashboard user directory, roles, and permissions with read-only Laravel integration."
+        title={isStaff ? "Staff" : "Users"}
+        description={
+          isStaff
+            ? "Internal JetPakistan employees only. Agent and Agent Staff accounts are listed under Users."
+            : "All platform accounts: Platform Admin, Staff, Customer, Agent, and Agent Staff."
+        }
       />
       <DataSourceNoticeSlot />
 
-      <nav aria-label="Users sections" className="flex flex-wrap gap-2">
-        {SUBROUTES.map((route) => (
-          <Link
-            key={route.key}
-            href={route.href}
-            className="min-h-11 rounded-xl border border-jp-border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent aria-[current=page]:border-jp-accent aria-[current=page]:bg-emerald-50"
-            aria-current={route.key === module ? "page" : undefined}
-          >
-            {route.label}
-          </Link>
-        ))}
-      </nav>
+      {isStaff ? null : (
+        <nav aria-label="Users sections" className="flex flex-wrap gap-2">
+          {SUBROUTES.map((route) => (
+            <Link
+              key={route.key}
+              href={route.href}
+              className="min-h-11 rounded-xl border border-jp-border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent aria-[current=page]:border-jp-accent aria-[current=page]:bg-emerald-50"
+              aria-current={route.key === module ? "page" : undefined}
+            >
+              {route.label}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {module !== "directory" && children ? (
         children
       ) : module === "directory" && result?.state === "loading" ? (
-        <UsersLoadingState />
+        <UsersLoadingState label={isStaff ? "staff" : "users"} />
       ) : module === "directory" && result ? (
-        <UsersWorkspace result={result} />
+        <UsersWorkspace result={result} basePath={isStaff ? "/staff" : "/users"} />
       ) : null}
     </PageContainer>
   );
 }
 
-function UsersLoadingState() {
+function UsersLoadingState({ label }: { label: string }) {
   return (
-    <div aria-busy="true" aria-label="Loading users" data-testid="users-loading-state">
+    <div aria-busy="true" aria-label={`Loading ${label}`} data-testid="users-loading-state">
       <Skeleton className="h-24 w-full" />
       <Skeleton className="mt-4 h-40 w-full" />
     </div>

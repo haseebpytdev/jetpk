@@ -26,6 +26,8 @@ export type UserType =
   | "administrator"
   | "operationsManager"
   | "bookingAgent"
+  | "agentStaff"
+  | "customer"
   | "ticketingAgent"
   | "financeOfficer"
   | "customerSupport"
@@ -485,10 +487,12 @@ export type SettingsCategoryDefinition = {
 };
 
 export const USER_TYPE_LABELS: Record<UserType, string> = {
-  superAdministrator: "Super Administrator",
+  superAdministrator: "Platform Admin",
   administrator: "Administrator",
-  operationsManager: "Operations Manager",
-  bookingAgent: "Booking Agent",
+  operationsManager: "Staff",
+  bookingAgent: "Agent",
+  agentStaff: "Agent Staff",
+  customer: "Customer",
   ticketingAgent: "Ticketing Agent",
   financeOfficer: "Finance Officer",
   customerSupport: "Customer Support",

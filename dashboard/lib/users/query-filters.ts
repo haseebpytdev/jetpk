@@ -15,6 +15,7 @@ export function countActiveUserFilters(query: UsersQuery): number {
   if (query.status !== "all") count += 1;
   if (query.userType !== "all") count += 1;
   if (query.department) count += 1;
+  if (query.agency) count += 1;
   if (query.role) count += 1;
   if (query.mfa !== "all") count += 1;
   if (query.verification !== "all") count += 1;

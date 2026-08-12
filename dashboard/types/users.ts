@@ -28,6 +28,7 @@ export type UsersQuery = {
   status: UserStatus | "all";
   userType: UserType | "all";
   department: string;
+  agency: string;
   role: string;
   mfa: MfaState | "all";
   verification: UserVerificationState | "all";
@@ -38,6 +39,7 @@ export type UsersQuery = {
   sort: UserSortField;
   direction: SortDirection;
   selected: string | null;
+  directoryScope: "users" | "staff";
   state: string;
   previewError: boolean;
   previewLoading: boolean;
@@ -61,6 +63,8 @@ export type UserTableRow = {
   displayName: string;
   email: string;
   department: string;
+  agencyName?: string;
+  orgLabel?: string;
   jobTitle: string;
   userType: UserType;
   userTypeLabel: string;

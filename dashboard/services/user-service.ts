@@ -35,10 +35,12 @@ function toLaravelQuery(query: UsersQuery): Record<string, string | number> {
     pageSize: query.pageSize,
     q: query.search,
     status: query.status,
-    accountType: query.userType,
+    accountType: query.directoryScope === "staff" ? "staff" : query.userType,
+    scope: query.directoryScope ?? "users",
     role: query.role,
     verificationState: query.verification,
     department: query.department,
+    agency: query.agency,
     sort: query.sort,
     direction: query.direction,
   };

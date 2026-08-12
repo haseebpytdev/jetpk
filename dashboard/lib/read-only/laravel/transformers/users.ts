@@ -9,7 +9,7 @@ export function transformUsersModule(
   selectedUser: User | null,
 ): UsersModuleResult {
   const users = payload.users as UserTableRow[];
-  const departments = [...new Set(users.map((u) => u.department).filter(Boolean))];
+  const departments = [...new Set(users.map((u) => u.department).filter((d) => d && d !== "—"))];
   const roles = users.flatMap((u) =>
     (u.assignedRoleNames ?? []).map((name, i) => ({
       id: `role-${i}`,
@@ -17,6 +17,7 @@ export function transformUsersModule(
     })),
   );
   const uniqueRoles = [...new Map(roles.map((r) => [r.name, r])).values()];
+  const payloadFacets = (payload as { facets?: { userTypes?: UserType[]; statuses?: UserStatus[] } }).facets;
 
   return {
     state: pagination.total === 0 ? "empty" : "ready",
@@ -41,8 +42,10 @@ export function transformUsersModule(
     facets: {
       departments,
       roles: uniqueRoles,
-      statuses: ["active", "invited", "suspended", "locked", "disabled"] as UserStatus[],
-      userTypes: [...new Set(users.map((u) => u.userType))] as UserType[],
+      statuses: (payloadFacets?.statuses as UserStatus[]) ?? (["active", "invited", "suspended", "locked", "disabled"] as UserStatus[]),
+      userTypes:
+        (payloadFacets?.userTypes as UserType[]) ??
+        ([...new Set(users.map((u) => u.userType))] as UserType[]),
     },
     selectedUser,
     validationSummary: {

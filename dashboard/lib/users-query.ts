@@ -25,6 +25,8 @@ const USER_TYPES: UserType[] = [
   "administrator",
   "operationsManager",
   "bookingAgent",
+  "agentStaff",
+  "customer",
   "ticketingAgent",
   "financeOfficer",
   "customerSupport",
@@ -81,15 +83,18 @@ function parsePageSize(raw: string): number {
 
 export function parseUsersQuery(
   searchParams: Record<string, string | string[] | undefined>,
+  defaults?: Partial<UsersQuery>,
 ): UsersQuery {
   const sortRaw = first(searchParams.sort);
   const directionRaw = first(searchParams.direction);
+  const scopeRaw = first(searchParams.scope) || defaults?.directoryScope || "users";
 
   return {
     search: first(searchParams.search).trim() || first(searchParams.q).trim(),
     status: parseEnum(first(searchParams.status), USER_STATUSES, "all"),
     userType: parseEnum(first(searchParams.userType), USER_TYPES, "all"),
     department: first(searchParams.department),
+    agency: first(searchParams.agency),
     role: first(searchParams.role),
     mfa: parseEnum(first(searchParams.mfa), MFA_STATES, "all"),
     verification: parseEnum(first(searchParams.verification), VERIFICATION_STATES, "all"),
@@ -100,6 +105,7 @@ export function parseUsersQuery(
     sort: SORT_FIELDS.includes(sortRaw as UserSortField) ? (sortRaw as UserSortField) : "fullName",
     direction: directionRaw === "asc" || directionRaw === "desc" ? directionRaw : "asc",
     selected: first(searchParams.selected) || null,
+    directoryScope: scopeRaw === "staff" ? "staff" : "users",
     state: first(searchParams.state),
     previewError: first(searchParams.previewError) === "1",
     previewLoading: first(searchParams.previewLoading) === "1",
@@ -111,10 +117,12 @@ export function usersQueryToSearchParams(query: UsersQuery, overrides?: Partial<
   const merged = { ...query, ...overrides };
   const params = new URLSearchParams();
 
+  if (merged.directoryScope === "staff") params.set("scope", "staff");
   if (merged.search) params.set("search", merged.search);
   if (merged.status !== "all") params.set("status", merged.status);
-  if (merged.userType !== "all") params.set("userType", merged.userType);
+  if (merged.userType !== "all" && merged.directoryScope !== "staff") params.set("userType", merged.userType);
   if (merged.department) params.set("department", merged.department);
+  if (merged.agency && merged.directoryScope !== "staff") params.set("agency", merged.agency);
   if (merged.role) params.set("role", merged.role);
   if (merged.mfa !== "all") params.set("mfa", merged.mfa);
   if (merged.verification !== "all") params.set("verification", merged.verification);

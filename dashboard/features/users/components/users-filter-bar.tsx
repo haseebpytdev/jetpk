@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
@@ -13,13 +13,15 @@ import type { UsersModuleResult, UsersQuery } from "@/types/users";
 type Props = {
   query: UsersQuery;
   facets: UsersModuleResult["facets"];
+  basePath?: "/users" | "/staff";
 };
 
-export function UsersFilterBar({ query, facets }: Props) {
+export function UsersFilterBar({ query, facets, basePath = "/users" }: Props) {
   const router = useDashboardRouter();
   const [pending, startTransition] = useTransition();
   const [draft, setDraft] = useState(query);
   const [moreOpen, setMoreOpen] = useState(false);
+  const isStaff = basePath === "/staff" || query.directoryScope === "staff";
 
   useEffect(() => {
     setDraft(query);
@@ -27,10 +29,13 @@ export function UsersFilterBar({ query, facets }: Props) {
 
   const pushQuery = useCallback(
     (next: UsersQuery) => {
-      const href = `/users${usersQueryToSearchParams(next)}`;
+      const href = `${basePath}${usersQueryToSearchParams({
+        ...next,
+        directoryScope: isStaff ? "staff" : next.directoryScope,
+      })}`;
       startTransition(() => router.push(href));
     },
-    [router],
+    [router, basePath, isStaff],
   );
 
   const apply = () => pushQuery({ ...draft, page: 1 });
@@ -41,6 +46,7 @@ export function UsersFilterBar({ query, facets }: Props) {
       status: "all",
       userType: "all",
       department: "",
+      agency: "",
       role: "",
       mfa: "all",
       verification: "all",
@@ -54,6 +60,7 @@ export function UsersFilterBar({ query, facets }: Props) {
       previewError: false,
       previewLoading: false,
       previewEmpty: false,
+      directoryScope: isStaff ? "staff" : "users",
     };
     setDraft(cleared);
     pushQuery(cleared);
@@ -62,6 +69,7 @@ export function UsersFilterBar({ query, facets }: Props) {
   const activeCount = countActiveUserFilters(query);
   const moreActive =
     (query.department ? 1 : 0) +
+    (query.agency ? 1 : 0) +
     (query.role ? 1 : 0) +
     (query.mfa !== "all" ? 1 : 0) +
     (query.verification !== "all" ? 1 : 0) +
@@ -69,7 +77,7 @@ export function UsersFilterBar({ query, facets }: Props) {
     (query.validationState !== "all" ? 1 : 0);
 
   return (
-    <div className="space-y-3 rounded-2xl border border-jp-border bg-white p-3 shadow-sm" data-testid="users-filters">
+    <div className="space-y-3 rounded-2xl border border-jp-border bg-white p-3 shadow-sm" data-testid={isStaff ? "staff-filters" : "users-filters"}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
         <div className="min-w-0 flex-1">
           <Label htmlFor="users-search">Search</Label>
@@ -82,24 +90,26 @@ export function UsersFilterBar({ query, facets }: Props) {
             onKeyDown={(e) => {
               if (e.key === "Enter") apply();
             }}
-            placeholder="Name, email, title…"
+            placeholder={isStaff ? "Name, email, job titleâ€¦" : "Name, email, titleâ€¦"}
           />
         </div>
-        <div className="w-full lg:w-44">
-          <Label htmlFor="users-type">User type</Label>
-          <Select
-            id="users-type"
-            value={draft.userType}
-            onChange={(e) => setDraft((d) => ({ ...d, userType: e.target.value as UsersQuery["userType"] }))}
-          >
-            <option value="all">All types</option>
-            {facets.userTypes.map((t) => (
-              <option key={t} value={t}>
-                {USER_TYPE_LABELS[t]}
-              </option>
-            ))}
-          </Select>
-        </div>
+        {isStaff ? null : (
+          <div className="w-full lg:w-44">
+            <Label htmlFor="users-type">Account type</Label>
+            <Select
+              id="users-type"
+              value={draft.userType}
+              onChange={(e) => setDraft((d) => ({ ...d, userType: e.target.value as UsersQuery["userType"] }))}
+            >
+              <option value="all">All types</option>
+              {facets.userTypes.map((t) => (
+                <option key={t} value={t}>
+                  {USER_TYPE_LABELS[t] ?? t}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
         <div className="w-full lg:w-44">
           <Label htmlFor="users-status">Status</Label>
           <Select
@@ -137,7 +147,7 @@ export function UsersFilterBar({ query, facets }: Props) {
       {moreOpen ? (
         <div className="grid gap-3 border-t border-jp-border pt-3 sm:grid-cols-2 xl:grid-cols-3" data-testid="users-more-filters">
           <div>
-            <Label htmlFor="users-department">Department / Agency</Label>
+            <Label htmlFor="users-department">Department</Label>
             <Select
               id="users-department"
               value={draft.department}
@@ -151,14 +161,27 @@ export function UsersFilterBar({ query, facets }: Props) {
               ))}
             </Select>
           </div>
+          {isStaff ? null : (
+            <div>
+              <Label htmlFor="users-agency">Agency</Label>
+              <input
+                id="users-agency"
+                type="search"
+                className="mt-1 w-full min-h-11 rounded-xl border border-jp-border px-3 text-sm"
+                value={draft.agency}
+                onChange={(e) => setDraft((d) => ({ ...d, agency: e.target.value }))}
+                placeholder="Agency nameâ€¦"
+              />
+            </div>
+          )}
           <div>
-            <Label htmlFor="users-role">Role</Label>
+            <Label htmlFor="users-role">{isStaff ? "Job title" : "Role"}</Label>
             <Select
               id="users-role"
               value={draft.role}
               onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value }))}
             >
-              <option value="">All roles</option>
+              <option value="">{isStaff ? "All job titles" : "All roles"}</option>
               {facets.roles.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.name}
@@ -187,43 +210,10 @@ export function UsersFilterBar({ query, facets }: Props) {
               value={draft.verification}
               onChange={(e) => setDraft((d) => ({ ...d, verification: e.target.value as UsersQuery["verification"] }))}
             >
-              <option value="all">All verification states</option>
+              <option value="all">All verification</option>
               <option value="verified">Verified</option>
-              <option value="pending">Pending</option>
               <option value="unverified">Unverified</option>
-              <option value="expired">Expired</option>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="users-security">Security state</Label>
-            <Select
-              id="users-security"
-              value={draft.securityState}
-              onChange={(e) => setDraft((d) => ({ ...d, securityState: e.target.value as UsersQuery["securityState"] }))}
-            >
-              <option value="all">All security states</option>
-              <option value="normal">Normal</option>
-              <option value="warning">Warning</option>
-              <option value="locked">Locked</option>
-              <option value="suspended">Suspended</option>
-              <option value="reviewRequired">Review required</option>
-              <option value="staleInvitation">Stale invitation</option>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="users-validation">Validation state</Label>
-            <Select
-              id="users-validation"
-              value={draft.validationState}
-              onChange={(e) =>
-                setDraft((d) => ({ ...d, validationState: e.target.value as UsersQuery["validationState"] }))
-              }
-            >
-              <option value="all">All validation states</option>
-              <option value="valid">Valid</option>
-              <option value="warning">Warning</option>
-              <option value="blocked">Blocked</option>
-              <option value="review">Review</option>
+              <option value="pending">Pending</option>
             </Select>
           </div>
         </div>

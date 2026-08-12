@@ -22,6 +22,7 @@ class DashboardUsersController extends Controller
             [
                 'users' => $result['items'],
                 'summary' => $result['summary'],
+                'facets' => $result['facets'] ?? [],
             ],
             pagination: $result['pagination'],
             filters: $result['filters'],

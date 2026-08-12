@@ -16,12 +16,14 @@ import type { UserSortField, UsersModuleResult } from "@/types/users";
 
 type Props = {
   result: UsersModuleResult;
+  basePath?: "/users" | "/staff";
 };
 
-export function UsersWorkspace({ result }: Props) {
+export function UsersWorkspace({ result, basePath = "/users" }: Props) {
   const router = useDashboardRouter();
   const [, startTransition] = useTransition();
   const [drawerDismissed, setDrawerDismissed] = useState(false);
+  const isStaff = basePath === "/staff" || result.query.directoryScope === "staff";
 
   useEffect(() => {
     setDrawerDismissed(false);
@@ -29,12 +31,16 @@ export function UsersWorkspace({ result }: Props) {
 
   const pushQuery = useCallback(
     (overrides: Partial<UsersModuleResult["query"]>) => {
-      const next = { ...result.query, ...overrides };
+      const next = {
+        ...result.query,
+        ...overrides,
+        directoryScope: isStaff ? ("staff" as const) : result.query.directoryScope,
+      };
       startTransition(() => {
-        router.push(`/users${usersQueryToSearchParams(next)}`);
+        router.push(`${basePath}${usersQueryToSearchParams(next)}`);
       });
     },
-    [result.query, router],
+    [result.query, router, basePath, isStaff],
   );
 
   const onSort = (field: UserSortField) => {
@@ -57,17 +63,21 @@ export function UsersWorkspace({ result }: Props) {
   const roleName = result.facets.roles.find((r) => r.id === result.query.role)?.name;
 
   return (
-    <div data-testid="users-workspace">
+    <div data-testid={isStaff ? "staff-workspace" : "users-workspace"}>
       <UsersSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
-        <UsersFilterBar query={result.query} facets={result.facets} />
+        <UsersFilterBar query={result.query} facets={result.facets} basePath={basePath} />
         <UsersActiveFilters query={result.query} roleName={roleName} />
       </div>
 
       {empty ? (
         <EmptyState
-          title="No users match your filters"
-          description="Try clearing filters or broadening your search. All data shown is synthetic preview data."
+          title={isStaff ? "No staff match your filters" : "No users match your filters"}
+          description={
+            isStaff
+              ? "Staff lists internal JetPakistan employees only. Agent Staff belong under Users."
+              : "Try clearing filters or broadening your search."
+          }
         />
       ) : (
         <>
@@ -80,6 +90,7 @@ export function UsersWorkspace({ result }: Props) {
               pageSize={result.table.pageSize}
               onSort={onSort}
               onView={onView}
+              mode={isStaff ? "staff" : "users"}
             />
             <UserMobileCard users={result.table.rows} onView={onView} />
           </div>
@@ -90,7 +101,7 @@ export function UsersWorkspace({ result }: Props) {
             total={result.table.total}
             onPageChange={(page) => pushQuery({ page })}
             onPageSizeChange={(pageSize) => pushQuery({ pageSize, page: 1 })}
-            ariaLabel="Users pagination"
+            ariaLabel={isStaff ? "Staff pagination" : "Users pagination"}
           />
         </>
       )}

@@ -155,7 +155,7 @@ final class BackOfficeLegacyViewRedirectController extends Controller
 
     public function adminStaffIndex(Request $request): RedirectResponse
     {
-        return redirect()->to($this->pathWithQuery('/admin/dashboard/users', $request->query()));
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/staff', $request->query()));
     }
 
     public function adminRolesPermissions(Request $request): RedirectResponse

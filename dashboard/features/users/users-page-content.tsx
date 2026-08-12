@@ -14,11 +14,17 @@ import { PageContainer, PageHeader } from "@/components/ui/page-layout";
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
   module: UsersModuleKey;
+  directoryScope?: "users" | "staff";
 };
 
-export async function UsersPageContent({ searchParams, module }: Props) {
+export async function UsersPageContent({
+  searchParams,
+  module,
+  directoryScope = "users",
+}: Props) {
   const sp = await searchParams;
-  const query = parseUsersQuery(sp);
+  const query = parseUsersQuery(sp, { directoryScope });
+  query.directoryScope = directoryScope;
 
   if (module !== "directory") {
     return <UsersModuleShell module={module} />;
@@ -26,22 +32,22 @@ export async function UsersPageContent({ searchParams, module }: Props) {
 
   try {
     const result = await getUsersModule(query);
-    return <UsersModuleShell module={module} result={result} />;
+    return <UsersModuleShell module={module} result={result} directoryScope={directoryScope} />;
   } catch (e) {
     return (
       <PageContainer>
-        <PageHeader title="Users" />
-        <UsersModuleError error={e} />
+        <PageHeader title={directoryScope === "staff" ? "Staff" : "Users"} />
+        <UsersModuleError error={e} resource={directoryScope === "staff" ? "staff" : "users"} />
       </PageContainer>
     );
   }
 }
 
-function UsersModuleError({ error }: { error: unknown }) {
+function UsersModuleError({ error, resource }: { error: unknown; resource: string }) {
   if (error instanceof ReadOnlyServiceError) {
     const code = error.envelope.error.code;
     if (code === "unauthenticated") return <UnauthorizedState />;
-    if (code === "forbidden") return <ForbiddenState resource="users" />;
+    if (code === "forbidden") return <ForbiddenState resource={resource} />;
     if (code === "unavailable") return <ServiceUnavailableState />;
     return (
       <SanitizedErrorState
