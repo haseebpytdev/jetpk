@@ -9,8 +9,8 @@
 | Item | Value |
 |---|---|
 | Wave-1 branch | `phase/jetpk-owner-uat-wave-1-portals-public-shell` |
-| Auth prerequisite | `f874b5d` included |
-| Frozen JP-UAT-01 remote | `phase/jetpk-uat-01-autonomous-business-uat` @ `d1085ed` (untouched) |
+| Wave-1 HEAD | `72cd954` (includes auth `f874b5d`) |
+| Frozen JP-UAT-01 remote | `phase/jetpk-uat-01-autonomous-business-uat` @ `d1085ed6e9ae0764033ea35928b8d6804f2d0f0b` (untouched) |
 | Remote | `jetpk` (not `origin`) |
 
 ## Auth carried forward
@@ -18,7 +18,12 @@
 - QA Staff / Agent / Customer: **active**
 - `OTA_CLIENT_REQUIRE_LOGIN_OTP=false` (temporary Owner UAT)
 - `OTP_DEMO_*` preserved
-- Staff login re-proven: `{"ok":true,"redirect":"/staff/dashboard"}`
+- Cold JSON login re-proven:
+  - Staff → `/staff/dashboard`
+  - Agent → `/agent`
+  - Customer → `/customer/bookings`
+- Agent JSON `/laravel/agent?format=json` → 200 with grouped `navigation`
+- Customer JSON `/laravel/customer/bookings?format=json` → 200
 
 ## Gates
 
