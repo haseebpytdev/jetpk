@@ -1,14 +1,21 @@
 # OWNER UAT W2-21 / W2-22 — Shared shell + typography V2
 
-## Branch
+## Branch reconciliation
 
-`phase/jetpk-owner-uat-w2-21-22-shell-typography`
+| Source | Ref |
+|---|---|
+| Isolated worktree | `C:\Users\khadi\ota-jetpk-w2-shell` @ `153cfaa` (`phase/jetpk-owner-uat-w2-21-22-shell-typography`) |
+| Implementation commits (worktree) | `e147367` → `6bfb497` → `a1e041a` (+ docs `153cfaa`) |
+| Authoritative business branch | `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure` |
+| Cherry-picks on business | `7e597fc` / `33db4c1` / `5885dec` (equivalent content) |
 
-Base: Wave-1 closure HEAD (does **not** include in-progress Wave-2 P1 business stash `w2-p1-business-wip-do-not-touch`).
+**No blind merge** of remote typography branch. **No force push.** Newer Wave-2 business work preserved.
+
+Content parity (worktree vs business): SiteHeader, CurrencySelector, DesktopNavigation, Dropdown (plus post-reconcile remasure), layouts, typography tokens, Clash fonts, Blade frontend layout — MATCH (CRLF-only noise ignored).
 
 ## Objective
 
-Execute shared-shell micro-polish and platform typography migration before final Wave-2 owner retest, without interrupting Wave-2 P1 business work.
+Shared-shell micro-polish + platform typography migration for Owner UAT Wave 2.
 
 ## Included
 
@@ -22,52 +29,36 @@ Execute shared-shell micro-polish and platform typography migration before final
 - **Plus Jakarta Sans** = platform UI (public, auth, Agent, Customer, Admin, Staff)
 - **Clash Display** = selective public marketing H1/H2 only (`font-display`)
 - **IBM Plex Mono** = machine identifiers
-- Inter removed from Next font authority + JetPakistan Blade theme tokens
+- Inter removed from Next font authority + JetPakistan Blade theme tokens (`frontend.blade.php` / `tokens.css`)
 
-## Excluded
-- Wave-2 P1 money/users/bookings/reports business work (stashed on business branch)
-- Production deploy / SFTP
-- Live supplier / payment mutations
+## Production verification (authoritative branch)
 
-## Key files
-- `frontend/components/layout/SiteHeader.tsx`
-- `frontend/components/navigation/CurrencySelector.tsx`
-- `frontend/components/navigation/DesktopNavigation.tsx`
-- `frontend/components/ui/Dropdown.tsx` (`placement: top|bottom`)
-- `frontend/app/layout.tsx` / `frontend/app/globals.css` / `frontend/styles/clash-display.css`
-- `frontend/lib/theme/typography.ts`
-- `dashboard/app/layout.tsx` / `dashboard/styles/typography-tokens.css` / `dashboard/lib/theme/typography.ts`
-- `frontend/public/fonts/clash-display/*.woff2`
-- `resources/views/themes/frontend/jetpakistan/layouts/frontend.blade.php`
-- `public/themes/frontend/jetpakistan/css/tokens.css`
+| Gate | Result |
+|---|---|
+| OWNER_W2_CURRENCY_DROPUP | PASS |
+| OWNER_W2_CURRENCY_MENU_COMPACT | PASS |
+| OWNER_W2_HEADER_NAV_CENTERED | PASS |
+| OWNER_W2_HEADER_NAV_CLARITY | PASS |
+| OWNER_W2_LOGIN_CTA_POLISH | PASS |
+| OWNER_W2_PLUS_JAKARTA_PLATFORM | PASS |
+| OWNER_W2_CLASH_DISPLAY_MARKETING | PASS |
+| OWNER_W2_INTER_RESIDUE | 0 |
+| OWNER_W2_FONT_FALLBACK_DEFECTS | 0 |
+| OWNER_W2_TYPOGRAPHY_RESPONSIVE | PASS |
+
+Evidence:
+- Worktree local accept: `tmp/jp-w2-shell-typography-accept.worktree-local.json` (commit `a1e041a`, pass=true)
+- Production accept: `tmp/jp-w2-shell-typography-accept.json`
+- Source parity: frontend shell/typography files MATCH production SHA256; OLS MATCH
 
 ## Acceptance script
 
 ```bash
-# with frontend on :3000
+# production
+set JP_FRONTEND_ORIGIN=https://jetpakistan.pk
 node tmp/jp-w2-shell-typography-accept.cjs
-```
-
-Gates:
-- OWNER_W2_CURRENCY_DROPUP
-- OWNER_W2_CURRENCY_MENU_COMPACT
-- OWNER_W2_HEADER_NAV_CENTERED
-- OWNER_W2_HEADER_NAV_CLARITY
-- OWNER_W2_LOGIN_CTA_POLISH
-- OWNER_W2_PLUS_JAKARTA_PLATFORM
-- OWNER_W2_CLASH_DISPLAY_MARKETING
-- OWNER_W2_INTER_RESIDUE=0
-- OWNER_W2_FONT_FALLBACK_DEFECTS=0
-- OWNER_W2_TYPOGRAPHY_RESPONSIVE
-
-## Restore P1 business work
-
-```bash
-git checkout phase/jetpk-owner-uat-wave-2-admin-staff-business-closure
-git stash list   # find w2-p1-business-wip-do-not-touch
-git stash pop stash@{N}
 ```
 
 ## Status
 
-CODE_READY — run local acceptance + owner retest after deploy of this branch only.
+**RECONCILED_ON_BUSINESS_BRANCH** — gates PASS on production after recover/reconcile/verify/deploy.

@@ -48,14 +48,33 @@ async function measureHeader(page) {
 
 async function measureCurrency(page) {
   return page.evaluate(async () => {
-    const trigger = document.querySelector('[data-testid="currency-selector"]');
+    const triggers = Array.from(document.querySelectorAll('[data-testid="currency-selector"]'));
+    const trigger =
+      triggers.find((el) => el.closest("footer")) ||
+      triggers[triggers.length - 1] ||
+      triggers[0];
     if (!trigger) return { ok: false, reason: "missing-trigger" };
+    trigger.scrollIntoView({ block: "nearest", inline: "nearest" });
+    await new Promise((r) => setTimeout(r, 80));
+    const tr0 = trigger.getBoundingClientRect();
+    if (tr0.bottom > window.innerHeight - 12) {
+      window.scrollBy(0, tr0.bottom - window.innerHeight + 24);
+      await new Promise((r) => setTimeout(r, 80));
+    }
+    if (tr0.top < 12) {
+      window.scrollBy(0, tr0.top - 24);
+      await new Promise((r) => setTimeout(r, 80));
+    }
     trigger.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await new Promise((r) => setTimeout(r, 120));
-    const panel =
-      document.querySelector('[data-testid="currency-menu-panel"]') ||
-      document.querySelector('[role="menu"][data-placement="top"]') ||
-      Array.from(document.querySelectorAll('[role="menu"]')).find((el) => el.textContent?.includes("Pakistani Rupee"));
+    let panel = null;
+    for (let i = 0; i < 20; i += 1) {
+      await new Promise((r) => setTimeout(r, 50));
+      panel =
+        document.querySelector('[data-testid="currency-menu-panel"]') ||
+        document.querySelector('[role="menu"][data-placement="top"]') ||
+        Array.from(document.querySelectorAll('[role="menu"]')).find((el) => el.textContent?.includes("Pakistani Rupee"));
+      if (panel && getComputedStyle(panel).position === "fixed") break;
+    }
     if (!panel) return { ok: false, reason: "missing-panel" };
     const pr = panel.getBoundingClientRect();
     const tr = trigger.getBoundingClientRect();
@@ -80,6 +99,15 @@ async function measureCurrency(page) {
       rowHeight: sample ? sample.getBoundingClientRect().height : null,
       nameSingleLine: name ? getComputedStyle(name).whiteSpace.includes("nowrap") || name.scrollHeight <= name.clientHeight + 2 : false,
       codeRight: !!(name && code && code.getBoundingClientRect().left >= name.getBoundingClientRect().right - 2),
+      triggerInFooter: Boolean(trigger.closest("footer")),
+      metrics: {
+        prTop: pr.top,
+        prBottom: pr.bottom,
+        prLeft: pr.left,
+        prRight: pr.right,
+        vh: window.innerHeight,
+        vw: window.innerWidth,
+      },
     };
   });
 }
@@ -110,7 +138,9 @@ async function measureTypography(page) {
   const report = { frontend: FRONTEND, gates: {}, fails };
 
   try {
-    await page.goto(FRONTEND + "/", { waitUntil: "load", timeout: 120_000 });
+    // Production homepage rarely reaches network "load"; domcontentloaded is sufficient for gate metrics.
+    await page.goto(FRONTEND + "/", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await page.waitForTimeout(1500);
 
     const header = await measureHeader(page);
     report.header = header;
@@ -134,6 +164,11 @@ async function measureTypography(page) {
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      const trigger = document.querySelector('[data-testid="currency-selector"]');
+      trigger?.scrollIntoView({ block: "end", inline: "nearest" });
+    });
+    await page.waitForTimeout(150);
     const currency = await measureCurrency(page);
     report.currency = currency;
     if (!currency.ok) {

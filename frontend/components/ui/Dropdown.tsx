@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/cn";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 type DropdownProps = {
@@ -33,7 +33,9 @@ export function Dropdown({
   panelTestId,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
-  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>(() =>
+    portal ? { position: "fixed", top: 0, left: 0, zIndex: 60, visibility: "hidden" } : {},
+  );
   const id = useId();
   const panelId = `${id}-panel`;
   const rootRef = useRef<HTMLDivElement>(null);
@@ -56,13 +58,19 @@ export function Dropdown({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [open]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open || !portal) return;
     const updatePosition = () => updatePortalPosition();
+    // Layout effect + rAF remasure keeps footer drop-up panels viewport-clamped.
     updatePosition();
+    const raf1 = window.requestAnimationFrame(() => {
+      updatePosition();
+      window.requestAnimationFrame(updatePosition);
+    });
     window.addEventListener("resize", updatePosition);
     window.addEventListener("scroll", updatePosition, true);
     return () => {
+      window.cancelAnimationFrame(raf1);
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
@@ -80,13 +88,17 @@ export function Dropdown({
     const left = Math.min(Math.max(viewportPad, preferredLeft), Math.max(viewportPad, maxRight - panelWidth));
 
     if (placement === "top") {
+      // Keep the drop-up panel inside the viewport even if the trigger is near/below the fold.
+      const desiredBottom = Math.min(rect.top - gap, window.innerHeight - viewportPad);
+      const top = Math.max(viewportPad, desiredBottom - panelHeight);
       setPanelStyle({
         position: "fixed",
-        top: Math.max(viewportPad, rect.top - panelHeight - gap),
+        top,
         left,
         right: "auto",
         zIndex: 60,
-        maxHeight: `min(16rem, ${Math.max(80, rect.top - viewportPad - gap)}px)`,
+        visibility: "visible",
+        maxHeight: `min(16rem, ${Math.max(80, desiredBottom - viewportPad)}px)`,
         maxWidth: `min(16rem, ${window.innerWidth - viewportPad * 2}px)`,
       });
       return;
@@ -98,6 +110,7 @@ export function Dropdown({
       left,
       right: "auto",
       zIndex: 60,
+      visibility: "visible",
       maxHeight: `min(16rem, ${Math.max(80, window.innerHeight - rect.bottom - viewportPad - gap)}px)`,
       maxWidth: `min(16rem, ${window.innerWidth - viewportPad * 2}px)`,
     });

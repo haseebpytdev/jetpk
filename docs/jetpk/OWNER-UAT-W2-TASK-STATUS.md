@@ -22,5 +22,5 @@
 | W2-18 | Email location semantics | DONE | PASS | DEPLOYED | Karachi | READY_OWNER | Seed address null; no security city | b7e72a3 | — | Owner retest |
 | W2-19 | Button/text clarity | DONE | PASS | DEPLOYED | Contrast | READY_OWNER | Ghost + muted contrast | 91602b4 | — | Owner retest |
 | W2-20 | Final cross-module regression | DONE | PASS | DEPLOYED | Gate closure | READY_OWNER | Staff auth + route smoke + OLS | see W2-20 evidence | — | Owner retest |
-| W2-21 | Public shell header/footer | DONE | PASS | DEPLOYED | Currency/nav | READY_OWNER | Cherry-pick + HOME=200 | 5885dec | — | Owner retest |
-| W2-22 | Plus Jakarta + Clash typography | DONE | PASS | DEPLOYED | Inter residue | READY_OWNER | Prod computed fonts verified | 5885dec | — | Owner retest |
+| W2-21 | Public shell header/footer | DONE | PASS | DEPLOYED | Currency/nav | READY_OWNER | Prod accept PASS | see W2-21/22 doc | — | Owner retest |
+| W2-22 | Plus Jakarta + Clash typography | DONE | PASS | DEPLOYED | Inter residue | READY_OWNER | Prod Inter=0; fonts verified | see W2-21/22 doc | — | Owner retest |

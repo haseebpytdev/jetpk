@@ -34,7 +34,13 @@ JP-REL-01 not started. Owner UAT is **not** declared complete — Wave 2 is read
 | OWNER_W2_PLUS_JAKARTA_PLATFORM | PASS |
 | OWNER_W2_CLASH_DISPLAY_MARKETING | PASS |
 | OWNER_W2_INTER_RESIDUE | 0 |
-| OWNER_W2_CURRENCY_DROPUP / NAV / LOGIN | PASS (W2-21 cherry-picked + prod HOME=200) |
+| OWNER_W2_CURRENCY_DROPUP / NAV / LOGIN | PASS (worktree recovered + prod accept) |
+| OWNER_W2_CURRENCY_MENU_COMPACT | PASS |
+| OWNER_W2_HEADER_NAV_CENTERED | PASS |
+| OWNER_W2_HEADER_NAV_CLARITY | PASS |
+| OWNER_W2_LOGIN_CTA_POLISH | PASS |
+| OWNER_W2_FONT_FALLBACK_DEFECTS | 0 |
+| OWNER_W2_TYPOGRAPHY_RESPONSIVE | PASS |
 | CMS pages baseline | PASS |
 | CMS banners/notices/assets write | DOCUMENTED GAP (no Laravel mutation domain; no migration) — disposition complete |
 | Settings IA + OWNER_INPUT_REQUIRED | PASS (live validator sync on Laravel payload) |

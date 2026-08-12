@@ -1,0 +1,18 @@
+{
+  "pass": true,
+  "fails": [],
+  "gates": {
+    "OWNER_W2_HEADER_NAV_CENTERED": "PASS",
+    "OWNER_W2_HEADER_NAV_CLARITY": "PASS",
+    "OWNER_W2_LOGIN_CTA_POLISH": "PASS",
+    "OWNER_W2_CURRENCY_DROPUP": "PASS",
+    "OWNER_W2_CURRENCY_MENU_COMPACT": "PASS",
+    "OWNER_W2_PLUS_JAKARTA_PLATFORM": "PASS",
+    "OWNER_W2_CLASH_DISPLAY_MARKETING": "PASS",
+    "OWNER_W2_INTER_RESIDUE": 0,
+    "OWNER_W2_TYPOGRAPHY_RESPONSIVE": "PASS",
+    "OWNER_W2_FONT_FALLBACK_DEFECTS": 0
+  },
+  "commit": "a1e041a",
+  "branch": "phase/jetpk-owner-uat-w2-21-22-shell-typography"
+}
