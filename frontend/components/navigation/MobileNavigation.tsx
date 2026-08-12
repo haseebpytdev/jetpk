@@ -5,7 +5,6 @@ import { CurrencySelector } from "@/components/navigation/CurrencySelector";
 import { ThemeSwitch } from "@/components/theme/ThemeSwitch";
 import { Badge } from "@/components/ui/Badge";
 import { IconButton } from "@/components/ui/IconButton";
-import { LinkButton } from "@/components/ui/LinkButton";
 import { useBodyScrollLock } from "@/lib/hooks/use-body-scroll-lock";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
@@ -86,11 +85,7 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
                 <ThemeSwitch className="!min-h-9 !gap-1.5 !px-2 !py-1.5" />
                 <CurrencySelector compact className="min-w-0 flex-1" />
               </div>
-              {session.status === "anonymous" ? (
-                <LinkButton href="/login" variant="primary" className="w-full whitespace-nowrap" onClick={closeMenu}>
-                  Login
-                </LinkButton>
-              ) : (
+              {session.status === "anonymous" ? null : (
                 <Link
                   href="/#flight-search"
                   className="block text-jp-sm font-semibold text-jp-text focus-visible:shadow-jp-focus"
