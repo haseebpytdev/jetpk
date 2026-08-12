@@ -1,55 +1,39 @@
 {
   "phase": "JP-UAT-01",
-  "updated_at_utc": "2026-08-12T05:45:00Z",
+  "updated_at_utc": "2026-08-12T07:35:00Z",
   "SOURCE_PARITY": "PASS",
   "files": [
+    { "PATH": "frontend/components/ui/Dropdown.tsx", "MATCH": "yes" },
+    { "PATH": "frontend/components/navigation/AccountMenu.tsx", "MATCH": "yes" },
+    { "PATH": "frontend/components/navigation/DesktopNavigation.tsx", "MATCH": "yes" },
+    { "PATH": "frontend/components/navigation/MobileNavigation.tsx", "MATCH": "yes" },
+    { "PATH": "frontend/components/navigation/CurrencySelector.tsx", "MATCH": "yes" },
+    { "PATH": "frontend/components/layout/SiteHeader.tsx", "MATCH": "yes" },
+    { "PATH": "frontend/lib/navigation.ts", "MATCH": "yes" },
+    { "PATH": "frontend/features/public-content/components/ContactForm.tsx", "MATCH": "yes" },
+    { "PATH": "frontend/features/public-content/components/SupportPageClient.tsx", "MATCH": "yes" },
+    { "PATH": "frontend/app/(public)/support/page.tsx", "MATCH": "yes" },
+    { "PATH": "dashboard/services/session-service.ts", "MATCH": "yes" },
+    { "PATH": "dashboard/app/layout.tsx", "MATCH": "yes" },
     {
-      "PATH": "frontend/components/ui/Dropdown.tsx",
-      "MATCH": "yes"
+      "PATH": "frontend/next.config.ts",
+      "MATCH": "yes",
+      "SHA256": "61ebe466d71253951b19e9c1040b3a501deb6d3c0696e4a91ecacdbd261befad"
     },
     {
-      "PATH": "frontend/components/navigation/AccountMenu.tsx",
-      "MATCH": "yes"
+      "PATH": "frontend/lib/api/laravel-action-client.ts",
+      "MATCH": "yes",
+      "SHA256": "9a2fd87271e8f23fd51251d8ccef3b02fbba9c79a62c0768c00a1e82e9ab45ff"
     },
     {
-      "PATH": "frontend/components/navigation/DesktopNavigation.tsx",
-      "MATCH": "yes"
+      "PATH": "frontend/features/agent-dashboard/overview/AgentOverviewPage.tsx",
+      "MATCH": "yes",
+      "SHA256": "4792cc316bd485ec927de80bb8ac5e647bec48268ceacb439d08fe97e83394db"
     },
     {
-      "PATH": "frontend/components/navigation/MobileNavigation.tsx",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "frontend/components/navigation/CurrencySelector.tsx",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "frontend/components/layout/SiteHeader.tsx",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "frontend/lib/navigation.ts",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "frontend/features/public-content/components/ContactForm.tsx",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "frontend/features/public-content/components/SupportPageClient.tsx",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "frontend/app/(public)/support/page.tsx",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "dashboard/services/session-service.ts",
-      "MATCH": "yes"
-    },
-    {
-      "PATH": "dashboard/app/layout.tsx",
-      "MATCH": "yes"
+      "PATH": "frontend/features/agent-dashboard/bookings/AgentBookingsPage.tsx",
+      "MATCH": "yes",
+      "SHA256": "0e4738484ba23637a2e654f601d8ac699f700b8eaca6227ca47d7e6bc51eb051"
     }
   ]
 }

@@ -136,6 +136,23 @@ async function executeRequest<T>(
       };
     }
 
+    // HTML 200 from a mis-routed /laravel proxy must never be treated as success JSON.
+    if (
+      payload &&
+      typeof payload === "object" &&
+      (payload as { _html?: boolean })._html === true
+    ) {
+      return {
+        ok: false,
+        code: "unknown",
+        status: response.status,
+        message:
+          (payload as { message?: string }).message ??
+          "Unexpected HTML response from API. Please try again.",
+        data: payload,
+      };
+    }
+
     return { ok: true, data: payload as T, status: response.status };
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {

@@ -76,6 +76,17 @@ const htmlPayload = normalizeNonJsonPayload(
 assert(htmlPayload?._html === true, "HTML body is flagged as non-JSON");
 assert(htmlPayload?.message?.includes("Something went wrong"), "HTML body uses status default message");
 
+// Mirror laravel-action-client: HTML-flagged payloads must not be treated as success.
+function treatHtmlAsFailure(payload) {
+  if (payload && typeof payload === "object" && payload._html === true) {
+    return { ok: false, code: "unknown", message: payload.message ?? "Unexpected HTML response from API." };
+  }
+  return { ok: true };
+}
+const htmlFailure = treatHtmlAsFailure(htmlPayload);
+assert(htmlFailure.ok === false, "HTML _html payload is rejected as API failure");
+assert(typeof htmlFailure.message === "string" && htmlFailure.message.length > 0, "HTML failure has message");
+
 const malformedJson = normalizeNonJsonPayload("application/json", "{not-json", defaultErrorMessage, 200);
 assert(malformedJson === null, "malformed JSON returns null");
 
@@ -90,4 +101,4 @@ const networkCodes = { network: 0, aborted: 0 };
 assert(networkCodes.network === 0 && networkCodes.aborted === 0, "network and abort use status 0 contract");
 
 if (failed > 0) process.exit(1);
-console.log(`JP-OPS-02 API error regression: ${statusCases.length + 6} assertions passed`);
+console.log(`JP-OPS-02 API error regression: ${statusCases.length + 8} assertions passed`);

@@ -1,0 +1,111 @@
+{
+  "phase": "JP-UAT-01",
+  "layer": "AGENTIC_BLACK_BOX_UAT",
+  "tooling": {
+    "BROWSER_USE": "UNAVAILABLE_CREDENTIAL_BOUNDARY",
+    "PLAYWRIGHT_MCP": "NOT_ACTIVE_SESSION_BOUNDARY",
+    "PLAYWRIGHT_CLI_SKILLS": "ACTIVE",
+    "AGENTIC_PERSONA_EXECUTION": "PASS"
+  },
+  "scripted_score_retained": 92,
+  "agentic_score": 90,
+  "commercial": {
+    "live_public_flight_searches": 1,
+    "max_allowed": 2,
+    "mutations_forbidden_observed": true
+  },
+  "personas": [
+    {
+      "id": "anonymous",
+      "session": "uat-anonymous",
+      "goal_achieved": true,
+      "starting_page": "https://jetpakistan.pk/",
+      "actions": 9,
+      "backtracks": 1,
+      "wrong_choices": 0,
+      "dead_ends": 0,
+      "hidden_knowledge_required": false,
+      "business_outcome_understood": true,
+      "confidence": 5,
+      "path": ["home", "flight_search", "return_tab_backtrack", "one_way", "search", "results", "stop_before_booking"]
+    },
+    {
+      "id": "customer",
+      "session": "uat-customer",
+      "goal_achieved": true,
+      "starting_page": "https://jetpakistan.pk/",
+      "actions": 8,
+      "backtracks": 0,
+      "wrong_choices": 0,
+      "dead_ends": 0,
+      "hidden_knowledge_required": false,
+      "business_outcome_understood": true,
+      "confidence": 5,
+      "path": ["home", "support_my_requests", "ticket_SEWJRVS9", "access_denied_admin_probe"],
+      "revalidations": ["UAT-F001", "UAT-F004"]
+    },
+    {
+      "id": "agent",
+      "session": "uat-agent",
+      "goal_achieved": true,
+      "starting_page": "https://jetpakistan.pk/",
+      "actions": 10,
+      "backtracks": 1,
+      "wrong_choices": 1,
+      "dead_ends": 0,
+      "hidden_knowledge_required": false,
+      "business_outcome_understood": true,
+      "confidence": 4,
+      "path": ["home", "dashboard_overview", "wallet", "support", "profile_misclick", "support", "bookings"],
+      "pre_fix_dead_ends": ["dashboard_error_boundary", "bookings_error_boundary"],
+      "finding": "UAT-F005",
+      "revalidations": ["UAT-F001", "UAT-F005"]
+    },
+    {
+      "id": "staff",
+      "session": "uat-staff",
+      "goal_achieved": true,
+      "starting_page": "https://jetpakistan.pk/",
+      "actions": 4,
+      "backtracks": 0,
+      "wrong_choices": 0,
+      "dead_ends": 0,
+      "hidden_knowledge_required": false,
+      "business_outcome_understood": true,
+      "confidence": 5,
+      "path": ["home", "staff_operations_dashboard", "support_tickets_list"]
+    },
+    {
+      "id": "admin",
+      "session": "uat-admin",
+      "goal_achieved": true,
+      "starting_page": "https://jetpakistan.pk/",
+      "actions": 6,
+      "backtracks": 0,
+      "wrong_choices": 0,
+      "dead_ends": 0,
+      "hidden_knowledge_required": false,
+      "business_outcome_understood": true,
+      "confidence": 4,
+      "path": ["home", "admin_operations_dashboard", "support_tickets", "users_staff", "system_health"]
+    },
+    {
+      "id": "exploratory",
+      "session": "uat-explore",
+      "goal_achieved": true,
+      "starting_page": "https://jetpakistan.pk/",
+      "actions": 5,
+      "backtracks": 1,
+      "dead_ends": 1,
+      "hidden_knowledge_required": false,
+      "confidence": 4,
+      "path": ["home_support_menu", "lookup_booking", "groups_search_empty"]
+    }
+  ],
+  "defects": {
+    "P0": 0,
+    "P1_open": 0,
+    "P1_fixed_this_supplement": ["UAT-F005"],
+    "P3": ["stops_filter_wording", "staff_nav_users_label", "groups_empty_sectors", "UAT-F003"]
+  }
+}

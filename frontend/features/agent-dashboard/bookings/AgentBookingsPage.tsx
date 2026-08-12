@@ -34,7 +34,7 @@ export function AgentBookingsPage({ session }: { session: PublicSession }) {
       setError(result.message);
       setBookings([]);
     } else {
-      setBookings(result.data.bookings);
+      setBookings(Array.isArray(result.data.bookings) ? result.data.bookings : []);
     }
     setLoading(false);
   };

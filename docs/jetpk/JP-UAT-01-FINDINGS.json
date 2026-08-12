@@ -1,10 +1,16 @@
 {
   "phase": "JP-UAT-01",
-  "updated_at_utc": "2026-08-12T05:45:00Z",
+  "updated_at_utc": "2026-08-12T07:35:00Z",
   "findings": [
     { "FINDING_ID": "UAT-F001", "SEVERITY": "P1", "STATUS": "PASS" },
     { "FINDING_ID": "UAT-F002", "SEVERITY": "P2", "STATUS": "PASS" },
     { "FINDING_ID": "UAT-F003", "SEVERITY": "P3", "STATUS": "ACCEPTED_NONBLOCKER" },
-    { "FINDING_ID": "UAT-F004", "SEVERITY": "P1", "STATUS": "PASS" }
+    { "FINDING_ID": "UAT-F004", "SEVERITY": "P1", "STATUS": "PASS" },
+    {
+      "FINDING_ID": "UAT-F005",
+      "SEVERITY": "P1",
+      "STATUS": "PASS",
+      "SUMMARY": "Agent/customer Laravel JSON via /laravel stolen by OLS Next SPA rules; fixed with /index.php rewrite + _html rejection"
+    }
   ]
 }

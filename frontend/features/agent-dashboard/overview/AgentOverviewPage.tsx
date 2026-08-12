@@ -118,7 +118,7 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
           <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
             <h2 className="text-jp-base font-semibold text-jp-text">Quick actions</h2>
             <div className="mt-3 flex flex-wrap gap-2">
-              {data.quick_actions.map((action) =>
+              {(data.quick_actions ?? []).map((action) =>
                 action.available && action.url ? (
                   <Link
                     key={action.code}
@@ -132,7 +132,7 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
             </div>
           </section>
 
-          {data.recent_bookings.length === 0 ? (
+          {(data.recent_bookings ?? []).length === 0 ? (
             <AgentEmptyState
               title="No bookings yet"
               description="Search flights to create your first agency booking."
@@ -149,7 +149,7 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
             <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
               <h2 className="text-jp-base font-semibold text-jp-text">Recent bookings</h2>
               <ul className="mt-4 space-y-3">
-                {data.recent_bookings.map((booking) => (
+                {(data.recent_bookings ?? []).map((booking) => (
                   <li
                     key={booking.booking_reference}
                     className="flex flex-wrap items-center justify-between gap-3 border-b border-jp-border pb-3 last:border-0"

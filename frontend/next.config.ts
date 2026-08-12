@@ -16,9 +16,12 @@ const nextConfig: NextConfig = {
         source: "/__dev/jetpk-theme-lab",
         destination: "/dev/jetpk-theme-lab",
       },
+      // Route through /index.php so OLS Next SPA rewrite rules for /agent/*
+      // and /customer/* cannot steal JSON API calls on the private Laravel
+      // listener (127.0.0.1:8088). Browser paths remain /laravel/:path*.
       {
         source: "/laravel/:path*",
-        destination: `${laravelProxyTarget}/:path*`,
+        destination: `${laravelProxyTarget}/index.php/:path*`,
       },
     ];
   },

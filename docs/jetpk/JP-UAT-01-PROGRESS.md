@@ -1,50 +1,33 @@
-# JP-UAT-01 — Progress Ledger
+# JP-UAT-01 — Progress
 
-## LAST_UPDATED_UTC
-
-2026-08-12T05:45:00Z
-
-## RESULT
+## Status
 
 `JP_UAT_01=AUTONOMOUS_BUSINESS_UAT_PASS_AWAITING_OWNER_SANITY_REVIEW`
 
-## BRANCH
+Branch: `phase/jetpk-uat-01-autonomous-business-uat`
 
-`phase/jetpk-uat-01-autonomous-business-uat`
+## Waves
 
-## TOOLING
+1. **Scripted / deterministic UAT** — closed at tip `8a8959f` with score **92** (retained).
+2. **Agentic black-box supplement** — Playwright CLI blind personas; discovered **UAT-F005**; fixed + blind agent rerun; agentic score **90**.
 
-| Tool | Status |
-|------|--------|
-| Browser Use | UNAVAILABLE_CREDENTIAL_BOUNDARY |
-| Playwright MCP | NOT_ACTIVE_SESSION_BOUNDARY |
-| Playwright CLI | ACTIVE |
-| Deterministic | JpOps08 PHPUnit + ops-08 Playwright |
+## Tooling
 
-## P0_COUNT
+```
+BROWSER_USE=UNAVAILABLE_CREDENTIAL_BOUNDARY
+PLAYWRIGHT_MCP=NOT_ACTIVE_SESSION_BOUNDARY
+PLAYWRIGHT_CLI_SKILLS=ACTIVE
+AGENTIC_PERSONA_EXECUTION=PASS
+```
 
-0
+## Current tip work
 
-## P1_COUNT
+- F005: `next.config.ts` rewrite via `/index.php/:path*`; `_html` rejection in `laravel-action-client.ts`; null-safe agent overview/bookings
+- Docs: AGENTIC-PERSONA-RESULTS + reconciled FINAL/SCORECARD/FINDINGS/TASK-STATUS
+- OLS hash MATCH (unchanged)
+- QA cleanup at closure
 
-0
+## Not done
 
-## CURRENT_SCORE
-
-92
-
-## SOURCE_PARITY
-
-PASS (frontend + dashboard gate files MATCH)
-
-## OLS_HASH
-
-`612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` MATCH
-
-## QA_STATE
-
-Suspended; denial proven; OTP required; OTP_DEMO_* preserved
-
-## NEXT_ACTION
-
-Owner sanity review (5–15 minutes)
+- Owner human sanity review
+- Merge / launch declaration (forbidden)
