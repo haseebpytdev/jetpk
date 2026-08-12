@@ -108,20 +108,20 @@ test.describe("JP-DASH-03 production acceptance", () => {
     }
   });
 
-  test("dashboard body uses Inter computed font on production", async ({ page }) => {
+  test("dashboard body uses Plus Jakarta Sans computed font on production", async ({ page }) => {
     await page.goto("/admin/dashboard", { waitUntil: "domcontentloaded", timeout: 120_000 });
     await expect(page.getByLabel("Dashboard navigation")).toBeVisible({ timeout: 60_000 });
     const fontFamily = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
-    expect(fontFamily.toLowerCase()).toMatch(/inter/);
+    expect(fontFamily.toLowerCase()).toMatch(/plus jakarta|jakarta/);
   });
 
-  test("public homepage uses Inter computed font on production", async ({ browser }) => {
+  test("public homepage uses Plus Jakarta Sans computed font on production", async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     try {
       await page.goto("/", { waitUntil: "domcontentloaded", timeout: 120_000 });
       const fontFamily = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
-      expect(fontFamily.toLowerCase()).toMatch(/inter/);
+      expect(fontFamily.toLowerCase()).toMatch(/plus jakarta|jakarta/);
     } finally {
       await context.close();
     }

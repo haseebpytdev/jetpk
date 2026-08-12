@@ -53,7 +53,7 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
                     />
                   </div>
                   <div className="p-jp-md">
-                    <h3 className="font-display text-jp-md font-semibold text-jp-text">
+                    <h3 className="font-sans text-jp-md font-semibold text-jp-text">
                       {route.from} → {route.to}
                     </h3>
                     {route.priceLabel ? (

@@ -24,7 +24,7 @@ export function EmptyState({ title, description, action, className, testId = "em
       >
         <EmptyIcon />
       </div>
-      <h2 className="font-display text-jp-md font-semibold text-jp-text">{title}</h2>
+      <h2 className="font-sans text-jp-md font-semibold text-jp-text">{title}</h2>
       {description ? <p className="mx-auto mt-2 max-w-md text-jp-sm text-jp-muted">{description}</p> : null}
       {action ? <div className="mt-jp-md">{action}</div> : null}
     </div>

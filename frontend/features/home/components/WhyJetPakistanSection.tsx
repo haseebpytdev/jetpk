@@ -20,7 +20,7 @@ export function WhyJetPakistanSection() {
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-jp-primary-soft text-jp-primary">
                 <ValueIcon type={item.icon} />
               </span>
-              <h3 className="mt-3 font-display text-jp-md font-semibold text-jp-text">{item.title}</h3>
+              <h3 className="mt-3 font-sans text-jp-md font-semibold text-jp-text">{item.title}</h3>
               <p className="mt-2 text-jp-sm leading-relaxed text-jp-muted">{item.description}</p>
             </li>
           ))}

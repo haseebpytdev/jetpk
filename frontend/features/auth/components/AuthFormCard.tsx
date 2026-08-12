@@ -13,7 +13,7 @@ export function AuthFormCard({ title, description, children, footer, secondaryCa
     <div className="space-y-4" data-testid="auth-form-card">
       <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-jp-lg shadow-jp-sm sm:p-jp-xl">
         <header className="mb-jp-md space-y-2">
-          <h1 className="font-display text-jp-h3 font-bold text-jp-text">{title}</h1>
+          <h1 className="font-sans text-jp-h3 font-bold text-jp-text">{title}</h1>
           {description ? <p className="text-jp-sm text-jp-muted">{description}</p> : null}
         </header>
         {children}

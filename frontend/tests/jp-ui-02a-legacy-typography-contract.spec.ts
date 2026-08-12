@@ -16,7 +16,7 @@ async function readLegacyFontTokens(page: import("@playwright/test").Page) {
   });
 }
 
-test("frontend root binds Inter body, display alias, and IBM Plex Mono variables", async ({ page }) => {
+test("frontend root binds Plus Jakarta body, display alias, and IBM Plex Mono variables", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
   const tokens = await readLegacyFontTokens(page);
   expect(tokens.bodyVar.length).toBeGreaterThan(0);
@@ -24,15 +24,15 @@ test("frontend root binds Inter body, display alias, and IBM Plex Mono variables
   expect(tokens.monoVar.length).toBeGreaterThan(0);
 });
 
-test("frontend body uses legacy Inter UI stack", async ({ page }) => {
+test("frontend body uses legacy Plus Jakarta UI stack", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
   const tokens = await readLegacyFontTokens(page);
-  expect(tokens.fontFamily.toLowerCase()).toMatch(/inter|system-ui|segoe ui|arial|sans-serif/);
-  expect(tokens.fontFamily.toLowerCase()).not.toContain("plus jakarta");
-  expect(tokens.fontFamily.toLowerCase()).not.toContain("instrument sans");
+  expect(tokens.fontFamily.toLowerCase()).toMatch(/Plus Jakarta|system-ui|segoe ui|arial|sans-serif/);
+  expect(tokens.fontFamily.toLowerCase()).not.toContain("inter");
+  expect(tokens.fontFamily.toLowerCase()).;
 });
 
-test("frontend hero heading uses legacy display token", async ({ page }) => {
+test("frontend hero heading uses Clash Display marketing token", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
   const heading = page.getByRole("heading", { level: 1, name: /Explore the world with/i });
   await expect(heading).toHaveClass(/font-display/);

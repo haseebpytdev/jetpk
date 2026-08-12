@@ -13,7 +13,7 @@ export default async function NotFoundPage() {
       <PageContainer className="py-jp-5xl">
         <div className="mx-auto max-w-2xl rounded-jp-card border border-jp-border bg-jp-surface p-jp-3xl text-center shadow-jp-card">
           <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-jp-primary">404</p>
-          <h1 className="mt-3 font-display text-jp-h2 font-bold text-jp-text">Page not found</h1>
+          <h1 className="mt-3 font-sans text-jp-h2 font-bold text-jp-text">Page not found</h1>
           <p className="mt-3 text-jp-body text-jp-muted">
             The page you requested is not available. Check the URL or use the links below to continue.
           </p>

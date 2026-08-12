@@ -25,7 +25,7 @@ export function FeaturedOffersSection() {
               </div>
               <div className="flex flex-1 flex-col p-jp-md">
                 {offer.badge ? <Badge variant="new">{offer.badge}</Badge> : null}
-                <h3 className="mt-2 font-display text-jp-md font-semibold text-jp-text">{offer.title}</h3>
+                <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">{offer.title}</h3>
                 <p className="mt-1 flex-1 text-jp-sm text-jp-muted">{offer.subtitle}</p>
                 {offer.samplePrice ? (
                   <p className="mt-2 text-jp-xs text-jp-muted">{offer.samplePrice} (sample)</p>

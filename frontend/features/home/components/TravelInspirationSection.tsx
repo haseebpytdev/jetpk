@@ -24,7 +24,7 @@ export function TravelInspirationSection() {
               </div>
               <div className="p-jp-md">
                 <Badge variant="new">{card.category}</Badge>
-                <h3 className="mt-2 font-display text-jp-md font-semibold text-jp-text">{card.title}</h3>
+                <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">{card.title}</h3>
                 <p className="mt-2 text-jp-sm leading-relaxed text-jp-muted">{card.excerpt}</p>
               </div>
             </article>

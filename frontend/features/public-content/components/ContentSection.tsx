@@ -12,7 +12,7 @@ export function ContentSection({ title, id, className, children }: ContentSectio
   return (
     <section id={id} className={cn("space-y-4", className)} aria-labelledby={title ? `${id}-heading` : undefined}>
       {title ? (
-        <h2 id={`${id}-heading`} className="font-display text-jp-h3 font-semibold text-jp-text">
+        <h2 id={`${id}-heading`} className="font-sans text-jp-h3 font-semibold text-jp-text">
           {title}
         </h2>
       ) : null}

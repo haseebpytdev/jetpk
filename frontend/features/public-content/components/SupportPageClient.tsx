@@ -61,7 +61,7 @@ export function SupportPageClient({
           {content.hero.kicker ? (
             <p className="text-jp-xs font-semibold uppercase tracking-[0.16em] text-jp-primary">{content.hero.kicker}</p>
           ) : null}
-          <h1 className="mt-3 font-display text-jp-h1 font-bold text-jp-text">
+          <h1 className="mt-3 font-sans text-jp-h1 font-bold text-jp-text">
             {content.hero.title || "We're Here to Help"}
           </h1>
           {content.hero.description ? (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { redirect } from "next/navigation";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { DashboardShell } from "@/layouts/dashboard-shell";
@@ -12,6 +13,20 @@ import { getDashboardSession, type DashboardSessionSummary } from "@/services/se
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "JetPakistan Back Office",
@@ -72,7 +87,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${plusJakartaSans.variable} ${ibmPlexMono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>

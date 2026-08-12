@@ -60,7 +60,7 @@ export function DestinationsSection() {
               </div>
               <div className="p-jp-md">
                 <Badge variant="new">{destination.label}</Badge>
-                <h3 className="mt-2 font-display text-jp-md font-semibold text-jp-text">
+                <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">
                   {destination.city}
                 </h3>
                 <p className="text-jp-sm text-jp-muted">{destination.country}</p>

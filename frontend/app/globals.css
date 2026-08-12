@@ -1,4 +1,5 @@
 @import "../styles/tokens.css";
+@import "../styles/clash-display.css";
 @import "../styles/kit-public.css";
 
 @tailwind base;
@@ -25,9 +26,37 @@ html {
 }
 
 body {
-  --font-display: var(--font-body);
+  /* Clash Display from clash-display.css (--font-display); UI via --font-body */
   @apply bg-jp-page text-jp-text font-sans antialiased;
   font-feature-settings: "tnum" 1;
+}
+
+.jp-header-login-cta {
+  min-width: 106px !important;
+  padding-inline: 1rem !important;
+  border-radius: var(--jp-radius-button, 0.625rem);
+  color: #ffffff !important;
+  background-color: #157a45;
+  background-image: linear-gradient(145deg, #1a8f52 0%, #157a45 52%, #11653a 100%) !important;
+  box-shadow: none !important;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.jp-header-login-cta:hover {
+  background-image: linear-gradient(145deg, #1f9a59 0%, #1a8550 52%, #147042 100%) !important;
+  color: #ffffff !important;
+}
+
+.jp-header-login-cta:active {
+  background-image: linear-gradient(145deg, #14663c 0%, #0f5230 100%) !important;
+  color: #ffffff !important;
+}
+
+.jp-header-login-cta:focus-visible {
+  outline: none;
+  box-shadow: var(--jp-shadow-focus, 0 0 0 3px rgba(21, 122, 69, 0.35)) !important;
 }
 
 .tabular-nums {

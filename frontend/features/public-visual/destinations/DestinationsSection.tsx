@@ -62,7 +62,7 @@ export function DestinationsSection({
                   </div>
                   <div className="p-jp-md">
                     {destination.code ? <Badge variant="new">{destination.code}</Badge> : null}
-                    <h3 className="mt-2 font-display text-jp-md font-semibold text-jp-text">{destination.title}</h3>
+                    <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">{destination.title}</h3>
                     {destination.country ? (
                       <p className="text-jp-sm text-jp-muted">{destination.country}</p>
                     ) : destination.text ? (

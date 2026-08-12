@@ -1,14 +1,13 @@
 /**
- * JetPakistan global typography authority (JP-DASH-03).
- *
- * UI/display: Inter — all normal JetPakistan text including headings and brand marks.
- * Numeric/mono: IBM Plex Mono — fares, codes, KPI machine values.
+ * JetPakistan platform typography authority (OWNER-UAT W2-22).
+ * UI: Plus Jakarta Sans. Display: Clash Display (marketing). Mono: IBM Plex Mono.
  */
-export const JETPK_LEGACY_FONT_BODY_FAMILY = "Inter";
-
-export const JETPK_LEGACY_FONT_DISPLAY_FAMILY = "Inter";
-
-export const JETPK_LEGACY_FONT_MONO_FAMILY = "IBM Plex Mono";
+export const JETPK_FONT_BODY_FAMILY = "Plus Jakarta Sans";
+export const JETPK_FONT_DISPLAY_FAMILY = "Clash Display";
+export const JETPK_FONT_MONO_FAMILY = "IBM Plex Mono";
+export const JETPK_LEGACY_FONT_BODY_FAMILY = JETPK_FONT_BODY_FAMILY;
+export const JETPK_LEGACY_FONT_DISPLAY_FAMILY = JETPK_FONT_DISPLAY_FAMILY;
+export const JETPK_LEGACY_FONT_MONO_FAMILY = JETPK_FONT_MONO_FAMILY;
 
 export const JETPK_FONT_CSS_VARS = {
   body: "--font-body",
@@ -25,48 +24,27 @@ export const JETPK_FONT_CSS_VARS = {
 
 export const JETPK_TYPOGRAPHY_CONTRACT = {
   brandDisplay: {
-    family: JETPK_LEGACY_FONT_DISPLAY_FAMILY,
+    family: JETPK_FONT_DISPLAY_FAMILY,
     cssVar: JETPK_FONT_CSS_VARS.display,
     tailwind: "font-display",
-    usage: "Hero/display headings, major page titles, KPI emphasis",
+    usage: "Selective public marketing H1/H2 only",
   },
   brandUi: {
-    family: JETPK_LEGACY_FONT_BODY_FAMILY,
+    family: JETPK_FONT_BODY_FAMILY,
     cssVar: JETPK_FONT_CSS_VARS.body,
     tailwind: "font-sans",
-    usage: "Navigation, body, controls, tables, forms, metadata",
+    usage: "Navigation, body, controls, tables, forms, KPIs, operational headings",
   },
   brandMono: {
-    family: JETPK_LEGACY_FONT_MONO_FAMILY,
+    family: JETPK_FONT_MONO_FAMILY,
     cssVar: JETPK_FONT_CSS_VARS.mono,
     tailwind: "font-mono",
-    usage: "Fares, references, uppercase labels, numeric tables",
+    usage: "PNR, booking references, true machine identifiers",
   },
 } as const;
 
 export type JetpkTypographyRole = keyof typeof JETPK_TYPOGRAPHY_CONTRACT;
 
-/** Tailwind stacks — each entry is a separate family; never wrap comma stacks in one var(). */
-export const JETPK_TAILWIND_FONT_SANS = [
-  "var(--font-body)",
-  "system-ui",
-  "-apple-system",
-  '"Segoe UI"',
-  "sans-serif",
-];
-
-export const JETPK_TAILWIND_FONT_DISPLAY = [
-  "var(--font-body)",
-  "system-ui",
-  "-apple-system",
-  '"Segoe UI"',
-  "sans-serif",
-];
-
-export const JETPK_TAILWIND_FONT_MONO = [
-  "var(--font-mono)",
-  "ui-monospace",
-  '"Cascadia Code"',
-  '"Segoe UI Mono"',
-  "monospace",
-];
+export const JETPK_TAILWIND_FONT_SANS = ["var(--font-body)", "system-ui", "-apple-system", '"Segoe UI"', "sans-serif"];
+export const JETPK_TAILWIND_FONT_DISPLAY = ["var(--font-display)", "var(--font-body)", "system-ui", "-apple-system", '"Segoe UI"', "sans-serif"];
+export const JETPK_TAILWIND_FONT_MONO = ["var(--font-mono)", "ui-monospace", '"Cascadia Code"', '"Segoe UI Mono"', "monospace"];

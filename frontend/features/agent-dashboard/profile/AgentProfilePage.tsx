@@ -105,7 +105,7 @@ export function AgentProfilePage({ session }: { session: PublicSession }) {
             data-testid="agent-profile-form"
           >
             <div>
-              <h2 className="font-display text-jp-h3 font-semibold text-jp-text">Personal details</h2>
+              <h2 className="font-sans text-jp-h3 font-semibold text-jp-text">Personal details</h2>
               <p className="mt-1 text-jp-sm text-jp-muted">
                 {profile.user.role_label} · Email verification: {profile.user.email_verified ? "Verified" : "Not verified"}
               </p>
@@ -155,7 +155,7 @@ export function AgentProfilePage({ session }: { session: PublicSession }) {
           <section className="max-w-2xl space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-6" data-testid="agent-agency-section">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h2 className="font-display text-jp-h3 font-semibold text-jp-text">Agency details</h2>
+                <h2 className="font-sans text-jp-h3 font-semibold text-jp-text">Agency details</h2>
                 <p className="mt-1 text-jp-sm text-jp-muted">Business profile for your agency workspace.</p>
               </div>
               {logoUrl ? (

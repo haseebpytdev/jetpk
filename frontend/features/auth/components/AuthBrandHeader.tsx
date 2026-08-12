@@ -11,7 +11,7 @@ export function AuthBrandHeader({ eyebrow, headline, headlineHighlight, descript
       {eyebrow ? (
         <p className="text-jp-xs font-semibold uppercase tracking-[0.16em] text-jp-brand">{eyebrow}</p>
       ) : null}
-      <h2 className="mt-2 font-display text-jp-h2 font-bold leading-tight text-jp-text">
+      <h2 className="mt-2 font-sans text-jp-h2 font-bold leading-tight text-jp-text">
         {headline}
         {headlineHighlight ? (
           <>

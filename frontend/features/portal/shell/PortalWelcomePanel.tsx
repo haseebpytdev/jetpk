@@ -72,7 +72,7 @@ export function PortalWelcomePanel({
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-jp-brand">{eyebrow}</p>
         ) : null}
         <div className="space-y-1.5">
-          <h2 className="font-display text-jp-h3 font-semibold tracking-tight text-jp-text sm:text-jp-h2">{title}</h2>
+          <h2 className="font-sans text-jp-h3 font-semibold tracking-tight text-jp-text sm:text-jp-h2">{title}</h2>
           <p className="max-w-xl text-jp-sm font-normal leading-relaxed text-jp-muted">{description}</p>
         </div>
         {meta.length > 0 ? (

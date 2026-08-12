@@ -15,6 +15,7 @@ type DropdownProps = {
   }) => ReactNode;
   children: ReactNode;
   align?: "start" | "end";
+  placement?: "bottom" | "top";
   className?: string;
   panelClassName?: string;
   portal?: boolean;
@@ -25,6 +26,7 @@ export function Dropdown({
   trigger,
   children,
   align = "start",
+  placement = "bottom",
   className,
   panelClassName,
   portal = false,
@@ -45,26 +47,18 @@ export function Dropdown({
 
   useEffect(() => {
     if (!open) return;
-
     const handlePointerDown = (event: MouseEvent) => {
       const target = event.target as Node;
-      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) {
-        return;
-      }
+      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) return;
       setOpen(false);
     };
-
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [open]);
 
   useEffect(() => {
     if (!open || !portal) return;
-
-    const updatePosition = () => {
-      updatePortalPosition();
-    };
-
+    const updatePosition = () => updatePortalPosition();
     updatePosition();
     window.addEventListener("resize", updatePosition);
     window.addEventListener("scroll", updatePosition, true);
@@ -72,56 +66,76 @@ export function Dropdown({
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [align, open, portal]);
+  }, [align, open, placement, portal]);
 
   const updatePortalPosition = () => {
     const rect = rootRef.current?.getBoundingClientRect();
     if (!rect) return;
-
+    const panelHeight = panelRef.current?.offsetHeight ?? 0;
+    const gap = 8;
+    const viewportPad = 16;
+    if (placement === "top") {
+      setPanelStyle({
+        position: "fixed",
+        top: Math.max(viewportPad, rect.top - panelHeight - gap),
+        left: align === "end" ? undefined : Math.max(viewportPad, rect.left),
+        right: align === "end" ? Math.max(viewportPad, window.innerWidth - rect.right) : undefined,
+        zIndex: 60,
+        maxHeight: `min(16rem, ${Math.max(80, rect.top - viewportPad - gap)}px)`,
+      });
+      return;
+    }
     setPanelStyle({
       position: "fixed",
-      top: rect.bottom + 8,
-      left: align === "end" ? undefined : rect.left,
-      right: align === "end" ? Math.max(16, window.innerWidth - rect.right) : undefined,
+      top: rect.bottom + gap,
+      left: align === "end" ? undefined : Math.max(viewportPad, rect.left),
+      right: align === "end" ? Math.max(viewportPad, window.innerWidth - rect.right) : undefined,
       zIndex: 60,
+      maxHeight: `min(16rem, ${Math.max(80, window.innerHeight - rect.bottom - viewportPad - gap)}px)`,
     });
   };
 
   const handleToggle = () => {
     setOpen((value) => {
       const next = !value;
-      if (next && portal) {
-        updatePortalPosition();
-      }
+      if (next && portal) requestAnimationFrame(() => updatePortalPosition());
       return next;
     });
   };
 
+  const openKey = placement === "top" ? "ArrowUp" : "ArrowDown";
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+    if (event.key === openKey || event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       setOpen(true);
+      if (portal) requestAnimationFrame(() => updatePortalPosition());
     }
   };
 
-  const panel =
-    open ? (
-      <div
-        ref={panelRef}
-        id={panelId}
-        role="menu"
-        data-testid={panelTestId}
-        style={portal ? panelStyle : undefined}
-        className={cn(
-          "min-w-[12rem] rounded-jp-md border border-jp-border bg-jp-surface p-2 shadow-jp-md",
-          portal ? undefined : "absolute z-50 mt-2",
-          !portal && (align === "end" ? "right-0" : "left-0"),
-          panelClassName,
-        )}
-      >
-        {children}
-      </div>
-    ) : null;
+  const panel = open ? (
+    <div
+      ref={panelRef}
+      id={panelId}
+      role="menu"
+      data-testid={panelTestId}
+      data-placement={placement}
+      style={portal ? panelStyle : undefined}
+      className={cn(
+        "min-w-[12rem] overflow-y-auto rounded-jp-md border border-jp-border bg-jp-surface p-1.5 shadow-jp-md",
+        portal
+          ? undefined
+          : cn(
+              "absolute z-50",
+              placement === "top" ? "bottom-full mb-2" : "top-full mt-2",
+              align === "end" ? "right-0" : "left-0",
+            ),
+        !portal && placement === "top" && "max-h-[min(16rem,calc(100vh-6rem))]",
+        panelClassName,
+      )}
+    >
+      {children}
+    </div>
+  ) : null;
 
   return (
     <div ref={rootRef} className={cn("relative", className)}>

@@ -21,7 +21,6 @@ function readStoredCurrency(): CurrencyOption {
 
 type CurrencySelectorProps = {
   className?: string;
-  /** Compact footer presentation: label + code ▾ */
   appearance?: "default" | "footer";
 };
 
@@ -39,7 +38,7 @@ export function CurrencySelector({ className, appearance = "default" }: Currency
     try {
       window.localStorage.setItem(STORAGE_KEY, option.code);
     } catch {
-      // ignore quota / private mode
+      // ignore
     }
   };
 
@@ -49,7 +48,13 @@ export function CurrencySelector({ className, appearance = "default" }: Currency
     <Dropdown
       className={className}
       align="end"
-      panelClassName="min-w-[12rem]"
+      placement={footer ? "top" : "bottom"}
+      panelClassName={cn(
+        footer
+          ? "min-w-[13.5rem] max-w-[min(16rem,calc(100vw-2rem))] border-jp-border/80 bg-jp-surface p-1 shadow-jp-md"
+          : "min-w-[12rem]",
+      )}
+      panelTestId={footer ? "currency-menu-panel" : undefined}
       trigger={({ id, expanded, onToggle, onKeyDown, triggerRef }) => (
         <button
           type="button"
@@ -73,22 +78,42 @@ export function CurrencySelector({ className, appearance = "default" }: Currency
         >
           {footer ? <span className="text-jp-xs font-medium uppercase tracking-wide text-white/60">Currency</span> : null}
           <span className={cn("font-semibold tracking-wide", footer ? "text-white" : undefined)}>{currency.code}</span>
-          <ChevronDownIcon className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")} />
+          <ChevronDownIcon
+            className={cn(
+              "h-3.5 w-3.5 transition-transform",
+              footer ? (expanded ? "rotate-0" : "rotate-180") : expanded && "rotate-180",
+            )}
+          />
         </button>
       )}
     >
-      {currencyOptions.map((option) => (
-        <DropdownItem
-          key={option.code}
-          onSelect={() => select(option)}
-          className={currency.code === option.code ? "bg-jp-primary-soft font-semibold" : undefined}
-        >
-          <span className="flex items-center justify-between gap-3">
-            <span>{option.label}</span>
-            <span className="text-jp-muted">{option.code}</span>
-          </span>
-        </DropdownItem>
-      ))}
+      {currencyOptions.map((option) => {
+        const selected = currency.code === option.code;
+        return (
+          <DropdownItem
+            key={option.code}
+            onSelect={() => select(option)}
+            className={cn(
+              "!px-2.5 !py-1.5 text-[12px] leading-5",
+              selected
+                ? "bg-jp-primary-soft font-semibold text-jp-text ring-1 ring-inset ring-jp-primary/25"
+                : "font-normal",
+            )}
+          >
+            <span className="flex w-full items-center gap-3 whitespace-nowrap">
+              <span className="min-w-0 flex-1 truncate text-left">{option.label}</span>
+              <span
+                className={cn(
+                  "shrink-0 text-right tabular-nums tracking-wide",
+                  selected ? "font-semibold text-jp-primary" : "font-medium text-jp-muted",
+                )}
+              >
+                {option.code}
+              </span>
+            </span>
+          </DropdownItem>
+        );
+      })}
     </Dropdown>
   );
 }
@@ -96,13 +121,7 @@ export function CurrencySelector({ className, appearance = "default" }: Currency
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M5 7.5L10 12.5L15 7.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

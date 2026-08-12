@@ -26,7 +26,7 @@ export function LegalDocumentLayout({ document, breadcrumbLabel }: LegalDocument
 
         <article className="jp-print-friendly min-w-0 rounded-jp-xl border border-jp-border bg-jp-surface p-jp-2xl shadow-jp-card">
           <header>
-            <h1 className="font-display text-jp-h2 font-bold text-jp-text">{document.title}</h1>
+            <h1 className="font-sans text-jp-h2 font-bold text-jp-text">{document.title}</h1>
             {(document.effectiveDate || document.lastUpdated) && (
               <p className="mt-2 text-jp-sm text-jp-muted">
                 {document.effectiveDate ? <span>Effective: {document.effectiveDate}</span> : null}
@@ -40,7 +40,7 @@ export function LegalDocumentLayout({ document, breadcrumbLabel }: LegalDocument
           <div className="mt-jp-xl space-y-jp-xl">
             {document.sections.map((section) => (
               <section key={section.id} id={section.id} className="scroll-mt-28">
-                <h2 className="font-display text-jp-h3 font-semibold text-jp-text">{section.heading}</h2>
+                <h2 className="font-sans text-jp-h3 font-semibold text-jp-text">{section.heading}</h2>
                 <div className="mt-3">
                   <ContentRichText body={section.body} />
                 </div>

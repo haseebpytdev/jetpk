@@ -27,7 +27,7 @@ export function FeatureBoardSection({ enabled, items }: FeatureBoardSectionProps
                 className="rounded-jp-card border border-jp-border bg-jp-surface px-jp-md py-jp-lg text-center shadow-jp-card"
               >
                 {item.value ? (
-                  <p className="font-display text-jp-h3 font-bold text-jp-primary">{item.value}</p>
+                  <p className="font-sans text-jp-h3 font-bold text-jp-primary">{item.value}</p>
                 ) : null}
                 {item.label ? <p className="mt-1 text-jp-sm font-medium text-jp-muted">{item.label}</p> : null}
               </ScrollReveal>

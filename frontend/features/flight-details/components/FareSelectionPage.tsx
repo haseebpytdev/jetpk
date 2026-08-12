@@ -100,7 +100,7 @@ export function FareSelectionPage() {
 
       <header className="mb-jp-xl">
         <p className="text-jp-sm text-jp-muted">Home › Flights › Fare Selection</p>
-        <h1 className="mt-jp-sm font-display text-jp-h2 font-bold text-jp-text">
+        <h1 className="mt-jp-sm font-sans text-jp-h2 font-bold text-jp-text">
           Choose Your <span className="text-jp-brand">Fare</span>
         </h1>
         <p className="mt-jp-xs text-jp-body text-jp-muted">

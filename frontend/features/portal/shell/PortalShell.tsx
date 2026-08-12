@@ -153,7 +153,7 @@ type PortalPageHeaderProps = {
 export function PortalPageHeader({ title, id = "portal-page-title" }: PortalPageHeaderProps) {
   return (
     <div className="mb-jp-lg hidden lg:block">
-      <h1 id={id} className="font-display text-jp-h2 font-semibold tracking-tight text-jp-text">
+      <h1 id={id} className="font-sans text-jp-h2 font-semibold tracking-tight text-jp-text">
         {title}
       </h1>
     </div>

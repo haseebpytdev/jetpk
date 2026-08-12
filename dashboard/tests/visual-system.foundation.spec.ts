@@ -73,7 +73,7 @@ test("typography uses font-display on page headings", async ({ page }) => {
   await expect(heading).toHaveClass(/font-display/);
 });
 
-test("dashboard shell uses legacy Inter UI font authority", async ({ page }) => {
+test("dashboard shell uses Plus Jakarta Sans platform font authority", async ({ page }) => {
   await page.goto("/admin/dashboard", { waitUntil: "load" });
   await expect(page.locator("body")).toHaveClass(/font-sans/);
   const sans = await page.evaluate(() =>
@@ -81,8 +81,8 @@ test("dashboard shell uses legacy Inter UI font authority", async ({ page }) => 
   );
   expect(sans).toMatch(/var\(--font-body\)|inter/i);
   const fontFamily = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
-  expect(fontFamily.toLowerCase()).toMatch(/inter/);
-  expect(fontFamily.toLowerCase()).not.toContain("plus jakarta");
+  expect(fontFamily.toLowerCase()).toMatch(/plus jakarta|jakarta/);
+  expect(fontFamily.toLowerCase()).not.toContain("inter");
 });
 
 test("dashboard semantic legacy font tokens are bound on body", async ({ page }) => {
@@ -100,11 +100,11 @@ test("dashboard semantic legacy font tokens are bound on body", async ({ page })
   expect(vars.monoVar.length).toBeGreaterThan(0);
 });
 
-test("staff dashboard inherits legacy typography authority", async ({ page }) => {
+test("staff dashboard inherits Plus Jakarta platform typography", async ({ page }) => {
   await page.goto("/staff/dashboard", { waitUntil: "load" });
   await expect(page.locator("body")).toHaveClass(/font-sans/);
   const fontFamily = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
-  expect(fontFamily.toLowerCase()).toMatch(/inter|system-ui|sans-serif/);
+  expect(fontFamily.toLowerCase()).toMatch(/plus jakarta|jakarta|system-ui|sans-serif/);
 });
 
 test("staff preview sidebar uses staff-scoped grouped navigation", async ({ page }) => {

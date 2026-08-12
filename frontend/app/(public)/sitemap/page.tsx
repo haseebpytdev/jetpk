@@ -37,7 +37,7 @@ export default async function HtmlSitemapPage() {
 
   return (
     <PageContainer className="py-jp-4xl">
-      <h1 className="font-display text-jp-h2 font-semibold text-jp-text">Sitemap</h1>
+      <h1 className="font-sans text-jp-h2 font-semibold text-jp-text">Sitemap</h1>
       <p className="mt-2 text-jp-sm text-jp-muted">Authoritative public routes served by JetPakistan.</p>
       <ul className="mt-jp-xl grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {routes.map((route) => (

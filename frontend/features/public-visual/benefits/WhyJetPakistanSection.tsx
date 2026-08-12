@@ -30,7 +30,7 @@ export function WhyJetPakistanSection({
               <ScrollReveal key={card.id} as="article" staggerIndex={index + 1}>
                 <article className="rounded-jp-card border border-jp-border bg-jp-surface p-jp-lg shadow-jp-card">
                   {card.num ? <p className="text-jp-xs font-semibold uppercase tracking-wide text-jp-primary">{card.num}</p> : null}
-                  <h3 className="mt-2 font-display text-jp-md font-semibold text-jp-text">{card.title}</h3>
+                  <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">{card.title}</h3>
                   {card.text ? <p className="mt-2 text-jp-sm leading-relaxed text-jp-muted">{card.text}</p> : null}
                 </article>
               </ScrollReveal>

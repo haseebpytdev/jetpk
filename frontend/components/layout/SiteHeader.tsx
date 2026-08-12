@@ -18,8 +18,8 @@ export function SiteHeader({ session, branding = null }: SiteHeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface">
-      <div className="mx-auto flex h-jp-nav w-full max-w-jp-container items-center justify-between gap-jp-md overflow-visible px-jp-xl">
-        <div className="flex min-w-0 items-center gap-jp-lg">
+      <div className="mx-auto grid h-jp-nav w-full max-w-jp-container grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-jp-md overflow-visible px-jp-xl">
+        <div className="flex min-w-0 items-center justify-start">
           <Link
             href="/"
             className="shrink-0 rounded-jp-md focus-visible:outline-none focus-visible:shadow-jp-focus"
@@ -32,26 +32,23 @@ export function SiteHeader({ session, branding = null }: SiteHeaderProps) {
               logoHeight={branding?.header_logo_height}
             />
           </Link>
-          <DesktopNavigation session={session} />
         </div>
 
-        <div className="hidden shrink-0 items-center gap-2 lg:flex">
-          <ThemeSwitch />
-          {signedIn ? (
-            <AccountMenu session={session} />
-          ) : (
-            <LinkButton
-              href="/login"
-              variant="primary"
-              className="jp-header-login-cta whitespace-nowrap !rounded-jp-button !bg-gradient-to-br !from-[#1f8f55] !via-[#187a48] !to-[#14663c] !px-4 !shadow-none hover:!from-[#22985b] hover:!via-[#1a8550] hover:!to-[#167242] active:!from-[#14663c] active:!to-[#0f5230]"
-              data-testid="header-login-cta"
-            >
-              Login
-            </LinkButton>
-          )}
-        </div>
+        <DesktopNavigation session={session} className="justify-center" />
 
-        <MobileNavigation session={session} />
+        <div className="flex items-center justify-end gap-2">
+          <div className="hidden shrink-0 items-center gap-2 lg:flex">
+            <ThemeSwitch />
+            {signedIn ? (
+              <AccountMenu session={session} />
+            ) : (
+              <LinkButton href="/login" variant="primary" className="jp-header-login-cta" data-testid="header-login-cta">
+                Login
+              </LinkButton>
+            )}
+          </div>
+          <MobileNavigation session={session} />
+        </div>
       </div>
     </header>
   );

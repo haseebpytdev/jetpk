@@ -17,7 +17,7 @@ export function ResultsHeroBand({ className }: ResultsHeroBandProps) {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className="text-jp-xs font-semibold uppercase tracking-[0.18em] text-jp-primary">Flight results</p>
-        <h2 id="results-hero-heading" className="mt-jp-xs font-display text-jp-h2 font-bold text-jp-text sm:text-3xl">
+        <h2 id="results-hero-heading" className="mt-jp-xs font-sans text-jp-h2 font-bold text-jp-text sm:text-3xl">
           Choose Your <span className="text-jp-brand">Perfect Flight</span>
         </h2>
         <p className="mt-jp-sm max-w-2xl text-jp-body text-jp-muted">

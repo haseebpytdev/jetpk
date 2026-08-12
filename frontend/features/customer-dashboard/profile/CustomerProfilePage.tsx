@@ -58,7 +58,7 @@ export function CustomerProfilePage({ session }: { session: PublicSession }) {
       {profile ? (
         <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-6" data-testid="customer-profile-form">
           <div>
-            <h2 className="font-display text-jp-h3 font-semibold text-jp-text">Personal details</h2>
+            <h2 className="font-sans text-jp-h3 font-semibold text-jp-text">Personal details</h2>
             <p className="mt-1 text-jp-sm text-jp-muted">
               Email verification: {profile.user.email_verified ? "Verified" : "Not verified"}
             </p>

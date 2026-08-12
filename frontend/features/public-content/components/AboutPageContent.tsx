@@ -26,7 +26,7 @@ export function AboutPageContent({ page }: AboutPageContentProps) {
             {page.hero.kicker ? (
               <p className="text-jp-xs font-semibold uppercase tracking-[0.16em] text-jp-primary">{page.hero.kicker}</p>
             ) : null}
-            <h1 id="about-page-heading" className="mt-3 font-display text-jp-h1 font-bold text-jp-text">
+            <h1 id="about-page-heading" className="mt-3 font-sans text-jp-h1 font-bold text-jp-text">
               {page.hero.title}
             </h1>
             {page.hero.description ? (

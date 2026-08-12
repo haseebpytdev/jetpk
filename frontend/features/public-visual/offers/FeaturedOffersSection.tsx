@@ -58,7 +58,7 @@ export function FeaturedOffersSection({
                     {offer.airline ? (
                       <p className="text-jp-xs uppercase tracking-wide text-jp-muted">{offer.airline}</p>
                     ) : null}
-                    <h3 className="mt-2 font-display text-jp-h3 font-bold text-jp-text">
+                    <h3 className="mt-2 font-sans text-jp-h3 font-bold text-jp-text">
                       {offer.from}
                       {offer.to ? (
                         <>

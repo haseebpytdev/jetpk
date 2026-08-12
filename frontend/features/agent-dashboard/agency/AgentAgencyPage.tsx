@@ -54,7 +54,7 @@ export function AgentAgencyPage({ session }: { session: PublicSession }) {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <h2 className="font-display text-jp-h3 font-semibold text-jp-text">{agencyName}</h2>
+              <h2 className="font-sans text-jp-h3 font-semibold text-jp-text">{agencyName}</h2>
               {profile.wallet_summary ? (
                 <p className="mt-1 text-jp-sm text-jp-muted">
                   Wallet: {profile.wallet_summary.currency} {profile.wallet_summary.balance.toLocaleString()}

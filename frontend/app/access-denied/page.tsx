@@ -66,7 +66,7 @@ export default async function AccessDeniedPage({ searchParams }: AccessDeniedPag
           {copy.code ? (
             <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-jp-primary">{copy.code}</p>
           ) : null}
-          <h1 className="mt-3 font-display text-jp-h2 font-bold text-jp-text">{copy.title}</h1>
+          <h1 className="mt-3 font-sans text-jp-h2 font-bold text-jp-text">{copy.title}</h1>
           <p className="mt-3 text-jp-sm text-jp-muted">{copy.message}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-4">
             <Link href="/" className="text-jp-sm font-semibold text-jp-primary hover:underline">

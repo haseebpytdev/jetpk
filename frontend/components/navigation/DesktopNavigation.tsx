@@ -28,7 +28,7 @@ function DesktopNavItem({ item }: { item: NavItem }) {
     return (
       <a
         href={item.href}
-        className="inline-flex items-center gap-2 rounded-jp-md px-3 py-2 text-jp-sm font-medium text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+        className="inline-flex items-center gap-2 rounded-jp-md px-3 py-2 text-jp-sm font-semibold tracking-[-0.01em] text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
       >
         <span>{item.label}</span>
         {item.badge ? <Badge variant="new">{item.badge}</Badge> : null}
@@ -49,7 +49,7 @@ function DesktopNavItem({ item }: { item: NavItem }) {
           aria-controls={id}
           onClick={onToggle}
           onKeyDown={onKeyDown}
-          className="inline-flex items-center gap-1.5 rounded-jp-md px-3 py-2 text-jp-sm font-medium text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+          className="inline-flex items-center gap-1.5 rounded-jp-md px-3 py-2 text-jp-sm font-semibold tracking-[-0.01em] text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
         >
           <span>{item.label}</span>
           <ChevronDownIcon className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")} />

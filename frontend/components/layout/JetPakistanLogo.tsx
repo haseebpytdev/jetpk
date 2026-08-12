@@ -78,7 +78,7 @@ export function JetPakistanLogo({
       <div className="min-w-0">
         <span
           className={cn(
-            "block font-display text-jp-lg font-bold leading-tight",
+            "block font-sans text-jp-lg font-bold leading-tight",
             isInverse ? "text-white" : "text-jp-text",
           )}
         >

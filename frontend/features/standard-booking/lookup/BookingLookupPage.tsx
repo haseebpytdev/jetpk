@@ -141,7 +141,7 @@ export function BookingLookupPage() {
         <PageContainer className="relative z-10 py-jp-2xl">
           <header className="max-w-2xl text-white">
             <p className="text-jp-xs font-semibold uppercase tracking-[0.16em] text-white/85">Manage booking</p>
-            <h1 className="mt-2 font-display text-jp-h1 font-bold leading-tight">
+            <h1 className="mt-2 font-sans text-jp-h1 font-bold leading-tight">
               Manage your <span className="text-jp-primary-soft">booking</span>
             </h1>
             <p className="mt-3 max-w-xl text-jp-sm leading-relaxed text-white/90">
