@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { laravelRequest } from "@/lib/api/laravel-action-client";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import { getDashboardSession, type DashboardSessionSummary } from "@/services/session-service";
 import { useDashboardPortal } from "@/lib/portal-context";
 import { Button } from "@/components/ui/button";
 
@@ -29,6 +28,14 @@ type ProfilePayload = {
   };
 };
 
+type SessionLite = {
+  displayName: string;
+  email: string;
+  roles: string[];
+  accountType: string;
+  accountStatus: string;
+};
+
 const emptyForm: ProfileFormState = {
   name: "",
   email: "",
@@ -38,10 +45,44 @@ const emptyForm: ProfileFormState = {
   country_code: "",
 };
 
+async function fetchSessionLite(portal: string): Promise<SessionLite> {
+  const response = await fetch(`/api/dashboard/session?portal=${encodeURIComponent(portal)}`, {
+    method: "GET",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const payload = (await response.json()) as {
+    data?: {
+      displayName?: string;
+      email?: string | null;
+      roles?: string[];
+      accountType?: string;
+      accountStatus?: string;
+    };
+  };
+  if (!response.ok || !payload.data) {
+    return {
+      displayName: "Session unavailable",
+      email: "—",
+      roles: [],
+      accountType: "unknown",
+      accountStatus: "unknown",
+    };
+  }
+  return {
+    displayName: payload.data.displayName ?? "Signed in",
+    email: payload.data.email ?? "—",
+    roles: payload.data.roles ?? [],
+    accountType: payload.data.accountType ?? "unknown",
+    accountStatus: payload.data.accountStatus ?? "unknown",
+  };
+}
+
 export function ProfilePageContent() {
   const portal = useDashboardPortal();
   const isLive = useDashboardLiveMode();
-  const [session, setSession] = useState<DashboardSessionSummary | null>(null);
+  const [session, setSession] = useState<SessionLite | null>(null);
   const [form, setForm] = useState<ProfileFormState>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,7 +95,7 @@ export function ProfilePageContent() {
     async function load() {
       setLoading(true);
       setError(null);
-      const nextSession = await getDashboardSession({ portal });
+      const nextSession = await fetchSessionLite(portal);
       if (cancelled) {
         return;
       }
