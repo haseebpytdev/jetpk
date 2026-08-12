@@ -1,9 +1,9 @@
 # JP-OPS-08 Scenario Matrix
 
 Transport: EVENT_POLLING
-Updated: 2026-08-12T04:30:00Z
-Closure: FAIL_NOT_OPERATIONALLY_CLOSED
-Blocker: OLS_INTEGRITY_HASH_UNREADABLE_WITHOUT_SUDO
+Updated: 2026-08-12T04:36:00Z
+Closure: ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT
+OLS_INTEGRITY: PASS
 
 | ID | Scenario | Status | Latency | Production | Notes |
 |----|----------|--------|---------|------------|-------|

@@ -31,7 +31,7 @@
 | JP-OPS08-26 | Event/worker production health | yes | yes | yes | n/a | yes | yes | PASS | N/A sync+poll | | | | |
 | JP-OPS08-27 | Responsive/a11y/NFR | yes | yes | yes | yes | yes | yes | PASS | responsive-nfr.spec widths+zooms | | | | |
 | JP-OPS08-28 | Full business simulation | yes | yes | yes | yes | yes | yes | PASS | domain + production support loop | | | | |
-| JP-OPS08-29 | Production deployment/source parity/OLS | yes | yes | yes | yes | yes | partial | FAIL | Full SOURCE_PARITY MATCH; OLS hash unreadable without sudo | 7f0f179 | | OLS_SUDO_REQUIRED | httpd_config exists but unreadable; sudo -n password required |
+| JP-OPS08-29 | Production deployment/source parity/OLS | yes | yes | yes | yes | yes | yes | PASS | Full SOURCE_PARITY MATCH; OLS hash MATCH via root SSH | e5528c7 | | | httpd_config SHA256 = expected baseline |
 | JP-OPS08-30 | Final QA security cleanup | yes | yes | yes | yes | yes | yes | PASS | suspended+denial proven 2026-08-12 | | | | OTP required; OTP_DEMO_* preserved |
-| JP-OPS08-31 | Final engineering report | yes | yes | yes | n/a | yes | n/a | PASS | FAIL_NOT_OPERATIONALLY_CLOSED documented | | | | |
-| JP-OPS08-32 | Final acceptance | yes | yes | yes | n/a | yes | n/a | FAIL | OLS integrity re-hash remaining hard/external blocker | | | OLS | all other engineering gates green |
+| JP-OPS08-31 | Final engineering report | yes | yes | yes | n/a | yes | n/a | PASS | ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT | | | | |
+| JP-OPS08-32 | Final acceptance | yes | yes | yes | n/a | yes | n/a | PASS | OLS_INTEGRITY=PASS; all mandatory engineering gates green | | | | Human UAT remains separate |

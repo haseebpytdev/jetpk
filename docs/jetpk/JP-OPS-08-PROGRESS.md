@@ -2,25 +2,30 @@
 
 ## LAST_UPDATED_UTC
 
-2026-08-12T04:30:00Z
+2026-08-12T04:36:00Z
 
 ## RESULT
 
-`JP_OPS_08=FAIL_NOT_OPERATIONALLY_CLOSED`
+`JP_OPS_08=ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT`
 
-## CLOSURE_BLOCKER
+## OLS
 
-`OLS_INTEGRITY_HASH_UNREADABLE_WITHOUT_SUDO`
-
-All other mandatory engineering gates reconciled green (matrix dimensions clean;
-task ledger consistent; full source parity MATCH; QA cleanup proven).
+| Field | Value |
+|-------|-------|
+| PATH | `/usr/local/lsws/conf/httpd_config.conf` |
+| METHOD | root SSH read-only `sha256sum` (approved jetpk key) |
+| PRODUCTION_SHA256 | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
+| EXPECTED | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
+| MATCH | yes |
+| OLS_MODIFIED | no |
+| OLS_INTEGRITY | PASS |
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
 | BRANCH | `phase/jetpk-ops-08-cross-portal-realtime` |
-| IMPLEMENTATION | includes stale concurrency + role-scoped fan-out @ `7f0f179` |
+| BASE_TIP | `e5528c775b3b10505f5688e7dd21e94e6aabb094` |
 | PARENT | JP-DASH-03 `4a0fccf` |
 
 ## EVENT_TRANSPORT
@@ -29,9 +34,8 @@ task ledger consistent; full source parity MATCH; QA cleanup proven).
 
 ## QA_SECURITY_STATE
 
-Suspended; sessions invalidated; login denial proven; OTP required; OTP_DEMO_* preserved.
+Suspended; sessions invalidated; login denial proven; OTP required; OTP_DEMO_* preserved. Unchanged this closure step.
 
 ## NEXT_ACTION
 
-Human/privileged OLS read-only hash verification (no OLS modification). Then flip
-to ENGINEERING_PASS only if hash matches expected baseline.
+Human final UAT / launch review (separate from engineering PASS).

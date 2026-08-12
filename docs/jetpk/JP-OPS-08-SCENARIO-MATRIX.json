@@ -1,9 +1,9 @@
 {
   "phase": "JP-OPS-08",
   "realtime_transport": "EVENT_POLLING",
-  "updated_utc": "2026-08-12T04:30:00Z",
-  "closure_state": "FAIL_NOT_OPERATIONALLY_CLOSED",
-  "closure_blocker": "OLS_INTEGRITY_HASH_UNREADABLE_WITHOUT_SUDO",
+  "updated_utc": "2026-08-12T04:36:00Z",
+  "closure_state": "ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT",
+  "closure_blocker": null,
   "scenarios": [
     {
       "SCENARIO_ID": "OPS08-S01",
@@ -335,5 +335,7 @@
       "STATUS": "PASS",
       "NOTES": "Domain full-sim + production support create/assign/reply + stale concurrency + reconnect"
     }
-  ]
+  ],
+  "ols_integrity": "PASS",
+  "ols_sha256": "612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c"
 }

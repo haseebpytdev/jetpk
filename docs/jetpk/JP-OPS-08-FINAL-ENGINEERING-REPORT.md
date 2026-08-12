@@ -2,70 +2,56 @@
 
 ## Result
 
-**JP_OPS_08=FAIL_NOT_OPERATIONALLY_CLOSED**
+**JP_OPS_08=ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT**
 
-Prior ENGINEERING_PASS was retracted because matrices/tasks contradicted the claim.
-Implementation was retained (`EVENT_POLLING` unchanged). After reconciliation and
-new concurrency/routing work, **all mandatory operational/scenario engineering
-gates are green except OLS integrity re-hash**, which remains an external hard
-blocker after exhausting the approved `pkjetp` SSH path.
+This is an engineering acceptance result only. It is **not** a declaration of
+launch-ready / final business UAT.
 
-## Remaining hard / external blocker
+## OLS integrity (resolved)
 
-### OLS_INTEGRITY
+| Field | Value |
+|-------|-------|
+| Access | Approved root SSH (`root@185.215.166.176`, jetpk key, IdentitiesOnly) |
+| Command | `sha256sum /usr/local/lsws/conf/httpd_config.conf` (read-only) |
+| Production SHA256 | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
+| Expected | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
+| MATCH | yes |
+| OLS files modified | **no** |
+| OLS_INTEGRITY | **PASS** |
 
-Expected global hash:
+Earlier `pkjetp` inability to read OLS is noted; root path succeeds and proves
+baseline integrity without configuration changes.
 
-`612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`
-
-Probe evidence (2026-08-12, no OLS files modified):
-
-- `/usr/local/lsws/conf/httpd_config.conf` → **exists, unreadable** by `pkjetp`
-- `sudo -n sha256sum ...` → **`sudo: a password is required`**
-- Alternate candidate paths absent
-
-Therefore:
-
-`OLS_INTEGRITY=EXTERNAL_BLOCKER_UNREADABLE`
-
-Do **not** treat `PASS_NO_MODIFICATION` as a substitute for the required
-baseline comparison until a privileged operator can run a read-only hash.
-
-## Architecture (unchanged decision)
+## Architecture
 
 - Laravel authoritative domain → durable `users.meta.ops_inbox` → same-origin
   `EVENT_POLLING` dashboard/customer/agent surfaces
-- Role/permission-scoped fan-out (support vs finance permissions)
-- Support stale concurrency via `lockForUpdate` + optional `expected_updated_at`
-  → HTTP **409** with fresh ticket state
+- Role/permission-scoped fan-out (support vs finance)
+- Support stale concurrency: `lockForUpdate` + `expected_updated_at` → HTTP 409
 
-## Evidence highlights
+## Mandatory gates
 
-| Gate | Evidence |
-|------|----------|
-| Support loop production | create→assign→reply latencies 2416 / 1466 / 1732 ms |
-| Stale concurrency production | Staff close + Admin assign → **409 stale_state**, refreshed status `closed`, assignee null |
-| Department routing | PHPUnit: support-only staff unread=0 on deposit; finance-only unread=0 on support create |
-| Outward status | PHPUnit: status change fans to customer; assignment/internal do not |
-| Agent finance | PHPUnit: balance unchanged; deep_link `agents/deposits`; agency B denied |
-| Responsive NFR | widths 768–1920 + zooms 80–125 PASS |
-| SOURCE_PARITY | Full intended manifest MATCH=yes (`JP-OPS-08-SOURCE-PARITY.json`) |
-| QA cleanup | ids 8–11 suspended; sessions 0; login denial 422×4; OTP required; OTP_DEMO_* PRESENT |
-| PRIVATE_ORIGIN_EXPOSURE | 0 |
+All required JP-OPS-08 engineering gates are PASS, including:
 
-## Tests
+- Cross-portal routing / support loops / reconnect / duplicate protection
+- Stale-state multi-browser concurrency (409 + refreshed closed state)
+- Department (role/permission) routing and agent finance fan-out (no money move)
+- SOURCE_PARITY (full intended deploy manifest MATCH=yes)
+- OLS_INTEGRITY=PASS
+- QA_SECURITY_CLEANUP=PASS
+- PRIVATE_ORIGIN_EXPOSURE=0
 
-- `php artisan test --filter=JpOps08` → **15 PASS / 85 assertions**
-- Playwright: support two-way, stale concurrency, responsive NFR PASS
+## Evidence pointers
+
+- Scenario matrix: `docs/jetpk/JP-OPS-08-SCENARIO-MATRIX.json` (dimensions clean)
+- Task ledger: `docs/jetpk/JP-OPS-08-TASK-STATUS.md`
+- Source parity: `docs/jetpk/JP-OPS-08-SOURCE-PARITY.json`
+- Progress: `docs/jetpk/JP-OPS-08-PROGRESS.md`
+- PHPUnit: `JpOps08*` 15 PASS / 85 assertions (prior reopen tip)
+- Playwright: support two-way, stale concurrency, responsive NFR
 
 ## Branch
 
-`phase/jetpk-ops-08-cross-portal-realtime` (implementation tip includes `7f0f179`+)
+`phase/jetpk-ops-08-cross-portal-realtime`
 
-## Human-only next step to unlock ENGINEERING_PASS
-
-1. Privileged read-only OLS hash of `httpd_config.conf` compared to expected baseline
-2. If MATCH → regenerate final report to `ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT`
-3. If drift → HARD STOP investigation (no autonomous OLS edits)
-
-No commercial QA side effects were created for finance/booking ledger fixtures.
+Human final UAT / launch decision remains a separate step.
