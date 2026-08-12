@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/page-layout";
 import { Select } from "@/components/ui/select";
 import { countActiveUserFilters } from "@/lib/users/query-filters";
@@ -20,6 +19,7 @@ export function UsersFilterBar({ query, facets }: Props) {
   const router = useDashboardRouter();
   const [pending, startTransition] = useTransition();
   const [draft, setDraft] = useState(query);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     setDraft(query);
@@ -60,25 +60,18 @@ export function UsersFilterBar({ query, facets }: Props) {
   };
 
   const activeCount = countActiveUserFilters(query);
+  const moreActive =
+    (query.department ? 1 : 0) +
+    (query.role ? 1 : 0) +
+    (query.mfa !== "all" ? 1 : 0) +
+    (query.verification !== "all" ? 1 : 0) +
+    (query.securityState !== "all" ? 1 : 0) +
+    (query.validationState !== "all" ? 1 : 0);
 
   return (
-    <Card className="space-y-4" data-testid="users-filters">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-gray-900">
-          User filters{activeCount > 0 ? ` (${activeCount} active)` : ""}
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="ghost" size="sm" type="button" onClick={reset}>
-            Reset filters
-          </Button>
-          <Button size="sm" type="button" onClick={apply} disabled={pending} aria-busy={pending}>
-            Apply filters
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div>
+    <div className="space-y-3 rounded-2xl border border-jp-border bg-white p-3 shadow-sm" data-testid="users-filters">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+        <div className="min-w-0 flex-1">
           <Label htmlFor="users-search">Search</Label>
           <input
             id="users-search"
@@ -89,22 +82,10 @@ export function UsersFilterBar({ query, facets }: Props) {
             onKeyDown={(e) => {
               if (e.key === "Enter") apply();
             }}
+            placeholder="Name, email, title…"
           />
         </div>
-        <div>
-          <Label htmlFor="users-status">Status</Label>
-          <Select
-            id="users-status"
-            value={draft.status}
-            onChange={(e) => setDraft((d) => ({ ...d, status: e.target.value as UsersQuery["status"] }))}
-          >
-            <option value="all">All statuses</option>
-            {facets.statuses.map((s) => (
-              <option key={s} value={s}>{USER_STATUS_LABELS[s]}</option>
-            ))}
-          </Select>
-        </div>
-        <div>
+        <div className="w-full lg:w-44">
           <Label htmlFor="users-type">User type</Label>
           <Select
             id="users-type"
@@ -113,95 +94,144 @@ export function UsersFilterBar({ query, facets }: Props) {
           >
             <option value="all">All types</option>
             {facets.userTypes.map((t) => (
-              <option key={t} value={t}>{USER_TYPE_LABELS[t]}</option>
+              <option key={t} value={t}>
+                {USER_TYPE_LABELS[t]}
+              </option>
             ))}
           </Select>
         </div>
-        <div>
-          <Label htmlFor="users-department">Department</Label>
+        <div className="w-full lg:w-44">
+          <Label htmlFor="users-status">Status</Label>
           <Select
-            id="users-department"
-            value={draft.department}
-            onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))}
+            id="users-status"
+            value={draft.status}
+            onChange={(e) => setDraft((d) => ({ ...d, status: e.target.value as UsersQuery["status"] }))}
           >
-            <option value="">All departments</option>
-            {facets.departments.map((d) => (
-              <option key={d} value={d}>{d}</option>
+            <option value="all">All statuses</option>
+            {facets.statuses.map((s) => (
+              <option key={s} value={s}>
+                {USER_STATUS_LABELS[s]}
+              </option>
             ))}
           </Select>
         </div>
-        <div>
-          <Label htmlFor="users-role">Role</Label>
-          <Select
-            id="users-role"
-            value={draft.role}
-            onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value }))}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((v) => !v)}
           >
-            <option value="">All roles</option>
-            {facets.roles.map((r) => (
-              <option key={r.id} value={r.id}>{r.name}</option>
-            ))}
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="users-mfa">MFA state</Label>
-          <Select
-            id="users-mfa"
-            value={draft.mfa}
-            onChange={(e) => setDraft((d) => ({ ...d, mfa: e.target.value as UsersQuery["mfa"] }))}
-          >
-            <option value="all">All MFA states</option>
-            <option value="enabled">Enabled</option>
-            <option value="disabled">Disabled</option>
-            <option value="required">Required</option>
-            <option value="pendingSetup">Pending setup</option>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="users-verification">Verification</Label>
-          <Select
-            id="users-verification"
-            value={draft.verification}
-            onChange={(e) => setDraft((d) => ({ ...d, verification: e.target.value as UsersQuery["verification"] }))}
-          >
-            <option value="all">All verification states</option>
-            <option value="verified">Verified</option>
-            <option value="pending">Pending</option>
-            <option value="unverified">Unverified</option>
-            <option value="expired">Expired</option>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="users-security">Security state</Label>
-          <Select
-            id="users-security"
-            value={draft.securityState}
-            onChange={(e) => setDraft((d) => ({ ...d, securityState: e.target.value as UsersQuery["securityState"] }))}
-          >
-            <option value="all">All security states</option>
-            <option value="normal">Normal</option>
-            <option value="warning">Warning</option>
-            <option value="locked">Locked</option>
-            <option value="suspended">Suspended</option>
-            <option value="reviewRequired">Review required</option>
-            <option value="staleInvitation">Stale invitation</option>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="users-validation">Validation state</Label>
-          <Select
-            id="users-validation"
-            value={draft.validationState}
-            onChange={(e) => setDraft((d) => ({ ...d, validationState: e.target.value as UsersQuery["validationState"] }))}
-          >
-            <option value="all">All validation states</option>
-            <option value="valid">Valid</option>
-            <option value="warning">Warning</option>
-            <option value="blocked">Blocked</option>
-            <option value="review">Review</option>
-          </Select>
+            More filters{moreActive > 0 ? ` (${moreActive})` : ""}
+          </Button>
+          <Button variant="ghost" size="sm" type="button" onClick={reset}>
+            Reset
+          </Button>
+          <Button size="sm" type="button" onClick={apply} disabled={pending} aria-busy={pending}>
+            Apply
+          </Button>
         </div>
       </div>
-    </Card>
+
+      {moreOpen ? (
+        <div className="grid gap-3 border-t border-jp-border pt-3 sm:grid-cols-2 xl:grid-cols-3" data-testid="users-more-filters">
+          <div>
+            <Label htmlFor="users-department">Department / Agency</Label>
+            <Select
+              id="users-department"
+              value={draft.department}
+              onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))}
+            >
+              <option value="">All departments</option>
+              {facets.departments.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="users-role">Role</Label>
+            <Select
+              id="users-role"
+              value={draft.role}
+              onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value }))}
+            >
+              <option value="">All roles</option>
+              {facets.roles.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="users-mfa">MFA state</Label>
+            <Select
+              id="users-mfa"
+              value={draft.mfa}
+              onChange={(e) => setDraft((d) => ({ ...d, mfa: e.target.value as UsersQuery["mfa"] }))}
+            >
+              <option value="all">All MFA states</option>
+              <option value="enabled">Enabled</option>
+              <option value="disabled">Disabled</option>
+              <option value="required">Required</option>
+              <option value="pendingSetup">Pending setup</option>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="users-verification">Verification</Label>
+            <Select
+              id="users-verification"
+              value={draft.verification}
+              onChange={(e) => setDraft((d) => ({ ...d, verification: e.target.value as UsersQuery["verification"] }))}
+            >
+              <option value="all">All verification states</option>
+              <option value="verified">Verified</option>
+              <option value="pending">Pending</option>
+              <option value="unverified">Unverified</option>
+              <option value="expired">Expired</option>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="users-security">Security state</Label>
+            <Select
+              id="users-security"
+              value={draft.securityState}
+              onChange={(e) => setDraft((d) => ({ ...d, securityState: e.target.value as UsersQuery["securityState"] }))}
+            >
+              <option value="all">All security states</option>
+              <option value="normal">Normal</option>
+              <option value="warning">Warning</option>
+              <option value="locked">Locked</option>
+              <option value="suspended">Suspended</option>
+              <option value="reviewRequired">Review required</option>
+              <option value="staleInvitation">Stale invitation</option>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="users-validation">Validation state</Label>
+            <Select
+              id="users-validation"
+              value={draft.validationState}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, validationState: e.target.value as UsersQuery["validationState"] }))
+              }
+            >
+              <option value="all">All validation states</option>
+              <option value="valid">Valid</option>
+              <option value="warning">Warning</option>
+              <option value="blocked">Blocked</option>
+              <option value="review">Review</option>
+            </Select>
+          </div>
+        </div>
+      ) : null}
+
+      {activeCount > 0 ? (
+        <p className="text-xs text-jp-muted">{activeCount} active filter{activeCount === 1 ? "" : "s"}</p>
+      ) : null}
+    </div>
   );
 }
