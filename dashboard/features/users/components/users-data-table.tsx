@@ -1,6 +1,5 @@
-import { AccessValidationBadge, MfaStatusBadge, UserStatusBadge } from "@/components/ui/status-badge";
+import { UserStatusBadge } from "@/components/ui/status-badge";
 import { Table, Td, Th } from "@/components/ui/table";
-import { formatDate } from "@/lib/format";
 import type { UserSortField } from "@/types/users";
 import type { UserTableRow } from "@/types/users";
 
@@ -8,26 +7,29 @@ type Props = {
   rows: UserTableRow[];
   sort: UserSortField;
   direction: "asc" | "desc";
+  page: number;
+  pageSize: number;
   onSort: (field: UserSortField) => void;
   onView: (id: string) => void;
 };
 
 const COLUMNS: { key: string; label: string; sortable?: boolean; sortField?: UserSortField }[] = [
-  { key: "id", label: "User ID" },
+  { key: "serial", label: "#" },
   { key: "fullName", label: "User", sortable: true, sortField: "fullName" },
   { key: "email", label: "Email", sortable: true, sortField: "email" },
-  { key: "department", label: "Department", sortable: true, sortField: "department" },
-  { key: "jobTitle", label: "Job title" },
   { key: "userType", label: "User type", sortable: true, sortField: "userType" },
-  { key: "roles", label: "Assigned roles" },
+  { key: "jobRole", label: "Job title / Role" },
+  { key: "department", label: "Department / Agency", sortable: true, sortField: "department" },
   { key: "status", label: "Status", sortable: true, sortField: "status" },
-  { key: "mfa", label: "MFA" },
-  { key: "lastSignIn", label: "Last sign-in", sortable: true, sortField: "lastSignIn" },
-  { key: "sessions", label: "Active sessions" },
-  { key: "validationState", label: "Validation", sortable: true, sortField: "validationState" },
+  { key: "actions", label: "Actions" },
 ];
 
-export function UsersDataTable({ rows, sort, direction, onSort, onView }: Props) {
+function serialLabel(page: number, pageSize: number, index: number): string {
+  const n = (page - 1) * pageSize + index + 1;
+  return String(n).padStart(2, "0");
+}
+
+export function UsersDataTable({ rows, sort, direction, page, pageSize, onSort, onView }: Props) {
   return (
     <div className="hidden md:block" data-testid="users-table">
       <Table>
@@ -52,46 +54,44 @@ export function UsersDataTable({ rows, sort, direction, onSort, onView }: Props)
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
+          {rows.map((row, index) => (
             <tr key={row.id}>
+              <Td className="tabular-nums text-jp-muted">{serialLabel(page, pageSize, index)}</Td>
+              <Td>
+                <div className="font-medium">{row.fullName}</div>
+                {row.displayName && row.displayName !== row.fullName ? (
+                  <div className="text-xs text-jp-muted">{row.displayName}</div>
+                ) : null}
+              </Td>
+              <Td className="max-w-[14rem] break-all">{row.email}</Td>
+              <Td>{row.userTypeLabel}</Td>
+              <Td>
+                <div>{row.jobTitle || "—"}</div>
+                <div className="text-xs text-jp-muted">
+                  {row.assignedRoleNames.length > 0 ? row.assignedRoleNames.join(", ") : "No roles"}
+                </div>
+              </Td>
+              <Td>{row.department || "—"}</Td>
+              <Td>
+                <UserStatusBadge status={row.status} />
+              </Td>
               <Td>
                 <button
                   type="button"
-                  className="font-medium text-jp-accent hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
+                  className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
                   onClick={() => onView(row.id)}
-                  aria-label={row.id}
+                  aria-label={`View user ${row.fullName}`}
                 >
-                  {row.id}
+                  View
                 </button>
               </Td>
-              <Td>
-                <div className="font-medium">{row.fullName}</div>
-                <div className="text-xs text-jp-muted">{row.displayName}</div>
-              </Td>
-              <Td className="max-w-[12rem] break-all">{row.email}</Td>
-              <Td>{row.department}</Td>
-              <Td>{row.jobTitle}</Td>
-              <Td>{row.userTypeLabel}</Td>
-              <Td>
-                <div className="flex flex-wrap gap-1">
-                  {row.assignedRoleNames.length > 0 ? (
-                    row.assignedRoleNames.map((name) => (
-                      <span key={name} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">{name}</span>
-                    ))
-                  ) : (
-                    <span className="text-xs text-jp-muted">No roles</span>
-                  )}
-                </div>
-              </Td>
-              <Td><UserStatusBadge status={row.status} /></Td>
-              <Td><MfaStatusBadge status={row.mfaState} /></Td>
-              <Td>{row.lastSignInAt ? formatDate(row.lastSignInAt) : "—"}</Td>
-              <Td className="tabular-nums">{row.activeSessionCount}</Td>
-              <Td><AccessValidationBadge status={row.validationState} /></Td>
             </tr>
           ))}
         </tbody>
       </Table>
+      <p className="mt-2 text-xs text-jp-muted">
+        Internal user ID, MFA, last sign-in, sessions, and validation details remain in View user.
+      </p>
     </div>
   );
 }

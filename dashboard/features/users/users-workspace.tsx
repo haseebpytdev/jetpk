@@ -76,6 +76,8 @@ export function UsersWorkspace({ result }: Props) {
               rows={result.table.rows}
               sort={result.query.sort}
               direction={result.query.direction}
+              page={result.table.page}
+              pageSize={result.table.pageSize}
               onSort={onSort}
               onView={onView}
             />
