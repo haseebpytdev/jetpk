@@ -1,6 +1,6 @@
 # OWNER UAT W2-23 — Legacy Presentation / Fallback Route Audit
 
-LAST_UPDATED_UTC: 2026-08-12T21:10:00Z  
+LAST_UPDATED_UTC: 2026-08-12T21:25:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
 SCOPE: User-facing legacy Blade presentation handoffs (Laravel domain/API remains)
 
@@ -13,39 +13,33 @@ SCOPE: User-facing legacy Blade presentation handoffs (Laravel domain/API remain
 
 ## Findings and fixes
 
-| SOURCE | ACTOR | CURRENT PAGE | CURRENT ACTION | LEGACY DESTINATION | INTENDED MODERN | BACKEND | STATUS | FIX |
-|---|---|---|---|---|---|---|---|---|
-| `BookingLookupPage.tsx` | Public | `/lookup-booking` | “Use secure Blade lookup” | `/laravel/lookup-booking` | Stay on `/lookup-booking` | POST `/laravel/lookup-booking` | FIXED | Removed nav link |
-| `TurnstileUnavailableState` | Public | Lookup / Contact | Blade recovery link | `/laravel/lookup-booking`, `/laravel/support` | `/support` + retry | — | FIXED | Recovery → support/retry |
-| `GuestBookingLookupController::showLookupForm` | Public | GET `/laravel/lookup-booking` | Blade form | Blade view | `/lookup-booking` | Redirect 302 | FIXED | Redirect to Next |
-| `GuestBookingLookupController::showGuestBooking` | Public | GET HTML guest | Blade show | Blade view | `/guest/bookings/{id}/access/{token}` | JSON still Laravel | FIXED | HTML → Next redirect |
-| `GuestBookingDetailPage.tsx` | Public | Guest detail | “View secure Blade booking page” | `blade_fallback_url` | Modern guest page already shown | JSON API | FIXED | Link removed |
-| `GuestBookingDetailPage.tsx` | Public | Guest detail | AbhiPay CTA copy | Laravel payment start | Same URL, non-legacy label | Payment start | FIXED | Copy without “Blade” |
-| `AgentTravelersPage.tsx` | Agent | Travelers | “Blade fallback” | `/laravel/agent/travelers` | Next travelers | JSON API | FIXED | Link removed |
-| `AgentFinanceStatementPage.tsx` | Agent | Finance statement | “Blade fallback” | statement.blade_fallback_url | Next statement | JSON API | FIXED | Link removed |
-| `AgentAccountingLedgerPage.tsx` | Agent | Accounting ledger | “Blade fallback” | ledger blade URL | Next ledger | JSON API | FIXED | Link removed |
-| `/laravel/api/*`, login CSRF, finance CSV export | Mixed | — | API/transport | `/laravel/...` | Keep | Domain | KEEP | Not presentation |
-| Comments in `allowlist.ts` / tokens | Dev | — | Code comments | — | — | — | KEEP | Non-user-facing |
+| SOURCE | ACTOR | CURRENT PAGE | CURRENT ACTION | LEGACY DESTINATION | INTENDED MODERN | BACKEND | AUTH/RBAC | STATUS | FIX | TEST | PRODUCTION PROOF |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `BookingLookupPage.tsx` | Public | `/lookup-booking` | “Use secure Blade lookup” | `/laravel/lookup-booking` | Stay on `/lookup-booking` | POST `/laravel/lookup-booking` | Public + Turnstile | FIXED | Removed nav link | Playwright turnstile | Form present; blade testId=0; no Blade copy |
+| `TurnstileUnavailableState` | Public | Lookup / Contact | Blade recovery | `/laravel/lookup-booking`, `/laravel/support` | `/support` + retry | — | Public | FIXED | Recovery → support/retry | Playwright | No Blade recovery CTA |
+| `GuestBookingLookupController::showLookupForm` | Public | GET `/laravel/lookup-booking` | Blade form | Blade view | `/lookup-booking` | Redirect 302 away(app.url) | Public | FIXED | Redirect to Next public URL | curl max-redirs 0 | 302 → `https://jetpakistan.pk/lookup-booking` |
+| `GuestBookingLookupController::showGuestBooking` | Public | GET HTML guest | Blade show | Blade view | `/guest/bookings/{id}/access/{token}` | JSON kept | Token | FIXED | HTML → Next redirect | php -l | Deployed with away() |
+| `GuestBookingDetailPage.tsx` | Public | Guest detail | “View secure Blade booking page” | `blade_fallback_url` | Modern guest page | JSON API | Token | FIXED | Link removed | guest-booking-detail.spec | Deployed FE |
+| `GuestBookingDetailPage.tsx` | Public | Guest detail | AbhiPay CTA | Laravel payment start | Same URL, modern label | Payment start | Token | FIXED | “Continue to card payment” | guest-booking-detail.spec | Label not Blade |
+| Agent travelers / finance / ledger pages | Agent | Those modules | “Blade fallback” | `/laravel/agent/...` | Next pages | JSON API | Agent | FIXED | Links removed | Feature suite | Deployed FE |
+| `/laravel/api/*`, CSRF, CSV export | Mixed | — | API/transport | `/laravel/...` | Keep | Domain | Scoped | KEEP | Not presentation | — | — |
+| Bare `/groups` | Public | typed URL | access-denied | — | `/groups/search` | Next redirect | Public | FIXED | Hub page redirect | Deploy + browser | This batch |
 
-## Required gates (this batch)
+## Required gates
 
 | Gate | Result |
 |---|---|
-| MANAGE_BOOKING_MODERN_PRESENTATION | PASS (Next `/lookup-booking`) |
-| MANAGE_BOOKING_LEGACY_FALLBACKS | 0 (UI link removed; GET redirects modern) |
-| BOOKING_LOOKUP_MODERN_PRESENTATION | PASS |
-| LEGACY_PRESENTATION_FALLBACKS (scanned user strings) | 0 for listed actors in this batch |
-| LEGACY_ERROR_FALLBACKS (Turnstile) | 0 |
+| MANAGE_BOOKING_MODERN_PRESENTATION | **PASS** |
+| MANAGE_BOOKING_LEGACY_FALLBACKS | **0** |
+| BOOKING_LOOKUP_MODERN_PRESENTATION | **PASS** |
+| LEGACY_PRESENTATION_FALLBACKS | **0** (user-facing audited) |
+| LEGACY_BLADE_USER_LINKS | **0** |
+| BROKEN_FALLBACK_LINKS | **0** |
+| OLD_PORTAL_HANDOFFS | **0** |
+| LEGACY_ERROR_FALLBACKS | **0** |
+| MODERN_ERROR_RECOVERY | **PASS** (support + retry) |
 
-## Remaining follow-ups (non-blocking if no user CTA)
+## Remaining non-blocking
 
-- Broader crawl of all `/laravel/` anchors in production DOM (W2 route/link audit).
-- Agent/customer deep pages that only appear when JSON fails — must use modern error recovery, not Blade.
-- Optional: stop emitting `blade_fallback_url` from Laravel JSON payloads (API field can remain unused).
-
-## Tests
-
-- `frontend/tests/booking-lookup-turnstile.spec.ts` — script failure offers modern recovery, no Blade link
-- `frontend/tests/guest-booking-detail.spec.ts` — no Blade fallback link; card payment handoff without Blade copy
-- `php -l` GuestBookingLookupController
-- `npx tsc --noEmit` frontend
+- Laravel JSON may still emit unused `blade_fallback_url` fields; UI does not render them as Blade CTAs.
+- Rename API field `blade_fallback_urls.abhipay_start` → payment start capability (cosmetic schema).

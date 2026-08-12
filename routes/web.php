@@ -120,6 +120,11 @@ Route::middleware('platform.module:public_flight_search')->group(function (): vo
 });
 Route::get('/airports/search', AirportSearchController::class)->middleware('throttle:60,1')->name('airports.search');
 
+// Bookmark-safe hub: public OLS may hit Laravel for bare /groups; modern UI is Next /groups/search.
+Route::get('/groups', function () {
+    return redirect()->away(rtrim((string) config('app.url'), '/').'/groups/search');
+})->name('group-ticketing.hub');
+
 Route::middleware('platform.module:public_umrah_groups')->group(function (): void {
     Route::bind('inventory', function (string $value): GroupInventory {
         $inventory = GroupInventory::query()

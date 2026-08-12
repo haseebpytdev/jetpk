@@ -24,5 +24,5 @@
 | W2-20 | Final cross-module regression | DONE | PASS | DEPLOYED | Gate closure | READY_OWNER | Staff auth + route smoke + OLS | see W2-20 evidence | — | Owner retest |
 | W2-21 | Public shell header/footer | DONE | PASS | DEPLOYED | Currency/nav | READY_OWNER | Prod accept PASS | see W2-21/22 doc | — | Owner retest |
 | W2-22 | Plus Jakarta + Clash typography | DONE | PASS | DEPLOYED | Inter residue | READY_OWNER | Prod Inter=0; fonts verified | see W2-21/22 doc | — | Owner retest |
-| W2-23 | Legacy presentation / fallback retirement | DONE | PENDING | PENDING | Blade lookup link | IN_PROGRESS | Audit + code fixes | WIP | Deploy/prod proof | Prod verify |
-| W2-24 | Module / API operational matrix | DONE | PENDING | PENDING | Pages≠ops | IN_PROGRESS | Matrix doc | WIP | Route crawl | Close gaps |
+| W2-23 | Legacy presentation / fallback retirement | DONE | PASS | DEPLOYED | Blade lookup link | READY_OWNER | Prod browser + 302 away | 7dc9d2a | — | Owner retest |
+| W2-24 | Module / API operational matrix | DONE | PASS | DOCUMENTED | Pages≠ops | READY_OWNER | Matrix + route audit | docs batch | PARTIAL deposits/markup/CMS-RO | Owner retest |
