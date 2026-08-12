@@ -1,9 +1,9 @@
 # OWNER UAT WAVE 2 — Progress Ledger
 
-LAST_UPDATED_UTC: 2026-08-12T18:50:00Z  
+LAST_UPDATED_UTC: 2026-08-12T19:40:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-LOCAL_HEAD: `67b82a5` (pending push confirm)  
-REMOTE_HEAD: tracking `jetpk`  
+LOCAL_HEAD: pending push (amendment + users/staff semantics)  
+REMOTE_HEAD: `1ec26f5` on `jetpk` (pre-push)  
 WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f` (`OWNER_UAT_WAVE_1=OWNER_ACCEPTED`)
 
 ## STATUS
@@ -25,6 +25,16 @@ WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f` (`OWNER_UAT_WAVE_1=OWN
 | Support | Default 10/page + Prev/Next |
 | Settings validation | Missing support contact → OWNER_INPUT_REQUIRED warning; supplier env demo/sandbox/live accepted |
 | Users table | Compact columns + serial `01..`; security detail stays in View |
+| Users filter bar | Compact filters + **More filters**; rebuild `In6djFqjlIPPlopeSNBn9`; USERS=307; OLS MATCH |
+
+## LOCAL READY TO PUSH / DEPLOY
+
+| Area | Notes |
+|---|---|
+| Booking route binding | `Booking::resolveRouteBinding` by id or booking_reference |
+| W2-06 local contact | Policy + PATCH admin/staff + management UI; passenger edit blocked after PNR |
+| W2-11 CMS pages | Laravel JSON store/update/archive + Next local editor (cms_pages only) |
+| W2-03/04 Staff semantics | `/staff` nav + scope=staff API; Users includes Customer; Agent≠Agent Staff; Agency vs Department split |
 
 ## OLS
 
@@ -36,14 +46,14 @@ OTP temporary Owner-UAT remains; OTP_DEMO_* preserved; QA identities active.
 
 ## REMAINING HIGH PRIORITY
 
-- W2-03/04 Users vs Staff semantics + compact filters (partial table done)
-- W2-06 booking amendment policy
-- W2-09 Settings IA redesign (validation false-errors partially fixed)
-- W2-11 CMS baseline operational
-- W2-07/19 typography + button clarity
-- W2-18 email location semantics
-- W2-20 final regression + source-parity manifest + OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST
+- Deploy + production verify Users/Staff + amendment + CMS pages
+- W2-13 compact filters on other modules
+- W2-09 Settings IA
+- W2-11 CMS beyond pages (sections/banners/notices/assets)
+- W2-18 email Karachi semantics
+- W2-21/22 typography reconcile from `ota-jetpk-w2-shell` @ `153cfaa`
+- W2-20 final regression + PASS_READY_FOR_OWNER_RETEST
 
 ## NEXT_ACTION
 
-Continue Users/Staff semantics + compact filter framework, then CMS + amendment policy.
+Commit/push local batch → deploy → continue Settings / filters / email / typography.

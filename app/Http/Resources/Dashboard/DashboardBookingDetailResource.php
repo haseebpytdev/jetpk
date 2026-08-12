@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\Booking;
+use App\Support\Bookings\BookingLocalAmendmentPolicy;
 use App\Support\Dashboard\DashboardMoneyPresenter;
 
 final class DashboardBookingDetailResource
@@ -15,6 +16,7 @@ final class DashboardBookingDetailResource
         $summary = DashboardBookingResource::fromModel($booking);
         $booking->loadMissing([
             'passengers',
+            'contact',
             'fareBreakdown',
             'payments',
             'latestSupplierBooking',
@@ -24,6 +26,7 @@ final class DashboardBookingDetailResource
             'communicationLogs.user',
             'documents.generatedBy',
         ]);
+        $amendment = BookingLocalAmendmentPolicy::evaluate($booking);
 
         $passengers = $booking->passengers
             ->map(static fn ($p): array => [
@@ -44,6 +47,12 @@ final class DashboardBookingDetailResource
 
         return [
             'summary' => $summary,
+            'localContact' => [
+                'email' => (string) ($booking->contact?->email ?? ''),
+                'phone' => (string) ($booking->contact?->phone ?? ''),
+                'country' => (string) ($booking->contact?->country ?? ''),
+            ],
+            'localAmendment' => $amendment,
             'itinerary' => [
                 'route' => (string) ($booking->route ?? ''),
                 'airline' => (string) ($booking->airline ?? ''),

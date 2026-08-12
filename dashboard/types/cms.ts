@@ -198,6 +198,7 @@ export type CmsSectionInstance = {
 
 export type CmsPage = {
   id: string;
+  internalId?: string;
   brand: CmsBrand;
   pageType: CmsPageType;
   title: string;
@@ -205,11 +206,17 @@ export type CmsPage = {
   locale: CmsLocale;
   status: CmsPageStatus;
   visibility: "public" | "hidden" | "preview_only";
+  content?: string;
+  excerpt?: string | null;
   seoTitle: string;
   seoDescription: string;
   socialTitle: string;
   socialDescription: string;
   canonicalPath: string;
+  robots?: string;
+  showInFooter?: boolean;
+  footerGroup?: string | null;
+  footerLabel?: string | null;
   sectionIds: string[];
   publicationWindow: CmsPublicationWindow;
   revisionNumber: number;

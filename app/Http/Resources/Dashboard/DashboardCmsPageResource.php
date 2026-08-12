@@ -21,10 +21,20 @@ final class DashboardCmsPageResource
 
         return [
             'id' => self::publicId($page),
+            'internalId' => (string) $page->id,
             'title' => (string) $page->title,
             'slug' => (string) $page->slug,
             'pageType' => self::pageType($page),
             'status' => $status,
+            'content' => (string) ($page->content ?? ''),
+            'excerpt' => $page->excerpt,
+            'seoTitle' => (string) ($page->seo_title ?: $page->title),
+            'seoDescription' => (string) ($page->seo_description ?? ''),
+            'canonicalUrl' => (string) ($page->canonical_url ?? ''),
+            'robots' => (string) ($page->robots ?: 'index'),
+            'showInFooter' => (bool) $page->show_in_footer,
+            'footerGroup' => $page->footer_group,
+            'footerLabel' => $page->footer_label,
             'validationState' => CmsContentSanitizer::isSafe($page->content) ? 'valid' : 'blocked',
             'themeMode' => 'automatic',
             'brand' => ['id' => 'jetpakistan', 'label' => 'JetPakistan'],
@@ -34,7 +44,7 @@ final class DashboardCmsPageResource
                 'routeUrl' => '/pages/'.$page->slug,
                 'seoTitle' => (string) ($page->seo_title ?: $page->title),
                 'robots' => (string) ($page->robots ?: 'index'),
-                'previewOnly' => true,
+                'previewOnly' => false,
             ],
             'reviewFlags' => [
                 'needsReview' => $page->status === CmsPage::STATUS_DRAFT,
@@ -44,6 +54,14 @@ final class DashboardCmsPageResource
             'updatedAt' => $page->updated_at?->toIso8601String(),
             'publishedAt' => $page->published_at?->toIso8601String(),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function detail(CmsPage $page): array
+    {
+        return self::fromModel($page);
     }
 
     public static function publicId(CmsPage $page): string

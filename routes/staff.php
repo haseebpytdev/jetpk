@@ -27,8 +27,9 @@ Route::prefix('staff')->name('staff.')->group(function (): void {
 
     Route::get('/bookings', [BackOfficeLegacyViewRedirectController::class, 'staffBookingsIndex'])->name('bookings.index');
     Route::get('/bookings/{booking}', [BackOfficeLegacyViewRedirectController::class, 'staffBookingShow'])->name('bookings.show');
-    Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{booking}/notes', [BookingController::class, 'storeNote'])->name('bookings.notes');
+    Route::patch('/bookings/{booking}/contact', [BookingController::class, 'updateContact'])->name('bookings.contact');
+    Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
     Route::middleware([
         'staff.permission:'.StaffPermission::BookingsUpdateStatus,
         'platform.module:supplier_booking',

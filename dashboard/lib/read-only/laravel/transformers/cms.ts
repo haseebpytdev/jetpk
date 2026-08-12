@@ -21,20 +21,28 @@ const PAGE_COLUMNS: CmsTableColumn[] = [
 ];
 
 export function mapCmsPage(row: Record<string, unknown>): CmsPage {
+  const preview = (row.previewMetadata as { seoTitle?: string; routeUrl?: string; previewOnly?: boolean; robots?: string } | undefined) ?? {};
   return {
     id: String(row.id ?? ""),
+    internalId: row.internalId != null ? String(row.internalId) : undefined,
     brand: CMS_BRAND.id,
     pageType: (row.pageType as CmsPageType) ?? "support",
     title: String(row.title ?? ""),
     slug: String(row.slug ?? ""),
     locale: "en-PK",
     status: (row.status as CmsPageStatus) ?? "draft",
-    visibility: "preview_only",
-    seoTitle: String((row.previewMetadata as { seoTitle?: string })?.seoTitle ?? row.title ?? ""),
-    seoDescription: "",
+    visibility: preview.previewOnly === false ? "public" : "preview_only",
+    content: String(row.content ?? ""),
+    excerpt: row.excerpt == null ? null : String(row.excerpt),
+    seoTitle: String(row.seoTitle ?? preview.seoTitle ?? row.title ?? ""),
+    seoDescription: String(row.seoDescription ?? ""),
     socialTitle: String(row.title ?? ""),
     socialDescription: "",
-    canonicalPath: String((row.previewMetadata as { routeUrl?: string })?.routeUrl ?? `/pages/${row.slug}`),
+    canonicalPath: String(preview.routeUrl ?? `/pages/${row.slug}`),
+    robots: String(row.robots ?? preview.robots ?? "index"),
+    showInFooter: Boolean(row.showInFooter ?? false),
+    footerGroup: row.footerGroup == null ? null : String(row.footerGroup),
+    footerLabel: row.footerLabel == null ? null : String(row.footerLabel),
     sectionIds: [],
     publicationWindow: { startDate: null, endDate: null },
     revisionNumber: 1,

@@ -75,6 +75,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/bookings/{booking}', [BackOfficeLegacyViewRedirectController::class, 'adminBookingShow'])->name('bookings.show');
     Route::patch('/bookings/{booking}/status', [BookingManagementController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{booking}/notes', [BookingManagementController::class, 'storeNote'])->name('bookings.notes');
+    Route::patch('/bookings/{booking}/contact', [BookingManagementController::class, 'updateContact'])->name('bookings.contact');
     Route::patch('/bookings/{booking}/assign-staff', [BookingManagementController::class, 'assignStaff'])->name('bookings.assign-staff');
     Route::middleware('platform.module:supplier_booking')->group(function (): void {
         Route::post('/bookings/{booking}/supplier-booking', [BookingManagementController::class, 'createSupplierBooking'])->name('bookings.supplier-booking');

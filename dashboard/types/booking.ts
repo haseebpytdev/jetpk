@@ -116,6 +116,18 @@ export type BookingFareSummary = {
 
 export type BookingManagementDetail = {
   summary: BookingRecord;
+  localContact?: {
+    email: string;
+    phone: string;
+    country: string;
+  };
+  localAmendment?: {
+    canEditContact: boolean;
+    canEditPassengers: boolean;
+    contactPolicy: string;
+    passengerPolicy: string;
+    hasSupplierPnr: boolean;
+  };
   passengers: BookingPassengerSummary[];
   fareSummary: BookingFareSummary | null;
   pnrSummary: {

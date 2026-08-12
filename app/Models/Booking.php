@@ -303,4 +303,28 @@ class Booking extends Model
     {
         return $this->reference_code;
     }
+
+    /**
+     * Resolve admin/staff portal {booking} by primary key or booking_reference.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $field = $field ?: $this->getRouteKeyName();
+        $key = (string) $value;
+
+        if ($field === $this->getRouteKeyName()) {
+            if ($key !== '' && ! ctype_digit($key)) {
+                return static::query()->where('booking_reference', $key)->first();
+            }
+
+            $byId = static::query()->where($this->getRouteKeyName(), $value)->first();
+            if ($byId !== null) {
+                return $byId;
+            }
+
+            return static::query()->where('booking_reference', $key)->first();
+        }
+
+        return static::query()->where($field, $value)->first();
+    }
 }

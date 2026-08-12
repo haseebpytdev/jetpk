@@ -37,7 +37,9 @@ use App\Support\Bookings\AdminPiaNdcTicketingPresenter;
 use App\Support\Bookings\AdminSabreDiagnosticPanelsPresenter;
 use App\Support\Bookings\AdminSabreGdsCancelPanelsPresenter;
 use App\Support\Bookings\AdminSabreGdsTicketingPanelsPresenter;
+use App\Models\BookingContact;
 use App\Support\Bookings\BookingListPresenter;
+use App\Support\Bookings\BookingLocalAmendmentPolicy;
 use App\Support\Bookings\SabrePnrCertificationSupport;
 use App\Support\BackOffice\BackOfficeBookingPresenter;
 use App\Support\Branding\PlatformBrandingResolver;
@@ -471,6 +473,62 @@ class BookingManagementController extends Controller
         }
 
         return back()->with('status', 'note-added');
+    }
+
+    public function updateContact(Request $request, Booking $booking): RedirectResponse|JsonResponse
+    {
+        Gate::authorize('update', $booking);
+
+        $policy = BookingLocalAmendmentPolicy::evaluate($booking);
+        if (! $policy['canEditContact']) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($policy['contactPolicy'], 409, 'contact_amendment_blocked');
+            }
+
+            return back()->withErrors(['contact' => $policy['contactPolicy']]);
+        }
+
+        $validated = $this->validateBackOffice($request, [
+            'email' => ['required', 'email', 'max:190'],
+            'phone' => ['required', 'string', 'max:40'],
+            'country' => ['nullable', 'string', 'max:80'],
+        ]);
+
+        $contact = $booking->contact;
+        if ($contact === null) {
+            $contact = new BookingContact(['booking_id' => $booking->id]);
+        }
+
+        $contact->fill([
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'country' => $validated['country'] ?? $contact->country,
+        ]);
+        $contact->booking_id = $booking->id;
+        $contact->save();
+
+        $this->bookingService->addInternalNote(
+            $booking,
+            $request->user(),
+            'Local contact amended (JetPakistan record only; not synced to supplier PNR).',
+            false,
+        );
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Local contact updated.',
+                'localContact' => [
+                    'email' => (string) $contact->email,
+                    'phone' => (string) $contact->phone,
+                    'country' => (string) ($contact->country ?? ''),
+                ],
+                'localAmendment' => BookingLocalAmendmentPolicy::evaluate($booking->fresh()),
+                'policyNote' => $policy['contactPolicy'],
+            ]);
+        }
+
+        return back()->with('status', 'booking-contact-updated');
     }
 
     public function assignStaff(Request $request, Booking $booking): RedirectResponse|JsonResponse

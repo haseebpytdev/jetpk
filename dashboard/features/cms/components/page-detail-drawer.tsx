@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CmsPageComposition } from "@/features/cms/components/cms-page-composition";
+import { CmsPageLocalEditor } from "@/features/cms/components/cms-page-local-editor";
 import { CmsMediaFieldCards } from "@/features/cms/components/cms-media-field-cards";
 import { CmsPreviewModeSelector } from "@/features/cms/components/cms-preview-mode-selector";
 import { CmsPreviewShell } from "@/features/cms/components/cms-preview-shell";
@@ -28,6 +29,7 @@ export function PageDetailDrawerContent({ page, previewMode, onPreviewModeChange
 
   return (
     <div className="space-y-4" data-testid="cms-page-drawer">
+      <CmsPageLocalEditor page={page} />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,42%)]" data-testid="cms-page-editor">
         <div className="space-y-4">
           <section>

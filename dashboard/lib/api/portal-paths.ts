@@ -64,6 +64,18 @@ export function bookingNotesPath(portal: DashboardPortal, bookingId: string): st
   return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/notes?format=json`);
 }
 
+export function bookingContactPath(portal: DashboardPortal, bookingId: string): string {
+  return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/contact?format=json`);
+}
+
+export function cmsPageUpdatePath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}?format=json`);
+}
+
+export function cmsPageArchivePath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}/archive?format=json`);
+}
+
 export function bookingAssignStaffPath(bookingId: string): string {
   return laravelPortalPath("admin", `/bookings/${encodeURIComponent(bookingId)}/assign-staff?format=json`);
 }

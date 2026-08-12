@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { MoneyDisplay } from "@/components/ui/money-display";
 import { formatDateTime } from "@/lib/format";
+import { BookingLocalContactEditor } from "@/features/bookings/booking-local-contact-editor";
 import type { BookingManagementDetail } from "@/types/booking";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -15,6 +16,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function BookingManagementPanels({ detail }: { detail: BookingManagementDetail }) {
   const {
     summary,
+    localContact,
+    localAmendment,
     passengers,
     fareSummary,
     pnrSummary,
@@ -28,6 +31,14 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
 
   return (
     <div className="space-y-4" data-testid="booking-management-panels">
+      <Section title="Local contact amendment">
+        <BookingLocalContactEditor
+          bookingId={summary.id}
+          localContact={localContact}
+          localAmendment={localAmendment}
+        />
+      </Section>
+
       {passengers.length > 0 ? (
         <Section title="Passengers">
           <ul className="space-y-2 text-sm">

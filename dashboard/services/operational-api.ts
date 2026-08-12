@@ -9,11 +9,14 @@ import {
   agentApplicationNeedsMoreInfoPath,
   agentApplicationRejectPath,
   bookingAssignStaffPath,
+  bookingContactPath,
   bookingNotesPath,
   cancellationApprovePath,
   cancellationProcessPath,
   cancellationRejectPath,
   cancellationStorePath,
+  cmsPageArchivePath,
+  cmsPageUpdatePath,
   commissionEntryApprovePath,
   commissionEntryRejectPath,
   depositApprovePath,
@@ -171,6 +174,44 @@ export async function storeBookingNote(
   return laravelRequest(bookingNotesPath(portal, bookingId), {
     method: "POST",
     json: { note, is_customer_visible: isCustomerVisible },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateBookingLocalContact(
+  portal: DashboardPortal,
+  bookingId: string,
+  payload: { email: string; phone: string; country?: string },
+): Promise<
+  MutationResponse<{
+    localContact?: { email: string; phone: string; country: string };
+    localAmendment?: Record<string, unknown>;
+    policyNote?: string;
+  }>
+> {
+  return laravelRequest(bookingContactPath(portal, bookingId), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateCmsPage(
+  pageId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(cmsPageUpdatePath(pageId), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function archiveCmsPage(
+  pageId: string,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(cmsPageArchivePath(pageId), {
+    method: "PATCH",
     retryCsrfOnce: false,
   });
 }
