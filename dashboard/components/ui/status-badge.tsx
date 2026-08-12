@@ -471,6 +471,7 @@ const cmsStatusStyles: Record<string, string> = {
   valid: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
   warning: "bg-amber-50 text-amber-900 ring-amber-600/20",
   blocked: "bg-red-50 text-red-800 ring-red-600/20",
+  review: "bg-blue-50 text-blue-800 ring-blue-600/20",
   unapproved: "bg-red-50 text-red-800 ring-red-600/20",
 };
 

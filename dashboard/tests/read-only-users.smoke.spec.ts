@@ -12,6 +12,7 @@ const baseQuery = {
   status: "all" as const,
   userType: "all" as const,
   department: "",
+  agency: "",
   role: "",
   mfa: "all" as const,
   verification: "all" as const,
@@ -26,6 +27,7 @@ const baseQuery = {
   previewError: false,
   previewLoading: false,
   previewEmpty: false,
+  directoryScope: "users" as const,
 };
 
 test("fixture users module loads", async () => {

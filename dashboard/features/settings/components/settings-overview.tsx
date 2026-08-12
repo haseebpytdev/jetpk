@@ -45,25 +45,52 @@ export function SettingsOverview({ result }: Props) {
             Category readiness
           </h3>
           <ul className="mt-3 space-y-2" role="list">
-            {result.categoryReadiness.map((category) => (
-              <li key={category.section} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-jp-border px-3 py-2 text-sm">
-                <div>
-                  <p className="font-medium text-gray-900">{category.label}</p>
-                  <p className="text-xs text-jp-muted">
-                    {category.issueCount} validation issue{category.issueCount === 1 ? "" : "s"}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CmsStatusBadge status={category.ready ? "valid" : "blocked"} label={category.ready ? "Ready" : "Blocked"} />
-                  <DashboardLink
-                    href={`/settings/${category.section}`}
-                    className="text-xs font-medium text-jp-accent hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
-                  >
-                    Open
-                  </DashboardLink>
-                </div>
-              </li>
-            ))}
+            {result.categoryReadiness.map((category) => {
+              const sectionIssues = result.validationIssues.filter(
+                (issue) => issue.entityId === `settings-${category.section}`,
+              );
+              const issueCount = Math.max(category.issueCount, sectionIssues.length);
+              const blocking = sectionIssues.some((issue) => issue.blocking) || !category.ready;
+              const ownerInputOnly =
+                sectionIssues.length > 0 &&
+                sectionIssues.every((issue) => issue.suggestedResolution.startsWith("OWNER_INPUT_REQUIRED"));
+              let badgeStatus = "valid";
+              let badgeLabel = "Ready";
+              if (blocking) {
+                badgeStatus = "blocked";
+                badgeLabel = "Blocked";
+              } else if (ownerInputOnly) {
+                badgeStatus = "review";
+                badgeLabel = "Owner input required";
+              } else if (issueCount > 0) {
+                badgeStatus = "warning";
+                badgeLabel = "Warning";
+              }
+
+              return (
+                <li
+                  key={category.section}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-jp-border px-3 py-2 text-sm"
+                >
+                  <div>
+                    <p className="font-medium text-gray-900">{category.label}</p>
+                    <p className="text-xs text-jp-muted">
+                      {issueCount} validation issue{issueCount === 1 ? "" : "s"}
+                      {ownerInputOnly ? " (owner input)" : ""}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CmsStatusBadge status={badgeStatus} label={badgeLabel} />
+                    <DashboardLink
+                      href={`/settings/${category.section}`}
+                      className="text-xs font-medium text-jp-accent hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
+                    >
+                      Open
+                    </DashboardLink>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
 

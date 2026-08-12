@@ -120,9 +120,23 @@ export function CmsWorkspace({ result }: Props) {
 
       <p className="text-sm text-jp-muted">
         {isLive ? (
-          <>
-            Managed CMS content for brand <strong>{result.brand.label}</strong>.
-          </>
+          result.module === "pages" ? (
+            <>
+              Live <strong>Pages</strong> for brand <strong>{result.brand.label}</strong>. Create/edit/archive uses the
+              Laravel CMS pages JSON path. Banners, notices, and assets stay read-only until a write domain exists (no
+              Wave-2 migration).
+            </>
+          ) : result.module === "overview" ? (
+            <>
+              CMS overview for brand <strong>{result.brand.label}</strong>. Pages are operational; banners, notices, and
+              assets remain read-only listings.
+            </>
+          ) : (
+            <>
+              Read-only <strong>{result.module}</strong> listing for brand <strong>{result.brand.label}</strong>. No
+              Laravel mutation domain in Wave 2 — view/filter only.
+            </>
+          )
         ) : (
           <>
             CMS content is structured, fixture-backed preview data. Brand: <strong>{result.brand.label}</strong> (fixed).
