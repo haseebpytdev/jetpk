@@ -9,7 +9,7 @@
 | Item | Value |
 |---|---|
 | Wave-1 branch | `phase/jetpk-owner-uat-wave-1-portals-public-shell` |
-| Wave-1 HEAD | `72cd954` (includes auth `f874b5d`) |
+| Wave-1 HEAD | `bc903a3` (includes auth `f874b5d` + feature `72cd954`) |
 | Frozen JP-UAT-01 remote | `phase/jetpk-uat-01-autonomous-business-uat` @ `d1085ed6e9ae0764033ea35928b8d6804f2d0f0b` (untouched) |
 | Remote | `jetpk` (not `origin`) |
 
