@@ -32,7 +32,8 @@ class GuestBookingLookupController extends Controller
     {
         // Modern Manage Booking presentation is Next /lookup-booking.
         // Keep POST lookup + guest JSON APIs on Laravel; retire Blade form presentation.
-        return redirect()->to('/lookup-booking', 302);
+        // Use app.url so redirects never point at private 127.0.0.1:8088 when proxied via /laravel.
+        return redirect()->away(rtrim((string) config('app.url'), '/').'/lookup-booking');
     }
 
     public function lookup(Request $request): RedirectResponse|JsonResponse
@@ -82,7 +83,9 @@ class GuestBookingLookupController extends Controller
         }
 
         // HTML presentation is owned by Next /guest/bookings/{id}/access/{token}.
-        return redirect()->to('/guest/bookings/'.$booking->getKey().'/access/'.$token, 302);
+        return redirect()->away(
+            rtrim((string) config('app.url'), '/').'/guest/bookings/'.$booking->getKey().'/access/'.$token
+        );
     }
 
     public function downloadGuestDocument(Request $request, BookingDocument $bookingDocument): BinaryFileResponse
