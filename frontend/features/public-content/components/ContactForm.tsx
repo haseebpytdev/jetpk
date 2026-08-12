@@ -18,7 +18,7 @@ type ContactFormProps = {
   categories?: Array<{ value: string; label: string }>;
 };
 
-const BLADE_SUPPORT_FALLBACK = "/laravel/support";
+const SUPPORT_RECOVERY_PATH = "/support";
 
 const fieldClass =
   "min-h-jp-button w-full rounded-jp-md border border-jp-border bg-jp-surface px-4 text-jp-sm text-jp-text placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus";
@@ -131,10 +131,11 @@ export function ContactForm({
   if (scriptFailed) {
     return (
       <TurnstileUnavailableState
-        bladeFallbackHref={BLADE_SUPPORT_FALLBACK}
+        recoveryHref={SUPPORT_RECOVERY_PATH}
         title="Security check unavailable"
-        body="We could not load the security verification widget. You can continue using the secure support form instead."
-        linkLabel="Use secure support form"
+        body="We could not load the security verification widget. Refresh this page to try again, or contact support if the problem continues."
+        linkLabel="Open support"
+        onRetry={() => window.location.reload()}
       />
     );
   }

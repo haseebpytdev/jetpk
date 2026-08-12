@@ -125,27 +125,18 @@ export function GuestBookingDetailPage({ bookingId, token }: GuestBookingDetailP
                 />
               ) : null}
               {data.capabilities?.blade_fallback_urls?.abhipay_start ? (
-                <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4" data-testid="guest-abhipay-blade-handoff">
+                <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4" data-testid="guest-card-payment-handoff">
                   <h2 className="text-jp-base font-semibold text-jp-text">Pay by card</h2>
                   <p className="mt-2 text-jp-sm text-jp-muted">
-                    Card payments are handled on our secure Blade checkout surface.
+                    Continue to our secure card payment provider to complete payment for this booking.
                   </p>
                   <a
                     href={data.capabilities.blade_fallback_urls.abhipay_start}
                     className="mt-3 inline-flex text-jp-sm font-semibold text-jp-primary"
                   >
-                    Continue to secure card payment
+                    Continue to card payment
                   </a>
                 </section>
-              ) : null}
-              {data.blade_fallback_url ? (
-                <Link
-                  href={data.blade_fallback_url}
-                  className="text-jp-sm text-jp-primary"
-                  data-testid="guest-blade-fallback-link"
-                >
-                  View secure Blade booking page
-                </Link>
               ) : null}
               <Link href="/lookup-booking" className="text-jp-sm text-jp-primary">Look up another booking</Link>
             </aside>

@@ -61,7 +61,6 @@ export function AgentAccountingLedgerPage({ session }: { session: PublicSession 
     reconciliation_status: string;
     currency: string;
   } | null>(null);
-  const [bladeFallbackUrl, setBladeFallbackUrl] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [denied, setDenied] = useState(false);
@@ -80,7 +79,6 @@ export function AgentAccountingLedgerPage({ session }: { session: PublicSession 
       setTransactions(result.data.transactions);
       setPagination(result.data.pagination);
       setSummary(result.data.summary);
-      setBladeFallbackUrl(result.data.blade_fallback_url);
     }
     setLoading(false);
   };
@@ -103,14 +101,6 @@ export function AgentAccountingLedgerPage({ session }: { session: PublicSession 
         <p className="mb-4 text-jp-sm text-jp-muted" data-testid="agent-accounting-ledger-summary">
           Wallet: {formatMoney(summary.wallet_balance, summary.currency)} · Ledger liability:{" "}
           {formatMoney(summary.ledger_liability, summary.currency)} · {summary.reconciliation_status}
-        </p>
-      ) : null}
-
-      {bladeFallbackUrl ? (
-        <p className="mb-4">
-          <a href={bladeFallbackUrl} className="text-jp-sm text-jp-muted hover:text-jp-primary">
-            Blade fallback
-          </a>
         </p>
       ) : null}
 

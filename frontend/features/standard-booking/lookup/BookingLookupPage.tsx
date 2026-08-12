@@ -13,7 +13,6 @@ import {
   useTurnstileToken,
 } from "@/features/security/turnstile";
 import { submitBookingLookup } from "./booking-lookup-service";
-import { BLADE_LOOKUP_FALLBACK_PATH } from "./guest-redirect";
 
 const fieldClass =
   "mt-1 w-full rounded-jp-md border border-jp-border bg-jp-surface px-3 py-2.5 text-jp-sm text-jp-text placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus";
@@ -280,7 +279,13 @@ export function BookingLookupPage() {
 
             {turnstileEnabled && scriptFailed ? (
               <div className="mt-4">
-                <TurnstileUnavailableState bladeFallbackHref={BLADE_LOOKUP_FALLBACK_PATH} />
+                <TurnstileUnavailableState
+                  recoveryHref="/support"
+                  onRetry={() => {
+                    resetToken();
+                    window.location.reload();
+                  }}
+                />
               </div>
             ) : null}
 
@@ -299,12 +304,6 @@ export function BookingLookupPage() {
         <div className="mt-jp-xl rounded-jp-lg border border-jp-border bg-jp-surface p-jp-lg">
           <BenefitStrip items={LOOKUP_TRUST_CHIPS} />
         </div>
-
-        <nav className="mt-jp-md flex flex-wrap gap-4 text-jp-sm print:hidden">
-          <Link href={BLADE_LOOKUP_FALLBACK_PATH} className="text-jp-primary focus-visible:shadow-jp-focus" data-testid="blade-lookup-fallback">
-            Use secure Blade lookup
-          </Link>
-        </nav>
       </PageContainer>
     </div>
   );

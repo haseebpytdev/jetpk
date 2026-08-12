@@ -159,7 +159,7 @@ test.describe("booking lookup turnstile", () => {
     await expect(page.getByTestId("lookup-submit")).toBeEnabled();
   });
 
-  test("script-load failure offers Blade fallback", async ({ page }) => {
+  test("script-load failure offers modern recovery without Blade handoff", async ({ page }) => {
     await mockTurnstileConfig(page, turnstileEnabledConfig);
     await page.route("**/challenges.cloudflare.com/turnstile/v0/api.js**", async (route) => {
       await route.abort("failed");
@@ -167,7 +167,8 @@ test.describe("booking lookup turnstile", () => {
 
     await page.goto("/lookup-booking");
     await expect(page.getByTestId("turnstile-unavailable")).toBeVisible();
-    await expect(page.getByTestId("blade-lookup-fallback")).toBeVisible();
+    await expect(page.getByTestId("blade-lookup-fallback")).toHaveCount(0);
+    await expect(page.getByTestId("turnstile-unavailable-recovery")).toBeVisible();
     await expect(page.getByTestId("lookup-submit")).toBeDisabled();
   });
 

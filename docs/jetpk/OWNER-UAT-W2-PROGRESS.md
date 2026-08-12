@@ -1,33 +1,21 @@
 # OWNER UAT WAVE 2 — Progress Ledger
 
-LAST_UPDATED_UTC: 2026-08-12T20:35:00Z  
+LAST_UPDATED_UTC: 2026-08-12T21:12:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-REMOTE_HEAD: verify after push  
+REMOTE_HEAD: `177e4b7` (+ W2-23 WIP)  
 WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f`
 
 ## STATUS
 
-`OWNER_UAT_WAVE_2` = **PASS_READY_FOR_OWNER_RETEST**
+`OWNER_UAT_WAVE_2` = **IN_PROGRESS** (W2-23/W2-24 mandatory before re-asserting PASS_READY)
 
-## PRODUCTION VERIFIED THIS LOOP
+## THIS HEARTBEAT
 
-| Gate | Result |
-|---|---|
-| OLS | MATCH `612aa838…2c4c` |
-| Admin/Staff routes (unauth) | 307 |
-| Public HOME | 200 |
-| Settings live readiness sync | DEPLOYED BUILD `R4rv1SsgHELJgxTWB7cD_` |
-| Reports compact filters | DEPLOYED |
-| Tickets compact filters | DEPLOYED BUILD `FqybHrg6rHaOCkMDMpxRp` |
-| Staff auth regression | 10/10 pages 200; overflow 0 |
-| Source parity (settings/reports/cms batch) | MATCH |
+- Reconciled HEAD `177e4b7` with remote (W2-21/22 already integrated).
+- Implemented W2-23 Manage Booking / guest / agent Blade presentation retirement.
+- Added `OWNER-UAT-W2-LEGACY-ROUTE-AUDIT.md` + `OWNER-UAT-W2-MODULE-API-MATRIX.md`.
+- Next: tests → commit → push → deploy → production browser proof → route crawl → close PASS_READY.
 
-## CMS DISPOSITION (W2-11)
+## QA AUTH
 
-- **Operational:** `cms_pages` JSON create/edit/archive
-- **Read-only:** banners/notices/assets (no Laravel mutation domain; no migration)
-- UI copy clarifies pages vs non-pages
-
-## NEXT_ACTION
-
-Owner retest. Do not restore OTP / suspend QA / start JP-REL-01 until Owner UAT COMPLETE is declared separately.
+OTP temporary Owner-UAT remains. OTP_DEMO_* preserved. QA identities active.

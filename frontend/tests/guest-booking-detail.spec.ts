@@ -49,7 +49,9 @@ test.describe("JP-FULLSTACK-01E guest booking detail", () => {
     await page.goto("/guest/bookings/1/access/test-token");
     await expect(page.getByTestId("guest-booking-detail-page")).toBeVisible();
     await expect(page.getByTestId("payment-status-card")).toContainText("Unpaid");
-    await expect(page.getByTestId("guest-blade-fallback-link")).toBeVisible();
+    await expect(page.getByTestId("guest-blade-fallback-link")).toHaveCount(0);
+    await expect(page.getByTestId("guest-card-payment-handoff")).toBeVisible();
+    await expect(page.getByText(/Blade/i)).toHaveCount(0);
   });
 
   test("invalid access shows error state", async ({ page }) => {

@@ -94,11 +94,6 @@ export function AgentFinanceStatementPage({ session }: { session: PublicSession 
             Export CSV
           </a>
         ) : null}
-        {statement?.blade_fallback_url ? (
-          <a href={statement.blade_fallback_url} className="text-jp-sm text-jp-muted">
-            Blade fallback
-          </a>
-        ) : null}
       </form>
 
       {loading ? <p className="text-jp-sm text-jp-muted">Loading statement…</p> : null}

@@ -68,9 +68,6 @@ export function AgentTravelersPage({ session }: { session: PublicSession }) {
         >
           Add traveler
         </Link>
-        <a href="/laravel/agent/travelers" className="text-jp-sm text-jp-muted hover:text-jp-primary">
-          Blade fallback
-        </a>
       </div>
 
       {loading ? <p className="text-jp-sm text-jp-muted">Loading travelers…</p> : null}

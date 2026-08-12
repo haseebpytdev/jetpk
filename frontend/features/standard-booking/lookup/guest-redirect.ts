@@ -34,8 +34,6 @@ export function resolveSafeGuestLookupRedirect(location: string | null): string 
   }
 }
 
-export const BLADE_LOOKUP_FALLBACK_PATH = "/laravel/lookup-booking";
-
 export const GENERIC_LOOKUP_FAILURE =
   "Booking not found for the provided reference and email.";
 
@@ -44,3 +42,6 @@ export const RATE_LIMIT_MESSAGE =
 
 export const TURNSTILE_FAILURE_MESSAGE =
   "Security check failed. Please refresh and try again.";
+
+/** @deprecated Removed from UI — modern lookup is /lookup-booking only. Kept for test imports. */
+export const BLADE_LOOKUP_FALLBACK_PATH = "/lookup-booking";

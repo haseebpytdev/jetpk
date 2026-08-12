@@ -2,26 +2,15 @@
 
 namespace App\Http\Controllers\Frontend;
 
-use App\Enums\BookingCancellationStatus;
 use App\Enums\BookingPaymentMethod;
-use App\Enums\BookingStatus;
 use App\Http\Controllers\Concerns\RespondsWithGuestBookingJson;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingDocument;
-use App\Services\Client\ClientPageRenderer;
 use App\Services\Customer\GuestBookingAccessService;
-use App\Support\Client\ClientPageKeys;
 use App\Services\Payments\BookingPaymentService;
-use App\Support\Bookings\BookingDetailTimelinePresenter;
-use App\Support\Bookings\BookingItineraryOverviewPresenter;
-use App\Support\Bookings\BookingPaymentSummaryPresenter;
-use App\Support\Bookings\PaymentOperationalStatus;
-use App\Support\Bookings\SupplierOperationalStatus;
-use App\Support\Bookings\TicketingOperationalStatus;
 use App\Support\GuestBooking\GuestBookingDetailPresenter;
 use App\Support\Security\TurnstileVerifier;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,14 +25,14 @@ class GuestBookingLookupController extends Controller
     public function __construct(
         protected GuestBookingAccessService $guestAccessService,
         protected BookingPaymentService $paymentService,
-        protected ClientPageRenderer $pageRenderer,
         protected GuestBookingDetailPresenter $guestDetailPresenter,
     ) {}
 
-    public function showLookupForm(Request $request): View
+    public function showLookupForm(Request $request): RedirectResponse
     {
-
-        return view(client_view('frontend.booking.lookup', 'frontend'), $this->pageRenderer->viewModel(ClientPageKeys::BOOKING_LOOKUP));
+        // Modern Manage Booking presentation is Next /lookup-booking.
+        // Keep POST lookup + guest JSON APIs on Laravel; retire Blade form presentation.
+        return redirect()->to('/lookup-booking', 302);
     }
 
     public function lookup(Request $request): RedirectResponse|JsonResponse
@@ -78,7 +67,7 @@ class GuestBookingLookupController extends Controller
         return redirect()->to($redirectUrl);
     }
 
-    public function showGuestBooking(Request $request, Booking $booking, string $token): View|JsonResponse
+    public function showGuestBooking(Request $request, Booking $booking, string $token): JsonResponse|RedirectResponse
     {
         if (! $this->guestAccessService->validateToken($booking, $token)) {
             if ($this->wantsGuestBookingJson($request)) {
@@ -92,69 +81,8 @@ class GuestBookingLookupController extends Controller
             return $this->guestBookingJson($this->guestDetailPresenter->present($booking, $token, $request));
         }
 
-        $booking->load([
-            'passengers',
-            'contact',
-            'fareBreakdown',
-            'statusLogs',
-            'payments',
-            'tickets',
-            'documents',
-            'communicationLogs',
-            'cancellationRequests.requester',
-            'refunds',
-            'supplierBookings',
-        ]);
-
-        $meta = is_array($booking->meta) ? $booking->meta : [];
-        $hasPnr = filled($booking->pnr)
-            || $booking->supplierBookings->contains(fn ($sb) => filled($sb->pnr));
-        $provider = (string) (($meta['supplier_provider'] ?? null) ?: ($booking->supplier ?? ''));
-        $hasLinkedAccount = filled($booking->customer_id);
-        $canUploadProof = ! $hasLinkedAccount
-            && $booking->status !== BookingStatus::Cancelled
-            && BookingPaymentSummaryPresenter::canUploadProof($booking, true);
-
-        $openCancellation = $booking->cancellationRequests->contains(
-            fn ($r) => in_array($r->status->value, [
-                BookingCancellationStatus::Requested->value,
-                BookingCancellationStatus::Approved->value,
-            ], true)
-        );
-        $showGuestCancelForm = ! $hasLinkedAccount
-            && $booking->status !== BookingStatus::Cancelled
-            && ! $openCancellation;
-
-        $viewData = [
-            'booking' => $booking,
-            'guestToken' => $token,
-            'viewerMode' => 'guest',
-            'hasLinkedAccount' => $hasLinkedAccount,
-            'hasPnr' => $hasPnr,
-            'loginUrl' => client_route('login', ['redirect' => '/customer/bookings/'.$booking->id]),
-            'allowGuestProofUpload' => $canUploadProof,
-            'showGuestCancelForm' => $showGuestCancelForm,
-            'itineraryOverview' => BookingItineraryOverviewPresenter::fromBookingMeta($meta, $hasPnr),
-            'paymentOperational' => PaymentOperationalStatus::fromValue((string) ($booking->payment_status ?? 'unpaid')),
-            'supplierOperational' => SupplierOperationalStatus::fromValues(
-                (string) ($booking->supplier_booking_status ?? 'not_started'),
-                $provider,
-                $hasPnr,
-                $meta,
-            ),
-            'ticketingOperational' => TicketingOperationalStatus::fromValues(
-                (string) ($booking->ticketing_status ?? 'not_started'),
-                (string) ($booking->payment_status ?? 'unpaid'),
-                $hasPnr,
-                $booking->tickets->isNotEmpty(),
-                $provider,
-                (string) ($booking->cancellation_status ?? ''),
-            ),
-            'customerTimeline' => BookingDetailTimelinePresenter::forBooking($booking, $meta, $hasPnr),
-            'paymentSummary' => BookingPaymentSummaryPresenter::forBooking($booking, $canUploadProof, 'customer'),
-        ];
-
-        return view('frontend.booking.guest-show', $viewData);
+        // HTML presentation is owned by Next /guest/bookings/{id}/access/{token}.
+        return redirect()->to('/guest/bookings/'.$booking->getKey().'/access/'.$token, 302);
     }
 
     public function downloadGuestDocument(Request $request, BookingDocument $bookingDocument): BinaryFileResponse
