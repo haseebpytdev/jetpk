@@ -1,4 +1,5 @@
 import { SupportOperationalWorkspace } from "@/features/support/support-operational-workspace";
+import { SupportPaginationNav } from "@/features/support/support-pagination";
 import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import {
@@ -8,15 +9,26 @@ import {
   UnauthorizedState,
 } from "@/components/ui/data-source-status";
 import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
-import { getSupportTickets, SupportServiceError } from "@/services/support-service";
+import {
+  getSupportTicketsPage,
+  SUPPORT_DEFAULT_PAGE_SIZE,
+  SupportServiceError,
+} from "@/services/support-service";
 
 export const metadata = {
   title: "Support — JetPakistan Dashboard",
 };
 
-export default async function SupportPage() {
+export default async function SupportPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   try {
-    const tickets = await getSupportTickets();
+    const params = await searchParams;
+    const rawPage = Array.isArray(params.page) ? params.page[0] : params.page;
+    const page = Math.max(1, Number.parseInt(rawPage ?? "1", 10) || 1);
+    const result = await getSupportTicketsPage({ page, pageSize: SUPPORT_DEFAULT_PAGE_SIZE });
 
     return (
       <PageContainer>
@@ -26,10 +38,22 @@ export default async function SupportPage() {
             <Breadcrumb items={[{ label: "Home" }, { label: "Communications" }, { label: "Support" }]} />
           }
           title="Support tickets"
-          description="Assign, reply, and resolve support cases from the Next operator shell."
+          description="Assign, reply, and resolve support cases from the Next operator shell. Default page size is 10."
         />
         <DataSourceNoticeSlot />
-        <SupportOperationalWorkspace tickets={tickets} />
+        <SupportPaginationNav
+          page={result.pagination.page}
+          pageCount={result.pagination.pageCount}
+          total={result.pagination.total}
+          pageSize={result.pagination.pageSize}
+        />
+        <SupportOperationalWorkspace tickets={result.tickets} />
+        <SupportPaginationNav
+          page={result.pagination.page}
+          pageCount={result.pagination.pageCount}
+          total={result.pagination.total}
+          pageSize={result.pagination.pageSize}
+        />
       </PageContainer>
     );
   } catch (error) {

@@ -31,7 +31,7 @@ class DashboardSupportTicketsReadService
         ], $user);
 
         $page = max(1, (int) $request->query('page', 1));
-        $pageSize = max(5, min(50, (int) $request->query('pageSize', 25)));
+        $pageSize = max(5, min(50, (int) $request->query('pageSize', 10)));
 
         $paginator = (clone $query)
             ->orderByDesc('last_reply_at')

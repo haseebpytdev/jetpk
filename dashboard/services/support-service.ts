@@ -14,10 +14,23 @@ export class SupportServiceError extends Error {
   }
 }
 
-type SupportListQuery = Record<string, never>;
+export type SupportListQuery = {
+  page?: number;
+  pageSize?: number;
+};
 
 type SupportListPayload = {
   tickets: SupportTicketRecord[];
+};
+
+export type SupportTicketsPage = {
+  tickets: SupportTicketRecord[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
 };
 
 function mapReadOnlyError(error: unknown): never {
@@ -27,20 +40,37 @@ function mapReadOnlyError(error: unknown): never {
   throw error;
 }
 
-const supportService = createReadOnlyService<SupportListQuery, SupportTicketRecord[]>({
+export const SUPPORT_DEFAULT_PAGE_SIZE = 10;
+
+const supportService = createReadOnlyService<SupportListQuery, SupportTicketsPage>({
   module: "support",
   fixtureAdapter: {
     mode: "fixture",
-    async fetch(_query, options) {
+    async fetch(query, options) {
       await new Promise((r) => setTimeout(r, 40));
-      return createReadOnlyEnvelope({ data: mockSupportTickets, metadata: options?.metadata });
+      const page = Math.max(1, query.page ?? 1);
+      const pageSize = Math.max(5, Math.min(50, query.pageSize ?? SUPPORT_DEFAULT_PAGE_SIZE));
+      const total = mockSupportTickets.length;
+      const pageCount = Math.max(1, Math.ceil(total / pageSize));
+      const start = (page - 1) * pageSize;
+      const tickets = mockSupportTickets.slice(start, start + pageSize);
+      return createReadOnlyEnvelope({
+        data: {
+          tickets,
+          pagination: { page, pageSize, total, pageCount },
+        },
+        metadata: options?.metadata,
+      });
     },
   },
   laravelAdapter: {
     mode: "laravelReadOnly",
-    async fetch(_query, options) {
+    async fetch(query, options) {
+      const page = Math.max(1, query.page ?? 1);
+      const pageSize = Math.max(5, Math.min(50, query.pageSize ?? SUPPORT_DEFAULT_PAGE_SIZE));
       const envelope = await fetchDashboardApi<SupportListPayload>(DASHBOARD_API_ROUTES.supportTickets, {
         signal: options?.signal,
+        query: { page, pageSize },
       });
       const tickets = (envelope.data?.tickets ?? []).map((row) => ({
         id: String(row.id),
@@ -48,16 +78,45 @@ const supportService = createReadOnlyService<SupportListQuery, SupportTicketReco
         status: String(row.status ?? "open"),
         assignedTo: row.assignedTo ?? null,
       }));
-      return { ...envelope, data: tickets };
+      const pagination = envelope.pagination ?? {
+        page,
+        pageSize,
+        total: tickets.length,
+        pageCount: 1,
+      };
+      return {
+        ...envelope,
+        data: {
+          tickets,
+          pagination: {
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            pageCount: pagination.pageCount,
+          },
+        },
+      };
     },
   },
 });
 
-export async function getSupportTickets(options?: ReadOnlyFetchOptions): Promise<SupportTicketRecord[]> {
+export async function getSupportTicketsPage(
+  query: SupportListQuery = {},
+  options?: ReadOnlyFetchOptions,
+): Promise<SupportTicketsPage> {
   try {
-    const envelope = await supportService.fetchReadOnly({}, options);
+    const envelope = await supportService.fetchReadOnly(
+      { page: query.page ?? 1, pageSize: query.pageSize ?? SUPPORT_DEFAULT_PAGE_SIZE },
+      options,
+    );
     return envelope.data;
   } catch (error) {
     mapReadOnlyError(error);
   }
+}
+
+/** @deprecated Prefer getSupportTicketsPage for pagination. */
+export async function getSupportTickets(options?: ReadOnlyFetchOptions): Promise<SupportTicketRecord[]> {
+  const page = await getSupportTicketsPage({ page: 1, pageSize: SUPPORT_DEFAULT_PAGE_SIZE }, options);
+  return page.tickets;
 }
