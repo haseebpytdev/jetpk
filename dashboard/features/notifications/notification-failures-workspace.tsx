@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
-import { DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { formatDateTime } from "@/lib/format";
 import { DashboardLink } from "@/components/dashboard/dashboard-link";
@@ -35,15 +33,39 @@ type FailurePayload = {
   };
 };
 
-type Envelope = {
-  data: FailurePayload;
-  pagination?: { page: number; pageSize: number; total: number; pageCount: number };
-};
+type Pagination = { page: number; pageSize: number; total: number; pageCount: number };
+
+async function fetchFailures(page: number): Promise<{ data: FailurePayload; pagination?: Pagination }> {
+  const params = new URLSearchParams({
+    status: "failed",
+    page: String(page),
+    pageSize: "25",
+  });
+  const response = await fetch(`/api/dashboard/communications/failures?${params.toString()}`, {
+    method: "GET",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const payload = (await response.json()) as {
+    data?: FailurePayload;
+    pagination?: Pagination;
+    error?: { message?: string };
+    message?: string;
+  };
+  if (!response.ok) {
+    throw new Error(payload.error?.message ?? payload.message ?? "Unable to load failed notifications.");
+  }
+  if (!payload.data) {
+    throw new Error("Unexpected empty failures payload.");
+  }
+  return { data: payload.data, pagination: payload.pagination };
+}
 
 export function NotificationFailuresWorkspace() {
   const isLive = useDashboardLiveMode();
   const [payload, setPayload] = useState<FailurePayload | null>(null);
-  const [pagination, setPagination] = useState<Envelope["pagination"]>(undefined);
+  const [pagination, setPagination] = useState<Pagination | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -69,14 +91,12 @@ export function NotificationFailuresWorkspace() {
       setLoading(true);
       setError(null);
       try {
-        const envelope = await fetchDashboardApi<FailurePayload>(DASHBOARD_API_ROUTES.communicationsFailures, {
-          query: { status: "failed", page, pageSize: 25 },
-        });
+        const result = await fetchFailures(page);
         if (cancelled) {
           return;
         }
-        setPayload(envelope.data);
-        setPagination(envelope.pagination ?? undefined);
+        setPayload(result.data);
+        setPagination(result.pagination);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Unable to load failed notifications.");
