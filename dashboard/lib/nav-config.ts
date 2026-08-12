@@ -33,7 +33,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { label: "Payments", href: "/payments", laravelRoute: "admin.payments" },
       { label: "Deposits", href: "/deposits", laravelRoute: "admin.agent-deposits.index" },
-      { label: "Markups", href: "/settings", laravelRoute: "admin.markups" },
+      { label: "Markups", href: "/markups", laravelRoute: "admin.markups" },
       { label: "Commissions", href: "/reports", laravelRoute: "admin.commissions.index" },
     ],
   },

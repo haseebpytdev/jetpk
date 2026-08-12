@@ -22,7 +22,7 @@ export default async function MarkupsPage() {
         <PageHeader
           breadcrumb={<Breadcrumb items={[{ label: "Home" }, { label: "Finance" }, { label: "Markups" }]} />}
           title="Markups"
-          description="Live markup rules. Domain mutations remain on Laravel intake APIs."
+          description="Authoritative markup rules from the JetPakistan pricing domain (read-only in this dashboard). Mutations use existing Laravel markup APIs in non-production proof only."
         />
         <DataSourceNoticeSlot />
         {markups.length === 0 ? (

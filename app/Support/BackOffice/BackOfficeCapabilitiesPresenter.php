@@ -165,7 +165,7 @@ class BackOfficeCapabilitiesPresenter
         if ($isAdmin && ($modules['agent_deposits'] ?? false)) {
             $finance[] = $this->dashboardNav('Deposits', 'deposits', '/deposits');
         }
-        if ($isAdmin && $this->platformModules->routeEnabled('markups')) {
+        if ($isAdmin && $this->platformModules->routeEnabled('markup_settings')) {
             $finance[] = $this->dashboardNav('Markups', 'markups', '/markups');
         }
         if ($isAdmin) {

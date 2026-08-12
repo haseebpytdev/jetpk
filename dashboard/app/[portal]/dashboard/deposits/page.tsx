@@ -7,7 +7,10 @@ export default async function DepositsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Agent deposits" description="Review pending agent deposit proofs and wallet postings." />
+      <PageHeader
+        title="Agent deposits"
+        description="Review deposit requests and proofs. Production Owner-UAT does not approve deposits or post manual wallet credits — use local/test fixtures for mutation proof. Immutable ledger adjustments already exist in Laravel FinanceAdjustmentController / ManualWalletAdjustmentService."
+      />
       <DepositsWorkspace deposits={result.deposits} />
     </div>
   );
