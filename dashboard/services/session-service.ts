@@ -48,7 +48,7 @@ function toInitials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
 }
 
-function unavailableSession(): DashboardSessionSummary {
+function unavailableSession(portal: DashboardPortal = "admin"): DashboardSessionSummary {
   return {
     id: "unavailable",
     displayName: "Session unavailable",
@@ -57,13 +57,13 @@ function unavailableSession(): DashboardSessionSummary {
     permissions: [],
     accountType: "unknown",
     accountStatus: "unknown",
-    portalType: "admin",
+    portalType: portal,
     platformRole: "unknown",
     sessionUsable: false,
     denialReason: "session_unavailable",
     requiresPasswordChange: false,
     requiresEmailVerification: false,
-    landingRoute: "/admin/dashboard",
+    landingRoute: `/${portal}/dashboard`,
     navigation: [],
     navigationGroups: [],
     capabilities: {},
@@ -185,16 +185,26 @@ const sessionService = createReadOnlyService<
 export async function getDashboardSession(
   options?: ReadOnlyFetchOptions & { portal?: DashboardPortal },
 ): Promise<DashboardSessionSummary> {
+  const portal = options?.portal ?? "admin";
   if (getDashboardMode() === "live") {
     try {
-      const envelope = await sessionService.fetchReadOnly({ portal: options?.portal }, options);
+      const envelope = await sessionService.fetchReadOnly({ portal }, options);
       return envelope.data;
-    } catch {
-      return unavailableSession();
+    } catch (error) {
+      if (error instanceof ReadOnlyServiceError) {
+        const code = error.envelope?.error?.code;
+        if (code === "forbidden" || code === "unauthenticated") {
+          return {
+            ...unavailableSession(portal),
+            denialReason: code,
+          };
+        }
+      }
+      return unavailableSession(portal);
     }
   }
 
-  const envelope = await sessionService.fetchReadOnly({ portal: options?.portal }, options);
+  const envelope = await sessionService.fetchReadOnly({ portal }, options);
   return envelope.data;
 }
 

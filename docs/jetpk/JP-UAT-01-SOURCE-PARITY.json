@@ -1,0 +1,55 @@
+{
+  "phase": "JP-UAT-01",
+  "updated_at_utc": "2026-08-12T05:45:00Z",
+  "SOURCE_PARITY": "PASS",
+  "files": [
+    {
+      "PATH": "frontend/components/ui/Dropdown.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/components/navigation/AccountMenu.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/components/navigation/DesktopNavigation.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/components/navigation/MobileNavigation.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/components/navigation/CurrencySelector.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/components/layout/SiteHeader.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/lib/navigation.ts",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/features/public-content/components/ContactForm.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/features/public-content/components/SupportPageClient.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "frontend/app/(public)/support/page.tsx",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "dashboard/services/session-service.ts",
+      "MATCH": "yes"
+    },
+    {
+      "PATH": "dashboard/app/layout.tsx",
+      "MATCH": "yes"
+    }
+  ]
+}

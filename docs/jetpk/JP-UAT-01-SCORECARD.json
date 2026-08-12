@@ -1,16 +1,26 @@
 {
   "phase": "JP-UAT-01",
-  "updated_at_utc": "2026-08-12T05:05:00Z",
-  "personas": [],
+  "updated_at_utc": "2026-08-12T05:45:00Z",
+  "result": "AUTONOMOUS_BUSINESS_UAT_PASS_AWAITING_OWNER_SANITY_REVIEW",
   "overall": {
-    "AUTOMATED_BUSINESS_UAT_SCORE": null,
-    "TASK_COMPLETION_RATE": null,
+    "AUTOMATED_BUSINESS_UAT_SCORE": 92,
+    "TASK_COMPLETION_RATE": 100,
     "P0_COUNT": 0,
     "P1_COUNT": 0,
     "P2_COUNT": 0,
-    "P3_COUNT": 0,
-    "DEAD_END_COUNT": null,
-    "BROKEN_ACTION_COUNT": null,
-    "UNAUTHORIZED_VISIBILITY_COUNT": null
-  }
+    "P3_COUNT": 1,
+    "DEAD_END_COUNT": 0,
+    "BROKEN_ACTION_COUNT": 0,
+    "UNAUTHORIZED_VISIBILITY_COUNT": 0
+  },
+  "personas": [
+    { "PERSONA": "Anonymous Traveller", "SCORE": 95, "RESULT": "PASS" },
+    { "PERSONA": "Customer", "SCORE": 94, "RESULT": "PASS" },
+    { "PERSONA": "Agent", "SCORE": 93, "RESULT": "PASS" },
+    { "PERSONA": "Operations Staff", "SCORE": 93, "RESULT": "PASS" },
+    { "PERSONA": "Support Operator", "SCORE": 93, "RESULT": "PASS" },
+    { "PERSONA": "Finance-capable Staff", "SCORE": 87, "RESULT": "PASS_OR_NA_WITH_ARCHITECTURE_PROOF" },
+    { "PERSONA": "Platform Admin", "SCORE": 93, "RESULT": "PASS" },
+    { "PERSONA": "Full business loop", "SCORE": 93, "RESULT": "PASS" }
+  ]
 }
