@@ -26,6 +26,10 @@
 
 `node frontend/tests/regression/jp-w1-agency-display.test.cjs` → PASS
 
-## Social icons note
+## Production verification
 
-Footer keeps **exact existing** `socialLinks` destinations (Facebook + Instagram). Icons are real SVG marks for those labels; no invented LinkedIn URL.
+`tmp/jp-w1-visual-closure-accept.cjs` → `ok: true`, `fails: []`
+
+OLS hash unchanged: `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`
+
+Commit: `2a5c6b3`
