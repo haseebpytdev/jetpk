@@ -13,7 +13,13 @@ import { formatDate, formatDateTime, tripTypeLabel } from "@/lib/format";
 import type { BookingRecord } from "@/types/booking";
 import { BookingOperationalActions } from "@/features/bookings/booking-operational-actions";
 
-export function BookingDetailDrawerContent({ booking }: { booking: BookingRecord }) {
+export function BookingDetailDrawerContent({
+  booking,
+  showOperationalActions = true,
+}: {
+  booking: BookingRecord;
+  showOperationalActions?: boolean;
+}) {
   return (
     <div className="space-y-5" data-testid="booking-drawer-content">
       <DetailDrawerSourceNotice className="text-xs" />
@@ -170,7 +176,9 @@ export function BookingDetailDrawerContent({ booking }: { booking: BookingRecord
 
       <Divider />
 
-      <BookingOperationalActions bookingId={booking.id} defaultCurrency={booking.currency} />
+      {showOperationalActions ? (
+        <BookingOperationalActions bookingId={booking.id} defaultCurrency={booking.currency} />
+      ) : null}
     </div>
   );
 }

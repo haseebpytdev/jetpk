@@ -13,6 +13,7 @@ import { ReportFilters } from "@/features/reports/components/report-filters";
 import { ReportMetricGrid } from "@/features/reports/components/report-metric-card";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { reportsQueryToSearchParams } from "@/lib/reports-query";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { ReportModuleResult } from "@/types/report";
 
 const MODULE_PATHS: Record<ReportModuleResult["module"], string> = {
@@ -29,6 +30,7 @@ type Props = {
 
 export function ReportsWorkspace({ result }: Props) {
   const router = useDashboardRouter();
+  const isLive = useDashboardLiveMode();
   const [, startTransition] = useTransition();
   const modulePath = MODULE_PATHS[result.module];
   const dateError = result.validation.valid ? null : result.validation.issues[0]?.message ?? null;
@@ -56,7 +58,11 @@ export function ReportsWorkspace({ result }: Props) {
       <ReportActiveFilters query={result.query} />
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-jp-muted">Reports are calculated from deterministic JetPakistan preview records.</p>
+        <p className="text-sm text-jp-muted">
+          {isLive
+            ? "Reports are calculated from live JetPakistan booking and payment records."
+            : "Reports are calculated from deterministic JetPakistan preview records."}
+        </p>
         <ReportExportMenu result={result} allRows={allRows} />
       </div>
 
@@ -147,7 +153,11 @@ export function ReportsWorkspace({ result }: Props) {
           {result.funnel.length > 0 && (result.module === "bookings" || result.module === "overview") ? (
             <Card data-testid="reports-funnel">
               <CardTitle>Booking lifecycle funnel</CardTitle>
-              <CardDescription className="mt-1">Reduced funnel based on available fixture statuses — search/quote stages are not fabricated.</CardDescription>
+              <CardDescription className="mt-1">
+                {isLive
+                  ? "Reduced funnel based on live booking statuses — search/quote stages are not fabricated."
+                  : "Reduced funnel based on available preview statuses — search/quote stages are not fabricated."}
+              </CardDescription>
               <ol className="mt-4 space-y-2">
                 {result.funnel.map((stage) => (
                   <li key={stage.id} className="flex items-center justify-between rounded-lg border border-jp-border px-3 py-2 text-sm">

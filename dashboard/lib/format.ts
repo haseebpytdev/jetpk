@@ -16,18 +16,33 @@ function parseIsoDate(iso: string): Date {
   return new Date(iso);
 }
 
+/**
+ * JetPakistan operational money display.
+ * PKR → Rs. XX,XXX.XX
+ * Other resolved ISO currencies → truthful ISO display (never relabeled as PKR).
+ */
 export function formatCurrency(amount: number, currency: string): string {
   const normalized = currency?.trim().toUpperCase();
   if (!normalized || !/^[A-Z]{3}$/.test(normalized)) {
     return MONEY_UNAVAILABLE_LABEL;
   }
 
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: normalized,
-    minimumFractionDigits: 0,
+  if (!Number.isFinite(amount)) {
+    return MONEY_UNAVAILABLE_LABEL;
+  }
+
+  const absolute = Math.abs(amount);
+  const formatted = absolute.toLocaleString("en-PK", {
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  });
+  const signed = amount < 0 ? `-${formatted}` : formatted;
+
+  if (normalized === "PKR") {
+    return `Rs. ${signed}`;
+  }
+
+  return `${normalized} ${signed}`;
 }
 
 export function formatDate(iso: string): string {

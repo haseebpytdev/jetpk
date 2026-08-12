@@ -26,11 +26,16 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($request->wantsJson() || $request->query('format') === 'json') {
-            if (! $user->isCustomer()) {
-                abort(403);
+            $user->loadMissing('profile');
+
+            if ($user->isCustomer()) {
+                return response()->json($this->customerProfilePresenter->present($user));
             }
 
-            return response()->json($this->customerProfilePresenter->present($user));
+            return response()->json([
+                'ok' => true,
+                'profile' => $this->dashboardProfilePayload($user),
+            ]);
         }
 
         $userProfile = $user->profile()->firstOrCreate([]);
@@ -105,13 +110,19 @@ class ProfileController extends Controller
         $profile->save();
 
         if ($request->wantsJson() || $request->query('format') === 'json') {
-            if (! $user->isCustomer()) {
-                abort(403);
+            $fresh = $user->fresh(['profile']);
+
+            if ($fresh->isCustomer()) {
+                return response()->json([
+                    'ok' => true,
+                    'profile' => $this->customerProfilePresenter->present($fresh),
+                    'message' => 'Profile updated successfully.',
+                ]);
             }
 
             return response()->json([
                 'ok' => true,
-                'profile' => $this->customerProfilePresenter->present($user->fresh(['profile'])),
+                'profile' => $this->dashboardProfilePayload($fresh),
                 'message' => 'Profile updated successfully.',
             ]);
         }
@@ -147,6 +158,24 @@ class ProfileController extends Controller
         if (Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function dashboardProfilePayload(User $user): array
+    {
+        $user->loadMissing('profile');
+
+        return [
+            'name' => $user->name,
+            'email' => $user->email,
+            'username' => $user->username,
+            'phone' => $user->profile?->phone,
+            'city' => $user->profile?->city,
+            'country_code' => $user->profile?->country_code,
+            'whatsapp' => $user->profile?->whatsapp,
+        ];
     }
 
     protected function dashboardUrlFor(User $user): string

@@ -73,7 +73,7 @@ export async function BookingManagementPageContent({ bookingId }: Props) {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div className="min-w-0 rounded-2xl border border-jp-border bg-white p-5 shadow-sm">
-            <BookingDetailDrawerContent booking={booking} />
+            <BookingDetailDrawerContent booking={booking} showOperationalActions={false} />
           </div>
           <aside className="space-y-4">
             <BookingManagementPanels detail={detail} />

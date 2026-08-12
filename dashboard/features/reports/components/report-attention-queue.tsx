@@ -6,7 +6,7 @@ export function ReportAttentionQueue({ items }: { items: ReportAttentionItem[] }
   return (
     <Card data-testid="reports-attention-queue">
       <CardTitle>Needs attention</CardTitle>
-      <CardDescription className="mt-1">Read-only operational queue derived from preview records.</CardDescription>
+      <CardDescription className="mt-1">Read-only operational queue derived from current report filters.</CardDescription>
       {items.length === 0 ? (
         <p className="mt-4 text-sm text-jp-muted">No attention items for current filters.</p>
       ) : (

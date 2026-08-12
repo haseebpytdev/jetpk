@@ -30,7 +30,7 @@ export function ReportsModuleShell({ module, result }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Reports" }, { label: current.label }]} />
         }
         title="Reports"
-        description="Operational and commercial analytics with explicit currency and read-only export preview."
+        description="Operational and commercial analytics with explicit currency handling and read-only CSV export."
       />
       <DataSourceNoticeSlot />
 

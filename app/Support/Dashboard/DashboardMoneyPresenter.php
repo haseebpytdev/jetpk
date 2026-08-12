@@ -61,7 +61,7 @@ final class DashboardMoneyPresenter
                 'currency' => $normalized,
                 'currencyStatus' => self::STATUS_RESOLVED,
                 'currencySource' => $currencySource,
-                'displayLabel' => $formatted.' '.$normalized,
+                'displayLabel' => self::formatDisplayLabel($amountMinor, $normalized),
                 'currencyLabel' => null,
                 'needsReview' => false,
             ];
@@ -119,5 +119,23 @@ final class DashboardMoneyPresenter
     public static function formatDecimalAmount(int|float $amount): string
     {
         return number_format((float) $amount, 2, '.', ',');
+    }
+
+    /**
+     * JetPakistan operational money label.
+     * PKR → Rs. XX,XXX.XX; other ISO → "{ISO} XX,XXX.XX" (never relabeled as PKR).
+     */
+    public static function formatDisplayLabel(int|float $amount, string $currency): string
+    {
+        $normalized = self::normalizeIsoCurrency($currency);
+        if ($normalized === '') {
+            return 'Amount unavailable';
+        }
+
+        $formatted = self::formatDecimalAmount($amount);
+
+        return $normalized === 'PKR'
+            ? 'Rs. '.$formatted
+            : $normalized.' '.$formatted;
     }
 }

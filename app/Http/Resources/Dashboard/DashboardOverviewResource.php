@@ -75,12 +75,16 @@ final class DashboardOverviewResource
         if (isset($commandSummary['gross_sales'])) {
             $multiCurrency = (bool) ($commandSummary['gross_sales_multi_currency'] ?? false);
             $currencyLabel = trim((string) ($commandSummary['gross_sales_currency_label'] ?? ''));
+            $grossAmount = (float) $commandSummary['gross_sales'];
             $cards[] = [
                 'key' => 'gross_sales',
                 'label' => 'Gross booking value',
                 'value' => $multiCurrency
                     ? 'Multiple currencies'
-                    : number_format((float) $commandSummary['gross_sales']).($currencyLabel !== '' && $currencyLabel !== '—' ? ' '.$currencyLabel : ''),
+                    : DashboardMoneyPresenter::formatDisplayLabel(
+                        $grossAmount,
+                        $currencyLabel !== '' && $currencyLabel !== '—' ? $currencyLabel : 'PKR',
+                    ),
                 'delta' => $multiCurrency ? 'Not combined without FX policy' : '',
                 'tone' => 'up',
             ];

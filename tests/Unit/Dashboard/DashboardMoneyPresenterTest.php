@@ -67,14 +67,20 @@ class DashboardMoneyPresenterTest extends TestCase
 
         $this->assertSame('resolved', $presented['currencyStatus']);
         $this->assertSame('PKR', $presented['currency']);
-        $this->assertSame('564.00 PKR', $presented['displayLabel']);
+        $this->assertSame('Rs. 564.00', $presented['displayLabel']);
     }
 
     public function test_present_minor_units_with_usd_currency(): void
     {
         $presented = DashboardMoneyPresenter::presentMinorUnits(590, 'USD', 'fareBreakdown.currency');
 
-        $this->assertSame('590.00 USD', $presented['displayLabel']);
+        $this->assertSame('USD 590.00', $presented['displayLabel']);
+    }
+
+    public function test_format_display_label_pkr_owner_form(): void
+    {
+        $this->assertSame('Rs. 25,500.00', DashboardMoneyPresenter::formatDisplayLabel(25500, 'PKR'));
+        $this->assertSame('USD 590.00', DashboardMoneyPresenter::formatDisplayLabel(590, 'USD'));
     }
 
     public function test_format_amount_label_without_currency_is_unavailable(): void

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Dashboard;
 
+use App\Support\Dashboard\DashboardMoneyPresenter;
 use Illuminate\Support\Carbon;
 
 final class DashboardReportResource
@@ -41,9 +42,10 @@ final class DashboardReportResource
     {
         $multiCurrency = $currencyCount > 1;
         $grossLabel = $multiCurrency ? 'Gross booking value (mixed currencies)' : 'Gross booking value';
+        $grossAmount = (int) round((float) ($financial['gross_sales'] ?? $summary['gross_sales'] ?? 0));
         $grossFormatted = $multiCurrency
             ? 'Multiple currencies'
-            : number_format((int) round((float) ($financial['gross_sales'] ?? $summary['gross_sales'] ?? 0))).' '.$currency;
+            : DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $currency);
 
         $base = [
             [
@@ -57,7 +59,7 @@ final class DashboardReportResource
             [
                 'key' => 'gross_booking_value',
                 'label' => $grossLabel,
-                'value' => (int) round((float) ($financial['gross_sales'] ?? $summary['gross_sales'] ?? 0)),
+                'value' => $grossAmount,
                 'formattedValue' => $grossFormatted,
                 'currency' => $multiCurrency ? null : $currency,
                 'trend' => 'neutral',
@@ -65,11 +67,12 @@ final class DashboardReportResource
         ];
 
         if ($section === 'payments') {
+            $outstanding = (int) round((float) ($summary['outstanding_balance'] ?? 0));
             $base[] = [
                 'key' => 'outstanding_balance',
                 'label' => 'Outstanding balance',
-                'value' => (int) round((float) ($summary['outstanding_balance'] ?? 0)),
-                'formattedValue' => number_format((int) round((float) ($summary['outstanding_balance'] ?? 0))).' '.$currency,
+                'value' => $outstanding,
+                'formattedValue' => DashboardMoneyPresenter::formatDisplayLabel($outstanding, $currency),
                 'currency' => $currency,
                 'trend' => 'warning',
             ];
