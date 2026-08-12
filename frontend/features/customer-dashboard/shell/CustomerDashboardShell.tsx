@@ -19,15 +19,15 @@ import {
 import type { PublicSession } from "@/types/session";
 
 const NAV_ITEMS: PortalNavItem[] = [
-  { href: "/customer/dashboard", label: "Overview", code: "overview" },
-  { href: "/customer/bookings", label: "My Bookings", code: "bookings" },
-  { href: "/customer/payments", label: "Payments", code: "payments" },
-  { href: "/customer/invoices", label: "Invoices", code: "invoices" },
-  { href: "/customer/travelers", label: "Saved travelers", code: "travelers" },
-  { href: "/customer/profile", label: "Profile", code: "profile" },
-  { href: "/customer/security", label: "Security", code: "security" },
-  { href: "/customer/support", label: "Support", code: "support" },
-  { href: "/customer/notifications", label: "Notifications", code: "notifications" },
+  { href: "/customer/dashboard", label: "Overview", code: "overview", group: "Overview" },
+  { href: "/customer/bookings", label: "My Bookings", code: "bookings", group: "Bookings" },
+  { href: "/customer/payments", label: "Payments", code: "payments", group: "Finance" },
+  { href: "/customer/invoices", label: "Invoices", code: "invoices", group: "Finance" },
+  { href: "/customer/travelers", label: "Saved travelers", code: "travelers", group: "Travel" },
+  { href: "/customer/support", label: "Support", code: "support", group: "Support" },
+  { href: "/customer/notifications", label: "Notifications", code: "notifications", group: "Support" },
+  { href: "/customer/profile", label: "Profile", code: "profile", group: "Account" },
+  { href: "/customer/security", label: "Security", code: "security", group: "Account" },
 ];
 
 type CustomerDashboardShellProps = {

@@ -82,18 +82,16 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
             </nav>
 
             <div className="space-y-3 border-t border-jp-border px-4 py-4">
-              <ThemeSwitch compact />
-              <CurrencySelector className="w-full" />
+              <div className="flex items-center gap-2">
+                <ThemeSwitch className="!min-h-9 !gap-1.5 !px-2 !py-1.5" />
+                <CurrencySelector compact className="min-w-0 flex-1" />
+              </div>
               {session.status === "anonymous" ? (
                 <Link href="/login" className="block text-jp-sm font-semibold text-jp-text">
                   Log in / Sign up
                 </Link>
-              ) : (
-                <a href={session.dashboardUrl} className="block text-jp-sm font-semibold text-jp-text">
-                  Dashboard
-                </a>
-              )}
-              <LinkButton href="/flights" variant="primary" className="w-full" onClick={closeMenu}>
+              ) : null}
+              <LinkButton href="/#flight-search" variant="primary" className="w-full whitespace-nowrap" onClick={closeMenu}>
                 Book Now
               </LinkButton>
             </div>

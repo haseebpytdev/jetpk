@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "owner-uat-w1-public-legacy-v1",
+  "branch": "phase/jetpk-owner-uat-wave-1-portals-public-shell",
+  "legacy_render": 0,
+  "unknown": 0,
+  "entries": [
+    {"id": "next-not-found", "classification": "NEXT_JETPAKISTAN_BRANDED", "path": "app/not-found.tsx"},
+    {"id": "next-error", "classification": "NEXT_JETPAKISTAN_BRANDED", "path": "app/error.tsx"},
+    {"id": "page-not-found", "classification": "NEXT_JETPAKISTAN_BRANDED", "path": "/page-not-found"},
+    {"id": "error-codes", "classification": "NEXT_JETPAKISTAN_BRANDED", "path": "/error/{code}"},
+    {"id": "laravel-html-errors", "classification": "CANONICAL_REDIRECT_TO_NEXT", "path": "ClientErrorResponseResolver"},
+    {"id": "laravel-json-errors", "classification": "INTERNAL_API_JSON", "path": "expectsJson"},
+    {"id": "dashboard-api", "classification": "INTERNAL_API_JSON", "path": "/api/dashboard/*"},
+    {"id": "access-denied", "classification": "NEXT_JETPAKISTAN_BRANDED", "path": "/access-denied"},
+    {"id": "login", "classification": "NEXT_JETPAKISTAN_BRANDED", "path": "/login"},
+    {"id": "jetpk-login", "classification": "CANONICAL_REDIRECT_TO_NEXT", "path": "/jetpk/login"},
+    {"id": "lookup-booking", "classification": "NEXT_JETPAKISTAN_BRANDED", "path": "/lookup-booking"}
+  ]
+}

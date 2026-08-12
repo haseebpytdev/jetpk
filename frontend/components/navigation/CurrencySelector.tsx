@@ -7,16 +7,17 @@ import { useState } from "react";
 
 type CurrencySelectorProps = {
   className?: string;
+  compact?: boolean;
 };
 
-export function CurrencySelector({ className }: CurrencySelectorProps) {
+export function CurrencySelector({ className, compact = false }: CurrencySelectorProps) {
   const [currency, setCurrency] = useState(currencyOptions[0]);
 
   return (
     <Dropdown
       className={className}
       align="end"
-      panelClassName="min-w-[14rem]"
+      panelClassName="min-w-[12rem]"
       trigger={({ id, expanded, onToggle, onKeyDown, triggerRef }) => (
         <button
           type="button"
@@ -24,19 +25,23 @@ export function CurrencySelector({ className }: CurrencySelectorProps) {
           aria-haspopup="menu"
           aria-expanded={expanded}
           aria-controls={id}
+          aria-label={`Currency: ${currency.code}`}
           onClick={onToggle}
           onKeyDown={onKeyDown}
           className={cn(
-            "inline-flex min-h-jp-button items-center gap-2 rounded-jp-md border border-jp-border bg-jp-surface px-3 text-jp-sm font-medium text-jp-text",
+            "inline-flex min-h-9 items-center gap-1.5 rounded-jp-md border border-jp-border bg-jp-surface text-jp-sm font-medium text-jp-text",
             "transition-colors hover:border-jp-primary hover:bg-jp-primary-soft",
             "focus-visible:outline-none focus-visible:shadow-jp-focus",
+            compact ? "px-2 py-1.5" : "min-h-jp-button px-3",
           )}
         >
-          <span aria-hidden="true" className="text-base leading-none">
-            🇵🇰
-          </span>
-          <span>{currency.code}</span>
-          <ChevronDownIcon className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")} />
+          {!compact ? (
+            <span aria-hidden="true" className="text-base leading-none">
+              🇵🇰
+            </span>
+          ) : null}
+          <span className="font-semibold tracking-wide">{currency.code}</span>
+          <ChevronDownIcon className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")} />
         </button>
       )}
     >

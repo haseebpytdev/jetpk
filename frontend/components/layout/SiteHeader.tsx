@@ -34,19 +34,11 @@ export function SiteHeader({ session, branding = null }: SiteHeaderProps) {
           <DesktopNavigation session={session} />
         </div>
 
-        <div className="hidden items-center gap-jp-sm lg:flex">
-          <ThemeSwitch />
-          <CurrencySelector />
-          {session.status === "authenticated" ? (
-            <Link
-              href={session.dashboardUrl || "/"}
-              className="inline-flex min-h-jp-button items-center rounded-jp-button px-3 text-jp-sm font-semibold text-jp-primary transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
-            >
-              Dashboard
-            </Link>
-          ) : null}
+        <div className="hidden shrink-0 items-center gap-2 lg:flex">
+          <ThemeSwitch className="!min-h-9 !gap-1.5 !px-2 !py-1.5" />
+          <CurrencySelector compact />
           <AccountMenu session={session} />
-          <LinkButton href="/#flight-search" variant="primary">
+          <LinkButton href="/#flight-search" variant="primary" className="whitespace-nowrap">
             Book Now
           </LinkButton>
         </div>

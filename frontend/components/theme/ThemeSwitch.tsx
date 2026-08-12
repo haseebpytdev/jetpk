@@ -35,11 +35,11 @@ export function ThemeSwitch({ className, compact = false }: ThemeSwitchProps) {
       type="button"
       onClick={cyclePreference}
       className={cn(
-        "inline-flex min-h-jp-tap items-center gap-2 rounded-jp-md border border-jp-border bg-jp-surface px-3 py-1.5",
+        "inline-flex min-h-9 items-center gap-1.5 rounded-jp-md border border-jp-border bg-jp-surface px-2 py-1.5",
         "text-jp-sm font-medium text-jp-text transition-colors duration-ui",
         "hover:bg-jp-surface-muted focus-visible:outline-none focus-visible:shadow-jp-focus",
         "motion-reduce:transition-none",
-        compact && "w-full justify-center",
+        compact && "w-full justify-center gap-2 px-3",
         className,
       )}
       aria-label={`Theme: ${LABELS[preference]}. Activate to switch theme.`}
@@ -47,9 +47,7 @@ export function ThemeSwitch({ className, compact = false }: ThemeSwitchProps) {
       data-theme-preference={preference}
     >
       <ThemeIcon preference={preference} />
-      <span aria-hidden={compact ? undefined : false}>
-        {compact ? LABELS[preference] : ICONS[preference]}
-      </span>
+      <span aria-hidden="true">{compact ? LABELS[preference] : ICONS[preference]}</span>
       <span className="sr-only">{LABELS[preference]}</span>
     </button>
   );

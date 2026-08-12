@@ -22,27 +22,27 @@ type AccountMenuLink = {
 function accountMenuLinks(session: AuthenticatedSession): AccountMenuLink[] {
   if (session.accountType === "customer") {
     return [
-      { href: "/customer/dashboard", label: "Dashboard" },
+      { href: "/customer/dashboard", label: "Overview" },
       { href: "/customer/bookings", label: "My Bookings" },
-      { href: "/customer/support", label: "Support" },
       { href: "/customer/profile", label: "Profile" },
+      { href: "/customer/support", label: "Support" },
     ];
   }
 
-  if (session.accountType === "agent") {
+  if (session.accountType === "agent" || session.accountType === "agent_staff") {
     return [
-      { href: "/agent/dashboard", label: "Dashboard" },
+      { href: "/agent/dashboard", label: "Overview" },
       { href: "/agent/bookings", label: "Bookings" },
       { href: "/agent/wallet", label: "Wallet" },
-      { href: "/agent/support", label: "Support" },
       { href: "/agent/profile", label: "Profile" },
+      { href: "/agent/support", label: "Support" },
     ];
   }
 
   if (session.accountType === "staff" || session.role === "staff" || session.portalType === "staff") {
     return [
       { href: session.dashboardUrl || "/staff/dashboard", label: "Staff dashboard" },
-      { href: "/staff/dashboard", label: "Live operations" },
+      { href: "/staff/dashboard/bookings", label: "Bookings" },
     ];
   }
 
@@ -54,11 +54,11 @@ function accountMenuLinks(session: AuthenticatedSession): AccountMenuLink[] {
   ) {
     return [
       { href: session.dashboardUrl || "/admin/dashboard", label: "Admin dashboard" },
-      { href: "/admin/dashboard", label: "Live operations" },
+      { href: "/admin/dashboard/bookings", label: "Bookings" },
     ];
   }
 
-  return [{ href: session.dashboardUrl || "/", label: "Dashboard" }];
+  return [{ href: session.dashboardUrl || "/", label: "Overview" }];
 }
 
 export function AccountMenu({ session, className, compact = false }: AccountMenuProps) {

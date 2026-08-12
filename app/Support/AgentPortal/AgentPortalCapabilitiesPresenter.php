@@ -121,67 +121,167 @@ class AgentPortalCapabilitiesPresenter
     private function presentNavigation(array $permissions, array $modules, bool $isOwner): array
     {
         $items = [
-            ['code' => 'overview', 'label' => 'Overview', 'href' => '/agent/dashboard', 'available' => true],
+            [
+                'code' => 'overview',
+                'label' => 'Overview',
+                'href' => '/agent/dashboard',
+                'available' => true,
+                'group' => 'Overview',
+            ],
         ];
 
         if ($permissions['bookings_view']) {
-            $items[] = ['code' => 'bookings', 'label' => 'Bookings', 'href' => '/agent/bookings', 'available' => true];
+            $items[] = [
+                'code' => 'bookings',
+                'label' => 'Bookings',
+                'href' => '/agent/bookings',
+                'available' => true,
+                'group' => 'Bookings',
+            ];
         }
 
         if ($permissions['bookings_create']) {
-            $items[] = ['code' => 'booking_create', 'label' => 'New booking', 'href' => '/agent/bookings/create', 'available' => true];
+            $items[] = [
+                'code' => 'booking_create',
+                'label' => 'New booking',
+                'href' => '/agent/bookings/create',
+                'available' => true,
+                'group' => 'Bookings',
+            ];
         }
 
         if ($permissions['wallet_view'] && $modules['agent_wallet']) {
-            $items[] = ['code' => 'wallet', 'label' => 'Wallet', 'href' => '/agent/wallet', 'available' => true];
-        }
-
-        if ($permissions['ledger_view'] && $modules['agent_ledger']) {
-            $items[] = ['code' => 'ledger', 'label' => 'Ledger', 'href' => '/agent/wallet/ledger', 'available' => true];
-            $items[] = ['code' => 'accounting_ledger', 'label' => 'Accounting ledger', 'href' => '/agent/accounting/ledger', 'available' => true];
-        }
-
-        if (($permissions['reports_view'] || $permissions['ledger_view']) && $modules['agent_reports']) {
-            $items[] = ['code' => 'finance_statement', 'label' => 'Statement', 'href' => '/agent/finance/statement', 'available' => true];
-        }
-
-        if ($permissions['travelers_manage'] && $modules['saved_travelers']) {
-            $items[] = ['code' => 'travelers', 'label' => 'Travelers', 'href' => '/agent/travelers', 'available' => true];
+            $items[] = [
+                'code' => 'wallet',
+                'label' => 'Wallet',
+                'href' => '/agent/wallet',
+                'available' => true,
+                'group' => 'Finance',
+            ];
         }
 
         if ($permissions['wallet_view'] && $modules['agent_deposits']) {
-            $items[] = ['code' => 'deposits', 'label' => 'Deposits', 'href' => '/agent/deposits', 'available' => true];
+            $items[] = [
+                'code' => 'deposits',
+                'label' => 'Deposits',
+                'href' => '/agent/deposits',
+                'available' => true,
+                'group' => 'Finance',
+            ];
+        }
+
+        if ($permissions['ledger_view'] && $modules['agent_ledger']) {
+            $items[] = [
+                'code' => 'ledger',
+                'label' => 'Ledger',
+                'href' => '/agent/wallet/ledger',
+                'available' => true,
+                'group' => 'Finance',
+            ];
+        }
+
+        if (($permissions['reports_view'] || $permissions['ledger_view']) && $modules['agent_reports']) {
+            $items[] = [
+                'code' => 'finance_statement',
+                'label' => 'Statement',
+                'href' => '/agent/finance/statement',
+                'available' => true,
+                'group' => 'Finance',
+            ];
         }
 
         if ($permissions['wallet_view']) {
-            $items[] = ['code' => 'payments', 'label' => 'Payments', 'href' => '/agent/payments', 'available' => true];
-            $items[] = ['code' => 'invoices', 'label' => 'Invoices', 'href' => '/agent/invoices', 'available' => true];
-        }
-
-        if ($permissions['reports_view'] && $modules['agent_reports']) {
-            $items[] = ['code' => 'reports', 'label' => 'Reports', 'href' => '/agent/reports', 'available' => true];
+            $items[] = [
+                'code' => 'invoices',
+                'label' => 'Invoices',
+                'href' => '/agent/invoices',
+                'available' => true,
+                'group' => 'Finance',
+            ];
         }
 
         if ($isOwner) {
-            $items[] = ['code' => 'commissions', 'label' => 'Commissions', 'href' => '/agent/commissions', 'available' => true];
+            $items[] = [
+                'code' => 'commissions',
+                'label' => 'Commissions',
+                'href' => '/agent/commissions',
+                'available' => true,
+                'group' => 'Finance',
+            ];
         }
 
-        if ($permissions['staff_manage'] && $modules['agent_staff']) {
-            $items[] = ['code' => 'staff', 'label' => 'Staff', 'href' => '/agent/staff', 'available' => true];
+        if ($permissions['reports_view'] && $modules['agent_reports']) {
+            $items[] = [
+                'code' => 'reports',
+                'label' => 'Reports',
+                'href' => '/agent/reports',
+                'available' => true,
+                'group' => 'Finance',
+            ];
         }
 
         if ($permissions['agency_view']) {
-            $items[] = ['code' => 'agency', 'label' => 'Agency', 'href' => '/agent/agency', 'available' => true];
+            $items[] = [
+                'code' => 'agency',
+                'label' => 'Agency',
+                'href' => '/agent/agency',
+                'available' => true,
+                'group' => 'Agency',
+            ];
         }
 
-        $items[] = ['code' => 'profile', 'label' => 'Profile', 'href' => '/agent/profile', 'available' => true];
-        $items[] = ['code' => 'security', 'label' => 'Security', 'href' => '/agent/security', 'available' => true];
+        if ($permissions['travelers_manage'] && $modules['saved_travelers']) {
+            $items[] = [
+                'code' => 'travelers',
+                'label' => 'Travelers',
+                'href' => '/agent/travelers',
+                'available' => true,
+                'group' => 'Agency',
+            ];
+        }
+
+        if ($permissions['staff_manage'] && $modules['agent_staff']) {
+            $items[] = [
+                'code' => 'staff',
+                'label' => 'Staff',
+                'href' => '/agent/staff',
+                'available' => true,
+                'group' => 'Agency',
+            ];
+        }
 
         if ($permissions['support_manage'] && $modules['agent_support']) {
-            $items[] = ['code' => 'support', 'label' => 'Support', 'href' => '/agent/support', 'available' => true];
+            $items[] = [
+                'code' => 'support',
+                'label' => 'Support',
+                'href' => '/agent/support',
+                'available' => true,
+                'group' => 'Support',
+            ];
         }
 
-        $items[] = ['code' => 'notifications', 'label' => 'Notifications', 'href' => '/agent/notifications', 'available' => true];
+        $items[] = [
+            'code' => 'notifications',
+            'label' => 'Notifications',
+            'href' => '/agent/notifications',
+            'available' => true,
+            'group' => 'Support',
+        ];
+
+        $items[] = [
+            'code' => 'profile',
+            'label' => 'Profile',
+            'href' => '/agent/profile',
+            'available' => true,
+            'group' => 'Account',
+        ];
+        $items[] = [
+            'code' => 'security',
+            'label' => 'Security',
+            'href' => '/agent/security',
+            'available' => true,
+            'group' => 'Account',
+        ];
 
         return $items;
     }

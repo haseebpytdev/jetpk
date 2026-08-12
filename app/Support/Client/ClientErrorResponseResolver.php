@@ -2,12 +2,14 @@
 
 namespace App\Support\Client;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
- * Selects and returns a single full-document error view (themed or generic).
+ * Selects and returns a single full-document error view (themed or generic),
+ * or delegates browser document errors to the Next.js public surface.
  */
 final class ClientErrorResponseResolver
 {
@@ -31,8 +33,21 @@ final class ClientErrorResponseResolver
     /**
      * @param  array<string, mixed>  $data
      */
-    public function response(string $code, array $data = [], ?int $status = null): Response
+    public function response(string $code, array $data = [], ?int $status = null): Response|RedirectResponse
     {
+        if ($this->shouldDelegateBrowserErrorToNext($code)) {
+            $path = match ($code) {
+                '404' => '/access-denied?reason=not-found',
+                '403' => '/access-denied?reason=forbidden',
+                '419' => '/login?reason=session-expired',
+                '429' => '/access-denied?reason=rate-limited',
+                '503' => '/access-denied?reason=unavailable',
+                default => '/access-denied?reason=service-error',
+            };
+
+            return redirect()->to($path);
+        }
+
         $statusCode = $status ?? (int) $code;
         $view = $this->resolveView($code);
 
@@ -43,7 +58,7 @@ final class ClientErrorResponseResolver
         return response()->view($view, $data, $statusCode);
     }
 
-    public function fromHttpException(HttpExceptionInterface $exception, array $data = []): Response
+    public function fromHttpException(HttpExceptionInterface $exception, array $data = []): Response|RedirectResponse
     {
         $status = $exception->getStatusCode();
         $code = (string) $status;
@@ -53,6 +68,32 @@ final class ClientErrorResponseResolver
         }
 
         return $this->response($code, $data, $status);
+    }
+
+    private function shouldDelegateBrowserErrorToNext(string $code): bool
+    {
+        if (! in_array($code, self::SUPPORTED_CODES, true)) {
+            return false;
+        }
+
+        if (! app()->environment('production')) {
+            return false;
+        }
+
+        if (! filter_var(env('OTA_PUBLIC_ERRORS_DELEGATE_TO_NEXT', true), FILTER_VALIDATE_BOOL)) {
+            return false;
+        }
+
+        $request = request();
+        if ($request->expectsJson() || $request->ajax()) {
+            return false;
+        }
+
+        if ($request->is('api/*', 'api/dashboard', 'api/dashboard/*', 'livewire/*')) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

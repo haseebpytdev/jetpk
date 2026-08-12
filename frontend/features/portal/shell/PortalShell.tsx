@@ -12,7 +12,38 @@ export type PortalNavItem = {
   label: string;
   code?: string;
   badge?: number;
+  group?: string;
 };
+
+const GROUP_ORDER = ["Overview", "Bookings", "Finance", "Agency", "Travel", "Support", "Account"] as const;
+
+function groupNavItems(items: PortalNavItem[]): Array<{ group: string | null; items: PortalNavItem[] }> {
+  const hasGroups = items.some((item) => Boolean(item.group));
+  if (!hasGroups) {
+    return [{ group: null, items }];
+  }
+
+  const buckets = new Map<string, PortalNavItem[]>();
+  for (const item of items) {
+    const key = item.group ?? "Other";
+    const list = buckets.get(key) ?? [];
+    list.push(item);
+    buckets.set(key, list);
+  }
+
+  const ordered: Array<{ group: string | null; items: PortalNavItem[] }> = [];
+  for (const group of GROUP_ORDER) {
+    const list = buckets.get(group);
+    if (list?.length) {
+      ordered.push({ group, items: list });
+      buckets.delete(group);
+    }
+  }
+  for (const [group, list] of buckets) {
+    ordered.push({ group, items: list });
+  }
+  return ordered;
+}
 
 type PortalMobileDrawerProps = {
   open: boolean;
@@ -70,14 +101,14 @@ type PortalSidebarProps = {
 
 export function PortalSidebar({ identityLabel, identityValue, nav, footer, testId = "portal-sidebar" }: PortalSidebarProps) {
   return (
-    <aside className="hidden w-jp-sidebar shrink-0 lg:block" aria-label="Dashboard sidebar" data-testid={testId}>
-      <div className="sticky top-[calc(var(--jp-nav-height)+1rem)] space-y-6 rounded-jp-lg border border-jp-border bg-jp-surface p-jp-lg shadow-jp-sm">
+    <aside className="hidden w-[13.5rem] shrink-0 xl:w-jp-sidebar lg:block" aria-label="Dashboard sidebar" data-testid={testId}>
+      <div className="sticky top-[calc(var(--jp-nav-height)+1rem)] space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm">
         <div>
           <p className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">{identityLabel}</p>
-          <p className="mt-1 truncate text-jp-sm text-jp-text">{identityValue}</p>
+          <p className="mt-1 truncate text-jp-sm font-medium text-jp-text">{identityValue}</p>
         </div>
         {nav}
-        {footer ? <div className="border-t border-jp-border pt-4 text-jp-sm">{footer}</div> : null}
+        {footer ? <div className="border-t border-jp-border pt-3 text-jp-sm">{footer}</div> : null}
       </div>
     </aside>
   );
@@ -149,7 +180,7 @@ export function PortalShell({
     <div className="jp-portal bg-jp-page" data-testid={testId}>
       {topbar}
       {drawer}
-      <div className="mx-auto flex max-w-jp-container gap-jp-lg px-jp-xl py-jp-lg">
+      <div className="mx-auto flex w-full max-w-jp-container gap-jp-md px-jp-lg py-jp-md xl:gap-jp-lg xl:px-jp-xl xl:py-jp-lg">
         {sidebar}
         {content}
       </div>
@@ -163,27 +194,38 @@ export function buildPortalNav(
   onNavigate?: () => void,
   ariaLabel = "Dashboard navigation",
 ) {
+  const sections = groupNavItems(items);
+
   return (
-    <nav aria-label={ariaLabel} className="space-y-1" data-testid="portal-nav">
-      {items.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={`flex min-h-10 items-center rounded-jp-md px-3 py-2 text-jp-sm font-medium focus-visible:shadow-jp-focus ${
-              active ? "bg-jp-brand-soft text-jp-brand" : "text-jp-text hover:bg-jp-surface-muted"
-            }`}
-            onClick={onNavigate}
-          >
-            {item.label}
-            {item.badge && item.badge > 0 ? (
-              <span className="ml-auto rounded-full bg-jp-brand px-2 py-0.5 text-jp-xs text-white">{item.badge}</span>
-            ) : null}
-          </Link>
-        );
-      })}
+    <nav aria-label={ariaLabel} className="space-y-4" data-testid="portal-nav">
+      {sections.map((section) => (
+        <div key={section.group ?? "all"} className="space-y-1">
+          {section.group && section.group !== "Overview" ? (
+            <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-jp-muted">
+              {section.group}
+            </p>
+          ) : null}
+          {section.items.map((item) => {
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={`flex min-h-9 items-center rounded-jp-md px-3 py-1.5 text-jp-sm font-medium focus-visible:shadow-jp-focus ${
+                  active ? "bg-jp-brand-soft text-jp-brand" : "text-jp-text hover:bg-jp-surface-muted"
+                }`}
+                onClick={onNavigate}
+              >
+                {item.label}
+                {item.badge && item.badge > 0 ? (
+                  <span className="ml-auto rounded-full bg-jp-brand px-2 py-0.5 text-jp-xs text-white">{item.badge}</span>
+                ) : null}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }

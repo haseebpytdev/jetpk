@@ -14,6 +14,7 @@ export type AgentNavigationItem = {
   label: string;
   href: string;
   available: boolean;
+  group?: string;
 };
 
 export type AgentCapabilities = {

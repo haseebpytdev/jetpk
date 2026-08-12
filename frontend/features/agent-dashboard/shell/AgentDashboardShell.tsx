@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -58,6 +57,7 @@ export function AgentDashboardShell({
       href: item.href,
       label: item.label,
       code: item.code,
+      group: item.group,
       badge: item.code === "notifications" ? unreadNotifications : undefined,
     }));
 
@@ -79,11 +79,11 @@ export function AgentDashboardShell({
   );
 
   const sidebar = (
-    <aside className="hidden w-jp-sidebar shrink-0 lg:block" aria-label="Agent sidebar" data-testid="portal-sidebar">
-      <div className="sticky top-[calc(var(--jp-nav-height)+1rem)] space-y-6 rounded-jp-lg border border-jp-border bg-jp-surface p-jp-lg shadow-jp-sm">
+    <aside className="hidden w-[13.5rem] shrink-0 xl:w-jp-sidebar lg:block" aria-label="Agent sidebar" data-testid="portal-sidebar">
+      <div className="sticky top-[calc(var(--jp-nav-height)+1rem)] space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm">
         {identityBlock}
         {nav}
-        <div className="border-t border-jp-border pt-4 text-jp-sm">
+        <div className="border-t border-jp-border pt-3 text-jp-sm">
           <PortalSidebarFooter />
         </div>
       </div>
