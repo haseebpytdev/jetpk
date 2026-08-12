@@ -62,9 +62,11 @@ F005 `/laravel/:path*` → `/index.php/:path*` rewrite retained.
 | QA Staff | 200 (with possible aborted duplicates) | POST `/laravel/login` 200 | yes | `/staff/dashboard` | yes | PASS |
 | QA Agent | 200 (with possible aborted duplicates) | POST `/laravel/login` 200 | yes | `/agent` → `/agent/dashboard` | yes | PASS |
 | QA Customer | 200 (with possible aborted duplicates) | POST `/laravel/login` 200 | yes | `/customer/bookings` | yes | PASS |
-| QA Agent (reuse context) | — | — | yes | Agent portal | yes | PASS |
+| QA Agent (reuse / second fresh) | 200 | POST `/laravel/login` 200 | yes | `/agent/dashboard` | yes | PASS |
 
-Gates for each:
+Additional: Agent F005 JSON `/laravel/agent?format=json` after browser-compatible session bootstrap → **PASS** (200 + navigation).
+
+Intermittent client-side `net::ERR_ABORTED` on duplicate CSRF GETs may still appear in DevTools during prep; retries absorb them so the UI no longer stops on Network error.
 
 - NETWORK_ERROR=0 (UI)
 - SILENT_REFRESH=0
