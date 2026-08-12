@@ -1,0 +1,16 @@
+{
+  "phase": "JP-UAT-01",
+  "updated_at_utc": "2026-08-12T05:05:00Z",
+  "personas": [],
+  "overall": {
+    "AUTOMATED_BUSINESS_UAT_SCORE": null,
+    "TASK_COMPLETION_RATE": null,
+    "P0_COUNT": 0,
+    "P1_COUNT": 0,
+    "P2_COUNT": 0,
+    "P3_COUNT": 0,
+    "DEAD_END_COUNT": null,
+    "BROKEN_ACTION_COUNT": null,
+    "UNAUTHORIZED_VISIBILITY_COUNT": null
+  }
+}
