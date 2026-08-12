@@ -72,26 +72,34 @@ export function Dropdown({
     const rect = rootRef.current?.getBoundingClientRect();
     if (!rect) return;
     const panelHeight = panelRef.current?.offsetHeight ?? 0;
+    const panelWidth = panelRef.current?.offsetWidth ?? 216;
     const gap = 8;
     const viewportPad = 16;
+    const maxRight = window.innerWidth - viewportPad;
+    const preferredLeft = align === "end" ? rect.right - panelWidth : rect.left;
+    const left = Math.min(Math.max(viewportPad, preferredLeft), Math.max(viewportPad, maxRight - panelWidth));
+
     if (placement === "top") {
       setPanelStyle({
         position: "fixed",
         top: Math.max(viewportPad, rect.top - panelHeight - gap),
-        left: align === "end" ? undefined : Math.max(viewportPad, rect.left),
-        right: align === "end" ? Math.max(viewportPad, window.innerWidth - rect.right) : undefined,
+        left,
+        right: "auto",
         zIndex: 60,
         maxHeight: `min(16rem, ${Math.max(80, rect.top - viewportPad - gap)}px)`,
+        maxWidth: `min(16rem, ${window.innerWidth - viewportPad * 2}px)`,
       });
       return;
     }
+
     setPanelStyle({
       position: "fixed",
       top: rect.bottom + gap,
-      left: align === "end" ? undefined : Math.max(viewportPad, rect.left),
-      right: align === "end" ? Math.max(viewportPad, window.innerWidth - rect.right) : undefined,
+      left,
+      right: "auto",
       zIndex: 60,
       maxHeight: `min(16rem, ${Math.max(80, window.innerHeight - rect.bottom - viewportPad - gap)}px)`,
+      maxWidth: `min(16rem, ${window.innerWidth - viewportPad * 2}px)`,
     });
   };
 

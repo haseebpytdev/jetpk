@@ -49,6 +49,7 @@ export function CurrencySelector({ className, appearance = "default" }: Currency
       className={className}
       align="end"
       placement={footer ? "top" : "bottom"}
+      portal={footer}
       panelClassName={cn(
         footer
           ? "min-w-[13.5rem] max-w-[min(16rem,calc(100vw-2rem))] border-jp-border/80 bg-jp-surface p-1 shadow-jp-md"

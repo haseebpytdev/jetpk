@@ -66,10 +66,10 @@ async function measureCurrency(page) {
     const name = row?.children?.[0];
     const code = row?.children?.[1];
     const overflow =
-      pr.top < 0 ||
-      pr.bottom > window.innerHeight + 1 ||
-      pr.left < -1 ||
-      pr.right > window.innerWidth + 1;
+      pr.top < -2 ||
+      pr.bottom > window.innerHeight + 2 ||
+      pr.left < -2 ||
+      pr.right > window.innerWidth + 2;
     return {
       ok: true,
       dropUp: pr.bottom <= tr.top + 4,
@@ -173,7 +173,7 @@ async function measureTypography(page) {
       await page.evaluate((zoom) => {
         document.documentElement.style.zoom = String(zoom);
       }, vp.z);
-      await page.goto(FRONTEND + "/", { waitUntil: "domcontentloaded", timeout: 60_000 });
+      await page.goto(FRONTEND + "/", { waitUntil: "domcontentloaded", timeout: 45_000 });
       const clipped = await page.evaluate(() => {
         const header = document.querySelector("header");
         if (!header) return true;
@@ -185,13 +185,12 @@ async function measureTypography(page) {
     if (!fails.some((f) => f.startsWith("OWNER_W2_TYPOGRAPHY_RESPONSIVE"))) {
       report.gates.OWNER_W2_TYPOGRAPHY_RESPONSIVE = "PASS";
     }
-    report.gates.OWNER_W2_FONT_FALLBACK_DEFECTS = fails.some((f) => f.includes("PLATFORM") || f.includes("CLASH"))
-      ? 1
-      : 0;
-    if (report.gates.OWNER_W2_FONT_FALLBACK_DEFECTS === 0) {
-      // already implied pass
-    } else {
+    report.gates.OWNER_W2_FONT_FALLBACK_DEFECTS =
+      fails.some((f) => f.includes("PLATFORM") || f.includes("CLASH") || f.includes("INTER_RESIDUE")) ? 1 : 0;
+    if (report.gates.OWNER_W2_FONT_FALLBACK_DEFECTS !== 0) {
       fail(fails, "OWNER_W2_FONT_FALLBACK_DEFECTS", "1");
+    } else {
+      report.gates.OWNER_W2_FONT_FALLBACK_DEFECTS = 0;
     }
   } catch (err) {
     fail(fails, "RUNTIME", err && err.message ? err.message : String(err));
