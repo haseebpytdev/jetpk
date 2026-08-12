@@ -2,9 +2,13 @@
 
 ## Result
 
-**JP_OPS_08=ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT**
+**JP_OPS_08=FAIL_NOT_OPERATIONALLY_CLOSED**
 
-This is an engineering acceptance result only. It is **not** a declaration of launch-ready / final business UAT.
+Prior ENGINEERING_PASS retracted on 2026-08-12: authoritative scenario matrix
+still contained PENDING dimension fields under STATUS=PASS, and task ledger
+still listed unresolved JP-OPS08-09/12/13/14/23/27/29/30/31/32. Implementation
+is retained; EVENT_POLLING architecture is unchanged. Closure is suspended
+until matrices, tasks, OLS, and full source parity are internally consistent.
 
 ## Branch / tips
 

@@ -1,32 +1,39 @@
-# JP-OPS-08 — Progress Ledger (closure)
+# JP-OPS-08 — Progress Ledger
 
 ## LAST_UPDATED_UTC
 
-2026-08-11T21:55:00Z
+2026-08-12T04:10:00Z
 
 ## RESULT
 
-`JP_OPS_08=ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT`
+`JP_OPS_08=FAIL_NOT_OPERATIONALLY_CLOSED`
+
+Prior ENGINEERING_PASS retracted: scenario matrix still contained many PENDING
+dimension fields under STATUS=PASS, and task ledger still had unresolved tasks.
 
 ## GIT
 
 | Field | Value |
 |-------|-------|
 | BRANCH | `phase/jetpk-ops-08-cross-portal-realtime` |
-| PARENT | JP-DASH-03 `4a0fccf` |
+| LOCAL_HEAD | `c497644269ef93216b91320ab1bacb61e21ab4ba` |
+| REMOTE_HEAD_VERIFIED | `c497644269ef93216b91320ab1bacb61e21ab4ba` |
+| PARENT_MILESTONE | JP-DASH-03 @ `4a0fccf` |
+
+## CURRENT_TASK
+
+Reconcile matrices → complete stale concurrency / agent-finance / department routing / NFR / OLS / full source parity → only then re-evaluate PASS.
 
 ## EVENT_TRANSPORT
 
-`EVENT_POLLING`
+`REALTIME_TRANSPORT=EVENT_POLLING` (architecture unchanged)
 
-## QA_SECURITY_STATE
+## BLOCKERS
 
-All four dedicated QA identities **suspended**; sessions 0; remember null; login denial proven; OTP required; OTP_DEMO_* PRESENT.
-
-## OLS
-
-No modification. Expected hash unchanged. Sudo re-hash not available to agent.
+1. Matrix PENDING dimensions under false PASS rows
+2. JP-OPS08-09/12/13/14/23/27/29/30/31/32 unresolved in task ledger
+3. OLS hash must be re-proven via approved SSH path
 
 ## NEXT_ACTION
 
-Human final UAT / launch review (separate from engineering PASS).
+Implement durable stale multi-browser concurrency + expand agent/department/outward tests; then reconcile every matrix field from evidence.
