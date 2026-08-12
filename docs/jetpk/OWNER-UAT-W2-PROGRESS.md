@@ -27,6 +27,13 @@ WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f`
 - Final Admin/Staff RBAC + responsive regression
 - Final report `OWNER-UAT-W2-FINAL-REPORT.md`
 
+## CMS DISPOSITION (W2-11)
+
+- **Operational today:** `cms_pages` list/detail + Next local create/edit/archive via admin JSON (`?format=json`).
+- **Not in Laravel mutation domain yet:** dedicated banners/notices/media asset CRUD APIs (Next modules remain fixture/read-only).
+- **Homepage structured content:** `ClientPageSetting*` / page-settings domain — separate from `cms_pages`; no Wave-2 migration; expose only when JSON write path exists without schema change.
+- **Owner gate:** pages baseline = DONE/DEPLOYED; non-pages = documented gap (not Page Builder), continue only if existing domain supports without migration.
+
 ## NEXT_ACTION
 
-Deploy Payments compact filters; document CMS non-pages domain gap; continue toward final regression.
+Finalize CMS non-pages copy in UI (read-only labels), then W2-20 regression pack toward PASS_READY_FOR_OWNER_RETEST.
