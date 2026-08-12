@@ -32,18 +32,39 @@ function isValidPhone(phone: string): boolean {
   return /^\+?[\d\s()-]{7,20}$/.test(phone);
 }
 
+const SUPPORTED_INTEGRATION_ENV_LABELS = new Set([
+  "demo",
+  "sandbox",
+  "live",
+  "preview",
+  "not_configured",
+  "staging",
+  "production",
+  "cert",
+  "test",
+]);
+
+function isBlankOrPlaceholder(value: string): boolean {
+  const trimmed = value.trim();
+  return trimmed === "" || trimmed === "—" || trimmed.toLowerCase() === "n/a" || trimmed.toLowerCase() === "pending";
+}
+
 export function validateGeneralSettings(values: GeneralSettingsValues): AccessValidationIssue[] {
   const issues: AccessValidationIssue[] = [];
   const id = "settings-general";
 
-  if (!values.organizationDisplayName.trim()) {
-    issues.push(issue("error", "SETTINGS_ORG_LABEL_MISSING", "Organization display name is required.", "organizationDisplayName", id, "Enter an organization label.", true));
+  if (!values.organizationDisplayName.trim() || isBlankOrPlaceholder(values.organizationDisplayName)) {
+    issues.push(issue("warning", "SETTINGS_ORG_LABEL_MISSING", "Organization display name is missing from configuration.", "organizationDisplayName", id, "OWNER_INPUT_REQUIRED: set organization display name when authoritative branding metadata exists.", false));
   }
-  if (!isValidEmail(values.supportEmail)) {
-    issues.push(issue("error", "SETTINGS_INVALID_EMAIL", "Support email format is invalid.", "supportEmail", id, "Use a valid email address.", true));
+  if (isBlankOrPlaceholder(values.supportEmail)) {
+    issues.push(issue("warning", "SETTINGS_SUPPORT_EMAIL_MISSING", "Support email is not configured in authoritative metadata.", "supportEmail", id, "OWNER_INPUT_REQUIRED: provide JetPakistan support email when available. Do not invent one.", false));
+  } else if (!isValidEmail(values.supportEmail)) {
+    issues.push(issue("error", "SETTINGS_INVALID_EMAIL", "Support email format is invalid.", "supportEmail", id, "Use a valid email address from authoritative configuration.", true));
   }
-  if (!isValidPhone(values.supportPhone)) {
-    issues.push(issue("warning", "SETTINGS_INVALID_PHONE", "Support phone metadata format may be invalid.", "supportPhone", id, "Use international phone format.", false));
+  if (isBlankOrPlaceholder(values.supportPhone)) {
+    issues.push(issue("warning", "SETTINGS_SUPPORT_PHONE_MISSING", "Support phone is not configured in authoritative metadata.", "supportPhone", id, "OWNER_INPUT_REQUIRED: provide JetPakistan support phone when available. Do not invent one.", false));
+  } else if (!isValidPhone(values.supportPhone)) {
+    issues.push(issue("warning", "SETTINGS_INVALID_PHONE", "Support phone metadata format may be invalid.", "supportPhone", id, "Use international phone format from authoritative configuration.", false));
   }
   if (!SUPPORTED_TIMEZONES.has(values.timezone)) {
     issues.push(issue("error", "SETTINGS_UNSUPPORTED_TIMEZONE", "Timezone is not supported.", "timezone", id, "Select a supported timezone.", true));
@@ -133,8 +154,8 @@ export function validateIntegrationSettings(values: IntegrationSettingsValues): 
     if (!integration.capabilitySummary.trim()) {
       issues.push(issue("warning", "SETTINGS_INTEGRATION_NO_CAPABILITY", `${integration.displayName} is missing capability metadata.`, `integrations.${integration.key}.capabilitySummary`, id, "Add capability summary.", false));
     }
-    if (!["preview", "not_configured", "staging", "production"].includes(integration.environmentLabel)) {
-      issues.push(issue("warning", "SETTINGS_UNSUPPORTED_ENV", `${integration.displayName} has unsupported environment label.`, `integrations.${integration.key}.environmentLabel`, id, "Use a supported environment label.", false));
+    if (!SUPPORTED_INTEGRATION_ENV_LABELS.has(integration.environmentLabel.trim().toLowerCase())) {
+      issues.push(issue("warning", "SETTINGS_UNSUPPORTED_ENV", `${integration.displayName} has unsupported environment label.`, `integrations.${integration.key}.environmentLabel`, id, "Use a canonical supplier environment label (demo, sandbox, live) or fixture labels (preview, staging, production).", false));
     }
     if (SECRET_PATTERN.test(integration.capabilitySummary) || SECRET_PATTERN.test(integration.documentationReference)) {
       issues.push(issue("error", "SETTINGS_SENSITIVE_KEY", "Sensitive key pattern detected in integration metadata.", `integrations.${integration.key}`, id, "Remove sensitive field references.", true));
