@@ -1,44 +1,45 @@
 # OWNER UAT WAVE 2 — Progress Ledger
 
-LAST_UPDATED_UTC: 2026-08-12T18:05:00Z  
+LAST_UPDATED_UTC: 2026-08-12T18:20:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-LOCAL_HEAD: `b9a97f43e6a260ede423bdc63fcb2f0c0ff499f2`  
-REMOTE_HEAD: `b9a97f43e6a260ede423bdc63fcb2f0c0ff499f2`  
+LOCAL_HEAD: `8ed171d46ad69d76a8dcc0c8bc424386b87e9445`  
+REMOTE_HEAD: `8ed171d46ad69d76a8dcc0c8bc424386b87e9445`  
 WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f` (`OWNER_UAT_WAVE_1=OWNER_ACCEPTED`)
 
 ## CURRENT_TASK
 
-Deploy batch 1–2 (money/profile/reports/fullscreen + failures ops + booking eligibility), then W2-14/W2-15.
+W2-14 Agent Deposits / W2-15 Markup discoverability (next), after batch 1–2 deploy.
 
 ## CURRENT_FINDING
 
-Production failed notifications = **74**, all QA SMTP **550 5.1.1** to `jp-dash-03-qa-*` mailboxes (auth/support events). Booking-linked = 0.
-
-Note: a parallel agent briefly diverted a partial commit onto `phase/jetpk-owner-uat-w2-21-22-shell-typography` (`5937c3b`). Authoritative Wave-2 work is only on this business-closure branch (`d18491d` → `d5f0214` → `b9a97f4`).
+- Failed notifications production classify: 74 QA SMTP 550 bounces to `jp-dash-03-qa-*` (no booking-linked).
+- Dashboard build required client-safe fetches for Profile + Failures workspaces (server-only import trap).
 
 ## CURRENT_ROOT_CAUSE
 
-QA mailbox bounces inflate failed-notification KPI; CTA previously misrouted to bookings.
+Client components must not import `session-service` / `laravel-client` (pulls `server-only`).
 
 ## LATEST_TESTS
 
-- DashboardMoneyPresenterTest: 9 passed / 20 assertions
-- dashboard tsc (batch 1): exit 0
-- PHP lint on communications service/controller/policy: clean
+- DashboardMoneyPresenterTest: 9 passed
+- dashboard tsc after profile fix: exit 0
+- Production `next build`: BUILD_RC=0, BUILD_ID=`6Hm55uTJAuaVGYH5BdNH_`
 
 ## LATEST_PRODUCTION_PROOF
 
 - OLS MATCH
-- Failed-notif classify documented in OWNER-UAT-W2-FAILED-NOTIFICATIONS.md
-- Code not yet deployed to production for batch 1–2
+- Laravel money presenter + communications route present on disk
+- HTTP smoke (unauthenticated): `/admin/dashboard`, `/profile`, `/notifications/failures`, `/reports` → **307** (auth redirect; not 404/500)
+- PM2 `jetpk-dashboard` restarted online
 
 ## DEPLOYED_BUILDS
 
-—
+- Dashboard Next BUILD_ID=`6Hm55uTJAuaVGYH5BdNH_`
+- Laravel batch files extracted from Wave-2 tip through money/profile/failures work
 
 ## SOURCE_PARITY
 
-—
+Intended Laravel snippets verified on production (`formatDisplayLabel`, `communications/failures`). Full file-hash manifest still pending end-of-wave.
 
 ## OLS_HASH
 
@@ -50,10 +51,10 @@ OTP temporary Owner-UAT remains; OTP_DEMO_* preserved; QA identities active.
 
 ## BLOCKERS
 
-Workspace contention with parallel typography branch — keep Wave-2 commits scoped and verify branch name before every push.
+None. Parallel typography branch noise — ignore for Wave-2 business closure.
 
 ## NEXT_ACTION
 
-1. Deploy Laravel + dashboard rebuild for batch 1–2.
-2. Continue Agent Deposits + Markup discoverability.
-3. Settings IA + Support pagination + Users semantics.
+1. Audit Agent Deposits + Markup domain/UI discoverability.
+2. Settings IA + Support page size 10.
+3. Users vs Staff compact table.
