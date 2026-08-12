@@ -77,7 +77,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
           className,
         )}
       >
-        {compact ? "Account" : "Log in / Sign up"}
+        Login
       </Link>
     );
   }
@@ -162,7 +162,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
         onClick={() => void handleLogout()}
         className="block w-full rounded-jp-sm px-3 py-2 text-left text-jp-sm text-jp-muted transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus disabled:opacity-60"
       >
-        {loggingOut ? "Signing out…" : "Log out"}
+        {loggingOut ? "Signing out…" : "Logout"}
       </button>
     </Dropdown>
   );

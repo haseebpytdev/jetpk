@@ -10,7 +10,11 @@ test("header exposes theme switch and authoritative navigation", async ({ page }
 
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
   await expect(page.getByTestId("theme-switch")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Book Now" })).toHaveAttribute("href", "/#flight-search");
+  await expect(page.getByRole("banner").getByTestId("header-login-cta")).toHaveAttribute("href", "/login");
+  await expect(page.getByRole("banner").getByRole("link", { name: "Login" })).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "Book Now" })).toHaveCount(0);
+  await expect(page.getByRole("banner").getByText("Sign up", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("banner").getByText("Log in / Sign up")).toHaveCount(0);
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: /^Hotels$/i })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /^Offers$/i })).toHaveCount(0);

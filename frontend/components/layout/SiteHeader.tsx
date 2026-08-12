@@ -15,6 +15,8 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ session, branding = null }: SiteHeaderProps) {
+  const signedIn = session.status === "authenticated";
+
   return (
     <header className="sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface">
       <div className="mx-auto flex h-jp-nav w-full max-w-jp-container items-center justify-between gap-jp-md overflow-visible px-jp-xl">
@@ -37,10 +39,13 @@ export function SiteHeader({ session, branding = null }: SiteHeaderProps) {
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
           <ThemeSwitch className="!min-h-9 !gap-1.5 !px-2 !py-1.5" />
           <CurrencySelector compact />
-          <AccountMenu session={session} />
-          <LinkButton href="/#flight-search" variant="primary" className="whitespace-nowrap">
-            Book Now
-          </LinkButton>
+          {signedIn ? (
+            <AccountMenu session={session} />
+          ) : (
+            <LinkButton href="/login" variant="primary" className="whitespace-nowrap" data-testid="header-login-cta">
+              Login
+            </LinkButton>
+          )}
         </div>
 
         <MobileNavigation session={session} />

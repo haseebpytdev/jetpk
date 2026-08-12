@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  PortalWelcomePanel,
+  portalWelcomeFirstName,
+} from "@/features/portal/shell/PortalWelcomePanel";
 import { customerApiErrorMessage, fetchDashboardOverview } from "../services/customer-dashboard-api";
 import {
   CustomerDashboardErrorState,
@@ -10,12 +14,14 @@ import {
   StatusBadge,
 } from "../shell/CustomerDashboardShell";
 import type { CustomerDashboardOverview } from "../types";
-import type { PublicSession } from "@/types/session";
+import type { AuthenticatedSession, PublicSession } from "@/types/session";
 
 export function DashboardOverviewPage({ session }: { session: PublicSession }) {
   const [data, setData] = useState<CustomerDashboardOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const auth = session.status === "authenticated" ? (session as AuthenticatedSession) : null;
+  const firstName = portalWelcomeFirstName(auth?.user.displayName ?? "there");
 
   const load = async () => {
     setLoading(true);
@@ -40,10 +46,21 @@ export function DashboardOverviewPage({ session }: { session: PublicSession }) {
       title="Travel overview"
       unreadNotifications={data?.notifications_available ? data.metrics.unread_notifications : 0}
     >
-      {loading ? <p className="text-jp-sm text-jp-muted">Loading overview…</p> : null}
+      <PortalWelcomePanel
+        testId="customer-welcome-panel"
+        eyebrow="Your travel hub"
+        title={`Welcome back, ${firstName}`}
+        description="Your trips, bookings and support in one place."
+        actions={[
+          { href: "/#flight-search", label: "Search flights", variant: "primary" },
+          { href: "/customer/bookings", label: "My bookings" },
+          { href: "/customer/support", label: "Support" },
+        ]}
+      />
+      {loading ? <p className="mt-5 text-jp-sm text-jp-muted">Loading overview…</p> : null}
       {error ? <CustomerDashboardErrorState message={error} onRetry={load} /> : null}
       {data ? (
-        <div className="w-full space-y-5" data-testid="customer-dashboard-overview">
+        <div className="mt-5 w-full space-y-5" data-testid="customer-dashboard-overview">
           <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {[
               { label: "Upcoming trips", value: data.metrics.upcoming_trips },

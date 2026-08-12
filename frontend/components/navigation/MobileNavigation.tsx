@@ -87,13 +87,18 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
                 <CurrencySelector compact className="min-w-0 flex-1" />
               </div>
               {session.status === "anonymous" ? (
-                <Link href="/login" className="block text-jp-sm font-semibold text-jp-text">
-                  Log in / Sign up
+                <LinkButton href="/login" variant="primary" className="w-full whitespace-nowrap" onClick={closeMenu}>
+                  Login
+                </LinkButton>
+              ) : (
+                <Link
+                  href="/#flight-search"
+                  className="block text-jp-sm font-semibold text-jp-text focus-visible:shadow-jp-focus"
+                  onClick={closeMenu}
+                >
+                  Search flights
                 </Link>
-              ) : null}
-              <LinkButton href="/#flight-search" variant="primary" className="w-full whitespace-nowrap" onClick={closeMenu}>
-                Book Now
-              </LinkButton>
+              )}
             </div>
           </div>
         </>

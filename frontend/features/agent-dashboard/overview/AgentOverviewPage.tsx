@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  PortalWelcomePanel,
+  type PortalWelcomeAction,
+} from "@/features/portal/shell/PortalWelcomePanel";
 import { fetchAgentDashboardOverview } from "../services/agent-dashboard-api";
 import {
   AgentDashboardErrorState,
@@ -10,7 +14,7 @@ import {
   StatusBadge,
 } from "../shell/AgentDashboardShell";
 import type { AgentDashboardOverview } from "../types";
-import type { PublicSession } from "@/types/session";
+import type { AuthenticatedSession, PublicSession } from "@/types/session";
 
 function formatMoney(amount: number, currency: string) {
   return `${currency} ${amount.toLocaleString()}`;
@@ -40,6 +44,50 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
 
   const wallet = data?.wallet_summary;
   const metrics = data?.metrics;
+  const auth = session.status === "authenticated" ? (session as AuthenticatedSession) : null;
+  const agencyName = data?.capabilities?.agency?.name ?? "your agency";
+  const roleLabel = data?.capabilities?.identity?.role_label ?? (auth?.agencyRole === "staff" ? "Agent staff" : "Agent");
+
+  const welcomeActions = useMemo(() => {
+    const actions: PortalWelcomeAction[] = [];
+    const push = (action: PortalWelcomeAction) => {
+      if (actions.length >= 3) return;
+      if (actions.some((item) => item.href === action.href || item.label === action.label)) return;
+      actions.push(action);
+    };
+
+    push({ href: "/#flight-search", label: "Search flights", variant: "primary" });
+
+    const fromApi = (data?.quick_actions ?? []).filter((action) => action.available && action.url);
+    const bookings = fromApi.find((action) => /booking/i.test(action.code) || /booking/i.test(action.label));
+    if (bookings?.url) {
+      push({ href: bookings.url, label: bookings.label === "Bookings" ? "View bookings" : bookings.label });
+    } else {
+      push({ href: "/agent/bookings", label: "View bookings" });
+    }
+
+    const deposit = fromApi.find(
+      (action) => /deposit/i.test(action.code) || /deposit/i.test(action.label),
+    );
+    if (deposit?.url) {
+      push({ href: deposit.url, label: /request/i.test(deposit.label) ? deposit.label : "Request deposit" });
+    } else if (fromApi.some((action) => /support/i.test(action.code) || /support/i.test(action.label))) {
+      const support = fromApi.find((action) => /support/i.test(action.code) || /support/i.test(action.label));
+      if (support?.url) push({ href: support.url, label: "Support" });
+    } else {
+      push({ href: "/agent/support", label: "Support" });
+    }
+
+    return actions;
+  }, [data?.quick_actions]);
+
+  const welcomeMeta = [
+    roleLabel,
+    data?.capabilities?.agency?.status ? `Status: ${data.capabilities.agency.status}` : null,
+    metrics && (metrics.pending_payment > 0 || metrics.ticketing_pending > 0)
+      ? `${metrics.pending_payment + metrics.ticketing_pending} pending actions`
+      : null,
+  ].filter((item): item is string => Boolean(item));
 
   const metricCards = metrics
     ? [
@@ -79,10 +127,18 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
       unreadNotifications={metrics?.unread_notifications ?? 0}
       capabilities={data?.capabilities ?? null}
     >
-      {loading ? <p className="text-jp-sm text-jp-muted">Loading overview…</p> : null}
+      <PortalWelcomePanel
+        testId="agent-welcome-panel"
+        eyebrow="Agency workspace"
+        title={`Welcome back, ${agencyName}`}
+        description="Manage bookings, finance, travelers and support from one place."
+        meta={welcomeMeta}
+        actions={welcomeActions}
+      />
+      {loading ? <p className="mt-5 text-jp-sm text-jp-muted">Loading overview…</p> : null}
       {error ? <AgentDashboardErrorState message={error} onRetry={load} /> : null}
       {data ? (
-        <div className="w-full space-y-5" data-testid="agent-dashboard-overview">
+        <div className="mt-5 w-full space-y-5" data-testid="agent-dashboard-overview">
           <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {metricCards.slice(0, 5).map((card) => (
               <div
