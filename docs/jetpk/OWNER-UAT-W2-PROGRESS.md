@@ -1,37 +1,49 @@
 # OWNER UAT WAVE 2 — Progress Ledger
 
-LAST_UPDATED_UTC: 2026-08-12T18:35:00Z  
+LAST_UPDATED_UTC: 2026-08-12T18:50:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-LOCAL_HEAD: `cd1e631a7004f5ff4b10eef85a345591430ba319`  
-REMOTE_HEAD: `cd1e631a7004f5ff4b10eef85a345591430ba319`  
+LOCAL_HEAD: `67b82a5` (pending push confirm)  
+REMOTE_HEAD: tracking `jetpk`  
 WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f` (`OWNER_UAT_WAVE_1=OWNER_ACCEPTED`)
 
-## CURRENT_TASK
+## STATUS
 
-W2-09 Settings IA / false-error audit next (Support pagination deployed).
+`OWNER_UAT_WAVE_2` = **IN_PROGRESS** (not ready for owner retest closure yet)
 
-## SHIPPED THIS SESSION (deployed)
+## SHIPPED + DEPLOYED (production dashboard rebuilds)
 
-- W2-01/02 money `Rs.` formatter + overview/report labels
-- W2-05 booking action dedupe + lifecycle eligibility
-- W2-08 My Profile
-- W2-10 Reports live-mode copy
-- W2-12 Support default page size 10 + Prev/Next
-- W2-14 deposits list read-only Owner-UAT guard (no prod money approve)
-- W2-15 markup nav via `markup_settings`
-- W2-16 failed notifications classified (74 QA SMTP 550) + ops page
-- W2-17 fullscreen control removed
+| Area | Notes |
+|---|---|
+| Money PKR display | `Rs. XX,XXX.XX`; no FX fabrication |
+| Reports | Live-mode copy; no preview claim when live |
+| Booking workspace | Duplicate ops panel removed; lifecycle eligibility |
+| My Profile | Admin/Staff menu + `/profile` |
+| Fullscreen ○ | Removed |
+| Failed notifications | Classified: 74 QA SMTP 550; ops page `/notifications/failures` |
+| Markup nav | `markup_settings` gate fixed |
+| Deposits | List + eligibility; Approve/Reject UI blocked for Owner-UAT money safety |
+| Support | Default 10/page + Prev/Next |
+| Settings validation | Missing support contact → OWNER_INPUT_REQUIRED warning; supplier env demo/sandbox/live accepted |
+| Users table | Compact columns + serial `01..`; security detail stays in View |
 
-## LATEST_PRODUCTION_PROOF
+## OLS
 
-- OLS MATCH
-- Dashboard builds: `6Hm55uTJAuaVGYH5BdNH_` → `3eIQgYjU8-J8e0ChVkr_e` (+ support rebuild)
-- Unauth smoke routes return 307 (present), not 404
+MATCH `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`
 
 ## QA_AUTH_STATE
 
 OTP temporary Owner-UAT remains; OTP_DEMO_* preserved; QA identities active.
 
+## REMAINING HIGH PRIORITY
+
+- W2-03/04 Users vs Staff semantics + compact filters (partial table done)
+- W2-06 booking amendment policy
+- W2-09 Settings IA redesign (validation false-errors partially fixed)
+- W2-11 CMS baseline operational
+- W2-07/19 typography + button clarity
+- W2-18 email location semantics
+- W2-20 final regression + source-parity manifest + OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST
+
 ## NEXT_ACTION
 
-Settings false-error root-cause → Users vs Staff compact table → CMS baseline → typography/button polish → final gates.
+Continue Users/Staff semantics + compact filter framework, then CMS + amendment policy.
