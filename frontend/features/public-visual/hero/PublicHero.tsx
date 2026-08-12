@@ -23,7 +23,7 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
 
   return (
     <section className="relative overflow-hidden border-b border-jp-border bg-jp-page">
-      <div className="relative min-h-[clamp(22rem,48vh,34rem)]">
+      <div className="relative min-h-[clamp(20rem,42vh,30rem)]">
         <div className="absolute inset-0" data-testid="homepage-hero-image">
           <ImageSlot
             src={hero.image?.url ?? fallbackImage}
@@ -35,6 +35,7 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
             className="!max-w-none !rounded-none h-full w-full"
             objectFit="cover"
             fallbackLabel="JetPakistan hero"
+            brandedFallback
           />
           <div
             className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-jp-page/95 dark:from-black/55 dark:via-black/35 dark:to-jp-page"
@@ -42,8 +43,8 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
           />
         </div>
 
-        <PageContainer className="relative z-10 flex min-h-[clamp(22rem,48vh,34rem)] flex-col justify-end pb-0 pt-jp-3xl">
-          <div className="max-w-3xl pb-jp-xl text-white">
+        <PageContainer className="relative z-10 flex min-h-[clamp(20rem,42vh,30rem)] flex-col justify-end pb-0 pt-jp-3xl">
+          <div className="max-w-3xl pb-jp-lg text-white">
             {hero.eyebrow ? (
               <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{hero.eyebrow}</p>
             ) : null}
@@ -55,15 +56,18 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
           </div>
 
           {hero.searchVisible ? (
-            <div className="relative z-20 -mb-10 sm:-mb-12 lg:-mb-14">
-              <SearchModule layout="compact" className="border-white/20 bg-jp-surface/98 backdrop-blur-sm" />
+            <div className="relative z-20 -mb-8 sm:-mb-10 lg:-mb-12">
+              <SearchModule
+                layout="compact"
+                className="border-white/25 bg-jp-surface/95 shadow-jp-md backdrop-blur-md dark:bg-jp-surface/92"
+              />
               <BenefitStrip items={trustChips} className="mt-jp-md border-white/10 text-jp-text" />
               <AnimatedFlightPath className="mt-jp-md max-w-lg" />
             </div>
           ) : null}
         </PageContainer>
       </div>
-      <div className={cn(hero.searchVisible ? "h-12 sm:h-14 lg:h-16" : "h-0")} aria-hidden="true" />
+      <div className={cn(hero.searchVisible ? "h-10 sm:h-12 lg:h-14" : "h-0")} aria-hidden="true" />
     </section>
   );
 }

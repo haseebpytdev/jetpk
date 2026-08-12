@@ -25,7 +25,7 @@ export function FeaturedOffersSection({
 
   return (
     <ScrollReveal as="section">
-      <SectionContainer className="bg-jp-surface-muted/40">
+      <SectionContainer className="!py-8 sm:!py-10 bg-jp-surface-muted/40">
         <PageContainer>
           <PublicSectionHeader
             eyebrow={eyebrow}
@@ -35,13 +35,13 @@ export function FeaturedOffersSection({
             ctaUrl={ctaUrl}
           />
 
-          <div className="mt-jp-lg grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-jp-md grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {items.map((offer, index) => {
               const media = resolveOfferMedia(offer, index);
 
               return (
               <ScrollReveal key={offer.id} as="article" staggerIndex={index + 1}>
-                <article className="flex min-h-[18rem] flex-col overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card">
+                <article className="flex min-h-[15rem] flex-col overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card">
                   <div className="relative aspect-[16/9] bg-jp-surface-muted">
                     <ImageSlot
                       src={media.image}
@@ -51,6 +51,7 @@ export function FeaturedOffersSection({
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="!max-w-none h-full w-full !rounded-none"
                       fallbackLabel={offer.from}
+                      brandedFallback
                     />
                   </div>
                   <div className="flex flex-1 flex-col p-jp-lg">

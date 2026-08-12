@@ -6,7 +6,8 @@ const variantClasses = {
     "bg-jp-brand text-white shadow-jp-sm hover:bg-jp-brand-hover active:bg-jp-brand-active",
   secondary:
     "border border-jp-border bg-jp-surface text-jp-text hover:bg-jp-surface-muted active:bg-jp-surface-muted",
-  ghost: "bg-transparent text-jp-text hover:bg-jp-surface-muted",
+  ghost: "bg-transparent text-jp-text hover:bg-jp-surface-muted active:bg-jp-surface-muted",
+  tertiary: "bg-transparent text-jp-brand hover:underline",
   danger: "bg-jp-danger text-white hover:opacity-90",
 } as const;
 

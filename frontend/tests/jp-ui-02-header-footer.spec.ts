@@ -12,6 +12,7 @@ test("header exposes theme switch and authoritative navigation", async ({ page }
   await expect(page.getByTestId("theme-switch")).toBeVisible();
   await expect(page.getByRole("banner").getByTestId("header-login-cta")).toHaveAttribute("href", "/login");
   await expect(page.getByRole("banner").getByRole("link", { name: "Login" })).toBeVisible();
+  await expect(page.getByRole("banner").getByTestId("currency-selector")).toHaveCount(0);
   await expect(page.getByRole("banner").getByRole("link", { name: "Book Now" })).toHaveCount(0);
   await expect(page.getByRole("banner").getByText("Sign up", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("banner").getByText("Log in / Sign up")).toHaveCount(0);
@@ -26,6 +27,9 @@ test("footer has authoritative columns without newsletter stub", async ({ page }
   await expect(page.getByRole("contentinfo")).toBeVisible();
   await expect(page.getByRole("contentinfo").getByRole("heading", { name: "Explore", exact: true })).toBeVisible();
   await expect(page.getByRole("contentinfo").getByRole("heading", { name: "Legal", exact: true })).toBeVisible();
+  await expect(page.getByRole("contentinfo").getByTestId("currency-selector")).toBeVisible();
+  await expect(page.getByRole("contentinfo").getByLabel("Facebook")).toBeVisible();
+  await expect(page.getByText("Made with")).toHaveCount(0);
   await expect(page.getByText("Stay Updated")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Subscribe" })).toHaveCount(0);
 });

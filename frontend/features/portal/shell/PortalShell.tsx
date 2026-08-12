@@ -107,10 +107,10 @@ type PortalSidebarProps = {
 export function PortalSidebar({ identityLabel, identityValue, nav, footer, testId = "portal-sidebar" }: PortalSidebarProps) {
   return (
     <aside className="hidden w-[13.5rem] shrink-0 xl:w-jp-sidebar lg:block" aria-label="Dashboard sidebar" data-testid={testId}>
-      <div className="sticky top-[calc(var(--jp-nav-height)+1rem)] space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm">
-        <div>
-          <p className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">{identityLabel}</p>
-          <p className="mt-1 truncate text-jp-sm font-medium text-jp-text">{identityValue}</p>
+      <div className="sticky top-[calc(var(--jp-nav-height)+1rem)] space-y-3 rounded-jp-lg border border-jp-border bg-jp-surface p-3.5 shadow-jp-sm">
+        <div className="border-b border-jp-border pb-3">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-jp-text/70">{identityLabel}</p>
+          <p className="mt-1 truncate text-jp-sm font-semibold text-jp-text">{identityValue}</p>
         </div>
         {nav}
         {footer ? <div className="border-t border-jp-border pt-3 text-jp-sm">{footer}</div> : null}
@@ -229,7 +229,7 @@ function PortalGroupedNav({
           return (
             <div key={group ?? "all"} className="space-y-1">
               {group && group !== "Overview" ? (
-                <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-jp-muted">{group}</p>
+                <p className="px-3 pb-0.5 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-jp-text/70">{group}</p>
               ) : null}
               {section.items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -260,7 +260,7 @@ function PortalGroupedNav({
           <div key={group} className="space-y-1">
             <button
               type="button"
-              className="flex w-full min-h-9 items-center justify-between rounded-jp-md px-3 py-1.5 text-left text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-jp-muted hover:bg-jp-surface-muted focus-visible:shadow-jp-focus"
+              className="flex w-full min-h-9 items-center justify-between rounded-jp-md px-3 py-1.5 text-left text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-jp-text/75 hover:bg-jp-surface-muted focus-visible:shadow-jp-focus"
               aria-expanded={showItems}
               onClick={() =>
                 setManualOpen((prev) => ({

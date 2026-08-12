@@ -14,7 +14,7 @@ import {
   StatusBadge,
 } from "../shell/AgentDashboardShell";
 import type { AgentDashboardOverview } from "../types";
-import type { AuthenticatedSession, PublicSession } from "@/types/session";
+import type { PublicSession } from "@/types/session";
 
 function formatMoney(amount: number, currency: string) {
   return `${currency} ${amount.toLocaleString()}`;
@@ -44,9 +44,7 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
 
   const wallet = data?.wallet_summary;
   const metrics = data?.metrics;
-  const auth = session.status === "authenticated" ? (session as AuthenticatedSession) : null;
   const agencyName = data?.capabilities?.agency?.name ?? "your agency";
-  const roleLabel = data?.capabilities?.identity?.role_label ?? (auth?.agencyRole === "staff" ? "Agent staff" : "Agent");
 
   const welcomeActions = useMemo(() => {
     const actions: PortalWelcomeAction[] = [];
@@ -80,14 +78,6 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
 
     return actions;
   }, [data?.quick_actions]);
-
-  const welcomeMeta = [
-    roleLabel,
-    data?.capabilities?.agency?.status ? `Status: ${data.capabilities.agency.status}` : null,
-    metrics && (metrics.pending_payment > 0 || metrics.ticketing_pending > 0)
-      ? `${metrics.pending_payment + metrics.ticketing_pending} pending actions`
-      : null,
-  ].filter((item): item is string => Boolean(item));
 
   const metricCards = metrics
     ? [
@@ -132,7 +122,6 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
         eyebrow="Agency workspace"
         title={`Welcome back, ${agencyName}`}
         description="Manage bookings, finance, travelers and support from one place."
-        meta={welcomeMeta}
         actions={welcomeActions}
       />
       {loading ? <p className="mt-5 text-jp-sm text-jp-muted">Loading overview…</p> : null}

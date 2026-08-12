@@ -1,7 +1,6 @@
 "use client";
 
 import { AccountMenu } from "@/components/navigation/AccountMenu";
-import { CurrencySelector } from "@/components/navigation/CurrencySelector";
 import { ThemeSwitch } from "@/components/theme/ThemeSwitch";
 import { Badge } from "@/components/ui/Badge";
 import { IconButton } from "@/components/ui/IconButton";
@@ -81,10 +80,7 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
             </nav>
 
             <div className="space-y-3 border-t border-jp-border px-4 py-4">
-              <div className="flex items-center gap-2">
-                <ThemeSwitch className="!min-h-9 !gap-1.5 !px-2 !py-1.5" />
-                <CurrencySelector compact className="min-w-0 flex-1" />
-              </div>
+              <ThemeSwitch />
               {session.status === "anonymous" ? null : (
                 <Link
                   href="/#flight-search"

@@ -104,7 +104,10 @@ export function resolveRouteMedia(
     if (match) return match;
   }
 
-  return destinationMediaFallbacks[index % destinationMediaFallbacks.length];
+  return {
+    image: "",
+    imageAlt: `${route.from} to ${route.to}`,
+  };
 }
 
 export function resolveDestinationMedia(
@@ -129,7 +132,10 @@ export function resolveDestinationMedia(
     if (match) return match;
   }
 
-  return destinationMediaFallbacks[index % destinationMediaFallbacks.length];
+  return {
+    image: "",
+    imageAlt: destination.title,
+  };
 }
 
 export function resolveOfferMedia(

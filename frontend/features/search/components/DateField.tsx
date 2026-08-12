@@ -30,7 +30,7 @@ export function DateField({
 
   return (
     <div className={cn("min-w-0", className)}>
-      <label htmlFor={id} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
+      <label htmlFor={id} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-text/80">
         {label}
       </label>
       <input

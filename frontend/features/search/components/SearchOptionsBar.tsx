@@ -23,13 +23,13 @@ function OptionToggle({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label htmlFor={id} className="inline-flex cursor-pointer items-center gap-2 text-jp-sm text-jp-text">
+    <label htmlFor={id} className="inline-flex cursor-pointer items-center gap-2 text-jp-sm font-medium text-jp-text">
       <input
         id={id}
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="h-4 w-4 rounded border-jp-border text-jp-primary focus-visible:outline-none focus-visible:shadow-jp-focus"
+        className="h-4 w-4 rounded border-jp-border text-jp-primary accent-jp-brand focus-visible:outline-none focus-visible:shadow-jp-focus"
       />
       <span>{label}</span>
     </label>

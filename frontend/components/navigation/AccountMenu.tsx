@@ -136,7 +136,11 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
               {user.initials}
             </span>
           )}
-          {!compact ? <span className="max-w-[8rem] truncate">{user.displayName}</span> : null}
+          {!compact ? (
+            <span className="max-w-[14rem] truncate text-[0.8125rem] font-medium leading-tight" title={user.displayName}>
+              {user.displayName}
+            </span>
+          ) : null}
           <ChevronDownIcon className={cn("h-4 w-4", expanded && "rotate-180")} />
         </button>
       )}

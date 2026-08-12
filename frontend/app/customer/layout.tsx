@@ -1,3 +1,4 @@
+import { PublicConfigService } from "@/features/public-content/services/public-config-service";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
@@ -11,9 +12,25 @@ export const metadata: Metadata = {
 };
 
 export default async function CustomerLayout({ children }: { children: ReactNode }) {
-  const session = await requireCustomerPortalLayoutAccess();
+  const [session, config] = await Promise.all([
+    requireCustomerPortalLayoutAccess(),
+    PublicConfigService.getConfig(),
+  ]);
+
   return (
-    <PublicShell session={session} hideFooter>
+    <PublicShell
+      session={session}
+      hideFooter
+      branding={
+        config
+          ? {
+              brand_name: config.brand_name,
+              logo_url: config.logo_url,
+              header_logo_height: config.header_logo_height,
+            }
+          : null
+      }
+    >
       {children}
       <PortalAppFooter />
     </PublicShell>

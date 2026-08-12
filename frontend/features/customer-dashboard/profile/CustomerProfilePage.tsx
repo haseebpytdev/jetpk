@@ -8,7 +8,7 @@ import type { CustomerProfile } from "../types";
 import type { PublicSession } from "@/types/session";
 
 const fieldClass =
-  "mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2 focus-visible:outline-none focus-visible:shadow-jp-focus";
+  "mt-1 w-full rounded-jp-md border border-jp-border bg-jp-surface px-3 py-2 text-jp-sm text-jp-text focus-visible:outline-none focus-visible:shadow-jp-focus";
 
 export function CustomerProfilePage({ session }: { session: PublicSession }) {
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
@@ -57,26 +57,29 @@ export function CustomerProfilePage({ session }: { session: PublicSession }) {
       ) : null}
       {profile ? (
         <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-6" data-testid="customer-profile-form">
-          <p className="text-jp-sm text-jp-muted">
-            Email verification: {profile.user.email_verified ? "Verified" : "Not verified"}
-          </p>
-          <label className="block text-jp-sm">
+          <div>
+            <h2 className="font-display text-jp-h3 font-semibold text-jp-text">Personal details</h2>
+            <p className="mt-1 text-jp-sm text-jp-muted">
+              Email verification: {profile.user.email_verified ? "Verified" : "Not verified"}
+            </p>
+          </div>
+          <label className="block text-jp-sm font-medium text-jp-text">
             Full name
             <input name="name" defaultValue={profile.user.name} className={fieldClass} required />
           </label>
-          <label className="block text-jp-sm">
+          <label className="block text-jp-sm font-medium text-jp-text">
             Email
             <input name="email" type="email" defaultValue={profile.user.email} className={fieldClass} required />
           </label>
-          <label className="block text-jp-sm">
+          <label className="block text-jp-sm font-medium text-jp-text">
             Username
             <input name="username" defaultValue={profile.user.username} className={fieldClass} required />
           </label>
-          <label className="block text-jp-sm">
+          <label className="block text-jp-sm font-medium text-jp-text">
             Phone
             <input name="phone" defaultValue={profile.profile.phone ?? ""} className={fieldClass} />
           </label>
-          <label className="block text-jp-sm">
+          <label className="block text-jp-sm font-medium text-jp-text">
             City
             <input name="city" defaultValue={profile.profile.city ?? ""} className={fieldClass} />
           </label>

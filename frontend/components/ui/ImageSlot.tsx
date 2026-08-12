@@ -27,6 +27,8 @@ type ImageSlotProps = {
   priority?: boolean;
   sizes?: string;
   fallbackLabel?: string;
+  /** Soft JetPakistan brand motif instead of a generic photo icon. */
+  brandedFallback?: boolean;
 };
 
 export function ImageSlot({
@@ -41,6 +43,7 @@ export function ImageSlot({
   priority = false,
   sizes,
   fallbackLabel = "Image unavailable",
+  brandedFallback = false,
 }: ImageSlotProps) {
   const [loading, setLoading] = useState(Boolean(src));
   const [failed, setFailed] = useState(false);
@@ -51,7 +54,10 @@ export function ImageSlot({
     return (
       <div
         className={cn(
-          "flex items-center justify-center rounded-jp-md border border-jp-border bg-jp-surface-muted text-jp-muted",
+          "relative flex items-center justify-center overflow-hidden rounded-jp-md border border-jp-border",
+          brandedFallback
+            ? "bg-gradient-to-br from-jp-brand-soft via-jp-surface to-jp-surface-muted text-jp-brand"
+            : "bg-jp-surface-muted text-jp-muted",
           className,
         )}
         style={{ aspectRatio, width: "100%", maxWidth: width }}
@@ -59,7 +65,7 @@ export function ImageSlot({
         aria-label={decorative ? undefined : fallbackLabel}
         data-testid="image-slot-fallback"
       >
-        <FallbackIcon />
+        {brandedFallback ? <BrandedFallbackMotif /> : <FallbackIcon />}
         {!decorative ? <span className="sr-only">{fallbackLabel}</span> : null}
       </div>
     );
@@ -104,6 +110,24 @@ function FallbackIcon() {
       <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
       <circle cx="8.5" cy="10" r="1.5" fill="currentColor" />
       <path d="M3 16l5-4 4 3 3-2 6 5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    </svg>
+  );
+}
+
+function BrandedFallbackMotif() {
+  return (
+    <svg viewBox="0 0 320 180" className="absolute inset-0 h-full w-full opacity-80" aria-hidden="true" fill="none">
+      <circle cx="250" cy="64" r="46" stroke="currentColor" strokeWidth="1.5" className="text-jp-brand/30" />
+      <path
+        d="M24 128 C96 48, 168 148, 248 64"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeDasharray="5 7"
+        strokeLinecap="round"
+        className="text-jp-brand/45"
+      />
+      <path d="M230 56 L266 72 L244 78 L238 98 Z" fill="currentColor" className="text-jp-brand/55" />
+      <circle cx="248" cy="64" r="3.5" fill="currentColor" className="text-jp-brand" />
     </svg>
   );
 }

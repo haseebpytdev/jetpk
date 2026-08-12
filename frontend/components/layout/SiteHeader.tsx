@@ -1,5 +1,4 @@
 import { AccountMenu } from "@/components/navigation/AccountMenu";
-import { CurrencySelector } from "@/components/navigation/CurrencySelector";
 import { DesktopNavigation } from "@/components/navigation/DesktopNavigation";
 import { MobileNavigation } from "@/components/navigation/MobileNavigation";
 import { JetPakistanLogo } from "@/components/layout/JetPakistanLogo";
@@ -37,12 +36,16 @@ export function SiteHeader({ session, branding = null }: SiteHeaderProps) {
         </div>
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
-          <ThemeSwitch className="!min-h-9 !gap-1.5 !px-2 !py-1.5" />
-          <CurrencySelector compact />
+          <ThemeSwitch />
           {signedIn ? (
             <AccountMenu session={session} />
           ) : (
-            <LinkButton href="/login" variant="primary" className="whitespace-nowrap" data-testid="header-login-cta">
+            <LinkButton
+              href="/login"
+              variant="primary"
+              className="jp-header-login-cta whitespace-nowrap !rounded-jp-button !bg-gradient-to-br !from-[#1f8f55] !via-[#187a48] !to-[#14663c] !px-4 !shadow-none hover:!from-[#22985b] hover:!via-[#1a8550] hover:!to-[#167242] active:!from-[#14663c] active:!to-[#0f5230]"
+              data-testid="header-login-cta"
+            >
               Login
             </LinkButton>
           )}
