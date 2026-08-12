@@ -101,6 +101,7 @@ class SupportTicketController extends Controller
             $ticket,
             SupportTicketStatus::from((string) $request->validated('status')),
             $request->user(),
+            $request->validated('expected_updated_at'),
         );
 
         $ticket->refresh();
@@ -127,6 +128,7 @@ class SupportTicketController extends Controller
             'assigned_to_user_id' => $ticket->assigned_to_user_id !== null ? (string) $ticket->assigned_to_user_id : null,
             'forwarded_to_agent_id' => $ticket->forwarded_to_agent_id !== null ? (string) $ticket->forwarded_to_agent_id : null,
             'last_reply_at' => $ticket->last_reply_at?->toIso8601String(),
+            'updated_at' => $ticket->updated_at?->toIso8601String(),
         ];
     }
 }

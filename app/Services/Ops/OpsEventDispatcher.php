@@ -138,7 +138,10 @@ class OpsEventDispatcher
 
         // Internal notes notify platform admins / assigned staff watchers via activity; inbox to admins in agency.
         if (! $customerVisible) {
-            foreach ($this->agencyOpsRecipients((int) $booking->agency_id) as $opsId) {
+            foreach ($this->agencyOpsRecipients((int) $booking->agency_id, [
+                \App\Support\Staff\StaffPermission::BookingsNotes,
+                \App\Support\Staff\StaffPermission::BookingsView,
+            ]) as $opsId) {
                 $recipients[] = $opsId;
             }
             if ($booking->assigned_staff_id) {
@@ -166,7 +169,11 @@ class OpsEventDispatcher
     public function supportTicketCreated(SupportTicket $ticket, ?User $actor = null): void
     {
         $ref = (string) ($ticket->ticket_reference ?? $ticket->id);
-        $recipients = $this->agencyOpsRecipients((int) $ticket->agency_id);
+        $recipients = $this->agencyOpsRecipients((int) $ticket->agency_id, [
+            \App\Support\Staff\StaffPermission::SupportView,
+            \App\Support\Staff\StaffPermission::SupportReply,
+            \App\Support\Staff\StaffPermission::SupportStatus,
+        ]);
 
         $this->dispatch(
             recipients: $recipients,
@@ -228,7 +235,10 @@ class OpsEventDispatcher
                 if ($ticket->assigned_to_user_id) {
                     $recipients[] = (int) $ticket->assigned_to_user_id;
                 }
-                foreach ($this->agencyOpsRecipients((int) $ticket->agency_id) as $opsId) {
+                foreach ($this->agencyOpsRecipients((int) $ticket->agency_id, [
+                    \App\Support\Staff\StaffPermission::SupportView,
+                    \App\Support\Staff\StaffPermission::SupportReply,
+                ]) as $opsId) {
                     $recipients[] = $opsId;
                 }
             } else {
@@ -239,7 +249,10 @@ class OpsEventDispatcher
             }
         } else {
             // Internal-only: never fan-out to customer/agent
-            foreach ($this->agencyOpsRecipients((int) $ticket->agency_id) as $opsId) {
+            foreach ($this->agencyOpsRecipients((int) $ticket->agency_id, [
+                \App\Support\Staff\StaffPermission::SupportView,
+                \App\Support\Staff\StaffPermission::SupportReply,
+            ]) as $opsId) {
                 $recipients[] = $opsId;
             }
             if ($ticket->assigned_to_user_id) {
@@ -273,9 +286,9 @@ class OpsEventDispatcher
     /**
      * @return list<int>
      */
-    protected function agencyOpsRecipients(int $agencyId): array
+    protected function agencyOpsRecipients(int $agencyId, ?array $staffPermissions = null): array
     {
-        return User::query()
+        $users = User::query()
             ->where(function ($query) use ($agencyId): void {
                 $query->where('account_type', AccountType::PlatformAdmin->value)
                     ->orWhere(function ($inner) use ($agencyId): void {
@@ -283,15 +296,40 @@ class OpsEventDispatcher
                             ->where('current_agency_id', $agencyId);
                     });
             })
-            ->pluck('id')
-            ->map(static fn ($id): int => (int) $id)
-            ->all();
+            ->get();
+
+        $ids = [];
+        foreach ($users as $user) {
+            if (method_exists($user, 'isPlatformAdmin') && $user->isPlatformAdmin()) {
+                $ids[] = (int) $user->id;
+                continue;
+            }
+
+            if ($staffPermissions === null || $staffPermissions === []) {
+                $ids[] = (int) $user->id;
+                continue;
+            }
+
+            foreach ($staffPermissions as $permission) {
+                if ($user->hasStaffPermission((string) $permission)) {
+                    $ids[] = (int) $user->id;
+                    break;
+                }
+            }
+        }
+
+        return array_values(array_unique($ids));
     }
 
     public function agentDepositSubmitted(AgentDepositRequest $deposit, User $actor): void
     {
         $ref = (string) ($deposit->reference ?? $deposit->id);
-        $recipients = $this->agencyOpsRecipients((int) $deposit->agency_id);
+        $recipients = $this->agencyOpsRecipients((int) $deposit->agency_id, [
+            \App\Support\Staff\StaffPermission::PaymentsVerify,
+            \App\Support\Staff\StaffPermission::PaymentsRecord,
+            \App\Support\Staff\StaffPermission::LedgerView,
+            \App\Support\Staff\StaffPermission::LedgerManage,
+        ]);
 
         $this->dispatch(
             recipients: $recipients,
@@ -311,6 +349,35 @@ class OpsEventDispatcher
                 'dedupe_token' => 'deposit-'.$deposit->id,
                 'amount' => (string) $deposit->amount,
                 'currency' => (string) $deposit->currency,
+            ],
+        );
+    }
+
+    public function supportStatusChanged(SupportTicket $ticket, User $actor, \App\Enums\SupportTicketStatus $status): void
+    {
+        $ref = (string) ($ticket->ticket_reference ?? $ticket->id);
+        $recipients = [];
+        if ($ticket->created_by_user_id) {
+            $recipients[] = (int) $ticket->created_by_user_id;
+        }
+
+        $this->dispatch(
+            recipients: $recipients,
+            eventType: 'support.status_changed',
+            entityType: 'support_ticket',
+            entityId: $ticket->id,
+            entityRef: $ref,
+            summary: 'Support ticket '.$ref.' status is now '.$status->value,
+            actor: $actor,
+            agencyId: $ticket->agency_id,
+            deepLink: 'support?ticket='.rawurlencode($ref),
+            category: 'support',
+            eventKey: 'support.status_changed:'.$ticket->id.':'.$status->value,
+            writeAudit: true,
+            auditableType: SupportTicket::class,
+            properties: [
+                'dedupe_token' => 'status-'.$ticket->id.'-'.$status->value,
+                'new_status' => $status->value,
             ],
         );
     }

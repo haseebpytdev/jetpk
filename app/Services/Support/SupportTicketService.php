@@ -216,30 +216,75 @@ class SupportTicketService
         return $message;
     }
 
-    public function updateStatus(SupportTicket $ticket, SupportTicketStatus $status, User $actor): SupportTicket
-    {
-        $previous = $ticket->status;
-        $ticket->forceFill([
-            'status' => $status,
-            'closed_at' => in_array($status, [SupportTicketStatus::Resolved, SupportTicketStatus::Closed], true)
-                ? now()
-                : null,
-        ])->save();
+    public function updateStatus(
+        SupportTicket $ticket,
+        SupportTicketStatus $status,
+        User $actor,
+        ?string $expectedUpdatedAt = null,
+    ): SupportTicket {
+        $previous = null;
+
+        $fresh = DB::transaction(function () use ($ticket, $status, $expectedUpdatedAt, &$previous): SupportTicket {
+            /** @var SupportTicket $locked */
+            $locked = SupportTicket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+            $this->assertNotStale($locked, $expectedUpdatedAt);
+
+            $previous = $locked->status;
+            $locked->forceFill([
+                'status' => $status,
+                'closed_at' => in_array($status, [SupportTicketStatus::Resolved, SupportTicketStatus::Closed], true)
+                    ? now()
+                    : null,
+            ])->save();
+
+            return $locked->fresh(['createdBy', 'assignedTo', 'booking']);
+        });
 
         if ($previous !== $status) {
-            $this->notifyStatusChanged($ticket->fresh(['createdBy', 'assignedTo', 'booking']), $actor, $status);
+            $this->notifyStatusChanged($fresh, $actor, $status);
+            try {
+                $this->opsEvents->supportStatusChanged($fresh, $actor, $status);
+            } catch (Throwable $e) {
+                Log::warning('ops.support_status_fanout_failed', [
+                    'ticket_id' => $ticket->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
         }
 
-        return $ticket;
+        return $fresh;
     }
 
-    public function assign(SupportTicket $ticket, ?User $assignee, ?User $actor = null): SupportTicket
-    {
-        $previousAssigneeId = $ticket->assigned_to_user_id;
+    public function assign(
+        SupportTicket $ticket,
+        ?User $assignee,
+        ?User $actor = null,
+        ?string $expectedUpdatedAt = null,
+    ): SupportTicket {
+        $previousAssigneeId = null;
 
-        $ticket->forceFill(['assigned_to_user_id' => $assignee?->id])->save();
+        $fresh = DB::transaction(function () use ($ticket, $assignee, $expectedUpdatedAt, &$previousAssigneeId): SupportTicket {
+            /** @var SupportTicket $locked */
+            $locked = SupportTicket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+            $this->assertNotStale($locked, $expectedUpdatedAt);
 
-        $fresh = $ticket->fresh(['assignedTo', 'createdBy', 'booking']);
+            if ($locked->isClosed()) {
+                throw new \App\Exceptions\StaleOperationalStateException(
+                    'Cannot assign a closed ticket. Refresh and retry.',
+                    ['ticket' => [
+                        'id' => (string) $locked->id,
+                        'status' => (string) ($locked->status?->value ?? $locked->status),
+                        'assigned_to_user_id' => $locked->assigned_to_user_id !== null ? (string) $locked->assigned_to_user_id : null,
+                        'updated_at' => $locked->updated_at?->toIso8601String(),
+                    ]],
+                );
+            }
+
+            $previousAssigneeId = $locked->assigned_to_user_id;
+            $locked->forceFill(['assigned_to_user_id' => $assignee?->id])->save();
+
+            return $locked->fresh(['assignedTo', 'createdBy', 'booking']);
+        });
 
         if (
             $assignee !== null
@@ -259,6 +304,40 @@ class SupportTicketService
         }
 
         return $fresh;
+    }
+
+    private function assertNotStale(SupportTicket $locked, ?string $expectedUpdatedAt): void
+    {
+        if ($expectedUpdatedAt === null || trim($expectedUpdatedAt) === '') {
+            return;
+        }
+
+        $current = $locked->updated_at?->toIso8601String()
+            ?? $locked->updated_at?->toDateTimeString();
+
+        if ($current === null) {
+            return;
+        }
+
+        $normalize = static function (string $value): string {
+            try {
+                return \Illuminate\Support\Carbon::parse($value)->utc()->format('Y-m-d\TH:i:s');
+            } catch (Throwable) {
+                return trim($value);
+            }
+        };
+
+        if ($normalize($current) !== $normalize($expectedUpdatedAt)) {
+            throw new \App\Exceptions\StaleOperationalStateException(
+                'This ticket was updated by another operator. Refresh and retry.',
+                ['ticket' => [
+                    'id' => (string) $locked->id,
+                    'status' => (string) ($locked->status?->value ?? $locked->status),
+                    'assigned_to_user_id' => $locked->assigned_to_user_id !== null ? (string) $locked->assigned_to_user_id : null,
+                    'updated_at' => $locked->updated_at?->toIso8601String(),
+                ]],
+            );
+        }
     }
 
     public function forward(SupportTicket $ticket, ?Agent $agent, User $actor): SupportTicket

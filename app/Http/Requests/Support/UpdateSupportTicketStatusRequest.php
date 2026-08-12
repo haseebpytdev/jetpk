@@ -23,6 +23,7 @@ class UpdateSupportTicketStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', 'string', Rule::in(SupportTicketStatus::values())],
+            'expected_updated_at' => ['nullable', 'string', 'max:64'],
         ];
     }
 }

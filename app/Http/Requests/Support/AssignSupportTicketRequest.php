@@ -21,6 +21,7 @@ class AssignSupportTicketRequest extends FormRequest
     {
         return [
             'assigned_to_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'expected_updated_at' => ['nullable', 'string', 'max:64'],
         ];
     }
 }
