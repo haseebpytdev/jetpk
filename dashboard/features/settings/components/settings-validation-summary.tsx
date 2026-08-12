@@ -53,7 +53,15 @@ export function SettingsValidationSummary({ issues, title = "Validation summary"
             <p className="font-medium">{issue.message}</p>
             <p className="mt-1 text-xs opacity-80">{issue.suggestedResolution}</p>
             <p className="mt-1 font-mono text-xs opacity-70">{issue.fieldPath}</p>
-            {issue.blocking ? <span className="mt-1 inline-block text-xs font-medium">Blocking</span> : null}
+            {issue.suggestedResolution.startsWith("OWNER_INPUT_REQUIRED") ? (
+              <span className="mt-1 inline-block rounded-full bg-white/70 px-2 py-0.5 text-xs font-medium">
+                Owner input required
+              </span>
+            ) : issue.blocking ? (
+              <span className="mt-1 inline-block text-xs font-medium">Blocking</span>
+            ) : issue.severity === "warning" ? (
+              <span className="mt-1 inline-block text-xs font-medium">Warning</span>
+            ) : null}
           </li>
         ))}
       </ul>

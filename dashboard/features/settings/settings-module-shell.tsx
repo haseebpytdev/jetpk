@@ -72,7 +72,7 @@ export function SettingsModuleShell({ section, result }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Settings" }, { label: current.label }]} />
         }
         title="Settings"
-        description="System settings metadata — no credentials, read-only Laravel integration."
+        description="Read-only system metadata across General, Security, Notifications, and Integrations. Missing owner inputs are labeled OWNER_INPUT_REQUIRED — credentials and secrets are never shown."
       />
       <DataSourceNoticeSlot />
 

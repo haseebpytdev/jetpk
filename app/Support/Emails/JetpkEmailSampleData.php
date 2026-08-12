@@ -162,7 +162,7 @@ trait JetpkEmailSampleData
                     'security'    => [
                         'login_time' => '09 Jul 2026, 3:10 PM PKT',
                         'device' => 'Android', 'browser' => 'Chrome',
-                        'location' => 'Karachi, Pakistan',
+                        // Preview-only: no fabricated city; live auth emails send IP/UA without GeoIP city.
                     ],
                 ]);
 

@@ -25,7 +25,7 @@ export function SettingsOverview({ result }: Props) {
     { key: "settingsRequiringReview", label: "Requiring review", value: overview.settingsRequiringReview },
     { key: "highRiskPolicyWarnings", label: "High-risk warnings", value: overview.highRiskPolicyWarnings },
     { key: "incompleteMetadata", label: "Incomplete metadata", value: overview.incompleteMetadata },
-    { key: "lastFixtureRevision", label: "Fixture revision", value: formatDateTime(overview.lastFixtureRevision) },
+    { key: "lastFixtureRevision", label: "Source snapshot", value: formatDateTime(overview.lastFixtureRevision) },
   ] as const;
 
   return (
@@ -76,14 +76,14 @@ export function SettingsOverview({ result }: Props) {
 
       <div
         role="note"
-        className="rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-3 text-sm text-violet-900"
+        className="rounded-xl border border-jp-border bg-gray-50 px-4 py-3 text-sm text-gray-800"
         data-testid="settings-laravel-boundary-note"
       >
-        <p className="font-medium">Future Laravel boundary</p>
+        <p className="font-medium">Read-only system metadata</p>
         <p className="mt-1">
-          Settings persistence, secret rotation, and supplier credential storage will live in Laravel services behind
-          authenticated admin APIs. This dashboard preview uses typed fixtures and local component state only — no
-          credentials, PCC, LNIATA, or publish workflow.
+          Live Admin/Staff Settings show Laravel-backed configuration without credentials or secret rotation. Missing
+          support contacts are Owner input required warnings, not false validation failures. Supplier environments accept
+          configured demo/sandbox/live labels.
         </p>
       </div>
     </div>

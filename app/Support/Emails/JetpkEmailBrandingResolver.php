@@ -179,7 +179,7 @@ class JetpkEmailBrandingResolver
             'support_phone' => '+92 21 111 000 000',
             'primary_color' => '#00843D',
             'accent_color'  => '#F58220',
-            'address'       => 'Karachi, Pakistan',
+            'address'       => null,
             'footer_text'   => 'JetPakistan — your gateway to seamless travel.',
         ]);
     }
