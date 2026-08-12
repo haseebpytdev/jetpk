@@ -43,7 +43,7 @@ export const AUTH_ROLES = {
   customer: {
     storageEnv: "JP_CUSTOMER_STORAGE_STATE",
     defaultPath: path.join(repoRoot, "tmp/jp-dash-03-customer-storage-state.json"),
-    dashboardPattern: /\/customer\/dashboard/,
+    dashboardPattern: /\/customer\/(dashboard|bookings|support|account)/,
     dashboardPath: "/customer/dashboard",
     portalLabelPattern: /customer/i,
     loginUrl: `${baseUrl}/login`,

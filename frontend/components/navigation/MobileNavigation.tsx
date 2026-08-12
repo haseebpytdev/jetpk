@@ -9,7 +9,7 @@ import { LinkButton } from "@/components/ui/LinkButton";
 import { useBodyScrollLock } from "@/lib/hooks/use-body-scroll-lock";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
-import { primaryNavigation } from "@/lib/navigation";
+import { primaryNavigationForSession } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import type { PublicSession } from "@/types/session";
@@ -75,7 +75,7 @@ export function MobileNavigation({ session, className }: MobileNavigationProps) 
 
             <nav aria-label="Mobile primary" className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
               <ul className="space-y-1">
-                {primaryNavigation.map((item) => (
+                {primaryNavigationForSession(session).map((item) => (
                   <MobileNavItem key={item.label} item={item} onNavigate={closeMenu} />
                 ))}
               </ul>

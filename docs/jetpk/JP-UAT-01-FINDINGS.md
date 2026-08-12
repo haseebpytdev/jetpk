@@ -1,8 +1,9 @@
 # JP-UAT-01 — Findings Register
 
-No findings yet. Rubric frozen before runs.
-
 Statuses: OPEN | FIXING | FIXED_PENDING_RETEST | PASS | ACCEPTED_NONBLOCKER | EXTERNAL_OWNER_DECISION
 
 | FINDING_ID | TIMESTAMP | PERSONA | SCENARIO | PAGE | OBSERVATION | EXPECTED | ACTUAL | SEVERITY | BUSINESS_IMPACT | REPRODUCIBLE | TECHNICAL_VERIFIER | ROOT_CAUSE | FIX_REQUIRED | FIX_SHA | RETEST | STATUS | NOTES |
 |------------|-----------|---------|----------|------|-------------|----------|--------|----------|-----------------|--------------|--------------------|------------|--------------|---------|--------|--------|-------|
+| UAT-F001 | 2026-08-12T05:07:00Z | Customer/Agent/Staff/Admin | UAT-DISC-01 / UAT-CUST-01 | `/` header | Logged-in users exploring from homepage follow public Support and never reach role portals; account chip menu not obvious; Support dropdown lacked account inbox entry | Authenticated users can discover dashboard/support workspace from visible chrome | Public Support dominated; portal entry only via account menu | P1 | Mandatory personas cannot complete core portal tasks from realistic marketing entry | yes | portal-entry-probe + auth-persona-explore telemetry | IA: public Support overshadowed account workspace; AccountMenu lacked Support; no header Dashboard link | yes | pending | FIXED_PENDING_RETEST | Fixed: header Dashboard link, role-aware Support nav, AccountMenu Support links, public Support signed-in bridge |
+| UAT-F002 | 2026-08-12T05:07:00Z | Anonymous/Customer | UAT-ERR-01 | `/support` | Submit support request control appears inactive without clear reason when Turnstile pending | User understands why submit is unavailable | Button disabled; label still said Submit | P2 | Users may think Support form is broken | yes | portal-entry-probe publicSupportSubmit.enabled=false | Turnstile gate disables submit | yes | pending | FIXED_PENDING_RETEST | Button label + hint when security check required |
+| UAT-F003 | 2026-08-12T05:02:00Z | Customer | UAT-CUST-01 | login redirect | Post-login landing is `/customer/bookings` not Overview dashboard | Acceptable if bookings is intentional landing; portal still reachable | Landing = bookings | P3 | Mild orientation surprise | yes | automated-login URL | Product landing_route | no | — | ACCEPTED_NONBLOCKER | Login script accepts bookings; Overview still in nav |

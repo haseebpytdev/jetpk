@@ -1,5 +1,24 @@
 {
   "phase": "JP-UAT-01",
-  "updated_at_utc": "2026-08-12T05:05:00Z",
-  "findings": []
+  "updated_at_utc": "2026-08-12T05:20:00Z",
+  "findings": [
+    {
+      "FINDING_ID": "UAT-F001",
+      "SEVERITY": "P1",
+      "STATUS": "FIXED_PENDING_RETEST",
+      "SUMMARY": "Logged-in portal discoverability from public header/Support IA"
+    },
+    {
+      "FINDING_ID": "UAT-F002",
+      "SEVERITY": "P2",
+      "STATUS": "FIXED_PENDING_RETEST",
+      "SUMMARY": "Public support submit disabled without clear Turnstile explanation"
+    },
+    {
+      "FINDING_ID": "UAT-F003",
+      "SEVERITY": "P3",
+      "STATUS": "ACCEPTED_NONBLOCKER",
+      "SUMMARY": "Customer post-login lands on bookings"
+    }
+  ]
 }

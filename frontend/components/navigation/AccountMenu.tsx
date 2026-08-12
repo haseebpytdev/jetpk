@@ -24,6 +24,7 @@ function accountMenuLinks(session: AuthenticatedSession): AccountMenuLink[] {
     return [
       { href: "/customer/dashboard", label: "Dashboard" },
       { href: "/customer/bookings", label: "My Bookings" },
+      { href: "/customer/support", label: "Support" },
       { href: "/customer/profile", label: "Profile" },
     ];
   }
@@ -33,11 +34,31 @@ function accountMenuLinks(session: AuthenticatedSession): AccountMenuLink[] {
       { href: "/agent/dashboard", label: "Dashboard" },
       { href: "/agent/bookings", label: "Bookings" },
       { href: "/agent/wallet", label: "Wallet" },
+      { href: "/agent/support", label: "Support" },
       { href: "/agent/profile", label: "Profile" },
     ];
   }
 
-  return [{ href: session.dashboardUrl, label: "Dashboard" }];
+  if (session.accountType === "staff" || session.role === "staff" || session.portalType === "staff") {
+    return [
+      { href: session.dashboardUrl || "/staff/dashboard", label: "Staff dashboard" },
+      { href: "/staff/dashboard", label: "Live operations" },
+    ];
+  }
+
+  if (
+    session.accountType === "platform_admin" ||
+    session.accountType === "admin" ||
+    session.portalType === "admin" ||
+    session.role === "admin"
+  ) {
+    return [
+      { href: session.dashboardUrl || "/admin/dashboard", label: "Admin dashboard" },
+      { href: "/admin/dashboard", label: "Live operations" },
+    ];
+  }
+
+  return [{ href: session.dashboardUrl || "/", label: "Dashboard" }];
 }
 
 export function AccountMenu({ session, className, compact = false }: AccountMenuProps) {
@@ -83,10 +104,12 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
       portal={compact}
       panelTestId={compact ? "account-menu-panel-compact" : "account-menu-panel-desktop"}
       panelClassName="min-w-[12.5rem]"
-      trigger={({ id, expanded, onToggle, onKeyDown }) => (
+      trigger={({ id, expanded, onToggle, onKeyDown, triggerRef }) => (
         <button
           type="button"
+          ref={triggerRef}
           data-testid={compact ? "account-menu-trigger-compact" : "account-menu-trigger-desktop"}
+          aria-label={`Account menu for ${user.displayName}`}
           aria-haspopup="menu"
           aria-expanded={expanded}
           aria-controls={id}
@@ -124,7 +147,7 @@ export function AccountMenu({ session, className, compact = false }: AccountMenu
       </div>
       {menuLinks.map((link) => (
         <a
-          key={link.href}
+          key={`${link.href}:${link.label}`}
           href={link.href}
           role="menuitem"
           className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"

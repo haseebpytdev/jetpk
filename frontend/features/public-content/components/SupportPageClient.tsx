@@ -13,9 +13,16 @@ import { EmptyContentState } from "./EmptyContentState";
 type SupportPageClientProps = {
   content: SupportPageContent;
   categories: Array<{ value: string; label: string }>;
+  accountSupportHref?: string | null;
+  accountSupportLabel?: string | null;
 };
 
-export function SupportPageClient({ content, categories }: SupportPageClientProps) {
+export function SupportPageClient({
+  content,
+  categories,
+  accountSupportHref = null,
+  accountSupportLabel = null,
+}: SupportPageClientProps) {
   const [query, setQuery] = useState("");
 
   const filteredTopics = useMemo(() => {
@@ -33,6 +40,22 @@ export function SupportPageClient({ content, categories }: SupportPageClientProp
 
   return (
     <div className="space-y-jp-3xl">
+      {accountSupportHref ? (
+        <div className="rounded-jp-lg border border-jp-primary/30 bg-jp-primary-soft px-jp-xl py-jp-lg">
+          <p className="text-jp-sm font-semibold text-jp-text">You are signed in</p>
+          <p className="mt-1 text-jp-sm text-jp-muted">
+            For booking help with replies and status tracking, use your account support inbox.
+          </p>
+          <p className="mt-3">
+            <Link
+              href={accountSupportHref}
+              className="inline-flex min-h-jp-button items-center rounded-jp-button bg-jp-primary px-4 text-jp-sm font-semibold text-white focus-visible:outline-none focus-visible:shadow-jp-focus"
+            >
+              {accountSupportLabel || "Open my support requests"}
+            </Link>
+          </p>
+        </div>
+      ) : null}
       <div className="grid gap-jp-xl lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
           {content.hero.kicker ? (

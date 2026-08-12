@@ -2,18 +2,21 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { Dropdown, DropdownLinkItem } from "@/components/ui/Dropdown";
-import { primaryNavigation } from "@/lib/navigation";
+import { primaryNavigationForSession } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
+import type { PublicSession } from "@/types/session";
 import type { NavItem } from "@/types/navigation";
 
 type DesktopNavigationProps = {
   className?: string;
+  session?: PublicSession;
 };
 
-export function DesktopNavigation({ className }: DesktopNavigationProps) {
+export function DesktopNavigation({ className, session }: DesktopNavigationProps) {
+  const items = primaryNavigationForSession(session);
   return (
     <nav aria-label="Primary" className={cn("hidden items-center gap-1 lg:flex", className)}>
-      {primaryNavigation.map((item) => (
+      {items.map((item) => (
         <DesktopNavItem key={item.label} item={item} />
       ))}
     </nav>
@@ -37,9 +40,10 @@ function DesktopNavItem({ item }: { item: NavItem }) {
     <Dropdown
       align="start"
       panelClassName="min-w-[15rem]"
-      trigger={({ id, expanded, onToggle, onKeyDown }) => (
+      trigger={({ id, expanded, onToggle, onKeyDown, triggerRef }) => (
         <button
           type="button"
+          ref={triggerRef}
           aria-haspopup="menu"
           aria-expanded={expanded}
           aria-controls={id}

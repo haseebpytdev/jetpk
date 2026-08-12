@@ -11,6 +11,7 @@ type DropdownProps = {
     expanded: boolean;
     onToggle: () => void;
     onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+    triggerRef: (node: HTMLButtonElement | null) => void;
   }) => ReactNode;
   children: ReactNode;
   align?: "start" | "end";
@@ -129,6 +130,9 @@ export function Dropdown({
         expanded: open,
         onToggle: handleToggle,
         onKeyDown: handleKeyDown,
+        triggerRef: (node) => {
+          triggerRef.current = node;
+        },
       })}
       {portal && typeof document !== "undefined" ? createPortal(panel, document.body) : panel}
     </div>

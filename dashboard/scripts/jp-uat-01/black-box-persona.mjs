@@ -143,9 +143,15 @@ const PERSONAS = {
 function scoreCandidate(text, keywords) {
   const t = text.toLowerCase().trim();
   if (!t || t.length > 80) return 0;
+  // Avoid accidental substring hits (e.g. "to" inside "to switch theme").
   let score = 0;
   for (const kw of keywords) {
-    if (t.includes(kw.toLowerCase())) score += kw.length > 8 ? 3 : 2;
+    const escaped = kw.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:[^a-z0-9]|$)`, "i");
+    if (re.test(t)) score += kw.length > 8 ? 3 : 2;
+  }
+  if (/theme|facebook|twitter|instagram|linkedin|youtube|cookie/i.test(t)) {
+    score = 0;
   }
   return score;
 }

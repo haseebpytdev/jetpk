@@ -88,6 +88,55 @@ export const primaryNavigation: NavItem[] = [
   },
 ];
 
+/**
+ * Role-aware primary nav for signed-in users so Support leads to the account
+ * support workspace instead of only the public help center.
+ */
+export function primaryNavigationForSession(session?: {
+  status: string;
+  accountType?: string | null;
+  portalType?: string | null;
+  dashboardUrl?: string;
+} | null): NavItem[] {
+  if (!session || session.status !== "authenticated") {
+    return primaryNavigation;
+  }
+
+  const supportItems = [...(primaryNavigation.find((item) => item.label === "Support" && item.type === "dropdown") as Extract<NavItem, { type: "dropdown" }>).items];
+
+  if (session.accountType === "customer") {
+    supportItems.unshift({
+      label: "My support requests",
+      href: "/customer/support",
+      description: "View and reply to your support tickets",
+    });
+  } else if (session.accountType === "agent") {
+    supportItems.unshift({
+      label: "Agency support",
+      href: "/agent/support",
+      description: "Open support cases for your agency",
+    });
+  } else if (
+    session.accountType === "staff" ||
+    session.portalType === "staff" ||
+    session.accountType === "platform_admin" ||
+    session.accountType === "admin" ||
+    session.portalType === "admin"
+  ) {
+    supportItems.unshift({
+      label: "Operations dashboard",
+      href: session.dashboardUrl || (session.portalType === "admin" || session.accountType === "platform_admin" || session.accountType === "admin" ? "/admin/dashboard" : "/staff/dashboard"),
+      description: "Continue to your work queue and assignments",
+    });
+  }
+
+  return primaryNavigation.map((item) => {
+    if (item.type === "dropdown" && item.label === "Support") {
+      return { ...item, items: supportItems };
+    }
+    return item;
+  });
+}
 export const footerColumns: FooterColumn[] = [
   {
     title: "Explore",

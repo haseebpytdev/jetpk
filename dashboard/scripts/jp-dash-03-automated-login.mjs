@@ -3,6 +3,8 @@
  * Usage: node scripts/jp-dash-03-automated-login.mjs [admin|staff|agent|customer|all]
  */
 import { chromium } from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
 import {
   AUTH_ROLES,
   baseUrl,
@@ -54,38 +56,121 @@ async function fetchCsrfToken(page) {
   return xsrf ? decodeURIComponent(xsrf.value) : null;
 }
 
+function readOtpDemoCode() {
+  const candidates = [
+    process.env.OTP_DEMO_FIXED_CODE,
+    (() => {
+      try {
+        const envPath = path.resolve(process.cwd(), "../.env");
+        const text = fs.readFileSync(envPath, "utf8");
+        const match = text.match(/^OTP_DEMO_FIXED_CODE=(.*)$/m);
+        return match?.[1]?.trim().replace(/^["']|["']$/g, "") ?? null;
+      } catch {
+        return null;
+      }
+    })(),
+    (() => {
+      try {
+        const envPath = path.resolve(process.cwd(), ".env");
+        const text = fs.readFileSync(envPath, "utf8");
+        const match = text.match(/^OTP_DEMO_FIXED_CODE=(.*)$/m);
+        return match?.[1]?.trim().replace(/^["']|["']$/g, "") ?? null;
+      } catch {
+        return null;
+      }
+    })(),
+  ];
+  for (const value of candidates) {
+    if (typeof value === "string" && value.length > 0) {
+      return value;
+    }
+  }
+  return "";
+}
+
+async function parseJsonResponse(response) {
+  const raw = (await response.text()).replace(/^\uFEFF/, "");
+  const contentType = response.headers()["content-type"] ?? "";
+  if (!contentType.includes("application/json") && !raw.trim().startsWith("{")) {
+    return { ok: false, reason: `unexpected_content_type:${response.status()}`, data: null };
+  }
+  try {
+    return { ok: true, reason: null, data: JSON.parse(raw) };
+  } catch {
+    return { ok: false, reason: `json_parse_failed:${response.status()}`, data: null };
+  }
+}
+
 async function submitLogin(page, login, password) {
-  const csrfToken = await fetchCsrfToken(page);
+  // Always refresh CSRF immediately before POST to avoid intermittent 419.
+  let csrfToken = await fetchCsrfToken(page);
   if (!csrfToken) {
     return { ok: false, reason: "csrf_unavailable" };
   }
 
-  const response = await page.request.post(`${baseUrl}/laravel/login`, {
-    headers: {
-      Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": csrfToken,
-    },
-    form: {
-      login,
-      password,
-      remember: "1",
-      client_slug: "jetpk",
-    },
-  });
-
-  const contentType = response.headers()["content-type"] ?? "";
-  if (!contentType.includes("application/json")) {
-    return { ok: false, reason: `unexpected_content_type:${response.status()}` };
+  async function postLogin(token) {
+    return page.request.post(`${baseUrl}/laravel/login`, {
+      headers: {
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-XSRF-TOKEN": token,
+      },
+      form: {
+        login,
+        password,
+        remember: "1",
+        client_slug: "jetpk",
+      },
+    });
   }
 
-  const data = await response.json();
+  let response = await postLogin(csrfToken);
+  if (response.status() === 419) {
+    csrfToken = await fetchCsrfToken(page);
+    if (!csrfToken) {
+      return { ok: false, reason: "csrf_unavailable_after_419" };
+    }
+    response = await postLogin(csrfToken);
+  }
+
+  const parsed = await parseJsonResponse(response);
+  if (!parsed.ok || !parsed.data) {
+    return { ok: false, reason: parsed.reason ?? "login_parse_failed" };
+  }
+
+  const data = parsed.data;
   if (!response.ok() || data.ok !== true) {
     return { ok: false, reason: `login_rejected:${response.status()}` };
   }
 
   if (data.requires_otp) {
-    return { ok: false, reason: "otp_required" };
+    const otpCode = readOtpDemoCode();
+    if (!otpCode) {
+      return { ok: false, reason: "otp_required_no_demo_code" };
+    }
+    csrfToken = await fetchCsrfToken(page);
+    const otpResponse = await page.request.post(`${baseUrl}/laravel/login/otp`, {
+      headers: {
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-XSRF-TOKEN": csrfToken ?? "",
+      },
+      form: {
+        otp: otpCode,
+        client_slug: "jetpk",
+      },
+    });
+    const otpParsed = await parseJsonResponse(otpResponse);
+    if (!otpParsed.ok || !otpParsed.data || otpParsed.data.ok !== true) {
+      return { ok: false, reason: `otp_rejected:${otpResponse.status()}` };
+    }
+    const redirectPath =
+      typeof otpParsed.data.redirect === "string" &&
+      otpParsed.data.redirect !== "" &&
+      otpParsed.data.redirect !== "/"
+        ? otpParsed.data.redirect
+        : null;
+    return { ok: true, redirect: redirectPath };
   }
 
   const redirectPath =

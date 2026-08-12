@@ -314,9 +314,25 @@ export function ContactForm({
 
       <p className="text-jp-xs text-jp-muted">{consentCopy}</p>
 
-      <PrimaryButton type="submit" disabled={submitDisabled} className="w-full sm:w-auto">
-        {status === "submitting" ? "Submitting…" : formType === "contact" ? "Send message" : "Submit support request"}
+      <PrimaryButton
+        type="submit"
+        disabled={submitDisabled}
+        className="w-full sm:w-auto"
+        aria-describedby={turnstileEnabled && !token ? `${formType}-turnstile-hint` : undefined}
+      >
+        {status === "submitting"
+          ? "Submitting…"
+          : turnstileEnabled && !token && !tokenExpired && !tokenError
+            ? "Complete security check to submit"
+            : formType === "contact"
+              ? "Send message"
+              : "Submit support request"}
       </PrimaryButton>
+      {turnstileEnabled && !token && !tokenExpired && !tokenError ? (
+        <p id={`${formType}-turnstile-hint`} className="text-jp-xs text-jp-muted">
+          The submit button stays unavailable until the security check is complete.
+        </p>
+      ) : null}
     </form>
   );
 }

@@ -17,9 +17,10 @@ export function CurrencySelector({ className }: CurrencySelectorProps) {
       className={className}
       align="end"
       panelClassName="min-w-[14rem]"
-      trigger={({ id, expanded, onToggle, onKeyDown }) => (
+      trigger={({ id, expanded, onToggle, onKeyDown, triggerRef }) => (
         <button
           type="button"
+          ref={triggerRef}
           aria-haspopup="menu"
           aria-expanded={expanded}
           aria-controls={id}
