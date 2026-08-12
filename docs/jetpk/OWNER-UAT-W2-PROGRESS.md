@@ -1,36 +1,36 @@
 # OWNER UAT WAVE 2 — Progress Ledger
 
-LAST_UPDATED_UTC: 2026-08-12T17:45:00Z  
+LAST_UPDATED_UTC: 2026-08-12T18:05:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-LOCAL_HEAD: pending commit (batch-1)  
-REMOTE_HEAD: pending first push  
+LOCAL_HEAD: `b9a97f43e6a260ede423bdc63fcb2f0c0ff499f2`  
+REMOTE_HEAD: `b9a97f43e6a260ede423bdc63fcb2f0c0ff499f2`  
 WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f` (`OWNER_UAT_WAVE_1=OWNER_ACCEPTED`)
 
 ## CURRENT_TASK
 
-W2-01 / W2-02 / W2-05 / W2-08 / W2-10 / W2-17 — first coherent repair batch.
+Deploy batch 1–2 (money/profile/reports/fullscreen + failures ops + booking eligibility), then W2-14/W2-15.
 
 ## CURRENT_FINDING
 
-- Money display was Intl/`{amount} {ISO}` drift; central formatter now `Rs.` for PKR and truthful ISO for others (no FX fabrication).
-- Reports live UI still said “preview records”; gated behind `useDashboardLiveMode`.
-- Booking Management rendered `BookingOperationalActions` twice (drawer content + sticky panel).
-- Admin header fullscreen ○ control removed; My Profile route added.
-- Recent booking amounts already use `DashboardMoneyPresenter::presentBookingTotal` → `displayLabel`.
-- Parallel workspace branch switch briefly interrupted this wave; WIP restored from stash onto the authoritative Wave-2 branch.
+Production failed notifications = **74**, all QA SMTP **550 5.1.1** to `jp-dash-03-qa-*` mailboxes (auth/support events). Booking-linked = 0.
+
+Note: a parallel agent briefly diverted a partial commit onto `phase/jetpk-owner-uat-w2-21-22-shell-typography` (`5937c3b`). Authoritative Wave-2 work is only on this business-closure branch (`d18491d` → `d5f0214` → `b9a97f4`).
 
 ## CURRENT_ROOT_CAUSE
 
-Presentation/formatting + duplicate panel mount + missing profile surface — not a new wallet schema.
+QA mailbox bounces inflate failed-notification KPI; CTA previously misrouted to bookings.
 
 ## LATEST_TESTS
 
-- `php artisan test --filter=DashboardMoneyPresenterTest` → passed 9 / assertions 20
-- `dashboard` `tsc --noEmit` → exit 0
+- DashboardMoneyPresenterTest: 9 passed / 20 assertions
+- dashboard tsc (batch 1): exit 0
+- PHP lint on communications service/controller/policy: clean
 
 ## LATEST_PRODUCTION_PROOF
 
-Not deployed yet this wave.
+- OLS MATCH
+- Failed-notif classify documented in OWNER-UAT-W2-FAILED-NOTIFICATIONS.md
+- Code not yet deployed to production for batch 1–2
 
 ## DEPLOYED_BUILDS
 
@@ -42,19 +42,18 @@ Not deployed yet this wave.
 
 ## OLS_HASH
 
-Expected (read-only): `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`
+MATCH `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`
 
 ## QA_AUTH_STATE
 
-OTP temporary Owner-UAT remains; OTP_DEMO_* preserved; QA Staff/Agent/Customer stay active.
+OTP temporary Owner-UAT remains; OTP_DEMO_* preserved; QA identities active.
 
 ## BLOCKERS
 
-None yet.
+Workspace contention with parallel typography branch — keep Wave-2 commits scoped and verify branch name before every push.
 
 ## NEXT_ACTION
 
-1. Commit + push Wave-2 branch to `jetpk`.
-2. Run money presenter unit tests + dashboard typecheck.
-3. Continue Booking action eligibility + failed notifications + deposits/markup audits.
-4. Deploy dashboard/Laravel batch when tests pass.
+1. Deploy Laravel + dashboard rebuild for batch 1–2.
+2. Continue Agent Deposits + Markup discoverability.
+3. Settings IA + Support pagination + Users semantics.
