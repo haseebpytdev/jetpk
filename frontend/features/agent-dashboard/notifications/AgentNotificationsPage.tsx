@@ -75,20 +75,24 @@ export function AgentNotificationsPage({ session }: { session: PublicSession }) 
       {error ? <AgentDashboardErrorState message={error} onRetry={() => load()} /> : null}
 
       {!loading && !error && available === false ? (
-        <AgentEmptyState
-          title="In-app notifications unavailable"
-          description={
-            message ?? "Booking and wallet updates are sent to your registered email address."
-          }
-        />
+        <div className="w-full">
+          <AgentEmptyState
+            title="In-app notifications unavailable"
+            description={
+              message ?? "Booking and wallet updates are sent to your registered email address."
+            }
+          />
+        </div>
       ) : null}
 
       {!loading && !error && available && notifications.length === 0 ? (
-        <AgentEmptyState title="No notifications" description="You are all caught up." />
+        <div className="w-full">
+          <AgentEmptyState title="No notifications" description="You are all caught up." />
+        </div>
       ) : null}
 
       {available && notifications.length > 0 ? (
-        <div className="space-y-3" data-testid="agent-notifications-list">
+        <div className="w-full space-y-3" data-testid="agent-notifications-list">
           {notifications.map((notification, index) => (
             <article key={String(notification.id ?? index)} className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
               <p className="font-semibold text-jp-text">{String(notification.title ?? "Notification")}</p>

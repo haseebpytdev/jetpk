@@ -12,5 +12,6 @@ export {
   PortalContent,
   buildPortalNav,
   PortalSidebarFooter,
+  PortalAppFooter,
   type PortalNavItem,
 } from "./shell/PortalShell";

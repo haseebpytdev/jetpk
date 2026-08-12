@@ -6,6 +6,8 @@
 
 Auth browser gate reopened and re-proven after owner Network-error report. See `OWNER-UAT-W1-AUTH-BROWSER-EVIDENCE.md`.
 
+Portal layout collapse fixed (`.jp-portal` 250px grid). See `OWNER-UAT-W1-PORTAL-LAYOUT-EVIDENCE.md`.
+
 ## Branch / baseline
 
 | Item | Value |

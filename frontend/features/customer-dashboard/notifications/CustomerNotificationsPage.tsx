@@ -24,10 +24,12 @@ export function CustomerNotificationsPage({ session }: { session: PublicSession 
       {loading ? <p className="text-jp-sm text-jp-muted">Loading notifications…</p> : null}
       {error ? <CustomerDashboardErrorState message={error} /> : null}
       {!loading && !error ? (
-        <CustomerEmptyState
-          title="No in-app notifications"
-          description={message ?? "Booking updates are sent to your registered email address."}
-        />
+        <div className="w-full">
+          <CustomerEmptyState
+            title="No in-app notifications"
+            description={message ?? "Booking updates are sent to your registered email address."}
+          />
+        </div>
       ) : null}
     </CustomerDashboardShell>
   );

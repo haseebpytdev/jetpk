@@ -26,9 +26,18 @@ export function sanitizeDashboardUrl(path: string | undefined | null, fallback =
     return fallback;
   }
 
-  const [pathOnly] = trimmed.split("?");
-  if (EXACT_PATHS.has(pathOnly)) return trimmed;
-  if (PREFIXES.some((prefix) => pathOnly.startsWith(prefix))) return trimmed;
+  let [pathOnly, query = ""] = trimmed.split("?");
+  if (pathOnly === "/jetpk") {
+    pathOnly = "/";
+  } else if (pathOnly.startsWith("/jetpk/")) {
+    pathOnly = pathOnly.slice("/jetpk".length);
+  }
+  const suffix = query ? `?${query}` : "";
+
+  if (EXACT_PATHS.has(pathOnly)) return `${pathOnly}${suffix}`;
+  if (PREFIXES.filter((prefix) => prefix !== "/jetpk/").some((prefix) => pathOnly.startsWith(prefix))) {
+    return `${pathOnly}${suffix}`;
+  }
 
   return fallback;
 }

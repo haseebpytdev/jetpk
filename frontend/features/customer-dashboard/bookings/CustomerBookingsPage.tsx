@@ -49,12 +49,15 @@ export function CustomerBookingsPage({ session }: { session: PublicSession }) {
 
   return (
     <CustomerDashboardShell session={session} title="My bookings">
-      <div className="mb-4 flex flex-wrap gap-2" data-testid="customer-bookings-filters">
+      <div
+        className="mb-4 flex w-full flex-nowrap gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible"
+        data-testid="customer-bookings-filters"
+      >
         {FILTERS.map((item) => (
           <button
             key={item.value}
             type="button"
-            className={`rounded-jp-button border px-3 py-1.5 text-jp-sm focus-visible:shadow-jp-focus ${
+            className={`shrink-0 whitespace-nowrap rounded-jp-button border px-3 py-1.5 text-jp-sm focus-visible:shadow-jp-focus ${
               filter === item.value ? "border-jp-primary bg-jp-primary/10 text-jp-primary" : "border-jp-border"
             }`}
             onClick={() => {
@@ -71,10 +74,12 @@ export function CustomerBookingsPage({ session }: { session: PublicSession }) {
       {error ? <CustomerDashboardErrorState message={error} onRetry={() => load()} /> : null}
 
       {!loading && !error && bookings.length === 0 ? (
-        <CustomerEmptyState title="No bookings found" description="Try another filter or search for flights." />
+        <div className="w-full">
+          <CustomerEmptyState title="No bookings found" description="Try another filter or search for flights." />
+        </div>
       ) : null}
 
-      <div className="space-y-3" data-testid="customer-bookings-list">
+      <div className="w-full space-y-3" data-testid="customer-bookings-list">
         {bookings.map((booking) => (
           <article key={booking.booking_reference} className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">

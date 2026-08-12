@@ -65,7 +65,7 @@ class ForcePasswordChangeJsonTest extends TestCase
             ->getJson('/password/force-change?format=json')
             ->assertOk()
             ->assertJsonPath('requires_password_change', false)
-            ->assertJsonPath('redirect', '/customer/bookings');
+            ->assertJsonPath('redirect', '/customer/dashboard');
     }
 
     public function test_unauthenticated_json_show_is_rejected(): void
@@ -85,7 +85,7 @@ class ForcePasswordChangeJsonTest extends TestCase
             ])
             ->assertOk()
             ->assertJsonPath('ok', true)
-            ->assertJsonPath('redirect', '/customer/bookings');
+            ->assertJsonPath('redirect', '/customer/dashboard');
 
         $user->refresh();
         $this->assertFalse($user->must_change_password);

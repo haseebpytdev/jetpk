@@ -82,26 +82,26 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
       {loading ? <p className="text-jp-sm text-jp-muted">Loading overview…</p> : null}
       {error ? <AgentDashboardErrorState message={error} onRetry={load} /> : null}
       {data ? (
-        <div className="space-y-5" data-testid="agent-dashboard-overview">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-            {metricCards.map((card) => (
+        <div className="w-full space-y-5" data-testid="agent-dashboard-overview">
+          <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {metricCards.slice(0, 5).map((card) => (
               <div
                 key={card.label}
-                className="rounded-jp-md border border-jp-border bg-jp-surface px-3 py-3 shadow-jp-sm"
+                className="min-w-0 rounded-jp-md border border-jp-border bg-jp-surface px-3 py-3 shadow-jp-sm"
                 data-testid="dashboard-metric-card"
               >
                 <p className="text-[0.68rem] font-medium uppercase tracking-wide text-jp-muted">{card.label}</p>
-                <p className="mt-1 text-jp-xl font-semibold text-jp-text">{card.value}</p>
+                <p className="mt-1 truncate text-jp-xl font-semibold text-jp-text">{card.value}</p>
               </div>
             ))}
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-            <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4" data-testid="agent-wallet-metrics">
+          <div className="grid w-full gap-4 lg:grid-cols-2">
+            <section className="min-w-0 rounded-jp-lg border border-jp-border bg-jp-surface p-4" data-testid="agent-wallet-metrics">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-jp-base font-semibold text-jp-text">Wallet & finance</h2>
                 {walletCards.length > 0 ? (
-                  <Link href="/agent/wallet" className="text-jp-sm font-medium text-jp-primary focus-visible:shadow-jp-focus">
+                  <Link href="/agent/wallet" className="shrink-0 text-jp-sm font-medium text-jp-primary focus-visible:shadow-jp-focus">
                     Open wallet
                   </Link>
                 ) : null}
@@ -109,9 +109,9 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
               {walletCards.length > 0 ? (
                 <div className="mt-3 grid gap-3 sm:grid-cols-3">
                   {walletCards.map((card) => (
-                    <div key={card.label} className="rounded-jp-md border border-jp-border bg-jp-surface-muted px-3 py-2.5">
+                    <div key={card.label} className="min-w-0 rounded-jp-md border border-jp-border bg-jp-surface-muted px-3 py-2.5">
                       <p className="text-[0.68rem] uppercase tracking-wide text-jp-muted">{card.label}</p>
-                      <p className="mt-1 text-jp-sm font-semibold text-jp-text">{card.value}</p>
+                      <p className="mt-1 truncate text-jp-sm font-semibold text-jp-text">{card.value}</p>
                     </div>
                   ))}
                 </div>
@@ -120,7 +120,7 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
               )}
             </section>
 
-            <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
+            <section className="min-w-0 rounded-jp-lg border border-jp-border bg-jp-surface p-4">
               <h2 className="text-jp-base font-semibold text-jp-text">Needs attention</h2>
               <ul className="mt-3 space-y-2 text-jp-sm">
                 <li className="flex items-center justify-between gap-2">
@@ -144,7 +144,7 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
                     <Link
                       key={action.code}
                       href={action.url!}
-                      className="rounded-jp-button border border-jp-border px-3 py-1.5 text-jp-sm font-semibold focus-visible:shadow-jp-focus"
+                      className="inline-flex whitespace-nowrap rounded-jp-button border border-jp-border px-3 py-1.5 text-jp-sm font-semibold focus-visible:shadow-jp-focus"
                     >
                       {action.label}
                     </Link>
@@ -154,20 +154,22 @@ export function AgentOverviewPage({ session }: { session: PublicSession }) {
           </div>
 
           {(data.recent_bookings ?? []).length === 0 ? (
-            <AgentEmptyState
-              title="No bookings yet"
-              description="Search flights to create your first agency booking."
-              action={
-                <Link
-                  href="/#flight-search"
-                  className="inline-flex min-h-10 items-center rounded-jp-button bg-jp-primary px-4 py-2 text-jp-sm font-semibold text-white focus-visible:shadow-jp-focus"
-                >
-                  Search flights
-                </Link>
-              }
-            />
+            <div className="w-full">
+              <AgentEmptyState
+                title="No bookings yet"
+                description="Search flights to create your first agency booking."
+                action={
+                  <Link
+                    href="/#flight-search"
+                    className="inline-flex min-h-10 items-center rounded-jp-button bg-jp-primary px-4 py-2 text-jp-sm font-semibold text-white focus-visible:shadow-jp-focus"
+                  >
+                    Search flights
+                  </Link>
+                }
+              />
+            </div>
           ) : (
-            <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
+            <section className="w-full rounded-jp-lg border border-jp-border bg-jp-surface p-4">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-jp-base font-semibold text-jp-text">Recent bookings</h2>
                 <Link href="/agent/bookings" className="text-jp-sm font-medium text-jp-primary focus-visible:shadow-jp-focus">

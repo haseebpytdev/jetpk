@@ -43,8 +43,8 @@ export function DashboardOverviewPage({ session }: { session: PublicSession }) {
       {loading ? <p className="text-jp-sm text-jp-muted">Loading overview…</p> : null}
       {error ? <CustomerDashboardErrorState message={error} onRetry={load} /> : null}
       {data ? (
-        <div className="space-y-5" data-testid="customer-dashboard-overview">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+        <div className="w-full space-y-5" data-testid="customer-dashboard-overview">
+          <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {[
               { label: "Upcoming trips", value: data.metrics.upcoming_trips },
               { label: "Pending payment", value: data.metrics.pending_payment },
@@ -56,25 +56,25 @@ export function DashboardOverviewPage({ session }: { session: PublicSession }) {
             ].map((card) => (
               <div
                 key={card.label}
-                className="rounded-jp-md border border-jp-border bg-jp-surface px-3 py-3 shadow-jp-sm"
+                className="min-w-0 rounded-jp-md border border-jp-border bg-jp-surface px-3 py-3 shadow-jp-sm"
                 data-testid="dashboard-metric-card"
               >
                 <p className="text-[0.68rem] font-medium uppercase tracking-wide text-jp-muted">{card.label}</p>
-                <p className="mt-1 text-jp-xl font-semibold text-jp-text">{card.value}</p>
+                <p className="mt-1 truncate text-jp-xl font-semibold text-jp-text">{card.value}</p>
               </div>
             ))}
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-            <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
+          <div className="grid w-full gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <section className="min-w-0 rounded-jp-lg border border-jp-border bg-jp-surface p-4">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-jp-base font-semibold text-jp-text">Recent bookings</h2>
-                <Link href="/customer/bookings" className="text-jp-sm font-medium text-jp-primary focus-visible:shadow-jp-focus">
+                <Link href="/customer/bookings" className="shrink-0 text-jp-sm font-medium text-jp-primary focus-visible:shadow-jp-focus">
                   View all
                 </Link>
               </div>
               {data.recent_bookings.length === 0 ? (
-                <div className="mt-3">
+                <div className="mt-3 w-full">
                   <CustomerEmptyState
                     title="No bookings yet"
                     description="Search flights to create your first booking."
@@ -111,7 +111,7 @@ export function DashboardOverviewPage({ session }: { session: PublicSession }) {
               )}
             </section>
 
-            <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
+            <section className="min-w-0 rounded-jp-lg border border-jp-border bg-jp-surface p-4">
               <h2 className="text-jp-base font-semibold text-jp-text">Quick actions</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {data.quick_actions
@@ -120,7 +120,7 @@ export function DashboardOverviewPage({ session }: { session: PublicSession }) {
                     <Link
                       key={action.code}
                       href={action.url!}
-                      className="rounded-jp-button border border-jp-border px-3 py-1.5 text-jp-sm font-semibold focus-visible:shadow-jp-focus"
+                      className="inline-flex whitespace-nowrap rounded-jp-button border border-jp-border px-3 py-1.5 text-jp-sm font-semibold focus-visible:shadow-jp-focus"
                     >
                       {action.label}
                     </Link>

@@ -75,17 +75,11 @@ final class ClientRedirectResolver
             AccountType::AgencyAdmin => Route::has('account.legacy')
                 ? $this->pathForRoute('account.legacy')
                 : '/account/legacy',
-            AccountType::Staff => Route::has('staff.dashboard')
-                ? $this->pathForRoute('staff.dashboard')
-                : $this->pathForUrl('/staff'),
-            AccountType::Agent, AccountType::AgentStaff => Route::has('agent.dashboard')
-                ? $this->pathForRoute('agent.dashboard')
-                : $this->pathForUrl('/agent'),
-            AccountType::Customer => Route::has('customer.bookings.index')
-                ? $this->pathForRoute('customer.bookings.index')
-                : (Route::has('customer.dashboard')
-                    ? $this->pathForRoute('customer.dashboard')
-                    : $this->pathForUrl('/customer')),
+            // Public Next portals must receive canonical (unprefixed) paths.
+            // Client-parity /jetpk/* URLs are not OLS-proxied to the Next app.
+            AccountType::Staff => '/staff/dashboard',
+            AccountType::Agent, AccountType::AgentStaff => '/agent',
+            AccountType::Customer => '/customer/dashboard',
         };
     }
 

@@ -21,7 +21,9 @@ final class PublicAuthRedirectAllowlist
         '/verify-email',
         '/password/force-change',
         '/customer',
+        '/customer/dashboard',
         '/agent',
+        '/agent/dashboard',
         '/admin/dashboard',
         '/staff/dashboard',
         '/account/legacy',
@@ -75,6 +77,13 @@ final class PublicAuthRedirectAllowlist
             return null;
         }
 
+        // Public Next auth redirects must not keep client-parity prefixes.
+        if ($pathOnly === '/jetpk') {
+            $pathOnly = '/';
+        } elseif (str_starts_with($pathOnly, '/jetpk/')) {
+            $pathOnly = substr($pathOnly, strlen('/jetpk'));
+        }
+
         $query = parse_url($trimmed, PHP_URL_QUERY);
         $suffix = is_string($query) && $query !== '' ? '?'.$query : '';
 
@@ -83,6 +92,9 @@ final class PublicAuthRedirectAllowlist
         }
 
         foreach (self::PREFIXES as $prefix) {
+            if ($prefix === '/jetpk/') {
+                continue;
+            }
             if (str_starts_with($pathOnly, $prefix)) {
                 return $pathOnly.$suffix;
             }
