@@ -22,6 +22,7 @@ import {
   cancellationRejectPath,
   cancellationStorePath,
   cmsPageArchivePath,
+  cmsPageStorePath,
   cmsPageUpdatePath,
   commissionEntryApprovePath,
   commissionEntryRejectPath,
@@ -39,6 +40,7 @@ import {
   mediaLibraryDestroyPath,
   mediaLibraryIndexPath,
   mediaLibraryStorePath,
+  notificationEventsUpdatePath,
   pageSettingsEditPath,
   pageSettingsPublishPath,
   paymentRejectPath,
@@ -210,6 +212,16 @@ export async function updateBookingLocalContact(
 > {
   return laravelRequest(bookingContactPath(portal, bookingId), {
     method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function createCmsPage(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(cmsPageStorePath(), {
+    method: "POST",
     json: payload,
     retryCsrfOnce: false,
   });
@@ -551,6 +563,16 @@ export async function toggleApiConnection(connectionId: string): Promise<Mutatio
 export async function testApiConnection(connectionId: string): Promise<MutationResponse<{ test?: Record<string, unknown> }>> {
   return laravelRequest(apiSettingsTestPath(connectionId), {
     method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateNotificationCategories(
+  categories: Array<Record<string, unknown>>,
+): Promise<MutationResponse<{ notifications?: Record<string, unknown> }>> {
+  return laravelRequest(notificationEventsUpdatePath(), {
+    method: "PATCH",
+    json: { categories },
     retryCsrfOnce: false,
   });
 }

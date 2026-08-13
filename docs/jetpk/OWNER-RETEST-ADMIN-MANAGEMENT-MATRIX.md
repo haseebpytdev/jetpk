@@ -1,43 +1,45 @@
-# OWNER RETEST — Admin management matrix (W2-36)
+# OWNER RETEST — Admin management matrix (W2 Owner Retest V2)
 
-OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST_V2
-ADMIN_FULL_MANAGEMENT_SYSTEM=YES
-ADMIN_REQUIRED_MANAGEMENT_GAPS=0
-ADMIN_READ_ONLY_PLACEHOLDERS=0
-ADMIN_FAKE_OPERATIONAL_PAGES=0
-ADMIN_AMBIGUOUS_ACTIONS=0
-ADMIN_RBAC=PASS
-ADMIN_PRODUCTION_BROWSER=PASS
-ADMIN_OLS_INTEGRITY=PASS
-ADMIN_LEGACY_PRESENTATION_HANDOFFS=0
+OWNER_UAT_WAVE_2=REOPENED_OWNER_RETEST_V2_FINDINGS
+ADMIN_FULL_MANAGEMENT_SYSTEM=NO
+OWNER_RETEST_V2=FAIL
+ADMIN_REQUIRED_MANAGEMENT_GAPS=>0
+JP_REL_01=PROHIBITED
+OTP_RESTORE=PROHIBITED
+QA_USER_SUSPEND=PROHIBITED
 
-LATEST_ENGINEERING_SHA=05c24789
-REMOTE_HEAD=05c24789
-PRODUCTION_DEPLOYED_STATE=API-settings HTML redirect + CMS panel; Dashboard BUILD_ID=llKFcUe5cBrUnhUEHic0U; money PHP 0860c212
-OLS_HASH=612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c
-OLS=MATCH
+LAST_EXTERNALLY_VERIFIED_DOCS_HEAD=d8c2f4c1
+REOPENED_AFTER=Owner production retest invalidated PASS_READY_FOR_OWNER_RETEST_V2
 
-QA_ADMIN_LOGIN=PASS
-QA_ADMIN_NEXT_SHELL=PASS
+## Module reclassification
 
-Money (fresh Admin session):
-- ADMIN_GBV_FORMAT=PASS — Gross booking value USD 590.00; note “USD totals; no booking-time PKR snapshot to convert”
-- ADMIN_RECENT_BOOKING_CURRENCY_TRUTH=PASS — USD amounts, not Rs.
-- ADMIN_REPORT_CURRENCY_TRUTH=PASS — USD 590.00
-- ADMIN_BOOKING_DETAIL=PASS — WL96PKN9 USD 624.00
-- AMOUNT_UNAVAILABLE_WHEN_AMOUNT_EXISTS=0
+| Module | Previous | Current | Notes |
+|---|---|---|---|
+| Financials / GBV KPI | PASS (USD truthful) | IN_PROGRESS | KPI must be Rs. from PKR snapshots only; legacy USD excluded with count |
+| Markups | PARTIAL | IN_PROGRESS | Business Apply-to builder; MarkupRule engine unchanged |
+| Settings | FAIL | IN_PROGRESS | Organization profile is source of truth for support/timezone Current Values |
+| Notifications | READ_ONLY | IN_PROGRESS | AgencyNotificationSetting write path; QA vs operational failure split |
+| Suppliers | ANALYTICS | IN_PROGRESS | PKR booking value from same money pipeline; registry states |
+| API Connections | PARTIAL | IN_PROGRESS | Manage + provider labels + registry; secrets never shown |
+| CMS Pages | FAIL | IN_PROGRESS | Create/edit/preview/publish via cms_pages; no schema migration |
+| Media Library | FAIL (CMS-LIVE-MODULE-UNAVAILABLE) | IN_PROGRESS | Agency media panel; no throw |
+| Homepage | PARTIAL | IN_PROGRESS | Same Page Settings panel + public preview link |
+| Banners / Notices | FAIL | REMOVED_FROM_NAV | No JetPakistan domain tables; not shown as operational failures |
+| Users | FAIL (2450456559) | IN_PROGRESS | Missing DashboardRoleCatalog import on detail |
+| Staff | OPEN | OPEN | Same users directory scope=staff |
+| Roles & Permissions | READ_ONLY | HARD_STOP_CANDIDATE | Account-type catalog cannot persist custom role matrices without a roles schema. Staff permission assignment already exists. Do not fake Next persistence. |
 
-Agent Applications:
-- AGENT_APPLICATIONS_PRODUCTION_LOAD=PASS
-- AGENT_APPLICATION_DETAIL=PASS (Wahab Travel selected)
-- AGENT_APPLICATION_ACTIONS_SELECTED_ONLY=PASS
-- AGENT_APPLICATION_SERVER_ERRORS=0
-- Not mutated
+## Gates still required before any PASS_READY label
 
-CMS Homepage:
-- Path `/admin/dashboard/cms/sections`
-- CMS_HOMEPAGE_STRUCTURED_UI=PASS (Hero, Trending routes, Destinations, Featured deals, Support CTA)
-- CMS_HOMEPAGE_LOAD=PASS (panel testid)
-- CMS_HOMEPAGE_SAVE_CONTRACT=PASS (Save draft + Publish present; not clicked)
-- No routine JSON textarea
-- Sections list API still CMS-LIVE-MODULE-UNAVAILABLE (not the homepage settings domain)
+ADMIN_FINANCIAL_PKR
+MARKUP_BUSINESS_RULE_BUILDER
+SETTINGS_SOURCE_OF_TRUTH
+NOTIFICATION_SETTINGS_MANAGEMENT
+SUPPLIER_REGISTRY_TRUTH
+SUPPLIER_MANAGEMENT
+API_CONNECTION_FULL_MANAGEMENT
+CMS_FULL_MANAGEMENT
+CMS_PREVIEW_PUBLISH
+MEDIA_LIBRARY
+USERS_MANAGEMENT
+RBAC_ROLE_PERMISSION_MANAGEMENT

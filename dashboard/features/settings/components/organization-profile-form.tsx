@@ -127,6 +127,22 @@ export function OrganizationProfileForm() {
             return;
           }
           setSuccess("Organization profile saved.");
+          const reloaded = await loadOrganizationProfile();
+          if (reloaded.ok) {
+            const payload = ("data" in reloaded ? reloaded.data : reloaded) as { organization?: Record<string, unknown> };
+            const org = payload.organization ?? {};
+            setForm({
+              display_name: String(org.display_name ?? form.display_name),
+              legal_name: String(org.legal_name ?? form.legal_name),
+              support_email: String(org.support_email ?? form.support_email),
+              support_phone: String(org.support_phone ?? form.support_phone),
+              website_url: String(org.website_url ?? form.website_url),
+              office_address: String(org.office_address ?? form.office_address),
+              city: String(org.city ?? form.city),
+              country: String(org.country ?? form.country),
+              timezone: String(org.timezone ?? form.timezone),
+            });
+          }
         }}
       >
         {saving ? "Saving…" : "Save organization profile"}

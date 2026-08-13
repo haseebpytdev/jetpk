@@ -153,7 +153,7 @@ class MarkupRuleController extends Controller
             'valueType' => is_object($rule->value_type) ? (string) $rule->value_type->value : (string) $rule->value_type,
             'priority' => (int) $rule->priority,
             'status' => is_object($rule->status) ? (string) $rule->status->value : (string) $rule->status,
-            'isActive' => (bool) $rule->is_active,
+            'appliesTo' => is_array($rule->applies_to) ? $rule->applies_to : [],
         ];
     }
 
@@ -185,9 +185,14 @@ class MarkupRuleController extends Controller
      */
     protected function payload(Request $request): array
     {
-        $appliesRaw = trim((string) $request->input('applies_to', ''));
-        $applies = $appliesRaw !== '' ? json_decode($appliesRaw, true) : null;
-
+        $appliesRaw = $request->input('applies_to');
+        $applies = null;
+        if (is_array($appliesRaw)) {
+            $applies = $appliesRaw;
+        } elseif (is_string($appliesRaw) && trim($appliesRaw) !== '') {
+            $decoded = json_decode($appliesRaw, true);
+            $applies = is_array($decoded) ? $decoded : null;
+        }
         if (! is_array($applies)) {
             $applies = $this->inferAppliesTo($request);
         }
@@ -216,7 +221,26 @@ class MarkupRuleController extends Controller
     protected function inferAppliesTo(Request $request): ?array
     {
         return match ($request->string('rule_type')->toString()) {
-            MarkupRuleType::Route->value => ['route' => $request->string('name')->toString()],
+            MarkupRuleType::Supplier->value => array_filter([
+                'supplier' => $request->string('supplier_key')->toString() ?: null,
+            ]),
+            MarkupRuleType::Airline->value => array_filter([
+                'airline' => strtoupper($request->string('airline_code')->toString()),
+            ]),
+            MarkupRuleType::Route->value => array_filter([
+                'origin' => strtoupper($request->string('origin')->toString()),
+                'destination' => strtoupper($request->string('destination')->toString()),
+                'direction' => $request->string('route_direction')->toString() ?: 'both',
+            ]),
+            MarkupRuleType::Agent->value => array_filter([
+                'agent_id' => $request->string('agent_id')->toString() ?: null,
+            ]),
+            MarkupRuleType::Cabin->value => array_filter([
+                'cabin' => $request->string('cabin')->toString() ?: null,
+            ]),
+            MarkupRuleType::FareFamily->value => array_filter([
+                'fare_family' => $request->string('fare_family')->toString() ?: null,
+            ]),
             default => null,
         };
     }

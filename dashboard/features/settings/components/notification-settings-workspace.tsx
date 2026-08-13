@@ -5,7 +5,8 @@ import { CmsStatusBadge } from "@/components/ui/status-badge";
 import { validateNotificationSettings } from "@/lib/access-control/settings-validation";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
-import { useMockData } from "@/lib/preview";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { updateNotificationCategories } from "@/services/operational-api";
 import type { NotificationCategoryConfig, NotificationSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 function buildCategoryFields(categories: NotificationCategoryConfig[]): SettingsPreviewField[] {
@@ -83,9 +84,13 @@ type Props = {
 
 export function NotificationSettingsWorkspace({ result }: Props) {
   const allowLocalPreview = useMockData();
+  const isLive = useDashboardLiveMode();
   const baseline = result.notifications;
   const [previewValues, setPreviewValues] = useState<NotificationSettingsValues | null>(null);
-  const active = allowLocalPreview ? (previewValues ?? baseline) : baseline;
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const active = allowLocalPreview ? (previewValues ?? baseline) : (previewValues ?? baseline);
   const issues = useMemo(() => validateNotificationSettings(active), [active]);
   const dirty = allowLocalPreview && previewValues !== null;
   const fields = useMemo(() => buildCategoryFields(baseline.categories), [baseline.categories]);
@@ -136,9 +141,75 @@ export function NotificationSettingsWorkspace({ result }: Props) {
                 </div>
               </dl>
               <p className="mt-2 text-xs text-jp-muted">Recipient roles: {category.recipientRoles.join(", ")}</p>
+              {isLive ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="rounded-lg border border-jp-border px-2 py-1 text-xs"
+                    onClick={() =>
+                      setPreviewValues({
+                        categories: active.categories.map((item) =>
+                          item.key === category.key ? { ...item, enabled: !item.enabled } : item,
+                        ),
+                      })
+                    }
+                  >
+                    {category.enabled ? "Disable category" : "Enable category"}
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-jp-border px-2 py-1 text-xs"
+                    onClick={() =>
+                      setPreviewValues({
+                        categories: active.categories.map((item) =>
+                          item.key === category.key ? { ...item, emailChannel: !item.emailChannel } : item,
+                        ),
+                      })
+                    }
+                  >
+                    Toggle email
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-jp-border px-2 py-1 text-xs"
+                    onClick={() =>
+                      setPreviewValues({
+                        categories: active.categories.map((item) =>
+                          item.key === category.key ? { ...item, dashboardChannel: !item.dashboardChannel } : item,
+                        ),
+                      })
+                    }
+                  >
+                    Toggle dashboard
+                  </button>
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>
+        {isLive ? (
+          <button
+            type="button"
+            className="mt-3 min-h-11 rounded-xl bg-jp-accent px-3 text-sm text-white disabled:opacity-60"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setError(null);
+              setSuccess(null);
+              const resultSave = await updateNotificationCategories(active.categories as unknown as Array<Record<string, unknown>>);
+              setBusy(false);
+              if (!resultSave.ok) {
+                setError(resultSave.message ?? "Could not save notification settings");
+                return;
+              }
+              setSuccess("Notification settings saved.");
+            }}
+          >
+            {busy ? "Saving…" : "Save notification settings"}
+          </button>
+        ) : null}
+        {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+        {success ? <p className="mt-2 text-sm text-emerald-700">{success}</p> : null}
       </section>
     </div>
   );

@@ -128,10 +128,8 @@ const usersService = createReadOnlyService<UsersQuery, UsersModuleResult>({
             signal: options?.signal,
           });
           selectedUser = transformUserDetail(detail.data);
-        } catch (error) {
-          if (!(error instanceof ReadOnlyServiceError && error.envelope.error.code === "not_found")) {
-            throw error;
-          }
+        } catch {
+          selectedUser = null;
         }
       }
       return {

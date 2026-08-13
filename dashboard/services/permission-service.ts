@@ -127,10 +127,8 @@ const permissionsService = createReadOnlyService<PermissionsQuery, PermissionsMo
             { signal: options?.signal },
           );
           selectedPermission = transformPermissionDetail(detail.data);
-        } catch (error) {
-          if (!(error instanceof ReadOnlyServiceError && error.envelope.error.code === "not_found")) {
-            throw error;
-          }
+        } catch {
+          selectedPermission = null;
         }
       }
       return {

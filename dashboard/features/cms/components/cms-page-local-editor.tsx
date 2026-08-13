@@ -94,7 +94,7 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
       <div>
         <h3 className="text-sm font-semibold text-gray-900">Edit CMS page</h3>
         <p className="mt-1 text-xs text-jp-muted">
-          Operational content/SEO fields for JetPakistan cms_pages. Page Builder and media uploads are out of scope.
+          Operational content, SEO, draft/publish, and preview for JetPakistan pages.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -197,13 +197,15 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
         </p>
       ) : null}
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="inline-flex min-h-11 items-center rounded-xl bg-jp-navy px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-          disabled={busy}
-          onClick={() => void handleSave()}
-          data-testid="cms-page-save"
+        <a
+          className="inline-flex min-h-11 items-center rounded-xl border border-jp-border bg-white px-4 py-2 text-sm font-medium text-gray-900"
+          href={slug ? `/pages/${encodeURIComponent(slug)}` : "/"}
+          target="_blank"
+          rel="noreferrer"
         >
+          Preview
+        </a>
+        <button
           {busy ? "Saving…" : "Save page"}
         </button>
         <button

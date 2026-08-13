@@ -25,8 +25,9 @@ const COLUMNS: { key: string; label: string; sortable?: boolean; sortField?: Per
   { key: "laravelPolicyHint", label: "Laravel policy hint" },
 ];
 
-function formatActionLabel(action: string): string {
-  return action.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
+function formatActionLabel(action: string | undefined): string {
+  const value = action || "view";
+  return value.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
 }
 
 function formatScopeLabel(scope: string): string {

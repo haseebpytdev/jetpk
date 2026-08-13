@@ -7,9 +7,20 @@ import {
   listApiConnections,
   testApiConnection,
   toggleApiConnection,
+  updateApiConnection,
 } from "@/services/operational-api";
 
-const INSTALLED_ADAPTERS = [
+const FIELD_LABELS: Record<string, string> = {
+  sign_in: "EPR / sign-in",
+  password: "Password",
+  pcc: "PCC",
+  username: "Username",
+  agency_id: "Agency ID",
+  agency_name: "Agency name",
+  owner_code: "Owner code",
+  api_key: "API key",
+  access_token: "Access token",
+};
   { key: "sabre", label: "Sabre", fields: ["sign_in", "password", "pcc"] },
   { key: "pia_ndc", label: "PIA NDC", fields: ["username", "password", "agency_id", "agency_name", "owner_code"] },
   { key: "airblue", label: "AirBlue", fields: ["username", "password", "agency_id"] },
@@ -47,6 +58,8 @@ export function ApiConnectionsWorkspace() {
   const [name, setName] = useState("");
   const [environment, setEnvironment] = useState("sandbox");
   const [credentials, setCredentials] = useState<Record<string, string>>({});
+  const [manageId, setManageId] = useState<string | null>(null);
+  const [manageEnv, setManageEnv] = useState("sandbox");
 
   const installed = INSTALLED_ADAPTERS.some((item) => item.key === provider);
   const adapter = INSTALLED_ADAPTERS.find((item) => item.key === provider);
@@ -108,6 +121,14 @@ export function ApiConnectionsWorkspace() {
                   type="button"
                   className="rounded-lg border border-jp-border px-2 py-1 text-xs"
                   disabled={busy}
+                  onClick={() => setManageId(row.id)}
+                >
+                  Manage
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg border border-jp-border px-2 py-1 text-xs"
+                  disabled={busy}
                   onClick={() => run(() => toggleApiConnection(String(row.id)))}
                 >
                   {row.enabled ? "Disable" : "Enable"}
@@ -125,6 +146,49 @@ export function ApiConnectionsWorkspace() {
           </li>
         ))}
       </ul>
+      {manageId ? (
+        <section className="space-y-3 rounded-xl border border-jp-border bg-white p-4" data-testid="api-connection-manage">
+          <h2 className="text-sm font-semibold">Manage connection</h2>
+          <p className="text-xs text-jp-muted">
+            Overview, environment, credentials (leave blank to keep stored secrets), capabilities, and health. Secrets are never shown.
+          </p>
+          <p className="text-sm">{rows.find((row) => row.id === manageId)?.name} · {rows.find((row) => row.id === manageId)?.provider}</p>
+          <label className="block text-xs">
+            Environment
+            <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={manageEnv} onChange={(e) => setManageEnv(e.target.value)}>
+              <option value="demo">demo</option>
+              <option value="sandbox">sandbox</option>
+              <option value="live">live</option>
+            </select>
+          </label>
+          {INSTALLED_ADAPTERS.find((item) => item.key === rows.find((row) => row.id === manageId)?.provider)?.fields.map((field) => (
+            <label key={field} className="block text-xs">
+              {FIELD_LABELS[field] ?? field} (leave blank to keep current)
+              <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" type="password" autoComplete="off" value={credentials[field] ?? ""} onChange={(e) => setCredentials((current) => ({ ...current, [field]: e.target.value }))} />
+            </label>
+          ))}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="min-h-11 rounded-xl bg-jp-accent px-3 text-sm text-white disabled:opacity-60"
+              disabled={busy}
+              onClick={() =>
+                run(() =>
+                  updateApiConnection(manageId, {
+                    environment: manageEnv,
+                    credentials: Object.fromEntries(Object.entries(credentials).filter(([, value]) => value.trim() !== "")),
+                  }),
+                )
+              }
+            >
+              Save connection
+            </button>
+            <button type="button" className="min-h-11 rounded-xl border border-jp-border px-3 text-sm" onClick={() => setManageId(null)}>
+              Close
+            </button>
+          </div>
+        </section>
+      ) : null}
       <section className="space-y-3 rounded-xl border border-jp-border bg-white p-4">
         <h2 className="text-sm font-semibold">Add connection</h2>
         <label className="block text-xs">
@@ -156,7 +220,7 @@ export function ApiConnectionsWorkspace() {
             </label>
             {adapter?.fields.map((field) => (
               <label key={field} className="block text-xs">
-                {field}
+                {FIELD_LABELS[field] ?? field}
                 <input
                   className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
                   type={field.includes("password") || field.includes("token") || field.includes("secret") ? "password" : "text"}

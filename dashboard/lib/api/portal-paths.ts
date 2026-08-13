@@ -68,6 +68,10 @@ export function bookingContactPath(portal: DashboardPortal, bookingId: string): 
   return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/contact?format=json`);
 }
 
+export function cmsPageStorePath(): string {
+  return laravelPortalPath("admin", "/cms-pages?format=json");
+}
+
 export function cmsPageUpdatePath(pageId: string): string {
   return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}?format=json`);
 }
@@ -225,8 +229,8 @@ export function apiSettingsTestPath(connectionId: string): string {
   return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}/test?format=json`);
 }
 
-export function brandingSettingsPath(): string {
-  return laravelPortalPath("admin", "/settings/branding?format=json");
+export function notificationEventsUpdatePath(): string {
+  return laravelPortalPath("admin", "/settings/communications/notification-events?format=json");
 }
 
 export function usersStorePath(): string {

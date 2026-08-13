@@ -10,10 +10,8 @@ import type { CmsModuleKey, CmsModuleResult } from "@/types/cms";
 const SUBROUTES: { key: CmsModuleKey; label: string; href: string }[] = [
   { key: "overview", label: "Overview", href: "/cms" },
   { key: "pages", label: "Pages", href: "/cms/pages" },
-  { key: "sections", label: "Sections", href: "/cms/sections" },
-  { key: "banners", label: "Banners", href: "/cms/banners" },
-  { key: "notices", label: "Notices", href: "/cms/notices" },
-  { key: "assets", label: "Assets", href: "/cms/assets" },
+  { key: "sections", label: "Homepage", href: "/cms/sections" },
+  { key: "assets", label: "Media library", href: "/cms/assets" },
 ];
 
 type Props = {
@@ -31,11 +29,15 @@ export function CmsModuleShell({ module, result }: Props) {
         breadcrumb={
           <Breadcrumb items={[{ label: "Home" }, { label: "Inventory & pricing" }, { label: "CMS" }, { label: current.label }]} />
         }
-        title="CMS"
+        title={current.label === "Overview" ? "CMS" : current.label}
         description={
           module === "pages"
-            ? "Operational cms_pages: list, view, and local edit/archive via Laravel JSON. No Page Builder."
-            : "Baseline CMS modules. Pages are operational; banners/notices/assets remain read-only until a Laravel write domain exists (no migration in Wave 2)."
+            ? "Create, edit, preview, and publish JetPakistan pages. Homepage content is managed under Homepage."
+            : module === "sections"
+              ? "Authoritative homepage content. Preview the public home after save."
+              : module === "assets"
+                ? "Upload, list, and reuse media. Alt text is stored with each file."
+                : "Pages, homepage, and media library are the operational CMS modules."
         }
       />
       <DataSourceNoticeSlot />

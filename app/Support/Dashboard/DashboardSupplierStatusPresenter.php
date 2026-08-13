@@ -4,17 +4,13 @@ namespace App\Support\Dashboard;
 
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
-use App\Services\Suppliers\AlHaider\AlHaiderClient;
+use App\Support\Suppliers\SupplierRegistry;
 
 /**
- * Single integration registry for dashboard status: DB connections plus unprovisioned adapters.
+ * Single integration registry for dashboard status: adapter code + connection + credentials + activation.
  */
 final class DashboardSupplierStatusPresenter
 {
-    public function __construct(
-        protected AlHaiderClient $alHaiderClient,
-    ) {}
-
     /**
      * @return list<array<string, string>>
      */
@@ -33,16 +29,12 @@ final class DashboardSupplierStatusPresenter
                 ? $connection->provider->value
                 : (string) $connection->provider;
             $seen[$provider] = true;
-            $active = (bool) $connection->is_active;
+            $state = SupplierRegistry::stateForConnection($connection);
             $rows[] = [
                 'key' => 'connection-'.$connection->id,
                 'label' => trim((string) ($connection->display_name ?: $connection->name ?: $provider)),
-                'status' => $active ? 'configured' : 'inactive',
-                'detail' => sprintf(
-                    'API connection · %s · %s',
-                    $provider,
-                    $active ? 'enabled' : 'disabled',
-                ),
+                'status' => $state,
+                'detail' => SupplierRegistry::businessLabel($state).' · '.$provider,
             ];
         }
 
@@ -50,32 +42,16 @@ final class DashboardSupplierStatusPresenter
             if (isset($seen[$provider->value])) {
                 continue;
             }
-            if (in_array($provider, [SupplierProvider::Amadeus, SupplierProvider::Travelport, SupplierProvider::AirlineDirect, SupplierProvider::Duffel], true)) {
-                $rows[] = [
-                    'key' => $provider->value,
-                    'label' => $provider->name,
-                    'status' => 'not_integrated',
-                    'detail' => 'Provider adapter not installed / engineering integration required',
-                ];
-
-                continue;
-            }
+            $state = SupplierRegistry::stateForUnprovisioned($provider);
             $rows[] = [
                 'key' => $provider->value,
                 'label' => $provider->name,
-                'status' => 'not_provisioned',
-                'detail' => 'No API connection record',
+                'status' => $state,
+                'detail' => $state === SupplierRegistry::ADAPTER_NOT_INSTALLED
+                    ? 'Catalogue provider only — not a production failure'
+                    : SupplierRegistry::businessLabel($state),
             ];
         }
-
-        $rows[] = [
-            'key' => 'al_haider',
-            'label' => 'Al Haider',
-            'status' => $this->alHaiderClient->isConfigured() ? 'pending_activation' : 'not_integrated',
-            'detail' => $this->alHaiderClient->isConfigured()
-                ? 'Adapter prepared; not an API Connections record; token issuance deferred'
-                : 'Provider adapter not provisioned as SupplierConnection',
-        ];
 
         return $rows;
     }

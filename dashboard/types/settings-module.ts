@@ -60,6 +60,7 @@ export type NotificationCategoryConfig = {
   severityThreshold: string;
   recipientRoles: string[];
   deliveryMode: "immediate" | "digest";
+  eventKeys?: string[];
 };
 
 export type NotificationSettingsValues = {

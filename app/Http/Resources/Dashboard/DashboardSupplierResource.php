@@ -4,7 +4,9 @@ namespace App\Http\Resources\Dashboard;
 
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
+use App\Support\Dashboard\BookingOperationalMoneyResolver;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
+use App\Support\Suppliers\SupplierRegistry;
 use App\Support\Suppliers\SupplierSourcePresenter;
 
 final class DashboardSupplierResource
@@ -15,7 +17,9 @@ final class DashboardSupplierResource
     public static function fromModel(SupplierConnection $connection): array
     {
         $provider = $connection->provider;
-        $bookingCount = (int) ($connection->supplier_bookings_count ?? 0);
+        $bookingCount = (int) ($connection->supplier_bookings_count ?? $connection->supplierBookings->count());
+        $pkrValue = self::pkrBookingValue($connection);
+        $registryState = SupplierRegistry::stateForConnection($connection);
         $currency = 'PKR';
 
         return [
@@ -26,13 +30,15 @@ final class DashboardSupplierResource
             'operatingRegion' => 'Pakistan',
             'operationalStatus' => $connection->isActive() ? 'Active' : 'Inactive',
             'integrationStatus' => self::integrationStatus($connection),
+            'registryState' => $registryState,
+            'registryLabel' => SupplierRegistry::businessLabel($registryState),
             'credentialStatus' => self::credentialStatus($connection),
             'settlementStatus' => 'Not Applicable',
             'currency' => $currency,
             'bookingCount' => $bookingCount,
             'confirmedBookingCount' => 0,
             'failedBookingCount' => 0,
-            'totalBookingValue' => 0,
+            'totalBookingValue' => $pkrValue,
             'totalPaidToSupplier' => 0,
             'outstandingSettlement' => 0,
             'refundExposure' => 0,
@@ -248,9 +254,34 @@ final class DashboardSupplierResource
         $env = $connection->environment?->value ?? 'sandbox';
 
         return sprintf(
-            '%s connection (%s) — read-only dashboard summary.',
+            '%s connection (%s) — %s.',
             self::displayName($connection),
             $env,
+            SupplierRegistry::businessLabel(SupplierRegistry::stateForConnection($connection)),
         );
+    }
+
+    protected static function pkrBookingValue(SupplierConnection $connection): int
+    {
+        if ($connection->relationLoaded('supplierBookings')) {
+            $bookings = $connection->supplierBookings;
+        } else {
+            $connection->load(['supplierBookings.booking.fareBreakdown', 'supplierBookings.booking.holdSession']);
+            $bookings = $connection->supplierBookings;
+        }
+
+        $total = 0.0;
+        foreach ($bookings as $supplierBooking) {
+            $booking = $supplierBooking->booking;
+            if ($booking === null) {
+                continue;
+            }
+            $snapshot = BookingOperationalMoneyResolver::pkrSnapshotAmount($booking);
+            if ($snapshot !== null) {
+                $total += $snapshot;
+            }
+        }
+
+        return (int) round($total);
     }
 }

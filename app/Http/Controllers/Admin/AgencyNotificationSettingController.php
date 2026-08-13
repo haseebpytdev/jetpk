@@ -3,18 +3,23 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OtaNotificationEvent;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\AgencyCommunicationSetting;
 use App\Models\AgencyNotificationSetting;
+use App\Http\Resources\Dashboard\DashboardSettingsResource;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class AgencyNotificationSettingController extends Controller
 {
-    public function index(Request $request): View
+    use RespondsWithBackOfficeJson;
+
+    public function index(Request $request): View|JsonResponse
     {
         $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
         $communicationSettingsRecord = $this->communicationSettingsForAuthorization($agency);
@@ -35,6 +40,13 @@ class AgencyNotificationSettingController extends Controller
             );
         }
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'notifications' => DashboardSettingsResource::notifications(),
+            ]);
+        }
+
         $notificationSettings = AgencyNotificationSetting::query()
             ->where('agency_id', $agency->id)
             ->where('channel', 'email')
@@ -52,7 +64,7 @@ class AgencyNotificationSettingController extends Controller
         ]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request): RedirectResponse|JsonResponse
     {
         $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
         $settings = $this->communicationSettingsForAuthorization($agency);
@@ -60,10 +72,30 @@ class AgencyNotificationSettingController extends Controller
 
         $allowedKeys = collect(OtaNotificationEvent::cases())->map->value->all();
 
+        if ($request->filled('categories') && ! $request->filled('events')) {
+            $events = [];
+            foreach ((array) $request->input('categories', []) as $category) {
+                if (! is_array($category)) {
+                    continue;
+                }
+                foreach ((array) ($category['eventKeys'] ?? []) as $eventKey) {
+                    $events[$eventKey] = [
+                        'enabled' => $category['enabled'] ?? false,
+                        'recipient_scope' => is_array($category['recipientRoles'] ?? null)
+                            ? ($category['recipientRoles'][0] ?? 'admin')
+                            : ($category['recipient_scope'] ?? 'admin'),
+                        'dashboard_channel' => $category['dashboardChannel'] ?? false,
+                        'delivery_mode' => $category['deliveryMode'] ?? 'immediate',
+                    ];
+                }
+            }
+            $request->merge(['events' => $events]);
+        }
+
         $validated = $request->validate([
             'events' => ['required', 'array'],
             'events.*.enabled' => ['nullable'],
-            'events.*.recipient_scope' => ['required', 'string', 'in:admin,staff,agent,customer'],
+            'events.*.recipient_scope' => ['nullable', 'string', 'in:admin,staff,agent,customer'],
             'events.*.recipient_emails' => ['nullable', 'string', 'max:8000'],
             'events.*.cc_emails' => ['nullable', 'string', 'max:8000'],
             'events.*.bcc_emails' => ['nullable', 'string', 'max:8000'],
@@ -75,6 +107,12 @@ class AgencyNotificationSettingController extends Controller
             }
 
             $enabled = filter_var($row['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $dashboard = filter_var($row['dashboard_channel'] ?? $row['dashboardChannel'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $digest = ($row['delivery_mode'] ?? $row['deliveryMode'] ?? 'immediate') === 'digest' ? 'digest' : 'immediate';
+            $scope = (string) ($row['recipient_scope'] ?? $row['recipientRoles'][0] ?? 'admin');
+            if (! in_array($scope, ['admin', 'staff', 'agent', 'customer'], true)) {
+                $scope = 'admin';
+            }
 
             AgencyNotificationSetting::query()->updateOrCreate(
                 [
@@ -84,13 +122,22 @@ class AgencyNotificationSettingController extends Controller
                 ],
                 [
                     'enabled' => $enabled,
-                    'recipient_scope' => $row['recipient_scope'],
+                    'recipient_scope' => $scope,
                     'recipient_emails' => $this->parseEmailList($row['recipient_emails'] ?? ''),
                     'cc_emails' => $this->parseEmailList($row['cc_emails'] ?? ''),
                     'bcc_emails' => $this->parseEmailList($row['bcc_emails'] ?? ''),
-                    'digest_mode' => 'immediate',
+                    'digest_mode' => $digest,
+                    'meta' => ['dashboard_channel' => $dashboard],
                 ]
             );
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Notification routing updated.',
+                'notifications' => DashboardSettingsResource::notifications(),
+            ]);
         }
 
         return redirect()->route('admin.settings.communications.notification-events.index')->with('status', 'notification-routing-updated');

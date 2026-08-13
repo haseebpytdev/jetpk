@@ -79,7 +79,7 @@ export function UsersDataTable({
               <Td>
                 <div>{row.jobTitle || "—"}</div>
                 <div className="text-xs text-jp-muted">
-                  {row.assignedRoleNames.length > 0 ? row.assignedRoleNames.join(", ") : "No roles"}
+                  {row.assignedRoleNames?.length ? row.assignedRoleNames.join(", ") : "No roles"}
                 </div>
               </Td>
               <Td>{row.orgLabel || row.department || row.agencyName || "—"}</Td>

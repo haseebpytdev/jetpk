@@ -20,7 +20,10 @@ class DashboardSuppliersReadService
     {
         Gate::authorize('viewAny', SupplierConnection::class);
 
-        $query = $this->scopedQuery($user)->withCount('supplierBookings');
+        $query = $this->scopedQuery($user)->with([
+            'supplierBookings.booking.fareBreakdown',
+            'supplierBookings.booking.holdSession',
+        ]);
         $this->applyFilters($query, $request);
 
         $page = max(1, (int) $request->query('page', 1));

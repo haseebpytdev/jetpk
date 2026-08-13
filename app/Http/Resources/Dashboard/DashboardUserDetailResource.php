@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\User;
+use App\Support\Dashboard\DashboardRoleCatalog;
 
 final class DashboardUserDetailResource
 {
@@ -12,7 +13,7 @@ final class DashboardUserDetailResource
     public static function fromModel(User $user): array
     {
         $base = DashboardUserResource::fromModel($user);
-        $role = DashboardRoleCatalog::find((string) ($base['assignedRoleIds'][0] ?? 'JP-ROL-0002'));
+        $role = DashboardRoleCatalog::find((string) ($base['assignedRoleIds'][0] ?? 'JP-ROL-0002')) ?? [];
 
         return [
             ...$base,

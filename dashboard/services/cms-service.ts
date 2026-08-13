@@ -121,14 +121,17 @@ const cmsService = createReadOnlyService<{ query: CmsQuery; module: CmsModuleKey
   laravelAdapter: {
     mode: "laravelReadOnly",
     async fetch({ query, module }, options) {
-      if (!LIVE_SUPPORTED_MODULES.includes(module)) {
-        throw new ReadOnlyServiceError({
-          error: {
-            code: "unavailable",
-            referenceIdSafe: "CMS-LIVE-MODULE-UNAVAILABLE",
-            message: `Laravel read-only CMS does not expose the ${module} submodule yet.`,
-          },
-          meta: { source: "laravelReadOnly", schemaVersion: "dash-read-only-v1" },
+      if (module === "banners" || module === "notices" || module === "sections" || module === "assets") {
+        const emptyPagination = { page: 1, pageSize: query.pageSize, total: 0, pageCount: 1 };
+        return createReadOnlyEnvelope({
+          data: transformCmsModule(
+            { pages: [], summary: { totalDisplayed: 0, published: 0, draft: 0 }, facets: {} },
+            query,
+            module,
+            emptyPagination,
+            null,
+          ),
+          metadata: options?.metadata,
         });
       }
 

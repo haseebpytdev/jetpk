@@ -44,6 +44,7 @@ final class DashboardOverviewResource
             'systemHealth' => self::systemHealth((bool) ($dashboard['hasLiveData'] ?? false)),
             'operationalCounts' => $commandSummary,
             'failedNotifications' => (int) ($commandSummary['failed_notifications'] ?? 0),
+            'failedNotificationsQaHistorical' => (int) ($commandSummary['failed_notifications_qa'] ?? 0),
             'supplierFailures' => self::supplierFailureCount($dashboard),
             'accountType' => $user->account_type->value,
         ];
@@ -73,28 +74,20 @@ final class DashboardOverviewResource
         if (isset($stats['unpaid_partial_bookings']) && (int) $stats['unpaid_partial_bookings'] > 0) {
             $cards[] = ['key' => 'unpaid_partial', 'label' => 'Unpaid / partial', 'value' => (string) ((int) $stats['unpaid_partial_bookings']), 'delta' => '', 'tone' => 'warn'];
         }
-                if (isset($commandSummary['gross_sales'])) {
-            $multiCurrency = (bool) ($commandSummary['gross_sales_multi_currency'] ?? false);
-            $currencyLabel = trim((string) ($commandSummary['gross_sales_currency_label'] ?? ''));
+        if (isset($commandSummary['gross_sales'])) {
+            $excluded = (int) ($commandSummary['gross_sales_excluded_count'] ?? 0);
             $grossAmount = (float) $commandSummary['gross_sales'];
-            $iso = $currencyLabel !== '' && $currencyLabel !== '—' && $currencyLabel !== 'Multiple currencies'
-                ? $currencyLabel
-                : '';
+            $qaFailures = (int) ($commandSummary['failed_notifications_qa'] ?? 0);
             $cards[] = [
                 'key' => 'gross_sales',
                 'label' => 'Gross booking value',
-                'value' => $multiCurrency && $iso === ''
-                    ? 'Multiple currencies'
-                    : ($iso === ''
-                        ? 'Amount unavailable'
-                        : DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $iso)),
-                'delta' => $iso === 'PKR'
-                    ? ($multiCurrency ? 'Non-PKR bookings excluded; no FX conversion without a PKR snapshot' : '')
-                    : ($iso === ''
-                        ? 'No booking-time PKR snapshot'
-                        : $iso.' totals; no booking-time PKR snapshot to convert'),
+                'value' => DashboardMoneyPresenter::formatDisplayLabel($grossAmount, 'PKR'),
+                'delta' => $excluded > 0
+                    ? $excluded.' legacy Non-PKR booking'.($excluded === 1 ? '' : 's').' excluded from this KPI (original currency kept on rows; no current-FX reconstruction)'
+                    : 'Authoritative booking-time PKR snapshots only',
                 'tone' => 'up',
             ];
+            unset($qaFailures);
         }
 
         return $cards;

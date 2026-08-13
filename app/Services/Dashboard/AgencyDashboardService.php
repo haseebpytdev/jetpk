@@ -16,6 +16,8 @@ use App\Models\CommunicationLog;
 use App\Models\SupplierBookingAttempt;
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Support\Dashboard\BookingOperationalMoneyResolver;
+use App\Support\Dashboard\CommunicationFailureClassifier;
 use App\Support\Dashboard\DashboardMoneyPresenter;
 use App\Support\Platform\PlatformModuleGate;
 use Illuminate\Database\Eloquent\Builder;
@@ -105,7 +107,8 @@ class AgencyDashboardService
             'refunds_pending' => $stats['pending_refund_count'],
             'cancellations_pending' => $this->countCancellationsPending($baseQuery),
             'today_departures' => (clone $baseQuery)->whereDate('travel_date', now()->toDateString())->count(),
-            'failed_notifications' => $this->countFailedNotifications($user),
+            'failed_notifications' => $this->countFailedNotifications($user, operationalOnly: true),
+            'failed_notifications_qa' => $this->countFailedNotifications($user, qaOnly: true),
             'pending_deposits' => $pendingDeposits,
         ];
 
@@ -434,12 +437,13 @@ class AgencyDashboardService
         })->count();
     }
 
-    protected function countFailedNotifications(User $user): int
+    protected function countFailedNotifications(User $user, bool $operationalOnly = false, bool $qaOnly = false): int
     {
         $query = CommunicationLog::query()->whereIn('status', ['failed', 'error']);
         if (! $user->isPlatformAdmin()) {
             $query->where('agency_id', $user->current_agency_id);
         }
+        CommunicationFailureClassifier::constrain($query, $operationalOnly, $qaOnly);
 
         return (int) $query->count();
     }
@@ -591,7 +595,9 @@ class AgencyDashboardService
                 'key' => 'failed_notifications',
                 'label' => 'Failed notifications',
                 'count' => $counts['failed_notifications'],
-                'helper' => 'Communication delivery failures needing review (no blind retry).',
+                'helper' => ($counts['failed_notifications_qa'] ?? 0) > 0
+                    ? 'Unresolved operational delivery failures. '.$counts['failed_notifications_qa'].' historical QA/test failures are retained separately and were not deleted.'
+                    : 'Unresolved operational communication delivery failures (no blind retry).',
                 'route' => 'admin.settings.communications.delivery-log.index',
                 'route_params' => ['status' => 'failed'],
             ],
@@ -616,73 +622,51 @@ class AgencyDashboardService
             'today_departures' => $counts['today_departures'],
             'pending_deposits' => $counts['pending_deposits'] ?? 0,
             'gross_sales' => (float) ($stats['gross_sales'] ?? 0),
-            'gross_sales_currency' => $currencyMeta['currency'] ?? null,
+            'gross_sales_currency' => $currencyMeta['currency'] ?? 'PKR',
             'gross_sales_multi_currency' => (bool) ($currencyMeta['multi'] ?? false),
-            'gross_sales_currency_label' => (string) ($currencyMeta['label'] ?? ''),
+            'gross_sales_currency_label' => (string) ($currencyMeta['label'] ?? 'PKR'),
+            'gross_sales_excluded_count' => (int) ($currencyMeta['excluded_count'] ?? 0),
+            'failed_notifications_qa' => (int) ($counts['failed_notifications_qa'] ?? 0),
         ];
     }
 
     /**
-     * @return array{currency: ?string, multi: bool, label: string}
-     */
-    /**
-     * @return array{amount: float, meta: array{currency: ?string, multi: bool, label: string}}
+     * Owner KPI: booking-time PKR snapshots only. Legacy non-PKR rows are excluded, never FX-reconstructed.
+     *
+     * @return array{amount: float, meta: array{currency: string, multi: bool, label: string, excluded_count: int}}
      */
     protected function operationalGrossSales(Builder $baseQuery): array
     {
-        $totals = [];
+        $pkrTotal = 0.0;
+        $excludedCount = 0;
         $this->grossSalesBookingsQuery($baseQuery)
             ->with(['fareBreakdown', 'holdSession'])
             ->orderBy('id')
-            ->chunkById(200, function (Collection $bookings) use (&$totals): void {
+            ->chunkById(200, function (Collection $bookings) use (&$pkrTotal, &$excludedCount): void {
                 foreach ($bookings as $booking) {
                     if (! $booking instanceof Booking) {
                         continue;
                     }
-                    $money = DashboardMoneyPresenter::presentBookingTotal(
-                        $booking,
-                        (int) round((float) ($booking->fareBreakdown?->total ?? 0)),
-                    );
-                    $currency = (string) ($money['currency'] ?? '');
-                    if ($currency === '' || ($money['currencyStatus'] ?? '') !== DashboardMoneyPresenter::STATUS_RESOLVED) {
+                    $snapshot = BookingOperationalMoneyResolver::pkrSnapshotAmount($booking);
+                    if ($snapshot !== null) {
+                        $pkrTotal += $snapshot;
                         continue;
                     }
-                    $totals[$currency] = ($totals[$currency] ?? 0) + (float) str_replace(',', '', (string) $money['amount']);
+                    $fareTotal = (float) ($booking->fareBreakdown?->total ?? 0);
+                    if ($fareTotal > 0) {
+                        $excludedCount++;
+                    }
                 }
             });
 
-        if ($totals === []) {
-            return [
-                'amount' => 0.0,
-                'meta' => ['currency' => null, 'multi' => false, 'label' => '—'],
-            ];
-        }
-
-        if (isset($totals['PKR'])) {
-            $other = array_diff_key($totals, ['PKR' => true]);
-
-            return [
-                'amount' => (float) $totals['PKR'],
-                'meta' => [
-                    'currency' => 'PKR',
-                    'multi' => $other !== [],
-                    'label' => $other !== [] ? 'PKR' : 'PKR',
-                ],
-            ];
-        }
-
-        if (count($totals) > 1) {
-            return [
-                'amount' => 0.0,
-                'meta' => ['currency' => null, 'multi' => true, 'label' => 'Multiple currencies'],
-            ];
-        }
-
-        $currency = (string) array_key_first($totals);
-
         return [
-            'amount' => (float) $totals[$currency],
-            'meta' => ['currency' => $currency, 'multi' => false, 'label' => $currency],
+            'amount' => $pkrTotal,
+            'meta' => [
+                'currency' => 'PKR',
+                'multi' => $excludedCount > 0,
+                'label' => 'PKR',
+                'excluded_count' => $excludedCount,
+            ],
         ];
     }
 

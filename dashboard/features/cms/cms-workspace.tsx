@@ -20,6 +20,7 @@ import { BannerDetailDrawerContent } from "@/features/cms/components/banner-deta
 import { NoticeDetailDrawerContent } from "@/features/cms/components/notice-detail-drawer";
 import { AssetDetailDrawerContent } from "@/features/cms/components/asset-detail-drawer";
 import { MediaLibraryPanel } from "@/features/cms/components/media-library-panel";
+import { CmsCreatePageForm } from "@/features/cms/components/cms-create-page-form";
 import { cmsQueryToSearchParams } from "@/lib/cms-query";
 import type { CmsModuleResult, CmsPreviewMode } from "@/types/cms";
 
@@ -160,6 +161,7 @@ export function CmsWorkspace({ result }: Props) {
       </p>
 
       {result.module === "assets" ? <MediaLibraryPanel /> : null}
+      {result.module === "pages" ? <CmsCreatePageForm /> : null}
 
       {result.state === "empty" ? (
         <EmptyState

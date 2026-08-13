@@ -110,7 +110,7 @@ export function transformSettingsModule(
   const securityIssues = validateSecuritySettings(security);
   const notificationIssues = validateNotificationSettings(notifications);
   const integrationIssues = validateIntegrationSettings(normalizedIntegrations);
-  const snapshotLabel = String(overview.lastFixtureRevision ?? "laravel-read-only");
+  const snapshotLabel = String(overview.lastFixtureRevision ?? "platform settings");
 
   return {
     state: "ready",

@@ -225,6 +225,14 @@ export function HomepageSettingsPanel() {
         >
           Publish
         </button>
+        <a
+          className="inline-flex min-h-11 items-center rounded-xl border border-jp-border px-3 text-sm"
+          href="/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Preview homepage
+        </a>
       </div>
     </section>
   );

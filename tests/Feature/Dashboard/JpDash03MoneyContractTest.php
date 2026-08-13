@@ -77,6 +77,29 @@ class JpDash03MoneyContractTest extends TestCase
         $this->assertStringNotContainsString('Rs.', (string) ($grossMetric['formattedValue'] ?? ''));
     }
 
+    public function test_kpi_usd_only_bookings_show_pkr_zero_and_exclusion(): void
+    {
+        $agency = Agency::factory()->create();
+        $admin = $this->platformAdmin();
+
+        $usd = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'status' => BookingStatus::Pending,
+            'currency' => 'PKR',
+        ]);
+        BookingFareBreakdown::query()->create(['booking_id' => $usd->id, 'total' => 590, 'currency' => 'USD']);
+
+        $dashboard = app(AgencyDashboardService::class)->build($admin);
+        $overview = DashboardOverviewResource::fromAgencyDashboard($dashboard, $admin);
+
+        $grossCard = collect($overview['summaryStats'] ?? [])->firstWhere('key', 'gross_sales');
+        $this->assertNotNull($grossCard);
+        $this->assertStringContainsString('Rs.', (string) ($grossCard['value'] ?? ''));
+        $this->assertStringContainsString('0.00', (string) ($grossCard['value'] ?? ''));
+        $this->assertStringContainsString('excluded', (string) ($grossCard['delta'] ?? ''));
+        $this->assertStringNotContainsString('USD', (string) ($grossCard['value'] ?? ''));
+    }
+
     public function test_kpi_gross_sales_multi_currency_label_not_blended_pkr_total(): void
     {
         $agency = Agency::factory()->create();

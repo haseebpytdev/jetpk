@@ -86,7 +86,7 @@ export function validateSecuritySettings(values: SecuritySettingsValues): Access
   const issues: AccessValidationIssue[] = [];
   const id = "settings-security";
 
-  if (values.passwordMinLength < 10) {
+  if (values.passwordMinLength < 8) {
     issues.push(issue("warning", "SETTINGS_WEAK_PASSWORD_LENGTH", "Password minimum length metadata is below recommended threshold.", "passwordMinLength", id, "Set minimum length to at least 10.", false));
   }
   if (values.privilegedRoleMfaPolicy === "disabled") {

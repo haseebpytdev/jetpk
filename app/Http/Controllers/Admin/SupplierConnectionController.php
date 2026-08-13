@@ -249,9 +249,13 @@ class SupplierConnectionController extends Controller
             'sabreNdcEnabled' => $provider === SupplierProvider::Sabre->value && SabreCapabilityTruth::ndcSupported()
                 ? SabreSupplierChannelConfig::ndcEnabled($connection)
                 : false,
-            'sabreNdcUi' => $provider === SupplierProvider::Sabre->value
-                ? (SabreCapabilityTruth::ndcSupported() ? 'integrated' : 'not_integrated')
-                : null,
+            'registryState' => \App\Support\Suppliers\SupplierRegistry::stateForConnection($connection),
+            'registryLabel' => \App\Support\Suppliers\SupplierRegistry::businessLabel(
+                \App\Support\Suppliers\SupplierRegistry::stateForConnection($connection)
+            ),
+            'baseUrl' => filled($connection->base_url) ? (string) $connection->base_url : null,
+            'baseUrlOverridable' => filled($connection->base_url),
+            'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
         ];
     }
 
