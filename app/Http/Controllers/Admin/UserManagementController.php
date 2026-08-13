@@ -24,6 +24,7 @@ use App\Support\Agencies\AgencyRoleResolver;
 use App\Support\Agencies\AgencyScopeResolver;
 use App\Support\Agencies\AgencyStaffPermissionAssignment;
 use App\Support\References\CompactReferenceGenerator;
+use App\Support\Staff\StaffPermission;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
