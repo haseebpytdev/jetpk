@@ -5,9 +5,9 @@ BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`
 
 ## CURRENT STATE (authoritative)
 
-REMOTE_BRANCH_HEAD: pending docs pin after this file (engineering already on remote as `694b5e1b21a86ffd4f861647090408c7288828a8`)  
+REMOTE_BRANCH_HEAD: `f30567556b402518c0405d988af2e3924796513f` (docs content; branch tip after pin commit will be later)  
 LATEST_ENGINEERING_SHA: `694b5e1b21a86ffd4f861647090408c7288828a8`  
-LATEST_DOCS_CONTENT_SHA: this docs commit (do not report REMOTE_HEAD as the engineering parent once the docs pin lands)
+LATEST_DOCS_CONTENT_SHA: `f30567556b402518c0405d988af2e3924796513f`
 
 OWNER_UAT_WAVE_2=`REOPENED_PRE_OWNER_RETEST_V3_SOURCE_INTEGRITY`  
 ADMIN_FULL_MANAGEMENT_SYSTEM=`NO` until production CMS QA draft proof + 5-actor cross-portal re-run after `694b5e1b`.
