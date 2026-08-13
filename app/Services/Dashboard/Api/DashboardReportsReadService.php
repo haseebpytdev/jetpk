@@ -22,12 +22,19 @@ class DashboardReportsReadService
     {
         $this->assertReportsPermission($user);
 
-        $currency = strtoupper((string) $request->query('currency', 'PKR'));
-        if ($currency === 'ALL') {
-            $currency = 'PKR';
-        }
-
         $payload = $this->bookingReports->build($user, $request);
+        $summary = is_array($payload['summary'] ?? null) ? $payload['summary'] : [];
+        $fareCount = (int) ($summary['fare_currency_count'] ?? 1);
+        $fareIso = strtoupper(trim((string) ($summary['fare_currency_iso'] ?? '')));
+        $requested = strtoupper((string) $request->query('currency', ''));
+
+        $currency = $fareCount > 1
+            ? 'PKR'
+            : ($fareIso !== '' ? $fareIso : ($requested !== '' && $requested !== 'ALL' ? $requested : 'PKR'));
+
+        if ($currency === 'ALL') {
+            $currency = $fareIso !== '' ? $fareIso : 'PKR';
+        }
         $mappedSection = match ($section) {
             'summary', 'overview', 'sales' => 'summary',
             'bookings' => 'bookings',

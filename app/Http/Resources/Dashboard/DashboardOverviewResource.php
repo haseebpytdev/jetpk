@@ -85,8 +85,14 @@ final class DashboardOverviewResource
                 'label' => 'Gross booking value',
                 'value' => $multiCurrency && $iso === ''
                     ? 'Multiple currencies'
-                    : DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $iso !== '' ? $iso : 'PKR'),
-                'delta' => $multiCurrency && $iso !== 'PKR' ? 'Not combined without FX policy' : '',
+                    : ($iso === ''
+                        ? 'Amount unavailable'
+                        : DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $iso)),
+                'delta' => $iso === 'PKR'
+                    ? ($multiCurrency ? 'Non-PKR bookings excluded; no FX conversion without a PKR snapshot' : '')
+                    : ($iso === ''
+                        ? 'No booking-time PKR snapshot'
+                        : $iso.' totals; no booking-time PKR snapshot to convert'),
                 'tone' => 'up',
             ];
         }

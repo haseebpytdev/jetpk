@@ -56,6 +56,27 @@ class JpDash03MoneyContractTest extends TestCase
         $this->assertSame('Multiple currencies', $grossMetric['formattedValue']);
     }
 
+    public function test_usd_only_report_does_not_relabel_as_pkr(): void
+    {
+        $agency = Agency::factory()->create();
+        $admin = $this->platformAdmin();
+
+        $usd = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'status' => BookingStatus::Pending,
+            'currency' => 'PKR',
+        ]);
+        BookingFareBreakdown::query()->create(['booking_id' => $usd->id, 'total' => 590, 'currency' => 'USD']);
+
+        $payload = app(BookingReportService::class)->build($admin, Request::create('/admin/reports'));
+        $this->assertSame('USD', $payload['summary']['fare_currency_iso'] ?? null);
+
+        $reportView = DashboardReportResource::fromBookingReport('bookings', $payload, (string) $payload['summary']['fare_currency_iso']);
+        $grossMetric = collect($reportView['metrics'] ?? [])->firstWhere('key', 'gross_booking_value');
+        $this->assertStringContainsString('USD', (string) ($grossMetric['formattedValue'] ?? ''));
+        $this->assertStringNotContainsString('Rs.', (string) ($grossMetric['formattedValue'] ?? ''));
+    }
+
     public function test_kpi_gross_sales_multi_currency_label_not_blended_pkr_total(): void
     {
         $agency = Agency::factory()->create();
@@ -80,8 +101,11 @@ class JpDash03MoneyContractTest extends TestCase
 
         $grossCard = collect($overview['summaryStats'] ?? [])->firstWhere('key', 'gross_sales');
         $this->assertNotNull($grossCard);
-        $this->assertStringContainsString('Multiple currencies', (string) ($grossCard['value'] ?? ''));
-        $this->assertStringNotContainsString('300 PKR', (string) ($grossCard['value'] ?? ''));
+        $this->assertStringContainsString('Rs.', (string) ($grossCard['value'] ?? ''));
+        $this->assertStringContainsString('200', (string) ($grossCard['value'] ?? ''));
+        $this->assertStringNotContainsString('300', (string) ($grossCard['value'] ?? ''));
+        $this->assertStringNotContainsString('100', (string) ($grossCard['value'] ?? ''));
+        $this->assertStringContainsString('Non-PKR', (string) ($grossCard['delta'] ?? ''));
     }
 
     public function test_payment_without_currency_uses_fare_over_stale_booking_pkr(): void

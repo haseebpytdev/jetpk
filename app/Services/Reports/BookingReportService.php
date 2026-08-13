@@ -70,6 +70,7 @@ class BookingReportService
             'ticketing_pending' => $this->countTicketingPending($baseQuery),
             'unpaid_partial_bookings' => (clone $baseQuery)->whereIn('payment_status', ['unpaid', 'partial'])->count(),
             'fare_currency_count' => $this->countDistinctFareCurrencies($grossSalesQuery),
+            'fare_currency_iso' => $this->singleFareCurrencyIso($grossSalesQuery),
         ];
 
         $monthExpr = $this->monthExpression('bookings.created_at');
@@ -328,6 +329,24 @@ class BookingReportService
             ->value('currency_count');
 
         return (int) $count;
+    }
+
+    protected function singleFareCurrencyIso(Builder $baseQuery): ?string
+    {
+        $codes = $this->grossSalesBookingsQuery($baseQuery)
+            ->leftJoin('booking_fare_breakdowns as fare', 'fare.booking_id', '=', 'bookings.id')
+            ->selectRaw('DISTINCT UPPER(TRIM(fare.currency)) as currency_code')
+            ->pluck('currency_code')
+            ->map(fn ($code): string => strtoupper(trim((string) $code)))
+            ->filter(fn (string $code): bool => $code !== '' && strlen($code) === 3)
+            ->unique()
+            ->values();
+
+        if ($codes->count() === 1) {
+            return (string) $codes->first();
+        }
+
+        return null;
     }
 
     protected function sumFare(Builder $query, string $column): float
@@ -980,6 +999,8 @@ class BookingReportService
                 'supplier_pnr_pending' => 0,
                 'ticketing_pending' => 0,
                 'unpaid_partial_bookings' => 0,
+                'fare_currency_count' => 0,
+                'fare_currency_iso' => null,
             ],
             'monthlySales' => collect(),
             'topRoutes' => collect(),
