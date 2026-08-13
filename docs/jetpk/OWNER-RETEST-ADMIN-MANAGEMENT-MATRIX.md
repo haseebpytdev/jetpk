@@ -9,11 +9,12 @@ OTP_RESTORE=PROHIBITED
 QA_USER_SUSPEND=PROHIBITED
 
 LAST_EXTERNALLY_VERIFIED_REMOTE_HEAD=d14f454e961bafa0cf478e5a3879ff892a6ddeac
-LATEST_ENGINEERING_SHA=LOCAL_UNCOMMITTED_THEN_THIS_COMMIT
-PRODUCTION_BUILD_ID=wCv83IB_v-tlTUR4XVckJ
+LATEST_ENGINEERING_SHA=d9548964
+PRODUCTION_BUILD_ID=l1GmGe19AuTVY_mTSFwS4
+PRODUCTION_PHP_SHA=d9548964
 REOPENED_AFTER=Owner production retest invalidated PASS_READY_FOR_OWNER_RETEST_V2
 
-TRACKED_WORKTREE_CLEAN=NO
+TRACKED_WORKTREE_CLEAN=YES_AFTER_THIS_COMMIT
 FULL_WORKTREE_CLEAN=NO
 PROTECTED_TMP_FILES_PRESERVED=YES
 RBAC_ROLE_PERMISSION_MANAGEMENT=HARD_STOP_PENDING_OWNER_SCHEMA_APPROVAL
@@ -25,18 +26,18 @@ Do not set OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST.
 
 | Gate | Status |
 |---|---|
-| ADMIN_FINANCIAL_PKR | OPEN — quote-time PKR from pricing_components; hold persist no longer overlays supplier USD; rows keep original ISO; KPI uses snapshot only. Production new-booking proof still required. |
-| MARKUP_BUSINESS_RULE_BUILDER | OPEN — Apply-to modes, airport/airline selectors, English preview. No production markup mutation for automated proof. |
-| SETTINGS_SOURCE_OF_TRUTH | OPEN — Org Profile writes agency settings; Current Values read same agency. Production save→reload proof still required. |
-| NOTIFICATION_SETTINGS_MANAGEMENT | OPEN — enable/email/dashboard/severity/delivery/roles persist in existing JSON/meta. Failed KPI operational-only. Production proof still required. |
-| SUPPLIER_REGISTRY_TRUTH | OPEN — registry states exist on connections and supplier rows. Production state matrix still required. |
-| SUPPLIER_MANAGEMENT | OPEN — business display name edit without credential rotation; PKR booking value pipeline shared. Production proof still required. |
-| API_CONNECTION_FULL_MANAGEMENT | OPEN — Manage tabs + name/environment/masked credentials. Status preserve on name-only save. Production proof still required. |
-| CMS_FULL_MANAGEMENT | OPEN — live cms_pages; structured data-jp-block reorder without raw HTML as primary UX. Schema not applied. |
-| CMS_PREVIEW_PUBLISH | OPEN — draft/publish + in-editor viewport preview. Production proof still required. |
-| MEDIA_LIBRARY | OPEN — upload/preview/copy URL/remove. Production proof still required. |
-| USERS_MANAGEMENT | OPEN — list/create/invite/activate/suspend exist. Production lifecycle proof still required. |
-| STAFF_MANAGEMENT | OPEN — staff create + permission editor exist. Production proof still required. |
+| ADMIN_FINANCIAL_PKR | OPEN — quote-time PKR from pricing_components; hold persist stores commercial_money; USD not copied. Unit tests 18/18. No live new booking. Legacy supplier GBV still Rs. 0.00. |
+| MARKUP_BUSINESS_RULE_BUILDER | OPEN — production UI: Apply-to modes, Origin/Destination, preview "Add 0% to all flights", Advanced hidden. No production markup mutation. |
+| SETTINGS_SOURCE_OF_TRUTH | OPEN — production Org Profile GET JSON now reaches Laravel; form matched Current Values (ota@jetpakistan.pk, +92 300 4455667, Asia/Karachi); save succeeded; General Ready / 0 support-contact warnings. Audit event not independently listed. |
+| NOTIFICATION_SETTINGS_MANAGEMENT | OPEN — production UI has enable/email/dashboard/severity/delivery/roles + Save. Failures page classifies QA vs operational. Save not executed this pass. |
+| SUPPLIER_REGISTRY_TRUTH | OPEN — production rows show Configured and enabled for Sabre and PIA JetPK. Full six-state matrix not fully populated in live data. |
+| SUPPLIER_MANAGEMENT | OPEN — production list + PKR value pipeline (Rs. 0.00 aligned with snapshot KPI). Display-name editor deployed; not mutated. |
+| API_CONNECTION_FULL_MANAGEMENT | OPEN — production Manage tabs, connection name, Sabre Sign-in / EPR, Password, masked. No credential rotation or Test this pass. |
+| CMS_FULL_MANAGEMENT | OPEN — page builder stores data-jp-block HTML; production Pages list showed no matching records under current filters. |
+| CMS_PREVIEW_PUBLISH | OPEN — draft/publish + in-editor preview deployed. Production page edit not completed this pass. |
+| MEDIA_LIBRARY | OPEN — production upload/alt panel visible. |
+| USERS_MANAGEMENT | OPEN — production Create and invite present. Lifecycle not executed against QA users. |
+| STAFF_MANAGEMENT | OPEN — production Create staff present. Permissions editor not retested this pass. |
 | RBAC_ROLE_PERMISSION_MANAGEMENT | HARD_STOP_PENDING_OWNER_SCHEMA_APPROVAL |
 
 ## Finding 10 — RBAC schema plan (DO NOT APPLY)
