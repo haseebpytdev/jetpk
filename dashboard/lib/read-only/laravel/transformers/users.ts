@@ -8,10 +8,11 @@ export function transformUsersModule(
   pagination: { page: number; pageSize: number; total: number; pageCount: number },
   selectedUser: User | null,
 ): UsersModuleResult {
-  const users = (Array.isArray((payload as { users?: unknown }).users)
-    ? (payload as { users: UserTableRow[] }).users
-    : Array.isArray((payload as { items?: unknown }).items)
-      ? ((payload as { items: UserTableRow[] }).items)
+  const source = payload as unknown as { users?: UserTableRow[]; items?: UserTableRow[] };
+  const users = (Array.isArray(source.users)
+    ? source.users
+    : Array.isArray(source.items)
+      ? source.items
       : []) as UserTableRow[];
   const departments = [...new Set(users.map((u) => u.department).filter((d) => d && d !== "—"))];
   const roles = users.flatMap((u) =>
