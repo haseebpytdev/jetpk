@@ -19,6 +19,7 @@ import { SectionDetailDrawerContent } from "@/features/cms/components/section-de
 import { BannerDetailDrawerContent } from "@/features/cms/components/banner-detail-drawer";
 import { NoticeDetailDrawerContent } from "@/features/cms/components/notice-detail-drawer";
 import { AssetDetailDrawerContent } from "@/features/cms/components/asset-detail-drawer";
+import { MediaLibraryPanel } from "@/features/cms/components/media-library-panel";
 import { cmsQueryToSearchParams } from "@/lib/cms-query";
 import type { CmsModuleResult, CmsPreviewMode } from "@/types/cms";
 
@@ -123,18 +124,27 @@ export function CmsWorkspace({ result }: Props) {
           result.module === "pages" ? (
             <>
               Live <strong>Pages</strong> for brand <strong>{result.brand.label}</strong>. Create/edit/archive uses the
-              Laravel CMS pages JSON path. Banners, notices, and assets stay read-only until a write domain exists (no
-              Wave-2 migration).
+              Laravel CMS pages JSON path. Media library uploads use agency media. Banners and notices have no JetPakistan
+              domain tables.
+            </>
+          ) : result.module === "assets" ? (
+            <>
+              Live <strong>Media library</strong> for brand <strong>{result.brand.label}</strong>. Upload, list, alt text, and
+              remove use Laravel agency media.
             </>
           ) : result.module === "overview" ? (
             <>
-              CMS overview for brand <strong>{result.brand.label}</strong>. Pages are operational; banners, notices, and
-              assets remain read-only listings.
+              CMS overview for brand <strong>{result.brand.label}</strong>. Pages and media are operational. Banners and
+              notices are not applicable until a domain exists.
+            </>
+          ) : result.module === "banners" || result.module === "notices" ? (
+            <>
+              <strong>{result.module}</strong> has no JetPakistan database domain. Do not treat fixture cards as live
+              site management.
             </>
           ) : (
             <>
-              Read-only <strong>{result.module}</strong> listing for brand <strong>{result.brand.label}</strong>. No
-              Laravel mutation domain in Wave 2 — view/filter only.
+              <strong>{result.module}</strong> listing for brand <strong>{result.brand.label}</strong>.
             </>
           )
         ) : (
@@ -143,6 +153,8 @@ export function CmsWorkspace({ result }: Props) {
           </>
         )}
       </p>
+
+      {result.module === "assets" ? <MediaLibraryPanel /> : null}
 
       {result.state === "empty" ? (
         <EmptyState

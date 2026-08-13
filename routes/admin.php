@@ -270,7 +270,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::patch('/settings/homepage-featured-fares/{homepageFeaturedFare}', [HomepageFeaturedFareController::class, 'update'])->name('settings.homepage-featured-fares.update');
         Route::delete('/settings/homepage-featured-fares/{homepageFeaturedFare}', [HomepageFeaturedFareController::class, 'destroy'])->name('settings.homepage-featured-fares.destroy');
         Route::post('/settings/homepage-featured-fares/{homepageFeaturedFare}/refresh', [HomepageFeaturedFareController::class, 'refresh'])->name('settings.homepage-featured-fares.refresh');
-        Route::get('/settings/media', [BackOfficeLegacyViewRedirectController::class, 'adminCmsPagesIndex'])->name('settings.media.index');
+        Route::get('/settings/media', [AgencyMediaController::class, 'index'])->name('settings.media.index');
         Route::post('/settings/media', [AgencyMediaController::class, 'store'])->name('settings.media.store');
         Route::delete('/settings/media/{agencyMedia}', [AgencyMediaController::class, 'destroy'])->name('settings.media.destroy');
         Route::get('/branding', [BackOfficeLegacyViewRedirectController::class, 'adminBrandingSettings'])->name('branding');

@@ -240,3 +240,15 @@ export function userResetPasswordPath(userId: string): string {
 export function userUpdatePath(userId: string): string {
   return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}?format=json`);
 }
+
+export function mediaLibraryIndexPath(): string {
+  return laravelPortalPath("admin", "/settings/media?format=json");
+}
+
+export function mediaLibraryStorePath(): string {
+  return laravelPortalPath("admin", "/settings/media?format=json");
+}
+
+export function mediaLibraryDestroyPath(mediaId: string): string {
+  return laravelPortalPath("admin", `/settings/media/${encodeURIComponent(mediaId)}?format=json`);
+}

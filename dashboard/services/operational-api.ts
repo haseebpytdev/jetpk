@@ -35,6 +35,9 @@ import {
   markupStorePath,
   markupTogglePath,
   markupUpdatePath,
+  mediaLibraryDestroyPath,
+  mediaLibraryIndexPath,
+  mediaLibraryStorePath,
   paymentRejectPath,
   paymentStorePath,
   paymentVerifyPath,
@@ -586,6 +589,28 @@ export async function updatePlatformUser(
   return laravelRequest(userUpdatePath(userId), {
     method: "PATCH",
     json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadMediaLibrary(): Promise<MutationResponse<{ media?: Record<string, unknown>[] }>> {
+  return laravelRequest(mediaLibraryIndexPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function uploadMediaLibraryFile(formData: FormData): Promise<MutationResponse<{ media?: Record<string, unknown> }>> {
+  return laravelRequest(mediaLibraryStorePath(), {
+    method: "POST",
+    formData,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function deleteMediaLibraryItem(mediaId: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(mediaLibraryDestroyPath(mediaId), {
+    method: "DELETE",
     retryCsrfOnce: false,
   });
 }

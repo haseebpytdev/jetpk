@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\AgencyMedia;
 use App\Services\Agencies\AgencyBrandingService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class AgencyMediaController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AgencyBrandingService $brandingService,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse|RedirectResponse
     {
         $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
         Gate::authorize('viewAny', [AgencyMedia::class, $agency]);
@@ -52,21 +56,19 @@ class AgencyMediaController extends Controller
             default => $query->latest('id'),
         };
 
-        return view(client_view('settings.media', 'admin'), [
-            'agency' => $agency,
-            'mediaItems' => $query->paginate(24)->withQueryString(),
-            'collections' => \App\Support\Client\ClientPageMediaConsumption::collections(),
-            'filters' => [
-                'q' => (string) $request->string('q'),
-                'collection' => (string) $request->string('collection'),
-                'type' => (string) $request->string('type'),
-                'sort' => $sort,
-                'view' => (string) $request->string('view', 'grid'),
-            ],
-        ]);
+        if ($this->wantsBackOfficeJson($request)) {
+            $items = $query->paginate(24);
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'media' => collect($items->items())->map(fn (AgencyMedia $item) => $this->presentMedia($item))->all(),
+            ]);
+        }
+
+        return redirect()->route('admin.cms-pages.index');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $agency = Agency::query()->findOrFail($request->user()->current_agency_id);
         Gate::authorize('create', [AgencyMedia::class, $agency]);
@@ -76,7 +78,7 @@ class AgencyMediaController extends Controller
             'alt_text' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $this->brandingService->uploadMedia(
+        $media = $this->brandingService->uploadMedia(
             $agency,
             $request->user(),
             $request->file('file'),
@@ -84,14 +86,40 @@ class AgencyMediaController extends Controller
             $validated['alt_text'] ?? null,
         );
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'media' => $this->presentMedia($media),
+            ]);
+        }
+
         return back()->with('status', 'media-uploaded');
     }
 
-    public function destroy(Request $request, AgencyMedia $agencyMedia): RedirectResponse
+    public function destroy(Request $request, AgencyMedia $agencyMedia): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $agencyMedia);
         $this->brandingService->deleteMedia($agencyMedia, $request->user());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true]);
+        }
+
         return back()->with('status', 'media-deleted');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function presentMedia(AgencyMedia $item): array
+    {
+        return [
+            'id' => (string) $item->id,
+            'file_name' => (string) $item->file_name,
+            'collection' => (string) ($item->collection ?? ''),
+            'alt_text' => (string) ($item->alt_text ?? ''),
+            'mime_type' => (string) ($item->mime_type ?? ''),
+            'url' => filled($item->file_path) ? asset('storage/'.$item->file_path) : null,
+        ];
     }
 }
