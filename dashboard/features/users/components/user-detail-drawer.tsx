@@ -10,6 +10,7 @@ import type { User } from "@/types/access-control";
 import { AccessValidationSummary } from "@/features/users/components/access-validation-summary";
 import { EffectiveAccessSummaryPanel } from "@/features/users/components/effective-access-summary";
 import { RoleAssignmentPreview } from "@/features/users/components/role-assignment-preview";
+import { StaffPermissionEditor } from "@/features/users/components/staff-permission-editor";
 import { UserLifecycleActions } from "@/features/users/components/user-lifecycle-actions";
 import { UserSecuritySummary } from "@/features/users/components/user-security-summary";
 
@@ -66,14 +67,14 @@ export function UserDetailDrawerContent({ user }: { user: User }) {
       <Divider />
 
       <section aria-labelledby="user-roles-heading">
-        <h3 id="user-roles-heading" className="text-sm font-semibold text-gray-900">Assigned roles (fixture)</h3>
+        <h3 id="user-roles-heading" className="text-sm font-semibold text-gray-900">Assigned access</h3>
         <ul className="mt-2 space-y-1 text-sm">
           {user.assignedRoles.length > 0 ? (
             user.assignedRoles.map((r) => (
               <li key={r.roleId}>{getRoleName(r.roleId)}</li>
             ))
           ) : (
-            <li className="text-jp-muted">No roles assigned</li>
+            <li className="text-jp-muted">Account type and staff permissions below are authoritative.</li>
           )}
         </ul>
       </section>
@@ -133,16 +134,16 @@ export function UserDetailDrawerContent({ user }: { user: User }) {
         <h3 id="user-lifecycle-heading" className="text-sm font-semibold text-gray-900">Account lifecycle</h3>
         <div className="mt-2">
           <UserLifecycleActions userId={user.id} status={user.security.status} />
+          <StaffPermissionEditor user={user} />
         </div>
       </section>
 
       <Divider />
 
       <section aria-labelledby="laravel-integration-heading">
-        <h3 id="laravel-integration-heading" className="text-sm font-semibold text-gray-900">Future Laravel integration</h3>
+        <h3 id="laravel-integration-heading" className="text-sm font-semibold text-gray-900">Authorization source</h3>
         <p className="mt-1 text-xs text-jp-muted">
-          User records, roles, and permissions will be sourced from Laravel authentication and authorization APIs.
-          This preview does not connect to live auth. Server-side policies and gates remain authoritative.
+          Live directory, invite, reset, activate/suspend, and staff permission writes use Laravel Users APIs. Server policies remain authoritative.
         </p>
       </section>
 

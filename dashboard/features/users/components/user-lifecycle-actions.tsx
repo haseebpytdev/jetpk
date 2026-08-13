@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import { activateUser, suspendUser } from "@/services/operational-api";
+import { activateUser, sendUserInvite, sendUserPasswordReset, suspendUser } from "@/services/operational-api";
 
 export function UserLifecycleActions({
   userId,
@@ -12,7 +12,7 @@ export function UserLifecycleActions({
   status: string;
 }) {
   const isLive = useDashboardLiveMode();
-  const [busy, setBusy] = useState<"activate" | "suspend" | null>(null);
+  const [busy, setBusy] = useState<"activate" | "suspend" | "invite" | "reset" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [localStatus, setLocalStatus] = useState(status);
 
@@ -58,6 +58,36 @@ export function UserLifecycleActions({
           data-testid="user-suspend"
         >
           {busy === "suspend" ? "Suspending…" : "Suspend"}
+        </button>
+        <button
+          type="button"
+          className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
+          disabled={busy !== null}
+          onClick={async () => {
+            setBusy("invite");
+            setError(null);
+            const result = await sendUserInvite(userId);
+            setBusy(null);
+            if (!result.ok) setError(result.message ?? "Invite failed");
+          }}
+          data-testid="user-invite"
+        >
+          {busy === "invite" ? "Sending…" : "Send invite"}
+        </button>
+        <button
+          type="button"
+          className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
+          disabled={busy !== null}
+          onClick={async () => {
+            setBusy("reset");
+            setError(null);
+            const result = await sendUserPasswordReset(userId);
+            setBusy(null);
+            if (!result.ok) setError(result.message ?? "Reset failed");
+          }}
+          data-testid="user-reset-password"
+        >
+          {busy === "reset" ? "Sending…" : "Password reset link"}
         </button>
       </div>
     </div>

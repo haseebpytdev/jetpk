@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Services\Agencies\AgencyBrandingService;
@@ -12,12 +13,14 @@ use App\Support\Agencies\AgencyPrefixService;
 use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Branding\PlatformBrandingResolver;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class AgencyBrandingController extends Controller
 {
+    use RespondsWithBackOfficeJson;
     public function __construct(
         protected AgencyBrandingService $brandingService,
         protected SlimTopbarPresenter $slimTopbarPresenter,
@@ -25,7 +28,7 @@ class AgencyBrandingController extends Controller
         protected BackgroundRemovalSettingsService $backgroundRemovalSettingsService,
     ) {}
 
-    public function edit(Request $request): View
+    public function edit(Request $request): View|JsonResponse
     {
         $agency = $this->resolveAgency($request);
         Gate::authorize('view', $agency);
@@ -35,6 +38,24 @@ class AgencyBrandingController extends Controller
 
         $logoPath = $settings->logo_path;
         $bgSettings = $this->backgroundRemovalSettingsService->getForAgency($agency);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'organization' => [
+                    'display_name' => (string) ($settings->display_name ?? ''),
+                    'legal_name' => (string) ($settings->legal_name ?? ''),
+                    'support_email' => (string) ($settings->support_email ?? ''),
+                    'support_phone' => (string) ($settings->support_phone ?? ''),
+                    'website_url' => (string) ($settings->website_url ?? ''),
+                    'office_address' => (string) ($settings->office_address ?? ''),
+                    'city' => (string) ($settings->city ?? ''),
+                    'country' => (string) ($settings->country ?? ''),
+                    'timezone' => (string) ($settings->timezone ?? 'Asia/Karachi'),
+                    'logo_url' => is_string($logoPath) && $logoPath !== '' ? asset('storage/'.$logoPath) : null,
+                ],
+            ]);
+        }
 
         return view(client_view('settings.branding', 'admin'), [
             'agency' => $agency,
@@ -57,7 +78,7 @@ class AgencyBrandingController extends Controller
         ]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request): RedirectResponse|JsonResponse
     {
         $agency = $this->resolveAgency($request);
         Gate::authorize('update', $agency);
@@ -159,6 +180,10 @@ class AgencyBrandingController extends Controller
             $settings = $this->brandingService->getSettingsForAgency($agency)->fresh();
             $meta = is_array($settings->meta) ? $settings->meta : [];
             $settings->forceFill(['meta' => array_merge($meta, $referencePrefixMeta)])->save();
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->edit($request);
         }
 
         return back()->with('status', 'branding-updated');

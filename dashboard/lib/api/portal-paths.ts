@@ -182,6 +182,13 @@ export function financeAdjustmentStorePath(): string {
   return laravelPortalPath("admin", "/finance/adjustments?format=json");
 }
 
+export function financeAdjustmentReversePath(walletTransactionId: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/finance/adjustments/${encodeURIComponent(walletTransactionId)}/reverse?format=json`,
+  );
+}
+
 export function markupStorePath(): string {
   return laravelPortalPath("admin", "/markups?format=json");
 }
@@ -196,4 +203,40 @@ export function markupTogglePath(markupId: string): string {
 
 export function markupDestroyPath(markupId: string): string {
   return laravelPortalPath("admin", `/markups/${encodeURIComponent(markupId)}?format=json`);
+}
+
+export function apiSettingsStorePath(): string {
+  return laravelPortalPath("admin", "/api-settings?format=json");
+}
+
+export function apiSettingsUpdatePath(connectionId: string): string {
+  return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}?format=json`);
+}
+
+export function apiSettingsTogglePath(connectionId: string): string {
+  return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}/toggle-status?format=json`);
+}
+
+export function apiSettingsTestPath(connectionId: string): string {
+  return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}/test?format=json`);
+}
+
+export function brandingSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/branding?format=json");
+}
+
+export function usersStorePath(): string {
+  return laravelPortalPath("admin", "/users?format=json");
+}
+
+export function userInvitePath(userId: string): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}/send-invite?format=json`);
+}
+
+export function userResetPasswordPath(userId: string): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}/reset-password-link?format=json`);
+}
+
+export function userUpdatePath(userId: string): string {
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}?format=json`);
 }

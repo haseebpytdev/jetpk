@@ -178,7 +178,9 @@ export function CmsWorkspace({ result }: Props) {
             <CmsRevisionTimeline revisions={result.recentRevisions} />
             <Card data-testid="cms-scheduled-queue">
               <CardTitle>Scheduled publication queue</CardTitle>
-              <CardDescription className="mt-1">Informational only — no live publishing.</CardDescription>
+              <CardDescription className="mt-1">
+                Scheduling metadata only. Publish or archive from the Pages editor.
+              </CardDescription>
               {result.scheduledQueue.length === 0 ? (
                 <p className="mt-3 text-sm text-jp-muted">No scheduled items.</p>
               ) : (

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSupplierConnectionRequest;
 use App\Http\Requests\Admin\UpdateSupplierConnectionRequest;
@@ -17,6 +18,7 @@ use App\Support\Suppliers\PiaNdcSupplierConnectionNormalizer;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +26,7 @@ use Illuminate\View\View;
 
 class SupplierConnectionController extends Controller
 {
+    use RespondsWithBackOfficeJson;
     public function __construct(
         protected SupplierConnectionService $service,
     ) {}
@@ -114,13 +117,17 @@ class SupplierConnectionController extends Controller
         }, $catalog);
     }
 
-    public function store(StoreSupplierConnectionRequest $request): RedirectResponse
+    public function store(StoreSupplierConnectionRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', SupplierConnection::class);
         $agency = $request->user()->currentAgency;
         abort_if($agency === null, 403, 'No agency context assigned.');
 
-        $this->service->storeConnection($agency, $this->payload($request));
+        $connection = $this->service->storeConnection($agency, $this->payload($request));
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true, 'connection' => $this->presentConnection($connection)]);
+        }
 
         return redirect()->route('admin.api-settings')->with('status', 'supplier-connection-created');
     }
@@ -158,31 +165,47 @@ class SupplierConnectionController extends Controller
         ]);
     }
 
-    public function update(UpdateSupplierConnectionRequest $request, SupplierConnection $supplierConnection): RedirectResponse
+    public function update(UpdateSupplierConnectionRequest $request, SupplierConnection $supplierConnection): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $supplierConnection);
         $this->service->updateConnection($supplierConnection, $this->payload($request, $supplierConnection));
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true, 'connection' => $this->presentConnection($supplierConnection->fresh() ?? $supplierConnection)]);
+        }
+
         return redirect()->route('admin.api-settings')->with('status', 'supplier-connection-updated');
     }
 
-    public function destroy(SupplierConnection $supplierConnection): RedirectResponse
+    public function destroy(Request $request, SupplierConnection $supplierConnection): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $supplierConnection);
         $supplierConnection->delete();
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true]);
+        }
+
         return redirect()->route('admin.api-settings')->with('status', 'supplier-connection-deleted');
     }
 
-    public function test(Request $request, SupplierConnection $supplierConnection): RedirectResponse
+    public function test(Request $request, SupplierConnection $supplierConnection): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $supplierConnection);
         $result = $this->service->testConnection($supplierConnection, $request->user());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'test' => is_array($result) ? $this->sanitizeTestResult($result) : ['status' => 'completed'],
+                'connection' => $this->presentConnection($supplierConnection->fresh() ?? $supplierConnection),
+            ]);
+        }
+
         return back()->with('status', 'supplier-test-ran')->with('test_result', $result);
     }
 
-    public function toggleStatus(Request $request, SupplierConnection $supplierConnection): RedirectResponse
+    public function toggleStatus(Request $request, SupplierConnection $supplierConnection): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $supplierConnection);
         $newStatus = $supplierConnection->status === SupplierConnectionStatus::Active
@@ -194,7 +217,69 @@ class SupplierConnectionController extends Controller
             'is_active' => $newStatus === SupplierConnectionStatus::Active,
         ]);
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true, 'connection' => $this->presentConnection($supplierConnection->fresh() ?? $supplierConnection)]);
+        }
+
         return back()->with('status', 'supplier-status-toggled');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function presentConnection(SupplierConnection $connection): array
+    {
+        $provider = $connection->provider instanceof SupplierProvider
+            ? $connection->provider->value
+            : (string) $connection->provider;
+
+        return [
+            'id' => (string) $connection->id,
+            'name' => (string) ($connection->display_name ?: $connection->name),
+            'provider' => $provider,
+            'environment' => $connection->environment?->value ?? '',
+            'status' => $connection->status?->value ?? '',
+            'enabled' => (bool) $connection->is_active,
+            'channel' => $provider === SupplierProvider::Sabre->value ? 'gds' : $provider,
+            'credentialsConfigured' => is_array($connection->credentials) && $connection->credentials !== [],
+            'maskedCredentials' => $connection->maskedCredentials(),
+            'lastTestedAt' => $connection->last_tested_at?->toIso8601String(),
+            'lastTestStatus' => $connection->last_test_status,
+            'lastFailure' => $this->sanitizeFailure((string) ($connection->last_error ?? '')),
+            'sabreGdsEnabled' => $provider === SupplierProvider::Sabre->value
+                ? (bool) data_get($connection->settings, 'sabre_gds_enabled', true)
+                : null,
+            'sabreNdcEnabled' => $provider === SupplierProvider::Sabre->value
+                ? (bool) data_get($connection->settings, 'sabre_ndc_enabled', false)
+                : null,
+            'sabreNdcSupported' => $provider === SupplierProvider::Sabre->value,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $result
+     * @return array<string, mixed>
+     */
+    protected function sanitizeTestResult(array $result): array
+    {
+        unset($result['credentials'], $result['password'], $result['token'], $result['secret']);
+
+        return [
+            'ok' => (bool) ($result['ok'] ?? $result['success'] ?? true),
+            'message' => (string) ($result['message'] ?? $result['status'] ?? 'Test completed'),
+        ];
+    }
+
+    protected function sanitizeFailure(string $error): ?string
+    {
+        $error = trim($error);
+        if ($error === '') {
+            return null;
+        }
+
+        $sanitized = preg_replace('/\b(pcc|lniata|password|token|secret|api[_-]?key)\b/i', '[redacted]', $error);
+
+        return mb_substr((string) $sanitized, 0, 200);
     }
 
     protected function scopedQuery($user): Builder

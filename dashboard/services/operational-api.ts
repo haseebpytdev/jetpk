@@ -8,6 +8,11 @@ import {
   agentApplicationApprovePath,
   agentApplicationNeedsMoreInfoPath,
   agentApplicationRejectPath,
+  apiSettingsStorePath,
+  apiSettingsTestPath,
+  apiSettingsTogglePath,
+  apiSettingsUpdatePath,
+  brandingSettingsPath,
   bookingAssignStaffPath,
   bookingContactPath,
   bookingNotesPath,
@@ -42,7 +47,11 @@ import {
   supportTicketReplyPath,
   supportTicketStatusPath,
   userActivatePath,
+  userInvitePath,
+  userResetPasswordPath,
   userSuspendPath,
+  userUpdatePath,
+  usersStorePath,
 } from "@/lib/api/portal-paths";
 
 type MutationResponse<T> = {
@@ -496,6 +505,87 @@ export async function toggleMarkupRule(markupId: string): Promise<MutationRespon
 export async function deleteMarkupRule(markupId: string): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(markupDestroyPath(markupId), {
     method: "DELETE",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function createApiConnection(payload: Record<string, unknown>): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsStorePath(), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateApiConnection(
+  connectionId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsUpdatePath(connectionId), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function toggleApiConnection(connectionId: string): Promise<MutationResponse<{ connection?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsTogglePath(connectionId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function testApiConnection(connectionId: string): Promise<MutationResponse<{ test?: Record<string, unknown> }>> {
+  return laravelRequest(apiSettingsTestPath(connectionId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadOrganizationProfile(): Promise<MutationResponse<{ organization?: Record<string, unknown> }>> {
+  return laravelRequest(brandingSettingsPath(), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateOrganizationProfile(payload: Record<string, unknown>): Promise<MutationResponse<{ organization?: Record<string, unknown> }>> {
+  return laravelRequest(brandingSettingsPath(), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function createPlatformUser(payload: Record<string, unknown>): Promise<MutationResponse<{ user?: Record<string, unknown> }>> {
+  return laravelRequest(usersStorePath(), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function sendUserInvite(userId: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(userInvitePath(userId), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function sendUserPasswordReset(userId: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(userResetPasswordPath(userId), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updatePlatformUser(
+  userId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ user?: Record<string, unknown> }>> {
+  return laravelRequest(userUpdatePath(userId), {
+    method: "PATCH",
+    json: payload,
     retryCsrfOnce: false,
   });
 }

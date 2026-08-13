@@ -64,7 +64,17 @@ export function AgentApplicationsWorkspace({ applications }: { applications: Age
             <p className="text-sm">{selected.agencyName}</p>
             <p className="text-xs text-jp-muted">
               {selected.contactName} · {selected.contactEmail}
+              {selected.contactPhone ? ` · ${selected.contactPhone}` : ""}
             </p>
+            <p className="text-xs text-jp-muted">
+              {[selected.city, selected.country, selected.businessType].filter(Boolean).join(" · ") || "No extra applicant details"}
+            </p>
+            {selected.ntn || selected.iataNumber ? (
+              <p className="text-xs text-jp-muted">
+                {selected.ntn ? `NTN ${selected.ntn}` : ""}
+                {selected.iataNumber ? ` · IATA ${selected.iataNumber}` : ""}
+              </p>
+            ) : null}
             <label className="block text-xs font-medium text-jp-muted" htmlFor="application-note">
               Operator note
             </label>

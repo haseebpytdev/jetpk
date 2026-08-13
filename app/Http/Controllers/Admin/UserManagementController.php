@@ -115,7 +115,7 @@ class UserManagementController extends Controller
         ));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', User::class);
         $actor = $request->user();
@@ -166,6 +166,19 @@ class UserManagementController extends Controller
 
         $this->notifyUserLifecycleEmail($user, $agency, $actor, 'created');
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'user' => [
+                    'id' => (string) $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'account_type' => $user->account_type?->value,
+                    'status' => $user->status?->value ?? (string) $user->status,
+                ],
+            ]);
+        }
+
         return redirect()->route('admin.users.show', $user)->with('status', 'user-created');
     }
 
@@ -194,7 +207,7 @@ class UserManagementController extends Controller
         ));
     }
 
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(Request $request, User $user): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $user);
         $actor = $request->user();
@@ -230,6 +243,24 @@ class UserManagementController extends Controller
             $this->syncProfile($user, $validated, $agency?->id);
             $this->writeAudit($actor, 'user.updated', ['user_id' => $user->id]);
         });
+
+        if ($this->wantsBackOfficeJson($request)) {
+            $user->refresh();
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'user' => [
+                    'id' => (string) $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'account_type' => $user->account_type?->value,
+                    'status' => $user->status?->value ?? (string) $user->status,
+                    'staff_permissions' => is_array($user->meta['staff_permissions'] ?? null)
+                        ? $user->meta['staff_permissions']
+                        : [],
+                ],
+            ]);
+        }
 
         return redirect()->route('admin.users.show', $user)->with('status', 'user-updated');
     }
@@ -274,15 +305,19 @@ class UserManagementController extends Controller
         return back()->with('status', 'user-activated');
     }
 
-    public function sendInvite(Request $request, User $user): RedirectResponse
+    public function sendInvite(Request $request, User $user): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $user);
         $this->dispatchInvite($user, $request->user());
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true]);
+        }
+
         return back()->with('status', 'user-invite-sent');
     }
 
-    public function sendResetPasswordLink(Request $request, User $user): RedirectResponse
+    public function sendResetPasswordLink(Request $request, User $user): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $user);
 
@@ -299,6 +334,10 @@ class UserManagementController extends Controller
             'sent_at' => now(),
         ]);
         $this->writeAudit($request->user(), 'user.password_reset_requested', ['user_id' => $user->id]);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true]);
+        }
 
         return back()->with('status', 'password-reset-link-sent');
     }

@@ -4,6 +4,7 @@ import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboa
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { UsersWorkspace } from "@/features/users/users-workspace";
+import { UserCreatePanel } from "@/features/users/components/user-create-panel";
 import type { UsersModuleKey, UsersModuleResult } from "@/types/users";
 
 const SUBROUTES: { key: UsersModuleKey; label: string; href: string }[] = [
@@ -66,7 +67,10 @@ export function UsersModuleShell({ module, result, children, directoryScope = "u
       ) : module === "directory" && result?.state === "loading" ? (
         <UsersLoadingState label={isStaff ? "staff" : "users"} />
       ) : module === "directory" && result ? (
-        <UsersWorkspace result={result} basePath={isStaff ? "/staff" : "/users"} />
+        <>
+          <UserCreatePanel accountType={isStaff ? "staff" : "customer"} />
+          <UsersWorkspace result={result} basePath={isStaff ? "/staff" : "/users"} />
+        </>
       ) : null}
     </PageContainer>
   );

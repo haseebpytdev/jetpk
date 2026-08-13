@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GeneralSettingsWorkspace } from "@/features/settings/components/general-settings-workspace";
-import { IntegrationSettingsWorkspace } from "@/features/settings/components/integration-settings-workspace";
+import { ApiConnectionsWorkspace } from "@/features/settings/components/api-connections-workspace";
 import { NotificationSettingsWorkspace } from "@/features/settings/components/notification-settings-workspace";
 import { SecuritySettingsWorkspace } from "@/features/settings/components/security-settings-workspace";
 import { SettingsOverview } from "@/features/settings/components/settings-overview";
@@ -55,7 +55,7 @@ function SettingsSectionContent({ section, result }: { section: SettingsSection 
     case "notifications":
       return <NotificationSettingsWorkspace result={result} />;
     case "integrations":
-      return <IntegrationSettingsWorkspace result={result} />;
+      return <ApiConnectionsWorkspace />;
     default:
       return null;
   }
@@ -72,7 +72,7 @@ export function SettingsModuleShell({ section, result }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Settings" }, { label: current.label }]} />
         }
         title="Settings"
-        description="Read-only system metadata across General, Security, Notifications, and Integrations. Missing owner inputs are labeled OWNER_INPUT_REQUIRED — credentials and secrets are never shown."
+        description="Organization, security, notifications, and API connection management. Secrets are never displayed after save."
       />
       <DataSourceNoticeSlot />
 

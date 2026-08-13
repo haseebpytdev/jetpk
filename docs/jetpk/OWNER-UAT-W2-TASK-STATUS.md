@@ -20,12 +20,12 @@ Prior PASS_READY is invalidated by owner production screenshots.
 | W2-26 | Full markup management | IN_PROGRESS | — | NOT_DEPLOYED | Read-only | REOPENED | Existing engine reused | — | — | Feature tests |
 | W2-27 | Applications vs Agents | IN_PROGRESS | SPEC UPDATED | NOT_DEPLOYED | Ambiguous actions | REOPENED | Selected application workspace | — | — | Deploy+retest |
 | W2-28 | Agents compact filters | IN_PROGRESS | — | NOT_DEPLOYED | Giant card | REOPENED | Search/status/type/more | — | — | Deploy+retest |
-| W2-29 | Supplier vs API | OPEN | — | — | Contradictory lists | REOPENED | Dashboard hardcodes 5 | — | Registry | Continue |
-| W2-30 | API connection mgmt | OPEN | — | — | Metadata | REOPENED | Laravel controller exists | — | Wire Next | Continue |
-| W2-31 | Sabre capability truth | OPEN | — | — | — | REOPENED | sabre_gds/ndc flags exist | — | Audit NDC truth | Continue |
-| W2-32 | Profile + org | OPEN | — | — | No avatar | REOPENED | — | — | Media domain | Continue |
-| W2-33 | CMS operational | OPEN | — | — | Unmanageable content | REOPENED | — | — | — | Continue |
-| W2-34 | Users/Staff/RBAC | OPEN | — | — | Read-only admin | REOPENED | Lifecycle exists | — | Roles write | Continue |
+| W2-29 | Supplier vs API | IN_PROGRESS | — | NOT_DEPLOYED | Contradictory lists | REOPENED | Connection registry + suppliers link | — | Deploy | Deploy |
+| W2-30 | API connection mgmt | IN_PROGRESS | CRUD 403 pre-existing agency-admin Blade | NOT_DEPLOYED | Metadata | REOPENED | Next workspace + JSON masked | — | No prod rotate | Deploy |
+| W2-31 | Sabre capability truth | IN_PROGRESS | — | — | — | REOPENED | NDC supported, default off | — | UI truth labels | Continue |
+| W2-32 | Profile + org | IN_PROGRESS | — | NOT_DEPLOYED | No avatar | REOPENED | Photo FormData + org form | — | Logo file UI | Deploy |
+| W2-33 | CMS operational | IN_PROGRESS | — | — | Unmanageable content | REOPENED | Pages live editor exists | — | Media/homepage | Continue |
+| W2-34 | Users/Staff/RBAC | IN_PROGRESS | — | NOT_DEPLOYED | Read-only admin | REOPENED | Invite/create/staff perms JSON | — | Custom role entity | Deploy |
 | W2-35 | Nav active state | IN_PROGRESS | — | NOT_DEPLOYED | Dual active | REOPENED | most-specific href | — | — | Deploy+retest |
 | W2-36 | Admin management matrix | IN_PROGRESS | DOC | — | Primary requirement | REOPENED | matrix file | — | Gaps remain | Continue |
 | W2-37 | Cross-portal matrix | IN_PROGRESS | DOC | — | — | REOPENED | matrix file | — | Audit remaining | Continue |

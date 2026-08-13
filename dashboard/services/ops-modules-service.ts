@@ -19,6 +19,14 @@ export type AgentApplicationRecord = {
   agencyName: string;
   contactName: string;
   contactEmail: string;
+  contactPhone?: string;
+  city?: string;
+  country?: string;
+  businessType?: string;
+  ntn?: string;
+  iataNumber?: string;
+  internalNote?: string;
+  reviewedAt?: string;
   status: string;
   submittedAt: string;
 };

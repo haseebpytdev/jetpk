@@ -35,9 +35,19 @@ class DashboardAgentApplicationsReadService
                 'agencyName' => (string) ($application->company_name ?? 'Application'),
                 'contactName' => $contactName !== '' ? $contactName : (string) ($application->email ?? ''),
                 'contactEmail' => (string) ($application->email ?? ''),
+                'contactPhone' => (string) ($application->mobile ?? ''),
+                'city' => (string) ($application->city ?? ''),
+                'country' => (string) ($application->country ?? ''),
+                'businessType' => (string) ($application->business_type ?? ''),
+                'ntn' => (string) ($application->ntn ?? ''),
+                'iataNumber' => (string) ($application->iata_number ?? ''),
+                'internalNote' => (string) ($application->internal_note ?? ''),
+                'reviewedAt' => $application->reviewed_at?->toIso8601String() ?? '',
                 'status' => is_object($status) && property_exists($status, 'value')
                     ? (string) $status->value
                     : (string) $status,
+                'submittedAt' => $application->created_at?->toIso8601String() ?? '',
+            ];
                 'submittedAt' => $application->created_at?->toIso8601String() ?? '',
             ];
         })->values()->all();

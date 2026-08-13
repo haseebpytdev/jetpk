@@ -175,6 +175,9 @@ class ProfileController extends Controller
             'city' => $user->profile?->city,
             'country_code' => $user->profile?->country_code,
             'whatsapp' => $user->profile?->whatsapp,
+            'photo_url' => filled($user->profile?->profile_photo_path)
+                ? asset('storage/'.$user->profile->profile_photo_path)
+                : null,
         ];
     }
 

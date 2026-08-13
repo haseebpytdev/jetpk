@@ -25,6 +25,7 @@ type ProfilePayload = {
     phone?: string | null;
     city?: string | null;
     country_code?: string | null;
+    photo_url?: string | null;
   };
 };
 
@@ -88,6 +89,9 @@ export function ProfilePageContent() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -147,6 +151,7 @@ export function ProfilePageContent() {
         city: String(profile.city ?? ""),
         country_code: String(profile.country_code ?? ""),
       });
+      setPhotoUrl(typeof profile.photo_url === "string" ? profile.photo_url : null);
       setLoading(false);
     }
 
@@ -164,17 +169,25 @@ export function ProfilePageContent() {
     setError(null);
     setSuccess(null);
 
+    const formData = new FormData();
+    formData.append("_method", "PATCH");
+    formData.append("name", form.name);
+    formData.append("email", form.email);
+    formData.append("username", form.username);
+    formData.append("phone", form.phone);
+    formData.append("city", form.city);
+    formData.append("country_code", form.country_code);
+    if (removePhoto) {
+      formData.append("remove_profile_photo", "1");
+    }
+    if (photoFile) {
+      formData.append("profile_photo", photoFile);
+    }
+
     const result = await laravelRequest<ProfilePayload>("/profile?format=json", {
-      method: "PATCH",
+      method: "POST",
       headers: { Accept: "application/json" },
-      json: {
-        name: form.name,
-        email: form.email,
-        username: form.username,
-        phone: form.phone || null,
-        city: form.city || null,
-        country_code: form.country_code || null,
-      },
+      formData,
       retryCsrfOnce: true,
     });
 
@@ -196,7 +209,10 @@ export function ProfilePageContent() {
         city: String(profile.city ?? ""),
         country_code: String(profile.country_code ?? ""),
       }));
+      setPhotoUrl(typeof profile.photo_url === "string" ? profile.photo_url : null);
     }
+    setPhotoFile(null);
+    setRemovePhoto(false);
   }
 
   return (
@@ -233,6 +249,45 @@ export function ProfilePageContent() {
         {success ? <p className="mt-3 text-sm text-green-700">{success}</p> : null}
         {!loading ? (
           <div className="mt-4 grid gap-3">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 overflow-hidden rounded-full border border-jp-border bg-gray-50">
+                {photoUrl && !removePhoto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={photoUrl} alt="Profile photo" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-jp-muted">No photo</div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  disabled={!isLive}
+                  data-testid="profile-photo"
+                  onChange={(e) => {
+                    setPhotoFile(e.target.files?.[0] ?? null);
+                    setRemovePhoto(false);
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setPhotoUrl(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="text-xs text-red-700 underline disabled:opacity-50"
+                  disabled={!isLive || (!photoUrl && !photoFile)}
+                  onClick={() => {
+                    setRemovePhoto(true);
+                    setPhotoFile(null);
+                    setPhotoUrl(null);
+                  }}
+                >
+                  Remove photo
+                </button>
+                <p className="text-xs text-jp-muted">JPEG, PNG, WebP or GIF. Max 2 MB. City does not affect security-event location.</p>
+              </div>
+            </div>
             <label className="block text-xs font-medium text-jp-muted">
               Full name
               <input

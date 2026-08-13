@@ -1,6 +1,7 @@
+import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
 import { SuppliersWorkspace } from "@/features/suppliers/suppliers-workspace";
 import { SuppliersErrorPanel } from "@/features/suppliers/suppliers-error-panel";
-import { Breadcrumb, PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parseSuppliersQuery } from "@/lib/suppliers-query";
@@ -67,9 +68,14 @@ export async function SuppliersPageContent({ searchParams }: Props) {
             />
           }
           title="Suppliers"
-          description="Supplier inventory and integration status with filters, sorting, and read-only detail."
+          description="Business vendor records grouped from connected providers. Configure technical channels on API Connections."
         />
         <DataSourceNoticeSlot />
+        <p className="text-sm">
+          <Link className="font-medium text-jp-accent-muted hover:underline" href="/settings/integrations">
+            View / configure API connections
+          </Link>
+        </p>
         <SuppliersWorkspace query={query} result={result} selectedSupplier={selectedSupplier} />
       </PageContainer>
     );
