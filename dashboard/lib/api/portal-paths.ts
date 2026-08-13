@@ -233,6 +233,10 @@ export function notificationEventsUpdatePath(): string {
   return laravelPortalPath("admin", "/settings/communications/notification-events?format=json");
 }
 
+export function brandingSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/branding?format=json");
+}
+
 export function usersStorePath(): string {
   return laravelPortalPath("admin", "/users?format=json");
 }

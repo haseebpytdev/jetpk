@@ -6,6 +6,7 @@ import { validateNotificationSettings } from "@/lib/access-control/settings-vali
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { useMockData } from "@/lib/preview";
 import { updateNotificationCategories } from "@/services/operational-api";
 import type { NotificationCategoryConfig, NotificationSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
