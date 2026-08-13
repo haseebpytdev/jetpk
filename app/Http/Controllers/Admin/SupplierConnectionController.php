@@ -335,18 +335,29 @@ class SupplierConnectionController extends Controller
 
         $credentials = array_merge($baseCredentials, $normalizedCredentials);
 
-        $settings = [];
-        $settingsRaw = trim((string) $request->input('settings_json', ''));
-        if ($settingsRaw !== '') {
-            $decoded = json_decode($settingsRaw, true);
-            if (is_array($decoded)) {
-                $settings = $decoded;
+        $settings = is_array($existing?->settings) ? $existing->settings : [];
+        if ($request->exists('settings_json')) {
+            $settingsRaw = trim((string) $request->input('settings_json', ''));
+            if ($settingsRaw === '') {
+                $settings = [];
+            } else {
+                $decoded = json_decode($settingsRaw, true);
+                if (is_array($decoded)) {
+                    $settings = $decoded;
+                }
             }
+        } elseif ($request->exists('settings') && is_array($request->input('settings'))) {
+            $settings = $request->input('settings');
         }
 
-        $meta = $request->input('meta', []);
-        if (! is_array($meta)) {
-            $meta = [];
+        $meta = is_array($existing?->meta) ? $existing->meta : [];
+        if ($request->exists('meta') && is_array($request->input('meta'))) {
+            $meta = $request->input('meta');
+        }
+
+        $baseUrl = $existing?->base_url;
+        if ($request->exists('base_url')) {
+            $baseUrl = $request->string('base_url')->toString() ?: null;
         }
 
         $status = $request->input(
@@ -360,17 +371,23 @@ class SupplierConnectionController extends Controller
             'display_name' => $request->string('name')->toString(),
             'environment' => $request->string('environment')->toString(),
             'status' => $status,
-            'base_url' => $request->string('base_url')->toString() ?: null,
+            'base_url' => $baseUrl,
             'credentials' => $credentials,
             'settings' => $settings,
             'meta' => $meta,
             'is_active' => $status === SupplierConnectionStatus::Active->value,
-            'advanced_base_url_override' => $request->boolean('advanced_base_url_override'),
+            'advanced_base_url_override' => $existing !== null && ! $request->exists('advanced_base_url_override')
+                ? true
+                : $request->boolean('advanced_base_url_override'),
         ];
 
         if ($provider === SupplierProvider::Sabre->value) {
-            $payload['sabre_gds_enabled'] = $request->boolean('sabre_gds_enabled', true);
-            $payload['sabre_ndc_enabled'] = $request->boolean('sabre_ndc_enabled', false);
+            if ($request->exists('sabre_gds_enabled')) {
+                $payload['sabre_gds_enabled'] = $request->boolean('sabre_gds_enabled');
+            }
+            if ($request->exists('sabre_ndc_enabled')) {
+                $payload['sabre_ndc_enabled'] = $request->boolean('sabre_ndc_enabled');
+            }
         }
 
         return OneApiSupplierConnectionNormalizer::normalizePayload(

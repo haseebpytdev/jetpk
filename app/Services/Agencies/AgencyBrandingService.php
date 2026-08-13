@@ -186,6 +186,17 @@ class AgencyBrandingService
         return $media;
     }
 
+    public function updateMediaAlt(AgencyMedia $media, User $actor, ?string $altText): AgencyMedia
+    {
+        $media->update(['alt_text' => $altText]);
+        $this->writeAudit(Agency::query()->findOrFail($media->agency_id), $actor, 'agency.media_updated', [
+            'agency_media_id' => $media->id,
+            'alt_text' => $altText,
+        ]);
+
+        return $media->fresh() ?? $media;
+    }
+
     public function deleteMedia(AgencyMedia $media, User $actor): void
     {
         if ($media->file_path !== null && Storage::disk('public')->exists($media->file_path)) {

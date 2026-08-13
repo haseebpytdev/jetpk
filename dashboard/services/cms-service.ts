@@ -27,7 +27,7 @@ export class CmsServiceError extends Error {
   }
 }
 
-const LIVE_SUPPORTED_MODULES: CmsModuleKey[] = ["overview", "pages"];
+const LIVE_SUPPORTED_MODULES: CmsModuleKey[] = ["overview", "pages", "assets"];
 
 function mapReadOnlyError(error: unknown): never {
   if (error instanceof ReadOnlyServiceError) {

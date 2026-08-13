@@ -18,6 +18,11 @@ class AgencyMediaPolicy
         return $user->isPlatformAdmin();
     }
 
+    public function update(User $user, AgencyMedia $media): bool
+    {
+        return $user->isPlatformAdmin();
+    }
+
     public function delete(User $user, AgencyMedia $media): bool
     {
         return $user->isPlatformAdmin();

@@ -42,6 +42,7 @@ import {
   mediaLibraryDestroyPath,
   mediaLibraryIndexPath,
   mediaLibraryStorePath,
+  mediaLibraryUpdatePath,
   notificationEventsUpdatePath,
   pageSettingsEditPath,
   pageSettingsPublishPath,
@@ -654,6 +655,17 @@ export async function uploadMediaLibraryFile(formData: FormData): Promise<Mutati
   return laravelRequest(mediaLibraryStorePath(), {
     method: "POST",
     formData,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateMediaLibraryItem(
+  mediaId: string,
+  payload: { alt_text?: string },
+): Promise<MutationResponse<{ media?: Record<string, unknown> }>> {
+  return laravelRequest(mediaLibraryUpdatePath(mediaId), {
+    method: "PATCH",
+    json: payload,
     retryCsrfOnce: false,
   });
 }

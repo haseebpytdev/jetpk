@@ -96,6 +96,29 @@ class AgencyMediaController extends Controller
         return back()->with('status', 'media-uploaded');
     }
 
+    public function update(Request $request, AgencyMedia $agencyMedia): RedirectResponse|JsonResponse
+    {
+        Gate::authorize('update', $agencyMedia);
+        $validated = $request->validate([
+            'alt_text' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $media = $this->brandingService->updateMediaAlt(
+            $agencyMedia,
+            $request->user(),
+            $validated['alt_text'] ?? null,
+        );
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'media' => $this->presentMedia($media),
+            ]);
+        }
+
+        return back()->with('status', 'media-updated');
+    }
+
     public function destroy(Request $request, AgencyMedia $agencyMedia): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $agencyMedia);

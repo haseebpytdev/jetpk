@@ -113,7 +113,7 @@ export function CmsWorkspace({ result }: Props) {
 
   return (
     <div className="space-y-4" data-testid="cms-workspace">
-      {result.module !== "overview" ? (
+      {result.module !== "overview" && result.module !== "assets" ? (
         <>
           <CmsFilterBar query={result.query} facets={result.facets} module={result.module} />
           <CmsActiveFilters query={result.query} />
@@ -153,7 +153,7 @@ export function CmsWorkspace({ result }: Props) {
       {result.module === "assets" ? <MediaLibraryPanel /> : null}
       {result.module === "pages" ? <CmsCreatePageForm /> : null}
 
-      {result.state === "empty" ? (
+      {result.state === "empty" && result.module !== "assets" ? (
         <EmptyState
           title="No CMS records match filters"
           description={

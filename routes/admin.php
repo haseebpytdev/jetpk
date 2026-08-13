@@ -273,6 +273,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/settings/homepage-featured-fares/{homepageFeaturedFare}/refresh', [HomepageFeaturedFareController::class, 'refresh'])->name('settings.homepage-featured-fares.refresh');
         Route::get('/settings/media', [AgencyMediaController::class, 'index'])->name('settings.media.index');
         Route::post('/settings/media', [AgencyMediaController::class, 'store'])->name('settings.media.store');
+        Route::patch('/settings/media/{agencyMedia}', [AgencyMediaController::class, 'update'])->name('settings.media.update');
         Route::delete('/settings/media/{agencyMedia}', [AgencyMediaController::class, 'destroy'])->name('settings.media.destroy');
         Route::get('/branding', [BackOfficeLegacyViewRedirectController::class, 'adminBrandingSettings'])->name('branding');
     });

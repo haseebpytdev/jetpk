@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-08-13 | OWNER-RETEST-V2 | **Admin closure:** name-only API connection PATCH preserves credentials/settings/base URL/Sabre channel flags. Media library JSON alt update (`AgencyBrandingService::updateMediaAlt`). CMS builder catalogue + field configure; `/cms/assets` no longer shows a false empty table. Tests: `OwnerRetestV2SafeManagementClosureTest`. |
 | 2026-08-11 | JP-OPS-08 | **Cross-portal ops inbox:** `OpsInboxService` + `OpsEventDispatcher` persist recipient notifications in `users.meta.ops_inbox` (no migration). Wired from `BookingService::assignStaff` / notes and `SupportTicketService` create/assign/reply. Dashboard `GET/POST /api/dashboard/ops/*` + Live Operations panel (`EVENT_POLLING`). Customer/Agent notification presenters now available. Tests: `JpOps08CrossPortalOpsInboxTest`. |
 | 2026-08-11 | JP-OPS-08 | **Engineering closure:** multi-browser support/assign/reply + reconnect + agent deposit fan-out + stable `event_key` dedupe. Transport=`EVENT_POLLING`. Result=`ENGINEERING_PASS_AWAITING_HUMAN_FINAL_UAT`. See `docs/jetpk/JP-OPS-08-FINAL-ENGINEERING-REPORT.md`. |
 | 2026-08-12 | JP-OPS-08 | **Acceptance reopen:** retracted false PASS; added stale concurrency (`expected_updated_at`/409), permission-scoped ops fan-out, outward status events, full source-parity manifest. Result=`FAIL_NOT_OPERATIONALLY_CLOSED` pending OLS sudo read-hash. |

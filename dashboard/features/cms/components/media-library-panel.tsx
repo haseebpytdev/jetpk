@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import { deleteMediaLibraryItem, loadMediaLibrary, uploadMediaLibraryFile } from "@/services/operational-api";
+import { deleteMediaLibraryItem, loadMediaLibrary, updateMediaLibraryItem, uploadMediaLibraryFile } from "@/services/operational-api";
 
 type MediaRow = {
   id: string;
@@ -101,6 +101,27 @@ export function MediaLibraryPanel() {
                   Copy URL
                 </button>
               ) : null}
+              <button
+                type="button"
+                className="text-xs text-jp-accent underline"
+                disabled={busy}
+                onClick={async () => {
+                  const nextAlt = window.prompt("Alt text", row.alt_text) ?? null;
+                  if (nextAlt === null) {
+                    return;
+                  }
+                  setBusy(true);
+                  const result = await updateMediaLibraryItem(row.id, { alt_text: nextAlt });
+                  setBusy(false);
+                  if (!result.ok) {
+                    setError(result.message ?? "Alt text update failed");
+                    return;
+                  }
+                  await refresh();
+                }}
+              >
+                Edit alt
+              </button>
               <button
                 type="button"
                 className="text-xs text-red-700 underline"

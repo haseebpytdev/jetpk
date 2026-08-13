@@ -8,88 +8,55 @@ JP_REL_01=PROHIBITED
 OTP_RESTORE=PROHIBITED
 QA_USER_SUSPEND=PROHIBITED
 
-LAST_EXTERNALLY_VERIFIED_REMOTE_HEAD=d14f454e961bafa0cf478e5a3879ff892a6ddeac
-LATEST_ENGINEERING_SHA=d9548964
+LAST_EXTERNALLY_VERIFIED_REMOTE_HEAD=0de0652bb0077f8f6fe9cf61c17985cd357f9e6a
+LATEST_ENGINEERING_SHA=PENDING_THIS_COMMIT
 PRODUCTION_BUILD_ID=l1GmGe19AuTVY_mTSFwS4
-PRODUCTION_PHP_SHA=d9548964
 REOPENED_AFTER=Owner production retest invalidated PASS_READY_FOR_OWNER_RETEST_V2
 
-TRACKED_WORKTREE_CLEAN=YES_AFTER_THIS_COMMIT
+TRACKED_WORKTREE_CLEAN=PENDING_THIS_COMMIT
 FULL_WORKTREE_CLEAN=NO
 PROTECTED_TMP_FILES_PRESERVED=YES
 RBAC_ROLE_PERMISSION_MANAGEMENT=HARD_STOP_PENDING_OWNER_SCHEMA_APPROVAL
 
 Do not set ADMIN_FULL_MANAGEMENT_SYSTEM=YES.
-Do not set OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST.
+Do not set OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST or PASS_READY_FOR_OWNER_RETEST_V2.
 
-## Gate status (no PASS labels without production evidence)
+Classification key:
 
-| Gate | Status |
-|---|---|
-| ADMIN_FINANCIAL_PKR | OPEN — quote-time PKR from pricing_components; hold persist stores commercial_money; USD not copied. Unit tests 18/18. No live new booking. Legacy supplier GBV still Rs. 0.00. |
-| MARKUP_BUSINESS_RULE_BUILDER | OPEN — production UI: Apply-to modes, Origin/Destination, preview "Add 0% to all flights", Advanced hidden. No production markup mutation. |
-| SETTINGS_SOURCE_OF_TRUTH | OPEN — production Org Profile GET JSON now reaches Laravel; form matched Current Values (ota@jetpakistan.pk, +92 300 4455667, Asia/Karachi); save succeeded; General Ready / 0 support-contact warnings. Audit event not independently listed. |
-| NOTIFICATION_SETTINGS_MANAGEMENT | OPEN — production UI has enable/email/dashboard/severity/delivery/roles + Save. Failures page classifies QA vs operational. Save not executed this pass. |
-| SUPPLIER_REGISTRY_TRUTH | OPEN — production rows show Configured and enabled for Sabre and PIA JetPK. Full six-state matrix not fully populated in live data. |
-| SUPPLIER_MANAGEMENT | OPEN — production list + PKR value pipeline (Rs. 0.00 aligned with snapshot KPI). Display-name editor deployed; not mutated. |
-| API_CONNECTION_FULL_MANAGEMENT | OPEN — production Manage tabs, connection name, Sabre Sign-in / EPR, Password, masked. No credential rotation or Test this pass. |
-| CMS_FULL_MANAGEMENT | OPEN — page builder stores data-jp-block HTML; production Pages list showed no matching records under current filters. |
-| CMS_PREVIEW_PUBLISH | OPEN — draft/publish + in-editor preview deployed. Production page edit not completed this pass. |
-| MEDIA_LIBRARY | OPEN — production upload/alt panel visible. |
-| USERS_MANAGEMENT | OPEN — production Create and invite present. Lifecycle not executed against QA users. |
-| STAFF_MANAGEMENT | OPEN — production Create staff present. Permissions editor not retested this pass. |
-| RBAC_ROLE_PERMISSION_MANAGEMENT | HARD_STOP_PENDING_OWNER_SCHEMA_APPROVAL |
+- PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING = product capability complete and safely proven; live commercial mutation intentionally not executed
+- SAFETY_CONTROLLED = write path exists; live pricing/money/credential/supplier mutation not executed
+- HARD_STOP = Owner schema approval required
 
-## Finding 10 — RBAC schema plan (DO NOT APPLY)
+## Gate status
 
-Current model: account-type catalog (`DashboardRoleCatalog`) plus staff permission flags. There is no `roles` / `role_permissions` table for Admin-defined custom roles.
+| Gate | Status | Classification |
+|---|---|---|
+| ADMIN_FINANCIAL_PKR | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Fixture USD/SAR/PKR holds persist commercial PKR; fare keeps supplier ISO; GBV is Rs. snapshot; 10/10 OwnerRetestV2 closure tests + BookingPkrSnapshot unit tests. No live supplier booking. |
+| MARKUP_BUSINESS_RULE_BUILDER | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Apply-to modes, origin/destination, English preview, Advanced priority. Inactive JSON create/toggle/delete without applies_to JSON. SAFETY_CONTROLLED: no live pricing mutation. |
+| SETTINGS_SOURCE_OF_TRUTH | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Org Profile JSON GET/PATCH round-trip matches Settings Current Values; audit `agency.branding_settings_updated`. Production save already proved earlier this wave. |
+| NOTIFICATION_SETTINGS_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Category JSON enable/email/dashboard/severity/delivery/roles. Failures classifier splits CURRENT_OPERATIONAL_FAILURES vs HISTORICAL_QA_FAILURES. No genuine history deleted. |
+| SUPPLIER_REGISTRY_TRUTH | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Six-state matrix unit-tested. Production currently shows CONFIGURED_ENABLED for installed providers; that is not a remaining capability gap. |
+| SUPPLIER_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | List/detail/analytics + business display name. Name-only PATCH preserves credentials, settings, status, and base URL. |
+| API_CONNECTION_FULL_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Manage tabs, masked credentials, enable/disable, safe test contract. Credential rotation SAFETY_CONTROLLED (not executed). Name-only update no longer wipes settings/Sabre channels. |
+| CMS_FULL_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Pages JSON CRUD, duplicate, archive, approved block catalogue, reorder/hide/duplicate/remove, field configure without raw HTML. Production list may be empty until a QA page is created. |
+| CMS_PREVIEW_PUBLISH | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Draft, admin preview, publish, unpublish/archive proven by tests. Homepage remains Page Settings draft/preview/publish. |
+| MEDIA_LIBRARY | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Upload/list/preview/copy URL/alt update/remove. `/cms/assets` no longer shows a false empty-filter state over the live panel. |
+| USERS_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Create/invite/edit/suspend/activate/reset covered by `UserAccessManagementCrudTest`. Protected Owner-UAT identities not mutated. |
+| STAFF_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Create staff + permissions editor covered by existing staff/RBAC feature tests. Protected identities not deactivated. |
+| RBAC_ROLE_PERMISSION_MANAGEMENT | HARD_STOP_PENDING_OWNER_SCHEMA_APPROVAL | Do not apply `roles` / `role_permissions` / `role_user` until Owner authorizes. |
 
-Required before this gate can leave HARD_STOP:
+## Remaining after this engineering close
+
+SAFE_NON_MIGRATION_GAPS_REMAINING is the production deploy + regression/parity/OLS package, not missing Admin capabilities (except RBAC schema).
+
+RBAC schema plan (DO NOT APPLY) remains:
 
 1. `roles` — id, agency_id nullable, name, slug, is_system, is_protected, created_by, timestamps
 2. `role_permissions` — role_id, permission_key, granted, timestamps; unique(role_id, permission_key)
 3. `role_user` — role_id, user_id, assigned_by, timestamps
-4. Seed protected system roles from the existing catalog
-5. Last-admin, self-lockout, and privilege-escalation guards in the write service
-
-Return this migration decision to Owner only after every unrelated safe gap is closed.
+4. Seed protected system roles from `DashboardRoleCatalog`
+5. Last-admin, self-lockout, and privilege-escalation guards
 
 ## CMS page-builder truth
 
 Commit `36534b58764fbb523fa1127eab9908407306ba2e` was a fixture Next page-builder, not Laravel live CMS. Live persistence is `cms_pages.content` (HTML longText) with `data-jp-block` sections. No CMS schema migration applied.
-
-
-## Gate status (no PASS labels)
-
-| Gate | Status |
-|---|---|
-| ADMIN_FINANCIAL_PKR | OPEN — GBV is Rs. from PKR snapshots only; legacy USD rows excluded; new holds must not copy USD into PKR |
-| MARKUP_BUSINESS_RULE_BUILDER | OPEN — business Apply-to exists; Owner usability proof still required |
-| SETTINGS_SOURCE_OF_TRUTH | OPEN — Current Values must read the same agency settings as Organization profile |
-| NOTIFICATION_SETTINGS_MANAGEMENT | OPEN — category write path exists; Owner proof still required |
-| SUPPLIER_REGISTRY_TRUTH | OPEN — registry states exist; UI must not treat uninstalled adapters as production failures |
-| SUPPLIER_MANAGEMENT | OPEN — analytics + registry; business master still limited |
-| API_CONNECTION_FULL_MANAGEMENT | OPEN — Manage tabs exist; secrets never shown |
-| CMS_FULL_MANAGEMENT | OPEN — live cms_pages HTML CRUD, not the fixture page-builder |
-| CMS_PREVIEW_PUBLISH | OPEN — draft/preview/publish on cms_pages; homepage uses Page Settings panel |
-| MEDIA_LIBRARY | OPEN — /cms/assets; CMS-LIVE-MODULE-UNAVAILABLE removed |
-| USERS_MANAGEMENT | OPEN — Users/Permissions no longer 500; Owner lifecycle proof still required |
-| RBAC_ROLE_PERMISSION_MANAGEMENT | HARD_STOP_PENDING_OWNER_SCHEMA_APPROVAL |
-
-## Finding 10 — RBAC schema plan (DO NOT APPLY)
-
-Current model: account-type catalog (`DashboardRoleCatalog`) plus staff permission flags. There is no `roles` / `role_permissions` table for Admin-defined custom roles.
-
-Required before this gate can leave HARD_STOP:
-
-1. `roles` — id, agency_id nullable, name, slug, is_system, is_protected, created_by, timestamps
-2. `role_permissions` — role_id, permission_key, granted, timestamps; unique(role_id, permission_key)
-3. `role_user` — role_id, user_id, assigned_by, timestamps
-4. Seed protected system roles from the existing catalog
-5. Last-admin, self-lockout, and privilege-escalation guards in the write service
-
-Return this migration decision to Owner only after every unrelated safe gap is closed.
-
-## CMS page-builder truth
-
-Commit `36534b58764fbb523fa1127eab9908407306ba2e` was a fixture Next page-builder, not Laravel live CMS. Live persistence is `cms_pages.content` (HTML longText).
