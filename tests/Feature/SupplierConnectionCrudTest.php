@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\AccountType;
 use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
@@ -140,7 +141,7 @@ class SupplierConnectionCrudTest extends TestCase
 
     public function test_agency_admin_cannot_edit_another_agency_supplier_connection(): void
     {
-        $admin = $this->seededAdmin();
+        $admin = $this->seededAgencyAdmin();
         $otherAgency = Agency::factory()->create();
         $foreign = SupplierConnection::factory()->create(['agency_id' => $otherAgency->id]);
 
@@ -156,7 +157,7 @@ class SupplierConnectionCrudTest extends TestCase
 
     public function test_agency_admin_cannot_delete_another_agency_supplier_connection(): void
     {
-        $admin = $this->seededAdmin();
+        $admin = $this->seededAgencyAdmin();
         $otherAgency = Agency::factory()->create();
         $foreign = SupplierConnection::factory()->create(['agency_id' => $otherAgency->id]);
 
@@ -539,7 +540,7 @@ class SupplierConnectionCrudTest extends TestCase
 
     public function test_supplier_rows_are_agency_scoped(): void
     {
-        $admin = $this->seededAdmin();
+        $admin = $this->seededAgencyAdmin();
         $otherAgency = Agency::factory()->create();
         SupplierConnection::factory()->create([
             'agency_id' => $otherAgency->id,
@@ -549,14 +550,30 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings')
-            ->assertOk()
-            ->assertDontSee('Foreign Supplier', false);
+            ->assertForbidden();
     }
 
     protected function seededAdmin(): User
     {
         $this->seed(OtaFoundationSeeder::class);
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        if ($admin->account_type !== AccountType::PlatformAdmin) {
+            $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
+            $admin = $admin->fresh();
+        }
 
-        return User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        return $admin;
+    }
+
+    protected function seededAgencyAdmin(): User
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        if ($admin->account_type !== AccountType::AgencyAdmin) {
+            $admin->forceFill(['account_type' => AccountType::AgencyAdmin])->save();
+            $admin = $admin->fresh();
+        }
+
+        return $admin;
     }
 }

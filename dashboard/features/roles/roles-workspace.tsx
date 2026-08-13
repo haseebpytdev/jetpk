@@ -58,6 +58,10 @@ export function RolesWorkspace({ result }: Props) {
 
   return (
     <div data-testid="roles-workspace">
+      <p className="mb-3 text-sm text-jp-muted">
+        Roles are the JetPakistan account-type catalogue (Platform Admin, Staff, Agent, Agent Staff, Customer). Permission
+        assignment for staff is managed on the Staff/Users record. Custom Spatie role CRUD is not part of this domain.
+      </p>
       <RolesSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
         <RolesFilterBar query={result.query} facets={result.facets} />

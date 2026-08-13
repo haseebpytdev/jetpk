@@ -72,7 +72,8 @@ export function ApiConnectionsWorkspace() {
     <div className="space-y-4" data-testid="api-connections-workspace">
       <p className="text-sm text-jp-muted">
         API Connections are technical channels. Suppliers remain the business vendor grouping. Secrets are never shown after save.
-        Production UAT must not rotate live credentials.
+        Production UAT must not rotate live credentials. Sabre NDC is shown as integrated only when Offer/Order adapters exist;
+        GDS remains the default channel. NDC defaults off. Do not treat a Sabre row as NDC-capable from the provider label alone.
       </p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <ul className="divide-y divide-jp-border rounded-xl border border-jp-border bg-white">

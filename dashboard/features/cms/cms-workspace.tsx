@@ -20,6 +20,7 @@ import { BannerDetailDrawerContent } from "@/features/cms/components/banner-deta
 import { NoticeDetailDrawerContent } from "@/features/cms/components/notice-detail-drawer";
 import { AssetDetailDrawerContent } from "@/features/cms/components/asset-detail-drawer";
 import { MediaLibraryPanel } from "@/features/cms/components/media-library-panel";
+import { HomepageSettingsPanel } from "@/features/cms/components/homepage-settings-panel";
 import { cmsQueryToSearchParams } from "@/lib/cms-query";
 import type { CmsModuleResult, CmsPreviewMode } from "@/types/cms";
 
@@ -132,10 +133,15 @@ export function CmsWorkspace({ result }: Props) {
               Live <strong>Media library</strong> for brand <strong>{result.brand.label}</strong>. Upload, list, alt text, and
               remove use Laravel agency media.
             </>
+          ) : result.module === "sections" ? (
+            <>
+              Live <strong>Homepage</strong> Page Settings for brand <strong>{result.brand.label}</strong>. Structured
+              homepage content is managed below. Fixture section cards are not the live site.
+            </>
           ) : result.module === "overview" ? (
             <>
-              CMS overview for brand <strong>{result.brand.label}</strong>. Pages and media are operational. Banners and
-              notices are not applicable until a domain exists.
+              CMS overview for brand <strong>{result.brand.label}</strong>. Pages, media, and homepage Page Settings are
+              operational. Banners and notices have no JetPakistan domain tables.
             </>
           ) : result.module === "banners" || result.module === "notices" ? (
             <>
@@ -155,6 +161,7 @@ export function CmsWorkspace({ result }: Props) {
       </p>
 
       {result.module === "assets" ? <MediaLibraryPanel /> : null}
+      {result.module === "sections" ? <HomepageSettingsPanel /> : null}
 
       {result.state === "empty" ? (
         <EmptyState

@@ -194,7 +194,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::delete('/markups/{markupRule}', [MarkupRuleController::class, 'destroy'])->name('markups.destroy');
     });
     Route::middleware('platform.module:api_settings')->group(function (): void {
-        Route::get('/api-settings', [BackOfficeLegacyViewRedirectController::class, 'adminApiSettingsIndex'])->name('api-settings');
+        Route::get('/api-settings', [SupplierConnectionController::class, 'index'])->name('api-settings');
         Route::get('/api-settings/create', [BackOfficeLegacyViewRedirectController::class, 'adminApiSettingsIndex'])->name('api-settings.create');
         Route::post('/api-settings', [SupplierConnectionController::class, 'store'])->name('api-settings.store');
         Route::get('/api-settings/{supplierConnection}/edit', [BackOfficeLegacyViewRedirectController::class, 'adminApiSettingsIndex'])->name('api-settings.edit');

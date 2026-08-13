@@ -13,7 +13,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/custom-pages', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('custom-pages.index');
         Route::get('/custom-pages/create', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('custom-pages.create');
         Route::post('/custom-pages', [\App\Http\Controllers\Admin\ClientCustomPageController::class, 'store'])->name('custom-pages.store');
-        Route::get('/{pageKey}', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('edit');
+        Route::get('/{pageKey}', [ClientPageSettingsController::class, 'edit'])->name('edit');
         Route::patch('/{pageKey}', [ClientPageSettingsController::class, 'update'])->name('update');
         Route::post('/home/refresh-fares', [ClientPageSettingsController::class, 'refreshHomeRouteFares'])->name('home.refresh-fares');
         Route::post('/{pageKey}/publish', [ClientPageSettingsController::class, 'publish'])->name('publish');

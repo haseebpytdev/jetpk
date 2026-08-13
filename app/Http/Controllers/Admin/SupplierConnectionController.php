@@ -15,6 +15,8 @@ use App\Support\Suppliers\AirBlueSupplierConnectionNormalizer;
 use App\Support\Suppliers\IatiSupplierConnectionNormalizer;
 use App\Support\Suppliers\OneApiSupplierConnectionNormalizer;
 use App\Support\Suppliers\PiaNdcSupplierConnectionNormalizer;
+use App\Support\Suppliers\SabreCapabilityTruth;
+use App\Support\Suppliers\SabreSupplierChannelConfig;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,13 +33,20 @@ class SupplierConnectionController extends Controller
         protected SupplierConnectionService $service,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', SupplierConnection::class);
 
         $query = $this->scopedQuery($request->user())
             ->withStoredCredentials();
         $connections = (clone $query)->orderBy('provider')->paginate(20);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'connections' => collect($connections->items())->map(fn ($row) => $this->presentConnection($row))->all(),
+            ]);
+        }
 
         $kpiBase = $this->scopedQuery($request->user())
             ->withStoredCredentials();
@@ -246,13 +255,21 @@ class SupplierConnectionController extends Controller
             'lastTestedAt' => $connection->last_tested_at?->toIso8601String(),
             'lastTestStatus' => $connection->last_test_status,
             'lastFailure' => $this->sanitizeFailure((string) ($connection->last_error ?? '')),
+            'sabreGdsSupported' => $provider === SupplierProvider::Sabre->value
+                ? SabreCapabilityTruth::gdsSupported()
+                : null,
             'sabreGdsEnabled' => $provider === SupplierProvider::Sabre->value
-                ? (bool) data_get($connection->settings, 'sabre_gds_enabled', true)
+                ? SabreSupplierChannelConfig::gdsEnabled($connection)
                 : null,
-            'sabreNdcEnabled' => $provider === SupplierProvider::Sabre->value
-                ? (bool) data_get($connection->settings, 'sabre_ndc_enabled', false)
+            'sabreNdcSupported' => $provider === SupplierProvider::Sabre->value
+                ? SabreCapabilityTruth::ndcSupported()
                 : null,
-            'sabreNdcSupported' => $provider === SupplierProvider::Sabre->value,
+            'sabreNdcEnabled' => $provider === SupplierProvider::Sabre->value && SabreCapabilityTruth::ndcSupported()
+                ? SabreSupplierChannelConfig::ndcEnabled($connection)
+                : false,
+            'sabreNdcUi' => $provider === SupplierProvider::Sabre->value
+                ? (SabreCapabilityTruth::ndcSupported() ? 'integrated' : 'not_integrated')
+                : null,
         ];
     }
 

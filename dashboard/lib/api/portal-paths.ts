@@ -252,3 +252,11 @@ export function mediaLibraryStorePath(): string {
 export function mediaLibraryDestroyPath(mediaId: string): string {
   return laravelPortalPath("admin", `/settings/media/${encodeURIComponent(mediaId)}?format=json`);
 }
+
+export function pageSettingsEditPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}?format=json`);
+}
+
+export function pageSettingsPublishPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/publish?format=json`);
+}

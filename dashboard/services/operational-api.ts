@@ -38,6 +38,8 @@ import {
   mediaLibraryDestroyPath,
   mediaLibraryIndexPath,
   mediaLibraryStorePath,
+  pageSettingsEditPath,
+  pageSettingsPublishPath,
   paymentRejectPath,
   paymentStorePath,
   paymentVerifyPath,
@@ -611,6 +613,31 @@ export async function uploadMediaLibraryFile(formData: FormData): Promise<Mutati
 export async function deleteMediaLibraryItem(mediaId: string): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(mediaLibraryDestroyPath(mediaId), {
     method: "DELETE",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadPageSettings(pageKey: string): Promise<MutationResponse<{ content?: Record<string, unknown>; pageKey?: string }>> {
+  return laravelRequest(pageSettingsEditPath(pageKey), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function savePageSettings(
+  pageKey: string,
+  content: Record<string, unknown>,
+): Promise<MutationResponse<{ content?: Record<string, unknown> }>> {
+  return laravelRequest(pageSettingsEditPath(pageKey), {
+    method: "PATCH",
+    json: { content },
+    retryCsrfOnce: false,
+  });
+}
+
+export async function publishPageSettings(pageKey: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(pageSettingsPublishPath(pageKey), {
+    method: "POST",
     retryCsrfOnce: false,
   });
 }
