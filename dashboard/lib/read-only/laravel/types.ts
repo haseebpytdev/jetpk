@@ -149,6 +149,7 @@ export type LaravelUsersListPayload = {
 export type LaravelRolesListPayload = {
   roles: import("@/types/roles").RoleTableRow[];
   summary: import("@/types/roles").RolesSummaryMetrics;
+  catalogPermissions?: Array<{ key: string; label: string; category: string; highRisk?: boolean }>;
 };
 
 export type LaravelPermissionsListPayload = {

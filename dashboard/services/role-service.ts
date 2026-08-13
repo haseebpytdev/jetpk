@@ -72,6 +72,7 @@ function buildFixtureResult(query: RolesQuery): RolesModuleResult {
       selectedRolePermissionKeys: [],
       selectedRoleAssignedUsers: [],
       validationIssues: [],
+      catalogPermissions: [],
     };
   }
 
@@ -93,8 +94,9 @@ function buildFixtureResult(query: RolesQuery): RolesModuleResult {
     facets: page.facets,
     selectedRole,
     selectedRolePermissionKeys: selectedRole ? getRolePermissionKeys(selectedRole.id) : [],
-    selectedRoleAssignedUsers: selectedRole ? getAssignedUsersForRole(selectedRole.id) : [],
-    validationIssues: selectedRole ? getRoleValidationIssues(selectedRole) : [],
+    selectedRoleAssignedUsers: [],
+    validationIssues: [],
+    catalogPermissions: [],
   };
 }
 

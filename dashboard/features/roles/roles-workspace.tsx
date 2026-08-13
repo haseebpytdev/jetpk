@@ -8,6 +8,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { RoleDetailDrawerContent } from "@/features/roles/components/role-detail-drawer";
 import { RoleMobileCard } from "@/features/roles/components/role-mobile-card";
 import { RolePermissionMatrix } from "@/features/roles/components/role-permission-matrix";
+import { RbacManagementPanel } from "@/features/roles/rbac-management-panel";
 import { RolesActiveFilters } from "@/features/roles/components/roles-active-filters";
 import { RolesDataTable } from "@/features/roles/components/roles-data-table";
 import { RolesFilterBar } from "@/features/roles/components/roles-filter-bar";
@@ -59,8 +60,8 @@ export function RolesWorkspace({ result }: Props) {
   return (
     <div data-testid="roles-workspace">
       <p className="mb-3 text-sm text-jp-muted">
-        Roles are the JetPakistan account-type catalogue (Platform Admin, Staff, Agent, Agent Staff, Customer). Permission
-        assignment for staff is managed on the Staff/Users record. Custom Spatie role CRUD is not part of this domain.
+        Protected system roles map to account types. Custom agency roles can be created, cloned, and assigned without
+        replacing AccountType or staff_permissions meta.
       </p>
       <RolesSummaryMetrics summary={result.summary} />
       <div className="mt-4 space-y-3">
@@ -100,6 +101,12 @@ export function RolesWorkspace({ result }: Props) {
             matrixRole={result.query.matrixRole}
             onDomainChange={(matrixDomain) => pushQuery({ matrixDomain })}
             onRoleChange={(matrixRole) => pushQuery({ matrixRole })}
+          />
+          <RbacManagementPanel
+            selectedRole={result.selectedRole}
+            permissionKeys={result.selectedRolePermissionKeys}
+            assignedUsers={result.selectedRoleAssignedUsers}
+            catalogPermissions={result.catalogPermissions}
           />
         </>
       )}

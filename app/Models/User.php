@@ -6,6 +6,7 @@ use App\Enums\AccountType;
 use App\Enums\UserAccountStatus;
 use App\Support\Agents\AgentPermission;
 use App\Support\Branding\BrandDisplayResolver;
+use App\Support\Rbac\RbacPermissionResolver;
 use App\Support\Staff\StaffPermission;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -76,6 +77,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Agency::class, 'agency_users')
             ->using(AgencyUser::class)
             ->withPivot(['role', 'agency_role'])
+            ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<Role, $this> */
+    public function rbacRoles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_user')
+            ->withPivot('assigned_by')
             ->withTimestamps();
     }
 
@@ -221,6 +230,11 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
+        $fromRoles = RbacPermissionResolver::staffKeysFromAssignedRoles($this);
+        if ($fromRoles !== null) {
+            return in_array($permission, $fromRoles, true);
+        }
+
         if (! array_key_exists('staff_permissions', $this->meta ?? [])) {
             return true;
         }
@@ -258,6 +272,11 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         if (! $this->isStaff()) {
             return [];
+        }
+
+        $fromRoles = RbacPermissionResolver::staffKeysFromAssignedRoles($this);
+        if ($fromRoles !== null) {
+            return $fromRoles;
         }
 
         if (! array_key_exists('staff_permissions', $this->meta ?? [])) {

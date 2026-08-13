@@ -102,6 +102,7 @@ export type RolesModuleResult = {
   selectedRolePermissionKeys: string[];
   selectedRoleAssignedUsers: { id: string; name: string }[];
   validationIssues: import("@/types/access-control").AccessValidationIssue[];
+  catalogPermissions: Array<{ key: string; label: string; category: string; highRisk?: boolean }>;
 };
 
 export type RoleComparisonResult = {

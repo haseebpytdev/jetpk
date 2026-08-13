@@ -40,8 +40,11 @@ export function transformRolesModule(
     selectedRolePermissionKeys: Array.isArray((selectedRole as { permissionKeys?: string[] } | null)?.permissionKeys)
       ? ((selectedRole as { permissionKeys?: string[] }).permissionKeys ?? [])
       : [],
-    selectedRoleAssignedUsers: [],
+    selectedRoleAssignedUsers: Array.isArray((selectedRole as { assignedUsers?: { id: string; name: string }[] } | null)?.assignedUsers)
+      ? ((selectedRole as { assignedUsers?: { id: string; name: string }[] }).assignedUsers ?? [])
+      : [],
     validationIssues: [],
+    catalogPermissions: payload.catalogPermissions ?? [],
   };
 }
 
@@ -68,5 +71,9 @@ export function transformRoleDetail(payload: Record<string, unknown>): Role {
     updatedAt: String(payload.updatedAt ?? ""),
     revision: 1,
     lastEditor: "system",
-  };
+    assignedUsers: Array.isArray(payload.assignedUsers)
+      ? (payload.assignedUsers as { id: string; name: string }[])
+      : [],
+    permissionKeys: Array.isArray(payload.permissionKeys) ? (payload.permissionKeys as string[]) : [],
+  } as Role;
 }

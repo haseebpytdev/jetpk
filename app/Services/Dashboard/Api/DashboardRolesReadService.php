@@ -3,13 +3,19 @@
 namespace App\Services\Dashboard\Api;
 
 use App\Http\Resources\Dashboard\DashboardRoleResource;
+use App\Models\Role;
 use App\Models\User;
+use App\Services\Rbac\RbacRolePresenter;
 use App\Support\Dashboard\DashboardPermissionResolver;
-use App\Support\Dashboard\DashboardRoleCatalog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardRolesReadService
 {
+    public function __construct(
+        protected RbacRolePresenter $presenter,
+    ) {}
+
     /**
      * @return array{items: list<array<string, mixed>>, pagination: array<string, int>, filters: array<string, mixed>, summary: array<string, int>}
      */
@@ -17,7 +23,7 @@ class DashboardRolesReadService
     {
         DashboardPermissionResolver::assertPermission($user, 'roles.view');
 
-        $roles = DashboardRoleCatalog::all();
+        $roles = $this->allPresented();
         $search = strtolower(trim((string) $request->query('q', $request->query('search', ''))));
         if ($search !== '') {
             $roles = array_values(array_filter(
@@ -51,6 +57,8 @@ class DashboardRolesReadService
             $slice,
         );
 
+        $custom = count(array_filter($roles, static fn (array $role): bool => ! (bool) $role['isSystem']));
+
         return [
             'items' => $items,
             'pagination' => [
@@ -68,7 +76,7 @@ class DashboardRolesReadService
                 'totalRoles' => $total,
                 'activeRoles' => $total,
                 'protectedSystemRoles' => count(array_filter($roles, static fn (array $role): bool => (bool) $role['isProtected'])),
-                'customRoles' => 0,
+                'customRoles' => $custom,
                 'rolesWithHighRiskPermissions' => count(array_filter($roles, static fn (array $role): bool => ($role['highRiskPermissionCount'] ?? 0) > 0)),
                 'rolesRequiringReview' => 0,
                 'unusedRoles' => count(array_filter($roles, static fn (array $role): bool => ($role['assignedUserCount'] ?? 0) === 0)),
@@ -83,8 +91,60 @@ class DashboardRolesReadService
     public function detail(User $user, string $id): ?array
     {
         DashboardPermissionResolver::assertPermission($user, 'roles.view');
-        $role = DashboardRoleCatalog::find($id);
+        $role = $this->findRole($id);
+        if ($role === null) {
+            return null;
+        }
 
-        return $role ? DashboardRoleResource::detail($role) : null;
+        $presented = $this->presenter->present($role);
+
+        return [
+            ...DashboardRoleResource::detail($presented),
+            'assignedUsers' => $presented['assignedUsers'],
+            'audit' => $this->presenter->history($role),
+            'catalogPermissions' => $this->presenter->catalogPermissions(),
+        ];
+    }
+
+    public function findRole(string $id): ?Role
+    {
+        if (! Schema::hasTable('roles')) {
+            return null;
+        }
+
+        if (ctype_digit($id)) {
+            return Role::query()->with(['permissionRows', 'users'])->find((int) $id);
+        }
+
+        return Role::query()->with(['permissionRows', 'users'])
+            ->where('slug', $id)
+            ->whereNull('agency_id')
+            ->first();
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function allPresented(): array
+    {
+        if (! Schema::hasTable('roles')) {
+            return [];
+        }
+
+        return Role::query()
+            ->with('permissionRows')
+            ->orderByDesc('is_system')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Role $role): array => $this->presenter->present($role))
+            ->all();
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function catalog(): array
+    {
+        return $this->presenter->catalogPermissions();
     }
 }

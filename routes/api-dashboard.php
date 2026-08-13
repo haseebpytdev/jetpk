@@ -170,9 +170,26 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
     Route::middleware('dashboard.permission:roles.view')->group(function (): void {
         Route::get('/roles', [DashboardRolesController::class, 'index'])
             ->name('roles.index');
+        Route::post('/roles', [DashboardRolesController::class, 'store'])
+            ->name('roles.store');
         Route::get('/roles/{role}', [DashboardRolesController::class, 'show'])
             ->where('role', '[^/]+')
             ->name('roles.show');
+        Route::patch('/roles/{role}', [DashboardRolesController::class, 'update'])
+            ->where('role', '[^/]+')
+            ->name('roles.update');
+        Route::delete('/roles/{role}', [DashboardRolesController::class, 'destroy'])
+            ->where('role', '[^/]+')
+            ->name('roles.destroy');
+        Route::post('/roles/{role}/clone', [DashboardRolesController::class, 'cloneRole'])
+            ->where('role', '[^/]+')
+            ->name('roles.clone');
+        Route::post('/roles/{role}/assign', [DashboardRolesController::class, 'assign'])
+            ->where('role', '[^/]+')
+            ->name('roles.assign');
+        Route::post('/roles/{role}/unassign', [DashboardRolesController::class, 'unassign'])
+            ->where('role', '[^/]+')
+            ->name('roles.unassign');
         Route::get('/rbac/matrix', [DashboardPermissionsController::class, 'matrix'])
             ->name('rbac.matrix');
     });
