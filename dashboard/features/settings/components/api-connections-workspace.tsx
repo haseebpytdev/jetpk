@@ -42,6 +42,7 @@ type ApiConnectionRow = {
   sabreNdcSupported?: boolean | null;
   sabreNdcEnabled?: boolean | null;
   lastTestStatus?: string | null;
+  registryLabel?: string | null;
 };
 
 function extractConnections(result: { ok: boolean; data?: unknown }): ApiConnectionRow[] {
@@ -115,6 +116,7 @@ export function ApiConnectionsWorkspace() {
                     } (${row.sabreNdcEnabled ? "enabled" : "off"})`
                   : ""}
                 {row.lastTestStatus ? ` · last test ${row.lastTestStatus}` : ""}
+                {row.registryLabel ? ` · ${row.registryLabel}` : ""}
               </p>
             </div>
             {isLive ? (

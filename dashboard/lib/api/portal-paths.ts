@@ -80,6 +80,14 @@ export function cmsPageArchivePath(pageId: string): string {
   return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}/archive?format=json`);
 }
 
+export function cmsPageDuplicatePath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}/duplicate?format=json`);
+}
+
+export function cmsPageDestroyPath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}?format=json`);
+}
+
 export function bookingAssignStaffPath(bookingId: string): string {
   return laravelPortalPath("admin", `/bookings/${encodeURIComponent(bookingId)}/assign-staff?format=json`);
 }

@@ -1,11 +1,11 @@
 import { CmsPageContent } from "@/features/cms/cms-page-content";
 
-export const metadata = { title: "CMS Notices — JetPakistan Dashboard" };
+export const metadata = { title: "CMS — JetPakistan Dashboard" };
 
 export default function CmsNoticesRoute({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  return <CmsPageContent searchParams={searchParams} module="notices" />;
+  return <CmsPageContent searchParams={searchParams} module="overview" />;
 }

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import { archiveCmsPage, updateCmsPage } from "@/services/operational-api";
+import { archiveCmsPage, destroyCmsPage, duplicateCmsPage, updateCmsPage } from "@/services/operational-api";
+import { CmsHtmlBlockBuilder } from "@/features/cms/components/cms-html-block-builder";
 import type { CmsPage } from "@/types/cms";
 
 function toLaravelStatus(status: CmsPage["status"]): "draft" | "active" | "archived" {
@@ -71,6 +72,37 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
       return;
     }
     setSuccess("CMS page saved.");
+    router.refresh();
+  }
+
+  async function handleDuplicate() {
+    setBusy(true);
+    setError(null);
+    setSuccess(null);
+    const result = await duplicateCmsPage(pageKey);
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.message ?? "Duplicate failed.");
+      return;
+    }
+    setSuccess("Draft copy created.");
+    router.refresh();
+  }
+
+  async function handleDestroy() {
+    if (!window.confirm("Remove this page? It can be restored from archive only if soft-deleted on the server.")) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    setSuccess(null);
+    const result = await destroyCmsPage(pageKey);
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.message ?? "Remove failed.");
+      return;
+    }
+    setSuccess("CMS page removed.");
     router.refresh();
   }
 
@@ -143,9 +175,13 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
           />
         </label>
         <label className="block text-sm sm:col-span-2">
-          <span className="text-jp-muted">Content (HTML)</span>
+          <span className="text-jp-muted">Content</span>
+          <CmsHtmlBlockBuilder
+            disabled={busy}
+            onInsert={(html) => setContent((current) => `${current}${current.endsWith("\n") || current === "" ? "" : "\n"}${html}`)}
+          />
           <textarea
-            className="mt-1 min-h-40 w-full rounded-xl border border-jp-border bg-white px-3 py-2 font-mono text-xs"
+            className="mt-2 min-h-40 w-full rounded-xl border border-jp-border bg-white px-3 py-2 font-mono text-xs"
             value={content}
             disabled={busy}
             onChange={(e) => setContent(e.target.value)}
@@ -222,6 +258,24 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
           data-testid="cms-page-archive"
         >
           Archive
+        </button>
+        <button
+          type="button"
+          className="inline-flex min-h-11 items-center rounded-xl border border-jp-border bg-white px-4 py-2 text-sm font-medium text-gray-900 disabled:opacity-50"
+          disabled={busy}
+          onClick={() => void handleDuplicate()}
+          data-testid="cms-page-duplicate"
+        >
+          Duplicate
+        </button>
+        <button
+          type="button"
+          className="inline-flex min-h-11 items-center rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 disabled:opacity-50"
+          disabled={busy}
+          onClick={() => void handleDestroy()}
+          data-testid="cms-page-destroy"
+        >
+          Remove
         </button>
       </div>
     </div>

@@ -27,7 +27,7 @@ export function CmsModuleShell({ module, result }: Props) {
       <PreviewModeBadgeSlot />
       <PageHeader
         breadcrumb={
-          <Breadcrumb items={[{ label: "Home" }, { label: "Inventory & pricing" }, { label: "CMS" }, { label: current.label }]} />
+          <Breadcrumb items={[{ label: "Home" }, { label: "CMS" }, { label: current.label }]} />
         }
         title={current.label === "Overview" ? "CMS" : current.label}
         description={

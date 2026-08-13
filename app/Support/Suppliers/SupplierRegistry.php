@@ -54,7 +54,7 @@ final class SupplierRegistry
             return self::CONNECTION_NOT_CONFIGURED;
         }
 
-        if ($status === SupplierConnectionStatus::Pending) {
+        if ($status === SupplierConnectionStatus::Testing) {
             return self::PENDING_ACTIVATION;
         }
 

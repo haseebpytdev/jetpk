@@ -22,6 +22,8 @@ import {
   cancellationRejectPath,
   cancellationStorePath,
   cmsPageArchivePath,
+  cmsPageDestroyPath,
+  cmsPageDuplicatePath,
   cmsPageStorePath,
   cmsPageUpdatePath,
   commissionEntryApprovePath,
@@ -243,6 +245,22 @@ export async function archiveCmsPage(
 ): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
   return laravelRequest(cmsPageArchivePath(pageId), {
     method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function duplicateCmsPage(
+  pageId: string,
+): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
+  return laravelRequest(cmsPageDuplicatePath(pageId), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function destroyCmsPage(pageId: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(cmsPageDestroyPath(pageId), {
+    method: "DELETE",
     retryCsrfOnce: false,
   });
 }

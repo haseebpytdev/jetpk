@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { CmsPageComposition } from "@/features/cms/components/cms-page-composition";
 import { CmsPageLocalEditor } from "@/features/cms/components/cms-page-local-editor";
 import { CmsMediaFieldCards } from "@/features/cms/components/cms-media-field-cards";
@@ -15,6 +16,7 @@ import { resolveValidation } from "@/lib/cms/query-filters";
 import type { CmsPage, CmsPreviewMode } from "@/types/cms";
 
 export function PageDetailDrawerContent({ page, previewMode, onPreviewModeChange }: { page: CmsPage; previewMode: CmsPreviewMode; onPreviewModeChange: (mode: CmsPreviewMode) => void }) {
+  const isLive = useDashboardLiveMode();
   const validation = resolveValidation(page, "page");
   const sections = useMemo(
     () => page.sectionIds.map((id) => mockCmsSections.find((s) => s.id === id)).filter(Boolean),
@@ -63,39 +65,42 @@ export function PageDetailDrawerContent({ page, previewMode, onPreviewModeChange
             </dl>
           </section>
 
-          <CmsPageComposition
-            page={page}
-            activeSectionId={activeSectionId}
-            onActiveSectionChange={setActiveSectionId}
-          />
-          <CmsMediaFieldCards assetIds={mediaAssetIds} />
-          <CmsValidationSummary issues={validation.issues} />
+          {isLive ? null : (
+            <CmsPageComposition
+              page={page}
+              activeSectionId={activeSectionId}
+              onActiveSectionChange={setActiveSectionId}
+            />
+          )}
+          {isLive ? null : (
+            <>
+              <CmsMediaFieldCards assetIds={mediaAssetIds} />
+              <CmsValidationSummary issues={validation.issues} />
+            </>
+          )}
         </div>
 
         <aside className="h-fit space-y-3 lg:sticky lg:top-4" data-testid="cms-page-preview-panel">
-          <h3 className="text-sm font-semibold text-gray-900">Live preview</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Preview</h3>
           <CmsPreviewModeSelector mode={previewMode} onChange={onPreviewModeChange} />
           <CmsPreviewShell mode={previewMode} label={page.title} large>
-            <div className="space-y-4">
-              {activeSection ? <CmsSectionPreview section={activeSection} mode={previewMode} compact /> : null}
-              {sections
-                .filter((section) => section && section.id !== activeSection?.id)
-                .map((section) =>
-                  section ? <CmsSectionPreview key={section.id} section={section} mode={previewMode} compact /> : null,
-                )}
-            </div>
+            {isLive ? (
+              <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: page.content ?? "" }} />
+            ) : (
+              <div className="space-y-4">
+                {activeSection ? <CmsSectionPreview section={activeSection} mode={previewMode} compact /> : null}
+                {sections
+                  .filter((section) => section && section.id !== activeSection?.id)
+                  .map((section) =>
+                    section ? <CmsSectionPreview key={section.id} section={section} mode={previewMode} compact /> : null,
+                  )}
+              </div>
+            )}
           </CmsPreviewShell>
         </aside>
       </div>
 
-      <CmsRevisionTimeline revisions={mockCmsRevisions} entityId={page.id} />
-
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900">Future Next.js mapping</h3>
-        <p className="mt-1 text-sm text-jp-muted">
-          Page sections map to trusted Next.js components via stable <code>frontendComponentKey</code> values from the section registry.
-        </p>
-      </section>
+      {isLive ? null : <CmsRevisionTimeline revisions={mockCmsRevisions} entityId={page.id} />}
     </div>
   );
 }

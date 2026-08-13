@@ -208,9 +208,9 @@ class BackOfficeCapabilitiesPresenter
             $content[] = $this->dashboardNav('Branding', 'branding', '/settings/general');
         }
         if ($isAdmin) {
+            $content[] = $this->dashboardNav('Pages', 'cms-pages', '/cms/pages');
             $content[] = $this->dashboardNav('Homepage', 'homepage', '/cms/sections');
             $content[] = $this->dashboardNav('Media library', 'media', '/cms/assets');
-            $content[] = $this->dashboardNav('Page settings', 'page-settings', '/cms/pages');
         }
         if ($content !== []) {
             $groups[] = ['label' => 'Content & website', 'items' => array_values(array_filter($content))];

@@ -175,6 +175,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::post('/cms-pages', [CmsPageController::class, 'store'])->name('cms-pages.store');
     Route::get('/cms-pages/{cmsPage}/edit', [BackOfficeLegacyViewRedirectController::class, 'adminCmsPagesIndex'])->name('cms-pages.edit');
     Route::patch('/cms-pages/{cmsPage}', [CmsPageController::class, 'update'])->name('cms-pages.update');
+    Route::post('/cms-pages/{cmsPage}/duplicate', [CmsPageController::class, 'duplicate'])->name('cms-pages.duplicate');
     Route::patch('/cms-pages/{cmsPage}/archive', [CmsPageController::class, 'archive'])->name('cms-pages.archive');
     Route::delete('/cms-pages/{cmsPage}', [CmsPageController::class, 'destroy'])->name('cms-pages.destroy');
     Route::get('/cms-pages/{cmsPage}/preview', [CmsPageController::class, 'preview'])->name('cms-pages.preview');

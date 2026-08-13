@@ -124,33 +124,23 @@ export function CmsWorkspace({ result }: Props) {
         {isLive ? (
           result.module === "pages" ? (
             <>
-              Live <strong>Pages</strong> for brand <strong>{result.brand.label}</strong>. Create/edit/archive uses the
-              Laravel CMS pages JSON path. Media library uploads use agency media. Banners and notices have no JetPakistan
-              domain tables.
+              Create, edit, duplicate, archive, and preview JetPakistan pages. Homepage content is managed under Homepage.
             </>
           ) : result.module === "assets" ? (
             <>
-              Live <strong>Media library</strong> for brand <strong>{result.brand.label}</strong>. Upload, list, alt text, and
-              remove use Laravel agency media.
+              Upload, list, preview, and reuse media. Alt text is stored with each file.
             </>
           ) : result.module === "sections" ? (
             <>
-              Live <strong>Homepage</strong> Page Settings for brand <strong>{result.brand.label}</strong>. Structured
-              homepage content is managed below. Fixture section cards are not the live site.
+              Authoritative homepage content. Save a draft, then preview the public home.
             </>
           ) : result.module === "overview" ? (
             <>
-              CMS overview for brand <strong>{result.brand.label}</strong>. Pages, media, and homepage Page Settings are
-              operational. Banners and notices have no JetPakistan domain tables.
-            </>
-          ) : result.module === "banners" || result.module === "notices" ? (
-            <>
-              <strong>{result.module}</strong> has no JetPakistan database domain. Do not treat fixture cards as live
-              site management.
+              Use Pages, Homepage, and Media library. Those are the operational CMS modules.
             </>
           ) : (
             <>
-              <strong>{result.module}</strong> listing for brand <strong>{result.brand.label}</strong>.
+              This CMS area is not an operational JetPakistan module.
             </>
           )
         ) : (

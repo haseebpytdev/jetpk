@@ -130,6 +130,30 @@ class CmsPageController extends Controller
         return redirect()->route('admin.cms-pages.index')->with('status', 'cms-page-updated');
     }
 
+    public function duplicate(CmsPage $cmsPage): RedirectResponse|JsonResponse
+    {
+        Gate::authorize('create', CmsPage::class);
+
+        $copy = $cmsPage->replicate(['published_at']);
+        $copy->title = $cmsPage->title.' (copy)';
+        $copy->slug = $this->uniqueCopySlug((string) $cmsPage->slug);
+        $copy->status = CmsPage::STATUS_DRAFT;
+        $copy->published_at = null;
+        $copy->created_by = auth()->id();
+        $copy->updated_by = auth()->id();
+        $copy->save();
+
+        if ($this->wantsBackOfficeJson(request())) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'CMS page duplicated as a draft.',
+                'page' => DashboardCmsPageResource::detail($copy->fresh()),
+            ]);
+        }
+
+        return redirect()->route('admin.cms-pages.index')->with('status', 'cms-page-duplicated');
+    }
+
     public function archive(CmsPage $cmsPage): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $cmsPage);
@@ -150,11 +174,18 @@ class CmsPageController extends Controller
         return back()->with('status', 'cms-page-archived');
     }
 
-    public function destroy(CmsPage $cmsPage): RedirectResponse
+    public function destroy(CmsPage $cmsPage): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $cmsPage);
 
         $cmsPage->delete();
+
+        if ($this->wantsBackOfficeJson(request())) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'CMS page removed.',
+            ]);
+        }
 
         return redirect()->route('admin.cms-pages.index')->with('status', 'cms-page-deleted');
     }
@@ -197,6 +228,19 @@ class CmsPageController extends Controller
             'created_by' => $existing?->created_by ?? $userId,
             'updated_by' => $userId,
         ];
+    }
+
+    protected function uniqueCopySlug(string $base): string
+    {
+        $root = preg_replace('/-copy(?:-\d+)?$/', '', $base) ?: $base;
+        $candidate = $root.'-copy';
+        $i = 2;
+        while (CmsPage::query()->withTrashed()->where('slug', $candidate)->exists()) {
+            $candidate = $root.'-copy-'.$i;
+            $i++;
+        }
+
+        return $candidate;
     }
 
     protected function storeFeaturedImage(UploadedFile $file, CmsPage $page): string
