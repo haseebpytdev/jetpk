@@ -76,6 +76,42 @@ class SupplierConnectionJsonManagementTest extends TestCase
         $this->assertTrue(SabreCapabilityTruth::ndcSupported());
     }
 
+    public function test_provider_catalog_returns_full_safe_field_metadata_and_audit_history(): void
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $admin = $this->platformAdmin();
+
+        $list = $this->actingAs($admin)->getJson('/admin/api-settings?format=json')->assertOk();
+        $airblue = collect($list->json('providers') ?? $list->json('data.providers'))
+            ->firstWhere('key', SupplierProvider::Airblue->value);
+        $this->assertIsArray($airblue);
+        $channel = collect($airblue['credentialFields'])->firstWhere('key', 'api_channel');
+        $this->assertSame('select', $channel['type']);
+        $this->assertNotEmpty($channel['options']);
+        $this->assertTrue($channel['required']);
+        $username = collect($airblue['credentialFields'])->firstWhere('key', 'username');
+        $this->assertSame('crane_ndc', $username['channel']);
+        $this->assertArrayNotHasKey('secret', $channel);
+
+        $create = $this->actingAs($admin)->postJson('/admin/api-settings?format=json', [
+            'provider' => SupplierProvider::Duffel->value,
+            'name' => 'QA metadata duffel',
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'credentials' => ['access_token' => 'qa-fixture-token'],
+        ])->assertOk();
+        $id = (string) $create->json('connection.id');
+        $listed = $this->actingAs($admin)->getJson('/admin/api-settings?format=json')->assertOk();
+        $row = collect($listed->json('connections') ?? $listed->json('data.connections'))->firstWhere('id', $id);
+        $this->assertNotEmpty($row['audit']['history'] ?? []);
+        $this->assertSame('supplier.connection_created', $row['audit']['history'][0]['action'] ?? $row['audit']['history'][count($row['audit']['history']) - 1]['action']);
+        $encoded = $listed->getContent();
+        $this->assertStringNotContainsString('qa-fixture-token', $encoded);
+        $apiVersion = collect($row['credentialFields'])->firstWhere('key', 'api_version');
+        $this->assertSame('advanced', $apiVersion['group'] ?? null);
+        $this->assertSame('v2', $apiVersion['default'] ?? null);
+    }
+
     protected function platformAdmin(): User
     {
         $this->seed(OtaFoundationSeeder::class);

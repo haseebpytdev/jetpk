@@ -135,6 +135,19 @@ export type Role = {
   revision: number;
   lastEditor: string;
   validationState: ValidationState;
+  assignedUsers?: { id: string; name: string; email?: string }[];
+  permissionKeys?: string[];
+  agencyId?: string | null;
+  audit?: Array<{ id?: number; action: string; createdAt?: string | null; actorId?: number | null }>;
+  authorization?: {
+    model: string;
+    rolePermissionKeys?: string[];
+    rolePermissionCount?: number;
+    accountTypeFallback?: string;
+    staffMetaOverrides?: string;
+    effectiveForFirstAssignee?: string[];
+    effectiveCountForFirstAssignee?: number;
+  };
 };
 
 export type PermissionGroup =

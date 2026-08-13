@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\CmsPage;
-use App\Services\Agencies\AboutUsContentPresenter;
+use App\Services\Cms\CmsPageContentSanitizer;
 use Illuminate\View\View;
 
 class CmsPageController extends Controller
 {
     public function __construct(
-        protected AboutUsContentPresenter $contentPresenter,
+        protected CmsPageContentSanitizer $contentSanitizer,
     ) {}
 
     public function show(string $slug): View
@@ -35,7 +35,7 @@ class CmsPageController extends Controller
 
         return [
             'page' => $page,
-            'bodyHtml' => $this->contentPresenter->formatHtmlOverrideForDisplay($page->content),
+            'bodyHtml' => $this->contentSanitizer->formatForPublicDisplay($page->content),
             'isPreview' => $isPreview,
             'metaTitle' => $metaTitle,
             'metaDescription' => $metaDescription,

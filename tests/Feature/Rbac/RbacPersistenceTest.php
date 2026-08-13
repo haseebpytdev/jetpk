@@ -210,4 +210,39 @@ class RbacPersistenceTest extends TestCase
         $this->actingAs($admin)->getJson('/api/dashboard/roles')->assertOk()
             ->assertJsonPath('data.summary.protectedSystemRoles', 6);
     }
+
+    public function test_role_detail_isolates_permission_keys_and_rejects_zero_agency(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        app(RbacInstallService::class)->seedAndBackfill();
+        $admin = $this->platformAdmin();
+        $agency = Agency::query()->firstOrFail();
+        $writes = app(RbacWriteService::class);
+        $roleA = $writes->createCustomRole($admin, 'Role A', 'role_a_iso', (int) $agency->id, ['dashboard.view']);
+        $roleB = $writes->createCustomRole($admin, 'Role B', 'role_b_iso', (int) $agency->id, ['cms.edit']);
+
+        $detailA = $this->actingAs($admin)->getJson('/api/dashboard/roles/'.$roleA->id)->assertOk();
+        $detailB = $this->actingAs($admin)->getJson('/api/dashboard/roles/'.$roleB->id)->assertOk();
+        $this->assertSame(['dashboard.view'], $detailA->json('data.permissionKeys'));
+        $this->assertSame(['cms.edit'], $detailB->json('data.permissionKeys'));
+        $this->assertSame('Role A', $detailA->json('data.name'));
+        $this->assertSame('Role B', $detailB->json('data.name'));
+        $this->assertSame('dual-read', $detailB->json('data.authorization.model'));
+        $this->assertIsArray($detailB->json('data.audit'));
+
+        $this->actingAs($admin)->patchJson('/api/dashboard/roles/'.$roleB->id, [
+            'permission_keys' => ['cms.edit', 'support.view'],
+        ])->assertOk();
+
+        $this->assertSame(['dashboard.view'], $roleA->fresh()->grantedPermissionKeys());
+        $this->assertEqualsCanonicalizing(['cms.edit', 'support.view'], $roleB->fresh()->grantedPermissionKeys());
+
+        $this->actingAs($admin)
+            ->postJson('/api/dashboard/roles', [
+                'name' => 'Invalid agency role',
+                'agency_id' => 0,
+                'permission_keys' => ['dashboard.view'],
+            ])
+            ->assertStatus(422);
+    }
 }

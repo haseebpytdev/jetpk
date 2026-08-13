@@ -97,12 +97,25 @@ class DashboardRolesReadService
         }
 
         $presented = $this->presenter->present($role);
+        $assignee = $role->users()->first();
+        $effective = $assignee instanceof User
+            ? DashboardPermissionResolver::effectivePermissionKeys($assignee)
+            : [];
 
         return [
             ...DashboardRoleResource::detail($presented),
             'assignedUsers' => $presented['assignedUsers'],
             'audit' => $this->presenter->history($role),
             'catalogPermissions' => $this->presenter->catalogPermissions(),
+            'authorization' => [
+                'model' => 'dual-read',
+                'rolePermissionKeys' => $presented['permissionKeys'],
+                'rolePermissionCount' => count($presented['permissionKeys']),
+                'accountTypeFallback' => 'AccountType baseline remains active when no matching role assignment applies.',
+                'staffMetaOverrides' => 'users.meta.staff_permissions still apply as staff overrides.',
+                'effectiveForFirstAssignee' => $effective,
+                'effectiveCountForFirstAssignee' => count($effective),
+            ],
         ];
     }
 

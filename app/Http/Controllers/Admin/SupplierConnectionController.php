@@ -19,6 +19,8 @@ use App\Support\Suppliers\SabreCapabilityTruth;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
+use App\Support\Suppliers\SupplierProviderFieldCatalog;
+use App\Models\AuditLog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -258,16 +260,8 @@ class SupplierConnectionController extends Controller
             'baseUrlOverridable' => in_array($provider, [SupplierProvider::PiaNdc->value, SupplierProvider::Airblue->value], true),
             'credentialFields' => $this->credentialFieldsFor($provider),
             'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
-            'advanced' => [
-                'settingsKeys' => is_array($connection->settings) ? array_keys($connection->settings) : [],
-                'advancedBaseUrlOverride' => (bool) data_get($connection->settings, 'advanced_base_url_override', filled($connection->base_url)),
-            ],
-            'audit' => [
-                'lastTestedAt' => $connection->last_tested_at?->toIso8601String(),
-                'lastTestStatus' => $connection->last_test_status,
-                'lastFailure' => $this->sanitizeFailure((string) ($connection->last_error ?? '')),
-                'updatedAt' => $connection->updated_at?->toIso8601String(),
-            ],
+            'advanced' => $this->presentAdvanced($connection, $provider),
+            'audit' => $this->presentAudit($connection),
         ];
     }
 
@@ -276,23 +270,19 @@ class SupplierConnectionController extends Controller
      */
     protected function providerCatalog(): array
     {
-        $config = config('supplier_credentials.providers', []);
         $catalog = [];
         foreach (SupplierProvider::cases() as $provider) {
-            $fields = [];
-            foreach ((array) data_get($config, $provider->value.'.fields', []) as $key => $meta) {
-                $fields[] = [
-                    'key' => (string) $key,
-                    'label' => (string) ($meta['label'] ?? $key),
-                    'type' => (string) ($meta['type'] ?? 'text'),
-                ];
-            }
+            $fields = SupplierProviderFieldCatalog::fieldsFor($provider->value);
             $catalog[] = [
                 'key' => $provider->value,
                 'label' => $provider->name,
                 'installed' => \App\Support\Suppliers\SupplierRegistry::adapterInstalled($provider),
                 'baseUrlOverridable' => in_array($provider->value, [SupplierProvider::PiaNdc->value, SupplierProvider::Airblue->value], true),
                 'credentialFields' => $fields,
+                'advancedFields' => array_values(array_filter(
+                    $fields,
+                    static fn (array $field): bool => in_array($field['group'] ?? '', ['advanced', 'channel'], true),
+                )),
                 'state' => \App\Support\Suppliers\SupplierRegistry::stateForUnprovisioned($provider),
             ];
         }
@@ -301,20 +291,121 @@ class SupplierConnectionController extends Controller
     }
 
     /**
-     * @return list<array<string, string>>
+     * @return list<array<string, mixed>>
      */
     protected function credentialFieldsFor(string $provider): array
     {
-        $fields = [];
-        foreach ((array) data_get(config('supplier_credentials.providers', []), $provider.'.fields', []) as $key => $meta) {
-            $fields[] = [
-                'key' => (string) $key,
-                'label' => (string) ($meta['label'] ?? $key),
-                'type' => (string) ($meta['type'] ?? 'text'),
+        return SupplierProviderFieldCatalog::fieldsFor($provider);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function presentAdvanced(SupplierConnection $connection, string $provider): array
+    {
+        $fields = array_values(array_filter(
+            SupplierProviderFieldCatalog::fieldsFor($provider),
+            static fn (array $field): bool => in_array($field['group'] ?? '', ['advanced', 'channel'], true),
+        ));
+        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+        $values = [];
+        foreach ($fields as $field) {
+            $key = (string) $field['key'];
+            $raw = $credentials[$key] ?? ($field['default'] ?? null);
+            if ($raw === null || $raw === '') {
+                continue;
+            }
+            $values[$key] = (string) $raw;
+        }
+        $settings = is_array($connection->settings) ? $connection->settings : [];
+        $readOnly = [];
+        if ($provider === SupplierProvider::Sabre->value) {
+            $readOnly[] = [
+                'key' => 'sabre_cancellation_gates',
+                'label' => 'Sabre cancellation gates',
+                'value' => 'Preserved internal policy — not editable here',
+            ];
+        }
+        foreach ($settings as $key => $value) {
+            if (! is_string($key) || in_array($key, ['advanced_base_url_override', 'timeouts'], true)) {
+                continue;
+            }
+            if (is_array($value) || is_object($value)) {
+                continue;
+            }
+            $readOnly[] = [
+                'key' => $key,
+                'label' => str_replace('_', ' ', $key),
+                'value' => is_bool($value) ? ($value ? 'yes' : 'no') : (string) $value,
             ];
         }
 
-        return $fields;
+        return [
+            'fields' => $fields,
+            'values' => $values,
+            'timeouts' => $settings['timeouts'] ?? null,
+            'timeoutsUserConfigurable' => false,
+            'baseUrlOverridable' => in_array($provider, [SupplierProvider::PiaNdc->value, SupplierProvider::Airblue->value], true),
+            'readOnly' => $readOnly,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function presentAudit(SupplierConnection $connection): array
+    {
+        $history = [];
+        if (\Illuminate\Support\Facades\Schema::hasTable('audit_logs')) {
+            $history = AuditLog::query()
+                ->where('auditable_type', SupplierConnection::class)
+                ->where('auditable_id', $connection->id)
+                ->latest('id')
+                ->limit(40)
+                ->get()
+                ->map(function (AuditLog $log): array {
+                    return [
+                        'id' => $log->id,
+                        'action' => $log->action,
+                        'createdAt' => $log->created_at?->toIso8601String(),
+                        'actorId' => $log->user_id,
+                        'properties' => $this->redactAuditProperties($log->properties),
+                    ];
+                })
+                ->all();
+        }
+
+        return [
+            'history' => $history,
+            'lastTestedAt' => $connection->last_tested_at?->toIso8601String(),
+            'lastTestStatus' => $connection->last_test_status,
+            'lastFailure' => $this->sanitizeFailure((string) ($connection->last_error ?? '')),
+            'updatedAt' => $connection->updated_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @param  mixed  $properties
+     * @return mixed
+     */
+    protected function redactAuditProperties(mixed $properties): mixed
+    {
+        if (! is_array($properties)) {
+            return $properties;
+        }
+        $blocked = ['password', 'secret', 'token', 'access_token', 'client_key', 'api_key', 'auth_code', 'credentials'];
+        $out = [];
+        foreach ($properties as $key => $value) {
+            $name = strtolower((string) $key);
+            if (in_array($name, $blocked, true) || str_contains($name, 'password') || str_contains($name, 'secret') || str_contains($name, 'token')) {
+                $out[$key] = '[redacted]';
+
+                continue;
+            }
+            $out[$key] = is_array($value) ? $this->redactAuditProperties($value) : $value;
+        }
+
+        return $out;
     }
 
     /**

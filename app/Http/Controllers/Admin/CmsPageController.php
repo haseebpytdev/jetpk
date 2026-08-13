@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\StoreCmsPageRequest;
 use App\Http\Requests\Admin\UpdateCmsPageRequest;
 use App\Http\Resources\Dashboard\DashboardCmsPageResource;
 use App\Models\CmsPage;
-use App\Services\Agencies\AboutUsContentPresenter;
+use App\Services\Cms\CmsPageContentSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,7 +21,7 @@ class CmsPageController extends Controller
     use RespondsWithBackOfficeJson;
 
     public function __construct(
-        protected AboutUsContentPresenter $contentPresenter,
+        protected CmsPageContentSanitizer $contentSanitizer,
     ) {}
 
     public function index(Request $request): View
@@ -210,7 +210,7 @@ class CmsPageController extends Controller
             'title' => $request->filled('title') ? $request->string('title')->toString() : $cmsPage->title,
             'excerpt' => $request->exists('excerpt') ? $request->input('excerpt') : $cmsPage->excerpt,
             'content' => $request->exists('content')
-                ? $this->contentPresenter->sanitizeHtmlOverrideForStorage($request->input('content'))
+                ? $this->contentSanitizer->sanitizeForStorage($request->input('content'))
                 : $cmsPage->content,
         ];
         $request->session()->put($this->draftOverlayKey($cmsPage), $overlay);
@@ -270,7 +270,7 @@ class CmsPageController extends Controller
         return [
             'title' => $request->string('title')->toString(),
             'slug' => $request->string('slug')->toString(),
-            'content' => $this->contentPresenter->sanitizeHtmlOverrideForStorage($request->input('content')),
+            'content' => $this->contentSanitizer->sanitizeForStorage($request->input('content')),
             'excerpt' => $request->filled('excerpt') ? $request->string('excerpt')->toString() : null,
             'seo_title' => $request->filled('seo_title') ? $request->string('seo_title')->toString() : null,
             'seo_description' => $request->filled('seo_description') ? $request->string('seo_description')->toString() : null,
@@ -317,7 +317,7 @@ class CmsPageController extends Controller
 
         return [
             'page' => $page,
-            'bodyHtml' => $this->contentPresenter->formatHtmlOverrideForDisplay($page->content),
+            'bodyHtml' => $this->contentSanitizer->formatForPreviewDisplay($page->content),
             'isPreview' => $isPreview,
             'metaTitle' => $metaTitle,
             'metaDescription' => $metaDescription,

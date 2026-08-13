@@ -52,7 +52,7 @@ class DashboardRolesController extends Controller
                 'name' => ['required', 'string', 'max:64'],
                 'slug' => ['nullable', 'string', 'max:64'],
                 'description' => ['nullable', 'string', 'max:255'],
-                'agency_id' => ['required', 'integer'],
+                'agency_id' => ['required', 'integer', 'min:1', 'exists:agencies,id'],
                 'permission_keys' => ['nullable', 'array'],
                 'permission_keys.*' => ['string', 'max:128'],
             ]);
@@ -84,7 +84,7 @@ class DashboardRolesController extends Controller
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:64'],
                 'slug' => ['nullable', 'string', 'max:64'],
-                'agency_id' => ['nullable', 'integer'],
+                'agency_id' => ['nullable', 'integer', 'min:1', 'exists:agencies,id'],
             ]);
             $cloned = $this->writes->cloneRole(
                 $request->user(),

@@ -397,4 +397,62 @@ class MarkupPricingEngineTest extends TestCase
         $this->assertGreaterThan(0, (float) $result['agent_markup_or_commission']);
         $this->assertGreaterThan((float) $result['supplier_total'], (float) $result['final_total']);
     }
+
+    public function test_markup_business_rule_builder_targeting_matrix(): void
+    {
+        $agency = Agency::factory()->create();
+        $agent = Agent::factory()->create(['agency_id' => $agency->id]);
+        $service = app(PricingRuleService::class);
+
+        $make = function (MarkupRuleType $type, array $appliesTo) use ($agency): MarkupRule {
+            return MarkupRule::factory()->create([
+                'agency_id' => $agency->id,
+                'name' => 'QA '.$type->value.' targeting',
+                'rule_type' => $type,
+                'value_type' => MarkupValueType::Fixed,
+                'value' => 100,
+                'priority' => 10,
+                'status' => MarkupRuleStatus::Active,
+                'is_active' => true,
+                'applies_to' => $appliesTo,
+            ]);
+        };
+
+        $global = $make(MarkupRuleType::Global, []);
+        $supplier = $make(MarkupRuleType::Supplier, ['supplier' => 'duffel']);
+        $airline = $make(MarkupRuleType::Airline, ['airline' => 'pk']);
+        $flight = $make(MarkupRuleType::Airline, ['airline' => 'pk', 'flight_number' => 'PK309']);
+        $od = $make(MarkupRuleType::Airline, ['airline' => 'pk', 'flight_number' => 'PK309', 'origin' => 'LHE', 'destination' => 'DXB']);
+        $route = $make(MarkupRuleType::Route, ['route' => 'LHE-DXB']);
+        $agentRule = $make(MarkupRuleType::Agent, ['agent_id' => $agent->id, 'source_channel' => 'agent_portal']);
+        $cabin = $make(MarkupRuleType::Cabin, ['cabin' => 'business']);
+        $fare = $make(MarkupRuleType::FareFamily, ['fare_family' => 'flex']);
+
+        $ids = fn (array $context) => $service->getApplicableRules($agency, $context)->pluck('id')->all();
+
+        $hit = $ids([
+            'supplier' => 'duffel',
+            'airline' => 'pk',
+            'flight_number' => 'PK309',
+            'origin' => 'LHE',
+            'destination' => 'DXB',
+            'route' => 'LHE-DXB',
+            'cabin' => 'business',
+            'fare_family' => 'flex',
+            'source_channel' => 'agent_portal',
+            'agent_id' => $agent->id,
+        ]);
+        foreach ([$global, $supplier, $airline, $flight, $od, $route, $agentRule, $cabin, $fare] as $rule) {
+            $this->assertContains($rule->id, $hit);
+        }
+
+        $this->assertNotContains($supplier->id, $ids(['supplier' => 'sabre', 'airline' => 'pk']));
+        $this->assertNotContains($airline->id, $ids(['airline' => 'ek']));
+        $this->assertNotContains($flight->id, $ids(['airline' => 'pk', 'flight_number' => 'PK308']));
+        $this->assertNotContains($od->id, $ids(['airline' => 'pk', 'flight_number' => 'PK309', 'origin' => 'KHI', 'destination' => 'DXB']));
+        $this->assertNotContains($route->id, $ids(['route' => 'KHI-JED']));
+        $this->assertNotContains($agentRule->id, $ids(['source_channel' => 'public_guest', 'agent_id' => $agent->id]));
+        $this->assertNotContains($cabin->id, $ids(['cabin' => 'economy']));
+        $this->assertNotContains($fare->id, $ids(['fare_family' => 'lite']));
+    }
 }

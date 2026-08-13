@@ -42,6 +42,7 @@ final class DashboardRoleResource
             'permissionKeys' => $role['permissionKeys'],
             'permissionGroups' => $role['permissionGroups'],
             'createdAt' => $role['createdAt'],
+            'agencyId' => $role['agencyId'] ?? null,
         ];
     }
 

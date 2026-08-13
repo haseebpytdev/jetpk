@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { PERMISSION_GROUP_LABELS } from "@/lib/access-control/permission-catalog";
 import { assignRbacRole, cloneRbacRole, createRbacRole, deleteRbacRole, unassignRbacRole, updateRbacRole } from "@/features/roles/rbac-write-api";
@@ -52,6 +52,18 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
   const [userHits, setUserHits] = useState<Array<{ id: string; label: string }>>([]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(permissionKeys);
 
+  useEffect(() => {
+    setName(selectedRole?.name ?? "QA Custom Role");
+    setSelectedKeys(permissionKeys);
+    setAgencyId(selectedRole?.agencyId && selectedRole.agencyId !== "null" ? selectedRole.agencyId : "");
+    setAgencyLabel("");
+    setAgencyHits([]);
+    setUserId("");
+    setUserLabel("");
+    setUserHits([]);
+    setError(null);
+  }, [selectedRole?.id, selectedRole?.name, selectedRole?.agencyId, permissionKeys]);
+
   const grouped = useMemo(() => {
     const map = new Map<string, CatalogPermission[]>();
     for (const permission of catalogPermissions) {
@@ -79,6 +91,8 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
   };
 
   const protectedRole = Boolean(selectedRole?.isProtected || selectedRole?.isSystem);
+  const parsedAgencyId = /^\d+$/.test(agencyId) ? Number(agencyId) : 0;
+  const agencyReady = parsedAgencyId > 0;
 
   return (
     <section className="mt-6 rounded-xl border border-jp-border bg-white p-4" data-testid="rbac-management-panel">
@@ -147,16 +161,20 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
         <button
           type="button"
           className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
-          disabled={pending}
-          onClick={() =>
-            run(() =>
+          disabled={pending || !agencyReady}
+          onClick={() => {
+            if (!agencyReady) {
+              setError("Select a valid agency before creating a custom role.");
+              return;
+            }
+            void run(() =>
               createRbacRole({
                 name,
-                agency_id: Number(agencyId),
+                agency_id: parsedAgencyId,
                 permission_keys: selectedKeys.filter((key) => !key.startsWith("users.assign") && !key.startsWith("roles.")),
               }),
-            )
-          }
+            );
+          }}
         >
           Create custom role
         </button>
@@ -165,12 +183,12 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
             <button
               type="button"
               className="rounded border px-3 py-1.5 text-sm disabled:opacity-50"
-              disabled={pending || !agencyId}
+              disabled={pending || !agencyReady}
               onClick={() =>
                 run(() =>
                   cloneRbacRole(selectedRole.id, {
                     name: `${selectedRole.name} copy`,
-                    agency_id: Number(agencyId),
+                    agency_id: parsedAgencyId,
                   }),
                 )
               }
@@ -239,9 +257,26 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
           <p className="sm:col-span-2 text-sm text-jp-muted">
             Assigned: {assignedUsers.length === 0 ? "none" : assignedUsers.map((user) => `${user.name}${user.email ? ` (${user.email})` : ""}`).join(", ")}
           </p>
-          <p className="sm:col-span-2 text-sm">
-            Effective permissions: {selectedKeys.length} catalog keys on this role. System AccountType fallback remains in dual-read.
+          <p className="sm:col-span-2 text-sm" data-testid="rbac-effective-permissions">
+            Dual-read authorization: this role grants {selectedRole.authorization?.rolePermissionCount ?? selectedKeys.length} catalog
+            keys. {selectedRole.authorization?.accountTypeFallback} {selectedRole.authorization?.staffMetaOverrides}
+            {typeof selectedRole.authorization?.effectiveCountForFirstAssignee === "number"
+              ? ` First assignee effective set: ${selectedRole.authorization.effectiveCountForFirstAssignee} keys.`
+              : ""}
           </p>
+          {selectedRole.audit && selectedRole.audit.length > 0 ? (
+            <ul className="sm:col-span-2 text-xs text-jp-muted" data-testid="rbac-role-audit">
+              {selectedRole.audit.slice(0, 8).map((entry) => (
+                <li key={`${entry.action}-${entry.id ?? entry.createdAt}`}>
+                  {entry.action} · {entry.createdAt ?? "unknown time"}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="sm:col-span-2 text-xs text-jp-muted" data-testid="rbac-role-audit">
+              No role audit events yet. History uses the existing AuditLog domain.
+            </p>
+          )}
         </div>
       ) : null}
     </section>

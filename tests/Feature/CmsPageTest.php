@@ -365,6 +365,7 @@ class CmsPageTest extends TestCase
             ->get(route('admin.cms-pages.preview', ['cmsPage' => $page, 'draft' => 1]))
             ->assertOk()
             ->assertSee('Unsaved heading', false)
+            ->assertSee('data-jp-block="heading"', false)
             ->assertDontSee('Stored copy.', false);
 
         $this->assertSame('<p>Stored copy.</p>', $page->fresh()->content);

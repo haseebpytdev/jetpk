@@ -75,5 +75,8 @@ export function transformRoleDetail(payload: Record<string, unknown>): Role {
       ? (payload.assignedUsers as { id: string; name: string }[])
       : [],
     permissionKeys: Array.isArray(payload.permissionKeys) ? (payload.permissionKeys as string[]) : [],
+    agencyId: payload.agencyId != null ? String(payload.agencyId) : null,
+    audit: Array.isArray(payload.audit) ? (payload.audit as Role["audit"]) : [],
+    authorization: (payload.authorization as Role["authorization"]) ?? undefined,
   } as Role;
 }

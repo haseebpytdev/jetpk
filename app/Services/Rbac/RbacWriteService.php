@@ -154,8 +154,8 @@ final class RbacWriteService
 
     private function assertCustomScope(?int $agencyId): void
     {
-        if ($agencyId === null) {
-            throw new RbacGuardException('Custom roles must belong to an agency. Platform scope is reserved for system roles.', 422, 'rbac_platform_custom_denied');
+        if ($agencyId === null || $agencyId < 1) {
+            throw new RbacGuardException('Custom roles must belong to a valid agency. Platform scope is reserved for system roles.', 422, 'rbac_platform_custom_denied');
         }
     }
 

@@ -6,6 +6,7 @@ use App\Enums\SupportTicketCategory;
 use App\Models\ClientPage;
 use App\Models\CmsPage;
 use App\Services\Agencies\AboutUsContentPresenter;
+use App\Services\Cms\CmsPageContentSanitizer;
 use App\Services\Client\ClientGlobalContactResolver;
 use App\Services\Client\ClientPageContentResolver;
 use App\Services\Client\ClientPageRenderer;
@@ -27,6 +28,7 @@ final class PublicContentApiPresenter
         private readonly ClientPageSeoResolver $seoResolver,
         private readonly ClientGlobalContactResolver $contactResolver,
         private readonly AboutUsContentPresenter $cmsContentPresenter,
+        private readonly CmsPageContentSanitizer $cmsPageSanitizer,
         private readonly ClientPageContentResolver $contentResolver,
     ) {}
 
@@ -85,9 +87,7 @@ final class PublicContentApiPresenter
             'slug' => $page->slug,
             'title' => $page->title,
             'subtitle' => $page->excerpt ?? '',
-            'body_html' => ClientSafeHtmlSanitizer::sanitize(
-                $this->cmsContentPresenter->formatHtmlOverrideForDisplay($page->content),
-            ),
+            'body_html' => $this->cmsPageSanitizer->formatForPublicDisplay($page->content),
             'seo' => [
                 'title' => $metaTitle,
                 'description' => $metaDescription,

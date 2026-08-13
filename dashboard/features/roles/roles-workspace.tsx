@@ -103,6 +103,7 @@ export function RolesWorkspace({ result }: Props) {
             onRoleChange={(matrixRole) => pushQuery({ matrixRole })}
           />
           <RbacManagementPanel
+            key={result.selectedRole?.id ?? "new-role"}
             selectedRole={result.selectedRole}
             permissionKeys={result.selectedRolePermissionKeys}
             assignedUsers={result.selectedRoleAssignedUsers}

@@ -10,12 +10,26 @@ import {
   updateApiConnection,
 } from "@/services/operational-api";
 
+type FieldMeta = {
+  key: string;
+  label: string;
+  type: string;
+  required?: boolean;
+  placeholder?: string;
+  help?: string;
+  default?: string;
+  channel?: string;
+  group?: string;
+  options?: Array<{ value: string; label: string }>;
+};
+
 type ProviderCatalog = {
   key: string;
   label: string;
   installed: boolean;
   baseUrlOverridable: boolean;
-  credentialFields: Array<{ key: string; label: string; type: string }>;
+  credentialFields: FieldMeta[];
+  advancedFields?: FieldMeta[];
 };
 
 const FIELD_LABELS: Record<string, string> = {};
@@ -39,10 +53,74 @@ type ApiConnectionRow = {
   registryState?: string | null;
   baseUrl?: string | null;
   baseUrlOverridable?: boolean;
-  credentialFields?: Array<{ key: string; label: string; type: string }>;
-  audit?: { lastTestedAt?: string | null; lastTestStatus?: string | null; lastFailure?: string | null; updatedAt?: string | null };
-  advanced?: { settingsKeys?: string[]; advancedBaseUrlOverride?: boolean };
+  credentialFields?: FieldMeta[];
+  audit?: {
+    lastTestedAt?: string | null;
+    lastTestStatus?: string | null;
+    lastFailure?: string | null;
+    updatedAt?: string | null;
+    history?: Array<{ id?: number; action: string; createdAt?: string | null }>;
+  };
+  advanced?: {
+    fields?: FieldMeta[];
+    values?: Record<string, string>;
+    timeouts?: unknown;
+    timeoutsUserConfigurable?: boolean;
+    baseUrlOverridable?: boolean;
+    readOnly?: Array<{ key: string; label: string; value: string }>;
+  };
 };
+
+function currentChannel(credentials: Record<string, string>, row?: ApiConnectionRow): string {
+  return credentials.api_channel || row?.advanced?.values?.api_channel || "crane_ndc";
+}
+
+function isFieldVisible(field: FieldMeta, credentials: Record<string, string>, row?: ApiConnectionRow): boolean {
+  if (!field.channel) {
+    return true;
+  }
+  return field.channel === currentChannel(credentials, row);
+}
+
+function ProviderField({
+  field,
+  value,
+  onChange,
+}: {
+  field: FieldMeta;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block text-xs">
+      {field.label}
+      {field.required ? " *" : ""}
+      {field.type === "select" && field.options && field.options.length > 0 ? (
+        <select
+          className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
+          value={value || field.default || ""}
+          onChange={(e) => onChange(e.target.value)}
+        >
+          {field.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
+          type={field.type === "password" ? "password" : "text"}
+          autoComplete="off"
+          placeholder={field.placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+      {field.help ? <span className="mt-1 block text-[11px] text-jp-muted">{field.help}</span> : null}
+    </label>
+  );
+}
 
 function extractConnections(result: { ok: boolean; data?: unknown }): ApiConnectionRow[] {
   const payload = (result as { data?: { connections?: ApiConnectionRow[] }; connections?: ApiConnectionRow[] }).data
@@ -141,6 +219,7 @@ export function ApiConnectionsWorkspace() {
                     setManageTab("overview");
                     setCredentials({});
                     setManageBaseUrl(row.baseUrl ?? "");
+                    setCredentials(row.advanced?.values?.api_channel ? { api_channel: row.advanced.values.api_channel } : {});
                   }}
                 >
                   Manage
@@ -237,11 +316,13 @@ export function ApiConnectionsWorkspace() {
                           </p>
                         ))
                       : null}
-                    {fields.map((field) => (
-                      <label key={field.key} className="block text-xs">
-                        {field.label}
-                        <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" type={field.type === "password" ? "password" : "text"} autoComplete="off" value={credentials[field.key] ?? ""} onChange={(e) => setCredentials((current) => ({ ...current, [field.key]: e.target.value }))} />
-                      </label>
+                    {fields.filter((field) => isFieldVisible(field, credentials, row)).map((field) => (
+                      <ProviderField
+                        key={field.key}
+                        field={field}
+                        value={credentials[field.key] ?? (field.group === "channel" || field.group === "advanced" ? (row.advanced?.values?.[field.key] ?? field.default ?? "") : "")}
+                        onChange={(value) => setCredentials((current) => ({ ...current, [field.key]: value }))}
+                      />
                     ))}
                   </>
                 ) : null}
@@ -255,10 +336,25 @@ export function ApiConnectionsWorkspace() {
                   <p className="text-sm text-jp-muted">Capabilities follow the installed adapter. No extra channel toggles for this provider.</p>
                 ) : null}
                 {manageTab === "advanced" ? (
-                  <dl className="text-sm">
-                    <div><dt className="text-jp-muted">Adapter settings keys</dt><dd>{(row.advanced?.settingsKeys ?? []).join(", ") || "None beyond credentials"}</dd></div>
-                    <div><dt className="text-jp-muted">Sabre cancellation gates</dt><dd>{row.provider === "sabre" ? "Preserved — not editable here" : "Not applicable"}</dd></div>
-                  </dl>
+                  <div className="space-y-3" data-testid="api-connection-advanced">
+                    {(row.advanced?.fields ?? []).filter((field) => isFieldVisible(field, credentials, row)).map((field) => (
+                      <ProviderField
+                        key={field.key}
+                        field={field}
+                        value={credentials[field.key] ?? row.advanced?.values?.[field.key] ?? field.default ?? ""}
+                        onChange={(value) => setCredentials((current) => ({ ...current, [field.key]: value }))}
+                      />
+                    ))}
+                    {row.advanced?.timeoutsUserConfigurable ? null : (
+                      <p className="text-sm text-jp-muted">Adapter timeouts are internal and not user-configurable for this provider.</p>
+                    )}
+                    {(row.advanced?.readOnly ?? []).map((item) => (
+                      <p key={item.key} className="text-sm">
+                        <span className="text-jp-muted">{item.label}: </span>
+                        {item.value}
+                      </p>
+                    ))}
+                  </div>
                 ) : null}
                 {manageTab === "health" ? (
                   <dl className="text-sm">
@@ -268,12 +364,21 @@ export function ApiConnectionsWorkspace() {
                   </dl>
                 ) : null}
                 {manageTab === "audit" ? (
-                  <dl className="text-sm">
-                    <div><dt className="text-jp-muted">Updated</dt><dd>{row.audit?.updatedAt ?? "—"}</dd></div>
-                    <div><dt className="text-jp-muted">Last tested</dt><dd>{row.audit?.lastTestedAt ?? row.lastTestedAt ?? "—"}</dd></div>
-                    <div><dt className="text-jp-muted">Last status</dt><dd>{row.audit?.lastTestStatus ?? row.lastTestStatus ?? "—"}</dd></div>
-                    <div><dt className="text-jp-muted">Last failure</dt><dd>{row.audit?.lastFailure ?? row.lastFailure ?? "—"}</dd></div>
-                  </dl>
+                  <div className="space-y-2" data-testid="api-connection-audit">
+                    <p className="text-xs text-jp-muted">Audit history from AuditLog. Secret values are never shown.</p>
+                    {(row.audit?.history ?? []).length === 0 ? (
+                      <p className="text-sm text-jp-muted">No connection audit events yet.</p>
+                    ) : (
+                      <ul className="space-y-1 text-sm">
+                        {(row.audit?.history ?? []).map((entry) => (
+                          <li key={`${entry.action}-${entry.id ?? entry.createdAt}`}>
+                            {entry.action} · {entry.createdAt ?? "unknown time"}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <p className="text-xs text-jp-muted">Last test: {row.audit?.lastTestStatus ?? row.lastTestStatus ?? "—"}</p>
+                  </div>
                 ) : null}
                 <div className="flex gap-2">
                   <button
@@ -330,17 +435,13 @@ export function ApiConnectionsWorkspace() {
                 <option value="live">live</option>
               </select>
             </label>
-            {(adapter?.credentialFields ?? []).map((field) => (
-              <label key={field.key} className="block text-xs">
-                {field.label}
-                <input
-                  className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
-                  type={field.type === "password" ? "password" : "text"}
-                  autoComplete="off"
-                  value={credentials[field.key] ?? ""}
-                  onChange={(e) => setCredentials((current) => ({ ...current, [field.key]: e.target.value }))}
-                />
-              </label>
+            {(adapter?.credentialFields ?? []).filter((field) => isFieldVisible(field, credentials)).map((field) => (
+              <ProviderField
+                key={field.key}
+                field={field}
+                value={credentials[field.key] ?? (field.type === "select" ? field.default ?? "" : "")}
+                onChange={(value) => setCredentials((current) => ({ ...current, [field.key]: value }))}
+              />
             ))}
             {isLive ? (
               <button
