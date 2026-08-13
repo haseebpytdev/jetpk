@@ -1,4 +1,5 @@
 import { createReadOnlyEnvelope } from "@/lib/read-only/response-envelope";
+import { createReadOnlyErrorEnvelope } from "@/lib/read-only/error-envelope";
 import { createReadOnlyService, ReadOnlyServiceError, type ReadOnlyFetchOptions } from "@/lib/read-only/read-only-service";
 import { fetchDashboardApi } from "@/lib/read-only/laravel/laravel-client";
 import { DASHBOARD_API_ROUTES } from "@/lib/read-only/laravel/api-base";
@@ -74,7 +75,12 @@ function mapError(error: unknown): never {
   if (error instanceof ReadOnlyServiceError) {
     throw error;
   }
-  throw error;
+  throw new ReadOnlyServiceError(
+    createReadOnlyErrorEnvelope({
+      code: "unavailable",
+      referenceIdSafe: "OPS-LIVE-LOAD",
+    }),
+  );
 }
 
 const markupsService = createReadOnlyService<Record<string, never>, MarkupRecord[]>({

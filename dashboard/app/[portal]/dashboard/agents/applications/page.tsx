@@ -58,5 +58,11 @@ function ModuleError({ error }: { error: unknown }) {
       />
     );
   }
-  throw error;
+
+  return (
+    <SanitizedErrorState
+      message="Agent applications could not be loaded from the live API."
+      referenceId="AA-LIVE-LOAD"
+    />
+  );
 }

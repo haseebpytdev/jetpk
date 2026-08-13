@@ -48,8 +48,6 @@ class DashboardAgentApplicationsReadService
                     : (string) $status,
                 'submittedAt' => $application->created_at?->toIso8601String() ?? '',
             ];
-                'submittedAt' => $application->created_at?->toIso8601String() ?? '',
-            ];
         })->values()->all();
 
         return [
