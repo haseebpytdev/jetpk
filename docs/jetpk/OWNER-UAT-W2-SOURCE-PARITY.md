@@ -1,67 +1,59 @@
 # OWNER UAT W2 — Source Parity
 
-LAST_UPDATED_UTC: 2026-08-13T19:15:00Z  
-BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-LOCAL_HEAD_AT_CHECK: `589e70897eb801ef69a38643ffbf48d20f818562`  
-REMOTE: `jetpk` engineering SHA `589e7089` (docs commit follows)
+LAST_UPDATED_UTC: 2026-08-13T20:00:00Z  
+BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`
 
-## OLS
+## CURRENT STATE (authoritative)
+
+REMOTE_BRANCH_HEAD: pending docs pin after this file (engineering already on remote as `694b5e1b21a86ffd4f861647090408c7288828a8`)  
+LATEST_ENGINEERING_SHA: `694b5e1b21a86ffd4f861647090408c7288828a8`  
+LATEST_DOCS_CONTENT_SHA: this docs commit (do not report REMOTE_HEAD as the engineering parent once the docs pin lands)
+
+OWNER_UAT_WAVE_2=`REOPENED_PRE_OWNER_RETEST_V3_SOURCE_INTEGRITY`  
+ADMIN_FULL_MANAGEMENT_SYSTEM=`NO` until production CMS QA draft proof + 5-actor cross-portal re-run after `694b5e1b`.
+
+### Production Dashboard BUILD_ID
+
+**Authoritative production Dashboard BUILD_ID:** `j_V7qVPpvh6PJvCoKBNLS`
+
+Do not treat any other BUILD_ID in this file as current. Older IDs belong only in the history section below.
+
+Laravel app: `/home/pkjetp/jetpk_app`  
+Dashboard: `/home/pkjetp/jetpk_app/dashboard`  
+PM2: `jetpk-dashboard` restarted after this BUILD_ID; `jetpk-public-frontend` not restarted.
+
+### OLS (read-only)
 
 | Check | Result |
 |---|---|
 | Expected SHA256 | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
-| Production | **MATCH** |
+| Production `/usr/local/lsws/conf/httpd_config.conf` | **MATCH** |
+| OLS modified this pass | **NO** |
 
-Dashboard BUILD_ID production: `t2IIp_9kfSUyeR9vl5_f-`  
-Distinguish: REMOTE_HEAD and LATEST_ENGINEERING_SHA are `589e7089` until the docs pin commit. LATEST_DOCS_CONTENT_SHA is the following docs commit, not the engineering parent.
+### Engineering close in `694b5e1b`
 
-## OLS
+- `CmsPageContentSanitizer` for CmsPage persist, draft overlay, admin preview, public render, public content API (About Us sanitizer not used for builder pages).
+- API Connections: full safe provider field metadata (options/help/channel/default except secrets), channel-aware UI, structured Advanced, AuditLog history.
+- RBAC: selected-role state sync + `agency_id` min 1; dual-read authorization payload + role audit from AuditLog.
+- Markup targeting matrix tests retained (no live production markup).
 
-| Check | Result |
-|---|---|
-| Expected SHA256 | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
-| Production | **MATCH** |
+## History / evidence (not current BUILD_ID)
+
+These IDs are historical only:
+
+| When | Dashboard BUILD_ID | Engineering SHA | Note |
+|---|---|---|---|
+| Pre-V3 audit `589e7089` | `t2IIp_9kfSUyeR9vl5_f-` | `589e7089` | Directional UX; sanitizer still About Us |
+| Earlier RBAC deploy | `7XX2vpVISL5H9S6kjpnqj` | `6d019160` era | Additive RBAC |
+| Public Next (unchanged this pass) | `3-0Jl1dsSg7bPAz3klPiz` | — | `jetpk-public-frontend` |
+| Older dashboard snapshot | `FqybHrg6rHaOCkMDMpxRp` | — | W2-23 era |
+
+`/groups` → **307** `/groups/search` → **200** (public BUILD_ID `3-0Jl1dsSg7bPAz3klPiz`).
 
 ## RBAC additive files (`6d019160`)
 
-Local SHA256 equals production (lowercase):
-
-- `app/Models/Role.php` `8c677595…d54759` MATCH
-- `app/Models/RolePermission.php` `050a72b8…d6e78a` MATCH
-- `app/Services/Rbac/RbacWriteService.php` `47311175…643c286` MATCH
-- `app/Services/Rbac/RbacInstallService.php` `f206fb55…b0d32a` MATCH
-- `app/Services/Rbac/RbacRolePresenter.php` `1d56dd40…72f735` MATCH
-- `database/migrations/2026_08_13_220000_create_rbac_roles_tables.php` `16975b5b…c2634b` MATCH
-- `dashboard/features/roles/rbac-management-panel.tsx` `0a1934ea…cfdc5` MATCH
-- `dashboard/features/roles/rbac-write-api.ts` `83a52e02…cefddc` MATCH
-- `dashboard/features/roles/roles-workspace.tsx` `2c94c931…7648f8` MATCH
-
-Dashboard BUILD_ID production: `7XX2vpVISL5H9S6kjpnqj`  
-PM2: `jetpk-dashboard` online; `jetpk-public-frontend` online (not restarted for RBAC).
-
-## Laravel intended files (W2-23)
-
-| File | Local SHA256 | Production | Result |
-|---|---|---|---|
-| `app/Http/Controllers/Frontend/GuestBookingLookupController.php` | `04117f9d2d80eb954fcc045492d01617f6f3bc96128cfab09e588407f61b490a` | same | **MATCH** |
-
-Behavior proof (stronger than hash): private redirects return public `https://jetpakistan.pk/lookup-booking`.
-
-## Frontend / Dashboard builds (production PM2)
-
-| Surface | BUILD_ID | PM2 |
-|---|---|---|
-| Public Next | `3-0Jl1dsSg7bPAz3klPiz` | `jetpk-public-frontend` (restarted after groups hub) |
-| Dashboard Next | `FqybHrg6rHaOCkMDMpxRp` | `jetpk-dashboard` |
-
-W2-23 frontend presentation retirement verified in production browser (Manage Booking form present; Blade CTAs absent; `/laravel/lookup-booking` lands modern).
-
-`/groups` → **307** `/groups/search` → **200** (BUILD_ID `3-0Jl1dsSg7bPAz3klPiz`).
-
-## Prior batch parity (still valid)
-
-Settings/Reports/CMS transformer files matched at W2-20 capture — see `OWNER-UAT-W2-20-REGRESSION-EVIDENCE.md`.
+Schema/guards remain in force. Dual-read unchanged. Do not treat MariaDB NULL unique as safe; uniqueness is `UNIQUE(scope_key, slug)`.
 
 ## Drift
 
-No unexplained Laravel controller drift for W2-23. OLS unchanged. No OLS edits performed.
+OLS unchanged. No OLS edits performed. Tracked worktree clean after engineering commit `694b5e1b` except protected untracked `tmp/` QA files.

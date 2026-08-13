@@ -1,7 +1,9 @@
 # OWNER UAT W2-24 — Module / API Operational Matrix
 
-LAST_UPDATED_UTC: 2026-08-12T21:25:00Z  
+LAST_UPDATED_UTC: 2026-08-13T20:00:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
+LATEST_ENGINEERING_SHA: `694b5e1b21a86ffd4f861647090408c7288828a8`  
+PRODUCTION_DASHBOARD_BUILD_ID: `j_V7qVPpvh6PJvCoKBNLS`  
 REFERENCE: JetPakistan `ota-jetpk` + read-only mature OTA `C:\Users\khadi\ota` (not modified)
 
 ## Operational definition
@@ -29,11 +31,13 @@ Write/mutation commercial paths may be proven by tests when production money QA 
 | Tickets/Documents | Admin/Staff | `/tickets` | Tickets | tickets JSON | RO | tickets | Compact | None | Deployed | filters | OPERATIONAL | — |
 | Reports | Admin/Staff | `/reports` | Reports | reports JSON | Export allowed | reports | Compact | Preview copy fixed | Deployed | filters | OPERATIONAL | Live-mode |
 | Settings | Admin/Staff | `/settings/*` | Settings | settings JSON | RO metadata | settings | Live readiness | None | Deployed | settings sync | OPERATIONAL | OWNER_INPUT_REQUIRED badges |
-| CMS Pages | Admin/Staff | `/cms/pages` | CmsPageController | pages | create/edit/archive | cms | Present | None | Deployed | cms baseline | OPERATIONAL | Baseline only |
+| CMS Pages | Admin/Staff | `/cms/pages` | CmsPageController + CmsPageContentSanitizer | pages JSON | create/edit/archive/preview-draft | cms | Present | None | Deployed BUILD `j_V7qVPpvh6PJvCoKBNLS` | CmsPageBuilderRoundtripTest | OPERATIONAL | Builder tags persist; hidden not public |
+| Markup | Admin/Staff | `/markups` | PricingRuleService | lookups JSON | CRUD (no live prod markup) | markup | Lookups | None | Deployed | MarkupPricingEngineTest targeting matrix | OPERATIONAL | flight_number + OD targeting |
+| API Connections | Admin | settings integrations | SupplierConnectionController + SupplierProviderFieldCatalog | list JSON | create/update/test (no prod rotate) | settings | Channel-aware fields | None | Deployed | SupplierConnectionJsonManagementTest | OPERATIONAL | Full metadata; AuditLog history |
 | CMS Banners/Notices/Assets | Admin/Staff | `/cms/*` | Read listings | GET | No write domain | cms | RO labels | None | Deployed | — | PARTIAL | Documented; no migration |
 | Support | Admin/Staff | `/support` | Support | tickets JSON | replies | support | Paginate 10 | None | Deployed | W2-12 | OPERATIONAL | — |
 | Deposits | Admin/Staff | `/deposits` | Deposits | RO + guard | No prod money QA | deposits | Guard UI | None | Deployed | — | PARTIAL | Architecture; NO_PROD_MONEY |
-| Markup | Admin/Staff | markup nav | Markup settings | RO | No prod mutation | markup | Discoverable | None | Deployed | — | PARTIAL | NO_PROD_MUTATION |
+| Markup | Admin/Staff | markup nav | Markup settings | lookups JSON | CRUD tests only | markup | Discoverable | None | Deployed | targeting matrix | OPERATIONAL | NO_PROD_MUTATION |
 | Notifications / failed | Admin/Staff | notifications | Notification ops | list + classify | — | notif | Explained | None | Classified | W2-16 | OPERATIONAL | QA SMTP |
 | Profile | Admin/Staff | `/profile` | Session/profile | profile JSON | safe profile | self | Present | None | Deployed | W2-08 | OPERATIONAL | — |
 | Public shell typography | Public | all | — | — | — | — | — | — | Prod accept | W2-21/22 | OPERATIONAL | Computed fonts PASS |
