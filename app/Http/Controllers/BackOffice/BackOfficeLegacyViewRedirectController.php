@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\BackOffice;
 
+use App\Http\Controllers\Admin\AgencyBrandingController;
+use App\Http\Controllers\Admin\AgencyNotificationSettingController;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Dashboard\DashboardBookingResource;
 use App\Models\Agent;
 use App\Models\Booking;
 use App\Models\User;
 use App\Support\Branding\PlatformBrandingResolver;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -19,6 +24,7 @@ use Illuminate\Support\Facades\Gate;
  */
 final class BackOfficeLegacyViewRedirectController extends Controller
 {
+    use RespondsWithBackOfficeJson;
     public function adminBookingsIndex(Request $request): RedirectResponse
     {
         Gate::authorize('viewAny', Booking::class);
@@ -234,13 +240,21 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         return redirect()->to($this->pathWithQuery('/admin/dashboard/cms', $request->query()));
     }
 
-    public function adminBrandingSettings(Request $request): RedirectResponse
+    public function adminBrandingSettings(Request $request): RedirectResponse|JsonResponse|View
     {
+        if ($this->wantsBackOfficeJson($request)) {
+            return app(AgencyBrandingController::class)->edit($request);
+        }
+
         return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/general', $request->query()));
     }
 
-    public function adminCommunicationsSettings(Request $request): RedirectResponse
+    public function adminCommunicationsSettings(Request $request): RedirectResponse|JsonResponse|View
     {
+        if ($this->wantsBackOfficeJson($request)) {
+            return app(AgencyNotificationSettingController::class)->index($request);
+        }
+
         return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/notifications', $request->query()));
     }
 
