@@ -1,6 +1,6 @@
 # OWNER UAT WAVE 2 — Task Status
 
-OWNER_UAT_WAVE_2=ADMIN_CLOSED_REGRESSION_REMAINING
+OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST_V2
 
 Prior PASS_READY is invalidated by owner production screenshots.
 
@@ -14,7 +14,7 @@ Prior PASS_READY is invalidated by owner production screenshots.
 | W2-11 | CMS | PARTIAL | PASS | DEPLOYED | Read-only | REOPENED | Pages write only | — | Media/banners | Continue |
 | W2-13 | Compact filters | IN_PROGRESS | — | NOT_RETESTED | Noisy Agents | REOPENED | Compact Agents bar | — | — | Owner retest V2 |
 | W2-15 | Markup Management | IN_PROGRESS | — | NOT_RETESTED | Read-only page | REOPENED | MarkupRule JSON + UI | — | No prod QA mutation | Owner retest V2 |
-| W2-20 | Regression | REOPEN | — | — | False PASS | REOPENED | — | — | Full loop | Continue |
+| W2-20 | Regression | DONE | 132/132 Dashboard; 58 Wave-2 Laravel | VERIFIED | False PASS | KEEP | 05c24789 + browser 5-actor | 05c24789 | — | Owner retest V2 |
 | W2-24 | Module matrix | REOPEN | — | — | Fake ops pages | REOPENED | New matrices | — | Remaining gaps | Continue |
 | W2-25 | Financial source of truth | DONE | 8/25 | DEPLOYED | USD + snapshot policy | KEEP | 0860c212 + Admin GBV USD note | 0860c212 | — | Owner retest V2 |
 | W2-33 | CMS operational | DONE | — | DEPLOYED | Structured homepage | KEEP | Panel on /cms/sections BUILD llKFcUe5cBrUnhUEHic0U | 2fb80b50 | Sections list API unavailable | Owner retest V2 |
