@@ -21,6 +21,8 @@ const FIELD_LABELS: Record<string, string> = {
   api_key: "API key",
   access_token: "Access token",
 };
+
+const INSTALLED_ADAPTERS = [
   { key: "sabre", label: "Sabre", fields: ["sign_in", "password", "pcc"] },
   { key: "pia_ndc", label: "PIA NDC", fields: ["username", "password", "agency_id", "agency_name", "owner_code"] },
   { key: "airblue", label: "AirBlue", fields: ["username", "password", "agency_id"] },

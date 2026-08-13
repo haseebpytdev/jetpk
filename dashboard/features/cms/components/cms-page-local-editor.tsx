@@ -206,6 +206,12 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
           Preview
         </a>
         <button
+          type="button"
+          className="inline-flex min-h-11 items-center rounded-xl bg-jp-navy px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          disabled={busy}
+          onClick={() => void handleSave()}
+          data-testid="cms-page-save"
+        >
           {busy ? "Saving…" : "Save page"}
         </button>
         <button
