@@ -2,7 +2,7 @@
 
 OWNER_UAT_WAVE_2=REOPENED_OWNER_RETEST_GAPS
 ADMIN_FULL_MANAGEMENT_SYSTEM=NO
-ADMIN_REQUIRED_MANAGEMENT_GAPS=1
+ADMIN_REQUIRED_MANAGEMENT_GAPS=2
 ADMIN_READ_ONLY_PLACEHOLDERS=0
 ADMIN_FAKE_OPERATIONAL_PAGES=0
 ADMIN_AMBIGUOUS_ACTIONS=0
@@ -10,28 +10,42 @@ ADMIN_AMBIGUOUS_ACTIONS=0
 SSH_AGENT_AUTH_RESTORED=PASS
 SSH_CURSOR_AUTH=PASS
 SFTP_AUTH=PASS
-SSH_CLASSIFICATION=SSH_AGENT_AUTH_RESTORED
-REMOTE_HEAD=8d79f0c762255f7f0bd6eee1fd659e640110c9cc
-PRODUCTION_DEPLOYED=NO
-PRODUCTION_BROWSER=FAIL
+REMOTE_HEAD=a8a7c527
+PRODUCTION_DEPLOYED=PARTIAL
+PRODUCTION_BROWSER=PARTIAL
 OLS_HASH=612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c
 OLS=MATCH
 
-Counts (code on branch; production deploy of this batch pending after dashboard build):
+JETPK_PHP_CLI=/usr/bin/php (8.3.6, PDO without pdo_mysql)
+JETPK_RUNTIME_PHP=/usr/local/lsws/lsphp83/bin/lsphp (8.3.31)
+JETPK_PHP_PDO_MYSQL_BLOCKER=NO
+artisan optimize:clear via lsphp artisan = exit 0
 
-- FULL_MANAGEMENT: Dashboard KPIs, CMS Pages, Media Library, Homepage Page Settings (structured hero/routes/destinations/deals/support CTA), My Profile, Organization, Users, Staff, Agents, Agent Applications, Roles catalogue (account-type; mutations on Users/Staff), Go-live checklist (live validators + deep links; no fake complete)
+Authenticated Admin shell: https://jetpakistan.pk/admin/dashboard (QA platform admin). Unauthenticated /admin/dashboard 404 is not a failure.
+
+Money (sampled booking WL96PKN9):
+- booking.currency=PKR
+- fareBreakdown.currency=USD, fare=623.73
+- converted_total_pkr / customer_total_pkr / displayed_total_pkr = absent
+- hold converted_total_pkr = null
+- presenter = USD 624.00 (fareBreakdown.currency)
+- No Amount unavailable
+- Reports showed Rs. 590.00 on at least one report row
+- Do not relabel this USD fare as PKR
+
+Nav: primary `aria-current=page` is the module link. Footer Contact Support uses accent styling and must not be counted as a second primary nav item.
+
+Agent applications: parse error in DashboardAgentApplicationsReadService repaired in a8a7c527.
+
+Homepage structured controls live on CMS sections module (`HomepageSettingsPanel`), not the CMS index.
+
+Counts:
+- FULL_MANAGEMENT: Dashboard KPIs, CMS Pages, Media Library, Homepage Page Settings, Profile, Organization, Users, Staff, Agents, Roles catalogue, Go-live validators
 - SAFETY_CONTROLLED: Markups, API Connections, Bookings, Execution, Cancellations, Tickets, Payments, Deposits, Commissions, Support
-- READ_ONLY_BY_DESIGN: Audit, System Health, Reports (filter/export), PNRs host view
-- NOT_APPLICABLE: CMS Banners, CMS Notices (no CmsBanner/CmsNotice tables; public site uses pages + homepage Page Settings)
-- BLOCKED: none (SSH restored)
+- READ_ONLY_BY_DESIGN: Audit, System Health, Reports, PNRs
+- NOT_APPLICABLE: CMS Banners, CMS Notices
+- BLOCKED: none
 
-Remaining required gap: production browser verification of the accumulated management batch after a successful Dashboard build/restart.
-
-SABRE_GDS_SUPPORTED=YES (SabreGdsTicketingService installed)
-SABRE_NDC_SUPPORTED=YES (Offer search/price + Order create adapters installed)
-SABRE_NDC_ENABLED=connection setting default false
-UI: NDC = integrated, default off; not inferred from provider==Sabre alone
-
-Roles: JetPakistan uses account-type catalogue + staff_permissions. No Spatie custom-role Create Role entity.
-
-Go-live: validator_with_deep_links. Commercial UAT item stays ok=false by design.
+Remaining gaps:
+1. Owner PKR KPI cannot be declared PASS without booking-time PKR snapshots (inventing FX is forbidden).
+2. Re-verify Agent Applications + CMS sections after a8a7c527 dashboard rebuild.
