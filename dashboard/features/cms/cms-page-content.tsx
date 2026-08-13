@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/data-source-status";
 import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
 import { PageContainer, PageHeader } from "@/components/ui/page-layout";
+import { HomepageSettingsPanel } from "@/features/cms/components/homepage-settings-panel";
 import type { CmsModuleKey } from "@/types/cms";
 
 type Props = {
@@ -27,6 +28,7 @@ export async function CmsPageContent({ searchParams, module }: Props) {
     return (
       <PageContainer>
         <PageHeader title="CMS" />
+        {module === "sections" ? <HomepageSettingsPanel /> : null}
         <CmsModuleError error={e} />
       </PageContainer>
     );
