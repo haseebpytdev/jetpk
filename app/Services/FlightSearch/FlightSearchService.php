@@ -460,6 +460,12 @@ class FlightSearchService
             'service_fee' => (float) ($pricing['service_fee'] ?? 0),
             'total' => (float) ($pricing['final_total'] ?? 0),
             'final_customer_price' => (float) ($pricing['final_total'] ?? 0),
+            'customer_total_pkr' => strtoupper((string) ($pricing['pricing_currency'] ?? '')) === 'PKR'
+                ? (float) ($pricing['final_total'] ?? 0)
+                : null,
+            'converted_total_pkr' => strtoupper((string) ($pricing['pricing_currency'] ?? '')) === 'PKR'
+                ? (float) ($pricing['final_total'] ?? 0)
+                : null,
             'pricing_currency' => (string) ($pricing['pricing_currency'] ?? ($fare['currency'] ?? 'PKR')),
             'supplier_currency' => (string) ($pricing['supplier_currency'] ?? ($fare['currency'] ?? 'PKR')),
             'conversion_status' => (string) ($pricing['conversion_status'] ?? 'same_currency'),

@@ -24,6 +24,7 @@ final class DashboardSupplierResource
 
         return [
             'id' => self::publicId($connection),
+            'connectionId' => (string) $connection->id,
             'supplierName' => self::displayName($connection),
             'displayCode' => self::displayCode($connection),
             'supplierCategory' => self::category($provider),

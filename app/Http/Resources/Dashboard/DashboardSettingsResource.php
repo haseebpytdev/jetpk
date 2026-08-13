@@ -99,15 +99,30 @@ final class DashboardSettingsResource
         foreach (\App\Support\Communication\JetpkNotificationEventCategories::grouped() as $label => $events) {
             $keys = array_map(static fn (OtaNotificationEvent $event): string => $event->value, $events);
             $subset = $rows->whereIn('event_key', $keys);
-            $enabled = $subset->contains(static fn (AgencyNotificationSetting $row): bool => (bool) $row->enabled);
-            $email = $subset->contains(static fn (AgencyNotificationSetting $row): bool => (bool) $row->enabled && $row->channel === 'email');
+            $firstMeta = is_array($subset->first()?->meta) ? $subset->first()->meta : [];
+            $enabled = $subset->contains(static function (AgencyNotificationSetting $row): bool {
+                $meta = is_array($row->meta) ? $row->meta : [];
+
+                return (bool) ($meta['category_enabled'] ?? $row->enabled);
+            });
+            $email = $subset->contains(static function (AgencyNotificationSetting $row): bool {
+                $meta = is_array($row->meta) ? $row->meta : [];
+
+                return (bool) ($meta['email_channel'] ?? ($row->enabled && $row->channel === 'email'));
+            });
             $dashboard = $subset->contains(static function (AgencyNotificationSetting $row): bool {
                 $meta = is_array($row->meta) ? $row->meta : [];
 
                 return (bool) ($meta['dashboard_channel'] ?? false);
             });
             $digest = $subset->contains(static fn (AgencyNotificationSetting $row): bool => $row->digest_mode === 'digest');
-            $roles = $subset->pluck('recipient_scope')->filter()->unique()->values()->all();
+            $roles = collect($firstMeta['recipient_roles'] ?? [])
+                ->merge($subset->pluck('recipient_scope'))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+            $severity = (string) ($firstMeta['severity_threshold'] ?? (in_array($label, ['Security', 'Payment'], true) ? 'warning' : 'notice'));
 
             $categories[] = [
                 'key' => \Illuminate\Support\Str::slug($label),
@@ -115,7 +130,7 @@ final class DashboardSettingsResource
                 'enabled' => $enabled || $subset->isEmpty(),
                 'emailChannel' => $email || $subset->isEmpty(),
                 'dashboardChannel' => $dashboard,
-                'severityThreshold' => in_array($label, ['Security', 'Payment'], true) ? 'warning' : 'notice',
+                'severityThreshold' => $severity,
                 'recipientRoles' => $roles !== [] ? $roles : ['admin'],
                 'deliveryMode' => $digest ? 'digest' : 'immediate',
                 'eventKeys' => $keys,

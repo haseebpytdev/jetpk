@@ -18,6 +18,7 @@ use App\Services\Communication\BookingCommunicationService;
 use App\Services\Finance\Ledger\LedgerEventRecorder;
 use App\Services\Ops\OpsEventDispatcher;
 use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
+use App\Support\Bookings\BookingPkrSnapshot;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -99,14 +100,20 @@ class BookingService
             $breakdown['supplier_currency'] = $supplierCurrency;
             $breakdown['converted_total_pkr'] = $pkrSnapshot;
             $attributes['breakdown'] = $breakdown;
-            $attributes['total'] = $pkrSnapshot;
-            $attributes['currency'] = 'PKR';
             $meta = is_array($booking->meta) ? $booking->meta : [];
             $meta['converted_total_pkr'] = $pkrSnapshot;
-            if (BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency($supplierCurrency) !== '') {
-                $meta['original_currency'] = BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency($supplierCurrency);
+            $meta['customer_total_pkr'] = $pkrSnapshot;
+            $commercial = BookingPkrSnapshot::conversionMeta(
+                is_array($booking->holdSession?->validated_offer_snapshot) ? $booking->holdSession->validated_offer_snapshot : []
+            );
+            if (($commercial['customer_total_pkr'] ?? null) !== null) {
+                $meta['commercial_money'] = $commercial;
             }
-            $booking->forceFill(['meta' => $meta, 'currency' => 'PKR'])->save();
+            $normalizedSupplier = BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency($supplierCurrency);
+            if ($normalizedSupplier !== '') {
+                $meta['original_currency'] = $normalizedSupplier;
+            }
+            $booking->forceFill(['meta' => $meta])->save();
         }
 
         $fareBreakdown = $booking->fareBreakdown()->updateOrCreate(

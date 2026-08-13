@@ -1978,18 +1978,20 @@ class BookingController extends Controller
             'hold_expires_at' => $protection['offer_expires_at'] ?? null,
             'validated_total_amount' => (float) ($protection['supplier_total'] ?? 0),
             'validated_total_currency' => (string) ($protection['supplier_currency'] ?? 'PKR'),
-            'converted_total_pkr' => BookingPkrSnapshot::fromOffer(array_merge(
-                is_array($protection['validated_offer_snapshot'] ?? null) ? $protection['validated_offer_snapshot'] : [],
-                [
-                    'currency' => $protection['supplier_currency'] ?? null,
-                    'total' => $protection['supplier_total'] ?? null,
-                    'supplier_currency' => $protection['supplier_currency'] ?? null,
-                    'supplier_total' => $protection['supplier_total'] ?? null,
-                ],
-            )),
+            'converted_total_pkr' => BookingPkrSnapshot::fromOffer(
+                is_array($protection['validated_offer_snapshot'] ?? null) ? $protection['validated_offer_snapshot'] : []
+            ),
             'markup_snapshot' => is_array($protection['validated_offer_snapshot']['pricing_components'] ?? null)
                 ? $protection['validated_offer_snapshot']['pricing_components']
                 : [],
+            'meta' => array_merge(
+                is_array($session->meta) ? $session->meta : [],
+                [
+                    'commercial_money' => BookingPkrSnapshot::conversionMeta(
+                        is_array($protection['validated_offer_snapshot'] ?? null) ? $protection['validated_offer_snapshot'] : []
+                    ),
+                ]
+            ),
             'passenger_counts' => [
                 'adults' => (int) ($criteria['adults'] ?? 1),
                 'children' => (int) ($criteria['children'] ?? 0),

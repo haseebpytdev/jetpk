@@ -349,7 +349,10 @@ class SupplierConnectionController extends Controller
             $meta = [];
         }
 
-        $status = $request->input('status', SupplierConnectionStatus::Inactive->value);
+        $status = $request->input(
+            'status',
+            $existing?->status?->value ?? SupplierConnectionStatus::Inactive->value
+        );
 
         $payload = [
             'provider' => $provider,

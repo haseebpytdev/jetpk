@@ -141,7 +141,74 @@ export function NotificationSettingsWorkspace({ result }: Props) {
                   <dd>{category.deliveryMode}</dd>
                 </div>
               </dl>
-              <p className="mt-2 text-xs text-jp-muted">Recipient roles: {category.recipientRoles.join(", ")}</p>
+              <p className="mt-2 text-xs text-jp-muted">Recipient roles</p>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {["admin", "staff", "agent", "customer"].map((role) => {
+                  const checked = category.recipientRoles.includes(role);
+                  return (
+                    <label key={role} className="flex items-center gap-1 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={!isLive}
+                        onChange={() =>
+                          setPreviewValues({
+                            categories: active.categories.map((item) => {
+                              if (item.key !== category.key) return item;
+                              const next = checked
+                                ? item.recipientRoles.filter((value) => value !== role)
+                                : [...item.recipientRoles, role];
+                              return { ...item, recipientRoles: next.length > 0 ? next : ["admin"] };
+                            }),
+                          })
+                        }
+                      />
+                      {role}
+                    </label>
+                  );
+                })}
+              </div>
+              {isLive ? (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <label className="text-xs">
+                    Severity
+                    <select
+                      className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
+                      value={category.severityThreshold}
+                      onChange={(e) =>
+                        setPreviewValues({
+                          categories: active.categories.map((item) =>
+                            item.key === category.key ? { ...item, severityThreshold: e.target.value } : item,
+                          ),
+                        })
+                      }
+                    >
+                      <option value="notice">Notice</option>
+                      <option value="warning">Warning</option>
+                      <option value="critical">Critical</option>
+                    </select>
+                  </label>
+                  <label className="text-xs">
+                    Delivery
+                    <select
+                      className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
+                      value={category.deliveryMode}
+                      onChange={(e) =>
+                        setPreviewValues({
+                          categories: active.categories.map((item) =>
+                            item.key === category.key
+                              ? { ...item, deliveryMode: e.target.value as NotificationCategoryConfig["deliveryMode"] }
+                              : item,
+                          ),
+                        })
+                      }
+                    >
+                      <option value="immediate">Immediate</option>
+                      <option value="digest">Digest</option>
+                    </select>
+                  </label>
+                </div>
+              ) : null}
               {isLive ? (
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button

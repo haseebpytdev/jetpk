@@ -33,4 +33,59 @@ class BookingPkrSnapshotTest extends TestCase
             'customer_total_pkr' => 164500,
         ]));
     }
+
+    public function test_quote_time_usd_conversion_uses_pricing_components(): void
+    {
+        $this->assertSame(164500.0, BookingPkrSnapshot::fromOffer([
+            'currency' => 'USD',
+            'total' => 590,
+            'supplier_currency' => 'USD',
+            'supplier_total' => 590,
+            'pricing_components' => [
+                'supplier_total_source' => 590,
+                'supplier_currency' => 'USD',
+                'pricing_currency' => 'PKR',
+                'conversion_status' => 'converted',
+                'fx_rate' => 278.8136,
+                'final_total' => 164500,
+            ],
+        ]));
+    }
+
+    public function test_sar_conversion_uses_pricing_components(): void
+    {
+        $this->assertSame(74200.0, BookingPkrSnapshot::fromOffer([
+            'currency' => 'SAR',
+            'total' => 1000,
+            'pricing_components' => [
+                'supplier_currency' => 'SAR',
+                'pricing_currency' => 'PKR',
+                'conversion_status' => 'converted',
+                'final_total' => 74200,
+            ],
+        ]));
+    }
+
+    public function test_supplier_overlay_does_not_hide_quote_pkr(): void
+    {
+        $snapshot = [
+            'currency' => 'PKR',
+            'total' => 164500,
+            'final_customer_price' => 164500,
+            'pricing_components' => [
+                'supplier_currency' => 'USD',
+                'pricing_currency' => 'PKR',
+                'conversion_status' => 'converted',
+                'final_total' => 164500,
+            ],
+        ];
+
+        $this->assertSame(164500.0, BookingPkrSnapshot::fromOffer($snapshot));
+        $this->assertNull(BookingPkrSnapshot::fromOffer([
+            'currency' => 'USD',
+            'total' => 590,
+            'supplier_currency' => 'USD',
+            'supplier_total' => 590,
+        ]));
+    }
 }

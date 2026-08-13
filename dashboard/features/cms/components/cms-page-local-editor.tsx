@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { archiveCmsPage, destroyCmsPage, duplicateCmsPage, updateCmsPage } from "@/services/operational-api";
 import { CmsHtmlBlockBuilder } from "@/features/cms/components/cms-html-block-builder";
-import type { CmsPage } from "@/types/cms";
+import { CmsPreviewModeSelector } from "@/features/cms/components/cms-preview-mode-selector";
+import type { CmsPage, CmsPreviewMode } from "@/types/cms";
 
 function toLaravelStatus(status: CmsPage["status"]): "draft" | "active" | "archived" {
   if (status === "published" || status === "approved") {
@@ -29,6 +30,8 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
   const [seoDescription, setSeoDescription] = useState(page.seoDescription);
   const [status, setStatus] = useState<"draft" | "active" | "archived">(toLaravelStatus(page.status));
   const [robots, setRobots] = useState(page.robots === "noindex" ? "noindex" : "index");
+  const [previewMode, setPreviewMode] = useState<CmsPreviewMode>("desktop_day");
+  const [showHtml, setShowHtml] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -174,20 +177,33 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
             data-testid="cms-page-excerpt"
           />
         </label>
-        <label className="block text-sm sm:col-span-2">
-          <span className="text-jp-muted">Content</span>
-          <CmsHtmlBlockBuilder
-            disabled={busy}
-            onInsert={(html) => setContent((current) => `${current}${current.endsWith("\n") || current === "" ? "" : "\n"}${html}`)}
-          />
-          <textarea
-            className="mt-2 min-h-40 w-full rounded-xl border border-jp-border bg-white px-3 py-2 font-mono text-xs"
-            value={content}
-            disabled={busy}
-            onChange={(e) => setContent(e.target.value)}
-            data-testid="cms-page-content"
-          />
-        </label>
+        <div className="sm:col-span-2 space-y-2">
+          <span className="text-sm text-jp-muted">Content</span>
+          <CmsHtmlBlockBuilder disabled={busy} content={content} onChange={setContent} />
+          <CmsPreviewModeSelector mode={previewMode} onChange={setPreviewMode} />
+          <div
+            className="mx-auto overflow-hidden rounded-xl border border-jp-border bg-white"
+            style={{
+              width: previewMode.includes("mobile") ? 360 : previewMode === "tablet" ? 768 : "100%",
+              maxWidth: "100%",
+            }}
+            data-testid="cms-page-preview"
+          >
+            <iframe title="CMS preview" className="h-[28rem] w-full" srcDoc={content} sandbox="" />
+          </div>
+          <button type="button" className="text-xs text-jp-accent" onClick={() => setShowHtml((value) => !value)}>
+            {showHtml ? "Hide HTML source" : "Advanced: HTML source"}
+          </button>
+          {showHtml ? (
+            <textarea
+              className="mt-2 min-h-40 w-full rounded-xl border border-jp-border bg-white px-3 py-2 font-mono text-xs"
+              value={content}
+              disabled={busy}
+              onChange={(e) => setContent(e.target.value)}
+              data-testid="cms-page-content"
+            />
+          ) : null}
+        </div>
         <label className="block text-sm">
           <span className="text-jp-muted">SEO title</span>
           <input

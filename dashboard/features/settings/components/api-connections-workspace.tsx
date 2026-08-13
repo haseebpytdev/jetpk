@@ -11,7 +11,7 @@ import {
 } from "@/services/operational-api";
 
 const FIELD_LABELS: Record<string, string> = {
-  sign_in: "EPR / sign-in",
+  sign_in: "Sabre Sign-in / EPR",
   password: "Password",
   pcc: "PCC",
   username: "Username",
@@ -70,6 +70,7 @@ export function ApiConnectionsWorkspace() {
   const [environment, setEnvironment] = useState("sandbox");
   const [credentials, setCredentials] = useState<Record<string, string>>({});
   const [manageId, setManageId] = useState<string | null>(null);
+  const [manageName, setManageName] = useState("");
   const [manageEnv, setManageEnv] = useState("sandbox");
   const [manageTab, setManageTab] = useState<"overview" | "environment" | "endpoints" | "credentials" | "capabilities" | "health">("overview");
 
@@ -136,6 +137,7 @@ export function ApiConnectionsWorkspace() {
                   disabled={busy}
                   onClick={() => {
                     setManageId(row.id);
+                    setManageName(row.name);
                     setManageEnv(row.environment || "sandbox");
                     setManageTab("overview");
                     setCredentials({});
@@ -191,12 +193,18 @@ export function ApiConnectionsWorkspace() {
                   ))}
                 </nav>
                 {manageTab === "overview" ? (
-                  <dl className="grid gap-2 text-sm sm:grid-cols-2">
-                    <div><dt className="text-jp-muted">Status</dt><dd>{row.status || (row.enabled ? "enabled" : "disabled")}</dd></div>
-                    <div><dt className="text-jp-muted">Registry</dt><dd>{row.registryLabel ?? "—"}</dd></div>
-                    <div><dt className="text-jp-muted">Credentials</dt><dd>{row.credentialsConfigured ? "Configured (masked)" : "Not configured"}</dd></div>
-                    <div><dt className="text-jp-muted">Last test</dt><dd>{row.lastTestStatus ?? "—"}</dd></div>
-                  </dl>
+                  <>
+                    <label className="block text-xs">
+                      Connection name
+                      <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={manageName} onChange={(e) => setManageName(e.target.value)} />
+                    </label>
+                    <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                      <div><dt className="text-jp-muted">Status</dt><dd>{row.status || (row.enabled ? "enabled" : "disabled")}</dd></div>
+                      <div><dt className="text-jp-muted">Registry</dt><dd>{row.registryLabel ?? "—"}</dd></div>
+                      <div><dt className="text-jp-muted">Credentials</dt><dd>{row.credentialsConfigured ? "Configured (masked)" : "Not configured"}</dd></div>
+                      <div><dt className="text-jp-muted">Last test</dt><dd>{row.lastTestStatus ?? "—"}</dd></div>
+                    </dl>
+                  </>
                 ) : null}
                 {manageTab === "environment" ? (
                   <label className="block text-xs">
@@ -257,7 +265,10 @@ export function ApiConnectionsWorkspace() {
                     onClick={() =>
                       run(() =>
                         updateApiConnection(manageId, {
+                          name: manageName.trim() || row.name,
+                          provider: row.provider,
                           environment: manageEnv,
+                          status: row.status || (row.enabled ? "active" : "inactive"),
                           credentials: Object.fromEntries(Object.entries(credentials).filter(([, value]) => value.trim() !== "")),
                         }),
                       )

@@ -27,15 +27,6 @@ final class BookingOperationalMoneyResolver
     {
         $booking->loadMissing(['fareBreakdown', 'holdSession']);
 
-        $pkrSnapshot = self::pkrSnapshotAmount($booking);
-        if ($pkrSnapshot !== null) {
-            return DashboardMoneyPresenter::presentMinorUnits(
-                (int) round($pkrSnapshot),
-                'PKR',
-                'operational.converted_total_pkr',
-            );
-        }
-
         $fareTotal = (float) ($booking->fareBreakdown?->total ?? 0);
         $paid = (float) ($booking->amount_paid ?? 0);
         $amount = $fareTotal > 0 ? $fareTotal : $paid;
@@ -43,9 +34,14 @@ final class BookingOperationalMoneyResolver
         $holdCurrency = BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency(
             $booking->holdSession?->validated_total_currency,
         );
+        $original = BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency(
+            data_get($booking->meta, 'original_currency')
+        );
 
-        $currency = $resolved['currency'] ?: ($holdCurrency !== '' ? $holdCurrency : null);
-        $source = $resolved['source'] ?? ($holdCurrency !== '' ? 'hold.validated_total_currency' : null);
+        $currency = $resolved['currency']
+            ?: ($original !== '' ? $original : null)
+            ?: ($holdCurrency !== '' ? $holdCurrency : null);
+        $source = $resolved['source'] ?? ($original !== '' ? 'meta.original_currency' : ($holdCurrency !== '' ? 'hold.validated_total_currency' : null));
 
         if ($amount > 0 && $currency) {
             return DashboardMoneyPresenter::presentMinorUnits((int) round($amount), $currency, $source);

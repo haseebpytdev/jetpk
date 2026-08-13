@@ -158,6 +158,7 @@ class FareHoldService
                 'reason_code' => (bool) ($paymentRequirements['requires_instant_payment'] ?? true)
                     ? 'hold_not_supported_instant_payment_required'
                     : 'hold_supported',
+                'commercial_money' => BookingPkrSnapshot::conversionMeta($normalizedOffer),
             ], $metaOverrides),
             'expires_at' => $checkoutExpiry,
             'created_by_user_id' => $user?->id,

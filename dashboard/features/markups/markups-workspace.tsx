@@ -6,6 +6,33 @@ import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { createMarkupRule, deleteMarkupRule, listApiConnections, toggleMarkupRule, updateMarkupRule } from "@/services/operational-api";
 import type { MarkupRecord } from "@/services/ops-modules-service";
 
+const AIRPORTS = [
+  { code: "LHE", name: "Lahore" },
+  { code: "KHI", name: "Karachi" },
+  { code: "ISB", name: "Islamabad" },
+  { code: "PEW", name: "Peshawar" },
+  { code: "MUX", name: "Multan" },
+  { code: "JED", name: "Jeddah" },
+  { code: "MED", name: "Madinah" },
+  { code: "DXB", name: "Dubai" },
+  { code: "AUH", name: "Abu Dhabi" },
+  { code: "DOH", name: "Doha" },
+  { code: "LHR", name: "London Heathrow" },
+];
+
+const AIRLINES = [
+  { code: "PK", name: "Pakistan International Airlines" },
+  { code: "SV", name: "Saudia" },
+  { code: "EK", name: "Emirates" },
+  { code: "QR", name: "Qatar Airways" },
+  { code: "EY", name: "Etihad" },
+  { code: "TK", name: "Turkish Airlines" },
+  { code: "PA", name: "Airblue" },
+  { code: "ER", name: "SereneAir" },
+];
+
+const CABINS = ["economy", "premium_economy", "business", "first"];
+
 const APPLY_OPTIONS = [
   { value: "global", label: "All flights" },
   { value: "supplier", label: "Supplier / API" },
@@ -58,19 +85,26 @@ const emptyForm: FormState = {
   meta_notes: "",
 };
 
-function preview(form: FormState): string {
-  const method = form.value_type === "percentage" ? `${form.value}%` : `Rs. ${form.value}`;
-  const apply = APPLY_OPTIONS.find((item) => item.value === form.rule_type)?.label ?? "All flights";
-  let target = "";
-  if (form.rule_type === "supplier" && form.supplier_key) target = ` (${form.supplier_key})`;
-  if (form.rule_type === "airline" && form.airline_code) target = ` (${form.airline_code.toUpperCase()})`;
-  if (form.rule_type === "route" && form.origin && form.destination) {
-    target = ` (${form.origin.toUpperCase()} → ${form.destination.toUpperCase()}, ${form.route_direction === "one_way" ? "one way" : "both directions"})`;
+function preview(form: FormState, connections: Array<{ id: string; name: string; provider: string }> = []): string {
+  const amount = form.value_type === "percentage" ? `${form.value}%` : `Rs. ${Number(form.value).toLocaleString("en-PK")}`;
+  if (form.rule_type === "global") return `Add ${amount} to all flights`;
+  if (form.rule_type === "supplier") {
+    const connection = connections.find((item) => item.provider === form.supplier_key);
+    const label = connection?.name || form.supplier_key || "selected supplier";
+    return `Add ${amount} to all ${label} fares`;
   }
-  if (form.rule_type === "cabin" && form.cabin) target = ` (${form.cabin})`;
-  if (form.rule_type === "fare_family" && form.fare_family) target = ` (${form.fare_family})`;
-  if (form.rule_type === "agent" && form.agent_id) target = ` (agent ${form.agent_id})`;
-  return `${method} markup on ${apply}${target}. Starts ${form.status === "active" ? "active" : "inactive"}.`;
+  if (form.rule_type === "airline") {
+    const airline = AIRLINES.find((item) => item.code === form.airline_code.toUpperCase());
+    return `Add ${amount} to ${airline ? `${airline.name} (${airline.code})` : (form.airline_code.toUpperCase() || "selected airline")} fares`;
+  }
+  if (form.rule_type === "route" && form.origin && form.destination) {
+    const dir = form.route_direction === "one_way" ? "" : " (both directions)";
+    return `Add ${amount} to ${form.origin.toUpperCase()} → ${form.destination.toUpperCase()}${dir}`;
+  }
+  if (form.rule_type === "cabin") return `Add ${amount} to ${form.cabin.replaceAll("_", " ") || "selected cabin"} fares`;
+  if (form.rule_type === "fare_family") return `Add ${amount} to ${form.fare_family || "selected fare family"}`;
+  if (form.rule_type === "agent") return `Add ${amount} for agent ${form.agent_id || "(select agent)"}`;
+  return `Add ${amount} markup.`;
 }
 
 function payloadFromForm(form: FormState): Record<string, unknown> {
@@ -104,7 +138,7 @@ export function MarkupsWorkspace({ markups }: { markups: MarkupRecord[] }) {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [connections, setConnections] = useState<Array<{ id: string; name: string; provider: string }>>([]);
   const selected = markups.find((row) => row.id === selectedId) ?? null;
-  const previewText = useMemo(() => preview(form), [form]);
+  const previewText = useMemo(() => preview(form, connections), [form, connections]);
 
   useEffect(() => {
     if (!isLive) {
@@ -199,18 +233,28 @@ export function MarkupsWorkspace({ markups }: { markups: MarkupRecord[] }) {
           </label>
         ) : null}
         {form.rule_type === "airline" ? (
-          <label className="block text-xs">Airline code or name
-            <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="PK" value={form.airline_code} onChange={(e) => setForm((f) => ({ ...f, airline_code: e.target.value }))} />
+          <label className="block text-xs">Airline
+            <input list="jp-markup-airlines" className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="Search code or name" value={form.airline_code} onChange={(e) => setForm((f) => ({ ...f, airline_code: e.target.value }))} />
+            <datalist id="jp-markup-airlines">
+              {AIRLINES.map((airline) => (
+                <option key={airline.code} value={airline.code}>{airline.name}</option>
+              ))}
+            </datalist>
           </label>
         ) : null}
         {form.rule_type === "route" ? (
           <div className="grid grid-cols-2 gap-2">
             <label className="block text-xs">Origin
-              <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="LHE" value={form.origin} onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value }))} />
+              <input list="jp-markup-airports" className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="LHE" value={form.origin} onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value }))} />
             </label>
             <label className="block text-xs">Destination
-              <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="DXB" value={form.destination} onChange={(e) => setForm((f) => ({ ...f, destination: e.target.value }))} />
+              <input list="jp-markup-airports" className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="JED" value={form.destination} onChange={(e) => setForm((f) => ({ ...f, destination: e.target.value }))} />
             </label>
+            <datalist id="jp-markup-airports">
+              {AIRPORTS.map((airport) => (
+                <option key={airport.code} value={airport.code}>{airport.name}</option>
+              ))}
+            </datalist>
             <label className="col-span-2 block text-xs">Direction
               <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={form.route_direction} onChange={(e) => setForm((f) => ({ ...f, route_direction: e.target.value }))}>
                 <option value="both">Both directions</option>
@@ -226,7 +270,12 @@ export function MarkupsWorkspace({ markups }: { markups: MarkupRecord[] }) {
         ) : null}
         {form.rule_type === "cabin" ? (
           <label className="block text-xs">Cabin
-            <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="economy" value={form.cabin} onChange={(e) => setForm((f) => ({ ...f, cabin: e.target.value }))} />
+            <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={form.cabin} onChange={(e) => setForm((f) => ({ ...f, cabin: e.target.value }))}>
+              <option value="">Select cabin</option>
+              {CABINS.map((cabin) => (
+                <option key={cabin} value={cabin}>{cabin.replaceAll("_", " ")}</option>
+              ))}
+            </select>
           </label>
         ) : null}
         {form.rule_type === "fare_family" ? (

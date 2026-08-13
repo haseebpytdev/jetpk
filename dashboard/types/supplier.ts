@@ -51,6 +51,9 @@ export type SupplierRecord = {
   notesSummary: string;
   registryState?: string;
   registryLabel?: string;
+  connectionId?: string;
+  provider?: string;
+  environment?: string;
 };
 
 export type SupplierSortField =

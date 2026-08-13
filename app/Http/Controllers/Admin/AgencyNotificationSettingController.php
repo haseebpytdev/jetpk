@@ -81,11 +81,16 @@ class AgencyNotificationSettingController extends Controller
                 foreach ((array) ($category['eventKeys'] ?? []) as $eventKey) {
                     $events[$eventKey] = [
                         'enabled' => $category['enabled'] ?? false,
+                        'email_channel' => $category['emailChannel'] ?? true,
                         'recipient_scope' => is_array($category['recipientRoles'] ?? null)
                             ? ($category['recipientRoles'][0] ?? 'admin')
                             : ($category['recipient_scope'] ?? 'admin'),
+                        'recipient_roles' => is_array($category['recipientRoles'] ?? null)
+                            ? $category['recipientRoles']
+                            : [$category['recipient_scope'] ?? 'admin'],
                         'dashboard_channel' => $category['dashboardChannel'] ?? false,
                         'delivery_mode' => $category['deliveryMode'] ?? 'immediate',
+                        'severity_threshold' => $category['severityThreshold'] ?? 'notice',
                     ];
                 }
             }
@@ -107,11 +112,21 @@ class AgencyNotificationSettingController extends Controller
             }
 
             $enabled = filter_var($row['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $emailChannel = filter_var($row['email_channel'] ?? $row['emailChannel'] ?? true, FILTER_VALIDATE_BOOLEAN);
             $dashboard = filter_var($row['dashboard_channel'] ?? $row['dashboardChannel'] ?? false, FILTER_VALIDATE_BOOLEAN);
             $digest = ($row['delivery_mode'] ?? $row['deliveryMode'] ?? 'immediate') === 'digest' ? 'digest' : 'immediate';
-            $scope = (string) ($row['recipient_scope'] ?? $row['recipientRoles'][0] ?? 'admin');
+            $severity = (string) ($row['severity_threshold'] ?? $row['severityThreshold'] ?? 'notice');
+            if (! in_array($severity, ['notice', 'warning', 'critical'], true)) {
+                $severity = 'notice';
+            }
+            $roles = is_array($row['recipient_roles'] ?? null) ? $row['recipient_roles'] : [];
+            $roles = array_values(array_filter($roles, static fn ($role): bool => in_array((string) $role, ['admin', 'staff', 'agent', 'customer'], true)));
+            $scope = (string) ($row['recipient_scope'] ?? $roles[0] ?? 'admin');
             if (! in_array($scope, ['admin', 'staff', 'agent', 'customer'], true)) {
                 $scope = 'admin';
+            }
+            if ($roles === []) {
+                $roles = [$scope];
             }
 
             AgencyNotificationSetting::query()->updateOrCreate(
@@ -121,13 +136,19 @@ class AgencyNotificationSettingController extends Controller
                     'channel' => 'email',
                 ],
                 [
-                    'enabled' => $enabled,
+                    'enabled' => $enabled && $emailChannel,
                     'recipient_scope' => $scope,
                     'recipient_emails' => $this->parseEmailList($row['recipient_emails'] ?? ''),
                     'cc_emails' => $this->parseEmailList($row['cc_emails'] ?? ''),
                     'bcc_emails' => $this->parseEmailList($row['bcc_emails'] ?? ''),
                     'digest_mode' => $digest,
-                    'meta' => ['dashboard_channel' => $dashboard],
+                    'meta' => [
+                        'category_enabled' => $enabled,
+                        'email_channel' => $emailChannel,
+                        'dashboard_channel' => $dashboard,
+                        'severity_threshold' => $severity,
+                        'recipient_roles' => $roles,
+                    ],
                 ]
             );
         }

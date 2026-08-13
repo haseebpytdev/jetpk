@@ -79,27 +79,46 @@ export function MediaLibraryPanel() {
       <ul className="divide-y divide-jp-border rounded-lg border border-jp-border">
         {rows.map((row) => (
           <li key={row.id} className="flex items-center justify-between gap-2 p-2 text-sm">
-            <div>
-              <p className="font-medium">{row.file_name}</p>
-              <p className="text-xs text-jp-muted">{row.collection} · {row.alt_text || "no alt"}</p>
+            <div className="flex min-w-0 items-center gap-3">
+              {row.url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={row.url} alt={row.alt_text || row.file_name} className="h-12 w-12 rounded object-cover" />
+              ) : null}
+              <div className="min-w-0">
+                <p className="font-medium truncate">{row.file_name}</p>
+                <p className="text-xs text-jp-muted">{row.collection} · {row.alt_text || "no alt"}</p>
+              </div>
             </div>
-            <button
-              type="button"
-              className="text-xs text-red-700 underline"
-              disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                const result = await deleteMediaLibraryItem(row.id);
-                setBusy(false);
-                if (!result.ok) {
-                  setError(result.message ?? "Delete failed");
-                  return;
-                }
-                await refresh();
-              }}
-            >
-              Remove
-            </button>
+            <div className="flex gap-2">
+              {row.url ? (
+                <button
+                  type="button"
+                  className="text-xs text-jp-accent underline"
+                  onClick={() => {
+                    void navigator.clipboard.writeText(row.url ?? "");
+                  }}
+                >
+                  Copy URL
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="text-xs text-red-700 underline"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  const result = await deleteMediaLibraryItem(row.id);
+                  setBusy(false);
+                  if (!result.ok) {
+                    setError(result.message ?? "Delete failed");
+                    return;
+                  }
+                  await refresh();
+                }}
+              >
+                Remove
+              </button>
+            </div>
           </li>
         ))}
       </ul>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLink as Link } from "@/components/dashboard/dashboard-link";
 import { Divider } from "@/components/ui/divider";
 import { DetailDrawerSourceNotice } from "@/components/ui/detail-drawer-source-notice";
@@ -11,12 +13,18 @@ import {
 } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { updateApiConnection } from "@/services/operational-api";
 import type { SupplierRecord } from "@/types/supplier";
 
 export function SupplierDetailDrawerContent({ supplier }: { supplier: SupplierRecord }) {
   const isLive = useDashboardLiveMode();
+  const router = useRouter();
   const recentBookings = supplier.linkedBookingIds.slice(0, 5);
   const recentTransactions = supplier.linkedTransactionIds.slice(0, 5);
+  const [displayName, setDisplayName] = useState(supplier.supplierName);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   return (
     <div className="space-y-5" data-testid="supplier-drawer-content">
@@ -35,6 +43,12 @@ export function SupplierDetailDrawerContent({ supplier }: { supplier: SupplierRe
             <dt className="text-jp-muted">Name</dt>
             <dd>{supplier.supplierName}</dd>
           </div>
+          {supplier.registryLabel ? (
+            <div className="flex justify-between gap-4">
+              <dt className="text-jp-muted">Registry</dt>
+              <dd>{supplier.registryLabel}</dd>
+            </div>
+          ) : null}
           <div className="flex justify-between gap-4">
             <dt className="text-jp-muted">Display code</dt>
             <dd>{supplier.displayCode}</dd>
@@ -86,9 +100,49 @@ export function SupplierDetailDrawerContent({ supplier }: { supplier: SupplierRe
           <CredentialStatusBadge status={supplier.credentialStatus} />
         </div>
         <p className="mt-2 text-xs text-jp-muted">
-          Abstract status only — no credentials, API keys, or secrets are displayed in preview.
+          Abstract status only — no credentials, API keys, or secrets are displayed here. API credentials stay on Settings → Integrations.
         </p>
       </section>
+
+      {isLive && supplier.connectionId ? (
+        <section className="rounded-xl border border-jp-border p-3" aria-labelledby="supplier-business-heading">
+          <h3 id="supplier-business-heading" className="text-sm font-semibold text-gray-900">
+            Business display name
+          </h3>
+          <p className="mt-1 text-xs text-jp-muted">This label is vendor metadata. It does not rotate API credentials.</p>
+          {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+          {success ? <p className="mt-2 text-sm text-emerald-700">{success}</p> : null}
+          <input
+            className="mt-2 w-full rounded-lg border border-jp-border px-2 py-1 text-sm"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
+          <button
+            type="button"
+            className="mt-2 min-h-11 rounded-xl bg-jp-accent px-3 text-sm text-white disabled:opacity-60"
+            disabled={busy || displayName.trim() === ""}
+            onClick={async () => {
+              setBusy(true);
+              setError(null);
+              setSuccess(null);
+              const result = await updateApiConnection(supplier.connectionId ?? "", {
+                name: displayName.trim(),
+                provider: supplier.provider,
+                environment: supplier.environment,
+              });
+              setBusy(false);
+              if (!result.ok) {
+                setError(result.message ?? "Could not save supplier name");
+                return;
+              }
+              setSuccess("Business display name saved.");
+              router.refresh();
+            }}
+          >
+            {busy ? "Saving…" : "Save display name"}
+          </button>
+        </section>
+      ) : null}
 
       <Divider />
 
