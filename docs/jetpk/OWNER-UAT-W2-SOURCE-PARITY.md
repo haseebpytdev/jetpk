@@ -1,9 +1,19 @@
 # OWNER UAT W2 — Source Parity
 
-LAST_UPDATED_UTC: 2026-08-13T18:40:00Z  
+LAST_UPDATED_UTC: 2026-08-13T19:15:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-LOCAL_HEAD_AT_CHECK: `6d019160ff23d5d8c14fc50d58606b4e52d63925`  
-REMOTE: `jetpk` engineering SHA `6d019160` (docs commit follows)
+LOCAL_HEAD_AT_CHECK: `589e70897eb801ef69a38643ffbf48d20f818562`  
+REMOTE: `jetpk` engineering SHA `589e7089` (docs commit follows)
+
+## OLS
+
+| Check | Result |
+|---|---|
+| Expected SHA256 | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
+| Production | **MATCH** |
+
+Dashboard BUILD_ID production: `t2IIp_9kfSUyeR9vl5_f-`  
+Distinguish: REMOTE_HEAD and LATEST_ENGINEERING_SHA are `589e7089` until the docs pin commit. LATEST_DOCS_CONTENT_SHA is the following docs commit, not the engineering parent.
 
 ## OLS
 

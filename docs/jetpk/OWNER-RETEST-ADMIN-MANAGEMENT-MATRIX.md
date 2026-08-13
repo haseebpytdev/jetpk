@@ -8,11 +8,11 @@ JP_REL_01=PROHIBITED
 OTP_RESTORE=PROHIBITED
 QA_USER_SUSPEND=PROHIBITED
 
-LAST_EXTERNALLY_VERIFIED_REMOTE_HEAD=6d019160ff23d5d8c14fc50d58606b4e52d63925
-LATEST_ENGINEERING_SHA=6d019160ff23d5d8c14fc50d58606b4e52d63925
-LATEST_DOCS_SHA=f4ea1b93d4a914faef741744c91c36189ff990fa
-PRODUCTION_BUILD_ID=7XX2vpVISL5H9S6kjpnqj
-PRODUCTION_PHP_SHA=6d019160
+LAST_EXTERNALLY_VERIFIED_REMOTE_HEAD=589e70897eb801ef69a38643ffbf48d20f818562
+LATEST_ENGINEERING_SHA=589e70897eb801ef69a38643ffbf48d20f818562
+LATEST_DOCS_SHA=PENDING_THIS_DOCS_COMMIT
+PRODUCTION_BUILD_ID=t2IIp_9kfSUyeR9vl5_f-
+PRODUCTION_PHP_SHA=589e7089
 OLS_HTTP_CONFIG_SHA256=612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c
 OLS_STATE=MATCH
 USER_ACCESS_MANAGEMENT_CRUD_TEST=PASS
@@ -54,14 +54,14 @@ Classification key:
 | Gate | Status | Classification |
 |---|---|---|
 | ADMIN_FINANCIAL_PKR | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Fixture USD/SAR/PKR holds persist commercial PKR; fare keeps supplier ISO; GBV is Rs. snapshot; 10/10 OwnerRetestV2 closure tests + BookingPkrSnapshot unit tests. No live supplier booking. |
-| MARKUP_BUSINESS_RULE_BUILDER | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Apply-to modes, origin/destination, English preview, Advanced priority. Inactive JSON create/toggle/delete without applies_to JSON. SAFETY_CONTROLLED: no live pricing mutation. |
+| MARKUP_BUSINESS_RULE_BUILDER | PASS | Authoritative airline/airport/agency lookups; configured supplier connections only; optional specific-flight keys on `applies_to` without a new enum/migration. No live pricing QA. |
 | SETTINGS_SOURCE_OF_TRUTH | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Org Profile JSON GET/PATCH round-trip matches Settings Current Values; audit `agency.branding_settings_updated`. Production save already proved earlier this wave. |
 | NOTIFICATION_SETTINGS_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Category JSON enable/email/dashboard/severity/delivery/roles. Failures classifier splits CURRENT_OPERATIONAL_FAILURES vs HISTORICAL_QA_FAILURES. No genuine history deleted. |
 | SUPPLIER_REGISTRY_TRUTH | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Six-state matrix unit-tested. Production currently shows CONFIGURED_ENABLED for installed providers; that is not a remaining capability gap. |
 | SUPPLIER_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | List/detail/analytics + business display name. Name-only PATCH preserves credentials, settings, status, and base URL. |
-| API_CONNECTION_FULL_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Manage tabs, masked credentials, enable/disable, safe test contract. Credential rotation SAFETY_CONTROLLED (not executed). Name-only update no longer wipes settings/Sabre channels. |
-| CMS_FULL_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Pages JSON CRUD, duplicate, archive, approved block catalogue, reorder/hide/duplicate/remove, field configure without raw HTML. Production list may be empty until a QA page is created. |
-| CMS_PREVIEW_PUBLISH | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Draft, admin preview, publish, unpublish/archive proven by tests. Homepage remains Page Settings draft/preview/publish. |
+| API_CONNECTION_FULL_MANAGEMENT | PASS | Overview/Environment/Endpoints/Credentials/Capabilities/Advanced/Health/Audit. Provider catalog from `SupplierRegistry`. Editable Base URL when adapter supports override. No credential rotation QA. |
+| CMS_FULL_MANAGEMENT | PASS | Structured business fields for every advertised block; insert above/below; Advanced HTML remains expert fallback. |
+| CMS_PREVIEW_PUBLISH | PASS | Authenticated draft overlay preview uses JetPakistan public layout; does not publish. Desktop/tablet/mobile + day/night. |
 | MEDIA_LIBRARY | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Upload/list/preview/copy URL/alt update/remove. `/cms/assets` no longer shows a false empty-filter state over the live panel. |
 | USERS_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Create/invite/edit/suspend/activate/reset covered by `UserAccessManagementCrudTest`. Protected Owner-UAT identities not mutated. |
 | STAFF_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Create staff + permissions editor covered by existing staff/RBAC feature tests. Protected identities not deactivated. |
