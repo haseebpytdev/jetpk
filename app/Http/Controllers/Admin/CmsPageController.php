@@ -190,11 +190,69 @@ class CmsPageController extends Controller
         return redirect()->route('admin.cms-pages.index')->with('status', 'cms-page-deleted');
     }
 
-    public function preview(CmsPage $cmsPage): View
+    public function preview(Request $request, CmsPage $cmsPage): View
     {
         Gate::authorize('view', $cmsPage);
 
-        return view('frontend.cms-pages.show', $this->viewData($cmsPage, true));
+        $page = $this->applyDraftOverlay($request, $cmsPage);
+
+        return view('frontend.cms-pages.show', $this->viewData($page, true) + [
+            'previewTheme' => $request->string('theme')->toString() === 'night' ? 'night' : 'day',
+            'previewViewport' => $request->string('viewport')->toString(),
+        ]);
+    }
+
+    public function previewDraft(Request $request, CmsPage $cmsPage): JsonResponse
+    {
+        Gate::authorize('view', $cmsPage);
+
+        $overlay = [
+            'title' => $request->filled('title') ? $request->string('title')->toString() : $cmsPage->title,
+            'excerpt' => $request->exists('excerpt') ? $request->input('excerpt') : $cmsPage->excerpt,
+            'content' => $request->exists('content')
+                ? $this->contentPresenter->sanitizeHtmlOverrideForStorage($request->input('content'))
+                : $cmsPage->content,
+        ];
+        $request->session()->put($this->draftOverlayKey($cmsPage), $overlay);
+
+        $theme = $request->string('theme')->toString() === 'night' ? 'night' : 'day';
+        $viewport = $request->string('viewport')->toString();
+
+        return $this->backOfficeJson([
+            'ok' => true,
+            'previewUrl' => route('admin.cms-pages.preview', $cmsPage).'?theme='.urlencode($theme).'&viewport='.urlencode($viewport).'&draft=1',
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function applyDraftOverlay(Request $request, CmsPage $cmsPage): CmsPage
+    {
+        $overlay = $request->session()->get($this->draftOverlayKey($cmsPage));
+        if (! is_array($overlay) || ! $request->boolean('draft')) {
+            return $cmsPage;
+        }
+
+        $clone = $cmsPage->replicate();
+        $clone->id = $cmsPage->id;
+        $clone->exists = true;
+        if (isset($overlay['title'])) {
+            $clone->title = (string) $overlay['title'];
+        }
+        if (array_key_exists('excerpt', $overlay)) {
+            $clone->excerpt = $overlay['excerpt'];
+        }
+        if (isset($overlay['content'])) {
+            $clone->content = (string) $overlay['content'];
+        }
+
+        return $clone;
+    }
+
+    protected function draftOverlayKey(CmsPage $cmsPage): string
+    {
+        return 'cms_draft_overlay.'.$cmsPage->getKey();
     }
 
     /**

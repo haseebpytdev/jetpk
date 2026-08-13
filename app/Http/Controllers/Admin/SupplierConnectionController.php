@@ -45,6 +45,7 @@ class SupplierConnectionController extends Controller
             return $this->backOfficeJson([
                 'ok' => true,
                 'connections' => collect($connections->items())->map(fn ($row) => $this->presentConnection($row))->all(),
+                'providers' => $this->providerCatalog(),
             ]);
         }
 
@@ -254,9 +255,66 @@ class SupplierConnectionController extends Controller
                 \App\Support\Suppliers\SupplierRegistry::stateForConnection($connection)
             ),
             'baseUrl' => filled($connection->base_url) ? (string) $connection->base_url : null,
-            'baseUrlOverridable' => filled($connection->base_url),
+            'baseUrlOverridable' => in_array($provider, [SupplierProvider::PiaNdc->value, SupplierProvider::Airblue->value], true),
+            'credentialFields' => $this->credentialFieldsFor($provider),
             'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
+            'advanced' => [
+                'settingsKeys' => is_array($connection->settings) ? array_keys($connection->settings) : [],
+                'advancedBaseUrlOverride' => (bool) data_get($connection->settings, 'advanced_base_url_override', filled($connection->base_url)),
+            ],
+            'audit' => [
+                'lastTestedAt' => $connection->last_tested_at?->toIso8601String(),
+                'lastTestStatus' => $connection->last_test_status,
+                'lastFailure' => $this->sanitizeFailure((string) ($connection->last_error ?? '')),
+                'updatedAt' => $connection->updated_at?->toIso8601String(),
+            ],
         ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    protected function providerCatalog(): array
+    {
+        $config = config('supplier_credentials.providers', []);
+        $catalog = [];
+        foreach (SupplierProvider::cases() as $provider) {
+            $fields = [];
+            foreach ((array) data_get($config, $provider->value.'.fields', []) as $key => $meta) {
+                $fields[] = [
+                    'key' => (string) $key,
+                    'label' => (string) ($meta['label'] ?? $key),
+                    'type' => (string) ($meta['type'] ?? 'text'),
+                ];
+            }
+            $catalog[] = [
+                'key' => $provider->value,
+                'label' => $provider->name,
+                'installed' => \App\Support\Suppliers\SupplierRegistry::adapterInstalled($provider),
+                'baseUrlOverridable' => in_array($provider->value, [SupplierProvider::PiaNdc->value, SupplierProvider::Airblue->value], true),
+                'credentialFields' => $fields,
+                'state' => \App\Support\Suppliers\SupplierRegistry::stateForUnprovisioned($provider),
+            ];
+        }
+
+        return $catalog;
+    }
+
+    /**
+     * @return list<array<string, string>>
+     */
+    protected function credentialFieldsFor(string $provider): array
+    {
+        $fields = [];
+        foreach ((array) data_get(config('supplier_credentials.providers', []), $provider.'.fields', []) as $key => $meta) {
+            $fields[] = [
+                'key' => (string) $key,
+                'label' => (string) ($meta['label'] ?? $key),
+                'type' => (string) ($meta['type'] ?? 'text'),
+            ];
+        }
+
+        return $fields;
     }
 
     /**

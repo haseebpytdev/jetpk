@@ -24,6 +24,7 @@ import {
   cmsPageArchivePath,
   cmsPageDestroyPath,
   cmsPageDuplicatePath,
+  cmsPagePreviewDraftPath,
   cmsPageStorePath,
   cmsPageUpdatePath,
   commissionEntryApprovePath,
@@ -236,6 +237,17 @@ export async function updateCmsPage(
 ): Promise<MutationResponse<{ page?: Record<string, unknown> }>> {
   return laravelRequest(cmsPageUpdatePath(pageId), {
     method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function previewCmsDraft(
+  pageId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ previewUrl?: string }>> {
+  return laravelRequest(cmsPagePreviewDraftPath(pageId), {
+    method: "POST",
     json: payload,
     retryCsrfOnce: false,
   });

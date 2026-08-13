@@ -112,4 +112,4 @@ Integrated from isolated worktree commit lineage; production computed font accep
 
 ## PROHIBITIONS HONORED
 
-No OTP restore, no QA suspend, no JP-REL-01, no money/supplier mutations, no force-push, OLS unchanged, no DB migration, Wave-1 frozen tip untouched.
+No OTP restore, no QA suspend, no JP-REL-01, no money/supplier mutations, no force-push, OLS unchanged. Additive RBAC migration `2026_08_13_220000_create_rbac_roles_tables` has run. Wave-1 frozen tip untouched.

@@ -342,6 +342,35 @@ class CmsPageTest extends TestCase
             ->assertSee('Preview mode', false);
     }
 
+    public function test_admin_draft_overlay_preview_does_not_publish_or_mutate_stored_content(): void
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $admin = $this->platformAdmin();
+        $page = $this->createPage([
+            'slug' => 'overlay-preview',
+            'title' => 'Stored title',
+            'status' => CmsPage::STATUS_DRAFT,
+            'content' => '<p>Stored copy.</p>',
+        ]);
+
+        $this->actingAs($admin)
+            ->postJson(route('admin.cms-pages.preview-draft', $page), [
+                'title' => 'Unsaved draft title',
+                'content' => '<section data-jp-block="heading"><h2>Unsaved heading</h2></section>',
+            ])
+            ->assertOk()
+            ->assertJsonPath('ok', true);
+
+        $this->actingAs($admin)
+            ->get(route('admin.cms-pages.preview', ['cmsPage' => $page, 'draft' => 1]))
+            ->assertOk()
+            ->assertSee('Unsaved heading', false)
+            ->assertDontSee('Stored copy.', false);
+
+        $this->assertSame('<p>Stored copy.</p>', $page->fresh()->content);
+        $this->get(route('pages.show', $page->slug))->assertNotFound();
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      */

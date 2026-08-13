@@ -3,14 +3,9 @@
 import { useMemo, useState, useTransition } from "react";
 import { useDashboardRouter } from "@/lib/dashboard-navigation";
 import { PERMISSION_GROUP_LABELS } from "@/lib/access-control/permission-catalog";
-import {
-  assignRbacRole,
-  cloneRbacRole,
-  createRbacRole,
-  deleteRbacRole,
-  unassignRbacRole,
-  updateRbacRole,
-} from "@/features/roles/rbac-write-api";
+import { assignRbacRole, cloneRbacRole, createRbacRole, deleteRbacRole, unassignRbacRole, updateRbacRole } from "@/features/roles/rbac-write-api";
+import { laravelRequest } from "@/lib/api/laravel-action-client";
+import { markupLookupsPath } from "@/lib/api/portal-paths";
 import type { Role } from "@/types/access-control";
 
 type CatalogPermission = { key: string; label: string; category: string; highRisk?: boolean };
@@ -50,6 +45,11 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
   const [name, setName] = useState("QA Custom Role");
   const [agencyId, setAgencyId] = useState("");
   const [userId, setUserId] = useState("");
+  const [permissionQuery, setPermissionQuery] = useState("");
+  const [agencyLabel, setAgencyLabel] = useState("");
+  const [userLabel, setUserLabel] = useState("");
+  const [agencyHits, setAgencyHits] = useState<Array<{ id: string; label: string }>>([]);
+  const [userHits, setUserHits] = useState<Array<{ id: string; label: string }>>([]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(permissionKeys);
 
   const grouped = useMemo(() => {
@@ -95,16 +95,30 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
           <input className="mt-1 w-full rounded border px-2 py-1" value={name} onChange={(e) => setName(e.target.value)} />
         </label>
         <label className="text-sm">
-          Agency ID
+          Agency
           <input
             className="mt-1 w-full rounded border px-2 py-1"
-            value={agencyId}
-            onChange={(e) => setAgencyId(e.target.value)}
-            inputMode="numeric"
+            value={agencyLabel}
+            onChange={async (e) => {
+              setAgencyLabel(e.target.value);
+              const result = await laravelRequest<{ items?: Array<{ id: string; label: string }> }>(markupLookupsPath("agency", e.target.value));
+              const payload = (result as { data?: { items?: Array<{ id: string; label: string }> } }).data ?? result;
+              setAgencyHits((payload as { items?: Array<{ id: string; label: string }> }).items ?? []);
+            }}
+            placeholder="Search agency name"
           />
+          {agencyHits.map((hit) => (
+            <button key={hit.id} type="button" className="mt-1 block text-left text-xs text-jp-accent" onClick={() => { setAgencyId(hit.id); setAgencyLabel(hit.label); setAgencyHits([]); }}>
+              {hit.label}
+            </button>
+          ))}
         </label>
       </div>
 
+      <label className="mt-3 block text-sm">
+        Search permissions
+        <input className="mt-1 w-full rounded border px-2 py-1" value={permissionQuery} onChange={(e) => setPermissionQuery(e.target.value)} />
+      </label>
       <div className="mt-4 max-h-72 overflow-auto rounded border p-3">
         {GROUPS.filter((group) => grouped.has(group)).map((group) => (
           <fieldset key={group} className="mb-3">
@@ -112,7 +126,9 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
               {PERMISSION_GROUP_LABELS[group as keyof typeof PERMISSION_GROUP_LABELS] ?? group}
             </legend>
             <div className="mt-1 grid gap-1 sm:grid-cols-2">
-              {(grouped.get(group) ?? []).map((permission) => (
+              {(grouped.get(group) ?? [])
+                .filter((permission) => permission.label.toLowerCase().includes(permissionQuery.toLowerCase()) || permission.key.includes(permissionQuery.toLowerCase()))
+                .map((permission) => (
                 <label key={permission.key} className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
@@ -165,7 +181,7 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
               type="button"
               className="rounded border px-3 py-1.5 text-sm disabled:opacity-50"
               disabled={pending || protectedRole}
-              onClick={() => run(() => updateRbacRole(selectedRole.id, { permission_keys: selectedKeys }))}
+              onClick={() => run(() => updateRbacRole(selectedRole.id, { name, permission_keys: selectedKeys }))}
             >
               Save permissions
             </button>
@@ -184,8 +200,23 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
       {selectedRole ? (
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <label className="text-sm">
-            Assign user ID
-            <input className="mt-1 w-full rounded border px-2 py-1" value={userId} onChange={(e) => setUserId(e.target.value)} />
+            Assign user / staff
+            <input
+              className="mt-1 w-full rounded border px-2 py-1"
+              value={userLabel}
+              onChange={async (e) => {
+                setUserLabel(e.target.value);
+                const result = await laravelRequest<{ items?: Array<{ id: string; label: string }> }>(markupLookupsPath("user", e.target.value));
+                const payload = (result as { data?: { items?: Array<{ id: string; label: string }> } }).data ?? result;
+                setUserHits((payload as { items?: Array<{ id: string; label: string }> }).items ?? []);
+              }}
+              placeholder="Search name or email"
+            />
+            {userHits.map((hit) => (
+              <button key={hit.id} type="button" className="mt-1 block text-left text-xs text-jp-accent" onClick={() => { setUserId(hit.id); setUserLabel(hit.label); setUserHits([]); }}>
+                {hit.label}
+              </button>
+            ))}
           </label>
           <div className="flex items-end gap-2">
             <button
@@ -206,7 +237,10 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
             </button>
           </div>
           <p className="sm:col-span-2 text-sm text-jp-muted">
-            Assigned: {assignedUsers.length === 0 ? "none" : assignedUsers.map((user) => `${user.name} (#${user.id})`).join(", ")}
+            Assigned: {assignedUsers.length === 0 ? "none" : assignedUsers.map((user) => `${user.name}${user.email ? ` (${user.email})` : ""}`).join(", ")}
+          </p>
+          <p className="sm:col-span-2 text-sm">
+            Effective permissions: {selectedKeys.length} catalog keys on this role. System AccountType fallback remains in dual-read.
           </p>
         </div>
       ) : null}

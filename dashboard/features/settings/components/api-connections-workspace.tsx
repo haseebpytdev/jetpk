@@ -10,27 +10,15 @@ import {
   updateApiConnection,
 } from "@/services/operational-api";
 
-const FIELD_LABELS: Record<string, string> = {
-  sign_in: "Sabre Sign-in / EPR",
-  password: "Password",
-  pcc: "PCC",
-  username: "Username",
-  agency_id: "Agency ID",
-  agency_name: "Agency name",
-  owner_code: "Owner code",
-  api_key: "API key",
-  access_token: "Access token",
+type ProviderCatalog = {
+  key: string;
+  label: string;
+  installed: boolean;
+  baseUrlOverridable: boolean;
+  credentialFields: Array<{ key: string; label: string; type: string }>;
 };
 
-const INSTALLED_ADAPTERS = [
-  { key: "sabre", label: "Sabre", fields: ["sign_in", "password", "pcc"] },
-  { key: "pia_ndc", label: "PIA NDC", fields: ["username", "password", "agency_id", "agency_name", "owner_code"] },
-  { key: "airblue", label: "AirBlue", fields: ["username", "password", "agency_id"] },
-  { key: "one_api", label: "One API", fields: ["api_key"] },
-  { key: "duffel", label: "Duffel", fields: ["access_token"] },
-];
-
-const NOT_INSTALLED = ["amadeus", "travelport", "al_haider"];
+const FIELD_LABELS: Record<string, string> = {};
 
 type ApiConnectionRow = {
   id: string;
@@ -51,6 +39,9 @@ type ApiConnectionRow = {
   registryState?: string | null;
   baseUrl?: string | null;
   baseUrlOverridable?: boolean;
+  credentialFields?: Array<{ key: string; label: string; type: string }>;
+  audit?: { lastTestedAt?: string | null; lastTestStatus?: string | null; lastFailure?: string | null; updatedAt?: string | null };
+  advanced?: { settingsKeys?: string[]; advancedBaseUrlOverride?: boolean };
 };
 
 function extractConnections(result: { ok: boolean; data?: unknown }): ApiConnectionRow[] {
@@ -72,10 +63,12 @@ export function ApiConnectionsWorkspace() {
   const [manageId, setManageId] = useState<string | null>(null);
   const [manageName, setManageName] = useState("");
   const [manageEnv, setManageEnv] = useState("sandbox");
-  const [manageTab, setManageTab] = useState<"overview" | "environment" | "endpoints" | "credentials" | "capabilities" | "health">("overview");
+  const [providers, setProviders] = useState<ProviderCatalog[]>([]);
+  const [manageTab, setManageTab] = useState<"overview" | "environment" | "endpoints" | "credentials" | "capabilities" | "advanced" | "health" | "audit">("overview");
+  const [manageBaseUrl, setManageBaseUrl] = useState("");
 
-  const installed = INSTALLED_ADAPTERS.some((item) => item.key === provider);
-  const adapter = INSTALLED_ADAPTERS.find((item) => item.key === provider);
+  const adapter = providers.find((item) => item.key === provider);
+  const installed = Boolean(adapter?.installed);
 
   const refresh = useCallback(async () => {
     if (!isLive) {
@@ -87,6 +80,12 @@ export function ApiConnectionsWorkspace() {
       return;
     }
     setRows(extractConnections(result));
+    const catalog = ((result as { data?: { providers?: ProviderCatalog[] } }).data?.providers
+      ?? (result as { providers?: ProviderCatalog[] }).providers
+      ?? []) as ProviderCatalog[];
+    if (Array.isArray(catalog) && catalog.length > 0) {
+      setProviders(catalog);
+    }
   }, [isLive]);
 
   useEffect(() => {
@@ -141,6 +140,7 @@ export function ApiConnectionsWorkspace() {
                     setManageEnv(row.environment || "sandbox");
                     setManageTab("overview");
                     setCredentials({});
+                    setManageBaseUrl(row.baseUrl ?? "");
                   }}
                 >
                   Manage
@@ -172,7 +172,8 @@ export function ApiConnectionsWorkspace() {
           {(() => {
             const row = rows.find((item) => item.id === manageId);
             if (!row) return null;
-            const tabs = ["overview", "environment", "endpoints", "credentials", "capabilities", "health"] as const;
+            const tabs = ["overview", "environment", "endpoints", "credentials", "capabilities", "advanced", "health", "audit"] as const;
+            const fields = row.credentialFields ?? providers.find((item) => item.key === row.provider)?.credentialFields ?? [];
             return (
               <>
                 <p className="text-sm">
@@ -217,26 +218,29 @@ export function ApiConnectionsWorkspace() {
                   </label>
                 ) : null}
                 {manageTab === "endpoints" ? (
-                  <p className="text-sm text-jp-muted">
-                    {row.baseUrlOverridable && row.baseUrl
-                      ? `Adapter endpoint override: ${row.baseUrl}`
-                      : "This adapter uses its built-in endpoint. A Base URL override is not supported here."}
-                  </p>
+                  row.baseUrlOverridable ? (
+                    <label className="block text-xs">
+                      Base URL
+                      <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={manageBaseUrl} onChange={(e) => setManageBaseUrl(e.target.value)} />
+                    </label>
+                  ) : (
+                    <p className="text-sm text-jp-muted">This adapter uses its built-in endpoint. A Base URL override is not supported.</p>
+                  )
                 ) : null}
                 {manageTab === "credentials" ? (
                   <>
-                    <p className="text-xs text-jp-muted">Stored secrets are never shown. Leave a field blank to keep the current value.</p>
+                    <p className="text-xs text-jp-muted">Stored secrets are never shown. Leave a field blank to keep the current value. Credential rotation is not executed in Owner UAT QA.</p>
                     {row.maskedCredentials
                       ? Object.entries(row.maskedCredentials).map(([key, value]) => (
                           <p key={key} className="text-xs text-jp-muted">
-                            {FIELD_LABELS[key] ?? key}: {value}
+                            {(fields.find((field) => field.key === key)?.label ?? key)}: {value}
                           </p>
                         ))
                       : null}
-                    {INSTALLED_ADAPTERS.find((item) => item.key === row.provider)?.fields.map((field) => (
-                      <label key={field} className="block text-xs">
-                        {FIELD_LABELS[field] ?? field}
-                        <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" type="password" autoComplete="off" value={credentials[field] ?? ""} onChange={(e) => setCredentials((current) => ({ ...current, [field]: e.target.value }))} />
+                    {fields.map((field) => (
+                      <label key={field.key} className="block text-xs">
+                        {field.label}
+                        <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" type={field.type === "password" ? "password" : "text"} autoComplete="off" value={credentials[field.key] ?? ""} onChange={(e) => setCredentials((current) => ({ ...current, [field.key]: e.target.value }))} />
                       </label>
                     ))}
                   </>
@@ -250,11 +254,25 @@ export function ApiConnectionsWorkspace() {
                 {manageTab === "capabilities" && row.provider !== "sabre" ? (
                   <p className="text-sm text-jp-muted">Capabilities follow the installed adapter. No extra channel toggles for this provider.</p>
                 ) : null}
+                {manageTab === "advanced" ? (
+                  <dl className="text-sm">
+                    <div><dt className="text-jp-muted">Adapter settings keys</dt><dd>{(row.advanced?.settingsKeys ?? []).join(", ") || "None beyond credentials"}</dd></div>
+                    <div><dt className="text-jp-muted">Sabre cancellation gates</dt><dd>{row.provider === "sabre" ? "Preserved — not editable here" : "Not applicable"}</dd></div>
+                  </dl>
+                ) : null}
                 {manageTab === "health" ? (
                   <dl className="text-sm">
                     <div><dt className="text-jp-muted">Last tested</dt><dd>{row.lastTestedAt ?? "—"}</dd></div>
                     <div><dt className="text-jp-muted">Last status</dt><dd>{row.lastTestStatus ?? "—"}</dd></div>
                     <div><dt className="text-jp-muted">Last failure</dt><dd>{row.lastFailure ?? "—"}</dd></div>
+                  </dl>
+                ) : null}
+                {manageTab === "audit" ? (
+                  <dl className="text-sm">
+                    <div><dt className="text-jp-muted">Updated</dt><dd>{row.audit?.updatedAt ?? "—"}</dd></div>
+                    <div><dt className="text-jp-muted">Last tested</dt><dd>{row.audit?.lastTestedAt ?? row.lastTestedAt ?? "—"}</dd></div>
+                    <div><dt className="text-jp-muted">Last status</dt><dd>{row.audit?.lastTestStatus ?? row.lastTestStatus ?? "—"}</dd></div>
+                    <div><dt className="text-jp-muted">Last failure</dt><dd>{row.audit?.lastFailure ?? row.lastFailure ?? "—"}</dd></div>
                   </dl>
                 ) : null}
                 <div className="flex gap-2">
@@ -270,6 +288,7 @@ export function ApiConnectionsWorkspace() {
                           environment: manageEnv,
                           status: row.status || (row.enabled ? "active" : "inactive"),
                           credentials: Object.fromEntries(Object.entries(credentials).filter(([, value]) => value.trim() !== "")),
+                          ...(row.baseUrlOverridable ? { base_url: manageBaseUrl.trim() || null } : {}),
                         }),
                       )
                     }
@@ -290,11 +309,8 @@ export function ApiConnectionsWorkspace() {
         <label className="block text-xs">
           Provider
           <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={provider} onChange={(e) => setProvider(e.target.value)}>
-            {INSTALLED_ADAPTERS.map((item) => (
-              <option key={item.key} value={item.key}>{item.label}</option>
-            ))}
-            {NOT_INSTALLED.map((key) => (
-              <option key={key} value={key}>{key} (not installed)</option>
+            {providers.map((item) => (
+              <option key={item.key} value={item.key}>{item.label}{item.installed ? "" : " (not installed)"}</option>
             ))}
           </select>
         </label>
@@ -314,15 +330,15 @@ export function ApiConnectionsWorkspace() {
                 <option value="live">live</option>
               </select>
             </label>
-            {adapter?.fields.map((field) => (
-              <label key={field} className="block text-xs">
-                {FIELD_LABELS[field] ?? field}
+            {(adapter?.credentialFields ?? []).map((field) => (
+              <label key={field.key} className="block text-xs">
+                {field.label}
                 <input
                   className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
-                  type={field.includes("password") || field.includes("token") || field.includes("secret") ? "password" : "text"}
+                  type={field.type === "password" ? "password" : "text"}
                   autoComplete="off"
-                  value={credentials[field] ?? ""}
-                  onChange={(e) => setCredentials((current) => ({ ...current, [field]: e.target.value }))}
+                  value={credentials[field.key] ?? ""}
+                  onChange={(e) => setCredentials((current) => ({ ...current, [field.key]: e.target.value }))}
                 />
               </label>
             ))}

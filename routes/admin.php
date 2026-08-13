@@ -179,6 +179,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::patch('/cms-pages/{cmsPage}/archive', [CmsPageController::class, 'archive'])->name('cms-pages.archive');
     Route::delete('/cms-pages/{cmsPage}', [CmsPageController::class, 'destroy'])->name('cms-pages.destroy');
     Route::get('/cms-pages/{cmsPage}/preview', [CmsPageController::class, 'preview'])->name('cms-pages.preview');
+    Route::post('/cms-pages/{cmsPage}/preview-draft', [CmsPageController::class, 'previewDraft'])->name('cms-pages.preview-draft');
     Route::get('/promo-codes', [BackOfficeLegacyViewRedirectController::class, 'adminPromoCodesIndex'])->name('promo-codes.index');
     Route::get('/promo-codes/create', [BackOfficeLegacyViewRedirectController::class, 'adminPromoCodesIndex'])->name('promo-codes.create');
     Route::post('/promo-codes', [PromoCodeController::class, 'store'])->name('promo-codes.store');
@@ -188,6 +189,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::middleware('platform.module:markup_settings')->group(function (): void {
         Route::get('/markups', [BackOfficeLegacyViewRedirectController::class, 'adminMarkupsIndex'])->name('markups');
         Route::get('/markups/create', [BackOfficeLegacyViewRedirectController::class, 'adminMarkupsIndex'])->name('markups.create');
+        Route::get('/markups/lookups', [MarkupRuleController::class, 'lookups'])->name('markups.lookups');
         Route::post('/markups', [MarkupRuleController::class, 'store'])->name('markups.store');
         Route::get('/markups/{markupRule}/edit', [BackOfficeLegacyViewRedirectController::class, 'adminMarkupsIndex'])->name('markups.edit');
         Route::patch('/markups/{markupRule}', [MarkupRuleController::class, 'update'])->name('markups.update');

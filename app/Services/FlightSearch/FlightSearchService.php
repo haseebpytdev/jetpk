@@ -918,6 +918,7 @@ class FlightSearchService
                             'origin' => $request->origin,
                             'destination' => $request->destination,
                             'airline' => strtolower((string) ($offer['airline_code'] ?? '')),
+                            'flight_number' => (string) ($offer['flight_number'] ?? ''),
                             'supplier' => $offer['supplier_provider'] ?? $connection->provider->value,
                             'agent_id' => $agentId,
                             'cabin' => $offer['cabin'] ?? null,

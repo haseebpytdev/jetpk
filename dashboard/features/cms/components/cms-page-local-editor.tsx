@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import { archiveCmsPage, destroyCmsPage, duplicateCmsPage, updateCmsPage } from "@/services/operational-api";
+import { archiveCmsPage, destroyCmsPage, duplicateCmsPage, previewCmsDraft, updateCmsPage } from "@/services/operational-api";
+import { cmsPagePreviewPath } from "@/lib/api/portal-paths";
 import { CmsHtmlBlockBuilder } from "@/features/cms/components/cms-html-block-builder";
 import { CmsPreviewModeSelector } from "@/features/cms/components/cms-preview-mode-selector";
 import type { CmsPage, CmsPreviewMode } from "@/types/cms";
@@ -31,6 +32,7 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
   const [status, setStatus] = useState<"draft" | "active" | "archived">(toLaravelStatus(page.status));
   const [robots, setRobots] = useState(page.robots === "noindex" ? "noindex" : "index");
   const [previewMode, setPreviewMode] = useState<CmsPreviewMode>("desktop_day");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showHtml, setShowHtml] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,31 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
         CMS page editing is available in live dashboard mode only.
       </p>
     );
+  }
+
+  async function handleLivePreview() {
+    setBusy(true);
+    setError(null);
+    const theme = previewMode.includes("night") ? "night" : "day";
+    const viewport = previewMode.includes("mobile") ? "mobile" : previewMode === "tablet" ? "tablet" : "desktop";
+    const result = await previewCmsDraft(pageKey, {
+      title: title.trim(),
+      excerpt: excerpt.trim() || null,
+      content,
+      theme,
+      viewport,
+    });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.message ?? "Draft preview failed.");
+      return;
+    }
+    setPreviewUrl(
+      String((result as { data?: { previewUrl?: string }; previewUrl?: string }).data?.previewUrl
+        ?? (result as { previewUrl?: string }).previewUrl
+        ?? `${cmsPagePreviewPath(pageKey, theme, viewport)}&t=${Date.now()}`),
+    );
+    setSuccess("Draft preview uses the JetPakistan public layout. It is not published.");
   }
 
   async function handleSave() {
@@ -181,6 +208,11 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
           <span className="text-sm text-jp-muted">Content</span>
           <CmsHtmlBlockBuilder disabled={busy} content={content} onChange={setContent} />
           <CmsPreviewModeSelector mode={previewMode} onChange={setPreviewMode} />
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="min-h-11 rounded-xl border border-jp-border bg-white px-3 text-sm" disabled={busy} onClick={() => void handleLivePreview()} data-testid="cms-page-live-preview">
+              Refresh JetPakistan draft preview
+            </button>
+          </div>
           <div
             className="mx-auto overflow-hidden rounded-xl border border-jp-border bg-white"
             style={{
@@ -189,7 +221,11 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
             }}
             data-testid="cms-page-preview"
           >
-            <iframe title="CMS preview" className="h-[28rem] w-full" srcDoc={content} sandbox="" />
+            {previewUrl ? (
+              <iframe title="CMS public layout preview" className="h-[28rem] w-full" src={previewUrl} />
+            ) : (
+              <p className="p-4 text-sm text-jp-muted">Refresh the JetPakistan draft preview to render unsaved content in the public theme. This does not publish the page.</p>
+            )}
           </div>
           <button type="button" className="text-xs text-jp-accent" onClick={() => setShowHtml((value) => !value)}>
             {showHtml ? "Hide HTML source" : "Advanced: HTML source"}
@@ -249,14 +285,14 @@ export function CmsPageLocalEditor({ page }: { page: CmsPage }) {
         </p>
       ) : null}
       <div className="flex flex-wrap gap-2">
-        <a
+        <button
+          type="button"
           className="inline-flex min-h-11 items-center rounded-xl border border-jp-border bg-white px-4 py-2 text-sm font-medium text-gray-900"
-          href={slug ? `/pages/${encodeURIComponent(slug)}` : "/"}
-          target="_blank"
-          rel="noreferrer"
+          disabled={busy}
+          onClick={() => void handleLivePreview()}
         >
-          Preview
-        </a>
+          Preview draft
+        </button>
         <button
           type="button"
           className="inline-flex min-h-11 items-center rounded-xl bg-jp-navy px-4 py-2 text-sm font-medium text-white disabled:opacity-50"

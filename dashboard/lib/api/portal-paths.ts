@@ -88,6 +88,17 @@ export function cmsPageDestroyPath(pageId: string): string {
   return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}?format=json`);
 }
 
+export function cmsPagePreviewDraftPath(pageId: string): string {
+  return laravelPortalPath("admin", `/cms-pages/${encodeURIComponent(pageId)}/preview-draft?format=json`);
+}
+
+export function cmsPagePreviewPath(pageId: string, theme: string, viewport: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/cms-pages/${encodeURIComponent(pageId)}/preview?draft=1&theme=${encodeURIComponent(theme)}&viewport=${encodeURIComponent(viewport)}`,
+  );
+}
+
 export function bookingAssignStaffPath(bookingId: string): string {
   return laravelPortalPath("admin", `/bookings/${encodeURIComponent(bookingId)}/assign-staff?format=json`);
 }
@@ -199,6 +210,10 @@ export function financeAdjustmentReversePath(walletTransactionId: string): strin
     "admin",
     `/finance/adjustments/${encodeURIComponent(walletTransactionId)}/reverse?format=json`,
   );
+}
+
+export function markupLookupsPath(type: string, q: string): string {
+  return laravelPortalPath("admin", `/markups/lookups?format=json&type=${encodeURIComponent(type)}&q=${encodeURIComponent(q)}`);
 }
 
 export function markupStorePath(): string {

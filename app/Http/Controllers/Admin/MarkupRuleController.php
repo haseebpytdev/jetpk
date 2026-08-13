@@ -66,6 +66,54 @@ class MarkupRuleController extends Controller
         ]);
     }
 
+    public function lookups(Request $request): JsonResponse
+    {
+        Gate::authorize('viewAny', MarkupRule::class);
+        $type = $request->string('type')->toString();
+        $q = trim($request->string('q')->toString());
+        $items = [];
+        if ($type === 'airline') {
+            $items = \App\Models\Airline::query()
+                ->search($q !== '' ? $q : null)
+                ->orderBy('name')
+                ->limit(20)
+                ->get(['id', 'name', 'iata_code'])
+                ->map(static fn ($row) => [
+                    'id' => (string) $row->iata_code,
+                    'label' => trim(($row->name ?? '').' ('.$row->iata_code.')'),
+                ])
+                ->all();
+        }
+        if ($type === 'agency') {
+            $query = \App\Models\Agency::query()->orderBy('name')->limit(20);
+            if ($q !== '') {
+                $query->where('name', 'like', '%'.$q.'%');
+            }
+            $items = $query->get(['id', 'name'])
+                ->map(static fn ($row) => [
+                    'id' => (string) $row->id,
+                    'label' => (string) $row->name,
+                ])
+                ->all();
+        }
+        if ($type === 'user') {
+            $query = \App\Models\User::query()->orderBy('name')->limit(20);
+            if ($q !== '') {
+                $query->where(function ($inner) use ($q): void {
+                    $inner->where('name', 'like', '%'.$q.'%')->orWhere('email', 'like', '%'.$q.'%');
+                });
+            }
+            $items = $query->get(['id', 'name', 'email'])
+                ->map(static fn ($row) => [
+                    'id' => (string) $row->id,
+                    'label' => trim($row->name.' · '.$row->email),
+                ])
+                ->all();
+        }
+
+        return $this->backOfficeJson(['ok' => true, 'items' => $items]);
+    }
+
     public function store(StoreMarkupRuleRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', MarkupRule::class);
@@ -226,6 +274,9 @@ class MarkupRuleController extends Controller
             ]),
             MarkupRuleType::Airline->value => array_filter([
                 'airline' => strtoupper($request->string('airline_code')->toString()),
+                'flight_number' => $request->string('flight_number')->toString() ?: null,
+                'origin' => strtoupper($request->string('origin')->toString()) ?: null,
+                'destination' => strtoupper($request->string('destination')->toString()) ?: null,
             ]),
             MarkupRuleType::Route->value => array_filter([
                 'origin' => strtoupper($request->string('origin')->toString()),

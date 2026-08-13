@@ -4,34 +4,67 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { createMarkupRule, deleteMarkupRule, listApiConnections, toggleMarkupRule, updateMarkupRule } from "@/services/operational-api";
+import { laravelRequest } from "@/lib/api/laravel-action-client";
+import { markupLookupsPath } from "@/lib/api/portal-paths";
+import { getLaravelApiBase } from "@/lib/read-only/laravel/api-base";
 import type { MarkupRecord } from "@/services/ops-modules-service";
 
-const AIRPORTS = [
-  { code: "LHE", name: "Lahore" },
-  { code: "KHI", name: "Karachi" },
-  { code: "ISB", name: "Islamabad" },
-  { code: "PEW", name: "Peshawar" },
-  { code: "MUX", name: "Multan" },
-  { code: "JED", name: "Jeddah" },
-  { code: "MED", name: "Madinah" },
-  { code: "DXB", name: "Dubai" },
-  { code: "AUH", name: "Abu Dhabi" },
-  { code: "DOH", name: "Doha" },
-  { code: "LHR", name: "London Heathrow" },
-];
-
-const AIRLINES = [
-  { code: "PK", name: "Pakistan International Airlines" },
-  { code: "SV", name: "Saudia" },
-  { code: "EK", name: "Emirates" },
-  { code: "QR", name: "Qatar Airways" },
-  { code: "EY", name: "Etihad" },
-  { code: "TK", name: "Turkish Airlines" },
-  { code: "PA", name: "Airblue" },
-  { code: "ER", name: "SereneAir" },
-];
-
 const CABINS = ["economy", "premium_economy", "business", "first"];
+
+function LookupField({
+  label,
+  value,
+  display,
+  type,
+  disabled,
+  onSelect,
+}: {
+  label: string;
+  value: string;
+  display?: string;
+  type: "airline" | "agency" | "user" | "airport";
+  disabled?: boolean;
+  onSelect: (id: string, label: string) => void;
+}) {
+  const [q, setQ] = useState(display || value);
+  const [items, setItems] = useState<Array<{ id: string; label: string }>>([]);
+  return (
+    <label className="block text-xs">
+      {label}
+      <input
+        className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
+        value={q}
+        disabled={disabled}
+        onChange={async (e) => {
+          const next = e.target.value;
+          setQ(next);
+          if (type === "airport") {
+            const base = getLaravelApiBase().replace(/\/$/, "");
+            const res = await fetch(`${base}/airports/search?q=${encodeURIComponent(next)}`, { credentials: "include" });
+            const json = (await res.json()) as { data?: Array<{ iata?: string; code?: string; label?: string; name?: string }> };
+            const rows = json.data ?? [];
+            setItems(rows.map((row) => ({ id: String(row.iata || row.code || ""), label: String(row.label || row.name || row.code || "") })));
+            return;
+          }
+          const result = await laravelRequest<{ items?: Array<{ id: string; label: string }> }>(markupLookupsPath(type, next));
+          const payload = (result as { data?: { items?: Array<{ id: string; label: string }> } }).data ?? result;
+          setItems((payload as { items?: Array<{ id: string; label: string }> }).items ?? []);
+        }}
+      />
+      {items.length > 0 ? (
+        <ul className="mt-1 max-h-40 overflow-auto rounded border border-jp-border bg-white">
+          {items.map((item) => (
+            <li key={item.id}>
+              <button type="button" className="w-full px-2 py-1 text-left text-sm hover:bg-gray-50" onClick={() => { onSelect(item.id, item.label); setQ(item.label); setItems([]); }}>
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </label>
+  );
+}
 
 const APPLY_OPTIONS = [
   { value: "global", label: "All flights" },
@@ -51,6 +84,7 @@ type FormState = {
   status: string;
   supplier_key: string;
   airline_code: string;
+  flight_number: string;
   origin: string;
   destination: string;
   route_direction: string;
@@ -72,6 +106,7 @@ const emptyForm: FormState = {
   status: "inactive",
   supplier_key: "",
   airline_code: "",
+  flight_number: "",
   origin: "",
   destination: "",
   route_direction: "both",
@@ -94,8 +129,7 @@ function preview(form: FormState, connections: Array<{ id: string; name: string;
     return `Add ${amount} to all ${label} fares`;
   }
   if (form.rule_type === "airline") {
-    const airline = AIRLINES.find((item) => item.code === form.airline_code.toUpperCase());
-    return `Add ${amount} to ${airline ? `${airline.name} (${airline.code})` : (form.airline_code.toUpperCase() || "selected airline")} fares`;
+    return `Add ${amount} to ${form.airline_code.toUpperCase() || "selected airline"}${form.flight_number ? ` flight ${form.flight_number}` : ""} fares`;
   }
   if (form.rule_type === "route" && form.origin && form.destination) {
     const dir = form.route_direction === "one_way" ? "" : " (both directions)";
@@ -117,6 +151,7 @@ function payloadFromForm(form: FormState): Record<string, unknown> {
     priority: Number(form.priority),
     supplier_key: form.supplier_key,
     airline_code: form.airline_code,
+    flight_number: form.flight_number,
     origin: form.origin,
     destination: form.destination,
     route_direction: form.route_direction,
@@ -227,46 +262,34 @@ export function MarkupsWorkspace({ markups }: { markups: MarkupRecord[] }) {
                   {connection.name} ({connection.provider})
                 </option>
               ))}
-              <option value="sabre">Sabre</option>
-              <option value="pia_ndc">PIA NDC</option>
             </select>
           </label>
         ) : null}
         {form.rule_type === "airline" ? (
-          <label className="block text-xs">Airline
-            <input list="jp-markup-airlines" className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="Search code or name" value={form.airline_code} onChange={(e) => setForm((f) => ({ ...f, airline_code: e.target.value }))} />
-            <datalist id="jp-markup-airlines">
-              {AIRLINES.map((airline) => (
-                <option key={airline.code} value={airline.code}>{airline.name}</option>
-              ))}
-            </datalist>
-          </label>
+          <>
+            <LookupField label="Airline" value={form.airline_code} type="airline" onSelect={(id) => setForm((f) => ({ ...f, airline_code: id }))} />
+            <label className="block text-xs">Flight number (optional specific flight)
+              <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={form.flight_number} onChange={(e) => setForm((f) => ({ ...f, flight_number: e.target.value }))} />
+            </label>
+            <p className="text-xs text-jp-muted">Specific-flight targeting is stored on MarkupRule.applies_to without a schema migration. Matching uses airline + optional flight number and route already present in pricing context.</p>
+          </>
         ) : null}
-        {form.rule_type === "route" ? (
+        {form.rule_type === "route" || (form.rule_type === "airline" && (form.origin || form.destination || form.flight_number)) ? (
           <div className="grid grid-cols-2 gap-2">
-            <label className="block text-xs">Origin
-              <input list="jp-markup-airports" className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="LHE" value={form.origin} onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value }))} />
-            </label>
-            <label className="block text-xs">Destination
-              <input list="jp-markup-airports" className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="JED" value={form.destination} onChange={(e) => setForm((f) => ({ ...f, destination: e.target.value }))} />
-            </label>
-            <datalist id="jp-markup-airports">
-              {AIRPORTS.map((airport) => (
-                <option key={airport.code} value={airport.code}>{airport.name}</option>
-              ))}
-            </datalist>
+            <LookupField label="Origin airport" value={form.origin} type="airport" onSelect={(id) => setForm((f) => ({ ...f, origin: id }))} />
+            <LookupField label="Destination airport" value={form.destination} type="airport" onSelect={(id) => setForm((f) => ({ ...f, destination: id }))} />
+            {form.rule_type === "route" ? (
             <label className="col-span-2 block text-xs">Direction
               <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={form.route_direction} onChange={(e) => setForm((f) => ({ ...f, route_direction: e.target.value }))}>
                 <option value="both">Both directions</option>
                 <option value="one_way">One way</option>
               </select>
             </label>
+            ) : null}
           </div>
         ) : null}
         {form.rule_type === "agent" ? (
-          <label className="block text-xs">Agent ID
-            <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={form.agent_id} onChange={(e) => setForm((f) => ({ ...f, agent_id: e.target.value }))} />
-          </label>
+          <LookupField label="Agent / agency" value={form.agent_id} type="agency" onSelect={(id) => setForm((f) => ({ ...f, agent_id: id }))} />
         ) : null}
         {form.rule_type === "cabin" ? (
           <label className="block text-xs">Cabin

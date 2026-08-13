@@ -231,7 +231,7 @@ class PricingRuleService
         return match ($rule->rule_type) {
             MarkupRuleType::Global => true,
             MarkupRuleType::Route => $this->valueInContext($appliesTo, 'route', $context['route'] ?? null),
-            MarkupRuleType::Airline => $this->valueInContext($appliesTo, 'airline', $context['airline'] ?? null),
+            MarkupRuleType::Airline => $this->matchAirlineRule($appliesTo, $context),
             MarkupRuleType::Supplier => $this->valueInContext($appliesTo, 'supplier', $context['supplier'] ?? null),
             MarkupRuleType::Agent => $this->matchAgentRule($appliesTo, $context),
             MarkupRuleType::Cabin => $this->valueInContext($appliesTo, 'cabin', $context['cabin'] ?? null),
@@ -252,6 +252,33 @@ class PricingRuleService
 
         if (isset($appliesTo['agent_id'])) {
             return (int) $appliesTo['agent_id'] === (int) ($context['agent_id'] ?? 0);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  array<string, mixed>  $appliesTo
+     * @param  array<string, mixed>  $context
+     */
+    protected function matchAirlineRule(array $appliesTo, array $context): bool
+    {
+        if (! $this->valueInContext($appliesTo, 'airline', $context['airline'] ?? null)) {
+            return false;
+        }
+        if (isset($appliesTo['flight_number']) && trim((string) $appliesTo['flight_number']) !== '') {
+            $expected = strtolower(preg_replace('/\s+/', '', (string) $appliesTo['flight_number']) ?? '');
+            $actual = strtolower(preg_replace('/\s+/', '', (string) ($context['flight_number'] ?? '')) ?? '');
+            if ($expected === '' || $actual === '' || $expected !== $actual) {
+                return false;
+            }
+        }
+        foreach (['origin', 'destination'] as $key) {
+            if (isset($appliesTo[$key]) && trim((string) $appliesTo[$key]) !== '') {
+                if (strtolower((string) $appliesTo[$key]) !== strtolower((string) ($context[$key] ?? ''))) {
+                    return false;
+                }
+            }
         }
 
         return true;

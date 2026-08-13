@@ -17,7 +17,7 @@
 @section('content')
     @if (! empty($isPreview))
         <div class="ota-cms-preview-banner" role="status">
-            Preview mode — this page is not public unless active.
+            Preview mode — this page is not public unless active. Draft overlay is not published.
             @if ($page->status !== 'active')
                 <span class="ota-cms-preview-banner__status">(Current status: {{ $page->status }})</span>
             @endif
@@ -77,5 +77,9 @@
         .ota-cms-page__body p { margin-bottom: 0.75rem; }
         .ota-cms-page__body ul, .ota-cms-page__body ol { margin-bottom: 1rem; padding-left: 1.25rem; }
         .ota-cms-page__body table { display: block; max-width: 100%; overflow-x: auto; }
+        @if (($previewTheme ?? 'day') === 'night')
+        body { background: #111827; color: #f3f4f6; }
+        .ota-cms-page { background: #111827; color: #f3f4f6; }
+        @endif
     </style>
 @endpush
