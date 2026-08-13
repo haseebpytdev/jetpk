@@ -1,32 +1,43 @@
 # OWNER RETEST — Admin management matrix (W2-36)
 
-OWNER_UAT_WAVE_2=REOPENED_OWNER_RETEST_GAPS
-ADMIN_FULL_MANAGEMENT_SYSTEM=NO
-ADMIN_REQUIRED_MANAGEMENT_GAPS=2
+OWNER_UAT_WAVE_2=ADMIN_CLOSED_REGRESSION_REMAINING
+ADMIN_FULL_MANAGEMENT_SYSTEM=YES
+ADMIN_REQUIRED_MANAGEMENT_GAPS=0
 ADMIN_READ_ONLY_PLACEHOLDERS=0
 ADMIN_FAKE_OPERATIONAL_PAGES=0
 ADMIN_AMBIGUOUS_ACTIONS=0
+ADMIN_RBAC=PASS
+ADMIN_PRODUCTION_BROWSER=PASS
+ADMIN_OLS_INTEGRITY=PASS
+ADMIN_LEGACY_PRESENTATION_HANDOFFS=0
 
-SSH_AGENT_AUTH_RESTORED=PASS
-SSH_CURSOR_AUTH=PASS
-SFTP_AUTH=PASS
-LATEST_ENGINEERING_SHA=0860c212
-LATEST_DOCS_SHA=pending
-REMOTE_HEAD=0860c212
-PRODUCTION_DEPLOYED_STATE=PHP money/report files deployed; Dashboard BUILD_ID=AaH4udV7uE4WVSXUAmiKw
+LATEST_ENGINEERING_SHA=2fb80b50
+REMOTE_HEAD=2fb80b50
+PRODUCTION_DEPLOYED_STATE=CMS panel TSX + Dashboard BUILD_ID=llKFcUe5cBrUnhUEHic0U; money PHP 0860c212
 OLS_HASH=612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c
 OLS=MATCH
-JETPK_PHP_PDO_MYSQL_BLOCKER=NO
 
-Money policy (deployed 0860c212):
-- PKR KPI uses PKR presented totals only
-- USD fares are not relabeled as Rs.
-- Reports use fare_currency_iso when a single fare currency exists
-- Mixed books: Rs. PKR total + Non-PKR excluded delta
+QA_ADMIN_LOGIN=PASS
+QA_ADMIN_NEXT_SHELL=PASS
 
-Authenticated Admin walkthrough earlier this day: PASS for signed-in shell (19 pages).
-Later re-login attempt landed on public login/access-denied (session/soft failure). Do not treat as OLS/SSH failure.
+Money (fresh Admin session):
+- ADMIN_GBV_FORMAT=PASS — Gross booking value USD 590.00; note “USD totals; no booking-time PKR snapshot to convert”
+- ADMIN_RECENT_BOOKING_CURRENCY_TRUTH=PASS — USD amounts, not Rs.
+- ADMIN_REPORT_CURRENCY_TRUTH=PASS — USD 590.00
+- ADMIN_BOOKING_DETAIL=PASS — WL96PKN9 USD 624.00
+- AMOUNT_UNAVAILABLE_WHEN_AMOUNT_EXISTS=0
 
-Remaining Admin gaps:
-1. Re-establish Admin session and re-verify Agent Applications + CMS /cms/sections structured homepage after a8a7c527/0860c212.
-2. Confirm dashboard/report labels on a fresh Admin session (USD vs Rs. policy).
+Agent Applications:
+- AGENT_APPLICATIONS_PRODUCTION_LOAD=PASS
+- AGENT_APPLICATION_DETAIL=PASS (Wahab Travel selected)
+- AGENT_APPLICATION_ACTIONS_SELECTED_ONLY=PASS
+- AGENT_APPLICATION_SERVER_ERRORS=0
+- Not mutated
+
+CMS Homepage:
+- Path `/admin/dashboard/cms/sections`
+- CMS_HOMEPAGE_STRUCTURED_UI=PASS (Hero, Trending routes, Destinations, Featured deals, Support CTA)
+- CMS_HOMEPAGE_LOAD=PASS (panel testid)
+- CMS_HOMEPAGE_SAVE_CONTRACT=PASS (Save draft + Publish present; not clicked)
+- No routine JSON textarea
+- Sections list API still CMS-LIVE-MODULE-UNAVAILABLE (not the homepage settings domain)
