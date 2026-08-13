@@ -37,12 +37,12 @@ class DashboardNavigationOperationalTest extends TestCase
         $this->assertContains('support', $keys);
 
         $pageSettings = collect($navigation)->firstWhere('key', 'page-settings');
-        $this->assertSame('laravel', $pageSettings['target'] ?? null);
-        $this->assertStringContainsString('/admin/page-settings', $pageSettings['href'] ?? '');
+        $this->assertSame('dashboard', $pageSettings['target'] ?? null);
+        $this->assertStringContainsString('/cms/pages', $pageSettings['href'] ?? '');
 
         $support = collect($navigation)->firstWhere('key', 'support');
-        $this->assertSame('laravel', $support['target'] ?? null);
-        $this->assertStringContainsString('/admin/support/tickets', $support['href'] ?? '');
+        $this->assertSame('dashboard', $support['target'] ?? null);
+        $this->assertStringContainsString('/support', $support['href'] ?? '');
     }
 
     public function test_laravel_navigation_hrefs_are_public_relative_paths(): void
@@ -70,11 +70,13 @@ class DashboardNavigationOperationalTest extends TestCase
 
         $staff = collect($navigation)->firstWhere('key', 'staff');
         $this->assertNotNull($staff);
-        $this->assertSame('/admin/staff', $staff['href']);
+        $this->assertSame('/staff', $staff['href']);
+        $this->assertSame('dashboard', $staff['target']);
 
         $apiSettings = collect($navigation)->firstWhere('key', 'api-settings');
         $this->assertNotNull($apiSettings);
-        $this->assertSame('/admin/api-settings', $apiSettings['href']);
+        $this->assertSame('/settings/integrations', $apiSettings['href']);
+        $this->assertSame('dashboard', $apiSettings['target']);
     }
 
     public function test_staff_navigation_omits_admin_only_laravel_modules(): void

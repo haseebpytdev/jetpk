@@ -33,7 +33,7 @@ class SupplierConnectionController extends Controller
         protected SupplierConnectionService $service,
     ) {}
 
-    public function index(Request $request): View|JsonResponse
+    public function index(Request $request): View|JsonResponse|RedirectResponse
     {
         Gate::authorize('viewAny', SupplierConnection::class);
 
@@ -48,25 +48,7 @@ class SupplierConnectionController extends Controller
             ]);
         }
 
-        $kpiBase = $this->scopedQuery($request->user())
-            ->withStoredCredentials();
-        $kpis = [
-            'total' => (clone $kpiBase)->count(),
-            'active' => (clone $kpiBase)->where('status', SupplierConnectionStatus::Active)->count(),
-            'sandbox' => (clone $kpiBase)->where('environment', SupplierEnvironment::Sandbox)->count(),
-            'live' => (clone $kpiBase)->where('environment', SupplierEnvironment::Live)->count(),
-        ];
-        $activeRealSupplierExists = (clone $kpiBase)
-            ->where('status', SupplierConnectionStatus::Active)
-            ->exists();
-
-        return view(client_view('api-settings.index', 'admin'), [
-            'connections' => $connections,
-            'kpis' => $kpis,
-            'hasRows' => $connections->count() > 0,
-            'fallbackSuppliers' => config('ota-suppliers.suppliers', []),
-            'activeRealSupplierExists' => $activeRealSupplierExists,
-        ]);
+        return redirect()->to('/admin/dashboard/settings/integrations');
     }
 
     public function create(Request $request): View

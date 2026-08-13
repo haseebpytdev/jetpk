@@ -76,7 +76,7 @@ class JpDash03Checkpoint12ModulesTest extends TestCase
         $this->assertTrue(Route::has('admin.staff'));
         $this->actingAs($admin)
             ->get(route('admin.staff'))
-            ->assertRedirect('/admin/dashboard/users');
+            ->assertRedirect('/admin/dashboard/staff');
         $this->actingAs($customer)->get(route('admin.staff'))->assertForbidden();
     }
 

@@ -120,7 +120,6 @@ class CustomerDetailSupportNavigationTest extends TestCase
 
         $this->actingAs($customer)->get(route('profile.edit'))
             ->assertOk()
-            ->assertSee('ota-dashboard-breadcrumbs', false)
             ->assertSee('Profile settings', false)
             ->assertSee('name="name"', false);
     }

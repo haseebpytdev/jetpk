@@ -41,7 +41,7 @@ class AgentBookingsNavigationTest extends TestCase
             ->assertOk()
             ->assertSee('ota-dashboard-breadcrumbs', false)
             ->assertSee($booking->display_reference, false)
-            ->assertSee('ota-account-detail-grid', false);
+            ->assertSee('data-testid="agent-booking-detail-layout"', false);
 
         $this->actingAs($scenario['adminB'])->get(route('agent.bookings.show', $booking))->assertForbidden();
     }
@@ -99,7 +99,7 @@ class AgentBookingsNavigationTest extends TestCase
 
         $this->actingAs($scenario['adminA'])->get(route('agent.dashboard'))
             ->assertOk()
-            ->assertSee('Total Bookings', false)
+            ->assertSee('Total bookings', false)
             ->assertDontSee('ota-dashboard-breadcrumbs__current">My bookings</span>', false);
     }
 }
