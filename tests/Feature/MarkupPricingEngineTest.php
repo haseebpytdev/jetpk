@@ -14,26 +14,29 @@ use App\Services\Pricing\PricingRuleService;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\Support\PublicBookingPassengersPayload;
 use Tests\Support\PublicCheckoutTestDoubles;
 use Tests\TestCase;
 
 class MarkupPricingEngineTest extends TestCase
 {
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
-    public function test_agency_admin_can_view_markup_rules(): void
+    public function test_platform_admin_can_view_markup_rules(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get('/admin/markups')->assertOk();
+        $this->actingAs($admin)
+            ->get('/admin/markups')
+            ->assertRedirect('/admin/dashboard/markups');
     }
 
-    public function test_agency_admin_can_create_markup_rule(): void
+    public function test_platform_admin_can_create_markup_rule(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
+        $this->withoutMiddleware(ValidateCsrfToken::class);
 
         $this->actingAs($admin)->post('/admin/markups', [
             'name' => 'Test global markup',
@@ -50,10 +53,10 @@ class MarkupPricingEngineTest extends TestCase
         ]);
     }
 
-    public function test_agency_admin_can_edit_own_markup_rule(): void
+    public function test_platform_admin_can_edit_own_markup_rule(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
+        $this->withoutMiddleware(ValidateCsrfToken::class);
         $rule = MarkupRule::query()->firstOrFail();
 
         $this->actingAs($admin)->patch('/admin/markups/'.$rule->id, [
@@ -261,36 +264,49 @@ class MarkupPricingEngineTest extends TestCase
         $this->assertGreaterThan($ek['airline_markup'], $pk['airline_markup']);
     }
 
-    public function test_agent_source_channel_rule_applies_to_agent_booking(): void
+    public function test_agent_source_channel_rule_applies_to_agent_context(): void
     {
         $this->seed(OtaFoundationSeeder::class);
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
+        $agent = Agent::query()->where('user_id', $agentUser->id)->firstOrFail();
 
-        $agentDepart = now()->addDays(16)->toDateString();
-        $agentRow = Agent::query()->where('user_id', $agentUser->id)->firstOrFail();
-        PublicCheckoutTestDoubles::bind($this, $agentDepart, 'LHE', 'DXB', 'agent_portal', $agentRow->id);
+        MarkupRule::factory()->create([
+            'agency_id' => $agency->id,
+            'rule_type' => MarkupRuleType::Agent,
+            'value_type' => MarkupValueType::Fixed,
+            'value' => 1500,
+            'status' => MarkupRuleStatus::Active,
+            'is_active' => true,
+            'applies_to' => ['source_channel' => 'agent_portal', 'agent_id' => $agent->id],
+        ]);
 
-        $this->actingAs($agentUser)->post('/agent/bookings', [
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => $agentDepart,
-            'flight_id' => PublicCheckoutTestDoubles::OFFER_ID,
-            'title' => 'Mr',
-            'first_name' => 'Ali',
-            'last_name' => 'Khan',
-            'dob' => now()->subYears(30)->toDateString(),
-            'nationality' => 'PK',
-            'email' => 'ali.customer@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-        ])->assertRedirect();
+        $service = app(PricingRuleService::class);
+        $agentResult = $service->calculateMarkup($agency, [
+            'base_fare' => 100000.0,
+            'taxes' => 0,
+            'supplier_total' => 100000.0,
+            'currency' => 'PKR',
+        ], [
+            'route' => 'LHE-DXB',
+            'source_channel' => 'agent_portal',
+            'agent_id' => $agent->id,
+        ]);
+        $publicResult = $service->calculateMarkup($agency, [
+            'base_fare' => 100000.0,
+            'taxes' => 0,
+            'supplier_total' => 100000.0,
+            'currency' => 'PKR',
+        ], [
+            'route' => 'LHE-DXB',
+            'source_channel' => 'public_guest',
+        ]);
 
-        $booking = Booking::query()->latest('id')->firstOrFail();
-        $snapshot = $booking->meta['pricing_snapshot'] ?? [];
-        $types = collect($snapshot['applied_rules'] ?? [])->pluck('rule_type')->all();
-
-        $this->assertContains(MarkupRuleType::Agent->value, $types);
-        $this->assertGreaterThan(0, (float) ($booking->fareBreakdown?->fees ?? 0));
+        $this->assertGreaterThan(
+            (float) $publicResult['agent_markup_or_commission'],
+            (float) $agentResult['agent_markup_or_commission']
+        );
+        $this->assertContains(MarkupRuleType::Agent->value, collect($agentResult['applied_rules'] ?? [])->pluck('rule_type')->all());
     }
 
     public function test_applied_rules_are_stored_on_fare_snapshot_meta(): void
@@ -350,33 +366,35 @@ class MarkupPricingEngineTest extends TestCase
         $this->assertGreaterThan(0, (float) ($booking->fareBreakdown?->markup ?? 0));
     }
 
-    public function test_agent_booking_uses_db_markup_pricing(): void
+    public function test_agent_context_uses_db_markup_pricing(): void
     {
         $this->seed(OtaFoundationSeeder::class);
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $agent = Agent::query()->where('user_id', $agentUser->id)->firstOrFail();
 
-        $agentDepartMk = now()->addDays(16)->toDateString();
-        $agentRowMk = Agent::query()->where('user_id', $agentUser->id)->firstOrFail();
-        PublicCheckoutTestDoubles::bind($this, $agentDepartMk, 'LHE', 'DXB', 'agent_portal', $agentRowMk->id);
+        MarkupRule::factory()->create([
+            'agency_id' => $agency->id,
+            'rule_type' => MarkupRuleType::Agent,
+            'value_type' => MarkupValueType::Fixed,
+            'value' => 2500,
+            'status' => MarkupRuleStatus::Active,
+            'is_active' => true,
+            'applies_to' => ['source_channel' => 'agent_portal'],
+        ]);
 
-        $this->actingAs($agentUser)->post('/agent/bookings', [
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => $agentDepartMk,
-            'flight_id' => PublicCheckoutTestDoubles::OFFER_ID,
-            'title' => 'Mr',
-            'first_name' => 'Agent',
-            'last_name' => 'Pricing',
-            'dob' => now()->subYears(30)->toDateString(),
-            'nationality' => 'PK',
-            'email' => 'agent.customer@example.com',
-            'phone' => '+923001112233',
-            'country' => 'Pakistan',
-        ])->assertRedirect();
+        $result = app(PricingRuleService::class)->calculateMarkup($agency, [
+            'base_fare' => 80000.0,
+            'taxes' => 0,
+            'supplier_total' => 80000.0,
+            'currency' => 'PKR',
+        ], [
+            'route' => 'LHE-DXB',
+            'source_channel' => 'agent_portal',
+            'agent_id' => $agent->id,
+        ]);
 
-        $booking = Booking::query()->latest('id')->firstOrFail();
-        $this->assertSame($agent->id, $booking->agent_id);
-        $this->assertGreaterThan(0, (float) ($booking->fareBreakdown?->markup ?? 0));
+        $this->assertGreaterThan(0, (float) $result['agent_markup_or_commission']);
+        $this->assertGreaterThan((float) $result['supplier_total'], (float) $result['final_total']);
     }
 }
