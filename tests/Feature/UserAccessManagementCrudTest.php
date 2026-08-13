@@ -21,7 +21,10 @@ class UserAccessManagementCrudTest extends TestCase
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.users.index'))->assertOk();
+        // STALE_BLADE_EXPECTATION: Admin users UI is Next, not Blade.
+        $this->actingAs($admin)
+            ->get(route('admin.users.index'))
+            ->assertRedirect('/admin/dashboard/users');
     }
 
     public function test_legacy_agency_admin_cannot_access_admin_portal(): void
@@ -120,7 +123,14 @@ class UserAccessManagementCrudTest extends TestCase
             'status' => UserAccountStatus::Active,
         ]);
 
-        $this->actingAs($admin)->get(route('admin.users.edit', $foreignUser))->assertOk();
+        $this->actingAs($admin)
+            ->get(route('admin.users.edit', $foreignUser))
+            ->assertRedirect('/admin/dashboard/users?selected='.$foreignUser->id);
+
+        $this->actingAs($admin)
+            ->getJson(route('api.dashboard.users.show', ['user' => $foreignUser->id]))
+            ->assertOk()
+            ->assertJsonPath('data.accountType', AccountType::Staff->value);
     }
 
     public function test_agency_admin_can_suspend_and_activate_own_agency_user(): void
@@ -204,11 +214,23 @@ class UserAccessManagementCrudTest extends TestCase
         User::factory()->create(['name' => 'Filter Match', 'email' => 'filter@demo.test', 'account_type' => AccountType::Staff, 'status' => UserAccountStatus::Invited, 'current_agency_id' => $admin->current_agency_id]);
         User::factory()->create(['name' => 'Other User', 'email' => 'other@demo.test', 'account_type' => AccountType::Customer, 'status' => UserAccountStatus::Active, 'current_agency_id' => $admin->current_agency_id]);
 
-        $this->actingAs($admin)->get(route('admin.users.index', [
-            'account_type' => 'staff',
+        $this->actingAs($admin)
+            ->get(route('admin.users.index', [
+                'account_type' => 'staff',
+                'status' => 'invited',
+                'search' => 'Filter',
+            ]))
+            ->assertRedirect();
+
+        $list = $this->actingAs($admin)->getJson(route('api.dashboard.users.index', [
+            'accountType' => 'staff',
             'status' => 'invited',
-            'search' => 'Filter',
-        ]))->assertOk()->assertSee('Filter Match')->assertDontSee('Other User');
+            'q' => 'Filter',
+        ]));
+        $list->assertOk();
+        $names = collect($list->json('data.users'))->pluck('fullName')->all();
+        $this->assertContains('Filter Match', $names);
+        $this->assertNotContains('Other User', $names);
     }
 
     public function test_admin_can_view_user_access_matrix_on_show_page(): void
@@ -222,13 +244,13 @@ class UserAccessManagementCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.users.show', $staff))
-            ->assertOk()
-            ->assertSee('Staff portal permissions', false)
-            ->assertSee('Access summary', false)
-            ->assertSee('Staff — granular staff portal permissions', false)
-            ->assertSee('data-testid="staff-access-mode-legacy"', false)
-            ->assertSee('Send account invitation', false)
-            ->assertSee('Send password reset', false);
+            ->assertRedirect('/admin/dashboard/users?selected='.$staff->id);
+
+        $detail = $this->actingAs($admin)->getJson(route('api.dashboard.users.show', ['user' => $staff->id]));
+        $detail->assertOk()
+            ->assertJsonPath('data.accountType', AccountType::Staff->value)
+            ->assertJsonPath('data.effectiveAccess.previewOnly', true);
+        $this->assertNotEmpty($detail->json('data.effectiveAccess.roleLabels'));
     }
 
     public function test_agent_staff_permissions_can_be_updated_from_admin(): void
