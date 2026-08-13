@@ -82,5 +82,11 @@ function SupportModuleError({ error }: { error: unknown }) {
   if (error instanceof SupportServiceError) {
     return <SanitizedErrorState message={error.message} referenceId={error.referenceId} />;
   }
-  throw error;
+
+  return (
+    <SanitizedErrorState
+      message="Support tickets could not be loaded."
+      referenceId="SUP-LOAD"
+    />
+  );
 }

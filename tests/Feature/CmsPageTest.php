@@ -320,8 +320,12 @@ class CmsPageTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.cms-pages.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.cms-pages.create'))->assertOk();
+        $this->actingAs($admin)
+            ->get(route('admin.cms-pages.index'))
+            ->assertRedirect(url('/admin/dashboard/cms/pages'));
+        $this->actingAs($admin)
+            ->get(route('admin.cms-pages.create'))
+            ->assertRedirect(url('/admin/dashboard/cms/pages'));
     }
 
     public function test_platform_admin_can_preview_draft_via_admin_preview_route(): void

@@ -2,11 +2,10 @@
 
 @section('title', $metaTitle)
 
-@if ($metaDescription !== '')
-    @section('meta-description', $metaDescription)
-@endif
-
 @push('head-meta')
+    @if ($metaDescription !== '')
+        <meta name="description" content="{{ $metaDescription }}">
+    @endif
     <link rel="canonical" href="{{ $canonicalUrl }}">
     @if ($robots === 'noindex')
         <meta name="robots" content="noindex, nofollow">

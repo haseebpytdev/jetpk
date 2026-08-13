@@ -27,70 +27,80 @@ class PlatformAdminAuthorizationTest extends TestCase
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.reports'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.reports'))
+            ->assertRedirect('/admin/dashboard/reports');
     }
 
     public function test_platform_admin_can_access_agent_applications(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.agent-applications.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.agent-applications.index'))
+            ->assertRedirect('/admin/dashboard/agents/applications');
     }
 
     public function test_platform_admin_can_access_admin_agencies(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.agencies.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.agencies.index'))
+            ->assertRedirect('/admin/dashboard/agents');
     }
 
     public function test_platform_admin_can_access_admin_users(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.users.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.users.index'))
+            ->assertRedirect('/admin/dashboard/users');
     }
 
     public function test_platform_admin_can_access_admin_api_settings(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.api-settings'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.api-settings'))
+            ->assertRedirect('/admin/dashboard/settings/integrations');
     }
 
     public function test_platform_admin_can_access_system_health(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.system-health'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.system-health'))
+            ->assertRedirect('/admin/dashboard/system/health');
     }
 
     public function test_platform_admin_can_access_deployment_checklist(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.deployment-checklist'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.deployment-checklist'))
+            ->assertRedirect('/admin/dashboard/system/go-live');
     }
 
     public function test_platform_admin_can_access_go_live_checklist(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.go-live-checklist'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.go-live-checklist'))
+            ->assertRedirect('/admin/dashboard/system/go-live');
     }
 
     public function test_platform_admin_can_access_roles_permissions_page(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.roles-permissions'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.roles-permissions'))
+            ->assertRedirect('/admin/dashboard/users/roles');
     }
 
     public function test_platform_admin_can_access_settings_hub(): void
     {
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.settings.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.settings.index'))
+            ->assertRedirect('/admin/dashboard/settings');
     }
 
     public function test_staff_cannot_access_admin_users(): void

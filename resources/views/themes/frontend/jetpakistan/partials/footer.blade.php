@@ -26,7 +26,14 @@
         <div class="fcol">
           <h4>{{ $column['title'] ?? '' }}</h4>
           @foreach ($renderer->enabledItems($column['links'] ?? []) as $link)
-            <a href="{{ $renderer->resolveDestination((string) ($link['url'] ?? $link['destination'] ?? '')) }}">{{ $link['label'] ?? '' }}</a>
+            @php
+                $rawHref = trim((string) ($link['url'] ?? ''));
+                $href = $rawHref !== '' && (str_starts_with($rawHref, 'http://') || str_starts_with($rawHref, 'https://') || str_starts_with($rawHref, '/'))
+                    ? $rawHref
+                    : $renderer->resolveDestination((string) ($link['destination'] ?? $rawHref));
+                $openInNewTab = ! empty($link['open_in_new_tab']);
+            @endphp
+            <a href="{{ $href }}"@if ($openInNewTab) target="_blank" rel="noopener noreferrer"@endif>{{ $link['label'] ?? '' }}</a>
           @endforeach
         </div>
       @endforeach

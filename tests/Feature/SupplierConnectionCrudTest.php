@@ -21,7 +21,8 @@ class SupplierConnectionCrudTest extends TestCase
     public function test_agency_admin_can_view_api_settings(): void
     {
         $admin = $this->seededAdmin();
-        $this->actingAs($admin)->get('/admin/api-settings')->assertOk();
+        $this->actingAs($admin)->get('/admin/api-settings')
+            ->assertRedirect('/admin/dashboard/settings/integrations');
     }
 
     public function test_agency_admin_can_create_supplier_connection(): void
@@ -52,17 +53,17 @@ class SupplierConnectionCrudTest extends TestCase
             ->where('provider', SupplierProvider::Sabre)
             ->firstOrFail();
 
-        $this->actingAs($admin)->post('/admin/api-settings', [
+        $this->actingAs($admin)->postJson('/admin/api-settings?format=json', [
             'provider' => SupplierProvider::Sabre->value,
             'name' => 'Sabre secondary sandbox',
             'environment' => SupplierEnvironment::Sandbox->value,
             'status' => SupplierConnectionStatus::Inactive->value,
             'credentials' => [
-                'client_id' => 'sabre-secondary-id',
-                'client_secret' => 'sabre-secondary-secret',
+                'sign_in' => 'sabre-secondary-id',
+                'password' => 'sabre-secondary-secret',
             ],
             'settings_json' => '{}',
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertOk()->assertJsonPath('ok', true);
 
         $this->assertSame(2, SupplierConnection::query()
             ->where('agency_id', $admin->current_agency_id)
@@ -104,9 +105,14 @@ class SupplierConnectionCrudTest extends TestCase
     public function test_agency_admin_can_edit_own_supplier_connection(): void
     {
         $admin = $this->seededAdmin();
-        $connection = SupplierConnection::query()->where('agency_id', $admin->current_agency_id)->firstOrFail();
+        $connection = SupplierConnection::factory()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Amadeus,
+            'name' => 'Amadeus Editable',
+            'credentials' => ['client_id' => 'keep-id', 'client_secret' => 'keep-secret'],
+        ]);
 
-        $this->actingAs($admin)->patch('/admin/api-settings/'.$connection->id, [
+        $this->actingAs($admin)->patchJson('/admin/api-settings/'.$connection->id.'?format=json', [
             'provider' => $connection->provider->value,
             'name' => 'Updated Provider Name',
             'environment' => SupplierEnvironment::Sandbox->value,
@@ -114,7 +120,7 @@ class SupplierConnectionCrudTest extends TestCase
             'base_url' => 'https://sandbox.example.test',
             'settings_json' => '{"region":"pk"}',
             'credentials' => [],
-        ])->assertRedirect('/admin/api-settings');
+        ])->assertOk()->assertJsonPath('ok', true);
 
         $connection->refresh();
         $this->assertSame('Updated Provider Name', $connection->name);
@@ -192,9 +198,10 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$connection->id.'/edit')
-            ->assertOk()
-            ->assertDontSee('secret-plaintext', false)
-            ->assertSee('••••', false);
+            ->assertRedirect('/admin/dashboard/settings/integrations');
+
+        $json = $this->actingAs($admin)->getJson('/admin/api-settings?format=json');
+        $json->assertOk()->assertJsonMissing(['secret-plaintext']);
     }
 
     public function test_empty_credential_update_preserves_old_credentials(): void
@@ -236,9 +243,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$duffel->id.'/edit')
-            ->assertOk()
-            ->assertSee('Access Token', false)
-            ->assertSee('API Version', false);
+            ->assertRedirect('/admin/dashboard/settings/integrations');
     }
 
     public function test_duffel_form_hides_generic_non_duffel_credentials(): void
@@ -252,11 +257,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$duffel->id.'/edit')
-            ->assertOk()
-            ->assertDontSee('Client ID</label>', false)
-            ->assertDontSee('Client Secret</label>', false)
-            ->assertDontSee('Username</label>', false)
-            ->assertDontSee('Password</label>', false);
+            ->assertRedirect('/admin/dashboard/settings/integrations');
     }
 
     public function test_duffel_store_requires_access_token(): void
@@ -391,10 +392,10 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$connection->id.'/edit')
-            ->assertOk()
-            ->assertDontSee('duffel_test_super_secret_token', false)
-            ->assertSee('Stored token:', false)
-            ->assertSee('duffel_test_', false);
+            ->assertRedirect('/admin/dashboard/settings/integrations');
+
+        $json = $this->actingAs($admin)->getJson('/admin/api-settings?format=json');
+        $json->assertOk()->assertJsonMissing(['duffel_test_super_secret_token']);
     }
 
     public function test_sabre_non_duffel_provider_fields_still_work(): void
@@ -478,14 +479,12 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$sabre->id.'/edit')
-            ->assertOk()
-            ->assertSee('Sabre Sign in / Client ID (EPR)', false)
-            ->assertSee('Sabre Secret / Password', false)
-            ->assertSee('PCC (pseudo city code)', false)
-            ->assertSee('Sign in / Client ID', false)
-            ->assertDontSee('epr4016', false)
-            ->assertDontSee('secretes99', false)
-            ->assertDontSee('Client Secret</label>', false);
+            ->assertRedirect('/admin/dashboard/settings/integrations');
+
+        $json = $this->actingAs($admin)->getJson('/admin/api-settings?format=json');
+        $json->assertOk()
+            ->assertJsonMissing(['epr4016'])
+            ->assertJsonMissing(['secretes99']);
     }
 
     public function test_api_settings_index_shows_enable_toggle(): void
@@ -494,9 +493,12 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings')
+            ->assertRedirect('/admin/dashboard/settings/integrations');
+
+        $this->actingAs($admin)
+            ->getJson('/admin/api-settings?format=json')
             ->assertOk()
-            ->assertSee('Enabled', false)
-            ->assertSee('toggle-status', false);
+            ->assertJsonPath('ok', true);
     }
 
     public function test_sabre_readiness_with_credentials_sets_ready_for_review_without_external_calls(): void

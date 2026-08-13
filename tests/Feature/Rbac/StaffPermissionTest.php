@@ -137,7 +137,8 @@ class StaffPermissionTest extends TestCase
         }
 
         $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.users.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.users.index'))
+            ->assertRedirect('/admin/dashboard/users');
     }
 
     public function test_agent_portal_unchanged(): void
