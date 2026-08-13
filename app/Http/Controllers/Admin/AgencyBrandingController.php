@@ -40,18 +40,20 @@ class AgencyBrandingController extends Controller
         $bgSettings = $this->backgroundRemovalSettingsService->getForAgency($agency);
 
         if ($this->wantsBackOfficeJson($request)) {
+            $branding = PlatformBrandingResolver::forAgency($agency);
+
             return $this->backOfficeJson([
                 'ok' => true,
                 'organization' => [
-                    'display_name' => (string) ($settings->display_name ?? ''),
+                    'display_name' => (string) ($settings->display_name ?: $branding->companyName() ?: ''),
                     'legal_name' => (string) ($settings->legal_name ?? ''),
-                    'support_email' => (string) ($settings->support_email ?? ''),
-                    'support_phone' => (string) ($settings->support_phone ?? ''),
+                    'support_email' => (string) ($settings->support_email ?: $branding->supportEmail() ?: ''),
+                    'support_phone' => (string) ($settings->support_phone ?: $branding->phone() ?: ''),
                     'website_url' => (string) ($settings->website_url ?? ''),
                     'office_address' => (string) ($settings->office_address ?? ''),
                     'city' => (string) ($settings->city ?? ''),
                     'country' => (string) ($settings->country ?? ''),
-                    'timezone' => (string) ($settings->timezone ?? 'Asia/Karachi'),
+                    'timezone' => (string) ($settings->timezone ?: 'Asia/Karachi'),
                     'logo_url' => is_string($logoPath) && $logoPath !== '' ? asset('storage/'.$logoPath) : null,
                 ],
             ]);
