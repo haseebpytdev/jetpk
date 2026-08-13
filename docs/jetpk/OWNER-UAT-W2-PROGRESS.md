@@ -2,7 +2,7 @@
 
 LAST_UPDATED_UTC: 2026-08-13T04:20:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-REMOTE_HEAD: `459c227` (plus this heartbeat)  
+REMOTE_HEAD: `c84a5bf`  
 WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f`
 
 ## STATUS
