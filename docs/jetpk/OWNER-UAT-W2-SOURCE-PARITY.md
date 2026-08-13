@@ -1,9 +1,9 @@
 # OWNER UAT W2 — Source Parity
 
-LAST_UPDATED_UTC: 2026-08-12T21:25:00Z  
+LAST_UPDATED_UTC: 2026-08-13T18:40:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-LOCAL_HEAD_AT_CHECK: `7dc9d2ae0597820d669e2b6fa18d38a50633dd9d`  
-REMOTE: `jetpk` same SHA before this docs/groups commit
+LOCAL_HEAD_AT_CHECK: `6d019160ff23d5d8c14fc50d58606b4e52d63925`  
+REMOTE: `jetpk` engineering SHA `6d019160` (docs commit follows)
 
 ## OLS
 
@@ -11,6 +11,23 @@ REMOTE: `jetpk` same SHA before this docs/groups commit
 |---|---|
 | Expected SHA256 | `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` |
 | Production | **MATCH** |
+
+## RBAC additive files (`6d019160`)
+
+Local SHA256 equals production (lowercase):
+
+- `app/Models/Role.php` `8c677595…d54759` MATCH
+- `app/Models/RolePermission.php` `050a72b8…d6e78a` MATCH
+- `app/Services/Rbac/RbacWriteService.php` `47311175…643c286` MATCH
+- `app/Services/Rbac/RbacInstallService.php` `f206fb55…b0d32a` MATCH
+- `app/Services/Rbac/RbacRolePresenter.php` `1d56dd40…72f735` MATCH
+- `database/migrations/2026_08_13_220000_create_rbac_roles_tables.php` `16975b5b…c2634b` MATCH
+- `dashboard/features/roles/rbac-management-panel.tsx` `0a1934ea…cfdc5` MATCH
+- `dashboard/features/roles/rbac-write-api.ts` `83a52e02…cefddc` MATCH
+- `dashboard/features/roles/roles-workspace.tsx` `2c94c931…7648f8` MATCH
+
+Dashboard BUILD_ID production: `7XX2vpVISL5H9S6kjpnqj`  
+PM2: `jetpk-dashboard` online; `jetpk-public-frontend` online (not restarted for RBAC).
 
 ## Laravel intended files (W2-23)
 

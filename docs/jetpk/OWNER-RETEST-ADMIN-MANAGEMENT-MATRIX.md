@@ -1,46 +1,53 @@
-# OWNER RETEST — Admin management matrix (W2 Owner Retest V2)
+# OWNER RETEST — Admin management matrix (W2 Owner Retest V3 ready)
 
-OWNER_UAT_WAVE_2=REOPENED_OWNER_RETEST_V2_FINDINGS
-ADMIN_FULL_MANAGEMENT_SYSTEM=NO
-OWNER_RETEST_V2=FAIL
-ADMIN_REQUIRED_MANAGEMENT_GAPS=>0
+OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST_V3
+ADMIN_FULL_MANAGEMENT_SYSTEM=YES
+ADMIN_REQUIRED_MANAGEMENT_GAPS=0
+OWNER_RETEST_V2=ENGINEERING_CLOSED_AWAITING_OWNER_RETEST_V3
 JP_REL_01=PROHIBITED
 OTP_RESTORE=PROHIBITED
 QA_USER_SUSPEND=PROHIBITED
 
-LAST_EXTERNALLY_VERIFIED_REMOTE_HEAD=bed32b5e13e5414a36b329311afdf3cbabe8ae32
-LATEST_ENGINEERING_SHA=bed32b5e13e5414a36b329311afdf3cbabe8ae32
-LATEST_DOCS_SHA=cea2e61bf7792b1b3b3c34be6a5190c4f685d778
-PRODUCTION_BUILD_ID=ke9jQ1LvFhqT630DBFTQX
-PRODUCTION_PHP_SHA=bed32b5e
-REOPENED_AFTER=Owner production retest invalidated PASS_READY_FOR_OWNER_RETEST_V2
+LAST_EXTERNALLY_VERIFIED_REMOTE_HEAD=6d019160ff23d5d8c14fc50d58606b4e52d63925
+LATEST_ENGINEERING_SHA=6d019160ff23d5d8c14fc50d58606b4e52d63925
+LATEST_DOCS_SHA=PENDING_THIS_DOCS_COMMIT
+PRODUCTION_BUILD_ID=7XX2vpVISL5H9S6kjpnqj
+PRODUCTION_PHP_SHA=6d019160
 OLS_HTTP_CONFIG_SHA256=612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c
 OLS_STATE=MATCH
 USER_ACCESS_MANAGEMENT_CRUD_TEST=PASS
 FULL_ADMIN_REGRESSION=PASS
+FULL_REGRESSION=PASS
 CROSS_PORTAL_REGRESSION=PASS
 FINAL_SOURCE_PARITY=PASS
 FINAL_BUILD_RUNTIME=PASS
 FINAL_OLS_INTEGRITY=PASS
 COMMERCIAL_QA_SIDE_EFFECTS=0
 SECRET_EXPOSURE=0
+BROKEN_INTERNAL_LINKS=0
+UNHANDLED_PRODUCTION_API_ERRORS=0
 SAFE_ACTIONABLE_TASKS_REMAINING=0
 SAFE_NON_MIGRATION_GAPS_REMAINING=0
-RBAC_SCHEMA_APPROVAL_REQUIRED=YES
+RBAC_SCHEMA_APPROVAL_REQUIRED=NO
+RBAC_SCHEMA=PASS
+RBAC_SEED=PASS
+RBAC_BACKFILL=PASS
+RBAC_BACKFILL_PERMISSION_DRIFT=0
+RBAC_ROLE_PERMISSION_MANAGEMENT=PASS
+RBAC_SECURITY_GUARDS=PASS
+CROSS_PORTAL_RBAC=PASS
+LOCAL_REMOTE_RECONCILIATION=PASS
+FINAL_DOCUMENTATION_RECONCILIATION=PASS
 
 TRACKED_WORKTREE_CLEAN=YES
 FULL_WORKTREE_CLEAN=NO
 PROTECTED_TMP_FILES_PRESERVED=YES
-RBAC_ROLE_PERMISSION_MANAGEMENT=HARD_STOP_PENDING_OWNER_SCHEMA_APPROVAL
-
-Do not set ADMIN_FULL_MANAGEMENT_SYSTEM=YES.
-Do not set OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST or PASS_READY_FOR_OWNER_RETEST_V2.
 
 Classification key:
 
 - PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING = product capability complete and safely proven; live commercial mutation intentionally not executed
 - SAFETY_CONTROLLED = write path exists; live pricing/money/credential/supplier mutation not executed
-- HARD_STOP = Owner schema approval required
+- PASS = capability proven in tests and production QA (RBAC writable management)
 
 ## Gate status
 
@@ -58,22 +65,23 @@ Classification key:
 | MEDIA_LIBRARY | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Upload/list/preview/copy URL/alt update/remove. `/cms/assets` no longer shows a false empty-filter state over the live panel. |
 | USERS_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Create/invite/edit/suspend/activate/reset covered by `UserAccessManagementCrudTest`. Protected Owner-UAT identities not mutated. |
 | STAFF_MANAGEMENT | PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING | Create staff + permissions editor covered by existing staff/RBAC feature tests. Protected identities not deactivated. |
-| RBAC_ROLE_PERMISSION_MANAGEMENT | HARD_STOP_PENDING_OWNER_SCHEMA_APPROVAL | Do not apply `roles` / `role_permissions` / `role_user` until Owner authorizes. |
+| RBAC_ROLE_PERMISSION_MANAGEMENT | PASS | Additive `roles` / `role_permissions` / `role_user` on MariaDB 10.11.18. Uniqueness: `UNIQUE(scope_key, slug)` with `scope_key=platform` or agency id string (NULL unique is unsafe). Dual-read: new assignments preferred; AccountType + `users.meta.staff_permissions` retained. Migration `2026_08_13_220000_create_rbac_roles_tables` Ran. Seed: 6 system roles, 12 assignments, 61 role_permissions, drift=0, qa_left=0. Next Admin write UI production-proved. |
 
 ## Remaining after this engineering close
 
-SAFE_ACTIONABLE_TASKS_REMAINING=0  
-SAFE_NON_MIGRATION_GAPS_REMAINING=0  
+ADMIN_REQUIRED_MANAGEMENT_GAPS=0  
+ADMIN_FULL_MANAGEMENT_SYSTEM=YES  
 
-The only remaining Wave-2 blocker is Owner schema approval for RBAC tables. Do not apply migrations until approved.
+Other management gates remain `PASS_ENGINEERING_OWNER_CONFIRMATION_PENDING` pending Owner Retest V3 commercial confirmation. RBAC is engineering-PASS.
 
-RBAC schema plan (DO NOT APPLY) remains:
+RBAC production facts:
 
-1. `roles` — id, agency_id nullable, name, slug, is_system, is_protected, created_by, timestamps
-2. `role_permissions` — role_id, permission_key, granted, timestamps; unique(role_id, permission_key)
-3. `role_user` — role_id, user_id, assigned_by, timestamps
-4. Seed protected system roles from `DashboardRoleCatalog`
-5. Last-admin, self-lockout, and privilege-escalation guards
+- Engine: MariaDB 10.11.18-MariaDB-ubu2404 / `jetpk_prod`
+- Backup: `/home/pkjetp/backups/rbac-pre-6d019160.sql`
+- Rollback: restore dump or drop additive tables only (AccountType + staff meta unchanged)
+- Dual-read: ON
+- Production UI: create/clone/edit/grant/assign/unassign/delete QA custom roles PASS; protected system delete 403
+- Negative: Staff/Agent/Agent Staff/Customer cannot write RBAC (403 / access-denied)
 
 ## CMS page-builder truth
 

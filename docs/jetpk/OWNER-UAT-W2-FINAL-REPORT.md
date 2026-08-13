@@ -1,11 +1,11 @@
 # OWNER UAT WAVE 2 — Final Report
 
-STATUS: `OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST_V2`
+STATUS: `OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST_V3`
 
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
 WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f`  
-LATEST_ENGINEERING_SHA: `05c24789`  
-PRODUCTION_DASHBOARD_BUILD_ID: `llKFcUe5cBrUnhUEHic0U`
+LATEST_ENGINEERING_SHA: `6d019160ff23d5d8c14fc50d58606b4e52d63925`  
+PRODUCTION_DASHBOARD_BUILD_ID: `7XX2vpVISL5H9S6kjpnqj`
 
 ## OLS
 
@@ -15,7 +15,7 @@ MATCH `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`
 
 OTP temporary Owner-UAT remains (`OTA_CLIENT_REQUIRE_LOGIN_OTP=false`).  
 OTP_DEMO_* preserved. QA identities remain active. OTP not restored. QA users not suspended.  
-JP-REL-01 not started. Owner UAT is **not** declared complete — Wave 2 is ready for owner retest only.
+JP-REL-01 not started. Owner UAT is **not** declared complete — Wave 2 is ready for Owner Retest V3 only. Additive RBAC is engineering-PASS (`RBAC_ROLE_PERMISSION_MANAGEMENT=PASS`).
 
 ## Owner findings disposition
 

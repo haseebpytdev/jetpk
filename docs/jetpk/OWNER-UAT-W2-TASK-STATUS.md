@@ -1,21 +1,24 @@
 # OWNER UAT WAVE 2 — Task Status
 
-OWNER_UAT_WAVE_2=REOPENED_OWNER_RETEST_V2_FINDINGS
-ADMIN_FULL_MANAGEMENT_SYSTEM=NO
-OWNER_RETEST_V2=FAIL
-LATEST_ENGINEERING_SHA=bed32b5e13e5414a36b329311afdf3cbabe8ae32
-REMOTE_HEAD=bed32b5e13e5414a36b329311afdf3cbabe8ae32
-PRODUCTION_BUILD_ID=ke9jQ1LvFhqT630DBFTQX
+OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST_V3
+ADMIN_FULL_MANAGEMENT_SYSTEM=YES
+ADMIN_REQUIRED_MANAGEMENT_GAPS=0
+OWNER_RETEST_V2=ENGINEERING_CLOSED_AWAITING_OWNER_RETEST_V3
+LATEST_ENGINEERING_SHA=6d019160ff23d5d8c14fc50d58606b4e52d63925
+REMOTE_HEAD=6d019160ff23d5d8c14fc50d58606b4e52d63925
+PRODUCTION_BUILD_ID=7XX2vpVISL5H9S6kjpnqj
 USER_ACCESS_MANAGEMENT_CRUD_TEST=PASS
 FULL_ADMIN_REGRESSION=PASS
+FULL_REGRESSION=PASS
 CROSS_PORTAL_REGRESSION=PASS
 FINAL_SOURCE_PARITY=PASS
 FINAL_OLS_INTEGRITY=PASS
+RBAC_ROLE_PERMISSION_MANAGEMENT=PASS
 SAFE_ACTIONABLE_TASKS_REMAINING=0
 SAFE_NON_MIGRATION_GAPS_REMAINING=0
-RBAC_SCHEMA_APPROVAL_REQUIRED=YES
+RBAC_SCHEMA_APPROVAL_REQUIRED=NO
 
-Prior PASS_READY is invalidated by owner production screenshots. Do not set PASS_READY_FOR_OWNER_RETEST_V2.
+Owner-authorized additive RBAC is deployed. Stop for Owner Retest V3. Do not start JP-REL-01.
 
 | TASK | SCOPE | CODE | TEST | PRODUCTION | OWNER_FINDING | STATUS | EVIDENCE | COMMIT | BLOCKER | NEXT |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -40,5 +43,5 @@ Prior PASS_READY is invalidated by owner production screenshots. Do not set PASS
 | W2-30 | API connection mgmt | DONE | 3/15 | DEPLOYED | Masked JSON | KEEP | — | 0e724683 | No prod rotate | Owner retest V2 |
 | W2-31 | Sabre capability truth | DONE | — | DEPLOYED | GDS/NDC labels | KEEP | — | 8d79f0c7 | — | Owner retest V2 |
 | W2-32 | Profile + org | DONE | — | DEPLOYED | Photo + org | KEEP | — | bf5e9cdb | — | Owner retest V2 |
-| W2-34 | Users/Staff/RBAC | DONE | — | DEPLOYED | Next users/staff | KEEP | Blade admin.users.show tests 302 | 8d79f0c7 | Test update | Full regression |
+| W2-34 | Users/Staff/RBAC | DONE | PASS | DEPLOYED | Writable Next Roles & Permissions | KEEP | Dual-read + prod QA CRUD + 174 PHPUnit | 6d019160 | — | Owner retest V3 |
 | W2-35 | Nav active state | DONE | — | DEPLOYED | most-specific href | KEEP | — | 8d79f0c7 | — | Owner retest V2 |
