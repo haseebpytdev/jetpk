@@ -26,6 +26,10 @@ import {
   groupBookingRejectPaymentPath,
   groupBookingVerifyPaymentPath,
   issueTicketPath,
+  markupDestroyPath,
+  markupStorePath,
+  markupTogglePath,
+  markupUpdatePath,
   paymentRejectPath,
   paymentStorePath,
   paymentVerifyPath,
@@ -326,9 +330,11 @@ export async function updateAgencyPrefix(
 
 export async function approveAgentApplication(
   applicationId: string,
+  note = "",
 ): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(agentApplicationApprovePath(applicationId), {
     method: "PATCH",
+    json: { internal_note: note },
     retryCsrfOnce: false,
   });
 }
@@ -339,7 +345,7 @@ export async function rejectAgentApplication(
 ): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(agentApplicationRejectPath(applicationId), {
     method: "PATCH",
-    json: { reason },
+    json: { internal_note: reason, reason },
     retryCsrfOnce: false,
   });
 }
@@ -350,7 +356,7 @@ export async function agentApplicationNeedsMoreInfo(
 ): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(agentApplicationNeedsMoreInfoPath(applicationId), {
     method: "PATCH",
-    json: { note },
+    json: { internal_note: note, note },
     retryCsrfOnce: false,
   });
 }
@@ -460,3 +466,37 @@ export async function reverseFinanceAdjustment(
     retryCsrfOnce: false,
   });
 }
+
+export async function createMarkupRule(payload: Record<string, unknown>): Promise<MutationResponse<{ markup?: Record<string, unknown> }>> {
+  return laravelRequest(markupStorePath(), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateMarkupRule(
+  markupId: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ markup?: Record<string, unknown> }>> {
+  return laravelRequest(markupUpdatePath(markupId), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function toggleMarkupRule(markupId: string): Promise<MutationResponse<{ markup?: Record<string, unknown> }>> {
+  return laravelRequest(markupTogglePath(markupId), {
+    method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function deleteMarkupRule(markupId: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(markupDestroyPath(markupId), {
+    method: "DELETE",
+    retryCsrfOnce: false,
+  });
+}
+

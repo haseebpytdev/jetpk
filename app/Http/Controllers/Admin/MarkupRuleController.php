@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\MarkupRuleStatus;
 use App\Enums\MarkupRuleType;
 use App\Enums\MarkupValueType;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreMarkupRuleRequest;
 use App\Http\Requests\Admin\UpdateMarkupRuleRequest;
 use App\Models\MarkupRule;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +19,7 @@ use Illuminate\View\View;
 
 class MarkupRuleController extends Controller
 {
+    use RespondsWithBackOfficeJson;
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', MarkupRule::class);
@@ -63,12 +66,16 @@ class MarkupRuleController extends Controller
         ]);
     }
 
-    public function store(StoreMarkupRuleRequest $request): RedirectResponse
+    public function store(StoreMarkupRuleRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', MarkupRule::class);
         $agencyId = $this->resolveAgencyId($request);
 
-        MarkupRule::query()->create($this->payload($request) + ['agency_id' => $agencyId]);
+        $rule = MarkupRule::query()->create($this->payload($request) + ['agency_id' => $agencyId]);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true, 'markup' => $this->presentRule($rule)]);
+        }
 
         return redirect()->route('admin.markups')->with('status', 'markup-rule-created');
     }
@@ -87,16 +94,20 @@ class MarkupRuleController extends Controller
         ]);
     }
 
-    public function update(UpdateMarkupRuleRequest $request, MarkupRule $markupRule): RedirectResponse
+    public function update(UpdateMarkupRuleRequest $request, MarkupRule $markupRule): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $markupRule);
 
         $markupRule->update($this->payload($request));
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true, 'markup' => $this->presentRule($markupRule->fresh() ?? $markupRule)]);
+        }
+
         return redirect()->route('admin.markups')->with('status', 'markup-rule-updated');
     }
 
-    public function toggleStatus(Request $request, MarkupRule $markupRule): RedirectResponse
+    public function toggleStatus(Request $request, MarkupRule $markupRule): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $markupRule);
 
@@ -109,16 +120,41 @@ class MarkupRuleController extends Controller
             'is_active' => $next === MarkupRuleStatus::Active,
         ])->save();
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true, 'markup' => $this->presentRule($markupRule)]);
+        }
+
         return back()->with('status', 'markup-rule-status-updated');
     }
 
-    public function destroy(MarkupRule $markupRule): RedirectResponse
+    public function destroy(Request $request, MarkupRule $markupRule): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $markupRule);
 
         $markupRule->delete();
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson(['ok' => true]);
+        }
+
         return redirect()->route('admin.markups')->with('status', 'markup-rule-deleted');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function presentRule(MarkupRule $rule): array
+    {
+        return [
+            'id' => (string) $rule->id,
+            'name' => (string) $rule->name,
+            'ruleType' => is_object($rule->rule_type) ? (string) $rule->rule_type->value : (string) $rule->rule_type,
+            'value' => (string) $rule->value,
+            'valueType' => is_object($rule->value_type) ? (string) $rule->value_type->value : (string) $rule->value_type,
+            'priority' => (int) $rule->priority,
+            'status' => is_object($rule->status) ? (string) $rule->status->value : (string) $rule->status,
+            'isActive' => (bool) $rule->is_active,
+        ];
     }
 
     protected function scopedQuery($user): Builder

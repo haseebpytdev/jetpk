@@ -16,6 +16,7 @@ use App\Models\CommunicationLog;
 use App\Models\SupplierBookingAttempt;
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Support\Dashboard\DashboardMoneyPresenter;
 use App\Support\Platform\PlatformModuleGate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -71,14 +72,15 @@ class AgencyDashboardService
         }
 
         $pendingDeposits = $this->countPendingAgentDeposits($user);
+        $operationalGross = $this->operationalGrossSales($baseQuery);
 
         $stats = [
             'total_bookings' => (clone $baseQuery)->count(),
             'pending_bookings' => (clone $baseQuery)->where('status', BookingStatus::Pending)->count(),
             'ticketed_bookings' => (clone $baseQuery)->where('status', BookingStatus::Ticketed)->count(),
             'unpaid_partial_bookings' => (clone $baseQuery)->whereIn('payment_status', ['unpaid', 'partial'])->count(),
-            'gross_sales' => $this->sumFareColumn($this->grossSalesBookingsQuery($baseQuery), 'total'),
-            'gross_sales_currency_meta' => $this->grossSalesCurrencyMeta($baseQuery),
+            'gross_sales' => $operationalGross['amount'],
+            'gross_sales_currency_meta' => $operationalGross['meta'],
             'paid_sales' => $this->sumFareColumn($this->paidSalesBookingsQuery($baseQuery), 'total'),
             'ticketed_sales' => $this->sumFareColumn($this->ticketedSalesBookingsQuery($baseQuery), 'total'),
             'markup_revenue' => $this->sumFareColumn($this->grossSalesBookingsQuery($baseQuery), 'markup'),
@@ -153,23 +155,32 @@ class AgencyDashboardService
         ];
 
         $recentBookings = (clone $baseQuery)
-            ->with(['contact', 'fareBreakdown'])
+            ->with(['contact', 'fareBreakdown', 'holdSession'])
             ->orderByDesc('bookings.created_at')
             ->limit(6)
             ->get()
-            ->map(fn (Booking $booking): array => [
-                'id' => $booking->id,
-                'ref' => $booking->booking_reference ?: 'Draft #'.$booking->id,
-                'has_reference' => filled($booking->booking_reference),
-                'preview_query' => $booking->booking_reference ?: (string) $booking->id,
-                'customer' => $booking->contact?->email ?: 'Guest',
-                'route' => $booking->route ?: '—',
-                'airline' => $booking->airline ?: '—',
-                'status' => str_replace('_', ' ', (string) $booking->status->value),
-                'payment_status' => str_replace('_', ' ', (string) ($booking->payment_status ?? 'unpaid')),
-                'amount_pkr' => (float) ($booking->fareBreakdown?->total ?? 0),
-                'created_at' => $booking->created_at?->format('Y-m-d H:i') ?? '-',
-            ]);
+            ->map(function (Booking $booking): array {
+                $money = DashboardMoneyPresenter::presentBookingTotal(
+                    $booking,
+                    (int) round((float) ($booking->fareBreakdown?->total ?? 0)),
+                );
+
+                return [
+                    'id' => $booking->id,
+                    'ref' => $booking->booking_reference ?: 'Draft #'.$booking->id,
+                    'has_reference' => filled($booking->booking_reference),
+                    'preview_query' => $booking->booking_reference ?: (string) $booking->id,
+                    'customer' => $booking->contact?->email ?: 'Guest',
+                    'route' => $booking->route ?: '—',
+                    'airline' => $booking->airline ?: '—',
+                    'status' => str_replace('_', ' ', (string) $booking->status->value),
+                    'payment_status' => str_replace('_', ' ', (string) ($booking->payment_status ?? 'unpaid')),
+                    'amount_pkr' => (float) str_replace(',', '', (string) $money['amount']),
+                    'currency' => $money['currency'],
+                    'amount_display' => $money['displayLabel'],
+                    'created_at' => $booking->created_at?->format('Y-m-d H:i') ?? '-',
+                ];
+            });
 
         return [
             'hasLiveData' => true,
@@ -614,29 +625,70 @@ class AgencyDashboardService
     /**
      * @return array{currency: ?string, multi: bool, label: string}
      */
+    /**
+     * @return array{amount: float, meta: array{currency: ?string, multi: bool, label: string}}
+     */
+    protected function operationalGrossSales(Builder $baseQuery): array
+    {
+        $totals = [];
+        $this->grossSalesBookingsQuery($baseQuery)
+            ->with(['fareBreakdown', 'holdSession'])
+            ->orderBy('id')
+            ->chunkById(200, function (Collection $bookings) use (&$totals): void {
+                foreach ($bookings as $booking) {
+                    if (! $booking instanceof Booking) {
+                        continue;
+                    }
+                    $money = DashboardMoneyPresenter::presentBookingTotal(
+                        $booking,
+                        (int) round((float) ($booking->fareBreakdown?->total ?? 0)),
+                    );
+                    $currency = (string) ($money['currency'] ?? '');
+                    if ($currency === '' || ($money['currencyStatus'] ?? '') !== DashboardMoneyPresenter::STATUS_RESOLVED) {
+                        continue;
+                    }
+                    $totals[$currency] = ($totals[$currency] ?? 0) + (float) str_replace(',', '', (string) $money['amount']);
+                }
+            });
+
+        if ($totals === []) {
+            return [
+                'amount' => 0.0,
+                'meta' => ['currency' => null, 'multi' => false, 'label' => '—'],
+            ];
+        }
+
+        if (isset($totals['PKR'])) {
+            $other = array_diff_key($totals, ['PKR' => true]);
+
+            return [
+                'amount' => (float) $totals['PKR'],
+                'meta' => [
+                    'currency' => 'PKR',
+                    'multi' => $other !== [],
+                    'label' => $other !== [] ? 'PKR' : 'PKR',
+                ],
+            ];
+        }
+
+        if (count($totals) > 1) {
+            return [
+                'amount' => 0.0,
+                'meta' => ['currency' => null, 'multi' => true, 'label' => 'Multiple currencies'],
+            ];
+        }
+
+        $currency = (string) array_key_first($totals);
+
+        return [
+            'amount' => (float) $totals[$currency],
+            'meta' => ['currency' => $currency, 'multi' => false, 'label' => $currency],
+        ];
+    }
+
     protected function grossSalesCurrencyMeta(Builder $baseQuery): array
     {
-        $currencies = $this->grossSalesBookingsQuery($baseQuery)
-            ->leftJoin('booking_fare_breakdowns as fare', 'fare.booking_id', '=', 'bookings.id')
-            ->toBase()
-            ->selectRaw('DISTINCT COALESCE(NULLIF(fare.currency, ""), bookings.currency) as currency')
-            ->pluck('currency')
-            ->map(static fn ($currency): string => strtoupper(trim((string) $currency)))
-            ->filter(static fn (string $currency): bool => strlen($currency) === 3)
-            ->unique()
-            ->values();
-
-        if ($currencies->isEmpty()) {
-            return ['currency' => null, 'multi' => false, 'label' => '—'];
-        }
-
-        if ($currencies->count() > 1) {
-            return ['currency' => null, 'multi' => true, 'label' => 'Multiple currencies'];
-        }
-
-        $currency = (string) $currencies->first();
-
-        return ['currency' => $currency, 'multi' => false, 'label' => $currency];
+        return $this->operationalGrossSales($baseQuery)['meta'];
     }
 
     protected function countPendingAgentDeposits(User $user): int

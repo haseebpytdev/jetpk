@@ -89,6 +89,26 @@ class BookingService
      */
     public function attachFareBreakdown(Booking $booking, array $attributes): BookingFareBreakdown
     {
+        $booking->loadMissing('holdSession');
+        $pkrSnapshot = (float) ($booking->holdSession?->converted_total_pkr ?? data_get($booking->meta, 'converted_total_pkr') ?? 0);
+        if ($pkrSnapshot > 0) {
+            $supplierTotal = $attributes['total'] ?? null;
+            $supplierCurrency = $attributes['currency'] ?? null;
+            $breakdown = is_array($attributes['breakdown'] ?? null) ? $attributes['breakdown'] : [];
+            $breakdown['supplier_total'] = $supplierTotal;
+            $breakdown['supplier_currency'] = $supplierCurrency;
+            $breakdown['converted_total_pkr'] = $pkrSnapshot;
+            $attributes['breakdown'] = $breakdown;
+            $attributes['total'] = $pkrSnapshot;
+            $attributes['currency'] = 'PKR';
+            $meta = is_array($booking->meta) ? $booking->meta : [];
+            $meta['converted_total_pkr'] = $pkrSnapshot;
+            if (BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency($supplierCurrency) !== '') {
+                $meta['original_currency'] = BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency($supplierCurrency);
+            }
+            $booking->forceFill(['meta' => $meta, 'currency' => 'PKR'])->save();
+        }
+
         $fareBreakdown = $booking->fareBreakdown()->updateOrCreate(
             ['booking_id' => $booking->id],
             $attributes

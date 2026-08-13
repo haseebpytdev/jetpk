@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import {
-  agentApplicationNeedsMoreInfo,
-  approveAgentApplication,
   applyAgencyUserPermissionTemplate,
-  rejectAgentApplication,
   updateAgencyPrefix,
   updateAgencyUserPermissions,
   updateAgencyUserRole,
@@ -39,6 +36,9 @@ export function AgencyOperationalPanel() {
   return (
     <div className="space-y-3 rounded-xl border border-jp-border p-4" data-testid="agency-operational-panel">
       <h2 className="text-sm font-semibold text-gray-900">Agency administration</h2>
+      <p className="text-xs text-jp-muted">
+        Application approve/reject lives on Agent applications. This page manages onboarded agent accounts only.
+      </p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <div className="flex flex-wrap gap-2">
         <input
@@ -55,33 +55,6 @@ export function AgencyOperationalPanel() {
           onClick={() => run("prefix", () => updateAgencyPrefix("1", prefix))}
         >
           Update agency prefix
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded-xl bg-jp-accent px-3 py-2 text-sm text-white disabled:opacity-60"
-          disabled={busy !== null}
-          data-testid="agent-application-approve"
-          onClick={() => run("approve", () => approveAgentApplication("1"))}
-        >
-          Approve application
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded-xl border border-red-300 px-3 py-2 text-sm text-red-700 disabled:opacity-60"
-          disabled={busy !== null}
-          data-testid="agent-application-reject"
-          onClick={() => run("reject", () => rejectAgentApplication("1", "Incomplete docs"))}
-        >
-          Reject application
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
-          disabled={busy !== null}
-          data-testid="agent-application-needs-more-info"
-          onClick={() => run("needs-info", () => agentApplicationNeedsMoreInfo("1", "Upload NTN"))}
-        >
-          Request more info
         </button>
         <button
           type="button"

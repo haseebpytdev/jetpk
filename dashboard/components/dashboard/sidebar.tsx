@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { sanitizePublicHref } from "@/lib/sanitize-public-href";
 import { laravelRouteUrl } from "@/lib/laravel-route-url";
 import { previewNavGroupsForPortal } from "@/lib/nav-config";
+import { isPrimaryActiveNav } from "@/lib/nav-active";
 import type { DashboardBranding } from "@/services/branding-service";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
@@ -22,12 +23,10 @@ type Props = {
   branding?: DashboardBranding | null;
 };
 
-function isActive(pathname: string, href: string): boolean {
-  if (href === "/") {
-    return pathname === "/" || pathname === "";
-  }
-  const base = href.split("?")[0];
-  return pathname === base || pathname.startsWith(`${base}/`);
+function flattenPreviewHrefs(groups: ReturnType<typeof previewNavGroupsForPortal>): string[] {
+  return groups.flatMap((group) =>
+    group.items.flatMap((item) => [item.href, ...(item.children?.map((child) => child.href) ?? [])]),
+  );
 }
 
 export function DashboardSidebar({ open, onClose, session: sessionProp, branding }: Props) {
@@ -43,6 +42,8 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
   const isLive = useDashboardLiveMode();
   const useSessionNavigation = isLive && navigationGroups.length > 0;
   const previewNavGroups = previewNavGroupsForPortal(effectivePortal);
+  const sessionHrefs = navigationGroups.flatMap((group) => group.items.map((item) => item.href));
+  const previewHrefs = flattenPreviewHrefs(previewNavGroups);
   const profile = session ?? {
     displayName: isLive ? "Session unavailable" : "Preview user",
     email: "—",
@@ -109,7 +110,9 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
                 </p>
                 <ul className="space-y-1">
                   {group.items.map((item) => {
-                    const active = item.target !== "laravel" && isActive(relativePathname, item.href);
+                    const active =
+                      item.target !== "laravel" &&
+                      isPrimaryActiveNav(relativePathname, item.href, sessionHrefs);
                     const href =
                       item.target === "laravel"
                         ? sanitizePublicHref(item.href)
@@ -153,7 +156,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
                 </p>
                 <ul className="space-y-1">
                   {group.items.map((item) => {
-                    const active = isActive(relativePathname, item.href);
+                    const active = isPrimaryActiveNav(relativePathname, item.href, previewHrefs);
                     const href = dashboardHref(effectivePortal, item.href);
                     return (
                       <li key={`${group.label}-${item.label}`}>

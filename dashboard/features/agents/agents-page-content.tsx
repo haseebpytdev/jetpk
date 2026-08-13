@@ -68,7 +68,7 @@ export async function AgentsPageContent({ searchParams }: Props) {
             />
           }
           title="Agents"
-          description="Agent and agency accounts with filters, sorting, and read-only detail."
+          description="Onboarded agent accounts. Application review is on Agent applications."
         />
         <DataSourceNoticeSlot />
         <AgencyOperationalPanel />

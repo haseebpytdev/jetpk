@@ -249,20 +249,26 @@ test.describe("JP-OPS-07 connected agency and finance panels", () => {
 
     await page.goto(`/admin/dashboard/agents?${fixture}`);
     await expect(page.getByTestId("agency-operational-panel")).toBeVisible();
+    await expect(page.getByTestId("agent-application-approve")).toHaveCount(0);
     await page.getByTestId("agency-prefix-update").click();
     await expect.poll(() => prefixHits.length).toBe(1);
-    await page.getByTestId("agent-application-approve").click();
-    await expect.poll(() => approveHits.length).toBe(1);
-    await page.getByTestId("agent-application-reject").click();
-    await expect.poll(() => rejectHits.length).toBe(1);
-    await page.getByTestId("agent-application-needs-more-info").click();
-    await expect.poll(() => needsHits.length).toBe(1);
     await page.getByTestId("agency-role-update").click();
     await expect.poll(() => roleHits.length).toBe(1);
     await page.getByTestId("agency-permissions-update").click();
     await expect.poll(() => permHits.length).toBe(1);
     await page.getByTestId("agency-permissions-template").click();
     await expect.poll(() => templateHits.length).toBe(1);
+
+    await page.goto(`/admin/dashboard/agents/applications?${fixture}`);
+    await page.once("dialog", (dialog) => dialog.accept());
+    await page.getByTestId("agent-application-approve").click();
+    await expect.poll(() => approveHits.length).toBe(1);
+    await page.once("dialog", (dialog) => dialog.accept());
+    await page.getByTestId("agent-application-reject").click();
+    await expect.poll(() => rejectHits.length).toBe(1);
+    await page.once("dialog", (dialog) => dialog.accept());
+    await page.getByTestId("agent-application-needs-more-info").click();
+    await expect.poll(() => needsHits.length).toBe(1);
   });
 
   test("support workspace sends assign forward reply and status routes", async ({ page }) => {

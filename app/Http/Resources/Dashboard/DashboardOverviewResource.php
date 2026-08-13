@@ -73,20 +73,20 @@ final class DashboardOverviewResource
         if (isset($stats['unpaid_partial_bookings']) && (int) $stats['unpaid_partial_bookings'] > 0) {
             $cards[] = ['key' => 'unpaid_partial', 'label' => 'Unpaid / partial', 'value' => (string) ((int) $stats['unpaid_partial_bookings']), 'delta' => '', 'tone' => 'warn'];
         }
-        if (isset($commandSummary['gross_sales'])) {
+                if (isset($commandSummary['gross_sales'])) {
             $multiCurrency = (bool) ($commandSummary['gross_sales_multi_currency'] ?? false);
             $currencyLabel = trim((string) ($commandSummary['gross_sales_currency_label'] ?? ''));
             $grossAmount = (float) $commandSummary['gross_sales'];
+            $iso = $currencyLabel !== '' && $currencyLabel !== '—' && $currencyLabel !== 'Multiple currencies'
+                ? $currencyLabel
+                : '';
             $cards[] = [
                 'key' => 'gross_sales',
                 'label' => 'Gross booking value',
-                'value' => $multiCurrency
+                'value' => $multiCurrency && $iso === ''
                     ? 'Multiple currencies'
-                    : DashboardMoneyPresenter::formatDisplayLabel(
-                        $grossAmount,
-                        $currencyLabel !== '' && $currencyLabel !== '—' ? $currencyLabel : 'PKR',
-                    ),
-                'delta' => $multiCurrency ? 'Not combined without FX policy' : '',
+                    : DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $iso !== '' ? $iso : 'PKR'),
+                'delta' => $multiCurrency && $iso !== 'PKR' ? 'Not combined without FX policy' : '',
                 'tone' => 'up',
             ];
         }
@@ -275,6 +275,14 @@ final class DashboardOverviewResource
                 }
 
                 if (is_array($booking)) {
+                    $amountLabel = trim((string) ($booking['amount_display'] ?? ''));
+                    if ($amountLabel === '') {
+                        $amountLabel = DashboardMoneyPresenter::formatAmountLabel(
+                            (float) ($booking['amount_pkr'] ?? 0),
+                            DashboardMoneyPresenter::normalizeIsoCurrency($booking['currency'] ?? ''),
+                        );
+                    }
+
                     return [
                         'id' => (string) ($booking['id'] ?? ''),
                         'pnr' => (string) ($booking['ref'] ?? $booking['pnr'] ?? ''),
@@ -283,10 +291,8 @@ final class DashboardOverviewResource
                         'route' => (string) ($booking['route'] ?? ''),
                         'date' => (string) ($booking['created_at'] ?? ''),
                         'status' => (string) ($booking['status'] ?? ''),
-                        'amount' => DashboardMoneyPresenter::formatAmountLabel(
-                            (float) ($booking['amount_pkr'] ?? 0),
-                            DashboardMoneyPresenter::normalizeIsoCurrency($booking['currency'] ?? ''),
-                        ),
+                        'amount' => $amountLabel,
+                        'currency' => DashboardMoneyPresenter::normalizeIsoCurrency($booking['currency'] ?? '') ?: null,
                         'payment' => (string) ($booking['payment_status'] ?? ''),
                     ];
                 }

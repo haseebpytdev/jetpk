@@ -182,9 +182,18 @@ export function financeAdjustmentStorePath(): string {
   return laravelPortalPath("admin", "/finance/adjustments?format=json");
 }
 
-export function financeAdjustmentReversePath(walletTransactionId: string): string {
-  return laravelPortalPath(
-    "admin",
-    `/finance/adjustments/${encodeURIComponent(walletTransactionId)}/reverse?format=json`,
-  );
+export function markupStorePath(): string {
+  return laravelPortalPath("admin", "/markups?format=json");
+}
+
+export function markupUpdatePath(markupId: string): string {
+  return laravelPortalPath("admin", `/markups/${encodeURIComponent(markupId)}?format=json`);
+}
+
+export function markupTogglePath(markupId: string): string {
+  return laravelPortalPath("admin", `/markups/${encodeURIComponent(markupId)}/toggle-status?format=json`);
+}
+
+export function markupDestroyPath(markupId: string): string {
+  return laravelPortalPath("admin", `/markups/${encodeURIComponent(markupId)}?format=json`);
 }

@@ -1,28 +1,31 @@
 # OWNER UAT WAVE 2 — Task Status
 
+OWNER_UAT_WAVE_2=REOPENED_OWNER_RETEST_GAPS
+
+Prior PASS_READY is invalidated by owner production screenshots.
+
 | TASK | SCOPE | CODE | TEST | PRODUCTION | OWNER_FINDING | STATUS | EVIDENCE | COMMIT | BLOCKER | NEXT |
 |---|---|---|---|---|---|---|---|---|---|---|
-| W2-01 | Authoritative PKR money pipeline | DONE | PASS | DEPLOYED | USD/PKR relabel | READY_OWNER | Rs. formatter | 8ed171d | — | Owner retest |
-| W2-02 | Admin dashboard amount reconciliation | PARTIAL | PASS | DEPLOYED | KPI inconsistency | READY_OWNER | Overview presenter | 8ed171d | — | Owner retest |
-| W2-03 | Users vs Staff semantics | DONE | PASS | DEPLOYED | Users≠Staff | READY_OWNER | /staff + scope tests | 73a48f2 | — | Owner retest |
-| W2-04 | Compact Users table + sort/filter | DONE | PASS | DEPLOYED | Hard to find roles | READY_OWNER | Compact table + filters | 1ec26f5 | — | Owner retest |
-| W2-05 | Booking Management one-page cleanup | PARTIAL | PASS | DEPLOYED | Duplicate actions | READY_OWNER | Dedupe + eligibility | 8ed171d | — | Owner retest |
-| W2-06 | Contact/passenger amendment | DONE | PASS | DEPLOYED | Need policy | READY_OWNER | Local contact PATCH | 4addea7 | NO_SUPPLIER_WRITE | Owner retest |
-| W2-07 | Admin/Staff typography | DONE | PASS | DEPLOYED | Clash/Inter | READY_OWNER | Plus Jakarta body; Clash H1; Inter=0 | 5885dec | — | Owner retest |
-| W2-08 | Admin/Staff My Profile | DONE | PASS | DEPLOYED | Missing entry | READY_OWNER | /profile | 8ed171d | — | Owner retest |
-| W2-09 | Settings redesign | DONE | PASS | DEPLOYED | Confusing validation | READY_OWNER | Live readiness + OWNER_INPUT | b3af949 | — | Owner retest |
-| W2-10 | Reports live-data | PARTIAL | PASS | DEPLOYED | Preview copy | READY_OWNER | Live-mode copy | 8ed171d | — | Owner retest |
-| W2-11 | CMS baseline operational | DONE | PASS | DEPLOYED | Empty/read-only | READY_OWNER | Pages write; others RO disposition | b3af949 | No Page Builder | Owner retest |
-| W2-12 | Support pagination max 10 | DONE | PASS | DEPLOYED | Need 10/page | READY_OWNER | Default 10 | cd1e631 | — | Owner retest |
-| W2-13 | Compact shared filters | DONE | PASS | DEPLOYED | Giant panels | READY_OWNER | Users/Staff/Bookings/Payments/Reports/Tickets | b3af949 | — | Owner retest |
-| W2-14 | Agent Deposits / manual credit | PARTIAL | PASS | DEPLOYED | Insufficient ops | READY_OWNER | Read-only guard | 3316ec0 | NO_PROD_MONEY | Owner retest |
-| W2-15 | Markup Management | PARTIAL | PASS | DEPLOYED | Not discoverable | READY_OWNER | markup_settings nav | 3316ec0 | NO_PROD_MUTATION | Owner retest |
-| W2-16 | Failed notifications | DONE | PASS | CLASSIFIED+UI | Count unexplained | READY_OWNER | QA SMTP 550 | 8ed171d | — | Owner retest |
-| W2-17 | Remove fullscreen control | DONE | PASS | DEPLOYED | Mystery ○ | READY_OWNER | header.tsx | 8ed171d | — | Owner retest |
-| W2-18 | Email location semantics | DONE | PASS | DEPLOYED | Karachi | READY_OWNER | Seed address null; no security city | b7e72a3 | — | Owner retest |
-| W2-19 | Button/text clarity | DONE | PASS | DEPLOYED | Contrast | READY_OWNER | Ghost + muted contrast | 91602b4 | — | Owner retest |
-| W2-20 | Final cross-module regression | DONE | PASS | DEPLOYED | Gate closure | READY_OWNER | Staff auth + route smoke + OLS | see W2-20 evidence | — | Owner retest |
-| W2-21 | Public shell header/footer | DONE | PASS | DEPLOYED | Currency/nav | READY_OWNER | Prod accept PASS | see W2-21/22 doc | — | Owner retest |
-| W2-22 | Plus Jakarta + Clash typography | DONE | PASS | DEPLOYED | Inter residue | READY_OWNER | Prod Inter=0; fonts verified | see W2-21/22 doc | — | Owner retest |
-| W2-23 | Legacy presentation / fallback retirement | DONE | PASS | DEPLOYED | Blade lookup link | READY_OWNER | Prod browser + 302 away | 7dc9d2a | — | Owner retest |
-| W2-24 | Module / API operational matrix | DONE | PASS | DOCUMENTED | Pages≠ops | READY_OWNER | Matrix + route audit | docs batch | PARTIAL deposits/markup/CMS-RO | Owner retest |
+| W2-01 | Authoritative PKR money pipeline | IN_PROGRESS | PARTIAL | NOT_RETESTED | USD 589.73 KPI | REOPENED | Operational PKR snapshot | — | Historical USD without snapshot | Owner retest V2 |
+| W2-02 | Admin dashboard amount reconciliation | IN_PROGRESS | PARTIAL | NOT_RETESTED | Amount unavailable | REOPENED | amount_display on recent rows | — | Missing currency on arrays | Owner retest V2 |
+| W2-03 | Users vs Staff semantics | PARTIAL | PASS | DEPLOYED | Management incomplete | REOPENED | — | — | Role mutations | Continue |
+| W2-04 | Compact Users table | DONE | PASS | DEPLOYED | — | KEEP | — | — | — | — |
+| W2-09 | Settings | PARTIAL | PASS | DEPLOYED | Metadata only | REOPENED | — | — | Credential UI | Continue |
+| W2-11 | CMS | PARTIAL | PASS | DEPLOYED | Read-only | REOPENED | Pages write only | — | Media/banners | Continue |
+| W2-13 | Compact filters | IN_PROGRESS | — | NOT_RETESTED | Noisy Agents | REOPENED | Compact Agents bar | — | — | Owner retest V2 |
+| W2-15 | Markup Management | IN_PROGRESS | — | NOT_RETESTED | Read-only page | REOPENED | MarkupRule JSON + UI | — | No prod QA mutation | Owner retest V2 |
+| W2-20 | Regression | REOPEN | — | — | False PASS | REOPENED | — | — | Full loop | Continue |
+| W2-24 | Module matrix | REOPEN | — | — | Fake ops pages | REOPENED | New matrices | — | Remaining gaps | Continue |
+| W2-25 | Financial source of truth | IN_PROGRESS | UNIT | NOT_DEPLOYED | USD + unavailable | REOPENED | BookingOperationalMoneyResolver | — | — | Deploy+retest |
+| W2-26 | Full markup management | IN_PROGRESS | — | NOT_DEPLOYED | Read-only | REOPENED | Existing engine reused | — | — | Feature tests |
+| W2-27 | Applications vs Agents | IN_PROGRESS | SPEC UPDATED | NOT_DEPLOYED | Ambiguous actions | REOPENED | Selected application workspace | — | — | Deploy+retest |
+| W2-28 | Agents compact filters | IN_PROGRESS | — | NOT_DEPLOYED | Giant card | REOPENED | Search/status/type/more | — | — | Deploy+retest |
+| W2-29 | Supplier vs API | OPEN | — | — | Contradictory lists | REOPENED | Dashboard hardcodes 5 | — | Registry | Continue |
+| W2-30 | API connection mgmt | OPEN | — | — | Metadata | REOPENED | Laravel controller exists | — | Wire Next | Continue |
+| W2-31 | Sabre capability truth | OPEN | — | — | — | REOPENED | sabre_gds/ndc flags exist | — | Audit NDC truth | Continue |
+| W2-32 | Profile + org | OPEN | — | — | No avatar | REOPENED | — | — | Media domain | Continue |
+| W2-33 | CMS operational | OPEN | — | — | Unmanageable content | REOPENED | — | — | — | Continue |
+| W2-34 | Users/Staff/RBAC | OPEN | — | — | Read-only admin | REOPENED | Lifecycle exists | — | Roles write | Continue |
+| W2-35 | Nav active state | IN_PROGRESS | — | NOT_DEPLOYED | Dual active | REOPENED | most-specific href | — | — | Deploy+retest |
+| W2-36 | Admin management matrix | IN_PROGRESS | DOC | — | Primary requirement | REOPENED | matrix file | — | Gaps remain | Continue |
+| W2-37 | Cross-portal matrix | IN_PROGRESS | DOC | — | — | REOPENED | matrix file | — | Audit remaining | Continue |

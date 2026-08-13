@@ -8,6 +8,7 @@ import {
   UnauthorizedState,
 } from "@/components/ui/data-source-status";
 import { ReadOnlyServiceError } from "@/lib/read-only/read-only-service";
+import { MarkupsWorkspace } from "@/features/markups/markups-workspace";
 import { getMarkups } from "@/services/ops-modules-service";
 
 export const metadata = { title: "Markups — JetPakistan Dashboard" };
@@ -22,23 +23,13 @@ export default async function MarkupsPage() {
         <PageHeader
           breadcrumb={<Breadcrumb items={[{ label: "Home" }, { label: "Finance" }, { label: "Markups" }]} />}
           title="Markups"
-          description="Authoritative markup rules from the JetPakistan pricing domain (read-only in this dashboard). Mutations use existing Laravel markup APIs in non-production proof only."
+          description="Authoritative markup rules from the JetPakistan pricing domain. Create, edit, enable/disable, and archive using the existing MarkupRule engine."
         />
         <DataSourceNoticeSlot />
         {markups.length === 0 ? (
-          <EmptyState title="No markup rules" description="No markup rules are configured for this agency." />
-        ) : (
-          <ul className="divide-y divide-jp-border rounded-xl border border-jp-border bg-white" data-testid="markups-list">
-            {markups.map((row) => (
-              <li key={row.id} className="p-4 text-sm">
-                <p className="font-medium text-gray-900">{row.name}</p>
-                <p className="text-jp-muted">
-                  {row.ruleType} · {row.value} ({row.valueType}) · priority {row.priority} · {row.status}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
+          <EmptyState title="No markup rules" description="No markup rules are configured yet. Create the first rule from the form." />
+        ) : null}
+        <MarkupsWorkspace markups={markups} />
       </PageContainer>
     );
   } catch (error) {

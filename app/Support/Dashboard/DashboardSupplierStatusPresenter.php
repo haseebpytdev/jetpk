@@ -7,7 +7,7 @@ use App\Models\SupplierConnection;
 use App\Services\Suppliers\AlHaider\AlHaiderClient;
 
 /**
- * Sanitized supplier operational labels for dashboard read-only panels.
+ * Single integration registry for dashboard status: DB connections plus unprovisioned adapters.
  */
 final class DashboardSupplierStatusPresenter
 {
@@ -20,53 +20,63 @@ final class DashboardSupplierStatusPresenter
      */
     public function present(): array
     {
-        $piaActive = SupplierConnection::query()
-            ->where('provider', SupplierProvider::PiaNdc)
-            ->where('is_active', true)
-            ->exists();
+        $rows = [];
+        $seen = [];
 
-        $oneApiConfigured = SupplierConnection::query()
-            ->where('provider', SupplierProvider::OneApi)
-            ->where('is_active', true)
-            ->exists();
+        $connections = SupplierConnection::query()
+            ->orderBy('provider')
+            ->orderBy('name')
+            ->get();
 
-        $alHaiderConfigured = $this->alHaiderClient->isConfigured();
+        foreach ($connections as $connection) {
+            $provider = $connection->provider instanceof SupplierProvider
+                ? $connection->provider->value
+                : (string) $connection->provider;
+            $seen[$provider] = true;
+            $active = (bool) $connection->is_active;
+            $rows[] = [
+                'key' => 'connection-'.$connection->id,
+                'label' => trim((string) ($connection->display_name ?: $connection->name ?: $provider)),
+                'status' => $active ? 'configured' : 'inactive',
+                'detail' => sprintf(
+                    'API connection · %s · %s',
+                    $provider,
+                    $active ? 'enabled' : 'disabled',
+                ),
+            ];
+        }
 
-        return [
-            [
-                'key' => 'sabre',
-                'label' => 'Sabre GDS',
-                'status' => 'operational',
-                'detail' => 'Live search operational',
-            ],
-            [
-                'key' => 'pia_ndc',
-                'label' => 'PIA NDC',
-                'status' => $piaActive ? 'configured' : 'inactive',
-                'detail' => $piaActive ? 'Connection configured' : 'No active connection',
-            ],
-            [
-                'key' => 'al_haider',
-                'label' => 'Al Haider',
-                'status' => $alHaiderConfigured ? 'pending_activation' : 'not_configured',
-                'detail' => $alHaiderConfigured
-                    ? 'Integration prepared; initial token issuance deferred'
-                    : 'Not configured',
-            ],
-            [
-                'key' => 'iati',
-                'label' => 'IATI',
-                'status' => 'inactive',
-                'detail' => 'Intentionally inactive',
-            ],
-            [
-                'key' => 'one_api',
-                'label' => 'One API',
-                'status' => $oneApiConfigured ? 'deferred' : 'inactive',
-                'detail' => $oneApiConfigured
-                    ? 'Credentials available; dedicated production test deferred'
-                    : 'Not active',
-            ],
+        foreach (SupplierProvider::cases() as $provider) {
+            if (isset($seen[$provider->value])) {
+                continue;
+            }
+            if (in_array($provider, [SupplierProvider::Amadeus, SupplierProvider::Travelport, SupplierProvider::AirlineDirect, SupplierProvider::Duffel], true)) {
+                $rows[] = [
+                    'key' => $provider->value,
+                    'label' => $provider->name,
+                    'status' => 'not_integrated',
+                    'detail' => 'Provider adapter not installed / engineering integration required',
+                ];
+
+                continue;
+            }
+            $rows[] = [
+                'key' => $provider->value,
+                'label' => $provider->name,
+                'status' => 'not_provisioned',
+                'detail' => 'No API connection record',
+            ];
+        }
+
+        $rows[] = [
+            'key' => 'al_haider',
+            'label' => 'Al Haider',
+            'status' => $this->alHaiderClient->isConfigured() ? 'pending_activation' : 'not_integrated',
+            'detail' => $this->alHaiderClient->isConfigured()
+                ? 'Adapter prepared; not an API Connections record; token issuance deferred'
+                : 'Provider adapter not provisioned as SupplierConnection',
         ];
+
+        return $rows;
     }
 }

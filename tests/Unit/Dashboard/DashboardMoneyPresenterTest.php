@@ -88,4 +88,19 @@ class DashboardMoneyPresenterTest extends TestCase
         $this->assertSame('Amount unavailable', DashboardMoneyPresenter::formatAmountLabel(564, ''));
         $this->assertStringNotContainsString('564', DashboardMoneyPresenter::formatAmountLabel(564, ''));
     }
+
+    public function test_operational_presenter_prefers_pkr_snapshot_over_supplier_usd(): void
+    {
+        $booking = new Booking([
+            'currency' => 'USD',
+            'meta' => ['converted_total_pkr' => 164500, 'original_currency' => 'USD'],
+        ]);
+        $booking->setRelation('fareBreakdown', (object) ['currency' => 'USD', 'total' => 589.73]);
+        $booking->setRelation('holdSession', null);
+
+        $presented = DashboardMoneyPresenter::presentBookingTotal($booking, 590);
+
+        $this->assertSame('PKR', $presented['currency']);
+        $this->assertSame('Rs. 164,500.00', $presented['displayLabel']);
+    }
 }
