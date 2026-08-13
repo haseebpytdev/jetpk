@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { loadOrganizationProfile, updateOrganizationProfile } from "@/services/operational-api";
 
@@ -30,6 +31,7 @@ const empty: OrgForm = {
 
 export function OrganizationProfileForm() {
   const isLive = useDashboardLiveMode();
+  const router = useRouter();
   const [form, setForm] = useState<OrgForm>(empty);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -126,7 +128,7 @@ export function OrganizationProfileForm() {
             setError(result.message ?? "Save failed");
             return;
           }
-          setSuccess("Organization profile saved.");
+          setSuccess("Organization profile saved. Current values will match this profile after reload.");
           const reloaded = await loadOrganizationProfile();
           if (reloaded.ok) {
             const payload = ("data" in reloaded ? reloaded.data : reloaded) as { organization?: Record<string, unknown> };
@@ -143,6 +145,7 @@ export function OrganizationProfileForm() {
               timezone: String(org.timezone ?? form.timezone),
             });
           }
+          router.refresh();
         }}
       >
         {saving ? "Saving…" : "Save organization profile"}

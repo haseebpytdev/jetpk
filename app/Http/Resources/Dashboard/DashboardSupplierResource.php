@@ -28,8 +28,8 @@ final class DashboardSupplierResource
             'displayCode' => self::displayCode($connection),
             'supplierCategory' => self::category($provider),
             'operatingRegion' => 'Pakistan',
-            'operationalStatus' => $connection->isActive() ? 'Active' : 'Inactive',
-            'integrationStatus' => self::integrationStatus($connection),
+            'operationalStatus' => self::operationalStatus($registryState, $connection),
+            'integrationStatus' => self::integrationStatus($registryState),
             'registryState' => $registryState,
             'registryLabel' => SupplierRegistry::businessLabel($registryState),
             'credentialStatus' => self::credentialStatus($connection),
@@ -111,19 +111,26 @@ final class DashboardSupplierResource
         };
     }
 
-    protected static function integrationStatus(SupplierConnection $connection): string
+    protected static function operationalStatus(string $registryState, SupplierConnection $connection): string
     {
-        if (! $connection->isActive()) {
-            return 'Disabled';
-        }
-        if (! $connection->supplierHealthHealthy()) {
-            return 'Degraded';
-        }
-        if ($connection->credentials === null) {
-            return 'Mock Only';
-        }
+        return match ($registryState) {
+            SupplierRegistry::CONFIGURED_ENABLED => 'Active',
+            SupplierRegistry::PENDING_ACTIVATION => 'Review Required',
+            SupplierRegistry::ADAPTER_NOT_INSTALLED => 'Inactive',
+            default => $connection->isActive() ? 'Active' : 'Inactive',
+        };
+    }
 
-        return 'Connected';
+    protected static function integrationStatus(string $registryState): string
+    {
+        return match ($registryState) {
+            SupplierRegistry::CONFIGURED_ENABLED => 'Connected',
+            SupplierRegistry::PENDING_ACTIVATION => 'Review Required',
+            SupplierRegistry::CONFIGURED_DISABLED => 'Disabled',
+            SupplierRegistry::CONNECTION_NOT_CONFIGURED => 'Disabled',
+            SupplierRegistry::ADAPTER_INSTALLED => 'Disabled',
+            default => 'Disabled',
+        };
     }
 
     protected static function credentialStatus(SupplierConnection $connection): string

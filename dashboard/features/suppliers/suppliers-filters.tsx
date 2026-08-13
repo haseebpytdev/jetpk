@@ -19,6 +19,7 @@ type Props = {
 export function SuppliersFilters({ query, facets }: Props) {
   const router = useDashboardRouter();
   const [pending, startTransition] = useTransition();
+  const [showMore, setShowMore] = useState(false);
   const [draft, setDraft] = useState(query);
 
   useEffect(() => {
@@ -178,6 +179,16 @@ export function SuppliersFilters({ query, facets }: Props) {
             <option value="Not Required">Not Required</option>
           </Select>
         </div>
+      </div>
+      <button
+        type="button"
+        className="text-sm font-medium text-jp-accent hover:underline"
+        onClick={() => setShowMore((open) => !open)}
+      >
+        {showMore ? "Hide extra filters" : "More filters"}
+      </button>
+      {showMore ? (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div>
           <Label htmlFor="filter-settlement-status">Settlement status</Label>
           <Select
@@ -247,6 +258,7 @@ export function SuppliersFilters({ query, facets }: Props) {
           />
         </div>
       </div>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={apply} disabled={pending} aria-busy={pending}>

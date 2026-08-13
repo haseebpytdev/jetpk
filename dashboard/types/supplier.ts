@@ -12,7 +12,7 @@ export type SupplierCategory =
 
 export type OperationalStatus = "Active" | "Inactive" | "Maintenance" | "Restricted" | "Review Required";
 
-export type IntegrationStatus = "Connected" | "Mock Only" | "Manual" | "Degraded" | "Disabled";
+export type IntegrationStatus = "Connected" | "Mock Only" | "Manual" | "Degraded" | "Disabled" | "Review Required";
 
 export type CredentialStatus = "Configured" | "Missing" | "Expiring Soon" | "Invalid" | "Not Required";
 
@@ -49,6 +49,8 @@ export type SupplierRecord = {
   linkedBookingIds: string[];
   linkedTransactionIds: string[];
   notesSummary: string;
+  registryState?: string;
+  registryLabel?: string;
 };
 
 export type SupplierSortField =

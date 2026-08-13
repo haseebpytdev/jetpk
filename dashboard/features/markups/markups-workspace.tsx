@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import { createMarkupRule, deleteMarkupRule, toggleMarkupRule, updateMarkupRule } from "@/services/operational-api";
+import { createMarkupRule, deleteMarkupRule, listApiConnections, toggleMarkupRule, updateMarkupRule } from "@/services/operational-api";
 import type { MarkupRecord } from "@/services/ops-modules-service";
 
 const APPLY_OPTIONS = [
@@ -102,8 +102,24 @@ export function MarkupsWorkspace({ markups }: { markups: MarkupRecord[] }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [connections, setConnections] = useState<Array<{ id: string; name: string; provider: string }>>([]);
   const selected = markups.find((row) => row.id === selectedId) ?? null;
   const previewText = useMemo(() => preview(form), [form]);
+
+  useEffect(() => {
+    if (!isLive) {
+      return;
+    }
+    void listApiConnections().then((result) => {
+      if (!result.ok) {
+        return;
+      }
+      const payload = (result as { data?: { connections?: Array<{ id: string; name: string; provider: string }> } }).data
+        ?? result;
+      const rows = (payload as { connections?: Array<{ id: string; name: string; provider: string }> }).connections ?? [];
+      setConnections(Array.isArray(rows) ? rows : []);
+    });
+  }, [isLive]);
 
   async function run(action: () => Promise<{ ok: boolean; message?: string }>) {
     setBusy(true);
@@ -170,7 +186,16 @@ export function MarkupsWorkspace({ markups }: { markups: MarkupRecord[] }) {
         </label>
         {form.rule_type === "supplier" ? (
           <label className="block text-xs">Supplier / API
-            <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" placeholder="Sabre, PIA NDC…" value={form.supplier_key} onChange={(e) => setForm((f) => ({ ...f, supplier_key: e.target.value }))} />
+            <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={form.supplier_key} onChange={(e) => setForm((f) => ({ ...f, supplier_key: e.target.value }))}>
+              <option value="">Select a configured supplier</option>
+              {connections.map((connection) => (
+                <option key={connection.id} value={connection.provider}>
+                  {connection.name} ({connection.provider})
+                </option>
+              ))}
+              <option value="sabre">Sabre</option>
+              <option value="pia_ndc">PIA NDC</option>
+            </select>
           </label>
         ) : null}
         {form.rule_type === "airline" ? (

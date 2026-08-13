@@ -106,11 +106,10 @@ export function SettingsOverview({ result }: Props) {
         className="rounded-xl border border-jp-border bg-gray-50 px-4 py-3 text-sm text-gray-800"
         data-testid="settings-laravel-boundary-note"
       >
-        <p className="font-medium">Read-only system metadata</p>
+        <p className="font-medium">Saved configuration</p>
         <p className="mt-1">
-          Live Admin/Staff Settings show Laravel-backed configuration without credentials or secret rotation. Missing
-          support contacts are Owner input required warnings, not false validation failures. Supplier environments accept
-          configured demo/sandbox/live labels.
+          Support contacts, timezone, and company identity come from Organization profile. Warnings remain until those
+          saved values are present. They are not suppressed.
         </p>
       </div>
     </div>

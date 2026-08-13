@@ -25,7 +25,7 @@ class DashboardSettingsReadService
     {
         DashboardPermissionResolver::assertPermission($user, 'settings.view');
 
-        return DashboardSettingsResource::general();
+        return DashboardSettingsResource::general($user);
     }
 
     /**
@@ -45,7 +45,7 @@ class DashboardSettingsReadService
     {
         DashboardPermissionResolver::assertPermission($user, 'settings.view');
 
-        return DashboardSettingsResource::notifications();
+        return DashboardSettingsResource::notifications($user);
     }
 
     /**

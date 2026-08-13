@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources\Dashboard;
 
+use App\Models\Agency;
 use App\Models\AgencySetting;
 use App\Models\AgencyNotificationSetting;
 use App\Models\SupplierConnection;
+use App\Models\User;
 use App\Enums\OtaNotificationEvent;
 use App\Support\Branding\PlatformBrandingResolver;
 use App\Support\Suppliers\SupplierRegistry;
@@ -37,28 +39,21 @@ final class DashboardSettingsResource
     /**
      * @return array<string, mixed>
      */
-    public static function general(): array
+    public static function general(?User $user = null): array
     {
-        $branding = PlatformBrandingResolver::forPlatform();
-        $agency = null;
-        try {
-            $agency = \App\Models\Agency::query()
-                ->where('slug', trim((string) config('ota.default_agency_slug', '')))
-                ->first();
-        } catch (\Throwable) {
-            $agency = null;
-        }
+        $agency = self::settingsAgency($user);
         $settings = $agency?->agencySetting ?? ($agency ? AgencySetting::query()->where('agency_id', $agency->id)->first() : null);
-        $supportEmail = trim((string) ($branding->supportEmail() ?: $settings?->support_email ?: ''));
-        $supportPhone = trim((string) ($branding->phone() ?: $settings?->support_phone ?: ''));
+        $branding = PlatformBrandingResolver::forAgency($agency);
+        $supportEmail = trim((string) ($settings?->support_email ?: $branding->supportEmail() ?: ''));
+        $supportPhone = trim((string) ($settings?->support_phone ?: $branding->phone() ?: ''));
         $timezone = trim((string) ($settings?->timezone ?: 'Asia/Karachi'));
         $currency = strtoupper(trim((string) ($settings?->currency ?: 'PKR'))) ?: 'PKR';
 
         return [
-            'organizationDisplayName' => (string) ($branding->companyName() ?: $settings?->display_name ?: 'JetPakistan'),
+            'organizationDisplayName' => (string) ($settings?->display_name ?: $branding->companyName() ?: 'JetPakistan'),
             'publicSupportLabel' => 'Customer Support',
-            'supportPhone' => $supportPhone !== '' ? $supportPhone : '',
-            'supportEmail' => $supportEmail !== '' ? $supportEmail : '',
+            'supportPhone' => $supportPhone,
+            'supportEmail' => $supportEmail,
             'timezone' => $timezone !== '' ? $timezone : 'Asia/Karachi',
             'defaultCurrency' => $currency,
             'locale' => 'en-PK',
@@ -93,11 +88,9 @@ final class DashboardSettingsResource
     /**
      * @return array<string, mixed>
      */
-    public static function notifications(): array
+    public static function notifications(?User $user = null): array
     {
-        $agency = \App\Models\Agency::query()
-            ->where('slug', trim((string) config('ota.default_agency_slug', '')))
-            ->first();
+        $agency = self::settingsAgency($user);
         $rows = $agency
             ? AgencyNotificationSetting::query()->where('agency_id', $agency->id)->get()
             : collect();
@@ -162,5 +155,22 @@ final class DashboardSettingsResource
                 ];
             })->values()->all(),
         ];
+    }
+
+    protected static function settingsAgency(?User $user): ?Agency
+    {
+        if ($user?->current_agency_id) {
+            $agency = Agency::query()->with('agencySetting')->find($user->current_agency_id);
+            if ($agency !== null) {
+                return $agency;
+            }
+        }
+
+        $slug = trim((string) config('ota.default_agency_slug', ''));
+        if ($slug === '') {
+            return null;
+        }
+
+        return Agency::query()->where('slug', $slug)->with('agencySetting')->first();
     }
 }

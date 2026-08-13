@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\Suppliers\OfferValidationService;
 use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
 use App\Support\Bookings\BookingHoldSessionSupplierOfferIdResolver;
+use App\Support\Bookings\BookingPkrSnapshot;
 use Illuminate\Support\Carbon;
 
 class FareHoldService
@@ -144,7 +145,7 @@ class FareHoldService
             'hold_expires_at' => $normalizedOffer['expires_at'] ?? null,
             'validated_total_amount' => (float) ($normalizedOffer['total'] ?? 0),
             'validated_total_currency' => (string) ($normalizedOffer['currency'] ?? 'PKR'),
-            'converted_total_pkr' => self::authoritativePkrSnapshot($normalizedOffer),
+            'converted_total_pkr' => BookingPkrSnapshot::fromOffer($normalizedOffer),
             'markup_snapshot' => is_array($normalizedOffer['pricing_components'] ?? null) ? $normalizedOffer['pricing_components'] : [],
             'passenger_counts' => $passengerCounts,
             'passenger_pricing' => $passengerPricing,
@@ -242,32 +243,9 @@ class FareHoldService
         ]);
     }
 
-    /**
-     * Persist booking-time PKR only when the commercial total is already PKR
-     * or the offer already carries an explicit PKR snapshot. Never copy a USD total into PKR.
-     *
-     * @param  array<string, mixed>  $normalizedOffer
-     */
     protected static function authoritativePkrSnapshot(array $normalizedOffer): ?float
     {
-        $currency = BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency($normalizedOffer['currency'] ?? null);
-        $total = (float) ($normalizedOffer['total'] ?? 0);
-        if ($currency === 'PKR' && $total > 0) {
-            return $total;
-        }
-
-        foreach (['converted_total_pkr', 'customer_total_pkr', 'displayed_total_pkr'] as $key) {
-            $candidate = data_get($normalizedOffer, $key);
-            if ($candidate === null || $candidate === '') {
-                continue;
-            }
-            $amount = (float) $candidate;
-            if ($amount > 0 && $currency !== 'PKR') {
-                return $amount;
-            }
-        }
-
-        return null;
+        return BookingPkrSnapshot::fromOffer($normalizedOffer);
     }
 
     /**

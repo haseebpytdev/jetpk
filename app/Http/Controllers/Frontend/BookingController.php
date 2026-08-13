@@ -40,6 +40,7 @@ use App\Support\Booking\AgentBookingContext;
 use App\Support\Booking\StandardBookingCheckoutJsonResponder;
 use App\Support\Booking\StandardBookingJsonPresenter;
 use App\Support\Bookings\BookingHoldSessionSupplierOfferIdResolver;
+use App\Support\Bookings\BookingPkrSnapshot;
 use App\Support\Bookings\BookingSupplierConfirmationNoticeResolver;
 use App\Support\FlightSearch\PublicMulticityInquiryPolicy;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
@@ -1977,7 +1978,15 @@ class BookingController extends Controller
             'hold_expires_at' => $protection['offer_expires_at'] ?? null,
             'validated_total_amount' => (float) ($protection['supplier_total'] ?? 0),
             'validated_total_currency' => (string) ($protection['supplier_currency'] ?? 'PKR'),
-            'converted_total_pkr' => (float) ($protection['supplier_total'] ?? 0),
+            'converted_total_pkr' => BookingPkrSnapshot::fromOffer(array_merge(
+                is_array($protection['validated_offer_snapshot'] ?? null) ? $protection['validated_offer_snapshot'] : [],
+                [
+                    'currency' => $protection['supplier_currency'] ?? null,
+                    'total' => $protection['supplier_total'] ?? null,
+                    'supplier_currency' => $protection['supplier_currency'] ?? null,
+                    'supplier_total' => $protection['supplier_total'] ?? null,
+                ],
+            )),
             'markup_snapshot' => is_array($protection['validated_offer_snapshot']['pricing_components'] ?? null)
                 ? $protection['validated_offer_snapshot']['pricing_components']
                 : [],

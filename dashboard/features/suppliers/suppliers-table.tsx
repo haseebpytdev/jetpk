@@ -40,6 +40,7 @@ export function SuppliersTable({ suppliers, query, onSort, onView }: Props) {
             </Th>
             <Th scope="col">Category</Th>
             <Th scope="col">Region</Th>
+            <Th scope="col">Registry</Th>
             <Th scope="col">Operational</Th>
             <Th scope="col">Integration</Th>
             <Th scope="col">Credentials</Th>
@@ -96,6 +97,7 @@ export function SuppliersTable({ suppliers, query, onSort, onView }: Props) {
               </Td>
               <Td>{supplier.supplierCategory}</Td>
               <Td>{supplier.operatingRegion}</Td>
+              <Td className="text-xs">{supplier.registryLabel ?? "—"}</Td>
               <Td>
                 <OperationalStatusBadge status={supplier.operationalStatus} />
               </Td>
