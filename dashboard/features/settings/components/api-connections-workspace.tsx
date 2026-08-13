@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import { createApiConnection, testApiConnection, toggleApiConnection } from "@/services/operational-api";
-import { getSuppliersPage } from "@/services/supplier-service";
-import type { SupplierRecord } from "@/types/supplier";
+import {
+  createApiConnection,
+  listApiConnections,
+  testApiConnection,
+  toggleApiConnection,
+} from "@/services/operational-api";
 
 const INSTALLED_ADAPTERS = [
   { key: "sabre", label: "Sabre", fields: ["sign_in", "password", "pcc"] },
@@ -17,10 +19,28 @@ const INSTALLED_ADAPTERS = [
 
 const NOT_INSTALLED = ["amadeus", "travelport", "al_haider"];
 
+type ApiConnectionRow = {
+  id: string;
+  name: string;
+  provider: string;
+  environment: string;
+  enabled: boolean;
+  sabreGdsSupported?: boolean | null;
+  sabreNdcSupported?: boolean | null;
+  sabreNdcEnabled?: boolean | null;
+  lastTestStatus?: string | null;
+};
+
+function extractConnections(result: { ok: boolean; data?: unknown }): ApiConnectionRow[] {
+  const payload = (result as { data?: { connections?: ApiConnectionRow[] }; connections?: ApiConnectionRow[] }).data
+    ?? (result as { connections?: ApiConnectionRow[] });
+  const rows = (payload as { connections?: ApiConnectionRow[] }).connections ?? [];
+  return Array.isArray(rows) ? rows : [];
+}
+
 export function ApiConnectionsWorkspace() {
-  const router = useRouter();
   const isLive = useDashboardLiveMode();
-  const [rows, setRows] = useState<SupplierRecord[]>([]);
+  const [rows, setRows] = useState<ApiConnectionRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [provider, setProvider] = useState("sabre");
@@ -31,30 +51,21 @@ export function ApiConnectionsWorkspace() {
   const installed = INSTALLED_ADAPTERS.some((item) => item.key === provider);
   const adapter = INSTALLED_ADAPTERS.find((item) => item.key === provider);
 
-  useEffect(() => {
+  const refresh = useCallback(async () => {
     if (!isLive) {
       return;
     }
-    void getSuppliersPage({
-      q: "",
-      category: "all",
-      operationalStatus: "all",
-      integrationStatus: "all",
-      credentialStatus: "all",
-      settlementStatus: "all",
-      operatingRegion: "",
-      hasOutstandingSettlement: "all",
-      activityFrom: "",
-      activityTo: "",
-      page: 1,
-      pageSize: 50,
-      sort: "supplierName",
-      direction: "asc",
-      selectedId: null,
-      previewError: false,
-      previewLoading: false,
-    }).then((result) => setRows(result.suppliers));
+    const result = await listApiConnections();
+    if (!result.ok) {
+      setError(result.message ?? "Could not load API connections.");
+      return;
+    }
+    setRows(extractConnections(result));
   }, [isLive]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   async function run(action: () => Promise<{ ok: boolean; message?: string }>) {
     setBusy(true);
@@ -65,24 +76,30 @@ export function ApiConnectionsWorkspace() {
       setError(result.message ?? "Request failed");
       return;
     }
-    router.refresh();
+    await refresh();
   }
 
   return (
     <div className="space-y-4" data-testid="api-connections-workspace">
       <p className="text-sm text-jp-muted">
         API Connections are technical channels. Suppliers remain the business vendor grouping. Secrets are never shown after save.
-        Production UAT must not rotate live credentials. Sabre NDC is shown as integrated only when Offer/Order adapters exist;
-        GDS remains the default channel. NDC defaults off. Do not treat a Sabre row as NDC-capable from the provider label alone.
+        Sabre GDS is integrated when SabreGdsTicketingService is installed. Sabre NDC is integrated when Offer/Order adapters exist,
+        and enabled only from the connection setting (default off).
       </p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <ul className="divide-y divide-jp-border rounded-xl border border-jp-border bg-white">
         {rows.map((row) => (
           <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
             <div>
-              <p className="font-medium">{row.supplierName}</p>
+              <p className="font-medium">{row.name}</p>
               <p className="text-jp-muted">
-                {row.displayCode} · {row.integrationStatus} · {row.credentialStatus} · {row.operationalStatus}
+                {row.provider} · {row.environment} · {row.enabled ? "enabled" : "disabled"}
+                {row.provider === "sabre"
+                  ? ` · GDS ${row.sabreGdsSupported ? "supported" : "not supported"} · NDC ${
+                      row.sabreNdcSupported ? "supported" : "not supported"
+                    } (${row.sabreNdcEnabled ? "enabled" : "off"})`
+                  : ""}
+                {row.lastTestStatus ? ` · last test ${row.lastTestStatus}` : ""}
               </p>
             </div>
             {isLive ? (
@@ -91,15 +108,15 @@ export function ApiConnectionsWorkspace() {
                   type="button"
                   className="rounded-lg border border-jp-border px-2 py-1 text-xs"
                   disabled={busy}
-                  onClick={() => run(() => toggleApiConnection(row.id.replace(/^SC-0*/, "") || row.id))}
+                  onClick={() => run(() => toggleApiConnection(String(row.id)))}
                 >
-                  {row.operationalStatus === "Active" ? "Disable" : "Enable"}
+                  {row.enabled ? "Disable" : "Enable"}
                 </button>
                 <button
                   type="button"
                   className="rounded-lg border border-jp-border px-2 py-1 text-xs"
                   disabled={busy}
-                  onClick={() => run(() => testApiConnection(row.id.replace(/^SC-0*/, "") || row.id))}
+                  onClick={() => run(() => testApiConnection(String(row.id)))}
                 >
                   Test
                 </button>

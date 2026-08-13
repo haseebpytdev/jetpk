@@ -8,6 +8,7 @@ import {
   agentApplicationApprovePath,
   agentApplicationNeedsMoreInfoPath,
   agentApplicationRejectPath,
+  apiSettingsIndexPath,
   apiSettingsStorePath,
   apiSettingsTestPath,
   apiSettingsTogglePath,
@@ -510,6 +511,13 @@ export async function toggleMarkupRule(markupId: string): Promise<MutationRespon
 export async function deleteMarkupRule(markupId: string): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(markupDestroyPath(markupId), {
     method: "DELETE",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function listApiConnections(): Promise<MutationResponse<{ connections?: Record<string, unknown>[] }>> {
+  return laravelRequest(apiSettingsIndexPath(), {
+    method: "GET",
     retryCsrfOnce: false,
   });
 }

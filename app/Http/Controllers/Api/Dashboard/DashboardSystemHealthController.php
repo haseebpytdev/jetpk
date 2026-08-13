@@ -24,4 +24,15 @@ class DashboardSystemHealthController extends Controller
             recordCount: count($result['checklist']),
         );
     }
+
+    public function goLive(Request $request): JsonResponse
+    {
+        $result = $this->health->goLive($request->user());
+
+        return DashboardReadOnlyEnvelope::success(
+            $result,
+            staleAfter: now()->addSeconds(15)->toIso8601String(),
+            recordCount: count($result['checklist']),
+        );
+    }
 }

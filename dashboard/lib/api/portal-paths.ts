@@ -205,6 +205,10 @@ export function markupDestroyPath(markupId: string): string {
   return laravelPortalPath("admin", `/markups/${encodeURIComponent(markupId)}?format=json`);
 }
 
+export function apiSettingsIndexPath(): string {
+  return laravelPortalPath("admin", "/api-settings?format=json");
+}
+
 export function apiSettingsStorePath(): string {
   return laravelPortalPath("admin", "/api-settings?format=json");
 }

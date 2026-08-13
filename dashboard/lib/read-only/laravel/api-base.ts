@@ -58,6 +58,7 @@ export const DASHBOARD_API_ROUTES = {
   agentApplications: "/agent-applications",
   commissions: "/commissions",
   systemHealth: "/system/health",
+  systemGoLive: "/system/go-live",
   opsInbox: "/ops/inbox",
   opsInboxUnread: "/ops/inbox/unread-summary",
   opsInboxRead: "/ops/inbox/read",

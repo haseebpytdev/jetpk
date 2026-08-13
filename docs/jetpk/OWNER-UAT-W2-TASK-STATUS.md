@@ -20,12 +20,12 @@ Prior PASS_READY is invalidated by owner production screenshots.
 | W2-26 | Full markup management | IN_PROGRESS | — | NOT_DEPLOYED | Read-only | REOPENED | Existing engine reused | — | — | Feature tests |
 | W2-27 | Applications vs Agents | IN_PROGRESS | SPEC UPDATED | NOT_DEPLOYED | Ambiguous actions | REOPENED | Selected application workspace | — | — | Deploy+retest |
 | W2-28 | Agents compact filters | IN_PROGRESS | — | NOT_DEPLOYED | Giant card | REOPENED | Search/status/type/more | — | — | Deploy+retest |
-| W2-29 | Supplier vs API | IN_PROGRESS | — | NOT_DEPLOYED | Contradictory lists | REOPENED | Connection registry + suppliers link | — | Deploy | Deploy |
-| W2-30 | API connection mgmt | IN_PROGRESS | CRUD 403 pre-existing agency-admin Blade | NOT_DEPLOYED | Metadata | REOPENED | Next workspace + JSON masked | — | No prod rotate | Deploy |
-| W2-31 | Sabre capability truth | IN_PROGRESS | — | — | — | REOPENED | NDC supported, default off | — | UI truth labels | Continue |
-| W2-32 | Profile + org | IN_PROGRESS | — | NOT_DEPLOYED | No avatar | REOPENED | Photo FormData + org form | — | Logo file UI | Deploy |
-| W2-33 | CMS operational | IN_PROGRESS | — | — | Unmanageable content | REOPENED | Pages live editor exists | — | Media/homepage | Continue |
-| W2-34 | Users/Staff/RBAC | IN_PROGRESS | — | NOT_DEPLOYED | Read-only admin | REOPENED | Invite/create/staff perms JSON | — | Custom role entity | Deploy |
-| W2-35 | Nav active state | IN_PROGRESS | — | NOT_DEPLOYED | Dual active | REOPENED | most-specific href | — | — | Deploy+retest |
-| W2-36 | Admin management matrix | IN_PROGRESS | DOC | — | Primary requirement | REOPENED | matrix file | — | Gaps remain | Continue |
+| W2-29 | Supplier vs API | DONE | PASS | PENDING_DEPLOY | Contradictory lists | CODE_CLOSED | Connection registry + suppliers link | 8d79f0c7 | Prod verify | Deploy+retest |
+| W2-30 | API connection mgmt | DONE | 3 tests / 15 assertions | PENDING_DEPLOY | Metadata | CODE_CLOSED | JSON masked + client list without server-only import | 8d79f0c7 | No prod rotate | Deploy+retest |
+| W2-31 | Sabre capability truth | DONE | Adapter classes | PENDING_DEPLOY | — | CODE_CLOSED | GDS/NDC supported; NDC enabled default false | 8d79f0c7 | Prod UI labels | Deploy+retest |
+| W2-32 | Profile + org | DONE | — | PENDING_DEPLOY | No avatar | CODE_CLOSED | Photo FormData + org form | 8d79f0c7 | Prod verify | Deploy+retest |
+| W2-33 | CMS operational | DONE | — | PENDING_DEPLOY | Unmanageable content | CODE_CLOSED | Pages + media + structured homepage | — | Prod verify | Deploy+retest |
+| W2-34 | Users/Staff/RBAC | DONE | — | PENDING_DEPLOY | Read-only admin | CODE_CLOSED | Invite/create/staff perms; account-type catalogue | 8d79f0c7 | No fake Create Role | Deploy+retest |
+| W2-35 | Nav active state | DONE | — | PENDING_DEPLOY | Dual active | CODE_CLOSED | most-specific href | 8d79f0c7 | SIDEBAR_PRIMARY_ACTIVE_COUNT=1 | Deploy+retest |
+| W2-36 | Admin management matrix | IN_PROGRESS | DOC | PENDING_DEPLOY | Primary requirement | REOPENED | Go-live validators wired | — | Prod verify | Deploy+retest |
 | W2-37 | Cross-portal matrix | IN_PROGRESS | DOC | — | — | REOPENED | matrix file | — | Audit remaining | Continue |

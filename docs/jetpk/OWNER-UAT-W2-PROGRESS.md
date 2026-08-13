@@ -1,22 +1,28 @@
 # OWNER UAT WAVE 2 — Progress Ledger
 
-LAST_UPDATED_UTC: 2026-08-13T04:20:00Z  
+LAST_UPDATED_UTC: 2026-08-13T08:50:00Z  
 BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-REMOTE_HEAD: `c84a5bf`  
+REMOTE_HEAD: `8d79f0c762255f7f0bd6eee1fd659e640110c9cc`  
 WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f`
 
 ## STATUS
 
-`OWNER_UAT_WAVE_2` = **PASS_READY_FOR_OWNER_RETEST**
+`OWNER_UAT_WAVE_2` = **REOPENED_OWNER_RETEST_GAPS**
+
+ADMIN_FULL_MANAGEMENT_SYSTEM=NO (production verification still required)
+
+SSH_AGENT_AUTH_RESTORED=PASS
+SSH_CURSOR_AUTH=PASS
+SFTP_AUTH=PASS
+OLS=612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c MATCH
 
 ## THIS HEARTBEAT
 
-- Continuation reconcile: local = remote `459c227`; Wave-1 frozen untouched.
-- Re-verified production browser: Manage Booking form present; Blade copy 0; `/laravel/lookup-booking` lands `/lookup-booking`; `/groups` lands `/groups/search`.
-- Computed fonts: body Plus Jakarta 400; H1 Clash Display 700; Login Plus Jakarta 600 width 106px (100–112). Inter residue sampled 0.
-- No user-facing Blade CTAs in `frontend/features` or `dashboard` TSX.
-- Remaining PARTIAL (documented, not hidden): CMS non-pages write; deposits/markup production mutations (safety / no migration).
-- Comment-only encoding cleanup in dashboard typography tokens.
+- Owner restored ssh-agent; Cursor verified non-interactive SSH/SFTP. Stale SSH_SERVER_REJECTED_KEY superseded.
+- Extracted committed management tar onto `/home/pkjetp/jetpk_app`. Laravel hashes matched local HEAD.
+- First production `npm run build` failed: client `ApiConnectionsWorkspace` imported server-only `supplier-service`.
+- Follow-up code: browser JSON list for API connections; structured homepage controls; go-live live validators + deep links; support selected ticket + customer-visible reply.
+- Not marked PRODUCTION_DEPLOYED until Dashboard build + `jetpk-dashboard` restart succeed.
 
 ## QA AUTH
 

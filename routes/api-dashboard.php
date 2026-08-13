@@ -202,6 +202,8 @@ Route::middleware(['throttle:120,1'])->group(function (): void {
             ->name('markups.index');
         Route::get('/system/health', [DashboardSystemHealthController::class, 'show'])
             ->name('system.health');
+        Route::get('/system/go-live', [DashboardSystemHealthController::class, 'goLive'])
+            ->name('system.go-live');
     });
 
     Route::middleware('dashboard.permission:audit.view')->group(function (): void {

@@ -18,6 +18,8 @@ export function SupportOperationalWorkspace({ tickets }: { tickets: SupportTicke
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState<Record<string, string>>({});
+  const [selectedId, setSelectedId] = useState<string | null>(tickets[0]?.id ?? null);
+  const [replyVisibility, setReplyVisibility] = useState<"internal" | "customer_visible">("internal");
 
   if (!isLive) {
     return (
@@ -44,9 +46,11 @@ export function SupportOperationalWorkspace({ tickets }: { tickets: SupportTicke
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <ul className="space-y-3">
         {rows.map((ticket) => (
-          <li key={ticket.id} className="rounded-xl border border-jp-border p-4 text-sm">
-            <p className="font-medium">{ticket.subject}</p>
-            <p className="text-jp-muted">Ticket {ticket.id} · Status: {ticket.status}</p>
+          <li key={ticket.id} className={`rounded-xl border p-4 text-sm ${selectedId === ticket.id ? "border-jp-accent" : "border-jp-border"}`}>
+            <button type="button" className="text-left" onClick={() => setSelectedId(ticket.id)}>
+              <p className="font-medium">{ticket.subject}</p>
+              <p className="text-jp-muted">Ticket {ticket.id} · Status: {ticket.status}{ticket.assignedTo ? ` · ${ticket.assignedTo}` : ""}</p>
+            </button>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
@@ -94,11 +98,19 @@ export function SupportOperationalWorkspace({ tickets }: { tickets: SupportTicke
             <div className="mt-3 space-y-2">
               <textarea
                 className="w-full rounded-lg border border-jp-border p-2 text-sm"
-                placeholder="Internal reply"
+                placeholder={replyVisibility === "customer_visible" ? "Customer-visible reply" : "Internal note"}
                 value={replyBody[ticket.id] ?? ""}
                 onChange={(e) => setReplyBody((current) => ({ ...current, [ticket.id]: e.target.value }))}
                 data-testid={`support-reply-input-${ticket.id}`}
               />
+              <label className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={replyVisibility === "customer_visible"}
+                  onChange={(e) => setReplyVisibility(e.target.checked ? "customer_visible" : "internal")}
+                />
+                Customer-visible reply
+              </label>
               <button
                 type="button"
                 className="min-h-11 rounded-xl bg-jp-accent px-3 py-2 text-white disabled:opacity-60"
@@ -110,10 +122,10 @@ export function SupportOperationalWorkspace({ tickets }: { tickets: SupportTicke
                     setError("Reply body is required.");
                     return;
                   }
-                  run(`reply-${ticket.id}`, () => replySupportTicket(portal, ticket.id, body, "internal"));
+                  run(`reply-${ticket.id}`, () => replySupportTicket(portal, ticket.id, body, replyVisibility));
                 }}
               >
-                Send internal reply
+                Send reply
               </button>
             </div>
           </li>

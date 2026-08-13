@@ -7,6 +7,7 @@ use App\Models\CommunicationLog;
 use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
 use App\Models\User;
+use App\Support\Dashboard\GoLiveChecklistPresenter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -70,6 +71,19 @@ class DashboardSystemHealthReadService
                 ['label' => 'Mail configured', 'ok' => filled(config('mail.default'))],
                 ['label' => 'Storage private path ready', 'ok' => is_writable(storage_path('app'))],
             ],
+        ];
+    }
+
+    /**
+     * @return array{checklist: list<array<string, mixed>>, managementMode: string}
+     */
+    public function goLive(User $user): array
+    {
+        Gate::authorize('platform.admin');
+
+        return [
+            'managementMode' => 'validator_with_deep_links',
+            'checklist' => (new GoLiveChecklistPresenter)->items($user),
         ];
     }
 }
