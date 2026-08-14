@@ -57,9 +57,12 @@ class JpDash03BookingDetailContractTest extends TestCase
         $fare = $detail['fareSummary'] ?? [];
 
         $this->assertNotEmpty($summary['id'] ?? null);
-        $this->assertSame('USD', $fare['currency'] ?? null);
-        $this->assertSame('USD', $listRow['currency'] ?? null);
-        $this->assertSame(624, (int) ($fare['total'] ?? 0));
+        $this->assertNull($fare['currency'] ?? null);
+        $this->assertSame('unresolved', $fare['currencyStatus'] ?? null);
+        $this->assertSame('Amount unavailable', $fare['totalMoney']['displayLabel'] ?? null);
+        $this->assertSame('USD 624.00', $fare['totalMoney']['originalAmountLabel'] ?? null);
+        $this->assertSame('', $listRow['currency'] ?? null);
+        $this->assertSame(0, (int) ($fare['total'] ?? 0));
     }
 
     public function test_booking_detail_includes_timeline_notes_and_communications(): void
