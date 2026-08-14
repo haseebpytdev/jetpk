@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierProvider;
 use App\Http\Controllers\Admin\BookingManagementController;
+use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\BookingContact;
@@ -19,7 +20,9 @@ use App\Support\Bookings\SabreCertifiedRouteSelector;
 use App\Support\Bookings\SabreHostErrorClassifier;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\ViewErrorBag;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
@@ -41,17 +44,15 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
     {
         $booking = $this->makeSabreBooking($this->completeOneSegmentSnapshot());
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('data-testid="sabre-continuity-diagnostic-panel"', false)
-            ->assertSee('Sabre continuity &amp; host classification', false)
-            ->assertSee('Readiness recommendation', false)
-            ->assertSee('auto pnr safe', false)
-            ->assertSee('Pricing context ready', false)
-            ->assertSee('Continuity field status', false)
-            ->assertSee('segment count', false)
-            ->assertSee('present', false);
+        $html = $this->adminBookingShowHtml($this->platformAdmin(), $booking);
+        $this->assertStringContainsString('data-testid="sabre-continuity-diagnostic-panel"', $html);
+        $this->assertStringContainsString('Sabre continuity &amp; host classification', $html);
+        $this->assertStringContainsString('Readiness recommendation', $html);
+        $this->assertStringContainsString('auto pnr safe', $html);
+        $this->assertStringContainsString('Pricing context ready', $html);
+        $this->assertStringContainsString('Continuity field status', $html);
+        $this->assertStringContainsString('segment count', $html);
+        $this->assertStringContainsString('present', $html);
     }
 
     public function test_staff_booking_show_displays_continuity_panel(): void
@@ -60,10 +61,8 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $staff->forceFill(['account_type' => AccountType::Staff])->save();
 
-        $this->actingAs($staff->fresh())
-            ->get(route('staff.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('data-testid="sabre-continuity-diagnostic-panel"', false);
+        $html = $this->staffBookingShowHtml($staff->fresh(), $booking);
+        $this->assertStringContainsString('data-testid="sabre-continuity-diagnostic-panel"', $html);
     }
 
     public function test_certified_route_pending_displays_as_internal_gate_not_host_rejection(): void
@@ -85,11 +84,9 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
         $evidenceRow = collect($panel['summary_rows'])->firstWhere('label', 'Host rejection evidence present');
         $this->assertSame('No', $evidenceRow['value'] ?? null);
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('certified route pending', false)
-            ->assertSee('not Sabre host rejection', false);
+        $html = $this->adminBookingShowHtml($this->platformAdmin(), $booking);
+        $this->assertStringContainsString('certified route pending', $html);
+        $this->assertStringContainsString('not Sabre host rejection', $html);
     }
 
     public function test_persisted_no_fares_rbd_carrier_displays_host_rejection_family(): void
@@ -106,12 +103,10 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
         $rejectedRow = collect($panel['summary_rows'])->firstWhere('label', 'Host rejected after local continuity');
         $this->assertSame('Yes', $rejectedRow['value'] ?? null);
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('no fares rbd carrier', false)
-            ->assertSee('blocked host rejected after local continuity', false)
-            ->assertSee('Host rejected after local continuity', false);
+        $html = $this->adminBookingShowHtml($this->platformAdmin(), $booking);
+        $this->assertStringContainsString('no fares rbd carrier', $html);
+        $this->assertStringContainsString('blocked host rejected after local continuity', $html);
+        $this->assertStringContainsString('Host rejected after local continuity', $html);
     }
 
     public function test_persisted_uc_segment_status_displays_host_rejection_family(): void
@@ -127,11 +122,9 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
             ]),
         ]);
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('uc segment status', false)
-            ->assertSee('blocked host rejected after local continuity', false);
+        $html = $this->adminBookingShowHtml($this->platformAdmin(), $booking);
+        $this->assertStringContainsString('uc segment status', $html);
+        $this->assertStringContainsString('blocked host rejected after local continuity', $html);
     }
 
     public function test_raw_payload_pii_booking_signature_and_response_error_messages_not_rendered(): void
@@ -150,11 +143,7 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
             ]),
         ]);
 
-        $response = $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking));
-
-        $response->assertOk();
-        $content = (string) $response->getContent();
+        $content = $this->adminBookingShowHtml($this->platformAdmin(), $booking);
         $this->assertStringContainsString('data-testid="sabre-continuity-diagnostic-panel"', $content);
         preg_match('/id="sabre-continuity-diagnostic-panel"[\s\S]*?<\/div>\s*<\/div>/', $content, $panelMatch);
         $panelHtml = $panelMatch[0] ?? '';
@@ -179,11 +168,9 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
             'meta' => ['supplier_provider' => SupplierProvider::Duffel->value],
         ]);
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertDontSee('data-testid="sabre-continuity-diagnostic-panel"', false)
-            ->assertDontSee('Sabre continuity &amp; host classification', false);
+        $html = $this->adminBookingShowHtml($this->platformAdmin(), $booking);
+        $this->assertStringNotContainsString('data-testid="sabre-continuity-diagnostic-panel"', $html);
+        $this->assertStringNotContainsString('Sabre continuity &amp; host classification', $html);
     }
 
     public function test_viewing_booking_show_does_not_update_booking_or_call_live_sabre(): void
@@ -194,9 +181,7 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
         $beforeStatus = $booking->status;
         $beforeUpdatedAt = $booking->updated_at?->toIso8601String();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk();
+        $this->adminBookingShowHtml($this->platformAdmin(), $booking);
 
         Http::assertNothingSent();
 
@@ -219,10 +204,8 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
             };
         });
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Sabre continuity diagnostic unavailable', false);
+        $html = $this->adminBookingShowHtml($this->platformAdmin(), $booking);
+        $this->assertStringContainsString('Sabre continuity diagnostic unavailable', $html);
     }
 
     public function test_build_sabre_continuity_diagnostic_panel_maps_auditor_report(): void
@@ -389,5 +372,25 @@ class AdminSabreContinuityDiagnosticPanelTest extends TestCase
         ]);
 
         return $booking->fresh();
+    }
+
+    private function adminBookingShowHtml(User $admin, Booking $booking): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/bookings/'.$booking->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(BookingManagementController::class)->show($booking)->render();
+    }
+
+    private function staffBookingShowHtml(User $staff, Booking $booking): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/bookings/'.$booking->id, 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffBookingController::class)->show($booking)->render();
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\AccountType;
+use App\Http\Controllers\Admin\CustomerManagementController;
 use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\BookingContact;
@@ -10,6 +11,7 @@ use App\Models\BookingPassenger;
 use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class AdminCustomersTest extends TestCase
@@ -22,8 +24,10 @@ class AdminCustomersTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.customers.index'))
-            ->assertOk()
-            ->assertSee('Customer list', false);
+            ->assertRedirect('/admin/dashboard/customers');
+
+        $html = $this->customersIndexHtml($admin);
+        $this->assertStringContainsString('Customer list', $html);
     }
 
     public function test_customer_list_only_shows_account_type_customer(): void
@@ -41,9 +45,11 @@ class AdminCustomersTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.customers.index'))
-            ->assertOk()
-            ->assertSee('Asif Customer')
-            ->assertDontSee('Staff Only Person');
+            ->assertRedirect('/admin/dashboard/customers');
+
+        $html = $this->customersIndexHtml($admin);
+        $this->assertStringContainsString('Asif Customer', $html);
+        $this->assertStringNotContainsString('Staff Only Person', $html);
     }
 
     public function test_agency_admin_can_view_customer_profile(): void
@@ -54,9 +60,11 @@ class AdminCustomersTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.customers.show', $customer))
-            ->assertOk()
-            ->assertSee('Asif Customer')
-            ->assertSee($customer->email);
+            ->assertRedirect('/admin/dashboard/customers?id=CU-'.$customer->id);
+
+        $html = $this->customerShowHtml($admin, $customer);
+        $this->assertStringContainsString('Asif Customer', $html);
+        $this->assertStringContainsString($customer->email, $html);
     }
 
     public function test_customer_profile_shows_seeded_bookings(): void
@@ -75,9 +83,11 @@ class AdminCustomersTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.customers.show', ['customer' => $customer, 'tab' => 'bookings']))
-            ->assertOk()
-            ->assertSee('CUST-TEST-001')
-            ->assertSee('LHE → DXB');
+            ->assertRedirect();
+
+        $html = $this->customerShowHtml($admin, $customer, ['tab' => 'bookings']);
+        $this->assertStringContainsString('CUST-TEST-001', $html);
+        $this->assertStringContainsString('LHE → DXB', $html);
     }
 
     public function test_non_customer_id_cannot_be_shown_through_customer_show_route(): void
@@ -113,9 +123,11 @@ class AdminCustomersTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.customers.index', ['segment' => 'guests']))
-            ->assertOk()
-            ->assertSee('GU-'.$booking->id.'-Usman', false)
-            ->assertSee('guest@example.test', false);
+            ->assertRedirect('/admin/dashboard/customers?segment=guests');
+
+        $html = $this->customersIndexHtml($admin, ['segment' => 'guests']);
+        $this->assertStringContainsString('GU-'.$booking->id.'-Usman', $html);
+        $this->assertStringContainsString('guest@example.test', $html);
     }
 
     public function test_registered_customer_does_not_appear_in_guest_customers_segment(): void
@@ -132,8 +144,10 @@ class AdminCustomersTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.customers.index', ['segment' => 'guests']))
-            ->assertOk()
-            ->assertDontSee('REG-001', false);
+            ->assertRedirect('/admin/dashboard/customers?segment=guests');
+
+        $html = $this->customersIndexHtml($admin, ['segment' => 'guests']);
+        $this->assertStringNotContainsString('REG-001', $html);
     }
 
     public function test_registered_customers_segment_excludes_guest_bookings(): void
@@ -151,8 +165,10 @@ class AdminCustomersTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.customers.index'))
-            ->assertOk()
-            ->assertDontSee('guestonly@example.test', false);
+            ->assertRedirect('/admin/dashboard/customers');
+
+        $html = $this->customersIndexHtml($admin);
+        $this->assertStringNotContainsString('guestonly@example.test', $html);
     }
 
     public function test_staff_cannot_access_admin_customer_routes(): void
@@ -181,5 +197,37 @@ class AdminCustomersTest extends TestCase
         }
 
         return [$admin];
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    private function customersIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        $uri = '/admin/customers';
+        if ($query !== []) {
+            $uri .= '?'.http_build_query($query);
+        }
+        $request = Request::create($uri, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(CustomerManagementController::class)->index($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    private function customerShowHtml(User $admin, User $customer, array $query = []): string
+    {
+        $this->actingAs($admin);
+        $uri = '/admin/customers/'.$customer->id;
+        if ($query !== []) {
+            $uri .= '?'.http_build_query($query);
+        }
+        $request = Request::create($uri, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(CustomerManagementController::class)->show($request, $customer)->render();
     }
 }
