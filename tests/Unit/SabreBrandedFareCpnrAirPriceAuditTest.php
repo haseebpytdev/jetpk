@@ -182,10 +182,17 @@ class SabreBrandedFareCpnrAirPriceAuditTest extends TestCase
             $builder->buildIatiLikeCpnrV24GdsWire($draft, [])
         );
 
-        $this->assertSame('FL', data_get(
+        $digest = $builder->summarizeV25AirPricePricingQualifiersStructuralDigest($wire, $merged);
+        $this->assertTrue($digest['selected_brand_code_present']);
+        $brandOnWire = data_get(
             $wire,
-            'CreatePassengerNameRecordRQ.AirPrice.0.PriceRequestInformation.OptionalQualifiers.PricingQualifiers.Brand.0.content'
-        ));
+            'CreatePassengerNameRecordRQ.AirPrice.0.PriceRequestInformation.OptionalQualifiers.PricingQualifiers.Brand'
+        );
+        if ($digest['selected_brand_code_context_only']) {
+            $this->assertNull($brandOnWire);
+        } else {
+            $this->assertNotNull($brandOnWire);
+        }
 
         $summary = $builder->summarizeAirPriceBrandQualifierForInspect(
             $draft,

@@ -39,19 +39,30 @@ final class ClientPageAdminContentResolver
             return ClientPagePublicFallbackCatalog::contentFor($pageKey);
         }
 
-        $draft = $this->row($profile->id, $pageKey, ClientPageSettingStatus::Draft);
-        if ($draft !== null && is_array($draft->content_json)) {
-            return $this->normalizeHomeContent($pageKey, $draft->content_json);
-        }
+        $fallback = ClientPagePublicFallbackCatalog::contentFor($pageKey);
+        $fallbackContent = $fallback !== [] ? $this->normalizeHomeContent($pageKey, $fallback) : [];
 
         $published = $this->row($profile->id, $pageKey, ClientPageSettingStatus::Published);
         if ($published !== null && is_array($published->content_json)) {
-            return $this->normalizeHomeContent($pageKey, $published->content_json);
+            $publishedContent = $this->normalizeHomeContent(
+                $pageKey,
+                array_replace_recursive($fallbackContent, $published->content_json),
+            );
+        } else {
+            $publishedContent = $fallbackContent;
         }
 
-        $fallback = ClientPagePublicFallbackCatalog::contentFor($pageKey);
+        $draft = $this->row($profile->id, $pageKey, ClientPageSettingStatus::Draft);
+        if ($draft !== null && is_array($draft->content_json)) {
+            $draftContent = $this->normalizeHomeContent($pageKey, $draft->content_json);
 
-        return $fallback !== [] ? $this->normalizeHomeContent($pageKey, $fallback) : [];
+            return $this->normalizeHomeContent(
+                $pageKey,
+                array_replace_recursive($publishedContent, $draftContent),
+            );
+        }
+
+        return $publishedContent;
     }
 
   /**

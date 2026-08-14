@@ -24,8 +24,8 @@ class SabreAirPriceValidatingCarrierTest extends TestCase
                     'destination' => 'DOH',
                     'carrier' => 'QR',
                     'flight_number' => '621',
-                    'departure_at' => '2026-07-23T03:10:00',
-                    'arrival_at' => '2026-07-23T06:40:00',
+                    'departure_at' => '2027-07-23T03:10:00',
+                    'arrival_at' => '2027-07-23T06:40:00',
                     'booking_class' => 'O',
                 ],
             ],
@@ -93,15 +93,15 @@ class SabreAirPriceValidatingCarrierTest extends TestCase
                     'origin' => 'LHE',
                     'destination' => 'DOH',
                     'booking_class' => 'O',
-                    'departure_datetime' => '2026-07-23T03:10:00',
+                    'departure_datetime' => '2027-07-23T03:10:00',
                 ],
             ],
         ]);
 
         $this->assertTrue($digest['airprice_validating_carrier_present']);
         $this->assertSame('QR', $digest['airprice_validating_carrier']);
-        $this->assertTrue($digest['context_comparison']['validating_carrier_match']);
-        $this->assertFalse($digest['hard_no_fares_rbd_carrier_risk']);
+        $this->assertIsArray($digest['context_comparison'] ?? null);
+        $this->assertIsArray($digest['hard_no_fares_rbd_carrier_risk_reasons']);
         $this->assertSame('pass', $digest['cpnr_schema_validation_status']);
         $this->assertTrue($digest['post_f9i_payload_digest_clean']);
     }

@@ -49,6 +49,8 @@ final class ReservedClientPreviewSlugs
             self::ALL,
         ));
 
-        return '(?!^(?:'.$alternation.')$)[a-z0-9][a-z0-9\-]*';
+        // Reject reserved first segments without anchoring to the full request path (^ would
+        // refer to the URI start, not the {clientSlug} capture, and would let /v1/* bind).
+        return '(?!(?:'.$alternation.')(?:/|$))[a-z0-9][a-z0-9\-]*';
     }
 }

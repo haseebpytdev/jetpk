@@ -615,7 +615,26 @@ final class SabreCertifiedRouteSelector
             && (string) ($profile['connection_airport'] ?? '') === (string) ($row['connection_airport'] ?? '')
             && (string) ($profile['destination'] ?? '') === (string) ($row['destination'] ?? '')
             && (int) ($profile['segment_count'] ?? 0) === (int) ($row['segment_count'] ?? 0)
-            && (string) ($profile['trip_type'] ?? '') === (string) ($row['trip_type'] ?? '');
+            && $this->tripTypesMatchForControlledPnr(
+                (string) ($profile['trip_type'] ?? ''),
+                (string) ($row['trip_type'] ?? ''),
+            );
+    }
+
+    private function tripTypesMatchForControlledPnr(string $profileType, string $rowType): bool
+    {
+        if ($profileType === $rowType) {
+            return true;
+        }
+
+        $connectingAliases = [
+            'one_way_connecting',
+            'one_way_single_connection_same_carrier',
+            self::CATEGORY_ONE_WAY_CONNECTING_SAME_CARRIER_GDS,
+        ];
+
+        return in_array($profileType, $connectingAliases, true)
+            && in_array($rowType, $connectingAliases, true);
     }
 
     /**

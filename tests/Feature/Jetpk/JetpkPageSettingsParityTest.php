@@ -38,12 +38,19 @@ class JetpkPageSettingsParityTest extends TestCase
             'current_agency_id' => null,
         ]);
 
-        $this->actingAs($admin)
-            ->get('/admin/page-settings/about')
+        $response = $this->actingAs($admin)
+            ->getJson('/admin/page-settings/about?format=json')
             ->assertOk()
-            ->assertSee('Cheap flights and secure online booking for Pakistan', false)
-            ->assertSee('ota@jetpakistan.pk', false)
-            ->assertSee('Form source: public fallback', false);
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('editorMeta.form_source', ClientPageAdminContentResolver::SOURCE_PUBLIC_FALLBACK);
+
+        $content = $response->json('content');
+        $this->assertIsArray($content);
+        $this->assertSame(
+            'Cheap flights and secure online booking for Pakistan',
+            data_get($content, 'hero.title'),
+        );
+        $this->assertSame('ota@jetpakistan.pk', data_get($content, 'contact.email'));
     }
 
     public function test_support_edit_loads_public_fallback_contact_details(): void
@@ -55,12 +62,16 @@ class JetpkPageSettingsParityTest extends TestCase
             'current_agency_id' => null,
         ]);
 
-        $this->actingAs($admin)
-            ->get('/admin/page-settings/support')
+        $response = $this->actingAs($admin)
+            ->getJson('/admin/page-settings/support?format=json')
             ->assertOk()
-            ->assertSee('Flight booking help, 24/7', false)
-            ->assertSee('0311 1222427', false)
-            ->assertSee('923111222427', false);
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('editorMeta.form_source', ClientPageAdminContentResolver::SOURCE_PUBLIC_FALLBACK);
+
+        $content = $response->json('content');
+        $this->assertSame('Flight booking help, 24/7', data_get($content, 'hero.title'));
+        $this->assertSame('0311 1222427', data_get($content, 'contact.phone'));
+        $this->assertSame('923111222427', data_get($content, 'contact.whatsapp'));
     }
 
     public function test_published_content_loads_when_no_draft_exists(): void
@@ -88,10 +99,10 @@ class JetpkPageSettingsParityTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/page-settings/about')
+            ->getJson('/admin/page-settings/about?format=json')
             ->assertOk()
-            ->assertSee('Published about title', false)
-            ->assertSee('Form source: published', false);
+            ->assertJsonPath('editorMeta.form_source', ClientPageAdminContentResolver::SOURCE_PUBLISHED)
+            ->assertJsonPath('content.hero.title', 'Published about title');
     }
 
     public function test_draft_takes_precedence_over_published_in_admin_form(): void
@@ -119,12 +130,13 @@ class JetpkPageSettingsParityTest extends TestCase
             'current_agency_id' => null,
         ]);
 
-        $this->actingAs($admin)
-            ->get('/admin/page-settings/support')
+        $response = $this->actingAs($admin)
+            ->getJson('/admin/page-settings/support?format=json')
             ->assertOk()
-            ->assertSee('Draft support title', false)
-            ->assertDontSee('Published support title', false)
-            ->assertSee('Form source: draft', false);
+            ->assertJsonPath('editorMeta.form_source', ClientPageAdminContentResolver::SOURCE_DRAFT)
+            ->assertJsonPath('content.hero.title', 'Draft support title');
+
+        $this->assertNotSame('Published support title', data_get($response->json('content'), 'hero.title'));
     }
 
     public function test_intentional_empty_title_persists_through_save_and_publish(): void

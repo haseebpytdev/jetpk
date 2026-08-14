@@ -3,10 +3,12 @@
 namespace Tests\Unit;
 
 use App\Support\Bookings\BookingItineraryOverviewPresenter;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class BookingItineraryOverviewPresenterTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_returns_null_when_meta_empty(): void
     {
         $this->assertNull(BookingItineraryOverviewPresenter::fromBookingMeta(null));

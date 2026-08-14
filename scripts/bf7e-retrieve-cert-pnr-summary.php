@@ -646,6 +646,13 @@ $report = [
     'status' => 'pending',
 ];
 
+function bf7eAssertBookingIdAllowed(int $bookingId): void
+{
+    if (in_array($bookingId, BF7E_BLOCKED_BOOKING_IDS, true)) {
+        throw new RuntimeException('booking_id_blocked_for_bf7e');
+    }
+}
+
 try {
     if ($pnrOpt === null || ! preg_match('/^[A-Z0-9]{5,8}$/', $pnrOpt)) {
         throw new RuntimeException('Missing or invalid --pnr={locator} (5-8 alphanumeric).');
@@ -655,9 +662,7 @@ try {
         throw new RuntimeException('Missing --booking={id} (e.g. --booking=51).');
     }
 
-    if (in_array($bookingOpt, BF7E_BLOCKED_BOOKING_IDS, true)) {
-        throw new RuntimeException('booking_id_blocked_for_bf7e');
-    }
+    bf7eAssertBookingIdAllowed($bookingOpt);
 
     $envGate = resolveAppEnvGate($allowProduction, $appEnv);
     if ($envGate !== null) {

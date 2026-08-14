@@ -120,16 +120,12 @@ class Bf7eRetrieveCertPnrSummaryTest extends TestCase
 
     public function test_blocked_booking_id_returns_error_without_http(): void
     {
-        $script = base_path('scripts/bf7e-retrieve-cert-pnr-summary.php');
-        Config::set('app.env', 'testing');
+        require_once base_path('scripts/bf7e-retrieve-cert-pnr-summary.php');
 
-        $cmd = PHP_BINARY.' '.escapeshellarg($script).' --pnr=RQFUYD --booking=43 --skip-send 2>&1';
-        $raw = (string) shell_exec($cmd);
-        $json = json_decode($raw, true);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('booking_id_blocked_for_bf7e');
 
-        $this->assertIsArray($json);
-        $this->assertSame('error', $json['status'] ?? null);
-        $this->assertStringContainsString('booking_id_blocked_for_bf7e', (string) ($json['error'] ?? ''));
+        bf7eAssertBookingIdAllowed(43);
     }
 
     public function test_assert_safety_flags_off_blocks_when_ticketing_enabled(): void

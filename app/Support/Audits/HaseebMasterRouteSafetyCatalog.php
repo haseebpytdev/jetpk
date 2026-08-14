@@ -11,7 +11,7 @@ use App\Support\Client\ReservedClientPreviewSlugs;
  */
 final class HaseebMasterRouteSafetyCatalog
 {
-    public const DEFAULT_CLIENT_SLUG = 'haseeb-master';
+    public const DEFAULT_CLIENT_SLUG = 'jetpk';
 
     /**
      * Named production routes that must exist at unprefixed URLs.
@@ -49,7 +49,7 @@ final class HaseebMasterRouteSafetyCatalog
             ['section' => 'Auth', 'route' => 'password.reset', 'method' => 'GET', 'expected_uri' => '/reset-password/{token}', 'notes' => 'Reset password (parametric URI)'],
 
             // 6. Admin
-            ['section' => 'Admin dashboard', 'route' => 'admin.dashboard', 'method' => 'GET', 'expected_uri' => '/admin', 'notes' => 'Admin home'],
+            ['section' => 'Admin dashboard', 'route' => 'admin.dashboard', 'method' => 'GET', 'expected_uri' => '/admin/dashboard/{path?}', 'notes' => 'Admin home (Next dashboard shell)'],
             ['section' => 'Admin dashboard', 'route' => 'admin.bookings', 'method' => 'GET', 'expected_uri' => '/admin/bookings', 'notes' => 'Admin bookings index'],
 
             // 7. Agent
@@ -57,7 +57,7 @@ final class HaseebMasterRouteSafetyCatalog
             ['section' => 'Agent dashboard', 'route' => 'agent.bookings.index', 'method' => 'GET', 'expected_uri' => '/agent/bookings', 'notes' => 'Agent bookings index'],
 
             // 8. Staff
-            ['section' => 'Staff dashboard', 'route' => 'staff.dashboard', 'method' => 'GET', 'expected_uri' => '/staff', 'notes' => 'Staff home'],
+            ['section' => 'Staff dashboard', 'route' => 'staff.dashboard', 'method' => 'GET', 'expected_uri' => '/staff/dashboard/{path?}', 'notes' => 'Staff home (Next dashboard shell)'],
             ['section' => 'Staff dashboard', 'route' => 'staff.bookings.index', 'method' => 'GET', 'expected_uri' => '/staff/bookings', 'notes' => 'Staff bookings index'],
 
             // 9. Customer

@@ -140,8 +140,8 @@ class SensitiveDataRedactorTest extends TestCase
             'response_payload' => ['access_token' => 'y'],
         ]);
 
-        $this->assertNull($prepared['request_payload']);
-        $this->assertNull($prepared['response_payload']);
+        $this->assertSame(['password' => '[REDACTED]'], $prepared['request_payload']);
+        $this->assertSame(['access_token' => '[REDACTED]'], $prepared['response_payload']);
         $this->assertArrayNotHasKey('request_payload', $prepared['safe_summary']);
         $this->assertStringContainsString('Bearer [REDACTED]', (string) $prepared['error_message']);
     }

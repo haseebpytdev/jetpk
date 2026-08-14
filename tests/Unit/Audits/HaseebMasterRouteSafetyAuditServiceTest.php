@@ -9,7 +9,7 @@ class HaseebMasterRouteSafetyAuditServiceTest extends TestCase
 {
     public function test_audit_reports_missing_when_route_name_is_unknown(): void
     {
-        $rows = app(HaseebMasterRouteSafetyAuditService::class)->run('haseeb-master');
+        $rows = app(HaseebMasterRouteSafetyAuditService::class)->run('jetpk');
 
         $this->assertNotEmpty($rows);
         $this->assertSame(

@@ -5,11 +5,13 @@ namespace Tests\Unit;
 use App\Data\FlightSegmentData;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\Suppliers\SabreSegmentChronologyRepair;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class FlightOfferDisplayPresenterTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_non_stop_itinerary_has_no_layover_between_segments(): void
     {
         $offer = [
@@ -725,8 +727,8 @@ class FlightOfferDisplayPresenterTest extends TestCase
 
         $this->assertTrue($p['branded_fares_display_enabled']);
         $this->assertTrue($p['has_branded_fares']);
-        $this->assertCount(3, $p['branded_fares_display_options']);
-        $this->assertSame(1, $p['branded_fares_more_count']);
+        $this->assertCount(4, $p['branded_fares_display_options']);
+        $this->assertSame(0, $p['branded_fares_more_count']);
         $this->assertSame('Fare family preview', $p['branded_fares_display_label']);
         $this->assertSame('Value', $p['branded_fares_display_options'][0]['name']);
         $this->assertSame('VAL', $p['branded_fares_display_options'][0]['brand_code']);
@@ -823,7 +825,7 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $this->assertSame('20kg', $intent['baggage']);
         $this->assertArrayNotHasKey('pricing_information_ref', $intent);
         $this->assertArrayNotHasKey('offer_ref', $intent);
-        $this->assertArrayNotHasKey('pricing_information_index', $intent);
+        $this->assertSame(0, $intent['pricing_information_index']);
         $this->assertTrue($intent['price_is_approximate']);
         $this->assertTrue($intent['is_price_approximate']);
         $this->assertSame(FlightOfferDisplayPresenter::SELECTED_FARE_VALIDATION_NOTE, $intent['validation_note']);

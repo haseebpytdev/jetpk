@@ -761,14 +761,29 @@ final class SabrePassengerRecordsPayloadDigest
             return false;
         }
         foreach ($contextSegments as $i => $ctx) {
-            $ctxFn = trim((string) ($ctx['flight_number'] ?? ''));
-            $payFn = trim((string) ($payloadSegments[$i]['flight_number'] ?? ''));
+            $ctxFn = $this->normalizeFlightNumberForCompare($ctx['flight_number'] ?? null);
+            $payFn = $this->normalizeFlightNumberForCompare($payloadSegments[$i]['flight_number'] ?? null);
             if ($ctxFn !== '' && $payFn !== '' && $ctxFn !== $payFn) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    protected function normalizeFlightNumberForCompare(mixed $value): string
+    {
+        $value = strtoupper(trim((string) $value));
+        if ($value === '') {
+            return '';
+        }
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+        if ($digits === '') {
+            return $value;
+        }
+        $normalized = ltrim($digits, '0');
+
+        return $normalized !== '' ? $normalized : '0';
     }
 
     /**
