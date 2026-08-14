@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Enums\AccountType;
+use App\Http\Controllers\Admin\AgentApplicationController;
 use App\Models\Agency;
 use App\Models\Agent;
 use App\Models\AgentApplication;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class AdminAgentApplicationsReviewQueueTest extends TestCase
@@ -25,16 +27,18 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
             'mobile' => '+923001112233',
         ]);
 
-        $response = $this->actingAs($admin)
+        $this->actingAs($admin)
             ->get(route('admin.agent-applications.index', ['preview' => $application->id]))
-            ->assertOk();
+            ->assertRedirect('/admin/dashboard/agents/applications?preview='.$application->id);
 
-        $response->assertSee('data-testid="ota-agent-applications-page-header"', false);
-        $response->assertSee('Agent applications', false);
-        $response->assertSee('Review partner applications, approve qualified agents, and track onboarding status.', false);
-        $response->assertSee('data-testid="ota-agent-applications-kpis"', false);
-        $response->assertSee('data-testid="ota-agent-applications-filter-card"', false);
-        $response->assertSee('data-testid="ota-agent-applications-table"', false);
+        $html = $this->agentApplicationsIndexHtml($admin, ['preview' => $application->id]);
+
+        $this->assertStringContainsString('data-testid="ota-agent-applications-page-header"', $html);
+        $this->assertStringContainsString('Agent applications', $html);
+        $this->assertStringContainsString('Review partner applications, approve qualified agents, and track onboarding status.', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-applications-kpis"', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-applications-filter-card"', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-applications-table"', $html);
 
         foreach ([
             'Applicant',
@@ -45,20 +49,19 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
             'Flags',
             'Action',
         ] as $header) {
-            $response->assertSee('>'.$header.'<', false);
+            $this->assertStringContainsString('>'.$header.'<', $html);
         }
 
         // Email lives under Contact, not as its own top-level table column.
-        $html = $response->getContent();
         $theadStart = strpos($html, '<thead');
         $theadEnd = strpos($html, '</thead>', (int) $theadStart);
         $thead = substr($html, (int) $theadStart, ((int) $theadEnd) - ((int) $theadStart));
         $this->assertStringNotContainsString('>Email<', $thead);
 
-        $response->assertSee('Furqan Applicant', false);
-        $response->assertSee('furqan@example.test', false);
-        $response->assertSee('Furqan Travels', false);
-        $response->assertSee('Open review', false);
+        $this->assertStringContainsString('Furqan Applicant', $html);
+        $this->assertStringContainsString('furqan@example.test', $html);
+        $this->assertStringContainsString('Furqan Travels', $html);
+        $this->assertStringContainsString('Open review', $html);
     }
 
     public function test_agent_applications_kpis_include_duplicates_and_converted_count(): void
@@ -79,20 +82,18 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
         ]);
         Agent::factory()->for($agency)->create(['user_id' => $agentUser->id]);
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.agent-applications.index'))
-            ->assertOk();
+        $html = $this->agentApplicationsIndexHtml($admin);
 
-        $response->assertSee('Total applications', false);
-        $response->assertSee('Pending review', false);
-        $response->assertSee('Approved', false);
-        $response->assertSee('Rejected', false);
-        $response->assertSee('Converted to agent', false);
-        $response->assertSee('Duplicate emails', false);
+        $this->assertStringContainsString('Total applications', $html);
+        $this->assertStringContainsString('Pending review', $html);
+        $this->assertStringContainsString('Approved', $html);
+        $this->assertStringContainsString('Rejected', $html);
+        $this->assertStringContainsString('Converted to agent', $html);
+        $this->assertStringContainsString('Duplicate emails', $html);
 
         // Duplicate metric counts duplicate-looking application rows, not just unique emails.
-        $response->assertSee('Duplicate email', false);
-        $response->assertSee('Converted', false);
+        $this->assertStringContainsString('Duplicate email', $html);
+        $this->assertStringContainsString('Converted', $html);
     }
 
     public function test_agent_applications_filters_status_city_country_dates_search_and_duplicate_only(): void
@@ -126,7 +127,7 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
             'created_at' => now()->subMonth(),
         ]);
 
-        $response = $this->actingAs($admin)
+        $this->actingAs($admin)
             ->get(route('admin.agent-applications.index', [
                 'search' => 'Matching',
                 'status' => 'pending',
@@ -136,14 +137,24 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
                 'duplicate_only' => 1,
                 'preview' => $matching->id,
             ]))
-            ->assertOk();
+            ->assertRedirect();
 
-        $response->assertSee('Matching Applicant', false);
-        $response->assertDontSee('Other Travel', false);
-        $response->assertSee('filters applied', false);
-        $response->assertSee('Duplicate email', false);
-        $response->assertSee('name="duplicate_only"', false);
-        $response->assertSee('checked', false);
+        $html = $this->agentApplicationsIndexHtml($admin, [
+            'search' => 'Matching',
+            'status' => 'pending',
+            'city_country' => 'Lahore',
+            'submitted_from' => now()->subDays(2)->toDateString(),
+            'submitted_to' => now()->toDateString(),
+            'duplicate_only' => 1,
+            'preview' => $matching->id,
+        ]);
+
+        $this->assertStringContainsString('Matching Applicant', $html);
+        $this->assertStringNotContainsString('Other Travel', $html);
+        $this->assertStringContainsString('filters applied', $html);
+        $this->assertStringContainsString('Duplicate email', $html);
+        $this->assertStringContainsString('name="duplicate_only"', $html);
+        $this->assertStringContainsString('checked', $html);
     }
 
     public function test_agent_application_preview_shows_context_risk_and_actions(): void
@@ -161,19 +172,21 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
             'notes' => 'Runs a corporate desk.',
         ]);
 
-        $response = $this->actingAs($admin)
+        $this->actingAs($admin)
             ->get(route('admin.agent-applications.show', $application))
-            ->assertOk();
+            ->assertRedirect('/admin/dashboard/agents/applications?id='.$application->id);
 
-        $response->assertSee('data-testid="ota-agent-application-preview-actions"', false);
-        $response->assertSee('Preview Applicant', false);
-        $response->assertSee('Preview Travels', false);
-        $response->assertSee('50 bookings/month', false);
-        $response->assertSee('Runs a corporate desk.', false);
-        $response->assertSee('Application details', false);
-        $response->assertSee('Approve and create agent account', false);
-        $response->assertSee('Mark needs more info', false);
-        $response->assertSee('Reject application', false);
+        $html = $this->agentApplicationShowHtml($admin, $application);
+
+        $this->assertStringContainsString('data-testid="ota-agent-application-preview-actions"', $html);
+        $this->assertStringContainsString('Preview Applicant', $html);
+        $this->assertStringContainsString('Preview Travels', $html);
+        $this->assertStringContainsString('50 bookings/month', $html);
+        $this->assertStringContainsString('Runs a corporate desk.', $html);
+        $this->assertStringContainsString('Application details', $html);
+        $this->assertStringContainsString('Approve and create agent account', $html);
+        $this->assertStringContainsString('Mark needs more info', $html);
+        $this->assertStringContainsString('Reject application', $html);
     }
 
     public function test_agent_applications_export_uses_filtered_safe_rows(): void
@@ -215,22 +228,20 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
         $this->createAgentApplicationRow(['email' => 'rejected@example.test', 'status' => 'rejected']);
         $this->createAgentApplicationRow(['email' => 'needs@example.test', 'status' => 'needs_more_info']);
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.agent-applications.index'))
-            ->assertOk();
+        $html = $this->agentApplicationsIndexHtml($admin);
 
-        $response->assertSee('data-testid="ota-agent-application-status-pending"', false);
-        $response->assertSee('badge-soft-warning', false);
-        $response->assertSee('>Pending<', false);
-        $response->assertSee('data-testid="ota-agent-application-status-approved"', false);
-        $response->assertSee('badge-soft-success', false);
-        $response->assertSee('>Approved<', false);
-        $response->assertSee('data-testid="ota-agent-application-status-rejected"', false);
-        $response->assertSee('badge-soft-danger', false);
-        $response->assertSee('>Rejected<', false);
-        $response->assertSee('data-testid="ota-agent-application-status-needs_more_info"', false);
-        $response->assertSee('badge-soft-purple', false);
-        $response->assertSee('>Needs info<', false);
+        $this->assertStringContainsString('data-testid="ota-agent-application-status-pending"', $html);
+        $this->assertStringContainsString('badge-soft-warning', $html);
+        $this->assertStringContainsString('>Pending<', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-application-status-approved"', $html);
+        $this->assertStringContainsString('badge-soft-success', $html);
+        $this->assertStringContainsString('>Approved<', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-application-status-rejected"', $html);
+        $this->assertStringContainsString('badge-soft-danger', $html);
+        $this->assertStringContainsString('>Rejected<', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-application-status-needs_more_info"', $html);
+        $this->assertStringContainsString('badge-soft-purple', $html);
+        $this->assertStringContainsString('>Needs info<', $html);
     }
 
     public function test_duplicate_email_flag_preview_warning_and_kpi_count_render(): void
@@ -245,13 +256,11 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
             'first_name' => 'Second',
         ]);
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.agent-applications.index'))
-            ->assertOk();
+        $html = $this->agentApplicationsIndexHtml($admin);
 
-        $response->assertSee('Duplicate emails', false);
-        $response->assertSee('data-testid="ota-agent-application-risk-duplicate"', false);
-        $response->assertSee('Duplicate email', false);
+        $this->assertStringContainsString('Duplicate emails', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-application-risk-duplicate"', $html);
+        $this->assertStringContainsString('Duplicate email', $html);
     }
 
     public function test_existing_agent_and_missing_phone_flags_render_safely(): void
@@ -270,15 +279,13 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
         ]);
         Agent::factory()->for($agency)->create(['user_id' => $agentUser->id]);
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.agent-applications.index'))
-            ->assertOk();
+        $html = $this->agentApplicationsIndexHtml($admin);
 
-        $response->assertSee('data-testid="ota-agent-application-risk-converted"', false);
-        $response->assertSee('Converted', false);
-        $response->assertSee('data-testid="ota-agent-application-risk-missing-phone"', false);
-        $response->assertSee('Missing phone', false);
-        $response->assertSee('badge-soft-converted', false);
+        $this->assertStringContainsString('data-testid="ota-agent-application-risk-converted"', $html);
+        $this->assertStringContainsString('Converted', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-application-risk-missing-phone"', $html);
+        $this->assertStringContainsString('Missing phone', $html);
+        $this->assertStringContainsString('badge-soft-converted', $html);
     }
 
     public function test_agent_applications_page_does_not_expose_sensitive_values(): void
@@ -295,9 +302,7 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
             'remember_token' => $token = 'admin-remember-token-secret',
         ])->save();
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.agent-applications.index', ['preview' => $application->id]))
-            ->assertOk();
+        $html = $this->agentApplicationsIndexHtml($admin, ['preview' => $application->id]);
 
         foreach ([
             'admin-secret-password',
@@ -308,7 +313,7 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
             'NTN-SHOULD-NOT-RENDER',
             'passport',
         ] as $secret) {
-            $response->assertDontSee($secret, false);
+            $this->assertStringNotContainsString($secret, $html);
         }
     }
 
@@ -316,17 +321,15 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
     {
         $admin = $this->makePlatformAdmin();
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.agent-applications.index'))
-            ->assertOk();
+        $html = $this->agentApplicationsIndexHtml($admin);
 
-        $response->assertSee('data-testid="ota-agent-applications-empty"', false);
-        $response->assertSee('No applications yet', false);
-        $response->assertSee('New partner requests will appear here after agents submit the registration form.', false);
-        $response->assertSee('data-testid="ota-agent-applications-empty-registration"', false);
-        $response->assertSee('View agent registration page', false);
-        $response->assertSee('data-testid="ota-agent-applications-empty-back-agents"', false);
-        $response->assertSee('Back to agents', false);
+        $this->assertStringContainsString('data-testid="ota-agent-applications-empty"', $html);
+        $this->assertStringContainsString('No applications yet', $html);
+        $this->assertStringContainsString('New partner requests will appear here after agents submit the registration form.', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-applications-empty-registration"', $html);
+        $this->assertStringContainsString('View agent registration page', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-applications-empty-back-agents"', $html);
+        $this->assertStringContainsString('Back to agents', $html);
     }
 
     protected function makePlatformAdmin(): User
@@ -357,5 +360,26 @@ class AdminAgentApplicationsReviewQueueTest extends TestCase
             'expected_booking_volume' => '25 bookings/month',
             'status' => 'pending',
         ], $overrides));
+    }
+    private function agentApplicationsIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        $uri = '/admin/agent-applications';
+        if ($query !== []) {
+            $uri .= '?'.http_build_query($query);
+        }
+        $request = Request::create($uri, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgentApplicationController::class)->index($request)->render();
+    }
+
+    private function agentApplicationShowHtml(User $admin, AgentApplication $application): string
+    {
+        $this->actingAs($admin);
+        $request = Request::create('/admin/agent-applications/'.$application->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgentApplicationController::class)->show($application)->render();
     }
 }
