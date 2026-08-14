@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { loadPageSettings, publishPageSettings, savePageSettings } from "@/services/operational-api";
 
-type Hero = { badge?: string; title?: string; subtitle?: string; enabled?: string | boolean };
+type Hero = {
+  eyebrow?: string;
+  headline?: string;
+  headline_highlight?: string;
+  subtitle?: string;
+  enabled?: string | boolean;
+};
 type RouteItem = { id?: string; from?: string; to?: string; title?: string; trip_type?: string; enabled?: string | boolean };
 type DestinationItem = { id?: string; code?: string; title?: string; country?: string; enabled?: string | boolean };
 type DealItem = { airline?: string; from?: string; to?: string; price?: string | number; enabled?: string | boolean };
@@ -37,6 +43,7 @@ function enabledValue(value: unknown): boolean {
 export function HomepageSettingsPanel() {
   const isLive = useDashboardLiveMode();
   const [content, setContent] = useState<HomepageContent>({});
+  const [formSource, setFormSource] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -50,8 +57,12 @@ export function HomepageSettingsPanel() {
         setError(result.message ?? "Could not load homepage settings.");
         return;
       }
-      const payload = ("data" in result ? result.data : result) as { content?: Record<string, unknown> };
+      const payload = ("data" in result ? result.data : result) as {
+        content?: Record<string, unknown>;
+        editorMeta?: { form_source?: string; effective_source?: string };
+      };
       setContent(asRecord(payload.content));
+      setFormSource(payload.editorMeta?.effective_source ?? payload.editorMeta?.form_source ?? "");
     });
   }, [isLive]);
 
@@ -94,18 +105,22 @@ export function HomepageSettingsPanel() {
     <section className="space-y-4 rounded-xl border border-jp-border bg-white p-4" data-testid="homepage-settings-panel">
       <h2 className="text-sm font-semibold">Homepage (live Page Settings)</h2>
       <p className="text-xs text-jp-muted">
-        Structured controls for the published JetPakistan homepage. This is not a universal page builder.
+        Structured controls for the published JetPakistan homepage. Loaded from authoritative Page Settings
+        {formSource ? ` (${formSource.replaceAll("_", " ")})` : ""}.
       </p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
 
       <fieldset className="space-y-2 rounded-lg border border-jp-border p-3">
         <legend className="text-sm font-medium">Hero</legend>
-        <label className="block text-xs">Badge
-          <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={hero.badge ?? ""} onChange={(e) => setContent({ ...content, hero: { ...hero, badge: e.target.value } })} />
+        <label className="block text-xs">Eyebrow
+          <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={hero.eyebrow ?? ""} onChange={(e) => setContent({ ...content, hero: { ...hero, eyebrow: e.target.value } })} />
         </label>
         <label className="block text-xs">Headline
-          <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={hero.title ?? ""} onChange={(e) => setContent({ ...content, hero: { ...hero, title: e.target.value } })} />
+          <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={hero.headline ?? ""} onChange={(e) => setContent({ ...content, hero: { ...hero, headline: e.target.value } })} />
+        </label>
+        <label className="block text-xs">Headline highlight
+          <input className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={hero.headline_highlight ?? ""} onChange={(e) => setContent({ ...content, hero: { ...hero, headline_highlight: e.target.value } })} />
         </label>
         <label className="block text-xs">Intro
           <textarea className="mt-1 w-full rounded-lg border border-jp-border p-2" rows={3} value={hero.subtitle ?? ""} onChange={(e) => setContent({ ...content, hero: { ...hero, subtitle: e.target.value } })} />

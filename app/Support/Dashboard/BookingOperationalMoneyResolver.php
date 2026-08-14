@@ -4,6 +4,8 @@ namespace App\Support\Dashboard;
 
 use App\Models\Booking;
 use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
  * JetPakistan operational money: prefer booking-time commercial PKR snapshot.
@@ -67,12 +69,13 @@ final class BookingOperationalMoneyResolver
 
     public static function pkrSnapshotAmount(Booking $booking): ?float
     {
-        $booking->loadMissing('holdSession');
+        $booking->loadMissing(['holdSession', 'fareBreakdown']);
 
         $candidates = [
             data_get($booking->meta, 'converted_total_pkr'),
             data_get($booking->meta, 'customer_total_pkr'),
             data_get($booking->meta, 'displayed_total_pkr'),
+            data_get($booking->meta, 'commercial_money.customer_total_pkr'),
             $booking->holdSession?->converted_total_pkr,
         ];
 
@@ -94,5 +97,86 @@ final class BookingOperationalMoneyResolver
         }
 
         return null;
+    }
+
+    /**
+     * Admin business display: authoritative booking-time PKR snapshot when available.
+     *
+     * @return array{
+     *     amount: string,
+     *     amountMinor: int,
+     *     currency: ?string,
+     *     currencyStatus: string,
+     *     currencySource: ?string,
+     *     displayLabel: string,
+     *     currencyLabel: ?string,
+     *     needsReview: bool,
+     *     originalCurrency: ?string,
+     *     originalAmountLabel: ?string
+     * }
+     */
+    public static function presentAdminBusinessAmount(Booking $booking): array
+    {
+        $snapshot = self::pkrSnapshotAmount($booking);
+        if ($snapshot !== null && $snapshot > 0) {
+            $presented = DashboardMoneyPresenter::presentMinorUnits(
+                (int) round($snapshot),
+                'PKR',
+                'booking.pkr_snapshot',
+            );
+            $originalCurrency = BookingAuthoritativeCurrencyResolver::normalizeIsoCurrency(
+                data_get($booking->meta, 'original_currency')
+                    ?: data_get($booking->meta, 'commercial_money.original_supplier_currency')
+            );
+            $originalAmount = (float) (
+                data_get($booking->meta, 'commercial_money.original_supplier_amount')
+                ?: ($booking->fareBreakdown?->total ?? 0)
+            );
+            $presented['originalCurrency'] = $originalCurrency !== '' ? $originalCurrency : null;
+            $presented['originalAmountLabel'] = $presented['originalCurrency'] && $originalAmount > 0
+                && $presented['originalCurrency'] !== 'PKR'
+                ? DashboardMoneyPresenter::formatDisplayLabel($originalAmount, $presented['originalCurrency'])
+                : null;
+
+            return $presented;
+        }
+
+        $operational = self::present($booking);
+        $operational['originalCurrency'] = $operational['currency'];
+        $operational['originalAmountLabel'] = $operational['currencyStatus'] === DashboardMoneyPresenter::STATUS_RESOLVED
+            ? $operational['displayLabel']
+            : null;
+
+        if (($operational['currency'] ?? '') === 'PKR') {
+            return $operational;
+        }
+
+        if ($operational['currencyStatus'] === DashboardMoneyPresenter::STATUS_RESOLVED) {
+            $operational['needsReview'] = true;
+            $operational['currencyLabel'] = 'PKR snapshot unavailable';
+        }
+
+        return $operational;
+    }
+
+    public static function sumAdminPkrForQuery(Builder $baseQuery): float
+    {
+        $pkrTotal = 0.0;
+        (clone $baseQuery)
+            ->with(['fareBreakdown', 'holdSession'])
+            ->orderBy('bookings.id')
+            ->chunkById(200, function (Collection $bookings) use (&$pkrTotal): void {
+                foreach ($bookings as $booking) {
+                    if (! $booking instanceof Booking) {
+                        continue;
+                    }
+                    $snapshot = self::pkrSnapshotAmount($booking);
+                    if ($snapshot !== null) {
+                        $pkrTotal += $snapshot;
+                    }
+                }
+            }, 'bookings.id', 'id');
+
+        return $pkrTotal;
     }
 }

@@ -74,20 +74,60 @@ final class DashboardOverviewResource
         if (isset($stats['unpaid_partial_bookings']) && (int) $stats['unpaid_partial_bookings'] > 0) {
             $cards[] = ['key' => 'unpaid_partial', 'label' => 'Unpaid / partial', 'value' => (string) ((int) $stats['unpaid_partial_bookings']), 'delta' => '', 'tone' => 'warn'];
         }
+        if (isset($commandSummary['agency_applications_pending'])) {
+            $cards[] = [
+                'key' => 'agency_applications_pending',
+                'label' => 'Agency applications',
+                'value' => (string) ((int) $commandSummary['agency_applications_pending']),
+                'delta' => '',
+                'tone' => ((int) $commandSummary['agency_applications_pending']) > 0 ? 'warn' : 'up',
+            ];
+        }
+        if (isset($commandSummary['active_agents'])) {
+            $cards[] = [
+                'key' => 'active_agents',
+                'label' => 'Active agents',
+                'value' => (string) ((int) $commandSummary['active_agents']),
+                'delta' => '',
+                'tone' => 'up',
+            ];
+        }
+        if (isset($commandSummary['pending_deposits'])) {
+            $cards[] = [
+                'key' => 'pending_deposits',
+                'label' => 'Pending deposits',
+                'value' => (string) ((int) $commandSummary['pending_deposits']),
+                'delta' => '',
+                'tone' => ((int) $commandSummary['pending_deposits']) > 0 ? 'warn' : 'up',
+            ];
+        }
+        if (isset($commandSummary['payment_review'])) {
+            $cards[] = [
+                'key' => 'payment_review',
+                'label' => 'Payments to review',
+                'value' => (string) ((int) $commandSummary['payment_review']),
+                'delta' => '',
+                'tone' => ((int) $commandSummary['payment_review']) > 0 ? 'warn' : 'up',
+            ];
+        }
+        if (isset($commandSummary['commissions_requiring_review'])) {
+            $cards[] = [
+                'key' => 'commissions_requiring_review',
+                'label' => 'Commissions to review',
+                'value' => (string) ((int) $commandSummary['commissions_requiring_review']),
+                'delta' => '',
+                'tone' => ((int) $commandSummary['commissions_requiring_review']) > 0 ? 'warn' : 'up',
+            ];
+        }
         if (isset($commandSummary['gross_sales'])) {
-            $excluded = (int) ($commandSummary['gross_sales_excluded_count'] ?? 0);
             $grossAmount = (float) $commandSummary['gross_sales'];
-            $qaFailures = (int) ($commandSummary['failed_notifications_qa'] ?? 0);
             $cards[] = [
                 'key' => 'gross_sales',
                 'label' => 'Gross booking value',
                 'value' => DashboardMoneyPresenter::formatDisplayLabel($grossAmount, 'PKR'),
-                'delta' => $excluded > 0
-                    ? $excluded.' legacy Non-PKR booking'.($excluded === 1 ? '' : 's').' excluded from this KPI (original currency kept on rows; no current-FX reconstruction)'
-                    : 'Authoritative booking-time PKR snapshots only',
+                'delta' => '',
                 'tone' => 'up',
             ];
-            unset($qaFailures);
         }
 
         return $cards;
@@ -160,6 +200,18 @@ final class DashboardOverviewResource
                 'label' => 'Pending deposits',
                 'count' => (int) $commandSummary['pending_deposits'],
                 'laravelRoute' => 'admin.agent-deposits.index',
+            ] : null,
+            isset($commandSummary['commissions_requiring_review']) && (int) $commandSummary['commissions_requiring_review'] > 0 ? [
+                'key' => 'commissions_requiring_review',
+                'label' => 'Commissions to review',
+                'count' => (int) $commandSummary['commissions_requiring_review'],
+                'laravelRoute' => 'admin.commissions.index',
+            ] : null,
+            isset($commandSummary['agency_applications_pending']) && (int) $commandSummary['agency_applications_pending'] > 0 ? [
+                'key' => 'agency_applications_pending',
+                'label' => 'Agency applications',
+                'count' => (int) $commandSummary['agency_applications_pending'],
+                'laravelRoute' => 'admin.agent-applications.index',
             ] : null,
         ]));
     }

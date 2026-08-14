@@ -50,5 +50,6 @@ export function transformOverviewPayload(payload: LaravelOverviewPayload): Overv
     })),
     supplierStatus: payload.supplierStatus ?? [],
     systemHealth: payload.systemHealth ?? [],
+    operationalCounts: payload.operationalCounts ?? {},
   };
 }

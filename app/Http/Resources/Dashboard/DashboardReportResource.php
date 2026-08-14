@@ -40,12 +40,10 @@ final class DashboardReportResource
      */
     protected static function metricsForSection(string $section, array $summary, array $financial, string $currency, int $currencyCount = 1): array
     {
-        $multiCurrency = $currencyCount > 1;
-        $grossLabel = $multiCurrency ? 'Gross booking value (mixed currencies)' : 'Gross booking value';
+        $reportingCurrency = 'PKR';
+        $grossLabel = 'Gross booking value';
         $grossAmount = (int) round((float) ($financial['gross_sales'] ?? $summary['gross_sales'] ?? 0));
-        $grossFormatted = $multiCurrency
-            ? 'Multiple currencies'
-            : DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $currency);
+        $grossFormatted = DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $reportingCurrency);
 
         $base = [
             [
@@ -61,7 +59,7 @@ final class DashboardReportResource
                 'label' => $grossLabel,
                 'value' => $grossAmount,
                 'formattedValue' => $grossFormatted,
-                'currency' => $multiCurrency ? null : $currency,
+                'currency' => $reportingCurrency,
                 'trend' => 'neutral',
             ],
         ];
@@ -72,8 +70,8 @@ final class DashboardReportResource
                 'key' => 'outstanding_balance',
                 'label' => 'Outstanding balance',
                 'value' => $outstanding,
-                'formattedValue' => DashboardMoneyPresenter::formatDisplayLabel($outstanding, $currency),
-                'currency' => $currency,
+                'formattedValue' => DashboardMoneyPresenter::formatDisplayLabel($outstanding, $reportingCurrency),
+                'currency' => $reportingCurrency,
                 'trend' => 'warning',
             ];
         }
@@ -127,20 +125,11 @@ final class DashboardReportResource
      */
     protected static function warnings(string $currency, int $currencyCount = 1): array
     {
-        $warnings = [
+        return [
             [
                 'code' => 'currency_explicit',
-                'message' => 'Monetary values are reported in '.$currency.' unless otherwise noted. Cross-currency totals are not merged.',
+                'message' => 'Monetary values are normalized to PKR using authoritative booking-time snapshots.',
             ],
         ];
-
-        if ($currencyCount > 1) {
-            $warnings[] = [
-                'code' => 'multi_currency_totals',
-                'message' => 'This report period contains multiple fare currencies; monetary totals are not combined across currencies.',
-            ];
-        }
-
-        return $warnings;
     }
 }

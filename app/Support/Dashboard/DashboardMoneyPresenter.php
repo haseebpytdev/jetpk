@@ -93,16 +93,20 @@ final class DashboardMoneyPresenter
      */
     public static function presentBookingTotal(Booking $booking, int $amountMinor): array
     {
-        $operational = BookingOperationalMoneyResolver::present($booking);
+        $presented = BookingOperationalMoneyResolver::presentAdminBusinessAmount($booking);
         $booking->loadMissing('fareBreakdown');
         $fareCurrency = self::normalizeIsoCurrency($booking->fareBreakdown?->currency);
         $bookingCurrency = self::normalizeIsoCurrency($booking->currency);
         if ($fareCurrency !== '' && $bookingCurrency !== '' && $fareCurrency !== $bookingCurrency) {
-            $operational['needsReview'] = true;
+            $presented['needsReview'] = true;
         }
 
-        if ($operational['currencyStatus'] === self::STATUS_RESOLVED || $amountMinor <= 0) {
-            return $operational;
+        if (($presented['currency'] ?? '') === 'PKR' || $presented['currencyStatus'] === self::STATUS_RESOLVED) {
+            return $presented;
+        }
+
+        if ($amountMinor <= 0) {
+            return $presented;
         }
 
         $resolved = self::resolveBookingCurrencyWithSource($booking);

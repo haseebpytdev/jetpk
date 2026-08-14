@@ -159,7 +159,7 @@ class OwnerRetestV2SafeManagementClosureTest extends TestCase
         $this->assertEqualsWithDelta(164500.0, (float) BookingOperationalMoneyResolver::pkrSnapshotAmount($booking->fresh()), 0.01);
 
         $presented = DashboardMoneyPresenter::presentBookingTotal($booking->fresh(), 590);
-        $this->assertSame('USD', $presented['currency']);
+        $this->assertSame('PKR', $presented['currency']);
 
         $dashboard = app(AgencyDashboardService::class)->build($admin);
         $overview = DashboardOverviewResource::fromAgencyDashboard($dashboard, $admin);

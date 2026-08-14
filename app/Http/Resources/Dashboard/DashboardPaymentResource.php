@@ -5,6 +5,7 @@ namespace App\Http\Resources\Dashboard;
 use App\Models\BookingPayment;
 use App\Models\User;
 use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
+use App\Support\Dashboard\BookingOperationalMoneyResolver;
 use App\Support\Dashboard\DashboardMoneyPresenter;
 use App\Support\Bookings\BookingListPresenter;
 
@@ -25,16 +26,23 @@ final class DashboardPaymentResource
         $storedPaymentCurrency = DashboardMoneyPresenter::normalizeIsoCurrency($payment->currency);
         $fareCurrency = DashboardMoneyPresenter::normalizeIsoCurrency($booking?->fareBreakdown?->currency);
         $bookingCurrency = DashboardMoneyPresenter::normalizeIsoCurrency($booking?->currency);
-        $paymentCurrency = $storedPaymentCurrency !== ''
-            ? $storedPaymentCurrency
-            : ($fareCurrency !== '' ? $fareCurrency : $bookingCurrency);
+        $pkrSnapshot = $booking ? BookingOperationalMoneyResolver::pkrSnapshotAmount($booking) : null;
+        $paymentCurrency = match (true) {
+            $storedPaymentCurrency !== '' => $storedPaymentCurrency,
+            $pkrSnapshot !== null && $pkrSnapshot > 0 => 'PKR',
+            $fareCurrency !== '' => $fareCurrency,
+            default => $bookingCurrency,
+        };
         $currencySource = match (true) {
             $storedPaymentCurrency !== '' => 'payment.currency',
+            $pkrSnapshot !== null && $pkrSnapshot > 0 => 'booking.pkr_snapshot',
             $fareCurrency !== '' => 'fareBreakdown.currency',
             $bookingCurrency !== '' => 'booking.currency',
             default => null,
         };
-        $grossMinor = (int) round((float) $payment->amount);
+        $grossMinor = $pkrSnapshot !== null && $pkrSnapshot > 0 && $storedPaymentCurrency === ''
+            ? (int) round($pkrSnapshot)
+            : (int) round((float) $payment->amount);
         $grossMoney = DashboardMoneyPresenter::presentMinorUnits($grossMinor, $paymentCurrency ?: null, $currencySource);
         $paidMinor = $status === 'verified' ? $grossMinor : 0;
         $paidMoney = DashboardMoneyPresenter::presentMinorUnits($paidMinor, $paymentCurrency ?: null, $currencySource);

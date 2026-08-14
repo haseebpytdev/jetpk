@@ -138,6 +138,7 @@ export function ApiConnectionsWorkspace() {
   const [name, setName] = useState("");
   const [environment, setEnvironment] = useState("sandbox");
   const [credentials, setCredentials] = useState<Record<string, string>>({});
+  const [createBaseUrl, setCreateBaseUrl] = useState("");
   const [manageId, setManageId] = useState<string | null>(null);
   const [manageName, setManageName] = useState("");
   const [manageEnv, setManageEnv] = useState("sandbox");
@@ -413,7 +414,11 @@ export function ApiConnectionsWorkspace() {
         <h2 className="text-sm font-semibold">Add connection</h2>
         <label className="block text-xs">
           Provider
-          <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={provider} onChange={(e) => setProvider(e.target.value)}>
+          <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={provider} onChange={(e) => {
+            setProvider(e.target.value);
+            setCredentials({});
+            setCreateBaseUrl("");
+          }}>
             {providers.map((item) => (
               <option key={item.key} value={item.key}>{item.label}{item.installed ? "" : " (not installed)"}</option>
             ))}
@@ -435,14 +440,43 @@ export function ApiConnectionsWorkspace() {
                 <option value="live">live</option>
               </select>
             </label>
-            {(adapter?.credentialFields ?? []).filter((field) => isFieldVisible(field, credentials)).map((field) => (
-              <ProviderField
-                key={field.key}
-                field={field}
-                value={credentials[field.key] ?? (field.type === "select" ? field.default ?? "" : "")}
-                onChange={(value) => setCredentials((current) => ({ ...current, [field.key]: value }))}
-              />
-            ))}
+            {adapter?.baseUrlOverridable ? (
+              <label className="block text-xs">
+                Base URL
+                <input
+                  className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1"
+                  value={createBaseUrl}
+                  onChange={(e) => setCreateBaseUrl(e.target.value)}
+                  placeholder="https://api.example.com"
+                />
+              </label>
+            ) : (
+              <p className="text-xs text-jp-muted">This adapter uses its built-in endpoint. A Base URL override is not supported.</p>
+            )}
+            <fieldset className="space-y-2 rounded-lg border border-jp-border p-3">
+              <legend className="text-sm font-medium">Credentials</legend>
+              {(adapter?.credentialFields ?? []).filter((field) => isFieldVisible(field, credentials)).map((field) => (
+                <ProviderField
+                  key={field.key}
+                  field={field}
+                  value={credentials[field.key] ?? (field.type === "select" ? field.default ?? "" : "")}
+                  onChange={(value) => setCredentials((current) => ({ ...current, [field.key]: value }))}
+                />
+              ))}
+            </fieldset>
+            {(adapter?.advancedFields ?? []).length > 0 ? (
+              <fieldset className="space-y-2 rounded-lg border border-jp-border p-3" data-testid="api-create-advanced">
+                <legend className="text-sm font-medium">Advanced configuration</legend>
+                {(adapter?.advancedFields ?? []).filter((field) => isFieldVisible(field, credentials)).map((field) => (
+                  <ProviderField
+                    key={field.key}
+                    field={field}
+                    value={credentials[field.key] ?? field.default ?? ""}
+                    onChange={(value) => setCredentials((current) => ({ ...current, [field.key]: value }))}
+                  />
+                ))}
+              </fieldset>
+            ) : null}
             {isLive ? (
               <button
                 type="button"
@@ -456,6 +490,7 @@ export function ApiConnectionsWorkspace() {
                       environment,
                       status: "inactive",
                       credentials,
+                      ...(adapter?.baseUrlOverridable ? { base_url: createBaseUrl.trim() || null } : {}),
                     }),
                   )
                 }

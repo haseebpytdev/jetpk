@@ -1,3 +1,4 @@
+import { CommissionsWorkspace } from "@/features/commissions/commissions-workspace";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer, PageHeader, Breadcrumb } from "@/components/ui/page-layout";
 import { DataSourceNoticeSlot, PreviewModeBadgeSlot } from "@/components/dashboard/data-source-notice";
@@ -22,7 +23,7 @@ export default async function CommissionsPage() {
         <PageHeader
           breadcrumb={<Breadcrumb items={[{ label: "Home" }, { label: "Finance" }, { label: "Commissions" }]} />}
           title="Commissions"
-          description="Agent commission ledger overview. Payout mutations remain Laravel intake (AD-009)."
+          description="Agent commission ledger and pending entry review through the authoritative Laravel commission service."
         />
         <DataSourceNoticeSlot />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-testid="commissions-kpis">
@@ -38,6 +39,7 @@ export default async function CommissionsPage() {
             </div>
           ))}
         </div>
+        <CommissionsWorkspace pendingEntries={overview.pendingEntries ?? []} />
         {overview.agents.length === 0 ? (
           <EmptyState title="No agents" description="No commission agents are available for this agency." />
         ) : (

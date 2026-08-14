@@ -25,7 +25,7 @@ class JpDash03MoneyContractTest extends TestCase
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
-    public function test_mixed_currency_report_flags_multiple_fare_currencies(): void
+    public function test_mixed_currency_report_uses_pkr_snapshot_pipeline(): void
     {
         $agency = Agency::factory()->create();
         $admin = $this->platformAdmin();
@@ -34,6 +34,7 @@ class JpDash03MoneyContractTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Pending,
             'currency' => 'PKR',
+            'meta' => ['converted_total_pkr' => 164500, 'original_currency' => 'USD'],
         ]);
         BookingFareBreakdown::query()->create(['booking_id' => $usd->id, 'total' => 624, 'currency' => 'USD']);
 
@@ -46,17 +47,17 @@ class JpDash03MoneyContractTest extends TestCase
 
         $payload = app(BookingReportService::class)->build($admin, Request::create('/admin/reports'));
 
-        $this->assertSame(2, (int) ($payload['summary']['fare_currency_count'] ?? 0));
+        $this->assertSame('PKR', $payload['summary']['fare_currency_iso'] ?? null);
+        $this->assertEqualsWithDelta(214500.0, (float) ($payload['summary']['gross_sales'] ?? 0), 0.01);
 
         $reportView = DashboardReportResource::fromBookingReport('bookings', $payload, 'PKR');
-        $warnings = $reportView['warnings'] ?? [];
-        $this->assertNotEmpty($warnings);
         $grossMetric = collect($reportView['metrics'] ?? [])->firstWhere('key', 'gross_booking_value');
         $this->assertNotNull($grossMetric);
-        $this->assertSame('Multiple currencies', $grossMetric['formattedValue']);
+        $this->assertStringContainsString('Rs.', (string) ($grossMetric['formattedValue'] ?? ''));
+        $this->assertStringNotContainsString('USD', (string) ($grossMetric['formattedValue'] ?? ''));
     }
 
-    public function test_usd_only_report_does_not_relabel_as_pkr(): void
+    public function test_usd_only_report_with_pkr_snapshot_displays_pkr(): void
     {
         $agency = Agency::factory()->create();
         $admin = $this->platformAdmin();
@@ -65,19 +66,20 @@ class JpDash03MoneyContractTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Pending,
             'currency' => 'PKR',
+            'meta' => ['converted_total_pkr' => 164500, 'original_currency' => 'USD'],
         ]);
         BookingFareBreakdown::query()->create(['booking_id' => $usd->id, 'total' => 590, 'currency' => 'USD']);
 
         $payload = app(BookingReportService::class)->build($admin, Request::create('/admin/reports'));
-        $this->assertSame('USD', $payload['summary']['fare_currency_iso'] ?? null);
+        $this->assertSame('PKR', $payload['summary']['fare_currency_iso'] ?? null);
 
-        $reportView = DashboardReportResource::fromBookingReport('bookings', $payload, (string) $payload['summary']['fare_currency_iso']);
+        $reportView = DashboardReportResource::fromBookingReport('bookings', $payload, 'PKR');
         $grossMetric = collect($reportView['metrics'] ?? [])->firstWhere('key', 'gross_booking_value');
-        $this->assertStringContainsString('USD', (string) ($grossMetric['formattedValue'] ?? ''));
-        $this->assertStringNotContainsString('Rs.', (string) ($grossMetric['formattedValue'] ?? ''));
+        $this->assertStringContainsString('Rs.', (string) ($grossMetric['formattedValue'] ?? ''));
+        $this->assertStringContainsString('164,500', (string) ($grossMetric['formattedValue'] ?? ''));
     }
 
-    public function test_kpi_usd_only_bookings_show_pkr_zero_and_exclusion(): void
+    public function test_kpi_without_pkr_snapshot_shows_zero_without_debug_disclaimer(): void
     {
         $agency = Agency::factory()->create();
         $admin = $this->platformAdmin();
@@ -96,11 +98,11 @@ class JpDash03MoneyContractTest extends TestCase
         $this->assertNotNull($grossCard);
         $this->assertStringContainsString('Rs.', (string) ($grossCard['value'] ?? ''));
         $this->assertStringContainsString('0.00', (string) ($grossCard['value'] ?? ''));
-        $this->assertStringContainsString('excluded', (string) ($grossCard['delta'] ?? ''));
+        $this->assertSame('', (string) ($grossCard['delta'] ?? ''));
         $this->assertStringNotContainsString('USD', (string) ($grossCard['value'] ?? ''));
     }
 
-    public function test_kpi_gross_sales_multi_currency_label_not_blended_pkr_total(): void
+    public function test_kpi_gross_sales_uses_pkr_snapshots_only(): void
     {
         $agency = Agency::factory()->create();
         $admin = $this->platformAdmin();
@@ -109,6 +111,7 @@ class JpDash03MoneyContractTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Pending,
             'currency' => 'PKR',
+            'meta' => ['converted_total_pkr' => 164500, 'original_currency' => 'USD'],
         ]);
         BookingFareBreakdown::query()->create(['booking_id' => $usd->id, 'total' => 100, 'currency' => 'USD']);
 
@@ -125,19 +128,19 @@ class JpDash03MoneyContractTest extends TestCase
         $grossCard = collect($overview['summaryStats'] ?? [])->firstWhere('key', 'gross_sales');
         $this->assertNotNull($grossCard);
         $this->assertStringContainsString('Rs.', (string) ($grossCard['value'] ?? ''));
-        $this->assertStringContainsString('200', (string) ($grossCard['value'] ?? ''));
-        $this->assertStringNotContainsString('300', (string) ($grossCard['value'] ?? ''));
-        $this->assertStringNotContainsString('100', (string) ($grossCard['value'] ?? ''));
-        $this->assertStringContainsString('Non-PKR', (string) ($grossCard['delta'] ?? ''));
+        $this->assertStringContainsString('164,700', (string) ($grossCard['value'] ?? ''));
+        $this->assertStringNotContainsString('264,500', (string) ($grossCard['value'] ?? ''));
+        $this->assertSame('', (string) ($grossCard['delta'] ?? ''));
     }
 
-    public function test_payment_without_currency_uses_fare_over_stale_booking_pkr(): void
+    public function test_payment_without_currency_uses_booking_pkr_snapshot(): void
     {
         $agency = Agency::factory()->create();
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
             'status' => BookingStatus::Paid,
             'currency' => 'PKR',
+            'meta' => ['converted_total_pkr' => 164500, 'original_currency' => 'USD'],
         ]);
         BookingFareBreakdown::query()->create([
             'booking_id' => $booking->id,
@@ -157,8 +160,8 @@ class JpDash03MoneyContractTest extends TestCase
         $payment->load('booking.fareBreakdown');
         $row = DashboardPaymentResource::fromModel($payment);
 
-        $this->assertSame('USD', $row['currency'] ?? null);
-        $this->assertStringContainsString('USD', (string) ($row['paidMoney']['displayLabel'] ?? ''));
+        $this->assertSame('PKR', $row['currency'] ?? null);
+        $this->assertStringContainsString('Rs.', (string) ($row['paidMoney']['displayLabel'] ?? ''));
     }
 
     public function test_payment_with_explicit_currency_uses_payment_currency_field(): void

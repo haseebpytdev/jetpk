@@ -6,6 +6,7 @@ use App\Models\Agent;
 use App\Models\AgentCommissionEntry;
 use App\Models\User;
 use App\Services\Agents\AgentCommissionService;
+use App\Support\Dashboard\DashboardMoneyPresenter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -37,6 +38,7 @@ class DashboardCommissionsReadService
             $entriesQuery->where('agency_id', $agencyId);
         }
 
+        $pendingCount = (clone $entriesQuery)->where('status', 'pending')->count();
         $pending = (clone $entriesQuery)->where('status', 'pending')->sum('commission_amount');
         $approvedUnpaid = (clone $entriesQuery)->where('status', 'approved')->sum('commission_amount');
         $paidThisMonth = (clone $entriesQuery)->where('status', 'paid')
@@ -46,10 +48,29 @@ class DashboardCommissionsReadService
         return [
             'kpis' => [
                 'pending' => (float) $pending,
+                'pendingCount' => (int) $pendingCount,
                 'approvedUnpaid' => (float) $approvedUnpaid,
                 'paidThisMonth' => (float) $paidThisMonth,
-                'activeAgents' => $agents->count(),
+                'activeAgents' => $agents->where('is_active', true)->count(),
             ],
+            'pendingEntries' => (clone $entriesQuery)
+                ->where('status', 'pending')
+                ->with(['agent.user'])
+                ->orderByDesc('id')
+                ->limit(25)
+                ->get()
+                ->map(function (AgentCommissionEntry $entry): array {
+                    return [
+                        'id' => (string) $entry->id,
+                        'agentName' => (string) ($entry->agent?->user?->name ?? $entry->agent?->code ?? 'Agent'),
+                        'amount' => (float) $entry->commission_amount,
+                        'amountLabel' => DashboardMoneyPresenter::formatDisplayLabel((float) $entry->commission_amount, 'PKR'),
+                        'status' => (string) $entry->status,
+                        'createdAt' => $entry->created_at?->toIso8601String(),
+                    ];
+                })
+                ->values()
+                ->all(),
             'agents' => $agents->map(function (Agent $agent): array {
                 $balance = $this->commissionService->calculateBalance($agent);
 

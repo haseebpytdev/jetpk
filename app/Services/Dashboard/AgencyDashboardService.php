@@ -6,7 +6,9 @@ use App\Enums\AccountType;
 use App\Enums\AgentDepositRequestStatus;
 use App\Enums\BookingPaymentStatus;
 use App\Enums\BookingStatus;
+use App\Models\Agent;
 use App\Models\AgentApplication;
+use App\Models\AgentCommissionEntry;
 use App\Models\AgentDepositRequest;
 use App\Models\Booking;
 use App\Models\BookingNote;
@@ -110,6 +112,9 @@ class AgencyDashboardService
             'failed_notifications' => $this->countFailedNotifications($user, operationalOnly: true),
             'failed_notifications_qa' => $this->countFailedNotifications($user, qaOnly: true),
             'pending_deposits' => $pendingDeposits,
+            'agency_applications_pending' => $this->countPendingAgencyApplications($user),
+            'active_agents' => $this->countActiveAgents($user),
+            'commissions_requiring_review' => $this->countPendingCommissions($user),
         ];
 
         $todayOperations = [
@@ -621,6 +626,9 @@ class AgencyDashboardService
             'ticketing_pending' => $counts['ticketing_pending'],
             'today_departures' => $counts['today_departures'],
             'pending_deposits' => $counts['pending_deposits'] ?? 0,
+            'agency_applications_pending' => (int) ($counts['agency_applications_pending'] ?? 0),
+            'active_agents' => (int) ($counts['active_agents'] ?? 0),
+            'commissions_requiring_review' => (int) ($counts['commissions_requiring_review'] ?? 0),
             'gross_sales' => (float) ($stats['gross_sales'] ?? 0),
             'gross_sales_currency' => $currencyMeta['currency'] ?? 'PKR',
             'gross_sales_multi_currency' => (bool) ($currencyMeta['multi'] ?? false),
@@ -1111,8 +1119,40 @@ class AgencyDashboardService
             'ticketing_pending' => 0,
             'today_departures' => 0,
             'pending_deposits' => $this->countPendingAgentDeposits($user),
+            'agency_applications_pending' => $this->countPendingAgencyApplications($user),
+            'active_agents' => $this->countActiveAgents($user),
+            'commissions_requiring_review' => $this->countPendingCommissions($user),
             'gross_sales' => 0,
         ];
+    }
+
+    protected function countPendingAgencyApplications(User $user): int
+    {
+        if (! $user->isPlatformAdmin()) {
+            return 0;
+        }
+
+        return (int) AgentApplication::query()->where('status', 'pending')->count();
+    }
+
+    protected function countActiveAgents(User $user): int
+    {
+        $query = Agent::query()->where('is_active', true);
+        if (! $user->isPlatformAdmin() && $user->current_agency_id !== null) {
+            $query->where('agency_id', $user->current_agency_id);
+        }
+
+        return (int) $query->count();
+    }
+
+    protected function countPendingCommissions(User $user): int
+    {
+        $query = AgentCommissionEntry::query()->where('status', 'pending');
+        if (! $user->isPlatformAdmin() && $user->current_agency_id !== null) {
+            $query->where('agency_id', $user->current_agency_id);
+        }
+
+        return (int) $query->count();
     }
 
     /**

@@ -77,6 +77,7 @@ export type OverviewData = {
   supportOperations: OperationalSummaryItem[];
   supplierStatus: SupplierStatusItem[];
   systemHealth: SystemHealthItem[];
+  operationalCounts?: Record<string, number>;
   /** Legacy preview chart payloads — omitted in live operational responses. */
   bookingTrend?: { day: string; bookings: number; revenue: number }[];
   statusBreakdown?: { name: string; value: number; color: string }[];

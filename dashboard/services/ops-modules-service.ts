@@ -35,10 +35,17 @@ export type AgentApplicationRecord = {
 export type CommissionsOverview = {
   kpis: {
     pending: number;
+    pendingCount?: number;
     approvedUnpaid: number;
     paidThisMonth: number;
     activeAgents: number;
   };
+  pendingEntries?: Array<{
+    id: string;
+    agentName: string;
+    amountLabel: string;
+    status: string;
+  }>;
   agents: Array<{
     id: string;
     code: string;

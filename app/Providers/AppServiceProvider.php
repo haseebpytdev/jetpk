@@ -61,7 +61,9 @@ use App\Support\Branding\SafeBrandingResolver;
 use App\Support\Ui\UiVersionResolver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Support\Url\PublicActionUrl;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
@@ -110,6 +112,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('public-flight-results-data', fn (Request $request): Limit => Limit::perMinute(60)->by($request->ip()));
         RateLimiter::for('public-flight-results-search', fn (Request $request): Limit => Limit::perMinute(30)->by($request->ip()));
 
+        ResetPassword::createUrlUsing(static function (object $notifiable, string $token): string {
+            return PublicActionUrl::passwordReset($token, $notifiable->getEmailForPasswordReset());
+        });
+
         VerifyEmail::createUrlUsing(static function (object $notifiable): string {
             $verificationPath = URL::temporarySignedRoute(
                 'verification.verify',
@@ -121,7 +127,7 @@ class AppServiceProvider extends ServiceProvider
                 false
             );
 
-            return url($verificationPath);
+            return PublicActionUrl::emailVerification($verificationPath);
         });
 
         Gate::policy(Agency::class, AgencyBrandingPolicy::class);

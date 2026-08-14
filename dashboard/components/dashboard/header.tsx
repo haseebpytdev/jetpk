@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DashboardGlobalSearch } from "@/components/dashboard/global-search";
 import { DashboardLink } from "@/components/dashboard/dashboard-link";
+import { OperationalInboxBadge } from "@/components/dashboard/operational-inbox-badge";
 import { postLaravelLogout } from "@/lib/laravel-auth-api";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import type { DashboardSessionSummary } from "@/services/session-service";
@@ -58,6 +59,7 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
       </Button>
       <DashboardGlobalSearch />
       <div className="ml-auto flex flex-wrap items-center gap-2">
+        <OperationalInboxBadge />
         <div className="relative" ref={menuRef}>
           <button
             type="button"

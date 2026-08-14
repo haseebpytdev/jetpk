@@ -15,6 +15,7 @@ use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
 use App\Models\SupplierDiagnosticLog;
 use App\Models\User;
+use App\Support\Dashboard\BookingOperationalMoneyResolver;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -46,9 +47,10 @@ class BookingReportService
         }
 
         $grossSalesQuery = $this->grossSalesBookingsQuery($baseQuery);
+        $operationalGrossPkr = BookingOperationalMoneyResolver::sumAdminPkrForQuery(clone $grossSalesQuery);
 
         $summary = [
-            'gross_sales' => $this->sumFare((clone $grossSalesQuery), 'fare.total'),
+            'gross_sales' => $operationalGrossPkr,
             'net_revenue' => $this->sumNetRevenue((clone $baseQuery)),
             'total_bookings' => (clone $baseQuery)->count(),
             'ticketed_bookings' => (clone $baseQuery)->where('status', BookingStatus::Ticketed)->count(),
@@ -58,8 +60,12 @@ class BookingReportService
                 (clone $baseQuery)->where('bookings.status', BookingStatus::Cancelled),
                 'fare.total',
             ),
-            'agent_sales' => $this->sumFare((clone $grossSalesQuery)->whereNotNull('bookings.agent_id'), 'fare.total'),
-            'direct_customer_sales' => $this->sumFare((clone $grossSalesQuery)->whereNull('bookings.agent_id'), 'fare.total'),
+            'agent_sales' => BookingOperationalMoneyResolver::sumAdminPkrForQuery(
+                (clone $grossSalesQuery)->whereNotNull('bookings.agent_id'),
+            ),
+            'direct_customer_sales' => BookingOperationalMoneyResolver::sumAdminPkrForQuery(
+                (clone $grossSalesQuery)->whereNull('bookings.agent_id'),
+            ),
             'refund_paid_amount' => $this->refundPaidAmount($user, $filters),
             'pending_refund_count' => $this->pendingRefundCount($user, $filters),
             'cancellation_count' => (clone $baseQuery)->whereNotNull('bookings.cancellation_status')->count(),
@@ -69,8 +75,9 @@ class BookingReportService
             'supplier_pnr_pending' => $this->countSupplierPnrPending($baseQuery),
             'ticketing_pending' => $this->countTicketingPending($baseQuery),
             'unpaid_partial_bookings' => (clone $baseQuery)->whereIn('payment_status', ['unpaid', 'partial'])->count(),
-            'fare_currency_count' => $this->countDistinctFareCurrencies($grossSalesQuery),
-            'fare_currency_iso' => $this->singleFareCurrencyIso($grossSalesQuery),
+            'fare_currency_count' => 1,
+            'fare_currency_iso' => 'PKR',
+            'reporting_currency' => 'PKR',
         ];
 
         $monthExpr = $this->monthExpression('bookings.created_at');
