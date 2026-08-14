@@ -3,12 +3,14 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\OtaNotificationEvent;
+use App\Http\Controllers\Admin\AgencyMessageTemplateController;
 use App\Models\Agency;
 use App\Models\AgencyMessageTemplate;
 use App\Models\User;
 use App\Support\Emails\EmailTemplateRegistry;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
@@ -47,11 +49,13 @@ class EmailTemplateRegistryTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.settings.communications.templates.index'))
-            ->assertOk()
-            ->assertSee('Email Event Content', false)
-            ->assertSee('data-testid="email-event-content-list"', false)
-            ->assertSee('booking_request_received', false)
-            ->assertSee('Content blocks', false);
+            ->assertRedirect('/admin/dashboard/settings/notifications');
+
+        $html = $this->templatesIndexHtml($admin);
+        $this->assertStringContainsString('Email Event Content', $html);
+        $this->assertStringContainsString('data-testid="email-event-content-list"', $html);
+        $this->assertStringContainsString('booking_request_received', $html);
+        $this->assertStringContainsString('Content blocks', $html);
 
         Mail::assertNothingSent();
     }
@@ -146,12 +150,14 @@ class EmailTemplateRegistryTest extends TestCase
                 'event' => 'booking_manual_review_required',
                 'channel' => 'email',
             ]))
-            ->assertOk()
-            ->assertSee('Edit Event Content', false)
-            ->assertSee('data-testid="template-edit-create-notice"', false)
-            ->assertSee('{{agency_name}}', false)
-            ->assertSee('{{booking_reference}}', false)
-            ->assertDontSee('&lt;?php', false);
+            ->assertRedirect('/admin/dashboard/settings/notifications');
+
+        $html = $this->templatesEditHtml($admin, 'booking_manual_review_required', 'email');
+        $this->assertStringContainsString('Edit Event Content', $html);
+        $this->assertStringContainsString('data-testid="template-edit-create-notice"', $html);
+        $this->assertStringContainsString('{{agency_name}}', $html);
+        $this->assertStringContainsString('{{booking_reference}}', $html);
+        $this->assertStringNotContainsString('&lt;?php', $html);
     }
 
     public function test_preview_iframe_uses_rendered_html_not_escaped_markup(): void
@@ -174,11 +180,13 @@ class EmailTemplateRegistryTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.settings.communications.templates.index'))
-            ->assertOk()
-            ->assertSee('Customized', false)
-            ->assertSee('Default', false)
-            ->assertSee('Preview', false)
-            ->assertSee('Customize content', false);
+            ->assertRedirect('/admin/dashboard/settings/notifications');
+
+        $html = $this->templatesIndexHtml($admin);
+        $this->assertStringContainsString('Customized', $html);
+        $this->assertStringContainsString('Default', $html);
+        $this->assertStringContainsString('Preview', $html);
+        $this->assertStringContainsString('Customize content', $html);
     }
 
     public function test_registry_list_uses_platform_agency_templates(): void
@@ -190,5 +198,25 @@ class EmailTemplateRegistryTest extends TestCase
 
         $rows = EmailTemplateRegistry::listForAgency($platformAgency);
         $this->assertGreaterThan(count(OtaNotificationEvent::cases()), count($rows));
+    }
+
+    private function templatesIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        $response = app(AgencyMessageTemplateController::class)->index(Request::create('/admin/settings/communications/templates', 'GET'));
+
+        return $response->render();
+    }
+
+    private function templatesEditHtml(User $admin, string $event, string $channel): string
+    {
+        $this->actingAs($admin);
+        $response = app(AgencyMessageTemplateController::class)->edit(
+            Request::create("/admin/settings/communications/templates/{$event}/{$channel}/edit", 'GET'),
+            $event,
+            $channel,
+        );
+
+        return $response->render();
     }
 }

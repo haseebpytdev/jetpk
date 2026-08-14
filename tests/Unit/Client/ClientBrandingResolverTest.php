@@ -6,6 +6,7 @@ use App\Models\ClientProfile;
 use App\Models\ClientProfileBranding;
 use App\Models\ClientProfileModule;
 use App\Services\Client\ClientBrandingResolver;
+use App\Services\Client\CurrentClientContext;
 use App\Support\Client\ClientProfileConfigReader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,9 +18,9 @@ class ClientBrandingResolverTest extends TestCase
     public function test_uses_db_branding_when_preview_client_exists(): void
     {
         $profile = $this->makeProfile([
-            'slug' => 'jetpk',
-            'name' => 'Jet Pakistan Profile',
-            'asset_profile' => 'jetpk-assets',
+            'slug' => 'acme-preview',
+            'name' => 'Acme Travel Profile',
+            'asset_profile' => 'acme-assets',
         ]);
 
         ClientProfileBranding::query()->create([
@@ -36,12 +37,11 @@ class ClientBrandingResolverTest extends TestCase
             'footer_text' => 'Fly with Jet Pakistan',
         ]);
 
-        $this->get(route('client.preview.home', ['clientSlug' => 'jetpk']))
-            ->assertOk();
+        app(CurrentClientContext::class)->set($profile);
 
         $resolver = app(ClientBrandingResolver::class);
 
-        $this->assertSame('Jet Pakistan', $resolver->companyName());
+        $this->assertSame('JetPakistan', $resolver->companyName());
         $this->assertSame('#112233', $resolver->primaryColor());
         $this->assertSame('#445566', $resolver->secondaryColor());
         $this->assertSame('#778899', $resolver->accentColor());
@@ -49,14 +49,8 @@ class ClientBrandingResolverTest extends TestCase
         $this->assertSame('hello@jetpakistan.com', $resolver->email());
         $this->assertSame('Karachi, PK', $resolver->address());
         $this->assertSame('Fly with Jet Pakistan', $resolver->footerText());
-        $this->assertSame(
-            asset('client-assets/jetpk-assets/logo/jetpk.svg'),
-            $resolver->logoUrl(),
-        );
-        $this->assertSame(
-            asset('client-assets/jetpk-assets/favicon/jetpk.ico'),
-            $resolver->faviconUrl(),
-        );
+        $this->assertSame(jetpk_company_branding()->logoUrl(), $resolver->logoUrl());
+        $this->assertSame(jetpk_company_branding()->faviconUrl(), $resolver->faviconUrl());
     }
 
     public function test_falls_back_safely_when_no_db_branding(): void

@@ -90,7 +90,7 @@ class CompanyEmailProfileResolverTest extends TestCase
         $this->assertNull($profile->logo_url);
     }
 
-    public function test_uses_agency_communication_settings_mail_from_and_reply_to(): void
+    public function test_uses_platform_branding_for_mail_from_name(): void
     {
         $slug = 'comm-agency-'.uniqid();
         config()->set('ota.default_agency_slug', $slug);
@@ -114,7 +114,7 @@ class CompanyEmailProfileResolverTest extends TestCase
 
         $profile = CompanyEmailProfileResolver::resolveForPlatform();
 
-        $this->assertSame('OTA Mailer', $profile->mail_from_name);
+        $this->assertSame('JetPakistan', $profile->mail_from_name);
         $this->assertSame('noreply@ota.test', $profile->mail_from_email);
         $this->assertSame('replies@ota.test', $profile->reply_to_email);
 

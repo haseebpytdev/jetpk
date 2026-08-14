@@ -14,10 +14,10 @@ class ClientThemeRegistryTest extends TestCase
     {
         $registry = app(ClientThemeRegistry::class);
 
-        $this->assertCount(6, $registry->all());
-        $this->assertCount(2, $registry->all('frontend'));
-        $this->assertCount(2, $registry->all('admin'));
-        $this->assertCount(2, $registry->all('staff'));
+        $this->assertCount(9, $registry->all());
+        $this->assertCount(3, $registry->all('frontend'));
+        $this->assertCount(3, $registry->all('admin'));
+        $this->assertCount(3, $registry->all('staff'));
     }
 
     public function test_active_filters_inactive_themes(): void

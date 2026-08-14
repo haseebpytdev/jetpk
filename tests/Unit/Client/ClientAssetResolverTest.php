@@ -30,8 +30,7 @@ class ClientAssetResolverTest extends TestCase
             'favicon_path' => 'favicon/preview.ico',
         ]);
 
-        $this->get(route('client.preview.home', ['clientSlug' => 'preview-client']))
-            ->assertOk();
+        app(CurrentClientContext::class)->set($profile);
 
         $resolver = app(ClientAssetResolver::class);
 
@@ -55,9 +54,9 @@ class ClientAssetResolverTest extends TestCase
     public function test_falls_back_to_config_when_no_preview_context(): void
     {
         $this->makeProfile([
-            'slug' => 'haseeb-master',
+            'slug' => 'jetpk',
             'active_frontend_theme' => 'v2-modern',
-            'asset_profile' => 'haseeb-master',
+            'asset_profile' => 'jetpk-assets',
         ]);
 
         config([
@@ -68,7 +67,7 @@ class ClientAssetResolverTest extends TestCase
 
         $context = app(CurrentClientContext::class);
         $this->assertFalse($context->isPreview());
-        $this->assertSame('haseeb-master', $context->slug());
+        $this->assertSame('jetpk', $context->slug());
 
         $resolver = app(ClientAssetResolver::class);
 

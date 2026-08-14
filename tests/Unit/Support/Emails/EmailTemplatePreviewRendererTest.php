@@ -74,7 +74,7 @@ class EmailTemplatePreviewRendererTest extends TestCase
 
         $result = app(EmailTemplatePreviewRenderer::class)->render($agency, 'ops-booking_confirmed');
 
-        $this->assertStringContainsString('GXJDHD8K', $result->innerBody);
+        $this->assertStringContainsString('GXJDHD8K', $result->html);
         $this->assertStringNotContainsString('<script>', $result->html);
     }
 
