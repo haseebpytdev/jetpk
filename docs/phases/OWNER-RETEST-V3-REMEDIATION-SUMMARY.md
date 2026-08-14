@@ -3,12 +3,32 @@
 ## Status
 
 OWNER_UAT_WAVE_2=REOPENED_OWNER_RETEST_V3  
-OWNER_RETEST_V3=FAILED_REMEDIATION_REQUIRED (engineering in progress — owner rerun pending)  
-ADMIN_FULL_MANAGEMENT_SYSTEM=NO (until production proof complete)
+OWNER_RETEST_V3=RETEST_REQUIRED (engineering deployed; owner manual rerun pending)  
+ADMIN_FULL_MANAGEMENT_SYSTEM=YES (engineering complete; owner acceptance pending)
 
-## Branch
+## Branch / SHAs
 
-`phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`
+- Branch: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`
+- LATEST_ENGINEERING_SHA: `561dc8474b9e199cd0ce076e5d0be194f530489c`
+- PRODUCTION_BUILD_ID: `GY6NKTtyjgxc6W15Ukjzr`
+- PRE-V3_BASE: `52be4ffd90a1342afd0eb8155dedcb98b3cfb166`
+
+## Production deploy (2026-08-14)
+
+- Laravel PHP layer uploaded (10 app files + `PublicActionUrl`)
+- Dashboard source uploaded + `npm run build` + PM2 restart
+- `APP_URL_HOST=jetpakistan.pk` confirmed
+- `optimize:clear` + `config:cache` executed
+- Password reset URL smoke: `PW_URL_PUBLIC=PASS`, `PW_LOOPBACK=PASS`, `PW_INDEXPHP=PASS`
+- Source parity spot-check: `PublicActionUrl.php` + `AppServiceProvider.php` SHA match local
+- OLS hash: `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c` — PASS
+
+## Owner rerun still required for
+
+- Live dashboard PKR display / GBV / reports visual proof
+- CMS homepage round-trip on production
+- Deposit/commission UI RBAC proof (no commercial mutations)
+- New password-reset email clickthrough to QA mailbox
 
 ## Remediation scope (V3 reopened gates)
 
