@@ -155,7 +155,11 @@ final class SabreOperationalPnrReadiness
         $offerSnapshotPresent = $this->resolveOfferSnapshot($meta) !== [];
         $sabreBookingContextPresent = $this->sabreBookingContextPresent($meta);
 
-        $sameCarrierConnecting = ($tripType === 'one_way_connecting'
+        $sameCarrierConnecting = (in_array($tripType, [
+            'one_way_connecting',
+            \App\Support\Sabre\GdsPnrCreate\SabreGdsOneWayTripShapeClassifier::TRIP_ONE_WAY_SINGLE_CONNECTION_SAME_CARRIER,
+            SabreCertifiedRouteSelector::CATEGORY_ONE_WAY_CONNECTING_SAME_CARRIER_GDS,
+        ], true)
             && $segmentCount === 2
             && $sameCarrier
             && ! $mixedCarrier

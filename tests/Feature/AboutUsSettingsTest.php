@@ -2,26 +2,33 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ClientPageSettingStatus;
 use App\Models\Agency;
 use App\Models\AgencySetting;
+use App\Models\ClientPageSetting;
 use App\Models\User;
 use App\Services\Agencies\AboutUsContentPresenter;
 use App\Services\Agencies\AgencyBrandingService;
+use App\Support\Client\ClientPageKeys;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\JetpkHomepageFixture;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AboutUsSettingsTest extends TestCase
 {
+    use JetpkHomepageFixture;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
+        config(['client_route_parity.enabled' => false]);
         $this->seed(OtaFoundationSeeder::class);
+        $this->seedJetpkAgency();
     }
 
     public function test_platform_admin_can_save_plain_about_us_content(): void
@@ -44,44 +51,64 @@ class AboutUsSettingsTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'agency.about_us_settings_updated']);
     }
 
-    public function test_public_about_us_renders_plain_formatted_content(): void
+    public function test_public_about_us_renders_published_cms_content(): void
     {
-        $admin = $this->platformAdmin();
-        $agency = Agency::query()->findOrFail($admin->current_agency_id);
-
-        app(AgencyBrandingService::class)->updateAboutUsSettings($agency, $admin, [
-            'plain' => '<p>Published <em>about</em> paragraph.</p>',
-            'html_override' => '',
-            'html_active' => false,
-            'updated_at' => now()->toIso8601String(),
+        $profile = $this->makeJetpkProfile();
+        ClientPageSetting::query()->create([
+            'client_profile_id' => $profile->id,
+            'page_key' => ClientPageKeys::ABOUT,
+            'status' => ClientPageSettingStatus::Published,
+            'content_json' => [
+                'hero' => [
+                    'kicker' => 'About JetPakistan',
+                    'title' => 'Published about headline',
+                    'description' => 'Published <em>about</em> paragraph.',
+                ],
+            ],
+            'published_at' => now(),
         ]);
 
         $this->get(route('about'))
             ->assertOk()
-            ->assertSee('Published <em>about</em> paragraph.', false)
-            ->assertSee('data-about-custom="plain"', false)
-            ->assertDontSee('Our story', false);
+            ->assertSee('Published about headline', false)
+            ->assertSee('Published &lt;em&gt;about&lt;/em&gt; paragraph.', false)
+            ->assertDontSee('data-about-custom', false);
     }
 
-    public function test_html_override_replaces_plain_content_on_public_page(): void
+    public function test_published_cms_content_replaces_empty_about_shell(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->platformAdmin();
-
-        $this->actingAs($admin)
-            ->patch(route('admin.settings.branding.about-us.update'), [
-                'plain' => '<p>Plain should not show when HTML is active.</p>',
-                'html_override' => '<h2>Override headline</h2><p>HTML body wins.</p>',
-                'html_active' => 1,
-            ])
-            ->assertRedirect();
+        $profile = $this->makeJetpkProfile();
+        ClientPageSetting::query()->create([
+            'client_profile_id' => $profile->id,
+            'page_key' => ClientPageKeys::ABOUT,
+            'status' => ClientPageSettingStatus::Published,
+            'content_json' => [
+                'hero' => [
+                    'title' => 'Override headline',
+                    'description' => 'HTML body wins.',
+                ],
+                'feature_cards' => [
+                    'enabled' => '1',
+                    'items' => [
+                        [
+                            'id' => 'about-fc-1',
+                            'title' => 'Override headline',
+                            'body' => 'Feature card body.',
+                            'enabled' => '1',
+                            'sort_order' => 0,
+                        ],
+                    ],
+                ],
+            ],
+            'published_at' => now(),
+        ]);
 
         $this->get(route('about'))
             ->assertOk()
             ->assertSee('Override headline', false)
-            ->assertSee('<h2>Override headline</h2>', false)
-            ->assertSee('data-about-custom="html"', false)
-            ->assertDontSee('Plain should not show', false);
+            ->assertSee('Feature card body.', false)
+            ->assertDontSee('data-about-custom', false);
     }
 
     public function test_unsafe_script_and_event_handlers_are_stripped(): void
@@ -103,20 +130,23 @@ class AboutUsSettingsTest extends TestCase
         $this->assertStringNotContainsString('onclick', $stored);
         $this->assertStringNotContainsString('javascript:', $stored);
 
-        $this->get(route('about'))
-            ->assertOk()
-            ->assertSee('Safe', false)
-            ->assertDontSee('alert(1)', false)
-            ->assertDontSee('onclick', false)
-            ->assertDontSee('javascript:', false);
+        $presented = app(AboutUsContentPresenter::class)->presentForPublic($settings);
+        $this->assertSame('html', $presented['mode']);
+        $this->assertStringContainsString('Safe', $presented['body_html']);
+        $this->assertStringNotContainsString('alert(1)', $presented['body_html']);
+        $this->assertStringNotContainsString('onclick', $presented['body_html']);
+        $this->assertStringNotContainsString('javascript:', $presented['body_html']);
     }
 
-    public function test_fallback_static_about_page_when_no_custom_content(): void
+    public function test_empty_cms_about_page_renders_shell_without_legacy_fallback_copy(): void
     {
+        $this->makeJetpkProfile();
+
         $this->get(route('about'))
             ->assertOk()
-            ->assertSee('Our story', false)
-            ->assertSee('Who we are', false)
+            ->assertSee('jp-page--about', false)
+            ->assertDontSee('Our story', false)
+            ->assertDontSee('Who we are', false)
             ->assertDontSee('data-about-custom', false);
     }
 

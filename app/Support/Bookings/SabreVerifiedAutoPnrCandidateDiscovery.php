@@ -167,7 +167,11 @@ final class SabreVerifiedAutoPnrCandidateDiscovery
 
     protected function isSameCarrierConnectingCandidate(Booking $booking, string $tripType): bool
     {
-        if ($tripType !== 'one_way_connecting') {
+        if (! in_array($tripType, [
+            'one_way_connecting',
+            \App\Support\Sabre\GdsPnrCreate\SabreGdsOneWayTripShapeClassifier::TRIP_ONE_WAY_SINGLE_CONNECTION_SAME_CARRIER,
+            SabreCertifiedRouteSelector::CATEGORY_ONE_WAY_CONNECTING_SAME_CARRIER_GDS,
+        ], true)) {
             return false;
         }
 

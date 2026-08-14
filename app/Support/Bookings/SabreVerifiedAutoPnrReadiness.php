@@ -5,6 +5,7 @@ namespace App\Support\Bookings;
 use App\Enums\SupplierProvider;
 use App\Models\Booking;
 use App\Services\Suppliers\Sabre\SabreBookingService;
+use App\Support\Sabre\GdsPnrCreate\SabreGdsOneWayTripShapeClassifier;
 
 /**
  * E5D/E5E/E5F: Evaluator for verified-lane public same-carrier connecting auto-PNR.
@@ -152,7 +153,7 @@ final class SabreVerifiedAutoPnrReadiness
             return $this->ineligible($base, self::REASON_TICKETING_ENABLED, 'Sabre ticketing is enabled — verified auto-PNR readiness requires ticketing disabled.');
         }
 
-        if ($tripType !== 'one_way_connecting') {
+        if (! $this->isVerifiedLaneSameCarrierConnectingTripType($tripType)) {
             return $this->ineligible($base, self::REASON_NOT_ONE_WAY, 'Trip type is not one-way connecting.');
         }
 
@@ -318,6 +319,15 @@ final class SabreVerifiedAutoPnrReadiness
         $connections = array_slice($routeChain, 1, -1);
 
         return array_values(array_unique(array_filter($connections, static fn (string $code) => $code !== '')));
+    }
+
+    protected function isVerifiedLaneSameCarrierConnectingTripType(string $tripType): bool
+    {
+        return in_array($tripType, [
+            'one_way_connecting',
+            SabreGdsOneWayTripShapeClassifier::TRIP_ONE_WAY_SINGLE_CONNECTION_SAME_CARRIER,
+            SabreCertifiedRouteSelector::CATEGORY_ONE_WAY_CONNECTING_SAME_CARRIER_GDS,
+        ], true);
     }
 
     protected function certificationLabel(string $status): string

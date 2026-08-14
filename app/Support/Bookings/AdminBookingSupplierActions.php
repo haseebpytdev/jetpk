@@ -700,13 +700,13 @@ class AdminBookingSupplierActions
     {
         $state = $this->build($booking, $genericSupplierEligible, false);
 
+        if ($state['can_create_pnr'] || $state['can_retry_pnr']) {
+            return null;
+        }
+
         $controlledBlock = $this->controlledPnrPostBlockMessage($state);
         if ($controlledBlock !== null) {
             return $controlledBlock;
-        }
-
-        if ($state['can_create_pnr'] || $state['can_retry_pnr']) {
-            return null;
         }
 
         if (($state['operational_pnr_eligible'] ?? false) === true && ! ($state['has_pnr_or_reference'] ?? false)) {

@@ -36,7 +36,7 @@ class AdminBookingSupplierActionsTest extends TestCase
         $state = $this->actions->build($booking, false, false);
 
         $this->assertTrue($state['can_sync_pnr_itinerary']);
-        $this->assertSame('Sync PNR itinerary', $state['sync_pnr_itinerary_label']);
+        $this->assertSame('Retrieve/sync PNR itinerary', $state['sync_pnr_itinerary_label']);
     }
 
     public function test_sabre_booking_includes_sabre_capability_posture_without_changing_action_booleans(): void
@@ -58,8 +58,8 @@ class AdminBookingSupplierActionsTest extends TestCase
         $posture = $state['sabre_capability_posture'];
         $this->assertIsArray($posture);
         $this->assertTrue($posture['show']);
-        $this->assertSame('Unresolved — manual required', $posture['gds_cancel_label']);
-        $this->assertSame('Disabled — manual required', $posture['gds_ticketing_label']);
+        $this->assertSame('Enabled', $posture['gds_cancel_label']);
+        $this->assertSame('Enabled', $posture['gds_ticketing_label']);
         $this->assertSame('Unknown/disabled — not production', $posture['ndc_label']);
         $this->assertStringContainsString('not customer-facing', strtolower($posture['diagnostics_label']));
 
@@ -121,7 +121,7 @@ class AdminBookingSupplierActionsTest extends TestCase
         $state = $this->actions->build($this->reloadBooking($booking), false, false);
 
         $this->assertTrue($state['has_pnr_itinerary_snapshot']);
-        $this->assertSame('Re-sync PNR itinerary', $state['sync_pnr_itinerary_label']);
+        $this->assertSame('Re-sync PNR itinerary (retrieve/sync)', $state['sync_pnr_itinerary_label']);
     }
 
     public function test_booking_with_pnr_hides_create_and_retry_pnr(): void
