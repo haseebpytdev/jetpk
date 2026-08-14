@@ -42,7 +42,7 @@ export function RbacManagementPanel({ selectedRole, permissionKeys, assignedUser
   const router = useDashboardRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [name, setName] = useState("QA Custom Role");
+  const [name, setName] = useState(selectedRole?.name ?? "QA Custom Role");
   const [agencyId, setAgencyId] = useState("");
   const [userId, setUserId] = useState("");
   const [permissionQuery, setPermissionQuery] = useState("");
