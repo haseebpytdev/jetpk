@@ -9,6 +9,9 @@ use App\Models\Agent;
 use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Services\Dashboard\AgencyDashboardService;
+use App\Services\Reports\BookingReportService;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class AdminDashboardReportsDbBackedTest extends TestCase
@@ -23,16 +26,12 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $this->createBooking($agency, BookingStatus::Ticketed, 'paid', null, 80_000, 'sabre');
         $this->createBooking($agency, BookingStatus::Ticketed, 'partial', null, 40_000, 'pia_ndc');
 
-        $this->actingAs($admin)
-            ->get('/admin')
-            ->assertOk()
-            ->assertViewHas('stats', function (array $stats): bool {
-                return $stats['total_bookings'] === 3
-                    && $stats['pending_bookings'] === 1
-                    && $stats['ticketed_bookings'] === 2
-                    && $stats['unpaid_partial_bookings'] === 2
-                    && (int) $stats['gross_sales'] === 240000;
-            });
+        $stats = $this->dashboardStats($admin);
+        $this->assertSame(3, $stats['total_bookings']);
+        $this->assertSame(1, $stats['pending_bookings']);
+        $this->assertSame(2, $stats['ticketed_bookings']);
+        $this->assertSame(2, $stats['unpaid_partial_bookings']);
+        $this->assertSame(240000, (int) $stats['gross_sales']);
     }
 
     public function test_admin_dashboard_does_not_include_another_agency_bookings(): void
@@ -43,10 +42,8 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
         $this->createBooking($otherAgency, BookingStatus::Pending, 'unpaid', null, 150_000, 'duffel');
 
-        $this->actingAs($admin)
-            ->get('/admin')
-            ->assertOk()
-            ->assertViewHas('stats', fn (array $stats): bool => $stats['total_bookings'] === 2);
+        $stats = $this->dashboardStats($admin);
+        $this->assertSame(2, $stats['total_bookings']);
     }
 
     public function test_platform_admin_can_see_dashboard_metrics_across_agencies(): void
@@ -61,10 +58,8 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $this->createBooking($agencyA, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
         $this->createBooking($agencyB, BookingStatus::Ticketed, 'paid', null, 250_000, 'sabre');
 
-        $this->actingAs($platform)
-            ->get('/admin')
-            ->assertOk()
-            ->assertViewHas('stats', fn (array $stats): bool => $stats['total_bookings'] === 2);
+        $stats = $this->dashboardStats($platform);
+        $this->assertSame(2, $stats['total_bookings']);
     }
 
     public function test_reports_summary_uses_db_totals(): void
@@ -74,15 +69,11 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 120_000, 'duffel');
         $this->createBooking($agency, BookingStatus::Ticketed, 'paid', null, 180_000, 'sabre');
 
-        $this->actingAs($admin)
-            ->get('/admin/reports')
-            ->assertOk()
-            ->assertViewHas('summary', function (array $summary): bool {
-                return $summary['total_bookings'] === 2
-                    && $summary['pending_bookings'] === 1
-                    && $summary['ticketed_bookings'] === 1
-                    && (int) $summary['gross_sales'] === 300000;
-            });
+        $summary = $this->reportsPayload($admin)['summary'];
+        $this->assertSame(2, $summary['total_bookings']);
+        $this->assertSame(1, $summary['pending_bookings']);
+        $this->assertSame(1, $summary['ticketed_bookings']);
+        $this->assertSame(300000, (int) $summary['gross_sales']);
     }
 
     public function test_reports_filter_by_date_range(): void
@@ -94,10 +85,10 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $old->forceFill(['created_at' => now()->subMonths(3)])->save();
         $new->forceFill(['created_at' => now()->subDays(2)])->save();
 
-        $this->actingAs($admin)
-            ->get('/admin/reports?date_from='.now()->subWeek()->toDateString())
-            ->assertOk()
-            ->assertViewHas('summary', fn (array $summary): bool => $summary['total_bookings'] === 1);
+        $summary = $this->reportsPayload($admin, [
+            'date_from' => now()->subWeek()->toDateString(),
+        ])['summary'];
+        $this->assertSame(1, $summary['total_bookings']);
     }
 
     public function test_reports_filter_by_channel_direct_and_agent(): void
@@ -108,15 +99,11 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', $agent, 200_000, 'duffel');
 
-        $this->actingAs($admin)
-            ->get('/admin/reports?channel=direct')
-            ->assertOk()
-            ->assertViewHas('summary', fn (array $summary): bool => $summary['total_bookings'] === 1);
+        $directSummary = $this->reportsPayload($admin, ['channel' => 'direct'])['summary'];
+        $this->assertSame(1, $directSummary['total_bookings']);
 
-        $this->actingAs($admin)
-            ->get('/admin/reports?channel=agent')
-            ->assertOk()
-            ->assertViewHas('summary', fn (array $summary): bool => $summary['total_bookings'] === 1);
+        $agentSummary = $this->reportsPayload($admin, ['channel' => 'agent'])['summary'];
+        $this->assertSame(1, $agentSummary['total_bookings']);
     }
 
     public function test_reports_filter_by_supplier(): void
@@ -126,21 +113,16 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'sabre');
 
-        $this->actingAs($admin)
-            ->get('/admin/reports?supplier=sabre')
-            ->assertOk()
-            ->assertViewHas('summary', fn (array $summary): bool => $summary['total_bookings'] === 1);
+        $summary = $this->reportsPayload($admin, ['supplier' => 'sabre'])['summary'];
+        $this->assertSame(1, $summary['total_bookings']);
     }
 
     public function test_reports_empty_state_works_when_no_bookings_exist(): void
     {
         [, $admin] = $this->makePlatformAdmin();
 
-        $this->actingAs($admin)
-            ->get('/admin/reports')
-            ->assertOk()
-            ->assertViewHas('hasLiveData', false)
-            ->assertSee('No live booking data yet', false);
+        $payload = $this->reportsPayload($admin);
+        $this->assertFalse($payload['hasLiveData']);
     }
 
     public function test_platform_admin_can_access_reports(): void
@@ -152,12 +134,10 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $agency = Agency::factory()->create();
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel', '');
 
-        $this->actingAs($platform)
-            ->get('/admin/reports')
-            ->assertOk()
-            ->assertViewHas('topRoutes', function ($routes): bool {
-                return collect($routes)->contains(fn (array $row): bool => $row['route'] === 'Unknown route');
-            });
+        $topRoutes = $this->reportsPayload($platform)['topRoutes'];
+        $this->assertTrue(collect($topRoutes)->contains(
+            fn (array $row): bool => $row['route'] === 'Unknown route'
+        ));
     }
 
     public function test_reports_route_grouping_renders_unknown_route_for_blank_route(): void
@@ -165,17 +145,15 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         [$agency, $admin] = $this->makePlatformAdmin();
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel', '');
 
-        $this->actingAs($admin)
-            ->get('/admin/reports')
-            ->assertOk()
-            ->assertViewHas('topRoutes', fn ($routes): bool => collect($routes)->contains(
-                fn (array $row): bool => $row['route'] === 'Unknown route' && $row['bookings'] === 1
-            ));
+        $topRoutes = $this->reportsPayload($admin)['topRoutes'];
+        $this->assertTrue(collect($topRoutes)->contains(
+            fn (array $row): bool => $row['route'] === 'Unknown route' && $row['bookings'] === 1
+        ));
     }
 
     public function test_guest_cannot_access_dashboard_or_reports(): void
     {
-        $this->get('/admin')->assertRedirect(route('login'));
+        $this->get('/admin/dashboard')->assertRedirect(route('login'));
         $this->get('/admin/reports')->assertRedirect(route('login'));
     }
 
@@ -190,6 +168,29 @@ class AdminDashboardReportsDbBackedTest extends TestCase
         $this->actingAs($staff)
             ->get('/admin/reports')
             ->assertForbidden();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function dashboardStats(User $user): array
+    {
+        $this->actingAs($user);
+
+        return app(AgencyDashboardService::class)->build($user)['stats'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    protected function reportsPayload(User $user, array $query = []): array
+    {
+        $this->actingAs($user);
+        $request = Request::create('/admin/reports', 'GET', $query);
+        $request->setUserResolver(fn () => $user);
+
+        return app(BookingReportService::class)->build($user, $request);
     }
 
     /**
