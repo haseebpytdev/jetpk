@@ -13,6 +13,7 @@ use App\Models\SupportTicket;
 use App\Models\User;
 use App\Support\Audits\BookingFlowSmokeSafetyOutput;
 use App\Support\Audits\RoutePageHealthAuditCatalog;
+use App\Support\References\CompactReferenceGenerator;
 use App\Support\Suppliers\LegacySupplierProviderDataRepair;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Console\Command;
@@ -486,9 +487,23 @@ class OtaRoutePageHealthAuditCommand extends Command
 
     private function resolveAuditBooking(): ?Booking
     {
+        $withReference = Booking::query()
+            ->whereNotNull('booking_reference')
+            ->where('booking_reference', '!=', '')
+            ->orderByDesc('id')
+            ->first();
+
+        if ($withReference !== null) {
+            return $withReference;
+        }
+
         $existing = Booking::query()->orderByDesc('id')->first();
         if ($existing !== null) {
-            return $existing;
+            return $this->ensureAuditBookingReference($existing);
+        }
+
+        if (! $this->allowsRouteHealthFoundationSeed()) {
+            return null;
         }
 
         $agency = Agency::query()->where('slug', config('ota.default_agency_slug', 'asif-travels'))->first()
@@ -498,11 +513,29 @@ class OtaRoutePageHealthAuditCommand extends Command
             return null;
         }
 
-        return Booking::factory()->create([
+        return $this->ensureAuditBookingReference(Booking::factory()->create([
             'agency_id' => $agency->id,
             'status' => BookingStatus::Paid,
             'payment_status' => 'paid',
-        ]);
+        ]));
+    }
+
+    private function ensureAuditBookingReference(Booking $booking): ?Booking
+    {
+        if (trim((string) ($booking->booking_reference ?? '')) !== '') {
+            return $booking;
+        }
+
+        if (! $this->allowsRouteHealthFoundationSeed()) {
+            return null;
+        }
+
+        $booking->forceFill([
+            'booking_reference' => app(CompactReferenceGenerator::class)
+                ->generateUnique('bookings', 'booking_reference', 8),
+        ])->save();
+
+        return $booking->fresh();
     }
 
     /**

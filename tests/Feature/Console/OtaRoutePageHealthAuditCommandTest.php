@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Console;
 
+use App\Enums\BookingStatus;
+use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\DeveloperUser;
 use App\Models\SupplierConnection;
@@ -49,6 +51,8 @@ class OtaRoutePageHealthAuditCommandTest extends TestCase
         $this->artisan('ota:route-page-health-audit', ['--all' => true, '--seed' => true])
             ->expectsOutputToContain('admin-booking-show')
             ->expectsOutputToContain('staff-booking-show')
+            ->expectsOutputToContain('agent-booking-show')
+            ->expectsOutputToContain('customer-booking-show')
             ->expectsOutputToContain('admin-api-settings')
             ->expectsOutputToContain('Route page health audit passed.')
             ->assertSuccessful();
@@ -58,6 +62,37 @@ class OtaRoutePageHealthAuditCommandTest extends TestCase
             SupplierConnection::query()->count(),
             'Route health audit --seed must not create supplier connection placeholders.',
         );
+    }
+
+    public function test_all_scope_resolves_agent_booking_show_when_latest_booking_has_no_reference(): void
+    {
+        DeveloperUser::query()->create([
+            'name' => 'Health Dev',
+            'email' => 'health-dev@example.com',
+            'password' => 'secret-password',
+            'is_active' => true,
+        ]);
+
+        $agency = Agency::factory()->create();
+
+        Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'booking_reference' => 'HEALTHREF1',
+            'status' => BookingStatus::Paid,
+            'payment_status' => 'paid',
+        ]);
+
+        Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'booking_reference' => null,
+            'status' => BookingStatus::Draft,
+            'payment_status' => 'unpaid',
+        ]);
+
+        $this->artisan('ota:route-page-health-audit', ['--all' => true, '--seed' => true])
+            ->expectsOutputToContain('agent-booking-show')
+            ->expectsOutputToContain('Route page health audit passed.')
+            ->assertSuccessful();
     }
 
     public function test_source_scan_fails_on_forbidden_blade_pattern(): void
