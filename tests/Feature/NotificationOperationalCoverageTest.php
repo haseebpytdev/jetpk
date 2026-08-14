@@ -201,8 +201,15 @@ class NotificationOperationalCoverageTest extends TestCase
 
         $emails = $resolved['to'];
         $this->assertContains(strtolower($platformAdmin->email), $emails);
-        $this->assertContains('traveler@example.test', $emails);
+        $this->assertNotContains('traveler@example.test', $emails);
         $this->assertSame(count($emails), count(array_unique($emails)));
+
+        $customerParty = app(NotificationRecipientResolver::class)->resolveBucket(
+            $agency,
+            'customer_party',
+            $booking,
+        );
+        $this->assertContains('traveler@example.test', $customerParty['emails']);
     }
 
     public function test_ota_notification_service_queues_mail_when_queue_not_sync(): void
@@ -230,7 +237,12 @@ class NotificationOperationalCoverageTest extends TestCase
             ],
         );
         config(['mail.default' => 'smtp', 'queue.default' => 'sync']);
-        Mail::shouldReceive('send')->once()->andThrow(new \RuntimeException('SMTP auth failed: super-secret-smtp-pass'));
+        $pending = \Mockery::mock(\Illuminate\Mail\PendingMail::class);
+        $pending->shouldReceive('cc')->andReturnSelf();
+        $pending->shouldReceive('bcc')->andReturnSelf();
+        $pending->shouldReceive('send')->andThrow(new \RuntimeException('SMTP auth failed: super-secret-smtp-pass'));
+        $pending->shouldReceive('queue')->andThrow(new \RuntimeException('SMTP auth failed: super-secret-smtp-pass'));
+        Mail::shouldReceive('to')->andReturn($pending);
 
         $booking = $this->draftBookingWithContact();
         app(BookingCommunicationService::class)->notifyManualReviewRequired($booking);

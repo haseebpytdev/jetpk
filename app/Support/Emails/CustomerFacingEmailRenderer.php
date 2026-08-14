@@ -412,9 +412,10 @@ class CustomerFacingEmailRenderer
      */
     protected function customerBookingCta(Booking $booking): ?array
     {
-        if ($booking->customer_id !== null && Route::has('customer.bookings.show')) {
+        $showUrl = EmailBaseVariables::customerBookingShowUrl($booking);
+        if ($showUrl !== null) {
             return [
-                'url' => route('customer.bookings.show', $booking, absolute: true),
+                'url' => $showUrl,
                 'label' => 'View booking',
             ];
         }

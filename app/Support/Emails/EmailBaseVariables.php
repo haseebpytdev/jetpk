@@ -8,6 +8,7 @@ use App\Support\Branding\BrandDisplayResolver;
 use App\Support\Branding\CompanyEmailProfileResolver;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Global placeholder variables merged into every operational/booking email render.
@@ -262,10 +263,32 @@ class EmailBaseVariables
         return self::NEUTRAL_BRAND_NAME;
     }
 
+    /**
+     * Customer show route is bound on booking_reference, not numeric id.
+     */
+    public static function customerBookingShowUrl(Booking $booking): ?string
+    {
+        if ($booking->customer_id === null || ! Route::has('customer.bookings.show')) {
+            return null;
+        }
+
+        $reference = trim((string) ($booking->booking_reference ?: $booking->reference_code ?: ''));
+        if ($reference === '') {
+            return null;
+        }
+
+        try {
+            return route('customer.bookings.show', ['booking' => $reference], absolute: true);
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
     protected static function manageBookingUrl(Booking $booking): string
     {
-        if ($booking->customer_id !== null && Route::has('customer.bookings.show')) {
-            return route('customer.bookings.show', $booking, absolute: true);
+        $showUrl = self::customerBookingShowUrl($booking);
+        if ($showUrl !== null) {
+            return $showUrl;
         }
 
         if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {

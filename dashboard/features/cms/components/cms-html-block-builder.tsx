@@ -121,6 +121,27 @@ function Field({
   );
 }
 
+type MediaLibraryItem = {
+  url?: string | null;
+  publicUrl?: string | null;
+  name?: string;
+  filename?: string;
+  file_name?: string;
+};
+
+export function mediaOptionsFromLibraryResult(result: unknown): Array<{ url: string; name: string }> {
+  const envelope = result as { data?: unknown; media?: unknown; assets?: unknown };
+  const payload = (envelope.data ?? envelope) as { media?: unknown; assets?: unknown; data?: { media?: unknown } };
+  const nested = payload.data?.media;
+  const list = [payload.media, payload.assets, nested].find(Array.isArray) as MediaLibraryItem[] | undefined;
+  return (list ?? [])
+    .map((asset) => ({
+      url: String(asset.publicUrl || asset.url || ""),
+      name: String(asset.name || asset.file_name || asset.filename || asset.url || "Media"),
+    }))
+    .filter((item) => item.url !== "");
+}
+
 function MediaUrlField({
   label,
   value,
@@ -141,18 +162,8 @@ function MediaUrlField({
         className="justify-self-start text-xs text-jp-accent"
         disabled={disabled}
         onClick={async () => {
-          const result = await laravelRequest<{ assets?: Array<{ url?: string; publicUrl?: string; name?: string; filename?: string }> }>(
-            mediaLibraryIndexPath(),
-            { method: "GET" },
-          );
-          const assets = (result as { assets?: Array<{ url?: string; publicUrl?: string; name?: string }> }).assets
-            ?? (result as { data?: { assets?: Array<{ url?: string; publicUrl?: string; name?: string }> } }).data?.assets
-            ?? [];
-          setOptions(
-            assets
-              .map((asset) => ({ url: asset.publicUrl || asset.url || "", name: asset.name || asset.url || "Media" }))
-              .filter((item) => item.url),
-          );
+          const result = await laravelRequest(mediaLibraryIndexPath(), { method: "GET" });
+          setOptions(mediaOptionsFromLibraryResult(result));
         }}
       >
         Load media library

@@ -8,6 +8,7 @@ use App\Models\BookingPayment;
 use App\Support\Bookings\BookingItineraryOverviewPresenter;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Branding\CompanyEmailProfileResolver;
+use App\Support\Emails\EmailBaseVariables;
 use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\Security\SensitiveDataRedactor;
 use Illuminate\Support\Facades\Route;
@@ -1411,11 +1412,9 @@ class BookingEmailPayloadFactory
             return $url !== null ? [['label' => 'Open booking', 'url' => $url]] : [];
         }
 
-        if ($booking->customer_id !== null && Route::has('customer.bookings.show')) {
-            $reference = trim((string) $booking->booking_reference);
-            if ($reference !== '') {
-                return [['label' => 'View booking', 'url' => route('customer.bookings.show', ['booking' => $reference], absolute: true)]];
-            }
+        $showUrl = EmailBaseVariables::customerBookingShowUrl($booking);
+        if ($showUrl !== null) {
+            return [['label' => 'View booking', 'url' => $showUrl]];
         }
 
         if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {
