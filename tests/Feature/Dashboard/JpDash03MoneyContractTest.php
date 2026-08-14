@@ -96,8 +96,7 @@ class JpDash03MoneyContractTest extends TestCase
 
         $grossCard = collect($overview['summaryStats'] ?? [])->firstWhere('key', 'gross_sales');
         $this->assertNotNull($grossCard);
-        $this->assertStringContainsString('Rs.', (string) ($grossCard['value'] ?? ''));
-        $this->assertStringContainsString('0.00', (string) ($grossCard['value'] ?? ''));
+        $this->assertSame('Amount unavailable', (string) ($grossCard['value'] ?? ''));
         $this->assertSame('', (string) ($grossCard['delta'] ?? ''));
         $this->assertStringNotContainsString('USD', (string) ($grossCard['value'] ?? ''));
     }

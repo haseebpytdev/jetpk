@@ -47,10 +47,12 @@ class BookingReportService
         }
 
         $grossSalesQuery = $this->grossSalesBookingsQuery($baseQuery);
-        $operationalGrossPkr = BookingOperationalMoneyResolver::sumAdminPkrForQuery(clone $grossSalesQuery);
+        $grossPkrMeta = BookingOperationalMoneyResolver::sumAdminPkrGrossMeta(clone $grossSalesQuery);
+        $operationalGrossPkr = $grossPkrMeta['amount'];
 
         $summary = [
             'gross_sales' => $operationalGrossPkr,
+            'pkr_snapshot_excluded_count' => $grossPkrMeta['excluded_count'],
             'net_revenue' => $this->sumNetRevenue((clone $baseQuery)),
             'total_bookings' => (clone $baseQuery)->count(),
             'ticketed_bookings' => (clone $baseQuery)->where('status', BookingStatus::Ticketed)->count(),

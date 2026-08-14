@@ -37,8 +37,10 @@ class DashboardMoneyPresenterTest extends TestCase
 
         $presented = DashboardMoneyPresenter::presentBookingTotal($booking, 624);
 
-        $this->assertSame('USD', $presented['currency']);
+        $this->assertNull($presented['currency']);
+        $this->assertSame('Amount unavailable', $presented['displayLabel']);
         $this->assertTrue($presented['needsReview']);
+        $this->assertSame('USD 624.00', $presented['originalAmountLabel']);
     }
 
     public function test_resolve_booking_currency_returns_empty_when_unknown(): void

@@ -43,7 +43,10 @@ final class DashboardReportResource
         $reportingCurrency = 'PKR';
         $grossLabel = 'Gross booking value';
         $grossAmount = (int) round((float) ($financial['gross_sales'] ?? $summary['gross_sales'] ?? 0));
-        $grossFormatted = DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $reportingCurrency);
+        $excludedCount = (int) ($summary['pkr_snapshot_excluded_count'] ?? 0);
+        $grossFormatted = ($grossAmount <= 0 && $excludedCount > 0)
+            ? 'Amount unavailable'
+            : DashboardMoneyPresenter::formatDisplayLabel($grossAmount, $reportingCurrency);
 
         $base = [
             [

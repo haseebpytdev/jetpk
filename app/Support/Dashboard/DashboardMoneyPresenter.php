@@ -101,17 +101,7 @@ final class DashboardMoneyPresenter
             $presented['needsReview'] = true;
         }
 
-        if (($presented['currency'] ?? '') === 'PKR' || $presented['currencyStatus'] === self::STATUS_RESOLVED) {
-            return $presented;
-        }
-
-        if ($amountMinor <= 0) {
-            return $presented;
-        }
-
-        $resolved = self::resolveBookingCurrencyWithSource($booking);
-
-        return self::presentMinorUnits($amountMinor, $resolved['currency'], $resolved['source']);
+        return $presented;
     }
 
     /**

@@ -151,21 +151,36 @@ final class BookingOperationalMoneyResolver
             return $operational;
         }
 
-        if ($operational['currencyStatus'] === DashboardMoneyPresenter::STATUS_RESOLVED) {
-            $operational['needsReview'] = true;
-            $operational['currencyLabel'] = 'PKR snapshot unavailable';
-        }
-
-        return $operational;
+        return [
+            'amount' => '0.00',
+            'amountMinor' => 0,
+            'currency' => null,
+            'currencyStatus' => DashboardMoneyPresenter::STATUS_UNRESOLVED,
+            'currencySource' => null,
+            'displayLabel' => 'Amount unavailable',
+            'currencyLabel' => 'PKR snapshot unavailable',
+            'needsReview' => true,
+            'originalCurrency' => $operational['currency'],
+            'originalAmountLabel' => $operational['originalAmountLabel'],
+        ];
     }
 
     public static function sumAdminPkrForQuery(Builder $baseQuery): float
     {
+        return self::sumAdminPkrGrossMeta($baseQuery)['amount'];
+    }
+
+    /**
+     * @return array{amount: float, excluded_count: int}
+     */
+    public static function sumAdminPkrGrossMeta(Builder $baseQuery): array
+    {
         $pkrTotal = 0.0;
+        $excludedCount = 0;
         (clone $baseQuery)
             ->with(['fareBreakdown', 'holdSession'])
             ->orderBy('bookings.id')
-            ->chunkById(200, function (Collection $bookings) use (&$pkrTotal): void {
+            ->chunkById(200, function (Collection $bookings) use (&$pkrTotal, &$excludedCount): void {
                 foreach ($bookings as $booking) {
                     if (! $booking instanceof Booking) {
                         continue;
@@ -173,10 +188,19 @@ final class BookingOperationalMoneyResolver
                     $snapshot = self::pkrSnapshotAmount($booking);
                     if ($snapshot !== null) {
                         $pkrTotal += $snapshot;
+
+                        continue;
+                    }
+                    $fareTotal = (float) ($booking->fareBreakdown?->total ?? 0);
+                    if ($fareTotal > 0) {
+                        $excludedCount++;
                     }
                 }
             }, 'bookings.id', 'id');
 
-        return $pkrTotal;
+        return [
+            'amount' => $pkrTotal,
+            'excluded_count' => $excludedCount,
+        ];
     }
 }

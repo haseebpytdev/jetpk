@@ -121,10 +121,14 @@ final class DashboardOverviewResource
         }
         if (isset($commandSummary['gross_sales'])) {
             $grossAmount = (float) $commandSummary['gross_sales'];
+            $excludedCount = (int) ($commandSummary['gross_sales_excluded_count'] ?? 0);
+            $grossLabel = ($grossAmount <= 0 && $excludedCount > 0)
+                ? 'Amount unavailable'
+                : DashboardMoneyPresenter::formatDisplayLabel($grossAmount, 'PKR');
             $cards[] = [
                 'key' => 'gross_sales',
                 'label' => 'Gross booking value',
-                'value' => DashboardMoneyPresenter::formatDisplayLabel($grossAmount, 'PKR'),
+                'value' => $grossLabel,
                 'delta' => '',
                 'tone' => 'up',
             ];
