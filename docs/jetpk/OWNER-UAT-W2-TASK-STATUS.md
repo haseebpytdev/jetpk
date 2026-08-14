@@ -5,12 +5,16 @@ ADMIN_FULL_MANAGEMENT_SYSTEM=YES
 ADMIN_REQUIRED_MANAGEMENT_GAPS=0
 OWNER_RETEST_V3=NOT_STARTED
 JP_REL_01=PROHIBITED
+OTP_RESTORE=PROHIBITED
+QA_USER_SUSPEND=PROHIBITED
 
-REMOTE_BRANCH_HEAD=6df9deb7676ddab572efb00efeaed8005f2fb471
+BRANCH=phase/jetpk-owner-uat-wave-2-admin-staff-business-closure
 LATEST_ENGINEERING_SHA=3032c66911aad3fdad0c7cd2912db720430084fe
-LATEST_DOCS_CONTENT_SHA=6df9deb7676ddab572efb00efeaed8005f2fb471
 PRODUCTION_BUILD_ID=gVySYezQbX8a2wfDmjyBM
 PRODUCTION_PHP_SHA=3032c66911aad3fdad0c7cd2912db720430084fe
+LAST_DOCS_BASELINE_SHA=6df9deb7676ddab572efb00efeaed8005f2fb471
+
+Branch HEAD is resolved externally via Git. This file does not record REMOTE_BRANCH_HEAD as its own commit SHA.
 
 NOTIFICATION_OPERATIONAL_COVERAGE=PASS
 BOOKING_EMAIL_CUSTOMER_CTA=PASS
@@ -99,7 +103,7 @@ Production split packs (not one monolith): CMS `tmp/jp-w2-prod-cms.json`, RBAC `
 | W2-25 | Financial source of truth | DONE | PASS | DEPLOYED | USD + snapshot policy | KEEP | — | 0860c212 | — | Owner retest V3 |
 | W2-33 | CMS operational | DONE | PASS | DEPLOYED | Structured homepage + pages | KEEP | Public layout draft preview | 589e7089 | — | Owner retest V3 |
 | W2-36 | Admin management matrix | DONE | DOC | VERIFIED | — | KEEP | — | 589e7089 | — | Owner retest V3 |
-| W2-37 | Cross-portal matrix | DONE | DOC | VERIFIED | — | KEEP | 5-actor smoke | — | Probe `/agent/dashboard/bookings` 403 | Owner retest V3 |
+| W2-37 | Cross-portal matrix | DONE | PASS | VERIFIED | Invented `/agent/dashboard/bookings` historically | KEEP | Five-actor pack; `/agent/bookings` | 3032c669 | — | Owner retest V3 |
 | W2-26 | Full markup management | DONE | PASS | DEPLOYED | Write UI | KEEP | No prod money mutation | 589e7089 | Safety | Owner retest V3 |
 | W2-27 | Applications vs Agents | DONE | — | DEPLOYED | Selected-only actions | KEEP | — | a8a7c527 | — | Owner retest V3 |
 | W2-28 | Agents compact filters | DONE | — | DEPLOYED | Compact bar | KEEP | — | ed57f078 | — | Owner retest V3 |

@@ -1,12 +1,21 @@
 # OWNER UAT WAVE 2 — Final Report
 
-STATUS: `OWNER_UAT_WAVE_2=REOPENED_PRE_OWNER_RETEST_V3_SOURCE_INTEGRITY`
+STATUS: `OWNER_UAT_WAVE_2=PASS_READY_FOR_OWNER_RETEST_V3`
+ADMIN_FULL_MANAGEMENT_SYSTEM=YES
+OWNER_RETEST_V3=NOT_STARTED
+JP_REL_01=PROHIBITED
 
-BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`  
-WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f`  
-LATEST_ENGINEERING_SHA: `694b5e1b21a86ffd4f861647090408c7288828a8`  
-PRODUCTION_DASHBOARD_BUILD_ID: `j_V7qVPpvh6PJvCoKBNLS`  
-Do not equate REMOTE_BRANCH_HEAD with LATEST_ENGINEERING_SHA after a later docs pin.
+BRANCH: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`
+WAVE_1_FROZEN: `741f7d370518b5a4f32452851202653d0df9911f`
+LATEST_ENGINEERING_SHA: `3032c66911aad3fdad0c7cd2912db720430084fe`
+PRODUCTION_DASHBOARD_BUILD_ID: `gVySYezQbX8a2wfDmjyBM`
+
+Branch HEAD is resolved externally via Git. Do not treat this file as containing its own commit SHA.
+
+## HISTORY (superseded identifiers)
+
+Previous current-state (source-integrity reopen, not current): engineering `694b5e1b`, BUILD_ID `j_V7qVPpvh6PJvCoKBNLS`, STATUS `REOPENED_PRE_OWNER_RETEST_V3_SOURCE_INTEGRITY`.
+
 
 ## OLS
 
@@ -14,8 +23,8 @@ MATCH `612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`
 
 ## QA_AUTH_STATE
 
-OTP temporary Owner-UAT remains (`OTA_CLIENT_REQUIRE_LOGIN_OTP=false`).  
-OTP_DEMO_* preserved. QA identities remain active. OTP not restored. QA users not suspended.  
+OTP temporary Owner-UAT remains (`OTA_CLIENT_REQUIRE_LOGIN_OTP=false`).
+OTP_DEMO_* preserved. QA identities remain active. OTP not restored. QA users not suspended.
 JP-REL-01 not started. Owner UAT is **not** declared complete — Wave 2 is ready for Owner Retest V3 only. Additive RBAC is engineering-PASS (`RBAC_ROLE_PERMISSION_MANAGEMENT=PASS`).
 
 ## Owner findings disposition
