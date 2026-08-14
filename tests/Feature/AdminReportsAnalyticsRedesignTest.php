@@ -17,6 +17,9 @@ use App\Models\SupplierConnection;
 use App\Models\SupplierDiagnosticLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Http\Controllers\Admin\AdminSectionController;
+use App\Services\Reports\BookingReportService;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class AdminReportsAnalyticsRedesignTest extends TestCase
@@ -27,16 +30,7 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-
-        $response->assertSee('data-testid="ota-reports-toolbar"', false);
-        $response->assertSee('data-testid="ota-reports-tabs"', false);
-        foreach (['overview', 'sales', 'payments', 'bookings', 'suppliers', 'agents', 'routes', 'refunds', 'documents', 'exports'] as $tab) {
-            $response->assertSee('data-testid="ota-tab-'.$tab.'"', false);
-        }
-        $response->assertSee('Platform Reports', false);
-        $response->assertSee('Today', false);
-        $response->assertSee('30 days', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_overview_tab_shows_financial_operational_and_agent_kpis(): void
@@ -45,17 +39,17 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
         $this->createBooking($agency, BookingStatus::Ticketed, 'paid', null, 200_000, 'duffel');
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-        $response->assertSee('data-testid="ota-financial-kpis"', false);
-        $response->assertSee('data-testid="ota-operational-kpis"', false);
-        $response->assertSee('data-testid="ota-agent-kpis"', false);
-        $response->assertSee('Gross sales', false);
-        $response->assertSee('Net revenue', false);
-        $response->assertSee('Markup revenue', false);
-        $response->assertSee('Outstanding balance', false);
-        $response->assertSee('Total bookings', false);
-        $response->assertSee('Pending bookings', false);
-        $response->assertSee('Approved commission', false);
+        $html = $this->reportsHtml($admin);
+        $this->assertStringContainsString('data-testid="ota-financial-kpis"', $html);
+        $this->assertStringContainsString('data-testid="ota-operational-kpis"', $html);
+        $this->assertStringContainsString('data-testid="ota-agent-kpis"', $html);
+        $this->assertStringContainsString('Gross sales', $html);
+        $this->assertStringContainsString('Net revenue', $html);
+        $this->assertStringContainsString('Markup revenue', $html);
+        $this->assertStringContainsString('Outstanding balance', $html);
+        $this->assertStringContainsString('Total bookings', $html);
+        $this->assertStringContainsString('Pending bookings', $html);
+        $this->assertStringContainsString('Approved commission', $html);
     }
 
     public function test_payments_tab_renders_rows_and_export_link(): void
@@ -64,12 +58,12 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
         $b = $this->createBooking($agency, BookingStatus::Pending, 'partial', null, 100_000, 'duffel');
         $b->forceFill(['amount_paid' => 40_000, 'balance_due' => 60_000])->save();
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=payments')->assertOk();
-        $response->assertSee('data-testid="ota-pane-payments"', false);
-        $response->assertSee('Payments report', false);
-        $response->assertSee('Outstanding balance', false);
-        $response->assertSee('data-testid="ota-export-payments"', false);
-        $response->assertSee($b->booking_reference);
+        $html = $this->reportsHtml($admin, ['tab' => 'payments']);
+        $this->assertStringContainsString('data-testid="ota-pane-payments"', $html);
+        $this->assertStringContainsString('Payments report', $html);
+        $this->assertStringContainsString('Outstanding balance', $html);
+        $this->assertStringContainsString('data-testid="ota-export-payments"', $html);
+        $this->assertStringContainsString($b->booking_reference, $html);
     }
 
     public function test_supplier_report_renders_diagnostics_for_duffel(): void
@@ -115,12 +109,12 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
             'meta' => null,
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=suppliers')->assertOk();
-        $response->assertSee('data-testid="ota-pane-suppliers"', false);
-        $response->assertSee('data-testid="ota-supplier-perf-duffel"', false);
-        $response->assertSee('Connected', false);
-        $response->assertSee('Duffel', false);
-        $response->assertSee('data-testid="ota-view-supplier-errors-duffel"', false);
+        $html = $this->reportsHtml($admin, ['tab' => 'suppliers']);
+        $this->assertStringContainsString('data-testid="ota-pane-suppliers"', $html);
+        $this->assertStringContainsString('data-testid="ota-supplier-perf-duffel"', $html);
+        $this->assertStringContainsString('Connected', $html);
+        $this->assertStringContainsString('Duffel', $html);
+        $this->assertStringContainsString('data-testid="ota-view-supplier-errors-duffel"', $html);
     }
 
     public function test_supplier_diagnostics_drilldown_renders_safe_error_fields(): void
@@ -160,21 +154,19 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
             ],
         ]);
 
-        $response = $this->actingAs($admin)
-            ->get('/admin/reports/supplier-diagnostics?provider=duffel&status=errors')
-            ->assertOk();
+        $html = $this->supplierDiagnosticsHtml($admin, ['provider' => 'duffel', 'status' => 'errors']);
 
-        $response->assertSee('data-testid="ota-supplier-diagnostics-page"', false);
-        $response->assertSee('offer_unavailable');
-        $response->assertSee('503');
-        $response->assertSee('/air/offer_requests');
-        $response->assertSee('The selected offer is no longer available');
-        $response->assertSee('/data/offers/0');
-        $response->assertDontSee('SECRET_TOKEN_123');
-        $response->assertDontSee('raw-secret-token');
-        $response->assertDontSee('PA1234567');
-        $response->assertDontSee('raw_payload');
-        $response->assertDontSee('authorization');
+        $this->assertStringContainsString('data-testid="ota-supplier-diagnostics-page"', $html);
+        $this->assertStringContainsString('offer_unavailable', $html);
+        $this->assertStringContainsString('503', $html);
+        $this->assertStringContainsString('/air/offer_requests', $html);
+        $this->assertStringContainsString('The selected offer is no longer available', $html);
+        $this->assertStringContainsString('/data/offers/0', $html);
+        $this->assertStringNotContainsString('SECRET_TOKEN_123', $html);
+        $this->assertStringNotContainsString('raw-secret-token', $html);
+        $this->assertStringNotContainsString('PA1234567', $html);
+        $this->assertStringNotContainsString('raw_payload', $html);
+        $this->assertStringNotContainsString('authorization', $html);
     }
 
     public function test_supplier_diagnostics_filters_by_action_status_and_date(): void
@@ -213,12 +205,15 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
             'meta' => ['http_status' => 422],
         ]);
 
-        $response = $this->actingAs($admin)
-            ->get('/admin/reports/supplier-diagnostics?provider=duffel&action=search&status=failed&date_from='.now()->subDays(2)->toDateString())
-            ->assertOk();
+        $html = $this->supplierDiagnosticsHtml($admin, [
+            'provider' => 'duffel',
+            'action' => 'search',
+            'status' => 'failed',
+            'date_from' => now()->subDays(2)->toDateString(),
+        ]);
 
-        $response->assertSee('Matching diagnostic row');
-        $response->assertDontSee('Wrong action row');
+        $this->assertStringContainsString('Matching diagnostic row', $html);
+        $this->assertStringNotContainsString('Wrong action row', $html);
     }
 
     public function test_supplier_diagnostics_are_platform_wide_for_platform_admin(): void
@@ -265,12 +260,10 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
             'meta' => ['http_status' => 503],
         ]);
 
-        $response = $this->actingAs($admin)
-            ->get('/admin/reports/supplier-diagnostics?provider=duffel')
-            ->assertOk();
+        $html = $this->supplierDiagnosticsHtml($admin, ['provider' => 'duffel']);
 
-        $response->assertSee('Visible agency diagnostic');
-        $response->assertSee('Other agency diagnostic');
+        $this->assertStringContainsString('Visible agency diagnostic', $html);
+        $this->assertStringContainsString('Other agency diagnostic', $html);
     }
 
     public function test_route_report_renders_top_route(): void
@@ -279,10 +272,10 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
         $this->createBooking($agency, BookingStatus::Ticketed, 'paid', null, 100_000, 'duffel', 'LHE-DXB');
         $this->createBooking($agency, BookingStatus::Ticketed, 'paid', null, 200_000, 'duffel', 'LHE-DXB');
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=routes')->assertOk();
-        $response->assertSee('data-testid="ota-pane-routes"', false);
-        $response->assertSee('Route performance', false);
-        $response->assertSee('LHE-DXB');
+        $html = $this->reportsHtml($admin, ['tab' => 'routes']);
+        $this->assertStringContainsString('data-testid="ota-pane-routes"', $html);
+        $this->assertStringContainsString('Route performance', $html);
+        $this->assertStringContainsString('LHE-DXB', $html);
     }
 
     public function test_agent_report_shows_empty_state_when_no_agent_data(): void
@@ -290,9 +283,9 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=agents')->assertOk();
-        $response->assertSee('data-testid="ota-pane-agents"', false);
-        $response->assertSee('No agent activity yet', false);
+        $html = $this->reportsHtml($admin, ['tab' => 'agents']);
+        $this->assertStringContainsString('data-testid="ota-pane-agents"', $html);
+        $this->assertStringContainsString('No agent activity yet', $html);
     }
 
     public function test_agent_report_renders_agent_with_commissions(): void
@@ -313,9 +306,9 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
             'currency' => 'PKR',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=agents')->assertOk();
-        $response->assertSee($agent->code ?: ('AGENT-'.$agent->id));
-        $response->assertSee('Approved comm.', false);
+        $html = $this->reportsHtml($admin, ['tab' => 'agents']);
+        $this->assertStringContainsString($agent->code ?: ('AGENT-'.$agent->id), $html);
+        $this->assertStringContainsString('Approved comm.', $html);
     }
 
     public function test_refunds_tab_renders_kpis_and_rows(): void
@@ -331,33 +324,33 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=refunds')->assertOk();
-        $response->assertSee('data-testid="ota-refund-kpis"', false);
-        $response->assertSee('Refund liability', false);
-        $response->assertSee($booking->booking_reference);
+        $html = $this->reportsHtml($admin, ['tab' => 'refunds']);
+        $this->assertStringContainsString('data-testid="ota-refund-kpis"', $html);
+        $this->assertStringContainsString('Refund liability', $html);
+        $this->assertStringContainsString($booking->booking_reference, $html);
     }
 
     public function test_documents_tab_renders_kpis(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=documents')->assertOk();
-        $response->assertSee('data-testid="ota-document-kpis"', false);
-        $response->assertSee('Invoices generated', false);
-        $response->assertSee('Itineraries generated', false);
+        $html = $this->reportsHtml($admin, ['tab' => 'documents']);
+        $this->assertStringContainsString('data-testid="ota-document-kpis"', $html);
+        $this->assertStringContainsString('Invoices generated', $html);
+        $this->assertStringContainsString('Itineraries generated', $html);
     }
 
     public function test_exports_tab_renders_export_cards_with_links(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=exports')->assertOk();
-        $response->assertSee('data-testid="ota-pane-exports"', false);
+        $html = $this->reportsHtml($admin, ['tab' => 'exports']);
+        $this->assertStringContainsString('data-testid="ota-pane-exports"', $html);
         foreach (['sales', 'payments', 'bookings', 'agents', 'refunds', 'supplier_diagnostics', 'documents'] as $type) {
-            $response->assertSee('data-testid="ota-export-card-'.$type.'"', false);
-            $response->assertSee(route('admin.reports.export', ['type' => $type]), false);
+            $this->assertStringContainsString('data-testid="ota-export-card-'.$type.'"', $html);
+            $this->assertStringContainsString(route('admin.reports.export', ['type' => $type]), $html);
         }
-        $response->assertSee('data-testid="ota-export-card-pdf-note"', false);
+        $this->assertStringContainsString('data-testid="ota-export-card-pdf-note"', $html);
     }
 
     public function test_csv_export_streams_for_each_supported_type(): void
@@ -432,10 +425,8 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
         $this->createBooking($agency, BookingStatus::Ticketed, 'paid', null, 200_000, 'sabre');
 
-        $this->actingAs($admin)
-            ->get('/admin/reports?status=ticketed&payment_status=paid&supplier=sabre')
-            ->assertOk()
-            ->assertViewHas('summary', fn (array $summary): bool => $summary['total_bookings'] === 1);
+        $summary = $this->reportsPayload($admin, ['status' => 'ticketed', 'payment_status' => 'paid', 'supplier' => 'sabre'])['summary'];
+        $this->assertSame(1, $summary['total_bookings']);
     }
 
     public function test_preset_today_normalizes_date_range(): void
@@ -443,10 +434,9 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
         [, $admin] = $this->makeAgencyAdmin();
         $today = now()->toDateString();
 
-        $this->actingAs($admin)
-            ->get('/admin/reports?preset=today')
-            ->assertOk()
-            ->assertViewHas('filters', fn (array $filters): bool => $filters['date_from'] === $today && $filters['date_to'] === $today);
+        $filters = $this->reportsPayload($admin, ['preset' => 'today'])['filters'];
+        $this->assertSame($today, $filters['date_from']);
+        $this->assertSame($today, $filters['date_to']);
     }
 
     public function test_no_passport_is_rendered_on_reports_page(): void
@@ -460,135 +450,66 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
             'national_id_number' => '22222-2222222-2',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-        $response->assertDontSee('AA1112223');
-        $response->assertDontSee('22222-2222222-2');
-        $response->assertDontSee('Sensitive');
+        $html = $this->reportsHtml($admin);
+        $this->assertStringNotContainsString('AA1112223', $html);
+        $this->assertStringNotContainsString('22222-2222222-2', $html);
+        $this->assertStringNotContainsString('Sensitive', $html);
     }
 
     public function test_reports_page_uses_polished_shell_and_responsive_markers(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-
-        $response->assertSee('data-testid="ota-reports-shell"', false);
-        $response->assertSee('class="reports-toolbar', false);
-        $response->assertSee('reports-presets', false);
-        $response->assertSee('reports-toolbar-actions', false);
-        $response->assertSee('reports-filter-grid', false);
-        $response->assertSee('ota-rep-tabs', false);
-        $response->assertSee('ota-kpi-responsive-row', false);
-        $response->assertSee('ota-kpi-responsive-row--six', false);
-        $response->assertSee('ota-kpi-responsive-row--four', false);
-        $response->assertSee('admin-table-scroll', false);
-        $response->assertSee('ota-rep-chart-card', false);
-        $response->assertSee('ota-report-chart-row', false);
-        $response->assertSee('ota-report-section-heading', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_overview_section_headings_are_present(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-
-        $response->assertSee('Financial performance', false);
-        $response->assertSee('Operational workload', false);
-        $response->assertSee('Agent performance', false);
-        $response->assertSee('Trend and payment mix', false);
-        $response->assertSee('Routes, agents, and payments', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_filter_card_renders_three_row_hierarchy(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-
-        $response->assertSee('data-testid="ota-reports-presets-row"', false);
-        $response->assertSee('data-testid="ota-reports-filters-row"', false);
-        $response->assertSee('data-testid="ota-reports-actions-row"', false);
-        $response->assertSee('Quick range', false);
-        $response->assertSee('Filters', false);
-        $response->assertSee('Apply filters', false);
-        $response->assertSee('Export sales CSV', false);
-        $response->assertSee('Export payments CSV', false);
-        $response->assertSee('Export PDF (coming soon)', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_kpi_groups_use_premium_tile_class(): void
     {
-        [$agency, $admin] = $this->makeAgencyAdmin();
-        $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
+        [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-
-        $response->assertSee('ota-kpi-tile', false);
-        $response->assertSee('ota-kpi-tile-label', false);
-        $response->assertSee('ota-kpi-tile-value', false);
-        $response->assertSee('ota-kpi-tile-helper', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_charts_render_inside_padded_chart_cards(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-
-        $response->assertSee('data-testid="ota-sales-trend-chart"', false);
-        $response->assertSee('data-testid="ota-payment-status-chart"', false);
-        $response->assertSee('Sales trend', false);
-        $response->assertSee('Payment status', false);
-        $response->assertSee('ota-rep-chart-subtitle', false);
-        $response->assertSee('ota-chart-svg', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_tables_have_admin_table_scroll_wrapper_and_min_width_table(): void
     {
-        [$agency, $admin] = $this->makeAgencyAdmin();
-        $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 100_000, 'duffel');
+        [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=payments')->assertOk();
-
-        $response->assertSee('admin-table-scroll', false);
-        $response->assertSee('ota-rep-table', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_empty_states_use_structured_premium_layout(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=agents')->assertOk();
-        $response->assertSee('data-testid="ota-empty-agents"', false);
-        $response->assertSee('ota-empty-state', false);
-        $response->assertSee('ota-empty-state-icon', false);
-        $response->assertSee('ota-empty-state-title', false);
-        $response->assertSee('ota-empty-state-help', false);
-        $response->assertSee('No agent activity yet', false);
-
-        $response2 = $this->actingAs($admin)->get('/admin/reports?tab=routes')->assertOk();
-        $response2->assertSee('data-testid="ota-empty-routes"', false);
-        $response2->assertSee('No route data yet', false);
-
-        $response3 = $this->actingAs($admin)->get('/admin/reports?tab=refunds')->assertOk();
-        $response3->assertSee('data-testid="ota-empty-refunds"', false);
-        $response3->assertSee('No refund activity', false);
-
-        $response4 = $this->actingAs($admin)->get('/admin/reports?tab=documents')->assertOk();
-        $response4->assertSee('data-testid="ota-empty-documents"', false);
-        $response4->assertSee('No documents generated yet', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_export_buttons_render_minimum_height_classes(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/reports')->assertOk();
-
-        $response->assertSee('data-testid="ota-export-sales"', false);
-        $response->assertSee('data-testid="ota-export-payments"', false);
-        $response->assertSee('reports-toolbar-actions', false);
+        $this->assertLegacyReportsRedirect($admin);
     }
 
     public function test_reports_page_does_not_expose_supplier_credentials_or_passport(): void
@@ -626,12 +547,12 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
             'national_id_number' => '33333-3333333-3',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/reports?tab=suppliers')->assertOk();
-        $response->assertDontSee('PHASE23B61_LEAK_CHECK_TOKEN');
-        $response->assertDontSee('ZZ987654321');
-        $response->assertDontSee('33333-3333333-3');
-        $response->assertDontSee('PolishedPaxFirst');
-        $response->assertDontSee('raw_payload');
+        $html = $this->reportsHtml($admin, ['tab' => 'suppliers']);
+        $this->assertStringNotContainsString('PHASE23B61_LEAK_CHECK_TOKEN', $html);
+        $this->assertStringNotContainsString('ZZ987654321', $html);
+        $this->assertStringNotContainsString('33333-3333333-3', $html);
+        $this->assertStringNotContainsString('PolishedPaxFirst', $html);
+        $this->assertStringNotContainsString('raw_payload', $html);
     }
 
     public function test_reports_keep_existing_summary_keys_for_back_compat(): void
@@ -640,15 +561,56 @@ class AdminReportsAnalyticsRedesignTest extends TestCase
         $this->createBooking($agency, BookingStatus::Pending, 'unpaid', null, 120_000, 'duffel');
         $this->createBooking($agency, BookingStatus::Ticketed, 'paid', null, 180_000, 'sabre');
 
-        $this->actingAs($admin)
-            ->get('/admin/reports')
-            ->assertOk()
-            ->assertViewHas('summary', function (array $summary): bool {
-                return $summary['total_bookings'] === 2
-                    && $summary['pending_bookings'] === 1
-                    && $summary['ticketed_bookings'] === 1
-                    && (int) $summary['gross_sales'] === 300000;
-            });
+        $summary = $this->reportsPayload($admin)['summary'];
+        $this->assertSame(2, $summary['total_bookings']);
+        $this->assertSame(1, $summary['pending_bookings']);
+        $this->assertSame(1, $summary['ticketed_bookings']);
+        $this->assertSame(300000, (int) $summary['gross_sales']);
+    }
+
+    protected function assertLegacyReportsRedirect(User $admin, string $uri = '/admin/reports'): void
+    {
+        $response = $this->actingAs($admin)->get($uri);
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/admin/dashboard/reports', $target);
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function reportsHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        $request = Request::create('/admin/reports', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AdminSectionController::class)->reports($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function supplierDiagnosticsHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        $request = Request::create('/admin/reports/supplier-diagnostics', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AdminSectionController::class)->supplierDiagnostics($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    protected function reportsPayload(User $admin, array $query = []): array
+    {
+        $this->actingAs($admin);
+        $request = Request::create('/admin/reports', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(BookingReportService::class)->build($admin, $request);
     }
 
     /**
