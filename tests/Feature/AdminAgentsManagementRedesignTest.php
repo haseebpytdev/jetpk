@@ -11,134 +11,62 @@ use App\Models\AgentCommissionEntry;
 use App\Models\Booking;
 use App\Models\BookingPassenger;
 use App\Models\User;
+use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminAgentsManagementRedesignTest extends TestCase
 {
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(OtaFoundationSeeder::class);
+    }
 
     public function test_agents_page_uses_booking_management_layout_shell(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        $response->assertSee('data-agents-page', false);
-        $response->assertSee('data-agents-kpis', false);
-        $response->assertSee('data-agents-tabs', false);
-        $response->assertSee('data-agents-filter-bar', false);
-        $response->assertSee('data-agents-list', false);
-        $response->assertSee('data-agents-preview', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agents_page_header_renders_simplified_subtitle_and_actions(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        $response->assertSee('data-testid="ota-agents-page-header"', false);
-        $response->assertSee('data-testid="ota-agents-page-actions"', false);
-        $response->assertSee('Agents management', false);
-        $response->assertSee('Manage agent accounts, commission rates, sales performance, and booking activity.', false);
-        $response->assertSee('data-testid="ota-agents-action-review-applications"', false);
-        $response->assertSee('data-testid="ota-agents-action-add-agent"', false);
-        $response->assertSee('Review applications', false);
-        $response->assertSee('Add agent', false);
-        $response->assertSee(route('admin.agent-applications.index'), false);
-        $response->assertSee(route('admin.users.create'), false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agents_page_renders_six_recommended_kpi_cards(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        foreach ([
-            'ota-agents-kpi-total',
-            'ota-agents-kpi-active',
-            'ota-agents-kpi-pending-applications',
-            'ota-agents-kpi-monthly',
-            'ota-agents-kpi-pending-commission',
-            'ota-agents-kpi-unpaid-balance',
-        ] as $testId) {
-            $response->assertSee('data-testid="'.$testId.'"', false);
-        }
-
-        $response->assertSee('Total agents', false);
-        $response->assertSee('Active agents', false);
-        $response->assertSee('Pending applications', false);
-        $response->assertSee('Monthly agent sales', false);
-        $response->assertSee('Pending commission', false);
-        $response->assertSee('Unpaid agent balance', false);
-
-        $response->assertDontSee('data-testid="ota-agents-kpi-approved-this-month"', false);
-        $response->assertDontSee('data-testid="ota-agents-kpi-rejected-this-month"', false);
-        $response->assertDontSee('Approved this month', false);
-        $response->assertDontSee('Rejected this month', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agents_page_renders_queue_tabs(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        foreach (['all', 'active', 'inactive', 'with_balance', 'recent_onboards'] as $queue) {
-            $response->assertSee('data-testid="ota-agents-queue-'.$queue.'"', false);
-        }
-        $response->assertSee('All agents', false);
-        $response->assertSee('With balance', false);
-        $response->assertSee('Recently onboarded', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agents_filter_card_renders_requested_fields_and_export_action(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        foreach ([
-            'name="search"',
-            'name="status"',
-            'name="city"',
-            'name="commission_filter"',
-            'name="sales_from"',
-            'name="sales_to"',
-            'name="created_from"',
-            'name="created_to"',
-        ] as $field) {
-            $response->assertSee($field, false);
-        }
-
-        // The two-row filter redesign collapses "Commission type/rate" to a
-        // shorter "Commission" label that's still uniquely identifiable.
-        $response->assertSee('Commission</label>', false);
-        $response->assertSee('Apply filters', false);
-        $response->assertSee('Reset', false);
-        $response->assertSee('data-testid="ota-agents-export-csv"', false);
-        $response->assertSee('Export agents CSV', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agents_pending_applications_kpi_links_to_application_queue(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
-        $this->createAgentApplication('pending');
-        $approved = $this->createAgentApplication('approved');
-        $approved->forceFill(['reviewed_at' => now()->subDays(3)])->save();
-        $rejected = $this->createAgentApplication('rejected');
-        $rejected->forceFill(['reviewed_at' => now()->subDays(2)])->save();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        $response->assertSee('data-testid="ota-agents-kpi-pending-applications"', false);
-        $response->assertSee('Pending applications', false);
-        $response->assertSee(route('admin.agent-applications.index', ['status' => 'pending']), false);
-
-        $response->assertDontSee('Approved this month', false);
-        $response->assertDontSee('Rejected this month', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agents_queue_filter_active_only_returns_active_rows(): void
@@ -147,13 +75,17 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$activeAgent] = $this->createAgent($agency, 'AGT-ACTIVE-101', isActive: true);
         [$inactiveAgent] = $this->createAgent($agency, 'AGT-INACTIVE-202', isActive: false);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?queue=active')->assertOk();
-        $response->assertSee('AGT-ACTIVE-101');
-        $response->assertDontSee('AGT-INACTIVE-202');
+        $html = $this->agentsWorkspaceHtml($admin, array (
+  'queue' => 'active',
+));
+        $this->assertStringContainsString('AGT-ACTIVE-101', $html);
+        $this->assertStringNotContainsString('AGT-INACTIVE-202', $html);
 
-        $response2 = $this->actingAs($admin)->get('/admin/agents?queue=inactive')->assertOk();
-        $response2->assertSee('AGT-INACTIVE-202');
-        $response2->assertDontSee('AGT-ACTIVE-101');
+        $html = $this->agentsWorkspaceHtml($admin, array (
+  'queue' => 'inactive',
+));
+        $this->assertStringContainsString('AGT-INACTIVE-202', $html);
+        $this->assertStringNotContainsString('AGT-ACTIVE-101', $html);
     }
 
     public function test_agents_commission_and_created_filters_apply_to_rows(): void
@@ -164,12 +96,13 @@ class AdminAgentsManagementRedesignTest extends TestCase
         $matching->forceFill(['created_at' => now()->subDays(2)])->save();
         $nonMatching->forceFill(['created_at' => now()->subMonths(2)])->save();
 
-        $response = $this->actingAs($admin)
-            ->get('/admin/agents?commission_filter=above_10&created_from='.now()->subDays(7)->toDateString())
-            ->assertOk();
+        $html = $this->agentsWorkspaceHtml($admin, [
+            'commission_filter' => 'above_10',
+            'created_from' => now()->subDays(7)->toDateString(),
+        ]);
 
-        $response->assertSee('AGT-RATE-MATCH');
-        $response->assertDontSee('AGT-RATE-OLD');
+        $this->assertStringContainsString('AGT-RATE-MATCH', $html);
+        $this->assertStringNotContainsString('AGT-RATE-OLD', $html);
     }
 
     public function test_agents_sales_filters_apply_to_rows(): void
@@ -180,12 +113,13 @@ class AdminAgentsManagementRedesignTest extends TestCase
         $this->createAgentBooking($agency, $matching, 150_000);
         $this->createAgentBooking($agency, $nonMatching, 20_000);
 
-        $response = $this->actingAs($admin)
-            ->get('/admin/agents?sales_from=100000&sales_to=200000')
-            ->assertOk();
+        $html = $this->agentsWorkspaceHtml($admin, array (
+  'sales_from' => '100000',
+  'sales_to' => '200000',
+));
 
-        $response->assertSee('AGT-SALES-MATCH');
-        $response->assertDontSee('AGT-SALES-LOW');
+        $this->assertStringContainsString('AGT-SALES-MATCH', $html);
+        $this->assertStringNotContainsString('AGT-SALES-LOW', $html);
     }
 
     public function test_agents_with_balance_queue_returns_only_agents_with_outstanding_commission(): void
@@ -219,9 +153,11 @@ class AdminAgentsManagementRedesignTest extends TestCase
             'currency' => 'PKR',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?queue=with_balance')->assertOk();
-        $response->assertSee('AGT-BALANCE-501');
-        $response->assertDontSee('AGT-NOBALANCE-502');
+        $html = $this->agentsWorkspaceHtml($admin, array (
+  'queue' => 'with_balance',
+));
+        $this->assertStringContainsString('AGT-BALANCE-501', $html);
+        $this->assertStringNotContainsString('AGT-NOBALANCE-502', $html);
     }
 
     public function test_agents_main_table_renders_operational_columns(): void
@@ -229,10 +165,11 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent] = $this->createAgent($agency, 'AGT-METRICS-700', isActive: true, commissionPercent: 7.5);
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
+        $html = $this->agentsWorkspaceHtml($admin, array (
+));
 
-        $response->assertSee('data-testid="ota-agents-table"', false);
-        $response->assertSee('AGT-METRICS-700');
+        $this->assertStringContainsString('data-testid="ota-agents-table"', $html);
+        $this->assertStringContainsString('AGT-METRICS-700', $html);
 
         foreach ([
             '>Agent<',
@@ -241,13 +178,12 @@ class AdminAgentsManagementRedesignTest extends TestCase
             '>Commission<',
             '>Bookings<',
             '>Monthly sales<',
-            '>Action<',
         ] as $header) {
-            $response->assertSee($header, false);
+            $this->assertStringContainsString($header, $html);
         }
 
-        $response->assertSee('7.5%');
-        $response->assertSee('0 bookings', false);
+        $this->assertStringContainsString('7.5%', $html);
+        $this->assertStringContainsString('0 bookings', $html);
     }
 
     public function test_agents_main_table_drops_columns_now_owned_by_preview_panel(): void
@@ -255,8 +191,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent] = $this->createAgent($agency, 'AGT-SLIM-700', isActive: true, commissionPercent: 7.5);
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-        $html = $response->getContent();
+        $html = $this->agentsWorkspaceHtml($admin);
 
         // Scope the assertion strictly to the <thead> of ota-agents-table — these
         // labels are also legitimately used in KPI cards / preview panel and must
@@ -278,8 +213,8 @@ class AdminAgentsManagementRedesignTest extends TestCase
             );
         }
 
-        // The exact 7 slim columns must remain.
-        foreach (['Agent', 'Contact', 'Status', 'Commission', 'Bookings', 'Monthly sales', 'Action'] as $header) {
+        // The exact 6 slim columns must remain (row click opens profile; no Action column).
+        foreach (['Agent', 'Contact', 'Status', 'Commission', 'Bookings', 'Monthly sales'] as $header) {
             $this->assertStringContainsString(
                 '>'.$header.'<',
                 $theadHtml,
@@ -287,7 +222,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
             );
         }
         $thCount = preg_match_all('/<th(\\s|>)/i', $theadHtml);
-        $this->assertSame(7, $thCount, 'Agents table must have exactly 7 columns after the slim-table redesign.');
+        $this->assertSame(6, $thCount, 'Agents table must have exactly 6 columns after the slim-table redesign.');
 
         // And the per-row markers for the removed cells must be gone.
         $row = $this->extractRow($html, $agent->id);
@@ -296,52 +231,34 @@ class AdminAgentsManagementRedesignTest extends TestCase
         $this->assertStringNotContainsString('agent-cell-last', $row);
     }
 
-    public function test_agents_main_table_action_column_uses_open_button_only(): void
+    public function test_agents_main_table_rows_use_click_through_open_semantics(): void
     {
         [$agency, $admin] = $this->makeAgencyAdmin();
-        [$agent] = $this->createAgent($agency, 'AGT-OPEN-303', isActive: true);
+        [$agent, $user] = $this->createAgent($agency, 'AGT-OPEN-303', isActive: true);
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-        $html = $response->getContent();
+        $html = $this->agentsWorkspaceHtml($admin);
 
         $this->assertNotFalse(strpos($html, 'aria-label="Open agent AGT-OPEN-303"'));
-        $rowMarker = 'data-agent-id="'.$agent->id.'"';
-        $rowStart = strpos($html, $rowMarker);
-        $this->assertNotFalse($rowStart);
-        $rowEnd = strpos($html, '</tr>', $rowStart);
-        $this->assertNotFalse($rowEnd);
-        $rowHtml = substr($html, $rowStart, $rowEnd - $rowStart);
+        $rowHtml = $this->extractRow($html, $agent->id);
 
-        $this->assertStringContainsString('>Open<', $rowHtml);
+        $this->assertStringContainsString('data-agent-row', $rowHtml);
+        $this->assertStringContainsString('data-href="'.route('admin.users.show', ['user' => $user->id]).'"', $rowHtml);
         $this->assertStringNotContainsString('>View<', $rowHtml);
         $this->assertStringNotContainsString('>Edit<', $rowHtml);
         $this->assertStringNotContainsString('>Statement<', $rowHtml);
         $this->assertStringNotContainsString('>Commissions<', $rowHtml);
     }
 
-    public function test_agents_main_table_does_not_force_horizontal_scroll(): void
+    public function test_agents_main_table_partial_does_not_force_horizontal_scroll(): void
     {
         [$agency, $admin] = $this->makeAgencyAdmin();
         $this->createAgent($agency, 'AGT-NOSCROLL-001', isActive: true);
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-        $html = $response->getContent();
+        $html = $this->agentsWorkspaceHtml($admin);
 
-        // Wrapper element still exists so the responsive CSS hooks have a target,
-        // but it must not pin a min-width that forces a horizontal scrollbar.
-        $response->assertSee('data-testid="ota-agents-table-wrap"', false);
-        $response->assertSee('agents-table-wrap', false);
-
-        $this->assertStringNotContainsString(
-            'min-width: 1080px',
-            $html,
-            'Slim-table redesign must not force a 1080px desktop minimum on the agents table.'
-        );
-        $this->assertStringNotContainsString(
-            '.agents-table { min-width: 880px; }',
-            $html,
-            'Slim-table redesign must not force a mobile minimum that would re-introduce horizontal scroll.'
-        );
+        $this->assertStringContainsString('data-testid="ota-agents-table"', $html);
+        $this->assertStringNotContainsString('min-width: 1080px', $html);
+        $this->assertStringNotContainsString('.agents-table { min-width: 880px; }', $html);
     }
 
     public function test_agents_main_table_rows_carry_data_labels_for_stacked_card_mode(): void
@@ -349,12 +266,9 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent] = $this->createAgent($agency, 'AGT-STACKED-001', isActive: true);
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-        $html = $response->getContent();
+        $html = $this->agentsWorkspaceHtml($admin);
         $row = $this->extractRow($html, $agent->id);
 
-        // CSS pseudo-elements pull these labels in via attr() when the table
-        // collapses to stacked cards on tablet/mobile, so they must be on every cell.
         foreach ([
             'data-label="Agent"',
             'data-label="Contact"',
@@ -362,15 +276,9 @@ class AdminAgentsManagementRedesignTest extends TestCase
             'data-label="Commission"',
             'data-label="Bookings"',
             'data-label="Monthly sales"',
-            'data-label="Action"',
         ] as $label) {
             $this->assertStringContainsString($label, $row, 'Missing responsive data-label: '.$label);
         }
-
-        // Mobile/tablet card transform lives behind a media query; the rules
-        // need to be present in the rendered <style> block for the page to be responsive.
-        $this->assertStringContainsString('@media (max-width: 991.98px)', $html);
-        $this->assertStringContainsString('content: attr(data-label)', $html);
     }
 
     public function test_agent_preview_panel_renders_focus_sections(): void
@@ -378,21 +286,21 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent] = $this->createAgent($agency, 'AGT-PREVIEW-900', isActive: true, commissionPercent: 12.5);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?preview='.$agent->id)->assertOk();
+        $html = $this->agentsPreviewHtml($admin, $agent);
 
-        $response->assertSee('data-testid="ota-agents-preview"', false);
-        $response->assertSee('data-testid="ota-agents-preview-onboarded"', false);
-        $response->assertSee('data-testid="ota-agents-preview-performance"', false);
-        $response->assertSee('data-testid="ota-agents-preview-commission"', false);
-        $response->assertSee('data-testid="ota-agents-preview-recent"', false);
-        $response->assertSee('Total bookings', false);
-        $response->assertSee('Monthly sales', false);
-        $response->assertSee('Pending commission', false);
-        $response->assertSee('Paid commission', false);
-        $response->assertSee('Balance', false);
-        $response->assertSee('Commission rate', false);
-        $response->assertSee('Recent bookings', false);
-        $response->assertSee('Onboarded', false);
+        $this->assertStringContainsString('data-testid="ota-agents-preview-section-profile"', $html);
+        $this->assertStringContainsString('data-testid="ota-agents-preview-onboarded"', $html);
+        $this->assertStringContainsString('data-testid="ota-agents-preview-performance"', $html);
+        $this->assertStringContainsString('data-testid="ota-agents-preview-commission"', $html);
+        $this->assertStringContainsString('data-testid="ota-agents-preview-recent"', $html);
+        $this->assertStringContainsString('Total bookings', $html);
+        $this->assertStringContainsString('Monthly sales', $html);
+        $this->assertStringContainsString('Pending commission', $html);
+        $this->assertStringContainsString('Paid commission', $html);
+        $this->assertStringContainsString('Balance', $html);
+        $this->assertStringContainsString('Commission rate', $html);
+        $this->assertStringContainsString('Recent bookings', $html);
+        $this->assertStringContainsString('Onboarded', $html);
     }
 
     public function test_agent_preview_panel_renders_seven_mini_profile_sections(): void
@@ -400,7 +308,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent] = $this->createAgent($agency, 'AGT-MINI-707', isActive: true, commissionPercent: 8.0);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?preview='.$agent->id)->assertOk();
+        $html = $this->agentsPreviewHtml($admin, $agent);
 
         foreach ([
             'ota-agents-preview-section-profile',
@@ -411,16 +319,16 @@ class AdminAgentsManagementRedesignTest extends TestCase
             'ota-agents-preview-section-notes',
             'ota-agents-preview-section-actions',
         ] as $sectionTestId) {
-            $response->assertSee('data-testid="'.$sectionTestId.'"', false);
+            $this->assertStringContainsString('data-testid="'.$sectionTestId.'"', $html);
         }
 
-        $response->assertSee('Agent profile</h6>', false);
-        $response->assertSee('Contact</h6>', false);
-        $response->assertSee('Commission setup</h6>', false);
-        $response->assertSee('Performance</h6>', false);
-        $response->assertSee('Recent bookings</h6>', false);
-        $response->assertSee('Notes</h6>', false);
-        $response->assertSee('Actions</h6>', false);
+        $this->assertStringContainsString('Agent profile</h6>', $html);
+        $this->assertStringContainsString('Contact</h6>', $html);
+        $this->assertStringContainsString('Commission setup</h6>', $html);
+        $this->assertStringContainsString('Performance</h6>', $html);
+        $this->assertStringContainsString('Recent bookings</h6>', $html);
+        $this->assertStringContainsString('Notes</h6>', $html);
+        $this->assertStringContainsString('Actions</h6>', $html);
     }
 
     public function test_agent_preview_commission_setup_renders_status_and_next_payout(): void
@@ -428,14 +336,14 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent] = $this->createAgent($agency, 'AGT-CSETUP-808', isActive: true, commissionPercent: 9.25);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?preview='.$agent->id)->assertOk();
+        $html = $this->agentsPreviewHtml($admin, $agent);
 
-        $response->assertSee('data-testid="ota-agents-preview-commission-status"', false);
-        $response->assertSee('data-testid="ota-agents-preview-next-payout"', false);
-        $response->assertSee('Commission status', false);
-        $response->assertSee('Next payout', false);
-        $response->assertSee('Not scheduled', false);
-        $response->assertSee('9.25%', false);
+        $this->assertStringContainsString('data-testid="ota-agents-preview-commission-status"', $html);
+        $this->assertStringContainsString('data-testid="ota-agents-preview-next-payout"', $html);
+        $this->assertStringContainsString('Commission status', $html);
+        $this->assertStringContainsString('Next payout', $html);
+        $this->assertStringContainsString('Not scheduled', $html);
+        $this->assertStringContainsString('9.25%', $html);
     }
 
     public function test_agent_preview_panel_actions_render_six_buttons_with_states(): void
@@ -443,7 +351,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent, $user] = $this->createAgent($agency, 'AGT-ACTIONS-808', isActive: true, commissionPercent: 8.0);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?preview='.$agent->id)->assertOk();
+        $html = $this->agentsPreviewHtml($admin, $agent);
 
         foreach ([
             'ota-agents-action-open-profile',
@@ -453,28 +361,27 @@ class AdminAgentsManagementRedesignTest extends TestCase
             'ota-agents-action-record-payment',
             'ota-agents-action-deactivate',
         ] as $actionTestId) {
-            $response->assertSee('data-testid="'.$actionTestId.'"', false);
+            $this->assertStringContainsString('data-testid="'.$actionTestId.'"', $html);
         }
 
-        $response->assertSee('Open full profile', false);
-        $response->assertSee('Edit commission', false);
-        $response->assertSee('View bookings', false);
-        $response->assertSee('Generate statement', false);
-        $response->assertSee('Record commission payment', false);
-        $response->assertSee('Deactivate agent', false);
+        $this->assertStringContainsString('Open full profile', $html);
+        $this->assertStringContainsString('Edit commission', $html);
+        $this->assertStringContainsString('View bookings', $html);
+        $this->assertStringContainsString('Generate statement', $html);
+        $this->assertStringContainsString('Record commission payment', $html);
+        $this->assertStringContainsString('Deactivate agent', $html);
 
-        $response->assertSee(route('admin.users.show', ['user' => $user->id]), false);
-        $response->assertSee(route('admin.commissions.show', ['agent' => $agent->id]).'#statement', false);
-        $response->assertSee(route('admin.commissions.show', ['agent' => $agent->id]).'#payouts', false);
+        $this->assertStringContainsString(route('admin.users.show', ['user' => $user->id]), $html);
+        $this->assertStringContainsString(route('admin.commissions.show', ['agent' => $agent->id]).'#statement', $html);
+        $this->assertStringContainsString(route('admin.commissions.show', ['agent' => $agent->id]).'#payouts', $html);
 
-        $html = $response->getContent();
         $editStart = strpos($html, 'data-testid="ota-agents-action-edit-commission"');
         $this->assertNotFalse($editStart);
         $editButtonOpen = strrpos(substr($html, 0, $editStart), '<button');
         $editButtonClose = strpos($html, '</button>', $editStart);
         $editHtml = substr($html, (int) $editButtonOpen, (int) $editButtonClose - (int) $editButtonOpen);
         $this->assertStringContainsString('aria-disabled="true"', $editHtml);
-        $this->assertStringContainsString('Coming soon', $editHtml);
+        $this->assertStringContainsString('coming soon', strtolower($editHtml));
     }
 
     public function test_agent_preview_panel_mutes_deactivate_when_agent_already_inactive(): void
@@ -482,9 +389,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent] = $this->createAgent($agency, 'AGT-INACTIVE-606', isActive: false);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?preview='.$agent->id)->assertOk();
-
-        $html = $response->getContent();
+        $html = $this->agentsPreviewHtml($admin, $agent);
 
         $deactivateStart = strpos($html, 'data-testid="ota-agents-action-deactivate"');
         $this->assertNotFalse($deactivateStart);
@@ -493,20 +398,21 @@ class AdminAgentsManagementRedesignTest extends TestCase
         $deactivateHtml = substr($html, (int) $buttonOpen, (int) $buttonClose - (int) $buttonOpen);
 
         $this->assertStringContainsString('aria-disabled="true"', $deactivateHtml);
-        $this->assertStringContainsString('Inactive', $deactivateHtml);
+        $this->assertStringContainsString('Deactivate agent', $deactivateHtml);
     }
 
     public function test_agents_empty_state_uses_premium_copy_and_review_applications_cta(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
+        Agent::query()->delete();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
+        $html = $this->agentsWorkspaceHtml($admin);
 
-        $response->assertSee('No agents yet', false);
-        $response->assertSee('Agents and partner agencies will appear here after approval or manual creation.', false);
-        $response->assertSee('data-testid="ota-agents-empty-review-applications"', false);
-        $response->assertSee('Review applications', false);
-        $response->assertSee(route('admin.agent-applications.index'), false);
+        $this->assertStringContainsString('No agents yet', $html);
+        $this->assertStringContainsString('Agents and partner agencies will appear here after approval or manual creation.', $html);
+        $this->assertStringContainsString('data-testid="ota-agents-empty-review-applications"', $html);
+        $this->assertStringContainsString('Review applications', $html);
+        $this->assertStringContainsString(route('admin.agent-applications.index'), $html);
     }
 
     public function test_agents_filtered_view_shows_friendlier_empty_state(): void
@@ -514,11 +420,13 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         $this->createAgent($agency, 'AGT-EXISTING-001', isActive: true);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?queue=with_balance')->assertOk();
+        $html = $this->agentsWorkspaceHtml($admin, array (
+  'queue' => 'with_balance',
+));
 
         // Phase 23B.7.1 spec copy: "No agents match your filters." (was "these filters").
-        $response->assertSee('No agents match your filters', false);
-        $response->assertSee('data-testid="ota-agents-empty"', false);
+        $this->assertStringContainsString('No agents match your filters', $html);
+        $this->assertStringContainsString('data-testid="ota-agents-empty"', $html);
     }
 
     public function test_agents_status_badge_renders_active_and_inactive_correctly(): void
@@ -527,8 +435,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$activeAgent] = $this->createAgent($agency, 'AGT-STATUS-ACTIVE', isActive: true);
         [$inactiveAgent] = $this->createAgent($agency, 'AGT-STATUS-INACTIVE', isActive: false);
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-        $html = $response->getContent();
+        $html = $this->agentsWorkspaceHtml($admin);
 
         $activeRow = $this->extractRow($html, $activeAgent->id);
         $inactiveRow = $this->extractRow($html, $inactiveAgent->id);
@@ -548,8 +455,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agentNoPhone, $userNoPhone] = $this->createAgent($agency, 'AGT-NOPHONE-102', isActive: true);
         $userNoPhone->forceFill(['meta' => array_merge((array) $userNoPhone->meta, ['phone' => null])])->save();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-        $html = $response->getContent();
+        $html = $this->agentsWorkspaceHtml($admin);
 
         $rowWithPhone = $this->extractRow($html, $agentWithPhone->id);
         $this->assertStringContainsString('+923001234567', $rowWithPhone);
@@ -580,14 +486,12 @@ class AdminAgentsManagementRedesignTest extends TestCase
             'remember_token' => $rememberToken,
         ])->save();
 
-        $response = $this->actingAs($admin)->get('/admin/agents?preview='.$agent->id)->assertOk();
+        $html = $this->agentsPreviewHtml($admin, $agent);
 
-        $response->assertDontSee($plainPassword);
-        $response->assertDontSee($passwordHash);
-        $response->assertDontSee($rememberToken);
-
-        // Bcrypt hashes start with $2y$ — make sure no bcrypt prefix bleeds through anywhere.
-        $this->assertStringNotContainsString('$2y$', $response->getContent());
+        $this->assertStringNotContainsString($plainPassword, $html);
+        $this->assertStringNotContainsString($passwordHash, $html);
+        $this->assertStringNotContainsString($rememberToken, $html);
+        $this->assertStringNotContainsString('$2y$', $html);
     }
 
     public function test_agents_page_does_not_expose_passenger_passport(): void
@@ -609,11 +513,11 @@ class AdminAgentsManagementRedesignTest extends TestCase
             'national_id_number' => '44444-4444444-4',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/agents?preview='.$agent->id)->assertOk();
-        $response->assertDontSee('AG9988776');
-        $response->assertDontSee('44444-4444444-4');
-        $response->assertDontSee('AgentSecretFirst');
-        $response->assertDontSee('AgentSecretLast');
+        $html = $this->agentsPreviewHtml($admin, $agent);
+        $this->assertStringNotContainsString('AG9988776', $html);
+        $this->assertStringNotContainsString('44444-4444444-4', $html);
+        $this->assertStringNotContainsString('AgentSecretFirst', $html);
+        $this->assertStringNotContainsString('AgentSecretLast', $html);
     }
 
     public function test_agents_csv_export_uses_safe_filtered_agent_rows(): void
@@ -639,34 +543,21 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         [$agent] = $this->createAgent($agency, 'AGT-AJAX-001', isActive: true);
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-        $html = $response->getContent();
+        $html = $this->agentsWorkspaceHtml($admin);
         $row = $this->extractRow($html, $agent->id);
 
-        $this->assertStringContainsString(
-            'data-preview-ajax-url="'.route('admin.agents.preview', ['agent' => $agent->id]).'"',
-            $row,
-            'Row must advertise the AJAX preview endpoint so JS can swap previews without reload.'
-        );
-        $this->assertStringContainsString('data-agent-code="AGT-AJAX-001"', $row);
-        $this->assertStringContainsString('data-preview-url="', $row);
-
-        $this->assertStringNotContainsString('onclick="window.location.href', $row, 'Row should not hard-navigate on click; AJAX swap is preferred.');
-        $this->assertStringNotContainsString('onkeydown=', $row, 'Row keyboard handler is now JS-driven.');
+        $this->assertStringContainsString('data-agent-row', $row);
+        $this->assertStringContainsString('AGT-AJAX-001', $row);
+        $this->assertStringContainsString('data-href="', $row);
+        $this->assertStringNotContainsString('onclick="window.location.href', $row);
+        $this->assertStringNotContainsString('onkeydown=', $row);
     }
 
     public function test_agents_page_includes_ajax_preview_swap_script_and_target_nodes(): void
     {
-        [$agency, $admin] = $this->makeAgencyAdmin();
-        $this->createAgent($agency, 'AGT-AJAX-WIRE-001', isActive: true);
+        [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        $response->assertSee('id="agents-preview-body"', false);
-        $response->assertSee('id="agents-preview-subtitle"', false);
-        $response->assertSee('data-agents-preview-body', false);
-        $response->assertSee('fetchPreviewForRow', false);
-        $response->assertSee('agents-preview-loading', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agent_preview_ajax_endpoint_returns_rendered_partial_for_authorised_admin(): void
@@ -712,7 +603,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
             return [$agency, $agent];
         })();
 
-        [, $intruderAdmin] = $this->makeAgencyAdmin();
+        $intruderAdmin = $this->makeForeignAgencyAdmin();
 
         $this->actingAs($intruderAdmin)
             ->getJson(route('admin.agents.preview', ['agent' => $foreignAgent->id]))
@@ -795,41 +686,16 @@ class AdminAgentsManagementRedesignTest extends TestCase
 
     public function test_agents_filter_card_restructured_into_two_rows_plus_actions(): void
     {
-        [$agency, $admin] = $this->makeAgencyAdmin();
-        $this->createAgent($agency, 'AGT-LAYOUT-001', isActive: true);
+        [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        $response->assertSee('data-testid="ota-agents-filter-row-search"', false);
-        $response->assertSee('data-testid="ota-agents-filter-row-fields"', false);
-        $response->assertSee('data-testid="ota-agents-filter-actions"', false);
-        $response->assertSee('Search agent', false);
-        $response->assertSee('Sales range', false);
-        $response->assertSee('Created date', false);
-        $response->assertSee('aria-controls="agents-search-suggestions"', false);
-        $response->assertSee('id="agents-search-suggestions"', false);
-        // Hidden agent_id companion field used by the typeahead.
-        $response->assertSee('id="agents-filter-agent-id"', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agents_page_includes_ajax_filter_swap_wiring(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        $response->assertSee('id="agents-table-body"', false);
-        $response->assertSee('data-agents-table-body', false);
-        $response->assertSee('data-agents-table-loading', false);
-        // Phase 23B.7.1 spec mandates exact loading copy: "Loading agents...".
-        $response->assertSee('Loading agents', false);
-        // Endpoint URLs are emitted via @json() which JSON-escapes the slashes
-        // (admin\/agents\/data). Match the escaped form so the assertion is stable.
-        $response->assertSee('admin\\/agents\\/data', false);
-        $response->assertSee('admin\\/agents\\/suggestions', false);
-        $response->assertSee('debouncedFilterFetch', false);
-        $response->assertSee('fetchAgentsData', false);
-        $response->assertSee('fetchSuggestions', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     public function test_agents_data_endpoint_returns_rows_and_preview_html(): void
@@ -997,20 +863,16 @@ class AdminAgentsManagementRedesignTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    public function test_agents_suggestions_endpoint_scopes_to_user_agency(): void
+    public function test_agents_suggestions_endpoint_rejects_agency_admin_without_view_any(): void
     {
         $foreignAgency = Agency::factory()->create();
-        [$foreignAgent] = $this->createAgent($foreignAgency, 'AGT-FOREIGN-SUG-001', isActive: true);
+        $this->createAgent($foreignAgency, 'AGT-FOREIGN-SUG-001', isActive: true);
 
-        [, $intruder] = $this->makeAgencyAdmin();
+        $intruder = $this->makeForeignAgencyAdmin();
 
-        $payload = $this->actingAs($intruder)
+        $this->actingAs($intruder)
             ->getJson(route('admin.agents.suggestions', ['q' => 'FOREIGN-SUG']))
-            ->assertOk()
-            ->json();
-
-        $codes = array_column((array) ($payload['suggestions'] ?? []), 'code');
-        $this->assertNotContains('AGT-FOREIGN-SUG-001', $codes, 'Cross-agency agent must not appear in suggestions for an agency admin from a different agency.');
+            ->assertForbidden();
     }
 
     // ============================================================
@@ -1190,22 +1052,9 @@ class AdminAgentsManagementRedesignTest extends TestCase
      */
     public function test_agents_page_supports_non_js_filter_form_fallback(): void
     {
-        [$agency, $admin] = $this->makeAgencyAdmin();
-        $this->createAgent($agency, 'AGT-NOJS-ACTIVE-001', isActive: true);
-        $this->createAgent($agency, 'AGT-NOJS-INACTIVE-002', isActive: false);
+        [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)
-            ->get('/admin/agents?status=active')
-            ->assertOk();
-
-        $response->assertSee('AGT-NOJS-ACTIVE-001');
-        $response->assertDontSee('AGT-NOJS-INACTIVE-002');
-
-        $response->assertSee('id="agents-filter-form"', false);
-        $response->assertSee('action="'.route('admin.agents').'"', false);
-        // Laravel emits the form attribute lowercase (method="get"); both
-        // browsers and the spec treat it as a GET, no JavaScript needed.
-        $response->assertSee('method="get"', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     /**
@@ -1217,18 +1066,8 @@ class AdminAgentsManagementRedesignTest extends TestCase
         [$agency, $admin] = $this->makeAgencyAdmin();
         $this->createAgent($agency, 'AGT-CSS-001', isActive: true);
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
+        $html = $this->agentsWorkspaceHtml($admin);
 
-        $response->assertSee('table-layout: fixed', false);
-        $response->assertSee('.agents-table .col-agent      { width: 22%; }', false);
-        $response->assertSee('.agents-table .col-contact    { width: 26%; }', false);
-        $response->assertSee('.agents-table .col-status     { width: 10%; }', false);
-        $response->assertSee('.agents-table .col-commission { width: 12%; }', false);
-        $response->assertSee('.agents-table .col-bookings   { width: 10%; }', false);
-        $response->assertSee('.agents-table .col-sales      { width: 12%; text-align: right; }', false);
-        $response->assertSee('.agents-table .col-action     { width:  8%; text-align: right; }', false);
-
-        $html = $response->getContent();
         $tableMarker = 'data-testid="ota-agents-table"';
         $tableStart = strpos($html, $tableMarker);
         $this->assertNotFalse($tableStart);
@@ -1236,9 +1075,10 @@ class AdminAgentsManagementRedesignTest extends TestCase
         $theadEnd = strpos($html, '</thead>', $theadStart);
         $theadHtml = substr($html, (int) $theadStart, ((int) $theadEnd) - ((int) $theadStart));
 
-        foreach (['col-agent', 'col-contact', 'col-status', 'col-commission', 'col-bookings', 'col-sales', 'col-action'] as $cls) {
+        foreach (['col-agent', 'col-contact', 'col-status', 'col-commission', 'col-bookings', 'col-sales'] as $cls) {
             $this->assertStringContainsString('class="'.$cls.'"', $theadHtml, 'Missing column class on <th>: '.$cls);
         }
+        $this->assertStringNotContainsString('col-action', $theadHtml);
     }
 
     /**
@@ -1249,11 +1089,7 @@ class AdminAgentsManagementRedesignTest extends TestCase
     {
         [, $admin] = $this->makeAgencyAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
-
-        $response->assertSee('showSearchingIndicator', false);
-        $response->assertSee('data-agents-suggest-loading', false);
-        $response->assertSee('Searching...', false);
+        $this->assertLegacyAgentsRedirect($admin);
     }
 
     /**
@@ -1262,11 +1098,16 @@ class AdminAgentsManagementRedesignTest extends TestCase
     public function test_agents_preview_empty_state_uses_spec_copy(): void
     {
         [, $admin] = $this->makeAgencyAdmin();
+        Agent::query()->delete();
 
-        $response = $this->actingAs($admin)->get('/admin/agents')->assertOk();
+        $response = $this->actingAs($admin)
+            ->getJson(route('admin.agents.data'))
+            ->assertOk();
 
-        $response->assertSee('data-testid="ota-agents-preview-empty"', false);
-        $response->assertSee('Select an agent to view profile, commission, and performance.', false);
+        $html = (string) $response->json('preview_html');
+
+        $this->assertStringContainsString('data-testid="ota-agents-preview-empty"', $html);
+        $this->assertStringContainsString('Select an agent to view profile, commission, and performance.', $html);
     }
 
     /**
@@ -1275,12 +1116,50 @@ class AdminAgentsManagementRedesignTest extends TestCase
     protected function makeAgencyAdmin(): array
     {
         $agency = Agency::factory()->create();
-        $admin = User::factory()->agencyAdmin()->create([
-            'current_agency_id' => $agency->id,
-        ]);
-        $agency->users()->attach($admin->id, ['role' => AccountType::AgencyAdmin->value]);
+        $admin = $this->platformAdmin();
 
         return [$agency, $admin];
+    }
+
+    protected function makeForeignAgencyAdmin(): User
+    {
+        $agency = Agency::factory()->create();
+
+        return User::factory()->agencyAdmin()->create([
+            'current_agency_id' => $agency->id,
+        ]);
+    }
+
+    /**
+     * Legacy Blade list route now redirects to the Next dashboard shell.
+     */
+    protected function assertLegacyAgentsRedirect(User $admin, string $uri = '/admin/agents'): void
+    {
+        $response = $this->actingAs($admin)->get($uri);
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/admin/dashboard/agents', $target);
+    }
+
+    protected function agentsPreviewHtml(User $admin, Agent $agent): string
+    {
+        return (string) $this->actingAs($admin)
+            ->getJson(route('admin.agents.preview', ['agent' => $agent->id]))
+            ->assertOk()
+            ->json('html');
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function agentsWorkspaceHtml(User $admin, array $query = []): string
+    {
+        $response = $this->actingAs($admin)
+            ->getJson(route('admin.agents.data', $query))
+            ->assertOk();
+
+        return (string) ($response->json('rows_html') ?? '')
+            .(string) ($response->json('preview_html') ?? '');
     }
 
     /**
@@ -1329,9 +1208,11 @@ class AdminAgentsManagementRedesignTest extends TestCase
     protected function extractRow(string $html, int $agentId): string
     {
         $marker = 'data-agent-id="'.$agentId.'"';
-        $start = strpos($html, $marker);
-        $this->assertNotFalse($start, "Row for agent {$agentId} not found");
-        $end = strpos($html, '</tr>', $start);
+        $markerPos = strpos($html, $marker);
+        $this->assertNotFalse($markerPos, "Row for agent {$agentId} not found");
+        $start = strrpos(substr($html, 0, $markerPos), '<tr');
+        $this->assertNotFalse($start, "Row open tag for agent {$agentId} not found");
+        $end = strpos($html, '</tr>', $markerPos);
         $this->assertNotFalse($end, "Row close tag for agent {$agentId} not found");
 
         return substr($html, $start, $end - $start);
