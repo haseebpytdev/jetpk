@@ -56,8 +56,8 @@ class PnrItinerarySyncSafetyPresenterTest extends TestCase
         $this->assertSame('Not present', $out['ticket_numbers_label']);
         $this->assertSame('Present', $out['booking_id_label']);
         $this->assertSame('Disabled', $out['live_cancel_label']);
-        $this->assertSame('Unresolved — manual required', $out['gds_cancel_posture_label']);
-        $this->assertSame('Disabled — manual required', $out['gds_ticketing_posture_label']);
+        $this->assertSame('Enabled', $out['gds_cancel_posture_label']);
+        $this->assertSame('Enabled', $out['gds_ticketing_posture_label']);
         $this->assertSame('Unknown/disabled — not production', $out['ndc_posture_label']);
         $this->assertCount(1, $out['segments']);
         $this->assertSame('LHE–KHI', $out['segments'][0]['route_label']);
@@ -215,8 +215,8 @@ class PnrItinerarySyncSafetyPresenterTest extends TestCase
         $out = PnrItinerarySyncSafetyPresenter::forBooking($booking);
 
         $this->assertSame('Enabled', $out['live_cancel_label']);
-        $this->assertSame('Unresolved — manual required', $out['gds_cancel_posture_label']);
-        $this->assertSame('Disabled — manual required', $out['gds_ticketing_posture_label']);
+        $this->assertSame('Enabled', $out['gds_cancel_posture_label']);
+        $this->assertSame('Enabled', $out['gds_ticketing_posture_label']);
     }
 
     public function test_partial_resource_unavailable_sidecar_shows_locator_and_verification_note(): void

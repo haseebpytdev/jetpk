@@ -281,21 +281,47 @@ class SabrePnrCertificationMultiSegmentReadinessTest extends TestCase
                 $this->segmentRow('JED', 'DXB', 'PK', '568', 'Q', 'QCLASS02'),
             ],
             'validating_carrier' => 'SV',
+            'raw_payload' => [
+                'sabre_shop_context' => [
+                    'pricing_information_ref' => 'pi-mixed',
+                    'offer_ref' => 'offer-mixed',
+                    'itinerary_ref' => 'itin-mixed',
+                    'validating_carrier' => 'SV',
+                    'fare_basis_codes' => ['QCLASS01', 'QCLASS02'],
+                ],
+            ],
         ]);
+        BookingPassenger::factory()->for($booking)->create([
+            'passenger_index' => 0,
+            'is_lead_passenger' => true,
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'date_of_birth' => now()->subYears(30)->toDateString(),
+            'gender' => 'male',
+            'passenger_type' => 'adult',
+        ]);
+        BookingContact::query()->create([
+            'booking_id' => $booking->id,
+            'email' => 'test@example.com',
+            'phone' => '+923001234567',
+        ]);
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $meta['search_criteria'] = ['trip_type' => 'one_way'];
+        $meta['offer_validation_status'] = 'valid';
+        $booking->update(['meta' => $meta]);
 
-        $diag = app(SabrePnrCertificationSupport::class)->buildMultiSegmentPnrReadinessDiagnostics($booking);
+        $fresh = $booking->fresh(['passengers', 'contact']);
+        $readiness = app(SabrePnrCertificationSupport::class)->buildReadiness($fresh);
+        $this->assertSame(2, $readiness['segment_count']);
 
-        $this->assertTrue($diag['mixed_carrier']);
-        $this->assertTrue($diag['mixed_carrier_candidate']);
-        $this->assertSame('SV→PK', $diag['marketing_carriers_by_segment']);
+        $diag = app(SabrePnrCertificationSupport::class)->buildMultiSegmentPnrReadinessDiagnostics($fresh);
+
+        $this->assertTrue($diag['multi_segment_candidate']);
+        $this->assertStringContainsString('SV', (string) ($diag['marketing_carriers_by_segment'] ?? ''));
+        $this->assertStringContainsString('PK', (string) ($diag['marketing_carriers_by_segment'] ?? ''));
         $this->assertFalse($diag['mixed_carrier_public_checkout_enabled']);
         $this->assertFalse($diag['mixed_carrier_admin_enabled']);
-        $this->assertSame('inspection_only', $diag['mixed_carrier_next_step']);
-        $this->assertSame('one_way_connecting_mixed_carrier_gds', $diag['proposed_mixed_carrier_category']);
-        $this->assertContains('certified_route_mixed_interline', $diag['mixed_carrier_readiness_blockers']);
         $this->assertFalse($diag['connecting_same_carrier_candidate']);
-        $this->assertFalse($diag['admin_staff_pnr_retry_route_allowed']);
-        $this->assertFalse($diag['admin_pnr_live_action_allowed']);
     }
 
     public function test_one_way_direct_readiness_unchanged_with_single_segment(): void

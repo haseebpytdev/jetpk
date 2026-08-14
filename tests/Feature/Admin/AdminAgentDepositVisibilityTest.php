@@ -10,11 +10,13 @@ use App\Models\User;
 use App\Services\Agents\AgentWalletService;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminAgentDepositVisibilityTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -35,12 +37,9 @@ class AdminAgentDepositVisibilityTest extends TestCase
         $admin = $this->platformAdmin();
         $admin->forceFill(['current_agency_id' => null])->save();
 
-        $this->actingAs($admin)
-            ->get(route('admin.dashboard'))
-            ->assertOk()
-            ->assertSee('data-testid="ota-command-banner-pending-deposits"', false)
-            ->assertSee('1 pending deposit', false)
-            ->assertSee(route('admin.agent-deposits.index', ['status' => 'submitted']), false);
+        $html = $this->adminDashboardHtml($admin);
+        $this->assertStringContainsString('data-testid="ota-op-kpi-pending_deposits"', $html);
+        $this->assertStringContainsString('Pending Deposits', $html);
     }
 
     public function test_platform_admin_deposit_index_lists_all_agencies_when_no_agency_context(): void
@@ -76,12 +75,15 @@ class AdminAgentDepositVisibilityTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agent-deposits.index', ['status' => 'submitted']))
-            ->assertOk()
-            ->assertSee('Asif Travels', false)
-            ->assertSee('Beta Travel', false)
-            ->assertSee('PRIMARY-DEP', false)
-            ->assertSee('BETA-DEP', false)
-            ->assertSee('Agency code: BETA', false);
+            ->assertRedirect('/admin/dashboard/deposits?status=submitted');
+
+        $html = $this->adminDepositsIndexHtml($admin, ['status' => 'submitted']);
+        $this->assertStringContainsString($primaryAgency->name, $html);
+        $this->assertStringContainsString('Beta Travel', $html);
+        $this->assertStringContainsString('PRIMARY-DEP', $html);
+        $this->assertStringContainsString('BETA-DEP', $html);
+        $this->assertStringContainsString('Agency code', $html);
+        $this->assertStringContainsString('BETA', $html);
     }
 
     public function test_submitted_status_filter_matches_pending_deposits(): void
@@ -109,9 +111,11 @@ class AdminAgentDepositVisibilityTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agent-deposits.index', ['status' => 'submitted']))
-            ->assertOk()
-            ->assertSee('NEW-PENDING', false)
-            ->assertDontSee('OLD-APPROVED', false);
+            ->assertRedirect('/admin/dashboard/deposits?status=submitted');
+
+        $html = $this->adminDepositsIndexHtml($admin, ['status' => 'submitted']);
+        $this->assertStringContainsString('NEW-PENDING', $html);
+        $this->assertStringNotContainsString('OLD-APPROVED', $html);
     }
 
     /**

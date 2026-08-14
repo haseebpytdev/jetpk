@@ -5,6 +5,7 @@ namespace Tests\Unit\Client;
 use App\Models\ClientProfile;
 use App\Models\ClientProfileModule;
 use App\Services\Client\ClientThemeResolver;
+use App\Services\Client\CurrentClientContext;
 use App\Support\Client\ClientProfileConfigReader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -15,7 +16,7 @@ class ClientThemeResolverTest extends TestCase
 
     public function test_uses_db_theme_when_preview_client_exists(): void
     {
-        $this->makeProfile([
+        $profile = $this->makeProfile([
             'slug' => 'jetpk',
             'active_frontend_theme' => 'v2-modern',
             'active_admin_theme' => 'admin-dark',
@@ -23,8 +24,7 @@ class ClientThemeResolverTest extends TestCase
             'asset_profile' => 'jetpk-assets',
         ]);
 
-        $this->get(route('client.parity.home.alias', ['clientSlug' => 'jetpk']))
-            ->assertOk();
+        app(CurrentClientContext::class)->set($profile);
 
         $resolver = app(ClientThemeResolver::class);
 

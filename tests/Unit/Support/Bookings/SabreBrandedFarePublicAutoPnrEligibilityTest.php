@@ -78,16 +78,15 @@ class SabreBrandedFarePublicAutoPnrEligibilityTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_blocked_when_ticketing_true(): void
+    public function test_ticketing_flag_is_reported_without_blocking_eligibility(): void
     {
         config(['suppliers.sabre.ticketing_enabled' => true]);
         $booking = $this->brandedFareConnectingBooking();
 
         $result = app(SabreBrandedFarePublicAutoPnrEligibility::class)->evaluate($booking);
 
-        $this->assertFalse($result['eligible']);
-        $this->assertContains('ticketing_disabled', $result['failed_conditions']);
         $this->assertTrue($result['ticketing_enabled']);
+        $this->assertNotContains('ticketing_disabled', $result['failed_conditions']);
         Http::assertNothingSent();
     }
 

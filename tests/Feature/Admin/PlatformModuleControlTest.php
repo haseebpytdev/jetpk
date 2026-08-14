@@ -6,11 +6,13 @@ use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class PlatformModuleControlTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -29,8 +31,10 @@ class PlatformModuleControlTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.settings.index'))
-            ->assertOk()
-            ->assertDontSee('Platform Module Control');
+            ->assertRedirect('/admin/dashboard/settings');
+
+        $html = $this->adminSettingsIndexHtml($admin);
+        $this->assertStringNotContainsString('Platform Module Control', $html);
     }
 
     public function test_legacy_agency_admin_cannot_access_removed_admin_route(): void

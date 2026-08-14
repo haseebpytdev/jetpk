@@ -10,11 +10,13 @@ use App\Services\Booking\BookingProviderRouter;
 use App\Services\Suppliers\SupplierBookingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminSupplierBookingServiceResolutionPhase17DTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -41,8 +43,10 @@ class AdminSupplierBookingServiceResolutionPhase17DTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.bookings'))
-            ->assertOk()
-            ->assertSee('Bookings', false);
+            ->assertRedirect('/admin/dashboard/bookings');
+
+        $html = $this->adminBookingsIndexHtml($admin);
+        $this->assertStringContainsString('Bookings', $html);
     }
 
     public function test_platform_admin_booking_show_returns_200(): void
@@ -51,9 +55,8 @@ class AdminSupplierBookingServiceResolutionPhase17DTest extends TestCase
         $booking = Booking::factory()->create(['agency_id' => $agency->id]);
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk();
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $this->adminBookingShowHtml($admin, $booking);
     }
 
     public function test_admin_booking_controller_does_not_inject_supplier_booking_service_directly(): void

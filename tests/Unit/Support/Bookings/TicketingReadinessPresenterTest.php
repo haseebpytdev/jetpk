@@ -137,7 +137,7 @@ class TicketingReadinessPresenterTest extends TestCase
         $supplierItem = collect($result['items'])->firstWhere('key', 'supplier_ticketing');
 
         $this->assertSame('blocked', $supplierItem['status']);
-        $this->assertStringContainsString('not implemented', strtolower($supplierItem['message']));
+        $this->assertStringContainsString('enhanced air ticket', strtolower($supplierItem['message']));
     }
 
     /**

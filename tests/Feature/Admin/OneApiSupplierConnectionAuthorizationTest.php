@@ -10,11 +10,13 @@ use App\Services\Suppliers\OneApi\Support\OneApiReadinessService;
 use App\Support\Platform\PlatformModuleEnforcer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class OneApiSupplierConnectionAuthorizationTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -38,7 +40,14 @@ class OneApiSupplierConnectionAuthorizationTest extends TestCase
     public function test_authorized_platform_admin_can_view_create_form(): void
     {
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)->get(route('admin.api-settings.create', ['provider' => 'one_api']))->assertOk();
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.api-settings.create', ['provider' => 'one_api']));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/settings/integrations', (string) $response->headers->get('Location'));
+
+        $html = $this->adminApiSettingsCreateHtml($admin, ['provider' => 'one_api']);
+        $this->assertNotSame('', trim($html));
     }
 
     public function test_platform_admin_can_create_and_update_one_api_connection(): void
@@ -72,7 +81,14 @@ class OneApiSupplierConnectionAuthorizationTest extends TestCase
         $connection = SupplierConnection::query()->where('name', 'One API Phase 9')->first();
         $this->assertNotNull($connection);
         $connection = $connection ?? SupplierConnection::query()->latest('id')->firstOrFail();
-        $this->actingAs($admin)->get(route('admin.api-settings.edit', $connection))->assertOk();
+
+        $editRedirect = $this->actingAs($admin)
+            ->get(route('admin.api-settings.edit', $connection));
+        $editRedirect->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/settings/integrations', (string) $editRedirect->headers->get('Location'));
+
+        $html = $this->adminApiSettingsEditHtml($admin, $connection);
+        $this->assertNotSame('', trim($html));
 
         $this->actingAs($admin)->patch(route('admin.api-settings.update', $connection), [
             'provider' => 'one_api',
@@ -93,9 +109,9 @@ class OneApiSupplierConnectionAuthorizationTest extends TestCase
 
         $connection->refresh();
         $this->assertSame('ONE_API_TEST_PASSWORD', $connection->credentials['password']);
-        $this->actingAs($admin)->get(route('admin.api-settings.edit', $connection))
-            ->assertOk()
-            ->assertDontSee('ONE_API_TEST_PASSWORD');
+
+        $htmlAfterUpdate = $this->adminApiSettingsEditHtml($admin, $connection);
+        $this->assertStringNotContainsString('ONE_API_TEST_PASSWORD', $htmlAfterUpdate);
     }
 
     public function test_blank_soap_url_readiness_shows_soap_blocked(): void

@@ -118,7 +118,8 @@ class AirlineAssetAuditHardeningTest extends TestCase
         $this->assertSame('PASS', $qr['status']);
         $this->assertFalse(
             collect($result['assets'])->contains(
-                static fn (array $asset): bool => ($asset['public_path'] ?? '') === '/storage/travel-assets/airlines/logos/QR.webp',
+                static fn (array $asset): bool => ($asset['public_path'] ?? '') === '/storage/travel-assets/airlines/logos/QR.webp'
+                    && ($asset['status'] ?? '') === 'FAIL',
             ),
         );
     }

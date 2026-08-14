@@ -186,11 +186,11 @@ class SabrePassengerPricingNormalizerTest extends TestCase
 
     public function test_results_blade_contains_passenger_pricing_modal_path(): void
     {
-        $contents = (string) file_get_contents(resource_path('views/frontend/flights/results.blade.php'));
+        $contents = (string) file_get_contents(resource_path('views/frontend/flights/partials/results-page.blade.php'));
 
         $this->assertStringContainsString('passenger_pricing_available', $contents);
-        $this->assertStringContainsString('groupPassengerPricingRows', $contents);
-        $this->assertStringContainsString('Agency charges', $contents);
+        $this->assertStringContainsString('passenger_pricing_trusted', $contents);
+        $this->assertStringContainsString('passengerPricing', $contents);
     }
 
     /**

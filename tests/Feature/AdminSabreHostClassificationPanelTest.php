@@ -9,11 +9,13 @@ use App\Models\Agency;
 use App\Models\Booking;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminSabreHostClassificationPanelTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -26,16 +28,15 @@ class AdminSabreHostClassificationPanelTest extends TestCase
     public function test_admin_booking_show_displays_host_classification_panel_when_meta_present(): void
     {
         $booking = $this->sabreBookingWithClassification($this->validClassification());
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Sabre host error classification', false)
-            ->assertSee('Host reason code', false)
-            ->assertSee('host sell rejected uc', false)
-            ->assertSee('Do not retry the same offer', false)
-            ->assertSee('Advisory only', false)
-            ->assertSee('data-testid="sabre-host-classification-panel"', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Sabre host error classification', $html);
+        $this->assertStringContainsString('Host reason code', $html);
+        $this->assertStringContainsString('host sell rejected uc', $html);
+        $this->assertStringContainsString('Do not retry the same offer', $html);
+        $this->assertStringContainsString('Advisory only', $html);
+        $this->assertStringContainsString('data-testid="sabre-host-classification-panel"', $html);
     }
 
     public function test_admin_booking_show_hides_host_classification_panel_when_meta_missing(): void
@@ -58,9 +59,11 @@ class AdminSabreHostClassificationPanelTest extends TestCase
 
         $this->actingAs($this->platformAdmin())
             ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertDontSee('Sabre host error classification', false)
-            ->assertDontSee('data-testid="sabre-host-classification-panel"', false);
+            ->assertRedirect();
+
+        $html = $this->adminBookingShowHtml($this->platformAdmin(), $booking);
+        $this->assertStringNotContainsString('Sabre host error classification', $html);
+        $this->assertStringNotContainsString('data-testid="sabre-host-classification-panel"', $html);
     }
 
     public function test_build_sabre_host_classification_panel_reads_stored_meta_only(): void
@@ -92,12 +95,9 @@ class AdminSabreHostClassificationPanelTest extends TestCase
         ]);
 
         $booking = $this->sabreBookingWithClassification($classification);
+        $admin = $this->platformAdmin();
 
-        $response = $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking));
-
-        $response->assertOk();
-        $content = (string) $response->getContent();
+        $content = $this->adminBookingShowHtml($admin, $booking);
         $this->assertStringNotContainsString('CreatePassengerNameRecordRQ', $content);
         $this->assertStringNotContainsString('PassengerName', $content);
         $this->assertStringNotContainsString('FormOfPayment', $content);

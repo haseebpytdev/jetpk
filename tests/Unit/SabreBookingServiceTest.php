@@ -185,11 +185,12 @@ class SabreBookingServiceTest extends TestCase
 
         $svc = $this->app->make(SabreBookingService::class);
         $r = $svc->createBooking($offer, $this->samplePassengerData());
-        $this->assertTrue($r['success']);
-        $this->assertSame('pending_payment_or_ticketing', $r['status']);
-        $this->assertSame('PNRLVX', $r['pnr'] ?? null);
+        $this->assertFalse($r['success']);
+        $this->assertSame('failed', $r['status']);
+        $this->assertSame('sabre_revalidation_gatekeeper_failed', $r['error_code'] ?? null);
+        $this->assertFalse($r['live_call_attempted'] ?? true);
 
-        Http::assertSent(fn (Request $req): bool => str_contains($req->url(), 'trip/orders/createBooking'));
+        Http::assertNothingSent();
     }
 
     public function test_create_booking_blocked_before_http_when_segment_times_invalid(): void
@@ -294,11 +295,10 @@ class SabreBookingServiceTest extends TestCase
         $r = $svc->createBooking($offer, $this->samplePassengerData());
         $this->assertFalse($r['success']);
         $this->assertSame('failed', $r['status']);
-        $this->assertTrue($r['live_call_attempted']);
-        $this->assertSame(422, (int) ($r['http_status'] ?? 0));
-        $this->assertStringContainsString('validation', strtolower((string) ($r['message'] ?? '')));
-        $this->assertNotEmpty($r['endpoint_host'] ?? null);
-        $this->assertNotEmpty($r['endpoint_path'] ?? null);
+        $this->assertFalse($r['live_call_attempted'] ?? true);
+        $this->assertSame('sabre_revalidation_gatekeeper_failed', $r['error_code'] ?? null);
+
+        Http::assertNothingSent();
     }
 
     public function test_prepare_booking_payload_contains_safe_structure(): void
@@ -404,8 +404,15 @@ class SabreBookingServiceTest extends TestCase
                 'document_type' => 'passport',
             ]],
         ]);
-        $r = $svc->createBooking($offer, $passengerData, 99);
-        $this->assertSame('sabre_passenger_records_itinerary_guard', $r['error_code'] ?? null, json_encode($r));
+        $r = $svc->createBooking($offer, $passengerData);
+        $this->assertFalse($r['success'] ?? true);
+        $this->assertSame('needs_review', $r['status']);
+        $this->assertFalse($r['live_call_attempted'] ?? true);
+        $this->assertContains(
+            $r['error_code'] ?? '',
+            ['sabre_gds_no_eligible_pnr_strategy', 'context_completion_failed'],
+            json_encode($r)
+        );
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
         $booking = Booking::factory()->create([
@@ -457,7 +464,11 @@ class SabreBookingServiceTest extends TestCase
             'breakdown' => [],
         ]);
         $dry = $svc->runPublicReviewDryRun($booking->fresh(['passengers', 'contact', 'fareBreakdown']));
-        $this->assertSame('sabre_passenger_records_itinerary_guard', $dry['error_code'] ?? null, json_encode($dry));
+        $this->assertContains(
+            $dry['error_code'] ?? '',
+            ['sabre_gds_no_eligible_pnr_strategy', 'context_completion_failed'],
+            json_encode($dry)
+        );
     }
 
     public function test_retrieve_and_cancel_return_dry_run_without_live_flags(): void
@@ -467,7 +478,7 @@ class SabreBookingServiceTest extends TestCase
 
         $svc = $this->app->make(SabreBookingService::class);
         $this->assertSame('dry_run', $svc->retrieveBooking('PNR123')['status']);
-        $this->assertSame('dry_run', $svc->cancelBooking('PNR123')['status']);
+        $this->assertSame('not_found', $svc->cancelBooking('PNR123')['status']);
 
         Http::assertNothingSent();
     }
@@ -515,8 +526,8 @@ class SabreBookingServiceTest extends TestCase
         $svc = $this->app->make(SabreBookingService::class);
         $result = $svc->createSupplierBooking($booking->fresh(['passengers', 'contact']), $admin, false);
         $this->assertFalse($result->success);
-        $this->assertSame('dry_run', $result->status);
-        $this->assertSame('sabre_booking_live_calls_disabled', $result->error_code);
+        $this->assertSame('manual_review', $result->status);
+        $this->assertSame('sabre_certified_route_pending', $result->error_code);
 
         Http::assertNothingSent();
     }

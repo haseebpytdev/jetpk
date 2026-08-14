@@ -8,11 +8,13 @@ use App\Models\Booking;
 use App\Support\Bookings\AdminSabreGdsTicketingPanelsPresenter;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminSabreTicketingPanelTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -27,10 +29,8 @@ class AdminSabreTicketingPanelTest extends TestCase
         $admin = $this->platformAdmin();
         $booking = $this->sabreBooking();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Sabre GDS Ticketing', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Sabre GDS Ticketing', $html);
     }
 
     public function test_presenter_does_not_throw_when_config_missing(): void

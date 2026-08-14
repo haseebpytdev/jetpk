@@ -51,6 +51,10 @@ class InternationalRouteDetector
      */
     public function nationalIdTravelDocumentsAllowedForOffer(?array $offer, ?string $fallbackOriginIata, ?string $fallbackDestinationIata): bool
     {
+        if (! $this->allItineraryIatasResolveToAirports($offer, $fallbackOriginIata, $fallbackDestinationIata)) {
+            return false;
+        }
+
         $buckets = $this->distinctCountryBucketsFromOffer($offer, $fallbackOriginIata, $fallbackDestinationIata);
 
         return count($buckets) === 1 && array_key_exists('PK', $buckets);
@@ -125,6 +129,60 @@ class InternationalRouteDetector
         }
 
         return $buckets;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $offer
+     */
+    protected function itineraryIataCodesFromOffer(?array $offer, ?string $fallbackOriginIata, ?string $fallbackDestinationIata): array
+    {
+        $iatas = [];
+        if (is_array($offer)) {
+            $segments = $offer['segments'] ?? [];
+            if (is_array($segments)) {
+                foreach ($segments as $seg) {
+                    if (! is_array($seg)) {
+                        continue;
+                    }
+                    foreach (['origin', 'destination', 'departure_airport', 'arrival_airport'] as $k) {
+                        $c = strtoupper(trim((string) ($seg[$k] ?? '')));
+                        if (strlen($c) === 3) {
+                            $iatas[$c] = true;
+                        }
+                    }
+                }
+            }
+            foreach (['origin', 'destination'] as $k) {
+                $c = strtoupper(trim((string) ($offer[$k] ?? '')));
+                if (strlen($c) === 3) {
+                    $iatas[$c] = true;
+                }
+            }
+        }
+        $fo = strtoupper(trim((string) $fallbackOriginIata));
+        $fd = strtoupper(trim((string) $fallbackDestinationIata));
+        if (strlen($fo) === 3) {
+            $iatas[$fo] = true;
+        }
+        if (strlen($fd) === 3) {
+            $iatas[$fd] = true;
+        }
+
+        return array_keys($iatas);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $offer
+     */
+    protected function allItineraryIatasResolveToAirports(?array $offer, ?string $fallbackOriginIata, ?string $fallbackDestinationIata): bool
+    {
+        foreach ($this->itineraryIataCodesFromOffer($offer, $fallbackOriginIata, $fallbackDestinationIata) as $iata) {
+            if (Airport::query()->where('iata_code', $iata)->doesntExist()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function canonicalCountryBucketForAirport(Airport $airport): string

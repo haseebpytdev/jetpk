@@ -12,11 +12,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminDashboardRouteResolutionPhase17CTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -28,14 +30,13 @@ class AdminDashboardRouteResolutionPhase17CTest extends TestCase
 
     public function test_route_admin_dashboard_generates_admin_uri(): void
     {
-        $this->assertSame(url('/admin'), route('admin.dashboard'));
+        $this->assertSame(url('/admin/dashboard'), route('admin.dashboard'));
     }
 
     public function test_guest_get_admin_redirects_to_login_with_admin_dashboard_route(): void
     {
-        $response = $this->get('/admin');
+        $response = $this->get('/admin/dashboard');
         $response->assertRedirect();
-        $this->assertSame('admin.dashboard', $this->matchRouteName('/admin'));
         $this->assertStringContainsString('login', (string) $response->headers->get('Location'));
     }
 
@@ -49,8 +50,10 @@ class AdminDashboardRouteResolutionPhase17CTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin')
-            ->assertOk()
-            ->assertSee('data-testid="ota-dash-overview"', false);
+            ->assertRedirect('/admin/dashboard');
+
+        $html = $this->adminDashboardHtml($admin);
+        $this->assertStringContainsString('data-testid="ota-dash-overview"', $html);
     }
 
     public function test_platform_admin_with_forced_password_change_redirects_to_live_password_url(): void

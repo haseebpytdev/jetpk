@@ -13,11 +13,13 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminBookingSyncPnrItineraryTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -33,10 +35,8 @@ class AdminBookingSyncPnrItineraryTest extends TestCase
         $booking = $this->sabreBookingWithPnr('UNGKWK');
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Sync PNR itinerary', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Retrieve/sync PNR itinerary', $html);
     }
 
     public function test_admin_show_renders_pnr_retrieve_safety_card_without_sensitive_leaks(): void
@@ -65,34 +65,31 @@ class AdminBookingSyncPnrItineraryTest extends TestCase
         ]);
         $admin = $this->platformAdmin();
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking));
+        $html = $this->adminBookingShowHtml($admin, $booking);
 
-        $response->assertOk()
-            ->assertSee('Sabre capability posture', false)
-            ->assertSee('GDS cancel (architecture)', false)
-            ->assertSee('GDS ticketing (architecture)', false)
-            ->assertSee('NDC (architecture)', false)
-            ->assertSee('Diagnostics (architecture)', false)
-            ->assertSee('Unresolved', false)
-            ->assertSee('manual required', false)
-            ->assertSee('PNR retrieve &amp; airline status', false)
-            ->assertSee('Retrieve result', false)
-            ->assertSee('Cancel eligible', false)
-            ->assertSee('Live supplier cancel (env gate)', false)
-            ->assertSee('Safe summary only — no raw Sabre response is shown.', false)
-            ->assertDontSee('automated supplier cancel is not wired', false)
-            ->assertDontSee('Automated void is not wired', false)
-            ->assertSee('LHE', false)
-            ->assertSee('PK303', false)
-            ->assertDontSee('FAKE-RAW-BOOKING-ID-99999', false)
-            ->assertDontSee('LEAKY/PASSENGER', false)
-            ->assertDontSee('fake-bearer-token-abc', false)
-            ->assertDontSee('PASSPORT123456', false)
-            ->assertDontSee('client_secret', false)
-            ->assertDontSee('access_token', false);
+        $this->assertStringContainsString('Sabre capability posture', $html);
+        $this->assertStringContainsString('GDS cancel (architecture)', $html);
+        $this->assertStringContainsString('GDS ticketing (architecture)', $html);
+        $this->assertStringContainsString('NDC (architecture)', $html);
+        $this->assertStringContainsString('Diagnostics (architecture)', $html);
+        $this->assertStringContainsString('Enabled', $html);
+        $this->assertStringContainsString('PNR retrieve &amp; airline status', $html);
+        $this->assertStringContainsString('Retrieve result', $html);
+        $this->assertStringContainsString('Cancel eligible', $html);
+        $this->assertStringContainsString('Live supplier cancel (env gate)', $html);
+        $this->assertStringContainsString('Safe summary only', $html);
+        $this->assertStringContainsString('no raw Sabre response is shown', $html);
+        $this->assertStringNotContainsString('automated supplier cancel is not wired', $html);
+        $this->assertStringNotContainsString('Automated void is not wired', $html);
+        $this->assertStringContainsString('LHE', $html);
+        $this->assertStringContainsString('PK303', $html);
+        $this->assertStringNotContainsString('FAKE-RAW-BOOKING-ID-99999', $html);
+        $this->assertStringNotContainsString('LEAKY/PASSENGER', $html);
+        $this->assertStringNotContainsString('fake-bearer-token-abc', $html);
+        $this->assertStringNotContainsString('PASSPORT123456', $html);
+        $this->assertStringNotContainsString('client_secret', $html);
+        $this->assertStringNotContainsString('access_token', $html);
 
-        $html = $response->getContent();
         $this->assertSame(1, substr_count($html, 'GDS cancel (architecture)'));
         $this->assertSame(1, substr_count($html, 'GDS ticketing (architecture)'));
         $this->assertSame(1, substr_count($html, 'NDC (architecture)'));
@@ -109,10 +106,8 @@ class AdminBookingSyncPnrItineraryTest extends TestCase
         ]);
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Re-sync PNR itinerary', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Re-sync PNR itinerary (retrieve/sync)', $html);
     }
 
     public function test_booking_without_pnr_hides_sync_button(): void
@@ -133,10 +128,8 @@ class AdminBookingSyncPnrItineraryTest extends TestCase
         ]);
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertDontSee('Sync PNR itinerary', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringNotContainsString('Retrieve/sync PNR itinerary', $html);
     }
 
     public function test_post_sync_without_pnr_returns_safe_error_not_500(): void
@@ -180,7 +173,7 @@ class AdminBookingSyncPnrItineraryTest extends TestCase
         $this->actingAs($admin)
             ->post(route('admin.bookings.sync-pnr-itinerary', $booking))
             ->assertRedirect()
-            ->assertSessionHas('status', 'PNR itinerary synced successfully.');
+            ->assertSessionHas('status', 'PNR itinerary retrieve/sync completed successfully.');
 
         $booking->refresh();
         $this->assertSame('LHE', data_get($booking->meta, 'pnr_itinerary_snapshot.origin'));
@@ -295,7 +288,7 @@ class AdminBookingSyncPnrItineraryTest extends TestCase
         $this->actingAs($staff)
             ->post(route('staff.bookings.sync-pnr-itinerary', $booking))
             ->assertRedirect()
-            ->assertSessionHas('status', 'PNR itinerary synced successfully.');
+            ->assertSessionHas('status', 'PNR itinerary retrieve/sync completed successfully.');
     }
 
     public function test_presenter_uses_synced_snapshot_after_admin_sync(): void

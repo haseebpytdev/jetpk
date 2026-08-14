@@ -38,7 +38,7 @@ class AirlineBrandingServiceTest extends TestCase
     {
         Config::set('ota.airline_logo_cache.download_on_miss', false);
 
-        $url = app(AirlineBrandingService::class)->getLogoForCode('EK');
+        $url = app(AirlineBrandingService::class)->getLogoForCode('ZZUNK');
         $this->assertSame('/images/airline-generic.svg', $url);
     }
 

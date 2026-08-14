@@ -6,11 +6,13 @@ use App\Models\Agent;
 use App\Models\Booking;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminUiIncompleteActionsTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -43,11 +45,9 @@ class AdminUiIncompleteActionsTest extends TestCase
         $booking = Booking::factory()->create();
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('data-testid="admin-booking-planned-passenger-actions"', false)
-            ->assertDontSee('btn btn-outline-primary w-100" disabled>Edit passenger details', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('data-testid="admin-booking-planned-passenger-actions"', $html);
+        $this->assertStringNotContainsString('btn btn-outline-primary w-100" disabled>Edit passenger details', $html);
     }
 
     public function test_admin_reports_does_not_show_active_pdf_export_button(): void
@@ -56,9 +56,11 @@ class AdminUiIncompleteActionsTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.reports'))
-            ->assertOk()
-            ->assertSee('data-testid="ota-reports-pdf-unavailable"', false)
-            ->assertSee('PDF export not enabled yet', false)
-            ->assertDontSee('Export PDF (coming soon)', false);
+            ->assertRedirect('/admin/dashboard/reports');
+
+        $html = $this->adminReportsHtml($admin);
+        $this->assertStringContainsString('data-testid="ota-reports-pdf-unavailable"', $html);
+        $this->assertStringContainsString('PDF export not enabled yet', $html);
+        $this->assertStringNotContainsString('Export PDF (coming soon)', $html);
     }
 }

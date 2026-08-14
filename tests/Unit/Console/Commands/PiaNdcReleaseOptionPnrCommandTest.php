@@ -279,6 +279,7 @@ class PiaNdcReleaseOptionPnrCommandTest extends TestCase
         $response = $this->actingAs($admin)->post(route('admin.bookings.release-pia-ndc-option-pnr', $booking), [
             'confirm_phrase' => PiaNdcReleaseOptionPnrService::RELEASE_CONFIRM_PHRASE,
             'operator_reason' => 'admin controlled release',
+            'admin_confirm_reviewed' => '1',
         ]);
 
         $response->assertRedirect();

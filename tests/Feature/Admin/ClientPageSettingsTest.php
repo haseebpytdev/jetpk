@@ -15,10 +15,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class ClientPageSettingsTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -64,8 +66,10 @@ class ClientPageSettingsTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/page-settings')
-            ->assertOk()
-            ->assertSee('Page settings', false);
+            ->assertRedirect('/admin/dashboard/cms');
+
+        $html = $this->adminPageSettingsIndexHtml($admin);
+        $this->assertStringContainsString('Page settings', $html);
     }
 
     public function test_store_asset_persists_metadata_and_redirects_to_media_tab(): void

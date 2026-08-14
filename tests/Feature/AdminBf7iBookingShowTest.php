@@ -10,11 +10,13 @@ use App\Support\Bookings\SabreBrandedFarePublicAutoPnrEligibility;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminBf7iBookingShowTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -27,12 +29,13 @@ class AdminBf7iBookingShowTest extends TestCase
     public function test_admin_booking_show_renders_without_stored_eligibility(): void
     {
         $booking = $this->sabreBooking([]);
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Not evaluated yet', false)
-            ->assertSee('data-testid="branded-fare-public-auto-pnr-panel"', false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Not evaluated yet', $html);
+        $this->assertStringContainsString('data-testid="branded-fare-public-auto-pnr-panel"', $html);
     }
 
     public function test_admin_booking_show_renders_with_valid_stored_eligibility(): void
@@ -51,17 +54,16 @@ class AdminBf7iBookingShowTest extends TestCase
                 'evaluated_at' => '2026-06-15T10:00:00+00:00',
             ],
         ]);
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Public Auto-PNR eligibility (branded fare, BF7-I dry)', false)
-            ->assertSee('auto pnr flag disabled', false)
-            ->assertSee('ECONVENIEN', false)
-            ->assertSee('object_content', false)
-            ->assertSee('QR', false)
-            ->assertSee('auto pnr flag enabled', false)
-            ->assertSee('public flag enabled', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Public Auto-PNR eligibility (branded fare, BF7-I dry)', $html);
+        $this->assertStringContainsString('auto pnr flag disabled', $html);
+        $this->assertStringContainsString('ECONVENIEN', $html);
+        $this->assertStringContainsString('object_content', $html);
+        $this->assertStringContainsString('QR', $html);
+        $this->assertStringContainsString('auto pnr flag enabled', $html);
+        $this->assertStringContainsString('public flag enabled', $html);
     }
 
     public function test_admin_booking_show_renders_with_partial_stored_eligibility(): void
@@ -72,12 +74,11 @@ class AdminBf7iBookingShowTest extends TestCase
                 'reason_code' => 'auto_pnr_flag_disabled',
             ],
         ]);
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('data-testid="branded-fare-public-auto-pnr-panel"', false)
-            ->assertSee('auto pnr flag disabled', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('data-testid="branded-fare-public-auto-pnr-panel"', $html);
+        $this->assertStringContainsString('auto pnr flag disabled', $html);
     }
 
     public function test_admin_booking_show_has_no_controller_static_panel_calls_in_blade(): void
@@ -100,10 +101,9 @@ class AdminBf7iBookingShowTest extends TestCase
                 'failed_conditions' => ['auto_pnr_flag_enabled'],
             ],
         ]);
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk();
+        $this->adminBookingShowHtml($admin, $booking);
 
         Http::assertNothingSent();
     }

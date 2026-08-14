@@ -55,7 +55,8 @@ class AdminBookingsAuthorizationTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin);
 
-        $this->get('/admin/agents')->assertOk();
+        $this->get('/admin/agents')
+            ->assertRedirect('/admin/dashboard/agents');
     }
 
     public function test_guest_redirected_from_admin_bookings(): void

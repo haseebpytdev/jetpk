@@ -182,7 +182,7 @@ class BookingOperationalStatusTest extends TestCase
         $row = BookingListPresenter::toListRow($booking->fresh());
 
         $this->assertSame('Sabre busy / retry later', $row['status_display']);
-        $this->assertSame('unpaid', $row['payment_status_display']);
+        $this->assertSame('Unpaid', $row['payment_status_display']);
         $this->assertStringNotContainsString('ticketing pending', strtolower((string) $row['status_display']));
     }
 

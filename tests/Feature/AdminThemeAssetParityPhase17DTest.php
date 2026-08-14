@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminThemeAssetParityPhase17DTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -15,7 +17,9 @@ class AdminThemeAssetParityPhase17DTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $html = $this->actingAs($admin)->get('/admin')->assertOk()->getContent();
+        $this->actingAs($admin)->get('/admin')->assertRedirect('/admin/dashboard');
+
+        $html = $this->adminDashboardHtml($admin);
 
         $this->assertStringContainsString('ota-admin-console.css', $html);
         $this->assertStringContainsString('ota-design-system.css', $html);
@@ -29,7 +33,7 @@ class AdminThemeAssetParityPhase17DTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $html = $this->actingAs($admin)->get(route('admin.bookings'))->assertOk()->getContent();
+        $html = $this->adminBookingsIndexHtml($admin);
 
         $this->assertStringContainsString('ota-admin-console.css', $html);
         $this->assertStringContainsString('tabler.min.css', $html);

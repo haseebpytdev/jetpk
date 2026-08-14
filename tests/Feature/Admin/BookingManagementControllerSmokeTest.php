@@ -11,11 +11,13 @@ use App\Models\SupplierConnection;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class BookingManagementControllerSmokeTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -38,9 +40,8 @@ class BookingManagementControllerSmokeTest extends TestCase
         $booking = $this->booking();
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk();
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $this->adminBookingShowHtml($admin, $booking);
 
         $this->actingAs($admin)
             ->get(route('admin.bookings.preview', $booking))
@@ -79,10 +80,8 @@ class BookingManagementControllerSmokeTest extends TestCase
         $booking = $this->booking();
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Sabre diagnostic summary', false);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Sabre diagnostic summary', $html);
     }
 
     public function test_sabre_compact_diagnostic_panel_includes_controlled_pnr_group(): void

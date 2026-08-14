@@ -30,7 +30,7 @@ class AdminRouteAuthForensicPhase17BTest extends TestCase
         $route = Route::getRoutes()->getByName('admin.dashboard');
         $this->assertNotNull($route);
         $this->assertContains('GET', $route->methods());
-        $this->assertSame('admin', $route->uri());
+        $this->assertSame('admin/dashboard/{path?}', $route->uri());
         $this->assertSame(
             \App\Http\Controllers\BackOffice\BackOfficeDashboardController::class.'@admin',
             $route->getAction('uses'),

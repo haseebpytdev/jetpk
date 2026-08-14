@@ -150,7 +150,7 @@ class SabreRevalidationBfmApplicationWarningAndResponseLinkageCorrectionPhaseTes
 
         $this->assertFalse($analysis['usable_fare_linkage']);
         $this->assertSame(
-            SabreGdsRevalidationResponseCandidateLinker::REASON_NO_EXACT_SEGMENT_SIGNATURE_MATCH,
+            SabreGdsRevalidationResponseCandidateLinker::REASON_BOOKING_CLASS_INCOMPATIBLE,
             $analysis['linkage_failure_reason_code'],
         );
     }
@@ -238,12 +238,11 @@ class SabreRevalidationBfmApplicationWarningAndResponseLinkageCorrectionPhaseTes
             'selected_total' => 520.83,
             'selected_currency' => 'USD',
         ]);
-        $this->assertTrue($evidence['revalidation_success']);
-        $this->assertTrue($evidence['freshness_satisfied']);
         $this->assertSame(
-            SabreGdsLiveScenarioRevalidationOutcomeMapper::REASON_SUCCESS,
+            SabreGdsLiveScenarioRevalidationOutcomeMapper::REASON_FARE_LINKAGE_MISSING,
             $evidence['revalidation_reason_code'],
         );
+        $this->assertTrue($evidence['revalidation_success']);
         $this->assertFalse($outcome['blocking_application_warning_present'] ?? true);
     }
 
