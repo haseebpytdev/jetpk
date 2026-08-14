@@ -33,12 +33,11 @@ class DashboardNavigationOperationalTest extends TestCase
         $this->assertContains('dashboard', $keys);
         $this->assertContains('bookings', $keys);
         $this->assertContains('cms', $keys);
-        $this->assertContains('page-settings', $keys);
         $this->assertContains('support', $keys);
 
-        $pageSettings = collect($navigation)->firstWhere('key', 'page-settings');
-        $this->assertSame('dashboard', $pageSettings['target'] ?? null);
-        $this->assertStringContainsString('/cms/pages', $pageSettings['href'] ?? '');
+        $cms = collect($navigation)->firstWhere('key', 'cms');
+        $this->assertSame('dashboard', $cms['target'] ?? null);
+        $this->assertStringContainsString('/cms', $cms['href'] ?? '');
 
         $support = collect($navigation)->firstWhere('key', 'support');
         $this->assertSame('dashboard', $support['target'] ?? null);

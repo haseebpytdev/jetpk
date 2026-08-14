@@ -1412,7 +1412,10 @@ class BookingEmailPayloadFactory
         }
 
         if ($booking->customer_id !== null && Route::has('customer.bookings.show')) {
-            return [['label' => 'View booking', 'url' => route('customer.bookings.show', $booking, absolute: true)]];
+            $reference = trim((string) $booking->booking_reference);
+            if ($reference !== '') {
+                return [['label' => 'View booking', 'url' => route('customer.bookings.show', ['booking' => $reference], absolute: true)]];
+            }
         }
 
         if ($booking->customer_id !== null && Route::has('customer.bookings.index')) {

@@ -44,14 +44,24 @@ class RbacConsistencyAuditTest extends TestCase
         $this->assertTrue($staff->hasStaffPermission(StaffPermission::BookingsView));
         $this->assertTrue($staff->hasStaffPermission(StaffPermission::TicketingIssue));
 
-        $this->actingAs($staff)->get(route('staff.dashboard'))->assertOk();
+        $this->actingAs($staff)
+            ->getJson(route('api.dashboard.session', ['portal' => 'staff']))
+            ->assertOk();
+        $this->actingAs($staff)->get(route('admin.dashboard'))->assertForbidden();
     }
 
-    public function test_staff_with_empty_staff_permissions_cannot_access_staff_dashboard(): void
+    public function test_staff_with_empty_staff_permissions_enters_staff_portal_without_capability_keys(): void
     {
         $staff = $this->staffWithPermissions([]);
 
-        $this->actingAs($staff)->get(route('staff.dashboard'))->assertForbidden();
+        $session = $this->actingAs($staff)
+            ->getJson(route('api.dashboard.session', ['portal' => 'staff']))
+            ->assertOk();
+        $permissionKeys = $session->json('data.permissions') ?? [];
+        $this->assertIsArray($permissionKeys);
+        $this->assertNotContains(StaffPermission::BookingsView, $permissionKeys);
+        $this->assertNotContains('bookings.view', $permissionKeys);
+        $this->actingAs($staff)->get(route('admin.dashboard'))->assertForbidden();
     }
 
     public function test_staff_with_empty_staff_permissions_is_denied_gated_booking_actions(): void
@@ -92,9 +102,8 @@ class RbacConsistencyAuditTest extends TestCase
     {
         [$admin] = $this->platformAdmin();
 
-        $response = $this->actingAs($admin)->get(route('admin.roles-permissions'));
-        $response->assertOk()
-            ->assertSee('Agency admin — legacy (disabled)', false);
+        $this->actingAs($admin)->get(route('admin.roles-permissions'))
+            ->assertRedirect('/admin/dashboard/users/roles');
 
         foreach (RolePermissionMatrix::areas() as $row) {
             $this->assertSame(

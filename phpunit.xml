@@ -34,5 +34,7 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="BACKGROUND_REMOVAL_FORCE_MOCK" value="true"/>
+        <env name="OTA_CLIENT_REQUIRE_LOGIN_OTP" value="false"/>
+        <env name="DASHBOARD_NEXT_PROXY_ENABLED" value="false"/>
     </php>
 </phpunit>

@@ -6,34 +6,34 @@ use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminSettingsHubTest extends TestCase
 {
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
-    public function test_settings_hub_loads_for_agency_admin(): void
+    public function test_settings_hub_redirects_platform_admin_to_dashboard_settings(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
 
         $this->actingAs($admin)
             ->get(route('admin.settings.index'))
-            ->assertOk()
-            ->assertSee('Settings')
-            ->assertSee('Branding &amp; company profile', false)
-            ->assertSee('Promo codes')
-            ->assertSee('Payment methods');
+            ->assertRedirect('/admin/dashboard/settings');
     }
 
-    public function test_settings_hub_links_only_resolve_to_valid_routes(): void
+    public function test_legacy_agency_admin_cannot_access_settings_hub(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $legacy = $this->legacyAgencyAdminFromSeed();
 
-        $response = $this->actingAs($admin)->get(route('admin.settings.index'));
-        $response->assertOk();
+        $this->actingAs($legacy)
+            ->get(route('admin.settings.index'))
+            ->assertForbidden();
+    }
 
+    public function test_settings_named_routes_remain_registered(): void
+    {
         $expectedRoutes = [
             'admin.settings.branding.edit',
             'admin.settings.branding.footer.edit',
@@ -51,24 +51,16 @@ class AdminSettingsHubTest extends TestCase
 
         foreach ($expectedRoutes as $routeName) {
             $this->assertTrue(Route::has($routeName), "Missing route: {$routeName}");
-            $response->assertSee(route($routeName), false);
         }
     }
 
-    public function test_payment_settings_page_loads_without_secrets(): void
+    public function test_payment_settings_page_redirects_without_exposing_named_secret_routes_to_guests(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
 
-        $response = $this->actingAs($admin)->get(route('admin.settings.payments.index'));
-        $response->assertOk()
-            ->assertSee('Online payment gateways not enabled')
-            ->assertSee('Bank transfer')
-            ->assertSee('payment proof', false);
-
-        $content = $response->getContent();
-        $this->assertStringNotContainsString('smtp_password', strtolower($content));
-        $this->assertStringNotContainsString('api_key', strtolower($content));
+        $this->actingAs($admin)
+            ->get(route('admin.settings.payments.index'))
+            ->assertRedirect('/admin/dashboard/settings');
     }
 
     public function test_staff_cannot_access_settings_hub(): void

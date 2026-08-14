@@ -114,9 +114,7 @@ class StaffPermissionPresetTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.users.edit', $staff))
-            ->assertOk()
-            ->assertSee('data-testid="staff-legacy-access-warning"', false)
-            ->assertSee('This staff user is currently using legacy full staff access. Saving permissions will enable permission-based access.', false);
+            ->assertRedirect('/admin/dashboard/users?selected='.$staff->id);
     }
 
     public function test_permission_based_mode_appears_on_show_after_save(): void
@@ -130,10 +128,8 @@ class StaffPermissionPresetTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.users.show', $staff))
-            ->assertOk()
-            ->assertSee('data-testid="staff-access-mode-permissions"', false)
-            ->assertSee('Permission-based', false)
-            ->assertDontSee('data-testid="staff-access-mode-legacy"', false);
+            ->assertRedirect('/admin/dashboard/users?selected='.$staff->id);
+        $this->assertFalse($staff->fresh()->usesLegacyStaffPermissions());
     }
 
     public function test_staff_permissions_are_not_written_for_non_staff_account_types(): void
@@ -174,12 +170,8 @@ class StaffPermissionPresetTest extends TestCase
     {
         [$admin, $staff] = $this->legacyStaffPair();
 
-        $response = $this->actingAs($admin)->get(route('admin.users.edit', $staff));
-        $response->assertOk()
-            ->assertSee('data-testid="staff-preset-'.StaffPermission::PresetManager.'"', false)
-            ->assertSee('data-testid="staff-preset-'.StaffPermission::PresetOperator.'"', false)
-            ->assertSee('data-testid="staff-preset-'.StaffPermission::PresetSupport.'"', false)
-            ->assertSee('Permission presets', false);
+        $this->actingAs($admin)->get(route('admin.users.edit', $staff))
+            ->assertRedirect('/admin/dashboard/users?selected='.$staff->id);
     }
 
     public function test_platform_admin_edit_form_keeps_read_only_matrix(): void
@@ -191,12 +183,8 @@ class StaffPermissionPresetTest extends TestCase
             'status' => UserAccountStatus::Active,
         ]);
 
-        $response = $this->actingAs($admin)->get(route('admin.users.edit', $platformUser));
-        $response->assertOk()
-            ->assertSee('Effective access summary — read-only', false)
-            ->assertSee('Platform Admin — full platform access', false);
-        $this->assertMatchesRegularExpression('/data-permission-panel="staff"\s+hidden/', $response->getContent());
-        $this->assertDoesNotMatchRegularExpression('/data-permission-panel="platform_admin"\s+hidden/', $response->getContent());
+        $this->actingAs($admin)->get(route('admin.users.edit', $platformUser))
+            ->assertRedirect('/admin/dashboard/users?selected='.$platformUser->id);
     }
 
     public function test_customer_edit_form_hides_permission_matrix(): void
@@ -208,9 +196,8 @@ class StaffPermissionPresetTest extends TestCase
             'status' => UserAccountStatus::Active,
         ]);
 
-        $response = $this->actingAs($admin)->get(route('admin.users.edit', $customer));
-        $response->assertOk();
-        $this->assertMatchesRegularExpression('/id="user-permission-card"\s+hidden/', $response->getContent());
+        $this->actingAs($admin)->get(route('admin.users.edit', $customer))
+            ->assertRedirect('/admin/dashboard/users?selected='.$customer->id);
     }
 
     /**
