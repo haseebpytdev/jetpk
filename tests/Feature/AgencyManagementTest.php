@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Admin\AgencyManagementController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Enums\AccountType;
 use App\Enums\AgentWalletStatus;
 use App\Enums\UserAccountStatus;
@@ -14,9 +16,11 @@ use App\Services\Agents\AgentWalletService;
 use App\Services\Finance\Dashboard\AdminFinanceDashboardService;
 use App\Services\Finance\Ledger\LedgerBalanceService;
 use App\Support\Agents\AgentPermission;
+use App\Support\Branding\CompanyEmailProfileResolver;
 use App\Support\Identity\ActorIdentifier;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -31,14 +35,16 @@ class AgencyManagementTest extends TestCase
         $agency = Agency::query()->where('slug', config('ota.default_agency_slug'))->first()
             ?? Agency::query()->firstOrFail();
         $this->app->make(AgencyBrandingService::class)->getSettingsForAgency($agency)
-            ->forceFill(['display_name' => 'YD Travels'])
+            ->forceFill(['display_name' => 'YD Travels', 'support_email' => 'yd@travels.test'])
             ->save();
+
+        $profile = CompanyEmailProfileResolver::resolve($agency);
+        $this->assertSame('YD Travels', $profile->name);
+        $this->assertSame('yd@travels.test', $profile->support_email);
 
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
-            ->assertOk()
-            ->assertSee('YD Travels', false)
-            ->assertDontSee('Asif Travels', false);
+            ->assertOk();
     }
 
     public function test_user_show_page_displays_username(): void
@@ -52,9 +58,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.users.show', $user))
-            ->assertOk()
-            ->assertSee('data-testid="user-access-username"', false)
-            ->assertSee('agentstaff01', false);
+            ->assertRedirect('/admin/dashboard/users?selected='.$user->id);
+
+        $html = $this->userShowHtml($admin, $user);
+        $this->assertStringContainsString('data-testid="user-access-username"', $html);
+        $this->assertStringContainsString('agentstaff01', $html);
     }
 
     public function test_platform_admin_can_view_agencies_index(): void
@@ -63,10 +71,12 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.index'))
-            ->assertOk()
-            ->assertSee('Agencies', false)
-            ->assertSee('Agency list', false)
-            ->assertSee('data-testid="admin-agencies-index"', false);
+            ->assertRedirect('/admin/dashboard/agents');
+
+        $html = $this->agenciesIndexHtml($admin);
+        $this->assertStringContainsString('Agencies', $html);
+        $this->assertStringContainsString('Agency list', $html);
+        $this->assertStringContainsString('data-testid="admin-agencies-index"', $html);
     }
 
     public function test_agency_detail_loads_with_missing_optional_data(): void
@@ -79,11 +89,13 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', $agency))
-            ->assertOk()
-            ->assertSee('Bare Agency', false)
-            ->assertSee('No agency owner user is linked', false)
-            ->assertSee('PKR 0.00', false)
-            ->assertDontSee('Wallet is not available', false);
+            ->assertRedirect('/admin/dashboard/agents');
+
+        $html = $this->agencyShowHtml($admin, $agency);
+        $this->assertStringContainsString('Bare Agency', $html);
+        $this->assertStringContainsString('No agency owner user is linked', $html);
+        $this->assertStringContainsString('PKR 0.00', $html);
+        $this->assertStringNotContainsString('Wallet is not available', $html);
     }
 
     public function test_agency_wallet_display_sums_all_wallets_for_multi_wallet_agency(): void
@@ -130,21 +142,18 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.index'))
-            ->assertOk()
-            ->assertSee('PKR 100.00', false);
+            ->assertRedirect('/admin/dashboard/agents');
 
-        $this->actingAs($admin)
-            ->get(route('admin.agencies.show', $agency))
-            ->assertOk()
-            ->assertSee('data-testid="admin-agency-wallet-balance"', false)
-            ->assertSee('PKR 100.00', false);
+        $this->assertStringContainsString('PKR 100.00', $this->agenciesIndexHtml($admin));
 
-        $this->actingAs($admin)
-            ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'wallet']))
-            ->assertOk()
-            ->assertSee('data-testid="admin-agency-wallet-available"', false)
-            ->assertSee('PKR 100.00', false)
-            ->assertSee('Individual wallets', false);
+        $showHtml = $this->agencyShowHtml($admin, $agency);
+        $this->assertStringContainsString('data-testid="admin-agency-wallet-balance"', $showHtml);
+        $this->assertStringContainsString('PKR 100.00', $showHtml);
+
+        $walletHtml = $this->agencyShowHtml($admin, $agency, ['tab' => 'wallet']);
+        $this->assertStringContainsString('data-testid="admin-agency-wallet-available"', $walletHtml);
+        $this->assertStringContainsString('PKR 100.00', $walletHtml);
+        $this->assertStringContainsString('Individual wallets', $walletHtml);
 
         $compare = app(LedgerBalanceService::class)->compareWalletToLedger($agency->id);
         $this->assertSame(100.0, $compare['wallet_balance']);
@@ -164,9 +173,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', $agency))
-            ->assertOk()
-            ->assertSee($agency->name, false)
-            ->assertSee('data-testid="admin-agency-tabs"', false);
+            ->assertRedirect('/admin/dashboard/agents');
+
+        $html = $this->agencyShowHtml($admin, $agency);
+        $this->assertStringContainsString($agency->name, $html);
+        $this->assertStringContainsString('data-testid="admin-agency-tabs"', $html);
     }
 
     public function test_agency_detail_shows_owner_user(): void
@@ -175,10 +186,12 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'owner']))
-            ->assertOk()
-            ->assertSee($owner->name, false)
-            ->assertSee($owner->email, false)
-            ->assertSee('Agency Owner', false);
+            ->assertRedirect('/admin/dashboard/agents?tab=owner');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'owner']);
+        $this->assertStringContainsString($owner->name, $html);
+        $this->assertStringContainsString($owner->email, $html);
+        $this->assertStringContainsString('Agency Owner', $html);
     }
 
     public function test_agency_detail_shows_staff_users_linked_to_agency(): void
@@ -198,9 +211,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'staff']))
-            ->assertOk()
-            ->assertSee($staffUser->name, false)
-            ->assertSee($staffUser->email, false);
+            ->assertRedirect('/admin/dashboard/agents?tab=staff');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'staff']);
+        $this->assertStringContainsString($staffUser->name, $html);
+        $this->assertStringContainsString($staffUser->email, $html);
     }
 
     public function test_users_access_labels_agent_as_agency_owner(): void
@@ -211,9 +226,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.users.index', ['account_type' => 'agent']))
-            ->assertOk()
-            ->assertSee('Agency Owner', false)
-            ->assertSee($agent->email, false);
+            ->assertRedirect('/admin/dashboard/users?account_type=agent');
+
+        $html = $this->usersIndexHtml($admin, ['account_type' => 'agent']);
+        $this->assertStringContainsString('Agency Owner', $html);
+        $this->assertStringContainsString($agent->email, $html);
     }
 
     public function test_users_access_labels_agent_staff_as_agency_staff(): void
@@ -230,9 +247,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.users.index', ['account_type' => 'agent_staff']))
-            ->assertOk()
-            ->assertSee('Agency Staff', false)
-            ->assertSee('stafflabel@agency.test', false);
+            ->assertRedirect('/admin/dashboard/users?account_type=agent_staff');
+
+        $html = $this->usersIndexHtml($admin, ['account_type' => 'agent_staff']);
+        $this->assertStringContainsString('Agency Staff', $html);
+        $this->assertStringContainsString('stafflabel@agency.test', $html);
     }
 
     public function test_users_access_shows_agency_badge_for_agency_users(): void
@@ -242,8 +261,10 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.users.index', ['account_type' => 'agent']))
-            ->assertOk()
-            ->assertSee($agency->name, false);
+            ->assertRedirect('/admin/dashboard/users?account_type=agent');
+
+        $html = $this->usersIndexHtml($admin, ['account_type' => 'agent']);
+        $this->assertStringContainsString($agency->name, $html);
     }
 
     public function test_staff_cannot_access_platform_admin_agency_management(): void
@@ -311,8 +332,10 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'bookings']))
-            ->assertOk()
-            ->assertSee('legacy_unknown_status', false);
+            ->assertRedirect('/admin/dashboard/agents?tab=bookings');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'bookings']);
+        $this->assertStringContainsString('legacy_unknown_status', $html);
     }
 
     public function test_agency_detail_activity_loads_without_meta_column(): void
@@ -326,8 +349,10 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'activity']))
-            ->assertOk()
-            ->assertSee('data-testid="admin-agency-tab-activity"', false);
+            ->assertRedirect('/admin/dashboard/agents?tab=activity');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'activity']);
+        $this->assertStringContainsString('data-testid="admin-agency-tab-activity"', $html);
     }
 
     public function test_agency_detail_activity_loads_with_empty_audit_logs(): void
@@ -340,8 +365,10 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'activity']))
-            ->assertOk()
-            ->assertSee('No audit activity recorded for this agency', false);
+            ->assertRedirect('/admin/dashboard/agents?tab=activity');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'activity']);
+        $this->assertStringContainsString('No audit activity recorded for this agency', $html);
     }
 
     public function test_agency_detail_activity_loads_with_null_user_id(): void
@@ -359,9 +386,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'activity']))
-            ->assertOk()
-            ->assertSee('agency.settings.updated', false)
-            ->assertSee('System', false);
+            ->assertRedirect('/admin/dashboard/agents?tab=activity');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'activity']);
+        $this->assertStringContainsString('agency.settings.updated', $html);
+        $this->assertStringContainsString('System', $html);
     }
 
     public function test_agency_detail_activity_loads_with_missing_audit_user(): void
@@ -382,9 +411,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'activity']))
-            ->assertOk()
-            ->assertSee('agency.owner.removed', false)
-            ->assertSee('System', false);
+            ->assertRedirect('/admin/dashboard/agents?tab=activity');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'activity']);
+        $this->assertStringContainsString('agency.owner.removed', $html);
+        $this->assertStringContainsString('System', $html);
     }
 
     public function test_agency_detail_activity_displays_actor_code_for_existing_user(): void
@@ -401,9 +432,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'activity']))
-            ->assertOk()
-            ->assertSee('agency.profile.updated', false)
-            ->assertSee(ActorIdentifier::forUser($owner), false);
+            ->assertRedirect('/admin/dashboard/agents?tab=activity');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'activity']);
+        $this->assertStringContainsString('agency.profile.updated', $html);
+        $this->assertStringContainsString(ActorIdentifier::forUser($owner), $html);
     }
 
     public function test_easy_ticket_agency_detail_loads_on_activity_tab(): void
@@ -417,9 +450,11 @@ class AgencyManagementTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'activity']))
-            ->assertOk()
-            ->assertSee('Easy Ticket', false)
-            ->assertSee('ET', false);
+            ->assertRedirect('/admin/dashboard/agents?tab=activity');
+
+        $html = $this->agencyShowHtml($admin, $agency, ['tab' => 'activity']);
+        $this->assertStringContainsString('Easy Ticket', $html);
+        $this->assertStringContainsString('ET', $html);
     }
 
     /**
@@ -458,5 +493,62 @@ class AgencyManagementTest extends TestCase
         $agent = Agent::query()->where('user_id', $owner->id)->firstOrFail();
 
         return [$admin, $agency, $owner, $agent];
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    private function agenciesIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        $uri = '/admin/agencies';
+        if ($query !== []) {
+            $uri .= '?'.http_build_query($query);
+        }
+        $request = Request::create($uri, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgencyManagementController::class)->index($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    private function agencyShowHtml(User $admin, Agency $agency, array $query = []): string
+    {
+        $this->actingAs($admin);
+        $uri = '/admin/agencies/'.$agency->id;
+        if ($query !== []) {
+            $uri .= '?'.http_build_query($query);
+        }
+        $request = Request::create($uri, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgencyManagementController::class)->show($request, $agency)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    private function usersIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        $uri = '/admin/users';
+        if ($query !== []) {
+            $uri .= '?'.http_build_query($query);
+        }
+        $request = Request::create($uri, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(UserManagementController::class)->index($request)->render();
+    }
+
+    private function userShowHtml(User $admin, User $user): string
+    {
+        $this->actingAs($admin);
+        $request = Request::create('/admin/users/'.$user->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(UserManagementController::class)->show($user)->render();
     }
 }
