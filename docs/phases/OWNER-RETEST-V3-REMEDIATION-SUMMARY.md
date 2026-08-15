@@ -3,14 +3,14 @@
 ## Status
 
 OWNER_UAT_WAVE_2=REOPENED_OWNER_RETEST_V3  
-OWNER_RETEST_V3=RETEST_REQUIRED (engineering deployed; owner manual rerun pending)  
+OWNER_RETEST_V3=RETEST_REQUIRED (Loop 4 production proof partial; owner manual rerun pending)  
 ADMIN_FULL_MANAGEMENT_SYSTEM=YES (engineering complete; owner acceptance pending)
 
 ## Branch / SHAs
 
 - Branch: `phase/jetpk-owner-uat-wave-2-admin-staff-business-closure`
-- LATEST_ENGINEERING_SHA: `561dc8474b9e199cd0ce076e5d0be194f530489c`
-- PRODUCTION_BUILD_ID: `GY6NKTtyjgxc6W15Ukjzr`
+- LATEST_ENGINEERING_SHA: `c1f69f0866f6044c1cb76dc1fb0965728f5de5c9`
+- PRODUCTION_BUILD_ID: `J404AEoiO1KUivMxDSN4Y`
 - PRE-V3_BASE: `52be4ffd90a1342afd0eb8155dedcb98b3cfb166`
 
 ## Production deploy (2026-08-14)
