@@ -43,14 +43,20 @@ class OtaClientContextFlowAuditCommand extends Command
             return self::FAILURE;
         }
 
+        $isDefaultSlug = $profileResolver->isDefaultDeploymentSlug($clientSlug);
+
         $checks = [];
-        $checks[] = $this->checkHttpRoute($clientSlug, 'login', '/login');
-        $checks[] = $this->checkHttpRoute($clientSlug, 'register', '/register');
-        $checks[] = $this->checkHttpRoute($clientSlug, 'group-ticketing.search', '/groups/search');
-        $checks[] = $this->checkHttpRoute($clientSlug, 'booking.lookup', '/lookup-booking');
-        $checks[] = $this->checkAdminGuestRedirect($clientSlug);
+        $checks[] = $this->checkHttpRoute($clientSlug, 'login', '/login', $isDefaultSlug);
+        $checks[] = $this->checkHttpRoute($clientSlug, 'register', '/register', $isDefaultSlug);
+        $checks[] = $this->checkHttpRoute($clientSlug, 'group-ticketing.search', '/groups/search', $isDefaultSlug);
+        $checks[] = $this->checkLookupRedirect($clientSlug);
+        $checks[] = $this->checkAdminGuestRedirect($clientSlug, $isDefaultSlug);
         $checks[] = $this->checkHelper('client_route(login)', fn () => client_route('login'), "/{$clientSlug}/login");
-        $checks[] = $this->checkHelper('client_route(admin.dashboard)', fn () => client_route('admin.dashboard'), "/{$clientSlug}/admin");
+        $checks[] = $this->checkHelper(
+            'client_route(admin.dashboard)',
+            fn () => client_route('admin.dashboard'),
+            "/{$clientSlug}/admin/dashboard",
+        );
         $checks[] = $this->checkHelper('client_url(/groups/search)', fn () => client_url('/groups/search'), "/{$clientSlug}/groups/search");
         $checks[] = $this->checkRootLoginUnprefixed();
         $checks[] = $this->checkDevCpUnprefixed();
@@ -81,7 +87,7 @@ class OtaClientContextFlowAuditCommand extends Command
     /**
      * @return array{name: string, expected: string, actual: string, ok: bool}
      */
-    private function checkHttpRoute(string $clientSlug, string $routeName, string $suffix): array
+    private function checkHttpRoute(string $clientSlug, string $routeName, string $suffix, bool $isDefaultSlug): array
     {
         $parityName = 'client.parity.'.$routeName;
         $expectedPath = "/{$clientSlug}{$suffix}";
@@ -89,13 +95,27 @@ class OtaClientContextFlowAuditCommand extends Command
         if (! Route::has($parityName)) {
             return [
                 'name' => "GET {$expectedPath}",
-                'expected' => '200 OK',
+                'expected' => $isDefaultSlug ? "redirect {$suffix}" : '200 OK',
                 'actual' => 'parity route missing',
                 'ok' => false,
             ];
         }
 
         $response = $this->httpGet($expectedPath);
+
+        if ($isDefaultSlug) {
+            $location = $response->headers->get('Location') ?? '';
+            $path = is_string($location) && $location !== '' ? parse_url($location, PHP_URL_PATH) : null;
+
+            return [
+                'name' => "GET {$expectedPath}",
+                'expected' => "redirect {$suffix}",
+                'actual' => is_string($path) ? $path : (string) $response->getStatusCode(),
+                'ok' => $response->isRedirect()
+                    && is_string($path)
+                    && $this->normalizePath($path) === $this->normalizePath($suffix),
+            ];
+        }
 
         return [
             'name' => "GET {$expectedPath}",
@@ -108,19 +128,43 @@ class OtaClientContextFlowAuditCommand extends Command
     /**
      * @return array{name: string, expected: string, actual: string, ok: bool}
      */
-    private function checkAdminGuestRedirect(string $clientSlug): array
+    private function checkLookupRedirect(string $clientSlug): array
     {
-        $expectedLogin = "/{$clientSlug}/login";
-        $response = $this->httpGet("/{$clientSlug}/admin");
+        $expectedPath = "/{$clientSlug}/lookup-booking";
+        $lookupTargetPath = '/lookup-booking';
+        $response = $this->httpGet($expectedPath);
+        $location = $response->headers->get('Location') ?? '';
+        $path = is_string($location) && $location !== '' ? parse_url($location, PHP_URL_PATH) : null;
+
+        return [
+            'name' => "GET {$expectedPath}",
+            'expected' => "redirect {$lookupTargetPath}",
+            'actual' => is_string($path) ? $path : ($location !== '' ? $location : (string) $response->getStatusCode()),
+            'ok' => $response->isRedirect()
+                && is_string($path)
+                && $this->normalizePath($path) === $lookupTargetPath,
+        ];
+    }
+
+    /**
+     * @return array{name: string, expected: string, actual: string, ok: bool}
+     */
+    private function checkAdminGuestRedirect(string $clientSlug, bool $isDefaultSlug): array
+    {
+        $adminPath = "/{$clientSlug}/admin/dashboard";
+        $expectedTarget = $isDefaultSlug ? '/admin/dashboard' : "/{$clientSlug}/login";
+        $response = $this->httpGet($adminPath);
 
         $location = $response->headers->get('Location') ?? '';
         $actual = $location !== '' ? parse_url($location, PHP_URL_PATH) : (string) $response->getStatusCode();
 
         return [
-            'name' => "GET /{$clientSlug}/admin (guest)",
-            'expected' => "redirect {$expectedLogin}",
+            'name' => "GET {$adminPath} (guest)",
+            'expected' => "redirect {$expectedTarget}",
             'actual' => is_string($actual) ? $actual : (string) $response->getStatusCode(),
-            'ok' => $response->isRedirect() && is_string($actual) && str_ends_with($actual, $expectedLogin),
+            'ok' => $response->isRedirect()
+                && is_string($actual)
+                && $this->normalizePath($actual) === $this->normalizePath($expectedTarget),
         ];
     }
 
@@ -193,5 +237,10 @@ class OtaClientContextFlowAuditCommand extends Command
         $kernel->terminate($request, $response);
 
         return $response;
+    }
+
+    private function normalizePath(string $path): string
+    {
+        return rtrim('/'.ltrim($path, '/'), '/') ?: '/';
     }
 }

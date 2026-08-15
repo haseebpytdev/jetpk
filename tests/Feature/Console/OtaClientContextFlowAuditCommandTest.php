@@ -18,6 +18,8 @@ class OtaClientContextFlowAuditCommandTest extends TestCase
         parent::setUp();
 
         Config::set('ota-developer.enabled', true);
+        Config::set('ota_client.single_client_mode', false);
+        Config::set('ota_client.single_client_root', false);
     }
 
     public function test_command_fails_when_client_profile_missing(): void
@@ -29,11 +31,19 @@ class OtaClientContextFlowAuditCommandTest extends TestCase
 
     public function test_command_succeeds_for_configured_client(): void
     {
-        $this->makeProfile(['slug' => 'jetpk', 'name' => 'Jet Pakistan']);
+        $this->makeProfile([
+            'slug' => 'jetpk',
+            'name' => 'Jet Pakistan',
+            'active_frontend_theme' => 'jetpakistan',
+            'active_admin_theme' => 'jetpakistan',
+            'asset_profile' => 'jetpk-assets',
+        ]);
 
-        $this->artisan('ota:client-context-flow-audit', [
+        $exitCode = \Illuminate\Support\Facades\Artisan::call('ota:client-context-flow-audit', [
             '--client' => 'jetpk',
-        ])->assertSuccessful();
+        ]);
+
+        $this->assertSame(0, $exitCode, \Illuminate\Support\Facades\Artisan::output());
     }
 
     /**
