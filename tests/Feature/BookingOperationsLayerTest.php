@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\AccountType;
 use App\Enums\BookingStatus;
+use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Models\Agency;
 use App\Models\AuditLog;
 use App\Models\Booking;
@@ -11,14 +12,20 @@ use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ViewErrorBag;
+use Tests\Support\AdminLegacyViewTestHelpers;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class BookingOperationsLayerTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
-    protected function createAgencyBooking(User $admin, array $overrides = []): Booking
+    protected function createAgencyBooking(User $actor, array $overrides = []): Booking
     {
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
 
@@ -30,38 +37,55 @@ class BookingOperationsLayerTest extends TestCase
         ], $overrides));
     }
 
-    public function test_agency_admin_can_filter_bookings_by_status(): void
+    public function test_platform_admin_can_filter_bookings_by_status(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $this->createAgencyBooking($admin, ['status' => BookingStatus::Pending, 'booking_reference' => 'OTA-F-PEND']);
         $this->createAgencyBooking($admin, ['status' => BookingStatus::Confirmed, 'booking_reference' => 'OTA-F-CONF']);
 
-        $this->actingAs($admin);
-        $this->get('/admin/bookings?status=pending')->assertOk()->assertSee('OTA-F-PEND', false)->assertDontSee('OTA-F-CONF', false);
+        $this->actingAs($admin)->get('/admin/bookings?status=pending')
+            ->assertRedirect();
+
+        $refs = collect($this->actingAs($admin)
+            ->getJson(route('admin.bookings.data', ['status' => 'pending']))
+            ->assertOk()
+            ->json('rows'))
+            ->pluck('booking_ref')
+            ->all();
+
+        $this->assertContains('OTA-F-PEND', $refs);
+        $this->assertNotContains('OTA-F-CONF', $refs);
     }
 
-    public function test_agency_admin_can_search_bookings_by_reference(): void
+    public function test_platform_admin_can_search_bookings_by_reference(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $this->createAgencyBooking($admin, ['booking_reference' => 'OTA-SEARCH-XYZ']);
 
-        $this->actingAs($admin);
-        $this->get('/admin/bookings?search=SEARCH-XYZ')->assertOk()->assertSee('OTA-SEARCH-XYZ', false);
+        $this->actingAs($admin)->get('/admin/bookings?search=SEARCH-XYZ')
+            ->assertRedirect();
+
+        $refs = collect($this->actingAs($admin)
+            ->getJson(route('admin.bookings.data', ['search' => 'SEARCH-XYZ']))
+            ->assertOk()
+            ->json('rows'))
+            ->pluck('booking_ref')
+            ->all();
+
+        $this->assertContains('OTA-SEARCH-XYZ', $refs);
     }
 
-    public function test_agency_admin_can_view_booking_detail_for_own_agency(): void
+    public function test_platform_admin_can_view_booking_detail_for_own_agency(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = $this->createAgencyBooking($admin);
 
-        $this->actingAs($admin);
-        $this->get(route('admin.bookings.show', $booking))->assertOk()->assertSee($booking->booking_reference, false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString($booking->booking_reference, $html);
     }
 
-    public function test_agency_admin_cannot_view_other_agency_booking(): void
+    public function test_agency_admin_policy_denies_other_agency_booking(): void
     {
         $this->seed(OtaFoundationSeeder::class);
         $other = Agency::query()->create([
@@ -74,16 +98,19 @@ class BookingOperationsLayerTest extends TestCase
             'status' => BookingStatus::Pending,
         ]);
 
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $this->actingAs($admin);
-        $this->get(route('admin.bookings.show', $foreign))->assertForbidden();
+        $agencyAdmin = $this->legacyAgencyAdminFromSeed();
+        $this->assertFalse(Gate::forUser($agencyAdmin)->allows('view', $foreign));
+
+        $admin = $this->platformAdmin();
+        $this->assertLegacyBookingShowRedirect($admin, $foreign);
+        $html = $this->adminBookingShowHtml($admin, $foreign);
+        $this->assertStringContainsString('OTA-FOREIGN-DETAIL', $html);
     }
 
-    public function test_agency_admin_can_change_pending_to_confirmed(): void
+    public function test_platform_admin_can_change_pending_to_confirmed(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = $this->createAgencyBooking($admin, ['status' => BookingStatus::Pending]);
 
         $this->actingAs($admin);
@@ -95,25 +122,26 @@ class BookingOperationsLayerTest extends TestCase
         $this->assertSame(BookingStatus::Confirmed, $booking->fresh()->status);
     }
 
-    public function test_invalid_status_transition_is_rejected(): void
+    public function test_invalid_status_transition_is_rejected_for_staff(): void
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $booking = $this->createAgencyBooking($admin, ['status' => BookingStatus::Pending]);
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
+        $booking = $this->createAgencyBooking($staff, ['status' => BookingStatus::Pending]);
 
-        $this->actingAs($admin);
-        $this->from(route('admin.bookings.show', $booking));
-        $this->patch(route('admin.bookings.status', $booking), [
+        $this->actingAs($staff);
+        $this->from('/staff/dashboard/bookings?id='.$booking->id);
+        $this->patch(route('staff.bookings.status', $booking), [
             'status' => BookingStatus::Ticketed->value,
         ])->assertSessionHasErrors('status');
+
+        $this->assertSame(BookingStatus::Pending, $booking->fresh()->status);
     }
 
     public function test_status_change_creates_status_log_and_audit_with_old_new_values(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = $this->createAgencyBooking($admin, ['status' => BookingStatus::Pending]);
 
         $this->actingAs($admin);
@@ -136,11 +164,10 @@ class BookingOperationsLayerTest extends TestCase
         $this->assertArrayHasKey('new_values', $audit->properties ?? []);
     }
 
-    public function test_agency_admin_can_add_internal_note(): void
+    public function test_platform_admin_can_add_internal_note(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = $this->createAgencyBooking($admin);
 
         $this->actingAs($admin);
@@ -225,7 +252,7 @@ class BookingOperationsLayerTest extends TestCase
         $foreignStaff->agencies()->attach($otherAgency->id, ['role' => 'staff']);
 
         $this->actingAs($platformAdmin);
-        $this->from(route('admin.bookings.show', $booking));
+        $this->from('/admin/dashboard/bookings?id='.$booking->id);
         $this->patch(route('admin.bookings.assign-staff', $booking), [
             'staff_user_id' => $foreignStaff->id,
         ])->assertSessionHasErrors('staff_user_id');
@@ -249,7 +276,7 @@ class BookingOperationsLayerTest extends TestCase
         $agencyAdmin->agencies()->attach($agency->id, ['role' => 'agency_admin']);
 
         $this->actingAs($platformAdmin);
-        $this->from(route('admin.bookings.show', $booking));
+        $this->from('/admin/dashboard/bookings?id='.$booking->id);
         $this->patch(route('admin.bookings.assign-staff', $booking), [
             'staff_user_id' => $agencyAdmin->id,
         ])->assertSessionHasErrors('staff_user_id');
@@ -263,17 +290,24 @@ class BookingOperationsLayerTest extends TestCase
             Agency::query()->where('slug', 'asif-travels')->firstOrFail()
         )->create(['status' => BookingStatus::Pending]);
 
-        $this->actingAs($staff)->get(route('staff.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('ota-booking-detail', false);
+        $response = $this->actingAs($staff)->get(route('staff.bookings.show', $booking));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/staff/dashboard/bookings', (string) $response->headers->get('Location'));
+
+        $html = $this->staffBookingShowHtml($staff, $booking);
+        $this->assertStringContainsString('ota-booking-detail', $html);
     }
 
     public function test_staff_can_access_staff_bookings_index(): void
     {
         $this->seed(OtaFoundationSeeder::class);
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
-        $this->actingAs($staff);
-        $this->get('/staff/bookings')->assertOk();
+        $response = $this->actingAs($staff)->get('/staff/bookings');
+        $response->assertRedirect();
+        $this->assertStringContainsString('/staff/dashboard/bookings', (string) $response->headers->get('Location'));
+
+        $html = $this->staffBookingsIndexHtml($staff);
+        $this->assertNotSame('', trim($html));
     }
 
     public function test_staff_cannot_access_other_agency_booking_detail(): void
@@ -289,5 +323,28 @@ class BookingOperationsLayerTest extends TestCase
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
         $this->get(route('staff.bookings.show', $foreign))->assertForbidden();
+    }
+
+    protected function staffBookingShowHtml(User $staff, Booking $booking): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/bookings/'.$booking->id, 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffBookingController::class)->show($booking)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function staffBookingsIndexHtml(User $staff, array $query = []): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/bookings', 'GET', $query);
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffBookingController::class)->index($request)->render();
     }
 }
