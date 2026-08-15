@@ -32,7 +32,7 @@ class ManualBookingCommunicationMail extends Mailable
     {
         return new Content(
             htmlString: $this->htmlBody,
-            text: $this->plainBody,
+            textString: $this->plainBody,
         );
     }
 }
