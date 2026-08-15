@@ -1,4 +1,4 @@
-@extends(client_layout('dashboard', auth()->user()?->isStaff() ? 'staff' : 'admin'))
+@extends('layouts.dashboard')
 
 @section('title', 'Profile settings')
 

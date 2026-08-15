@@ -1,4 +1,4 @@
-@extends(client_layout('customer-account', 'customer'))
+@extends('layouts.customer-account')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/ota-public.css') }}?v=101" />

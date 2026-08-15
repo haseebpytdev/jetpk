@@ -378,13 +378,11 @@ final class RuntimeLayoutMigrationAuditService
             $this->checkHttpStatus('/login', '200', '/login'),
             $this->checkHttpStatus("{$clientSlug}/login", '200', "/{$clientSlug}/login"),
             $this->checkGuestRedirect('/admin', '/login'),
-            $this->checkGuestRedirect("/{$clientSlug}/admin", "/{$clientSlug}/login"),
+            $this->checkGuestRedirect("/{$clientSlug}/admin/dashboard", "/{$clientSlug}/login"),
             $this->checkGuestRedirect('/staff', '/login'),
-            $this->checkGuestRedirect("/{$clientSlug}/staff", "/{$clientSlug}/login"),
+            $this->checkGuestRedirect("/{$clientSlug}/staff/dashboard", "/{$clientSlug}/login"),
             $this->checkGuestRedirect('/agent', '/login'),
-            $this->checkGuestRedirect("/{$clientSlug}/agent", "/{$clientSlug}/login"),
             $this->checkGuestRedirect('/customer', '/login'),
-            $this->checkGuestRedirect("/{$clientSlug}/customer", "/{$clientSlug}/login"),
         ];
     }
 

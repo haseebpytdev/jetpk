@@ -46,7 +46,7 @@ class RuntimeViewResolverTest extends TestCase
 
         $resolver = app(RuntimeViewResolver::class);
 
-        $this->assertSame('frontend.home', $resolver->view('home', 'frontend', $profile));
+        $this->assertSame('themes.frontend.v1-classic.frontend.home', $resolver->view('home', 'frontend', $profile));
         $this->assertSame('themes.frontend.v1-classic.home', $resolver->themeViewName('home', 'frontend', $profile));
         $this->assertTrue($resolver->exists('home', 'frontend', $profile));
         $this->assertFalse($resolver->exists('definitely-missing-view', 'frontend', $profile));
@@ -104,7 +104,7 @@ class RuntimeViewResolverTest extends TestCase
         ]);
         app(CurrentClientContext::class)->set($profile);
 
-        $this->assertSame('frontend.home', client_view('home', 'frontend'));
+        $this->assertSame('themes.frontend.v1-classic.frontend.home', client_view('home', 'frontend'));
         $this->assertTrue(client_view_exists('home', 'frontend'));
         $this->assertFalse(client_view_exists('missing-logical-view', 'frontend'));
     }
@@ -228,7 +228,7 @@ class RuntimeViewResolverTest extends TestCase
 
         $resolver = app(RuntimeViewResolver::class);
 
-        $this->assertSame('frontend.home', $resolver->first(['missing-a', 'home'], 'frontend', $profile));
+        $this->assertSame('themes.frontend.v1-classic.frontend.home', $resolver->first(['missing-a', 'home'], 'frontend', $profile));
     }
 
     public function test_admin_dotted_logical_names_fall_back_to_dashboard_prefix(): void

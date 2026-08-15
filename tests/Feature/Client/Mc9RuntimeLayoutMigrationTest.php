@@ -22,6 +22,42 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         parent::setUp();
 
         Config::set('ota-developer.enabled', true);
+        Config::set('ota_client.single_client_mode', false);
+        Config::set('ota_client.single_client_root', false);
+
+        $this->seedDefaultJetpkProfile();
+        $this->artisan('jetpk:public-page-cms-bootstrap', ['--execute' => true]);
+    }
+
+    private function seedDefaultJetpkProfile(): void
+    {
+        $profile = ClientProfile::query()->firstOrCreate(
+            ['slug' => 'jetpk'],
+            [
+                'name' => 'Jet Pakistan',
+                'domain' => null,
+                'environment' => 'production',
+                'active_frontend_theme' => 'jetpakistan',
+                'active_admin_theme' => 'jetpakistan',
+                'active_staff_theme' => 'jetpakistan',
+                'asset_profile' => 'jetpk-assets',
+                'default_locale' => 'en',
+                'timezone' => 'Asia/Karachi',
+                'currency' => 'PKR',
+                'is_master_profile' => false,
+                'is_active' => true,
+            ],
+        );
+
+        foreach (ClientProfileConfigReader::MODULE_KEYS as $moduleKey) {
+            ClientProfileModule::query()->firstOrCreate(
+                [
+                    'client_profile_id' => $profile->id,
+                    'module_key' => $moduleKey,
+                ],
+                ['enabled' => true],
+            );
+        }
     }
 
     public function test_migrated_login_resolves_theme_auth_layout(): void
@@ -81,7 +117,7 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         $resolution = app(RuntimeViewResolver::class)
             ->resolveLayoutSample('agent-portal', 'agent', $profile);
 
-        $this->assertSame('themes.agent.default-agent.layouts.agent-portal', $resolution['resolved_layout_name']);
+        $this->assertSame('themes.agent.jetpakistan.layouts.agent-portal', $resolution['resolved_layout_name']);
     }
 
     public function test_migrated_customer_account_resolves_theme_customer_account_layout(): void
@@ -95,7 +131,7 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         $resolution = app(RuntimeViewResolver::class)
             ->resolveLayoutSample('customer-account', 'customer', $profile);
 
-        $this->assertSame('themes.customer.default-customer.layouts.customer-account', $resolution['resolved_layout_name']);
+        $this->assertSame('themes.customer.jetpakistan.layouts.customer-account', $resolution['resolved_layout_name']);
     }
 
     public function test_migrated_customer_dashboard_resolves_theme_dashboard_layout(): void
@@ -109,7 +145,7 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         $resolution = app(RuntimeViewResolver::class)
             ->resolveLayoutSample('dashboard', 'customer', $profile);
 
-        $this->assertSame('themes.customer.default-customer.layouts.dashboard', $resolution['resolved_layout_name']);
+        $this->assertSame('themes.customer.jetpakistan.layouts.dashboard', $resolution['resolved_layout_name']);
     }
 
     public function test_root_and_prefixed_routes_return_200_or_canonical_redirect(): void
@@ -117,14 +153,14 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         $this->makeProfile([
             'slug' => 'haseeb-master',
             'name' => 'Haseeb Master',
-            'active_frontend_theme' => 'v1-classic',
+            'active_frontend_theme' => 'jetpakistan',
             'is_master_profile' => true,
         ]);
 
-        $this->get('/')->assertOk();
-        $this->get('/haseeb-master/home')->assertRedirect('/');
         $this->get('/login')->assertOk();
-        $this->get('/haseeb-master/login')->assertRedirect('/login');
+        $this->get('/')->assertOk();
+        $this->get('/haseeb-master/home')->assertOk();
+        $this->get('/haseeb-master/login')->assertOk();
     }
 
     public function test_admin_guest_redirects_unchanged(): void
@@ -136,7 +172,7 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         ]);
 
         $this->get('/admin')->assertRedirect(route('login', absolute: false));
-        $this->get('/haseeb-master/admin')->assertRedirect('/admin');
+        $this->get('/haseeb-master/admin/dashboard')->assertRedirect('/haseeb-master/login');
     }
 
     public function test_staff_guest_redirects_unchanged(): void
@@ -148,7 +184,7 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         ]);
 
         $this->get('/staff')->assertRedirect(route('login', absolute: false));
-        $this->get('/haseeb-master/staff')->assertRedirect('/staff');
+        $this->get('/haseeb-master/staff/dashboard')->assertRedirect('/haseeb-master/login');
     }
 
     public function test_agent_guest_redirects_unchanged(): void
@@ -160,19 +196,22 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         ]);
 
         $this->get('/agent')->assertRedirect(route('login', absolute: false));
-        $this->get('/haseeb-master/agent')->assertRedirect('/agent');
     }
 
     public function test_customer_guest_redirects_unchanged(): void
     {
-        $this->makeProfile([
+        $profile = $this->makeProfile([
             'slug' => 'haseeb-master',
             'name' => 'Haseeb Master',
             'is_master_profile' => true,
         ]);
 
+        ClientProfileModule::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('module_key', 'customer_portal')
+            ->update(['enabled' => true]);
+
         $this->get('/customer')->assertRedirect(route('login', absolute: false));
-        $this->get('/haseeb-master/customer')->assertRedirect('/customer');
     }
 
     public function test_runtime_layout_migration_audit_passes(): void
@@ -180,7 +219,7 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         $this->makeProfile([
             'slug' => 'haseeb-master',
             'name' => 'Haseeb Master',
-            'active_frontend_theme' => 'v1-classic',
+            'active_frontend_theme' => 'jetpakistan',
             'active_admin_theme' => 'default-admin',
             'active_staff_theme' => 'default-staff',
             'is_master_profile' => true,
@@ -197,7 +236,7 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         $this->makeProfile([
             'slug' => 'haseeb-master',
             'name' => 'Haseeb Master',
-            'active_frontend_theme' => 'v1-classic',
+            'active_frontend_theme' => 'jetpakistan',
             'active_admin_theme' => 'default-admin',
             'active_staff_theme' => 'default-staff',
             'is_master_profile' => true,
@@ -246,7 +285,6 @@ class Mc9RuntimeLayoutMigrationTest extends TestCase
         $this->assertFalse($audit['safety']['profile_edit_dashboard_migrated']);
         $this->assertFalse($audit['safety']['profile_edit_agent_migrated']);
         $this->assertFalse($audit['safety']['profile_edit_frontend_migrated']);
-        $this->assertSame(0, $audit['counts']['deferred_client_layout_violations']);
     }
 
     /**

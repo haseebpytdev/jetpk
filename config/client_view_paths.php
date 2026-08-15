@@ -54,7 +54,7 @@ return [
     | "optional" views are skipped when neither theme nor legacy exists.
     */
     'audit_samples' => [
-        ['area' => 'frontend', 'name' => 'home', 'label' => 'frontend home'],
+        ['area' => 'frontend', 'name' => 'frontend.home', 'label' => 'frontend home'],
         ['area' => 'frontend', 'name' => 'welcome', 'label' => 'frontend welcome', 'optional' => true],
         ['area' => 'frontend', 'name' => 'auth.login', 'label' => 'auth login'],
         ['area' => 'admin', 'name' => 'index', 'label' => 'admin dashboard'],

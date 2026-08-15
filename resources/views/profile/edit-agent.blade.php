@@ -1,4 +1,4 @@
-@extends(client_layout('agent-portal', 'agent'))
+@extends('layouts.agent-portal')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/ota-public.css') }}?v=101" />

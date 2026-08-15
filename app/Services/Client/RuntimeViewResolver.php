@@ -28,17 +28,18 @@ final class RuntimeViewResolver
 
     public function view(string $name, string $area = 'frontend', ?ClientProfile $profile = null): string
     {
-        $themeName = $this->themeViewName($name, $area, $profile);
+        $normalizedArea = $this->normalizeArea($area);
+        $resolution = $this->resolveViewCandidate($name, $normalizedArea, $profile);
 
-        if (View::exists($themeName)) {
-            return $themeName;
+        if ($resolution['resolved'] !== null) {
+            return $resolution['resolved'];
         }
 
-        if ($this->requiresStrictThemedView($area)) {
-            $this->handleMissingThemedView($name, $area, $themeName);
+        if ($this->requiresStrictThemedView($normalizedArea)) {
+            $this->handleMissingThemedView($name, $normalizedArea, $resolution['primary_theme_view']);
         }
 
-        return $this->legacyViewName($name, $area);
+        return $resolution['legacy_view_name'];
     }
 
     public function exists(string $name, string $area = 'frontend', ?ClientProfile $profile = null): bool
@@ -214,20 +215,64 @@ final class RuntimeViewResolver
     {
         $normalizedArea = $this->normalizeArea($area);
         $theme = $this->resolvedTheme($normalizedArea, $profile);
-        $themeViewName = $this->themeViewName($name, $normalizedArea, $profile);
-        $legacyViewName = $this->legacyViewName($name, $normalizedArea);
-        $resolvedViewName = $this->view($name, $normalizedArea, $profile);
+        $resolution = $this->resolveViewCandidate($name, $normalizedArea, $profile);
+        $legacyViewName = $resolution['legacy_view_name'];
+        $resolvedViewName = $resolution['resolved'] ?? $resolution['primary_theme_view'];
         $fallbackUsed = $resolvedViewName === $legacyViewName;
 
         return [
             'logical_name' => $name,
             'area' => $normalizedArea,
             'resolved_theme' => $theme,
-            'theme_view_name' => $themeViewName,
+            'theme_view_name' => $resolution['primary_theme_view'],
             'legacy_view_name' => $legacyViewName,
             'resolved_view_name' => $resolvedViewName,
             'fallback_used' => $fallbackUsed,
             'view_exists' => View::exists($resolvedViewName),
+        ];
+    }
+
+    /**
+     * @return array{
+     *     primary_theme_view: string,
+     *     legacy_view_name: string,
+     *     resolved: ?string
+     * }
+     */
+    private function resolveViewCandidate(string $name, string $area, ?ClientProfile $profile = null): array
+    {
+        $themeViewName = $this->themeViewName($name, $area, $profile);
+        $prefixedThemeViewName = $this->prefixedThemeViewName($name, $area, $profile);
+        $legacyViewName = $this->legacyViewName($name, $area);
+
+        if (View::exists($themeViewName)) {
+            return [
+                'primary_theme_view' => $themeViewName,
+                'legacy_view_name' => $legacyViewName,
+                'resolved' => $themeViewName,
+            ];
+        }
+
+        if ($prefixedThemeViewName !== $themeViewName && View::exists($prefixedThemeViewName)) {
+            return [
+                'primary_theme_view' => $themeViewName,
+                'legacy_view_name' => $legacyViewName,
+                'resolved' => $prefixedThemeViewName,
+            ];
+        }
+
+        if (! $this->requiresStrictThemedView($area) && View::exists($legacyViewName)) {
+            return [
+                'primary_theme_view' => $themeViewName,
+                'legacy_view_name' => $legacyViewName,
+                'resolved' => $legacyViewName,
+            ];
+        }
+
+        return [
+            'primary_theme_view' => $themeViewName,
+            'legacy_view_name' => $legacyViewName,
+            'resolved' => null,
         ];
     }
 
@@ -395,6 +440,22 @@ final class RuntimeViewResolver
         $area = strtolower(trim($area));
 
         return in_array($area, self::AREAS, true) ? $area : 'frontend';
+    }
+
+    /**
+     * Theme blades for frontend (and similar areas) often live under the legacy prefix
+     * folder inside the theme root — e.g. themes.frontend.jetpakistan.frontend.home
+     * for logical key "home".
+     */
+    private function prefixedThemeViewName(string $name, string $area, ?ClientProfile $profile = null): string
+    {
+        $prefix = trim((string) (config('client_view_paths.areas.'.$area.'.legacy_prefix') ?? ''));
+
+        if ($prefix === '' || str_starts_with($name, $prefix.'.')) {
+            return $this->themeViewName($name, $area, $profile);
+        }
+
+        return $this->themeViewName($prefix.'.'.$name, $area, $profile);
     }
 
     private function requiresStrictThemedView(string $area): bool
