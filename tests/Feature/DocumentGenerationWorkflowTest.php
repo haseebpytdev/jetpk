@@ -11,14 +11,15 @@ use App\Models\Booking;
 use App\Models\BookingPayment;
 use App\Models\BookingTicket;
 use App\Models\User;
-use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class DocumentGenerationWorkflowTest extends TestCase
 {
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     public function test_agency_admin_can_generate_booking_confirmation_pdf(): void
@@ -51,11 +52,12 @@ class DocumentGenerationWorkflowTest extends TestCase
     public function test_cross_agency_document_generation_denied(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        [$booking, $admin] = $this->bookingForAgencyAdmin();
+        [$booking] = $this->bookingForAgencyAdmin();
+        $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $foreignAgency = Agency::factory()->create();
         $foreignBooking = Booking::factory()->create(['agency_id' => $foreignAgency->id, 'status' => BookingStatus::Paid]);
 
-        $this->actingAs($admin)->post(route('admin.bookings.documents.confirmation', $foreignBooking))->assertForbidden();
+        $this->actingAs($staff)->post(route('staff.bookings.documents.confirmation', $foreignBooking))->assertForbidden();
         $this->assertDatabaseMissing('booking_documents', ['booking_id' => $foreignBooking->id]);
     }
 
@@ -204,8 +206,7 @@ class DocumentGenerationWorkflowTest extends TestCase
      */
     protected function bookingForAgencyAdmin(array $overrides = []): array
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $booking = Booking::factory()->create(array_merge([
             'agency_id' => $admin->current_agency_id,
             'status' => BookingStatus::Paid,
