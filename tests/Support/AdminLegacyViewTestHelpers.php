@@ -2,6 +2,8 @@
 
 namespace Tests\Support;
 
+use App\Http\Controllers\Admin\AccountingLedgerController;
+use App\Http\Controllers\Admin\AccountingReconciliationController;
 use App\Http\Controllers\Admin\AgentApplicationController;
 use App\Http\Controllers\Admin\AdminSectionController;
 use App\Http\Controllers\Admin\AdminSettingsHubController;
@@ -9,9 +11,14 @@ use App\Http\Controllers\Admin\AgentDepositController;
 use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\ClientPageSettingsController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FinanceAdjustmentController;
+use App\Http\Controllers\Admin\FinanceDashboardController;
+use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Models\Agency;
 use App\Models\AgentApplication;
+use App\Models\Booking;
 use App\Models\SupplierConnection;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -133,6 +140,84 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(AgentApplicationController::class)->show($application)->render();
+    }
+
+    protected function adminFinanceDashboardHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/finance/dashboard', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(FinanceDashboardController::class)->index($request)->render();
+    }
+
+    protected function adminFinanceStatementsIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/finance/statements', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(FinanceStatementController::class)->index($request)->render();
+    }
+
+    protected function adminFinanceStatementShowHtml(User $admin, Agency $agency): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/finance/statements/'.$agency->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(FinanceStatementController::class)->show($request, $agency)->render();
+    }
+
+    protected function adminFinanceAdjustmentsIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/finance/adjustments', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(FinanceAdjustmentController::class)->index($request)->render();
+    }
+
+    protected function adminFinanceAdjustmentsCreateHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/finance/adjustments/create', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(FinanceAdjustmentController::class)->create($request)->render();
+    }
+
+    protected function adminAccountingLedgerIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/accounting/ledger', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AccountingLedgerController::class)->index($request)->render();
+    }
+
+    protected function adminAccountingReconciliationIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/accounting/reconciliation', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AccountingReconciliationController::class)->index($request)->render();
+    }
+
+    protected function assertLegacyAccountingRedirect(User $admin, string $uri = '/admin/finance/dashboard'): void
+    {
+        $response = $this->actingAs($admin)->get($uri);
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/admin/dashboard/accounting', $target);
     }
 
     protected function assertLegacyBookingShowRedirect(User $admin, Booking $booking): void

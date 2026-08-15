@@ -161,6 +161,42 @@ class SabreBookingReviewSubmitTest extends TestCase
         ]);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    protected function sabreTripOrdersDryRunOffer(string $depart, SupplierConnection $sabreConn): array
+    {
+        return [
+            'id' => 'sabre-offer-dry-run',
+            'supplier_provider' => 'sabre',
+            'supplier_connection_id' => $sabreConn->id,
+            'airline_code' => 'EK',
+            'airline_name' => 'Emirates',
+            'depart_at' => $depart.'T08:00:00Z',
+            'arrive_at' => $depart.'T14:00:00Z',
+            'total' => 100000,
+            'currency' => 'PKR',
+            'validating_carrier' => 'EK',
+            'segments' => [[
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'carrier' => 'EK',
+                'flight_number' => '601',
+                'departure_at' => $depart.'T08:00:00Z',
+                'arrival_at' => $depart.'T14:00:00Z',
+                'booking_class' => 'Y',
+                'fare_basis_code' => 'YLITE',
+                'cabin' => 'economy',
+                'brand_code' => 'ECON',
+            ]],
+            'fare_breakdown' => [
+                'supplier_total' => 100000,
+                'currency' => 'PKR',
+                'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
+            ],
+        ];
+    }
+
     private function sabreStubOAuthAndHttp(callable $afterTokenResponder): void
     {
         Http::fake(function (Request $request, array $options) use ($afterTokenResponder) {
@@ -291,27 +327,24 @@ class SabreBookingReviewSubmitTest extends TestCase
         ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $sabreConn = SupplierConnection::query()
+            ->where('agency_id', $agency->id)
+            ->where('provider', 'sabre')
+            ->firstOrFail();
+        $this->activateSabreConnectionForHttp($sabreConn);
+
         $depart = now()->addDays(10)->toDateString();
-        $offer = [
-            'id' => 'sabre-offer-1',
-            'supplier_provider' => 'sabre',
-            'airline_code' => 'EK',
-            'airline_name' => 'Emirates',
-            'depart_at' => $depart.'T08:00:00Z',
-            'arrive_at' => $depart.'T14:00:00Z',
-            'total' => 100000,
-            'currency' => 'PKR',
-        ];
+        $offer = $this->sabreTripOrdersDryRunOffer($depart, $sabreConn);
 
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
+            'meta' => array_merge([
                 'supplier_provider' => SupplierProvider::Sabre->value,
+                'supplier_connection_id' => $sabreConn->id,
                 'requires_price_change_confirmation' => false,
                 'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
                 'search_criteria' => [
                     'origin' => 'LHE',
                     'destination' => 'DXB',
@@ -322,7 +355,9 @@ class SabreBookingReviewSubmitTest extends TestCase
                     'children' => 0,
                     'infants' => 0,
                 ],
-            ],
+            ], $this->sabreB74GdsStrategyEligibleMeta($offer, [
+                'supplier_connection_id' => $sabreConn->id,
+            ])),
         ]);
 
         BookingPassenger::factory()->create([

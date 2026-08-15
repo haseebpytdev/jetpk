@@ -377,7 +377,10 @@ trait SabrePublicCreatePhase17ETestSupport
     protected function httpRecordedSnapshot(): \Illuminate\Support\Collection
     {
         if ($this->phase17eHttpRecordedSnapshot === null) {
-            $this->phase17eHttpRecordedSnapshot = Http::recorded();
+            $recorded = Http::recorded();
+            $this->phase17eHttpRecordedSnapshot = $recorded instanceof \Illuminate\Support\Collection
+                ? $recorded
+                : collect(is_array($recorded) ? $recorded : []);
         }
 
         return $this->phase17eHttpRecordedSnapshot;

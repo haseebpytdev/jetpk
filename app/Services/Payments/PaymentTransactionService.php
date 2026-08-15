@@ -19,6 +19,7 @@ use App\Services\Promos\PromoCodeService;
 use App\Services\Suppliers\PiaNdc\Exceptions\PiaNdcValidationException;
 use App\Services\Suppliers\PiaNdc\PiaNdcBookingStatusRefreshService;
 use App\Support\Bookings\BookingAuthoritativeCurrencyResolver;
+use App\Support\Payments\BookingPayableResolver;
 use App\Support\Payments\PaymentGatewayPayloadRedactor;
 use App\Support\References\CompactReferenceGenerator;
 use Illuminate\Http\Request;

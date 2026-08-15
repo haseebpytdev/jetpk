@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\Enums\BookingStatus;
+use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierProvider;
 use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\BookingContact;
 use App\Models\BookingFareBreakdown;
 use App\Models\BookingPassenger;
+use App\Models\SupplierConnection;
 use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Support\Bookings\ComplexItineraryPolicy;
 use App\Support\PublicBooking;
@@ -54,19 +56,52 @@ class ComplexItineraryPnrGuardTest extends TestCase
             'suppliers.sabre.booking_path' => '/v1/trip/orders/createBooking',
             'suppliers.sabre.booking_schema' => null,
             'suppliers.sabre.complex_itinerary_pnr_enabled' => false,
+            'suppliers.sabre.refresh_offer_before_public_pnr' => false,
+            'suppliers.sabre.revalidate_before_booking' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
         ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $sabreConn = SupplierConnection::query()
+            ->where('agency_id', $agency->id)
+            ->where('provider', 'sabre')
+            ->firstOrFail();
+        $sabreConn->update([
+            'is_active' => true,
+            'status' => SupplierConnectionStatus::Active,
+            'base_url' => 'https://example.sabre.test',
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+        ]);
+
         $depart = now()->addDays(10)->toDateString();
         $offer = [
             'id' => 'sabre-offer-1',
             'supplier_provider' => 'sabre',
+            'supplier_connection_id' => $sabreConn->id,
             'airline_code' => 'EK',
             'airline_name' => 'Emirates',
+            'validating_carrier' => 'EK',
             'depart_at' => $depart.'T08:00:00Z',
             'arrive_at' => $depart.'T14:00:00Z',
             'total' => 100000,
             'currency' => 'PKR',
+            'segments' => [[
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'carrier' => 'EK',
+                'flight_number' => '601',
+                'departure_at' => $depart.'T08:00:00Z',
+                'arrival_at' => $depart.'T14:00:00Z',
+                'booking_class' => 'Y',
+                'fare_basis_code' => 'YLITE',
+                'cabin' => 'economy',
+                'brand_code' => 'ECON',
+            ]],
+            'fare_breakdown' => [
+                'supplier_total' => 100000,
+                'currency' => 'PKR',
+                'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
+            ],
         ];
 
         $booking = Booking::factory()->create([
@@ -75,9 +110,20 @@ class ComplexItineraryPnrGuardTest extends TestCase
             'supplier' => SupplierProvider::Sabre->value,
             'meta' => [
                 'supplier_provider' => SupplierProvider::Sabre->value,
+                'supplier_connection_id' => $sabreConn->id,
                 'requires_price_change_confirmation' => false,
                 'protection_mode' => 'hold_price_guaranteed',
                 'flight_offer_snapshot' => $offer,
+                'normalized_offer_snapshot' => $offer,
+                'validated_offer_snapshot' => $offer,
+                'revalidation_status' => 'success',
+                'selected_offer_revalidation_status' => 'success',
+                'selected_fare_family_option' => [
+                    'brand_code' => 'ECON',
+                    'booking_classes_by_segment' => ['Y'],
+                    'fare_basis_codes_by_segment' => ['YLITE'],
+                    'cabin_by_segment' => ['economy'],
+                ],
                 'search_criteria' => [
                     'origin' => 'LHE',
                     'destination' => 'DXB',
