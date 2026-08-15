@@ -105,10 +105,11 @@ class AgentBookingCreationTest extends TestCase
             'source_channel' => 'agent_portal',
             'status' => BookingStatus::Pending,
             'payment_status' => 'unpaid',
+            'booking_reference' => 'OTA-AGENT-OWN',
         ]);
 
         $this->actingAs($agentUser)
-            ->get('/agent/bookings/'.$booking->id)
+            ->get('/agent/bookings/'.$booking->booking_reference)
             ->assertOk();
     }
 
@@ -137,7 +138,7 @@ class AgentBookingCreationTest extends TestCase
         ]);
 
         $this->actingAs($agentUser)
-            ->get('/agent/bookings/'.$booking->id)
+            ->get('/agent/bookings/'.$booking->booking_reference)
             ->assertForbidden();
     }
 
