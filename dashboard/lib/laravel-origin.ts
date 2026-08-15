@@ -5,9 +5,11 @@ export function buildCookieHeader(cookieList: Array<{ name: string; value: strin
 }
 
 export function getLaravelServerBase(): string {
-  return (
-    process.env.LARAVEL_URL ??
-    process.env.NEXT_PUBLIC_LARAVEL_URL ??
-    "http://127.0.0.1:8088"
-  ).replace(/\/$/, "");
+  const fromEnv = process.env.LARAVEL_URL?.replace(/\/$/, "");
+  if (fromEnv) {
+    return fromEnv;
+  }
+
+  // Server-only runtime target; never use NEXT_PUBLIC_* loopback fallbacks in client bundles.
+  return "http://127.0.0.1:8088";
 }

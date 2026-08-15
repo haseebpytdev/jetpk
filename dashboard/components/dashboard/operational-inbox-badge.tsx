@@ -67,6 +67,7 @@ export function OperationalInboxBadge() {
     <div className="relative">
       <button
         type="button"
+        data-testid="operational-inbox-badge"
         className="relative flex min-h-11 items-center rounded-xl border border-jp-border px-3 text-sm"
         aria-expanded={open}
         aria-label="Operational inbox"
