@@ -17,10 +17,12 @@ use App\Http\Controllers\Admin\FinanceDashboardController;
 use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedgerController;
 use App\Models\Agency;
 use App\Models\Agent;
 use App\Models\AgentApplication;
 use App\Models\Booking;
+use App\Models\LedgerTransaction;
 use App\Models\SupplierConnection;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -194,16 +196,6 @@ trait AdminLegacyViewTestHelpers
         return app(FinanceAdjustmentController::class)->create($request)->render();
     }
 
-    protected function adminAccountingLedgerIndexHtml(User $admin): string
-    {
-        $this->actingAs($admin);
-        view()->share('errors', new ViewErrorBag);
-        $request = Request::create('/admin/accounting/ledger', 'GET');
-        $request->setUserResolver(fn () => $admin);
-
-        return app(AccountingLedgerController::class)->index($request)->render();
-    }
-
     protected function adminAccountingReconciliationIndexHtml(User $admin): string
     {
         $this->actingAs($admin);
@@ -230,6 +222,50 @@ trait AdminLegacyViewTestHelpers
         view()->share('errors', new ViewErrorBag);
 
         return app(AgentCommissionController::class)->show($agent)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function adminAccountingLedgerIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/accounting/ledger', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AccountingLedgerController::class)->index($request)->render();
+    }
+
+    protected function adminAccountingLedgerShowHtml(User $admin, LedgerTransaction $transaction): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/accounting/ledger/'.$transaction->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AccountingLedgerController::class)->show($request, $transaction)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function staffAccountingLedgerIndexHtml(User $staff, array $query = []): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/accounting/ledger', 'GET', $query);
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffAccountingLedgerController::class)->index($request)->render();
+    }
+
+    protected function assertLegacyStaffAccountingRedirect(User $staff, string $uri = '/staff/accounting/ledger'): void
+    {
+        $response = $this->actingAs($staff)->get($uri);
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/staff/dashboard/accounting', $target);
     }
 
     protected function assertLegacyAccountingRedirect(User $admin, string $uri = '/admin/finance/dashboard'): void

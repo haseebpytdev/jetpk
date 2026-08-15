@@ -7,6 +7,7 @@ use App\Enums\LedgerTransactionStatus;
 use App\Enums\LedgerTransactionType;
 use App\Enums\UserAccountStatus;
 use App\Models\Agency;
+use App\Models\AgencyUser;
 use App\Models\Agent;
 use App\Models\AgentDepositRequest;
 use App\Models\AgentWallet;
@@ -20,10 +21,12 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class LedgerVisibilityTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -39,11 +42,11 @@ class LedgerVisibilityTest extends TestCase
         $admin = $this->platformAdmin();
         [$txA, $txB] = $this->seedLedgerTransactionsForTwoAgencies();
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-table"', false)
-            ->assertSee('data-testid="accounting-ledger-row-'.$txA->id.'"', false)
-            ->assertSee('data-testid="accounting-ledger-row-'.$txB->id.'"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index'));
+        $html = $this->adminAccountingLedgerIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="accounting-ledger-table"', $html);
+        $this->assertStringContainsString('data-testid="accounting-ledger-row-'.$txA->id.'"', $html);
+        $this->assertStringContainsString('data-testid="accounting-ledger-row-'.$txB->id.'"', $html);
     }
 
     public function test_platform_admin_can_view_transaction_detail_with_entries(): void
@@ -51,11 +54,11 @@ class LedgerVisibilityTest extends TestCase
         $admin = $this->platformAdmin();
         $tx = $this->seedPostedDepositLedgerTransaction();
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.show', $tx))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-entries"', false)
-            ->assertSee('data-testid="accounting-ledger-show-actor"', false)
-            ->assertSee($tx->transaction_ref);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.show', $tx));
+        $html = $this->adminAccountingLedgerShowHtml($admin, $tx);
+        $this->assertStringContainsString('data-testid="accounting-ledger-entries"', $html);
+        $this->assertStringContainsString('data-testid="accounting-ledger-show-actor"', $html);
+        $this->assertStringContainsString($tx->transaction_ref, $html);
     }
 
     public function test_staff_with_ledger_permission_can_see_accounting_ledger(): void
@@ -63,8 +66,9 @@ class LedgerVisibilityTest extends TestCase
         $staff = $this->staffWithPermissions([StaffPermission::LedgerView]);
         $this->seedPostedDepositLedgerTransaction();
 
-        $this->actingAs($staff)->get(route('staff.accounting.ledger.index'))->assertOk()
-            ->assertSee('data-testid="accounting-ledger-table"', false);
+        $this->assertLegacyStaffAccountingRedirect($staff, route('staff.accounting.ledger.index'));
+        $html = $this->staffAccountingLedgerIndexHtml($staff);
+        $this->assertStringContainsString('data-testid="accounting-ledger-table"', $html);
     }
 
     public function test_staff_without_ledger_permission_gets_403(): void
@@ -120,17 +124,18 @@ class LedgerVisibilityTest extends TestCase
         $admin = $this->platformAdmin();
         $depositTx = $this->seedPostedDepositLedgerTransaction();
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index', [
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index', [
             'transaction_type' => LedgerTransactionType::AgencyDepositApproved->value,
-        ]))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-row-'.$depositTx->id.'"', false);
+        ]));
+        $matched = $this->adminAccountingLedgerIndexHtml($admin, [
+            'transaction_type' => LedgerTransactionType::AgencyDepositApproved->value,
+        ]);
+        $this->assertStringContainsString('data-testid="accounting-ledger-row-'.$depositTx->id.'"', $matched);
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index', [
+        $empty = $this->adminAccountingLedgerIndexHtml($admin, [
             'transaction_type' => LedgerTransactionType::BookingPaymentVerified->value,
-        ]))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-empty"', false);
+        ]);
+        $this->assertStringContainsString('data-testid="accounting-ledger-empty"', $empty);
     }
 
     public function test_filters_by_agency_work_for_admin(): void
@@ -141,20 +146,19 @@ class LedgerVisibilityTest extends TestCase
         $txA = $this->seedPostedDepositLedgerTransaction($agencyA->id);
         $txB = $this->seedPostedDepositLedgerTransaction($agencyB->id);
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index', ['agency_id' => $agencyA->id]))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-row-'.$txA->id.'"', false)
-            ->assertDontSee('data-testid="accounting-ledger-row-'.$txB->id.'"', false);
+        $html = $this->adminAccountingLedgerIndexHtml($admin, ['agency_id' => $agencyA->id]);
+        $this->assertStringContainsString('data-testid="accounting-ledger-row-'.$txA->id.'"', $html);
+        $this->assertStringNotContainsString('data-testid="accounting-ledger-row-'.$txB->id.'"', $html);
     }
 
     public function test_empty_ledger_state_renders_without_error(): void
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index'))
-            ->assertOk()
-            ->assertSee('No double-entry ledger transactions yet', false)
-            ->assertSee('data-testid="accounting-ledger-empty"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index'));
+        $html = $this->adminAccountingLedgerIndexHtml($admin);
+        $this->assertStringContainsString('No double-entry ledger transactions yet', $html);
+        $this->assertStringContainsString('data-testid="accounting-ledger-empty"', $html);
     }
 
     public function test_balanced_filter_works_with_posted_data(): void
@@ -162,13 +166,11 @@ class LedgerVisibilityTest extends TestCase
         $admin = $this->platformAdmin();
         $tx = $this->seedPostedDepositLedgerTransaction();
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index', ['balanced' => 'yes']))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-row-'.$tx->id.'"', false);
+        $balanced = $this->adminAccountingLedgerIndexHtml($admin, ['balanced' => 'yes']);
+        $this->assertStringContainsString('data-testid="accounting-ledger-row-'.$tx->id.'"', $balanced);
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index', ['balanced' => 'no']))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-empty"', false);
+        $unbalanced = $this->adminAccountingLedgerIndexHtml($admin, ['balanced' => 'no']);
+        $this->assertStringContainsString('data-testid="accounting-ledger-empty"', $unbalanced);
     }
 
     public function test_unbalanced_filter_finds_manually_unbalanced_transaction(): void
@@ -212,9 +214,8 @@ class LedgerVisibilityTest extends TestCase
         ]);
         $tx = LedgerTransaction::query()->findOrFail($txId);
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index', ['balanced' => 'no']))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-row-'.$tx->id.'"', false);
+        $html = $this->adminAccountingLedgerIndexHtml($admin, ['balanced' => 'no']);
+        $this->assertStringContainsString('data-testid="accounting-ledger-row-'.$tx->id.'"', $html);
     }
 
     public function test_existing_master_ledger_routes_still_work(): void
@@ -223,8 +224,8 @@ class LedgerVisibilityTest extends TestCase
         [$agentUser] = $this->seedAgent();
         $staff = $this->staffWithPermissions([StaffPermission::LedgerView]);
 
-        $this->actingAs($admin)->get(route('admin.ledger.index'))->assertOk();
-        $this->actingAs($staff)->get(route('staff.ledger.index'))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.ledger.index'));
+        $this->assertLegacyStaffAccountingRedirect($staff, route('staff.ledger.index'));
         $this->actingAs($agentUser)->get(route('agent.ledger.index'))->assertOk();
     }
 
@@ -237,10 +238,13 @@ class LedgerVisibilityTest extends TestCase
         $walletTxCount = AgentWalletTransaction::query()->count();
         $depositCount = AgentDepositRequest::query()->count();
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index'))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index'));
+        $this->adminAccountingLedgerIndexHtml($admin);
         $tx = LedgerTransaction::query()->firstOrFail();
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.show', $tx))->assertOk();
-        $this->actingAs($admin)->get(route('admin.accounting.reconciliation.index'))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.show', $tx));
+        $this->adminAccountingLedgerShowHtml($admin, $tx);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.reconciliation.index'));
+        $this->adminAccountingReconciliationIndexHtml($admin);
 
         $this->assertSame($walletCount, AgentWallet::query()->count());
         $this->assertSame($walletTxCount, AgentWalletTransaction::query()->count());
@@ -278,7 +282,7 @@ class LedgerVisibilityTest extends TestCase
 
     protected function createAgentStaff(Agent $agent, string $email, array $permissions): User
     {
-        return User::query()->create([
+        $staff = User::query()->create([
             'name' => 'Agent Staff',
             'username' => str_replace('@', '-', $email),
             'email' => $email,
@@ -291,6 +295,13 @@ class LedgerVisibilityTest extends TestCase
                 'agent_permissions' => $permissions,
             ],
         ]);
+
+        AgencyUser::query()->updateOrCreate(
+            ['agency_id' => $agent->agency_id, 'user_id' => $staff->id],
+            ['role' => AccountType::AgentStaff->value],
+        );
+
+        return $staff;
     }
 
     protected function seedPostedDepositLedgerTransaction(?int $agencyId = null): LedgerTransaction
