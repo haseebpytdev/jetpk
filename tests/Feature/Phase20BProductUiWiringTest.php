@@ -8,17 +8,23 @@ use App\Models\Agent;
 use App\Models\Booking;
 use App\Models\StaffProfile;
 use App\Models\User;
+use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class Phase20BProductUiWiringTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     public function test_admin_agents_uses_db_rows_not_demo_config(): void
     {
-        [$agency, $admin] = $this->agencyAdmin();
+        $agency = Agency::factory()->create();
+        $admin = $this->platformAdmin();
         $agentUser = User::factory()->create([
             'current_agency_id' => $agency->id,
             'account_type' => AccountType::Agent,
@@ -29,15 +35,17 @@ class Phase20BProductUiWiringTest extends TestCase
             'code' => 'AGT-REAL-2001',
         ]);
 
-        $this->actingAs($admin)->get(route('admin.agents'))
-            ->assertOk()
-            ->assertSee('AGT-REAL-2001')
-            ->assertDontSee('AGT-1001');
+        $this->assertLegacyAgentsRedirect($admin);
+
+        $html = $this->agentsWorkspaceHtml($admin);
+        $this->assertStringContainsString('AGT-REAL-2001', $html);
+        $this->assertStringNotContainsString('AGT-1001', $html);
     }
 
-    public function test_admin_agents_scopes_by_agency(): void
+    public function test_admin_agents_platform_admin_sees_cross_agency_rows(): void
     {
-        [$agency, $admin] = $this->agencyAdmin();
+        $agency = Agency::factory()->create();
+        $admin = $this->platformAdmin();
         $otherAgency = Agency::factory()->create();
 
         Agent::factory()->create([
@@ -51,19 +59,26 @@ class Phase20BProductUiWiringTest extends TestCase
             'code' => 'AGT-OTHER',
         ]);
 
-        $this->actingAs($admin)->get(route('admin.agents'))
-            ->assertOk()
-            ->assertSee('AGT-LOCAL')
-            ->assertDontSee('AGT-OTHER');
+        $this->assertLegacyAgentsRedirect($admin);
+
+        $html = $this->agentsWorkspaceHtml($admin);
+        $this->assertStringContainsString('AGT-LOCAL', $html);
+        $this->assertStringContainsString('AGT-OTHER', $html);
     }
 
     public function test_admin_agents_empty_state_when_no_agents(): void
     {
-        [, $admin] = $this->agencyAdmin();
-        $this->actingAs($admin)->get(route('admin.agents'))
-            ->assertOk()
-            ->assertSee('No agents yet')
-            ->assertSee('Agents and partner agencies will appear here after approval or manual creation.');
+        $admin = $this->platformAdmin();
+        Agent::query()->delete();
+
+        $this->assertLegacyAgentsRedirect($admin);
+
+        $html = $this->agentsWorkspaceHtml($admin);
+        $this->assertStringContainsString('No agents yet', $html);
+        $this->assertStringContainsString(
+            'Agents and partner agencies will appear here after approval or manual creation.',
+            $html
+        );
     }
 
     public function test_foundation_seeder_adds_five_demo_agents_for_agents_dashboard(): void
@@ -92,7 +107,8 @@ class Phase20BProductUiWiringTest extends TestCase
 
     public function test_admin_staff_uses_db_rows_not_demo_config(): void
     {
-        [$agency, $admin] = $this->agencyAdmin();
+        $agency = Agency::factory()->create();
+        $admin = $this->platformAdmin();
         $staffUser = User::factory()->create([
             'name' => 'Real Staff Member',
             'current_agency_id' => $agency->id,
@@ -105,14 +121,17 @@ class Phase20BProductUiWiringTest extends TestCase
         ]);
 
         $this->actingAs($admin)->get(route('admin.staff'))
-            ->assertOk()
-            ->assertSee('Real Staff Member')
-            ->assertDontSee('STF-001');
+            ->assertRedirect('/admin/dashboard/staff');
+
+        $html = $this->adminStaffIndexHtml($admin);
+        $this->assertStringContainsString('Real Staff Member', $html);
+        $this->assertStringNotContainsString('STF-001', $html);
     }
 
-    public function test_admin_staff_scopes_by_agency(): void
+    public function test_admin_staff_platform_admin_sees_cross_agency_rows(): void
     {
-        [$agency, $admin] = $this->agencyAdmin();
+        $agency = Agency::factory()->create();
+        $admin = $this->platformAdmin();
         $otherAgency = Agency::factory()->create();
 
         $staffA = User::factory()->create(['current_agency_id' => $agency->id, 'account_type' => AccountType::Staff]);
@@ -121,52 +140,70 @@ class Phase20BProductUiWiringTest extends TestCase
         StaffProfile::factory()->create(['agency_id' => $otherAgency->id, 'user_id' => $staffB->id, 'job_title' => 'Ops B']);
 
         $this->actingAs($admin)->get(route('admin.staff'))
-            ->assertOk()
-            ->assertSee('Ops A')
-            ->assertDontSee('Ops B');
+            ->assertRedirect('/admin/dashboard/staff');
+
+        $html = $this->adminStaffIndexHtml($admin);
+        $this->assertStringContainsString('Ops A', $html);
+        $this->assertStringContainsString('Ops B', $html);
     }
 
     public function test_admin_staff_empty_state_when_no_staff(): void
     {
-        [, $admin] = $this->agencyAdmin();
+        $admin = $this->platformAdmin();
+        StaffProfile::query()->delete();
+
         $this->actingAs($admin)->get(route('admin.staff'))
-            ->assertOk()
-            ->assertSee('No staff users have been created yet. Create staff from Users & Access.');
+            ->assertRedirect('/admin/dashboard/staff');
+
+        $html = $this->adminStaffIndexHtml($admin);
+        $this->assertStringContainsString(
+            'No staff users have been created yet. Create staff from Users &amp; Access.',
+            $html
+        );
     }
 
     public function test_roles_permissions_renders_real_access_matrix(): void
     {
-        [, $admin] = $this->agencyAdmin();
+        $admin = $this->platformAdmin();
         $this->actingAs($admin)->get(route('admin.roles-permissions'))
-            ->assertOk()
-            ->assertSee('Platform Admin')
-            ->assertSee('Agency Admin')
-            ->assertSee('Staff')
-            ->assertSee('Agent')
-            ->assertSee('Customer')
-            ->assertSee('This matrix reflects current middleware and policy behavior.');
+            ->assertRedirect('/admin/dashboard/users/roles');
+
+        $html = $this->adminRolesPermissionsHtml($admin);
+        $this->assertStringContainsString('Platform admin', $html);
+        $this->assertStringContainsString('Agency admin', $html);
+        $this->assertStringContainsString('Staff', $html);
+        $this->assertStringContainsString('Agent', $html);
+        $this->assertStringContainsString('Customer', $html);
+        $this->assertStringContainsString('This matrix reflects current middleware and policy behavior.', $html);
     }
 
     public function test_sidebar_contains_production_navigation_groups(): void
     {
-        [, $admin] = $this->agencyAdmin();
+        $admin = $this->platformAdmin();
         $this->actingAs($admin)->get(route('admin.dashboard'))
-            ->assertOk()
-            ->assertSee('Operations')
-            ->assertSee('Network')
-            ->assertSee('Finance')
-            ->assertSee('Suppliers')
-            ->assertSee('Website')
-            ->assertSee('Communications')
-            ->assertSee('System')
-            ->assertDontSee('PLANNED')
-            ->assertDontSee('placeholder');
+            ->assertOk();
+
+        $labels = collect(app(BackOfficeCapabilitiesPresenter::class)->present($admin)['navigation_groups'] ?? [])
+            ->pluck('label')
+            ->all();
+
+        $this->assertContains('Booking operations', $labels);
+        $this->assertContains('Finance', $labels);
+        $this->assertContains('Customers & distribution', $labels);
+        $this->assertContains('Suppliers', $labels);
+        $this->assertContains('Content & website', $labels);
+        $this->assertContains('Communications', $labels);
+        $this->assertContains('System', $labels);
+        $this->assertNotContains('PLANNED', $labels);
+        $this->assertFalse(
+            collect($labels)->contains(fn (string $label): bool => str_contains(strtolower($label), 'placeholder'))
+        );
     }
 
     public function test_key_pages_avoid_demo_fake_placeholder_sample_data_wording(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $customer = User::factory()->create(['account_type' => AccountType::Customer, 'current_agency_id' => $admin->current_agency_id]);
 
         $publicPaths = [
@@ -215,32 +252,45 @@ class Phase20BProductUiWiringTest extends TestCase
 
     public function test_legacy_branding_route_redirects_to_real_settings_page(): void
     {
-        [, $admin] = $this->agencyAdmin();
+        $admin = $this->platformAdmin();
         $this->actingAs($admin)->get(route('admin.branding'))
-            ->assertRedirect(route('admin.settings.branding.edit'));
+            ->assertRedirect('/admin/dashboard/settings/general');
     }
 
     public function test_go_live_checklist_remains_admin_only_and_production_safe(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($admin)->get(route('admin.go-live-checklist'))
-            ->assertOk()
-            ->assertDontSee('demo');
+            ->assertRedirect('/admin/dashboard/system/go-live');
+
+        $html = $this->adminGoLiveChecklistHtml($admin);
+        $this->assertStringNotContainsString('demo only', strtolower($html));
+        $this->assertStringNotContainsString('sample data', strtolower($html));
+        $this->assertStringNotContainsString('placeholder', strtolower($html));
+
         $this->actingAs($staff)->get(route('admin.go-live-checklist'))->assertForbidden();
     }
 
-    /**
-     * @return array{Agency, User}
-     */
-    protected function agencyAdmin(): array
+    protected function assertLegacyAgentsRedirect(User $admin, string $uri = '/admin/agents'): void
     {
-        $agency = Agency::factory()->create();
-        $admin = User::factory()->agencyAdmin()->create(['current_agency_id' => $agency->id]);
-        $agency->users()->attach($admin->id, ['role' => AccountType::AgencyAdmin->value]);
+        $response = $this->actingAs($admin)->get($uri);
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/admin/dashboard/agents', $target);
+    }
 
-        return [$agency, $admin];
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function agentsWorkspaceHtml(User $admin, array $query = []): string
+    {
+        $response = $this->actingAs($admin)
+            ->getJson(route('admin.agents.data', $query))
+            ->assertOk();
+
+        return (string) ($response->json('rows_html') ?? '')
+            .(string) ($response->json('preview_html') ?? '');
     }
 }

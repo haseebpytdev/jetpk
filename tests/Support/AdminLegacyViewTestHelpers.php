@@ -260,6 +260,35 @@ trait AdminLegacyViewTestHelpers
         return app(StaffAccountingLedgerController::class)->index($request)->render();
     }
 
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function adminStaffIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/staff', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AdminSectionController::class)->staff($request)->render();
+    }
+
+    protected function adminRolesPermissionsHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(AdminSectionController::class)->rolesPermissions()->render();
+    }
+
+    protected function adminGoLiveChecklistHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(AdminSectionController::class)->goLiveChecklist()->render();
+    }
+
     protected function assertLegacyStaffAccountingRedirect(User $staff, string $uri = '/staff/accounting/ledger'): void
     {
         $response = $this->actingAs($staff)->get($uri);
