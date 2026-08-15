@@ -221,7 +221,7 @@ final class JetpkHomepageSectionData
     {
         $items = $this->field('trust.cards', null);
         if (is_array($items) && $items !== []) {
-            return array_values($items);
+            return $this->sortedEnabledItems($items);
         }
 
         return [];
