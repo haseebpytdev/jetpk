@@ -20,11 +20,13 @@ use App\Services\Suppliers\TicketingAdapters\DuffelSupplierTicketingAdapter;
 use App\Support\Staff\StaffPermission;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AgentCommissionLedgerTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -64,8 +66,22 @@ class AgentCommissionLedgerTest extends TestCase
     {
         [$agent, $admin] = $this->agentForAgency();
 
-        $this->actingAs($admin)->get(route('admin.commissions.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.commissions.show', $agent))->assertOk();
+        $indexResponse = $this->actingAs($admin)->get(route('admin.commissions.index'));
+        $indexResponse->assertRedirect();
+        $this->assertStringContainsString(
+            '/admin/dashboard/commissions',
+            (string) $indexResponse->headers->get('Location'),
+        );
+
+        $showResponse = $this->actingAs($admin)->get(route('admin.commissions.show', $agent));
+        $showResponse->assertRedirect();
+        $this->assertStringContainsString(
+            '/admin/dashboard/commissions',
+            (string) $showResponse->headers->get('Location'),
+        );
+
+        $this->assertStringContainsString('commission', strtolower($this->adminCommissionsIndexHtml($admin)));
+        $this->assertStringContainsString('commission', strtolower($this->adminCommissionShowHtml($admin, $agent)));
     }
 
     public function test_legacy_agency_admin_cannot_view_commissions(): void

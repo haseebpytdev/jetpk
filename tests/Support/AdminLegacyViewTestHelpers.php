@@ -2,6 +2,7 @@
 
 namespace Tests\Support;
 
+use App\Http\Controllers\Admin\AgentCommissionController;
 use App\Http\Controllers\Admin\AccountingLedgerController;
 use App\Http\Controllers\Admin\AccountingReconciliationController;
 use App\Http\Controllers\Admin\AgentApplicationController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Models\Agency;
+use App\Models\Agent;
 use App\Models\AgentApplication;
 use App\Models\Booking;
 use App\Models\SupplierConnection;
@@ -210,6 +212,24 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(AccountingReconciliationController::class)->index($request)->render();
+    }
+
+    protected function adminCommissionsIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/commissions', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgentCommissionController::class)->index($request)->render();
+    }
+
+    protected function adminCommissionShowHtml(User $admin, Agent $agent): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(AgentCommissionController::class)->show($agent)->render();
     }
 
     protected function assertLegacyAccountingRedirect(User $admin, string $uri = '/admin/finance/dashboard'): void
