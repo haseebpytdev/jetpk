@@ -11,10 +11,12 @@ use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class AgentApplicationWorkflowTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     public function test_platform_admin_can_approve_application_and_create_active_agency(): void
@@ -47,10 +49,12 @@ class AgentApplicationWorkflowTest extends TestCase
         $this->assertSame('New Partner Travels', $agency->name);
         $this->assertSame($agency->id, $owner->current_agency_id);
 
-        $this->actingAs($admin)
-            ->get(route('admin.agencies.index', ['status' => 'active']))
-            ->assertOk()
-            ->assertSee('New Partner Travels', false);
+        $response = $this->actingAs($admin)
+            ->get(route('admin.agencies.index', ['status' => 'active']));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/agents', (string) $response->headers->get('Location'));
+
+        $this->assertSame('New Partner Travels', Agency::query()->where('name', 'New Partner Travels')->value('name'));
     }
 
     public function test_approval_rejection_and_needs_info_send_communication_logs(): void
@@ -88,12 +92,14 @@ class AgentApplicationWorkflowTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.agent-applications.show', $application))
-            ->assertOk()
-            ->assertSee('data-testid="ota-agent-application-preview-actions"', false)
-            ->assertSee(route('admin.agent-applications.approve', $application), false)
-            ->assertSee(route('admin.agent-applications.needs-more-info', $application), false)
-            ->assertSee(route('admin.agent-applications.reject', $application), false)
-            ->assertSee('Approve and create agent account', false);
+            ->assertRedirect('/admin/dashboard/agents/applications?id='.$application->id);
+
+        $html = $this->agentApplicationShowHtml($admin, $application);
+        $this->assertStringContainsString('data-testid="ota-agent-application-preview-actions"', $html);
+        $this->assertStringContainsString(route('admin.agent-applications.approve', $application), $html);
+        $this->assertStringContainsString(route('admin.agent-applications.needs-more-info', $application), $html);
+        $this->assertStringContainsString(route('admin.agent-applications.reject', $application), $html);
+        $this->assertStringContainsString('Approve and create agent account', $html);
     }
 
     public function test_staff_access_wording_uses_default_staff_access_active(): void
@@ -102,11 +108,16 @@ class AgentApplicationWorkflowTest extends TestCase
         [$admin] = $this->platformAdmin();
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
-        $this->actingAs($admin)
-            ->get(route('admin.users.show', $staff))
-            ->assertOk()
-            ->assertSee('Default staff access active', false)
-            ->assertDontSee('Legacy full access', false);
+        $response = $this->actingAs($admin)
+            ->get(route('admin.users.show', $staff));
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/admin/dashboard/users', $target);
+        $this->assertStringContainsString((string) $staff->id, $target);
+
+        $html = $this->adminUserShowHtml($admin, $staff);
+        $this->assertStringContainsString('Default staff access active', $html);
+        $this->assertStringNotContainsString('Legacy full access', $html);
     }
 
     /**

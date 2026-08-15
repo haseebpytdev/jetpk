@@ -2,6 +2,7 @@
 
 namespace Tests\Support;
 
+use App\Http\Controllers\Admin\AgentApplicationController;
 use App\Http\Controllers\Admin\AdminSectionController;
 use App\Http\Controllers\Admin\AdminSettingsHubController;
 use App\Http\Controllers\Admin\AgentDepositController;
@@ -9,7 +10,8 @@ use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\ClientPageSettingsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
-use App\Models\Booking;
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Models\AgentApplication;
 use App\Models\SupplierConnection;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -111,6 +113,26 @@ trait AdminLegacyViewTestHelpers
         view()->share('errors', new ViewErrorBag);
 
         return app(SupplierConnectionController::class)->edit($connection)->render();
+    }
+
+    protected function adminUserShowHtml(User $admin, User $user): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/users/'.$user->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(UserManagementController::class)->show($user)->render();
+    }
+
+    protected function agentApplicationShowHtml(User $admin, AgentApplication $application): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/agent-applications/'.$application->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgentApplicationController::class)->show($application)->render();
     }
 
     protected function assertLegacyBookingShowRedirect(User $admin, Booking $booking): void
