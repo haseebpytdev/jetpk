@@ -33,6 +33,7 @@ use App\Services\Client\ClientCustomPageRouteRegistrar;
 use App\Services\Client\ClientMutatingFlowParityRouteRegistrar;
 use App\Services\Client\ClientPageSettingsParityRouteRegistrar;
 use App\Services\Client\ClientPrefixedRouteRegistrar;
+use App\Services\Client\ClientRedirectResolver;
 use App\Support\Client\ClientErrorResponseResolver;
 use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\Platform\PlatformModuleRegistry;
@@ -231,7 +232,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     return redirect()->guest(route('dev.cp.login'));
                 }
 
-                return redirect()->guest(client_route('login'));
+                return redirect()->guest(app(ClientRedirectResolver::class)->guestLoginPath());
             }
 
             if ($e instanceof \App\Services\Suppliers\OneApi\Exceptions\OneApiException) {

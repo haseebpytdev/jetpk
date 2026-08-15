@@ -51,13 +51,21 @@ class OtaClientContextFlowAuditCommand extends Command
         $checks[] = $this->checkHttpRoute($clientSlug, 'group-ticketing.search', '/groups/search', $isDefaultSlug);
         $checks[] = $this->checkLookupRedirect($clientSlug);
         $checks[] = $this->checkAdminGuestRedirect($clientSlug, $isDefaultSlug);
-        $checks[] = $this->checkHelper('client_route(login)', fn () => client_route('login'), "/{$clientSlug}/login");
+        $checks[] = $this->checkHelper(
+            'client_route(login)',
+            fn () => client_route('login'),
+            $isDefaultSlug ? '/login' : "/{$clientSlug}/login",
+        );
         $checks[] = $this->checkHelper(
             'client_route(admin.dashboard)',
             fn () => client_route('admin.dashboard'),
-            "/{$clientSlug}/admin/dashboard",
+            $isDefaultSlug ? '/admin/dashboard' : "/{$clientSlug}/admin/dashboard",
         );
-        $checks[] = $this->checkHelper('client_url(/groups/search)', fn () => client_url('/groups/search'), "/{$clientSlug}/groups/search");
+        $checks[] = $this->checkHelper(
+            'client_url(/groups/search)',
+            fn () => client_url('/groups/search'),
+            $isDefaultSlug ? '/groups/search' : "/{$clientSlug}/groups/search",
+        );
         $checks[] = $this->checkRootLoginUnprefixed();
         $checks[] = $this->checkDevCpUnprefixed();
 
@@ -189,12 +197,26 @@ class OtaClientContextFlowAuditCommand extends Command
 
         $actual = $generator();
 
+        $normalizedExpected = $this->normalizeHelperValue($expected);
+        $normalizedActual = $this->normalizeHelperValue(is_string($actual) ? $actual : json_encode($actual));
+
         return [
             'name' => $name,
             'expected' => $expected,
             'actual' => is_string($actual) ? $actual : json_encode($actual),
-            'ok' => $actual === $expected,
+            'ok' => $normalizedActual === $normalizedExpected,
         ];
+    }
+
+    private function normalizeHelperValue(string $value): string
+    {
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            $path = parse_url($value, PHP_URL_PATH);
+
+            return is_string($path) ? $this->normalizePath($path) : $value;
+        }
+
+        return $this->normalizePath($value);
     }
 
     /**

@@ -4,6 +4,7 @@ use App\Http\Middleware\PersistClientPreviewContext;
 use App\Models\ClientProfile;
 use App\Services\Client\ClientAssetResolver;
 use App\Services\Client\ClientBrandingResolver;
+use App\Services\Client\ClientProfileResolver;
 use App\Services\Client\ClientThemeResolver;
 use App\Services\Client\CurrentClientContext;
 use App\Services\Client\RuntimeViewResolver;
@@ -213,7 +214,9 @@ if (! function_exists('client_route')) {
 
         $slug = $clientSlug ?? current_client_slug();
 
-        if ($slug !== null && config('client_route_parity.enabled', true)) {
+        if ($slug !== null
+            && config('client_route_parity.enabled', true)
+            && ! app(ClientProfileResolver::class)->isDefaultDeploymentSlug($slug)) {
             $parityName = client_parity_route_name($routeName);
             if ($parityName !== null) {
                 $parameters['clientSlug'] = $slug;
@@ -248,7 +251,9 @@ if (! function_exists('client_url')) {
             $normalized = '';
         }
 
-        if ($slug !== null && ota_single_client_root_slug() === null) {
+        if ($slug !== null
+            && ota_single_client_root_slug() === null
+            && ! app(ClientProfileResolver::class)->isDefaultDeploymentSlug($slug)) {
             $prefixed = '/'.$slug.$normalized;
 
             return ui_preserve_url($queryPart !== '' ? $prefixed.'?'.$queryPart : $prefixed);
