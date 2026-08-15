@@ -904,6 +904,9 @@ class SabreCertGdsCpnrReportCommandTest extends TestCase
         Config::set('suppliers.sabre.booking_mode', 'pnr_only');
         Config::set('suppliers.sabre.ticketing_enabled', false);
         Config::set('suppliers.sabre.cancel_enabled', false);
+        // Opt into NN HaltOnStatus so fingerprint proves NN-halt detection (default production omits NN).
+        Config::set('suppliers.sabre.cpnr_omit_nn_from_halt_on_status', false);
+        Config::set('suppliers.sabre.cpnr_include_nn_in_halt_on_status', true);
         Http::fake([
             '*/v2/auth/token*' => Http::response(['access_token' => 'fake-token-for-tests-only', 'expires_in' => 1800], 200),
             '*v4/offers/shop*' => Http::response($this->shopFixtureWithBookingCode('Y'), 200),

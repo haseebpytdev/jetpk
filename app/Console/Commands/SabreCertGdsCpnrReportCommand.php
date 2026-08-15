@@ -1009,21 +1009,32 @@ class SabreCertGdsCpnrReportCommand extends Command
         $pri = is_array($airPriceRow['PriceRequestInformation'] ?? null) ? $airPriceRow['PriceRequestInformation'] : [];
         $oq = is_array($pri['OptionalQualifiers'] ?? null) ? $pri['OptionalQualifiers'] : [];
         $pq = is_array($oq['PricingQualifiers'] ?? null) ? $oq['PricingQualifiers'] : [];
-        $cmd = is_array($pq['CommandPricing'] ?? null) ? $pq['CommandPricing'] : [];
-        foreach (['FareBasis', 'fareBasis'] as $key) {
-            if (trim((string) ($cmd[$key] ?? '')) !== '') {
-                return true;
-            }
+        $cmdRaw = $pq['CommandPricing'] ?? null;
+        if (! is_array($cmdRaw)) {
+            return false;
         }
-        $segments = $cmd['SegmentSelect'] ?? $cmd['segmentSelect'] ?? null;
-        if (is_array($segments)) {
+
+        $commands = array_is_list($cmdRaw) ? $cmdRaw : [$cmdRaw];
+        foreach ($commands as $cmd) {
+            if (! is_array($cmd)) {
+                continue;
+            }
+            foreach (['FareBasis', 'fareBasis'] as $key) {
+                if ($this->scalarStringNonEmpty($cmd[$key] ?? null)) {
+                    return true;
+                }
+            }
+            $segments = $cmd['SegmentSelect'] ?? $cmd['segmentSelect'] ?? null;
+            if (! is_array($segments)) {
+                continue;
+            }
             $list = array_is_list($segments) ? $segments : [$segments];
             foreach ($list as $seg) {
                 if (! is_array($seg)) {
                     continue;
                 }
                 foreach (['FareBasis', 'fareBasis'] as $key) {
-                    if (trim((string) ($seg[$key] ?? '')) !== '') {
+                    if ($this->scalarStringNonEmpty($seg[$key] ?? null)) {
                         return true;
                     }
                 }
@@ -1031,6 +1042,15 @@ class SabreCertGdsCpnrReportCommand extends Command
         }
 
         return false;
+    }
+
+    protected function scalarStringNonEmpty(mixed $value): bool
+    {
+        if ($value === null || is_array($value) || is_object($value)) {
+            return false;
+        }
+
+        return trim((string) $value) !== '';
     }
 
     /**
