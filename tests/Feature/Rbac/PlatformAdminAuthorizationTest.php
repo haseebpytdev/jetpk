@@ -60,7 +60,7 @@ class PlatformAdminAuthorizationTest extends TestCase
         [$admin] = $this->platformAdmin();
 
         $this->actingAs($admin)->get(route('admin.api-settings'))
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
     }
 
     public function test_platform_admin_can_access_system_health(): void

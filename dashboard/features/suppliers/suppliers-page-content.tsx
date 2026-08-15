@@ -72,7 +72,7 @@ export async function SuppliersPageContent({ searchParams }: Props) {
         />
         <DataSourceNoticeSlot />
         <p className="text-sm">
-          <Link className="font-medium text-jp-accent-muted hover:underline" href="/settings/integrations">
+          <Link className="font-medium text-jp-accent-muted hover:underline" href="/api-connections">
             View / configure API connections
           </Link>
         </p>

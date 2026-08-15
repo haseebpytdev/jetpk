@@ -29,7 +29,6 @@ test("settings section navigation renders", async ({ page }) => {
   await expect(nav.getByRole("link", { name: "General", exact: true })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Security", exact: true })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Notifications", exact: true })).toBeVisible();
-  await expect(nav.getByRole("link", { name: "Integrations", exact: true })).toBeVisible();
 });
 
 test("overview metric grid renders", async ({ page }) => {
@@ -64,9 +63,11 @@ test("notification settings route renders", async ({ page }) => {
   await expect(page.getByTestId("notification-settings-workspace")).toBeVisible();
 });
 
-test("integration settings route renders", async ({ page }) => {
-  await page.goto("/admin/dashboard/settings/integrations", { waitUntil: "load" });
-  await expect(page.getByTestId("integration-settings-workspace")).toBeVisible();
+test("api connections hub route renders", async ({ page }) => {
+  await page.goto("/admin/dashboard/api-connections", { waitUntil: "load" });
+  await expect(page.getByTestId("api-connections-workspace")).toBeVisible();
+  await expect(page.getByTestId("api-connections-card-grid")).toBeVisible();
+  await expect(page.getByTestId("api-connection-add-card")).toBeVisible();
 });
 
 test("general settings shows JetPakistan baseline", async ({ page }) => {
@@ -129,13 +130,13 @@ test("notification settings preview reset works", async ({ page }) => {
 });
 
 test("integration records distinguish GDS and NDC", async ({ page }) => {
-  await page.goto("/admin/dashboard/settings/integrations", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/api-connections", { waitUntil: "load" });
   await expect(page.getByTestId("integration-record-sabreGds")).toContainText("Sabre GDS");
   await expect(page.getByTestId("integration-record-sabreNdc")).toContainText("Sabre NDC");
 });
 
 test("integration settings preview reset works", async ({ page }) => {
-  await page.goto("/admin/dashboard/settings/integrations", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/api-connections", { waitUntil: "load" });
   const form = page.getByTestId("integration-settings-workspace").getByTestId("settings-local-preview-form");
   await form.getByLabel("Configuration completeness (%)").fill("99");
   await form.getByRole("button", { name: "Apply to preview" }).click();
@@ -145,7 +146,7 @@ test("integration settings preview reset works", async ({ page }) => {
 });
 
 test("integration records show no credential fields", async ({ page }) => {
-  await page.goto("/admin/dashboard/settings/integrations", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/api-connections", { waitUntil: "load" });
   const records = page.getByTestId("integration-settings-workspace");
   const text = await records.textContent();
   expect(text).not.toMatch(/\bpassword\b|\bapikey\b|\bapi_key\b|\bpcc\b|\blniata\b/i);
@@ -158,9 +159,9 @@ test("settings section nav marks current page", async ({ page }) => {
 });
 
 test("browser back and forward works", async ({ page }) => {
-  await page.goto("/admin/dashboard/settings/integrations", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/api-connections", { waitUntil: "load" });
   await expectSettingsReady(page);
-  await page.goto("/admin/dashboard/settings/integrations?validationState=blocked", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/api-connections?validationState=blocked", { waitUntil: "load" });
   await expect(page).toHaveURL(/validationState=blocked/);
   const workspace = page.getByTestId("integration-settings-workspace");
   await expect(workspace).toBeVisible();
@@ -280,7 +281,7 @@ test("all settings subroutes render preview banner", async ({ page }) => {
     "/admin/dashboard/settings/general",
     "/admin/dashboard/settings/security",
     "/admin/dashboard/settings/notifications",
-    "/admin/dashboard/settings/integrations",
+    "/admin/dashboard/api-connections",
   ];
   for (const route of routes) {
     await page.goto(route, { waitUntil: "load" });

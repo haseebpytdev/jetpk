@@ -72,7 +72,7 @@ final class GoLiveChecklistPresenter
                 'label' => 'At least one active API connection',
                 'ok' => $connectionOk,
                 'note' => $connectionOk ? 'An active supplier connection exists.' : 'Add and enable an installed adapter connection.',
-                'href' => '/admin/dashboard/settings/integrations',
+                'href' => '/admin/dashboard/api-connections',
                 'actionLabel' => 'Open API connections',
             ],
             [

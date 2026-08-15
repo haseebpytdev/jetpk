@@ -498,7 +498,7 @@ test.describe("JP-DASH-03 checkpoint 12", () => {
     expect(configuredBody).not.toMatch(PREVIEW_RESIDUE);
     expect(configuredBody).not.toMatch(PRIVATE_ORIGIN);
 
-    await page.goto("/admin/dashboard/settings/integrations", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await page.goto("/admin/dashboard/api-connections", { waitUntil: "domcontentloaded", timeout: 120_000 });
     const integrationsBody = await page.locator("body").innerText();
     expect(integrationsBody).not.toMatch(PREVIEW_RESIDUE);
     expect(integrationsBody).toMatch(/Integration|Supplier|API|Settings/i);

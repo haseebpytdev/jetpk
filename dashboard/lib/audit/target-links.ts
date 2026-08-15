@@ -18,10 +18,10 @@ const TARGET_ROUTE_MAP: Partial<Record<AuditTargetType, (id: string) => string |
     if (id === "security") return "/settings/security";
     if (id === "general") return "/settings/general";
     if (id === "notifications") return "/settings/notifications";
-    if (id === "integrations") return "/settings/integrations";
+    if (id === "integrations") return "/api-connections";
     return "/settings";
   },
-  integration: () => `/settings/integrations`,
+  integration: () => `/api-connections`,
   auditEvent: (id) => `/audit?selected=${encodeURIComponent(id)}`,
   dashboard: () => `/`,
 };

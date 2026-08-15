@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import {
   createApiConnection,
@@ -9,6 +9,9 @@ import {
   toggleApiConnection,
   updateApiConnection,
 } from "@/services/operational-api";
+import { ApiConnectionCard } from "@/features/api-connections/components/connection-card";
+import { AddApiConnectionCard, ProviderCatalogCards } from "@/features/api-connections/components/provider-catalog-cards";
+import type { ApiConnectionRow } from "@/features/api-connections/lib/connection-status";
 
 type FieldMeta = {
   key: string;
@@ -23,7 +26,7 @@ type FieldMeta = {
   options?: Array<{ value: string; label: string }>;
 };
 
-type ProviderCatalog = {
+export type ProviderCatalog = {
   key: string;
   label: string;
   installed: boolean;
@@ -32,9 +35,18 @@ type ProviderCatalog = {
   advancedFields?: FieldMeta[];
 };
 
-const FIELD_LABELS: Record<string, string> = {};
+type ProviderCardMeta = {
+  key: string;
+  label: string;
+  channel?: string;
+  description?: string;
+  configured?: boolean;
+  icon?: string;
+  capabilities?: string[];
+  readiness?: string;
+};
 
-type ApiConnectionRow = {
+type WorkspaceConnectionRow = ApiConnectionRow & {
   id: string;
   name: string;
   provider: string;
@@ -71,11 +83,11 @@ type ApiConnectionRow = {
   };
 };
 
-function currentChannel(credentials: Record<string, string>, row?: ApiConnectionRow): string {
+function currentChannel(credentials: Record<string, string>, row?: WorkspaceConnectionRow): string {
   return credentials.api_channel || row?.advanced?.values?.api_channel || "crane_ndc";
 }
 
-function isFieldVisible(field: FieldMeta, credentials: Record<string, string>, row?: ApiConnectionRow): boolean {
+function isFieldVisible(field: FieldMeta, credentials: Record<string, string>, row?: WorkspaceConnectionRow): boolean {
   if (!field.channel) {
     return true;
   }
@@ -122,16 +134,16 @@ function ProviderField({
   );
 }
 
-function extractConnections(result: { ok: boolean; data?: unknown }): ApiConnectionRow[] {
-  const payload = (result as { data?: { connections?: ApiConnectionRow[] }; connections?: ApiConnectionRow[] }).data
-    ?? (result as { connections?: ApiConnectionRow[] });
-  const rows = (payload as { connections?: ApiConnectionRow[] }).connections ?? [];
+function extractConnections(result: { ok: boolean; data?: unknown }): WorkspaceConnectionRow[] {
+  const payload = (result as { data?: { connections?: WorkspaceConnectionRow[] }; connections?: WorkspaceConnectionRow[] }).data
+    ?? (result as { connections?: WorkspaceConnectionRow[] });
+  const rows = (payload as { connections?: WorkspaceConnectionRow[] }).connections ?? [];
   return Array.isArray(rows) ? rows : [];
 }
 
 export function ApiConnectionsWorkspace() {
   const isLive = useDashboardLiveMode();
-  const [rows, setRows] = useState<ApiConnectionRow[]>([]);
+  const [rows, setRows] = useState<WorkspaceConnectionRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [provider, setProvider] = useState("sabre");
@@ -143,6 +155,8 @@ export function ApiConnectionsWorkspace() {
   const [manageName, setManageName] = useState("");
   const [manageEnv, setManageEnv] = useState("sandbox");
   const [providers, setProviders] = useState<ProviderCatalog[]>([]);
+  const [providerCards, setProviderCards] = useState<ProviderCardMeta[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
   const [manageTab, setManageTab] = useState<"overview" | "environment" | "endpoints" | "credentials" | "capabilities" | "advanced" | "health" | "audit">("overview");
   const [manageBaseUrl, setManageBaseUrl] = useState("");
 
@@ -165,6 +179,12 @@ export function ApiConnectionsWorkspace() {
     if (Array.isArray(catalog) && catalog.length > 0) {
       setProviders(catalog);
     }
+    const cards = ((result as { data?: { providerCards?: ProviderCardMeta[] } }).data?.providerCards
+      ?? (result as { providerCards?: ProviderCardMeta[] }).providerCards
+      ?? []) as ProviderCardMeta[];
+    if (Array.isArray(cards) && cards.length > 0) {
+      setProviderCards(cards);
+    }
   }, [isLive]);
 
   useEffect(() => {
@@ -183,69 +203,80 @@ export function ApiConnectionsWorkspace() {
     await refresh();
   }
 
+  const providerLabelByKey = useMemo(() => {
+    const map = new Map<string, string>();
+    providers.forEach((item) => map.set(item.key, item.label));
+    providerCards.forEach((item) => map.set(item.key, item.label));
+    return map;
+  }, [providers, providerCards]);
+
+  const providerIconByKey = useMemo(() => {
+    const map = new Map<string, string>();
+    providerCards.forEach((item) => {
+      if (item.icon) {
+        map.set(item.key, item.icon);
+      }
+    });
+    return map;
+  }, [providerCards]);
+
+  const connectionsByProvider = useMemo(() => {
+    const grouped = new Map<string, WorkspaceConnectionRow[]>();
+    rows.forEach((row) => {
+      const list = grouped.get(row.provider) ?? [];
+      list.push(row);
+      grouped.set(row.provider, list);
+    });
+    return grouped;
+  }, [rows]);
+
   return (
-    <div className="space-y-4" data-testid="api-connections-workspace">
+    <div className="space-y-6" data-testid="api-connections-workspace">
       <p className="text-sm text-jp-muted">
-        API Connections are technical channels. Suppliers remain the business vendor grouping. Secrets are never shown after save.
-        Sabre GDS is integrated when SabreGdsTicketingService is installed. Sabre NDC is integrated when Offer/Order adapters exist,
-        and enabled only from the connection setting (default off).
+        Manage technical supplier channels from one hub. Business supplier records remain under Suppliers for operational reporting.
+        Secrets are never shown after save.
       </p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      <ul className="divide-y divide-jp-border rounded-xl border border-jp-border bg-white">
-        {rows.map((row) => (
-          <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
-            <div>
-              <p className="font-medium">{row.name}</p>
-              <p className="text-jp-muted">
-                {row.provider} · {row.environment} · {row.enabled ? "enabled" : "disabled"}
-                {row.provider === "sabre"
-                  ? ` · GDS ${row.sabreGdsSupported ? "supported" : "not supported"} · NDC ${
-                      row.sabreNdcSupported ? "supported" : "not supported"
-                    } (${row.sabreNdcEnabled ? "enabled" : "off"})`
-                  : ""}
-                {row.lastTestStatus ? ` · last test ${row.lastTestStatus}` : ""}
-                {row.registryLabel ? ` · ${row.registryLabel}` : ""}
+
+      <section className="space-y-4" data-testid="api-connections-card-grid">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-gray-900">Connections</h2>
+          <p className="text-xs text-jp-muted">{rows.length} connection{rows.length === 1 ? "" : "s"}</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {rows.map((row) => (
+            <ApiConnectionCard
+              key={row.id}
+              row={row}
+              providerLabel={providerLabelByKey.get(row.provider) ?? row.provider}
+              providerIcon={providerIconByKey.get(row.provider)}
+              busy={busy}
+              isLive={isLive}
+              onConfigure={() => {
+                setManageId(row.id);
+                setManageName(row.name);
+                setManageEnv(row.environment || "sandbox");
+                setManageTab("overview");
+                setCredentials({});
+                setManageBaseUrl(row.baseUrl ?? "");
+                setCredentials(row.advanced?.values?.api_channel ? { api_channel: row.advanced.values.api_channel } : {});
+              }}
+              onTest={() => run(() => testApiConnection(String(row.id)))}
+              onToggle={() => run(() => toggleApiConnection(String(row.id)))}
+            />
+          ))}
+          <AddApiConnectionCard onClick={() => setShowCreate(true)} />
+        </div>
+        {connectionsByProvider.size > 0 ? (
+          <div className="rounded-xl border border-jp-border bg-gray-50 p-3 text-xs text-jp-muted">
+            {Array.from(connectionsByProvider.entries()).map(([providerKey, items]) => (
+              <p key={providerKey}>
+                {providerLabelByKey.get(providerKey) ?? providerKey}: {items.length} connection{items.length === 1 ? "" : "s"}
               </p>
-            </div>
-            {isLive ? (
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="rounded-lg border border-jp-border px-2 py-1 text-xs"
-                  disabled={busy}
-                  onClick={() => {
-                    setManageId(row.id);
-                    setManageName(row.name);
-                    setManageEnv(row.environment || "sandbox");
-                    setManageTab("overview");
-                    setCredentials({});
-                    setManageBaseUrl(row.baseUrl ?? "");
-                    setCredentials(row.advanced?.values?.api_channel ? { api_channel: row.advanced.values.api_channel } : {});
-                  }}
-                >
-                  Manage
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg border border-jp-border px-2 py-1 text-xs"
-                  disabled={busy}
-                  onClick={() => run(() => toggleApiConnection(String(row.id)))}
-                >
-                  {row.enabled ? "Disable" : "Enable"}
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg border border-jp-border px-2 py-1 text-xs"
-                  disabled={busy}
-                  onClick={() => run(() => testApiConnection(String(row.id)))}
-                >
-                  Test
-                </button>
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+            ))}
+          </div>
+        ) : null}
+      </section>
       {manageId ? (
         <section className="space-y-3 rounded-xl border border-jp-border bg-white p-4" data-testid="api-connection-manage">
           <h2 className="text-sm font-semibold">Manage connection</h2>
@@ -410,8 +441,23 @@ export function ApiConnectionsWorkspace() {
           })()}
         </section>
       ) : null}
-      <section className="space-y-3 rounded-xl border border-jp-border bg-white p-4">
-        <h2 className="text-sm font-semibold">Add connection</h2>
+      <section className={`space-y-3 rounded-xl border border-jp-border bg-white p-4 ${showCreate ? "" : "hidden"}`} data-testid="api-connection-create-panel">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold">Add API Connection</h2>
+          <button type="button" className="text-xs text-jp-muted hover:underline" onClick={() => setShowCreate(false)}>
+            Close
+          </button>
+        </div>
+        <ProviderCatalogCards
+          providers={providers}
+          providerCards={providerCards}
+          selectedKey={provider}
+          onSelect={(key) => {
+            setProvider(key);
+            setCredentials({});
+            setCreateBaseUrl("");
+          }}
+        />
         <label className="block text-xs">
           Provider
           <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={provider} onChange={(e) => {
@@ -483,16 +529,23 @@ export function ApiConnectionsWorkspace() {
                 className="min-h-11 rounded-xl bg-jp-accent px-3 text-sm text-white disabled:opacity-60"
                 disabled={busy || !name.trim()}
                 onClick={() =>
-                  run(() =>
-                    createApiConnection({
+                  run(async () => {
+                    const result = await createApiConnection({
                       provider,
                       name: name.trim(),
                       environment,
                       status: "inactive",
                       credentials,
                       ...(adapter?.baseUrlOverridable ? { base_url: createBaseUrl.trim() || null } : {}),
-                    }),
-                  )
+                    });
+                    if (result.ok) {
+                      setShowCreate(false);
+                      setName("");
+                      setCredentials({});
+                      setCreateBaseUrl("");
+                    }
+                    return result;
+                  })
                 }
               >
                 Save securely

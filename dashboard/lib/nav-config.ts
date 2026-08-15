@@ -47,7 +47,7 @@ export const navGroups: NavGroup[] = [
   {
     label: "Suppliers",
     items: [
-      { label: "Suppliers", href: "/suppliers", laravelRoute: "admin.api-settings" },
+      { label: "Suppliers", href: "/suppliers", laravelRoute: "admin.suppliers" },
     ],
   },
   {
@@ -88,6 +88,7 @@ export const navGroups: NavGroup[] = [
   {
     label: "System",
     items: [
+      { label: "API Connections", href: "/api-connections", laravelRoute: "admin.api-settings" },
       {
         label: "Settings",
         href: "/settings",
@@ -97,7 +98,6 @@ export const navGroups: NavGroup[] = [
           { label: "General", href: "/settings/general" },
           { label: "Security", href: "/settings/security" },
           { label: "Notifications", href: "/settings/notifications" },
-          { label: "Integrations", href: "/settings/integrations" },
         ],
       },
     ],
@@ -133,7 +133,7 @@ export const staffNavGroups: NavGroup[] = [
   },
   {
     label: "Suppliers",
-    items: [{ label: "Suppliers", href: "/suppliers", laravelRoute: "staff.api-settings" }],
+    items: [{ label: "Suppliers", href: "/suppliers", laravelRoute: "staff.suppliers" }],
   },
   {
     label: "Content & website",

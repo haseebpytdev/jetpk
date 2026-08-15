@@ -45,7 +45,7 @@ class JpDash03Checkpoint12ModulesTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.api-settings'))
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
 
         $this->actingAs($staff)->get(route('admin.api-settings'))->assertForbidden();
     }
@@ -63,7 +63,7 @@ class JpDash03Checkpoint12ModulesTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.api-settings.edit', $connection))
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
     }
 
     public function test_staff_management_module_routes_and_rbac(): void

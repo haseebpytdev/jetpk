@@ -22,7 +22,7 @@ class SupplierConnectionCrudTest extends TestCase
     {
         $admin = $this->seededAdmin();
         $this->actingAs($admin)->get('/admin/api-settings')
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
     }
 
     public function test_agency_admin_can_create_supplier_connection(): void
@@ -198,7 +198,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$connection->id.'/edit')
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
 
         $json = $this->actingAs($admin)->getJson('/admin/api-settings?format=json');
         $json->assertOk()->assertJsonMissing(['secret-plaintext']);
@@ -243,7 +243,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$duffel->id.'/edit')
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
     }
 
     public function test_duffel_form_hides_generic_non_duffel_credentials(): void
@@ -257,7 +257,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$duffel->id.'/edit')
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
     }
 
     public function test_duffel_store_requires_access_token(): void
@@ -392,7 +392,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$connection->id.'/edit')
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
 
         $json = $this->actingAs($admin)->getJson('/admin/api-settings?format=json');
         $json->assertOk()->assertJsonMissing(['duffel_test_super_secret_token']);
@@ -479,7 +479,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings/'.$sabre->id.'/edit')
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
 
         $json = $this->actingAs($admin)->getJson('/admin/api-settings?format=json');
         $json->assertOk()
@@ -493,7 +493,7 @@ class SupplierConnectionCrudTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/api-settings')
-            ->assertRedirect('/admin/dashboard/settings/integrations');
+            ->assertRedirect('/admin/dashboard/api-connections');
 
         $this->actingAs($admin)
             ->getJson('/admin/api-settings?format=json')

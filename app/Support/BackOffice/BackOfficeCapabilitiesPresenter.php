@@ -192,9 +192,6 @@ class BackOfficeCapabilitiesPresenter
         $suppliers = [];
         if ($has('suppliers.view')) {
             $suppliers[] = $this->dashboardNav('Suppliers', 'suppliers', '/suppliers');
-            if ($isAdmin) {
-                $suppliers[] = $this->dashboardNav('API connections', 'api-settings', '/settings/integrations');
-            }
         }
         if ($suppliers !== []) {
             $groups[] = ['label' => 'Suppliers', 'items' => array_values(array_filter($suppliers))];
@@ -251,6 +248,9 @@ class BackOfficeCapabilitiesPresenter
         }
 
         $system = [];
+        if ($isAdmin && $has('suppliers.view')) {
+            $system[] = $this->dashboardNav('API Connections', 'api-settings', '/api-connections');
+        }
         if ($has('settings.view')) {
             $system[] = $this->dashboardNav('Settings', 'settings', '/settings');
         }

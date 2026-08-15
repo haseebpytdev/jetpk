@@ -76,7 +76,7 @@ const PROBES: RbacProbe[] = [
   },
   {
     module: "API Settings",
-    adminRoute: "/admin/dashboard/settings/integrations",
+    adminRoute: "/admin/dashboard/api-connections",
     laravelRoute: "/admin/api-settings",
     staffApiExpected: "deny",
     anonymousExpected: "deny",

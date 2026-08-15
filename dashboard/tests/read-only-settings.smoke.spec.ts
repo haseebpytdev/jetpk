@@ -39,7 +39,7 @@ test("settings security subsection", async ({ page }) => {
 });
 
 test("settings integrations subsection", async ({ page }) => {
-  await page.goto("/admin/dashboard/settings/integrations", { waitUntil: "load" });
+  await page.goto("/admin/dashboard/api-connections", { waitUntil: "load" });
   await expect(page.locator("main")).toBeVisible({ timeout: 60_000 });
 });
 

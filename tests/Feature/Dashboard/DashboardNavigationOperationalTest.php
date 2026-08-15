@@ -74,7 +74,7 @@ class DashboardNavigationOperationalTest extends TestCase
 
         $apiSettings = collect($navigation)->firstWhere('key', 'api-settings');
         $this->assertNotNull($apiSettings);
-        $this->assertSame('/settings/integrations', $apiSettings['href']);
+        $this->assertSame('/api-connections', $apiSettings['href']);
         $this->assertSame('dashboard', $apiSettings['target']);
     }
 

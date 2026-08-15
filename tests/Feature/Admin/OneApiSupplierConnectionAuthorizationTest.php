@@ -44,7 +44,7 @@ class OneApiSupplierConnectionAuthorizationTest extends TestCase
         $response = $this->actingAs($admin)
             ->get(route('admin.api-settings.create', ['provider' => 'one_api']));
         $response->assertRedirect();
-        $this->assertStringContainsString('/admin/dashboard/settings/integrations', (string) $response->headers->get('Location'));
+        $this->assertStringContainsString('/admin/dashboard/api-connections', (string) $response->headers->get('Location'));
 
         $html = $this->adminApiSettingsCreateHtml($admin, ['provider' => 'one_api']);
         $this->assertNotSame('', trim($html));
@@ -85,7 +85,7 @@ class OneApiSupplierConnectionAuthorizationTest extends TestCase
         $editRedirect = $this->actingAs($admin)
             ->get(route('admin.api-settings.edit', $connection));
         $editRedirect->assertRedirect();
-        $this->assertStringContainsString('/admin/dashboard/settings/integrations', (string) $editRedirect->headers->get('Location'));
+        $this->assertStringContainsString('/admin/dashboard/api-connections', (string) $editRedirect->headers->get('Location'));
 
         $html = $this->adminApiSettingsEditHtml($admin, $connection);
         $this->assertNotSame('', trim($html));

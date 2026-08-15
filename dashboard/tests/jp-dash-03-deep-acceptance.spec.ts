@@ -34,7 +34,7 @@ const LEGACY_REDIRECT_PAGES = [
   { module: "Legacy Settings", route: "/admin/settings", expectPath: "/admin/dashboard/settings" },
   { module: "Legacy Support", route: "/admin/support/tickets", expectPath: "/admin/dashboard/support" },
   { module: "Legacy Staff", route: "/admin/staff", expectPath: "/admin/dashboard/users" },
-  { module: "Legacy API Settings", route: "/admin/api-settings", expectPath: "/admin/dashboard/settings/integrations" },
+  { module: "Legacy API Settings", route: "/admin/api-settings", expectPath: "/admin/dashboard/api-connections" },
   { module: "Legacy Page Settings", route: "/admin/page-settings", expectPath: "/admin/dashboard/cms" },
   { module: "Legacy Branding", route: "/admin/settings/branding", expectPath: "/admin/dashboard/settings/general" },
   { module: "Legacy Markups", route: "/admin/markups", expectPath: "/admin/dashboard/markups" },
@@ -129,7 +129,7 @@ test.describe("JP-DASH-03 deep acceptance", () => {
 
     const redirects = [
       { label: "Staff", href: "/admin/staff", expectPath: "/admin/dashboard/users" },
-      { label: "API Settings", href: "/admin/api-settings", expectPath: "/admin/dashboard/settings/integrations" },
+      { label: "API Settings", href: "/admin/api-settings", expectPath: "/admin/dashboard/api-connections" },
       { label: "Laravel Settings", href: "/admin/settings", expectPath: "/admin/dashboard/settings" },
       { label: "Cancellations queue", href: "/admin/bookings?queue=cancellations", expectPath: "/admin/dashboard/bookings" },
       { label: "Execution queue", href: "/admin/bookings?queue=needs_action", expectPath: "/admin/dashboard/bookings" },

@@ -44,14 +44,17 @@ class SupplierConnectionController extends Controller
         $connections = (clone $query)->orderBy('provider')->paginate(20);
 
         if ($this->wantsBackOfficeJson($request)) {
+            $existingProviders = (clone $query)->pluck('provider')->map(fn ($p) => $p->value ?? (string) $p)->all();
+
             return $this->backOfficeJson([
                 'ok' => true,
                 'connections' => collect($connections->items())->map(fn ($row) => $this->presentConnection($row))->all(),
                 'providers' => $this->providerCatalog(),
+                'providerCards' => $this->providerCards($existingProviders),
             ]);
         }
 
-        return redirect()->to('/admin/dashboard/settings/integrations');
+        return redirect()->to('/admin/dashboard/api-connections');
     }
 
     public function create(Request $request): View

@@ -11,6 +11,8 @@ const PLANNED_REDIRECTS: Record<string, RedirectTarget> = {
   suppliers: { kind: "next", path: "/suppliers" },
   reports: { kind: "next", path: "/reports" },
   settings: { kind: "next", path: "/settings" },
+  "api-connections": { kind: "next", path: "/api-connections" },
+  "api-settings": { kind: "next", path: "/api-connections" },
   support: { kind: "next", path: "/support" },
   "page-settings": { kind: "next", path: "/cms" },
   markups: { kind: "next", path: "/markups" },
