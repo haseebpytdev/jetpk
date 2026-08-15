@@ -91,7 +91,15 @@ function isFieldVisible(field: FieldMeta, credentials: Record<string, string>, r
   if (!field.channel) {
     return true;
   }
-  return field.channel === currentChannel(credentials, row);
+
+  const authChannels = new Set(["manual_token", "credentials_auto_token"]);
+  if (authChannels.has(field.channel)) {
+    const authMode = credentials.auth_mode || row?.advanced?.values?.auth_mode || row?.maskedCredentials?.auth_mode || "manual_token";
+    return field.channel === authMode;
+  }
+
+  const apiChannel = credentials.api_channel || row?.advanced?.values?.api_channel || "crane_ndc";
+  return field.channel === apiChannel;
 }
 
 function ProviderField({

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\SupplierProvider;
+use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
 use Illuminate\Validation\Rule;
@@ -166,6 +167,25 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
                     && SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials) !== '';
                 if (! $hasApiKey && ! $hasToken && ! $hasUserPass) {
                     $validator->errors()->add('credentials', 'Airline direct usually needs api_key, token, or username/password.');
+                }
+
+                return;
+            }
+
+            if ($provider === SupplierProvider::AlHaider->value) {
+                $authMode = strtolower(trim((string) (
+                    SupplierCredentialFormPresenter::effectiveValue('auth_mode', $credentials, $existingCredentials)
+                    ?: AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL
+                )));
+                if ($authMode === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_AUTO) {
+                    if (SupplierCredentialFormPresenter::effectiveValue('username', $credentials, $existingCredentials) === '') {
+                        $validator->errors()->add('credentials.username', 'Al-Haider username is required for auto token mode.');
+                    }
+                    if (SupplierCredentialFormPresenter::effectiveValue('password', $credentials, $existingCredentials) === '') {
+                        $validator->errors()->add('credentials.password', 'Al-Haider password is required for auto token mode.');
+                    }
+                } elseif (SupplierCredentialFormPresenter::effectiveValue('existing_token', $credentials, $existingCredentials) === '') {
+                    $validator->errors()->add('credentials.existing_token', 'Al-Haider manual token mode requires an existing token.');
                 }
 
                 return;

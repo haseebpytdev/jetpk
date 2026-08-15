@@ -113,7 +113,7 @@ class AlHaiderClientAuthTest extends TestCase
         Http::fake();
 
         $this->expectException(AlHaiderProviderException::class);
-        $this->expectExceptionMessage('persisted bearer token');
+        $this->expectExceptionMessage('Authentication required');
 
         try {
             app(AlHaiderClient::class)->listGroups();

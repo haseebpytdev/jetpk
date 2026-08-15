@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\StoreSupplierConnectionRequest;
 use App\Http\Requests\Admin\UpdateSupplierConnectionRequest;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\SupplierConnectionService;
+use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
 use App\Support\Suppliers\AirBlueSupplierConnectionNormalizer;
 use App\Support\Suppliers\IatiSupplierConnectionNormalizer;
 use App\Support\Suppliers\OneApiSupplierConnectionNormalizer;
@@ -280,7 +281,11 @@ class SupplierConnectionController extends Controller
                 'key' => $provider->value,
                 'label' => $provider->name,
                 'installed' => \App\Support\Suppliers\SupplierRegistry::adapterInstalled($provider),
-                'baseUrlOverridable' => in_array($provider->value, [SupplierProvider::PiaNdc->value, SupplierProvider::Airblue->value], true),
+                'baseUrlOverridable' => in_array($provider->value, [
+                    SupplierProvider::PiaNdc->value,
+                    SupplierProvider::Airblue->value,
+                    SupplierProvider::AlHaider->value,
+                ], true),
                 'credentialFields' => $fields,
                 'advancedFields' => array_values(array_filter(
                     $fields,
@@ -542,11 +547,14 @@ class SupplierConnectionController extends Controller
             }
         }
 
-        return OneApiSupplierConnectionNormalizer::normalizePayload(
-            AirBlueSupplierConnectionNormalizer::normalizePayload(
-                PiaNdcSupplierConnectionNormalizer::normalizePayload(
-                    IatiSupplierConnectionNormalizer::normalizePayload(
-                        SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+        return AlHaiderSupplierConnectionNormalizer::normalizePayload(
+            OneApiSupplierConnectionNormalizer::normalizePayload(
+                AirBlueSupplierConnectionNormalizer::normalizePayload(
+                    PiaNdcSupplierConnectionNormalizer::normalizePayload(
+                        IatiSupplierConnectionNormalizer::normalizePayload(
+                            SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+                            $existing
+                        ),
                         $existing
                     ),
                     $existing

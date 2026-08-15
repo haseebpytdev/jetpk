@@ -11,6 +11,7 @@ enum SupplierProvider: string
     case Duffel = 'duffel';
     case Iati = 'iati';
     case OneApi = 'one_api';
+    case AlHaider = 'al_haider';
     case Amadeus = 'amadeus';
     case Travelport = 'travelport';
 }

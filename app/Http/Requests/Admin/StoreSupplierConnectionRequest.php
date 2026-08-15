@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
+use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -114,6 +115,19 @@ class StoreSupplierConnectionRequest extends FormRequest
                     if (! in_array($field, $keys, true)) {
                         $validator->errors()->add('credentials.'.$field, 'This field is required for IATI.');
                     }
+                }
+            }
+
+            if ($provider === SupplierProvider::AlHaider->value) {
+                $authMode = strtolower(trim((string) ($credentials['auth_mode'] ?? AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL)));
+                if ($authMode === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_AUTO) {
+                    foreach (['username', 'password'] as $field) {
+                        if (! in_array($field, $keys, true)) {
+                            $validator->errors()->add('credentials.'.$field, 'This field is required for Al-Haider auto token mode.');
+                        }
+                    }
+                } elseif (! in_array('existing_token', $keys, true)) {
+                    $validator->errors()->add('credentials.existing_token', 'Al-Haider manual token mode requires an existing token.');
                 }
             }
         });

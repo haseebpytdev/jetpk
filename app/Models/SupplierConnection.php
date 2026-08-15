@@ -146,6 +146,12 @@ class SupplierConnection extends Model
                 continue;
             }
 
+            if (in_array($key, ['existing_token', 'password', 'client_secret', 'token', 'agent_password', 'auth_code'], true)) {
+                $masked[$key] = $text !== '' ? 'Configured (masked)' : '••••••••';
+
+                continue;
+            }
+
             $tail = strlen($text) > 4 ? substr($text, -4) : $text;
             $masked[$key] = '••••'.$tail;
         }

@@ -5,6 +5,7 @@ namespace App\Support\Suppliers;
 use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierProvider;
 use App\Models\SupplierConnection;
+use App\Services\Suppliers\AlHaider\AlHaiderClient;
 use App\Services\Suppliers\SupplierAdapterResolver;
 
 /**
@@ -26,6 +27,10 @@ final class SupplierRegistry
 
     public static function adapterInstalled(SupplierProvider $provider): bool
     {
+        if ($provider === SupplierProvider::AlHaider) {
+            return class_exists(AlHaiderClient::class);
+        }
+
         try {
             app(SupplierAdapterResolver::class)->resolve($provider);
 

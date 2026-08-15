@@ -392,5 +392,62 @@ return [
                 'client_secret' => ['label' => 'Client Secret', 'type' => 'password', 'required' => true],
             ],
         ],
+        'al_haider' => [
+            'fields' => [
+                'auth_mode' => [
+                    'label' => 'Authentication mode',
+                    'type' => 'select',
+                    'required' => true,
+                    'default' => 'manual_token',
+                    'options' => [
+                        'manual_token' => 'Existing token / Manual token',
+                        'credentials_auto_token' => 'Credentials (auto token — future)',
+                    ],
+                    'help' => 'Use manual token when the owner supplies an existing bearer token. Auto token uses username/password only when the provider contract supports login.',
+                ],
+                'existing_token' => [
+                    'label' => 'Existing token',
+                    'type' => 'password',
+                    'required' => false,
+                    'channel' => 'manual_token',
+                    'placeholder' => 'Leave blank to keep the current token.',
+                    'help' => 'Bearer token supplied by Al-Haider. Never shown after save.',
+                ],
+                'token_expires_at' => [
+                    'label' => 'Known token expiry (optional)',
+                    'type' => 'text',
+                    'required' => false,
+                    'channel' => 'manual_token',
+                    'placeholder' => 'YYYY-MM-DD or ISO-8601',
+                    'help' => 'Optional owner-known expiry for operational reminders only.',
+                ],
+                'username' => [
+                    'label' => 'Username',
+                    'type' => 'text',
+                    'required' => false,
+                    'channel' => 'credentials_auto_token',
+                    'placeholder' => 'Al-Haider API username',
+                ],
+                'password' => [
+                    'label' => 'Password',
+                    'type' => 'password',
+                    'required' => false,
+                    'channel' => 'credentials_auto_token',
+                    'placeholder' => 'Leave blank to keep existing value.',
+                ],
+                'clear_existing_token' => [
+                    'label' => 'Clear stored token',
+                    'type' => 'select',
+                    'required' => false,
+                    'channel' => 'manual_token',
+                    'default' => '0',
+                    'options' => [
+                        '0' => 'Keep current token',
+                        '1' => 'Clear stored token',
+                    ],
+                    'help' => 'Explicit clear only. Does not rotate or request a new token from the supplier.',
+                ],
+            ],
+        ],
     ],
 ];

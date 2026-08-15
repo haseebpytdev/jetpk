@@ -10,6 +10,7 @@ final class SupplierProviderFieldCatalog
     /** @var list<string> */
     private const ADVANCED_KEYS = [
         'api_channel',
+        'auth_mode',
         'currency',
         'language_code',
         'owner_code',
@@ -78,7 +79,7 @@ final class SupplierProviderFieldCatalog
 
     private static function groupFor(string $key, string $type): string
     {
-        if ($key === 'api_channel') {
+        if ($key === 'api_channel' || $key === 'auth_mode') {
             return 'channel';
         }
         if ($type === 'password') {

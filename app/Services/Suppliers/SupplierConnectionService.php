@@ -4,6 +4,7 @@ namespace App\Services\Suppliers;
 
 use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierProvider;
+use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
 use App\Models\Agency;
 use App\Models\AuditLog;
 use App\Models\SupplierConnection;
@@ -141,9 +142,25 @@ class SupplierConnectionService
      */
     public function maskCredentials(array $credentials): array
     {
+        $secretKeys = [
+            'existing_token',
+            'password',
+            'client_secret',
+            'access_token',
+            'token',
+            'agent_password',
+            'auth_code',
+        ];
+
         $masked = [];
         foreach ($credentials as $key => $value) {
             $text = trim((string) $value);
+            if (in_array(strtolower((string) $key), $secretKeys, true) && $text !== '') {
+                $masked[$key] = 'Configured (masked)';
+
+                continue;
+            }
+
             $tail = strlen($text) > 4 ? substr($text, -4) : '';
             $masked[$key] = $tail !== '' ? '••••'.$tail : '••••••••';
         }
@@ -205,8 +222,23 @@ class SupplierConnectionService
                 && in_array('agent_code', $keys, true)
                 && in_array('rest_auth_url', $keys, true)
                 && in_array('rest_search_url', $keys, true),
+            SupplierProvider::AlHaider => self::alHaiderCredentialKeysComplete($credentials),
             default => true,
         };
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    protected static function alHaiderCredentialKeysComplete(array $credentials): bool
+    {
+        $mode = strtolower(trim((string) ($credentials['auth_mode'] ?? AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL)));
+        if ($mode === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_AUTO) {
+            return trim((string) ($credentials['username'] ?? '')) !== ''
+                && trim((string) ($credentials['password'] ?? '')) !== '';
+        }
+
+        return trim((string) ($credentials['existing_token'] ?? '')) !== '';
     }
 
     protected function writeAudit(SupplierConnection $connection, ?User $actor, string $action, array $oldValues, array $newValues): void
