@@ -14,12 +14,16 @@ use Illuminate\Support\Facades\Route;
  *
  * Prefers client_route()/client_url() when preview context or session slug exists;
  * falls back to standard route()/url() for root production URLs.
+ *
+ * Default deployment slug (jetpk) is alias-only: redirects and path helpers use
+ * canonical unprefixed routes, matching ResolvePreviewClient 302 behavior.
  */
 final class ClientRedirectResolver
 {
     public function __construct(
         private readonly Request $request,
         private readonly CurrentClientContext $clientContext,
+        private readonly ClientProfileResolver $profileResolver,
     ) {}
 
     public function intended(string $fallbackRouteName = 'dashboard', ?User $user = null): RedirectResponse
@@ -53,7 +57,7 @@ final class ClientRedirectResolver
     {
         $slug = $this->resolveSlug(allowSessionFallback: false, capturedSessionSlug: $capturedSessionSlug);
 
-        if ($slug !== null) {
+        if ($slug !== null && ! $this->profileResolver->isDefaultDeploymentSlug($slug)) {
             if ($parityName = client_parity_route_name('home')) {
                 return route($parityName, ['clientSlug' => $slug], false);
             }
@@ -90,7 +94,9 @@ final class ClientRedirectResolver
     {
         $slug = $this->resolveSlug(allowSessionFallback: true);
 
-        if ($slug !== null && config('client_route_parity.enabled', true)) {
+        if ($slug !== null
+            && config('client_route_parity.enabled', true)
+            && ! $this->profileResolver->isDefaultDeploymentSlug($slug)) {
             $parityName = client_parity_route_name($routeName);
             if ($parityName !== null) {
                 $parameters['clientSlug'] = $slug;
@@ -106,7 +112,7 @@ final class ClientRedirectResolver
     {
         $slug = $this->resolveSlug(allowSessionFallback: true);
 
-        if ($slug === null) {
+        if ($slug === null || $this->profileResolver->isDefaultDeploymentSlug($slug)) {
             return url($path);
         }
 

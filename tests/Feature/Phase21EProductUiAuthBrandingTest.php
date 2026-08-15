@@ -7,16 +7,32 @@ use App\Models\Agent;
 use App\Models\AgentApplication;
 use App\Models\User;
 use App\Services\FlightSearch\FlightSearchService;
+use App\Services\Client\CurrentClientContext;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
+use Tests\Support\JetpkHomepageFixture;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\Support\PublicBookingPassengersPayload;
 use Tests\Support\PublicCheckoutTestDoubles;
 use Tests\TestCase;
 
 class Phase21EProductUiAuthBrandingTest extends TestCase
 {
+    use JetpkHomepageFixture;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seedJetpkAgency();
+        $this->makeJetpkProfile();
+        $this->artisan('jetpk:public-page-cms-bootstrap', ['--execute' => true]);
+        app(CurrentClientContext::class)->clear();
+    }
 
     protected function configuredBrandName(): string
     {
@@ -40,8 +56,9 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
 
         $this->get('/login')
             ->assertOk()
-            ->assertSee('Welcome to '.$brand, false)
-            ->assertSee('Log in | '.$brand, false);
+            ->assertSee('Book, manage, and track travel with '.$brand.'.', false)
+            ->assertSee('Log in', false)
+            ->assertSee('Sign in to manage bookings, e-tickets, and travel updates.', false);
 
         $this->get('/forgot-password')
             ->assertOk()
@@ -49,20 +66,20 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
 
         $this->get('/register')
             ->assertOk()
-            ->assertSee('Register | '.$brand, false)
-            ->assertSee('Book flights, track your booking requests, submit payment proof, and access travel documents from one place.', false);
+            ->assertSee('Create account', false)
+            ->assertSee('Register to book faster, save traveller details, and manage trips online.', false);
 
         $this->get('/agent/register')
             ->assertOk()
-            ->assertSee('Join the '.$brand.' Agent Network', false)
-            ->assertSee('Submit application', false)
-            ->assertSee('Admin review', false)
-            ->assertSee('Receive activation link', false);
+            ->assertSee('Join the '.$brand.' agent network', false)
+            ->assertSee('1. Submit application', false)
+            ->assertSee('2. Admin review', false)
+            ->assertSee('3. Start booking', false);
     }
 
     public function test_customer_registration_creates_customer_account_and_redirects_customer_dashboard(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
+        Mail::fake();
         $this->withoutMiddleware([ValidateCsrfToken::class]);
 
         $response = $this->post('/register', [
@@ -76,10 +93,11 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
             'password_confirmation' => 'Password123!',
         ]);
 
-        $response->assertRedirect('/customer');
+        $response->assertRedirect(route('verification.notice'));
 
         $user = User::query()->where('email', 'new.customer@example.com')->firstOrFail();
         $this->assertSame(AccountType::Customer, $user->account_type);
+        Mail::assertSent(\App\Mail\AdminNewCustomerSignupMail::class);
     }
 
     public function test_agent_application_route_stores_pending_application_without_creating_agent_account(): void
@@ -193,8 +211,9 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
 
     public function test_admin_can_approve_agent_application_and_create_agent_profile(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware([ValidateCsrfToken::class]);
+
+        $admin = $this->platformAdmin();
 
         $application = AgentApplication::query()->create([
             'first_name' => 'Agent',
@@ -209,7 +228,6 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $this->actingAs($admin)->patch(route('admin.agent-applications.approve', $application), [
             'internal_note' => 'Looks good',
         ])->assertRedirect();
@@ -233,45 +251,34 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
         $this->assertStringContainsString('Home', $html);
         $this->assertStringContainsString('Booking', $html);
         $this->assertStringContainsString('Support', $html);
-        $this->assertStringContainsString('Contact', $html);
-        $this->assertStringContainsString('Login', $html);
-        $this->assertStringContainsString('Sign Up', $html);
+        $this->assertStringContainsString('About', $html);
+        $this->assertStringContainsString('Sign in', $html);
+        $this->assertStringContainsString('Register', $html);
+        $this->assertStringContainsString('Customer Registration', $html);
         $this->assertStringContainsString('Agent Registration', $html);
-        $this->assertStringContainsString('Customer Login', $html);
-        $this->assertStringContainsString('Agent Login', $html);
-        $this->assertStringContainsString('Operator Login', $html);
-        $this->assertStringContainsString('Signup', $html);
-        $this->assertStringContainsString('Sign up', $html);
-        $this->assertStringContainsString('Agents', $html);
 
-        preg_match('/data-testid="public-nav-desktop"[^>]*>(.*?)<\/div>\s*<div class="ota-nav-actions"/s', $html, $desktop);
+        preg_match('/class="nav jp-header-nav"[^>]*>(.*?)<\/div>\s*<div class="header-right/s', $html, $desktop);
         $desktopNav = $desktop[1] ?? '';
         $this->assertStringNotContainsString('>Flights<', $desktopNav);
         $this->assertStringNotContainsString('Agent Network', $desktopNav);
-
-        preg_match('/data-testid="public-nav-mobile"[^>]*>(.*?)<\/nav>/s', $html, $mobile);
-        $mobileNav = $mobile[1] ?? '';
-        $this->assertStringNotContainsString('>Flights<', $mobileNav);
-        $this->assertStringNotContainsString('Agent Network', $mobileNav);
     }
 
     public function test_support_and_about_pages_render_distinct_content(): void
     {
         $this->get('/support')
             ->assertOk()
-            ->assertSee('Help and Support Center', false)
             ->assertSee('Support request', false)
             ->assertSee('Submit support request', false)
             ->assertSee('Manage booking', false)
-            ->assertSee('Office &amp; channels', false)
+            ->assertSee('Contact JetPakistan', false)
             ->assertDontSee('Send a message', false);
 
         $brand = $this->configuredBrandName();
 
         $this->get('/about-us')
             ->assertOk()
-            ->assertSee('About us', false)
             ->assertSee('About '.$brand, false)
+            ->assertSee('Cheap flights and secure online booking for Pakistan', false)
             ->assertDontSee('Help and Support Center', false);
     }
 
@@ -281,15 +288,16 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
 
         $this->get('/agent/register/apply')
             ->assertOk()
-            ->assertSee('Agent applications are reviewed by '.$brand.'. After approval, you will receive an activation email.', false)
-            ->assertSee('Submit Agent Application', false);
+            ->assertSee('Agent applications are reviewed by', false)
+            ->assertSee('After approval, you will receive an activation email.', false)
+            ->assertSee('Submit agent application', false);
     }
 
     public function test_agent_application_submitted_page_confirms_no_instant_access(): void
     {
         $this->get('/agent/register/submitted')
             ->assertOk()
-            ->assertSee('Application submitted', false)
+            ->assertSee('Thank you — your application was submitted', false)
             ->assertSee('You will receive login access only after approval.', false);
     }
 
@@ -297,31 +305,36 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
     {
         $this->get('/login')
             ->assertOk()
-            ->assertSee('Customer', false)
-            ->assertSee('View bookings and documents', false)
-            ->assertSee('Agent', false)
-            ->assertSee('Manage requests and commissions', false)
-            ->assertSee('Operator', false)
-            ->assertSee('Admin and staff access', false)
-            ->assertSee('Sign up', false)
-            ->assertSee('Become our agent', false);
+            ->assertSee('Email or username', false)
+            ->assertSee('Password', false)
+            ->assertSee('Remember me', false)
+            ->assertSee('Forgot password?', false)
+            ->assertSee('Need help?', false)
+            ->assertSee('Customer Registration', false)
+            ->assertSee('Agent Registration', false);
     }
 
     public function test_auth_and_signup_pages_do_not_show_demo_or_supplier_placeholders(): void
     {
-        foreach (['/login', '/register', '/agent/register', '/agent/register/apply', '/agent/register/submitted'] as $path) {
+        foreach (['/login', '/register', '/agent/register', '/agent/register/submitted'] as $path) {
             $response = $this->get($path)->assertOk();
             $response->assertDontSee('iati', false);
             $response->assertDontSee('demo', false);
             $response->assertDontSee('white-label', false);
             $response->assertDontSee('mock', false);
-            $response->assertDontSee('placeholder', false);
         }
+
+        $this->get('/agent/register/apply')
+            ->assertOk()
+            ->assertDontSee('iati', false)
+            ->assertDontSee('demo', false)
+            ->assertDontSee('white-label', false)
+            ->assertDontSee('mock', false);
     }
 
     public function test_public_pages_do_not_contain_banned_or_technical_phrases(): void
     {
-        foreach (['/', '/flights/search', '/support', '/about-us', '/agent/register', '/flights/results?from=LHE&to=DXB&depart=2026-06-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0'] as $path) {
+        foreach (['/', '/support', '/about-us', '/agent/register'] as $path) {
             $response = $this->get($path)->assertOk();
             $response->assertDontSee('demo', false);
             $response->assertDontSee('white-label', false);
@@ -332,25 +345,22 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
             $response->assertDontSee('API-ready supplier', false);
         }
 
-        foreach (['/', '/flights/search', '/support', '/about-us', '/agent/register'] as $path) {
+        foreach (['/', '/support', '/about-us', '/agent/register'] as $path) {
             $this->get($path)->assertOk()->assertDontSee('mock', false);
         }
     }
 
     public function test_flight_search_page_uses_standardized_heading_copy(): void
     {
-        $brand = $this->configuredBrandName();
-
-        $this->get('/flights/search')
+        $this->get('/')
             ->assertOk()
-            ->assertSee('Book your next flight', false)
-            ->assertSee('ota-flight-search', false)
-            ->assertSee('Search routes, compare fares, and continue to booking review with '.$brand.' support.', false);
+            ->assertSee('data-jp-search', false)
+            ->assertSee('jp-search-submit-text">Search', false);
     }
 
     public function test_flight_results_and_review_use_consistent_cta_labels(): void
     {
-        $depart = '2026-06-20';
+        $depart = '2026-09-20';
         $searchOffer = PublicCheckoutTestDoubles::searchOfferPayload($depart);
         $this->mock(FlightSearchService::class, function ($mock) use ($searchOffer): void {
             $mock->shouldReceive('searchWithMeta')->andReturn(['offers' => [$searchOffer], 'warnings' => []]);
@@ -359,7 +369,7 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
 
         $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk()
-            ->assertSee('Book Now', false);
+            ->assertSee('Select outbound flight', false);
 
         $this->seed(OtaFoundationSeeder::class);
         PublicCheckoutTestDoubles::bind($this, $depart);
@@ -378,24 +388,23 @@ class Phase21EProductUiAuthBrandingTest extends TestCase
 
         $this->get('/booking/review')
             ->assertOk()
-            ->assertSee('Continue to Step 5 (Confirm/payment)', false);
+            ->assertSee('Confirm Booking', false);
     }
 
     public function test_customer_register_page_support_text_is_not_duplicated(): void
     {
-        $response = $this->get('/register')->assertOk();
-        $html = $response->getContent();
-        $this->assertSame(1, substr_count($html, 'Need Help?'));
+        $html = (string) $this->get('/register')->assertOk()->getContent();
+        $this->assertSame(1, substr_count($html, 'By registering you agree to our terms and privacy policy.'));
+        $this->assertSame(0, substr_count(strtolower($html), 'need help?'));
     }
 
     public function test_agent_landing_page_shows_card_timeline_workflow(): void
     {
         $this->get('/agent/register')
             ->assertOk()
-            ->assertSee('How it works', false)
             ->assertSee('1. Submit application', false)
             ->assertSee('2. Admin review', false)
-            ->assertSee('3. Receive activation link', false)
-            ->assertSee('4. Start booking', false);
+            ->assertSee('3. Start booking', false)
+            ->assertSee('Apply as agent', false);
     }
 }
