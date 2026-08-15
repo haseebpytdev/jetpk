@@ -27,10 +27,12 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class SabreBookingReviewSubmitTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -195,6 +197,58 @@ class SabreBookingReviewSubmitTest extends TestCase
                 'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
             ],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function sabreEnrichOfferForGdsContext(array $offer): array
+    {
+        if (! is_array($offer['segments'] ?? null)) {
+            return $offer;
+        }
+
+        $segments = [];
+        foreach ($offer['segments'] as $segment) {
+            if (! is_array($segment)) {
+                $segments[] = $segment;
+
+                continue;
+            }
+            $segments[] = array_merge([
+                'fare_basis_code' => 'YLITE',
+                'cabin' => 'economy',
+                'brand_code' => 'ECON',
+            ], $segment);
+        }
+        $offer['segments'] = $segments;
+
+        if (! isset($offer['validating_carrier']) && is_array($segments[0] ?? null)) {
+            $offer['validating_carrier'] = $segments[0]['carrier'] ?? $offer['airline_code'] ?? null;
+        }
+
+        return $offer;
+    }
+
+    /**
+     * @param  array<string, mixed>  $offer
+     * @param  array<string, mixed>  $searchCriteria
+     * @param  array<string, mixed>  $extraMeta
+     * @return array<string, mixed>
+     */
+    protected function sabreLiveBookingMeta(SupplierConnection $sabreConn, array $offer, array $searchCriteria, array $extraMeta = []): array
+    {
+        $enrichedOffer = $this->sabreEnrichOfferForGdsContext($offer);
+
+        return array_merge([
+            'supplier_provider' => SupplierProvider::Sabre->value,
+            'supplier_connection_id' => $sabreConn->id,
+            'requires_price_change_confirmation' => false,
+            'protection_mode' => 'hold_price_guaranteed',
+            'search_criteria' => $searchCriteria,
+        ], $this->sabreB74GdsStrategyEligibleMeta($enrichedOffer, array_merge([
+            'supplier_connection_id' => $sabreConn->id,
+        ], $extraMeta)));
     }
 
     private function sabreStubOAuthAndHttp(callable $afterTokenResponder): void
@@ -487,23 +541,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -827,38 +874,29 @@ class SabreBookingReviewSubmitTest extends TestCase
         ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $sabreConn = SupplierConnection::query()
+            ->where('agency_id', $agency->id)
+            ->where('provider', 'sabre')
+            ->firstOrFail();
+        $this->activateSabreConnectionForHttp($sabreConn);
+
         $depart = now()->addDays(10)->toDateString();
-        $offer = [
-            'id' => 'sabre-dup-no-live',
-            'supplier_provider' => 'sabre',
-            'airline_code' => 'EK',
-            'airline_name' => 'Emirates',
-            'depart_at' => $depart.'T08:00:00Z',
-            'arrive_at' => $depart.'T14:00:00Z',
-            'total' => 100000,
-            'currency' => 'PKR',
-        ];
+        $offer = $this->sabreTripOrdersDryRunOffer($depart, $sabreConn);
 
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create([
@@ -1226,38 +1264,22 @@ class SabreBookingReviewSubmitTest extends TestCase
         ]);
 
         $depart = now()->addDays(10)->toDateString();
-        $offer = [
-            'id' => 'sabre-offer-403',
-            'supplier_provider' => 'sabre',
-            'airline_code' => 'EK',
-            'airline_name' => 'Emirates',
-            'depart_at' => $depart.'T08:00:00Z',
-            'arrive_at' => $depart.'T14:00:00Z',
-            'total' => 100000,
-            'currency' => 'PKR',
-        ];
+        $offer = $this->sabreEnrichOfferForGdsContext($this->sabreTripOrdersDryRunOffer($depart, $sabreConn));
 
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -1870,23 +1892,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -1976,23 +1991,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -2093,23 +2101,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -2230,23 +2231,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -3384,23 +3378,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -3518,23 +3505,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -3635,23 +3615,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -4051,6 +4024,7 @@ class SabreBookingReviewSubmitTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin->forceFill(['account_type' => \App\Enums\AccountType::PlatformAdmin])->save();
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
 
         $booking = Booking::factory()->create([
@@ -4072,17 +4046,17 @@ class SabreBookingReviewSubmitTest extends TestCase
             ],
         ]);
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee('Manual Review Required', false)
-            ->assertSee('Passenger Records risky itinerary guard', false)
-            ->assertSee('multi_segment', false)
-            ->assertSee('Segment count', false)
-            ->assertSee('Live Sabre call attempted', false)
-            ->assertSee('Not created', false)
-            ->assertSee('Disabled / pending manual', false)
-            ->assertSee('Create/check booking manually in Sabre or use alternate supplier flow.', false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+
+        $html = $this->adminBookingShowHtml($admin, $booking->fresh());
+        $this->assertStringContainsString('Manual Review Required', $html);
+        $this->assertStringContainsString('Passenger Records risky itinerary guard', $html);
+        $this->assertStringContainsString('multi_segment', $html);
+        $this->assertStringContainsString('Segment count', $html);
+        $this->assertStringContainsString('Live Sabre call attempted', $html);
+        $this->assertStringContainsString('Not created', $html);
+        $this->assertStringContainsString('Disabled / pending manual', $html);
+        $this->assertStringContainsString('Create/check booking manually in Sabre or use alternate supplier flow.', $html);
     }
 
     public function test_b65_allow_verified_valid_multi_segment_creates_pnr(): void
@@ -4573,6 +4547,7 @@ class SabreBookingReviewSubmitTest extends TestCase
      */
     protected function b63SabreBookingWithOffer(int $agencyId, int $connectionId, array $offer, string $depart, string $email): Booking
     {
+        $offer = $this->sabreEnrichOfferForGdsContext($offer);
         $booking = Booking::factory()->create([
             'agency_id' => $agencyId,
             'status' => BookingStatus::Draft,
@@ -4795,23 +4770,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
@@ -4920,23 +4888,16 @@ class SabreBookingReviewSubmitTest extends TestCase
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, [
+                'origin' => 'LHE',
+                'destination' => 'DXB',
+                'depart_date' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]),
         ]);
 
         BookingPassenger::factory()->create(array_merge([
