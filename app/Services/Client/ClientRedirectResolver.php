@@ -92,6 +92,11 @@ final class ClientRedirectResolver
      */
     public function pathForRoute(string $routeName, array $parameters = []): string
     {
+        // Named redirect alias — send callers to the canonical homepage search surface.
+        if ($routeName === 'flights.search') {
+            return '/';
+        }
+
         $slug = $this->resolveSlug(allowSessionFallback: true);
 
         if ($slug !== null

@@ -90,9 +90,7 @@ class PublicFlightSearchRequest extends FormRequest
             );
         }
 
-        $target = current_client_slug() !== null
-            ? client_route('home').'#jp-flight-search'
-            : route('flights.search');
+        $target = route('home').'#jp-flight-search';
 
         throw new HttpResponseException(
             redirect()->to($target)->withErrors($validator)->withInput()
