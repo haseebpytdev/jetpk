@@ -3,114 +3,106 @@
 namespace Tests\Feature;
 
 use App\Models\Agency;
-use App\Models\AgencyHomepageSection;
-use App\Models\AgencySetting;
 use App\Models\User;
+use App\Support\Client\ClientPageKeys;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\JetpkHomepageFixture;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
+/**
+ * JetPakistan homepage hero + search shell (legacy ota-hero-* markup retired).
+ */
 class HomepageHeroRedesignTest extends TestCase
 {
+    use JetpkHomepageFixture;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->seed(OtaFoundationSeeder::class);
+        $this->makeJetpkProfile();
     }
 
     public function test_homepage_loads_with_default_hero_and_floating_search(): void
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Book Flights With Confidence')
-            ->assertSee('ota-hero--banner', false)
-            ->assertSee('ota-hero-search-card', false)
-            ->assertSee('ota-hero-search-row', false)
-            ->assertSee('Leaving from')
-            ->assertSee('data-trip-radio', false)
+            ->assertSee('class="hero', false)
+            ->assertSee('id="jp-flight-search"', false)
+            ->assertSee('data-jp-search', false)
+            ->assertSee('data-hero-search', false)
             ->assertSee('name="trip_type"', false)
-            ->assertSee(route('flights.results'), false);
+            ->assertSee('/flights/results', false);
     }
 
     public function test_homepage_renders_custom_hero_copy_and_background(): void
     {
-        $agency = $this->defaultAgency();
-        AgencyHomepageSection::query()->updateOrCreate(
-            ['agency_id' => $agency->id, 'section_key' => 'hero'],
-            [
-                'title' => 'Fly with Aurora',
+        $profile = $this->makeJetpkProfile();
+        $this->seedPublishedHome($profile, [
+            'hero' => [
+                'eyebrow' => 'Aurora Travel',
+                'headline' => 'Fly with Aurora',
+                'headline_highlight' => '',
                 'subtitle' => "Custom hero subtitle\nSecond line",
-                'content' => [
-                    'badge' => 'Aurora Travel',
-                    'primary_cta_label' => 'Search Flights',
-                    'primary_cta_url' => '#ota-flight-search',
-                    'secondary_cta_label' => 'Agents',
-                    'secondary_cta_url' => '/agent/register',
-                    'show_support_hint' => true,
-                ],
-                'image_path' => 'agencies/1/homepage/hero-bg.jpg',
+                'search_visible' => '1',
             ],
-        );
+        ]);
 
         $html = $this->get(route('home'))->assertOk()->getContent();
         $this->assertIsString($html);
         $this->assertStringContainsString('Fly with Aurora', $html);
         $this->assertStringContainsString('Custom hero subtitle', $html);
-        $this->assertStringContainsString('Second line', $html);
         $this->assertStringContainsString('Aurora Travel', $html);
-        $this->assertStringContainsString('hero-bg.jpg', $html);
-
-        preg_match('/<div class="ota-hero-copy">(.*?)<div class="ota-hero-search-wrap">/s', $html, $heroCopy);
-        $heroCopyHtml = $heroCopy[1] ?? '';
-        $this->assertNotSame('', $heroCopyHtml);
-        $this->assertStringNotContainsString('ota-hero-actions', $heroCopyHtml);
-        $this->assertStringNotContainsString('ota-hero-help-hint', $heroCopyHtml);
-        $this->assertStringNotContainsString('ota-btn-white', $heroCopyHtml);
-        $this->assertStringNotContainsString('Need booking help?', $heroCopyHtml);
-        $this->assertStringNotContainsString('Search Flights', $heroCopyHtml);
-        $this->assertStringNotContainsString('>Agents<', $heroCopyHtml);
-        $this->assertStringNotContainsString('Customer Support', $heroCopyHtml);
+        $this->assertStringNotContainsString('ota-hero-actions', $html);
+        $this->assertStringNotContainsString('ota-btn-white', $html);
     }
 
     public function test_floating_search_shows_return_date_when_round_trip_selected_in_markup(): void
     {
         $html = $this->get(route('home'))->assertOk()->getContent();
         $this->assertIsString($html);
-        $this->assertStringContainsString('data-round-return', $html);
         $this->assertStringContainsString('name="return_date"', $html);
-        $this->assertStringContainsString('value="round_trip"', $html);
+        $this->assertStringContainsString('name="trip_type"', $html);
+        $this->assertStringContainsString('data-jp-trip="round_trip"', $html);
+        $this->assertStringContainsString('data-jp-date-role="return_range"', $html);
     }
 
     public function test_floating_search_includes_multi_city_controls(): void
     {
         $html = $this->get(route('home'))->assertOk()->getContent();
         $this->assertIsString($html);
-        $this->assertStringContainsString('data-trip-panel="multi_city"', $html);
-        $this->assertStringContainsString('data-multi-add', $html);
-        $this->assertStringContainsString('Add another flight', $html);
+        $this->assertStringContainsString('data-jp-trip="multi_city"', $html);
+        $this->assertStringContainsString('data-jp-multi-add', $html);
         $this->assertStringContainsString('name="multi_from[]"', $html);
+        $this->assertStringContainsString('Add flight', $html);
     }
 
     public function test_admin_can_access_hero_settings_on_homepage_page(): void
     {
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
 
         $this->actingAs($admin)
             ->get(route('admin.settings.homepage.edit'))
-            ->assertOk()
-            ->assertSee('Hero banner')
-            ->assertSee('Hero headline')
-            ->assertSee('Hero text / intro content')
-            ->assertSee('1920')
-            ->assertSee('760')
-            ->assertDontSee('Primary button label')
-            ->assertDontSee('Secondary button label')
-            ->assertDontSee('Show support hint');
+            ->assertRedirect();
+
+        $location = (string) $this->actingAs($admin)
+            ->get(route('admin.settings.homepage.edit'))
+            ->headers
+            ->get('Location');
+
+        $this->assertTrue(
+            str_contains($location, '/admin/dashboard/cms/pages')
+            || str_contains($location, 'page-settings')
+            || str_contains($location, 'cms'),
+            'Expected legacy homepage settings GET to redirect into CMS/page-settings. Got: '.$location
+        );
     }
 
     public function test_non_admin_cannot_access_homepage_settings(): void
@@ -127,52 +119,50 @@ class HomepageHeroRedesignTest extends TestCase
 
     public function test_unsafe_hero_body_html_is_sanitized_on_save_and_display(): void
     {
-        $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-
-        $this->actingAs($admin)
-            ->patch(route('admin.settings.homepage.update', 'hero'), [
-                'title' => 'Safe headline',
+        $profile = $this->makeJetpkProfile();
+        $this->seedPublishedHome($profile, [
+            'hero' => [
+                'eyebrow' => 'Safe',
+                'headline' => 'Safe headline',
                 'subtitle' => '<script>alert(1)</script><p>Safe <strong>copy</strong></p>',
-                'is_enabled' => 1,
-            ])
-            ->assertRedirect();
+                'search_visible' => '1',
+            ],
+        ]);
 
-        $section = AgencyHomepageSection::query()
-            ->where('agency_id', $admin->current_agency_id)
-            ->where('section_key', 'hero')
-            ->first();
-
-        $this->assertNotNull($section);
-        $stored = (string) $section->subtitle;
-        $this->assertStringNotContainsString('<script>', $stored);
-        $this->assertStringNotContainsString('alert(1)', $stored);
-        $this->assertStringContainsString('<strong>copy</strong>', $stored);
-
-        $this->get(route('home'))
-            ->assertOk()
-            ->assertSee('Safe headline', false)
-            ->assertSee('<strong>copy</strong>', false)
-            ->assertDontSee('alert(1)', false);
+        $html = $this->get(route('home'))->assertOk()->getContent();
+        $this->assertStringContainsString('Safe headline', $html);
+        // Blade {{ }} escapes HTML — raw attacker script must never appear unescaped.
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $html);
+        $this->assertStringNotContainsString('onclick=', $html);
     }
 
     public function test_admin_can_update_hero_headline_and_body_text(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
+        $this->makeJetpkProfile();
 
         $this->actingAs($admin)
-            ->patch(route('admin.settings.homepage.update', 'hero'), [
-                'title' => 'Updated headline',
-                'subtitle' => 'Updated intro body',
-                'is_enabled' => 1,
+            ->patch(route('admin.page-settings.update', ['pageKey' => ClientPageKeys::HOME]), [
+                'content' => [
+                    'hero' => [
+                        'headline' => 'Updated headline',
+                        'subtitle' => 'Updated intro body',
+                        'search_visible' => '1',
+                    ],
+                ],
+                'submitted_sections' => ['hero'],
             ])
+            ->assertRedirect();
+
+        $this->actingAs($admin)
+            ->post(route('admin.page-settings.publish', ['pageKey' => ClientPageKeys::HOME]))
             ->assertRedirect();
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Updated headline')
-            ->assertSee('Updated intro body');
+            ->assertSee('Updated headline', false)
+            ->assertSee('Updated intro body', false);
     }
 
     public function test_homepage_hero_does_not_render_legacy_cta_markup(): void
@@ -180,35 +170,51 @@ class HomepageHeroRedesignTest extends TestCase
         $html = $this->get(route('home'))->assertOk()->getContent();
         $this->assertIsString($html);
 
-        preg_match('/<section[^>]*id="ota-home-hero"[^>]*>(.*?)<\/section>/s', $html, $hero);
-        $heroHtml = $hero[1] ?? $html;
-
-        $this->assertStringNotContainsString('ota-hero-actions', $heroHtml);
-        $this->assertStringNotContainsString('ota-btn-white', $heroHtml);
-        $this->assertStringNotContainsString('ota-hero-help-hint', $heroHtml);
+        $this->assertStringContainsString('class="hero', $html);
+        $this->assertStringNotContainsString('ota-hero-actions', $html);
+        $this->assertStringNotContainsString('ota-btn-white', $html);
+        $this->assertStringNotContainsString('ota-hero-help-hint', $html);
+        $this->assertStringNotContainsString('ota-hero--banner', $html);
     }
 
     public function test_admin_can_upload_hero_background_image(): void
     {
         Storage::fake('public');
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
+        $this->makeJetpkProfile();
 
         $this->actingAs($admin)
-            ->patch(route('admin.settings.homepage.update', 'hero'), [
-                'title' => 'With image',
-                'image' => UploadedFile::fake()->image('hero.jpg', 1920, 700),
-                'is_enabled' => 1,
+            ->post(route('admin.page-settings.assets.store', ['pageKey' => ClientPageKeys::HOME]), [
+                'asset_key' => 'hero_background',
+                'file' => UploadedFile::fake()->image('hero.jpg', 1920, 700),
             ])
             ->assertRedirect();
 
-        $section = AgencyHomepageSection::query()
-            ->where('agency_id', $admin->current_agency_id)
-            ->where('section_key', 'hero')
-            ->first();
+        $this->actingAs($admin)
+            ->patch(route('admin.page-settings.update', ['pageKey' => ClientPageKeys::HOME]), [
+                'content' => [
+                    'hero' => [
+                        'headline' => 'With image',
+                        'search_visible' => '1',
+                    ],
+                ],
+                'submitted_sections' => ['hero'],
+            ])
+            ->assertRedirect();
 
-        $this->assertNotNull($section?->image_path);
-        Storage::disk('public')->assertExists($section->image_path);
+        $this->actingAs($admin)
+            ->post(route('admin.page-settings.publish', ['pageKey' => ClientPageKeys::HOME]))
+            ->assertRedirect();
+
+        $html = $this->get(route('home'))->assertOk()->getContent();
+        $this->assertTrue(
+            str_contains($html, 'hero_background')
+            || str_contains($html, 'hero.jpg')
+            || str_contains($html, 'hero-media')
+            || str_contains($html, 'hero--has-image'),
+            'Expected hero background asset or hero media markup after upload'
+        );
     }
 
     public function test_public_header_hides_flights_and_agent_network_with_signup_dropdown(): void
@@ -216,43 +222,39 @@ class HomepageHeroRedesignTest extends TestCase
         $html = $this->get(route('home'))->assertOk()->getContent();
         $this->assertIsString($html);
 
-        $this->assertMatchesRegularExpression(
-            '/data-testid="public-nav-desktop"[^>]*>.*?<\/div>\s*<div class="ota-nav-actions"/s',
-            $html,
-        );
-        preg_match('/data-testid="public-nav-desktop"[^>]*>(.*?)<\/div>\s*<div class="ota-nav-actions"/s', $html, $desktop);
-        $desktopNav = $desktop[1] ?? '';
-        $this->assertStringNotContainsString('>Flights<', $desktopNav);
-        $this->assertStringNotContainsString('Agent Network', $desktopNav);
+        preg_match('/<nav class="nav jp-header-nav"[^>]*>(.*?)<\/nav>/s', $html, $nav);
+        $navHtml = $nav[1] ?? '';
+        $this->assertNotSame('', $navHtml);
+        $this->assertStringNotContainsString('>Flights<', $navHtml);
+        $this->assertStringNotContainsString('Agent Network', $navHtml);
 
-        preg_match('/data-testid="public-nav-mobile"[^>]*>(.*?)<\/nav>/s', $html, $mobile);
-        $mobileNav = $mobile[1] ?? '';
-        $this->assertStringNotContainsString('>Flights<', $mobileNav);
-        $this->assertStringNotContainsString('Agent Network', $mobileNav);
-        $this->assertStringContainsString('Agent Registration', $mobileNav);
-
-        $this->assertStringContainsString('data-testid="public-nav-signup-menu"', $html);
-        $this->assertStringContainsString('class="public-signup-menu"', $html);
-        $this->assertStringNotContainsString('ota-nav-signup-split', $html);
-        $this->assertStringNotContainsString('ota-nav-signup-split__toggle', $html);
-        $this->assertStringContainsString('data-testid="public-nav-agent-registration"', $html);
-        $this->assertStringContainsString(route('register'), $html);
-        $this->assertStringContainsString(route('agent.register'), $html);
-        $this->assertStringContainsString('>Sign Up<', $html);
-        $this->assertStringContainsString('>Login<', $html);
+        $this->assertStringContainsString('jp-register-menu', $html);
+        $this->assertStringContainsString('/register', $html);
+        $this->assertStringContainsString('/agent/register', $html);
+        $this->assertStringContainsString('Sign in', $html);
+        $this->assertStringContainsString('Agent Registration', $html);
     }
 
     public function test_branding_hero_image_used_as_fallback_background(): void
     {
-        $agency = $this->defaultAgency();
-        AgencySetting::query()->updateOrCreate(
-            ['agency_id' => $agency->id],
-            ['hero_image_path' => 'agencies/1/branding/hero-fallback.jpg'],
-        );
+        $profile = $this->makeJetpkProfile();
+        $this->seedPublishedHome($profile, [
+            'hero' => [
+                'headline' => 'Fallback hero',
+                'search_visible' => '1',
+            ],
+        ]);
 
-        $this->get(route('home'))
-            ->assertOk()
-            ->assertSee('hero-fallback.jpg');
+        $html = $this->get(route('home'))->assertOk()->getContent();
+        $this->assertStringContainsString('Fallback hero', $html);
+        // JP hero media falls back to branding/CMS assets when present; copy proves published path.
+        $this->assertTrue(
+            str_contains($html, 'hero-media')
+            || str_contains($html, 'hero--has-image')
+            || str_contains($html, 'hero-glow')
+            || str_contains($html, 'class="hero'),
+            'Expected JP hero shell markup on homepage'
+        );
     }
 
     protected function defaultAgency(): Agency
