@@ -52,6 +52,7 @@
 
 @section('content')
   @include('themes.frontend.jetpakistan.sections.hero')
+  @include('frontend.partials.ota-home-groups-preview', ['groupHomepageTiles' => $groupHomepageTiles ?? []])
   @foreach (($homepageOrderedSections ?? []) as $jpSection)
     <!-- jp-section-start:{{ $jpSection['key'] }}:order-{{ $jpSection['order'] }} -->
     @include('themes.frontend.jetpakistan.sections.'.$jpSection['view'])
