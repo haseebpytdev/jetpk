@@ -11,12 +11,16 @@ use App\Models\User;
 use App\Services\Agents\AgentWalletService;
 use App\Support\Staff\StaffPermission;
 use Database\Seeders\OtaFoundationSeeder;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class LedgerReconciliationUiTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -31,25 +35,35 @@ class LedgerReconciliationUiTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.accounting.reconciliation.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-reconciliation-cards"', false)
-            ->assertSee('data-testid="accounting-reconciliation-title"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.reconciliation.index'));
+        $html = $this->adminAccountingReconciliationIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="accounting-reconciliation-cards"', $html);
+        $this->assertStringContainsString('data-testid="accounting-reconciliation-title"', $html);
     }
 
     public function test_staff_with_ledger_permission_can_access_reconciliation_dashboard(): void
     {
         $staff = $this->staffWithPermissions([StaffPermission::LedgerView]);
 
-        $this->actingAs($staff)->get(route('staff.accounting.reconciliation.index'))->assertOk()
-            ->assertSee('data-testid="accounting-reconciliation-cards"', false);
+        $this->assertLegacyStaffAccountingRedirect($staff, route('staff.accounting.reconciliation.index'));
+        $html = $this->staffAccountingReconciliationIndexHtml($staff);
+        $this->assertStringContainsString('data-testid="accounting-reconciliation-cards"', $html);
     }
 
     public function test_staff_without_ledger_permission_gets_403_on_reconciliation(): void
     {
         $staff = $this->staffWithPermissions([StaffPermission::BookingsView]);
 
-        $this->actingAs($staff)->get(route('staff.accounting.reconciliation.index'))->assertForbidden();
+        $this->actingAs($staff);
+        $request = Request::create('/staff/accounting/reconciliation', 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        try {
+            app(\App\Http\Controllers\Staff\AccountingReconciliationController::class)->index($request);
+            $this->fail('Expected staff reconciliation index to deny access.');
+        } catch (AuthorizationException $e) {
+            $this->assertTrue(true);
+        }
     }
 
     public function test_reconciliation_cards_calculate_wallet_vs_ledger_difference(): void
@@ -83,21 +97,21 @@ class LedgerReconciliationUiTest extends TestCase
         ]);
         app(AgentWalletService::class)->approveDeposit($deposit, $admin);
 
-        $response = $this->actingAs($admin)->get(route('admin.accounting.reconciliation.index'));
-        $response->assertOk()
-            ->assertSee('Wallet balance (source of truth)', false)
-            ->assertSee('Agency wallet liability (ledger)', false)
-            ->assertSee('data-testid="reconciliation-agency-'.$agency->id.'"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.reconciliation.index'));
+        $html = $this->adminAccountingReconciliationIndexHtml($admin);
+        $this->assertStringContainsString('Wallet balance (source of truth)', $html);
+        $this->assertStringContainsString('Agency wallet liability (ledger)', $html);
+        $this->assertStringContainsString('data-testid="reconciliation-agency-'.$agency->id.'"', $html);
     }
 
     public function test_empty_production_reconciliation_shows_zero_safely(): void
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.accounting.reconciliation.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-reconciliation-cards"', false)
-            ->assertSee('None yet', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.reconciliation.index'));
+        $html = $this->adminAccountingReconciliationIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="accounting-reconciliation-cards"', $html);
+        $this->assertStringContainsString('None yet', $html);
     }
 
     public function test_agent_accounting_ledger_shows_agency_summary(): void

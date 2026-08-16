@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\AdminGroupTicketingController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedgerController;
+use App\Http\Controllers\Staff\AccountingReconciliationController as StaffAccountingReconciliationController;
 use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Http\Controllers\Staff\FinanceStatementController as StaffFinanceStatementController;
 use App\Http\Controllers\Admin\AdminLedgerController;
@@ -309,11 +310,11 @@ trait AdminLegacyViewTestHelpers
         return app(FinanceAdjustmentController::class)->index($request)->render();
     }
 
-    protected function adminFinanceAdjustmentsCreateHtml(User $admin): string
+    protected function adminFinanceAdjustmentsCreateHtml(User $admin, array $query = []): string
     {
         $this->actingAs($admin);
         view()->share('errors', new ViewErrorBag);
-        $request = Request::create('/admin/finance/adjustments/create', 'GET');
+        $request = Request::create('/admin/finance/adjustments/create', 'GET', $query);
         $request->setUserResolver(fn () => $admin);
 
         return app(FinanceAdjustmentController::class)->create($request)->render();
@@ -422,6 +423,19 @@ trait AdminLegacyViewTestHelpers
     /**
      * @param  array<string, mixed>  $query
      */
+    protected function adminAgencyShowHtml(User $admin, Agency $agency, array $query = []): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/agencies/'.$agency->id, 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgencyManagementController::class)->show($request, $agency)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
     protected function adminUsersIndexHtml(User $admin, array $query = []): string
     {
         $this->actingAs($admin);
@@ -430,6 +444,16 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(UserManagementController::class)->index($request)->render();
+    }
+
+    protected function staffAccountingReconciliationIndexHtml(User $staff): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/accounting/reconciliation', 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffAccountingReconciliationController::class)->index($request)->render();
     }
 
     protected function assertLegacyAdminUsersRedirect(User $admin, string $uri): void

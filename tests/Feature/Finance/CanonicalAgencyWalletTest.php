@@ -18,10 +18,12 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class CanonicalAgencyWalletTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -145,14 +147,15 @@ class CanonicalAgencyWalletTest extends TestCase
     {
         [$agency] = $this->seedMultiWallets([0, 0, 100]);
         $canonical = app(AgentWalletService::class)->canonicalWalletForAgency($agency);
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.finance.adjustments.create', ['agency_id' => $agency->id]))
-            ->assertOk()
-            ->assertSee('data-testid="finance-adjustment-canonical-wallet"', false)
-            ->assertSee('data-testid="finance-adjustment-duplicate-wallet-warning"', false)
-            ->assertSee('Wallet #'.$canonical?->id, false)
-            ->assertDontSee('Select wallet', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.adjustments.create', ['agency_id' => $agency->id]));
+        $html = $this->adminFinanceAdjustmentsCreateHtml($admin, ['agency_id' => $agency->id]);
+
+        $this->assertStringContainsString('data-testid="finance-adjustment-canonical-wallet"', $html);
+        $this->assertStringContainsString('data-testid="finance-adjustment-duplicate-wallet-warning"', $html);
+        $this->assertStringContainsString('Wallet #'.$canonical?->id, $html);
+        $this->assertStringNotContainsString('Select wallet', $html);
     }
 
     public function test_manual_credit_posts_to_canonical_wallet(): void
@@ -231,14 +234,13 @@ class CanonicalAgencyWalletTest extends TestCase
         [$agency] = $this->seedMultiWallets([0, 0, 100]);
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.agencies.index'))
-            ->assertOk()
-            ->assertSee('PKR 100.00', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.agencies.index'));
+        $this->assertStringContainsString('PKR 100.00', $this->adminAgenciesIndexHtml($admin));
 
-        $this->actingAs($admin)->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'wallet']))
-            ->assertOk()
-            ->assertSee('PKR 100.00', false)
-            ->assertSee('Canonical wallet', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.agencies.show', ['agency' => $agency, 'tab' => 'wallet']));
+        $html = $this->adminAgencyShowHtml($admin, $agency, ['tab' => 'wallet']);
+        $this->assertStringContainsString('PKR 100.00', $html);
+        $this->assertStringContainsString('Canonical wallet', $html);
     }
 
     public function test_finance_dashboard_remains_matched(): void
@@ -257,8 +259,9 @@ class CanonicalAgencyWalletTest extends TestCase
     public function test_statement_remains_correct_after_canonical_adjustment(): void
     {
         [$agency] = $this->seedMultiWallets([0, 0, 100]);
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($this->platformAdmin())->post(route('admin.finance.adjustments.store'), [
+        $this->actingAs($admin)->post(route('admin.finance.adjustments.store'), [
             'agency_id' => $agency->id,
             'adjustment_type' => 'manual_credit',
             'amount' => 5,
@@ -267,14 +270,16 @@ class CanonicalAgencyWalletTest extends TestCase
             'confirmation' => '1',
         ])->assertRedirect();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.finance.statements.show', [
-                'agency' => $agency,
-                'date_from' => now()->subDay()->toDateString(),
-                'date_to' => now()->addDay()->toDateString(),
-            ]))
-            ->assertOk()
-            ->assertSee('Manual wallet credit', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.statements.show', [
+            'agency' => $agency,
+            'date_from' => now()->subDay()->toDateString(),
+            'date_to' => now()->addDay()->toDateString(),
+        ]));
+        $html = $this->adminFinanceStatementShowHtmlWithQuery($admin, $agency, [
+            'date_from' => now()->subDay()->toDateString(),
+            'date_to' => now()->addDay()->toDateString(),
+        ]);
+        $this->assertStringContainsString('Manual wallet credit', $html);
     }
 
     public function test_viewing_agency_pages_does_not_mutate_wallets(): void
@@ -286,10 +291,14 @@ class CanonicalAgencyWalletTest extends TestCase
         ];
 
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)->get(route('admin.agencies.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.agencies.show', $agency))->assertOk();
-        $this->actingAs($admin)->get(route('admin.agencies.show', ['agency' => $agency, 'tab' => 'wallet']))->assertOk();
-        $this->actingAs($admin)->get(route('admin.finance.adjustments.create', ['agency_id' => $agency->id]))->assertOk();
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.agencies.index'));
+        $this->assertNotEmpty($this->adminAgenciesIndexHtml($admin));
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.agencies.show', $agency));
+        $this->assertNotEmpty($this->adminAgencyShowHtml($admin, $agency));
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.agencies.show', ['agency' => $agency, 'tab' => 'wallet']));
+        $this->assertNotEmpty($this->adminAgencyShowHtml($admin, $agency, ['tab' => 'wallet']));
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.adjustments.create', ['agency_id' => $agency->id]));
+        $this->assertNotEmpty($this->adminFinanceAdjustmentsCreateHtml($admin, ['agency_id' => $agency->id]));
 
         $this->assertSame($before['wallets'], AgentWallet::query()->count());
         $this->assertSame($before['transactions'], AgentWalletTransaction::query()->count());
