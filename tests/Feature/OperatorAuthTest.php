@@ -21,6 +21,8 @@ class OperatorAuthTest extends TestCase
     public function test_agency_admin_can_login_and_access_admin(): void
     {
         $this->seed(OtaFoundationSeeder::class);
+        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
 
         $this->withoutMiddleware([ValidateCsrfToken::class]);
 
@@ -29,8 +31,9 @@ class OperatorAuthTest extends TestCase
             'password' => 'password',
         ]);
 
-        $response->assertRedirect(route('admin.dashboard', absolute: false));
-        $this->get('/admin')->assertOk();
+        $response->assertRedirect('/admin/dashboard');
+        $this->get('/admin')->assertRedirect('/admin/dashboard');
+        $this->get('/admin/dashboard')->assertOk();
     }
 
     public function test_staff_login_redirects_to_staff_dashboard(): void
@@ -41,7 +44,7 @@ class OperatorAuthTest extends TestCase
         $this->post('/login', [
             'email' => 'staff@ota.demo',
             'password' => 'password',
-        ])->assertRedirect(route('staff.dashboard', absolute: false));
+        ])->assertRedirect('/staff/dashboard');
     }
 
     public function test_agent_login_redirects_to_agent_dashboard(): void
@@ -52,7 +55,7 @@ class OperatorAuthTest extends TestCase
         $this->post('/login', [
             'email' => 'agent@ota.demo',
             'password' => 'password',
-        ])->assertRedirect(route('agent.dashboard', absolute: false));
+        ])->assertRedirect('/agent');
     }
 
     public function test_customer_login_redirects_to_customer_dashboard(): void
@@ -68,7 +71,7 @@ class OperatorAuthTest extends TestCase
         $this->post('/login', [
             'email' => 'customer@example.test',
             'password' => 'password',
-        ])->assertRedirect(route('customer.dashboard', absolute: false));
+        ])->assertRedirect('/customer/dashboard');
     }
 
     public function test_staff_cannot_access_admin(): void
@@ -86,7 +89,8 @@ class OperatorAuthTest extends TestCase
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
         $this->actingAs($staff);
-        $this->get('/staff')->assertOk();
+        $this->get('/staff')->assertRedirect('/staff/dashboard');
+        $this->get('/staff/dashboard')->assertOk();
     }
 
     public function test_agent_can_access_agent_dashboard(): void
@@ -130,7 +134,7 @@ class OperatorAuthTest extends TestCase
         $this->assertNull($staff->current_agency_id);
 
         $this->actingAs($staff);
-        $this->get('/staff')->assertOk();
+        $this->get('/staff')->assertRedirect('/staff/dashboard');
 
         $staff->refresh();
         $this->assertSame($agencyId, $staff->current_agency_id);
@@ -155,6 +159,7 @@ class OperatorAuthTest extends TestCase
         ]);
 
         $this->actingAs($user);
-        $this->get('/admin')->assertOk();
+        $this->get('/admin')->assertRedirect('/admin/dashboard');
+        $this->get('/admin/dashboard')->assertOk();
     }
 }
