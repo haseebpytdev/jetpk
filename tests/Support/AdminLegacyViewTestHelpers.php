@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedgerController;
+use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Http\Controllers\Staff\FinanceStatementController as StaffFinanceStatementController;
 use App\Http\Controllers\Admin\AdminLedgerController;
 use App\Http\Controllers\Staff\LedgerController as StaffLedgerController;
@@ -428,5 +429,23 @@ trait AdminLegacyViewTestHelpers
         $response->assertRedirect();
         $target = (string) $response->headers->get('Location');
         $this->assertStringContainsString('/admin/dashboard/bookings', $target);
+    }
+
+    protected function staffBookingShowHtml(User $staff, Booking $booking): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/bookings/'.$booking->id, 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffBookingController::class)->show($booking)->render();
+    }
+
+    protected function assertLegacyStaffBookingShowRedirect(User $staff, Booking $booking): void
+    {
+        $response = $this->actingAs($staff)->get(route('staff.bookings.show', $booking));
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/staff/dashboard/bookings', $target);
     }
 }

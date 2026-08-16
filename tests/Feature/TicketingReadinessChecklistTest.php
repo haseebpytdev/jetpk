@@ -12,11 +12,13 @@ use App\Models\SupplierConnection;
 use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class TicketingReadinessChecklistTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -31,12 +33,12 @@ class TicketingReadinessChecklistTest extends TestCase
         $booking = $this->sabreBookingWithPnr('UNGKWK');
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', ['booking' => $booking, 'tab' => 'ticketing']))
-            ->assertOk()
-            ->assertSee('Ticketing readiness checklist', false)
-            ->assertSee('PNR exists', false)
-            ->assertSee('PNR itinerary synced', false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Ticketing readiness checklist', $html);
+        $this->assertStringContainsString('PNR exists', $html);
+        $this->assertStringContainsString('PNR itinerary synced', $html);
     }
 
     public function test_staff_booking_show_displays_ticketing_readiness_checklist(): void
@@ -44,10 +46,10 @@ class TicketingReadinessChecklistTest extends TestCase
         $booking = $this->sabreBookingWithPnr('UNGKWK');
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
-        $this->actingAs($staff)
-            ->get(route('staff.bookings.show', ['booking' => $booking, 'tab' => 'ticketing']))
-            ->assertOk()
-            ->assertSee('Ticketing readiness checklist', false);
+        $this->assertLegacyStaffBookingShowRedirect($staff, $booking);
+
+        $html = $this->staffBookingShowHtml($staff, $booking);
+        $this->assertStringContainsString('Ticketing readiness checklist', $html);
     }
 
     public function test_customer_booking_show_hides_ticketing_readiness_checklist(): void
@@ -70,6 +72,7 @@ class TicketingReadinessChecklistTest extends TestCase
         $booking = Booking::factory()->for($agency)->create([
             'agent_id' => $agent->id,
             'pnr' => 'AGENT1',
+            'booking_reference' => 'BKG-TR-AGENT-1',
             'meta' => ['supplier_provider' => SupplierProvider::Sabre->value],
         ]);
         BookingPassenger::factory()->for($booking)->create();
@@ -89,11 +92,11 @@ class TicketingReadinessChecklistTest extends TestCase
         $booking = $this->readySabreBooking();
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', ['booking' => $booking, 'tab' => 'ticketing']))
-            ->assertOk()
-            ->assertSee('Ready for manual ticketing review', false)
-            ->assertSee('live API ticketing remains disabled', false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Ready for manual ticketing review', $html);
+        $this->assertStringContainsString('live API ticketing remains disabled', $html);
     }
 
     public function test_checklist_does_not_render_raw_supplier_secrets(): void
@@ -103,11 +106,11 @@ class TicketingReadinessChecklistTest extends TestCase
         ]);
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', ['booking' => $booking, 'tab' => 'ticketing']))
-            ->assertOk()
-            ->assertDontSee('secret-token', false)
-            ->assertDontSee('supplier_payload', false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringNotContainsString('secret-token', $html);
+        $this->assertStringNotContainsString('supplier_payload', $html);
     }
 
     protected function customerBooking(): Booking
@@ -116,6 +119,7 @@ class TicketingReadinessChecklistTest extends TestCase
         $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
         $booking = Booking::factory()->for($agency)->create([
             'customer_id' => $customer->id,
+            'booking_reference' => 'BKG-TR-CUST-1',
         ]);
         BookingPassenger::factory()->for($booking)->create();
         BookingContact::query()->create([
@@ -141,6 +145,7 @@ class TicketingReadinessChecklistTest extends TestCase
         return Booking::factory()->for($agency)->create([
             'supplier' => SupplierProvider::Sabre->value,
             'pnr' => $pnr,
+            'booking_reference' => 'BKG-TR-'.strtoupper($pnr),
             'meta' => array_merge([
                 'supplier_provider' => SupplierProvider::Sabre->value,
                 'supplier_connection_id' => $conn->id,
