@@ -199,6 +199,7 @@ class PlatformModuleRouteGuardTest extends TestCase
             'status' => BookingStatus::Pending,
             'payment_status' => 'unpaid',
             'source_channel' => 'agent_portal',
+            'booking_reference' => 'BKG-PM-AGENT-1',
         ]);
 
         $this->actingAs($agent)
@@ -241,6 +242,7 @@ class PlatformModuleRouteGuardTest extends TestCase
             'customer_id' => $customer->id,
             'status' => BookingStatus::PaymentPending,
             'payment_status' => 'unpaid',
+            'booking_reference' => 'BKG-PM-CUST-1',
         ]);
 
         $this->actingAs($customer)->postJson(route('customer.bookings.payment-proof', $booking), [
@@ -264,6 +266,7 @@ class PlatformModuleRouteGuardTest extends TestCase
             'status' => BookingStatus::PaymentPending,
             'payment_status' => 'unpaid',
             'source_channel' => 'agent_portal',
+            'booking_reference' => 'BKG-PM-AGENT-PP',
         ]);
 
         $this->actingAs($agent)->postJson(route('agent.bookings.payment-proof', $booking), [
@@ -278,7 +281,10 @@ class PlatformModuleRouteGuardTest extends TestCase
 
     public function test_enabled_module_allows_guarded_route(): void
     {
-        $this->get(route('booking.lookup'))->assertOk();
+        // Blade lookup form retired; Laravel GET redirects to Next /lookup-booking.
+        $this->get(route('booking.lookup'))
+            ->assertRedirect()
+            ->assertRedirectContains('/lookup-booking');
     }
 
     public function test_protected_admin_portal_route_passes_when_db_plans_module_off(): void
@@ -359,7 +365,7 @@ class PlatformModuleRouteGuardTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.bookings'))
-            ->assertOk();
+            ->assertRedirect('/admin/dashboard/bookings');
     }
 
     public function test_allows_stays_true_and_route_enabled_false_for_planned_off_module(): void
