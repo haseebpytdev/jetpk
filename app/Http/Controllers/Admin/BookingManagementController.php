@@ -40,6 +40,7 @@ use App\Support\Bookings\AdminSabreGdsTicketingPanelsPresenter;
 use App\Models\BookingContact;
 use App\Support\Bookings\BookingListPresenter;
 use App\Support\Bookings\BookingLocalAmendmentPolicy;
+use App\Support\Bookings\BookingSourceFilter;
 use App\Support\Bookings\SabrePnrCertificationSupport;
 use App\Support\BackOffice\BackOfficeBookingPresenter;
 use App\Support\Branding\PlatformBrandingResolver;
@@ -153,7 +154,7 @@ class BookingManagementController extends Controller
             'selectedPreviewKey' => $selectedPreviewKey,
             'usingDatabase' => true,
             'hasRows' => $mappedRows->isNotEmpty(),
-            'filters' => $request->only(['search', 'status', 'payment_status', 'date_from', 'date_to', 'assigned_staff_id', 'product']),
+            'filters' => $request->only(['search', 'status', 'payment_status', 'date_from', 'date_to', 'assigned_staff_id', 'product', 'source', 'queue']),
             'filterStaffUsers' => $filterStaff,
             'statusEnumCases' => BookingStatus::cases(),
         ]);
@@ -873,6 +874,11 @@ class BookingManagementController extends Controller
         if ($request->filled('assigned_staff_id')) {
             $q->where('assigned_staff_id', $request->integer('assigned_staff_id'));
         }
+
+        BookingSourceFilter::apply(
+            $q,
+            BookingSourceFilter::resolve($request->string('source')->toString())
+        );
     }
 
     protected function applyQueueFilter(Builder $q, string $queue): void

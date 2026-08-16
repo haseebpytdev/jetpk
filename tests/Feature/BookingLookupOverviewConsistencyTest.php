@@ -16,10 +16,12 @@ use App\Support\Security\TurnstileVerifier;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class BookingLookupOverviewConsistencyTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -35,12 +37,20 @@ class BookingLookupOverviewConsistencyTest extends TestCase
 
     public function test_lookup_booking_form_does_not_render_phone_field(): void
     {
-        $html = $this->get(route('booking.lookup'))->assertOk()->getContent();
+        // Canonical guest lookup UI is Next (/lookup-booking); Laravel GET redirects.
+        $this->get(route('booking.lookup'))
+            ->assertRedirect()
+            ->assertRedirectContains('/lookup-booking');
 
-        $this->assertStringNotContainsString('name="phone"', $html);
-        $this->assertStringNotContainsString('id="lookup_phone"', $html);
-        $this->assertStringContainsString('name="email"', $html);
-        $this->assertStringContainsString('required', $html);
+        // Operational submit contract still requires email (no phone).
+        $this->post(route('lookup-booking.submit'), [
+            'booking_reference' => 'ABC123',
+        ])->assertSessionHasErrors('email');
+        $this->post(route('lookup-booking.submit'), [
+            'booking_reference' => 'ABC123',
+            'email' => 'guest@example.com',
+            'phone' => '03001234567',
+        ])->assertSessionDoesntHaveErrors('phone');
     }
 
     public function test_lookup_validation_works_with_booking_reference_and_email_only(): void
@@ -138,11 +148,18 @@ class BookingLookupOverviewConsistencyTest extends TestCase
         );
 
         $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+            ->assertRedirect();
+
+        $payload = $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json')
             ->assertOk()
-            ->assertSee('data-testid="guest-masked-email"', false)
-            ->assertDontSee('guestmask@example.test', false)
-            ->assertDontSee('Masked Guest', false)
-            ->assertDontSee('XY9876543', false);
+            ->json();
+
+        $encoded = json_encode($payload);
+        $this->assertIsString($encoded);
+        $this->assertStringNotContainsString('guestmask@example.test', $encoded);
+        $this->assertStringNotContainsString('Masked Guest', $encoded);
+        $this->assertStringNotContainsString('XY9876543', $encoded);
+        $this->assertStringNotContainsString('03009998877', $encoded);
     }
 
     public function test_admin_all_bookings_supports_guest_customer_agent_source_filter(): void
@@ -177,24 +194,25 @@ class BookingLookupOverviewConsistencyTest extends TestCase
             'booking_reference' => 'AGT-FILTER01',
         ]);
 
-        $this->actingAs($admin)->get(route('admin.bookings', ['source' => 'guest']))
-            ->assertOk()
-            ->assertSee('data-testid="bookings-source-filter"', false)
-            ->assertSee($guestBooking->booking_reference, false)
-            ->assertDontSee($customerBooking->booking_reference, false)
-            ->assertDontSee($agentBooking->booking_reference, false);
+        $response = $this->actingAs($admin)->get(route('admin.bookings', ['source' => 'guest']));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/bookings', (string) $response->headers->get('Location'));
 
-        $this->actingAs($admin)->get(route('admin.bookings', ['source' => 'customer']))
-            ->assertOk()
-            ->assertSee($customerBooking->booking_reference, false)
-            ->assertDontSee($guestBooking->booking_reference, false)
-            ->assertDontSee($agentBooking->booking_reference, false);
+        $guestHtml = $this->adminBookingsIndexHtml($admin, ['source' => 'guest']);
+        $this->assertStringContainsString('data-testid="bookings-source-filter"', $guestHtml);
+        $this->assertStringContainsString($guestBooking->booking_reference, $guestHtml);
+        $this->assertStringNotContainsString($customerBooking->booking_reference, $guestHtml);
+        $this->assertStringNotContainsString($agentBooking->booking_reference, $guestHtml);
 
-        $this->actingAs($admin)->get(route('admin.bookings', ['source' => 'agent']))
-            ->assertOk()
-            ->assertSee($agentBooking->booking_reference, false)
-            ->assertDontSee($guestBooking->booking_reference, false)
-            ->assertDontSee($customerBooking->booking_reference, false);
+        $customerHtml = $this->adminBookingsIndexHtml($admin, ['source' => 'customer']);
+        $this->assertStringContainsString($customerBooking->booking_reference, $customerHtml);
+        $this->assertStringNotContainsString($guestBooking->booking_reference, $customerHtml);
+        $this->assertStringNotContainsString($agentBooking->booking_reference, $customerHtml);
+
+        $agentHtml = $this->adminBookingsIndexHtml($admin, ['source' => 'agent']);
+        $this->assertStringContainsString($agentBooking->booking_reference, $agentHtml);
+        $this->assertStringNotContainsString($guestBooking->booking_reference, $agentHtml);
+        $this->assertStringNotContainsString($customerBooking->booking_reference, $agentHtml);
     }
 
     /**

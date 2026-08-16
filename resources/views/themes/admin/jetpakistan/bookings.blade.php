@@ -67,6 +67,16 @@
             </select>
         </div>
         <div class="jp-filterbar__field">
+            <label class="jp-label" for="bookings-source">Source</label>
+            <select name="source" id="bookings-source" class="jp-select" data-testid="bookings-source-filter">
+                @php $activeSource = $f['source'] ?? ''; @endphp
+                <option value="">All bookings</option>
+                <option value="guest" @selected($activeSource === 'guest')>Guest bookings</option>
+                <option value="customer" @selected($activeSource === 'customer')>Registered customer</option>
+                <option value="agent" @selected($activeSource === 'agent')>Agent / agency</option>
+            </select>
+        </div>
+        <div class="jp-filterbar__field">
             <label class="jp-label" for="bookings-staff">Staff</label>
             <select name="assigned_staff_id" id="bookings-staff" class="jp-select">
                 <option value="">Any</option>
