@@ -12,11 +12,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\JetpkHomepageFixture;
 use Tests\TestCase;
 
 class JetpkHomepagePermissionsTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use JetpkHomepageFixture;
     use RefreshDatabase;
 
@@ -39,19 +41,17 @@ class JetpkHomepagePermissionsTest extends TestCase
             'current_agency_id' => null,
         ]);
 
-        $this->actingAs($admin)
-            ->get('/admin/page-settings/home')
-            ->assertOk();
+        $this->assertLegacyPageSettingsHomeRedirect($admin);
+        $this->assertNotSame('', $this->adminPageSettingsEditHtml($admin, 'home'));
     }
 
     public function test_staff_with_explicit_page_settings_permission_is_allowed(): void
     {
         $staff = $this->staffWithPermissions([StaffPermission::PageSettingsManage]);
 
-        $this->actingAs($staff)
-            ->get('/admin/page-settings/home')
-            ->assertOk()
-            ->assertSee('dashboard.css', false);
+        $this->assertLegacyPageSettingsHomeRedirect($staff);
+        $html = $this->adminPageSettingsEditHtml($staff, 'home');
+        $this->assertStringContainsString('dashboard.css', $html);
     }
 
     public function test_staff_with_unrelated_permission_is_denied(): void
@@ -148,11 +148,10 @@ class JetpkHomepagePermissionsTest extends TestCase
     {
         $staff = $this->staffWithPermissions([StaffPermission::PageSettingsManage]);
 
-        $this->actingAs($staff)
-            ->get('/admin/page-settings/home')
-            ->assertOk()
-            ->assertSee('Edit Home', false)
-            ->assertSee('dashboard.css', false);
+        $this->assertLegacyPageSettingsHomeRedirect($staff);
+        $html = $this->adminPageSettingsEditHtml($staff, 'home');
+        $this->assertStringContainsString('Edit Home', $html);
+        $this->assertStringContainsString('dashboard.css', $html);
     }
 
     public function test_legacy_staff_without_explicit_permission_is_denied_even_if_has_staff_permission_would_pass_globally(): void

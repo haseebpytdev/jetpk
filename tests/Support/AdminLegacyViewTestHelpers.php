@@ -132,6 +132,18 @@ trait AdminLegacyViewTestHelpers
         return app(ClientPageSettingsController::class)->editView($pageKey)->render();
     }
 
+    protected function assertLegacyPageSettingsHomeRedirect(User $user): void
+    {
+        $response = $this->actingAs($user)->get('/admin/page-settings/home');
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertTrue(
+            str_contains($target, '/admin/dashboard/cms')
+            || str_contains($target, 'page-settings'),
+            'Expected page-settings home GET to redirect into Next CMS. Got: '.$target
+        );
+    }
+
     protected function adminBackgroundRemovalEditHtml(User $admin): string
     {
         $this->actingAs($admin);

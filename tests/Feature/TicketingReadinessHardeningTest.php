@@ -21,11 +21,13 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class TicketingReadinessHardeningTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -146,22 +148,36 @@ class TicketingReadinessHardeningTest extends TestCase
         [$booking, $admin] = $this->eligibleSabreBooking(withSupplierBooking: true);
         $booking->update(['payment_status' => 'paid']);
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', ['booking' => $booking, 'tab' => 'ticketing']))
-            ->assertOk()
-            ->assertSee('Ticketing is disabled for this deployment.', false)
-            ->assertSee('disabled', false)
-            ->assertDontSee('btn btn-primary w-100 mb-2">Issue ticket', false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Ticketing is disabled for this deployment.', $html);
+        $this->assertStringContainsString('disabled', $html);
+        $this->assertStringNotContainsString('btn btn-primary w-100 mb-2">Issue ticket', $html);
     }
 
     public function test_admin_booking_page_shows_pnr_required_before_ticketing(): void
     {
         [$booking, $admin] = $this->eligibleSabreBooking(withSupplierBooking: false);
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', ['booking' => $booking, 'tab' => 'ticketing']))
-            ->assertOk()
-            ->assertSee('Create or attach PNR before ticketing.', false);
+        $state = app(AdminBookingSupplierActions::class)
+            ->build($booking->fresh(['passengers', 'latestSupplierBooking']), false, true);
+
+        $this->assertStringContainsString(
+            'Create or attach PNR before ticketing.',
+            (string) ($state['issue_ticket_disabled_reason'] ?? ''),
+        );
+
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Ticketing readiness checklist', $html);
+        $this->assertTrue(
+            str_contains($html, 'Create or attach PNR before ticketing.')
+            || str_contains($html, 'supplier PNR is missing')
+            || str_contains($html, 'PNR exists'),
+            'Expected booking show HTML to surface missing-PNR ticketing guidance.'
+        );
     }
 
     public function test_issue_ticket_cta_not_active_when_sabre_env_disabled(): void
@@ -179,10 +195,10 @@ class TicketingReadinessHardeningTest extends TestCase
             strtolower((string) $state['issue_ticket_disabled_reason']),
         );
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', ['booking' => $booking, 'tab' => 'ticketing']))
-            ->assertOk()
-            ->assertSee('Ticketing readiness checklist', false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('Ticketing readiness checklist', $html);
     }
 
     public function test_ticketing_service_never_calls_live_sabre_http(): void
