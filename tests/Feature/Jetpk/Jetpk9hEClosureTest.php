@@ -4,13 +4,13 @@ namespace Tests\Feature\Jetpk;
 
 use App\Models\Agency;
 use App\Models\ClientProfile;
-use App\Models\User;
 use App\Services\Client\CurrentClientContext;
 use App\Support\Branding\JetpkBrandPaletteCssResolver;
 use App\Support\Emails\EmailBaseVariables;
 use App\Support\Emails\EmailPlaceholderFallbacks;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
@@ -19,6 +19,7 @@ use Tests\TestCase;
  */
 class Jetpk9hEClosureTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -33,41 +34,37 @@ class Jetpk9hEClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.page-settings.edit', ['pageKey' => 'home']))
-            ->assertOk()
-            ->assertSee('destination_1', false)
-            ->assertSee('Choose image', false);
+            ->assertRedirect('/admin/dashboard/cms/pages');
+
+        $html = $this->adminPageSettingsEditHtml($admin, 'home');
+        $this->assertStringContainsString('destination_1', $html);
+        $this->assertStringContainsString('Choose image', $html);
     }
 
     public function test_group_card_media_upload_control_renders(): void
     {
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)
-            ->get(route('admin.page-settings.edit', ['pageKey' => 'home']))
-            ->assertOk()
-            ->assertSee('group_card_1', false)
-            ->assertSee('data-jp-section-panel="group-cards"', false);
+        $html = $this->adminPageSettingsEditHtml($admin, 'home');
+        $this->assertStringContainsString('group_card_1', $html);
+        $this->assertStringContainsString('data-jp-section-panel="group-cards"', $html);
     }
 
     public function test_why_travellers_and_trust_card_editors_render(): void
     {
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)
-            ->get(route('admin.page-settings.edit', ['pageKey' => 'home']))
-            ->assertOk()
-            ->assertSee('data-jp-section-panel="trust"', false)
-            ->assertSee('data-jp-section-panel="why-book"', false)
-            ->assertSee('name="content[trust][cards][0][title]"', false)
-            ->assertSee('name="content[why_book][cards][0][title]"', false);
+        $html = $this->adminPageSettingsEditHtml($admin, 'home');
+        $this->assertStringContainsString('data-jp-section-panel="trust"', $html);
+        $this->assertStringContainsString('data-jp-section-panel="why-book"', $html);
+        $this->assertStringContainsString('name="content[trust][cards][0][title]"', $html);
+        $this->assertStringContainsString('name="content[why_book][cards][0][title]"', $html);
     }
 
     public function test_support_cta_media_keys_documented_in_editor(): void
     {
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)
-            ->get(route('admin.page-settings.edit', ['pageKey' => 'home']))
-            ->assertOk()
-            ->assertSee('support_cta_background', false)
-            ->assertSee('support_cta_background_mobile', false);
+        $html = $this->adminPageSettingsEditHtml($admin, 'home');
+        $this->assertStringContainsString('support_cta_background', $html);
+        $this->assertStringContainsString('support_cta_background_mobile', $html);
     }
 
     public function test_primary_soft_gradient_variables_exist(): void
@@ -98,9 +95,11 @@ class Jetpk9hEClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.api-settings.create'))
-            ->assertOk()
-            ->assertSee('jp-btn--primary', false)
-            ->assertSee('jp-provider-card', false);
+            ->assertRedirect('/admin/dashboard/api-connections');
+
+        $html = $this->adminApiSettingsCreateHtml($admin);
+        $this->assertStringContainsString('jp-btn--primary', $html);
+        $this->assertStringContainsString('jp-provider-card', $html);
     }
 
     public function test_template_reset_route_exists(): void
@@ -146,23 +145,18 @@ class Jetpk9hEClosureTest extends TestCase
     public function test_homepage_editor_uses_canonical_jp_control_fields(): void
     {
         $admin = $this->platformAdmin();
-        $html = $this->actingAs($admin)
-            ->get(route('admin.page-settings.edit', ['pageKey' => 'home']))
-            ->assertOk()
-            ->getContent();
-        $this->assertStringContainsString('jp-control', (string) $html);
-        $this->assertStringContainsString('jp-field__label', (string) $html);
-        $this->assertStringNotContainsString('class="form-control"', (string) $html);
+        $html = $this->adminPageSettingsEditHtml($admin, 'home');
+        $this->assertStringContainsString('jp-control', $html);
+        $this->assertStringContainsString('jp-field__label', $html);
+        $this->assertStringNotContainsString('class="form-control"', $html);
     }
 
     public function test_featured_deals_panel_renders_in_page_settings(): void
     {
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)
-            ->get(route('admin.page-settings.edit', ['pageKey' => 'home']))
-            ->assertOk()
-            ->assertSee('data-jp-section-panel="featured-deals"', false)
-            ->assertSee('featured_deals', false);
+        $html = $this->adminPageSettingsEditHtml($admin, 'home');
+        $this->assertStringContainsString('data-jp-section-panel="featured-deals"', $html);
+        $this->assertStringContainsString('featured_deals', $html);
     }
 
     public function test_deep_page_inventory_has_zero_blocked_routes(): void

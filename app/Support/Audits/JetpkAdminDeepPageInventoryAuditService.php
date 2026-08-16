@@ -83,7 +83,9 @@ final class JetpkAdminDeepPageInventoryAuditService
 
             $contractAudit = ['pass' => true, 'legacy_markers' => [], 'jp_markers' => [], 'defects' => []];
             $auditView = '';
-            if ($isVisibleUi) {
+            $controller = $this->controllerAction($route);
+            $isLegacyNextRedirect = $this->isLegacyNextRedirectController($controller);
+            if ($isVisibleUi && ! $isLegacyNextRedirect) {
                 $auditView = $this->contractAuditViewName($viewInfo);
                 if ($auditView !== '') {
                     $contractAudit = $this->contractAuditor->auditView($auditView);
@@ -98,9 +100,11 @@ final class JetpkAdminDeepPageInventoryAuditService
             }
 
             $firstPassResult = $isVisibleUi
-                ? $this->firstPassResult($shellStatus, $legacyStatus, $uri, $contractAudit)
+                ? ($isLegacyNextRedirect
+                    ? 'legacy-next-redirect'
+                    : $this->firstPassResult($shellStatus, $legacyStatus, $uri, $contractAudit))
                 : '';
-            $defectsFound = $isVisibleUi ? $contractAudit['defects'] : [];
+            $defectsFound = ($isVisibleUi && ! $isLegacyNextRedirect) ? $contractAudit['defects'] : [];
             $filesChanged = $isVisibleUi && $defectsFound !== []
                 ? $this->bladeFilePath($auditView)
                 : '';
@@ -112,6 +116,7 @@ final class JetpkAdminDeepPageInventoryAuditService
                 $method,
                 $viewInfo,
                 $contractAudit,
+                $controller,
             );
             $secondPassResult = $isVisibleUi ? $finalVerdict : 'NOT-UI';
             $actionRequired = in_array($finalVerdict, ['PASS', 'FIXED', 'NOT-UI', 'LEGACY-REDIRECTED'], true)
@@ -141,7 +146,7 @@ final class JetpkAdminDeepPageInventoryAuditService
                 'route_name' => $name,
                 'http_method' => $method,
                 'uri' => $uri,
-                'controller' => $this->controllerAction($route),
+                'controller' => $controller,
                 'blade' => $viewInfo['view'],
                 'page_type' => $pageType,
                 'role_access' => 'platform_admin',
@@ -374,9 +379,14 @@ final class JetpkAdminDeepPageInventoryAuditService
         string $method,
         array $viewInfo,
         array $contractAudit,
+        string $controller = '',
     ): string {
         if (! $isVisibleUi) {
             return 'NOT-UI';
+        }
+
+        if ($this->isLegacyNextRedirectController($controller)) {
+            return 'LEGACY-REDIRECTED';
         }
 
         if (Str::contains($uri, 'settings/homepage') && ! Str::contains($uri, 'featured-fares')) {
@@ -404,13 +414,25 @@ final class JetpkAdminDeepPageInventoryAuditService
         return 'BLOCKED';
     }
 
+    private function isLegacyNextRedirectController(string $controller): bool
+    {
+        if ($controller === '') {
+            return false;
+        }
+
+        return Str::contains($controller, [
+            'BackOfficeLegacyViewRedirectController',
+            'Illuminate\\Routing\\RedirectController',
+        ]);
+    }
+
     private function actionRequired(string $finalStatus, string $shellStatus, string $legacyStatus): string
     {
         return match ($finalStatus) {
             'BLOCKED' => $shellStatus === 'legacy-shell-wrapped'
                 ? 'Convert legacy inner markup to jp-* contract or promote to themed view'
                 : 'Fix blade contract defects on themed view',
-            'LEGACY-REDIRECTED' => 'Route redirects to canonical Page Settings editor',
+            'LEGACY-REDIRECTED' => 'Route redirects to canonical Next dashboard surface',
             default => '',
         };
     }
