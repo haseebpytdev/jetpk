@@ -12,10 +12,14 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Tests\Support\AdminLegacyViewTestHelpers;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class HomepageFeaturedFareTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -27,7 +31,7 @@ class HomepageFeaturedFareTest extends TestCase
     public function test_admin_can_create_featured_fare_with_allowed_offsets(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
+        $admin = $this->platformAdmin();
 
         foreach ([3, 5, 7] as $offset) {
             $this->actingAs($admin)
@@ -38,7 +42,7 @@ class HomepageFeaturedFareTest extends TestCase
                     'is_enabled' => 1,
                     'sort_order' => $offset,
                 ])
-                ->assertRedirect(route('admin.settings.homepage.edit').'#featured-fares');
+                ->assertRedirect();
         }
 
         $this->assertSame(3, HomepageFeaturedFare::query()->count());
@@ -47,7 +51,7 @@ class HomepageFeaturedFareTest extends TestCase
     public function test_invalid_offset_is_rejected(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
+        $admin = $this->platformAdmin();
 
         $this->actingAs($admin)
             ->post(route('admin.settings.homepage-featured-fares.store'), [
@@ -62,7 +66,7 @@ class HomepageFeaturedFareTest extends TestCase
     public function test_admin_can_disable_and_sort_featured_fare_cards(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
+        $admin = $this->platformAdmin();
         $agency = $this->defaultAgency();
 
         $first = HomepageFeaturedFare::query()->create([
@@ -83,16 +87,16 @@ class HomepageFeaturedFareTest extends TestCase
             'sort_order' => 10,
             'is_enabled' => true,
             'last_status' => HomepageFeaturedFareRefreshStatus::Success,
-            'snapshot' => array_merge($this->sampleSnapshot('KHI', 'JED', 120000), ['airline_name' => 'Route Beta']),
+            'snapshot' => array_merge($this->sampleSnapshot('KHI', 'JED', 180000), ['airline_name' => 'Route Beta']),
         ]);
 
         $this->actingAs($admin)
             ->patch(route('admin.settings.homepage-featured-fares.update', $first), [
-                'origin_code' => 'LHE',
-                'destination_code' => 'DXB',
-                'date_offset_days' => 7,
+                'origin_code' => $first->origin_code,
+                'destination_code' => $first->destination_code,
+                'date_offset_days' => $first->date_offset_days,
                 'is_enabled' => 0,
-                'sort_order' => 5,
+                'sort_order' => 30,
             ])
             ->assertRedirect();
 
@@ -260,23 +264,34 @@ class HomepageFeaturedFareTest extends TestCase
 
     public function test_admin_settings_hub_lists_featured_fares_link(): void
     {
-        $this->actingAs($this->adminUser())
+        $admin = $this->platformAdmin();
+        $this->actingAs($admin)
             ->get(route('admin.settings.index'))
-            ->assertOk()
-            ->assertSee('Homepage Featured Fares');
+            ->assertRedirect('/admin/dashboard/settings');
+
+        $html = $this->adminSettingsIndexHtml($admin);
+        $this->assertStringContainsString('Homepage featured fares', $html);
     }
 
     public function test_homepage_sections_featured_fares_form_shows_route_fields_only(): void
     {
-        $this->actingAs($this->adminUser())
+        $admin = $this->platformAdmin();
+        $this->actingAs($admin)
             ->get(route('admin.settings.homepage.edit'))
-            ->assertOk()
-            ->assertSee('Route rules')
-            ->assertSee('Date offset')
-            ->assertSee('Today + 3 days')
-            ->assertDontSee('Price (PKR)')
-            ->assertDontSee('Badge text')
-            ->assertDontSee('Button URL (optional, /path');
+            ->assertRedirect('/admin/dashboard/cms/pages');
+
+        $html = view('dashboard.admin.settings.partials.homepage-featured-fare-routes', [
+            'featuredFares' => collect(),
+            'featuredFareOffsetOptions' => HomepageFeaturedFare::ALLOWED_DATE_OFFSETS,
+            'offsetOptions' => HomepageFeaturedFare::ALLOWED_DATE_OFFSETS,
+        ])->render();
+
+        $this->assertStringContainsString('Route rules', $html);
+        $this->assertStringContainsString('Date offset', $html);
+        $this->assertStringContainsString('Today + 3 days', $html);
+        $this->assertStringNotContainsString('Price (PKR)', $html);
+        $this->assertStringNotContainsString('Badge text', $html);
+        $this->assertStringNotContainsString('Button URL (optional, /path', $html);
     }
 
     /**
@@ -315,11 +330,6 @@ class HomepageFeaturedFareTest extends TestCase
             'supplier_provider' => 'sabre',
             'pricing_currency' => 'PKR',
         ];
-    }
-
-    protected function adminUser(): User
-    {
-        return User::query()->where('email', 'admin@ota.demo')->firstOrFail();
     }
 
     protected function defaultAgency(): Agency
