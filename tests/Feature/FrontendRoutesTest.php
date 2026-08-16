@@ -12,18 +12,23 @@ use App\Models\User;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\Support\PublicBookingPassengersPayload;
 use Tests\Support\PublicCheckoutTestDoubles;
 use Tests\TestCase;
 
 class FrontendRoutesTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     public function test_home_responds(): void
     {
-        $this->get('/')->assertOk()
-            ->assertSee('Subject to airline confirmation.', false);
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('JetPakistan', false);
     }
 
     /** @see README — client demo navigation checklist */
@@ -34,41 +39,36 @@ class FrontendRoutesTest extends TestCase
         $depart = now()->addWeek()->format('Y-m-d');
         PublicCheckoutTestDoubles::bind($this, $depart, 'LHE', 'DXB');
 
-        foreach ([
-            '/',
-            '/request-demo',
-            '/flights/search',
-            '/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0',
-            '/booking/passengers?flight_id=fixture-offer-1&from=LHE&to=DXB&depart='.$depart,
-        ] as $path) {
-            $this->get($path)->assertOk();
-        }
+        $this->get('/')->assertOk();
+        $this->get('/flights/search')->assertRedirect('/');
+        $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+            ->assertOk();
+        $this->get('/booking/passengers?flight_id=fixture-offer-1&from=LHE&to=DXB&depart='.$depart)
+            ->assertOk();
 
-        $this->get('/booking/confirmation')->assertRedirect(route('flights.search'));
+        $this->get('/booking/confirmation')->assertRedirect('/');
 
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
-        $this->actingAs($admin->fresh());
+        $admin = $this->platformAdmin();
+        $this->actingAs($admin);
 
         foreach ([
-            '/admin',
-            '/admin/agents',
-            '/admin/staff',
-            '/admin/markups',
-            '/admin/api-settings',
-            '/admin/roles-permissions',
-            '/admin/reports',
-            '/admin/settings/branding',
-            '/admin/go-live-checklist',
-        ] as $path) {
-            $this->get($path)->assertOk();
+            '/admin' => '/admin/dashboard',
+            '/admin/agents' => '/admin/dashboard/agents',
+            '/admin/staff' => '/admin/dashboard/staff',
+            '/admin/markups' => '/admin/dashboard/markups',
+            '/admin/api-settings' => '/admin/dashboard/api-connections',
+            '/admin/roles-permissions' => '/admin/dashboard/users/roles',
+            '/admin/reports' => '/admin/dashboard/reports',
+            '/admin/settings/branding' => '/admin/dashboard/settings/general',
+            '/admin/go-live-checklist' => '/admin/dashboard/system/go-live',
+            '/admin/bookings' => '/admin/dashboard/bookings',
+        ] as $path => $target) {
+            $this->get($path)->assertRedirect($target);
         }
-
-        $this->get('/admin/bookings')->assertRedirect('/admin/dashboard/bookings');
 
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
-        $this->get('/staff')->assertOk();
+        $this->get('/staff')->assertRedirect('/staff/dashboard');
 
         $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $this->actingAs($agent);
@@ -86,7 +86,7 @@ class FrontendRoutesTest extends TestCase
 
     public function test_flight_search_and_results_flow(): void
     {
-        $this->get('/flights/search')->assertOk();
+        $this->get('/flights/search')->assertRedirect('/');
 
         $depart = now()->addWeek()->format('Y-m-d');
         PublicCheckoutTestDoubles::bind($this, $depart, 'NYC', 'LON');
@@ -102,13 +102,13 @@ class FrontendRoutesTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $this->actingAs($admin);
-        $this->get('/admin')->assertOk();
+        $this->get('/admin')->assertRedirect('/admin/dashboard');
 
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
         $this->actingAs($staff);
-        $this->get('/staff')->assertOk();
+        $this->get('/staff')->assertRedirect('/staff/dashboard');
 
         $agent = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
         $this->actingAs($agent);
@@ -122,24 +122,22 @@ class FrontendRoutesTest extends TestCase
     public function test_admin_section_routes_respond(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
-        $this->actingAs($admin->fresh());
+        $admin = $this->platformAdmin();
+        $this->actingAs($admin);
 
         foreach ([
-            '/admin/agents',
-            '/admin/staff',
-            '/admin/markups',
-            '/admin/api-settings',
-            '/admin/reports',
-            '/admin/roles-permissions',
-            '/admin/settings/branding',
-            '/admin/go-live-checklist',
-        ] as $path) {
-            $this->get($path)->assertOk();
+            '/admin/agents' => '/admin/dashboard/agents',
+            '/admin/staff' => '/admin/dashboard/staff',
+            '/admin/markups' => '/admin/dashboard/markups',
+            '/admin/api-settings' => '/admin/dashboard/api-connections',
+            '/admin/reports' => '/admin/dashboard/reports',
+            '/admin/roles-permissions' => '/admin/dashboard/users/roles',
+            '/admin/settings/branding' => '/admin/dashboard/settings/general',
+            '/admin/go-live-checklist' => '/admin/dashboard/system/go-live',
+            '/admin/bookings' => '/admin/dashboard/bookings',
+        ] as $path => $target) {
+            $this->get($path)->assertRedirect($target);
         }
-
-        $this->get('/admin/bookings')->assertRedirect('/admin/dashboard/bookings');
     }
 
     public function test_admin_preview_query_routes_respond(): void
@@ -156,9 +154,8 @@ class FrontendRoutesTest extends TestCase
             'source_channel' => 'test',
         ]);
 
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
-        $this->actingAs($admin->fresh());
+        $admin = $this->platformAdmin();
+        $this->actingAs($admin);
 
         $this->get('/admin/bookings?preview=OTA-99214')
             ->assertRedirect('/admin/dashboard/bookings?q=OTA-99214');
@@ -173,8 +170,21 @@ class FrontendRoutesTest extends TestCase
             'user_id' => $staffUser->id,
         ]);
 
-        $this->get('/admin/agents?preview='.$agent->id)->assertOk()->assertSee('AGT-9921', false);
-        $this->get('/admin/staff?preview='.$staff->id)->assertOk()->assertSee('STF-'.$staff->id, false);
+        $this->get('/admin/agents?preview='.$agent->id)
+            ->assertRedirect('/admin/dashboard/agents?preview='.$agent->id);
+        $this->get('/admin/staff?preview='.$staff->id)
+            ->assertRedirect('/admin/dashboard/staff?preview='.$staff->id);
+
+        $agentsData = $this->actingAs($admin)
+            ->getJson(route('admin.agents.data', ['preview' => $agent->id]))
+            ->assertOk();
+        $agentsHtml = (string) ($agentsData->json('rows_html') ?? '').(string) ($agentsData->json('preview_html') ?? '');
+        $this->assertStringContainsString('AGT-9921', $agentsHtml);
+
+        $this->assertStringContainsString(
+            'STF-'.$staff->id,
+            $this->adminStaffIndexHtml($admin, ['preview' => $staff->id]),
+        );
     }
 
     public function test_booking_passengers_post_redirects_to_review(): void
