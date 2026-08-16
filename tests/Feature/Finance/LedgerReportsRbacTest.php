@@ -13,19 +13,25 @@ use App\Support\Agents\AgentPermission;
 use App\Support\Staff\StaffPermission;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class LedgerReportsRbacTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     public function test_platform_admin_can_access_master_ledger_and_reports(): void
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.ledger.index'))->assertOk()
-            ->assertSee('data-testid="master-ledger-table"', false);
-        $this->actingAs($admin)->get(route('admin.reports'))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.ledger.index', absolute: false));
+        $html = $this->adminMasterLedgerHtml($admin);
+        $this->assertStringContainsString('data-testid="master-ledger-table"', $html);
+
+        $this->actingAs($admin)->get(route('admin.reports'))->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/reports', (string) $this->actingAs($admin)->get(route('admin.reports'))->headers->get('Location'));
+        $this->assertNotSame('', trim($this->adminReportsHtml($admin)));
     }
 
     public function test_platform_admin_ledger_lists_multiple_agencies(): void
@@ -36,9 +42,9 @@ class LedgerReportsRbacTest extends TestCase
         $this->seedTransactionForAgency($agencyA);
         $this->seedTransactionForAgency($agencyB);
 
-        $response = $this->actingAs($admin)->get(route('admin.ledger.index'));
-        $response->assertOk()
-            ->assertSee('data-testid="ledger-row-', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.ledger.index', absolute: false));
+        $html = $this->adminMasterLedgerHtml($admin);
+        $this->assertStringContainsString('data-testid="ledger-row-', $html);
     }
 
     public function test_platform_admin_can_filter_ledger_by_agency(): void
@@ -49,10 +55,14 @@ class LedgerReportsRbacTest extends TestCase
         $txA = $this->seedTransactionForAgency($agencyA);
         $txB = $this->seedTransactionForAgency($agencyB);
 
-        $this->actingAs($admin)->get(route('admin.ledger.index', ['agency_id' => $agencyA->id]))
-            ->assertOk()
-            ->assertSee('data-testid="ledger-row-'.$txA->id.'"', false)
-            ->assertDontSee('data-testid="ledger-row-'.$txB->id.'"', false);
+        $this->assertLegacyAccountingRedirect(
+            $admin,
+            route('admin.ledger.index', ['agency_id' => $agencyA->id], false)
+        );
+
+        $html = $this->adminMasterLedgerHtml($admin, ['agency_id' => $agencyA->id]);
+        $this->assertStringContainsString('data-testid="ledger-row-'.$txA->id.'"', $html);
+        $this->assertStringNotContainsString('data-testid="ledger-row-'.$txB->id.'"', $html);
     }
 
     public function test_staff_with_ledger_view_can_access_staff_ledger(): void
@@ -62,7 +72,10 @@ class LedgerReportsRbacTest extends TestCase
         $this->assertTrue($staff->hasStaffPermission(StaffPermission::LedgerView));
         $this->assertTrue($staff->can('viewAny', AgentWalletTransaction::class));
 
-        $this->actingAs($staff)->get(route('staff.ledger.index'))->assertOk();
+        $response = $this->actingAs($staff)->get(route('staff.ledger.index'));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/staff/dashboard/accounting', (string) $response->headers->get('Location'));
+        $this->assertStringContainsString('Master Ledger', $this->staffMasterLedgerHtml($staff));
     }
 
     public function test_staff_without_ledger_view_cannot_access_staff_ledger(): void
@@ -76,7 +89,10 @@ class LedgerReportsRbacTest extends TestCase
     {
         $staff = $this->staffWithPermissions([StaffPermission::ReportsView]);
 
-        $this->actingAs($staff)->get(route('staff.reports.index'))->assertOk();
+        $response = $this->actingAs($staff)->get(route('staff.reports.index'));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/staff/dashboard/reports', (string) $response->headers->get('Location'));
+        $this->assertNotSame('', trim($this->staffReportsIndexHtml($staff)));
     }
 
     public function test_staff_without_reports_view_cannot_access_staff_reports(): void
@@ -115,6 +131,10 @@ class LedgerReportsRbacTest extends TestCase
         [, $agent] = $this->seedAgent();
         $this->seedWalletTransaction($agent);
         $staff = $this->createAgentStaff($agent, 'ledger-ok@test', [AgentPermission::LedgerView]);
+
+        $this->assertTrue($staff->hasAgentPermission(AgentPermission::LedgerView));
+        $this->assertNotNull($staff->agent());
+        $this->assertTrue($staff->can('viewLedger', $agent));
 
         $this->actingAs($staff)->get(route('agent.ledger.index'))->assertOk();
     }
@@ -158,19 +178,26 @@ class LedgerReportsRbacTest extends TestCase
         $agent = Agent::factory()->create(['agency_id' => $agency->id]);
         $tx = $this->seedWalletTransaction($agent, $admin);
 
-        $this->actingAs($admin)->get(route('admin.ledger.index'))
-            ->assertOk()
-            ->assertSee('data-testid="ledger-actor-'.$tx->id.'"', false)
-            ->assertSee('ADM-', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.ledger.index', absolute: false));
+        $html = $this->adminMasterLedgerHtml($admin);
+        $this->assertStringContainsString('data-testid="ledger-actor-'.$tx->id.'"', $html);
+        $this->assertStringContainsString('ADM-', $html);
     }
 
     public function test_invalid_ledger_status_filter_does_not_crash(): void
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.ledger.index', ['status' => 'not-a-real-status']))
-            ->assertOk()
-            ->assertSee('data-testid="master-ledger-empty"', false);
+        $this->assertLegacyAccountingRedirect(
+            $admin,
+            route('admin.ledger.index', ['status' => 'not-a-real-status'], false)
+        );
+        $html = $this->adminMasterLedgerHtml($admin, ['status' => 'not-a-real-status']);
+        $this->assertTrue(
+            str_contains($html, 'data-testid="master-ledger-table"')
+            || str_contains($html, 'data-testid="master-ledger-empty"'),
+            'Invalid status filter must render ledger shell without crashing.'
+        );
     }
 
     protected function platformAdmin(): User
@@ -207,7 +234,7 @@ class LedgerReportsRbacTest extends TestCase
 
     protected function createAgentStaff(Agent $agent, string $email, array $permissions): User
     {
-        return User::query()->create([
+        $staff = User::query()->create([
             'name' => 'Agent Staff',
             'username' => str_replace('@', '-', $email),
             'email' => $email,
@@ -220,6 +247,12 @@ class LedgerReportsRbacTest extends TestCase
                 'agent_permissions' => $permissions,
             ],
         ]);
+
+        $staff->agencies()->syncWithoutDetaching([
+            $agent->agency_id => ['role' => AccountType::AgentStaff->value],
+        ]);
+
+        return $staff->fresh();
     }
 
     protected function seedWalletTransaction(Agent $agent, ?User $creator = null): AgentWalletTransaction

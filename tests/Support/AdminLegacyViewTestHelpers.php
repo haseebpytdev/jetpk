@@ -18,7 +18,9 @@ use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedgerController;
-use App\Http\Controllers\Staff\FinanceStatementController as StaffFinanceStatementController;
+use App\Http\Controllers\Admin\AdminLedgerController;
+use App\Http\Controllers\Staff\LedgerController as StaffLedgerController;
+use App\Http\Controllers\Staff\ReportsController as StaffReportsController;
 use App\Models\Agency;
 use App\Models\Agent;
 use App\Models\AgentApplication;
@@ -211,6 +213,42 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $staff);
 
         return app(StaffFinanceStatementController::class)->show($request, $agency)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function adminMasterLedgerHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/ledger', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AdminLedgerController::class)->index($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function staffMasterLedgerHtml(User $staff, array $query = []): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/ledger', 'GET', $query);
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffLedgerController::class)->index($request)->render();
+    }
+
+    protected function staffReportsIndexHtml(User $staff): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/reports', 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffReportsController::class)->index($request)->render();
     }
 
     protected function adminFinanceAdjustmentsIndexHtml(User $admin): string
