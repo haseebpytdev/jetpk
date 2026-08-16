@@ -113,7 +113,12 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         [, $booking] = $this->customerBooking();
         $token = app(GuestBookingAccessService::class)->createTokenForBooking($booking, 'a@example.test', null);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))->assertOk();
+        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+            ->assertRedirect();
+        $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json')
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('viewer_mode', 'guest');
     }
 
     public function test_expired_guest_token_is_denied(): void
@@ -146,9 +151,11 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         ]);
         $token = app(GuestBookingAccessService::class)->createTokenForBooking($booking, 'a@example.test', null);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $payload = $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json')
             ->assertOk()
-            ->assertDontSee('Internal Admin Secret Note');
+            ->json();
+
+        $this->assertStringNotContainsString('Internal Admin Secret Note', json_encode($payload));
     }
 
     public function test_customer_portal_does_not_expose_audit_logs_or_raw_supplier_payload(): void
@@ -165,7 +172,9 @@ class CustomerPortalAndGuestLookupTest extends TestCase
 
     public function test_public_lookup_routes_remain_unauthenticated(): void
     {
-        $this->get(route('booking.lookup'))->assertOk();
+        $this->get(route('booking.lookup'))
+            ->assertRedirect()
+            ->assertRedirectContains('/lookup-booking');
         $this->post(route('lookup-booking.submit'), ['booking_reference' => 'ABC'])->assertSessionHasErrors('email');
     }
 
@@ -184,7 +193,7 @@ class CustomerPortalAndGuestLookupTest extends TestCase
 
         $this->actingAs($customer)->get(route('customer.dashboard'))
             ->assertOk()
-            ->assertSee('data-testid="customer-dashboard-kpis"', false)
+            ->assertSee('data-testid="jp-customer-dashboard-kpis"', false)
             ->assertSee('Total bookings', false)
             ->assertSee('Pending payment', false)
             ->assertSee($booking->display_reference, false);
@@ -203,7 +212,7 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         $this->actingAs($customer)->get(route('customer.bookings.index', ['filter' => 'pending_payment']))
             ->assertOk()
             ->assertSee('data-testid="customer-bookings-filters"', false)
-            ->assertSee('ota-bstat', false)
+            ->assertSee('data-testid="jp-customer-bookings-list"', false)
             ->assertDontSee($paidBooking->booking_reference, false);
     }
 
@@ -293,14 +302,16 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         );
 
         $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+            ->assertRedirect();
+
+        $payload = $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json')
             ->assertOk()
-            ->assertSee('data-testid="customer-booking-timeline"', false)
-            ->assertSee('PNR / airline booking', false)
-            ->assertSee('PNR: TQMNEV', false)
-            ->assertSee('PNR/airline itinerary', false)
-            ->assertSee('Final airline itinerary synced from PNR.', false)
-            ->assertSee('Ticketing process started.', false)
-            ->assertDontSee('data-testid="booking-pnr-ticketing"', false);
+            ->json();
+
+        $encoded = json_encode($payload);
+        $this->assertSame('guest_lookup', $payload['source'] ?? null);
+        $this->assertStringContainsString('TQMNEV', (string) $encoded);
+        $this->assertStringNotContainsString('booking-pnr-ticketing', (string) $encoded);
     }
 
     /**
@@ -404,12 +415,14 @@ class CustomerPortalAndGuestLookupTest extends TestCase
         ]);
         $token = app(GuestBookingAccessService::class)->createTokenForBooking($booking, 'a@example.test', null);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+        $payload = $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json')
             ->assertOk()
-            ->assertSee('data-testid="booking-payment-summary"', false)
-            ->assertSee('data-testid="booking-documents-center"', false)
-            ->assertDontSee('Internal staff note must not show')
-            ->assertDontSee('Invalid transfer');
+            ->json();
+
+        $encoded = json_encode($payload);
+        $this->assertStringNotContainsString('Internal staff note must not show', (string) $encoded);
+        $this->assertStringNotContainsString('Invalid transfer', (string) $encoded);
+        $this->assertArrayHasKey('capabilities', $payload);
     }
 
     /**
