@@ -84,7 +84,7 @@ class ReservedRoutePrecedencePhase17GTest extends TestCase
         $pattern = '/^'.ClientManagedPageReservedSlugs::routeSlugConstraint().'$/';
         $this->assertSame(0, preg_match($pattern, 'admin'));
         $this->assertSame(1, preg_match($pattern, 'valid-custom-slug'));
-        $this->assertSame('admin.dashboard', $this->matchRouteName('GET', '/admin'));
+        $this->assertSame('admin.entry', $this->matchRouteName('GET', '/admin'));
     }
 
     /**
@@ -93,7 +93,8 @@ class ReservedRoutePrecedencePhase17GTest extends TestCase
     public static function deterministicRoutePrecedenceProvider(): array
     {
         $cases = [
-            ['method' => 'GET', 'uri' => '/admin', 'expected' => 'admin.dashboard'],
+            ['method' => 'GET', 'uri' => '/admin', 'expected' => 'admin.entry'],
+            ['method' => 'GET', 'uri' => '/admin/dashboard', 'expected' => 'admin.dashboard'],
             ['method' => 'GET', 'uri' => '/admin/bookings', 'expected' => 'admin.bookings'],
             ['method' => 'POST', 'uri' => '/booking/review', 'expected' => 'booking.review'],
             ['method' => 'GET', 'uri' => '/login', 'expected' => 'login'],
@@ -149,7 +150,14 @@ class ReservedRoutePrecedencePhase17GTest extends TestCase
     protected function matchRouteName(string $method, string $uri): string
     {
         $request = Request::create($uri, $method);
-        $route = Route::getRoutes()->match($request);
+
+        try {
+            $route = Route::getRoutes()->match($request);
+        } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            // Reserved roots may have no named route (filesystem / API prefixes) but must
+            // still not fall through to the CMS custom-page catch-all.
+            return '';
+        }
 
         return (string) $route->getName();
     }

@@ -59,7 +59,7 @@ Route::bind('customer', function (string $value): User {
 });
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
-    Route::redirect('/', '/admin/dashboard');
+    Route::redirect('/', '/admin/dashboard')->name('entry');
     Route::get('/dashboard/{path?}', [BackOfficeDashboardController::class, 'admin'])
         ->where('path', '.*')
         ->name('dashboard');

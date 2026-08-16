@@ -20,7 +20,7 @@ use App\Support\Ui\UiVersionResolver;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('staff')->name('staff.')->group(function (): void {
-    Route::redirect('/', '/staff/dashboard');
+    Route::redirect('/', '/staff/dashboard')->name('entry');
     Route::get('/dashboard/{path?}', [BackOfficeDashboardController::class, 'staff'])
         ->where('path', '.*')
         ->name('dashboard');
