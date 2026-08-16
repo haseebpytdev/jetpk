@@ -22,10 +22,12 @@ use App\Support\Staff\StaffPermission;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class AgentStatementTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -41,8 +43,14 @@ class AgentStatementTest extends TestCase
         $admin = $this->platformAdmin();
 
         $this->actingAs($admin)->get(route('admin.finance.statements.index'))
-            ->assertOk()
-            ->assertSee('data-testid="finance-statements-index-title"', false);
+            ->assertRedirect();
+        $this->assertStringContainsString(
+            '/admin/dashboard/accounting',
+            (string) $this->actingAs($admin)->get(route('admin.finance.statements.index'))->headers->get('Location')
+        );
+
+        $html = $this->adminFinanceStatementsIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="finance-statements-index-title"', $html);
     }
 
     public function test_admin_can_view_agency_statement(): void
@@ -50,9 +58,10 @@ class AgentStatementTest extends TestCase
         $admin = $this->platformAdmin();
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
 
-        $this->actingAs($admin)->get(route('admin.finance.statements.show', $agency))
-            ->assertOk()
-            ->assertSee('data-testid="finance-statement-show-title"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.statements.show', $agency, false));
+
+        $html = $this->adminFinanceStatementShowHtml($admin, $agency);
+        $this->assertStringContainsString('data-testid="finance-statement-show-title"', $html);
     }
 
     public function test_staff_with_reports_view_can_view_statements(): void
@@ -60,8 +69,18 @@ class AgentStatementTest extends TestCase
         $staff = $this->staffWithPermissions([StaffPermission::ReportsView]);
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
 
-        $this->actingAs($staff)->get(route('staff.finance.statements.index'))->assertOk();
-        $this->actingAs($staff)->get(route('staff.finance.statements.show', $agency))->assertOk();
+        $this->actingAs($staff)->get(route('staff.finance.statements.index'))
+            ->assertRedirect();
+        $this->assertStringContainsString(
+            '/staff/dashboard/accounting',
+            (string) $this->actingAs($staff)->get(route('staff.finance.statements.index'))->headers->get('Location')
+        );
+
+        $this->assertStringContainsString('Agent Statements', $this->staffFinanceStatementsIndexHtml($staff));
+        $this->assertStringContainsString(
+            'data-testid="finance-statement-show-title"',
+            $this->staffFinanceStatementShowHtml($staff, $agency)
+        );
     }
 
     public function test_staff_without_reports_view_gets_403(): void
@@ -82,7 +101,8 @@ class AgentStatementTest extends TestCase
 
         $this->actingAs($agentUser->fresh())->get(route('agent.finance.statement.show'))
             ->assertOk()
-            ->assertSee('data-testid="agent-finance-statement-title"', false);
+            ->assertSee('Agency Statement')
+            ->assertSee('data-testid="finance-statement-summary"', false);
     }
 
     public function test_other_agent_cannot_access_another_agency_statement_via_policy(): void
@@ -129,13 +149,16 @@ class AgentStatementTest extends TestCase
         $from = now()->subDay()->toDateString();
         $to = now()->addDay()->toDateString();
 
-        $this->actingAs($admin)->get(route('admin.finance.statements.show', [
-            'agency' => $agency,
+        $this->assertLegacyAccountingRedirect(
+            $admin,
+            route('admin.finance.statements.show', ['agency' => $agency, 'date_from' => $from, 'date_to' => $to], false)
+        );
+
+        $html = $this->adminFinanceStatementShowHtmlWithQuery($admin, $agency, [
             'date_from' => $from,
             'date_to' => $to,
-        ]))
-            ->assertOk()
-            ->assertSee('Deposit approved', false);
+        ]);
+        $this->assertStringContainsString('Deposit approved', $html);
     }
 
     public function test_opening_balance_before_date_range_is_calculated(): void
@@ -329,14 +352,18 @@ class AgentStatementTest extends TestCase
         $admin = $this->platformAdmin();
         $agency = Agency::factory()->create();
 
-        $this->actingAs($admin)->get(route('admin.finance.statements.show', [
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.statements.show', [
             'agency' => $agency,
             'date_from' => '2099-01-01',
             'date_to' => '2099-01-31',
-        ]))
-            ->assertOk()
-            ->assertSee('data-testid="finance-statement-empty"', false)
-            ->assertSee('No statement movements found for this period.', false);
+        ], false));
+
+        $html = $this->adminFinanceStatementShowHtmlWithQuery($admin, $agency, [
+            'date_from' => '2099-01-01',
+            'date_to' => '2099-01-31',
+        ]);
+        $this->assertStringContainsString('data-testid="finance-statement-empty"', $html);
+        $this->assertStringContainsString('No statement movements found for this period.', $html);
     }
 
     public function test_viewing_statements_does_not_create_finance_rows(): void
@@ -351,7 +378,8 @@ class AgentStatementTest extends TestCase
         $refundCount = BookingRefund::query()->count();
         $bookingCount = Booking::query()->count();
 
-        $this->actingAs($admin)->get(route('admin.finance.statements.show', $agency))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.statements.show', $agency, false));
+        $this->adminFinanceStatementShowHtml($admin, $agency);
         $this->actingAs($admin)->get(route('admin.finance.statements.export', $agency))->assertOk();
 
         $this->assertSame($walletCount, AgentWallet::query()->count());
@@ -367,9 +395,9 @@ class AgentStatementTest extends TestCase
         $admin = $this->platformAdmin();
         [$agentUser] = $this->seedAgent();
 
-        $this->actingAs($admin)->get(route('admin.ledger.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.accounting.reconciliation.index'))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.ledger.index', absolute: false));
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index', absolute: false));
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.reconciliation.index', absolute: false));
         $this->actingAs($agentUser)->get(route('agent.ledger.index'))->assertOk();
         $this->actingAs($agentUser)->get(route('agent.accounting.ledger.index'))->assertOk();
     }

@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedgerController;
+use App\Http\Controllers\Staff\FinanceStatementController as StaffFinanceStatementController;
 use App\Models\Agency;
 use App\Models\Agent;
 use App\Models\AgentApplication;
@@ -174,6 +175,42 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(FinanceStatementController::class)->show($request, $agency)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function adminFinanceStatementShowHtmlWithQuery(User $admin, Agency $agency, array $query): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/finance/statements/'.$agency->id, 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(FinanceStatementController::class)->show($request, $agency)->render();
+    }
+
+    protected function staffFinanceStatementsIndexHtml(User $staff): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/finance/statements', 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffFinanceStatementController::class)->index($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function staffFinanceStatementShowHtml(User $staff, Agency $agency, array $query = []): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/finance/statements/'.$agency->id, 'GET', $query);
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffFinanceStatementController::class)->show($request, $agency)->render();
     }
 
     protected function adminFinanceAdjustmentsIndexHtml(User $admin): string
