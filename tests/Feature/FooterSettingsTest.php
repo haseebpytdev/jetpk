@@ -2,62 +2,72 @@
 
 namespace Tests\Feature;
 
-use App\Models\Agency;
+use App\Enums\ClientPageSettingStatus;
+use App\Models\ClientPageSetting;
 use App\Models\User;
-use App\Services\Agencies\AgencyBrandingService;
-use App\Services\Agencies\FooterSettingsPresenter;
+use App\Support\Client\ClientPageKeys;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\JetpkHomepageFixture;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
+/**
+ * JetPakistan public footer is CMS-owned (ClientPageKeys::FOOTER).
+ * Legacy AgencyFooterSettingsController remains for compatibility/validation.
+ */
 class FooterSettingsTest extends TestCase
 {
+    use JetpkHomepageFixture;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->seed(OtaFoundationSeeder::class);
+        $this->makeJetpkProfile();
     }
 
     public function test_public_footer_renders_default_structured_sections(): void
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('ota-footer-pro', false)
+            ->assertSee('class="footer"', false)
             ->assertSee('Company', false)
             ->assertSee('Support', false)
-            ->assertSee('Explore', false)
-            ->assertSee('Get In Touch', false)
-            ->assertSee('24/7 Support', false)
-            ->assertSee('Subject to airline confirmation.', false)
-            ->assertSee('SSL Secure', false);
+            ->assertSee('Policies', false)
+            ->assertSee('B2B', false)
+            ->assertSee('agents', false)
+            ->assertSee('IATA', false)
+            ->assertSee('PCI-DSS', false);
     }
 
-    public function test_public_footer_hides_unverified_iata_and_pci_badges(): void
+    public function test_public_footer_shows_jetpk_trust_badges(): void
     {
-        $agency = Agency::query()->where('slug', config('ota.default_agency_slug', 'asif-travels'))->firstOrFail();
-        $settings = app(AgencyBrandingService::class)->getSettingsForAgency($agency);
-        $labels = collect(app(FooterSettingsPresenter::class)->presentForPublic($settings)['bottom_bar']['trust_badges'])
-            ->pluck('label')
-            ->all();
-
-        $this->assertContains('SSL Secure', $labels);
-        $this->assertNotContains('IATA', $labels);
-        $this->assertNotContains('PCI DSS', $labels);
+        $html = $this->get(route('home'))->assertOk()->getContent();
+        $this->assertStringContainsString('IATA', $html);
+        $this->assertStringContainsString('PCAA', $html);
+        $this->assertStringContainsString('PCI-DSS', $html);
     }
 
-    public function test_admin_can_access_footer_settings_page(): void
+    public function test_platform_admin_footer_settings_redirect_to_cms(): void
     {
-        $admin = $this->adminUser();
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
+        $location = (string) $this->actingAs($admin)
             ->get(route('admin.settings.branding.footer.edit'))
-            ->assertOk()
-            ->assertSee('Branding / Footer', false)
-            ->assertSee('Menu: Company', false)
-            ->assertSee('Add legal link', false);
+            ->assertRedirect()
+            ->headers
+            ->get('Location');
+
+        $this->assertTrue(
+            str_contains($location, '/admin/dashboard/settings')
+            || str_contains($location, 'cms')
+            || str_contains($location, 'page-settings'),
+            'Expected footer settings GET to redirect into dashboard settings/CMS. Got: '.$location
+        );
     }
 
     public function test_staff_customer_agent_cannot_edit_footer_settings(): void
@@ -72,46 +82,51 @@ class FooterSettingsTest extends TestCase
         $this->patch(route('admin.settings.branding.footer.update'))->assertForbidden();
     }
 
-    public function test_admin_can_update_brand_about_and_menu_items(): void
+    public function test_cms_footer_custom_intro_and_columns_render_on_homepage(): void
     {
-        $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
-
-        $payload = $this->validFooterPayload([
-            'brand' => [
-                'name' => 'Asif Travels Custom',
-                'description' => 'Custom footer about text for tests.',
-                'use_brand_logo' => '1',
-                'show_logo' => '1',
+        $profile = $this->makeJetpkProfile();
+        ClientPageSetting::query()->updateOrCreate(
+            [
+                'client_profile_id' => $profile->id,
+                'page_key' => ClientPageKeys::FOOTER,
+                'status' => ClientPageSettingStatus::Published,
             ],
-            'menu_sections' => [
-                'company' => [
-                    'heading' => 'Our Company',
-                    'is_enabled' => '1',
-                    'sort_order' => '20',
-                    'items' => [
-                        0 => [
-                            'item_key' => 'company-0',
-                            'label' => 'About us',
-                            'url' => '/about-us',
-                            'is_enabled' => '1',
-                            'sort_order' => '10',
-                        ],
-                        1 => [
-                            'item_key' => 'company-1',
-                            'label' => 'Hidden link',
-                            'url' => '/support',
-                            'is_enabled' => '0',
-                            'sort_order' => '20',
+            [
+                'content_json' => [
+                    'description' => [
+                        'text' => 'Custom footer about text for tests.',
+                    ],
+                    'columns' => [
+                        [
+                            'id' => 'foot-company',
+                            'title' => 'Our Company',
+                            'enabled' => '1',
+                            'sort_order' => 0,
+                            'links' => [
+                                [
+                                    'id' => 'about',
+                                    'label' => 'About us',
+                                    'url' => '/about-us',
+                                    'enabled' => '1',
+                                    'sort_order' => 0,
+                                ],
+                                [
+                                    'id' => 'hidden',
+                                    'label' => 'Hidden link',
+                                    'url' => '/support',
+                                    'enabled' => '0',
+                                    'sort_order' => 1,
+                                ],
+                            ],
                         ],
                     ],
+                    'legal' => [
+                        'copyright' => '© {year} JetPakistan test.',
+                    ],
+                    'social' => [],
                 ],
             ],
-        ]);
-
-        $this->actingAs($admin)
-            ->patch(route('admin.settings.branding.footer.update'), $payload)
-            ->assertRedirect();
+        );
 
         $this->get(route('home'))
             ->assertOk()
@@ -121,167 +136,169 @@ class FooterSettingsTest extends TestCase
             ->assertDontSee('Hidden link', false);
     }
 
-    public function test_sort_order_is_respected_for_menu_items(): void
+    public function test_sort_order_is_respected_for_footer_column_links(): void
     {
-        $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
-
-        $payload = $this->validFooterPayload([
-            'menu_sections' => [
-                'support' => [
-                    'heading' => 'Support',
-                    'is_enabled' => '1',
-                    'sort_order' => '30',
-                    'items' => [
-                        0 => ['label' => 'Zebra link', 'url' => '/support', 'is_enabled' => '1', 'sort_order' => '30'],
-                        1 => ['label' => 'Alpha link', 'url' => '/about-us', 'is_enabled' => '1', 'sort_order' => '10'],
+        $profile = $this->makeJetpkProfile();
+        ClientPageSetting::query()->updateOrCreate(
+            [
+                'client_profile_id' => $profile->id,
+                'page_key' => ClientPageKeys::FOOTER,
+                'status' => ClientPageSettingStatus::Published,
+            ],
+            [
+                'content_json' => [
+                    'description' => ['text' => 'Sort footer'],
+                    'columns' => [
+                        [
+                            'id' => 'foot-support',
+                            'title' => 'Support',
+                            'enabled' => '1',
+                            'sort_order' => 0,
+                            'links' => [
+                                [
+                                    'id' => 'z',
+                                    'label' => 'Zebra link',
+                                    'url' => '/support',
+                                    'enabled' => '1',
+                                    'sort_order' => 30,
+                                ],
+                                [
+                                    'id' => 'a',
+                                    'label' => 'Alpha link',
+                                    'url' => '/about-us',
+                                    'enabled' => '1',
+                                    'sort_order' => 10,
+                                ],
+                            ],
+                        ],
                     ],
+                    'legal' => ['copyright' => '© {year}'],
+                    'social' => [],
                 ],
             ],
-        ]);
+        );
 
-        $this->actingAs($admin)->patch(route('admin.settings.branding.footer.update'), $payload);
-
-        $html = $this->get(route('home'))->getContent();
-        $this->assertNotFalse($html);
+        $html = $this->get(route('home'))->assertOk()->getContent();
         $this->assertLessThan(
             strpos($html, 'Zebra link'),
             strpos($html, 'Alpha link'),
         );
     }
 
-    public function test_admin_can_add_legal_link_for_future_page(): void
+    public function test_cms_footer_legal_copyright_renders(): void
     {
-        $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
-
-        $payload = $this->validFooterPayload([
-            'bottom_bar' => array_merge($this->validFooterPayload()['bottom_bar'], [
-                'legal_links' => [
-                    0 => [
-                        'label' => 'Privacy Policy',
-                        'url' => '/privacy-policy',
-                        'is_enabled' => '1',
-                        'sort_order' => '10',
+        $profile = $this->makeJetpkProfile();
+        ClientPageSetting::query()->updateOrCreate(
+            [
+                'client_profile_id' => $profile->id,
+                'page_key' => ClientPageKeys::FOOTER,
+                'status' => ClientPageSettingStatus::Published,
+            ],
+            [
+                'content_json' => [
+                    'description' => ['text' => 'Legal footer'],
+                    'columns' => [],
+                    'legal' => [
+                        'copyright' => '© {year} Privacy Policy notice.',
                     ],
+                    'social' => [],
                 ],
-            ]),
-        ]);
+            ],
+        );
 
-        $this->actingAs($admin)->patch(route('admin.settings.branding.footer.update'), $payload);
-
+        $year = date('Y');
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Privacy Policy', false);
+            ->assertSee('© '.$year.' Privacy Policy notice.', false);
     }
 
-    public function test_valid_hex_color_is_accepted(): void
+    public function test_legacy_footer_update_accepts_valid_hex_for_platform_admin(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
-
-        $payload = $this->validFooterPayload([
-            'style' => [
-                'background_color' => '#E2E8F0',
-                'bottom_bar_background_color' => '#F1F5F9',
-                'text_color' => '#334155',
-                'heading_color' => '#0F172A',
-                'link_color' => '#1E3A5F',
-                'link_hover_color' => '#0C4A6E',
-                'accent_color' => '#0284C7',
-                'spacing' => 'normal',
-                'columns' => '5',
-            ],
-        ]);
+        $admin = $this->platformAdmin();
 
         $this->actingAs($admin)
-            ->patch(route('admin.settings.branding.footer.update'), $payload)
+            ->patch(route('admin.settings.branding.footer.update'), $this->minimalLegacyFooterPayload([
+                'style' => [
+                    'background_color' => '#E2E8F0',
+                    'bottom_bar_background_color' => '#F1F5F9',
+                    'text_color' => '#334155',
+                    'heading_color' => '#0F172A',
+                    'link_color' => '#1E3A5F',
+                    'link_hover_color' => '#0C4A6E',
+                    'accent_color' => '#0284C7',
+                    'spacing' => 'normal',
+                    'columns' => '5',
+                ],
+            ]))
             ->assertRedirect();
-
-        $this->get(route('home'))
-            ->assertOk()
-            ->assertSee('--ota-footer-bg: #E2E8F0', false);
     }
 
-    public function test_invalid_hex_color_is_rejected(): void
+    public function test_legacy_footer_update_rejects_invalid_hex(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
-
-        $payload = $this->validFooterPayload([
-            'style' => [
-                'background_color' => 'not-a-color',
-                'bottom_bar_background_color' => '#F1F5F9',
-                'text_color' => '#334155',
-                'heading_color' => '#0F172A',
-                'link_color' => '#1E3A5F',
-                'link_hover_color' => '#0C4A6E',
-                'accent_color' => '#0284C7',
-                'spacing' => 'normal',
-                'columns' => '5',
-            ],
-        ]);
+        $admin = $this->platformAdmin();
 
         $this->actingAs($admin)
-            ->patch(route('admin.settings.branding.footer.update'), $payload)
+            ->patch(route('admin.settings.branding.footer.update'), $this->minimalLegacyFooterPayload([
+                'style' => [
+                    'background_color' => 'not-a-color',
+                    'bottom_bar_background_color' => '#F1F5F9',
+                    'text_color' => '#334155',
+                    'heading_color' => '#0F172A',
+                    'link_color' => '#1E3A5F',
+                    'link_hover_color' => '#0C4A6E',
+                    'accent_color' => '#0284C7',
+                    'spacing' => 'normal',
+                    'columns' => '5',
+                ],
+            ]))
             ->assertSessionHasErrors('style.background_color');
     }
 
-    public function test_javascript_url_is_rejected(): void
+    public function test_legacy_footer_update_rejects_javascript_url(): void
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $admin = $this->adminUser();
+        $admin = $this->platformAdmin();
 
-        $payload = $this->validFooterPayload([
-            'menu_sections' => [
-                'company' => [
-                    'heading' => 'Company',
-                    'is_enabled' => '1',
-                    'sort_order' => '20',
-                    'items' => [
-                        0 => [
-                            'label' => 'Bad',
-                            'url' => 'javascript:alert(1)',
-                            'is_enabled' => '1',
-                            'sort_order' => '10',
+        $this->actingAs($admin)
+            ->patch(route('admin.settings.branding.footer.update'), $this->minimalLegacyFooterPayload([
+                'menu_sections' => [
+                    'company' => [
+                        'heading' => 'Company',
+                        'is_enabled' => '1',
+                        'sort_order' => '20',
+                        'items' => [
+                            0 => [
+                                'label' => 'Bad',
+                                'url' => 'javascript:alert(1)',
+                                'is_enabled' => '1',
+                                'sort_order' => '10',
+                            ],
                         ],
                     ],
                 ],
-            ],
-        ]);
-
-        $this->actingAs($admin)
-            ->patch(route('admin.settings.branding.footer.update'), $payload)
+            ]))
             ->assertSessionHasErrors();
-    }
-
-    protected function adminUser(): User
-    {
-        return User::query()->where('email', 'admin@ota.demo')->firstOrFail();
     }
 
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */
-    protected function validFooterPayload(array $overrides = []): array
+    protected function minimalLegacyFooterPayload(array $overrides = []): array
     {
-        $agency = Agency::query()->where('slug', config('ota.default_agency_slug', 'asif-travels'))->firstOrFail();
-        $settings = app(AgencyBrandingService::class)->getSettingsForAgency($agency);
-        $presenter = app(FooterSettingsPresenter::class);
-        $admin = $presenter->presentForAdmin($settings);
-
         $base = [
             'brand' => [
-                'name' => $admin['brand']['name'] ?? 'Asif Travels',
-                'description' => $admin['brand']['description'] ?? 'About',
+                'name' => 'JetPakistan',
+                'description' => 'About',
                 'use_brand_logo' => '1',
                 'show_logo' => '1',
             ],
             'support_card' => [
                 'is_enabled' => '1',
-                'title' => $admin['support_card']['title'] ?? '24/7 Support',
-                'subtitle' => $admin['support_card']['subtitle'] ?? 'Help',
+                'title' => '24/7 Support',
+                'subtitle' => 'Help',
                 'icon' => 'headphones',
             ],
             'contact' => [
@@ -301,19 +318,26 @@ class FooterSettingsTest extends TestCase
                     0 => ['label' => 'SSL Secure', 'is_enabled' => '1', 'sort_order' => '10'],
                 ],
             ],
-            'style' => $admin['style'],
-            'menu_sections' => [],
+            'style' => [
+                'background_color' => '#0F172A',
+                'bottom_bar_background_color' => '#020617',
+                'text_color' => '#E2E8F0',
+                'heading_color' => '#FFFFFF',
+                'link_color' => '#93C5FD',
+                'link_hover_color' => '#BFDBFE',
+                'accent_color' => '#38BDF8',
+                'spacing' => 'normal',
+                'columns' => '5',
+            ],
+            'menu_sections' => [
+                'company' => [
+                    'heading' => 'Company',
+                    'is_enabled' => '1',
+                    'sort_order' => '10',
+                    'items' => [],
+                ],
+            ],
         ];
-
-        foreach (FooterSettingsPresenter::MENU_SECTION_KEYS as $key) {
-            $section = collect($admin['menu_sections'])->firstWhere('section_key', $key);
-            $base['menu_sections'][$key] = [
-                'heading' => $section['heading'] ?? ucfirst($key),
-                'is_enabled' => '1',
-                'sort_order' => (string) ($section['sort_order'] ?? 10),
-                'items' => collect($section['items'] ?? [])->values()->all(),
-            ];
-        }
 
         return array_replace_recursive($base, $overrides);
     }
