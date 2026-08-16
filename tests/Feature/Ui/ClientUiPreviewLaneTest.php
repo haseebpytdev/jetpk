@@ -46,9 +46,10 @@ class ClientUiPreviewLaneTest extends TestCase
             'current_agency_id' => null,
         ]);
 
+        // /v2 strips to /admin, which permanently redirects to the Next admin dashboard.
         $this->actingAs($admin)
             ->get('/v2/admin')
-            ->assertOk();
+            ->assertRedirect('/admin/dashboard');
     }
 
     public function test_v2_post_is_blocked(): void
@@ -91,7 +92,8 @@ class ClientUiPreviewLaneTest extends TestCase
         $response = $this->get('/v2?preview_key=test-preview-secret');
 
         $response->assertOk();
-        $response->assertSee('css/v2/ota-public-v2.css', false);
+        // JetPakistan public shell uses the branded theme layout; v2 lane is marked on <html>.
+        $response->assertSee('ui-version-v2', false);
     }
 
     public function test_ui_preserve_url_prefixes_in_namespace(): void

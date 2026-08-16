@@ -8,7 +8,15 @@
     $jpBodyClass = trim($__env->yieldContent('jp_body_class'));
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="day">
+<html
+    @class([
+        'ui-version-v1' => ($currentUiVersion ?? 'v1') === 'v1',
+        'ui-version-v2' => ($currentUiVersion ?? 'v1') === 'v2',
+        'ui-preview-namespace' => $isUiPreviewNamespace ?? false,
+    ])
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    data-theme="day"
+>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
