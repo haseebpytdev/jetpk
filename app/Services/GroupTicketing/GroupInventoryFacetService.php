@@ -18,6 +18,10 @@ class GroupInventoryFacetService
      */
     public function sectors(): array
     {
+        if (! Schema::hasTable('group_inventories')) {
+            return [];
+        }
+
         return $this->baseQuery()
             ->whereNotNull('sector')
             ->where('sector', '!=', '')
@@ -34,6 +38,10 @@ class GroupInventoryFacetService
      */
     public function airlines(): array
     {
+        if (! Schema::hasTable('group_inventories')) {
+            return [];
+        }
+
         return $this->baseQuery()
             ->whereNotNull('airline_name')
             ->where('airline_name', '!=', '')
@@ -50,6 +58,10 @@ class GroupInventoryFacetService
      */
     public function departureDates(): array
     {
+        if (! Schema::hasTable('group_inventories')) {
+            return [];
+        }
+
         return $this->baseQuery()
             ->whereNotNull('departure_date')
             ->distinct()
@@ -65,7 +77,7 @@ class GroupInventoryFacetService
      */
     public function categoriesWithInventory(): array
     {
-        if (! Schema::hasTable('group_categories')) {
+        if (! Schema::hasTable('group_categories') || ! Schema::hasTable('group_inventories')) {
             return [];
         }
 
@@ -74,7 +86,6 @@ class GroupInventoryFacetService
             ->selectRaw('group_category_id, COUNT(*) as inventory_count')
             ->groupBy('group_category_id')
             ->pluck('inventory_count', 'group_category_id');
-
         if ($counts->isEmpty()) {
             return [];
         }
@@ -116,6 +127,10 @@ class GroupInventoryFacetService
 
     public function totalActiveInventoryCount(): int
     {
+        if (! Schema::hasTable('group_inventories')) {
+            return 0;
+        }
+
         return $this->baseQuery()->count();
     }
 

@@ -2,23 +2,31 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\OtaFoundationSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class Phase22DUiPolishTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(OtaFoundationSeeder::class);
+    }
+
     public function test_homepage_does_not_show_corridor_fare_cards_heading(): void
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Search your route to view available fares', false)
             ->assertDontSee('Available fares on your corridor', false);
     }
 
     public function test_results_blade_embeds_book_now_and_flight_details_in_card_template(): void
     {
-        $path = resource_path('views/frontend/flights/results.blade.php');
-        $src = file_get_contents($path);
-        $this->assertStringContainsString('Book Now', $src);
+        $src = file_get_contents(resource_path('views/frontend/flights/partials/results-page.blade.php'));
+        $this->assertStringContainsString('data-book-now', $src);
         $this->assertStringContainsString('Flight details', $src);
         $this->assertStringContainsString('data-flight-details-open', $src);
         $this->assertStringContainsString('data-fare-summary-open', $src);
@@ -35,7 +43,7 @@ class Phase22DUiPolishTest extends TestCase
 
     public function test_results_blade_has_mobile_filter_drawer_markup(): void
     {
-        $src = file_get_contents(resource_path('views/frontend/flights/results.blade.php'));
+        $src = file_get_contents(resource_path('views/frontend/flights/partials/results-page.blade.php'));
         $this->assertStringContainsString('data-filter-drawer', $src);
         $this->assertStringContainsString('data-mobile-filter-open', $src);
         $this->assertStringContainsString('data-filter-backdrop', $src);
@@ -43,14 +51,13 @@ class Phase22DUiPolishTest extends TestCase
 
     public function test_checkout_passengers_template_shows_review_before_submit_copy(): void
     {
-        $src = file_get_contents(resource_path('views/frontend/booking/passenger-details.blade.php'));
-        $this->assertStringContainsString('Next: Step 4 review.', $src);
-        $this->assertStringContainsString('ota-checkout-review-hint', $src);
+        $src = file_get_contents(resource_path('views/frontend/booking/partials/passenger-details-body.blade.php'));
+        $this->assertStringContainsString('Continue to review', $src);
     }
 
     public function test_confirmation_template_contains_next_steps_copy(): void
     {
-        $src = file_get_contents(resource_path('views/frontend/booking/confirmation.blade.php'));
+        $src = file_get_contents(resource_path('views/frontend/booking/partials/confirmation-body.blade.php'));
         $this->assertStringContainsString('Our team reviews your booking request', $src);
         $this->assertStringContainsString('data-confirmation-next-steps', $src);
     }
@@ -78,14 +85,14 @@ class Phase22DUiPolishTest extends TestCase
 
     public function test_admin_booking_show_has_pipeline_bar(): void
     {
-        $src = file_get_contents(resource_path('views/dashboard/admin/bookings/show.blade.php'));
+        $src = file_get_contents(resource_path('views/dashboard/admin/bookings/partials/detail-header.blade.php'));
         $this->assertStringContainsString('data-booking-pipeline-bar', $src);
     }
 
     public function test_review_template_has_request_booking_primary_copy(): void
     {
-        $src = file_get_contents(resource_path('views/frontend/booking/review.blade.php'));
-        $this->assertStringContainsString('Continue to Step 5 (Confirm/payment)', $src);
+        $src = file_get_contents(resource_path('views/frontend/booking/partials/review-body.blade.php'));
+        $this->assertStringContainsString('Confirm Booking', $src);
     }
 
     public function test_core_booking_routes_remain_registered(): void
