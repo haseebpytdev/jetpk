@@ -18,25 +18,41 @@ class ClientContextPersistenceTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const PARITY_SLUG = 'preview-agency';
+
     protected function setUp(): void
     {
         parent::setUp();
 
         Config::set('ota-developer.enabled', true);
+        Config::set('client_route_parity.enabled', true);
+        Config::set('ota_client.slug', 'jetpk');
     }
 
     public function test_preview_get_sets_session_slug(): void
     {
-        $this->makeProfile(['slug' => 'jetpk', 'name' => 'Jet Pakistan']);
+        $this->makeParityProfile();
 
-        $this->get('/jetpk/login')
+        $this->get('/'.self::PARITY_SLUG.'/login')
             ->assertOk()
-            ->assertSessionHas(PersistClientPreviewContext::SESSION_KEY, 'jetpk');
+            ->assertSessionHas(PersistClientPreviewContext::SESSION_KEY, self::PARITY_SLUG);
     }
 
-    public function test_client_redirect_resolver_preserves_client_slug_for_admin(): void
+    public function test_default_slug_login_alias_redirects_to_canonical_login(): void
     {
-        $profile = $this->makeProfile(['slug' => 'jetpk', 'name' => 'Jet Pakistan']);
+        $this->makeProfile([
+            'slug' => 'jetpk',
+            'name' => 'Jet Pakistan',
+            'is_master_profile' => true,
+        ]);
+
+        $this->get('/jetpk/login')
+            ->assertRedirect('/login');
+    }
+
+    public function test_client_redirect_resolver_uses_canonical_admin_for_default_deployment(): void
+    {
+        $profile = $this->makeProfile(['slug' => 'jetpk', 'name' => 'Jet Pakistan', 'is_master_profile' => true]);
         app(CurrentClientContext::class)->set($profile);
 
         $admin = User::factory()->create([
@@ -45,7 +61,7 @@ class ClientContextPersistenceTest extends TestCase
 
         $path = app(ClientRedirectResolver::class)->dashboardPathForUser($admin);
 
-        $this->assertSame('/jetpk/admin', $path);
+        $this->assertSame('/admin/dashboard', $path);
     }
 
     public function test_dev_cp_route_is_not_client_prefixed(): void
@@ -55,12 +71,16 @@ class ClientContextPersistenceTest extends TestCase
 
     public function test_current_client_slug_and_profile_helpers(): void
     {
-        $profile = $this->makeProfile(['slug' => 'jetpk', 'name' => 'Jet Pakistan']);
+        $profile = $this->makeParityProfile();
 
-        $this->get('/jetpk/login');
+        $this->get('/'.self::PARITY_SLUG.'/login')
+            ->assertOk()
+            ->assertSessionHas(PersistClientPreviewContext::SESSION_KEY, self::PARITY_SLUG);
+
+        app(CurrentClientContext::class)->set($profile);
 
         $this->assertTrue(is_client_preview());
-        $this->assertSame('jetpk', current_client_slug());
+        $this->assertSame(self::PARITY_SLUG, app(CurrentClientContext::class)->slug());
         $this->assertSame($profile->id, current_client_profile()?->id);
     }
 
@@ -94,5 +114,18 @@ class ClientContextPersistenceTest extends TestCase
         }
 
         return $profile;
+    }
+
+    private function makeParityProfile(): ClientProfile
+    {
+        return $this->makeProfile([
+            'slug' => self::PARITY_SLUG,
+            'name' => 'Preview Agency',
+            'is_master_profile' => false,
+            'active_frontend_theme' => 'jetpakistan',
+            'active_admin_theme' => 'jetpakistan',
+            'active_staff_theme' => 'jetpakistan',
+            'asset_profile' => 'jetpk-assets',
+        ]);
     }
 }
