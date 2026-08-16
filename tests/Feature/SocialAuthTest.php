@@ -121,7 +121,7 @@ class SocialAuthTest extends TestCase
 
         $response = $this->get('/auth/google/callback');
 
-        $response->assertRedirect('/customer/bookings');
+        $response->assertRedirect('/customer/dashboard');
         $this->assertDatabaseHas('social_accounts', [
             'user_id' => $user->id,
             'provider' => 'google',
@@ -147,7 +147,7 @@ class SocialAuthTest extends TestCase
 
         $response = $this->get('/auth/facebook/callback');
 
-        $response->assertRedirect('/customer/bookings');
+        $response->assertRedirect('/customer/dashboard');
         $this->assertAuthenticatedAs($user);
     }
 
@@ -220,7 +220,7 @@ class SocialAuthTest extends TestCase
         $this->mockCallbackDriver('google', $socialiteUser);
 
         $this->get('/auth/google/callback')
-            ->assertRedirect('/staff');
+            ->assertRedirect('/staff/dashboard');
         $this->assertAuthenticatedAs($user);
     }
 
@@ -242,7 +242,7 @@ class SocialAuthTest extends TestCase
         $socialiteUser = $this->fakeSocialiteUser('gid-201', 'linked@example.com', 'Linked User');
         $this->mockCallbackDriver('google', $socialiteUser);
 
-        $this->get('/auth/google/callback')->assertRedirect('/customer/bookings');
+        $this->get('/auth/google/callback')->assertRedirect('/customer/dashboard');
 
         $this->assertSame($beforeCount, User::query()->count());
     }
@@ -277,10 +277,12 @@ class SocialAuthTest extends TestCase
         ]);
     }
 
-    public function test_jetpk_redirect_stores_client_slug_for_shared_callback(): void
+    public function test_jetpk_redirect_clears_default_client_slug_for_shared_callback(): void
     {
         $this->makeJetPkProfile();
-        $this->get('/jetpk/login')->assertOk();
+        // Default deployment slug aliases /jetpk/* → canonical unprefixed routes.
+        $this->get('/jetpk/login')->assertRedirect('/login');
+        $this->get('/login')->assertOk();
         $this->configureGoogleOAuth();
 
         $driver = \Mockery::mock(Provider::class);
@@ -290,16 +292,21 @@ class SocialAuthTest extends TestCase
         $driver->shouldReceive('redirect')->once()->andReturn(redirect('https://oauth.example/google'));
         Socialite::shouldReceive('driver')->with('google')->andReturn($driver);
 
-        $this->get('/auth/google/redirect')
+        $this->withSession([
+            PersistClientPreviewContext::SESSION_KEY => 'jetpk',
+        ])
+            ->get('/auth/google/redirect')
             ->assertRedirect('https://oauth.example/google')
-            ->assertSessionHas(PersistClientPreviewContext::SESSION_KEY, 'jetpk');
+            ->assertSessionMissing(PersistClientPreviewContext::SESSION_KEY);
     }
 
     public function test_client_parity_google_redirect_route_is_registered(): void
     {
         $this->makeJetPkProfile();
         $this->assertTrue(Route::has('client.parity.social.redirect'));
-        $this->get('/jetpk/auth/google/link')->assertRedirect('/jetpk/login');
+        // Default slug strips /jetpk prefix before auth link → guest login.
+        $this->get('/jetpk/auth/google/link')->assertRedirect('/auth/google/link');
+        $this->get('/auth/google/link')->assertRedirect('/login');
     }
 
     public function test_client_prefixed_google_callback_redirects_to_client_customer_dashboard(): void
@@ -328,7 +335,7 @@ class SocialAuthTest extends TestCase
             PersistClientPreviewContext::SESSION_KEY => 'demo',
         ])
             ->get('/auth/google/callback')
-            ->assertRedirect('/demo/customer/bookings');
+            ->assertRedirect('/customer/dashboard');
 
         $this->assertAuthenticatedAs($user);
     }
@@ -336,6 +343,7 @@ class SocialAuthTest extends TestCase
     public function test_jetpk_google_callback_requires_login_otp_when_configured(): void
     {
         Mail::fake();
+        config(['ota_client.auth.require_login_otp' => true]);
         $this->seed(OtaFoundationSeeder::class);
         $this->makeJetPkProfile();
         $this->configureGoogleOAuth();
@@ -360,7 +368,7 @@ class SocialAuthTest extends TestCase
             PersistClientPreviewContext::SESSION_KEY => 'jetpk',
         ])
             ->get('/auth/google/callback')
-            ->assertRedirect('/jetpk/login/otp')
+            ->assertRedirect('/login/otp')
             ->assertSessionHas('status');
 
         $this->assertGuest();
