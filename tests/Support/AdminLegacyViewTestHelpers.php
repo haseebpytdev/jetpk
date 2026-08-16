@@ -2,6 +2,8 @@
 
 namespace Tests\Support;
 
+use App\Http\Controllers\Admin\AgencyBrandingController;
+use App\Http\Controllers\Admin\AgencyCommunicationSettingsController;
 use App\Http\Controllers\Admin\AgencyMessageTemplateController;
 use App\Http\Controllers\Admin\AgencyNotificationSettingController;
 use App\Http\Controllers\Admin\AgencyManagementController;
@@ -158,6 +160,16 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(AgencyMessageTemplateController::class)->index($request)->render();
+    }
+
+    protected function adminCommunicationsSettingsHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/settings/communications', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgencyCommunicationSettingsController::class)->index($request)->render();
     }
 
     protected function adminApiSettingsCreateHtml(User $admin, array $query = []): string

@@ -19,6 +19,7 @@ use App\Support\Staff\StaffPermission;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
@@ -27,6 +28,7 @@ use Tests\TestCase;
  */
 class ReportsExportsNotificationsQueueReadinessTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -40,8 +42,9 @@ class ReportsExportsNotificationsQueueReadinessTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.reports'))->assertOk()
-            ->assertSee('Platform Reports', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.reports'));
+        $html = $this->adminReportsHtml($admin);
+        $this->assertStringContainsString('Platform Reports', $html);
 
         $this->actingAs($admin)->get(route('admin.reports.export', 'sales'))->assertOk()
             ->assertHeader('content-type', 'text/csv; charset=UTF-8');
@@ -75,7 +78,10 @@ class ReportsExportsNotificationsQueueReadinessTest extends TestCase
     {
         $staff = $this->staffWithPermissions([StaffPermission::ReportsView]);
 
-        $this->actingAs($staff)->get(route('staff.reports.index'))->assertOk();
+        $response = $this->actingAs($staff)->get(route('staff.reports.index'));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/staff/dashboard/reports', (string) $response->headers->get('Location'));
+        $this->assertNotEmpty($this->staffReportsIndexHtml($staff));
         $this->actingAs($staff)->get(route('staff.reports.export', 'sales'))->assertForbidden();
     }
 
@@ -83,7 +89,8 @@ class ReportsExportsNotificationsQueueReadinessTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $html = $this->actingAs($admin)->get(route('admin.reports'))->assertOk()->getContent();
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.reports'));
+        $html = $this->adminReportsHtml($admin);
 
         $this->assertStringContainsString('data-testid="ota-reports-pdf-unavailable"', $html);
         $this->assertStringContainsString('PDF export not enabled yet', $html);
@@ -174,11 +181,13 @@ class ReportsExportsNotificationsQueueReadinessTest extends TestCase
     {
         config(['queue.default' => 'database']);
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.settings.communications.index'))
-            ->assertOk()
-            ->assertSee('data-testid="ota-queue-worker-readiness"', false)
-            ->assertSee('requires a queue worker', false);
+        $admin = $this->platformAdmin();
+        $response = $this->actingAs($admin)->get(route('admin.settings.communications.index'));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/settings/notifications', (string) $response->headers->get('Location'));
+        $html = $this->adminCommunicationsSettingsHtml($admin);
+        $this->assertStringContainsString('data-testid="ota-queue-worker-readiness"', $html);
+        $this->assertStringContainsString('requires a queue worker', $html);
     }
 
     protected function seedBookingForAgency(Agency $agency, string $reference, ?Agent $agent = null, int $total = 100_000): Booking
