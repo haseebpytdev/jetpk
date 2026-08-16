@@ -14,8 +14,12 @@ use App\Services\Customer\GuestBookingAccessService;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
+/**
+ * Guest booking HTML is owned by Next; Laravel proves token access + guest-safe JSON.
+ */
 class GuestBookingLookupRedesignTest extends TestCase
 {
     use RefreshDatabase;
@@ -27,15 +31,19 @@ class GuestBookingLookupRedesignTest extends TestCase
 
         $this->assertGuest();
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
-            ->assertOk()
-            ->assertSee('data-testid="guest-booking-detail-layout"', false)
-            ->assertSee('data-testid="booking-detail-summary"', false)
-            ->assertSee('data-testid="customer-booking-timeline"', false)
-            ->assertSee('data-testid="booking-documents-center"', false)
-            ->assertDontSee('data-testid="booking-pnr-ticketing"', false)
-            ->assertSee('data-testid="booking-help-card"', false)
-            ->assertSee('data-testid="guest-masked-email"', false);
+        $this->assertGuestHtmlRedirectsToNext($booking, $token);
+
+        $json = $this->guestBookingJson($booking, $token);
+        $json->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('source', 'guest_lookup')
+            ->assertJsonPath('viewer_mode', 'guest');
+
+        $payload = $json->json();
+        $this->assertIsArray($payload['contact'] ?? null);
+        $this->assertIsArray($payload['capabilities'] ?? null);
+        $this->assertArrayHasKey('documents', $payload['capabilities']);
+        $this->assertArrayNotHasKey('pnr_ticketing', $payload);
     }
 
     public function test_guest_lookup_renders_in_guest_safe_mode_while_admin_is_logged_in(): void
@@ -56,15 +64,19 @@ class GuestBookingLookupRedesignTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+            ->assertRedirect();
+
+        $payload = $this->actingAs($admin)
+            ->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json')
             ->assertOk()
-            ->assertSee('data-testid="guest-booking-detail-layout"', false)
-            ->assertSee('data-testid="guest-masked-email"', false)
-            ->assertSee('data-testid="guest-masked-phone"', false)
-            ->assertSee('data-testid="guest-masked-passport"', false)
-            ->assertDontSee('guestmatch@example.test', false)
-            ->assertDontSee('03001234567', false)
-            ->assertDontSee('Haseeb Khan', false)
-            ->assertDontSee('AB1234567', false);
+            ->json();
+
+        $this->assertSame('guest', $payload['viewer_mode'] ?? null);
+        $this->assertNotSame('guestmatch@example.test', $payload['contact']['email_masked'] ?? null);
+        $this->assertStringNotContainsString('guestmatch@example.test', (string) ($payload['contact']['email_masked'] ?? ''));
+        $this->assertStringNotContainsString('03001234567', (string) ($payload['contact']['phone_masked'] ?? ''));
+        $this->assertStringNotContainsString('AB1234567', json_encode($payload['passengers'] ?? []));
+        $this->assertStringNotContainsString('Haseeb Khan', json_encode($payload['passengers'] ?? []));
     }
 
     public function test_guest_passenger_and_contact_details_are_masked(): void
@@ -83,15 +95,16 @@ class GuestBookingLookupRedesignTest extends TestCase
         ]);
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
-            ->assertOk()
-            ->assertSee('data-testid="guest-masked-email"', false)
-            ->assertSee('data-testid="guest-masked-phone"', false)
-            ->assertSee('data-testid="guest-masked-passport"', false)
-            ->assertDontSee('guestmatch@example.test', false)
-            ->assertDontSee('03001234567', false)
-            ->assertDontSee('Haseeb Khan', false)
-            ->assertDontSee('AB1234567', false);
+        $payload = $this->guestBookingJson($booking, $token)->assertOk()->json();
+
+        $this->assertArrayHasKey('email_masked', $payload['contact'] ?? []);
+        $this->assertArrayHasKey('phone_masked', $payload['contact'] ?? []);
+        $this->assertStringNotContainsString('guestmatch@example.test', (string) ($payload['contact']['email_masked'] ?? ''));
+        $this->assertStringNotContainsString('03001234567', (string) ($payload['contact']['phone_masked'] ?? ''));
+        $encoded = json_encode($payload['passengers'] ?? []);
+        $this->assertStringNotContainsString('Haseeb Khan', (string) $encoded);
+        $this->assertStringNotContainsString('AB1234567', (string) $encoded);
+        $this->assertNotEmpty($payload['passengers'][0]['passport_number_masked'] ?? null);
     }
 
     public function test_guest_linked_account_booking_shows_login_cta_and_hides_full_controls(): void
@@ -99,14 +112,16 @@ class GuestBookingLookupRedesignTest extends TestCase
         [, $booking] = $this->guestLookupBooking();
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
-            ->assertOk()
-            ->assertSee('data-testid="guest-linked-account-cta"', false)
-            ->assertSee('data-testid="guest-payment-proof-login-hint"', false)
-            ->assertSee('data-testid="guest-cancellation-login-hint"', false)
-            ->assertDontSee('data-testid="customer-payment-proof-form"', false)
-            ->assertDontSee('data-testid="guest-cancellation-form"', false)
-            ->assertSee('/login?redirect=%2Fcustomer%2Fbookings%2F'.$booking->id, false);
+        $this->assertGuestHtmlRedirectsToNext($booking, $token);
+
+        $payload = $this->guestBookingJson($booking, $token)->assertOk()->json();
+        $capabilities = $payload['capabilities'] ?? [];
+
+        $this->assertFalse((bool) ($capabilities['can_upload_payment_proof'] ?? true));
+        $this->assertFalse((bool) ($capabilities['can_request_cancellation'] ?? true));
+        $this->assertNull(data_get($capabilities, 'mutation_urls.payment_proof'));
+        $this->assertNull(data_get($capabilities, 'mutation_urls.request_cancellation'));
+        $this->assertNotNull($booking->customer_id);
     }
 
     public function test_guest_without_linked_account_can_use_secure_payment_proof_route(): void
@@ -118,26 +133,29 @@ class GuestBookingLookupRedesignTest extends TestCase
         ]);
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
-            ->assertOk()
-            ->assertSee('data-testid="guest-payment-proof-form"', false)
-            ->assertDontSee('data-testid="guest-linked-account-cta"', false);
+        $payload = $this->guestBookingJson($booking, $token)->assertOk()->json();
+        $capabilities = $payload['capabilities'] ?? [];
+
+        $this->assertTrue((bool) ($capabilities['can_upload_payment_proof'] ?? false));
+        $this->assertNotEmpty($capabilities['mutation_urls']['payment_proof'] ?? null);
+        $this->assertNull($booking->customer_id);
     }
 
     public function test_guest_documents_card_shows_states_and_hides_email_share_actions(): void
     {
         [, $booking] = $this->guestLookupBooking(['customer_id' => null]);
-        $this->documentForBooking($booking, BookingDocumentType::Invoice);
+        $doc = $this->documentForBooking($booking, BookingDocumentType::Invoice);
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
-            ->assertOk()
-            ->assertSee('data-testid="booking-document-row-invoice"', false)
-            ->assertSee('data-testid="booking-document-download-invoice"', false)
-            ->assertDontSee('data-testid="booking-document-row-e_ticket"', false)
-            ->assertDontSee('data-testid="booking-document-row-receipt"', false)
-            ->assertDontSee('data-testid="booking-document-email-invoice-disabled"', false)
-            ->assertDontSee('data-testid="booking-document-share-invoice-disabled"', false);
+        $payload = $this->guestBookingJson($booking, $token)->assertOk()->json();
+        $documents = $payload['capabilities']['documents'] ?? [];
+
+        $this->assertNotEmpty($documents);
+        $this->assertSame($doc->id, $documents[0]['id'] ?? null);
+        $this->assertStringContainsString('/laravel/guest/documents/'.$doc->id.'/download', (string) ($documents[0]['download_url'] ?? ''));
+        $this->assertArrayNotHasKey('email_share_url', $documents[0]);
+        $this->assertArrayNotHasKey('share_url', $documents[0]);
+        $this->assertCount(1, $documents);
     }
 
     public function test_guest_does_not_see_customer_only_cancellation_history(): void
@@ -145,10 +163,27 @@ class GuestBookingLookupRedesignTest extends TestCase
         [, $booking] = $this->guestLookupBooking(['customer_id' => null]);
         $token = $this->guestToken($booking);
 
-        $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
-            ->assertOk()
-            ->assertSee('data-testid="guest-cancellation-form"', false)
-            ->assertDontSee('Your requests', false);
+        $payload = $this->guestBookingJson($booking, $token)->assertOk()->json();
+
+        $this->assertTrue((bool) ($payload['capabilities']['can_request_cancellation'] ?? false));
+        $this->assertSame('available', $payload['cancellation']['state'] ?? null);
+        $this->assertArrayNotHasKey('history', $payload['cancellation'] ?? []);
+        $this->assertStringNotContainsString('Your requests', json_encode($payload['cancellation'] ?? []));
+    }
+
+    protected function assertGuestHtmlRedirectsToNext(Booking $booking, string $token): void
+    {
+        $response = $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]));
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/guest/bookings/'.$booking->getKey().'/access/'.$token, $target);
+        $this->assertStringNotContainsString('127.0.0.1', $target);
+        $this->assertStringNotContainsString('localhost', $target);
+    }
+
+    protected function guestBookingJson(Booking $booking, string $token): TestResponse
+    {
+        return $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json');
     }
 
     /**
