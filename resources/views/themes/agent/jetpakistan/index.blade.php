@@ -25,12 +25,12 @@
 </div>
 
 @if ($perm['bookings_view'] ?? false)
-    <div class="jp-portal-stat-grid">
+    <div class="jp-portal-stat-grid" data-testid="agent-dashboard-kpis">
         <div class="jp-portal-stat"><div class="jp-portal-stat__v">{{ number_format((int) ($bk['total'] ?? 0)) }}</div><div class="jp-portal-stat__l">Total bookings</div></div>
         <div class="jp-portal-stat jp-portal-stat--amber"><div class="jp-portal-stat__v">{{ number_format((int) ($bk['pending_payment'] ?? 0)) }}</div><div class="jp-portal-stat__l">Pending payment</div></div>
         <div class="jp-portal-stat jp-portal-stat--teal"><div class="jp-portal-stat__v">{{ number_format((int) ($bk['pnr_confirmed'] ?? 0)) }}</div><div class="jp-portal-stat__l">PNR confirmed</div></div>
         @if ($perm['commissions_view'] ?? false)
-            <div class="jp-portal-stat"><div class="jp-portal-stat__v">Rs {{ number_format((float) ($fin['balance'] ?? 0), 0) }}</div><div class="jp-portal-stat__l">Commission balance</div></div>
+            <div class="jp-portal-stat" data-testid="agent-dashboard-commission-balance"><div class="jp-portal-stat__v">Rs {{ number_format((float) ($fin['balance'] ?? 0), 0) }}</div><div class="jp-portal-stat__l">Commission balance</div></div>
         @endif
     </div>
 @endif

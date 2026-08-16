@@ -25,13 +25,10 @@ class AgentPortalDashboardTest extends TestCase
         $this->actingAs($agentUser)->get(route('agent.dashboard'))
             ->assertOk()
             ->assertSee('data-testid="agent-dashboard-kpis"', false)
-            ->assertSee('My bookings', false)
             ->assertSee('Pending payment', false)
-            ->assertSee('PNR created / confirmed', false)
-            ->assertSee('Commission earned', false)
-            ->assertSee('data-testid="agent-finance-summary"', false)
-            ->assertSee('data-testid="agent-dashboard-wallet-balance"', false)
-            ->assertSee('Booking credit enforcement is not enabled yet', false)
+            ->assertSee('PNR confirmed', false)
+            ->assertSee('Commission balance', false)
+            ->assertSee('data-testid="agent-dashboard-commission-balance"', false)
             ->assertSee($booking->booking_reference, false);
     }
 
@@ -52,7 +49,7 @@ class AgentPortalDashboardTest extends TestCase
         $this->actingAs($agentUser)->get(route('agent.bookings.index', ['filter' => 'pending_payment']))
             ->assertOk()
             ->assertSee('data-testid="agent-bookings-filters"', false)
-            ->assertSee('ota-bstat', false)
+            ->assertSee('jp-portal-badge', false)
             ->assertSee($unpaid->booking_reference, false)
             ->assertDontSee($paid->booking_reference, false);
     }

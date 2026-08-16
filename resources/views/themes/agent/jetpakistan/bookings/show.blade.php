@@ -59,7 +59,7 @@
     </div>
     <div>
         @if (auth()->user()?->isAgentAdmin())
-            <div class="jp-portal-card">
+            <div class="jp-portal-card" data-testid="agent-booking-commission">
                 <div class="jp-portal-card__head"><h2 class="jp-portal-card__title">Your commission</h2></div>
                 <div class="jp-portal-card__body">
                     @if ($commissionEntry ?? null)
