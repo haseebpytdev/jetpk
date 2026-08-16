@@ -87,24 +87,50 @@ class ClientPageSettingsController extends Controller
         Gate::authorize('client.page-settings.manage');
         abort_unless(ClientPageKeys::isValid($pageKey), 404);
 
-        $profile = $this->requireProfile();
-        $content = $this->adminContentResolver->formContentFor($profile, $pageKey);
-        $editorMeta = $this->adminContentResolver->editorMeta($profile, $pageKey);
-        $previewRoute = ClientPageKeys::previewRoutes()[$pageKey] ?? 'home';
-        $previewUrl = client_route($previewRoute);
-
         if ($this->wantsBackOfficeJson($request)) {
+            $profile = $this->requireProfile();
+            $previewRoute = ClientPageKeys::previewRoutes()[$pageKey] ?? 'home';
+
             return $this->backOfficeJson([
                 'ok' => true,
                 'pageKey' => $pageKey,
                 'pageLabel' => ClientPageKeys::labels()[$pageKey] ?? $pageKey,
-                'content' => $content,
-                'editorMeta' => $editorMeta,
-                'previewUrl' => $previewUrl,
+                'content' => $this->adminContentResolver->formContentFor($profile, $pageKey),
+                'editorMeta' => $this->adminContentResolver->editorMeta($profile, $pageKey),
+                'previewUrl' => client_route($previewRoute),
             ]);
         }
 
-        return redirect()->route('admin.cms-pages.index');
+        return redirect()->to('/admin/dashboard/cms/pages');
+    }
+
+    /**
+     * Blade editor surface retained for operational/regression coverage while GET redirects to Next CMS.
+     */
+    public function editView(string $pageKey): View
+    {
+        Gate::authorize('client.page-settings.manage');
+        abort_unless(ClientPageKeys::isValid($pageKey), 404);
+
+        $profile = $this->requireProfile();
+        $previewRoute = ClientPageKeys::previewRoutes()[$pageKey] ?? 'home';
+
+        return view(client_view('page-settings.edit', 'admin'), [
+            'pageKey' => $pageKey,
+            'pageLabel' => ClientPageKeys::labels()[$pageKey] ?? $pageKey,
+            'content' => $this->adminContentResolver->formContentFor($profile, $pageKey),
+            'editorMeta' => $this->adminContentResolver->editorMeta($profile, $pageKey),
+            'previewUrl' => client_route($previewRoute),
+            'assets' => ClientPageAsset::query()
+                ->where('client_profile_id', $profile->id)
+                ->where('page_key', $pageKey)
+                ->orderBy('asset_key')
+                ->get(),
+            'palette' => ClientThemePalette::query()->where('client_profile_id', $profile->id)->first(),
+            'activeDefault' => Schema::hasTable('client_page_setting_defaults')
+                ? $this->defaultService->getActive($profile, $pageKey)
+                : null,
+        ]);
     }
 
     public function update(Request $request, string $pageKey): RedirectResponse|JsonResponse

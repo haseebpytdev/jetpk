@@ -2,6 +2,8 @@
 
 namespace Tests\Support;
 
+use App\Http\Controllers\Admin\AgencyMessageTemplateController;
+use App\Http\Controllers\Admin\AgencyNotificationSettingController;
 use App\Http\Controllers\Admin\AgentCommissionController;
 use App\Http\Controllers\Admin\AccountingLedgerController;
 use App\Http\Controllers\Admin\AccountingReconciliationController;
@@ -9,6 +11,7 @@ use App\Http\Controllers\Admin\AgentApplicationController;
 use App\Http\Controllers\Admin\AdminSectionController;
 use App\Http\Controllers\Admin\AdminSettingsHubController;
 use App\Http\Controllers\Admin\AgentDepositController;
+use App\Http\Controllers\Admin\BackgroundRemovalSettingsController;
 use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\ClientPageSettingsController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -110,6 +113,44 @@ trait AdminLegacyViewTestHelpers
         view()->share('errors', new ViewErrorBag);
 
         return app(ClientPageSettingsController::class)->index()->render();
+    }
+
+    protected function adminPageSettingsEditHtml(User $admin, string $pageKey = 'home'): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(ClientPageSettingsController::class)->editView($pageKey)->render();
+    }
+
+    protected function adminBackgroundRemovalEditHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/settings/media/background-removal', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(BackgroundRemovalSettingsController::class)->edit($request)->render();
+    }
+
+    protected function adminNotificationEventsHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/settings/communications/notification-events', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgencyNotificationSettingController::class)->index($request)->render();
+    }
+
+    protected function adminEmailTemplatesIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/settings/communications/templates', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgencyMessageTemplateController::class)->index($request)->render();
     }
 
     protected function adminApiSettingsCreateHtml(User $admin, array $query = []): string

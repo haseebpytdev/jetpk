@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use ReflectionClass;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
@@ -22,6 +23,7 @@ use Tests\TestCase;
  */
 class Jetpk9hDClosureTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -35,8 +37,11 @@ class Jetpk9hDClosureTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $response = $this->actingAs($admin)->get(route('admin.settings.index'));
-        $response->assertOk();
+        $this->actingAs($admin)
+            ->get(route('admin.settings.index'))
+            ->assertRedirect('/admin/dashboard/settings');
+
+        $html = $this->adminSettingsIndexHtml($admin);
         foreach ([
             'Company branding',
             'Page settings',
@@ -47,7 +52,7 @@ class Jetpk9hDClosureTest extends TestCase
             'Supplier API connections',
             'Supplier diagnostics',
         ] as $label) {
-            $response->assertSee($label, false);
+            $this->assertStringContainsString($label, $html);
         }
         $this->assertTrue(Route::has('admin.settings.background-removal.edit'));
     }
@@ -57,7 +62,10 @@ class Jetpk9hDClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.settings.background-removal.edit'))
-            ->assertOk();
+            ->assertRedirect('/admin/dashboard/settings/general');
+
+        $html = $this->adminBackgroundRemovalEditHtml($admin);
+        $this->assertNotSame('', trim($html));
     }
 
     public function test_unauthorized_user_denied_settings_hub(): void
@@ -79,11 +87,13 @@ class Jetpk9hDClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.page-settings.edit', ['pageKey' => 'home']))
-            ->assertOk()
-            ->assertSee('data-jp-section-panel="feature-board"', false)
-            ->assertSee('data-jp-section-panel="trust"', false)
-            ->assertSee('data-jp-section-panel="routes"', false)
-            ->assertSee('Choose from Media Library', false);
+            ->assertRedirect('/admin/dashboard/cms/pages');
+
+        $html = $this->adminPageSettingsEditHtml($admin, 'home');
+        $this->assertStringContainsString('data-jp-section-panel="feature-board"', $html);
+        $this->assertStringContainsString('data-jp-section-panel="trust"', $html);
+        $this->assertStringContainsString('data-jp-section-panel="routes"', $html);
+        $this->assertStringContainsString('Choose from Media Library', $html);
     }
 
     public function test_legacy_homepage_settings_redirects_to_page_settings(): void
@@ -91,7 +101,7 @@ class Jetpk9hDClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.settings.homepage.edit'))
-            ->assertRedirect(route('admin.page-settings.edit', ['pageKey' => 'home']));
+            ->assertRedirect('/admin/dashboard/cms/pages');
     }
 
     public function test_supplier_create_renders_provider_picker_first(): void
@@ -99,11 +109,13 @@ class Jetpk9hDClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.api-settings.create'))
-            ->assertOk()
-            ->assertSee('Sabre', false)
-            ->assertSee('AirSial', false)
-            ->assertSee('Al-Haider', false)
-            ->assertSee('Duffel', false);
+            ->assertRedirect('/admin/dashboard/api-connections');
+
+        $html = $this->adminApiSettingsCreateHtml($admin);
+        $this->assertStringContainsString('Sabre', $html);
+        $this->assertStringContainsString('AirSial', $html);
+        $this->assertStringContainsString('Al-Haider', $html);
+        $this->assertStringContainsString('Duffel', $html);
     }
 
     public function test_supplier_provider_catalog_includes_required_cards(): void
@@ -124,10 +136,12 @@ class Jetpk9hDClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.settings.communications.notification-events.index'))
-            ->assertOk()
-            ->assertSee('data-jp-notification-search', false)
-            ->assertSee('data-jp-unsaved-badge', false)
-            ->assertSee('Save all routing', false);
+            ->assertRedirect('/admin/dashboard/settings/notifications');
+
+        $html = $this->adminNotificationEventsHtml($admin);
+        $this->assertStringContainsString('data-jp-notification-search', $html);
+        $this->assertStringContainsString('data-jp-unsaved-badge', $html);
+        $this->assertStringContainsString('Save all routing', $html);
         $this->assertGreaterThan(0, count(OtaNotificationEvent::cases()));
     }
 
@@ -146,10 +160,12 @@ class Jetpk9hDClosureTest extends TestCase
         $admin = $this->platformAdmin();
         $this->actingAs($admin)
             ->get(route('admin.settings.communications.templates.index'))
-            ->assertOk()
-            ->assertSee('data-testid="email-event-content-list"', false)
-            ->assertSee('Customize content', false)
-            ->assertDontSee('Create editable template', false);
+            ->assertRedirect('/admin/dashboard/settings/notifications');
+
+        $html = $this->adminEmailTemplatesIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="email-event-content-list"', $html);
+        $this->assertStringContainsString('Customize content', $html);
+        $this->assertStringNotContainsString('Create editable template', $html);
         Mail::assertNothingSent();
     }
 
@@ -164,17 +180,19 @@ class Jetpk9hDClosureTest extends TestCase
     {
         $admin = $this->platformAdmin();
         $routes = [
-            'admin.settings.payments.index',
-            'admin.promo-codes.index',
-            'admin.markups.index',
-            'admin.cms-pages.index',
-            'admin.users.index',
+            'admin.settings.payments.index' => '/admin/dashboard/settings',
+            'admin.promo-codes.index' => '/admin/dashboard/cms',
+            'admin.markups' => '/admin/dashboard/markups',
+            'admin.cms-pages.index' => '/admin/dashboard/cms/pages',
+            'admin.users.index' => '/admin/dashboard/users',
         ];
-        foreach ($routes as $routeName) {
+        foreach ($routes as $routeName => $expectedPath) {
             if (! Route::has($routeName)) {
                 continue;
             }
-            $this->actingAs($admin)->get(route($routeName))->assertOk();
+            $this->actingAs($admin)
+                ->get(route($routeName))
+                ->assertRedirect($expectedPath);
         }
     }
 
