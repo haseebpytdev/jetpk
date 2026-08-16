@@ -29,6 +29,7 @@ use App\Http\Controllers\Staff\ReportsController as StaffReportsController;
 use App\Models\Agency;
 use App\Models\Agent;
 use App\Models\AgentApplication;
+use App\Models\AgentWalletTransaction;
 use App\Models\Booking;
 use App\Models\LedgerTransaction;
 use App\Models\SupplierConnection;
@@ -312,6 +313,16 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(FinanceAdjustmentController::class)->create($request)->render();
+    }
+
+    protected function adminFinanceAdjustmentsShowHtml(User $admin, AgentWalletTransaction $walletTransaction): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/finance/adjustments/'.$walletTransaction->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(FinanceAdjustmentController::class)->show($request, $walletTransaction)->render();
     }
 
     protected function adminAccountingReconciliationIndexHtml(User $admin): string

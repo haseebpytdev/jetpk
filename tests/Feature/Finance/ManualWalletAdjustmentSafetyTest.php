@@ -19,10 +19,12 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class ManualWalletAdjustmentSafetyTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -180,14 +182,18 @@ class ManualWalletAdjustmentSafetyTest extends TestCase
         $original = $this->postCredit($agency, $wallet, 12);
         $this->reverseAsAdmin($original);
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.finance.statements.show', [
-                'agency' => $agency,
-                'date_from' => now()->subDay()->toDateString(),
-                'date_to' => now()->addDay()->toDateString(),
-            ]))
-            ->assertOk()
-            ->assertSee('Manual wallet credit reversal', false);
+        $admin = $this->platformAdmin();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.statements.show', [
+            'agency' => $agency,
+            'date_from' => now()->subDay()->toDateString(),
+            'date_to' => now()->addDay()->toDateString(),
+        ]));
+
+        $html = $this->adminFinanceStatementShowHtmlWithQuery($admin, $agency, [
+            'date_from' => now()->subDay()->toDateString(),
+            'date_to' => now()->addDay()->toDateString(),
+        ]);
+        $this->assertStringContainsString('Manual wallet credit reversal', $html);
     }
 
     public function test_reversal_appears_in_agent_statement(): void

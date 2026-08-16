@@ -7,6 +7,7 @@ use App\Enums\AgentWalletTransactionType;
 use App\Enums\LedgerTransactionStatus;
 use App\Enums\LedgerTransactionType;
 use App\Enums\UserAccountStatus;
+use App\Http\Controllers\Admin\FinanceAdjustmentController;
 use App\Models\Agency;
 use App\Models\Agent;
 use App\Models\AgentWallet;
@@ -18,12 +19,16 @@ use App\Services\Finance\Ledger\LedgerBalanceService;
 use App\Support\Agents\AgentPermission;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class ManualWalletAdjustmentTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -36,17 +41,28 @@ class ManualWalletAdjustmentTest extends TestCase
 
     public function test_platform_admin_can_open_create_page(): void
     {
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.finance.adjustments.create'))
-            ->assertOk()
-            ->assertSee('data-testid="finance-adjustment-warning"', false);
+        $admin = $this->platformAdmin();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.adjustments.create'));
+
+        $html = $this->adminFinanceAdjustmentsCreateHtml($admin);
+        $this->assertStringContainsString('data-testid="finance-adjustment-warning"', $html);
     }
 
     public function test_non_admin_cannot_open_create_page(): void
     {
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
-        $this->actingAs($staff)->get(route('admin.finance.adjustments.create'))->assertForbidden();
+        // Legacy GET redirects to Next without Blade authz; prove controller RBAC separately.
+        $this->actingAs($staff);
+        $request = Request::create('/admin/finance/adjustments/create', 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        try {
+            app(FinanceAdjustmentController::class)->create($request);
+            $this->fail('Expected staff create() to abort with 403.');
+        } catch (HttpException $e) {
+            $this->assertSame(403, $e->getStatusCode());
+        }
     }
 
     public function test_platform_admin_can_create_manual_credit(): void
@@ -100,14 +116,18 @@ class ManualWalletAdjustmentTest extends TestCase
         [$agency, $wallet] = $this->seedAgencyWallet(0);
         $this->postAdjustment($agency, $wallet, 'manual_credit', 15);
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.finance.statements.show', [
-                'agency' => $agency,
-                'date_from' => now()->subDay()->toDateString(),
-                'date_to' => now()->addDay()->toDateString(),
-            ]))
-            ->assertOk()
-            ->assertSee('Manual wallet credit', false);
+        $admin = $this->platformAdmin();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.statements.show', [
+            'agency' => $agency,
+            'date_from' => now()->subDay()->toDateString(),
+            'date_to' => now()->addDay()->toDateString(),
+        ]));
+
+        $html = $this->adminFinanceStatementShowHtmlWithQuery($admin, $agency, [
+            'date_from' => now()->subDay()->toDateString(),
+            'date_to' => now()->addDay()->toDateString(),
+        ]);
+        $this->assertStringContainsString('Manual wallet credit', $html);
     }
 
     public function test_manual_credit_appears_in_agent_statement(): void
@@ -169,14 +189,18 @@ class ManualWalletAdjustmentTest extends TestCase
         [$agency, $wallet] = $this->seedAgencyWallet(50);
         $this->postAdjustment($agency, $wallet, 'manual_debit', 10);
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.finance.statements.show', [
-                'agency' => $agency,
-                'date_from' => now()->subDay()->toDateString(),
-                'date_to' => now()->addDay()->toDateString(),
-            ]))
-            ->assertOk()
-            ->assertSee('Manual wallet debit', false);
+        $admin = $this->platformAdmin();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.statements.show', [
+            'agency' => $agency,
+            'date_from' => now()->subDay()->toDateString(),
+            'date_to' => now()->addDay()->toDateString(),
+        ]));
+
+        $html = $this->adminFinanceStatementShowHtmlWithQuery($admin, $agency, [
+            'date_from' => now()->subDay()->toDateString(),
+            'date_to' => now()->addDay()->toDateString(),
+        ]);
+        $this->assertStringContainsString('Manual wallet debit', $html);
     }
 
     public function test_manual_debit_cannot_exceed_balance_without_credit_limit(): void
@@ -280,11 +304,11 @@ class ManualWalletAdjustmentTest extends TestCase
         $this->postAdjustment($agency, $wallet, 'manual_credit', 33);
 
         $ledger = LedgerTransaction::query()->where('agency_id', $agency->id)->latest('id')->firstOrFail();
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.accounting.ledger.show', $ledger))
-            ->assertOk()
-            ->assertSee($ledger->transaction_ref, false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.show', $ledger));
+        $html = $this->adminAccountingLedgerShowHtml($admin, $ledger);
+        $this->assertStringContainsString($ledger->transaction_ref, $html);
     }
 
     public function test_viewing_adjustment_pages_does_not_mutate_balances(): void
@@ -295,9 +319,12 @@ class ManualWalletAdjustmentTest extends TestCase
         $balance = (float) $wallet->fresh()->balance;
 
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)->get(route('admin.finance.adjustments.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.finance.adjustments.show', $tx))->assertOk();
-        $this->actingAs($admin)->get(route('admin.finance.adjustments.create'))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.adjustments.index'));
+        $this->assertNotEmpty($this->adminFinanceAdjustmentsIndexHtml($admin));
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.adjustments.show', $tx));
+        $this->assertNotEmpty($this->adminFinanceAdjustmentsShowHtml($admin, $tx));
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.adjustments.create'));
+        $this->assertNotEmpty($this->adminFinanceAdjustmentsCreateHtml($admin));
 
         $this->assertSame($balance, (float) $wallet->fresh()->balance);
         $this->assertSame(1, AgentWalletTransaction::query()->where('agent_wallet_id', $wallet->id)->where('type', 'manual_credit')->count());
