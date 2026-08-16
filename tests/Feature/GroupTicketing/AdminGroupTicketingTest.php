@@ -15,11 +15,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AdminGroupTicketingTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -34,15 +36,15 @@ class AdminGroupTicketingTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.group-ticketing.tiles.index'))
-            ->assertOk()
-            ->assertSee('All Groups', false)
-            ->assertSee('Tiles are generated from live group inventory', false)
-            ->assertSee('Save all homepage tiles', false)
-            ->assertSee('enctype="multipart/form-data"', false)
-            ->assertDontSee('Add tile', false)
-            ->assertDontSee('btn btn-primary btn-sm w-100">Save</button>', false);
+        $this->assertLegacyGroupTicketingRedirect($admin, route('admin.group-ticketing.tiles.index'));
+        $html = $this->adminGroupTicketingTilesIndexHtml($admin);
+
+        $this->assertStringContainsString('All Groups', $html);
+        $this->assertStringContainsString('Tiles are generated from live group inventory', $html);
+        $this->assertStringContainsString('Save all homepage tiles', $html);
+        $this->assertStringContainsString('enctype="multipart/form-data"', $html);
+        $this->assertStringNotContainsString('Add tile', $html);
+        $this->assertStringNotContainsString('btn btn-primary btn-sm w-100">Save</button>', $html);
     }
 
     public function test_admin_tiles_page_lists_inventory_backed_categories_without_manual_rows(): void
@@ -50,10 +52,22 @@ class AdminGroupTicketingTest extends TestCase
         $admin = $this->platformAdmin();
         $this->seedInventoryCategories();
 
-        $this->actingAs($admin)
-            ->get(route('admin.group-ticketing.tiles.index'))
-            ->assertOk()
-            ->assertSeeInOrder(['All Groups', 'KSA Groups', 'UAE Groups', 'Muscat Groups'], false);
+        $this->assertLegacyGroupTicketingRedirect($admin, route('admin.group-ticketing.tiles.index'));
+        $html = $this->adminGroupTicketingTilesIndexHtml($admin);
+
+        $this->assertStringContainsString('All Groups', $html);
+        $this->assertStringContainsString('KSA Groups', $html);
+        $this->assertStringContainsString('UAE Groups', $html);
+        $this->assertStringContainsString('Muscat Groups', $html);
+        $posAll = strpos($html, 'All Groups');
+        $posKsa = strpos($html, 'KSA Groups');
+        $posUae = strpos($html, 'UAE Groups');
+        $posMuscat = strpos($html, 'Muscat Groups');
+        $this->assertNotFalse($posAll);
+        $this->assertNotFalse($posKsa);
+        $this->assertNotFalse($posUae);
+        $this->assertNotFalse($posMuscat);
+        $this->assertTrue($posAll < $posKsa && $posKsa < $posUae && $posUae < $posMuscat);
 
         $this->assertSame(0, GroupHomepageTile::query()->count());
     }
@@ -133,11 +147,10 @@ class AdminGroupTicketingTest extends TestCase
             ->assertOk()
             ->assertDontSee('Muscat Groups', false);
 
-        $this->actingAs($admin)
-            ->get(route('admin.group-ticketing.tiles.index'))
-            ->assertOk()
-            ->assertSee('Muscat Groups', false)
-            ->assertSee('Hidden on homepage', false);
+        $this->assertLegacyGroupTicketingRedirect($admin, route('admin.group-ticketing.tiles.index'));
+        $html = $this->adminGroupTicketingTilesIndexHtml($admin);
+        $this->assertStringContainsString('Muscat Groups', $html);
+        $this->assertStringContainsString('Hidden on homepage', $html);
     }
 
     public function test_group_inventory_sync_is_scheduled_daily_and_release_expired_every_minute(): void
@@ -165,15 +178,15 @@ class AdminGroupTicketingTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.group-ticketing.index'))
-            ->assertOk()
-            ->assertSee(route('admin.group-ticketing.index', [], false), false)
-            ->assertSee(route('admin.group-ticketing.tiles.index', [], false), false)
-            ->assertSee(route('admin.group-ticketing.inventory.index', [], false), false)
-            ->assertSee(route('admin.group-bookings.index', [], false), false)
-            ->assertSee('Group Ticketing', false)
-            ->assertSee('Homepage Tiles', false);
+        $this->assertLegacyGroupTicketingRedirect($admin, route('admin.group-ticketing.index'));
+        $html = $this->adminGroupTicketingIndexHtml($admin);
+
+        $this->assertStringContainsString(route('admin.group-ticketing.index', [], false), $html);
+        $this->assertStringContainsString(route('admin.group-ticketing.tiles.index', [], false), $html);
+        $this->assertStringContainsString(route('admin.group-ticketing.inventory.index', [], false), $html);
+        $this->assertStringContainsString(route('admin.group-bookings.index', [], false), $html);
+        $this->assertStringContainsString('Group Ticketing', $html);
+        $this->assertStringContainsString('Homepage Tiles', $html);
     }
 
     public function test_api_categories_page_is_read_only(): void
@@ -181,13 +194,13 @@ class AdminGroupTicketingTest extends TestCase
         $admin = $this->platformAdmin();
         $this->seedInventoryCategories();
 
-        $this->actingAs($admin)
-            ->get(route('admin.group-ticketing.categories.index'))
-            ->assertOk()
-            ->assertSee('API Categories', false)
-            ->assertSee('ksa-oneway', false)
-            ->assertSee('KSA Groups', false)
-            ->assertDontSee('Add category', false);
+        $this->assertLegacyGroupTicketingRedirect($admin, route('admin.group-ticketing.categories.index'));
+        $html = $this->adminGroupTicketingCategoriesIndexHtml($admin);
+
+        $this->assertStringContainsString('API Categories', $html);
+        $this->assertStringContainsString('ksa-oneway', $html);
+        $this->assertStringContainsString('KSA Groups', $html);
+        $this->assertStringNotContainsString('Add category', $html);
     }
 
     public function test_batch_save_updates_title_order_and_active_for_multiple_tiles(): void

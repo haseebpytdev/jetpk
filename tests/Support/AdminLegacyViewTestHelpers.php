@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinanceAdjustmentController;
 use App\Http\Controllers\Admin\FinanceDashboardController;
 use App\Http\Controllers\Admin\FinanceStatementController;
+use App\Http\Controllers\Admin\AdminGroupTicketingController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedgerController;
@@ -34,6 +35,8 @@ use App\Models\Booking;
 use App\Models\LedgerTransaction;
 use App\Models\SupplierConnection;
 use App\Models\User;
+use App\Services\GroupTicketing\GroupInventoryFacetService;
+use App\Support\GroupTicketing\GroupHomepageTilePresenter;
 use Illuminate\Http\Request;
 use Illuminate\Support\ViewErrorBag;
 
@@ -458,5 +461,43 @@ trait AdminLegacyViewTestHelpers
         $response->assertRedirect();
         $target = (string) $response->headers->get('Location');
         $this->assertStringContainsString('/staff/dashboard/bookings', $target);
+    }
+
+    protected function assertLegacyGroupTicketingRedirect(User $admin, string $uri): void
+    {
+        $response = $this->actingAs($admin)->get($uri);
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/admin/dashboard/group-ticketing', $target);
+    }
+
+    protected function adminGroupTicketingIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(AdminGroupTicketingController::class)
+            ->index(app(GroupInventoryFacetService::class))
+            ->render();
+    }
+
+    protected function adminGroupTicketingTilesIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(AdminGroupTicketingController::class)
+            ->tilesIndex(app(GroupHomepageTilePresenter::class))
+            ->render();
+    }
+
+    protected function adminGroupTicketingCategoriesIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(AdminGroupTicketingController::class)
+            ->categoriesIndex(app(GroupInventoryFacetService::class))
+            ->render();
     }
 }
