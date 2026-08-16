@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedgerController;
+use App\Http\Controllers\Staff\FinanceStatementController as StaffFinanceStatementController;
 use App\Http\Controllers\Admin\AdminLedgerController;
 use App\Http\Controllers\Staff\LedgerController as StaffLedgerController;
 use App\Http\Controllers\Staff\ReportsController as StaffReportsController;
