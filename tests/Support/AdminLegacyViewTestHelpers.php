@@ -4,6 +4,7 @@ namespace Tests\Support;
 
 use App\Http\Controllers\Admin\AgencyMessageTemplateController;
 use App\Http\Controllers\Admin\AgencyNotificationSettingController;
+use App\Http\Controllers\Admin\AgencyManagementController;
 use App\Http\Controllers\Admin\AgentCommissionController;
 use App\Http\Controllers\Admin\AccountingLedgerController;
 use App\Http\Controllers\Admin\AccountingReconciliationController;
@@ -403,6 +404,46 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(AdminSectionController::class)->staff($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function adminAgenciesIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/agencies', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgencyManagementController::class)->index($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function adminUsersIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/users', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(UserManagementController::class)->index($request)->render();
+    }
+
+    protected function assertLegacyAdminUsersRedirect(User $admin, string $uri): void
+    {
+        $response = $this->actingAs($admin)->get($uri);
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertTrue(
+            str_contains($target, '/admin/dashboard/users')
+                || str_contains($target, '/admin/dashboard/staff')
+                || str_contains($target, '/admin/dashboard/agents')
+                || str_contains($target, '/admin/dashboard/reports'),
+            "Unexpected admin redirect target [{$target}] for {$uri}"
+        );
     }
 
     protected function adminRolesPermissionsHtml(User $admin): string

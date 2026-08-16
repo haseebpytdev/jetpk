@@ -13,10 +13,12 @@ use App\Support\Agencies\AgencyScopeResolver;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class ReconcileAgenciesTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     public function test_dry_run_detects_approved_application_without_agent_linkage(): void
@@ -185,10 +187,9 @@ class ReconcileAgenciesTest extends TestCase
 
         app(AgencyReconciliationService::class)->reconcile(false);
 
-        $this->actingAs($admin)
-            ->get(route('admin.agencies.index', ['status' => 'active']))
-            ->assertOk()
-            ->assertSee('Easy Ticket', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.agencies.index', ['status' => 'active']));
+        $html = $this->adminAgenciesIndexHtml($admin, ['status' => 'active']);
+        $this->assertStringContainsString('Easy Ticket', $html);
 
         Agent::query()->where('user_id', $owner->id)->where('agency_id', $platform->id)->first()?->refresh();
         $this->assertFalse(
@@ -217,10 +218,9 @@ class ReconcileAgenciesTest extends TestCase
 
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.users.index'))
-            ->assertOk()
-            ->assertSee('Easy Ticket', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.users.index'));
+        $html = $this->adminUsersIndexHtml($admin);
+        $this->assertStringContainsString('Easy Ticket', $html);
     }
 
     public function test_platform_admin_reports_handles_null_current_agency_id(): void
@@ -228,10 +228,10 @@ class ReconcileAgenciesTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
         $admin->forceFill(['account_type' => AccountType::PlatformAdmin, 'current_agency_id' => null])->save();
+        $admin = $admin->fresh();
 
-        $this->actingAs($admin->fresh())
-            ->get(route('admin.reports'))
-            ->assertOk();
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.reports'));
+        $this->assertNotEmpty($this->adminReportsHtml($admin));
     }
 
     public function test_agencies_active_count_reflects_active_agent_record(): void
@@ -244,10 +244,9 @@ class ReconcileAgenciesTest extends TestCase
         ]);
         Agent::factory()->for($agency)->create(['user_id' => $owner->id, 'is_active' => true]);
 
-        $this->actingAs($admin)
-            ->get(route('admin.agencies.index', ['status' => 'active']))
-            ->assertOk()
-            ->assertSee('Active Partner', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.agencies.index', ['status' => 'active']));
+        $html = $this->adminAgenciesIndexHtml($admin, ['status' => 'active']);
+        $this->assertStringContainsString('Active Partner', $html);
     }
 
     public function test_staff_page_status_badge_is_readable(): void
@@ -255,11 +254,10 @@ class ReconcileAgenciesTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         [$admin] = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.staff'))
-            ->assertOk()
-            ->assertSee('data-testid="admin-staff-status-active"', false)
-            ->assertSee('ota-bstat', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.staff'));
+        $html = $this->adminStaffIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="admin-staff-status-active"', $html);
+        $this->assertStringContainsString('ota-bstat', $html);
     }
 
     /**
