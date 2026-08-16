@@ -11,10 +11,12 @@ use App\Support\Staff\StaffPermission;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class UserPermissionMatrixTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     public function test_customer_user_form_hides_permission_matrix(): void
@@ -26,9 +28,9 @@ class UserPermissionMatrixTest extends TestCase
             'status' => UserAccountStatus::Active,
         ]);
 
-        $response = $this->actingAs($admin)->get(route('admin.users.edit', $customer));
-        $response->assertOk();
-        $this->assertMatchesRegularExpression('/id="user-permission-card"\s+hidden/', $response->getContent());
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.users.edit', $customer));
+        $html = $this->adminUserEditHtml($admin, $customer);
+        $this->assertMatchesRegularExpression('/id="user-permission-card"\s+hidden/', $html);
     }
 
     public function test_staff_user_form_shows_editable_staff_permissions(): void
@@ -40,14 +42,13 @@ class UserPermissionMatrixTest extends TestCase
             'status' => UserAccountStatus::Active,
         ]);
 
-        $this->actingAs($admin)
-            ->get(route('admin.users.edit', $staff))
-            ->assertOk()
-            ->assertSee('Editable staff portal permissions', false)
-            ->assertSee('Permission presets', false)
-            ->assertSee('data-testid="staff-preset-'.StaffPermission::PresetManager.'"', false)
-            ->assertSee('staff_permissions[]', false)
-            ->assertSee(StaffPermission::TicketingIssue, false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.users.edit', $staff));
+        $html = $this->adminUserEditHtml($admin, $staff);
+        $this->assertStringContainsString('Editable staff portal permissions', $html);
+        $this->assertStringContainsString('Permission presets', $html);
+        $this->assertStringContainsString('data-testid="staff-preset-'.StaffPermission::PresetManager.'"', $html);
+        $this->assertStringContainsString('staff_permissions[]', $html);
+        $this->assertStringContainsString(StaffPermission::TicketingIssue, $html);
     }
 
     public function test_customer_edit_shows_portal_only_note(): void
@@ -59,11 +60,10 @@ class UserPermissionMatrixTest extends TestCase
             'status' => UserAccountStatus::Active,
         ]);
 
-        $this->actingAs($admin)
-            ->get(route('admin.users.edit', $customer))
-            ->assertOk()
-            ->assertSee('Customer portal access only', false)
-            ->assertSee('Promote account type', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.users.edit', $customer));
+        $html = $this->adminUserEditHtml($admin, $customer);
+        $this->assertStringContainsString('Customer portal access only', $html);
+        $this->assertStringContainsString('Promote account type', $html);
     }
 
     public function test_agency_admin_can_create_agent_staff_with_permissions(): void
@@ -102,13 +102,12 @@ class UserPermissionMatrixTest extends TestCase
             'status' => UserAccountStatus::Active,
         ]);
 
-        $this->actingAs($admin)
-            ->get(route('admin.users.show', $customer))
-            ->assertOk()
-            ->assertSee('Customer portal only', false)
-            ->assertSee('Open customer profile', false)
-            ->assertDontSee('Effective access summary', false)
-            ->assertDontSee('Capability area', false);
+        $this->assertLegacyAdminUsersRedirect($admin, route('admin.users.show', $customer));
+        $html = $this->adminUserShowHtml($admin, $customer);
+        $this->assertStringContainsString('Customer portal only', $html);
+        $this->assertStringContainsString('Open customer profile', $html);
+        $this->assertStringNotContainsString('Effective access summary', $html);
+        $this->assertStringNotContainsString('Capability area', $html);
     }
 
     /**

@@ -188,6 +188,16 @@ trait AdminLegacyViewTestHelpers
         return app(UserManagementController::class)->show($user)->render();
     }
 
+    protected function adminUserEditHtml(User $admin, User $user): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/users/'.$user->id.'/edit', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(UserManagementController::class)->edit($request, $user)->render();
+    }
+
     protected function agentApplicationShowHtml(User $admin, AgentApplication $application): string
     {
         $this->actingAs($admin);
