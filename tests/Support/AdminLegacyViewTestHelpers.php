@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\FinanceDashboardController;
 use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\AdminGroupTicketingController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
+use App\Http\Controllers\Admin\SystemSafetyController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\WalletAuditController;
 use App\Http\Controllers\Agent\AccountingLedgerController as AgentAccountingLedgerController;
@@ -30,6 +31,8 @@ use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedg
 use App\Http\Controllers\Staff\AccountingReconciliationController as StaffAccountingReconciliationController;
 use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Http\Controllers\Staff\FinanceStatementController as StaffFinanceStatementController;
+use App\Http\Controllers\Staff\SupportTicketController as StaffSupportTicketController;
+use App\Http\Controllers\Admin\SupportTicketController as AdminSupportTicketController;
 use App\Http\Controllers\Admin\AdminLedgerController;
 use App\Http\Controllers\Staff\LedgerController as StaffLedgerController;
 use App\Http\Controllers\Staff\ReportsController as StaffReportsController;
@@ -40,6 +43,7 @@ use App\Models\AgentWalletTransaction;
 use App\Models\Booking;
 use App\Models\LedgerTransaction;
 use App\Models\SupplierConnection;
+use App\Models\SupportTicket;
 use App\Models\User;
 use App\Services\GroupTicketing\GroupInventoryFacetService;
 use App\Support\GroupTicketing\GroupHomepageTilePresenter;
@@ -580,6 +584,72 @@ trait AdminLegacyViewTestHelpers
         view()->share('errors', new ViewErrorBag);
 
         return app(AdminSectionController::class)->goLiveChecklist()->render();
+    }
+
+    protected function adminSystemHealthHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(SystemSafetyController::class)->systemHealth()->render();
+    }
+
+    protected function adminDeploymentChecklistHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+
+        return app(SystemSafetyController::class)->deploymentChecklist()->render();
+    }
+
+    protected function staffSupportTicketsIndexHtml(User $staff): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/support/tickets', 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffSupportTicketController::class)->index($request)->render();
+    }
+
+    protected function staffSupportTicketShowHtml(User $staff, SupportTicket $ticket): string
+    {
+        $this->actingAs($staff);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/staff/support/tickets/'.$ticket->id, 'GET');
+        $request->setUserResolver(fn () => $staff);
+
+        return app(StaffSupportTicketController::class)->show($request, $ticket)->render();
+    }
+
+    protected function adminSupportTicketsIndexHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/support/tickets', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AdminSupportTicketController::class)->index($request)->render();
+    }
+
+    /**
+     * Portal list/show GETs may already be Next-migrated (302) or still Blade (200).
+     */
+    protected function assertPortalGetOkOrRedirect(User $user, string $uri, string $locationNeedle): void
+    {
+        $response = $this->actingAs($user)->get($uri);
+        $this->assertContains(
+            $response->getStatusCode(),
+            [200, 301, 302],
+            "Expected OK or redirect for {$uri}, got ".$response->getStatusCode()
+        );
+        if ($response->isRedirect()) {
+            $this->assertStringContainsString(
+                $locationNeedle,
+                (string) $response->headers->get('Location'),
+                "Unexpected redirect for {$uri}"
+            );
+        }
     }
 
     protected function assertLegacyStaffAccountingRedirect(User $staff, string $uri = '/staff/accounting/ledger'): void

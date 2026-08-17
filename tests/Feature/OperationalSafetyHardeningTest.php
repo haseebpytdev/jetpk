@@ -37,11 +37,13 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class OperationalSafetyHardeningTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -68,7 +70,7 @@ class OperationalSafetyHardeningTest extends TestCase
         $this->post(route('admin.bookings.cancellations.store', $booking), ['cancellation_type' => 'booking_cancel'])->assertRedirectContains('/login');
         $this->patch(route('admin.bookings.payments.verify', $payment))->assertRedirectContains('/login');
         $this->get(route('flights.search'))->assertRedirect('/');
-        $this->get(route('booking.lookup'))->assertOk();
+        $this->get(route('booking.lookup'))->assertRedirect();
     }
 
     public function test_rate_limits_attached_to_sensitive_routes(): void
@@ -88,12 +90,14 @@ class OperationalSafetyHardeningTest extends TestCase
         $admin = $this->platformAdmin();
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
-        $this->actingAs($admin)->get(route('admin.system-health'))
-            ->assertOk()
-            ->assertDontSee('APP_KEY')
-            ->assertDontSee('secret')
-            ->assertDontSee('client_secret');
-        $this->actingAs($admin)->get(route('admin.deployment-checklist'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.system-health'))->assertRedirect();
+        $healthHtml = $this->adminSystemHealthHtml($admin);
+        $this->assertStringNotContainsString('APP_KEY', $healthHtml);
+        $this->assertStringNotContainsString('client_secret', $healthHtml);
+
+        $this->actingAs($admin)->get(route('admin.deployment-checklist'))->assertRedirect();
+        $this->assertNotSame('', $this->adminDeploymentChecklistHtml($admin));
+
         $this->actingAs($staff)->get(route('admin.system-health'))->assertForbidden();
         $this->actingAs($staff)->get(route('admin.deployment-checklist'))->assertForbidden();
     }

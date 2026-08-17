@@ -13,11 +13,13 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class PaymentWorkflowFoundationTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -248,11 +250,11 @@ class PaymentWorkflowFoundationTest extends TestCase
             'submitted_at' => now(),
         ]);
 
-        $this->actingAs($admin)->get(route('admin.bookings.show', ['booking' => $booking, 'tab' => 'payments']))
-            ->assertOk()
-            ->assertSee('data-testid="admin-pending-payment-proof"', false)
-            ->assertSee('data-testid="admin-booking-payment-summary"', false)
-            ->assertSee('Verify payment', false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString('data-testid="admin-pending-payment-proof"', $html);
+        $this->assertStringContainsString('data-testid="admin-booking-payment-summary"', $html);
+        $this->assertStringContainsString('Verify payment', $html);
     }
 
     public function test_payment_rejection_creates_audit_and_does_not_count_toward_amount_paid(): void
@@ -317,7 +319,10 @@ class PaymentWorkflowFoundationTest extends TestCase
     public function test_dashboard_report_payment_breakdown_still_works(): void
     {
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)->get('/admin/reports')->assertOk();
+        $response = $this->actingAs($admin)->get('/admin/reports');
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/reports', (string) $response->headers->get('Location'));
+        $this->assertNotSame('', $this->adminReportsHtml($admin));
     }
 
     /**

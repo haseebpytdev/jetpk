@@ -16,11 +16,13 @@ use App\Models\User;
 use App\Services\Communication\NotificationRecipientResolver;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class SupportTicketTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -86,8 +88,10 @@ class SupportTicketTest extends TestCase
         [$customer, $ticket] = $this->customerTicket();
         $staff = $this->staffUser($customer->current_agency_id);
 
-        $this->actingAs($staff)->get(route('staff.support.tickets.index'))->assertOk();
-        $this->actingAs($staff)->get(route('staff.support.tickets.show', $ticket))->assertOk();
+        $this->assertPortalGetOkOrRedirect($staff, route('staff.support.tickets.index'), '/staff/dashboard');
+        $this->assertPortalGetOkOrRedirect($staff, route('staff.support.tickets.show', $ticket), '/staff/dashboard');
+        $this->assertNotSame('', $this->staffSupportTicketsIndexHtml($staff));
+        $this->assertNotSame('', $this->staffSupportTicketShowHtml($staff, $ticket));
     }
 
     public function test_staff_public_reply_visible_to_customer(): void
@@ -184,10 +188,11 @@ class SupportTicketTest extends TestCase
         $staff = $this->staffUser($customer->current_agency_id);
         $admin = $this->platformAdmin();
 
-        $this->actingAs($customer)->get(route('customer.support.tickets.index'))->assertOk();
-        $this->actingAs($agent)->get(route('agent.support.tickets.index'))->assertOk();
-        $this->actingAs($staff)->get(route('staff.support.tickets.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.support.tickets.index'))->assertOk();
+        $this->assertPortalGetOkOrRedirect($customer, route('customer.support.tickets.index'), '/customer/dashboard');
+        $this->assertPortalGetOkOrRedirect($agent, route('agent.support.tickets.index'), '/agent');
+        $this->assertPortalGetOkOrRedirect($staff, route('staff.support.tickets.index'), '/staff/dashboard');
+        $this->assertPortalGetOkOrRedirect($admin, route('admin.support.tickets.index'), '/admin/dashboard');
+        $this->assertNotSame('', $this->adminSupportTicketsIndexHtml($admin));
     }
 
     public function test_customer_support_status_labels_on_index(): void
