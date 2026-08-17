@@ -2580,6 +2580,12 @@ class BookingController extends Controller
         }
 
         if ($fareOptionKey === '') {
+            // Deep links / base checkout without an explicit branded option remain allowed.
+            // Enforce fare_option_key only when the traveller arrived from results (Book CTA).
+            if (! $fromResults) {
+                return null;
+            }
+
             $criteria = $this->resolveCheckoutSearchCriteria(
                 $this->bookingDraft->current(),
                 trim($request->string('search_id')->toString()),

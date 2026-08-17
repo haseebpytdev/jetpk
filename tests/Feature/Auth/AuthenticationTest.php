@@ -161,7 +161,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('customer.bookings.index', absolute: false));
+        $response->assertRedirect('/customer/dashboard');
     }
 
     public function test_users_can_authenticate_using_username(): void
@@ -317,6 +317,7 @@ class AuthenticationTest extends TestCase
             'account_type' => AccountType::PlatformAdmin,
         ]);
 
-        $this->actingAs($platformAdmin)->get(route('admin.api-settings'))->assertOk();
+        $this->actingAs($platformAdmin)->get(route('admin.api-settings'))
+            ->assertRedirect('/admin/dashboard/api-connections');
     }
 }

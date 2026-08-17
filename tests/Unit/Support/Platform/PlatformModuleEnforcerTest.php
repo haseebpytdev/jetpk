@@ -291,13 +291,13 @@ class PlatformModuleEnforcerTest extends TestCase
 
     public function test_disabled_exception_renders_json_403_for_json_request(): void
     {
-        Route::get('/_test/platform-module-enforcer-json-get', function (): void {
+        Route::get('/api/_test/platform-module-enforcer-json-get', function (): void {
             app(PlatformModuleEnforcer::class)->ensureModuleEnabled('agent_portal');
         });
 
         $this->planModuleOff('agent_portal');
 
-        $this->getJson('/_test/platform-module-enforcer-json-get')
+        $this->getJson('/api/_test/platform-module-enforcer-json-get')
             ->assertForbidden()
             ->assertJson([
                 'message' => PlatformModuleDisabledException::PUBLIC_MESSAGE,
@@ -306,13 +306,13 @@ class PlatformModuleEnforcerTest extends TestCase
 
     public function test_disabled_exception_renders_friendly_page_for_get_html_without_module_key_for_guest(): void
     {
-        Route::get('/_test/platform-module-enforcer-html', function (): void {
+        Route::get('/api/_test/platform-module-enforcer-html', function (): void {
             app(PlatformModuleEnforcer::class)->ensureModuleEnabled('agent_portal');
         });
 
         $this->planModuleOff('agent_portal');
 
-        $this->get('/_test/platform-module-enforcer-html')
+        $this->get('/api/_test/platform-module-enforcer-html')
             ->assertForbidden()
             ->assertSee(PlatformModuleDisabledException::PUBLIC_MESSAGE, false)
             ->assertDontSee('agent_portal', false);

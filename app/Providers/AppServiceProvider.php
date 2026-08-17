@@ -81,6 +81,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Replace the session manager before the session service is resolved so JSON
+        // session serialization remarsals ViewErrorBag after save() (same-request consumers).
+        $this->app->singleton('session', function ($app) {
+            return new \App\Session\SessionManager($app);
+        });
+
         $this->app->scoped(UiVersionResolver::class, function ($app): UiVersionResolver {
             return new UiVersionResolver($app->make(Request::class));
         });

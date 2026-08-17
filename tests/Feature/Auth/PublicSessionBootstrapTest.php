@@ -13,10 +13,12 @@ use App\Support\Client\ClientProfileConfigReader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Tests\Support\Auth\ConfiguresAuthTestEnvironment;
 use Tests\TestCase;
 
 class PublicSessionBootstrapTest extends TestCase
 {
+    use ConfiguresAuthTestEnvironment;
     use RefreshDatabase;
 
     public function test_guest_session_bootstrap_returns_unauthenticated(): void
@@ -106,6 +108,7 @@ class PublicSessionBootstrapTest extends TestCase
 
     public function test_json_otp_verify_completes_login(): void
     {
+        $this->withJetPkLoginOtpGate();
         Mail::fake();
         $this->makeJetPkProfile();
         $user = User::factory()->customer()->create([
@@ -236,6 +239,7 @@ class PublicSessionBootstrapTest extends TestCase
 
     public function test_pending_otp_session_never_exposes_otp_value(): void
     {
+        $this->withJetPkLoginOtpGate();
         Mail::fake();
         $this->makeJetPkProfile();
         $user = User::factory()->customer()->create([
