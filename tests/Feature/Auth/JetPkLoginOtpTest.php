@@ -207,7 +207,8 @@ class JetPkLoginOtpTest extends TestCase
     {
         $this->makeJetPkProfile();
 
-        $this->get('/jetpk/this-page-does-not-exist-jetpk-hotfix')
+        $this->followingRedirects()
+            ->get('/jetpk/this-page-does-not-exist-jetpk-hotfix')
             ->assertNotFound()
             ->assertSee('Page not found', false)
             ->assertSee('JetPakistan', false);

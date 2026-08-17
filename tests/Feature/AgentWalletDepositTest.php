@@ -14,11 +14,13 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class AgentWalletDepositTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -128,7 +130,8 @@ class AgentWalletDepositTest extends TestCase
         $admin = $this->platformAdmin();
 
         $this->actingAs($agentUser)->get(route('admin.agent-deposits.show', $deposit))->assertForbidden();
-        $this->actingAs($admin)->get(route('admin.agent-deposits.show', $deposit))->assertOk();
+        $this->assertLegacyAdminDepositShowRedirect($admin, $deposit);
+        $this->adminDepositShowHtml($admin, $deposit);
     }
 
     public function test_admin_approve_increases_wallet_balance_once(): void

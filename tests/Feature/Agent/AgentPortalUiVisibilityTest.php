@@ -19,7 +19,7 @@ class AgentPortalUiVisibilityTest extends TestCase
         $booking = $scenario['recordsA']['bookings']['paymentPending'];
 
         $this->actingAs($admin)->get(route('agent.bookings.index'))
-            ->assertSee('Create booking request', false)
+            ->assertSee('New booking', false)
             ->assertSee('data-testid="agent-bookings-create-link"', false);
 
         $this->actingAs($admin)->get(route('agent.wallet.show'))
@@ -58,7 +58,8 @@ class AgentPortalUiVisibilityTest extends TestCase
 
         $this->actingAs($admin)->get(route('agent.dashboard'))
             ->assertSee('Commissions', false)
-            ->assertSee('Wallet balance', false);
+            ->assertSee('Wallet', false)
+            ->assertSee('data-testid="agent-dashboard-commission-balance"', false);
     }
 
     public function test_staff_a0_hides_restricted_nav_and_ctas(): void

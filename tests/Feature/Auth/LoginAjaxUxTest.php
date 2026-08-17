@@ -12,10 +12,12 @@ use App\Support\Client\ClientProfileConfigReader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Tests\Support\Auth\ConfiguresAuthTestEnvironment;
 use Tests\TestCase;
 
 class LoginAjaxUxTest extends TestCase
 {
+    use ConfiguresAuthTestEnvironment;
     use RefreshDatabase;
 
     private const GENERIC_LOGIN_FAILURE = 'These credentials do not match our records.';
@@ -25,6 +27,7 @@ class LoginAjaxUxTest extends TestCase
         parent::setUp();
 
         config(['app.debug' => false]);
+        $this->withJetPkLoginOtpGate();
     }
 
     public function test_jetpk_login_get_returns_200(): void

@@ -62,7 +62,7 @@ class BackOfficeDashboardRoutingTest extends TestCase
 
         $this->actingAs($customer)
             ->get(route('dashboard'))
-            ->assertRedirect(route('customer.bookings.index'));
+            ->assertRedirect('/customer/dashboard');
     }
 
     public function test_legacy_admin_root_redirects_to_admin_dashboard(): void

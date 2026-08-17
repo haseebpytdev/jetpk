@@ -41,6 +41,7 @@ use App\Http\Controllers\Staff\ReportsController as StaffReportsController;
 use App\Models\Agency;
 use App\Models\Agent;
 use App\Models\AgentApplication;
+use App\Models\AgentDepositRequest;
 use App\Models\AgentWalletTransaction;
 use App\Models\Booking;
 use App\Models\LedgerTransaction;
@@ -153,6 +154,23 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(AgentDepositController::class)->index($request)->render();
+    }
+
+    protected function adminDepositShowHtml(User $admin, AgentDepositRequest $deposit): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/agent-deposits/'.$deposit->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AgentDepositController::class)->show($deposit)->render();
+    }
+
+    protected function assertLegacyAdminDepositShowRedirect(User $admin, AgentDepositRequest $deposit): void
+    {
+        $response = $this->actingAs($admin)->get(route('admin.agent-deposits.show', $deposit));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/deposits', (string) $response->headers->get('Location'));
     }
 
     /**
