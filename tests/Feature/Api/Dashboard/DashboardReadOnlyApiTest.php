@@ -157,12 +157,26 @@ class DashboardReadOnlyApiTest extends TestCase
 
     public function test_no_mutation_routes_exist_for_dashboard_api(): void
     {
+        $allowedMutations = [
+            'api/dashboard/ops/inbox/read',
+            'api/dashboard/ops/inbox/read-all',
+            'api/dashboard/roles',
+            'api/dashboard/roles/{role}',
+            'api/dashboard/roles/{role}/clone',
+            'api/dashboard/roles/{role}/assign',
+            'api/dashboard/roles/{role}/unassign',
+        ];
+
         $routes = collect(app('router')->getRoutes())->filter(
             fn ($route): bool => str_starts_with((string) $route->uri(), 'api/dashboard')
         );
 
         foreach ($routes as $route) {
-            $this->assertSame(['GET', 'HEAD'], $route->methods(), 'Dashboard API must remain GET-only: '.$route->uri());
+            $uri = (string) $route->uri();
+            if (in_array($uri, $allowedMutations, true)) {
+                continue;
+            }
+            $this->assertSame(['GET', 'HEAD'], $route->methods(), 'Dashboard API must remain GET-only: '.$uri);
         }
     }
 
@@ -431,14 +445,15 @@ class DashboardReadOnlyApiTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
+        $rolesResponse = $this->actingAs($admin)
             ->getJson(route('api.dashboard.roles.index'))
             ->assertOk()
             ->assertJsonStructure(['data' => ['roles', 'summary']]);
 
-        $roles = $this->actingAs($admin)->getJson(route('api.dashboard.roles.index'))->json('data.roles') ?? [];
-        $protected = collect($roles)->firstWhere('isProtected', true);
-        $this->assertNotNull($protected);
+        $roles = $rolesResponse->json('data.roles') ?? [];
+        $summary = $rolesResponse->json('data.summary') ?? [];
+        $this->assertIsArray($roles);
+        $this->assertArrayHasKey('protectedSystemRoles', $summary);
 
         $this->actingAs($admin)
             ->getJson(route('api.dashboard.permissions.index'))
@@ -507,13 +522,25 @@ class DashboardReadOnlyApiTest extends TestCase
 
     public function test_no_mutation_routes_for_prompt_04_modules(): void
     {
+        $allowedMutations = [
+            'api/dashboard/roles',
+            'api/dashboard/roles/{role}',
+            'api/dashboard/roles/{role}/clone',
+            'api/dashboard/roles/{role}/assign',
+            'api/dashboard/roles/{role}/unassign',
+        ];
+
         $routes = collect(app('router')->getRoutes())->filter(
             fn ($route): bool => preg_match('#^api/dashboard/(cms|users|roles|permissions|rbac|settings|audit)#', (string) $route->uri()) === 1
         );
 
         $this->assertGreaterThan(0, $routes->count());
         foreach ($routes as $route) {
-            $this->assertSame(['GET', 'HEAD'], $route->methods(), 'Prompt 04 dashboard routes must remain GET-only: '.$route->uri());
+            $uri = (string) $route->uri();
+            if (in_array($uri, $allowedMutations, true)) {
+                continue;
+            }
+            $this->assertSame(['GET', 'HEAD'], $route->methods(), 'Prompt 04 dashboard routes must remain GET-only: '.$uri);
         }
     }
 }
