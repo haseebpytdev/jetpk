@@ -80,11 +80,11 @@ final class OtaFinanceDemoScenario
         'wallet_balance' => 18_750.0,
     ];
 
-    /** @var array<string, float> */
+    /** @var array<string, float> Non-cancelled ET booking fares (PKR); cancelled ticket value is excluded from gross KPIs. */
     public const AGENCY_ET_REPORTS = [
-        'gross_sales' => 107_500.0,
+        'gross_sales' => 97_500.0,
         'markup_revenue' => 9_500.0,
-        'agent_sales' => 34_500.0,
+        'agent_sales' => 24_500.0,
         'direct_customer_sales' => 73_000.0,
     ];
 
@@ -334,7 +334,7 @@ final class OtaFinanceDemoScenario
      */
     protected function createAgentStaff(Agent $agent, string $email, string $name, array $permissions): User
     {
-        return User::query()->create([
+        $staff = User::query()->create([
             'name' => $name,
             'username' => str_replace('@', '-', $email),
             'email' => $email,
@@ -347,6 +347,12 @@ final class OtaFinanceDemoScenario
                 'agent_permissions' => $permissions,
             ],
         ]);
+
+        $staff->agencies()->syncWithoutDetaching([
+            $agent->agency_id => ['role' => AccountType::AgentStaff->value],
+        ]);
+
+        return $staff->fresh();
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Support\Identity\ActorIdentifier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 /**
@@ -19,6 +20,7 @@ use Tests\TestCase;
  */
 class OtaFinanceScenarioTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -72,10 +74,12 @@ class OtaFinanceScenarioTest extends TestCase
         $this->assertSame([(int) $et['agency']->id], $ids);
 
         $jpTxId = $jp['ledger']['transactions']['deposit1']->id;
-        $this->actingAs($admin)
-            ->get(route('admin.ledger.index', ['agency_id' => $et['agency']->id]))
-            ->assertOk()
-            ->assertDontSee('data-testid="ledger-row-'.$jpTxId.'"', false);
+        $this->assertLegacyAccountingRedirect(
+            $admin,
+            route('admin.ledger.index', ['agency_id' => $et['agency']->id], false),
+        );
+        $html = $this->adminMasterLedgerHtml($admin, ['agency_id' => $et['agency']->id]);
+        $this->assertStringNotContainsString('data-testid="ledger-row-'.$jpTxId.'"', $html);
     }
 
     public function test_master_ledger_filters_by_status_type_direction_and_booking_ref(): void
@@ -185,11 +189,14 @@ class OtaFinanceScenarioTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.reports', ['status' => 'not-a-real-status']))
-            ->assertOk();
+            ->assertRedirect();
+        $this->assertNotSame('', trim($this->adminReportsHtml($admin, ['status' => 'not-a-real-status'])));
 
-        $this->actingAs($admin)
-            ->get(route('admin.ledger.index', ['status' => 'invalid-status']))
-            ->assertOk();
+        $this->assertLegacyAccountingRedirect(
+            $admin,
+            route('admin.ledger.index', ['status' => 'invalid-status'], false),
+        );
+        $this->assertNotSame('', trim($this->adminMasterLedgerHtml($admin, ['status' => 'invalid-status'])));
     }
 
     public function test_actor_identifiers_match_required_formats(): void
@@ -224,11 +231,13 @@ class OtaFinanceScenarioTest extends TestCase
         );
 
         $holdTx = $et['ledger']['transactions']['bookingHold'];
-        $this->actingAs($platformAdmin)
-            ->get(route('admin.ledger.index', ['agency_id' => $et['agency']->id]))
-            ->assertOk()
-            ->assertSee('ET-AGM-'.$et['owner']->id.'-Tariq', false)
-            ->assertSee('data-testid="ledger-actor-'.$holdTx->id.'"', false);
+        $this->assertLegacyAccountingRedirect(
+            $platformAdmin,
+            route('admin.ledger.index', ['agency_id' => $et['agency']->id], false),
+        );
+        $html = $this->adminMasterLedgerHtml($platformAdmin, ['agency_id' => $et['agency']->id]);
+        $this->assertStringContainsString('ET-AGM-'.$et['owner']->id.'-Tariq', $html);
+        $this->assertStringContainsString('data-testid="ledger-actor-'.$holdTx->id.'"', $html);
     }
 
     public function test_finance_rbac_matrix(): void
@@ -237,11 +246,19 @@ class OtaFinanceScenarioTest extends TestCase
         $et = $this->scenario['agencies']['et'];
         $customer = $this->scenario['customers']['et'];
 
-        $this->actingAs($platform['admin'])->get(route('admin.ledger.index'))->assertOk();
-        $this->actingAs($platform['admin'])->get(route('admin.reports'))->assertOk();
+        $this->assertLegacyAccountingRedirect($platform['admin'], route('admin.ledger.index', absolute: false));
+        $this->assertNotSame('', trim($this->adminMasterLedgerHtml($platform['admin'])));
+        $this->actingAs($platform['admin'])->get(route('admin.reports'))->assertRedirect();
+        $this->assertNotSame('', trim($this->adminReportsHtml($platform['admin'])));
 
-        $this->actingAs($platform['staffFinance'])->get(route('staff.ledger.index'))->assertOk();
-        $this->actingAs($platform['staffFinance'])->get(route('staff.reports.index'))->assertOk();
+        $this->actingAs($platform['staffFinance'])->get(route('staff.ledger.index'))->assertRedirect();
+        $this->assertStringContainsString(
+            '/staff/dashboard/accounting',
+            (string) $this->actingAs($platform['staffFinance'])->get(route('staff.ledger.index'))->headers->get('Location'),
+        );
+        $this->assertNotSame('', trim($this->staffMasterLedgerHtml($platform['staffFinance'])));
+        $this->actingAs($platform['staffFinance'])->get(route('staff.reports.index'))->assertRedirect();
+        $this->assertNotSame('', trim($this->staffReportsIndexHtml($platform['staffFinance'])));
 
         $this->actingAs($platform['staffOps'])->get(route('staff.ledger.index'))->assertForbidden();
         $this->actingAs($platform['staffOps'])->get(route('staff.reports.index'))->assertForbidden();

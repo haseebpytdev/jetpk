@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-14 (OWNER-UAT-W2 source-integrity CMS sanitizer / provider metadata / RBAC switch)
+**Last updated:** 2026-08-17 (OtaFinanceDemoScenario agent-staff membership + ET report KPIs)
 
 ---
 
@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-08-17 | OWNER-RETEST-V3 finance | **`OtaFinanceDemoScenario::createAgentStaff`** attaches `agency_users` (required by **`AgentPortalAccess`**). **`AGENCY_ET_REPORTS`** gross/agent sales exclude cancelled bookings to match **`BookingReportService::grossSalesBookingsQuery`**. **`OtaFinanceScenarioTest`** admin ledger/reports assert Next redirects + Blade helpers. |
 | 2026-08-14 | OWNER-UAT-W2 source integrity | Dedicated **`CmsPageContentSanitizer`** for builder persist/preview/public (About Us allowlist no longer used for CmsPage). API Connections return full provider field metadata + channel-aware UI, structured Advanced, AuditLog history. RBAC panel syncs on role switch; custom role requires `agency_id>=1`. Markup targeting matrix tests retained. |
 | 2026-08-13 | OWNER-RETEST-V3 | **Pre-V3 audit close:** CMS structured catalogue fields + JetPakistan draft overlay preview; API Connections registry-driven providers, Advanced/Audit, editable Base URL; markup authoritative lookups + optional flight `applies_to`; RBAC searchable agency/user pickers. HEAD `589e7089`, BUILD `t2IIp_9kfSUyeR9vl5_f-`. |
 | 2026-08-13 | OWNER-RETEST-V2 | **Safe-gap close:** CMS public `seo_description` in JetPakistan head; footer CMS links via `ClientHeaderFooterPresenter`; Staff Support no longer rethrows into Dashboard unavailable. Admin GET tests assert Next 302. HEAD `bed32b5e`, BUILD `ke9jQ1LvFhqT630DBFTQX`. |
