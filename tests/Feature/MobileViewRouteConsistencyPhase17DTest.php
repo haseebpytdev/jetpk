@@ -3,39 +3,38 @@
 namespace Tests\Feature;
 
 use App\Http\Controllers\Frontend\MobileViewController;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
+/**
+ * Phase17D mobile preference routes were retired for JetPakistan responsive CSS.
+ * Canonical proof: JetpkCanonicalResponsiveUiTest.
+ */
 class MobileViewRouteConsistencyPhase17DTest extends TestCase
 {
     public function test_mobile_view_controller_class_exists(): void
     {
-        $this->assertTrue(class_exists(MobileViewController::class));
+        $this->assertFalse(
+            class_exists(MobileViewController::class),
+            'MobileViewController was retired; responsive UX uses CSS shells.'
+        );
     }
 
     public function test_mobile_preference_routes_resolve_to_mobile_view_controller(): void
     {
-        $names = [
+        foreach ([
             'view-preference.mobile',
             'view-preference.desktop',
             'view-preference.mobile-get',
             'view-preference.desktop-preview',
-        ];
-
-        foreach ($names as $name) {
-            $route = Route::getRoutes()->getByName($name);
-            $this->assertNotNull($route, $name);
-            $action = (string) $route->getAction('uses');
-            $this->assertStringContainsString(MobileViewController::class, $action, $name);
+        ] as $name) {
+            $this->assertFalse(Route::has($name), "Retired route still registered: {$name}");
         }
     }
 
     public function test_mobile_preference_post_routes_accept_requests(): void
     {
-        $this->withoutMiddleware(ValidateCsrfToken::class);
-
-        $this->post(route('view-preference.mobile'))->assertRedirect();
-        $this->post(route('view-preference.desktop'))->assertRedirect();
+        $this->assertFalse(Route::has('view-preference.mobile'));
+        $this->assertFalse(Route::has('view-preference.desktop'));
     }
 }
