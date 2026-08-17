@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-17 (OtaFinanceDemoScenario agent-staff membership + ET report KPIs)
+**Last updated:** 2026-08-17 (MC-8C smoke: standalone strict no silent legacy fallback)
 
 ---
 
@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-08-17 | MC-8C client-view-smoke | Standalone JetPK smoke proves missing theme twins do **not** silent-fallback to legacy; fallback sample → `frontend.cms-pages.show`. Dev CP tests expect JetPakistan Deployment copy + settings Next redirect. |
 | 2026-08-17 | OWNER-RETEST-V3 emails | **`JetpkEmailEventTypeMap`**: `booking_expiring` no longer aliases onto `booking_manual_review_required`; preferred reverse type `manual_review`. Comms settings/booking show tests assert Next redirects + Blade helpers; Duffel ticketing mocks the Duffel adapter. |
 | 2026-08-17 | OWNER-RETEST-V3 finance | **`OtaFinanceDemoScenario::createAgentStaff`** attaches `agency_users` (required by **`AgentPortalAccess`**). **`AGENCY_ET_REPORTS`** gross/agent sales exclude cancelled bookings to match **`BookingReportService::grossSalesBookingsQuery`**. **`OtaFinanceScenarioTest`** admin ledger/reports assert Next redirects + Blade helpers. |
 | 2026-08-14 | OWNER-UAT-W2 source integrity | Dedicated **`CmsPageContentSanitizer`** for builder persist/preview/public (About Us allowlist no longer used for CmsPage). API Connections return full provider field metadata + channel-aware UI, structured Advanced, AuditLog history. RBAC panel syncs on role switch; custom role requires `agency_id>=1`. Markup targeting matrix tests retained. |

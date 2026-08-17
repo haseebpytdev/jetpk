@@ -6,11 +6,13 @@ use App\Models\DeveloperUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class DeveloperControlPanelTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -101,8 +103,9 @@ class DeveloperControlPanelTest extends TestCase
             ->assertOk()
             ->assertSee('id="dev-cp-shell"', false)
             ->assertSee('ota-dev-cp-layout', false)
-            ->assertSee('Deployment Owner Controls', false)
-            ->assertSee('deployment-level capabilities and are not client admin settings', false)
+            ->assertSee('JetPakistan Deployment', false)
+            ->assertSee('Deployment-owner control panel for this OTA install', false)
+            ->assertSee('not client admin settings', false)
             ->assertSee('Product Owner', false)
             ->assertSee('dev@example.com', false)
             ->assertSee('Overview')
@@ -265,8 +268,10 @@ class DeveloperControlPanelTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.settings.index'))
-            ->assertOk()
-            ->assertDontSee('Platform Module Control');
+            ->assertRedirect('/admin/dashboard/settings');
+
+        $html = $this->adminSettingsIndexHtml($admin);
+        $this->assertStringNotContainsString('Platform Module Control', $html);
     }
 
     public function test_page_does_not_expose_secrets_or_developer_credentials(): void

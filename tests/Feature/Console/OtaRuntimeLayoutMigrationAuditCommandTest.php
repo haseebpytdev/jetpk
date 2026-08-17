@@ -17,6 +17,7 @@ class OtaRuntimeLayoutMigrationAuditCommandTest extends TestCase
         $this->makeProfile([
             'slug' => 'haseeb-master',
             'name' => 'Haseeb Master',
+            'active_frontend_theme' => 'jetpakistan',
             'is_master_profile' => true,
         ]);
 
@@ -32,7 +33,7 @@ class OtaRuntimeLayoutMigrationAuditCommandTest extends TestCase
         $this->makeProfile([
             'slug' => 'haseeb-master',
             'name' => 'Haseeb Master',
-            'active_frontend_theme' => 'v1-classic',
+            'active_frontend_theme' => 'jetpakistan',
             'active_admin_theme' => 'default-admin',
             'active_staff_theme' => 'default-staff',
             'is_master_profile' => true,

@@ -70,18 +70,34 @@ class OtaClientViewSmokeCommand extends Command
         );
 
         /** @var array{area: string, logical_name: string, label: string} $fallbackSample */
-        $fallbackSample = $page['fallback_sample'] ?? ['area' => 'frontend', 'logical_name' => 'auth.login', 'label' => 'auth login'];
+        $fallbackSample = $page['fallback_sample'] ?? ['area' => 'frontend', 'logical_name' => 'frontend.cms-pages.show', 'label' => 'cms page show'];
         $fallbackResolution = $viewResolver->resolveSample(
             $fallbackSample['logical_name'],
             $fallbackSample['area'],
             $profile,
         );
-        $checks[] = $this->row(
-            'Legacy fallback when theme view missing',
-            $fallbackSample['label'],
-            $fallbackResolution['fallback_used'] ? 'fallback_used=yes' : 'fallback_used=no',
-            $fallbackResolution['fallback_used'] && $fallbackResolution['view_exists'],
-        );
+
+        $strictFrontend = (bool) config('client.standalone', false)
+            && ! (bool) config('client.fallback_policy.allow_cross_client_views', false);
+
+        if ($strictFrontend) {
+            // JetPakistan standalone: missing theme twins must not silently resolve to legacy HTML.
+            $checks[] = $this->row(
+                'Strict themed: missing twin does not silent-fallback',
+                'view_exists=false (no silent legacy)',
+                $fallbackResolution['view_exists']
+                    ? 'view_exists=yes resolved='.$fallbackResolution['resolved_view_name']
+                    : 'view_exists=no fallback_used='.($fallbackResolution['fallback_used'] ? 'yes' : 'no'),
+                ! $fallbackResolution['view_exists'] && ! $fallbackResolution['fallback_used'],
+            );
+        } else {
+            $checks[] = $this->row(
+                'Legacy fallback when theme view missing',
+                $fallbackSample['label'],
+                $fallbackResolution['fallback_used'] ? 'fallback_used=yes' : 'fallback_used=no',
+                $fallbackResolution['fallback_used'] && $fallbackResolution['view_exists'],
+            );
+        }
 
         $rootResponse = $this->httpGet('/');
         $checks[] = $this->row(

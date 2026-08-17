@@ -17,6 +17,7 @@ class OtaClientViewSmokeCommandTest extends TestCase
         $this->makeProfile([
             'slug' => 'haseeb-master',
             'name' => 'Haseeb Master',
+            'active_frontend_theme' => 'jetpakistan',
             'is_master_profile' => true,
         ]);
 
@@ -32,18 +33,20 @@ class OtaClientViewSmokeCommandTest extends TestCase
         $this->makeProfile([
             'slug' => 'haseeb-master',
             'name' => 'Haseeb Master',
-            'active_frontend_theme' => 'v1-classic',
+            'active_frontend_theme' => 'jetpakistan',
             'active_admin_theme' => 'default-admin',
             'active_staff_theme' => 'default-staff',
             'is_master_profile' => true,
         ]);
 
+        // jetpk is the default deployment slug; haseeb-master remains a non-default
+        // fixture for multi-client smoke coverage (prefixed homepage, not root alias).
         $this->artisan('ota:client-view-smoke', ['--client' => 'haseeb-master'])
             ->expectsOutputToContain('Migrated page resolves')
             ->expectsOutputToContain('Theme view preferred when present')
-            ->expectsOutputToContain('Legacy fallback when theme view missing')
+            ->expectsOutputToContain('Strict themed: missing twin does not silent-fallback')
             ->expectsOutputToContain('Root homepage GET /')
-            ->expectsOutputToContain('Default slug alias /haseeb-master/home')
+            ->expectsOutputToContain('Prefixed homepage /haseeb-master/home')
             ->expectsOutputToContain('Route safety audit')
             ->expectsOutputToContain('Client view smoke passed for haseeb-master.')
             ->assertSuccessful();

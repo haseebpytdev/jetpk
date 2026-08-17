@@ -87,9 +87,11 @@ return [
         'logical_name' => 'frontend.home',
         'label' => 'Public homepage (desktop)',
         'fallback_sample' => [
+            // Prefer a page that still has no JetPakistan theme twin so MC-8C
+            // can prove legacy fallback still works after auth.login theming.
             'area' => 'frontend',
-            'logical_name' => 'auth.login',
-            'label' => 'auth login (legacy fallback sample)',
+            'logical_name' => 'frontend.cms-pages.show',
+            'label' => 'cms page show (legacy fallback sample)',
         ],
     ],
 
