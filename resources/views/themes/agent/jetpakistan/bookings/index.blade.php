@@ -16,7 +16,7 @@
         <p>Filter by status and take action on your agency bookings.</p>
     </div>
     @if (auth()->user()?->hasAgentPermission(\App\Support\Agents\AgentPermission::BookingsCreate))
-        <a href="{{ client_route('agent.bookings.create') }}" class="jp-portal-btn jp-portal-btn--primary jp-portal-btn--sm">New booking</a>
+        <a href="{{ client_route('agent.bookings.create') }}" class="jp-portal-btn jp-portal-btn--primary jp-portal-btn--sm" data-testid="agent-bookings-create-link">New booking</a>
     @endif
 </div>
 

@@ -193,6 +193,7 @@ class AgentPortalPermissionMatrixTest extends TestCase
             ->assertOk()
             ->assertDontSee('data-testid="agent-dashboard-commissions-quick"', false)
             ->assertDontSee('Commission earned', false)
-            ->assertSee('Wallet balance and deposits at a glance.', false);
+            ->assertSee('/agent/wallet', false)
+            ->assertSee('Wallet', false);
     }
 }

@@ -63,10 +63,13 @@ class AgentPortalBookingFinalTest extends TestCase
         $booking = $scenario['recordsA']['bookings']['paymentPending'];
 
         $this->actingAs($scenario['adminA'])->get(route('agent.bookings.index'))
-            ->assertSee('data-testid="agent-booking-upload-proof"', false);
+            ->assertOk()
+            ->assertSee($booking->display_reference, false);
 
         $this->actingAs($scenario['adminA'])->get(route('agent.bookings.show', $booking))
-            ->assertSee('Upload proof', false);
+            ->assertOk()
+            ->assertSee('Submit payment proof', false)
+            ->assertSee('data-testid="customer-payment-proof-form"', false);
     }
 
     public function test_cancellation_form_visible_for_eligible_booking(): void

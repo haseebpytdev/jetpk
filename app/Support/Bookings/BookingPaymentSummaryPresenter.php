@@ -140,7 +140,7 @@ class BookingPaymentSummaryPresenter
 
         $paymentStatus = strtolower((string) ($booking->payment_status ?? 'unpaid'));
 
-        return in_array($paymentStatus, ['unpaid', 'partial', 'rejected'], true)
+        return in_array($paymentStatus, ['unpaid', 'partial', 'rejected', 'awaiting_proof'], true)
             || (float) ($booking->balance_due ?? 0) > 0;
     }
 
