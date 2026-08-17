@@ -53,7 +53,7 @@ class GoogleOnboardingTest extends TestCase
                 'mobile' => '3001234567',
             ]);
 
-        $response->assertRedirect('/customer/bookings');
+        $response->assertRedirect('/customer/dashboard');
         $user->refresh();
         $this->assertSame('complete@example.com', $user->email);
         $this->assertSame('Complete Me', $user->name);
@@ -126,7 +126,7 @@ class GoogleOnboardingTest extends TestCase
         $this->mockCallbackDriver($this->fakeSocialiteUser('gid-complete', 'complete-linked@example.com', 'Complete Linked'));
 
         $this->get('/auth/google/callback')
-            ->assertRedirect('/customer/bookings');
+            ->assertRedirect('/customer/dashboard');
         $this->assertFalse(session()->has(GoogleOnboarding::SESSION_REQUIRED));
     }
 
@@ -170,7 +170,7 @@ class GoogleOnboardingTest extends TestCase
         $this->mockCallbackDriver($this->fakeSocialiteUser('gid-promoted', 'promoted@example.com', 'Promoted User'));
 
         $this->get('/auth/google/callback')
-            ->assertRedirect('/staff');
+            ->assertRedirect('/staff/dashboard');
         $this->assertFalse(session()->has(GoogleOnboarding::SESSION_REQUIRED));
     }
 
@@ -208,7 +208,7 @@ class GoogleOnboardingTest extends TestCase
         $beforeCount = User::query()->count();
         $this->mockCallbackDriver($this->fakeSocialiteUser('gid-dup', 'linked@example.com', 'Linked User'));
 
-        $this->get('/auth/google/callback')->assertRedirect('/customer/bookings');
+        $this->get('/auth/google/callback')->assertRedirect('/customer/dashboard');
 
         $this->assertSame($beforeCount, User::query()->count());
     }

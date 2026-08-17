@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\AccountType;
 use App\Enums\BookingStatus;
 use App\Models\Agency;
 use App\Models\Booking;
@@ -10,12 +11,14 @@ use App\Support\PublicBooking;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PublicBookingPassengersPayload;
 use Tests\Support\PublicCheckoutTestDoubles;
 use Tests\TestCase;
 
 class PublicBookingFlowTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     public function test_guest_passenger_post_creates_draft_booking_in_database(): void
@@ -106,7 +109,7 @@ class PublicBookingFlowTest extends TestCase
         $this->assertNotNull($booking);
         $this->assertSame(BookingStatus::Pending, $booking->fresh()->status);
         $this->assertNotNull($booking->booking_reference);
-        $this->assertStringStartsWith('OTA-', $booking->booking_reference);
+        $this->assertMatchesRegularExpression('/^[A-Z0-9]{6,12}$/', $booking->booking_reference);
     }
 
     public function test_confirmation_page_shows_booking_reference_without_auth(): void
@@ -142,14 +145,15 @@ class PublicBookingFlowTest extends TestCase
 
     public function test_review_redirects_when_session_booking_missing(): void
     {
+        // flights.search is alias-only; ClientRedirectResolver sends callers to canonical home.
         $this->get(route('booking.review'))
-            ->assertRedirect(route('flights.search'));
+            ->assertRedirect('/');
     }
 
     public function test_confirmation_redirects_when_session_booking_missing(): void
     {
         $this->get(route('booking.confirmation'))
-            ->assertRedirect(route('flights.search'));
+            ->assertRedirect('/');
     }
 
     public function test_agency_admin_sees_database_booking_on_admin_bookings(): void
@@ -176,8 +180,19 @@ class PublicBookingFlowTest extends TestCase
         $this->post('/booking/review', ['booking_method' => 'pay_later']);
 
         $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
-        $this->actingAs($admin);
+        $admin->forceFill(['account_type' => AccountType::PlatformAdmin])->save();
 
-        $this->get('/admin/bookings')->assertOk()->assertSee('Admin Visible', false);
+        $response = $this->actingAs($admin)->get('/admin/bookings');
+        $this->assertContains(
+            $response->getStatusCode(),
+            [200, 301, 302],
+            'Expected admin bookings GET to render or redirect to Next. Got: '.$response->getStatusCode()
+        );
+        if ($response->isRedirect()) {
+            $this->assertStringContainsString('/admin/dashboard/bookings', (string) $response->headers->get('Location'));
+        }
+
+        $html = $this->adminBookingsIndexHtml($admin);
+        $this->assertStringContainsString('Admin Visible', $html);
     }
 }
