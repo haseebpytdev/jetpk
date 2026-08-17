@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AgentDepositController;
 use App\Http\Controllers\Admin\BackgroundRemovalSettingsController;
 use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\ClientPageSettingsController;
+use App\Http\Controllers\Admin\CustomerManagementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinanceAdjustmentController;
 use App\Http\Controllers\Admin\FinanceDashboardController;
@@ -85,6 +86,49 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(BookingManagementController::class)->index($request)->render();
+    }
+
+    protected function adminCustomersIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/customers', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(CustomerManagementController::class)->index($request)->render();
+    }
+
+    protected function assertLegacyAdminBookingsIndexRedirect(User $admin): void
+    {
+        $response = $this->actingAs($admin)->get(route('admin.bookings'));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/bookings', (string) $response->headers->get('Location'));
+    }
+
+    protected function assertLegacyAdminCustomersIndexRedirect(User $admin): void
+    {
+        $response = $this->actingAs($admin)->get(route('admin.customers.index'));
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertTrue(
+            str_contains($target, '/admin/dashboard/customers')
+            || str_contains($target, '/admin/dashboard'),
+            'Expected customers index GET to redirect into Next customers. Got: '.$target
+        );
+    }
+
+    protected function assertLegacyAdminReportsRedirect(User $admin): void
+    {
+        $response = $this->actingAs($admin)->get(route('admin.reports'));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/reports', (string) $response->headers->get('Location'));
+    }
+
+    protected function assertLegacyStaffBookingsIndexRedirect(User $staff): void
+    {
+        $response = $this->actingAs($staff)->get(route('staff.bookings.index'));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/staff/dashboard/bookings', (string) $response->headers->get('Location'));
     }
 
     /**

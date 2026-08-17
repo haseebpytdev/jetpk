@@ -8,11 +8,13 @@ use App\Support\Staff\StaffPermission;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Agent\Concerns\BuildsAgentPortalScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\JetpkHomepageFixture;
 use Tests\TestCase;
 
 class PortalPermissionBoundaryTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsAgentPortalScenario;
     use JetpkHomepageFixture;
     use RefreshDatabase;
@@ -63,9 +65,7 @@ class PortalPermissionBoundaryTest extends TestCase
     {
         $staff = $this->staffWithPermissions([StaffPermission::BookingsView]);
 
-        $this->actingAs($staff)
-            ->get(route('staff.bookings.index'))
-            ->assertOk();
+        $this->assertLegacyStaffBookingsIndexRedirect($staff);
     }
 
     public function test_platform_staff_without_required_permission_is_denied_admin_route_without_payload(): void

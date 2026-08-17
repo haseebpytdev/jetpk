@@ -6,11 +6,13 @@ use App\Models\ClientProfile;
 use App\Services\Client\CurrentClientContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class JetPakistanAdminDesignSystemParityPhase17DTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -45,8 +47,10 @@ class JetPakistanAdminDesignSystemParityPhase17DTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $bookings = $this->actingAs($admin)->get(route('admin.bookings'))->assertOk()->getContent();
-        $customers = $this->actingAs($admin)->get(route('admin.customers.index'))->assertOk()->getContent();
+        $this->assertLegacyAdminBookingsIndexRedirect($admin);
+        $this->assertLegacyAdminCustomersIndexRedirect($admin);
+        $bookings = $this->adminBookingsIndexHtml($admin);
+        $customers = $this->adminCustomersIndexHtml($admin);
 
         foreach ([$bookings, $customers] as $html) {
             $this->assertStringContainsString('ota-admin-console.css', $html);

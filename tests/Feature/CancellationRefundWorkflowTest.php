@@ -24,10 +24,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class CancellationRefundWorkflowTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use RefreshDatabase;
 
     protected function tearDown(): void
@@ -435,7 +437,10 @@ class CancellationRefundWorkflowTest extends TestCase
 
         $this->assertSame('rejected', $refund->fresh()->status->value);
         $this->assertNotSame('refunded', $booking->fresh()->refund_status);
-        $this->actingAs($admin)->get(route('admin.reports'))->assertOk()->assertSee('Cancellations')->assertSee('Pending refunds');
+        $this->assertLegacyAdminReportsRedirect($admin);
+        $html = $this->adminReportsHtml($admin);
+        $this->assertStringContainsString('Cancellations', $html);
+        $this->assertStringContainsString('Pending refunds', $html);
     }
 
     /**

@@ -36,10 +36,12 @@ use Illuminate\Support\Facades\Artisan;
 use Mockery;
 use RuntimeException;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class LedgerLivePostingTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -257,8 +259,8 @@ class LedgerLivePostingTest extends TestCase
         $platform = $scenario['platform'];
         $et = $scenario['agencies']['et'];
 
-        $this->actingAs($platform['admin'])->get(route('admin.ledger.index'))->assertOk();
-        $this->actingAs($platform['staffFinance'])->get(route('staff.ledger.index'))->assertOk();
+        $this->assertLegacyAccountingRedirect($platform['admin'], route('admin.ledger.index'));
+        $this->assertLegacyStaffAccountingRedirect($platform['staffFinance'], route('staff.ledger.index'));
         $this->actingAs($et['owner'])->get(route('agent.ledger.index'))->assertOk();
         $this->actingAs($platform['staffOps'])->get(route('staff.ledger.index'))->assertForbidden();
     }
