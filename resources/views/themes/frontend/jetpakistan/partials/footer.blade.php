@@ -40,7 +40,13 @@
       @if ($jpFooter['columns'] === [])
         <div class="fcol"><h4>Company</h4><a href="{{ client_route('about') }}">About us</a><a href="{{ client_route('support') }}">Contact</a></div>
         <div class="fcol"><h4>Policies</h4><a href="{{ client_route('terms') }}">Terms</a><a href="{{ client_route('privacy') }}">Privacy</a></div>
-        <div class="fcol"><h4>Support</h4><a href="{{ client_route('faq') }}">Help centre</a><a href="{{ client_route('booking.lookup') }}">Manage booking</a></div>
+        <div class="fcol">
+          <h4>Support</h4>
+          <a href="{{ client_route('faq') }}">Help centre</a>
+          @if (\App\Support\Platform\PlatformModuleGate::visible('customer_booking_lookup'))
+            <a href="{{ client_route('booking.lookup') }}">Manage booking</a>
+          @endif
+        </div>
         <div class="fcol"><h4>B2B & agents</h4><a href="{{ client_route('agent.register') }}">Become an agent</a></div>
       @endif
     </div>

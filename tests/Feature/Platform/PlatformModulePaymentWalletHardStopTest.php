@@ -328,6 +328,7 @@ class PlatformModulePaymentWalletHardStopTest extends TestCase
             'payment_status' => 'unpaid',
             'source_channel' => 'agent_portal',
             'route' => 'LHE-DXB',
+            'booking_reference' => 'AGT-'.strtoupper((string) fake()->unique()->bothify('????####')),
         ]);
     }
 
