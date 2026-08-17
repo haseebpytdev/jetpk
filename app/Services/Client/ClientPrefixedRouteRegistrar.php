@@ -220,15 +220,16 @@ final class ClientPrefixedRouteRegistrar
 
         $middleware = $this->parityMiddleware($sourceRoute->gatherMiddleware());
         $action = $sourceRoute->getAction();
-        unset($action['as'], $action['prefix'], $action['middleware']);
+        // Source action often carries where=[] which would wipe registrar constraints on merge.
+        unset($action['as'], $action['prefix'], $action['middleware'], $action['where']);
         $action['client_parity_classification'] = $classification;
         $action['client_parity_portal'] = $this->resolvePortal($originalName, $classification);
 
         $registrar = RouteFacade::middleware($middleware)
             ->prefix('{clientSlug}')
             ->where(array_merge(
-                ['clientSlug' => ReservedClientPreviewSlugs::routeParameterConstraint()],
                 $sourceRoute->wheres,
+                ['clientSlug' => ReservedClientPreviewSlugs::routeParameterConstraint()],
             ));
 
         $registered = match (strtoupper($method)) {
@@ -241,6 +242,7 @@ final class ClientPrefixedRouteRegistrar
             return;
         }
 
+        $registered->where('clientSlug', ReservedClientPreviewSlugs::routeParameterConstraint());
         $registered->name($parityName);
         $this->registeredKeys[$collisionKey] = true;
         $this->byClassification[$classification] = ($this->byClassification[$classification] ?? 0) + 1;
@@ -252,7 +254,8 @@ final class ClientPrefixedRouteRegistrar
     {
         $middleware = $this->parityMiddleware($sourceRoute->gatherMiddleware());
         $action = $sourceRoute->getAction();
-        unset($action['as'], $action['prefix'], $action['middleware']);
+        // Source action often carries where=[] which would wipe registrar constraints on merge.
+        unset($action['as'], $action['prefix'], $action['middleware'], $action['where']);
         $action['client_parity_classification'] = $classification;
         $action['client_parity_portal'] = $this->resolvePortal('home', $classification);
 
@@ -287,14 +290,16 @@ final class ClientPrefixedRouteRegistrar
             return;
         }
 
-        RouteFacade::middleware($middleware)
+        $registered = RouteFacade::middleware($middleware)
             ->prefix('{clientSlug}')
             ->where(array_merge(
-                ['clientSlug' => ReservedClientPreviewSlugs::routeParameterConstraint()],
                 $sourceRoute->wheres,
+                ['clientSlug' => ReservedClientPreviewSlugs::routeParameterConstraint()],
             ))
-            ->get('home', $action)
-            ->name($aliasName);
+            ->get('home', $action);
+
+        $registered->where('clientSlug', ReservedClientPreviewSlugs::routeParameterConstraint());
+        $registered->name($aliasName);
 
         $this->registeredKeys[$aliasKey] = true;
         $this->byClassification[$classification] = ($this->byClassification[$classification] ?? 0) + 1;

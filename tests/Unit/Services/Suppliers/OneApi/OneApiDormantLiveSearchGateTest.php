@@ -186,7 +186,7 @@ class OneApiDormantLiveSearchGateTest extends TestCase
         return new FlightSearchRequestData(
             origin: 'SHJ',
             destination: 'KHI',
-            departure_date: '2026-08-15',
+            departure_date: now()->addDays(21)->toDateString(),
             return_date: null,
             adults: 1,
             children: 0,
