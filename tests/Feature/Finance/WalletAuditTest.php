@@ -21,10 +21,12 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class WalletAuditTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -37,11 +39,11 @@ class WalletAuditTest extends TestCase
 
     public function test_platform_admin_can_view_wallet_audit_page(): void
     {
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.finance.wallet-audit.index'))
-            ->assertOk()
-            ->assertSee('data-testid="wallet-audit-summary-cards"', false)
-            ->assertSee('data-testid="wallet-audit-readonly-notice"', false);
+        $admin = $this->platformAdmin();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.wallet-audit.index'));
+        $html = $this->adminWalletAuditIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="wallet-audit-summary-cards"', $html);
+        $this->assertStringContainsString('data-testid="wallet-audit-readonly-notice"', $html);
     }
 
     public function test_staff_cannot_view_wallet_audit_page(): void
@@ -235,9 +237,9 @@ class WalletAuditTest extends TestCase
 
         $countsBefore = $this->financeTableCounts();
 
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.finance.wallet-audit.index'))
-            ->assertOk();
+        $this->actingAs($this->platformAdmin());
+        $this->assertLegacyAccountingRedirect($this->platformAdmin(), route('admin.finance.wallet-audit.index'));
+        $this->adminWalletAuditIndexHtml($this->platformAdmin());
 
         $this->assertSame($countsBefore, $this->financeTableCounts());
     }

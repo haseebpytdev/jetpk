@@ -12,6 +12,9 @@
             @endif
         </div>
         <div class="jp-toolbar">
+            @if (Route::has('admin.accounting.ledger.export'))
+                <a href="{{ route('admin.accounting.ledger.export', request()->query()) }}" class="jp-btn jp-btn--outline" data-testid="accounting-ledger-export">Export CSV</a>
+            @endif
             @if (Route::has('admin.accounting.reconciliation.index'))
                 <a href="{{ route('admin.accounting.reconciliation.index') }}" class="jp-btn jp-btn--ghost">Reconciliation</a>
             @endif

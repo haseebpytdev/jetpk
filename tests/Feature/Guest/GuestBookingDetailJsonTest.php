@@ -64,9 +64,17 @@ class GuestBookingDetailJsonTest extends TestCase
         $booking = $this->guestBooking();
         $token = $this->guestToken($booking);
 
+        // HTML presentation is owned by Next; Laravel keeps guest-safe JSON.
         $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+            ->assertRedirect();
+
+        $payload = $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json')
             ->assertOk()
-            ->assertSee('data-testid="guest-booking-detail-layout"', false);
+            ->assertJsonPath('ok', true)
+            ->json();
+
+        $this->assertSame($booking->booking_reference, $payload['booking_reference'] ?? null);
+        $this->assertNotEmpty($payload['blade_fallback_url'] ?? null);
     }
 
     public function test_json_and_blade_reference_same_booking(): void
@@ -80,10 +88,14 @@ class GuestBookingDetailJsonTest extends TestCase
             ->json('booking_reference');
 
         $this->get(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]))
+            ->assertRedirect();
+
+        $redirectedJson = $this->getJson(route('guest.bookings.show', ['booking' => $booking, 'token' => $token]).'?format=json')
             ->assertOk()
-            ->assertSee($booking->booking_reference, false);
+            ->json('booking_reference');
 
         $this->assertSame($booking->booking_reference, $json);
+        $this->assertSame($booking->booking_reference, $redirectedJson);
     }
 
     public function test_lookup_json_request_returns_safe_internal_redirect_url(): void

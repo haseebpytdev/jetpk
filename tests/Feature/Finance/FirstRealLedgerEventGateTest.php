@@ -23,6 +23,7 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 /**
@@ -30,6 +31,7 @@ use Tests\TestCase;
  */
 class FirstRealLedgerEventGateTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -125,39 +127,53 @@ class FirstRealLedgerEventGateTest extends TestCase
             ->where('transaction_type', LedgerTransactionType::AgencyDepositApproved)
             ->firstOrFail();
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-row-'.$tx->id.'"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index'));
+        $this->assertStringContainsString(
+            'data-testid="accounting-ledger-row-'.$tx->id.'"',
+            $this->adminAccountingLedgerIndexHtml($admin)
+        );
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.show', $tx))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-entries"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.show', $tx));
+        $this->assertStringContainsString(
+            'data-testid="accounting-ledger-entries"',
+            $this->adminAccountingLedgerShowHtml($admin, $tx)
+        );
 
-        $this->actingAs($admin)->get(route('admin.accounting.reconciliation.index'))
-            ->assertOk()
-            ->assertSee('data-testid="reconciliation-agency-'.$agent->agency_id.'"', false)
-            ->assertSee('Matched', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.reconciliation.index'));
+        $reconHtml = $this->adminAccountingReconciliationIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="reconciliation-agency-'.$agent->agency_id.'"', $reconHtml);
+        $this->assertStringContainsString('Matched', $reconHtml);
 
-        $this->actingAs($agentUser)->get(route('agent.accounting.ledger.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-row-'.$tx->id.'"', false);
+        $this->assertLegacyAgentAccountingRedirectOrOk($agentUser, route('agent.accounting.ledger.index'));
+        $this->assertStringContainsString(
+            'data-testid="accounting-ledger-row-'.$tx->id.'"',
+            $this->agentAccountingLedgerIndexHtml($agentUser)
+        );
 
         $otherAgentUser = $this->seedOtherAgencyAgentUser();
-        $this->actingAs($otherAgentUser)->get(route('agent.accounting.ledger.index'))
-            ->assertOk()
-            ->assertDontSee('data-testid="accounting-ledger-row-'.$tx->id.'"', false);
+        $this->assertLegacyAgentAccountingRedirectOrOk($otherAgentUser, route('agent.accounting.ledger.index'));
+        $this->assertStringNotContainsString(
+            'data-testid="accounting-ledger-row-'.$tx->id.'"',
+            $this->agentAccountingLedgerIndexHtml($otherAgentUser)
+        );
 
         $staffAllowed = $this->staffWithPermissions([StaffPermission::LedgerView]);
-        $this->actingAs($staffAllowed)->get(route('staff.accounting.ledger.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-row-'.$tx->id.'"', false);
+        $this->assertLegacyStaffAccountingRedirect($staffAllowed, route('staff.accounting.ledger.index'));
+        $this->assertStringContainsString(
+            'data-testid="accounting-ledger-row-'.$tx->id.'"',
+            $this->staffAccountingLedgerIndexHtml($staffAllowed)
+        );
 
         $staffDenied = $this->staffWithPermissions([StaffPermission::BookingsView]);
         $this->actingAs($staffDenied)->get(route('staff.accounting.ledger.index'))->assertForbidden();
 
-        $this->actingAs($admin)->get(route('admin.ledger.index'))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.ledger.index'));
+        $this->assertNotSame('', $this->adminMasterLedgerHtml($admin));
         $this->actingAs($agentUser)->get(route('agent.ledger.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.reports'))->assertOk();
+        $reports = $this->actingAs($admin)->get(route('admin.reports'));
+        $reports->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/reports', (string) $reports->headers->get('Location'));
+        $this->assertNotSame('', $this->adminReportsHtml($admin));
     }
 
     public function test_viewing_accounting_pages_does_not_mutate_source_of_truth_after_gate(): void
@@ -170,9 +186,12 @@ class FirstRealLedgerEventGateTest extends TestCase
         $ledgerTxCount = LedgerTransaction::query()->count();
 
         $tx = LedgerTransaction::query()->firstOrFail();
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.show', $tx))->assertOk();
-        $this->actingAs($admin)->get(route('admin.accounting.reconciliation.index'))->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index'));
+        $this->adminAccountingLedgerIndexHtml($admin);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.show', $tx));
+        $this->adminAccountingLedgerShowHtml($admin, $tx);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.reconciliation.index'));
+        $this->adminAccountingReconciliationIndexHtml($admin);
 
         $this->assertSame($walletCount, AgentWallet::query()->count());
         $this->assertSame($walletTxCount, AgentWalletTransaction::query()->count());

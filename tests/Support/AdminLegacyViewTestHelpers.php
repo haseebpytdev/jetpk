@@ -24,6 +24,8 @@ use App\Http\Controllers\Admin\FinanceStatementController;
 use App\Http\Controllers\Admin\AdminGroupTicketingController;
 use App\Http\Controllers\Admin\SupplierConnectionController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\WalletAuditController;
+use App\Http\Controllers\Agent\AccountingLedgerController as AgentAccountingLedgerController;
 use App\Http\Controllers\Staff\AccountingLedgerController as StaffAccountingLedgerController;
 use App\Http\Controllers\Staff\AccountingReconciliationController as StaffAccountingReconciliationController;
 use App\Http\Controllers\Staff\BookingController as StaffBookingController;
@@ -372,6 +374,66 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(AccountingReconciliationController::class)->index($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function adminWalletAuditIndexHtml(User $admin, array $query = []): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/finance/wallet-audit', 'GET', $query);
+        $request->setUserResolver(fn () => $admin);
+
+        return app(WalletAuditController::class)->index($request)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    protected function agentAccountingLedgerIndexHtml(User $agentUser, array $query = []): string
+    {
+        $this->actingAs($agentUser);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/agent/accounting/ledger', 'GET', $query);
+        $request->setUserResolver(fn () => $agentUser);
+
+        $response = app(AgentAccountingLedgerController::class)->index($request);
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $response);
+
+        return $response->render();
+    }
+
+    protected function assertLegacyAgentAccountingRedirect(User $agentUser, string $uri = '/agent/accounting/ledger'): void
+    {
+        $response = $this->actingAs($agentUser)->get($uri);
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertTrue(
+            str_contains($target, '/agent/dashboard') || str_contains($target, '/agent/accounting'),
+            'Expected agent accounting GET to redirect into Next agent accounting. Got: '.$target
+        );
+    }
+
+    /**
+     * Agent accounting GETs may still render Blade until the portal route is fully Next-migrated.
+     */
+    protected function assertLegacyAgentAccountingRedirectOrOk(User $agentUser, string $uri = '/agent/accounting/ledger'): void
+    {
+        $response = $this->actingAs($agentUser)->get($uri);
+        $this->assertContains(
+            $response->getStatusCode(),
+            [200, 301, 302],
+            'Expected agent accounting GET to render or redirect. Got: '.$response->getStatusCode()
+        );
+        if ($response->isRedirect()) {
+            $target = (string) $response->headers->get('Location');
+            $this->assertTrue(
+                str_contains($target, '/agent/dashboard') || str_contains($target, '/agent/accounting'),
+                'Unexpected agent accounting redirect target: '.$target
+            );
+        }
     }
 
     protected function adminCommissionsIndexHtml(User $admin): string

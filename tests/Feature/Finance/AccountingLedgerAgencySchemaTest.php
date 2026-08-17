@@ -16,6 +16,7 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ use Tests\TestCase;
  */
 class AccountingLedgerAgencySchemaTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -55,16 +57,14 @@ class AccountingLedgerAgencySchemaTest extends TestCase
         $admin = $this->platformAdmin();
         $tx = $this->seedPostedDepositLedgerTransaction();
 
-        $this->actingAs($admin)
-            ->get(route('admin.accounting.ledger.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-table"', false)
-            ->assertSee('data-testid="accounting-ledger-row-'.$tx->id.'"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index'));
+        $indexHtml = $this->adminAccountingLedgerIndexHtml($admin);
+        $this->assertStringContainsString('data-testid="accounting-ledger-table"', $indexHtml);
+        $this->assertStringContainsString('data-testid="accounting-ledger-row-'.$tx->id.'"', $indexHtml);
 
-        $this->actingAs($admin)
-            ->get(route('admin.accounting.ledger.show', $tx))
-            ->assertOk()
-            ->assertSee($tx->transaction_ref);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.show', $tx));
+        $showHtml = $this->adminAccountingLedgerShowHtml($admin, $tx);
+        $this->assertStringContainsString($tx->transaction_ref, $showHtml);
     }
 
     public function test_finance_dashboard_recent_ledger_link_does_not_500_without_agency_code_column(): void
@@ -72,9 +72,8 @@ class AccountingLedgerAgencySchemaTest extends TestCase
         $admin = $this->platformAdmin();
         $this->seedPostedDepositLedgerTransaction();
 
-        $this->actingAs($admin)
-            ->get(route('admin.finance.dashboard'))
-            ->assertOk();
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.dashboard'));
+        $this->assertNotSame('', $this->adminFinanceDashboardHtml($admin));
     }
 
     protected function platformAdmin(): User

@@ -18,10 +18,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Tests\Feature\Finance\Concerns\BuildsOtaFinanceScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\TestCase;
 
 class FinanceExportAuditPackTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsOtaFinanceScenario;
     use RefreshDatabase;
 
@@ -178,31 +180,47 @@ class FinanceExportAuditPackTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.finance.dashboard'))
-            ->assertOk()
-            ->assertSee('data-testid="finance-dashboard-export-csv"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.dashboard'));
+        $this->assertStringContainsString(
+            'data-testid="finance-dashboard-export-csv"',
+            $this->adminFinanceDashboardHtml($admin)
+        );
 
-        $this->actingAs($admin)->get(route('admin.accounting.reconciliation.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-reconciliation-export-csv"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.reconciliation.index'));
+        $this->assertStringContainsString(
+            'data-testid="accounting-reconciliation-export-csv"',
+            $this->adminAccountingReconciliationIndexHtml($admin)
+        );
 
-        $this->actingAs($admin)->get(route('admin.finance.wallet-audit.index'))
-            ->assertOk()
-            ->assertSee('data-testid="wallet-audit-export-csv"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.wallet-audit.index'));
+        $this->assertStringContainsString(
+            'data-testid="wallet-audit-export-csv"',
+            $this->adminWalletAuditIndexHtml($admin)
+        );
 
-        $this->actingAs($admin)->get(route('admin.finance.adjustments.index'))
-            ->assertOk()
-            ->assertSee('data-testid="finance-adjustments-export-csv"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.finance.adjustments.index'));
+        $this->assertStringContainsString(
+            'data-testid="finance-adjustments-export-csv"',
+            $this->adminFinanceAdjustmentsIndexHtml($admin)
+        );
 
-        $this->actingAs($admin)->get(route('admin.accounting.ledger.index'))
-            ->assertOk()
-            ->assertSee('data-testid="accounting-ledger-export"', false);
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index'));
+        $this->assertStringContainsString(
+            'data-testid="accounting-ledger-export"',
+            $this->adminAccountingLedgerIndexHtml($admin)
+        );
     }
 
     public function test_legacy_query_export_csv_on_ledger_index_still_works(): void
     {
-        $this->actingAs($this->platformAdmin())
-            ->get(route('admin.accounting.ledger.index', ['export' => 'csv']))
+        $admin = $this->platformAdmin();
+        $this->actingAs($admin);
+
+        // Legacy GET index redirects to Next; CSV remains available via dedicated export route
+        // and via controller export query handling when invoked directly.
+        $this->assertLegacyAccountingRedirect($admin, route('admin.accounting.ledger.index', ['export' => 'csv']));
+
+        $this->get(route('admin.accounting.ledger.export'))
             ->assertOk()
             ->assertHeader('content-type', 'text/csv; charset=UTF-8');
     }
