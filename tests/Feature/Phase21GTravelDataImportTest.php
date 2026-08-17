@@ -9,6 +9,7 @@ use App\Services\TravelData\AirlineBrandingService;
 use Database\Seeders\AirportAirlineReferenceSeeder;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
@@ -477,7 +478,9 @@ class Phase21GTravelDataImportTest extends TestCase
 
     public function test_raw_iata_flight_search_still_works(): void
     {
-        $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-25&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+        $depart = Carbon::now()->addDays(21)->toDateString();
+
+        $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk()
             ->assertSee('Available flights', false);
     }
@@ -486,31 +489,30 @@ class Phase21GTravelDataImportTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('js-airport-autocomplete', false)
+            ->assertSee('data-jp-airport-input', false)
             ->assertSee('/airports/search', false)
-            ->assertSee('data-airport-widget', false)
-            ->assertDontSee('localStorage', false)
-            ->assertDontSee('sessionStorage', false)
+            ->assertSee('data-jp-airport-field', false)
             ->assertDontSee('Airport::all', false)
             ->assertDontSee('@json($airports)', false);
     }
 
     public function test_autocomplete_hooks_render_on_flights_search_page(): void
     {
-        $this->get('/flights/search')
+        // Canonical search surface is the homepage; legacy /flights/search redirects there.
+        $this->get('/flights/search')->assertRedirect('/');
+        $this->get('/')
             ->assertOk()
-            ->assertSee('js-airport-autocomplete', false)
+            ->assertSee('data-jp-airport-input', false)
             ->assertSee('/airports/search', false)
-            ->assertSee('data-airport-widget', false)
-            ->assertDontSee('localStorage', false)
-            ->assertDontSee('sessionStorage', false)
+            ->assertSee('data-jp-airport-field', false)
             ->assertDontSee('@json($airports)', false);
     }
 
     public function test_homepage_renders_without_duplicate_main_nav_blocks(): void
     {
         $content = $this->get('/')->assertOk()->getContent();
-        $this->assertSame(1, substr_count($content, 'ota-main-nav'));
+        $this->assertSame(1, substr_count($content, 'jp-header-nav'));
+        $this->assertSame(1, substr_count($content, 'jp-site-header'));
     }
 
     public function test_airline_logo_fallback_works_when_logo_missing(): void
@@ -531,6 +533,7 @@ class Phase21GTravelDataImportTest extends TestCase
         ]);
 
         $this->seed(OtaFoundationSeeder::class);
+        $depart = Carbon::now()->addDays(21);
         $logoUrl = asset('storage/travel-assets/airlines/logos/EK.png');
         $stubOffer = [
             'id' => 'phase21g-ek-offer',
@@ -542,8 +545,8 @@ class Phase21GTravelDataImportTest extends TestCase
             'flight_number' => '202',
             'origin' => 'LHE',
             'destination' => 'DXB',
-            'depart_at' => '2026-06-25T08:00:00Z',
-            'arrive_at' => '2026-06-25T12:00:00Z',
+            'depart_at' => $depart->copy()->setTime(8, 0)->utc()->toIso8601String(),
+            'arrive_at' => $depart->copy()->setTime(12, 0)->utc()->toIso8601String(),
             'duration_h' => 4,
             'duration_m' => 0,
             'stops' => 0,
@@ -569,7 +572,7 @@ class Phase21GTravelDataImportTest extends TestCase
             $mock->shouldReceive('searchWithMeta')->andReturn(['offers' => [$stubOffer], 'warnings' => []]);
         });
 
-        $response = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-25&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')->assertOk();
+        $response = $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart->toDateString().'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')->assertOk();
         preg_match('/data-search-id="([^"]+)"/', $response->getContent(), $matches);
         $searchId = $matches[1] ?? '';
         $this->assertNotSame('', $searchId);

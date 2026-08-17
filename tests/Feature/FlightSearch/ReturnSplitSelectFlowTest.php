@@ -5,6 +5,7 @@ namespace Tests\Feature\FlightSearch;
 use App\Services\FlightSearch\FlightSearchResultStore;
 use App\Services\FlightSearch\FlightSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Mockery;
 use Tests\TestCase;
@@ -16,7 +17,15 @@ class ReturnSplitSelectFlowTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Fixture query strings use July 2026; pin "today" earlier so depart validation stays green.
+        Carbon::setTestNow(Carbon::parse('2026-06-15 10:00:00'));
         config(['ota.return_split_select_enabled' => true]);
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
     }
 
     public function test_one_way_results_data_unchanged_without_return_split_flow(): void

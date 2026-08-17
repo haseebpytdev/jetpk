@@ -13,6 +13,7 @@ use App\Models\SupplierConnection;
 use App\Models\User;
 use App\Services\Pricing\PricingRuleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -128,7 +129,9 @@ class Phase21HLegacyDataAndDuffelPrepTest extends TestCase
         ]);
         DB::table('markup_rules')->where('id', $rule->id)->update(['rule_type' => 'fixed_pkr']);
 
-        $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-25&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+        $depart = Carbon::now()->addDays(21)->toDateString();
+
+        $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk();
     }
 
@@ -136,7 +139,9 @@ class Phase21HLegacyDataAndDuffelPrepTest extends TestCase
     {
         Agency::factory()->create(['slug' => (string) config('ota.default_agency_slug', 'asif-travels')]);
 
-        $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-25&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+        $depart = Carbon::now()->addDays(21)->toDateString();
+
+        $this->get('/flights/results?from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk()
             ->assertSee('No fares found for this route/date. Try a different date or contact support.');
     }
