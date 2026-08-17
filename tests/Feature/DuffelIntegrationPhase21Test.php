@@ -26,16 +26,17 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class DuffelIntegrationPhase21Test extends TestCase
 {
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     public function test_duffel_readiness_check_accepts_access_token(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $connection = $this->configureDuffelConnection((int) $admin->current_agency_id, [
             'environment' => SupplierEnvironment::Sandbox,
             'status' => SupplierConnectionStatus::Inactive,
