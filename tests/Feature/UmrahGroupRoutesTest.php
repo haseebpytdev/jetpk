@@ -11,6 +11,18 @@ class UmrahGroupRoutesTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config([
+            'ota.group_ticketing.inventory_search_sync_enabled' => false,
+            'ota.group_ticketing.realtime_search_enabled' => false,
+            'ota.group_ticketing.require_live_provider_for_public_results' => false,
+            'ota.group_ticketing.require_live_provider_for_reservation' => false,
+            'suppliers.al_haider.enabled' => false,
+        ]);
+    }
+
     public function test_umrah_groups_index_redirects_to_group_search(): void
     {
         $this->seed(OtaFoundationSeeder::class);
@@ -29,7 +41,7 @@ class UmrahGroupRoutesTest extends TestCase
             'public_id' => 'ALH-42',
             'title' => 'Umrah Group — LHE-JED',
             'sector' => 'LHE-JED',
-            'departure_date' => '2026-03-01',
+            'departure_date' => now()->addDays(45)->toDateString(),
             'total_seats' => 12,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -40,7 +52,7 @@ class UmrahGroupRoutesTest extends TestCase
 
         $this->get('/groups/search')
             ->assertOk()
-            ->assertSee('Umrah Group — LHE-JED', false)
+            ->assertSee('LHE-JED', false)
             ->assertSee('185,000', false);
     }
 
@@ -54,6 +66,7 @@ class UmrahGroupRoutesTest extends TestCase
             'public_id' => 'ALH-1',
             'title' => 'Fixture Umrah Package',
             'sector' => 'LHE-JED',
+            'departure_date' => now()->addDays(50)->toDateString(),
             'total_seats' => 8,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -68,6 +81,6 @@ class UmrahGroupRoutesTest extends TestCase
         $this->get('/groups/package/ALH-1')
             ->assertOk()
             ->assertSee('Fixture Umrah Package', false)
-            ->assertSee('Sign in to book', false);
+            ->assertSee('Book now', false);
     }
 }

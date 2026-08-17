@@ -31,7 +31,7 @@ class SearchResultsUxTest extends TestCase
                 'title' => 'Group '.$i,
                 'sector' => 'SKT-SHJ',
                 'airline_name' => 'AIR ARABIA',
-                'departure_date' => '2026-06-'.str_pad((string) min(28, $i), 2, '0', STR_PAD_LEFT),
+                'departure_date' => now()->addDays(min(60, 10 + $i))->toDateString(),
                 'baggage' => '20+10',
                 'total_seats' => 10,
                 'held_seats' => 0,
@@ -50,8 +50,8 @@ class SearchResultsUxTest extends TestCase
 
         $this->get(route('group-ticketing.search'))
             ->assertOk()
-            ->assertSee('ota-hero-group-search-form', false)
-            ->assertSee('Search Groups', false);
+            ->assertSee('data-jp-group-form', false)
+            ->assertSee('Search groups', false);
     }
 
     public function test_search_shows_fifteen_results_initially(): void

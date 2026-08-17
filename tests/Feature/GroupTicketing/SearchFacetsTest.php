@@ -13,6 +13,18 @@ class SearchFacetsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config([
+            'ota.group_ticketing.inventory_search_sync_enabled' => false,
+            'ota.group_ticketing.realtime_search_enabled' => false,
+            'ota.group_ticketing.require_live_provider_for_public_results' => false,
+            'ota.group_ticketing.require_live_provider_for_reservation' => false,
+            'suppliers.al_haider.enabled' => false,
+        ]);
+    }
+
     public function test_search_dropdowns_use_database_inventory_only(): void
     {
         $this->seed(OtaFoundationSeeder::class);
@@ -33,7 +45,7 @@ class SearchFacetsTest extends TestCase
             'sector' => 'LHE-JED',
             'airline_id' => 7,
             'airline_name' => 'Saudi Airlines',
-            'departure_date' => '2026-07-01',
+            'departure_date' => now()->addDays(40)->toDateString(),
             'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -62,7 +74,7 @@ class SearchFacetsTest extends TestCase
             'sector' => 'LHE-RUH',
             'airline_id' => null,
             'airline_name' => 'FLYNAS',
-            'departure_date' => '2026-08-01',
+            'departure_date' => now()->addDays(45)->toDateString(),
             'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -105,7 +117,7 @@ class SearchFacetsTest extends TestCase
             'title' => 'UAE Group',
             'sector' => 'LHE-DXB',
             'airline_name' => 'AIR ARABIA',
-            'departure_date' => '2026-09-01',
+            'departure_date' => now()->addDays(50)->toDateString(),
             'total_seats' => 8,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -132,7 +144,7 @@ class SearchFacetsTest extends TestCase
             'title' => 'Flynas Group',
             'sector' => 'LHE-RUH',
             'airline_name' => 'FLYNAS',
-            'departure_date' => '2026-08-01',
+            'departure_date' => now()->addDays(30)->toDateString(),
             'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -148,7 +160,7 @@ class SearchFacetsTest extends TestCase
             'title' => 'Air Sial Group',
             'sector' => 'LHE-MCT',
             'airline_name' => 'AIR SIAL',
-            'departure_date' => '2026-08-15',
+            'departure_date' => now()->addDays(45)->toDateString(),
             'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -183,7 +195,7 @@ class SearchFacetsTest extends TestCase
             'title' => 'KSA Group',
             'sector' => 'LHE-RUH',
             'airline_name' => 'FLYNAS',
-            'departure_date' => '2026-07-01',
+            'departure_date' => now()->addDays(35)->toDateString(),
             'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -209,7 +221,7 @@ class SearchFacetsTest extends TestCase
             'title' => 'Hero Group Package',
             'sector' => 'LHE-JED',
             'airline_name' => 'FLYNAS',
-            'departure_date' => '2026-07-01',
+            'departure_date' => now()->addDays(40)->toDateString(),
             'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -220,10 +232,10 @@ class SearchFacetsTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('ota-hero-group-search-form', false)
+            ->assertSee('data-jp-group-form', false)
             ->assertSee('name="date_from"', false)
             ->assertSee('name="date_to"', false)
-            ->assertSee('Search Groups', false)
+            ->assertSee('Search groups', false)
             ->assertDontSee('group-category', false)
             ->assertDontSee('name="flexible"', false)
             ->assertDontSee('name="dept_date"', false);
@@ -233,6 +245,9 @@ class SearchFacetsTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
 
+        $inRange = now()->addDays(20);
+        $outOfRange = now()->addDays(50);
+
         GroupInventory::query()->create([
             'supplier' => 'alhaider',
             'supplier_package_id' => 'july-1',
@@ -240,7 +255,7 @@ class SearchFacetsTest extends TestCase
             'title' => 'July Group',
             'sector' => 'LHE-JED',
             'airline_name' => 'FLYNAS',
-            'departure_date' => '2026-07-15',
+            'departure_date' => $inRange->toDateString(),
             'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -256,7 +271,7 @@ class SearchFacetsTest extends TestCase
             'title' => 'August Group',
             'sector' => 'LHE-JED',
             'airline_name' => 'FLYNAS',
-            'departure_date' => '2026-08-15',
+            'departure_date' => $outOfRange->toDateString(),
             'total_seats' => 10,
             'held_seats' => 0,
             'sold_seats' => 0,
@@ -265,10 +280,13 @@ class SearchFacetsTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->get('/groups/search?date_from=2026-07-01&date_to=2026-07-31')
+        $from = now()->addDays(10)->toDateString();
+        $to = now()->addDays(30)->toDateString();
+
+        $this->get('/groups/search?date_from='.$from.'&date_to='.$to)
             ->assertOk()
-            ->assertSee('15 Jul 2026', false)
+            ->assertSee($inRange->format('j M Y'), false)
             ->assertSee('FLYNAS', false)
-            ->assertDontSee('15 Aug 2026', false);
+            ->assertDontSee($outOfRange->format('j M Y'), false);
     }
 }

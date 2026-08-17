@@ -18,7 +18,13 @@ class PassengerCheckoutTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['ota.group_ticketing.inventory_search_sync_enabled' => false]);
+        config([
+            'ota.group_ticketing.inventory_search_sync_enabled' => false,
+            'ota.group_ticketing.realtime_search_enabled' => false,
+            'ota.group_ticketing.require_live_provider_for_public_results' => false,
+            'ota.group_ticketing.require_live_provider_for_reservation' => false,
+            'suppliers.al_haider.enabled' => false,
+        ]);
     }
 
     private function inventory(int $seats = 5): GroupInventory
