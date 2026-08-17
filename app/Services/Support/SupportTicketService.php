@@ -2,6 +2,7 @@
 
 namespace App\Services\Support;
 
+use App\Enums\AccountType;
 use App\Enums\OtaNotificationEvent;
 use App\Enums\SupportTicketMessageVisibility;
 use App\Enums\SupportTicketStatus;
