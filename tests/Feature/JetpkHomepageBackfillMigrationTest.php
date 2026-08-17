@@ -20,7 +20,7 @@ class JetpkHomepageBackfillMigrationTest extends TestCase
         $this->seedJetpkAirports();
     }
 
-    public function test_backfill_adds_fourth_cards_without_overwriting_custom_three_card_state(): void
+    public function test_backfill_preserves_custom_three_card_state(): void
     {
         $profile = $this->makeJetpkProfile();
         $original = $this->representativeThreeCardHomeContent();
@@ -39,8 +39,8 @@ class JetpkHomepageBackfillMigrationTest extends TestCase
         $content = $published->content_json;
         $this->assertSame('Custom JetPK eyebrow', data_get($content, 'hero.eyebrow'));
         $this->assertSame('Custom routes title', data_get($content, 'routes.title'));
-        $this->assertCount(4, $content['routes']['items']);
-        $this->assertCount(4, $content['destinations']['items']);
+        $this->assertCount(3, $content['routes']['items']);
+        $this->assertCount(3, $content['destinations']['items']);
 
         $this->assertSame(11111, (int) data_get($content, 'routes.items.0.manual_fallback_price'));
         $this->assertSame(22222, (int) data_get($content, 'routes.items.1.manual_fallback_price'));
@@ -48,11 +48,6 @@ class JetpkHomepageBackfillMigrationTest extends TestCase
         $this->assertSame(44444, (int) data_get($content, 'destinations.items.0.manual_fallback_price'));
         $this->assertSame(55555, (int) data_get($content, 'destinations.items.1.manual_fallback_price'));
         $this->assertSame(66666, (int) data_get($content, 'destinations.items.2.manual_fallback_price'));
-
-        $addedRoute = collect($content['routes']['items'])->first(fn ($item) => ($item['from'] ?? '') === 'KHI' && ($item['to'] ?? '') === 'RUH');
-        $this->assertNotNull($addedRoute);
-        $addedDest = collect($content['destinations']['items'])->first(fn ($item) => ($item['code'] ?? '') === 'IST');
-        $this->assertNotNull($addedDest);
 
         foreach ($content['routes']['items'] as $item) {
             $price = (int) ($item['manual_fallback_price'] ?? 0);
@@ -153,7 +148,7 @@ class JetpkHomepageBackfillMigrationTest extends TestCase
             ->where('status', ClientPageSettingStatus::Published)
             ->first();
 
-        $this->assertCount(4, $jetpkPublished->content_json['routes']['items']);
+        $this->assertCount(3, $jetpkPublished->content_json['routes']['items']);
         $this->assertNull($otherPublished);
         $this->assertSame('custom-route-1', $jetpkPublished->content_json['routes']['items'][0]['id']);
     }

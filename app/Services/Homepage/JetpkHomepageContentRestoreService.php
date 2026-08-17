@@ -3,6 +3,7 @@
 namespace App\Services\Homepage;
 
 use App\Services\Client\ClientPageContentResolver;
+use App\Support\Client\ClientPageBootstrapTemplate;
 
 /**
  * Section-scoped homepage CMS repair for blanked JetPK Page Settings fields.
@@ -46,6 +47,23 @@ final class JetpkHomepageContentRestoreService
     {
         $changes = [];
         $defaults = $this->contentResolver->defaultHomeContent();
+        $bootstrap = ClientPageBootstrapTemplate::homeContent();
+        // Section copy lives in the install bootstrap; the runtime shell keeps empty repeating items.
+        if (is_array(data_get($bootstrap, 'feature_board.items'))) {
+            data_set($defaults, 'feature_board', $bootstrap['feature_board']);
+        }
+        foreach (['routes', 'destinations', 'group_cards', 'support_cta'] as $section) {
+            $bootstrapSection = data_get($bootstrap, $section);
+            if (! is_array($bootstrapSection)) {
+                continue;
+            }
+            foreach ($bootstrapSection as $key => $value) {
+                if ($key === 'items') {
+                    continue;
+                }
+                data_set($defaults, $section.'.'.$key, $value);
+            }
+        }
 
         $this->planFeatureBoard($changes, $current, $defaults);
         $this->planTrust($changes, $current);
