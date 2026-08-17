@@ -68,15 +68,20 @@ class JetpkCanonicalResponsiveUiTest extends TestCase
 
     public function test_support_and_lookup_use_canonical_layout_on_mobile_user_agent(): void
     {
-        foreach (['support', 'booking.lookup'] as $routeName) {
-            $html = $this->withHeader('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)')
-                ->get(route($routeName))
-                ->assertOk()
-                ->getContent();
+        $mobileUa = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)';
 
-            $this->assertStringNotContainsString('ota-mobile-app-shell', $html);
-            $this->assertStringNotContainsString('ota-mobile-auth', $html);
-        }
+        $supportHtml = $this->withHeader('User-Agent', $mobileUa)
+            ->get(route('support'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('ota-mobile-app-shell', $supportHtml);
+        $this->assertStringNotContainsString('ota-mobile-auth', $supportHtml);
+
+        // Manage Booking presentation lives on Next; Laravel only redirects the form GET.
+        $this->withHeader('User-Agent', $mobileUa)
+            ->get('/lookup-booking')
+            ->assertRedirect(rtrim((string) config('app.url'), '/').'/lookup-booking');
     }
 
     public function test_homepage_section_stack_renders_without_preview_context(): void

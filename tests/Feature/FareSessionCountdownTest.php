@@ -31,10 +31,9 @@ class FareSessionCountdownTest extends TestCase
     public function test_checkout_blades_include_fare_session_countdown_component(): void
     {
         $files = [
-            resource_path('views/frontend/booking/passenger-details.blade.php'),
-            resource_path('views/frontend/booking/review.blade.php'),
-            resource_path('views/mobile/bookings/passengers.blade.php'),
-            resource_path('views/mobile/bookings/review.blade.php'),
+            resource_path('views/frontend/booking/partials/passenger-details-body.blade.php'),
+            resource_path('views/frontend/booking/partials/review-body.blade.php'),
+            resource_path('views/themes/frontend/jetpakistan/frontend/booking/partials/review-body.blade.php'),
         ];
 
         foreach ($files as $file) {

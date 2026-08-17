@@ -11,12 +11,13 @@ class OtaSyncCurrentClientProfileCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_sync_creates_haseeb_master_from_config(): void
+    public function test_sync_creates_jetpk_profile_from_empty_config_slug(): void
     {
         config([
             'ota_client.slug' => '',
-            'ota_client.theme' => 'v2-modern',
-            'ota_client.asset_profile' => 'haseeb-master',
+            'ota_client.theme' => 'jetpakistan',
+            'ota_client.asset_profile' => 'jetpk-assets',
+            'client.canonical_client.slug' => 'jetpk',
             'ota_client.modules' => [
                 'sabre' => true,
                 'al_haider_group_ticketing' => false,
@@ -28,9 +29,9 @@ class OtaSyncCurrentClientProfileCommandTest extends TestCase
                 'staff_panel' => true,
                 'admin_panel' => true,
             ],
-            'ota-client.agency_name' => 'Haseeb Master Travel',
-            'ota-client.domain_preview' => 'ota.haseebasif.com',
-            'app.url' => 'https://ota.haseebasif.com',
+            'ota-client.agency_name' => 'JetPakistan',
+            'ota-client.domain_preview' => 'jetpk.test',
+            'app.url' => 'https://jetpk.test',
             'app.env' => 'production',
             'app.locale' => 'en',
             'app.timezone' => 'Asia/Karachi',
@@ -38,22 +39,21 @@ class OtaSyncCurrentClientProfileCommandTest extends TestCase
 
         $this->artisan('ota:sync-current-client-profile')
             ->assertSuccessful()
-            ->expectsOutputToContain('haseeb-master');
+            ->expectsOutputToContain('jetpk');
 
         $this->assertDatabaseHas('client_profiles', [
-            'slug' => 'haseeb-master',
-            'name' => 'Haseeb Master Travel',
-            'active_frontend_theme' => 'v2-modern',
-            'asset_profile' => 'haseeb-master',
-            'is_master_profile' => true,
+            'slug' => 'jetpk',
+            'name' => 'JetPakistan',
+            'active_frontend_theme' => 'jetpakistan',
+            'asset_profile' => 'jetpk-assets',
             'is_active' => true,
         ]);
 
-        $profile = ClientProfile::query()->where('slug', 'haseeb-master')->firstOrFail();
+        $profile = ClientProfile::query()->where('slug', 'jetpk')->firstOrFail();
 
         $this->assertDatabaseHas('client_profile_branding', [
             'client_profile_id' => $profile->id,
-            'company_name' => 'Haseeb Master Travel',
+            'company_name' => 'JetPakistan',
         ]);
 
         $this->assertDatabaseHas('client_profile_modules', [

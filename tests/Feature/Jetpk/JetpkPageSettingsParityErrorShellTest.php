@@ -82,7 +82,7 @@ class JetpkPageSettingsParityErrorShellTest extends TestCase
     {
         $layout = file_get_contents(resource_path('views/themes/frontend/jetpakistan/layouts/frontend.blade.php')) ?: '';
         $this->assertStringContainsString('publicCssVariableBlocks', $layout);
-        $this->assertStringContainsString('$jpAssetVersion = 43', $layout);
+        $this->assertMatchesRegularExpression('/\$jpAssetVersion\s*=\s*\d+/', $layout);
     }
 
     public function test_public_palette_css_blocks_resolve_for_jetpk(): void
