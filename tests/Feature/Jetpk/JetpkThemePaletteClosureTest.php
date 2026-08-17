@@ -9,11 +9,13 @@ use App\Support\Branding\JetpkBrandPaletteCssResolver;
 use App\Support\Branding\JetpkThemePaletteValidator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class JetpkThemePaletteClosureTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -350,13 +352,12 @@ class JetpkThemePaletteClosureTest extends TestCase
     public function test_theme_palette_settings_page_renders_day_and_night_sections(): void
     {
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)
-            ->get(route('admin.settings.theme-palette.edit'))
-            ->assertOk()
-            ->assertSee('Day Theme Palette', false)
-            ->assertSee('Night Theme Palette', false)
-            ->assertSee('Primary Action', false)
-            ->assertSee('Live preview', false);
+        $this->assertLegacyThemePaletteRedirect($admin);
+        $html = $this->adminThemePaletteEditHtml($admin);
+        $this->assertStringContainsString('Day Theme Palette', $html);
+        $this->assertStringContainsString('Night Theme Palette', $html);
+        $this->assertStringContainsString('Primary Action', $html);
+        $this->assertStringContainsString('Live preview', $html);
     }
 
     public function test_admin_theme_palette_routes_are_registered(): void

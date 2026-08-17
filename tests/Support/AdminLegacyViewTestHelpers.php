@@ -32,6 +32,7 @@ use App\Http\Controllers\Staff\AccountingReconciliationController as StaffAccoun
 use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Http\Controllers\Staff\FinanceStatementController as StaffFinanceStatementController;
 use App\Http\Controllers\Staff\SupportTicketController as StaffSupportTicketController;
+use App\Http\Controllers\Admin\JetpkThemePaletteSettingsController;
 use App\Http\Controllers\Admin\SupportTicketController as AdminSupportTicketController;
 use App\Http\Controllers\Admin\AdminLedgerController;
 use App\Http\Controllers\Staff\LedgerController as StaffLedgerController;
@@ -630,6 +631,48 @@ trait AdminLegacyViewTestHelpers
         $request->setUserResolver(fn () => $admin);
 
         return app(AdminSupportTicketController::class)->index($request)->render();
+    }
+
+    protected function adminSupportTicketShowHtml(User $admin, SupportTicket $ticket): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/support/tickets/'.$ticket->id, 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(AdminSupportTicketController::class)->show($request, $ticket)->render();
+    }
+
+    protected function assertLegacyAdminSupportTicketShowRedirect(User $admin, SupportTicket $ticket): void
+    {
+        $response = $this->actingAs($admin)->get(route('admin.support.tickets.show', $ticket));
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/admin/dashboard/support', $target);
+    }
+
+    protected function adminThemePaletteEditHtml(User $admin): string
+    {
+        $this->actingAs($admin);
+        view()->share('errors', new ViewErrorBag);
+        $request = Request::create('/admin/settings/theme-palette', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        return app(JetpkThemePaletteSettingsController::class)->edit($request)->render();
+    }
+
+    protected function assertLegacyThemePaletteRedirect(User $admin): void
+    {
+        $response = $this->actingAs($admin)->get(route('admin.settings.theme-palette.edit'));
+        $response->assertRedirect();
+        $target = (string) $response->headers->get('Location');
+        $this->assertTrue(
+            str_contains($target, '/admin/dashboard')
+            || str_contains($target, 'theme')
+            || str_contains($target, 'branding')
+            || str_contains($target, 'settings'),
+            'Expected theme-palette GET to redirect into Next settings. Got: '.$target
+        );
     }
 
     /**

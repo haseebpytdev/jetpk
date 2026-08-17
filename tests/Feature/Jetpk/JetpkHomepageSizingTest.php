@@ -13,12 +13,14 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\JetpkHomepageFixture;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class JetpkHomepageSizingTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use JetpkHomepageFixture;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
@@ -111,13 +113,12 @@ class JetpkHomepageSizingTest extends TestCase
     {
         $this->makeJetpkProfile();
         $admin = $this->platformAdmin();
-        $this->actingAs($admin)
-            ->get(route('admin.page-settings.edit', ['pageKey' => 'home']))
-            ->assertOk()
-            ->assertSee('Hero sizing', false)
-            ->assertSee('name="content[hero][headline_size]"', false)
-            ->assertSee('name="content[hero][search_ui_scale]"', false)
-            ->assertSee('Search box size', false);
+        $this->assertLegacyPageSettingsHomeRedirect($admin);
+        $html = $this->adminPageSettingsEditHtml($admin, 'home');
+        $this->assertStringContainsString('Hero sizing', $html);
+        $this->assertStringContainsString('name="content[hero][headline_size]"', $html);
+        $this->assertStringContainsString('name="content[hero][search_ui_scale]"', $html);
+        $this->assertStringContainsString('Search box size', $html);
     }
 
     public function test_highlight_outline_css_preserved(): void

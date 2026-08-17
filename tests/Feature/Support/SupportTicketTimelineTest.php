@@ -13,11 +13,13 @@ use App\Support\Support\SupportTicketTimelineBuilder;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Agent\Concerns\BuildsAgentPortalScenario;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class SupportTicketTimelineTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use BuildsAgentPortalScenario;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
@@ -172,10 +174,10 @@ class SupportTicketTimelineTest extends TestCase
             'last_reply_at' => now(),
         ]);
 
-        $this->actingAs($admin)->get(route('admin.support.tickets.show', $ticket))
-            ->assertOk()
-            ->assertSee('data-testid="support-ticket-timeline"', false)
-            ->assertSee((string) $staff->name, false);
+        $this->assertLegacyAdminSupportTicketShowRedirect($admin, $ticket);
+        $html = $this->adminSupportTicketShowHtml($admin, $ticket);
+        $this->assertStringContainsString('data-testid="support-ticket-timeline"', $html);
+        $this->assertStringContainsString((string) $staff->name, $html);
     }
 
     public function test_resolved_step_uses_closed_at(): void

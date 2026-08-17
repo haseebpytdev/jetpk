@@ -15,11 +15,13 @@ use App\Support\Bookings\PiaNdcBookingStatusInterpreter;
 use App\Support\Bookings\PiaNdcOperationAuditRecorder;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class PiaNdcAdminBookingVoidStateTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -33,16 +35,15 @@ class PiaNdcAdminBookingVoidStateTest extends TestCase
     {
         [$booking, $admin] = $this->voidedPiaBooking();
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking));
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $html = $this->adminBookingShowHtml($admin, $booking);
 
-        $response->assertOk();
-        $response->assertSee('VOIDED', false);
-        $response->assertSee('Ticket voided', false);
-        $response->assertSee('Void status:', false);
-        $response->assertSee('Ticket already voided', false);
-        $response->assertSee('Voided tickets cannot be sent', false);
-        $response->assertDontSee('Ticketing completed.', false);
+        $this->assertStringContainsString('VOIDED', $html);
+        $this->assertStringContainsString('Ticket voided', $html);
+        $this->assertStringContainsString('Void status:', $html);
+        $this->assertStringContainsString('Ticket already voided', $html);
+        $this->assertStringContainsString('Voided tickets cannot be sent', $html);
+        $this->assertStringNotContainsString('Ticketing completed.', $html);
     }
 
     /**

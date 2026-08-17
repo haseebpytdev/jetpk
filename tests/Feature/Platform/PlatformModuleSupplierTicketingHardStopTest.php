@@ -26,11 +26,13 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class PlatformModuleSupplierTicketingHardStopTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -150,9 +152,8 @@ class PlatformModuleSupplierTicketingHardStopTest extends TestCase
         $booking = $this->eligibleDuffelBooking(withSupplierBooking: true);
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk();
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $this->adminBookingShowHtml($admin, $booking);
     }
 
     public function test_developer_cp_remains_accessible_when_supplier_ticketing_modules_off(): void

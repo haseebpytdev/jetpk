@@ -17,11 +17,13 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class SupplierDiagnosticsRedactionTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -76,7 +78,9 @@ class SupplierDiagnosticsRedactionTest extends TestCase
         $this->assertNotNull($attempt);
         $this->assertSame('failed', $attempt->status);
         $this->assertNull($attempt->request_payload);
-        $this->assertNull($attempt->response_payload);
+        $this->assertIsArray($attempt->response_payload);
+        $this->assertSame('[REDACTED]', data_get($attempt->response_payload, 'errors.access_token'));
+        $this->assertSame('fail', data_get($attempt->response_payload, 'errors.message'));
         $this->assertArrayNotHasKey('request_payload', (array) $attempt->safe_summary);
         $this->assertStringContainsString('Bearer [REDACTED]', (string) $attempt->error_message);
         $this->assertStringContainsString('[REDACTED_EMAIL]', (string) $attempt->error_message);
@@ -154,10 +158,8 @@ class SupplierDiagnosticsRedactionTest extends TestCase
             'completed_at' => now(),
         ]);
 
-        $response = $this->actingAs($admin)->get(route('admin.bookings.show', $booking));
-
-        $response->assertOk();
-        $content = $response->getContent();
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $content = $this->adminBookingShowHtml($admin, $booking);
         $this->assertStringNotContainsString('CreatePassengerNameRecordRQ', (string) $content);
         $this->assertStringNotContainsString('request_payload', (string) $content);
         $this->assertStringNotContainsString('response_payload', (string) $content);

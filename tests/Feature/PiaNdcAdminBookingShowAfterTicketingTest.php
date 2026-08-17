@@ -14,11 +14,13 @@ use App\Models\User;
 use App\Support\Bookings\PiaNdcBookingStatusInterpreter;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class PiaNdcAdminBookingShowAfterTicketingTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -32,9 +34,8 @@ class PiaNdcAdminBookingShowAfterTicketingTest extends TestCase
     {
         [$booking, $admin] = $this->ticketedPiaBookingWithPartialSync();
 
-        $this->actingAs($admin)
-            ->get(route('admin.bookings.show', $booking))
-            ->assertOk();
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $this->adminBookingShowHtml($admin, $booking);
     }
 
     /**
