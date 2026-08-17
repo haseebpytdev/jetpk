@@ -46,7 +46,16 @@ class PublicCheckoutStabilizationTest extends TestCase
             .'&offer_id=missing-offer-9d2'
             .'&from=LHE&to=DXB&depart='.$depart
             .'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
-            ->assertRedirect(route('flights.search'))
+            ->assertRedirect(route('flights.results', [
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]))
             ->assertSessionHasErrors('flight_id');
     }
 
@@ -90,7 +99,16 @@ class PublicCheckoutStabilizationTest extends TestCase
             .'&offer_id='.PublicCheckoutTestDoubles::OFFER_ID
             .'&search_id='.$searchId
             .'&from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
-            ->assertRedirect(route('flights.search'))
+            ->assertRedirect(route('flights.results', [
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => $depart,
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+                'adults' => 1,
+                'children' => 0,
+                'infants' => 0,
+            ]))
             ->assertSessionHasErrors('flight_id');
     }
 
@@ -341,6 +359,33 @@ class PublicCheckoutStabilizationTest extends TestCase
             'children' => 0,
             'infants' => 0,
         ], [$offer], []);
+
+        $validated = PublicCheckoutTestDoubles::validatedNormalizedOffer($depart, 'LHE', 'DXB');
+        $validated->offer_id = $offerId;
+        $validated->supplier_provider = SupplierProvider::Sabre->value;
+        $validated->supplier_connection_id = $sabreConn->id;
+        $validated->distribution_channel = 'GDS';
+
+        $ovs = Mockery::mock(OfferValidationService::class);
+        $ovs->shouldReceive('validateSelectedOffer')->andReturn(new OfferValidationResultData(
+            is_valid: true,
+            status: 'ok',
+            original_offer_id: $offerId,
+            validated_offer: $validated,
+            currency: 'PKR',
+            meta: [
+                'pricing_snapshot' => PublicCheckoutTestDoubles::pricingSnapshot(),
+            ],
+        ));
+        $ovs->shouldReceive('pricingSnapshotForCachedOffer')->andReturn(PublicCheckoutTestDoubles::pricingSnapshot());
+        App::instance(OfferValidationService::class, $ovs);
+
+        $freshnessGate = Mockery::mock(\App\Services\Suppliers\Sabre\Gds\SabreSelectedOfferRevalidationGate::class);
+        $freshnessGate->shouldReceive('evaluateCheckoutTransition')->andReturn([
+            'allowed' => true,
+            'freshness_meta' => ['offer_freshness_status' => 'fresh'],
+        ]);
+        App::instance(\App\Services\Suppliers\Sabre\Gds\SabreSelectedOfferRevalidationGate::class, $freshnessGate);
 
         $this->post('/booking/passengers', array_merge(
             PublicBookingPassengersPayload::merge([

@@ -146,6 +146,7 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
 
     private function storeSabreSearchWithDigest(): string
     {
+        $departDay = now()->addWeek()->format('Y-m-d');
         $offer = [
             'id' => 'offer-sabre-1',
             'offer_id' => 'offer-sabre-1',
@@ -154,8 +155,8 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
             'supplier_offer_id' => 'secret-supplier-ref',
             'airline_code' => 'PK',
             'airline_name' => 'PIA',
-            'depart_at' => '2026-06-25T08:00:00Z',
-            'arrive_at' => '2026-06-25T12:30:00Z',
+            'depart_at' => $departDay.'T08:00:00Z',
+            'arrive_at' => $departDay.'T12:30:00Z',
             'duration_h' => 4,
             'duration_m' => 30,
             'stops' => 0,
@@ -180,19 +181,20 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
                 [
                     'origin' => 'LHE',
                     'destination' => 'DXB',
-                    'departure_at' => '2026-06-25T08:00:00Z',
-                    'arrival_at' => '2026-06-25T12:30:00Z',
+                    'departure_at' => $departDay.'T08:00:00Z',
+                    'arrival_at' => $departDay.'T12:30:00Z',
                     'airline_code' => 'PK',
                     'flight_number' => '301',
                 ],
             ],
         ];
 
-        return $this->storeSearch([$offer]);
+        return $this->storeSearch([$offer], $departDay);
     }
 
     private function storeDuffelSearch(): string
     {
+        $departDay = now()->addWeek()->format('Y-m-d');
         $offer = [
             'id' => 'offer-duffel-1',
             'offer_id' => 'offer-duffel-1',
@@ -201,8 +203,8 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
             'supplier_offer_id' => 'duffel-secret',
             'airline_code' => 'EK',
             'airline_name' => 'Emirates',
-            'depart_at' => '2026-06-25T08:00:00Z',
-            'arrive_at' => '2026-06-25T12:30:00Z',
+            'depart_at' => $departDay.'T08:00:00Z',
+            'arrive_at' => $departDay.'T12:30:00Z',
             'duration_h' => 4,
             'duration_m' => 30,
             'stops' => 0,
@@ -223,28 +225,29 @@ class Phase2PublicFlightSearchSecurityTest extends TestCase
                 [
                     'origin' => 'LHE',
                     'destination' => 'DXB',
-                    'departure_at' => '2026-06-25T08:00:00Z',
-                    'arrival_at' => '2026-06-25T12:30:00Z',
+                    'departure_at' => $departDay.'T08:00:00Z',
+                    'arrival_at' => $departDay.'T12:30:00Z',
                     'airline_code' => 'EK',
                     'flight_number' => '601',
                 ],
             ],
         ];
 
-        return $this->storeSearch([$offer]);
+        return $this->storeSearch([$offer], $departDay);
     }
 
     /**
      * @param  list<array<string, mixed>>  $offers
      */
-    private function storeSearch(array $offers): string
+    private function storeSearch(array $offers, ?string $departDay = null): string
     {
+        $departDay ??= now()->addWeek()->format('Y-m-d');
         $mock = Mockery::mock(FlightSearchService::class);
         $mock->shouldReceive('searchWithMeta')->andReturn(['offers' => $offers, 'warnings' => []]);
         $mock->shouldReceive('search')->andReturn($offers);
         $this->instance(FlightSearchService::class, $mock);
 
-        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-25&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+        $page = $this->get('/flights/results?from=LHE&to=DXB&depart='.$departDay.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk();
 
         preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
