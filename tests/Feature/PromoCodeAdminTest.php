@@ -10,11 +10,13 @@ use App\Models\User;
 use App\Services\Promo\PromoCodeValidationService;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class PromoCodeAdminTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -36,7 +38,7 @@ class PromoCodeAdminTest extends TestCase
         $admin = $this->platformAdmin();
         $agencyId = $admin->current_agency_id;
 
-        $this->actingAs($admin)->get(route('admin.promo-codes.index'))->assertOk();
+        $this->assertLegacyAdminPromoCodesIndexRedirect($admin);
 
         $this->actingAs($admin)->post(route('admin.promo-codes.store'), [
             'code' => 'SAVE10',
@@ -51,7 +53,7 @@ class PromoCodeAdminTest extends TestCase
         $this->assertNotNull($promo);
         $this->assertSame('SAVE10', $promo->code);
 
-        $this->actingAs($admin)->get(route('admin.promo-codes.edit', $promo))->assertOk();
+        $this->assertLegacyAdminPromoCodesEditRedirect($admin, $promo);
 
         $this->actingAs($admin)->patch(route('admin.promo-codes.update', $promo), [
             'code' => 'SAVE10',

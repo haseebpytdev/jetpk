@@ -248,7 +248,13 @@ class OtaSmokeLiveRoutesCommand extends Command
     {
         $existing = Booking::query()->orderByDesc('id')->first();
         if ($existing !== null) {
-            return $existing;
+            if (! filled($existing->booking_reference)) {
+                $existing->forceFill([
+                    'booking_reference' => 'SMOKE'.strtoupper(substr(md5((string) $existing->id), 0, 8)),
+                ])->save();
+            }
+
+            return $existing->fresh();
         }
 
         $agency = Agency::query()->where('slug', config('ota.default_agency_slug', 'asif-travels'))->first()
@@ -260,6 +266,7 @@ class OtaSmokeLiveRoutesCommand extends Command
 
         return Booking::factory()->create([
             'agency_id' => $agency->id,
+            'booking_reference' => 'SMOKE'.strtoupper(substr(md5(uniqid('', true)), 0, 8)),
             'status' => BookingStatus::Paid,
             'payment_status' => 'paid',
         ]);

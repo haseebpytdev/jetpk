@@ -135,11 +135,12 @@ class JetpkPortalParityTest extends TestCase
     {
         $customer = User::factory()->customer()->create();
 
+        // Legacy mobile-app shell was removed; responsive portal keeps POST logout in the account footer.
         $this->actingAs($customer)
             ->withHeader('Sec-CH-Viewport-Width', '390')
             ->get(route('profile.edit'))
             ->assertOk()
-            ->assertSee('data-testid="mobile-customer-logout"', false)
+            ->assertSee('data-testid="jp-portal-sidebar-logout"', false)
             ->assertSee('action="'.route('logout').'"', false);
     }
 
@@ -151,7 +152,8 @@ class JetpkPortalParityTest extends TestCase
             ->withHeader('Sec-CH-Viewport-Width', '390')
             ->get(route('profile.edit'))
             ->assertOk()
-            ->assertSee('data-testid="mobile-agent-logout"', false);
+            ->assertSee('data-testid="jp-portal-sidebar-logout"', false)
+            ->assertSee('action="'.route('logout').'"', false);
     }
 
     private function makeJetpkProfile(): ClientProfile

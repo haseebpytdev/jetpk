@@ -45,6 +45,7 @@ use App\Models\AgentDepositRequest;
 use App\Models\AgentWalletTransaction;
 use App\Models\Booking;
 use App\Models\LedgerTransaction;
+use App\Models\PromoCode;
 use App\Models\SupplierConnection;
 use App\Models\SupportTicket;
 use App\Models\User;
@@ -123,6 +124,20 @@ trait AdminLegacyViewTestHelpers
         $response = $this->actingAs($admin)->get(route('admin.reports'));
         $response->assertRedirect();
         $this->assertStringContainsString('/admin/dashboard/reports', (string) $response->headers->get('Location'));
+    }
+
+    protected function assertLegacyAdminPromoCodesIndexRedirect(User $admin): void
+    {
+        $response = $this->actingAs($admin)->get(route('admin.promo-codes.index'));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/cms', (string) $response->headers->get('Location'));
+    }
+
+    protected function assertLegacyAdminPromoCodesEditRedirect(User $admin, PromoCode $promo): void
+    {
+        $response = $this->actingAs($admin)->get(route('admin.promo-codes.edit', $promo));
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin/dashboard/cms', (string) $response->headers->get('Location'));
     }
 
     protected function assertLegacyStaffBookingsIndexRedirect(User $staff): void
