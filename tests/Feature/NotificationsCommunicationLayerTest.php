@@ -17,17 +17,19 @@ use App\Models\User;
 use App\Services\Booking\BookingService;
 use App\Services\Payments\BookingPaymentService;
 use App\Services\Suppliers\BookingAdapters\DuffelSupplierBookingAdapter;
-use App\Services\Suppliers\TicketingAdapters\PiaNdcSupplierTicketingAdapter;
+use App\Services\Suppliers\TicketingAdapters\DuffelSupplierTicketingAdapter;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class NotificationsCommunicationLayerTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -133,7 +135,7 @@ class NotificationsCommunicationLayerTest extends TestCase
     public function test_ticket_issued_creates_communication_log(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $this->bindDuffelTicketingThroughPiaAdapter();
+        $this->bindSuccessfulDuffelTicketingAdapter();
         Mail::fake();
         $this->withoutMiddleware(ValidateCsrfToken::class);
         [$booking, $admin] = $this->ticketingEligibleBooking();
@@ -149,7 +151,7 @@ class NotificationsCommunicationLayerTest extends TestCase
     public function test_notification_failure_does_not_roll_back_ticketing_action(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $this->bindDuffelTicketingThroughPiaAdapter();
+        $this->bindSuccessfulDuffelTicketingAdapter();
         config()->set('mail.default', 'log');
         Mail::shouldReceive('to')->andThrow(new \RuntimeException('mail fail'));
         $this->withoutMiddleware(ValidateCsrfToken::class);
@@ -185,7 +187,9 @@ class NotificationsCommunicationLayerTest extends TestCase
         $booking = $this->draftBookingWithContact();
         app(BookingService::class)->submitBookingRequest($booking);
 
-        $this->actingAs($admin)->get(route('admin.bookings.show', $booking->fresh()))->assertOk()->assertSee('Communication');
+        $this->assertLegacyBookingShowRedirect($admin, $booking->fresh());
+        $html = $this->adminBookingShowHtml($admin, $booking->fresh());
+        $this->assertStringContainsString('Communication', $html);
     }
 
     public function test_no_sms_or_whatsapp_external_calls_are_made(): void
@@ -289,9 +293,9 @@ class NotificationsCommunicationLayerTest extends TestCase
         });
     }
 
-    protected function bindDuffelTicketingThroughPiaAdapter(): void
+    protected function bindSuccessfulDuffelTicketingAdapter(): void
     {
-        $this->mock(PiaNdcSupplierTicketingAdapter::class, function ($mock): void {
+        $this->mock(DuffelSupplierTicketingAdapter::class, function ($mock): void {
             $mock->shouldReceive('issueTickets')->andReturnUsing(function (Booking $booking, SupplierBooking $supplierBooking, User $actor): TicketingResultData {
                 $tickets = [];
                 foreach ($booking->passengers as $passenger) {

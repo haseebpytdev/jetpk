@@ -234,6 +234,7 @@ class JetpkEmailEventContentRegistry
             ['customer_welcome', 'Customer welcome', EmailTemplateRegistry::CATEGORY_AUTH_USER, 'customer', 'account_created'],
             ['itinerary_ready', 'Itinerary ready', EmailTemplateRegistry::CATEGORY_TICKETING, 'customer', 'booking_confirmed'],
             ['settings_test_email', 'Settings test email', EmailTemplateRegistry::CATEGORY_AUTH_USER, 'admin', 'notification'],
+            ['booking_expiring', 'Booking expiring', EmailTemplateRegistry::CATEGORY_BOOKING, 'customer', 'booking_expiring'],
         ];
 
         $manual = [
@@ -414,6 +415,18 @@ class JetpkEmailEventContentRegistry
                 'cta_label' => 'View booking',
                 'cta_url_key' => 'booking_url',
                 'content_blocks' => ['status-alert', 'change-summary', 'booking-summary', 'itinerary', 'passengers', 'support-card'],
+            ],
+            'manual_review' => [
+                'preheader' => 'A booking requires manual review before it can proceed.',
+                'heading' => 'Manual review required',
+                'status_label' => 'Manual review',
+                'status_type' => 'warning',
+                'detail_fields' => ['booking_reference', 'route', 'passenger_name', 'review_reason'],
+                'cta_label' => 'Open in admin',
+                'cta_url_key' => 'admin_booking_url',
+                'content_blocks' => ['status-alert', 'booking-summary', 'support-card'],
+                'alert_title' => 'Manual review required',
+                'alert_message' => 'Please assign and review this booking in the Admin Portal promptly.',
             ],
             'booking_expiring' => [
                 'preheader' => 'Complete payment before your booking expires.',

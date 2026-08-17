@@ -24,7 +24,11 @@ final class JetpkEmailEventTypeMap
         'booking_failed' => 'booking_failed_validation',
         'booking_cancelled' => 'booking_cancelled',
         'booking_updated' => 'booking_status_changed',
-        'booking_expiring' => 'booking_manual_review_required',
+        // Canonical hold/payment expiry surface (must not alias onto manual-review).
+        'booking_expiring' => 'booking_expiring',
+        // Canonical admin manual-review / ops alert surface.
+        'manual_review' => 'booking_manual_review_required',
+        'admin_operational_notification' => 'booking_manual_review_required',
         'pnr_created' => 'pnr_itinerary_synced',
         'manual_payment_received' => 'payment_proof_submitted',
         'payment_success' => 'payment_verified',
@@ -38,8 +42,18 @@ final class JetpkEmailEventTypeMap
         'group_reservation_expiring' => 'group_booking_released_unpaid',
         'agent_registration_received' => 'agent_application_submitted',
         'agent_registration_approved' => 'agent_application_approved',
-        'admin_operational_notification' => 'booking_manual_review_required',
         'notification' => 'booking_status_changed',
+    ];
+
+    /**
+     * Preferred reverse map when multiple type keys share one event key.
+     *
+     * @var array<string, string>
+     */
+    protected static array $preferredEventToType = [
+        'booking_manual_review_required' => 'manual_review',
+        'payment_proof_submitted' => 'manual_payment_received',
+        'booking_status_changed' => 'booking_updated',
     ];
 
     public static function eventForType(string $type): ?string
@@ -51,6 +65,10 @@ final class JetpkEmailEventTypeMap
 
     public static function typeForEvent(string $eventKey): ?string
     {
+        if (isset(self::$preferredEventToType[$eventKey])) {
+            return self::$preferredEventToType[$eventKey];
+        }
+
         foreach (self::$typeToEvent as $type => $event) {
             if ($event === $eventKey) {
                 return $type;

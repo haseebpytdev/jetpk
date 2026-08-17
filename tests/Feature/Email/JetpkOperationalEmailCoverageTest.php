@@ -34,6 +34,9 @@ class JetpkOperationalEmailCoverageTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
+        User::query()->where('email', 'admin@ota.demo')->update([
+            'account_type' => AccountType::PlatformAdmin,
+        ]);
 
         $this->post(route('agent.register.store'), [
             'first_name' => 'Apply',

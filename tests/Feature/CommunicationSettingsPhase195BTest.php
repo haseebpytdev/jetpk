@@ -16,11 +16,14 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class CommunicationSettingsPhase195BTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -29,7 +32,13 @@ class CommunicationSettingsPhase195BTest extends TestCase
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.settings.communications.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.settings.communications.index'))->assertRedirect();
+        $this->assertStringContainsString(
+            '/admin/dashboard/settings/notifications',
+            (string) $this->actingAs($admin)->get(route('admin.settings.communications.index'))->headers->get('Location'),
+        );
+        $this->assertNotSame('', trim($this->adminCommunicationsSettingsHtml($admin)));
+
         $this->actingAs($admin)->patch(route('admin.settings.communications.update'), [
             'email_enabled' => 1,
             'smtp_enabled' => 1,
@@ -167,9 +176,15 @@ class CommunicationSettingsPhase195BTest extends TestCase
         $ready = app(AgencyCommunicationSettingsService::class)->testWhatsappReadiness($agency, $admin);
         $this->assertSame('ready_for_review', $ready['status']);
 
-        $this->actingAs($admin)->get(route('admin.dashboard'))
-            ->assertOk()
-            ->assertSee('Communications')
-            ->assertSee('Email Templates');
+        // Admin dashboard HTML is served by Next; prove nav + Blade settings surface separately.
+        $this->actingAs($admin)->get(route('admin.settings.communications.index'))->assertRedirect();
+        $navJson = json_encode(app(BackOfficeCapabilitiesPresenter::class)->present($admin), JSON_THROW_ON_ERROR);
+        $this->assertStringContainsString('Communications', $navJson);
+        $html = $this->adminCommunicationsSettingsHtml($admin);
+        $this->assertStringContainsString('Communications', $html);
+        $this->assertTrue(
+            str_contains($html, 'Email Templates') || str_contains($html, 'email template'),
+            'Expected communications settings Blade to reference email templates',
+        );
     }
 }

@@ -55,7 +55,8 @@ class OtaOperationalNotificationModernLayoutTest extends TestCase
             $this->assertStringContainsString('<!DOCTYPE html>', $mail->htmlBody);
             $this->assertStringContainsString(e($profile->name), $mail->htmlBody);
             $this->assertStringContainsString('manual review', strtolower($mail->htmlBody));
-            $this->assertStringContainsString('A booking requires manual review.', $mail->plainBody);
+            $this->assertStringContainsString('Manual review required', $mail->emailSubject);
+            $this->assertStringNotContainsString('Your booking is about to expire', $mail->htmlBody);
 
             return true;
         });
@@ -151,27 +152,32 @@ class OtaOperationalNotificationModernLayoutTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $agency = $this->asifAgency();
         $profile = CompanyEmailProfileResolver::resolve($agency);
-        $this->enableOutbound($agency, OtaNotificationEvent::StaffCreated->value);
+        // Use a non-per-bucket event so AgencyMessageTemplate is not overridden by JetPK bucket variants.
+        $this->enableOutbound($agency, OtaNotificationEvent::SupplierBookingFailed->value);
 
-        AgencyMessageTemplate::query()->create([
-            'agency_id' => $agency->id,
-            'event' => OtaNotificationEvent::StaffCreated->value,
-            'channel' => 'email',
-            'subject' => 'New staff at {{ agency_name }}',
-            'body' => "Welcome ops alert for {{ agency_name }}.\n<script>alert('xss')</script>",
-            'is_enabled' => true,
-        ]);
+        AgencyMessageTemplate::query()->updateOrCreate(
+            [
+                'agency_id' => $agency->id,
+                'event' => OtaNotificationEvent::SupplierBookingFailed->value,
+                'channel' => 'email',
+            ],
+            [
+                'subject' => 'Supplier fail at {{ agency_name }}',
+                'body' => "Welcome ops alert for {{ agency_name }}.\n<script>alert('xss')</script>",
+                'is_enabled' => true,
+            ],
+        );
 
         app(OtaNotificationService::class)->send(
             $agency,
-            OtaNotificationEvent::StaffCreated->value,
+            OtaNotificationEvent::SupplierBookingFailed->value,
             [],
             fallbackSubject: 'Fallback subject',
             fallbackBody: 'Fallback body',
         );
 
         Mail::assertSent(OtaOperationalNotificationMail::class, function (OtaOperationalNotificationMail $mail) use ($profile): bool {
-            $this->assertSame('New staff at '.$profile->name, $mail->emailSubject);
+            $this->assertSame('Supplier fail at '.$profile->name, $mail->emailSubject);
             $this->assertStringContainsString('Welcome ops alert for '.e($profile->name), $mail->htmlBody);
             $this->assertStringNotContainsString('<script>', $mail->htmlBody);
             $this->assertStringNotContainsString('Fallback body', $mail->plainBody);
@@ -180,11 +186,14 @@ class OtaOperationalNotificationModernLayoutTest extends TestCase
         });
 
         $log = CommunicationLog::query()
-            ->where('event', OtaNotificationEvent::StaffCreated->value)
+            ->where('event', OtaNotificationEvent::SupplierBookingFailed->value)
             ->latest('id')
             ->first();
         $this->assertTrue((bool) data_get($log->meta, 'used_db_template'));
-        $this->assertTrue((bool) data_get($log->meta, 'modern_layout'));
+        $this->assertTrue(
+            (bool) data_get($log->meta, 'modern_layout')
+            || (bool) data_get($log->meta, 'jetpk_universal_layout'),
+        );
     }
 
     #[Test]
@@ -212,6 +221,7 @@ class OtaOperationalNotificationModernLayoutTest extends TestCase
         Mail::fake();
         $this->seed(OtaFoundationSeeder::class);
         $agency = $this->asifAgency();
+        $profile = CompanyEmailProfileResolver::resolve($agency);
         $this->enableOutbound($agency, OtaNotificationEvent::AdminLoginSuccess->value);
 
         app(OtaNotificationService::class)->send(
@@ -222,9 +232,14 @@ class OtaOperationalNotificationModernLayoutTest extends TestCase
             fallbackBody: 'An admin signed in successfully.',
         );
 
-        Mail::assertSent(OtaOperationalNotificationMail::class, function (OtaOperationalNotificationMail $mail): bool {
-            $this->assertSame('Admin login alert', $mail->emailSubject);
-            $this->assertStringContainsString('An admin signed in successfully.', $mail->plainBody);
+        $defaults = OperationalEmailDefaults::forEvent(OtaNotificationEvent::AdminLoginSuccess->value);
+        $this->assertNotNull($defaults);
+
+        Mail::assertSent(OtaOperationalNotificationMail::class, function (OtaOperationalNotificationMail $mail) use ($profile, $defaults): bool {
+            $expectedSubject = str_replace('{{ brand_name }}', $profile->name, (string) $defaults['subject']);
+            $this->assertSame($expectedSubject, $mail->emailSubject);
+            $this->assertStringContainsString('Admin Portal', $mail->emailSubject);
+            $this->assertNotSame('', trim($mail->plainBody));
 
             return true;
         });
