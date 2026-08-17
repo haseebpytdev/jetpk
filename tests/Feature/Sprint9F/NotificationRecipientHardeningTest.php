@@ -17,6 +17,7 @@ use App\Services\Communication\OtaNotificationService;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Support\AdminLegacyViewTestHelpers;
 use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
@@ -25,6 +26,7 @@ use Tests\TestCase;
  */
 class NotificationRecipientHardeningTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
     use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
@@ -86,6 +88,11 @@ class NotificationRecipientHardeningTest extends TestCase
     public function test_support_email_fallback_when_no_platform_admin_on_agency(): void
     {
         $agency = $this->asifAgency();
+        User::query()
+            ->where('current_agency_id', $agency->id)
+            ->where('account_type', AccountType::PlatformAdmin)
+            ->update(['account_type' => AccountType::Customer]);
+        $agency->users()->where('account_type', AccountType::PlatformAdmin)->detach();
         AgencySetting::query()->updateOrCreate(
             ['agency_id' => $agency->id],
             ['support_email' => 'ops.fallback@example.test'],
@@ -102,8 +109,14 @@ class NotificationRecipientHardeningTest extends TestCase
 
     public function test_brand_support_email_fallback_when_agency_support_missing(): void
     {
-        config(['ota-brand.support_email' => 'brand.ops@example.test']);
+        config(['client.canonical_support_email' => 'brand.ops@example.test']);
         $agency = $this->asifAgency();
+        User::query()
+            ->where('current_agency_id', $agency->id)
+            ->where('account_type', AccountType::PlatformAdmin)
+            ->update(['account_type' => AccountType::Customer]);
+        $agency->users()->where('account_type', AccountType::PlatformAdmin)->detach();
+        AgencySetting::query()->where('agency_id', $agency->id)->delete();
 
         $resolved = $this->resolver->resolve(
             $agency,
@@ -116,12 +129,13 @@ class NotificationRecipientHardeningTest extends TestCase
     public function test_no_recipients_logs_skipped_when_no_fallback_available(): void
     {
         Mail::fake();
-        config(['ota-brand.support_email' => '']);
+        config(['client.canonical_support_email' => '']);
         $agency = $this->asifAgency();
         User::query()
             ->where('current_agency_id', $agency->id)
             ->where('account_type', AccountType::PlatformAdmin)
             ->update(['account_type' => AccountType::AgencyAdmin]);
+        $agency->users()->where('account_type', AccountType::PlatformAdmin)->detach();
         AgencySetting::query()->where('agency_id', $agency->id)->delete();
         AgencyCommunicationSetting::query()->updateOrCreate(
             ['agency_id' => $agency->id],
@@ -165,19 +179,28 @@ class NotificationRecipientHardeningTest extends TestCase
     {
         $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.settings.communications.index'))->assertOk()
-            ->assertSee('data-testid="ota-notification-recipient-guidance"', false);
-        $this->actingAs($admin)->get(route('admin.reports'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.settings.communications.index'))
+            ->assertRedirect();
+        $this->assertStringContainsString(
+            '/admin/dashboard/settings/notifications',
+            (string) $this->actingAs($admin)->get(route('admin.settings.communications.index'))->headers->get('Location'),
+        );
+        $html = $this->adminCommunicationsSettingsHtml($admin);
+        $this->assertStringContainsString('data-testid="ota-notification-recipient-guidance"', $html);
+
+        $this->actingAs($admin)->get(route('admin.reports'))->assertRedirect();
     }
 
     public function test_communication_settings_explains_recipient_fallback_and_queue_worker(): void
     {
         config(['queue.default' => 'database']);
 
-        $html = $this->actingAs($this->platformAdmin())
+        $admin = $this->platformAdmin();
+        $this->actingAs($admin)
             ->get(route('admin.settings.communications.index'))
-            ->assertOk()
-            ->getContent();
+            ->assertRedirect();
+
+        $html = $this->adminCommunicationsSettingsHtml($admin);
 
         $this->assertStringContainsString('data-testid="ota-notification-recipient-guidance"', $html);
         $this->assertStringContainsString('recipient emails', strtolower($html));

@@ -446,16 +446,8 @@ class NotificationRecipientResolver
             return $this->normalizeEmails($platformAdminEmails);
         }
 
-        $agencyAdminEmails = $agency->users()
-            ->where('account_type', AccountType::AgencyAdmin)
-            ->where('users.status', UserAccountStatus::Active)
-            ->pluck('email')
-            ->all();
-
-        if ($agencyAdminEmails !== []) {
-            return $this->normalizeEmails($agencyAdminEmails);
-        }
-
+        // Do not fall back to agency_admin users for the admin/platform_admin bucket —
+        // those belong in the agency_admin bucket only. Use ops support inbox instead.
         return $this->supportEmailFallback($agency);
     }
 
