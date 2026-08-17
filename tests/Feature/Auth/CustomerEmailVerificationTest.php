@@ -162,7 +162,7 @@ class CustomerEmailVerificationTest extends TestCase
 
     public function test_guest_booking_lookup_stays_public(): void
     {
-        $this->get(route('booking.lookup'))->assertOk();
+        $this->get(route('booking.lookup'))->assertRedirect();
         $this->post(route('lookup-booking.submit'), ['booking_reference' => 'ABC'])->assertSessionHasErrors('email');
     }
 

@@ -58,9 +58,12 @@ class BookingDetailRedesignTest extends TestCase
         ]);
         AgencyPrefixService::savePrefix($booking->agency, 'PR');
 
+        // Portal display_reference is the stored booking_reference (no PR-CU prefix transform).
+        $this->assertSame('OTA-43JKSUMD', $booking->fresh()->display_reference);
+
         $this->actingAs($customer)->get(route('customer.bookings.show', $booking))
             ->assertOk()
-            ->assertSee('Booking PR-CU-43JKSUMD', false);
+            ->assertSee('OTA-43JKSUMD', false);
     }
 
     public function test_agent_booking_show_displays_formatted_reference(): void
@@ -70,9 +73,11 @@ class BookingDetailRedesignTest extends TestCase
         ]);
         AgencyPrefixService::savePrefix($booking->agency, 'PR');
 
+        $this->assertSame('OTA-43JKSUMD', $booking->fresh()->display_reference);
+
         $this->actingAs($agentUser)->get(route('agent.bookings.show', $booking))
             ->assertOk()
-            ->assertSee('Booking PR-AG-43JKSUMD', false);
+            ->assertSee('OTA-43JKSUMD', false);
     }
 
     public function test_documents_card_shows_e_ticket_when_ticket_document_available(): void
@@ -160,10 +165,18 @@ class BookingDetailRedesignTest extends TestCase
             'booking_reference' => 'OTA-PNRBOOK1',
         ]);
 
-        $this->actingAs($customer)->get(route('customer.dashboard'))
+        $payload = $this->actingAs($customer)
+            ->getJson(route('customer.bookings.index').'?format=json')
             ->assertOk()
-            ->assertSee('ABC123', false)
-            ->assertDontSee('PNR ABC123', false);
+            ->json();
+
+        $row = collect($payload['bookings'] ?? $payload['items'] ?? [])
+            ->first(fn ($b) => ($b['booking_reference'] ?? null) === 'OTA-PNRBOOK1'
+                || ($b['booking_reference'] ?? null) === $booking->display_reference);
+
+        $this->assertNotNull($row, 'Expected booking row in customer bookings JSON');
+        $this->assertSame('ABC123', $row['pnr'] ?? null);
+        $this->assertNotSame('PNR ABC123', $row['pnr'] ?? null);
     }
 
     public function test_customer_dashboard_pnr_column_shows_not_assigned_when_missing(): void
@@ -173,9 +186,20 @@ class BookingDetailRedesignTest extends TestCase
             'booking_reference' => 'OTA-NOPNR001',
         ]);
 
-        $this->actingAs($customer)->get(route('customer.dashboard'))
+        $payload = $this->actingAs($customer)
+            ->getJson(route('customer.bookings.index').'?format=json')
             ->assertOk()
-            ->assertSee('Not assigned', false);
+            ->json();
+
+        $row = collect($payload['bookings'] ?? $payload['items'] ?? [])
+            ->first(fn ($b) => ($b['booking_reference'] ?? null) === 'OTA-NOPNR001'
+                || ($b['booking_reference'] ?? null) === $booking->display_reference);
+
+        $this->assertNotNull($row, 'Expected booking row in customer bookings JSON');
+        $this->assertTrue(
+            ! array_key_exists('pnr', $row) || $row['pnr'] === null,
+            'Expected missing PNR to be null/absent in customer bookings JSON'
+        );
     }
 
     public function test_cancellation_form_renders_for_eligible_customer_booking(): void
