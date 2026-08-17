@@ -14,10 +14,14 @@ use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\AdminLegacyViewTestHelpers;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\TestCase;
 
 class LiveDeploymentPreparationTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     public function test_env_example_contains_required_ota_keys(): void
@@ -106,8 +110,7 @@ class LiveDeploymentPreparationTest extends TestCase
 
     public function test_security_headers_apply_on_public_and_admin_routes(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
 
         $public = $this->get(route('home'))->assertOk();
         $adminResponse = $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
@@ -122,12 +125,17 @@ class LiveDeploymentPreparationTest extends TestCase
 
     public function test_deployment_checklist_and_system_health_stay_admin_only(): void
     {
-        $this->seed(OtaFoundationSeeder::class);
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
         $staff = User::query()->where('email', 'staff@ota.demo')->firstOrFail();
 
-        $this->actingAs($admin)->get(route('admin.deployment-checklist'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.system-health'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.deployment-checklist'))
+            ->assertRedirect('/admin/dashboard/system/go-live');
+        $this->assertNotSame('', $this->adminDeploymentChecklistHtml($admin));
+
+        $this->actingAs($admin)->get(route('admin.system-health'))
+            ->assertRedirect('/admin/dashboard/system/health');
+        $this->assertNotSame('', $this->adminSystemHealthHtml($admin));
+
         $this->actingAs($staff)->get(route('admin.deployment-checklist'))->assertForbidden();
         $this->actingAs($staff)->get(route('admin.system-health'))->assertForbidden();
     }

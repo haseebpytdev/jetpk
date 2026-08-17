@@ -7,16 +7,21 @@ use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\CommunicationLog;
 use App\Models\User;
+use App\Support\Bookings\PublicCheckoutFareChangeState;
 use App\Support\Travel\TravelDocumentFormatter;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AdminLegacyViewTestHelpers;
+use Tests\Support\PlatformAdminTestHelpers;
 use Tests\Support\PublicBookingPassengersPayload;
 use Tests\Support\PublicCheckoutTestDoubles;
 use Tests\TestCase;
 
 class Phase22FCheckoutTest extends TestCase
 {
+    use AdminLegacyViewTestHelpers;
+    use PlatformAdminTestHelpers;
     use RefreshDatabase;
 
     /**
@@ -308,11 +313,11 @@ class Phase22FCheckoutTest extends TestCase
         $this->post('/booking/review', ['booking_method' => 'pay_later']);
 
         $booking = Booking::query()->firstOrFail();
-        $admin = User::query()->where('email', 'admin@ota.demo')->firstOrFail();
+        $admin = $this->platformAdmin();
 
-        $this->actingAs($admin)->get(route('admin.bookings.show', $booking))
-            ->assertOk()
-            ->assertSee($passport, false);
+        $this->assertLegacyBookingShowRedirect($admin, $booking);
+        $html = $this->adminBookingShowHtml($admin, $booking);
+        $this->assertStringContainsString($passport, $html);
     }
 
     public function test_customer_portal_masks_passport_on_booking_page(): void
@@ -425,13 +430,28 @@ class Phase22FCheckoutTest extends TestCase
         $booking = Booking::query()->firstOrFail();
         $meta = is_array($booking->meta) ? $booking->meta : [];
         $meta['protection_mode'] = 'hold_price_guaranteed';
+        $meta[PublicCheckoutFareChangeState::META_FARE_CHANGE] = [
+            'fare_changed' => true,
+            'old_total' => 450000.0,
+            'new_total' => 462500.0,
+            'difference' => 12500.0,
+            'currency' => 'PKR',
+            'recorded_at' => now()->toIso8601String(),
+        ];
+        $meta[PublicCheckoutFareChangeState::META_CHECKOUT_PRICE_CHANGE] = $meta[PublicCheckoutFareChangeState::META_FARE_CHANGE];
         $meta['requires_price_change_confirmation'] = true;
         $meta['price_change_old_total'] = 450000;
         $meta['price_change_new_total'] = 462500;
-        $booking->forceFill(['meta' => $meta])->save();
+        $booking->forceFill([
+            'meta' => $meta,
+            'selected_fare_total' => 450000,
+            'revalidated_fare_total' => 462500,
+            'fare_change_accepted_at' => null,
+        ])->save();
 
         $this->post('/booking/review', ['booking_method' => 'pay_later'])
             ->assertRedirect(route('booking.review'))
-            ->assertSessionHasErrors('confirm_updated_fare');
+            ->assertSessionHas('show_offer_refresh_modal')
+            ->assertSessionHasErrors('booking');
     }
 }
