@@ -50,6 +50,9 @@ class JetpkApplicantContextHotfixTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $agency = Agency::query()->firstOrFail();
+        User::query()->where('email', 'admin@ota.demo')->update([
+            'account_type' => AccountType::PlatformAdmin,
+        ]);
         $resolver = app(NotificationRecipientResolver::class);
 
         $applicant = $resolver->resolveBucket(
@@ -72,6 +75,9 @@ class JetpkApplicantContextHotfixTest extends TestCase
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->seed(OtaFoundationSeeder::class);
+        User::query()->where('email', 'admin@ota.demo')->update([
+            'account_type' => AccountType::PlatformAdmin,
+        ]);
 
         $this->post(route('agent.register.store'), [
             'first_name' => 'Hotfix',
