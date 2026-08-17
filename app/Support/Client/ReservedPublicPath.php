@@ -74,13 +74,24 @@ final class ReservedPublicPath
         'forgot-password',
         'reset-password',
         'dev-cp',
+        // Default JetPakistan deployment slug — must not be captured by CMS custom-page show.
+        'jetpk',
     ];
 
     public static function isReservedFirstSegment(string $segment): bool
     {
         $normalized = self::normalizeSegment($segment);
 
-        return $normalized === '' || in_array($normalized, self::FIRST_SEGMENT, true);
+        if ($normalized === '' || in_array($normalized, self::FIRST_SEGMENT, true)) {
+            return true;
+        }
+
+        $defaultSlug = self::normalizeSegment((string) config(
+            'client.canonical_client.slug',
+            config('ota_client.slug', 'jetpk'),
+        ));
+
+        return $defaultSlug !== '' && $normalized === $defaultSlug;
     }
 
     public static function normalizeSegment(string $segment): string
@@ -97,9 +108,18 @@ final class ReservedPublicPath
      */
     public static function customPageSlugConstraint(): string
     {
+        $segments = self::FIRST_SEGMENT;
+        $defaultSlug = self::normalizeSegment((string) config(
+            'client.canonical_client.slug',
+            config('ota_client.slug', 'jetpk'),
+        ));
+        if ($defaultSlug !== '' && ! in_array($defaultSlug, $segments, true)) {
+            $segments[] = $defaultSlug;
+        }
+
         $alternation = implode('|', array_map(
             static fn (string $slug): string => preg_quote($slug, '/'),
-            self::FIRST_SEGMENT,
+            $segments,
         ));
 
         return '(?!(?:'.$alternation.')$)[a-z0-9]+(?:-[a-z0-9]+)*';

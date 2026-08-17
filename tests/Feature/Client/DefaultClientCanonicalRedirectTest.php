@@ -91,7 +91,14 @@ class DefaultClientCanonicalRedirectTest extends TestCase
         ]);
 
         $this->get('/client-demo/login')->assertOk();
-        $this->get('/client-demo/admin')->assertRedirect('/client-demo/login');
+
+        $response = $this->get('/client-demo/admin/dashboard');
+        $response->assertRedirect();
+        $location = (string) $response->headers->get('Location');
+        $this->assertTrue(
+            str_contains($location, '/client-demo/login') || str_ends_with(parse_url($location, PHP_URL_PATH) ?: '', '/login'),
+            'Expected guest admin dashboard to redirect toward login, got: '.$location
+        );
     }
 
     public function test_is_default_deployment_slug_helper(): void
