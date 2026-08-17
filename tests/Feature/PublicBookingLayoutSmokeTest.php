@@ -21,9 +21,9 @@ class PublicBookingLayoutSmokeTest extends TestCase
         $passengersUrl = '/booking/passengers?flight_id='.PublicCheckoutTestDoubles::OFFER_ID.'&from=LHE&to=DXB&depart='.$depart;
 
         $html = $this->get($passengersUrl)->assertOk()->getContent();
-        $this->assertSame(1, substr_count($html, 'class="ota-main-nav'), 'Expected exactly one primary nav on passenger checkout');
-        $this->assertSame(1, substr_count($html, 'class="ota-site-header'), 'Expected fixed site header wrapper once');
-        $this->assertSame(1, substr_count($html, 'id="ota-main"'), 'Expected single main content landmark');
+        $this->assertSame(1, substr_count($html, 'class="nav jp-header-nav"'), 'Expected exactly one primary nav on passenger checkout');
+        $this->assertSame(1, substr_count($html, 'jp-site-header'), 'Expected JetPakistan site header wrapper once');
+        $this->assertSame(1, substr_count($html, 'id="jp-main"'), 'Expected single main content landmark');
 
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->post('/booking/passengers', array_merge(
@@ -39,12 +39,12 @@ class PublicBookingLayoutSmokeTest extends TestCase
         ));
 
         $reviewHtml = $this->get(route('booking.review'))->assertOk()->assertSee('Review your booking', false)->getContent();
-        $this->assertSame(1, substr_count($reviewHtml, 'class="ota-main-nav'));
-        $this->assertSame(1, substr_count($reviewHtml, 'class="ota-site-header'));
+        $this->assertSame(1, substr_count($reviewHtml, 'class="nav jp-header-nav"'));
+        $this->assertSame(1, substr_count($reviewHtml, 'jp-site-header'));
 
         $confirmHtml = $this->get(route('booking.confirmation'))->assertOk()->getContent();
-        $this->assertSame(1, substr_count($confirmHtml, 'class="ota-main-nav'));
-        $this->assertSame(1, substr_count($confirmHtml, 'class="ota-site-header'));
+        $this->assertSame(1, substr_count($confirmHtml, 'class="nav jp-header-nav"'));
+        $this->assertSame(1, substr_count($confirmHtml, 'jp-site-header'));
     }
 
     public function test_home_and_results_have_single_site_header(): void
@@ -56,8 +56,8 @@ class PublicBookingLayoutSmokeTest extends TestCase
         ] as $response) {
             $response->assertOk();
             $h = $response->getContent();
-            $this->assertSame(1, substr_count($h, 'class="ota-site-header'));
-            $this->assertSame(1, substr_count($h, 'class="ota-main-nav'));
+            $this->assertSame(1, substr_count($h, 'jp-site-header'));
+            $this->assertSame(1, substr_count($h, 'class="nav jp-header-nav"'));
         }
     }
 }
