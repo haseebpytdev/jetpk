@@ -60,6 +60,7 @@ class ProviderActiveAuthAuditCommandTest extends TestCase
 
     public function test_send_probe_reports_status_without_printing_token(): void
     {
+        Config::set('suppliers.al_haider.token_generation_enabled', true);
         Http::fake([
             'alhaider.test/api/login' => Http::response(['token' => 'probe-token-must-not-print'], 200),
         ]);
