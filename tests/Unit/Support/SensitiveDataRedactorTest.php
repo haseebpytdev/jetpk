@@ -130,6 +130,30 @@ class SensitiveDataRedactorTest extends TestCase
     }
 
     #[Test]
+    public function sanitize_supplier_summary_preserves_sabre_wire_diagnostic_flags(): void
+    {
+        $summary = [
+            'wire_traveler_count' => 1,
+            'has_create_passenger_name_record_rq' => true,
+            'agency_phone_error' => true,
+            'passenger_records_error_digest_present' => true,
+            'traveler_1_has_given_name' => true,
+            'payload_style' => 'trip_orders_flight_offer_root_v1',
+            'given_name' => 'Ali',
+        ];
+
+        $sanitized = SensitiveDataRedactor::sanitizeSupplierSummary($summary);
+
+        $this->assertSame(1, $sanitized['wire_traveler_count']);
+        $this->assertTrue($sanitized['has_create_passenger_name_record_rq']);
+        $this->assertTrue($sanitized['agency_phone_error']);
+        $this->assertTrue($sanitized['passenger_records_error_digest_present']);
+        $this->assertTrue($sanitized['traveler_1_has_given_name']);
+        $this->assertSame('trip_orders_flight_offer_root_v1', $sanitized['payload_style']);
+        $this->assertSame('[REDACTED]', $sanitized['given_name']);
+    }
+
+    #[Test]
     public function prepare_supplier_attempt_attributes_nulls_payloads_on_failed_status(): void
     {
         $prepared = SensitiveDataRedactor::prepareSupplierAttemptAttributes([

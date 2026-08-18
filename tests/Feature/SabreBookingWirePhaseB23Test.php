@@ -27,6 +27,20 @@ class SabreBookingWirePhaseB23Test extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Trip Orders wire matrix must not be diverted by public GDS/PR certified-route gates.
+        config([
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
+            'suppliers.sabre.passenger_records_fresh_shop_guard_before_live' => false,
+            'suppliers.sabre.verified_multiseg_auto_pnr_enabled' => false,
+            'suppliers.sabre.cpnr_connecting_same_carrier_public_checkout_enabled' => false,
+            'suppliers.sabre.revalidate_before_booking' => false,
+            'suppliers.sabre.ticketing_enabled' => false,
+        ]);
+    }
+
     protected function seedWireTestBooking(): Booking
     {
         $this->seed(OtaFoundationSeeder::class);

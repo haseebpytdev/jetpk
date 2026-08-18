@@ -609,6 +609,19 @@ class SabreBookingService
     }
 
     /**
+     * Config/path intent for Trip Orders createBooking (ignores certified-route override).
+     */
+    protected function configRequestsTripOrdersCreateBooking(): bool
+    {
+        $explicit = trim((string) config('suppliers.sabre.booking_schema', ''));
+        if ($explicit === 'trip_orders_create_booking') {
+            return true;
+        }
+
+        return str_contains((string) config('suppliers.sabre.booking_path', ''), '/v1/trip/orders/createBooking');
+    }
+
+    /**
      * @param  array<string, mixed>  $apiDraft  {@see SabreBookingPayloadBuilder::buildInternalDraft()} without \_valid
      * @param  array<string, mixed>  $offer  Normalized offer (ticketing hints)
      * @return array<string, mixed>
@@ -2088,6 +2101,14 @@ class SabreBookingService
         if (($options['admin_confirmed_gds_pnr_strategy_fallback'] ?? false) === true
             || ($options['certification_full_itinerary_fallback'] ?? false) === true
             || $this->isOperatorApprovedPnrBypassActive($options)) {
+            return null;
+        }
+
+        // Trip Orders (and other non-GDS-PR) createBooking lanes are not governed by the
+        // GDS passenger-records strategy registry. Honor explicit Trip Orders config even when
+        // a certified-route selection would otherwise prefer passenger-records for diagnostics.
+        if ($this->configRequestsTripOrdersCreateBooking()
+            || ! $this->isSabreGdsPassengerRecordsCheckoutPath($this->attemptPassengerRecordsStyleDecision)) {
             return null;
         }
 

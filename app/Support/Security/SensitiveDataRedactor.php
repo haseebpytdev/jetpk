@@ -149,6 +149,32 @@ class SensitiveDataRedactor
         'source',
     ];
 
+    /**
+     * Supplier {@code safe_summary} keys that must survive redaction (counts/flags only; no raw PII values).
+     *
+     * @var list<string>
+     */
+    protected const SUPPLIER_DIAGNOSTIC_KEY_PREFIXES = [
+        'wire_',
+        'response_',
+        'agency_phone_',
+        'passenger_records_',
+        'application_results_',
+        'host_warning_',
+        'revalidate_',
+        'wire_iati_',
+        'has_agency_',
+        'has_create_passenger_name_record',
+        'blind_agency_phone_',
+        'likely_profile_',
+        'traditional_pnr_',
+        'entitlement_',
+        'createbooking_',
+        'payload_summary',
+        'request_body_non_empty',
+        'request_body_root_keys',
+    ];
+
     public const MAX_APPLICATION_DIAGNOSTIC_TEXT_LENGTH = 220;
 
     protected const MAX_SUMMARY_STRING_LENGTH = 240;
@@ -493,6 +519,10 @@ class SensitiveDataRedactor
 
     protected static function isPiiKey(string $key): bool
     {
+        if (self::isSupplierDiagnosticSummaryKey($key)) {
+            return false;
+        }
+
         $exactOnly = ['name', 'contact'];
 
         foreach (self::PII_KEYS as $pii) {
@@ -514,7 +544,32 @@ class SensitiveDataRedactor
     protected static function isSummaryForbiddenKey(string $key): bool
     {
         foreach (self::SUMMARY_FORBIDDEN_KEYS as $forbidden) {
-            if ($key === $forbidden || str_contains($key, $forbidden)) {
+            if ($key === $forbidden) {
+                return true;
+            }
+        }
+
+        if (self::isSupplierDiagnosticSummaryKey($key)) {
+            return false;
+        }
+
+        foreach (self::SUMMARY_FORBIDDEN_KEYS as $forbidden) {
+            if (str_contains($key, $forbidden)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected static function isSupplierDiagnosticSummaryKey(string $key): bool
+    {
+        if (preg_match('/^traveler_\d+_/', $key) === 1) {
+            return true;
+        }
+
+        foreach (self::SUPPLIER_DIAGNOSTIC_KEY_PREFIXES as $prefix) {
+            if ($prefix !== '' && str_starts_with($key, $prefix)) {
                 return true;
             }
         }
