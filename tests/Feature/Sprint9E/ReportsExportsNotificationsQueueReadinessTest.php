@@ -6,6 +6,7 @@ use App\Enums\AccountType;
 use App\Enums\BookingStatus;
 use App\Enums\OtaNotificationEvent;
 use App\Enums\UserAccountStatus;
+use App\Mail\BookingUniversalNotification;
 use App\Models\Agency;
 use App\Models\AgencyCommunicationSetting;
 use App\Models\AgencyMessageTemplate;
@@ -114,7 +115,8 @@ class ReportsExportsNotificationsQueueReadinessTest extends TestCase
 
         $this->assertNotNull($log);
         $this->assertNotSame('failed', $log->status);
-        Mail::assertNothingSent();
+        // Customer + operational buckets intentionally send BookingUniversalNotification under Mail::fake.
+        Mail::assertSent(BookingUniversalNotification::class);
     }
 
     public function test_duplicate_booking_request_does_not_queue_duplicate_operational_email(): void
@@ -125,6 +127,13 @@ class ReportsExportsNotificationsQueueReadinessTest extends TestCase
         $communication = app(BookingCommunicationService::class);
 
         $communication->sendBookingRequestReceived($booking);
+        $afterFirst = CommunicationLog::query()
+            ->where('booking_id', $booking->id)
+            ->where('event', OtaNotificationEvent::BookingRequestReceived->value)
+            ->whereIn('status', ['queued', 'sent', 'sending'])
+            ->count();
+        $this->assertGreaterThanOrEqual(1, $afterFirst);
+
         $communication->sendBookingRequestReceived($booking->fresh());
 
         $sentLike = CommunicationLog::query()
@@ -133,7 +142,7 @@ class ReportsExportsNotificationsQueueReadinessTest extends TestCase
             ->whereIn('status', ['queued', 'sent', 'sending'])
             ->count();
 
-        $this->assertSame(1, $sentLike);
+        $this->assertSame($afterFirst, $sentLike);
     }
 
     public function test_queued_mail_dispatch_uses_fakes_without_real_email(): void
