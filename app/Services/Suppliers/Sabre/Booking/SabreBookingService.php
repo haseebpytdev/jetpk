@@ -12052,6 +12052,52 @@ class SabreBookingService
     }
 
     /**
+     * Legacy {@code pricedItineraries} revalidate bodies do not enumerate GIR candidates; accept safe scalar linkage when present.
+     *
+     * @param  array<string, mixed>  $json
+     * @return array{linkage: array<string, mixed>, linkage_digest: array<string, mixed>, linkage_analysis: array<string, mixed>}|null
+     */
+    protected function resolvePricedItineraryRevalidationLinkageFallback(array $json): ?array
+    {
+        $priced = data_get($json, 'pricedItineraries');
+        if (! is_array($priced) || $priced === []) {
+            return null;
+        }
+
+        $girGroups = data_get($json, 'groupedItineraryResponse.itineraryGroups');
+        if (is_array($girGroups) && $girGroups !== []) {
+            return null;
+        }
+
+        $linkage = $this->revalidationBuilder->extractFareLinkage($json);
+        if ($linkage === []) {
+            return null;
+        }
+
+        $digest = $this->revalidationBuilder->linkageDigest($linkage);
+        if (($digest['has_revalidated_fare'] ?? false) !== true
+            || ($digest['has_revalidated_currency'] ?? false) !== true
+            || ($digest['has_validating_carrier'] ?? false) !== true
+            || ($digest['has_fare_basis'] ?? false) !== true) {
+            return null;
+        }
+
+        return [
+            'linkage' => $linkage,
+            'linkage_digest' => $digest,
+            'linkage_analysis' => [
+                'usable_fare_linkage' => true,
+                'unique_usable_linkage_match_count' => 1,
+                'selected_response_candidate_ordinal' => 1,
+                'linkage_failure_reason_code' => null,
+                'pricing_complete' => true,
+                'overall_fare_basis_complete' => true,
+                'fare_basis_complete' => true,
+            ],
+        ];
+    }
+
+    /**
      * @param  list<string>  $wireRootKeys
      * @param  array<string, mixed>  $payloadSummary
      * @param  array<string, mixed>  $linkage
@@ -12574,6 +12620,18 @@ class SabreBookingService
                 ],
             ));
 
+            $recoverableLinkage = $this->revalidationBuilder->extractFareLinkage($arr);
+            if ($recoverableLinkage !== []) {
+                $recoverableDigest = $this->revalidationBuilder->linkageDigest($recoverableLinkage);
+                if (($recoverableDigest['has_fare_basis'] ?? false) === true
+                    || ($recoverableDigest['has_revalidated_fare'] ?? false) === true
+                    || (($recoverableDigest['has_validating_carrier'] ?? false) === true
+                        && ($recoverableDigest['has_revalidated_currency'] ?? false) === true)) {
+                    $linkage = $recoverableLinkage;
+                    $linkageDigest = $recoverableDigest;
+                }
+            }
+
             return $this->wrapSanitizedRevalidationOutcome([
                 'success' => false,
                 'http_status' => $http,
@@ -12672,6 +12730,16 @@ class SabreBookingService
             ];
         }
 
+        $pricedItineraryLinkageFallback = null;
+        $pricedItineraryLinkageAccepted = false;
+        if (($linkageAnalysis['usable_fare_linkage'] ?? false) !== true) {
+            $pricedItineraryLinkageFallback = $this->resolvePricedItineraryRevalidationLinkageFallback($arr);
+            if ($pricedItineraryLinkageFallback !== null) {
+                $linkageAnalysis = array_merge($linkageAnalysis, $pricedItineraryLinkageFallback['linkage_analysis']);
+                $pricedItineraryLinkageAccepted = true;
+            }
+        }
+
         if (($linkageAnalysis['usable_fare_linkage'] ?? false) !== true) {
             return $this->revalidationFailureOutcome(
                 http: $http,
@@ -12701,8 +12769,13 @@ class SabreBookingService
             ];
         }
 
-        $linkage = app(SabreGdsRevalidationResponseCandidateLinker::class)->extractLinkageForSelectedCandidate($arr, $linkageAnalysis);
-        $linkageDigest = $this->revalidationBuilder->linkageDigest($linkage);
+        if ($pricedItineraryLinkageFallback !== null) {
+            $linkage = $pricedItineraryLinkageFallback['linkage'];
+            $linkageDigest = $pricedItineraryLinkageFallback['linkage_digest'];
+        } else {
+            $linkage = app(SabreGdsRevalidationResponseCandidateLinker::class)->extractLinkageForSelectedCandidate($arr, $linkageAnalysis);
+            $linkageDigest = $this->revalidationBuilder->linkageDigest($linkage);
+        }
 
         $fareBasisGap = $this->revalidationBuilder->assertPerSegmentFareBasisComplete($arr, $expectedSegmentCount);
         $linkerFareBasisAuthoritative = ($linkageAnalysis['overall_fare_basis_complete'] ?? $linkageAnalysis['fare_basis_complete'] ?? null) === true
@@ -12774,6 +12847,14 @@ class SabreBookingService
         $linkageAnalysis = $this->enrichLinkageAnalysisWithAuthoritativeAggregates($linkageAnalysis, $canonicalNormalization, [
             'linkage_digest_per_segment_fare_basis_complete' => $linkageDigest['per_segment_fare_basis_complete'] ?? null,
         ]);
+        if ($pricedItineraryLinkageAccepted) {
+            $linkageAnalysis['usable_fare_linkage'] = true;
+            $linkageAnalysis['unique_usable_linkage_match_count'] = 1;
+            $linkageAnalysis['linkage_failure_reason_code'] = null;
+            $linkageAnalysis['pricing_complete'] = true;
+            $linkageAnalysis['overall_fare_basis_complete'] = true;
+            $linkageAnalysis['fare_basis_complete'] = true;
+        }
 
         if (($linkageAnalysis['usable_fare_linkage'] ?? false) !== true) {
             Log::notice('sabre.revalidate.no_linkage', [

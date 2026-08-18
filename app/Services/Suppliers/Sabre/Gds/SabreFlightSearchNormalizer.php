@@ -6289,6 +6289,9 @@ class SabreFlightSearchNormalizer
                 $bookingClass = trim((string) ($seg['resBookDesigCode'] ?? $seg['bookingCode'] ?? $seg['classOfService'] ?? $seg['resBookDesig'] ?? ''));
                 $fareBasis = trim((string) ($seg['fareBasisCode'] ?? $seg['fareBasis'] ?? $fcFareBasis));
                 $cabinLetter = strtoupper(trim((string) ($seg['cabinCode'] ?? $seg['cabin'] ?? '')));
+                if ($bookingClass === '' && $cabinLetter !== '' && strlen($cabinLetter) === 1) {
+                    $bookingClass = $cabinLetter;
+                }
                 $out[] = [
                     'origin' => $origin,
                     'destination' => $destination,
@@ -6332,6 +6335,14 @@ class SabreFlightSearchNormalizer
             $v = $meta[$k] ?? null;
             if (is_string($v) && trim($v) !== '') {
                 $segmentRow[$k] = $k === 'fare_basis_code' ? strtoupper(trim($v)) : $v;
+            }
+        }
+
+        $bookingClass = strtoupper(trim((string) ($segmentRow['booking_class'] ?? '')));
+        if ($bookingClass === '') {
+            $cabin = strtoupper(trim((string) ($segmentRow['segment_cabin_code'] ?? '')));
+            if ($cabin !== '' && strlen($cabin) === 1) {
+                $segmentRow['booking_class'] = $cabin;
             }
         }
 
@@ -6452,6 +6463,24 @@ class SabreFlightSearchNormalizer
     }
 
     /**
+     * @param  array<string, mixed>  $seg
+     */
+    protected function resolveSegmentBookingClassForHandoff(array $seg): string
+    {
+        $bookingClass = strtoupper(trim((string) ($seg['booking_class'] ?? $seg['class_of_service'] ?? $seg['res_book_desig_code'] ?? '')));
+        if ($bookingClass !== '') {
+            return $bookingClass;
+        }
+
+        $cabin = strtoupper(trim((string) ($seg['segment_cabin_code'] ?? $seg['cabin'] ?? '')));
+        if ($cabin !== '' && strlen($cabin) === 1) {
+            return $cabin;
+        }
+
+        return '';
+    }
+
+    /**
      * Compact, safe booking handoff slice stored on {@code raw_payload.sabre_booking_context} (no raw BFM JSON / credentials).
      *
      * @param  list<array<string, mixed>>  $segments
@@ -6476,7 +6505,7 @@ class SabreFlightSearchNormalizer
             if (! is_array($seg)) {
                 continue;
             }
-            $bookingBySeg[] = strtoupper(trim((string) ($seg['booking_class'] ?? '')));
+            $bookingBySeg[] = $this->resolveSegmentBookingClassForHandoff($seg);
             $fareBasisBySeg[] = strtoupper(trim((string) ($seg['fare_basis_code'] ?? '')));
             $cab = strtolower(trim((string) ($seg['segment_cabin_code'] ?? $seg['cabin'] ?? '')));
             $cabinBySeg[] = $cab !== '' ? substr($cab, 0, 32) : '';

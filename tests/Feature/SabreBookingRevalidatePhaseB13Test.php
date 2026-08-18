@@ -1647,6 +1647,7 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
         $builder = $this->app->make(SabreRevalidationPayloadBuilder::class);
         $draft = $this->sampleInternalDraftWithSegments('Y', 'YOWPK', 'K', 'KLITE1');
         $draft['segments'][1]['booking_class'] = '';
+        $draft['segments'][1]['segment_cabin_code'] = '';
         $payload = $builder->buildPayload($draft);
 
         $this->expectException(SabreRevalidateGatekeeperException::class);

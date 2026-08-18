@@ -1383,6 +1383,9 @@ final class SabreRevalidationPayloadBuilder
         }
 
         $bookingClass = strtoupper(trim((string) ($seg['booking_class'] ?? '')));
+        if ($bookingClass === '') {
+            $bookingClass = strtoupper(trim((string) ($seg['segment_cabin_code'] ?? $seg['class_of_service'] ?? '')));
+        }
 
         if ($bookingClass !== '') {
             $node['ClassOfService'] = $bookingClass;

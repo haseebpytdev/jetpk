@@ -9136,6 +9136,9 @@ final class SabreBookingPayloadBuilder
             if ($cab === '' && isset($cabinBySeg[$idx]) && trim((string) $cabinBySeg[$idx]) !== '') {
                 $cab = strtoupper(trim((string) $cabinBySeg[$idx]));
             }
+            if ($bc === '' && $cab !== '' && strlen($cab) === 1) {
+                $bc = $cab;
+            }
             $segmentsOut[] = array_filter([
                 'origin' => strtoupper(trim((string) ($seg['origin'] ?? ''))),
                 'destination' => strtoupper(trim((string) ($seg['destination'] ?? ''))),
