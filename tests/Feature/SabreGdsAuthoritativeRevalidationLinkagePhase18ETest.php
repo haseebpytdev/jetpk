@@ -77,12 +77,13 @@ class SabreGdsAuthoritativeRevalidationLinkagePhase18ETest extends TestCase
         $this->assertSame('SLOW1', $stored['segments'][0]['fare_basis_code'] ?? $stored['segments'][0]['fare_basis'] ?? null);
     }
 
-    public function test_stale_search_blocks_revalidate_endpoint(): void
+    public function test_stale_search_can_revalidate_via_refresh_endpoint(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        Http::fake();
-
         $connection = $this->activateSabreConnection();
+        $fixture = $this->linkageFixture();
+        $this->fakeRevalidateOnly(Http::response($fixture['response'], 200));
+
         $offer = $this->offerFromLinkageFixture($connection);
         $searchId = $this->storeSabreSearchPayload(now()->subMinutes(20)->toIso8601String(), $offer);
 
@@ -91,9 +92,11 @@ class SabreGdsAuthoritativeRevalidationLinkagePhase18ETest extends TestCase
             'offer_id' => $offer['id'],
         ]);
 
-        $response->assertStatus(410);
-        $response->assertJsonPath('status', 'offer_stale');
-        Http::assertNothingSent();
+        $response->assertOk();
+        $response->assertJsonPath('success', true);
+        $response->assertJsonPath('offer_freshness.revalidation_status', 'success');
+        Http::assertSent(fn (Request $request): bool => str_contains($request->url(), '/revalidate'));
+        Http::assertNotSent(fn (Request $request): bool => str_contains($request->url(), 'createBooking'));
     }
 
     public function test_revalidation_supplier_rejection_is_sanitized_and_skips_create_pnr(): void
