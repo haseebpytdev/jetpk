@@ -196,6 +196,22 @@ class OtaJetpkThemeIsolationAuditCommand extends Command
         $brokenEntities = $this->countBrokenEntities($html);
 
         $notes = [];
+        $isNextOwnedPublicPath = in_array('/'.ltrim($path, '/'), [
+            '/lookup-booking',
+        ], true);
+
+        if ($missingJetpk && $isNextOwnedPublicPath && $masterCss === 0 && $masterJs === 0 && $forbiddenBrand === 0) {
+            // Canonical Manage Booking is Next /lookup-booking; Blade JetPK CSS is not expected.
+            return [
+                'page' => $label,
+                'status' => 'PASS',
+                'master_css' => $masterCss,
+                'master_js' => $masterJs,
+                'other_client' => $otherClient,
+                'notes' => 'next-owned public surface (Blade theme stylesheet not required)',
+            ];
+        }
+
         if ($missingJetpk) {
             $notes[] = 'no JetPK theme stylesheet';
         }

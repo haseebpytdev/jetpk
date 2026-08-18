@@ -145,10 +145,11 @@ class OtaEmailTemplateSmokeCommand extends Command
             }
 
             $html = $result->html;
+            // JetPK ops previews use the universal JetPakistan email shell (not the legacy ModernEmailLayout ops markers).
             $structuralChecks = [
                 '<!DOCTYPE html>' => 'DOCTYPE',
-                'Operational alert' => 'ops header label',
-                'Summary' => 'summary section',
+                'jetpk-container' => 'JetPK email container',
+                'jetpk-h1' => 'JetPK headline',
             ];
 
             foreach ($structuralChecks as $needle => $label) {
@@ -158,9 +159,9 @@ class OtaEmailTemplateSmokeCommand extends Command
                 }
             }
 
-            if (! preg_match('/Action required|What to do next/', $html)) {
+            if (! preg_match('/Visit site|Open booking|View booking|Open in admin/i', $html)) {
                 $failed++;
-                $this->warn($key.' missing action card title.');
+                $this->warn($key.' missing action/CTA marker.');
             }
 
             if (preg_match('/\{\{\s*[\w.]+\s*\}\}/', $html) === 1) {
