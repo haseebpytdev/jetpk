@@ -122,8 +122,10 @@ class I8EmailModernizationTest extends TestCase
                 && str_contains($mail->htmlBody, '<!DOCTYPE html>')
                 && str_contains($mail->htmlBody, 'New customer signup')
                 && str_contains($mail->htmlBody, 'New Signup')
-                && str_contains($mail->htmlBody, 'new.signup@example.test')
-                && str_contains($mail->htmlBody, '+923001234567')
+                && str_contains($mail->htmlBody, 'n***@example.test')
+                && str_contains($mail->htmlBody, '***4567')
+                && ! str_contains($mail->htmlBody, 'new.signup@example.test')
+                && ! str_contains($mail->htmlBody, '+923001234567')
                 && ! str_contains($mail->htmlBody, 'SECRET-SABRE')
                 && ! str_contains($mail->htmlBody, '$2y$')
                 && ! str_contains($mail->htmlBody, 'reset_token=');

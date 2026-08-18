@@ -49,7 +49,7 @@ class CustomerFacingMailableModernLayoutTest extends TestCase
         $this->assertStringContainsString('ASIF-2026-000777', $mail->htmlBody);
         $this->assertStringContainsString('Booking request received', $mail->htmlBody);
         $this->assertStringContainsString('ASIF-2026-000777', $mail->plainBody);
-        $this->assertSame('Booking request received — ASIF-2026-000777', $mail->envelope()->subject);
+        $this->assertSame('Your booking request was received — ASIF-2026-000777', $mail->envelope()->subject);
     }
 
     #[Test]
