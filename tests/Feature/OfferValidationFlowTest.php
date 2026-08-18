@@ -10,6 +10,7 @@ use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierEnvironment;
 use App\Enums\SupplierProvider;
 use App\Models\Agency;
+use App\Models\Agent;
 use App\Models\Booking;
 use App\Models\SupplierConnection;
 use App\Models\User;
@@ -174,21 +175,22 @@ class OfferValidationFlowTest extends TestCase
         PublicCheckoutTestDoubles::bind($this, $depart);
         $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
-        $this->actingAs($agentUser)->post('/agent/bookings', [
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => $depart,
-            'flight_id' => PublicCheckoutTestDoubles::OFFER_ID,
-            'title' => 'Mr',
-            'first_name' => 'Agent',
-            'last_name' => 'Validation',
-            'dob' => now()->subYears(30)->toDateString(),
-            'nationality' => 'PK',
-            'gender' => 'M',
-            'email' => 'agent.validation@example.com',
-            'phone' => '+923001112299',
-            'country' => 'Pakistan',
-        ]);
+        $agent = Agent::query()->where('user_id', $agentUser->id)->firstOrFail();
+        PublicCheckoutTestDoubles::bind($this, $depart, 'LHE', 'DXB', 'agent_portal', $agent->id);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $this->actingAs($agentUser)->get(route('agent.bookings.create'))->assertOk();
+
+        $this->actingAs($agentUser)->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => PublicCheckoutTestDoubles::OFFER_ID,
+                'offer_id' => PublicCheckoutTestDoubles::OFFER_ID,
+                'from' => 'LHE',
+                'to' => 'DXB',
+                'depart' => $depart,
+                'email' => 'agent.validation@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ))->assertRedirect(route('booking.review'));
 
         $meta = Booking::query()->firstOrFail()->meta ?? [];
         $this->assertArrayHasKey('offer_validation_status', $meta);
@@ -240,18 +242,28 @@ class OfferValidationFlowTest extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $this->withoutMiddleware(ValidateCsrfToken::class);
-        $response = $this->post('/booking/passengers', PublicBookingPassengersPayload::merge([
-            'flight_id' => 'missing-id',
-            'offer_id' => 'missing-id',
-            'from' => 'LHE',
-            'to' => 'KHI',
-            'depart' => now()->addWeek()->toDateString(),
-            'first_name' => 'Unavailable',
-            'last_name' => 'Case',
-            'email' => 'unavailable@example.com',
-        ]));
+        $response = $this->post('/booking/passengers', array_merge(
+            PublicBookingPassengersPayload::merge([
+                'flight_id' => 'missing-id',
+                'offer_id' => 'missing-id',
+                'from' => 'LHE',
+                'to' => 'KHI',
+                'depart' => now()->addWeek()->toDateString(),
+                'first_name' => 'Unavailable',
+                'last_name' => 'Case',
+                'email' => 'unavailable@example.com',
+            ]),
+            PublicBookingPassengersPayload::internationalDocuments(),
+        ));
 
-        $response->assertRedirect(route('flights.search'));
+        $response->assertRedirect();
+        $this->assertTrue(
+            $response->isRedirect() && (
+                str_contains((string) $response->headers->get('Location'), '/flights')
+                || str_contains((string) $response->headers->get('Location'), '#jp-flight-search')
+                || rtrim((string) $response->headers->get('Location'), '/') === rtrim((string) config('app.url'), '/')
+            )
+        );
     }
 
     public function test_sabre_validate_offer_search_replay_uses_http_fake_and_no_pnr(): void

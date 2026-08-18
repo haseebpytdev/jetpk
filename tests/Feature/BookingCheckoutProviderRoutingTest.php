@@ -121,8 +121,8 @@ class BookingCheckoutProviderRoutingTest extends TestCase
         $this->assertNotEmpty($offers);
         $first = $offers[0];
         $this->assertSame('duffel', $first['supplier_provider'] ?? null);
-        $this->assertSame($duffelConn->id, (int) ($first['supplier_connection_id'] ?? 0));
-        $this->assertNotSame('', (string) ($first['supplier_offer_id'] ?? ''));
+        $this->assertArrayNotHasKey('supplier_connection_id', $first);
+        $this->assertArrayNotHasKey('supplier_offer_id', $first);
         $selectUrl = (string) ($first['select_url'] ?? '');
         $this->assertStringContainsString('search_id=', $selectUrl);
         $this->assertStringContainsString('flight_id=', $selectUrl);

@@ -114,22 +114,12 @@ class BookingPassengersRedirectLoopTest extends TestCase
         $depart = now()->addWeek()->format('Y-m-d');
         $warning = 'This fare is no longer available. Please refresh results and select again.';
 
-        $flightSearch = Mockery::mock(FlightSearchService::class);
-        $flightSearch->shouldReceive('search')->once()->andReturn([]);
-        $flightSearch->shouldReceive('searchWithMeta')->once()->andReturn([
-            'offers' => [PublicCheckoutTestDoubles::searchOfferPayload($depart)],
-            'warnings' => [],
-        ]);
-        App::instance(FlightSearchService::class, $flightSearch);
+        $response = $this->get('/booking/passengers?flight_id=missing-offer&offer_id=missing-offer'
+            .'&from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0');
 
-        $html = $this->followingRedirects()
-            ->get('/booking/passengers?flight_id=missing-offer&offer_id=missing-offer'
-                .'&from=LHE&to=DXB&depart='.$depart.'&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
-            ->assertOk()
-            ->getContent();
-
-        $this->assertStringContainsString($warning, $html);
-        $this->assertStringContainsString('data-results-root', $html);
+        $response->assertRedirect();
+        $response->assertSessionHasErrors('flight_id');
+        $this->assertSame($warning, session('errors')?->first('flight_id'));
     }
 
     public function test_missing_book_now_without_search_context_redirects_home_with_warning(): void
