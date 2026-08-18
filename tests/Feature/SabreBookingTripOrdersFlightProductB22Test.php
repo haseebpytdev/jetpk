@@ -31,6 +31,13 @@ class SabreBookingTripOrdersFlightProductB22Test extends TestCase
         config([
             'suppliers.sabre.revalidate_before_booking' => false,
             'suppliers.sabre.allow_createbooking_without_revalidation' => false,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
+            'suppliers.sabre.booking_path' => '/v1/trip/orders/createBooking',
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
+            'suppliers.sabre.passenger_records_fresh_shop_guard_before_live' => false,
+            'suppliers.sabre.verified_multiseg_auto_pnr_enabled' => false,
+            'suppliers.sabre.cpnr_connecting_same_carrier_public_checkout_enabled' => false,
+            'suppliers.sabre.ticketing_enabled' => false,
         ]);
     }
 
@@ -49,6 +56,7 @@ class SabreBookingTripOrdersFlightProductB22Test extends TestCase
             'supplier_provider' => 'sabre',
             'supplier_connection_id' => $sabreConn->id,
             'airline_code' => 'PK',
+            'validating_carrier' => 'PK',
             'segments' => [
                 [
                     'origin' => 'LHE',
@@ -83,6 +91,18 @@ class SabreBookingTripOrdersFlightProductB22Test extends TestCase
                 'supplier_provider' => SupplierProvider::Sabre->value,
                 'supplier_connection_id' => $sabreConn->id,
                 'normalized_offer_snapshot' => $snapshot,
+                'selected_fare_family_option' => [
+                    'brand_code' => 'ECON',
+                    'booking_classes_by_segment' => ['Y'],
+                    'fare_basis_codes_by_segment' => ['YOWPK'],
+                    'ready_for_booking_payload' => true,
+                ],
+                'sabre_booking_context' => [
+                    'ready_for_booking_payload' => true,
+                    'booking_classes_by_segment' => ['Y'],
+                    'fare_basis_codes_by_segment' => ['YOWPK'],
+                    'validating_carrier' => 'PK',
+                ],
                 'search_criteria' => [
                     'origin' => 'LHE',
                     'destination' => 'DXB',
@@ -101,6 +121,13 @@ class SabreBookingTripOrdersFlightProductB22Test extends TestCase
             'passenger_index' => 1,
             'passenger_type' => 'adult',
             'is_lead_passenger' => true,
+            'first_name' => 'Ada',
+            'last_name' => 'Lovelace',
+            'date_of_birth' => '1990-01-15',
+            'nationality' => 'PK',
+            'passport_number' => 'AB1234567',
+            'passport_expiry_date' => '2030-12-31',
+            'passport_issuing_country' => 'PK',
         ]);
 
         BookingContact::query()->create([
@@ -221,7 +248,7 @@ class SabreBookingTripOrdersFlightProductB22Test extends TestCase
             'suppliers.sabre.booking_live_call_enabled' => true,
             'suppliers.sabre.ticketing_enabled' => false,
             'suppliers.sabre.booking_path' => $bookingPath,
-            'suppliers.sabre.booking_schema' => null,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
             'suppliers.sabre.revalidate_before_booking' => false,
             'suppliers.sabre.createbooking_payload_style' => 'trip_orders_flight_offer_v1',
         ]);
@@ -259,7 +286,7 @@ class SabreBookingTripOrdersFlightProductB22Test extends TestCase
             'suppliers.sabre.booking_live_call_enabled' => true,
             'suppliers.sabre.ticketing_enabled' => false,
             'suppliers.sabre.booking_path' => $bookingPath,
-            'suppliers.sabre.booking_schema' => null,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
             'suppliers.sabre.revalidate_before_booking' => false,
             'suppliers.sabre.createbooking_payload_style' => 'trip_orders_flight_offer_v1',
         ]);
