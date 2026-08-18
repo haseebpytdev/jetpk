@@ -190,6 +190,53 @@ class FlightSearchResultStore
     }
 
     /**
+     * Resolve a cached offer for checkout freshness / revalidation (includes stale search payloads).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findOfferForCheckoutTransition(string $searchId, string $offerId): ?array
+    {
+        $offerId = trim($offerId);
+        if ($offerId === '') {
+            return null;
+        }
+
+        $payload = $this->get($searchId, false);
+        if ($payload === null) {
+            return null;
+        }
+
+        foreach ($this->displayOffersFromPayload($payload) as $offer) {
+            if (! is_array($offer)) {
+                continue;
+            }
+            if ((string) ($offer['id'] ?? '') === $offerId || (string) ($offer['offer_id'] ?? '') === $offerId) {
+                if ($this->isOfferBlockedForSelection($offer)) {
+                    return null;
+                }
+
+                return $offer;
+            }
+        }
+
+        $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
+        foreach ($offers as $offer) {
+            if (! is_array($offer)) {
+                continue;
+            }
+            if ((string) ($offer['id'] ?? '') === $offerId || (string) ($offer['offer_id'] ?? '') === $offerId) {
+                if ($this->isOfferBlockedForSelection($offer)) {
+                    return null;
+                }
+
+                return $offer;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public function findOffer(string $searchId, string $offerId): ?array

@@ -193,7 +193,7 @@ class BookingController extends Controller
 
             $offer = null;
             if ($searchId !== '') {
-                $offer = $this->searchStore->findOffer($searchId, $selectedOfferId);
+                $offer = $this->searchStore->findOfferForCheckoutTransition($searchId, $selectedOfferId);
             }
             // Offer may be missing from the cached slice (MAX_STORED_OFFERS); fall back to a fresh search before treating the session as expired.
             if ($offer === null) {
@@ -872,7 +872,7 @@ class BookingController extends Controller
         if ($effectiveFlightId !== '') {
             $offer = null;
             if (is_string($draft['search_id'] ?? null) && ($draft['search_id'] ?? '') !== '') {
-                $offer = $this->searchStore->findOffer((string) $draft['search_id'], $effectiveFlightId);
+                $offer = $this->searchStore->findOfferForCheckoutTransition((string) $draft['search_id'], $effectiveFlightId);
             }
             if ($offer === null) {
                 $offers = $agency !== null && $criteria['origin'] !== '' && $criteria['destination'] !== '' && $criteria['depart_date'] !== ''

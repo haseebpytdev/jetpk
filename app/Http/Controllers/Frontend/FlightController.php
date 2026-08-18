@@ -226,20 +226,7 @@ class FlightController extends Controller
             ], 410);
         }
 
-        if ($this->searchPayloadBlocksSelection($payload)) {
-            return response()->json([
-                'success' => false,
-                'status' => 'offer_stale',
-                'message' => $this->sabreOfferFreshness->customerSafeMessage('offer_stale_before_checkout'),
-                'search_freshness' => $this->sabreOfferFreshness->sanitizeForCustomerApi(
-                    is_array($payload['offer_freshness'] ?? null)
-                        ? $payload['offer_freshness']
-                        : $this->sabreOfferFreshness->buildSearchFreshnessMeta($payload),
-                ),
-            ], 410);
-        }
-
-        $offer = $this->searchStore->findOffer($searchId, $offerId);
+        $offer = $this->searchStore->findOfferForCheckoutTransition($searchId, $offerId);
         if ($offer === null) {
             return response()->json([
                 'success' => false,
