@@ -178,9 +178,19 @@ class HomepageDraftPublishPipelineTest extends TestCase
         $response = $this->get('/')->assertOk();
         $html = $response->getContent();
 
+        $this->assertTrue(
+            (bool) preg_match('/class="grid-dest[\s\S]*?<\/section>/', $html, $sectionMatch),
+            'Expected destinations grid section in homepage HTML'
+        );
+        $sectionHtml = $sectionMatch[0];
+        $dubaiPos = strpos($sectionHtml, 'Dubai');
+        $jeddahPos = strpos($sectionHtml, 'Jeddah');
+        $this->assertNotFalse($dubaiPos);
+        $this->assertNotFalse($jeddahPos);
+        // PHPUnit assertLessThan($expected, $actual) asserts $actual < $expected.
         $this->assertLessThan(
-            strpos($html, 'Dubai'),
-            strpos($html, 'Jeddah'),
+            $jeddahPos,
+            $dubaiPos,
             'Dubai (sort_order 0) must render before Jeddah (sort_order 1) despite being inserted second in the array',
         );
     }
