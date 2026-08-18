@@ -269,6 +269,134 @@ class PublicCheckoutSabrePnrItineraryAutoSyncTest extends TestCase
         return str_contains(strtolower($url), strtolower((string) config('suppliers.sabre.token_path', '/v2/auth/token')));
     }
 
+    /**
+     * @param  array<string, mixed>  $offer
+     * @return array<string, mixed>
+     */
+    private function sabreEnrichOfferForGdsContext(array $offer): array
+    {
+        if (! is_array($offer['segments'] ?? null)) {
+            return $offer;
+        }
+
+        $segments = [];
+        foreach ($offer['segments'] as $segment) {
+            if (! is_array($segment)) {
+                $segments[] = $segment;
+
+                continue;
+            }
+            $segments[] = array_merge([
+                'fare_basis_code' => 'YLITE',
+                'cabin' => 'economy',
+                'brand_code' => 'ECON',
+            ], $segment);
+        }
+        $offer['segments'] = $segments;
+
+        if (! isset($offer['validating_carrier']) && is_array($segments[0] ?? null)) {
+            $offer['validating_carrier'] = $segments[0]['carrier'] ?? $offer['airline_code'] ?? null;
+        }
+
+        return $offer;
+    }
+
+    /**
+     * @param  array<string, mixed>  $offer
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function sabreGdsStrategyEligibleMeta(array $offer, array $meta = []): array
+    {
+        $segments = is_array($offer['segments'] ?? null) ? $offer['segments'] : [];
+        $lastSegment = $segments[array_key_last($segments)] ?? [];
+        $offer = array_merge([
+            'origin' => (string) ($segments[0]['origin'] ?? 'LHE'),
+            'destination' => (string) ($lastSegment['destination'] ?? 'DXB'),
+            'depart_at' => (string) ($segments[0]['departure_at'] ?? now()->addDays(10)->toIso8601String()),
+            'arrive_at' => (string) ($lastSegment['arrival_at'] ?? now()->addDays(10)->toIso8601String()),
+            'currency' => (string) ($offer['currency'] ?? data_get($offer, 'fare_breakdown.currency', 'PKR')),
+            'total' => (float) ($offer['total'] ?? data_get($offer, 'fare_breakdown.supplier_total', 0)),
+            'validating_carrier' => (string) ($offer['validating_carrier'] ?? $offer['airline_code'] ?? $segments[0]['carrier'] ?? 'EK'),
+        ], $offer);
+        $bookingClasses = array_values(array_filter(array_map(
+            fn (array $segment): ?string => $segment['booking_class'] ?? null,
+            $segments,
+        )));
+        $fareBasisCodes = array_values(array_filter(array_map(
+            fn (array $segment): ?string => $segment['fare_basis_code'] ?? null,
+            $segments,
+        )));
+        $cabins = array_values(array_map(
+            fn (array $segment): string => (string) ($segment['cabin'] ?? 'economy'),
+            $segments,
+        ));
+        $brandCode = 'ECON';
+        foreach ($segments as $segment) {
+            $candidate = strtoupper(trim((string) ($segment['brand_code'] ?? '')));
+            if ($candidate !== '') {
+                $brandCode = $candidate;
+                break;
+            }
+        }
+        $category = count($segments) > 1 ? 'one_way_connecting' : 'one_way_direct';
+
+        return array_merge([
+            'flight_offer_snapshot' => $offer,
+            'normalized_offer_snapshot' => $offer,
+            'validated_offer_snapshot' => $offer,
+            'revalidation_status' => 'success',
+            'selected_offer_revalidation_status' => 'success',
+            'last_revalidated_at' => now()->subMinutes(2)->toIso8601String(),
+            'certified_route_selection' => [
+                'category' => $category,
+                'route_status' => 'certified',
+                'endpoint_path' => '/v2.5.0/passenger/records?mode=create',
+                'payload_style' => 'iati_like_cpnr_v2_4_gds',
+            ],
+            'selected_fare_family_option' => [
+                'brand_code' => $brandCode,
+                'booking_classes_by_segment' => $bookingClasses,
+                'fare_basis_codes_by_segment' => $fareBasisCodes,
+                'cabin_by_segment' => $cabins,
+            ],
+            'sabre_booking_context' => [
+                'ready_for_booking_payload' => true,
+                'validating_carrier' => (string) ($segments[0]['carrier'] ?? $offer['airline_code'] ?? 'EK'),
+                'brand_code' => $brandCode,
+                'selected_brand_code' => $brandCode,
+                'fare_basis_codes_by_segment' => $fareBasisCodes,
+                'booking_classes_by_segment' => $bookingClasses,
+                'cabin_by_segment' => $cabins,
+            ],
+            'pricing_snapshot' => [
+                'currency' => (string) ($offer['currency'] ?? 'PKR'),
+                'final_total' => (float) ($offer['total'] ?? data_get($offer, 'fare_breakdown.supplier_total', 0)),
+                'supplier_total' => (float) data_get($offer, 'fare_breakdown.supplier_total', $offer['total'] ?? 0),
+            ],
+        ], $meta);
+    }
+
+    /**
+     * @param  array<string, mixed>  $offer
+     * @param  array<string, mixed>  $searchCriteria
+     * @return array<string, mixed>
+     */
+    private function sabreLiveBookingMeta(SupplierConnection $sabreConn, array $offer, array $searchCriteria): array
+    {
+        $enrichedOffer = $this->sabreEnrichOfferForGdsContext($offer);
+
+        return array_merge([
+            'supplier_provider' => SupplierProvider::Sabre->value,
+            'supplier_connection_id' => $sabreConn->id,
+            'requires_price_change_confirmation' => false,
+            'protection_mode' => 'hold_price_guaranteed',
+            'search_criteria' => $searchCriteria,
+        ], $this->sabreGdsStrategyEligibleMeta($enrichedOffer, [
+            'supplier_connection_id' => $sabreConn->id,
+        ]));
+    }
+
     private function draftSabreBookingReadyForReviewSubmit(): Booking
     {
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
@@ -309,28 +437,22 @@ class PublicCheckoutSabrePnrItineraryAutoSyncTest extends TestCase
                 'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
             ],
         ];
+        $searchCriteria = [
+            'origin' => 'LHE',
+            'destination' => 'DXB',
+            'depart_date' => $depart,
+            'trip_type' => 'one_way',
+            'cabin' => 'economy',
+            'adults' => 1,
+            'children' => 0,
+            'infants' => 0,
+        ];
 
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
             'status' => BookingStatus::Draft,
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => [
-                'supplier_provider' => SupplierProvider::Sabre->value,
-                'supplier_connection_id' => $sabreConn->id,
-                'requires_price_change_confirmation' => false,
-                'protection_mode' => 'hold_price_guaranteed',
-                'flight_offer_snapshot' => $offer,
-                'search_criteria' => [
-                    'origin' => 'LHE',
-                    'destination' => 'DXB',
-                    'depart_date' => $depart,
-                    'trip_type' => 'one_way',
-                    'cabin' => 'economy',
-                    'adults' => 1,
-                    'children' => 0,
-                    'infants' => 0,
-                ],
-            ],
+            'meta' => $this->sabreLiveBookingMeta($sabreConn, $offer, $searchCriteria),
         ]);
 
         BookingPassenger::factory()->create([

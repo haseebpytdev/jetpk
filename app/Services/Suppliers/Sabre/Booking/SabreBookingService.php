@@ -5606,6 +5606,10 @@ class SabreBookingService
             $bookingColumnPatch['supplier_booking_status'] = 'manual_review';
         }
 
+        $booking->refresh();
+        $persistedMeta = is_array($booking->meta) ? $booking->meta : [];
+        $meta = array_merge($persistedMeta, $meta);
+
         $booking->forceFill(array_merge(['meta' => $meta], $bookingColumnPatch))->save();
     }
 
