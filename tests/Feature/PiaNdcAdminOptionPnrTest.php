@@ -227,6 +227,9 @@ class PiaNdcAdminOptionPnrTest extends TestCase
             'pax_ref_id' => 'ADTPax-1',
             'owner_code' => 'PK',
             'payment_time_limit' => '2099-12-31T23:59:59',
+            'fare_type_code' => 'ECO LIGHT',
+            'fare_basis' => 'VNBAG',
+            'rbd' => 'V',
             'offer_item_refs' => [
                 [
                     'offer_item_ref_id' => 'OfferItem-13',
@@ -238,9 +241,12 @@ class PiaNdcAdminOptionPnrTest extends TestCase
         $snapshot = [
             'supplier_provider' => SupplierProvider::PiaNdc->value,
             'supplier_connection_id' => $connection->id,
+            'fare_family' => 'ECO LIGHT',
             'raw_reference' => 'raw-hitit-offer-id-for-order-create',
             'provider_context' => $providerContext,
             'raw_payload' => ['provider_context' => $providerContext],
+            'fare_breakdown' => ['supplier_total' => 24410],
+            'id' => 'pia-ndc-browser-offer-1',
         ];
 
         $booking = Booking::factory()->create([

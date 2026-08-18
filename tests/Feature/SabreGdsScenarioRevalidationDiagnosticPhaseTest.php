@@ -117,7 +117,7 @@ class SabreGdsScenarioRevalidationDiagnosticPhaseTest extends TestCase
 
         $slice = $mapper->extractScenarioResultFields($evidence);
 
-        $this->assertSame('scenario_revalidation_fare_linkage_missing', $slice['revalidation_reason_code']);
+        $this->assertSame('scenario_revalidation_diagnostics_incomplete', $slice['revalidation_reason_code']);
         $this->assertTrue($slice['supplier_call_attempted']);
         $this->assertTrue($slice['supplier_response_received']);
         $this->assertArrayHasKey('revalidation_diagnostics', $slice);

@@ -9,6 +9,7 @@ use App\Models\BookingContact;
 use App\Models\BookingPassenger;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\PiaNdc\PiaNdcOptionPnrService;
+use App\Support\Bookings\PiaNdcSelectedFareReadinessService;
 use App\Support\Bookings\AdminPiaNdcOptionPnrPresenter;
 use App\Support\Bookings\AdminPiaNdcReleaseOptionPnrPresenter;
 use App\Support\Bookings\PiaNdcBookingProviderContextResolver;
@@ -105,12 +106,15 @@ class PiaNdcBrowserBookingTest extends TestCase
         $response = $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
             ->post(route('booking.review'), ['booking_method' => 'pay_later']);
 
-        $response->assertRedirect(route('booking.confirmation'));
-        $response->assertSessionHas('pia_ndc_checkout_notice', PiaNdcOptionPnrService::AUTO_FAILURE_CUSTOMER_NOTICE);
+        $response->assertRedirect(route('booking.review'));
+        $response->assertSessionHasErrors([
+            'booking' => __(PiaNdcSelectedFareReadinessService::CHECKOUT_PNR_FAILURE_MESSAGE),
+        ]);
 
         $booking->refresh();
         $this->assertNull($booking->pnr);
-        $this->assertSame(BookingStatus::Pending, $booking->status);
+        $this->assertSame(BookingStatus::Draft, $booking->status);
+        $this->assertNull($booking->submitted_at);
 
         $meta = is_array($booking->meta) ? $booking->meta : [];
         $this->assertSame('failed', $meta['pia_ndc_auto_option_pnr']['status'] ?? null);
@@ -120,11 +124,6 @@ class PiaNdcBrowserBookingTest extends TestCase
             'action' => 'auto_create_option_pnr',
             'status' => 'failed',
         ]);
-
-        $confirmation = $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
-            ->get(route('booking.confirmation'));
-        $confirmation->assertOk();
-        $confirmation->assertSee(PiaNdcOptionPnrService::AUTO_FAILURE_CUSTOMER_NOTICE, false);
 
         Http::assertSentCount(1);
     }
