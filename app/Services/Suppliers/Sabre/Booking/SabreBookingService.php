@@ -27,6 +27,7 @@ use App\Support\Bookings\ComplexItineraryPolicy;
 use App\Support\Bookings\ControlledStaffOfferRefreshDiagnostics;
 use App\Support\Bookings\PublicCheckoutFareChangeState;
 use App\Support\Bookings\SabreAdminManualPnrFallbackReadiness;
+use App\Support\Bookings\SabreBookingValidationManualRequestPolicy;
 use App\Support\Bookings\SabreCertifiedRouteSelector;
 use App\Support\Bookings\SabreControlledFinalPnrRetryAllowanceGate;
 use App\Support\Bookings\SabreControlledPnrApprovalOverrideGate;
@@ -5975,7 +5976,10 @@ class SabreBookingService
         $strategySelection = app(SabreGdsPnrCreateStrategySelector::class)->selectForBooking($booking);
 
         $selectedStrategy = trim((string) ($strategySelection['selected_strategy'] ?? ''));
-        if ($selectedStrategy === '' && $this->isBookingLiveCallEnabled()) {
+        if ($selectedStrategy === ''
+            && $this->isBookingLiveCallEnabled()
+            && (SabreBookingValidationManualRequestPolicy::publicAutoPnrEnabled()
+                || SabreBookingValidationManualRequestPolicy::ticketingEnabled())) {
             $publicAutoBlockReason = trim((string) ($strategySelection['public_auto_block_reason'] ?? ''));
             $errorCode = $publicAutoBlockReason !== ''
                 ? $publicAutoBlockReason

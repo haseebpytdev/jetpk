@@ -912,6 +912,7 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
             'supplier_connection_id' => $sabreConn->id,
             'airline_code' => 'EK',
             'airline_name' => 'Emirates',
+            'validating_carrier' => 'EK',
             'depart_at' => $depart.'T08:00:00Z',
             'arrive_at' => $depart.'T14:00:00Z',
             'total' => 165000,
@@ -934,6 +935,11 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
                 'currency' => 'PKR',
                 'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
             ],
+            'raw_payload' => [
+                'sabre_booking_context' => [
+                    'ready_for_booking_payload' => true,
+                ],
+            ],
         ];
 
         $booking = Booking::factory()->create([
@@ -951,8 +957,17 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
                     'brand_code' => 'FRD',
                     'baggage_summary' => '30kg',
                     'fare_basis_codes' => ['FLWOPPK1'],
-                    'booking_classes_by_segment' => ['V'],
+                    'fare_basis_codes_by_segment' => ['FLWOPPK1'],
+                    'booking_classes_by_segment' => ['Y'],
                     'price_display' => 'Approx. PKR 165,000',
+                    'ready_for_booking_payload' => true,
+                ],
+                'sabre_booking_context' => [
+                    'ready_for_booking_payload' => true,
+                    'selected_brand_code' => 'FRD',
+                    'brand_code' => 'FRD',
+                    'booking_classes_by_segment' => ['Y'],
+                    'fare_basis_codes_by_segment' => ['FLWOPPK1'],
                 ],
                 'flight_offer_snapshot' => $offer,
                 'normalized_offer_snapshot' => $offer,
