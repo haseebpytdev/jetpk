@@ -11,6 +11,7 @@ use App\Models\BookingContact;
 use App\Models\BookingFareBreakdown;
 use App\Models\BookingPassenger;
 use App\Models\SupplierConnection;
+use App\Services\Suppliers\Sabre\Booking\SabreBookingPayloadBuilder;
 use App\Services\Suppliers\Sabre\Diagnostics\SabreBookingContinuityAuditor;
 use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Support\Bookings\SabreCertifiedRouteSelector;
@@ -39,7 +40,6 @@ class SabreHostClassificationPersistenceTest extends TestCase
 
     public function test_no_fares_rbd_carrier_failure_persists_safe_host_classification(): void
     {
-        $recordsPath = '/v2.5.0/passenger/records?mode=create';
         $this->stubSabreOAuthAndHttp(fn () => Http::response([
             'CreatePassengerNameRecordRS' => [
                 'ApplicationResults' => [
@@ -59,12 +59,14 @@ class SabreHostClassificationPersistenceTest extends TestCase
         config([
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
-            'suppliers.sabre.booking_path' => $recordsPath,
-            'suppliers.sabre.booking_schema' => 'passenger_records_create_pnr',
+            'suppliers.sabre.pnr_create_enabled' => true,
+            'suppliers.sabre.booking_payload_style' => SabreBookingPayloadBuilder::IATI_LIKE_CPNR_V2_4_GDS,
             'suppliers.sabre.revalidate_before_booking' => false,
             'suppliers.sabre.ticketing_enabled' => false,
             'suppliers.sabre.passenger_records_fresh_shop_guard_before_live' => false,
             'suppliers.sabre.passenger_records_block_risky_itinerary_live' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
+            'suppliers.sabre.refresh_offer_before_public_pnr' => false,
         ]);
 
         $booking = $this->seedLivePnrBooking('sabre-11kd-no-fares-offer');
@@ -168,34 +170,112 @@ class SabreHostClassificationPersistenceTest extends TestCase
             'meta' => [
                 'supplier_provider' => SupplierProvider::Sabre->value,
                 'supplier_connection_id' => $sabreConn->id,
-                'flight_offer_snapshot' => [
+                'distribution_channel' => 'gds',
+                'normalized_offer_snapshot' => [
                     'id' => '11kd-connecting-offer',
                     'supplier_provider' => 'sabre',
                     'supplier_connection_id' => $sabreConn->id,
+                    'validating_carrier' => 'EK',
                     'segments' => [
                         [
                             'origin' => 'LHE',
                             'destination' => 'DXB',
                             'carrier' => 'EK',
+                            'marketing_carrier' => 'EK',
+                            'operating_carrier' => 'EK',
                             'flight_number' => '615',
                             'departure_at' => $depart.'T10:00:00Z',
                             'arrival_at' => $depart.'T14:00:00Z',
                             'booking_class' => 'K',
+                            'fare_basis_code' => 'KLOW',
                         ],
                         [
                             'origin' => 'DXB',
                             'destination' => 'DOH',
                             'carrier' => 'EK',
+                            'marketing_carrier' => 'EK',
+                            'operating_carrier' => 'EK',
                             'flight_number' => '847',
                             'departure_at' => $depart.'T18:00:00Z',
                             'arrival_at' => $depart.'T18:45:00Z',
                             'booking_class' => 'K',
+                            'fare_basis_code' => 'KLOW',
                         ],
                     ],
                     'fare_breakdown' => [
                         'supplier_total' => 120000,
                         'currency' => 'PKR',
                         'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
+                        'fare_basis_codes' => ['KLOW', 'KLOW'],
+                    ],
+                    'raw_payload' => [
+                        'sabre_shop_context' => [
+                            'validating_carrier' => 'EK',
+                            'booking_classes_by_segment' => ['K', 'K'],
+                            'fare_basis_codes_by_segment' => ['KLOW', 'KLOW'],
+                        ],
+                        'sabre_booking_context' => [
+                            'validating_carrier' => 'EK',
+                            'booking_classes_by_segment' => ['K', 'K'],
+                            'fare_basis_codes_by_segment' => ['KLOW', 'KLOW'],
+                            'segment_slice_count' => 2,
+                        ],
+                    ],
+                ],
+                'sabre_booking_context' => [
+                    'validating_carrier' => 'EK',
+                    'booking_classes_by_segment' => ['K', 'K'],
+                    'fare_basis_codes_by_segment' => ['KLOW', 'KLOW'],
+                ],
+                'flight_offer_snapshot' => [
+                    'id' => '11kd-connecting-offer',
+                    'supplier_provider' => 'sabre',
+                    'supplier_connection_id' => $sabreConn->id,
+                    'validating_carrier' => 'EK',
+                    'segments' => [
+                        [
+                            'origin' => 'LHE',
+                            'destination' => 'DXB',
+                            'carrier' => 'EK',
+                            'marketing_carrier' => 'EK',
+                            'operating_carrier' => 'EK',
+                            'flight_number' => '615',
+                            'departure_at' => $depart.'T10:00:00Z',
+                            'arrival_at' => $depart.'T14:00:00Z',
+                            'booking_class' => 'K',
+                            'fare_basis_code' => 'KLOW',
+                        ],
+                        [
+                            'origin' => 'DXB',
+                            'destination' => 'DOH',
+                            'carrier' => 'EK',
+                            'marketing_carrier' => 'EK',
+                            'operating_carrier' => 'EK',
+                            'flight_number' => '847',
+                            'departure_at' => $depart.'T18:00:00Z',
+                            'arrival_at' => $depart.'T18:45:00Z',
+                            'booking_class' => 'K',
+                            'fare_basis_code' => 'KLOW',
+                        ],
+                    ],
+                    'fare_breakdown' => [
+                        'supplier_total' => 120000,
+                        'currency' => 'PKR',
+                        'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
+                        'fare_basis_codes' => ['KLOW', 'KLOW'],
+                    ],
+                    'raw_payload' => [
+                        'sabre_shop_context' => [
+                            'validating_carrier' => 'EK',
+                            'booking_classes_by_segment' => ['K', 'K'],
+                            'fare_basis_codes_by_segment' => ['KLOW', 'KLOW'],
+                        ],
+                        'sabre_booking_context' => [
+                            'validating_carrier' => 'EK',
+                            'booking_classes_by_segment' => ['K', 'K'],
+                            'fare_basis_codes_by_segment' => ['KLOW', 'KLOW'],
+                            'segment_slice_count' => 2,
+                        ],
                     ],
                 ],
             ],
@@ -449,41 +529,41 @@ class SabreHostClassificationPersistenceTest extends TestCase
         ]);
 
         $depart = now()->addDays(10)->toDateString();
-        $offer = [
-            'id' => $offerId,
-            'supplier_provider' => 'sabre',
-            'supplier_connection_id' => $sabreConn->id,
-            'airline_code' => 'SV',
-            'segments' => [[
-                'origin' => 'LHE',
-                'destination' => 'JED',
-                'carrier' => 'SV',
-                'flight_number' => '739',
-                'departure_at' => $depart.'T09:00:00Z',
-                'arrival_at' => $depart.'T12:00:00Z',
-                'booking_class' => 'K',
-            ]],
-            'fare_breakdown' => [
-                'supplier_total' => 95000,
-                'currency' => 'PKR',
-                'passenger_counts' => ['adults' => 1, 'children' => 0, 'infants' => 0],
-            ],
-        ];
+        $snapshot = $this->completeOneSegmentSnapshot();
+        $snapshot['offer_id'] = $offerId;
+        $snapshot['id'] = $offerId;
+        $snapshot['supplier_connection_id'] = $sabreConn->id;
+        $offer = $snapshot;
 
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
-            'status' => BookingStatus::Draft,
+            'status' => BookingStatus::Pending,
             'supplier' => SupplierProvider::Sabre->value,
             'meta' => [
                 'supplier_provider' => SupplierProvider::Sabre->value,
                 'supplier_connection_id' => $sabreConn->id,
                 'requires_price_change_confirmation' => false,
                 'protection_mode' => 'hold_price_guaranteed',
+                'payment_mode' => 'pay_later_booking_request',
+                'distribution_channel' => 'gds',
+                'selected_fare_family_option' => [
+                    'brand_code' => 'MAIN',
+                    'booking_classes_by_segment' => ['K'],
+                    'fare_basis_codes_by_segment' => ['KLOW'],
+                ],
+                'normalized_offer_snapshot' => $offer,
+                'sabre_booking_context' => [
+                    'selected_brand_code' => 'MAIN',
+                    'brand_code' => 'MAIN',
+                    'validating_carrier' => 'EK',
+                    'booking_classes_by_segment' => ['K'],
+                    'fare_basis_codes_by_segment' => ['KLOW'],
+                ],
                 'flight_offer_snapshot' => $offer,
                 'search_criteria' => [
                     'origin' => 'LHE',
-                    'destination' => 'JED',
-                    'depart_date' => $depart,
+                    'destination' => 'DXB',
+                    'depart_date' => '2026-10-01',
                     'trip_type' => 'one_way',
                     'cabin' => 'economy',
                     'adults' => 1,
