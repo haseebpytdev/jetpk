@@ -5881,6 +5881,15 @@ class SabreBookingService
     {
         $booking->loadMissing(['passengers', 'contact', 'fareBreakdown', 'supplierBookings']);
 
+        if (ComplexItineraryPolicy::isComplex($booking)
+            && ! ComplexItineraryPolicy::complexItineraryPnrEnabled()) {
+            $result = $this->complexItineraryPnrBlockedResult($booking);
+            $this->finalizePublicCheckoutSabreStorage($booking, $result);
+            $this->persistComplexItineraryDeferMeta($booking);
+
+            return $result;
+        }
+
         $contextCompletionService = app(SabreGdsAutoPnrContextCompletionService::class);
         $completion = $contextCompletionService->completeForBooking($booking);
 
