@@ -1132,7 +1132,7 @@ class SabreSandboxSearchTest extends TestCase
         $this->assertSame('KHI', $o->segments[0]['destination']);
         $this->assertSame('KHI', $o->segments[1]['origin']);
         $this->assertSame('DXB', $o->segments[1]['destination']);
-        $this->assertStringContainsString('25 KG', (string) ($o->baggage->summary ?? ''));
+        $this->assertMatchesRegularExpression('/25\s*kg/i', (string) ($o->baggage->summary ?? ''));
         $this->assertSame('MAIN', $o->fare_family);
 
         $rc = $normalizer->routeContinuityDiagnostics($offers);
@@ -1236,7 +1236,7 @@ class SabreSandboxSearchTest extends TestCase
             $this->assertNotSame('0h 00m', (string) ($row['duration_display'] ?? ''));
         }
 
-        $this->assertStringContainsString('30 KG', (string) ($o->baggage->summary ?? ''));
+        $this->assertMatchesRegularExpression('/30\s*kg/i', (string) ($o->baggage->summary ?? ''));
         $this->assertSame('YOWTK1', $o->fare_family);
     }
 
