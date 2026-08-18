@@ -167,7 +167,7 @@ class SabreOperationalPublicAutoPnrCheckoutTest extends TestCase
         $this->assertSame('failed', $meta['operational_auto_pnr_result'] ?? null);
     }
 
-    public function test_ticketing_enabled_blocks_operational_attempt(): void
+    public function test_ticketing_enabled_does_not_block_operational_attempt(): void
     {
         config(['suppliers.sabre.ticketing_enabled' => true]);
         $booking = $this->operationalConnectingBooking();
@@ -176,9 +176,13 @@ class SabreOperationalPublicAutoPnrCheckoutTest extends TestCase
             $booking->fresh(['passengers', 'contact', 'fareBreakdown', 'supplierBookings']),
         );
 
-        $this->assertFalse(app(SabreOperationalPnrReadiness::class)->wouldAttemptPnr($booking->fresh()));
+        $readiness = app(SabreOperationalPnrReadiness::class);
+        $this->assertTrue($readiness->wouldAttemptPnr($booking->fresh()));
+        $evaluation = $readiness->evaluate($booking->fresh(['supplierBookings']));
+        $this->assertNotContains('ticketing_disabled', $evaluation['blocking_conditions'] ?? []);
+
         $meta = is_array($booking->fresh()->meta) ? $booking->fresh()->meta : [];
-        $this->assertNotSame('attempted', $meta['operational_auto_pnr_result'] ?? null);
+        $this->assertSame('deferred', $meta['operational_auto_pnr_result'] ?? null);
         Http::assertNothingSent();
     }
 
