@@ -17,7 +17,7 @@ use App\Services\Suppliers\Sabre\SabreBookingOfferRefreshService;
 use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
 use App\Services\Suppliers\Sabre\SabreFlightSearchRequestBuilder;
-use App\Services\Suppliers\Sabre\SabreSegmentFreshShopSellabilityService;
+use App\Services\Suppliers\Sabre\Gds\SabreSegmentFreshShopSellabilityService;
 use Database\Seeders\OtaFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
@@ -224,6 +224,8 @@ class SabrePnrCertificationFreshShopGuardTest extends TestCase
             'probable_issue' => $probableIssue,
         ];
 
+        // Partial mock: keep real extractStoredSegmentsFromOfferSnapshot for OfferRefresh
+        // full-itinerary matching (container binds Gds FQCN, not the Sabre\ alias).
         $partial = Mockery::mock(SabreSegmentFreshShopSellabilityService::class, [
             app(SabreFlightSearchRequestBuilder::class),
             app(SabreClient::class),
@@ -232,6 +234,10 @@ class SabrePnrCertificationFreshShopGuardTest extends TestCase
         $partial->shouldReceive('segmentReportsForOffer')->andReturn([$report]);
         $partial->shouldReceive('segmentPassesPnrFreshShopGuard')->andReturn($allPass);
         $this->app->instance(SabreSegmentFreshShopSellabilityService::class, $partial);
+        $this->app->forgetInstance(SabreBookingService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\Booking\SabreBookingService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\Gds\SabreBookingOfferRefreshService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\SabreBookingOfferRefreshService::class);
     }
 
     /**
@@ -390,6 +396,10 @@ class SabrePnrCertificationFreshShopGuardTest extends TestCase
         $mock->shouldReceive('searchWithMeta')
             ->andReturn(['offers' => [$offer], 'warnings' => []]);
         $this->app->instance(FlightSearchService::class, $mock);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\Gds\SabreBookingOfferRefreshService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\SabreBookingOfferRefreshService::class);
+        $this->app->forgetInstance(SabreBookingService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\Booking\SabreBookingService::class);
     }
 
     /**

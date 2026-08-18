@@ -17,7 +17,7 @@ use App\Services\Suppliers\Sabre\SabreBookingOfferRefreshService;
 use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
 use App\Services\Suppliers\Sabre\SabreFlightSearchRequestBuilder;
-use App\Services\Suppliers\Sabre\SabreSegmentFreshShopSellabilityService;
+use App\Services\Suppliers\Sabre\Gds\SabreSegmentFreshShopSellabilityService;
 use App\Support\Bookings\SabreOfferRefreshAcceptance;
 use App\Support\Bookings\SabrePnrCertificationClassifier;
 use Database\Seeders\OtaFoundationSeeder;
@@ -349,6 +349,10 @@ class SabreOfferRefreshAcceptanceTest extends TestCase
         $partial->shouldReceive('segmentReportsForOffer')->andReturn([$report]);
         $partial->shouldReceive('segmentPassesPnrFreshShopGuard')->andReturn($allPass);
         $this->app->instance(SabreSegmentFreshShopSellabilityService::class, $partial);
+        $this->app->forgetInstance(SabreBookingService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\Booking\SabreBookingService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\Gds\SabreBookingOfferRefreshService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\SabreBookingOfferRefreshService::class);
     }
 
     protected function mockFullItinerarySearch(array $offer): void
@@ -356,6 +360,10 @@ class SabreOfferRefreshAcceptanceTest extends TestCase
         $mock = Mockery::mock(FlightSearchService::class);
         $mock->shouldReceive('searchWithMeta')->andReturn(['offers' => [$offer], 'meta' => []]);
         $this->app->instance(FlightSearchService::class, $mock);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\Gds\SabreBookingOfferRefreshService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\SabreBookingOfferRefreshService::class);
+        $this->app->forgetInstance(SabreBookingService::class);
+        $this->app->forgetInstance(\App\Services\Suppliers\Sabre\Booking\SabreBookingService::class);
     }
 
     protected function fakePassengerRecordsHttp(string $pnr): void

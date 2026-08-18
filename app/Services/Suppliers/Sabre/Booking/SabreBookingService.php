@@ -2085,7 +2085,9 @@ class SabreBookingService
         string $fareCur,
         array $options = [],
     ): ?array {
-        if (($options['admin_confirmed_gds_pnr_strategy_fallback'] ?? false) === true) {
+        if (($options['admin_confirmed_gds_pnr_strategy_fallback'] ?? false) === true
+            || ($options['certification_full_itinerary_fallback'] ?? false) === true
+            || $this->isOperatorApprovedPnrBypassActive($options)) {
             return null;
         }
 
@@ -2335,7 +2337,8 @@ class SabreBookingService
     protected function isOperatorApprovedPnrBypassActive(array $options): bool
     {
         return $this->isAdminManualStrategyFallbackActive($options)
-            || $this->isScenarioRunnerPnrCreateActive($options);
+            || $this->isScenarioRunnerPnrCreateActive($options)
+            || ($options['certification_full_itinerary_fallback'] ?? false) === true;
     }
 
     /**
@@ -13202,6 +13205,10 @@ class SabreBookingService
         array $routeSelection,
         array $options,
     ): bool {
+        if (($options['certification_full_itinerary_fallback'] ?? false) === true) {
+            return true;
+        }
+
         if ($this->isOperatorApprovedPnrBypassActive($options)) {
             return true;
         }
