@@ -44,7 +44,7 @@ class SabreClassifyPnrFailureCommandTest extends TestCase
         $this->assertSame('latest_attempt', $payload['source']);
         $this->assertSame(SabrePnrFailureClassifier::CLASSIFICATION_HOST_SELL_REJECTED_UC, $payload['classification']);
         $this->assertFalse($payload['retry_allowed']);
-        $this->assertStringContainsString('host refused', strtolower((string) $payload['staff_message']));
+        $this->assertStringContainsString('did not confirm/sell', strtolower((string) $payload['staff_message']));
     }
 
     public function test_booking_16_style_no_fares_classifies_as_no_fares_rbd_carrier(): void
@@ -55,6 +55,7 @@ class SabreClassifyPnrFailureCommandTest extends TestCase
             'error_code' => 'sabre_booking_application_error',
             'safe_summary' => [
                 'response_error_messages' => ['EnhancedAirBookRQ: *NO FARES/RBD/CARRIER'],
+                'auto_pnr_pricing_context_ready' => true,
             ],
         ]);
 
