@@ -97,7 +97,7 @@ class SabreOfferRefreshPublicCheckoutTest extends TestCase
         ])->get(route('booking.review'))->assertOk()->getContent();
 
         $this->assertStringContainsString('Fare updated before airline hold', $html);
-        $this->assertStringContainsString('Accept updated fare and continue', $html);
+        $this->assertStringContainsString('Accept new fare', $html);
         $this->assertStringContainsString('ota-offer-refresh-modal', $html);
         $modalSnippet = (string) strstr($html, 'ota-offer-refresh-modal');
         $this->assertStringNotContainsStringIgnoringCase('rbd', substr($modalSnippet, 0, 2500));

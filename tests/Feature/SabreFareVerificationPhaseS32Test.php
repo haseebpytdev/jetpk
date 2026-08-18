@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Enums\MarkupRuleType;
+use App\Enums\MarkupValueType;
 use App\Enums\SupplierProvider;
 use App\Models\Agency;
+use App\Models\MarkupRule;
 use App\Models\SupplierConnection;
 use App\Services\Pricing\PricingRuleService;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
@@ -19,6 +22,13 @@ class SabreFareVerificationPhaseS32Test extends TestCase
     public function test_pricing_engine_uses_explicit_supplier_total_over_base_plus_tax_sum(): void
     {
         $agency = Agency::factory()->create(['slug' => (string) config('ota.default_agency_slug')]);
+        MarkupRule::factory()->create([
+            'agency_id' => $agency->id,
+            'rule_type' => MarkupRuleType::Global,
+            'value' => 500,
+            'value_type' => MarkupValueType::Fixed,
+            'priority' => 1,
+        ]);
         $pricing = app(PricingRuleService::class)->calculateMarkup($agency, [
             'base_fare' => 200000.0,
             'taxes' => 66106.0,

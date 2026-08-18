@@ -59,10 +59,13 @@ class SabreGdsAutoPnrBrandedFareFlowTest extends TestCase
             $builder->buildIatiLikeCpnrV24GdsWire($draft, []),
         );
 
-        $brand = data_get(
+        $brandNode = data_get(
             $wire,
-            'CreatePassengerNameRecordRQ.AirPrice.0.PriceRequestInformation.OptionalQualifiers.PricingQualifiers.Brand.0.content'
+            'CreatePassengerNameRecordRQ.AirPrice.0.PriceRequestInformation.OptionalQualifiers.PricingQualifiers.Brand'
         );
+        $brand = is_array($brandNode) && array_is_list($brandNode)
+            ? ($brandNode[0]['content'] ?? null)
+            : (is_array($brandNode) ? ($brandNode['content'] ?? null) : null);
         $this->assertSame('SM', $brand);
     }
 

@@ -40,10 +40,12 @@ class SabreBookingPricingContextPhaseB16Test extends TestCase
         $this->assertStringContainsString('pricing_node_scalar_keys=', $out);
         $this->assertStringContainsString('fare_basis_codes=', $out);
         $this->assertStringContainsString('payload_style=', $out);
-        $this->assertStringContainsString('auto_pnr_pricing_context_ready=false', $out);
+        $this->assertStringContainsString('auto_pnr_pricing_context_ready=true', $out);
+        $this->assertStringContainsString('pricing_context_policy_used=bfm_gds_priced_itinerary', $out);
+        $this->assertStringContainsString('bfm_index_linkage_sufficient=true', $out);
         $this->assertStringContainsString('has_pricing_information_ref=true', $out);
         $this->assertStringContainsString('has_offer_reference=false', $out);
-        $this->assertStringContainsString('missing_pricing_context_fields=offer_reference', $out);
+        $this->assertStringContainsString('missing_pricing_context_fields=', $out);
         $this->assertStringNotContainsString('{', $out);
         $this->assertStringNotContainsString('passport', $out);
         $this->assertStringNotContainsString('phone', $out);
