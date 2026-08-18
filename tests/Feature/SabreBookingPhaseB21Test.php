@@ -10,13 +10,10 @@ use App\Models\Booking;
 use App\Models\BookingContact;
 use App\Models\BookingFareBreakdown;
 use App\Models\BookingPassenger;
-use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
 use App\Models\User;
 use App\Services\Suppliers\Sabre\SabreBookingService;
-use App\Support\PublicBooking;
 use Database\Seeders\OtaFoundationSeeder;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -25,6 +22,9 @@ use Tests\TestCase;
 
 /**
  * Phase B21 — controlled Trip Orders createBooking without successful revalidation (opt-in only).
+ *
+ * Exercises {@see SabreBookingService::createBooking()} (service layer). Public checkout no longer
+ * auto-fires supplier confirmation on review submit without staff confirmation.
  */
 class SabreBookingPhaseB21Test extends TestCase
 {
@@ -44,20 +44,18 @@ class SabreBookingPhaseB21Test extends TestCase
             $sabreBase.$revalidatePath => Http::response(['message' => 'revalidation failed'], 422),
             $sabreBase.$bookingPath => Http::response(['recordLocator' => 'SHOULD_NOT_BE_CALLED'], 200),
         ]);
-        $this->withoutMiddleware(ValidateCsrfToken::class);
         config([
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
             'suppliers.sabre.booking_path' => '/v1/trip/orders/createBooking',
-            'suppliers.sabre.booking_schema' => null,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
             'suppliers.sabre.revalidate_before_booking' => true,
             'suppliers.sabre.allow_createbooking_without_revalidation' => false,
             'suppliers.sabre.revalidate_path' => $revalidatePath,
         ]);
 
         $booking = $this->seedLiveSabreBooking('b21-default@example.com');
-        $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
-            ->post(route('booking.review'), ['booking_method' => 'pay_later']);
+        $this->invokeCreateBooking($booking);
 
         Http::assertNotSent(fn ($request) => $request instanceof Request && str_contains($request->url(), $bookingPath));
     }
@@ -75,32 +73,30 @@ class SabreBookingPhaseB21Test extends TestCase
             $sabreBase.$revalidatePath => Http::response(['message' => 'revalidation failed'], 422),
             $sabreBase.$bookingPath => Http::response(['order' => ['id' => 'ORD-1'], 'pnr' => 'ABC123'], 200),
         ]);
-        $this->withoutMiddleware(ValidateCsrfToken::class);
         config([
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
             'suppliers.sabre.booking_path' => $bookingPath,
-            'suppliers.sabre.booking_schema' => null,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
             'suppliers.sabre.revalidate_before_booking' => true,
             'suppliers.sabre.allow_createbooking_without_revalidation' => true,
             'suppliers.sabre.revalidate_path' => $revalidatePath,
             'suppliers.sabre.ticketing_enabled' => false,
+            'suppliers.sabre.passenger_records_fresh_shop_guard_before_live' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
         ]);
 
         $booking = $this->seedLiveSabreBooking('b21-bypass@example.com');
-        $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
-            ->post(route('booking.review'), ['booking_method' => 'pay_later']);
+        $result = $this->invokeCreateBooking($booking);
 
         Http::assertSent(fn ($request) => $request instanceof Request && str_contains($request->url(), $bookingPath));
-        $attempt = SupplierBookingAttempt::query()->where('booking_id', $booking->id)->orderByDesc('id')->first();
-        $this->assertNotNull($attempt);
-        $summary = is_array($attempt->safe_summary) ? $attempt->safe_summary : [];
-        $this->assertTrue((bool) ($summary['revalidation_skipped_by_config'] ?? false));
-        $this->assertTrue((bool) ($summary['revalidation_bypass_enabled'] ?? false));
-        $this->assertFalse((bool) ($summary['ticketing_enabled'] ?? true));
-        $this->assertArrayHasKey('has_fare_basis', $summary);
-        $this->assertArrayHasKey('has_booking_class', $summary);
-        $this->assertArrayHasKey('has_validating_carrier', $summary);
+        $this->assertTrue((bool) ($result['live_call_attempted'] ?? false));
+        $this->assertTrue((bool) ($result['revalidation_skipped_by_config'] ?? false));
+        $this->assertTrue((bool) ($result['revalidation_bypass_enabled'] ?? false));
+        $this->assertFalse((bool) ($result['ticketing_enabled'] ?? true));
+        $this->assertArrayHasKey('has_fare_basis', $result);
+        $this->assertArrayHasKey('has_booking_class', $result);
+        $this->assertArrayHasKey('has_validating_carrier', $result);
     }
 
     public function test_revalidate_disabled_skips_revalidate_http_and_sets_audit_flags(): void
@@ -115,25 +111,21 @@ class SabreBookingPhaseB21Test extends TestCase
             $sabreBase.$tokenPath => Http::response(['access_token' => 'tok', 'expires_in' => 3600], 200),
             $sabreBase.$bookingPath => Http::response(['pnr' => 'SKIPPED'], 200),
         ]);
-        $this->withoutMiddleware(ValidateCsrfToken::class);
         config([
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
             'suppliers.sabre.booking_path' => $bookingPath,
-            'suppliers.sabre.booking_schema' => null,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
             'suppliers.sabre.revalidate_before_booking' => false,
             'suppliers.sabre.allow_createbooking_without_revalidation' => false,
             'suppliers.sabre.revalidate_path' => $revalidatePath,
         ]);
 
         $booking = $this->seedLiveSabreBooking('b21-norev@example.com');
-        $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
-            ->post(route('booking.review'), ['booking_method' => 'pay_later']);
+        $result = $this->invokeCreateBooking($booking);
 
         Http::assertNotSent(fn ($request) => $request instanceof Request && str_contains($request->url(), $revalidatePath));
-        $attempt = SupplierBookingAttempt::query()->where('booking_id', $booking->id)->orderByDesc('id')->first();
-        $summary = is_array($attempt?->safe_summary) ? $attempt->safe_summary : [];
-        $this->assertTrue((bool) ($summary['revalidation_skipped_by_config'] ?? false));
+        $this->assertTrue((bool) ($result['revalidation_skipped_by_config'] ?? false));
     }
 
     public function test_http_2xx_with_order_id_only_needs_review(): void
@@ -147,20 +139,18 @@ class SabreBookingPhaseB21Test extends TestCase
             $sabreBase.$tokenPath => Http::response(['access_token' => 'tok', 'expires_in' => 3600], 200),
             $sabreBase.$bookingPath => Http::response(['orderId' => 'ORD-ONLY', 'booking' => ['id' => 'B1']], 200),
         ]);
-        $this->withoutMiddleware(ValidateCsrfToken::class);
         config([
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
             'suppliers.sabre.booking_path' => $bookingPath,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
             'suppliers.sabre.revalidate_before_booking' => false,
         ]);
 
         $booking = $this->seedLiveSabreBooking('b21-order@example.com');
-        $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
-            ->post(route('booking.review'), ['booking_method' => 'pay_later']);
+        $result = $this->invokeCreateBooking($booking);
 
-        $attempt = SupplierBookingAttempt::query()->where('booking_id', $booking->id)->orderByDesc('id')->first();
-        $this->assertSame('needs_review', $attempt->status);
+        $this->assertSame('needs_review', $result['status'] ?? null);
     }
 
     public function test_http_400_maps_validation_failed(): void
@@ -174,20 +164,18 @@ class SabreBookingPhaseB21Test extends TestCase
             $sabreBase.$tokenPath => Http::response(['access_token' => 'tok', 'expires_in' => 3600], 200),
             $sabreBase.$bookingPath => Http::response(['message' => 'bad'], 400),
         ]);
-        $this->withoutMiddleware(ValidateCsrfToken::class);
         config([
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
             'suppliers.sabre.booking_path' => $bookingPath,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
             'suppliers.sabre.revalidate_before_booking' => false,
         ]);
 
         $booking = $this->seedLiveSabreBooking('b21-400@example.com');
-        $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
-            ->post(route('booking.review'), ['booking_method' => 'pay_later']);
+        $result = $this->invokeCreateBooking($booking);
 
-        $attempt = SupplierBookingAttempt::query()->where('booking_id', $booking->id)->orderByDesc('id')->first();
-        $this->assertSame('sabre_booking_validation_failed', $attempt->error_code);
+        $this->assertSame('sabre_booking_validation_failed', $result['error_code'] ?? null);
     }
 
     public function test_inspect_booking_config_can_attempt_flags(): void
@@ -227,20 +215,18 @@ class SabreBookingPhaseB21Test extends TestCase
             $sabreBase.$tokenPath => Http::response(['access_token' => 'tok', 'expires_in' => 3600], 200),
             $sabreBase.$bookingPath => Http::response(['pnr' => 'ZZ99ZZ'], 200),
         ]);
-        $this->withoutMiddleware(ValidateCsrfToken::class);
         config([
             'suppliers.sabre.booking_enabled' => true,
             'suppliers.sabre.booking_live_call_enabled' => true,
             'suppliers.sabre.booking_path' => $bookingPath,
+            'suppliers.sabre.booking_schema' => 'trip_orders_create_booking',
             'suppliers.sabre.revalidate_before_booking' => false,
         ]);
 
         $booking = $this->seedLiveSabreBooking('b21-log-leak-test@example.com');
-        $this->withSession([PublicBooking::SESSION_BOOKING_ID => $booking->id])
-            ->post(route('booking.review'), ['booking_method' => 'pay_later']);
+        $result = $this->invokeCreateBooking($booking);
 
-        $attempt = SupplierBookingAttempt::query()->where('booking_id', $booking->id)->orderByDesc('id')->first();
-        $json = json_encode($attempt?->safe_summary ?? []);
+        $json = json_encode($result);
         $this->assertIsString($json);
         $this->assertStringNotContainsString('b21-log-leak-test@example.com', $json);
     }
@@ -256,6 +242,37 @@ class SabreBookingPhaseB21Test extends TestCase
         $out = $svc->issueTicket($booking, $user);
         $this->assertFalse($out['success'] ?? true);
         Http::assertNothingSent();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function invokeCreateBooking(Booking $booking): array
+    {
+        config([
+            'suppliers.sabre.passenger_records_fresh_shop_guard_before_live' => false,
+            'suppliers.sabre.certified_route_selector_public_checkout_enabled' => false,
+        ]);
+
+        $svc = app(SabreBookingService::class);
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $offer = is_array($meta['normalized_offer_snapshot'] ?? null)
+            ? $meta['normalized_offer_snapshot']
+            : (is_array($meta['flight_offer_snapshot'] ?? null) ? $meta['flight_offer_snapshot'] : []);
+
+        return $svc->createBooking(
+            $offer,
+            $svc->passengerDataFromBookingForCommand($booking->fresh(['passengers', 'contact'])),
+            $booking->id,
+            [
+                'allow_controlled_staff_pnr' => true,
+                'operator_approved_live_pnr_create' => true,
+                'admin_confirmed_gds_pnr_strategy_fallback' => true,
+                'skip_auto_pnr_flag_gate' => true,
+                'mode' => 'admin_manual_strategy_fallback',
+                'source' => 'admin_supplier_action',
+            ],
+        );
     }
 
     protected function seedLiveSabreBooking(string $email): Booking
@@ -274,6 +291,7 @@ class SabreBookingPhaseB21Test extends TestCase
         $depart = now()->addDays(10)->toDateString();
         $offer = [
             'id' => 'sabre-b21-'.uniqid(),
+            'offer_id' => 'sabre-b21-'.uniqid(),
             'supplier_provider' => 'sabre',
             'supplier_connection_id' => $sabreConn->id,
             'airline_code' => 'EK',
@@ -313,6 +331,7 @@ class SabreBookingPhaseB21Test extends TestCase
                 'requires_price_change_confirmation' => false,
                 'protection_mode' => 'hold_price_guaranteed',
                 'flight_offer_snapshot' => $offer,
+                'normalized_offer_snapshot' => $offer,
                 'search_criteria' => [
                     'origin' => 'LHE',
                     'destination' => 'DXB',
@@ -331,6 +350,14 @@ class SabreBookingPhaseB21Test extends TestCase
             'passenger_index' => 1,
             'passenger_type' => 'adult',
             'is_lead_passenger' => true,
+            'first_name' => 'Ada',
+            'last_name' => 'Lovelace',
+            'date_of_birth' => '1990-01-15',
+            'gender' => 'female',
+            'nationality' => 'PK',
+            'passport_number' => 'AB1234567',
+            'passport_expiry_date' => '2030-12-31',
+            'passport_issuing_country' => 'PK',
         ]);
 
         BookingContact::query()->create([
