@@ -14,7 +14,7 @@ class Phase22EFlightPresentationTest extends TestCase
     public function test_results_data_formats_schedule_without_iso_strings(): void
     {
         $this->mockFlightSearch(2);
-        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-25&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')->assertOk();
+        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-12-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')->assertOk();
         preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
         $searchId = $matches[1] ?? '';
         $this->assertNotSame('', $searchId);
@@ -36,7 +36,7 @@ class Phase22EFlightPresentationTest extends TestCase
 
     public function test_login_with_checkout_return_sets_intended_redirect(): void
     {
-        $path = '/booking/passengers?flight_id=offer-1&search_id=test-search&from=LHE&to=DXB&depart=2026-06-25';
+        $path = '/booking/passengers?flight_id=offer-1&search_id=test-search&from=LHE&to=DXB&depart=2026-12-15';
         $this->get('/login?checkout_return='.urlencode($path))->assertOk();
 
         $this->assertSame(url($path), session()->get('url.intended'));
@@ -44,7 +44,7 @@ class Phase22EFlightPresentationTest extends TestCase
 
     public function test_login_with_redirect_query_sets_intended_url(): void
     {
-        $path = '/booking/passengers?search_id=s1&offer_id=offer-1&from=LHE&to=DXB&depart=2026-06-25';
+        $path = '/booking/passengers?search_id=s1&offer_id=offer-1&from=LHE&to=DXB&depart=2026-12-15';
         $this->get('/login?redirect='.urlencode($path))->assertOk();
 
         $this->assertSame(url($path), session()->get('url.intended'));
@@ -65,8 +65,8 @@ class Phase22EFlightPresentationTest extends TestCase
                 'airline_code' => 'TA',
                 'airline_name' => 'TestAir',
                 'flight_number' => (string) (100 + $i),
-                'depart_at' => '2026-06-25T0'.($i % 9).':00:00Z',
-                'arrive_at' => '2026-06-25T1'.($i % 9).':30:00Z',
+                'depart_at' => '2026-12-15T0'.($i % 9).':00:00Z',
+                'arrive_at' => '2026-12-15T1'.($i % 9).':30:00Z',
                 'duration_h' => 2,
                 'duration_m' => 30,
                 'stops' => $i % 3 === 0 ? 1 : 0,
@@ -88,8 +88,8 @@ class Phase22EFlightPresentationTest extends TestCase
                     [
                         'origin' => 'LHE',
                         'destination' => 'DXB',
-                        'departure_at' => '2026-06-25T08:00:00Z',
-                        'arrival_at' => '2026-06-25T12:30:00Z',
+                        'departure_at' => '2026-12-15T08:00:00Z',
+                        'arrival_at' => '2026-12-15T12:30:00Z',
                         'airline_code' => 'TA',
                         'airline_name' => 'TestAir',
                         'flight_number' => '123',

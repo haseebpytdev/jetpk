@@ -109,14 +109,16 @@ class Phase23DFastAutocompleteTest extends TestCase
         $depart = now()->addDays(10)->format('Y-m-d');
 
         $response = $this->get('/flights/results?trip_type=one_way&from=Dubai&to=ISB&depart='.$depart.'&cabin=economy&adults=1&children=0&infants=0');
-        $response->assertRedirect(route('flights.search'));
+        $response->assertRedirect(url('/').'#jp-flight-search');
         $response->assertSessionHasErrors(['from']);
         $this->assertSame('Please select a valid origin airport.', session('errors')->first('from'));
     }
 
     public function test_results_page_contains_display_and_hidden_airport_inputs(): void
     {
-        $html = $this->get('/flights/search')->assertOk()->getContent();
+        // Canonical search form is on home; /flights/search redirects there.
+        $this->get('/flights/search')->assertRedirect('/');
+        $html = $this->get('/')->assertOk()->getContent();
         $this->assertStringContainsString('name="from_display"', $html);
         $this->assertStringContainsString('name="from"', $html);
         $this->assertStringContainsString('name="to_display"', $html);

@@ -61,7 +61,7 @@ class IatiPublicSearchFlowTest extends TestCase
         $result = app(FlightSearchService::class)->searchWithMeta([
             'origin' => 'LHE',
             'destination' => 'DXB',
-            'depart_date' => '2026-07-18',
+            'depart_date' => '2026-12-15',
             'adults' => 1,
         ], $agency, 'public_guest');
 
@@ -94,7 +94,7 @@ class IatiPublicSearchFlowTest extends TestCase
         $offers = app(FlightSearchService::class)->search([
             'origin' => 'LHE',
             'destination' => 'DXB',
-            'depart_date' => '2026-07-18',
+            'depart_date' => '2026-12-15',
         ], $agency, 'public_guest');
 
         $this->assertCount(1, $offers);
@@ -106,7 +106,7 @@ class IatiPublicSearchFlowTest extends TestCase
     {
         Config::set('ota.public_flight_results_suppliers', ['duffel', 'sabre', 'iati']);
 
-        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-07-18');
+        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-12-15');
         $offer['offer_id'] = 'iati_public_offer_1';
         $offer['id'] = 'iati_public_offer_1';
         $offer['supplier_provider'] = 'iati';
@@ -120,7 +120,7 @@ class IatiPublicSearchFlowTest extends TestCase
         $mock->shouldReceive('search')->andReturn([$offer]);
         $this->instance(FlightSearchService::class, $mock);
 
-        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-07-18&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-12-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk();
         preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
         $searchId = $matches[1] ?? '';
@@ -165,7 +165,7 @@ class IatiPublicSearchFlowTest extends TestCase
     {
         Config::set('ota.public_flight_results_suppliers', ['duffel', 'sabre', 'iati']);
 
-        $iatiOffer = PublicCheckoutTestDoubles::searchOfferPayload('2026-07-18');
+        $iatiOffer = PublicCheckoutTestDoubles::searchOfferPayload('2026-12-15');
         $iatiOffer['supplier_provider'] = 'iati';
         $iatiOffer['offer_id'] = 'iati_gate_offer_1';
         $iatiOffer['id'] = 'iati_gate_offer_1';
@@ -178,7 +178,7 @@ class IatiPublicSearchFlowTest extends TestCase
         $mock->shouldReceive('search')->andReturn([$iatiOffer]);
         $this->instance(FlightSearchService::class, $mock);
 
-        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-07-18&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-12-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk();
         preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
 
@@ -201,7 +201,7 @@ class IatiPublicSearchFlowTest extends TestCase
         $result = app(FlightSearchService::class)->searchWithMeta([
             'origin' => 'LHE',
             'destination' => 'DXB',
-            'depart_date' => '2026-07-18',
+            'depart_date' => '2026-12-15',
         ], $agency, 'public_guest');
 
         $this->assertSame([], $result['offers']);
@@ -243,8 +243,8 @@ class IatiPublicSearchFlowTest extends TestCase
 
     private function iatiNormalizedOffer(string $offerId): NormalizedFlightOfferData
     {
-        $departIso = '2026-07-18T08:00:00Z';
-        $arriveIso = '2026-07-18T12:30:00Z';
+        $departIso = '2026-12-15T08:00:00Z';
+        $arriveIso = '2026-12-15T12:30:00Z';
 
         return new NormalizedFlightOfferData(
             offer_id: $offerId,

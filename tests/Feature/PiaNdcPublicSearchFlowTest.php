@@ -69,7 +69,7 @@ class PiaNdcPublicSearchFlowTest extends TestCase
         $result = app(FlightSearchService::class)->searchWithMeta([
             'origin' => 'KHI',
             'destination' => 'ISB',
-            'depart_date' => '2026-07-23',
+            'depart_date' => '2026-12-15',
             'adults' => 1,
         ], $agency, 'public_guest');
 
@@ -118,7 +118,7 @@ class PiaNdcPublicSearchFlowTest extends TestCase
         $result = app(FlightSearchService::class)->searchWithMeta([
             'origin' => 'KHI',
             'destination' => 'ISB',
-            'depart_date' => '2026-07-23',
+            'depart_date' => '2026-12-15',
         ], $agency, 'public_guest');
 
         $this->assertCount(1, $result['offers']);
@@ -174,7 +174,7 @@ class PiaNdcPublicSearchFlowTest extends TestCase
         $result = app(FlightSearchService::class)->searchWithMeta([
             'origin' => 'KHI',
             'destination' => 'ISB',
-            'depart_date' => '2026-07-23',
+            'depart_date' => '2026-12-15',
         ], $agency, 'public_guest');
 
         $this->assertCount(1, $result['offers']);
@@ -185,7 +185,7 @@ class PiaNdcPublicSearchFlowTest extends TestCase
     #[Test]
     public function test_public_supplier_gate_keeps_pia_ndc_offers_for_results_store(): void
     {
-        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-07-23');
+        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-12-15');
         $offer['offer_id'] = 'pia_ndc_gate_offer_1';
         $offer['id'] = 'pia_ndc_gate_offer_1';
         $offer['supplier_provider'] = 'pia_ndc';
@@ -201,7 +201,7 @@ class PiaNdcPublicSearchFlowTest extends TestCase
         $mock->shouldReceive('search')->andReturn([$offer]);
         $this->instance(FlightSearchService::class, $mock);
 
-        $page = $this->get('/flights/results?from=KHI&to=ISB&depart=2026-07-23&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+        $page = $this->get('/flights/results?from=KHI&to=ISB&depart=2026-12-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk();
         preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
 
@@ -337,8 +337,8 @@ class PiaNdcPublicSearchFlowTest extends TestCase
      */
     private function piaNdcNormalizedOffer(string $offerId, array $providerContext = []): NormalizedFlightOfferData
     {
-        $departIso = '2026-07-23T08:00:00Z';
-        $arriveIso = '2026-07-23T10:00:00Z';
+        $departIso = '2026-12-15T08:00:00Z';
+        $arriveIso = '2026-12-15T10:00:00Z';
         $context = $providerContext !== [] ? $providerContext : [
             'offer_ref_id' => 'OFFER-'.$offerId,
             'offer_item_ref_id' => 'ITEM-'.$offerId,

@@ -2119,7 +2119,7 @@ class SabreSandboxSearchTest extends TestCase
             '*/v4/offers/shop' => Http::response($fixture, 200),
         ]);
 
-        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-06-10&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')->assertOk();
+        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-12-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')->assertOk();
         preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
         $searchId = $matches[1] ?? '';
         $this->assertNotSame('', $searchId);

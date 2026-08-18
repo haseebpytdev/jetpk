@@ -248,7 +248,7 @@ class IatiPublicRevalidationTest extends TestCase
     {
         $this->mockFlightSearchForResultsPage();
 
-        $this->get('/flights/results?from=LHE&to=DXB&depart=2026-07-18&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
+        $this->get('/flights/results?from=LHE&to=DXB&depart=2026-12-15&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0')
             ->assertOk()
             ->assertSee('beginIatiSelectRevalidation', false)
             ->assertSee('isIatiProviderOffer', false)
@@ -259,7 +259,7 @@ class IatiPublicRevalidationTest extends TestCase
     #[Test]
     public function test_sabre_offer_still_uses_sabre_revalidation_path(): void
     {
-        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-07-18');
+        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-12-15');
         $offer['supplier_provider'] = 'sabre';
         $offer['id'] = 'sabre_gate_offer_1';
         $offer['offer_id'] = 'sabre_gate_offer_1';
@@ -283,7 +283,7 @@ class IatiPublicRevalidationTest extends TestCase
 
     protected function mockFlightSearchForResultsPage(): void
     {
-        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-07-18');
+        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-12-15');
         $offer['supplier_provider'] = 'iati';
         $offer['provider'] = 'iati';
 
@@ -307,7 +307,7 @@ class IatiPublicRevalidationTest extends TestCase
             'criteria' => [
                 'origin' => 'LHE',
                 'destination' => 'DXB',
-                'depart_date' => '2026-07-18',
+                'depart_date' => '2026-12-15',
                 'adults' => 1,
                 'children' => 0,
                 'infants' => 0,
@@ -327,7 +327,7 @@ class IatiPublicRevalidationTest extends TestCase
      */
     protected function iatiCachedOffer(): array
     {
-        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-07-18');
+        $offer = PublicCheckoutTestDoubles::searchOfferPayload('2026-12-15');
         $offer['supplier_provider'] = 'iati';
         $offer['provider'] = 'iati';
         $offer['offer_id'] = 'iati_reval_offer_1';

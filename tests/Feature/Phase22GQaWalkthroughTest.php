@@ -24,7 +24,9 @@ class Phase22GQaWalkthroughTest extends TestCase
     public function test_standalone_flight_search_form_has_no_lhe_dxb_prefill_without_query(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $html = $this->get(route('flights.search'))->assertOk()->getContent();
+        // Canonical search lives on home; /flights/search is a permanent redirect.
+        $this->get(route('flights.search'))->assertRedirect('/');
+        $html = $this->get('/')->assertOk()->getContent();
         $this->assertStringNotContainsString('value="LHE"', $html);
         $this->assertStringNotContainsString('value="DXB"', $html);
     }
@@ -45,6 +47,6 @@ class Phase22GQaWalkthroughTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         $past = now()->subDays(3)->format('Y-m-d');
         $this->get('/flights/results?trip_type=multi_city&cabin=economy&adults=1&children=0&infants=0&multi_from[]=LHE&multi_from[]=DXB&multi_to[]=DXB&multi_to[]=JED&multi_depart[]='.$past.'&multi_depart[]='.now()->addDays(10)->format('Y-m-d'))
-            ->assertRedirect(route('flights.search'));
+            ->assertRedirect(url('/').'#jp-flight-search');
     }
 }
