@@ -50,6 +50,18 @@ class PlatformModuleProviderControlsTest extends TestCase
         Http::fake();
         $this->planModuleOff('sabre_gds');
         $agency = $this->activateSabreConnectionOnly();
+        // Connection-level NDC defaults off; enable it so GDS-off still keeps Sabre search via NDC.
+        $sabre = SupplierConnection::query()
+            ->where('agency_id', $agency->id)
+            ->where('provider', SupplierProvider::Sabre)
+            ->firstOrFail();
+        $settings = is_array($sabre->settings) ? $sabre->settings : [];
+        $sabre->update([
+            'settings' => array_merge($settings, [
+                'sabre_gds_enabled' => true,
+                'sabre_ndc_enabled' => true,
+            ]),
+        ]);
 
         $this->mock(SabreFlightSupplierAdapter::class, function ($mock): void {
             $mock->shouldReceive('search')->once()->andReturn(new FlightSearchResultData(
