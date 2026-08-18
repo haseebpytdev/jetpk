@@ -371,7 +371,7 @@ final class SabrePassengerRecordsApplicationResultDigest
             : [];
         $digestRows = is_array($digest) ? (array) ($digest[$bucket] ?? []) : [];
 
-        if (! $this->applicationRowsAreRedactedPlaceholders($attemptRows)) {
+        if ($attemptRows !== [] && ! $this->applicationRowsAreRedactedPlaceholders($attemptRows)) {
             return array_slice(
                 SensitiveDataRedactor::sanitizeApplicationDiagnosticRows($attemptRows),
                 0,
