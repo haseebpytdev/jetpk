@@ -157,7 +157,10 @@ class SabreGdsLiveScenarioPlanExactOfferEvidenceTest extends TestCase
         $this->fakeSabreShopAndPnr();
 
         $this->app->bind(SabreGdsLiveScenarioExactOfferEvidence::class, function () {
-            return new class(app(\App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest::class)) extends SabreGdsLiveScenarioExactOfferEvidence {
+            return new class(
+                app(\App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest::class),
+                app(\App\Support\Sabre\Revalidation\SabreGdsRevalidationCanonicalSegmentSignature::class),
+            ) extends SabreGdsLiveScenarioExactOfferEvidence {
                 public function buildLinkageContext(
                     \App\Models\SupplierConnection $connection,
                     array $snap,
@@ -207,12 +210,13 @@ class SabreGdsLiveScenarioPlanExactOfferEvidenceTest extends TestCase
 
         $callCount = 0;
         $this->app->bind(SabreGdsLiveScenarioExactOfferEvidence::class, function () use (&$callCount) {
-            return new class(app(\App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest::class), $callCount) extends SabreGdsLiveScenarioExactOfferEvidence {
+            return new class(app(\App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest::class), app(\App\Support\Sabre\Revalidation\SabreGdsRevalidationCanonicalSegmentSignature::class), $callCount) extends SabreGdsLiveScenarioExactOfferEvidence {
                 public function __construct(
                     \App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest $pricingDigest,
+                    \App\Support\Sabre\Revalidation\SabreGdsRevalidationCanonicalSegmentSignature $canonicalSegmentSignature,
                     private int &$callCount,
                 ) {
-                    parent::__construct($pricingDigest);
+                    parent::__construct($pricingDigest, $canonicalSegmentSignature);
                 }
 
                 public function buildLinkageContext(

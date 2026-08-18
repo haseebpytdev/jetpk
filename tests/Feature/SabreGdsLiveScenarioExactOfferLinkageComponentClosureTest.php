@@ -202,12 +202,13 @@ class SabreGdsLiveScenarioExactOfferLinkageComponentClosureTest extends TestCase
     {
         $buildCount = 0;
         $this->app->bind(SabreGdsLiveScenarioExactOfferEvidence::class, function () use (&$buildCount) {
-            return new class(app(\App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest::class), $buildCount) extends SabreGdsLiveScenarioExactOfferEvidence {
+            return new class(app(\App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest::class), app(\App\Support\Sabre\Revalidation\SabreGdsRevalidationCanonicalSegmentSignature::class), $buildCount) extends SabreGdsLiveScenarioExactOfferEvidence {
                 public function __construct(
                     \App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest $pricingDigest,
+                    \App\Support\Sabre\Revalidation\SabreGdsRevalidationCanonicalSegmentSignature $canonicalSegmentSignature,
                     private int &$buildCount,
                 ) {
-                    parent::__construct($pricingDigest);
+                    parent::__construct($pricingDigest, $canonicalSegmentSignature);
                 }
 
                 public function buildLinkageContext(
@@ -235,12 +236,13 @@ class SabreGdsLiveScenarioExactOfferLinkageComponentClosureTest extends TestCase
     {
         $buildCount = 0;
         $this->app->bind(SabreGdsLiveScenarioExactOfferEvidence::class, function () use (&$buildCount) {
-            return new class(app(\App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest::class), $buildCount) extends SabreGdsLiveScenarioExactOfferEvidence {
+            return new class(app(\App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest::class), app(\App\Support\Sabre\Revalidation\SabreGdsRevalidationCanonicalSegmentSignature::class), $buildCount) extends SabreGdsLiveScenarioExactOfferEvidence {
                 public function __construct(
                     \App\Services\Suppliers\Sabre\Gds\SabreStoredPricingContextDigest $pricingDigest,
+                    \App\Support\Sabre\Revalidation\SabreGdsRevalidationCanonicalSegmentSignature $canonicalSegmentSignature,
                     private int &$buildCount,
                 ) {
-                    parent::__construct($pricingDigest);
+                    parent::__construct($pricingDigest, $canonicalSegmentSignature);
                 }
 
                 public function buildLinkageContext(
