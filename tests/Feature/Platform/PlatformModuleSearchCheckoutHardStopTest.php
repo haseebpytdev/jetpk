@@ -88,11 +88,13 @@ class PlatformModuleSearchCheckoutHardStopTest extends TestCase
 
         $agentUser = User::query()->where('email', 'agent@ota.demo')->firstOrFail();
 
-        $this->actingAs($agentUser)->get(route('agent.bookings.create', [
-            'from' => 'LHE',
-            'to' => 'DXB',
-            'depart' => $depart,
-        ]))->assertOk();
+        app(FlightSearchService::class)->search([
+            'origin' => 'LHE',
+            'destination' => 'DXB',
+            'depart_date' => $depart,
+        ], $agency, 'agent_portal');
+
+        $this->actingAs($agentUser)->get(route('agent.bookings.create'))->assertOk();
     }
 
     public function test_supplier_search_off_prevents_provider_adapter_search_call(): void
