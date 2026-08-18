@@ -826,40 +826,24 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
         $tokenPath = (string) config('suppliers.sabre.token_path', '/v2/auth/token');
         $revalidatePath = '/v4/shop/flights/revalidate';
 
+        $booking = $this->seedInspectableSabreBooking();
+        $okBody = $this->girRevalidateSuccessBody(
+            $this->segmentsFromInspectableBooking($booking),
+            'REVAL-INSPECT-1',
+            150000.0,
+            includeTicketingTimeLimit: true,
+        );
         Http::fake([
             $sabreBase.$tokenPath => Http::response(['access_token' => 'secret-token-do-not-leak', 'expires_in' => 3600], 200),
-            $sabreBase.$revalidatePath => Http::response([
-                'pricedItineraries' => [
-                    [
-                        'airItineraryPricingInfo' => [
-                            'fareInfos' => [
-                                [
-                                    'fareBasisCode' => 'YOWPK',
-                                    'departureAirport' => 'LHE',
-                                    'arrivalAirport' => 'KHI',
-                                    'bookingCode' => 'Y',
-                                ],
-                            ],
-                            'validatingCarrier' => 'PK',
-                            'itinTotalFare' => [
-                                'totalFare' => ['totalPrice' => 400, 'currencyCode' => 'PKR'],
-                            ],
-                        ],
-                    ],
-                ],
-                'revalidationReference' => 'REVAL-INSPECT-1',
-                'ticketingTimeLimit' => '2026-12-31T23:59:00Z',
-            ], 200),
+            $sabreBase.$revalidatePath => Http::response($okBody, 200),
         ]);
-
-        $booking = $this->seedInspectableSabreBooking();
         $cid = (int) data_get($booking->meta, 'supplier_connection_id');
         $conn = SupplierConnection::query()->find($cid);
         $this->assertNotNull($conn);
         $conn->update([
             'is_active' => true,
             'status' => SupplierConnectionStatus::Active,
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         Artisan::call('sabre:inspect-booking-revalidate', [
@@ -890,38 +874,137 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
     /**
      * @return array<string, mixed>
      */
-    /**
-     * @return array<string, mixed>
-     */
     protected function twoSegmentRevalidateSuccessBody(string $revalidationReference, float $totalPrice): array
     {
-        return [
-            'pricedItineraries' => [
+        return $this->girRevalidateSuccessBody(
+            [
                 [
-                    'airItineraryPricingInfo' => [
-                        'fareInfos' => [
-                            [
-                                'fareBasisCode' => 'YOWPK',
-                                'departureAirport' => 'LHE',
-                                'arrivalAirport' => 'KHI',
-                                'bookingCode' => 'Y',
-                            ],
-                            [
-                                'fareBasisCode' => 'KLITE1',
-                                'departureAirport' => 'KHI',
-                                'arrivalAirport' => 'DXB',
-                                'bookingCode' => 'K',
-                            ],
-                        ],
-                        'validatingCarrier' => 'PK',
-                        'itinTotalFare' => [
-                            'totalFare' => ['totalPrice' => $totalPrice, 'currencyCode' => 'PKR'],
-                        ],
-                    ],
+                    'origin' => 'LHE',
+                    'destination' => 'KHI',
+                    'departure_at' => '2026-08-15T05:00:00',
+                    'arrival_at' => '2026-08-15T06:45:00',
+                    'carrier' => 'PK',
+                    'flight_number' => '303',
+                    'booking_class' => 'Y',
+                    'fare_basis_code' => 'YOWPK',
                 ],
+                [
+                    'origin' => 'KHI',
+                    'destination' => 'DXB',
+                    'departure_at' => '2026-08-15T10:00:00',
+                    'arrival_at' => '2026-08-15T11:30:00',
+                    'carrier' => 'EK',
+                    'flight_number' => '601',
+                    'booking_class' => 'K',
+                    'fare_basis_code' => 'KLITE1',
+                ],
+            ],
+            $revalidationReference,
+            $totalPrice,
+        );
+    }
+
+    /**
+     * GIR-shaped revalidate HTTP 200 body that uniquely links to the given draft/booking segments.
+     *
+     * @param  list<array<string, mixed>>  $segments
+     * @return array<string, mixed>
+     */
+    protected function girRevalidateSuccessBody(
+        array $segments,
+        string $revalidationReference,
+        float $totalPrice,
+        bool $includeTicketingTimeLimit = false,
+        ?int $blankFareBasisSegmentIndex = null,
+    ): array {
+        $scheduleDescs = [];
+        $legDescs = [];
+        $fareSegments = [];
+        $legs = [];
+        foreach (array_values($segments) as $index => $segment) {
+            $ref = $index + 1;
+            $depAt = trim((string) ($segment['departure_at'] ?? ''));
+            $arrAt = trim((string) ($segment['arrival_at'] ?? ''));
+            $depTime = strlen($depAt) >= 19 ? substr($depAt, 11, 8) : $depAt;
+            $arrTime = strlen($arrAt) >= 19 ? substr($arrAt, 11, 8) : $arrAt;
+            $scheduleDescs[] = [
+                'ref' => $ref,
+                'departure' => [
+                    'airport' => strtoupper(trim((string) ($segment['origin'] ?? ''))),
+                    'time' => $depTime,
+                ],
+                'arrival' => [
+                    'airport' => strtoupper(trim((string) ($segment['destination'] ?? ''))),
+                    'time' => $arrTime,
+                ],
+                'carrier' => [
+                    'marketing' => strtoupper(trim((string) ($segment['carrier'] ?? ''))),
+                    'marketingFlightNumber' => (string) ($segment['flight_number'] ?? ''),
+                ],
+            ];
+            $legDescs[] = ['ref' => $ref, 'schedules' => [['ref' => $ref]]];
+            $legs[] = ['ref' => $ref];
+            $fareBasis = $blankFareBasisSegmentIndex === $index
+                ? ''
+                : strtoupper(trim((string) ($segment['fare_basis_code'] ?? '')));
+            $fareSegments[] = [
+                'segment' => [
+                    'bookingCode' => strtoupper(trim((string) ($segment['booking_class'] ?? 'Y'))),
+                    'fareBasisCode' => $fareBasis,
+                    'cabinCode' => 'Y',
+                ],
+            ];
+        }
+
+        $body = [
+            'groupedItineraryResponse' => [
+                'scheduleDescs' => $scheduleDescs,
+                'legDescs' => $legDescs,
+                'itineraryGroups' => [[
+                    'itineraries' => [[
+                        'id' => 'gir-match-1',
+                        'legs' => $legs,
+                        'pricingInformation' => [[
+                            'fare' => [
+                                'validatingCarrierCode' => 'PK',
+                                'totalFare' => [
+                                    'totalPrice' => $totalPrice,
+                                    'currencyCode' => 'PKR',
+                                ],
+                                'passengerInfoList' => [[
+                                    'passengerInfo' => [
+                                        'fareComponents' => [[
+                                            'segments' => $fareSegments,
+                                        ]],
+                                    ],
+                                ]],
+                            ],
+                        ]],
+                    ]],
+                ]],
             ],
             'revalidationReference' => $revalidationReference,
         ];
+        if ($includeTicketingTimeLimit) {
+            $body['ticketingTimeLimit'] = '2026-12-31T23:59:00Z';
+        }
+
+        return $body;
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    protected function segmentsFromInspectableBooking(Booking $booking): array
+    {
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $snapshot = is_array($meta['normalized_offer_snapshot'] ?? null)
+            ? $meta['normalized_offer_snapshot']
+            : (is_array($meta['flight_offer_snapshot'] ?? null) ? $meta['flight_offer_snapshot'] : []);
+        $segments = is_array($snapshot['segments'] ?? null) ? array_values($snapshot['segments']) : [];
+        $this->assertNotEmpty($segments);
+
+        return $segments;
     }
 
     protected function sampleInternalDraftWithSegments(
@@ -1056,7 +1139,7 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
         $sabreConn->update([
             'is_active' => true,
             'status' => SupplierConnectionStatus::Active,
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         $depart = now()->addDays(10)->toDateString();
@@ -1437,9 +1520,14 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
     public function test_compare_revalidate_styles_prints_recommended_path_when_offers_v4_beats_bfm_baseline(): void
     {
         $this->seed(OtaFoundationSeeder::class);
-        $sabreBase = rtrim((string) config('suppliers.sabre.default_base_url'), '/');
         $tokenPath = (string) config('suppliers.sabre.token_path', '/v2/auth/token');
-        $okBody = $this->twoSegmentRevalidateSuccessBody('REVAL-CMP-1', 150000);
+
+        $booking = $this->seedInspectableSabreBooking();
+        $okBody = $this->girRevalidateSuccessBody(
+            $this->segmentsFromInspectableBooking($booking),
+            'REVAL-CMP-1',
+            150000.0,
+        );
 
         Http::fake(function (Request $request) use ($tokenPath, $okBody) {
             $u = $request->url();
@@ -1456,12 +1544,11 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
             };
         });
 
-        $booking = $this->seedInspectableSabreBooking();
         $cid = (int) data_get($booking->meta, 'supplier_connection_id');
         $conn = SupplierConnection::query()->find($cid);
         $this->assertNotNull($conn);
         $conn->update([
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         Artisan::call('sabre:compare-revalidate-styles', ['--booking' => (string) $booking->id]);
@@ -1474,7 +1561,13 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $tokenPath = (string) config('suppliers.sabre.token_path', '/v2/auth/token');
-        $okBody = $this->twoSegmentRevalidateSuccessBody('REVAL-BFM-WINS', 150000);
+
+        $booking = $this->seedInspectableSabreBooking();
+        $okBody = $this->girRevalidateSuccessBody(
+            $this->segmentsFromInspectableBooking($booking),
+            'REVAL-BFM-WINS',
+            150000.0,
+        );
 
         Http::fake(function (Request $request) use ($tokenPath, $okBody) {
             $u = $request->url();
@@ -1492,12 +1585,11 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
             };
         });
 
-        $booking = $this->seedInspectableSabreBooking();
         $cid = (int) data_get($booking->meta, 'supplier_connection_id');
         $conn = SupplierConnection::query()->find($cid);
         $this->assertNotNull($conn);
         $conn->update([
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         Artisan::call('sabre:compare-revalidate-styles', ['--booking' => (string) $booking->id]);
@@ -1634,26 +1726,15 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
 
         Http::fake([
             $sabreBase.$tokenPath => Http::response(['access_token' => 'tok-fb', 'expires_in' => 3600], 200),
-            $sabreBase.$revalidatePath => Http::response([
-                'pricedItineraries' => [
-                    [
-                        'airItineraryPricingInfo' => [
-                            'fareInfos' => [
-                                [
-                                    'fareBasisCode' => 'YOWPK',
-                                    'departureAirport' => 'LHE',
-                                    'arrivalAirport' => 'KHI',
-                                    'bookingCode' => 'Y',
-                                ],
-                            ],
-                            'validatingCarrier' => 'PK',
-                            'itinTotalFare' => [
-                                'totalFare' => ['totalPrice' => 320.50, 'currencyCode' => 'PKR'],
-                            ],
-                        ],
-                    ],
-                ],
-            ], 200),
+            $sabreBase.$revalidatePath => Http::response(
+                $this->girRevalidateSuccessBody(
+                    $this->sampleInternalDraftWithSegments('Y', 'YOWPK', 'K', 'KLITE1')['segments'],
+                    'REVAL-PARTIAL-FB',
+                    320.50,
+                    blankFareBasisSegmentIndex: 1,
+                ),
+                200,
+            ),
         ]);
 
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
@@ -1677,7 +1758,11 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
 
         $this->assertFalse((bool) ($out['success'] ?? false));
         $this->assertSame('sabre_revalidation_empty_or_unusable_response', $out['reason_code'] ?? null);
-        $this->assertSame('fare_basis_incomplete', $out['revalidation_failure_class'] ?? null);
+        // Linker fails closed when per-segment fare basis cannot uniquely confirm the offer.
+        $this->assertContains(
+            (string) ($out['revalidation_failure_class'] ?? ''),
+            ['fare_basis_incomplete', 'unusable_linkage'],
+        );
     }
 
     public function test_run_revalidation_http_200_warnings_yield_application_warning_reason(): void
@@ -1874,27 +1959,13 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
     {
         $this->seed(OtaFoundationSeeder::class);
         $tokenPath = (string) config('suppliers.sabre.token_path', '/v2/auth/token');
-        $okBody = [
-            'pricedItineraries' => [
-                [
-                    'airItineraryPricingInfo' => [
-                        'fareInfos' => [
-                            [
-                                'fareBasisCode' => 'YOWPK',
-                                'departureAirport' => 'LHE',
-                                'arrivalAirport' => 'KHI',
-                                'bookingCode' => 'Y',
-                            ],
-                        ],
-                        'validatingCarrier' => 'PK',
-                        'itinTotalFare' => [
-                            'totalFare' => ['totalPrice' => 400, 'currencyCode' => 'PKR'],
-                        ],
-                    ],
-                ],
-            ],
-            'revalidationReference' => 'REVAL-MX-1',
-        ];
+
+        $booking = $this->seedInspectableSabreBooking();
+        $okBody = $this->girRevalidateSuccessBody(
+            $this->segmentsFromInspectableBooking($booking),
+            'REVAL-MX-1',
+            150000.0,
+        );
 
         Http::fake(function (Request $request) use ($tokenPath, $okBody) {
             $u = $request->url();
@@ -1910,12 +1981,11 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
             };
         });
 
-        $booking = $this->seedInspectableSabreBooking();
         $cid = (int) data_get($booking->meta, 'supplier_connection_id');
         $conn = SupplierConnection::query()->find($cid);
         $this->assertNotNull($conn);
         $conn->update([
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         Artisan::call('sabre:compare-revalidate-endpoints', [
@@ -1982,7 +2052,7 @@ class SabreBookingRevalidatePhaseB13Test extends TestCase
         $conn = SupplierConnection::query()->find($cid);
         $this->assertNotNull($conn);
         $conn->update([
-            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec'],
+            'credentials' => ['client_id' => 'cid', 'client_secret' => 'sec', 'pcc' => 'TEST'],
         ]);
 
         $report = sys_get_temp_dir().DIRECTORY_SEPARATOR.'sabre-revalidate-matrix-test-'.uniqid('', true).'.json';
