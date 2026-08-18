@@ -38,7 +38,6 @@ final class SabrePnrLaneDiagnostics
         return [
             'operational_auto_pnr_enabled',
             'pnr_create_enabled',
-            'ticketing_disabled',
             'gds_enabled',
             'payment_mode_manual',
             'provider_is_sabre',

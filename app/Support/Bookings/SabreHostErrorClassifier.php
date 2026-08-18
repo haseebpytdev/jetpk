@@ -158,6 +158,97 @@ class SabreHostErrorClassifier
         return $slice;
     }
 
+    /**
+     * When host classification is present, replace raw supplier echo strings in attempt
+     * safe-summary diagnostic rows with the classified admin-safe text.
+     *
+     * @param  array<string, mixed>  $summary
+     * @return array<string, mixed>
+     */
+    public static function scrubClassifiedDiagnosticEchoFromAttemptSummary(array $summary): array
+    {
+        $family = trim((string) ($summary['host_error_family'] ?? ''));
+        if ($family === '') {
+            return $summary;
+        }
+
+        $replacement = trim((string) ($summary['safe_summary'] ?? $summary['admin_summary'] ?? ''));
+        if ($replacement === '') {
+            return $summary;
+        }
+
+        foreach (['safe_application_warnings', 'safe_application_errors', 'safe_application_successes'] as $bucket) {
+            if (! is_array($summary[$bucket] ?? null)) {
+                continue;
+            }
+            foreach ($summary[$bucket] as $index => $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                $message = trim((string) ($row['message'] ?? ''));
+                if ($message === '' || ! self::diagnosticMessageEchoesHostFamily($family, $message)) {
+                    continue;
+                }
+                $summary[$bucket][$index]['message'] = $replacement;
+            }
+        }
+
+        if (is_array($summary['safe_validation_excerpts_structured'] ?? null)) {
+            foreach ($summary['safe_validation_excerpts_structured'] as $index => $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                $message = trim((string) ($row['message'] ?? ''));
+                if ($message !== '' && self::diagnosticMessageEchoesHostFamily($family, $message)) {
+                    $summary['safe_validation_excerpts_structured'][$index]['message'] = $replacement;
+                }
+            }
+        }
+
+        if (is_array($summary['safe_validation_excerpts'] ?? null)) {
+            $summary['safe_validation_excerpts'] = array_values(array_filter(array_map(
+                static function (mixed $excerpt) use ($family, $replacement): ?string {
+                    if (! is_string($excerpt)) {
+                        return is_scalar($excerpt) ? (string) $excerpt : null;
+                    }
+                    if (self::diagnosticMessageEchoesHostFamily($family, $excerpt)) {
+                        $prefix = '';
+                        if (preg_match('/^(warning|error|info)\s*:\s*/i', $excerpt, $matches) === 1) {
+                            $prefix = strtolower($matches[1]).': ';
+                        }
+
+                        return $prefix.$replacement;
+                    }
+
+                    return $excerpt;
+                },
+                $summary['safe_validation_excerpts'],
+            ), static fn (?string $value): bool => $value !== null && $value !== ''));
+        }
+
+        return $summary;
+    }
+
+    public static function diagnosticMessageEchoesHostFamily(string $family, string $message): bool
+    {
+        $upper = strtoupper(trim($message));
+        if ($upper === '') {
+            return false;
+        }
+
+        return match ($family) {
+            self::HOST_ERROR_FAMILY_ENHANCED_AIRBOOK_FORMAT => str_contains($upper, 'ENHANCEDAIRBOOKRQ')
+                && str_contains($upper, 'FORMAT'),
+            self::HOST_ERROR_FAMILY_NO_FARES_RBD_CARRIER => str_contains($upper, 'NO FARES/RBD/CARRIER')
+                || (str_contains($upper, 'NO FARES') && ! str_contains($upper, 'ENHANCEDAIRBOOKRQ')),
+            self::HOST_ERROR_FAMILY_UC_SEGMENT_STATUS => str_contains($upper, 'UC')
+                || str_contains($upper, 'UNABLE TO CONFIRM'),
+            self::HOST_ERROR_FAMILY_HOST_SEGMENT_STATUS => str_contains($upper, 'UNCONFIRMED')
+                || str_contains($upper, 'PENDING'),
+            default => false,
+        };
+    }
+
     public static function hostErrorFamilyForReason(string $safeReasonCode): ?string
     {
         return match (strtolower(trim($safeReasonCode))) {

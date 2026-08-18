@@ -780,7 +780,9 @@ class SabreBookingService
             ])),
         ), self::passengerRecordsEndpointSliceFromResult($result), self::createPayloadAndStructureSliceFromResult($result), $this->strategyChangedRetryAuditSlice, array_intersect_key($ep, array_flip(['endpoint_host', 'endpoint_path']))));
 
-        return $this->appendAutoPnrContextCompletionToAttemptSummary($summary, $result);
+        $summary = $this->appendAutoPnrContextCompletionToAttemptSummary($summary, $result);
+
+        return SabreHostErrorClassifier::scrubClassifiedDiagnosticEchoFromAttemptSummary($summary);
     }
 
     /**

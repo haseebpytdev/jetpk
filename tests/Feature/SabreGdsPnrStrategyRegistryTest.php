@@ -16,6 +16,7 @@ use App\Models\SupplierBookingAttempt;
 use App\Models\SupplierConnection;
 use App\Services\Suppliers\Sabre\Booking\SabreBookingPayloadBuilder;
 use App\Services\Suppliers\Sabre\Booking\SabreBookingService;
+use App\Services\Suppliers\Sabre\Gds\SabreRevalidationPayloadBuilder;
 use App\Support\Bookings\SabreAdminManualPnrFallbackReadiness;
 use App\Support\Bookings\SabreCertifiedRouteSelector;
 use App\Support\Bookings\SabreOperationalPnrReadiness;
@@ -2415,6 +2416,7 @@ class SabreGdsPnrStrategyRegistryTest extends TestCase
                 SabreGdsMixedCarrierFareBasisPayloadPreflight::REASON_PAYLOAD_MAPPING_UNAVAILABLE,
                 SabreGdsMixedCarrierFareBasisPayloadPreflight::REASON_FARE_COMPONENT_CARRIER_MAPPING_UNAVAILABLE,
                 SabreGdsMixedCarrierFareBasisPayloadPreflight::REASON_V24_COMMANDPRICING_SCHEMA_INVALID,
+                SabreRevalidationPayloadBuilder::REASON_MISSING_OR_INVALID_PSEUDO_CITY_CODE,
             ],
         );
     }
