@@ -95,8 +95,8 @@ class Phase22StagingPrepTest extends TestCase
         config()->set('app.debug', false);
         $this->get('/non-existent-stage-route')
             ->assertStatus(404)
-            ->assertSee('Back to Home')
-            ->assertSee('Contact Support')
+            ->assertSee('Back to home')
+            ->assertSee('Contact support')
             ->assertDontSee('Stack trace')
             ->assertDontSee('Ignition');
     }

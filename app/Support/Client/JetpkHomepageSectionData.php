@@ -22,7 +22,7 @@ final class JetpkHomepageSectionData
      */
     public function defaults(): array
     {
-        return [];
+        return $this->resolver->defaultHomeContent();
     }
 
     public function field(string $key, mixed $defaultWhenAbsent = ''): mixed

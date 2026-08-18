@@ -70,10 +70,13 @@ class TurnstileProtectionTest extends TestCase
     {
         $this->enableTurnstile();
 
-        $html = $this->get(route('booking.lookup'))->assertOk()->getContent();
+        $this->get(route('booking.lookup'))
+            ->assertRedirect()
+            ->assertRedirectContains('/lookup-booking');
 
-        $this->assertStringContainsString('cf-turnstile', $html);
-        $this->assertStringContainsString('jp-page--lookup', $html);
+        $nextLookup = (string) file_get_contents(base_path('frontend/features/standard-booking/lookup/BookingLookupPage.tsx'));
+        $this->assertStringContainsString('TurnstileWidget', $nextLookup);
+        $this->assertStringContainsString('cf-turnstile-response', $nextLookup);
     }
 
     public function test_booking_lookup_submission_requires_turnstile_when_enabled(): void

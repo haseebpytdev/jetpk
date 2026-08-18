@@ -3,6 +3,7 @@
 namespace App\Services\TravelData;
 
 use App\Models\Airline;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
@@ -227,6 +228,10 @@ final class AirlineCanonicalResolver
 
     public function findDatabaseAirline(string $iata): ?Airline
     {
+        if (! Schema::hasTable('airlines')) {
+            return null;
+        }
+
         return Airline::query()
             ->whereRaw('UPPER(COALESCE(iata_code, "")) = ?', [Str::upper(trim($iata))])
             ->first();

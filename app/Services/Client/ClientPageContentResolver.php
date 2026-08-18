@@ -303,7 +303,12 @@ final class ClientPageContentResolver
             ]),
             'feature_board' => ['enabled' => '1', 'items' => []],
             'why_book' => ['enabled' => '1', 'cards' => []],
-            'trust' => ['enabled' => '1', 'cards' => []],
+            'trust' => [
+                'enabled' => '1',
+                'eyebrow' => 'Why travellers stay',
+                'title' => 'Booking that respects your time and money.',
+                'cards' => [],
+            ],
             'routes' => ['enabled' => '1', 'items' => []],
             'destinations' => ['enabled' => '1', 'items' => []],
             'group_cards' => ['enabled' => '1', 'items' => []],

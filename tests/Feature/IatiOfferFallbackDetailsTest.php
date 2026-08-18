@@ -154,7 +154,7 @@ class IatiOfferFallbackDetailsTest extends TestCase
     #[Test]
     public function test_results_blade_uses_fallback_flight_details_when_no_branded_options(): void
     {
-        $src = file_get_contents(resource_path('views/frontend/flights/results.blade.php'));
+        $src = (string) file_get_contents(resource_path('views/frontend/flights/partials/results-page.blade.php'));
 
         $this->assertStringContainsString('has_fallback_details', $src);
         $this->assertStringContainsString('fallback_details', $src);

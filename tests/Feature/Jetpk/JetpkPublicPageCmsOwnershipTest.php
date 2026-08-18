@@ -146,21 +146,31 @@ class JetpkPublicPageCmsOwnershipTest extends TestCase
         $profile = $this->makeJetpkProfile();
         $this->artisan('jetpk:public-page-cms-bootstrap', ['--execute' => true])->assertSuccessful();
 
-        $paths = [
+        $cmsPaths = [
             '/about-us',
             '/terms',
             '/privacy',
             '/faq',
             '/support',
+        ];
+        foreach ($cmsPaths as $path) {
+            $this->get($path)->assertSuccessful();
+        }
+
+        // Next-owned public surfaces: Laravel GET may 302 to the canonical Next path.
+        $nextOwnedPaths = [
             '/login',
             '/register',
             '/lookup-booking',
             '/agent/register',
             '/groups/search',
         ];
-
-        foreach ($paths as $path) {
-            $this->get($path)->assertSuccessful();
+        foreach ($nextOwnedPaths as $path) {
+            $status = $this->get($path)->status();
+            $this->assertTrue(
+                in_array($status, [200, 301, 302], true),
+                "Expected 200/301/302 for {$path}, got {$status}."
+            );
         }
 
         $customSlug = 'our-story';
