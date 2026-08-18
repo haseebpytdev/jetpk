@@ -85,11 +85,17 @@ class SabreGdsTicketServicingCommandTest extends TestCase
     private function bookingWithTicket(): array
     {
         $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $connectionId = SupplierConnection::query()
+            ->where('provider', SupplierProvider::Sabre->value)
+            ->value('id');
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
             'pnr' => 'VOID1',
             'supplier' => SupplierProvider::Sabre->value,
-            'meta' => ['supplier_provider' => SupplierProvider::Sabre->value],
+            'meta' => [
+                'supplier_provider' => SupplierProvider::Sabre->value,
+                'supplier_connection_id' => $connectionId,
+            ],
         ]);
         BookingTicket::query()->create([
             'agency_id' => $agency->id,

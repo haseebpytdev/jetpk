@@ -30,6 +30,10 @@ class SabreGdsTicketingCommandTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
         Config::set('suppliers.sabre.ticketing_enabled', false);
         Config::set('suppliers.sabre.ticketing_live_call_enabled', false);
+    }
+
+    private function fakeNoSupplierHttp(): void
+    {
         Http::fake();
     }
 
@@ -43,6 +47,7 @@ class SabreGdsTicketingCommandTest extends TestCase
 
     public function test_issue_ticket_dry_run_does_not_call_supplier(): void
     {
+        $this->fakeNoSupplierHttp();
         $booking = $this->sabreBooking();
         Artisan::call('sabre:gds-issue-ticket', [
             '--booking' => (string) $booking->id,
@@ -55,6 +60,7 @@ class SabreGdsTicketingCommandTest extends TestCase
 
     public function test_issue_ticket_default_without_send_is_dry_run(): void
     {
+        $this->fakeNoSupplierHttp();
         $booking = $this->sabreBooking();
         Artisan::call('sabre:gds-issue-ticket', [
             '--booking' => (string) $booking->id,
@@ -67,6 +73,7 @@ class SabreGdsTicketingCommandTest extends TestCase
 
     public function test_issue_ticket_confirm_without_send_is_dry_run(): void
     {
+        $this->fakeNoSupplierHttp();
         $booking = $this->sabreBooking();
         Artisan::call('sabre:gds-issue-ticket', [
             '--booking' => (string) $booking->id,
@@ -80,6 +87,7 @@ class SabreGdsTicketingCommandTest extends TestCase
 
     public function test_issue_ticket_send_without_confirm_is_blocked(): void
     {
+        $this->fakeNoSupplierHttp();
         $booking = $this->sabreBooking();
         Artisan::call('sabre:gds-issue-ticket', [
             '--booking' => (string) $booking->id,
@@ -93,6 +101,7 @@ class SabreGdsTicketingCommandTest extends TestCase
 
     public function test_issue_ticket_confirmed_blocks_when_env_disabled(): void
     {
+        $this->fakeNoSupplierHttp();
         $booking = $this->sabreBooking();
         Artisan::call('sabre:gds-issue-ticket', [
             '--booking' => (string) $booking->id,
@@ -144,8 +153,17 @@ class SabreGdsTicketingCommandTest extends TestCase
             'email' => 'booker@example.com',
             'phone' => '3001234567',
         ]);
+        $booking->supplierBookings()->create([
+            'agency_id' => $booking->agency_id,
+            'supplier_connection_id' => $conn->id,
+            'provider' => SupplierProvider::Sabre->value,
+            'status' => 'created',
+            'supplier_reference' => $booking->pnr,
+        ]);
+        $booking->load(['passengers', 'contact', 'latestSupplierBooking']);
 
         $baseUrl = rtrim((string) $conn->base_url, '/');
+        Http::preventStrayRequests();
         Http::fake(function (Request $request) {
             $url = $request->url();
             if (str_contains($url, '/v2/auth/token')) {
@@ -174,6 +192,7 @@ class SabreGdsTicketingCommandTest extends TestCase
 
     public function test_service_dry_run_never_calls_http(): void
     {
+        $this->fakeNoSupplierHttp();
         $booking = $this->sabreBooking();
         $connection = SupplierConnection::query()->where('provider', SupplierProvider::Sabre->value)->firstOrFail();
         $actor = User::query()->where('email', 'admin@ota.demo')->firstOrFail();

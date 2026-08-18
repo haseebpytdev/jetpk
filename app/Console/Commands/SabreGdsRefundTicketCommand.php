@@ -46,13 +46,19 @@ class SabreGdsRefundTicketCommand extends Command
             ['suppliers.sabre.refund_enabled'],
         );
 
-        if (! $gate['live_allowed'] && ! ($gate['send_requested'] ?? false)) {
-            $this->line(json_encode(array_merge($evaluation, [
-                'gate' => $gate,
-                'live_supplier_call_attempted' => false,
-            ]), JSON_UNESCAPED_SLASHES));
+        if (! $gate['live_allowed']) {
+            $manualWorkflowSend = ($gate['send_requested'] ?? false)
+                && ($gate['confirm_matches'] ?? false)
+                && (bool) config('suppliers.sabre.refund_enabled', false);
 
-            return self::SUCCESS;
+            if (! $manualWorkflowSend) {
+                $this->line(json_encode(array_merge($evaluation, [
+                    'gate' => $gate,
+                    'live_supplier_call_attempted' => false,
+                ]), JSON_UNESCAPED_SLASHES));
+
+                return self::SUCCESS;
+            }
         }
 
         $connection = $this->resolveConnection($booking);
