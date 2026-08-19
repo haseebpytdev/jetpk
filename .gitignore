@@ -163,6 +163,9 @@ frontend/tsconfig.tsbuildinfo
 # JP-DASH-03 local-only Playwright session (never commit)
 tmp/jp-dash-03-admin-storage-state.json
 tmp/jp-dash-03-staff-storage-state.json
+
+# Search UI local review evidence (never commit)
+/tmp/search-ui-polish-visual-owner-review/
 dashboard-src.tgz
 /deployment_packages/
 /_dash12-reviewed-untracked-backup/
