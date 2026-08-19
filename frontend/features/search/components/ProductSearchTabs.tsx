@@ -69,7 +69,7 @@ export function ProductSearchTabs({
               "focus-visible:outline-none focus-visible:shadow-jp-focus",
               selected
                 ? "border-jp-primary text-jp-primary"
-                : "border-transparent text-jp-muted hover:text-jp-text",
+                : "border-transparent text-jp-text/70 hover:text-jp-text",
             )}
           >
             {PRODUCT_LABELS[tab]}

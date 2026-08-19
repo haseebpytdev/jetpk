@@ -162,12 +162,11 @@ export function TripTypeDropdown({
         onClick={() => setOpen((value) => !value)}
         onKeyDown={handleTriggerKeyDown}
         className={cn(
-          "inline-flex items-center gap-2 rounded-jp-md border border-jp-border bg-white px-3 py-2 text-jp-sm font-medium text-jp-text dark:bg-jp-surface",
-          compact ? "min-h-[2.75rem]" : "min-h-jp-tap",
+          "inline-flex items-center gap-1.5 rounded-jp-md border border-jp-border bg-white px-2.5 py-2 text-jp-sm font-medium text-jp-text dark:bg-jp-surface",
+          compact ? "min-h-[2.75rem] text-jp-xs" : "min-h-jp-tap",
           "focus-visible:outline-none focus-visible:shadow-jp-focus",
         )}
       >
-        <span className="text-jp-muted">Trip type:</span>
         <span>{TRIP_TYPE_LABELS[tripType]}</span>
         <svg viewBox="0 0 20 20" className="h-4 w-4 text-jp-muted" aria-hidden="true">
           <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" strokeWidth="1.75" />

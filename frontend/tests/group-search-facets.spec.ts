@@ -69,7 +69,11 @@ test("empty facets state blocks submission", async ({ page }) => {
   await resetFacetsCache(page);
 
   await page.goto("/groups/search");
-  await expect(page.getByText("No group sectors are currently available")).toBeVisible();
+  await expect(page.getByTestId("group-empty-state")).toContainText(
+    "No group fares are currently available. Please check again later or contact JetPakistan Groups.",
+  );
+  await expect(page.getByText("Request failed")).toHaveCount(0);
+  await expect(page.getByTestId("group-sector-select").locator("option")).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Search Group Fares" })).toBeDisabled();
 });
 

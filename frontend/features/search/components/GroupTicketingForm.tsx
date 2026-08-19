@@ -64,6 +64,27 @@ export function GroupTicketingForm({
         Passenger counts are collected later during group booking. Search uses sector, travel date, and category only.
       </p>
 
+      {facetsEmpty ? (
+        <div
+          id={`${id}-group-empty`}
+          className="rounded-jp-md border border-jp-border bg-jp-surface-muted px-4 py-3 text-jp-sm text-jp-text"
+          role="status"
+          aria-live="polite"
+          data-testid="group-empty-state"
+        >
+          <p>No group fares are currently available. Please check again later or contact JetPakistan Groups.</p>
+          {onRetryFacets ? (
+            <button
+              type="button"
+              onClick={onRetryFacets}
+              className="mt-2 rounded-jp-md border border-jp-border px-3 py-1.5 text-jp-sm font-semibold focus-visible:outline-none focus-visible:shadow-jp-focus"
+            >
+              Retry
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label htmlFor={`${id}-sector`} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
@@ -76,7 +97,7 @@ export function GroupTicketingForm({
             onChange={(event) => onSectorChange(event.target.value)}
             aria-busy={facetsLoading}
             aria-invalid={facetsFailed || facetsEmpty}
-            aria-describedby={facetsFailed ? `${id}-sector-error` : facetsEmpty ? `${id}-sector-empty` : undefined}
+            aria-describedby={facetsFailed ? `${id}-sector-error` : facetsEmpty ? `${id}-group-empty` : undefined}
             className="w-full min-h-jp-tap rounded-jp-md border border-jp-border bg-jp-surface px-3 py-2.5 text-jp-sm focus-visible:outline-none focus-visible:shadow-jp-focus disabled:cursor-not-allowed disabled:bg-jp-surface-muted disabled:text-jp-muted"
             data-testid="group-sector-select"
           >
@@ -89,11 +110,6 @@ export function GroupTicketingForm({
           </select>
           {facetsLoading ? (
             <p className="mt-1 text-jp-xs text-jp-muted" role="status" aria-live="polite">Loading group sectors from live inventory…</p>
-          ) : null}
-          {facetsEmpty ? (
-            <p id={`${id}-sector-empty`} className="mt-1 text-jp-sm text-jp-muted" role="status">
-              No group sectors are currently available. Please check back later.
-            </p>
           ) : null}
           {facetsFailed ? (
             <div id={`${id}-sector-error`} className="mt-2 space-y-2" role="alert">

@@ -233,7 +233,7 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
   return (
     <section
       className={cn(
-        "overflow-visible rounded-jp-card border border-white/35 bg-[rgba(248,250,252,0.82)] shadow-[0_10px_40px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-md dark:border-white/10 dark:bg-[rgba(30,41,59,0.78)]",
+        "overflow-visible rounded-jp-card border border-white/60 bg-[rgba(246,248,250,0.94)] shadow-[0_10px_40px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-md dark:border-white/10 dark:bg-[rgba(30,41,59,0.78)]",
         compact ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
         className,
       )}

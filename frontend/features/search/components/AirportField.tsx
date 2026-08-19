@@ -31,15 +31,19 @@ export function AirportField({
   density = "default",
 }: AirportFieldProps) {
   const listId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value ? `${value.city} (${value.iata})` : "");
+  const [editing, setEditing] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [results, setResults] = useState<Airport[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const editingRef = useRef(false);
+  const editValueRef = useRef<Airport | null>(value);
 
   const debouncedQuery = useDebouncedValue(query, 280);
 
@@ -48,15 +52,34 @@ export function AirportField({
     setActiveIndex(-1);
   }, []);
 
-  useEscapeKey(open, () => {
+  const setEditingState = useCallback((next: boolean) => {
+    editingRef.current = next;
+    setEditing(next);
+  }, []);
+
+  const restoreEditing = useCallback(() => {
+    const previous = editValueRef.current;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    if (value?.iata !== previous?.iata) onChange(previous);
+    setQuery(previous ? `${previous.city} (${previous.iata})` : "");
+    setEditingState(false);
     closeList();
+  }, [closeList, onChange, setEditingState, value]);
+
+  const handleEscape = useCallback(() => {
+    if (editingRef.current) {
+      restoreEditing();
+    } else {
+      closeList();
+    }
     inputRef.current?.focus();
-  });
+  }, [closeList, restoreEditing]);
+
+  useEscapeKey(open, handleEscape);
 
   useEffect(() => {
-    if (value) {
-      setQuery(`${value.city} (${value.iata})`);
-    }
+    if (!editingRef.current) setQuery(value ? `${value.city} (${value.iata})` : "");
   }, [value]);
 
   useEffect(() => {
@@ -110,8 +133,26 @@ export function AirportField({
   const selectAirport = (airport: Airport) => {
     onChange(airport);
     setQuery(`${airport.city} (${airport.iata})`);
+    editValueRef.current = airport;
+    setEditingState(false);
     closeList();
     inputRef.current?.focus();
+  };
+
+  const beginEditing = () => {
+    if (disabled) return;
+    if (editingRef.current) {
+      setOpen(true);
+      return;
+    }
+
+    editValueRef.current = value;
+    setEditingState(true);
+    setQuery("");
+    setOpen(true);
+    setResults(filterAirports(""));
+    setActiveIndex(-1);
+    setError(null);
   };
 
   const handleInputChange = (next: string) => {
@@ -119,7 +160,6 @@ export function AirportField({
     setOpen(true);
     setResults(filterAirports(next));
     setActiveIndex(-1);
-    if (!next.trim()) onChange(null);
   };
 
   const retrySearch = () => {
@@ -150,19 +190,15 @@ export function AirportField({
       selectAirport(results[activeIndex]);
     }
 
-    if (event.key === "Escape") {
-      event.preventDefault();
-      closeList();
-    }
   };
 
   return (
-    <div className={cn("relative min-w-0", className)}>
+    <div ref={rootRef} className={cn("relative min-w-0", className)}>
       <label htmlFor={id} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-text/80">
         {label}
       </label>
       <div className="relative">
-        {value ? (
+        {value && !editing ? (
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-jp-sm font-bold text-jp-primary">
             {value.iata}
           </span>
@@ -182,19 +218,21 @@ export function AirportField({
           value={query}
           placeholder={placeholder}
           onChange={(event) => handleInputChange(event.target.value)}
-          onFocus={() => setOpen(true)}
+          onFocus={beginEditing}
           onBlur={(event) => {
-            if (!event.currentTarget.parentElement?.parentElement?.contains(event.relatedTarget as Node)) {
-              closeList();
-            }
+            const relatedTarget = event.relatedTarget;
+            if (relatedTarget instanceof Node && rootRef.current?.contains(relatedTarget)) return;
+            if (editingRef.current) restoreEditing();
+            else closeList();
           }}
           onKeyDown={handleKeyDown}
           className={cn(
             "w-full rounded-jp-md border border-jp-border bg-white px-3 text-jp-sm text-jp-text dark:bg-jp-surface",
             density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
             "placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus",
-            value ? "pl-14" : "",
+            value && !editing ? "pl-14" : "",
           )}
+          aria-activedescendant={activeIndex >= 0 && results[activeIndex] ? `${listId}-option-${results[activeIndex].iata}` : undefined}
         />
       </div>
 
@@ -224,6 +262,7 @@ export function AirportField({
                 <button
                   type="button"
                   role="option"
+                  id={`${listId}-option-${airport.iata}`}
                   aria-selected={index === activeIndex}
                   className={cn(
                     "flex w-full items-start gap-3 px-3 py-2 text-left text-jp-sm transition-colors",

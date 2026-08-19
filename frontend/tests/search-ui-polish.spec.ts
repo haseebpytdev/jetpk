@@ -23,6 +23,74 @@ test.beforeAll(async ({ request }) => {
 });
 
 test.describe("Search UI polish cluster", () => {
+  test.describe("airport click-to-replace", () => {
+    test.beforeEach(async ({ page }) => {
+      await page.route("**/laravel/airports/search**", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify([
+            { iata: "ISB", name: "Islamabad International Airport", city: "Islamabad", country: "Pakistan" },
+            { iata: "LHE", name: "Allama Iqbal International Airport", city: "Lahore", country: "Pakistan" },
+            { iata: "DXB", name: "Dubai International Airport", city: "Dubai", country: "UAE" },
+          ]),
+        });
+      });
+    });
+
+    test("click activation clears the populated field and selecting a result replaces it", async ({ page }) => {
+      await page.goto("/", { waitUntil: "load" });
+      const from = page.getByRole("combobox", { name: "From" });
+
+      await from.click();
+      await expect(from).toHaveValue("");
+      await expect(from).not.toHaveClass(/pl-14/);
+
+      await from.fill("Lah");
+      const lahore = page.getByRole("option", { name: /LHE.*Lahore/i });
+      await expect(lahore).toBeVisible();
+      await lahore.click();
+
+      await expect(from).toHaveValue("Lahore (LHE)");
+    });
+
+    test("blur without a selection restores the previous airport", async ({ page }) => {
+      await page.goto("/", { waitUntil: "load" });
+      const from = page.getByRole("combobox", { name: "From" });
+
+      await from.click();
+      await expect(from).toHaveValue("");
+      await page.getByTestId("trip-type-trigger").click();
+
+      await expect(from).toHaveValue("Islamabad (ISB)");
+    });
+
+    test("escape restores the previous airport and closes suggestions", async ({ page }) => {
+      await page.goto("/", { waitUntil: "load" });
+      const from = page.getByRole("combobox", { name: "From" });
+
+      await from.click();
+      await expect(from).toHaveValue("");
+      await page.keyboard.press("Escape");
+
+      await expect(from).toHaveValue("Islamabad (ISB)");
+      await expect(page.getByRole("listbox", { name: "From suggestions" })).toHaveCount(0);
+    });
+
+    test("keyboard navigation still selects a replacement airport", async ({ page }) => {
+      await page.goto("/", { waitUntil: "load" });
+      const from = page.getByRole("combobox", { name: "From" });
+
+      await from.click();
+      await from.fill("Lah");
+      await expect(page.getByRole("option", { name: /LHE.*Lahore/i })).toBeVisible();
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("Enter");
+
+      await expect(from).toHaveValue("Lahore (LHE)");
+    });
+  });
+
   test("one way renders single departure date field", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     await page.getByTestId("trip-type-trigger").click();
@@ -92,6 +160,18 @@ test.describe("Search UI polish cluster", () => {
     await page.getByTestId("trip-type-trigger").click();
     await page.getByRole("menuitem", { name: "Return" }).click();
     await expect(page.getByTestId("date-range-trigger")).toBeVisible();
+  });
+
+  test("trip type selector is compact without a visible prefix", async ({ page }) => {
+    await page.goto("/", { waitUntil: "load" });
+    const trigger = page.getByTestId("trip-type-trigger");
+    await expect(trigger).toHaveAttribute("aria-label", "Trip type");
+    await expect(trigger).toContainText("One Way");
+    await expect(trigger).not.toContainText("Trip type:");
+
+    const box = await trigger.boundingBox();
+    expect(box).not.toBeNull();
+    if (box) expect(box.height).toBeGreaterThanOrEqual(40);
   });
 
   test("flights and group ticketing are separate product tabs", async ({ page }) => {
