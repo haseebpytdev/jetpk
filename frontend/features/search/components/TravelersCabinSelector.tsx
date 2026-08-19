@@ -214,7 +214,7 @@ export function TravelersCabinSelector({
               <label
                 key={cabin.value}
                 className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-jp-sm px-2 py-2 text-jp-sm transition-colors",
+                  "flex cursor-pointer items-center gap-2 rounded-jp-sm px-2 py-2 transition-colors",
                   selected ? "bg-jp-primary-soft font-semibold text-jp-primary" : "text-jp-text hover:bg-jp-primary-soft/60",
                 )}
               >
@@ -226,7 +226,9 @@ export function TravelersCabinSelector({
                   onChange={() => onCabinChange(cabin.value)}
                   className="h-4 w-4 border-jp-border text-jp-primary accent-jp-brand focus-visible:outline-none focus-visible:shadow-jp-focus"
                 />
-                <span>{cabin.label}</span>
+                <span className="text-jp-xs" data-testid="cabin-option-label">
+                  {cabin.label}
+                </span>
               </label>
             );
           })}

@@ -2,11 +2,11 @@
 
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
-import { useId } from "react";
+import { useId, useRef } from "react";
 import { MULTI_CITY_MAX_SEGMENTS, MULTI_CITY_MIN_SEGMENTS } from "../types";
 import type { FlightSegment, PassengerSelection } from "../types";
-import { AirportField } from "./AirportField";
-import { DateField } from "./DateField";
+import { AirportField, type AirportFieldHandle } from "./AirportField";
+import { DateField, type DateFieldHandle } from "./DateField";
 import { TravelersCabinSelector } from "./TravelersCabinSelector";
 
 type MultiCityFormProps = {
@@ -38,6 +38,9 @@ export function MultiCityForm({
   disabled = false,
 }: MultiCityFormProps) {
   const id = useId();
+  const fromRefs = useRef<Array<AirportFieldHandle | null>>([]);
+  const toRefs = useRef<Array<AirportFieldHandle | null>>([]);
+  const dateRefs = useRef<Array<DateFieldHandle | null>>([]);
 
   return (
     <form
@@ -61,22 +64,37 @@ export function MultiCityForm({
             <legend className="px-1 text-jp-sm font-semibold text-jp-text">Flight {index + 1}</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <AirportField
+                ref={(handle) => {
+                  fromRefs.current[index] = handle;
+                }}
                 id={`${id}-from-${index}`}
                 label="From"
                 value={segment.from}
                 onChange={(airport) => onSegmentChange(index, { ...segment, from: airport })}
+                onSelectionComplete={() => toRefs.current[index]?.focusAndEdit()}
               />
               <AirportField
+                ref={(handle) => {
+                  toRefs.current[index] = handle;
+                }}
                 id={`${id}-to-${index}`}
                 label="To"
                 value={segment.to}
                 onChange={(airport) => onSegmentChange(index, { ...segment, to: airport })}
+                onSelectionComplete={() => dateRefs.current[index]?.focus()}
               />
               <DateField
+                ref={(handle) => {
+                  dateRefs.current[index] = handle;
+                }}
                 id={`${id}-date-${index}`}
                 label="Departure"
                 value={segment.departureDate}
                 onChange={(value) => onSegmentChange(index, { ...segment, departureDate: value })}
+                onSelectionComplete={() => {
+                  const nextFrom = fromRefs.current[index + 1];
+                  if (nextFrom) nextFrom.focusAndEdit();
+                }}
               />
             </div>
             {segments.length > MULTI_CITY_MIN_SEGMENTS ? (

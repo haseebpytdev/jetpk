@@ -2,7 +2,16 @@
 
 import { cn } from "@/lib/cn";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { addDays, formatDisplayDate, todayIsoDate } from "../utils/dates";
 
@@ -17,6 +26,11 @@ type DateRangeFieldProps = {
   disabled?: boolean;
   className?: string;
   density?: "default" | "compact";
+};
+
+export type DateRangeFieldHandle = {
+  focus: () => void;
+  focusAndOpen: () => void;
 };
 
 type CalendarDay = {
@@ -58,23 +72,40 @@ function isBetween(iso: string, start: string, end: string): boolean {
   return iso >= rangeStart && iso <= rangeEnd;
 }
 
-export function DateRangeField({
-  id,
-  departureDate,
-  returnDate,
-  onDepartureChange,
-  onReturnChange,
-  min = todayIsoDate(),
-  max,
-  disabled = false,
-  className,
-  density = "default",
-}: DateRangeFieldProps) {
+export const DateRangeField = forwardRef<DateRangeFieldHandle, DateRangeFieldProps>(function DateRangeField(
+  {
+    id,
+    departureDate,
+    returnDate,
+    onDepartureChange,
+    onReturnChange,
+    min = todayIsoDate(),
+    max,
+    disabled = false,
+    className,
+    density = "default",
+  },
+  ref,
+) {
   const panelId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        triggerRef.current?.focus();
+      },
+      focusAndOpen: () => {
+        triggerRef.current?.focus();
+        if (!disabled) setOpen(true);
+      },
+    }),
+    [disabled],
+  );
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({
     position: "fixed",
     top: 0,
@@ -318,7 +349,7 @@ export function DateRangeField({
       <input type="hidden" name="return_date" value={returnDate} readOnly />
     </div>
   );
-}
+});
 
 export function defaultReturnDate(departureDate: string): string {
   if (!departureDate) return "";

@@ -4,7 +4,17 @@ import { IconButton } from "@/components/ui/IconButton";
 import { cn } from "@/lib/cn";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { AirportSearchService } from "@/services/airports";
 import { filterAirports } from "../utils/airport-filter";
 import type { Airport } from "../types";
@@ -14,25 +24,37 @@ type AirportFieldProps = {
   label: string;
   value: Airport | null;
   onChange: (airport: Airport | null) => void;
+  /** Fires only after a legitimate suggestion selection (not blur/escape/partial typing). */
+  onSelectionComplete?: (airport: Airport) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
   density?: "default" | "compact";
 };
 
-export function AirportField({
-  id,
-  label,
-  value,
-  onChange,
-  placeholder = "City or airport",
-  disabled = false,
-  className,
-  density = "default",
-}: AirportFieldProps) {
+export type AirportFieldHandle = {
+  focus: () => void;
+  focusAndEdit: () => void;
+};
+
+export const AirportField = forwardRef<AirportFieldHandle, AirportFieldProps>(function AirportField(
+  {
+    id,
+    label,
+    value,
+    onChange,
+    onSelectionComplete,
+    placeholder = "City or airport",
+    disabled = false,
+    className,
+    density = "default",
+  },
+  ref,
+) {
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
   const [open, setOpen] = useState(false);
@@ -42,8 +64,17 @@ export function AirportField({
   const [results, setResults] = useState<Airport[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [listStyle, setListStyle] = useState<React.CSSProperties>({
+    position: "fixed",
+    top: 0,
+    left: 0,
+    zIndex: 60,
+    visibility: "hidden",
+  });
   const editingRef = useRef(false);
   const editValueRef = useRef<Airport | null>(value);
+  const onSelectionCompleteRef = useRef(onSelectionComplete);
+  onSelectionCompleteRef.current = onSelectionComplete;
 
   const debouncedQuery = useDebouncedValue(query, 280);
 
@@ -77,6 +108,36 @@ export function AirportField({
   }, [closeList, restoreEditing]);
 
   useEscapeKey(open, handleEscape);
+
+  const beginEditing = useCallback(() => {
+    if (disabled) return;
+    if (editingRef.current) {
+      setOpen(true);
+      return;
+    }
+
+    editValueRef.current = value;
+    setEditingState(true);
+    setQuery("");
+    setOpen(true);
+    setResults(filterAirports(""));
+    setActiveIndex(-1);
+    setError(null);
+  }, [disabled, setEditingState, value]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        inputRef.current?.focus();
+      },
+      focusAndEdit: () => {
+        inputRef.current?.focus();
+        beginEditing();
+      },
+    }),
+    [beginEditing],
+  );
 
   useEffect(() => {
     if (!editingRef.current) setQuery(value ? `${value.city} (${value.iata})` : "");
@@ -130,29 +191,70 @@ export function AirportField({
     return () => controller.abort();
   }, [debouncedQuery, value]);
 
+  const updateListPosition = useCallback(() => {
+    const rect = inputRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const viewportPad = 8;
+    const gap = 4;
+    const width = Math.min(rect.width, window.innerWidth - viewportPad * 2);
+    const left = Math.min(
+      Math.max(viewportPad, rect.left),
+      Math.max(viewportPad, window.innerWidth - width - viewportPad),
+    );
+    const desiredTop = rect.bottom + gap;
+    const maxHeight = Math.max(120, Math.min(240, window.innerHeight - desiredTop - viewportPad));
+    const listHeight = listRef.current?.offsetHeight ?? maxHeight;
+    const top = Math.min(desiredTop, Math.max(viewportPad, window.innerHeight - listHeight - viewportPad));
+
+    setListStyle({
+      position: "fixed",
+      top,
+      left,
+      width,
+      zIndex: 60,
+      visibility: "visible",
+      maxHeight: `${maxHeight}px`,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updateListPosition();
+    const raf = window.requestAnimationFrame(updateListPosition);
+    window.addEventListener("resize", updateListPosition);
+    window.addEventListener("scroll", updateListPosition, true);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("resize", updateListPosition);
+      window.removeEventListener("scroll", updateListPosition, true);
+    };
+  }, [open, results, loading, error, updateListPosition]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (rootRef.current?.contains(target) || listRef.current?.contains(target)) return;
+      if (editingRef.current) restoreEditing();
+      else closeList();
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [closeList, open, restoreEditing]);
+
   const selectAirport = (airport: Airport) => {
     onChange(airport);
     setQuery(`${airport.city} (${airport.iata})`);
     editValueRef.current = airport;
     setEditingState(false);
     closeList();
-    inputRef.current?.focus();
-  };
-
-  const beginEditing = () => {
-    if (disabled) return;
-    if (editingRef.current) {
-      setOpen(true);
-      return;
+    const advance = onSelectionCompleteRef.current;
+    if (advance) {
+      // Defer so React commits closed list / value before focus moves.
+      window.requestAnimationFrame(() => advance(airport));
+    } else {
+      inputRef.current?.focus();
     }
-
-    editValueRef.current = value;
-    setEditingState(true);
-    setQuery("");
-    setOpen(true);
-    setResults(filterAirports(""));
-    setActiveIndex(-1);
-    setError(null);
   };
 
   const handleInputChange = (next: string) => {
@@ -189,8 +291,58 @@ export function AirportField({
       event.preventDefault();
       selectAirport(results[activeIndex]);
     }
-
   };
+
+  const list = open ? (
+    <ul
+      ref={listRef}
+      id={listId}
+      role="listbox"
+      aria-label={`${label} suggestions`}
+      data-testid="airport-suggestions"
+      style={listStyle}
+      className="overflow-auto rounded-jp-md border border-jp-border bg-jp-surface py-1 shadow-jp-md"
+    >
+      {loading ? (
+        <li className="px-3 py-2 text-jp-sm text-jp-muted" role="status" aria-live="polite">
+          Searching airports…
+        </li>
+      ) : error ? (
+        <li className="px-3 py-2 text-jp-sm">
+          <p className="text-jp-danger">{error}</p>
+          <button type="button" className="mt-1 text-jp-primary underline" onMouseDown={(e) => e.preventDefault()} onClick={retrySearch}>
+            Retry
+          </button>
+        </li>
+      ) : results.length === 0 ? (
+        <li className="px-3 py-2 text-jp-sm text-jp-muted">No airports found</li>
+      ) : (
+        results.map((airport, index) => (
+          <li key={airport.iata} role="presentation">
+            <button
+              type="button"
+              role="option"
+              id={`${listId}-option-${airport.iata}`}
+              aria-selected={index === activeIndex}
+              className={cn(
+                "flex w-full items-start gap-3 px-3 py-2 text-left text-jp-sm transition-colors",
+                "hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus",
+                index === activeIndex && "bg-jp-primary-soft",
+              )}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectAirport(airport)}
+            >
+              <span className="min-w-[2.5rem] font-bold text-jp-primary">{airport.iata}</span>
+              <span>
+                <span className="block font-medium text-jp-text">{airport.city}</span>
+                <span className="block text-jp-xs text-jp-muted">{airport.name}</span>
+              </span>
+            </button>
+          </li>
+        ))
+      )}
+    </ul>
+  ) : null;
 
   return (
     <div ref={rootRef} className={cn("relative min-w-0", className)}>
@@ -221,9 +373,23 @@ export function AirportField({
           onFocus={beginEditing}
           onBlur={(event) => {
             const relatedTarget = event.relatedTarget;
-            if (relatedTarget instanceof Node && rootRef.current?.contains(relatedTarget)) return;
-            if (editingRef.current) restoreEditing();
-            else closeList();
+            if (relatedTarget instanceof Node) {
+              if (rootRef.current?.contains(relatedTarget) || listRef.current?.contains(relatedTarget)) return;
+            }
+            // Defer so option mousedown/click and programmatic focus advance can win the race.
+            window.setTimeout(() => {
+              if (!editingRef.current) {
+                closeList();
+                return;
+              }
+              if (
+                rootRef.current?.contains(document.activeElement) ||
+                listRef.current?.contains(document.activeElement)
+              ) {
+                return;
+              }
+              restoreEditing();
+            }, 0);
           }}
           onKeyDown={handleKeyDown}
           className={cn(
@@ -236,56 +402,10 @@ export function AirportField({
         />
       </div>
 
-      {open ? (
-        <ul
-          id={listId}
-          role="listbox"
-          aria-label={`${label} suggestions`}
-          className="absolute z-40 mt-1 max-h-60 w-full overflow-auto rounded-jp-md border border-jp-border bg-jp-surface py-1 shadow-jp-md"
-        >
-          {loading ? (
-            <li className="px-3 py-2 text-jp-sm text-jp-muted" role="status" aria-live="polite">
-              Searching airports…
-            </li>
-          ) : error ? (
-            <li className="px-3 py-2 text-jp-sm">
-              <p className="text-jp-danger">{error}</p>
-              <button type="button" className="mt-1 text-jp-primary underline" onMouseDown={(e) => e.preventDefault()} onClick={retrySearch}>
-                Retry
-              </button>
-            </li>
-          ) : results.length === 0 ? (
-            <li className="px-3 py-2 text-jp-sm text-jp-muted">No airports found</li>
-          ) : (
-            results.map((airport, index) => (
-              <li key={airport.iata} role="presentation">
-                <button
-                  type="button"
-                  role="option"
-                  id={`${listId}-option-${airport.iata}`}
-                  aria-selected={index === activeIndex}
-                  className={cn(
-                    "flex w-full items-start gap-3 px-3 py-2 text-left text-jp-sm transition-colors",
-                    "hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus",
-                    index === activeIndex && "bg-jp-primary-soft",
-                  )}
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => selectAirport(airport)}
-                >
-                  <span className="min-w-[2.5rem] font-bold text-jp-primary">{airport.iata}</span>
-                  <span>
-                    <span className="block font-medium text-jp-text">{airport.city}</span>
-                    <span className="block text-jp-xs text-jp-muted">{airport.name}</span>
-                  </span>
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
-      ) : null}
+      {typeof document !== "undefined" ? createPortal(list, document.body) : null}
     </div>
   );
-}
+});
 
 type AirportSwapButtonProps = {
   onSwap: () => void;
