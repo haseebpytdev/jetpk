@@ -3,7 +3,6 @@
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useId } from "react";
 import { AirportField, AirportSwapButton } from "./AirportField";
-import { DateField } from "./DateField";
 import { DateRangeField } from "./DateRangeField";
 import { SearchOptionsBar } from "./SearchOptionsBar";
 import { SearchFormErrors, type SearchLayout } from "./SearchFormErrors";

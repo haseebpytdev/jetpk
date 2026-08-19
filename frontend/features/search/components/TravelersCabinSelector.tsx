@@ -113,15 +113,20 @@ export function TravelersCabinSelector({
     const rect = rootRef.current?.getBoundingClientRect();
     if (!rect) return;
     const panelWidth = panelRef.current?.offsetWidth ?? 320;
+    const panelHeight = panelRef.current?.offsetHeight ?? 360;
     const viewportPad = 16;
+    const gap = 8;
     const left = Math.min(Math.max(viewportPad, rect.left), Math.max(viewportPad, window.innerWidth - panelWidth - viewportPad));
+    const desiredTop = rect.bottom + gap;
+    const top = Math.min(desiredTop, Math.max(viewportPad, window.innerHeight - panelHeight - viewportPad));
+
     setPanelStyle({
       position: "fixed",
-      top: rect.bottom + 8,
+      top,
       left,
       zIndex: 60,
       visibility: "visible",
-      maxHeight: `min(24rem, ${Math.max(120, window.innerHeight - rect.bottom - viewportPad - 8)}px)`,
+      maxHeight: `min(24rem, ${Math.max(120, window.innerHeight - top - viewportPad)}px)`,
       maxWidth: `min(20rem, ${window.innerWidth - viewportPad * 2}px)`,
     });
   };
@@ -138,6 +143,28 @@ export function TravelersCabinSelector({
       window.removeEventListener("scroll", updatePortalPosition, true);
     };
   }, [open, passengers]);
+
+  useEffect(() => {
+    if (!open) return;
+    let raf2 = 0;
+    const raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        const focusable = panelRef.current?.querySelector<HTMLElement>("input:not([disabled]), button:not([disabled])");
+        focusable?.focus();
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(raf1);
+      if (raf2) window.cancelAnimationFrame(raf2);
+    };
+  }, [open]);
+
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setOpen(true);
+    }
+  };
 
   const panel = open ? (
     <div
@@ -221,6 +248,7 @@ export function TravelersCabinSelector({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
+        onKeyDown={handleTriggerKeyDown}
         className={cn(
           "flex w-full items-center justify-between gap-2 rounded-jp-md border border-jp-border bg-white px-3 text-left text-jp-sm dark:bg-jp-surface",
           density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",

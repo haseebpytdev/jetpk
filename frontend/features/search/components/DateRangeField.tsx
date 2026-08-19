@@ -162,6 +162,23 @@ export function DateRangeField({
     };
   }, [open, viewMonth, viewYear]);
 
+  useEffect(() => {
+    if (!open) return;
+    const raf = window.requestAnimationFrame(() => {
+      const focusable = panelRef.current?.querySelector<HTMLElement>("button:not([disabled])");
+      focusable?.focus();
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [open]);
+
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (disabled) return;
+    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setOpen(true);
+    }
+  };
+
   const handleDaySelect = (iso: string) => {
     if (iso < min || (max && iso > max)) return;
 
@@ -284,6 +301,7 @@ export function DateRangeField({
         aria-controls={panelId}
         data-testid="date-range-trigger"
         onClick={() => setOpen((value) => !value)}
+        onKeyDown={handleTriggerKeyDown}
         className={cn(
           "flex w-full items-center justify-between gap-2 rounded-jp-md border border-jp-border bg-white px-3 text-left text-jp-sm text-jp-text dark:bg-jp-surface",
           compact ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",

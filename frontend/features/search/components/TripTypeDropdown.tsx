@@ -85,6 +85,37 @@ export function TripTypeDropdown({
     };
   }, [open, tripType]);
 
+  useEffect(() => {
+    if (!open) return;
+    const raf = window.requestAnimationFrame(() => {
+      const focusable = panelRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+      focusable?.focus();
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [open]);
+
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setOpen(true);
+    }
+  };
+
+  const handlePanelKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(panelRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? []);
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (index === -1) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      items[(index + 1) % items.length]?.focus();
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      items[(index - 1 + items.length) % items.length]?.focus();
+    }
+  };
+
   const selectTripType = (next: TripType) => {
     onTripTypeChange(next);
     setOpen(false);
@@ -98,6 +129,7 @@ export function TripTypeDropdown({
       role="menu"
       data-testid="trip-type-panel"
       style={panelStyle}
+      onKeyDown={handlePanelKeyDown}
       className="min-w-[12rem] overflow-y-auto rounded-jp-md border border-jp-border bg-white p-1.5 shadow-jp-md dark:bg-jp-surface"
     >
       {TRIP_TYPES.map((option) => (
@@ -128,6 +160,7 @@ export function TripTypeDropdown({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
+        onKeyDown={handleTriggerKeyDown}
         className={cn(
           "inline-flex items-center gap-2 rounded-jp-md border border-jp-border bg-white px-3 py-2 text-jp-sm font-medium text-jp-text dark:bg-jp-surface",
           compact ? "min-h-[2.75rem]" : "min-h-jp-tap",
