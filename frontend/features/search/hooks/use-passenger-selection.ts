@@ -39,11 +39,25 @@ export function usePassengerSelection(initial: PassengerSelection = DEFAULT_PASS
   return { passengers, setAdults, setChildren, setInfants, setCabin, setPassengers };
 }
 
-export function passengerSummary(passengers: PassengerSelection, cabinLabel: string): string {
+export function passengerSummary(
+  passengers: PassengerSelection,
+  cabinLabel: string,
+  compact = false,
+): string {
+  const total = passengers.adults + passengers.children + passengers.infants;
+
+  if (compact && total >= 5) {
+    return `${total} Travellers · ${cabinLabel}`;
+  }
+
   const parts: string[] = [];
   parts.push(`${passengers.adults} Adult${passengers.adults === 1 ? "" : "s"}`);
-  if (passengers.children > 0) parts.push(`${passengers.children} Child${passengers.children === 1 ? "" : "ren"}`);
-  if (passengers.infants > 0) parts.push(`${passengers.infants} Infant${passengers.infants === 1 ? "" : "s"}`);
+  if (passengers.children > 0) {
+    parts.push(`${passengers.children} Child${passengers.children === 1 ? "" : "ren"}`);
+  }
+  if (passengers.infants > 0) {
+    parts.push(`${passengers.infants} Infant${passengers.infants === 1 ? "" : "s"}`);
+  }
   return `${parts.join(", ")} · ${cabinLabel}`;
 }
 

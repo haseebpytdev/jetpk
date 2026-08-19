@@ -190,7 +190,7 @@ export function AirportField({
           }}
           onKeyDown={handleKeyDown}
           className={cn(
-            "w-full rounded-jp-md border border-jp-border bg-jp-surface px-3 text-jp-sm text-jp-text",
+            "w-full rounded-jp-md border border-jp-border bg-white px-3 text-jp-sm text-jp-text dark:bg-jp-surface",
             density === "compact" ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
             "placeholder:text-jp-muted focus-visible:outline-none focus-visible:shadow-jp-focus",
             value ? "pl-14" : "",

@@ -1,6 +1,7 @@
 export { SearchModule } from "./components/SearchModule";
 export { AirportField, AirportSwapButton } from "./components/AirportField";
 export { DateField } from "./components/DateField";
+export { DateRangeField } from "./components/DateRangeField";
 export { TravelersCabinSelector } from "./components/TravelersCabinSelector";
 export * from "./types";
 export { AIRPORT_FIXTURES } from "./fixtures/airports";

@@ -1,10 +1,10 @@
 "use client";
 
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { cn } from "@/lib/cn";
 import { useId } from "react";
 import { AirportField, AirportSwapButton } from "./AirportField";
 import { DateField } from "./DateField";
+import { DateRangeField } from "./DateRangeField";
 import { SearchOptionsBar } from "./SearchOptionsBar";
 import { SearchFormErrors, type SearchLayout } from "./SearchFormErrors";
 import { TravelersCabinSelector } from "./TravelersCabinSelector";
@@ -65,7 +65,7 @@ export function ReturnForm({
         className="space-y-3"
         aria-label="Round trip flight search"
       >
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(8.5rem,9.5rem)_minmax(8.5rem,9.5rem)_minmax(10rem,12rem)_auto] xl:items-end">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(11rem,13rem)_minmax(10rem,12rem)_auto] xl:items-end">
           <AirportField id={`${id}-from`} label="From" value={origin} onChange={onOriginChange} density="compact" />
           <AirportSwapButton
             onSwap={() => {
@@ -75,14 +75,14 @@ export function ReturnForm({
             className="justify-self-center xl:mb-1"
           />
           <AirportField id={`${id}-to`} label="To" value={destination} onChange={onDestinationChange} density="compact" />
-          <DateField id={`${id}-departure`} label="Departure" value={departureDate} onChange={onDepartureDateChange} density="compact" />
-          <DateField
-            id={`${id}-return`}
-            label="Return"
-            value={returnDate}
-            min={departureDate || undefined}
-            onChange={onReturnDateChange}
+          <DateRangeField
+            id={`${id}-date-range`}
+            departureDate={departureDate}
+            returnDate={returnDate}
+            onDepartureChange={onDepartureDateChange}
+            onReturnChange={onReturnDateChange}
             density="compact"
+            className="sm:col-span-2 xl:col-span-1"
           />
           <TravelersCabinSelector
             passengers={passengers}
@@ -124,14 +124,13 @@ export function ReturnForm({
         <AirportField id={`${id}-to`} label="To" value={destination} onChange={onDestinationChange} />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <DateField id={`${id}-departure`} label="Departure" value={departureDate} onChange={onDepartureDateChange} />
-        <DateField
-          id={`${id}-return`}
-          label="Return"
-          value={returnDate}
-          min={departureDate || undefined}
-          onChange={onReturnDateChange}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_auto] lg:items-end">
+        <DateRangeField
+          id={`${id}-date-range`}
+          departureDate={departureDate}
+          returnDate={returnDate}
+          onDepartureChange={onDepartureDateChange}
+          onReturnChange={onReturnDateChange}
         />
         <TravelersCabinSelector
           passengers={passengers}
@@ -139,15 +138,14 @@ export function ReturnForm({
           onChildrenChange={onPassengersChange.children}
           onInfantsChange={onPassengersChange.infants}
           onCabinChange={onPassengersChange.cabin}
-          className="sm:col-span-2 lg:col-span-2"
         />
+        <PrimaryButton type="submit" className="w-full lg:w-auto" disabled={disabled}>
+          {disabled ? "Searching…" : "Search Flights"}
+        </PrimaryButton>
       </div>
 
       <SearchOptionsBar options={options} onChange={onOptionsChange} />
       <SearchFormErrors errors={errors} />
-      <PrimaryButton type="submit" className="w-full sm:w-auto" disabled={disabled}>
-        {disabled ? "Searching…" : "Search Flights"}
-      </PrimaryButton>
     </form>
   );
 }

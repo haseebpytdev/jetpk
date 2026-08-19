@@ -1,7 +1,6 @@
 "use client";
 
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { cn } from "@/lib/cn";
 import { useId } from "react";
 import { AirportField, AirportSwapButton } from "./AirportField";
 import { DateField } from "./DateField";
@@ -118,7 +117,7 @@ export function OneWayForm({
         <AirportField id={`${id}-to`} label="To" value={destination} onChange={onDestinationChange} />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
         <DateField id={`${id}-departure`} label="Departure" value={departureDate} onChange={onDepartureDateChange} />
         <TravelersCabinSelector
           passengers={passengers}
@@ -127,13 +126,13 @@ export function OneWayForm({
           onInfantsChange={onPassengersChange.infants}
           onCabinChange={onPassengersChange.cabin}
         />
+        <PrimaryButton type="submit" className="w-full lg:w-auto" disabled={disabled}>
+          {disabled ? "Searching…" : "Search Flights"}
+        </PrimaryButton>
       </div>
 
       <SearchOptionsBar options={options} onChange={onOptionsChange} />
       <SearchFormErrors errors={errors} />
-      <PrimaryButton type="submit" className="w-full sm:w-auto" disabled={disabled}>
-        {disabled ? "Searching…" : "Search Flights"}
-      </PrimaryButton>
     </form>
   );
 }

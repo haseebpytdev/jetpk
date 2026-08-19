@@ -15,8 +15,10 @@ import {
   MULTI_CITY_MAX_SEGMENTS,
   MULTI_CITY_MIN_SEGMENTS,
   type FlightSegment,
+  type ProductTab,
   type SearchMode,
   type SearchOptions,
+  type TripType,
 } from "../types";
 import { validateFlightSearch, validateGroupSearch } from "../utils/validation";
 import { flattenLaravelFieldErrors } from "../utils/laravel-errors";
@@ -26,7 +28,8 @@ import { MultiCityForm } from "./MultiCityForm";
 import { OneWayForm } from "./OneWayForm";
 import { ReturnForm } from "./ReturnForm";
 import { SearchStatusBanner } from "./SearchStatusBanner";
-import { SearchTabs } from "./SearchTabs";
+import { ProductSearchTabs } from "./ProductSearchTabs";
+import { TripTypeDropdown } from "./TripTypeDropdown";
 import type { SearchLayout } from "./SearchFormErrors";
 
 function createSegment(id: string): FlightSegment {
@@ -39,13 +42,19 @@ const DEFAULT_OPTIONS: SearchOptions = {
   flexibleDates: false,
 };
 
+function resolveSearchMode(productTab: ProductTab, tripType: TripType): SearchMode {
+  return productTab === "group" ? "group" : tripType;
+}
+
 type SearchModuleProps = {
   className?: string;
   layout?: SearchLayout;
 };
 
 export function SearchModule({ className, layout = "default" }: SearchModuleProps) {
-  const [mode, setMode] = useState<SearchMode>("one_way");
+  const [productTab, setProductTab] = useState<ProductTab>("flights");
+  const [tripType, setTripType] = useState<TripType>("one_way");
+  const mode = resolveSearchMode(productTab, tripType);
   const [origin, setOrigin] = useState(() => findAirportByIata("ISB") ?? null);
   const [destination, setDestination] = useState(() => findAirportByIata("DXB") ?? null);
   const [departureDate, setDepartureDate] = useState("");
@@ -85,15 +94,30 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
     [setAdults, setChildren, setInfants, setCabin],
   );
 
-  const handleModeChange = useCallback((next: SearchMode) => {
+  const resetSubmitState = useCallback(() => {
     if (abortRef.current) {
       abortRef.current.abort();
       abortRef.current = null;
     }
-    setMode(next);
     setErrors([]);
     setSubmitState({ status: "idle" });
   }, []);
+
+  const handleProductTabChange = useCallback(
+    (next: ProductTab) => {
+      resetSubmitState();
+      setProductTab(next);
+    },
+    [resetSubmitState],
+  );
+
+  const handleTripTypeChange = useCallback(
+    (next: TripType) => {
+      resetSubmitState();
+      setTripType(next);
+    },
+    [resetSubmitState],
+  );
 
   const submitToLaravel = useCallback(
     async (searchMode: Exclude<SearchMode, "group">, draftSegments: FlightSegment[], extraReturnDate?: string) => {
@@ -204,26 +228,33 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
     });
   };
 
+  const compact = layout === "compact";
+
   return (
     <section
       className={cn(
-        "rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card",
-        layout === "compact" ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
+        "overflow-visible rounded-jp-card border border-white/35 bg-[rgba(248,250,252,0.82)] shadow-[0_10px_40px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-md dark:border-white/10 dark:bg-[rgba(30,41,59,0.78)]",
+        compact ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
         className,
       )}
       aria-label="Flight search"
       data-testid="search-module"
       data-search-layout={layout}
     >
-      <SearchTabs mode={mode} onModeChange={handleModeChange} compact={layout === "compact"} />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <ProductSearchTabs productTab={productTab} onProductTabChange={handleProductTabChange} compact={compact} />
+        {productTab === "flights" ? (
+          <TripTypeDropdown tripType={tripType} onTripTypeChange={handleTripTypeChange} compact={compact} />
+        ) : null}
+      </div>
 
       <div
         className={cn(
           "mt-jp-md transition-opacity duration-ui",
-          layout === "compact" ? "min-h-0" : "min-h-[18rem]",
+          compact ? "min-h-0" : "min-h-[18rem]",
         )}
       >
-        {mode === "one_way" ? (
+        {productTab === "flights" && tripType === "one_way" ? (
           <OneWayForm
             origin={origin}
             destination={destination}
@@ -242,7 +273,7 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
           />
         ) : null}
 
-        {mode === "return" ? (
+        {productTab === "flights" && tripType === "return" ? (
           <ReturnForm
             origin={origin}
             destination={destination}
@@ -263,7 +294,7 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
           />
         ) : null}
 
-        {mode === "multi_city" ? (
+        {productTab === "flights" && tripType === "multi_city" ? (
           <MultiCityForm
             segments={segments}
             passengers={passengers}
@@ -277,7 +308,7 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
           />
         ) : null}
 
-        {mode === "group" ? (
+        {productTab === "group" ? (
           <GroupTicketingForm
             sector={groupSector}
             category={groupCategory}

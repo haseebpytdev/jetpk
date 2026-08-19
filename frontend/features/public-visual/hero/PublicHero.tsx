@@ -57,10 +57,7 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
 
           {hero.searchVisible ? (
             <div className="relative z-20 -mb-8 sm:-mb-10 lg:-mb-12">
-              <SearchModule
-                layout="compact"
-                className="border-white/25 bg-jp-surface/95 shadow-jp-md backdrop-blur-md dark:bg-jp-surface/92"
-              />
+              <SearchModule layout="compact" />
               <BenefitStrip items={trustChips} className="mt-jp-md border-white/10 text-jp-text" />
               <AnimatedFlightPath className="mt-jp-md max-w-lg" />
             </div>

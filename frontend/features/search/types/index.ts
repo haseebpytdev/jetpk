@@ -1,7 +1,13 @@
-/** Search mode tabs — mirrors Laravel trip_type vocabulary where applicable. */
-export type SearchMode = "one_way" | "return" | "multi_city" | "group";
+/** Flight trip types — mirrors Laravel trip_type vocabulary where applicable. */
+export type TripType = "one_way" | "return" | "multi_city";
 
-export type CabinClass = "economy" | "premium_economy" | "business";
+/** Top-level homepage search products. */
+export type ProductTab = "flights" | "group";
+
+/** Combined search mode used by submit/handoff paths. */
+export type SearchMode = TripType | "group";
+
+export type CabinClass = "economy" | "premium_economy" | "business" | "first";
 
 export type Airport = {
   iata: string;

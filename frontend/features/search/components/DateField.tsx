@@ -42,7 +42,7 @@ export function DateField({
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
         className={cn(
-          "w-full rounded-jp-md border border-jp-border bg-jp-surface px-3 text-jp-sm text-jp-text",
+          "w-full rounded-jp-md border border-jp-border bg-white px-3 text-jp-sm text-jp-text dark:bg-jp-surface",
           compact ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
           "focus-visible:outline-none focus-visible:shadow-jp-focus",
           "[color-scheme:light] dark:[color-scheme:dark]",

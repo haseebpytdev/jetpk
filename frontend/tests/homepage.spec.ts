@@ -29,7 +29,7 @@ test("homepage loads with full hero and search shell", async ({ page }) => {
   await expect(page.getByRole("contentinfo")).toBeVisible();
 });
 
-test("one way tab submits to Laravel search-init when departure is set", async ({ page }) => {
+test("one way trip submits to Laravel search-init when departure is set", async ({ page }) => {
   let initRequested = false;
   await page.route("**/laravel/flights/results/search**", async (route) => {
     initRequested = true;
@@ -49,34 +49,39 @@ test("one way tab submits to Laravel search-init when departure is set", async (
   });
 
   await page.goto("/", { waitUntil: "load" });
-  await page.getByRole("tab", { name: "One Way" }).click();
-  await page.getByLabel("Departure").fill(tomorrowIso());
+  await page.getByTestId("trip-type-trigger").click();
+  await page.getByRole("menuitem", { name: "One Way" }).click();
+  await page.getByLabel("Departure", { exact: true }).fill(tomorrowIso());
   await page.getByRole("button", { name: "Search Flights" }).click();
 
   await expect.poll(() => initRequested).toBe(true);
 });
 
-test("return tab shows return date field", async ({ page }) => {
+test("return trip shows combined date range field", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
-  await page.getByRole("tab", { name: "Return" }).click();
-  await expect(page.getByRole("textbox", { name: "Return" })).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "Departure" })).toBeVisible();
+  await page.getByTestId("trip-type-trigger").click();
+  await page.getByRole("menuitem", { name: "Return" }).click();
+  await expect(page.getByTestId("date-range-trigger")).toBeVisible();
+  await expect(page.getByLabel("Departure", { exact: true })).toHaveCount(0);
 });
 
-test("return tab enforces return date minimum from departure", async ({ page }) => {
+test("return range prevents return before outbound", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
-  await page.getByRole("tab", { name: "Return" }).click();
+  await page.getByTestId("trip-type-trigger").click();
+  await page.getByRole("menuitem", { name: "Return" }).click();
   const departure = dayAfterTomorrowIso();
-  await page.getByRole("textbox", { name: "Departure" }).fill(departure);
-  await expect(page.getByRole("textbox", { name: "Return" })).toHaveAttribute("min", departure);
+  await page.getByTestId("date-range-trigger").click();
+  await page.locator(`[data-testid="date-range-panel"] [data-date="${departure}"]`).click();
+  await expect(page.getByTestId("date-range-trigger")).toContainText("Return");
 });
 
 test("multi-city add and remove segments", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
-  await page.getByRole("tab", { name: "Multi-City" }).click();
+  await page.getByTestId("trip-type-trigger").click();
+  await page.getByRole("menuitem", { name: "Multi-City" }).click();
   await expect(page.getByText("Flight 1")).toBeVisible();
   await expect(page.getByText("Flight 2")).toBeVisible();
 
@@ -87,7 +92,7 @@ test("multi-city add and remove segments", async ({ page }) => {
   await expect(page.getByText("Flight 3")).toBeHidden();
 });
 
-test("group ticketing tab renders Laravel search fields only", async ({ page }) => {
+test("group ticketing product tab renders Laravel search fields only", async ({ page }) => {
   await page.route("**/laravel/groups/search/facets**", async (route) => {
     await route.fulfill({
       status: 200,
@@ -106,7 +111,7 @@ test("group ticketing tab renders Laravel search fields only", async ({ page }) 
 
   await page.goto("/", { waitUntil: "load" });
 
-  await page.getByRole("tab", { name: "Group Ticketing" }).click();
+  await page.getByTestId("product-tab-group").click();
   await expect(page.getByRole("button", { name: "Search Group Fares" })).toBeVisible();
   await expect(page.getByLabel("Sector")).toBeVisible();
   await expect(page.getByLabel("Travel date")).toBeVisible();
@@ -144,8 +149,9 @@ test("mobile homepage search layout remains usable", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
   await expect(page.getByTestId("search-module")).toBeVisible();
-  await expect(page.getByRole("tab", { name: "One Way" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Group Ticketing" })).toBeVisible();
+  await expect(page.getByTestId("product-tab-flights")).toBeVisible();
+  await expect(page.getByTestId("product-tab-group")).toBeVisible();
+  await expect(page.getByTestId("trip-type-trigger")).toBeVisible();
   await expect(page.getByLabel("From")).toBeVisible();
 });
 
