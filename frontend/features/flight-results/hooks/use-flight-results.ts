@@ -146,8 +146,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         setResolvedSearchId(id);
       }
 
-      lastBootstrappedId.current = id;
       await loadPage(id, 1, false, "init");
+      lastBootstrappedId.current = id;
     };
 
     void bootstrap();
@@ -160,11 +160,15 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   }, [identity]);
 
   useEffect(() => {
-    if (!resolvedSearchId || !readyRef.current) return;
+    if (!resolvedSearchId) return;
+    // Consume the post-bootstrap skip even if results are not ready yet.
+    // Previously this waited for readyRef, so the skip flag was never cleared
+    // and the first sort/filter change after load was dropped.
     if (skipNextRefresh.current) {
       skipNextRefresh.current = false;
       return;
     }
+    if (!readyRef.current) return;
     void loadPage(resolvedSearchId, 1, false, "refresh");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey, laravelSort, resolvedSearchId, viewKey]);

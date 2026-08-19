@@ -432,8 +432,8 @@ test("edit search is inline SearchModule", async ({ page }) => {
   await expect(page.getByTestId("inline-edit-search")).toBeVisible();
   await expect(page.getByTestId("search-module")).toHaveAttribute("data-search-variant", "results");
   await expect(page.getByRole("dialog", { name: "Modify search" })).toHaveCount(0);
-  await expect(page.getByLabel("From")).toHaveValue(/ISB/i);
-  await expect(page.getByLabel("To")).toHaveValue(/DXB/i);
+  await expect(page.getByTestId("search-module").getByRole("combobox", { name: "From" })).toHaveValue(/ISB/i);
+  await expect(page.getByTestId("search-module").getByRole("combobox", { name: "To" })).toHaveValue(/DXB/i);
 });
 
 test("return search shows pair/segmented selector", async ({ page }) => {

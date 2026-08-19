@@ -63,7 +63,9 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     setFormError(null);
     setErrorStatus(null);
     return fetchStandardPassengersContext(searchParams);
-  }, [searchParams]);
+    // queryKey is the stable identity for searchParams contents
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryKey]);
 
   useEffect(() => {
     let cancelled = false;
