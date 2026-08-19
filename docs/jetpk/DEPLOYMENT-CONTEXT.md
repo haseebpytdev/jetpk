@@ -43,35 +43,39 @@ browser URL.
 
 ## Actor and access boundary
 
-The repository's `CLAUDE.md` prohibits the Cursor agent from deploying to
-production and from accessing production SSH or SFTP. Its local-only
-development rule also means the agent must not perform production browser
-verification.
+Direct or ad-hoc production access by Cursor remains forbidden. After explicit
+owner authorization in the active task, Cursor may execute only the
+established protected JetPakistan deployment scripts and their documented
+read-only verification operations.
 
-This is an **AGENT_EXECUTION_PROHIBITED** boundary, not an
-**ALL_PRODUCTION_DEPLOYMENT_PROHIBITED** policy. It does not prohibit the owner
-from manually running an established, owner-approved protected JetPakistan
-procedure.
+| Operation | Cursor agent |
+|---|---|
+| Direct SSH | Forbidden |
+| Direct SFTP/SCP | Forbidden |
+| Ad-hoc production commands | Forbidden |
+| Protected JetPK scripts after explicit owner authorization | Allowed |
+| Documented read-only verification | Allowed |
+| Production browser verification | Allowed on `https://jetpakistan.pk` only |
 
-| Operation | Cursor agent | Owner manual procedure |
-|---|---|---|
-| Direct SSH | Forbidden | Only through owner-approved access |
-| Direct SFTP/SCP | Forbidden | Only through owner-approved access |
-| Protected JetPK scripts | Forbidden to execute | Allowed when explicitly approved |
-| Production browser verification | Forbidden | Allowed on `https://jetpakistan.pk` only |
-
-No unrestricted SSH/SFTP, ad-hoc transfer, supplier action, booking, ticketing,
-refund, payment, or production-data mutation is enabled by this document.
+The protected-script exception does not enable unrestricted SSH/SFTP, ad-hoc
+transfer, supplier action, booking, ticketing, refund, payment, credential
+change, markup mutation, or production-data mutation.
 
 ## Supported deployment route
 
 ```text
-SUPPORTED_DEPLOYMENT_ROUTE=OWNER_MANUAL_PROTECTED_DEPLOYMENT_REQUIRED
+SUPPORTED_DEPLOYMENT_ROUTE=CURSOR_PROTECTED_DEPLOYMENT_ALLOWED
+DIRECT_SSH_BY_CURSOR=FORBIDDEN
+DIRECT_SFTP_BY_CURSOR=FORBIDDEN
+AD_HOC_PRODUCTION_COMMANDS=FORBIDDEN
+OWNER_AUTHORIZED_PROTECTED_SCRIPTS=ALLOWED
+DOCUMENTED_READ_ONLY_VERIFICATION=ALLOWED
 ```
 
-Cursor may provide read-only guidance and inspect local protected scripts, but
-must not execute them. The owner-only sequence below is copied from the
-established protected scripts; stop on any non-zero result or failed gate:
+The sequence below is copied from the established protected scripts; execute
+it only after explicit owner authorization in the active task, stop on any
+non-zero result or failed gate, and do not replace it with ad-hoc SFTP or SSH
+commands:
 
 ```bash
 bash jetpk-backup.sh
@@ -83,12 +87,10 @@ bash jetpk-pre-proxy-gate.sh
 
 Use the `RELEASE_STAGED_AT` value emitted by `jetpk-stage-release.sh` as
 `<RELEASE_DIR>` and the corresponding release timestamp as `<TIMESTAMP>`.
-These commands are an owner-manual procedure only. Do not replace them with
-ad-hoc SFTP or SSH commands, and do not run them from Cursor.
 
-After the protected scripts pass, the owner performs the documented browser
-smoke test and log verification against `https://jetpakistan.pk`; no other
-public host is an accepted JetPakistan production evidence source.
+After the protected scripts pass, perform the documented browser smoke test
+and log verification against `https://jetpakistan.pk`; no other public host is
+an accepted JetPakistan production evidence source.
 
 ## Source records
 

@@ -23,8 +23,8 @@ Claude may work on:
 
 Do not:
 
-- deploy to production
-- access production SSH or SFTP
+- perform direct or ad-hoc production deployment
+- use direct or ad-hoc production SSH, SFTP, or SCP
 - use production credentials
 - perform live supplier searches
 - create live bookings or PNRs
@@ -36,6 +36,15 @@ Do not:
 - work directly on main
 - merge your own branches
 - force push
+
+For JetPakistan only, after explicit owner authorization in the active task,
+Cursor may execute the established protected JetPakistan deployment scripts
+and the documented read-only verification operations required by those
+scripts or their runbooks. This exception applies only to that protected
+workflow. Cursor may not bypass the protected scripts with arbitrary
+SSH/SFTP/SCP commands, perform unrestricted production access, or perform
+commercial, supplier, credential, payment, booking, or production-data
+mutations.
 
 ## Development Safety
 
