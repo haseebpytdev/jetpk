@@ -79,14 +79,25 @@ commands:
 
 ```bash
 bash jetpk-backup.sh
-bash jetpk-stage-release.sh
+AUTHORIZED_SHA=<approved-git-sha> bash jetpk-stage-release.sh
 bash jetpk-deploy.sh <RELEASE_DIR> <TIMESTAMP>
-bash jetpk-next-build.sh
+PUBLIC_ONLY=1 bash jetpk-next-build.sh   # Search UI / public-only releases
 bash jetpk-pre-proxy-gate.sh
+```
+
+`jetpk-stage-release.sh` must receive an explicit `AUTHORIZED_SHA`. It stages
+runtime files from Git at that SHA through the tracked helper
+`scripts/jetpk/stage-release-from-sha.sh`. Hard-coded historical archives
+(for example `b95efd4`) are forbidden. Required staging invariants:
+
+```text
+STAGED_SOURCE_SHA == AUTHORIZED_SHA
 ```
 
 Use the `RELEASE_STAGED_AT` value emitted by `jetpk-stage-release.sh` as
 `<RELEASE_DIR>` and the corresponding release timestamp as `<TIMESTAMP>`.
+When the staged release includes `DELETE_RUNTIME_FILES`,
+`jetpk-deploy.sh` applies only those exact allowlisted paths after backup.
 
 After the protected scripts pass, perform the documented browser smoke test
 and log verification against `https://jetpakistan.pk`; no other public host is
@@ -98,6 +109,9 @@ an accepted JetPakistan production evidence source.
 - `docs/PRODUCTION_DEPLOYMENT_SAFETY.md` — generic safety workflow
 - `docs/jetpk/JETPK-PRODUCTION-CLOSURE-2026-08-08.md` — established topology
 - `docs/jetpk/sftp-deployment-checklist.md` — JetPK gates and smoke scope
+- `scripts/jetpk/stage-release-from-sha.sh` — tracked SHA-parameterized staging
+- `scripts/jetpk/apply-delete-manifest.sh` — tracked exact deletion helper
+- `scripts/jetpk/README.md` — staging/deletion usage
 - `tmp/jetpk-backup.sh`
 - `tmp/jetpk-stage-release.sh`
 - `tmp/jetpk-deploy.sh`
