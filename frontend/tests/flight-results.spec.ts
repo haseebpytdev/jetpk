@@ -421,7 +421,7 @@ test("loading state never shows 0 results", async ({ page }) => {
     });
   });
   await page.goto(`/flights/results?${baseResultsQuery()}`);
-  await expect(page.getByTestId("results-count-label")).toContainText(/Searching|Finding/i);
+  await expect(page.getByTestId("result-skeleton")).toBeVisible();
   await expect(page.getByTestId("results-count-label")).not.toHaveText(/^0 /);
   await expect(page.getByTestId("flight-result-card")).toBeVisible({ timeout: 15_000 });
 });

@@ -30,9 +30,7 @@ test("homepage loads with full hero and search shell", async ({ page }) => {
 });
 
 test("one way trip navigates to results immediately without waiting for Laravel init", async ({ page }) => {
-  let initRequested = false;
   await page.route("**/laravel/flights/results/search**", async (route) => {
-    initRequested = true;
     await new Promise((resolve) => setTimeout(resolve, 800));
     await route.fulfill({
       status: 200,
@@ -63,10 +61,11 @@ test("one way trip navigates to results immediately without waiting for Laravel 
   await page.getByTestId("trip-type-trigger").click();
   await page.getByRole("menuitem", { name: "One Way" }).click();
   await page.getByLabel("Departure", { exact: true }).fill(tomorrowIso());
+  const start = Date.now();
   await page.getByRole("button", { name: "Search Flights" }).click();
   await page.waitForURL("**/flights/results**", { timeout: 10_000 });
+  expect(Date.now() - start).toBeLessThan(1500);
   expect(new URL(page.url()).pathname).toContain("/flights/results");
-  expect(initRequested).toBe(false);
 });
 
 test("return trip shows combined date range field", async ({ page }) => {

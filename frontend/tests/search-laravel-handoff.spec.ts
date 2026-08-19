@@ -8,7 +8,8 @@ function tomorrowIso(): string {
 
 test("client validation keeps the user on home when departure is missing", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
-  await page.getByRole("tab", { name: "One Way" }).click();
+  await page.getByTestId("trip-type-trigger").click();
+  await page.getByRole("menuitem", { name: "One Way" }).click();
   await page.getByRole("button", { name: "Search Flights" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByTestId("search-module").getByRole("status")).toBeVisible();
@@ -43,7 +44,8 @@ test("valid search navigates to results immediately", async ({ page }) => {
   });
 
   await page.goto("/", { waitUntil: "load" });
-  await page.getByRole("tab", { name: "One Way" }).click();
+  await page.getByTestId("trip-type-trigger").click();
+  await page.getByRole("menuitem", { name: "One Way" }).click();
   await page.getByLabel("Departure").fill(tomorrowIso());
   const start = Date.now();
   await page.getByRole("button", { name: "Search Flights" }).click();
