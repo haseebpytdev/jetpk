@@ -14,6 +14,7 @@ Master roadmap: [../JETPK-V1-CLIENT-UI-COMPLETION-ROADMAP.md](../JETPK-V1-CLIENT
 | Document | Use when |
 |----------|----------|
 | [DEPLOYMENT-CONTEXT.md](DEPLOYMENT-CONTEXT.md) | Current host, topology, protected deploy route |
+| [deployments/JETPAKISTAN-PK-SEARCH-INPUT-FLOW-DEPLOYMENT-20260819.md](deployments/JETPAKISTAN-PK-SEARCH-INPUT-FLOW-DEPLOYMENT-20260819.md) | 2026-08-19 search field flow + dropdown layering production deployment |
 | [deployments/JETPAKISTAN-PK-HOME-VISUAL-CONSISTENCY-DEPLOYMENT-20260819.md](deployments/JETPAKISTAN-PK-HOME-VISUAL-CONSISTENCY-DEPLOYMENT-20260819.md) | 2026-08-19 homepage visual consistency production deployment |
 | [deployments/JETPAKISTAN-PK-SEARCH-UI-PARITY-DEPLOYMENT-20260819.md](deployments/JETPAKISTAN-PK-SEARCH-UI-PARITY-DEPLOYMENT-20260819.md) | 2026-08-19 Search UI production deployment record |
 | [file-inventory.md](file-inventory.md) | Auditing JetPK-only files before deploy |
