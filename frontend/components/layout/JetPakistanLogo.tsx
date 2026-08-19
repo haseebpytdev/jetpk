@@ -20,21 +20,21 @@ export function JetPakistanLogo({
   showTagline = true,
   logoUrl,
   brandName = "JetPakistan",
-  logoHeight = 36,
+  logoHeight = 40,
 }: JetPakistanLogoProps) {
   const isInverse = variant === "inverse";
   const imageSrc = resolveHeaderLogoUrl(logoUrl);
 
   return (
-    <div className={cn("flex min-h-[var(--jp-header-logo-height,36px)] min-w-[7.5rem] items-center", className)}>
+    <div className={cn("flex min-h-[var(--jp-header-logo-height,40px)] min-w-[8.5rem] items-center", className)}>
       <Image
         src={imageSrc}
         alt={brandName}
-        width={Math.max(120, logoHeight * 4)}
+        width={Math.max(132, logoHeight * 4)}
         height={logoHeight}
         unoptimized={shouldUseUnoptimizedHeaderLogo(imageSrc)}
-        className="h-auto w-auto max-h-[var(--jp-header-logo-height,36px)] max-w-[min(180px,42vw)] object-contain object-left"
-        style={{ maxHeight: `${logoHeight}px` }}
+        className="object-contain object-left"
+        style={{ height: `${logoHeight}px`, width: "auto", maxWidth: "min(200px, 44vw)" }}
         data-testid="jetpakistan-header-logo"
       />
       {showTagline ? (

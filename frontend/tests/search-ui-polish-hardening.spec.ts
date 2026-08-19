@@ -127,6 +127,18 @@ test.describe("Search UI geometry assertions", () => {
       await page.getByRole("menuitem", { name: "Return" }).click();
       await expect(page.getByTestId("date-range-trigger")).toHaveCount(1);
 
+      if (viewport.name === "desktop" || viewport.name === "laptop") {
+        const fromField = page.getByRole("combobox", { name: "From" });
+        const searchButton = page.getByRole("button", { name: "Search Flights" });
+        const fromBox = await fromField.boundingBox();
+        const searchBox = await searchButton.boundingBox();
+        expect(fromBox).not.toBeNull();
+        expect(searchBox).not.toBeNull();
+        if (fromBox && searchBox) {
+          expect(Math.abs(fromBox.y - searchBox.y)).toBeLessThan(36);
+        }
+      }
+
       await page.getByTestId("travelers-cabin-trigger").first().click();
       await assertElementInViewport(page, '[data-testid="travelers-cabin-panel"]');
       await expect(page.getByRole("radio", { name: "First" })).toBeVisible();

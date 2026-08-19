@@ -108,7 +108,7 @@ export function DateRangeField({
       return `${formatDisplayDate(departureDate)} → ${formatDisplayDate(returnDate)}`;
     }
     if (departureDate) return `${formatDisplayDate(departureDate)} → Return`;
-    return "Select departure and return";
+    return "Select dates";
   }, [departureDate, returnDate]);
 
   useEscapeKey(open, () => {

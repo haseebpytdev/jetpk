@@ -64,15 +64,15 @@ export function ReturnForm({
         className="space-y-3"
         aria-label="Round trip flight search"
       >
-        <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(11rem,13rem)_minmax(10rem,12rem)_auto] xl:items-end">
-          <div className="grid grid-cols-1 gap-2 max-sm:grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-end xl:contents">
+        <div className="grid gap-2 lg:grid-cols-[minmax(0,1.1fr)_auto_minmax(0,1.1fr)_minmax(0,1.05fr)_minmax(0,1fr)_auto] lg:items-end">
+          <div className="grid grid-cols-1 gap-2 max-sm:grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-end lg:contents">
             <AirportField id={`${id}-from`} label="From" value={origin} onChange={onOriginChange} density="compact" />
             <AirportSwapButton
               onSwap={() => {
                 onOriginChange(destination);
                 onDestinationChange(origin);
               }}
-              className="justify-self-center sm:mb-1 xl:mb-1"
+              className="justify-self-center sm:mb-1 lg:mb-1"
             />
             <AirportField id={`${id}-to`} label="To" value={destination} onChange={onDestinationChange} density="compact" />
           </div>
@@ -83,7 +83,7 @@ export function ReturnForm({
             onDepartureChange={onDepartureDateChange}
             onReturnChange={onReturnDateChange}
             density="compact"
-            className="sm:col-span-2 xl:col-span-1"
+            className="max-lg:col-span-2 lg:col-span-1"
           />
           <TravelersCabinSelector
             passengers={passengers}
@@ -92,9 +92,9 @@ export function ReturnForm({
             onInfantsChange={onPassengersChange.infants}
             onCabinChange={onPassengersChange.cabin}
             density="compact"
-            className="sm:col-span-2 xl:col-span-1"
+            className="max-lg:col-span-2 lg:col-span-1"
           />
-          <PrimaryButton type="submit" className="w-full shrink-0 sm:col-span-2 xl:mb-0.5 xl:w-auto xl:min-w-[9.5rem]" disabled={disabled}>
+          <PrimaryButton type="submit" className="w-full shrink-0 max-lg:col-span-2 lg:col-span-1 lg:mb-0.5 lg:w-auto lg:min-w-[9.5rem]" disabled={disabled}>
             {disabled ? "Searching…" : "Search Flights"}
           </PrimaryButton>
         </div>

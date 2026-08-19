@@ -17,6 +17,9 @@ test("public shell renders header, hero, and footer", async ({ page }) => {
   await expect(headerLogo).toHaveAttribute("alt", /JetPakistan/i);
   const logoResponse = await page.request.get("/client-assets/jetpk/logo/logo.svg");
   expect(logoResponse.ok()).toBeTruthy();
+  const logoSvg = await logoResponse.text();
+  expect(logoSvg).toContain("#0B3D2E");
+  expect(logoSvg).not.toContain("#E8F5EC");
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
   await expect(page.getByTestId("theme-switch")).toBeVisible();
 });

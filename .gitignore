@@ -166,6 +166,7 @@ tmp/jp-dash-03-staff-storage-state.json
 
 # Search UI local review evidence (never commit)
 /tmp/search-ui-polish-visual-owner-review/
+/tmp/search-ui-polish-visual/
 dashboard-src.tgz
 /deployment_packages/
 /_dash12-reviewed-untracked-backup/

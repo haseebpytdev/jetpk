@@ -36,6 +36,7 @@ test.describe("Search UI polish cluster", () => {
     await page.getByTestId("trip-type-trigger").click();
     await page.getByRole("menuitem", { name: "Return" }).click();
     await expect(page.getByTestId("date-range-trigger")).toBeVisible();
+    await expect(page.getByTestId("date-range-trigger")).toContainText("Select dates");
     await expect(page.getByLabel("Departure", { exact: true })).toHaveCount(0);
     await expect(page.getByLabel("Return", { exact: true })).toHaveCount(0);
   });

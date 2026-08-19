@@ -235,6 +235,15 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
       className={cn(
         "overflow-visible rounded-jp-card border border-white/22 bg-[rgba(51,65,85,0.34)] shadow-[0_14px_44px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl dark:border-white/12 dark:bg-[rgba(15,23,42,0.58)]",
         compact ? "p-jp-md sm:p-jp-lg" : "p-jp-lg sm:p-jp-xl",
+        compact && [
+          "[&_label]:text-white/90",
+          "[&_legend]:text-white/90",
+          "[&_[role=tab]:not([aria-selected=true])]:text-white/80",
+          "[&_[role=tab]:not([aria-selected=true])]:hover:text-white",
+          "[&_[data-testid=trip-type-trigger]_span:first-child]:text-white/75",
+          "[&_.text-jp-muted]:text-white/78",
+          "[&_p.text-jp-xs]:text-white/78",
+        ],
         className,
       )}
       aria-label="Flight search"

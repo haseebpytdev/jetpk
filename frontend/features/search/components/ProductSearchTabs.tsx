@@ -70,6 +70,7 @@ export function ProductSearchTabs({
               selected
                 ? "border-jp-primary text-jp-primary"
                 : "border-transparent text-jp-muted hover:text-jp-text",
+              compact && !selected && "text-white/80 hover:text-white",
             )}
           >
             {PRODUCT_LABELS[tab]}
