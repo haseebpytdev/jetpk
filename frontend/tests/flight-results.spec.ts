@@ -269,7 +269,7 @@ test("one-stop card and layover keyboard tooltip", async ({ page }) => {
   await expect(page.getByRole("tooltip")).toContainText("DXB");
 });
 
-test("branded fare selection navigates to dedicated fare route", async ({ page }) => {
+test("branded fare selection stays on results", async ({ page }) => {
   const fares = [
     { option_key: "eco", name: "Economy Saver", displayed_price: 100000, price_display: "100,000 PKR" },
     { option_key: "flex", name: "Economy Flex", displayed_price: 112000, price_display: "112,000 PKR" },
@@ -318,9 +318,9 @@ test("branded fare selection navigates to dedicated fare route", async ({ page }
       }),
     });
   });
-  await page.getByTestId("fare-price-eco").click();
-  await page.waitForURL("**/flights/fare-selection**");
-  await expect(page.getByTestId("fare-selection-page")).toBeVisible();
+  await page.getByRole("button", { name: /Economy Saver/ }).click();
+  await expect(page).not.toHaveURL(/fare-selection/);
+  await expect(page.getByTestId("branded-fare-carousel")).toBeVisible();
 });
 
 test("branded fare carousel with more than three fares", async ({ page }) => {
@@ -409,4 +409,58 @@ test("public shell header and footer on results", async ({ page }) => {
   await gotoResults(page);
   await expect(page.getByRole("banner")).toBeVisible();
   await expect(page.getByRole("contentinfo")).toBeVisible();
+});
+
+test("loading state never shows 0 results", async ({ page }) => {
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(mockResultsBody()),
+    });
+  });
+  await page.goto(`/flights/results?${baseResultsQuery()}`);
+  await expect(page.getByTestId("results-count-label")).toContainText(/Searching|Finding/i);
+  await expect(page.getByTestId("results-count-label")).not.toHaveText(/^0 /);
+  await expect(page.getByTestId("flight-result-card")).toBeVisible({ timeout: 15_000 });
+});
+
+test("edit search is inline SearchModule", async ({ page }) => {
+  await gotoResults(page);
+  await page.getByTestId("edit-search-button").click();
+  await expect(page.getByTestId("inline-edit-search")).toBeVisible();
+  await expect(page.getByTestId("search-module")).toHaveAttribute("data-search-variant", "results");
+  await expect(page.getByRole("dialog", { name: "Modify search" })).toHaveCount(0);
+  await expect(page.getByLabel("From")).toHaveValue(/ISB/i);
+  await expect(page.getByLabel("To")).toHaveValue(/DXB/i);
+});
+
+test("return search shows pair/segmented selector", async ({ page }) => {
+  const query = new URLSearchParams({
+    search_id: MOCK_SEARCH_ID,
+    trip_type: "round_trip",
+    from: "LHE",
+    to: "JED",
+    depart: "2026-09-01",
+    return_date: "2026-09-10",
+    adults: "1",
+    cabin: "economy",
+  }).toString();
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(mockResultsBody({ flow: "return_split_outbound", offers: [], outbound_options: [] })),
+    });
+  });
+  await page.goto(`/flights/results?${query}`);
+  await expect(page.getByTestId("return-view-selector")).toBeVisible();
+  await page.getByTestId("return-view-segmented").click();
+  await expect(page).toHaveURL(/view=segmented/);
+});
+
+test("one-way never shows return view selector", async ({ page }) => {
+  await gotoResults(page);
+  await expect(page.getByTestId("return-view-selector")).toHaveCount(0);
 });

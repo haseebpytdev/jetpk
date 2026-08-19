@@ -68,7 +68,7 @@ export function FlightResultCard({ offer, searchId, selecting, onSelect, onOpenD
 
   return (
     <article
-      className="rounded-jp-card border border-jp-border bg-jp-surface p-4 shadow-jp-card sm:p-5"
+      className="rounded-jp-card border border-jp-border bg-jp-surface p-3 shadow-jp-card sm:p-4"
       data-testid="flight-result-card"
       aria-label={`${offer.airline_name ?? offer.airline_code ?? "Flight"} ${offer.departure_time ?? ""} to ${offer.arrival_time ?? ""}`}
     >
@@ -78,8 +78,11 @@ export function FlightResultCard({ offer, searchId, selecting, onSelect, onOpenD
             code={offer.airline_code}
             name={offer.airline_name}
             logoUrl={offer.airline_logo_url}
-            size="lg"
+            size="md"
           />
+          {offer.flight_number ? (
+            <p className="text-xs text-jp-text-muted">{offer.flight_number}</p>
+          ) : null}
           {offer.segments && offer.segments.length > 0 ? (
             <FlightSegmentSummary segments={offer.segments} />
           ) : (

@@ -80,7 +80,7 @@ export function BrandedFareCarousel({
                 data-fare-card
                 role="listitem"
                 className={cn(
-                  "min-w-[11rem] max-w-[11rem] shrink-0 snap-start rounded-jp-md border p-3",
+                  "min-w-[16rem] max-w-[18rem] shrink-0 snap-start rounded-jp-md border p-3",
                   isSelected ? "border-jp-primary bg-jp-primary-soft" : "border-jp-border bg-jp-surface",
                 )}
               >
@@ -90,10 +90,13 @@ export function BrandedFareCarousel({
                   onClick={() => onSelect(option.option_key)}
                   aria-pressed={isSelected}
                 >
-                  <p className="truncate text-sm font-semibold text-jp-text">{option.name ?? option.brand_name ?? "Fare"}</p>
-                  {option.baggage ? <p className="mt-1 text-xs text-jp-text-muted">{option.baggage}</p> : null}
-                  {option.refund_rule ? <p className="text-xs text-jp-text-muted">{option.refund_rule}</p> : null}
-                  {option.change_rule ? <p className="text-xs text-jp-text-muted">{option.change_rule}</p> : null}
+                  <p className="text-sm font-semibold text-jp-text">{option.name ?? option.brand_name ?? "Fare"}</p>
+                  {isSelected ? <p className="text-[10px] font-medium uppercase text-jp-primary">Selected</p> : null}
+                  {option.baggage ? <p className="mt-1 text-xs text-jp-text-muted">Checked: {option.baggage}</p> : <p className="mt-1 text-xs text-jp-text-muted">Checked: Not specified</p>}
+                  {option.meal ? <p className="text-xs text-jp-text-muted">Meal: {option.meal}</p> : <p className="text-xs text-jp-text-muted">Meal: Airline policy</p>}
+                  {option.refund_rule ? <p className="text-xs text-jp-text-muted">Refund: {option.refund_rule}</p> : <p className="text-xs text-jp-text-muted">Refund: Airline policy</p>}
+                  {option.change_rule ? <p className="text-xs text-jp-text-muted">Changes: {option.change_rule}</p> : <p className="text-xs text-jp-text-muted">Changes: Airline policy</p>}
+                  {option.seat_selection ? <p className="text-xs text-jp-text-muted">Seat: {option.seat_selection}</p> : null}
                 </button>
                 <div className="mt-2">
                   <PriceBlock

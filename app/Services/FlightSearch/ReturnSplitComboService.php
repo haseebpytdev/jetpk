@@ -165,6 +165,74 @@ class ReturnSplitComboService
     }
 
     /**
+     * One card per supplier-indexed combo. Does not invent pairings.
+     *
+     * @param  array<string, mixed>  $index
+     * @param  list<array<string, mixed>>  $offers
+     * @param  array<string, mixed>  $criteria
+     * @param  array<string, string|null>  $airlineLogos
+     * @param  array<string, string>  $cityMap
+     * @param  array<string, string>  $airlineNameMap
+     * @return list<array<string, mixed>>
+     */
+    public function buildPairedComboOptions(
+        array $index,
+        array $offers,
+        array $criteria,
+        array $airlineLogos,
+        array $cityMap,
+        array $airlineNameMap,
+    ): array {
+        $rows = [];
+        foreach ($index['combos'] ?? [] as $combo) {
+            if (! is_array($combo)) {
+                continue;
+            }
+            $comboId = (string) ($combo['combo_id'] ?? '');
+            $offer = $this->findOfferInList($offers, $comboId);
+            if ($offer === null) {
+                continue;
+            }
+            $presentation = FlightOfferDisplayPresenter::buildPresentation($offer, $criteria, $cityMap, $airlineNameMap);
+            $journeys = is_array($presentation['journeys_display'] ?? null) ? $presentation['journeys_display'] : [];
+            $outJourney = is_array($journeys[0] ?? null) ? $journeys[0] : null;
+            $retJourney = is_array($journeys[1] ?? null) ? $journeys[1] : null;
+            if ($outJourney === null || $retJourney === null) {
+                continue;
+            }
+            $total = $this->comboFinalPrice($combo);
+            $code = strtoupper((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')));
+            $rows[] = [
+                'combo_id' => $comboId,
+                'outbound_key' => (string) ($combo['outbound_key'] ?? ''),
+                'return_key' => (string) ($combo['return_key'] ?? ''),
+                'outbound_journey' => $outJourney,
+                'return_journey' => $retJourney,
+                'airline_code' => $code,
+                'airline_name' => AirlineDisplayNameResolver::resolveForOffer($offer, $airlineNameMap),
+                'airline_logo_url' => $airlineLogos[$code] ?? null,
+                'total_amount' => $total,
+                'total_display' => $total !== null && $total > 0 ? 'PKR '.number_format((float) $total, 0) : 'Fare unavailable',
+                'cabin' => (string) ($offer['cabin'] ?? ''),
+                'fare_family' => (string) ($offer['fare_family'] ?? ''),
+                'baggage' => (string) ($offer['baggage'] ?? ($offer['baggage_summary_display'] ?? '')),
+                'refundable' => (bool) ($offer['refundable'] ?? false),
+                'can_book' => $total !== null && $total > 0,
+                'pairing_authority' => 'SUPPLIER_RETURNED',
+            ];
+        }
+
+        usort($rows, function (array $a, array $b): int {
+            $pa = $a['total_amount'] ?? PHP_FLOAT_MAX;
+            $pb = $b['total_amount'] ?? PHP_FLOAT_MAX;
+
+            return $pa <=> $pb;
+        });
+
+        return array_values($rows);
+    }
+
+    /**
      * @param  array<string, mixed>  $index
      * @param  list<array<string, mixed>>  $offers
      * @param  array<string, mixed>  $criteria

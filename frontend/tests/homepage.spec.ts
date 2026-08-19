@@ -29,23 +29,34 @@ test("homepage loads with full hero and search shell", async ({ page }) => {
   await expect(page.getByRole("contentinfo")).toBeVisible();
 });
 
-test("one way trip submits to Laravel search-init when departure is set", async ({ page }) => {
+test("one way trip navigates to results immediately without waiting for Laravel init", async ({ page }) => {
   let initRequested = false;
   await page.route("**/laravel/flights/results/search**", async (route) => {
     initRequested = true;
+    await new Promise((resolve) => setTimeout(resolve, 800));
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
         search_id: "mock-search-id",
-        results_page_url: "http://127.0.0.1:8000/flights/results",
-        initial_results_url: "http://127.0.0.1:8000/flights/results/data?search_id=mock-search-id",
+        results_page_url: "/flights/results",
+        initial_results_url: "/flights/results/data?search_id=mock-search-id",
       }),
     });
   });
-
-  await page.addInitScript(() => {
-    window.location.assign = (() => undefined) as typeof window.location.assign;
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        search_id: "mock-search-id",
+        page: 1,
+        per_page: 12,
+        total: 0,
+        has_more: false,
+        offers: [],
+      }),
+    });
   });
 
   await page.goto("/", { waitUntil: "load" });
@@ -53,8 +64,9 @@ test("one way trip submits to Laravel search-init when departure is set", async 
   await page.getByRole("menuitem", { name: "One Way" }).click();
   await page.getByLabel("Departure", { exact: true }).fill(tomorrowIso());
   await page.getByRole("button", { name: "Search Flights" }).click();
-
-  await expect.poll(() => initRequested).toBe(true);
+  await page.waitForURL("**/flights/results**", { timeout: 10_000 });
+  expect(new URL(page.url()).pathname).toContain("/flights/results");
+  expect(initRequested).toBe(false);
 });
 
 test("return trip shows combined date range field", async ({ page }) => {

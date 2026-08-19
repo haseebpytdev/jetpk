@@ -2,13 +2,13 @@
 
 import { cn } from "@/lib/cn";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   handoffToGroupSearch,
-  handoffToFlightResults,
-  initFlightSearch,
   buildGroupHandoffQuery,
   type SearchSubmitState,
 } from "@/services/flight-search";
+import { buildFlightResultsPagePath, buildFlightSearchQueryParams } from "../utils/laravel-payload";
 import { findAirportByIata } from "../utils/airport-filter";
 import { usePassengerSelection } from "../hooks/use-passenger-selection";
 import {
@@ -21,7 +21,6 @@ import {
   type TripType,
 } from "../types";
 import { validateFlightSearch, validateGroupSearch } from "../utils/validation";
-import { flattenLaravelFieldErrors } from "../utils/laravel-errors";
 import { GroupTicketingForm } from "./GroupTicketingForm";
 import { useGroupSearchFacets } from "@/features/group-ticketing/hooks/use-group-search-facets";
 import { MultiCityForm } from "./MultiCityForm";
@@ -36,12 +35,6 @@ function createSegment(id: string): FlightSegment {
   return { id, from: null, to: null, departureDate: "" };
 }
 
-const DEFAULT_OPTIONS: SearchOptions = {
-  directFlightsOnly: false,
-  includeNearbyAirports: false,
-  flexibleDates: false,
-};
-
 function resolveSearchMode(productTab: ProductTab, tripType: TripType): SearchMode {
   return productTab === "group" ? "group" : tripType;
 }
@@ -49,21 +42,58 @@ function resolveSearchMode(productTab: ProductTab, tripType: TripType): SearchMo
 type SearchModuleProps = {
   className?: string;
   layout?: SearchLayout;
+  variant?: "home" | "results";
+  initialParams?: URLSearchParams | null;
+  onSubmitted?: () => void;
 };
 
-export function SearchModule({ className, layout = "default" }: SearchModuleProps) {
+function hydrateTripType(params?: URLSearchParams | null): TripType {
+  const tripType = params?.get("trip_type");
+  if (tripType === "round_trip") return "return";
+  if (tripType === "multi_city") return "multi_city";
+  return "one_way";
+}
+
+export function SearchModule({
+  className,
+  layout = "default",
+  variant = "home",
+  initialParams = null,
+  onSubmitted,
+}: SearchModuleProps) {
+  const router = useRouter();
   const [productTab, setProductTab] = useState<ProductTab>("flights");
-  const [tripType, setTripType] = useState<TripType>("one_way");
+  const [tripType, setTripType] = useState<TripType>(() => hydrateTripType(initialParams));
   const mode = resolveSearchMode(productTab, tripType);
-  const [origin, setOrigin] = useState(() => findAirportByIata("ISB") ?? null);
-  const [destination, setDestination] = useState(() => findAirportByIata("DXB") ?? null);
-  const [departureDate, setDepartureDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
-  const [options, setOptions] = useState<SearchOptions>(DEFAULT_OPTIONS);
-  const [segments, setSegments] = useState<FlightSegment[]>([
-    createSegment("segment-1"),
-    createSegment("segment-2"),
-  ]);
+  const [origin, setOrigin] = useState(() => {
+    const from = initialParams?.get("from");
+    if (from) return findAirportByIata(from) ?? null;
+    return variant === "results" ? null : findAirportByIata("ISB") ?? null;
+  });
+  const [destination, setDestination] = useState(() => {
+    const to = initialParams?.get("to");
+    if (to) return findAirportByIata(to) ?? null;
+    return variant === "results" ? null : findAirportByIata("DXB") ?? null;
+  });
+  const [departureDate, setDepartureDate] = useState(() => initialParams?.get("depart") ?? "");
+  const [returnDate, setReturnDate] = useState(() => initialParams?.get("return_date") ?? "");
+  const [options, setOptions] = useState<SearchOptions>(() => ({
+    directFlightsOnly: initialParams?.get("stops") === "direct",
+    includeNearbyAirports: initialParams?.get("include_nearby") === "1",
+    flexibleDates: initialParams?.get("flexible_dates") === "1",
+  }));
+  const [segments, setSegments] = useState<FlightSegment[]>(() => {
+    const fromList = initialParams?.getAll("multi_from[]") ?? [];
+    if (fromList.length >= 2) {
+      return fromList.map((code, index) => ({
+        id: `segment-${index + 1}`,
+        from: findAirportByIata(code) ?? null,
+        to: findAirportByIata(initialParams?.getAll("multi_to[]")[index] ?? "") ?? null,
+        departureDate: initialParams?.getAll("multi_depart[]")[index] ?? "",
+      }));
+    }
+    return [createSegment("segment-1"), createSegment("segment-2")];
+  });
   const [groupSector, setGroupSector] = useState("");
   const [groupCategory, setGroupCategory] = useState("all");
   const [groupTravelDate, setGroupTravelDate] = useState("");
@@ -77,7 +107,12 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
     setChildren,
     setInfants,
     setCabin,
-  } = usePassengerSelection();
+  } = usePassengerSelection({
+    adults: Number(initialParams?.get("adults") ?? "1"),
+    children: Number(initialParams?.get("children") ?? "0"),
+    infants: Number(initialParams?.get("infants") ?? "0"),
+    cabin: (initialParams?.get("cabin") ?? "economy") as import("../types").CabinClass,
+  });
 
   const isSubmitting = submitState.status === "submitting" || submitState.status === "redirecting";
   const groupFacets = useGroupSearchFacets(mode === "group");
@@ -138,39 +173,25 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
       setErrors([]);
       setSubmitState({ status: "submitting" });
 
-      if (abortRef.current) abortRef.current.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      const response = await initFlightSearch(
-        {
-          mode: searchMode,
-          origin: primary.from.iata,
-          destination: primary.to.iata,
-          departureDate: primary.departureDate,
-          returnDate: extraReturnDate,
-          segments: searchMode === "multi_city" ? draftSegments : undefined,
-          passengers,
-          options,
-        },
-        controller.signal,
-      );
-
-      if (!response.ok) {
-        const laravelErrors = flattenLaravelFieldErrors(response.fieldErrors);
-        setErrors(laravelErrors.length > 0 ? laravelErrors : [response.message]);
-        setSubmitState({
-          status: "error",
-          message: response.message,
-          fieldErrors: response.fieldErrors,
-        });
-        return;
+      const query = buildFlightSearchQueryParams({
+        mode: searchMode,
+        origin: primary.from.iata,
+        destination: primary.to.iata,
+        departureDate: primary.departureDate,
+        returnDate: extraReturnDate,
+        segments: searchMode === "multi_city" ? draftSegments : undefined,
+        passengers,
+        options,
+      });
+      const resultsPath = buildFlightResultsPagePath(query);
+      setSubmitState({ status: "redirecting", targetUrl: resultsPath });
+      if (typeof document !== "undefined") {
+        document.body.setAttribute("data-handoff-url", resultsPath);
       }
-
-      setSubmitState({ status: "redirecting", targetUrl: response.resultsPath });
-      handoffToFlightResults(response.resultsPath);
+      router.push(resultsPath);
+      onSubmitted?.();
     },
-    [options, passengers],
+    [onSubmitted, options, passengers, router],
   );
 
   const handleOneWaySubmit = () => {
@@ -240,9 +261,14 @@ export function SearchModule({ className, layout = "default" }: SearchModuleProp
       aria-label="Flight search"
       data-testid="search-module"
       data-search-layout={layout}
+      data-search-variant={variant}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <ProductSearchTabs productTab={productTab} onProductTabChange={handleProductTabChange} compact={compact} />
+        {variant === "home" ? (
+          <ProductSearchTabs productTab={productTab} onProductTabChange={handleProductTabChange} compact={compact} />
+        ) : (
+          <p className="text-sm font-semibold text-jp-text">Edit search</p>
+        )}
         {productTab === "flights" ? (
           <TripTypeDropdown tripType={tripType} onTripTypeChange={handleTripTypeChange} compact={compact} />
         ) : null}

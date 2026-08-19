@@ -3,7 +3,6 @@
 import { useCallback, useRef, useState } from "react";
 import { resolvePassengerCheckoutHandoffUrl } from "@/features/flight-details/utils/handoff";
 import {
-  absoluteLaravelHandoffUrl,
   buildCheckoutHandoffUrl,
   revalidateOffer,
 } from "../services/flight-results-api";
@@ -53,8 +52,9 @@ export function useOfferSelection(searchId: string) {
             return;
           }
 
-          const resolved = resolvePassengerCheckoutHandoffUrl(passengersUrl) ?? absoluteLaravelHandoffUrl(passengersUrl);
-          window.location.assign(resolved);
+          const resolved = resolvePassengerCheckoutHandoffUrl(passengersUrl) ?? passengersUrl;
+          const next = resolved.startsWith("http") ? resolved : resolved.startsWith("/") ? resolved : `/${resolved}`;
+          window.location.assign(next);
           return;
         }
 
@@ -65,7 +65,12 @@ export function useOfferSelection(searchId: string) {
           searchId,
         );
         const resolvedCheckout = resolvePassengerCheckoutHandoffUrl(checkoutUrl) ?? checkoutUrl;
-        window.location.assign(resolvedCheckout);
+        const next = resolvedCheckout.startsWith("http")
+          ? resolvedCheckout
+          : resolvedCheckout.startsWith("/")
+            ? resolvedCheckout
+            : `/${resolvedCheckout}`;
+        window.location.assign(next);
       } finally {
         inFlightRef.current = false;
         setSelectingId(null);

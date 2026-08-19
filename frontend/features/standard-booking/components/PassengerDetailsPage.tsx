@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import {
   BookingLayout,
-  BookingLoadingState,
   BookingMainColumn,
   BookingPageHeader,
   BookingPageShell,
@@ -31,6 +30,9 @@ import {
   OfferExpiredState,
   SeatExtrasReadinessPanel,
   SupplierRequirementsUnavailableState,
+  NetworkErrorState,
+  ServerErrorState,
+  InvalidHandoffState,
 } from "./BookingStateCards";
 import { PassengerCard } from "./PassengerCard";
 import { ContactDetailsSection } from "./ContactDetailsSection";
@@ -56,26 +58,45 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
   const queryKey = useMemo(() => JSON.stringify(searchParams), [searchParams]);
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadContext = useCallback(() => {
     setLoading(true);
     setFormError(null);
     setErrorStatus(null);
+    return fetchStandardPassengersContext(searchParams);
+  }, [searchParams]);
 
-    void fetchStandardPassengersContext(searchParams).then((response) => {
+  useEffect(() => {
+    let cancelled = false;
+
+    void loadContext().then((response) => {
       if (cancelled) return;
       setLoading(false);
 
       if (!response.ok) {
         const data = response.data as { status?: string; redirect_url?: string } | undefined;
-        setErrorStatus(data?.status ?? (response.status === 404 ? "missing_session" : "error"));
+        const apiStatus = (data?.status ?? "").toLowerCase();
+        if (response.status === 0) {
+          setErrorStatus("network_error");
+        } else if (response.status === 404 || apiStatus === "missing_session") {
+          setErrorStatus("missing_session");
+        } else if (response.status === 410 || apiStatus === "offer_expired" || apiStatus === "checkout_expired") {
+          setErrorStatus(apiStatus === "checkout_expired" ? "checkout_expired" : "offer_expired");
+        } else if (apiStatus === "supplier_requirements_unavailable") {
+          setErrorStatus("supplier_requirements_unavailable");
+        } else if (apiStatus === "invalid_fare" || apiStatus === "invalid_handoff") {
+          setErrorStatus("invalid_handoff");
+        } else if (response.status >= 500) {
+          setErrorStatus("server_error");
+        } else {
+          setErrorStatus("server_error");
+        }
         setErrorRedirect(data?.redirect_url ?? null);
         setFormError(response.message);
         return;
       }
 
       if (!response.data.ok) {
-        setErrorStatus("error");
+        setErrorStatus("server_error");
         setFormError("Unable to load passenger form.");
         return;
       }
@@ -88,7 +109,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     return () => {
       cancelled = true;
     };
-  }, [queryKey, searchParams]);
+  }, [queryKey, loadContext]);
 
   const updatePassenger = useCallback((index: number, field: keyof PassengerFormValues, value: string) => {
     setPassengers((rows) => rows.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
@@ -152,16 +173,61 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     router.push(resolved);
   };
 
+  const fallbackProgress = [
+    { key: "search", label: "Search", state: "completed" as const },
+    { key: "results", label: "Results", state: "completed" as const },
+    { key: "passenger_details", label: "Travelers", state: "current" as const },
+    { key: "review", label: "Review", state: "upcoming" as const },
+    { key: "payment", label: "Payment", state: "upcoming" as const },
+  ];
+
   if (loading) {
-    return <BookingLoadingState message="Loading passenger form…" testId="passengers-loading" />;
+    return (
+      <BookingPageShell testId="passengers-loading">
+        <BookingProgress steps={fallbackProgress} className="mb-6" />
+        <BookingPageHeader title="Traveler information" description="Traveler information is loading." />
+        <BookingLayout
+          main={
+            <BookingMainColumn>
+              <div className="space-y-4" aria-busy="true" data-testid="passenger-skeleton">
+                <p className="text-sm text-jp-muted" role="status">Traveler information is loading</p>
+                <div className="h-40 animate-pulse rounded-jp-card border border-jp-border bg-jp-surface" />
+                <div className="h-40 animate-pulse rounded-jp-card border border-jp-border bg-jp-surface" />
+              </div>
+            </BookingMainColumn>
+          }
+          sidebar={
+            <BookingSidebar>
+              <div className="h-48 animate-pulse rounded-jp-card border border-jp-border bg-jp-surface" data-testid="order-summary-skeleton" />
+            </BookingSidebar>
+          }
+        />
+      </BookingPageShell>
+    );
   }
 
   if (errorStatus === "missing_session") {
     return <div className="mx-auto max-w-jp-booking p-8"><MissingBookingSessionState /></div>;
   }
 
-  if (errorStatus === "offer_expired") {
+  if (errorStatus === "offer_expired" || errorStatus === "checkout_expired") {
     return <div className="mx-auto max-w-jp-booking p-8"><OfferExpiredState redirectUrl={errorRedirect} /></div>;
+  }
+
+  if (errorStatus === "network_error") {
+    return <div className="mx-auto max-w-jp-booking p-8"><NetworkErrorState onRetry={() => void loadContext()} /></div>;
+  }
+
+  if (errorStatus === "invalid_handoff") {
+    return <div className="mx-auto max-w-jp-booking p-8"><InvalidHandoffState /></div>;
+  }
+
+  if (errorStatus === "supplier_requirements_unavailable") {
+    return <div className="mx-auto max-w-jp-booking p-8"><SupplierRequirementsUnavailableState /></div>;
+  }
+
+  if (errorStatus === "server_error") {
+    return <div className="mx-auto max-w-jp-booking p-8"><ServerErrorState onRetry={() => void loadContext()} /></div>;
   }
 
   if (expired) {
@@ -169,7 +235,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   }
 
   if (!context) {
-    return <div className="mx-auto max-w-jp-booking p-8"><SupplierRequirementsUnavailableState /></div>;
+    return <div className="mx-auto max-w-jp-booking p-8"><ServerErrorState onRetry={() => void loadContext()} /></div>;
   }
 
   const typeOrdinals: Record<string, number> = { adult: 0, child: 0, infant: 0 };

@@ -2,78 +2,57 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { initFlightSearch } from "@/services/flight-search";
-import type { FlightSearchPayloadInput } from "@/features/search/utils/laravel-payload";
-import type { CabinClass } from "@/features/search/types";
 import { fetchFlightResultsData } from "../services/flight-results-api";
-import type {
-  ActiveResultsFilters,
-  FlightResultsDataResponse,
-  ResultsPageStatus,
-} from "../types";
+import type { ActiveResultsFilters, FlightResultsDataResponse, ResultsPageStatus } from "../types";
 import { resolveLaravelSort, type UiSortKey } from "../utils/sorting";
+import { criteriaFromSearchParams } from "../utils/criteria-from-params";
+import { searchIdentityKey } from "../utils/search-identity";
 
 export type UseFlightResultsOptions = {
   searchId: string | null;
   searchParams: URLSearchParams;
   sort: UiSortKey;
   filters: ActiveResultsFilters;
+  view?: string | null;
 };
 
-function criteriaFromSearchParams(params: URLSearchParams): FlightSearchPayloadInput | null {
-  const tripType = params.get("trip_type");
-  if (!tripType) return null;
-
-  const mode =
-    tripType === "round_trip" ? "return" : tripType === "multi_city" ? "multi_city" : "one_way";
-
-  const from = params.get("from") ?? "";
-  const to = params.get("to") ?? "";
-  const depart = params.get("depart") ?? "";
-  if (mode !== "multi_city" && (!from || !to || !depart)) {
-    return null;
+function isAuthoritativeEmpty(payload: FlightResultsDataResponse): boolean {
+  const status = (payload.status ?? payload.search_freshness?.status ?? "").toLowerCase();
+  if (status === "searching" || status === "partial" || status === "in_progress") {
+    return false;
   }
-
-  return {
-    mode,
-    origin: from,
-    destination: to,
-    departureDate: depart,
-    returnDate: params.get("return_date") ?? undefined,
-    passengers: {
-      adults: Number(params.get("adults") ?? "1"),
-      children: Number(params.get("children") ?? "0"),
-      infants: Number(params.get("infants") ?? "0"),
-      cabin: (params.get("cabin") ?? "economy") as CabinClass,
-    },
-    options: {
-      directFlightsOnly: params.get("stops") === "direct",
-      includeNearbyAirports: params.get("include_nearby") === "1",
-      flexibleDates: params.get("flexible_dates") === "1",
-    },
-  };
+  const total = payload.total ?? 0;
+  const count = (payload.offers ?? []).length + (payload.outbound_options ?? []).length + (payload.paired_options ?? []).length;
+  return total === 0 && count === 0;
 }
 
-export function useFlightResults({ searchId, searchParams, sort, filters }: UseFlightResultsOptions) {
+export function useFlightResults({ searchId, searchParams, sort, filters, view }: UseFlightResultsOptions) {
   const [resolvedSearchId, setResolvedSearchId] = useState<string | null>(searchId);
   const [status, setStatus] = useState<ResultsPageStatus>("idle");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("Searching flights…");
   const [data, setData] = useState<FlightResultsDataResponse | null>(null);
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const requestSeq = useRef(0);
   const readyRef = useRef(false);
+  const lastBootstrappedId = useRef<string | null>(null);
+  const skipNextRefresh = useRef(true);
   const filtersKey = JSON.stringify(filters);
   const laravelSort = resolveLaravelSort(sort);
+  const identity = searchIdentityKey(searchParams);
+  const viewKey = view ?? "";
 
   const loadPage = useCallback(
     async (id: string, targetPage: number, append: boolean, phase: "init" | "refresh") => {
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
+      const seq = ++requestSeq.current;
 
       if (!append) {
         setStatus(phase === "init" ? "initializing" : "loading");
-        if (phase === "init") setMessage("Searching flights…");
+        setMessage(phase === "init" ? "Searching flights…" : "Finding the best available flights…");
       } else {
         setIsLoadingMore(true);
       }
@@ -84,12 +63,18 @@ export function useFlightResults({ searchId, searchParams, sort, filters }: UseF
         perPage: 12,
         sort: laravelSort,
         filters,
+        view: viewKey || undefined,
         signal: controller.signal,
       });
 
-      if (controller.signal.aborted) return;
+      if (seq !== requestSeq.current || controller.signal.aborted) {
+        return;
+      }
 
       if (!response.ok) {
+        if (response.status === 0 && response.message === "Request cancelled.") {
+          return;
+        }
         setStatus(response.status === 410 ? "expired" : "error");
         setMessage(response.message);
         setIsLoadingMore(false);
@@ -103,24 +88,38 @@ export function useFlightResults({ searchId, searchParams, sort, filters }: UseF
           ...payload,
           offers: [...(current.offers ?? []), ...(payload.offers ?? [])],
           outbound_options: [...(current.outbound_options ?? []), ...(payload.outbound_options ?? [])],
+          paired_options: [...(current.paired_options ?? []), ...(payload.paired_options ?? [])],
         };
       });
 
-      const total = payload.total ?? 0;
-      const count = (payload.offers ?? []).length + (payload.outbound_options ?? []).length;
-      setStatus(total === 0 || (!append && count === 0) ? "empty" : "ready");
-      setMessage(total === 0 || (!append && count === 0) ? payload.empty_message ?? "No flights match your search." : "");
+      if (isAuthoritativeEmpty(payload) && !append) {
+        setStatus("empty");
+        setMessage(payload.empty_message ?? "No flights match your search.");
+      } else {
+        setStatus("ready");
+        setMessage("");
+      }
       setPage(targetPage);
       setIsLoadingMore(false);
       readyRef.current = true;
     },
-    [filters, laravelSort],
+    [filters, laravelSort, viewKey],
   );
 
   useEffect(() => {
     let cancelled = false;
 
     const bootstrap = async () => {
+      if (searchId && lastBootstrappedId.current === searchId) {
+        return;
+      }
+
+      setStatus("initializing");
+      setMessage("Searching flights…");
+      setData(null);
+      readyRef.current = false;
+      skipNextRefresh.current = true;
+
       let id = searchId;
       if (!id) {
         const criteria = criteriaFromSearchParams(searchParams);
@@ -147,10 +146,10 @@ export function useFlightResults({ searchId, searchParams, sort, filters }: UseF
         setResolvedSearchId(id);
       }
 
+      lastBootstrappedId.current = id;
       await loadPage(id, 1, false, "init");
     };
 
-    readyRef.current = false;
     void bootstrap();
 
     return () => {
@@ -158,13 +157,17 @@ export function useFlightResults({ searchId, searchParams, sort, filters }: UseF
       abortRef.current?.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- bootstrap only when search identity changes
-  }, [searchId, searchParams.toString()]);
+  }, [identity]);
 
   useEffect(() => {
     if (!resolvedSearchId || !readyRef.current) return;
+    if (skipNextRefresh.current) {
+      skipNextRefresh.current = false;
+      return;
+    }
     void loadPage(resolvedSearchId, 1, false, "refresh");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtersKey, laravelSort, resolvedSearchId]);
+  }, [filtersKey, laravelSort, resolvedSearchId, viewKey]);
 
   const retry = useCallback(async () => {
     readyRef.current = false;
@@ -197,7 +200,10 @@ export function useFlightResults({ searchId, searchParams, sort, filters }: UseF
     resolvedSearchId,
     offers: useMemo(() => data?.offers ?? [], [data]),
     outboundOptions: useMemo(() => data?.outbound_options ?? [], [data]),
+    pairedOptions: useMemo(() => data?.paired_options ?? [], [data]),
     isReturnSplit: data?.flow === "return_split_outbound",
+    isReturnPair: data?.flow === "return_pair",
+    pairingAuthority: data?.pairing_authority ?? null,
     freshness: data?.search_freshness ?? null,
     page,
     hasMore: Boolean(data?.has_more),

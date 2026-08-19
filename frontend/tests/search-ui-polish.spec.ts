@@ -110,23 +110,6 @@ test.describe("Search UI polish cluster", () => {
   });
 
   test("return range serializes outbound and return dates on submit", async ({ page }) => {
-    let capturedUrl = "";
-    await page.route("**/laravel/flights/results/search**", async (route) => {
-      capturedUrl = route.request().url();
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          search_id: "mock-search-id",
-          results_page_url: "http://127.0.0.1:8000/flights/results",
-          initial_results_url: "http://127.0.0.1:8000/flights/results/data?search_id=mock-search-id",
-        }),
-      });
-    });
-    await page.addInitScript(() => {
-      window.location.assign = (() => undefined) as typeof window.location.assign;
-    });
-
     await page.goto("/", { waitUntil: "load" });
     await page.getByTestId("trip-type-trigger").click();
     await page.getByRole("menuitem", { name: "Return" }).click();
@@ -138,8 +121,9 @@ test.describe("Search UI polish cluster", () => {
     await page.locator(`[data-testid="date-range-panel"] [data-date="${inbound}"]`).click();
 
     await page.getByRole("button", { name: "Search Flights" }).click();
-    await expect.poll(() => capturedUrl.includes(`depart=${outbound}`)).toBe(true);
-    expect(capturedUrl).toContain(`return_date=${inbound}`);
+    await page.waitForURL("**/flights/results**");
+    expect(page.url()).toContain(`depart=${outbound}`);
+    expect(page.url()).toContain(`return_date=${inbound}`);
   });
 
   test("multi-city retains per-segment date fields", async ({ page }) => {
@@ -208,31 +192,14 @@ test.describe("Search UI polish cluster", () => {
   });
 
   test("search submission carries cabin value", async ({ page }) => {
-    let capturedUrl = "";
-    await page.route("**/laravel/flights/results/search**", async (route) => {
-      capturedUrl = route.request().url();
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          search_id: "mock-search-id",
-          results_page_url: "http://127.0.0.1:8000/flights/results",
-          initial_results_url: "http://127.0.0.1:8000/flights/results/data?search_id=mock-search-id",
-        }),
-      });
-    });
-    await page.addInitScript(() => {
-      window.location.assign = (() => undefined) as typeof window.location.assign;
-    });
-
     await page.goto("/", { waitUntil: "load" });
     await page.getByTestId("travelers-cabin-trigger").first().click();
     await page.getByRole("radio", { name: "First" }).check();
     await page.keyboard.press("Escape");
     await page.getByLabel("Departure", { exact: true }).fill(tomorrowIso());
     await page.getByRole("button", { name: "Search Flights" }).click();
-
-    await expect.poll(() => capturedUrl.includes("cabin=first")).toBe(true);
+    await page.waitForURL("**/flights/results**");
+    expect(page.url()).toContain("cabin=first");
   });
 
   test("traveler validation keeps infant constraint", async ({ page }) => {

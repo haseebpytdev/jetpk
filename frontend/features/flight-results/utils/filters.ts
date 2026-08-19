@@ -16,6 +16,7 @@ const FILTER_KEYS: Array<keyof ActiveResultsFilters> = [
   "fare_family",
   "bookable_only",
   "operating_airline",
+  "flight_number",
 ];
 
 export function parseFiltersFromSearchParams(params: URLSearchParams): ActiveResultsFilters {

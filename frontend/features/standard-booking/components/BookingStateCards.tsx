@@ -73,6 +73,46 @@ export function SupplierRequirementsUnavailableState() {
   );
 }
 
+export function NetworkErrorState({ onRetry }: { onRetry?: () => void }) {
+  return (
+    <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-6" data-testid="network-error">
+      <h1 className="text-xl font-semibold text-jp-text">Connection problem</h1>
+      <p className="mt-2 text-jp-sm text-jp-muted">We could not reach the booking service. Check your connection and try again.</p>
+      {onRetry ? (
+        <button type="button" className="mt-4 rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white" onClick={onRetry}>
+          Retry
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export function ServerErrorState({ onRetry }: { onRetry?: () => void }) {
+  return (
+    <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-6" data-testid="server-error">
+      <h1 className="text-xl font-semibold text-jp-text">Something went wrong</h1>
+      <p className="mt-2 text-jp-sm text-jp-muted">The booking page could not be loaded. Please try again.</p>
+      {onRetry ? (
+        <button type="button" className="mt-4 rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white" onClick={onRetry}>
+          Retry
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export function InvalidHandoffState() {
+  return (
+    <StateCard
+      testId="invalid-handoff"
+      title="Invalid fare selection"
+      message="This checkout link is missing a valid selected fare. Please return to results and choose a flight again."
+      actionHref="/flights/results"
+      actionLabel="Back to results"
+    />
+  );
+}
+
 export function SeatExtrasReadinessPanel({ message }: { message: string }) {
   return (
     <div

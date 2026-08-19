@@ -21,6 +21,7 @@ export type FetchResultsParams = {
   perPage?: number;
   sort?: string;
   filters?: ActiveResultsFilters;
+  view?: string;
   signal?: AbortSignal;
 };
 
@@ -36,6 +37,9 @@ export async function fetchFlightResultsData(
   query.set("per_page", String(params.perPage ?? 12));
   if (params.sort) {
     query.set("sort", params.sort);
+  }
+  if (params.view) {
+    query.set("view", params.view);
   }
   if (params.filters) {
     Object.entries(params.filters).forEach(([key, value]) => {

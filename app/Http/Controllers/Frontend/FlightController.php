@@ -520,6 +520,7 @@ class FlightController extends Controller
             'fare_family' => trim((string) $request->query('fare_family', '')),
             'bookable_only' => trim((string) $request->query('bookable_only', '')),
             'operating_airline' => strtoupper(trim((string) $request->query('operating_airline', ''))),
+            'flight_number' => strtoupper(trim((string) $request->query('flight_number', ''))),
         ];
 
         /** @var list<array<string, mixed>> $offers */
@@ -541,6 +542,19 @@ class FlightController extends Controller
         $offers = $this->sortOffers($offers, $sort, $critForFilters);
 
         if ($this->searchStore->returnSplitFlowActive($searchId)) {
+            $view = trim((string) $request->query('view', ''));
+            if ($view === 'pair') {
+                return $this->resultsDataReturnPair(
+                    $request,
+                    $payload,
+                    $searchId,
+                    $offers,
+                    $sort,
+                    $page,
+                    $perPage,
+                );
+            }
+
             return $this->resultsDataReturnSplitOutbound(
                 $request,
                 $payload,
@@ -922,6 +936,68 @@ class FlightController extends Controller
         }
 
         return redirect()->to($selectUrl);
+    }
+
+    /**
+     * Pair view: one card per supplier-returned round-trip combo. Never stitches legs.
+     *
+     * @param  array<string, mixed>  $payload
+     * @param  list<array<string, mixed>>  $offers
+     */
+    protected function resultsDataReturnPair(
+        Request $request,
+        array $payload,
+        string $searchId,
+        array $offers,
+        string $sort,
+        int $page,
+        int $perPage,
+    ): JsonResponse {
+        $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
+        $index = $this->searchStore->getReturnSplitIndex($searchId) ?? [];
+        $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
+            AirlineDisplayNameResolver::collectCodesFromOffers($offers)
+        );
+        $filterMeta = $this->buildFilterMeta($offers, $criteria, $airlineNameMap);
+        $airlineLogos = $this->airlineBranding->mapLogosForOffers($offers);
+        $iataCodes = [];
+        foreach ($offers as $offRow) {
+            if (is_array($offRow)) {
+                $iataCodes = array_merge($iataCodes, FlightOfferDisplayPresenter::collectIataCodes($offRow));
+            }
+        }
+        $cityMap = FlightOfferDisplayPresenter::airportCityMap($iataCodes);
+
+        $paired = $this->returnSplitComboService->buildPairedComboOptions(
+            $index,
+            $offers,
+            $criteria,
+            $airlineLogos,
+            $cityMap,
+            $airlineNameMap,
+        );
+
+        $total = count($paired);
+        $offset = ($page - 1) * $perPage;
+        $slice = array_slice($paired, $offset, $perPage);
+        $freshness = app(SabreOfferFreshness::class);
+
+        return response()->json([
+            'flow' => 'return_pair',
+            'pairing_authority' => $total > 0 ? 'SUPPLIER_RETURNED' : 'UNAVAILABLE',
+            'search_id' => $searchId,
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'has_more' => ($offset + $perPage) < $total,
+            'filters' => $filterMeta,
+            'paired_options' => $slice,
+            'offers' => [],
+            'outbound_options' => [],
+            'warnings' => [],
+            'empty_message' => $total === 0 ? 'No paired return options are currently available.' : '',
+            'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
+        ]);
     }
 
     /**
@@ -1775,6 +1851,25 @@ class FlightController extends Controller
             if (($filters['operating_airline'] ?? '') !== '') {
                 $op = strtoupper((string) ($offer['operating_carrier_code'] ?? $offer['operating_airline_code'] ?? ''));
                 if ($op === '' || $op !== $filters['operating_airline']) {
+                    return false;
+                }
+            }
+
+            if (($filters['flight_number'] ?? '') !== '') {
+                $needle = strtoupper((string) $filters['flight_number']);
+                $hay = strtoupper((string) ($offer['flight_number'] ?? ''));
+                $segmentMatch = false;
+                foreach (($offer['segments'] ?? []) as $segment) {
+                    if (! is_array($segment)) {
+                        continue;
+                    }
+                    $fn = strtoupper((string) ($segment['flight_number'] ?? ''));
+                    if ($fn !== '' && str_contains($fn, $needle)) {
+                        $segmentMatch = true;
+                        break;
+                    }
+                }
+                if (! str_contains($hay, $needle) && ! $segmentMatch) {
                     return false;
                 }
             }

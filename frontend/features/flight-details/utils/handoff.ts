@@ -51,8 +51,9 @@ export function resolvePassengerCheckoutHandoffUrl(pathOrUrl: string): string | 
       ? pathOrUrl
       : `/${pathOrUrl}`;
 
-  if (normalized.startsWith("/booking/passengers")) {
-    return normalized;
+  if (normalized.startsWith("/booking/passengers") || /(?:^|\/)booking\/passengers(?:\?|$)/.test(normalized)) {
+    const match = normalized.match(/(\/booking\/passengers(?:\?.*)?)$/);
+    return match ? match[1] : "/booking/passengers";
   }
 
   return resolveHandoffUrl(pathOrUrl);

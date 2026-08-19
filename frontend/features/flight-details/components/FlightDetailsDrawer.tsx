@@ -154,21 +154,30 @@ export function FlightDetailsDrawer({
                   disabled={revalidation.state === "loading"}
                 />
 
-                <BaggageDetails
-                  baggage={fallback?.baggage}
-                  summaryDisplay={offer.baggage_summary_display ?? offer.baggage}
-                  checkedDisplay={offer.baggage_checked_display}
-                  cabinDisplay={offer.baggage_cabin_display}
-                />
+                <section data-testid="fare-details-baggage">
+                  <h3 className="text-sm font-semibold text-jp-text">Baggage Policy</h3>
+                  <BaggageDetails
+                    baggage={fallback?.baggage}
+                    summaryDisplay={offer.baggage_summary_display ?? offer.baggage}
+                    checkedDisplay={offer.baggage_checked_display}
+                    cabinDisplay={offer.baggage_cabin_display}
+                  />
+                </section>
 
-                <FareRulesAccordion
-                  rules={fallback?.fare_rules}
-                  refundRule={offer.refund_rule}
-                  changeRule={offer.change_rule}
-                  refundable={offer.refundable}
-                />
+                <section data-testid="fare-details-policy">
+                  <h3 className="text-sm font-semibold text-jp-text">Fare Policy</h3>
+                  <FareRulesAccordion
+                    rules={fallback?.fare_rules}
+                    refundRule={offer.refund_rule}
+                    changeRule={offer.change_rule}
+                    refundable={offer.refundable}
+                  />
+                </section>
 
-                <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />
+                <section data-testid="fare-details-breakdown">
+                  <h3 className="text-sm font-semibold text-jp-text">Fare Details</h3>
+                  <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />
+                </section>
 
                 {revalidation.state === "loading" ? (
                   <RevalidationPanel message="Confirming fare with the airline…" />

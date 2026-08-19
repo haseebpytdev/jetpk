@@ -109,6 +109,24 @@ export type FlightOffer = {
   final_customer_price?: number;
 };
 
+export type PairedReturnOption = {
+  combo_id: string;
+  outbound_key?: string;
+  return_key?: string;
+  outbound_journey?: Record<string, unknown>;
+  return_journey?: Record<string, unknown>;
+  total_amount?: number | null;
+  total_display?: string;
+  fare_family?: string;
+  cabin?: string;
+  baggage?: string;
+  refundable?: boolean;
+  can_book?: boolean;
+  airline_name?: string;
+  airline_code?: string;
+  pairing_authority?: string;
+};
+
 export type OutboundOption = {
   outbound_key: string;
   journey_display?: {
@@ -149,7 +167,7 @@ export type ResultsFilterMeta = {
 
 export type FlightResultsDataResponse = {
   search_id: string;
-  flow?: "return_split_outbound";
+  flow?: "return_split_outbound" | "return_pair";
   page: number;
   per_page: number;
   total: number;
@@ -157,6 +175,8 @@ export type FlightResultsDataResponse = {
   filters?: ResultsFilterMeta;
   offers?: FlightOffer[];
   outbound_options?: OutboundOption[];
+  paired_options?: PairedReturnOption[];
+  pairing_authority?: "SUPPLIER_RETURNED" | "SUPPLIER_VALIDATED" | "UNAVAILABLE";
   warnings?: string[];
   empty_message?: string;
   search_freshness?: SearchFreshness;
@@ -238,6 +258,7 @@ export type ActiveResultsFilters = {
   fare_family?: string;
   bookable_only?: string;
   operating_airline?: string;
+  flight_number?: string;
 };
 
 export type ResultsPageStatus =
