@@ -18,7 +18,7 @@ Creates/updates:
 
 | Table | Values |
 |-------|--------|
-| `client_profiles` | slug `jetpk`, theme `jetpakistan`, asset `jetpk-assets`, domain `jetpakistan.com` |
+| `client_profiles` | slug `jetpk`, theme `jetpakistan`, asset `jetpk-assets`, domain `jetpakistan.pk` |
 | `client_profile_branding` | Green/gold brand, support contact |
 | `client_profile_modules` | From config defaults |
 | `client_profile_suppliers` | All suppliers disabled initially |
@@ -37,7 +37,7 @@ Copy `clients/jetpk/env.production.example` → server `.env`:
 - [ ] `OTA_ACTIVE_THEME=jetpakistan`
 - [ ] `OTA_PUBLIC_ASSET_PROFILE=jetpk-assets`
 - [ ] `OTA_MODULE_*` match `modules.json`
-- [ ] `APP_URL=https://www.jetpakistan.com` (or staging domain)
+- [ ] `APP_URL=https://jetpakistan.pk` (or an explicitly named staging domain)
 - [ ] `OTA_DEFAULT_AGENCY_SLUG=jetpk` (or agency slug for JetPK)
 
 On **master workspace** (testing only), keep `OTA_CLIENT_SLUG=haseeb-master`; use `/jetpk/*` preview routes.

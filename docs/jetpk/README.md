@@ -1,5 +1,10 @@
 # JetPK deployment & completion docs
 
+**Authoritative live context:** read
+[DEPLOYMENT-CONTEXT.md](DEPLOYMENT-CONTEXT.md) before using any deployment,
+SSH/SFTP, or production browser instruction. Historical shared-preview and
+dedicated-domain records are not current JetPakistan production context.
+
 Index for **JetPakistan** (`slug: jetpk`, theme: `jetpakistan`, assets: `jetpk-assets`).
 
 Master roadmap: [../JETPK-V1-CLIENT-UI-COMPLETION-ROADMAP.md](../JETPK-V1-CLIENT-UI-COMPLETION-ROADMAP.md)

@@ -1,7 +1,7 @@
 {
     "client_name": "JetPakistan",
     "client_slug": "jetpk",
-    "domain": "jetpakistan.com",
+    "domain": "jetpakistan.pk",
     "environment": "production",
     "active_theme": "jetpakistan",
     "active_public_asset_profile": "jetpk-assets",

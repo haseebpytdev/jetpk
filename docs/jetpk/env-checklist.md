@@ -10,7 +10,7 @@ Copy from `clients/jetpk/env.production.example`. Never commit real `.env`.
 | `APP_ENV` | `production` | Yes |
 | `APP_KEY` | Generate on server | Yes |
 | `APP_DEBUG` | `false` | Yes |
-| `APP_URL` | `https://www.jetpakistan.com` | Yes |
+| `APP_URL` | `https://jetpakistan.pk` | Yes |
 | `APP_LOCALE` | `en` | Yes |
 
 ## Database & session

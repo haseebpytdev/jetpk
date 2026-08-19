@@ -4,6 +4,10 @@
 Work precisely. Use the smallest safe change. Do not rewrite unrelated code.
 
 ## Before Editing
+- For JetPakistan live context, read
+  `docs/jetpk/DEPLOYMENT-CONTEXT.md` first. It is authoritative for the
+  canonical host, production topology, forbidden hosts, and deployment actor;
+  historical or generic hosting references must not override it.
 - **Read and obey `docs/PRODUCTION_DEPLOYMENT_SAFETY.md`** before modifying files
   (no blind namespace, deployment workflow, defensive coding, verification commands).
 - Obey `.cursor/rules/laravel-production-safety.mdc` and

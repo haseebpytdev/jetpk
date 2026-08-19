@@ -4,11 +4,11 @@
     "ssh_port": 22,
     "ssh_user": "REPLACE_SSH_USER",
     "auth_type": "password",
-    "app_path": "/home/REPLACE_USER/domains/jetpakistan.com/laravel",
-    "public_html_path": "/home/REPLACE_USER/domains/jetpakistan.com/public_html",
-    "public_assets_path": "/home/REPLACE_USER/domains/jetpakistan.com/public_html/client-assets/jetpk-assets",
-    "backup_path": "/home/REPLACE_USER/backups/jetpk",
-    "deploy_strategy": "sftp_single_file",
+    "app_path": "/home/pkjetp/jetpk_app",
+    "public_html_path": "/home/pkjetp/public_html",
+    "public_assets_path": "/home/pkjetp/public_html/client-assets/jetpk-assets",
+    "backup_path": "/home/pkjetp/backups",
+    "deploy_strategy": "owner_manual_protected_scripts",
     "last_deployed_at": null,
     "last_deployed_by": null
 }

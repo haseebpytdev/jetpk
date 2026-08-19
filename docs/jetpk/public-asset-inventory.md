@@ -33,10 +33,10 @@ Base URL: `/client-assets/jetpk-assets/`
 
 Source files: design team / jetpakistan.com brand kit.
 
-Upload target (Hostinger example):
+Upload target (current JetPakistan production webroot):
 
 ```
-/home/{user}/domains/jetpakistan.com/public_html/client-assets/jetpk-assets/
+/home/pkjetp/public_html/client-assets/jetpk-assets/
 ```
 
 See `clients/jetpk/deployment.json` for client-specific paths.

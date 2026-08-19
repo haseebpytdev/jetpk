@@ -1,7 +1,7 @@
 # SPEC.md
 
 ## Project Name
-Asif Travels OTA (Online Travel Agency)
+JetPakistan OTA (Online Travel Agency)
 
 ## Project Goal
 Build and maintain this Laravel-based OTA platform with minimal regressions, minimal
@@ -18,7 +18,12 @@ flows unless explicitly told otherwise.
 - **PDF:** `barryvdh/laravel-dompdf`
 - **Testing:** PHPUnit 12 (unit/feature) + Playwright 1.59 (E2E desktop/mobile)
 - **Code Style:** Laravel Pint
-- **Hosting/Deployment:** VPS (production URL: `https://ota.haseebasif.com`)
+- **Hosting/Deployment:** JetPakistan production at `https://jetpakistan.pk`;
+  Laravel `/home/pkjetp/jetpk_app`; public Next
+  `/home/pkjetp/jetpk_app/frontend`; webroot `/home/pkjetp/public_html`;
+  PM2 processes `jetpk-public-frontend` and `jetpk-dashboard`; private Laravel
+  `127.0.0.1:8088`; authoritative PHP
+  `/usr/local/lsws/lsphp83/bin/lsphp`
 - **Suppliers:** Sabre, Duffel (mock supplier was removed — do not re-introduce)
 
 ## Important Existing Architecture

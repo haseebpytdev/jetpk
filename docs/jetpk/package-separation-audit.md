@@ -81,7 +81,7 @@ Client parity registers **GET/HEAD only** (209 routes). Booking POST actions use
 ## Recommended production topology
 
 ```
-jetpakistan.com
+jetpakistan.pk
 ├── Laravel app (shared codebase)
 ├── OTA_CLIENT_SLUG=jetpk
 ├── OTA_ACTIVE_THEME=jetpakistan
