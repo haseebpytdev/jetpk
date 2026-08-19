@@ -94,5 +94,5 @@
 - Revert the phase commit to restore the prior search components/tests and summary entries.
 - Do not roll back or modify production; no production files were uploaded.
 
-- Commit SHA: pending
+- Commit SHA: `0d08874612c399cfe4d9adce8a2218e5c9cd5a2b`
 - Final status: `LOCAL_PASS_LIVE_BLOCKED_OWNER_REVIEW_REQUIRED`
