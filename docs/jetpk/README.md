@@ -13,6 +13,8 @@ Master roadmap: [../JETPK-V1-CLIENT-UI-COMPLETION-ROADMAP.md](../JETPK-V1-CLIENT
 
 | Document | Use when |
 |----------|----------|
+| [DEPLOYMENT-CONTEXT.md](DEPLOYMENT-CONTEXT.md) | Current host, topology, protected deploy route |
+| [deployments/JETPAKISTAN-PK-SEARCH-UI-PARITY-DEPLOYMENT-20260819.md](deployments/JETPAKISTAN-PK-SEARCH-UI-PARITY-DEPLOYMENT-20260819.md) | 2026-08-19 Search UI production deployment record |
 | [file-inventory.md](file-inventory.md) | Auditing JetPK-only files before deploy |
 | [common-backend-inventory.md](common-backend-inventory.md) | Confirming shared backend scope |
 | [public-asset-inventory.md](public-asset-inventory.md) | Uploading theme + branding assets |
