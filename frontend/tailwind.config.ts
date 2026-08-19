@@ -6,6 +6,9 @@ import {
 } from "./lib/theme/typography";
 
 const config: Config = {
+  // JetPakistan dark: utilities must follow the internal data-theme switch only —
+  // never OS/browser prefers-color-scheme alone.
+  darkMode: ["selector", '[data-theme="dark"]'],
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",

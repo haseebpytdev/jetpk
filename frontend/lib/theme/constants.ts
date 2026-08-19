@@ -8,20 +8,26 @@ export {
 
 export const THEME_STORAGE_KEY = "jp-theme-preference";
 
-export const THEME_VALUES = ["system", "light", "dark"] as const;
+/** Internal day/night preferences only. Legacy "system" is accepted then coerced to light. */
+export const THEME_VALUES = ["light", "dark"] as const;
 
-export type ThemePreference = (typeof THEME_VALUES)[number];
+export const THEME_CYCLE_VALUES = THEME_VALUES;
+
+export type ThemePreference = (typeof THEME_VALUES)[number] | "system";
 
 export type ResolvedTheme = "light" | "dark";
 
-export const DEFAULT_THEME_PREFERENCE: ThemePreference = "system";
+export const DEFAULT_THEME_PREFERENCE: ThemePreference = "light";
 
 export function isThemePreference(value: unknown): value is ThemePreference {
-  return typeof value === "string" && (THEME_VALUES as readonly string[]).includes(value);
+  return value === "light" || value === "dark" || value === "system";
 }
 
-export function resolveTheme(preference: ThemePreference, systemDark: boolean): ResolvedTheme {
+/**
+ * Resolve visual theme. Browser/OS preference never activates dark unless the
+ * internal preference is explicitly "dark". Legacy "system" maps to light.
+ */
+export function resolveTheme(preference: ThemePreference, _systemDark = false): ResolvedTheme {
   if (preference === "dark") return "dark";
-  if (preference === "light") return "light";
-  return systemDark ? "dark" : "light";
+  return "light";
 }

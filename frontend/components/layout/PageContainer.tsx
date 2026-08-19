@@ -16,7 +16,7 @@ export function PageContainer({ children, className, narrow, booking, fullBleed 
   return (
     <div
       className={cn(
-        "mx-auto w-full px-jp-xl",
+        "mx-auto w-full min-w-0 max-w-full px-jp-xl",
         !fullBleed && (narrow ? "max-w-jp-narrow" : booking ? "max-w-jp-booking" : "max-w-jp-container"),
         className,
       )}

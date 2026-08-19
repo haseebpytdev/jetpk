@@ -1,13 +1,12 @@
 "use client";
 
-import { THEME_VALUES, type ThemePreference } from "@/lib/theme/constants";
+import { THEME_CYCLE_VALUES, type ThemePreference } from "@/lib/theme/constants";
 import { cn } from "@/lib/cn";
 import { useTheme } from "./ThemeProvider";
 
-const LABELS: Record<ThemePreference, string> = {
-  system: "System theme",
-  light: "Light theme",
-  dark: "Dark theme",
+const LABELS: Record<"light" | "dark", string> = {
+  light: "Day theme",
+  dark: "Night theme",
 };
 
 type ThemeSwitchProps = {
@@ -18,10 +17,11 @@ type ThemeSwitchProps = {
 
 export function ThemeSwitch({ className, iconOnly = true }: ThemeSwitchProps) {
   const { preference, setPreference } = useTheme();
+  const mode: "light" | "dark" = preference === "dark" ? "dark" : "light";
 
   const cyclePreference = () => {
-    const index = THEME_VALUES.indexOf(preference);
-    const next = THEME_VALUES[(index + 1) % THEME_VALUES.length];
+    const index = THEME_CYCLE_VALUES.indexOf(mode);
+    const next = THEME_CYCLE_VALUES[(index + 1) % THEME_CYCLE_VALUES.length];
     setPreference(next);
   };
 
@@ -29,7 +29,7 @@ export function ThemeSwitch({ className, iconOnly = true }: ThemeSwitchProps) {
     <button
       type="button"
       onClick={cyclePreference}
-      title={LABELS[preference]}
+      title={LABELS[mode]}
       className={cn(
         "inline-flex items-center justify-center border border-jp-border bg-jp-surface text-jp-text",
         "transition-colors duration-ui hover:bg-jp-surface-muted",
@@ -39,31 +39,17 @@ export function ThemeSwitch({ className, iconOnly = true }: ThemeSwitchProps) {
           : "min-h-9 gap-1.5 rounded-jp-md px-2 py-1.5 text-jp-sm font-medium",
         className,
       )}
-      aria-label={`Theme: ${LABELS[preference]}. Activate to switch theme.`}
+      aria-label={`Theme: ${LABELS[mode]}. Activate to switch theme.`}
       data-testid="theme-switch"
-      data-theme-preference={preference}
+      data-theme-preference={mode}
     >
-      <ThemeIcon preference={preference} />
-      <span className="sr-only">{LABELS[preference]}</span>
+      <ThemeIcon preference={mode} />
+      <span className="sr-only">{LABELS[mode]}</span>
     </button>
   );
 }
 
 function ThemeIcon({ preference }: { preference: ThemePreference }) {
-  if (preference === "light") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true">
-        <circle cx="12" cy="12" r="4" fill="currentColor" />
-        <path
-          d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-      </svg>
-    );
-  }
-
   if (preference === "dark") {
     return (
       <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true">
@@ -77,14 +63,13 @@ function ThemeIcon({ preference }: { preference: ThemePreference }) {
 
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.35" />
+      <circle cx="12" cy="12" r="4" fill="currentColor" />
       <path
-        d="M12 3v2.5M12 18.5V21M4.2 12H6.7M17.3 12H19.8M6.1 6.1l1.8 1.8M16.1 16.1l1.8 1.8M6.1 17.9l1.8-1.8M16.1 7.9l1.8-1.8"
+        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinecap="round"
       />
-      <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3" stroke="currentColor" strokeWidth="1.8" fill="none" />
     </svg>
   );
 }

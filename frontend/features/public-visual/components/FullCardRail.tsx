@@ -5,9 +5,11 @@ import { cn } from "@/lib/cn";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 function visibleCardCount(width: number): number {
-  if (width >= 1180) return 4;
-  if (width >= 900) return 3;
-  if (width >= 640) return 2;
+  // Desktop PageContainer is ~1160–1240 minus horizontal padding, so the rail
+  // itself is typically under 1180px. Use 1000 so desktop still shows 4 cards.
+  if (width >= 1000) return 4;
+  if (width >= 720) return 3;
+  if (width >= 520) return 2;
   return 1;
 }
 
@@ -33,7 +35,8 @@ export function FullCardRail({
   nextLabel,
 }: FullCardRailProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [count, setCount] = useState(4);
+  // Default to 1 so SSR/first paint never forces a 4-up basis on narrow viewports.
+  const [count, setCount] = useState(1);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
 
@@ -72,7 +75,7 @@ export function FullCardRail({
   const cardBasis = `calc((100% - ${(count - 1) * 1}rem) / ${count})`;
 
   return (
-    <div className={cn("mt-jp-md flex items-center gap-2", className)} data-full-card-count={count}>
+    <div className={cn("mt-jp-md flex w-full max-w-full items-center gap-2 overflow-hidden", className)} data-full-card-count={count}>
       {needsNav ? (
         <SecondaryButton
           type="button"
@@ -86,7 +89,7 @@ export function FullCardRail({
       ) : null}
       <div
         ref={scrollerRef}
-        className="flex min-w-0 flex-1 snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex min-w-0 w-full max-w-full flex-1 snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="region"
         aria-label={ariaLabel}
         style={{ ["--jp-card-basis" as string]: cardBasis }}
@@ -109,4 +112,4 @@ export function FullCardRail({
 }
 
 export const fullCardArticleClass =
-  "shrink-0 snap-start overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card [flex-basis:var(--jp-card-basis)] [width:var(--jp-card-basis)] max-w-full";
+  "shrink-0 snap-start overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card [flex-basis:var(--jp-card-basis)] [width:var(--jp-card-basis)] [max-width:var(--jp-card-basis)]";

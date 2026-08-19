@@ -71,7 +71,12 @@ is_excluded_runtime_path() {
     frontend/tests/*|*/tests/*) return 0 ;;
     *.spec.ts|*.spec.tsx|*.test.ts|*.test.tsx|*.test.mjs|*.test.js) return 0 ;;
     frontend/tmp/*|frontend/node_modules/*|frontend/.next/*) return 0 ;;
-    docs/*|tmp/*|*.md|*.log|*.png|*.jpg|*.jpeg|*.webp) return 0 ;;
+    docs/*|tmp/*|*.md|*.log) return 0 ;;
+    *.png|*.jpg|*.jpeg|*.webp)
+      # Allow tracked JetPakistan brand assets under client-assets; exclude other images.
+      [[ "${path}" == frontend/public/client-assets/* ]] && return 1
+      return 0
+      ;;
     .env|.env.*|*.pem|*.key|*.p12) return 0 ;;
     dashboard/*) return 0 ;;
     *) return 1 ;;

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const CANONICAL_JETPK_HEADER_LOGO_PATH = "/client-assets/jetpk/logo/logo.svg";
+const CANONICAL_JETPK_HEADER_LOGO_PATH = "/client-assets/jetpk/logo/logo.png";
 
 function isClientAssetsPath(pathname) {
   return pathname.startsWith("/client-assets/") || pathname.startsWith("client-assets/");
@@ -43,8 +43,8 @@ test("resolveHeaderLogoUrl falls back to canonical JetPakistan logo", () => {
 
 test("resolveHeaderLogoUrl normalizes Laravel absolute client-assets URLs", () => {
   assert.equal(
-    resolveHeaderLogoUrl("http://127.0.0.1:8000/client-assets/jetpk/logo/logo.svg"),
-    "/client-assets/jetpk/logo/logo.svg",
+    resolveHeaderLogoUrl("http://127.0.0.1:8000/client-assets/jetpk/logo/logo.png"),
+    "/client-assets/jetpk/logo/logo.png",
   );
 });
 

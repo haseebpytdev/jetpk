@@ -19,7 +19,7 @@ import {
 } from "react";
 
 type ThemeContextValue = {
-  preference: ThemePreference;
+  preference: ResolvedTheme;
   resolved: ResolvedTheme;
   setPreference: (preference: ThemePreference) => void;
 };
@@ -41,45 +41,46 @@ function applyResolvedTheme(resolved: ResolvedTheme) {
   document.documentElement.style.colorScheme = resolved;
 }
 
+function normalizePreference(preference: ThemePreference): "light" | "dark" {
+  return preference === "dark" ? "dark" : "light";
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(DEFAULT_THEME_PREFERENCE);
-  const [systemDark, setSystemDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setPreferenceState(readStoredPreference());
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const updateSystem = () => setSystemDark(media.matches);
-    updateSystem();
-    media.addEventListener("change", updateSystem);
+    const stored = readStoredPreference();
+    // Legacy "system" must not follow OS — coerce to light (DAY).
+    setPreferenceState(normalizePreference(stored));
     setMounted(true);
-    return () => media.removeEventListener("change", updateSystem);
   }, []);
 
-  const resolved = resolveTheme(preference, systemDark);
+  const resolved = resolveTheme(preference);
 
   useEffect(() => {
     applyResolvedTheme(resolved);
     if (!mounted) return;
     try {
-      localStorage.setItem(THEME_STORAGE_KEY, preference);
+      localStorage.setItem(THEME_STORAGE_KEY, normalizePreference(preference));
     } catch {
       /* storage unavailable */
     }
   }, [preference, resolved, mounted]);
 
   const setPreference = useCallback((next: ThemePreference) => {
-    setPreferenceState(next);
-    applyResolvedTheme(resolveTheme(next, window.matchMedia("(prefers-color-scheme: dark)").matches));
+    const normalized = normalizePreference(next);
+    setPreferenceState(normalized);
+    applyResolvedTheme(resolveTheme(normalized));
     try {
-      localStorage.setItem(THEME_STORAGE_KEY, next);
+      localStorage.setItem(THEME_STORAGE_KEY, normalized);
     } catch {
       /* storage unavailable */
     }
   }, []);
 
   const value = useMemo(
-    () => ({ preference, resolved, setPreference }),
+    () => ({ preference: normalizePreference(preference), resolved, setPreference }),
     [preference, resolved, setPreference],
   );
 

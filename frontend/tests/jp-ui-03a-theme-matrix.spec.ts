@@ -13,6 +13,12 @@ async function applyTheme(page: import("@playwright/test").Page, theme: "light" 
 }
 
 async function assertNoHorizontalOverflow(page: import("@playwright/test").Page) {
+  await page.waitForFunction(() => {
+    const rails = Array.from(document.querySelectorAll("[data-full-card-count]"));
+    if (rails.length === 0) return true;
+    return rails.every((rail) => Number(rail.getAttribute("data-full-card-count") || "0") >= 1);
+  });
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 }
@@ -26,11 +32,12 @@ for (const theme of ["light", "dark", "system-light", "system-dark"] as const) {
     await setupPublicBaseline(page);
     await applyTheme(page, theme);
     await page.goto("/", { waitUntil: "load" });
-    const expected = theme === "dark" || theme === "system-dark" ? "dark" : "light";
+    // Legacy "system" is coerced to light; OS scheme never activates night alone.
+    const expected = theme === "dark" ? "dark" : "light";
     await expect(page.locator("html")).toHaveAttribute("data-theme", expected);
     await expect(page.getByTestId("theme-switch")).toHaveAttribute(
       "data-theme-preference",
-      theme.startsWith("system") ? "system" : theme,
+      expected,
     );
   });
 }
@@ -53,14 +60,14 @@ test("explicit dark ignores browser scheme change", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
-test("system preference tracks browser scheme changes", async ({ page }) => {
+test("legacy system preference stays light even when OS is dark", async ({ page }) => {
   await setupPublicBaseline(page);
   await applyTheme(page, "system-light");
   await page.goto("/", { waitUntil: "load" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.emulateMedia({ colorScheme: "dark" });
   await page.waitForTimeout(300);
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
 
 test("theme persists across public navigation", async ({ page }) => {
@@ -76,7 +83,7 @@ test("invalid stored theme value is ignored", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.evaluate(() => localStorage.setItem("jp-theme-preference", "invalid-value"));
   await page.reload({ waitUntil: "load" });
-  await expect(page.getByTestId("theme-switch")).toHaveAttribute("data-theme-preference", "system");
+  await expect(page.getByTestId("theme-switch")).toHaveAttribute("data-theme-preference", "light");
 });
 
 test("no hydration warnings on themed homepage", async ({ page }) => {

@@ -1,5 +1,5 @@
-/** Canonical JetPakistan header logo served from Laravel `public/client-assets`. */
-export const CANONICAL_JETPK_HEADER_LOGO_PATH = "/client-assets/jetpk/logo/logo.svg";
+/** Canonical JetPakistan header logo (owner-approved artwork, PNG). */
+export const CANONICAL_JETPK_HEADER_LOGO_PATH = "/client-assets/jetpk/logo/logo.png";
 
 function isClientAssetsPath(pathname: string): boolean {
   return pathname.startsWith("/client-assets/") || pathname.startsWith("client-assets/");
