@@ -11,7 +11,12 @@ test("public shell renders header, hero, and footer", async ({ page }) => {
   await expect(page.getByRole("contentinfo")).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: /Explore the world with/i })).toBeVisible();
   await expect(page.getByTestId("search-module")).toBeVisible();
-  await expect(page.getByRole("link", { name: "JetPakistan home" })).toBeVisible();
+  await expect(page.getByLabel("JetPakistan home")).toBeVisible();
+  const headerLogo = page.getByRole("banner").getByTestId("jetpakistan-header-logo");
+  await expect(headerLogo).toBeVisible();
+  await expect(headerLogo).toHaveAttribute("alt", /JetPakistan/i);
+  const logoResponse = await page.request.get("/client-assets/jetpk/logo/logo.svg");
+  expect(logoResponse.ok()).toBeTruthy();
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
   await expect(page.getByTestId("theme-switch")).toBeVisible();
 });

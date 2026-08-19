@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
         source: "/laravel/:path*",
         destination: `${laravelProxyTarget}/index.php/:path*`,
       },
+      {
+        source: "/client-assets/:path*",
+        destination: `${laravelProxyTarget}/client-assets/:path*`,
+      },
+      {
+        source: "/storage/:path*",
+        destination: `${laravelProxyTarget}/storage/:path*`,
+      },
     ];
   },
 };
