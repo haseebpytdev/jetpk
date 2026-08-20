@@ -186,6 +186,7 @@ test.describe("JP-FE-06 flight details", () => {
     });
     await page.getByTestId("flight-details-trigger").click();
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+    await expect.poll(() => resolveDetails).toBeTruthy();
     resolveDetails?.();
     await expect(page.getByTestId("price-breakdown")).toBeVisible();
   });
@@ -476,6 +477,7 @@ test.describe("JP-FE-06 flight details", () => {
     });
     await page.getByTestId("flight-details-trigger").click();
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+    await expect.poll(() => detailsUrl).not.toBe("");
     const parsed = new URL(detailsUrl);
     expect(parsed.pathname).toContain("/laravel/flights/results/offer");
     expect(parsed.searchParams.get("search_id")).toBeTruthy();
@@ -562,6 +564,7 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page.getByTestId("flight-result-card")).toBeVisible();
     await page.getByTestId("flight-details-trigger").click();
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+    await expect.poll(() => detailsUrl).not.toBe("");
     expect(detailsUrl).toContain("fare_option_key=eco-basic");
   });
 

@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-18 (OWNER-RETEST-V3 B23 Sabre wire + redaction)
+**Last updated:** 2026-08-20 (JetPakistan Flight Details 422 closure)
 
 ---
 
@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-08-20 | JETPK FLIGHT DETAILS 422 CLOSURE | **Next Flight Details request contract:** ordinary offers send `search_id` + `offer_id` without the card's booking fallback as `fare_option_key`; branded offers send only a selected key present in the offer's real fare-family options. Laravel `invalid_fare_option` validation remains fail-closed; Details stays GET/read-only. Focused PHPUnit and Playwright coverage includes ordinary/branded keys, expired search, cache immutability, URL safety, and stable async request capture. |
 | 2026-08-19 | JETPK SEARCH UI LIVE FOLLOW-UP | **Next public search UI:** populated airport fields enter safe replace mode on activation (blur/Escape restore), return mode keeps the single `DateRangeField`, Trip Type is compact, product-tab contrast is improved, SearchModule uses a more opaque whitish-grey glass panel, and successful empty group facets show a JetPakistan-specific empty state. Live `jetpakistan.pk` parity was read-only diagnosed as stale bundle/deployment drift; no production mutation. |
 | 2026-08-18 | OWNER-RETEST-V3 B23 Sabre wire | **`SabreBookingService`**: Trip Orders createBooking/compare bypasses GDS passenger-records strategy gate when schema/path requests Trip Orders. **`SensitiveDataRedactor`**: supplier wire diagnostic keys (`wire_*`, `agency_phone_*`, `traveler_N_*`, `has_create_passenger_name_record_rq`, etc.) no longer redacted in `safe_summary`. **`SabreBookingWirePhaseB23Test`**: setUp disables public GDS/PR diversion flags for wire matrix. |
 | 2026-08-18 | OWNER-RETEST-V3 v25 cluster | **`AirlineCanonicalResolver::findDatabaseAirline`** skips missing `airlines` table. **`JetpkHomepageSectionData::defaults()`** returns **`defaultHomeContent()`**; trust eyebrow/title restored. Tests follow Next GET redirects for lookup/public pages; traveller layout + IATI fallback source paths updated. |
