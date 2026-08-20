@@ -12,7 +12,7 @@ export function BookingLayout({ main, sidebar, mobileSummary, className }: Booki
   return (
     <div className={cn("jp-booking-shell mt-6", className)}>
       {mobileSummary ? <div className="mb-4 lg:hidden">{mobileSummary}</div> : null}
-      <div className="jp-booking-grid grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,22rem)]">
+      <div className="jp-booking-grid grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)]">
         {main}
         {sidebar ? <div className="hidden lg:block">{sidebar}</div> : null}
       </div>

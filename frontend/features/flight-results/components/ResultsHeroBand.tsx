@@ -20,9 +20,8 @@ export function ResultsHeroBand({ className }: ResultsHeroBandProps) {
         <h2 id="results-hero-heading" className="mt-jp-xs font-sans text-jp-h2 font-bold text-jp-text sm:text-3xl">
           Choose Your <span className="text-jp-brand">Perfect Flight</span>
         </h2>
-        <p className="mt-jp-sm max-w-2xl text-jp-body text-jp-muted">
-          Compare fares, filters, and flight details from live supplier results. Prices and availability are
-          confirmed when you continue to booking.
+        <p className="mt-1.5 max-w-2xl text-sm text-jp-muted">
+          Compare available flights, review the fare details, and choose the journey that suits you.
         </p>
       </div>
     </header>

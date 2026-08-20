@@ -57,15 +57,15 @@ export function FareRulesAccordion({
   return (
     <section data-testid="fare-rules-accordion" aria-labelledby={`${baseId}-heading`}>
       <h3 id={`${baseId}-heading`} className="text-sm font-semibold text-jp-text">
-        Fare rules
+        Fare policy
       </h3>
-      <div className="mt-2 space-y-2">
+      <div className="mt-2.5 overflow-hidden rounded-jp-md border border-jp-border">
         {sections.map((section) => {
           if (!section.content) return null;
           const expanded = openSection === section.id;
           const panelId = `${baseId}-${section.id}`;
           return (
-            <div key={section.id} className="rounded-jp-md border border-jp-border">
+            <div key={section.id} className="border-b border-jp-border-soft last:border-b-0">
               <button
                 type="button"
                 className="flex w-full items-center justify-between px-3 py-2 text-left text-sm font-medium text-jp-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
@@ -77,7 +77,7 @@ export function FareRulesAccordion({
                 <span aria-hidden>{expanded ? "−" : "+"}</span>
               </button>
               {expanded ? (
-                <div id={panelId} className="border-t border-jp-border px-3 py-2">
+                <div id={panelId} className="border-t border-jp-border-soft bg-jp-surface-muted px-3 py-2.5">
                   <SafeRuleText text={section.content} />
                 </div>
               ) : null}
@@ -85,7 +85,7 @@ export function FareRulesAccordion({
           );
         })}
         {ruleLines.length > 0 ? (
-          <div className="rounded-jp-md border border-jp-border px-3 py-2">
+          <div className="border-t border-jp-border px-3 py-2.5">
             <p className="mb-2 text-sm font-medium text-jp-text">Full fare conditions</p>
             {ruleLines.map((line, index) => (
               <SafeRuleText key={`rule-line-${index}`} text={line} />
@@ -93,7 +93,7 @@ export function FareRulesAccordion({
           </div>
         ) : null}
         {sections.every((s) => !s.content) && ruleLines.length === 0 ? (
-          <p className="text-sm text-jp-text-muted">Fare rules were not provided by the airline.</p>
+          <p className="px-3 py-2.5 text-sm text-jp-text-muted">Fare rules were not provided by the airline.</p>
         ) : null}
       </div>
     </section>

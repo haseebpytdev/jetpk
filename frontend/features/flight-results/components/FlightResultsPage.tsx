@@ -147,12 +147,12 @@ export function FlightResultsPage() {
 
       <div className="relative">
         <ResultsHeroBand />
-        <div className="relative z-10 mx-auto -mt-14 max-w-7xl px-4 sm:-mt-16 sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto -mt-11 max-w-7xl px-4 sm:-mt-12 sm:px-6 lg:px-8">
           <SearchSummaryBar summary={summary} onModifyClick={() => setEditOpen((open) => !open)} />
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-7xl space-y-3 px-4 pb-6 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl space-y-2.5 px-4 pb-6 pt-3 sm:px-6 lg:px-8">
         {editOpen ? (
           <div data-testid="inline-edit-search">
             <SearchModule
@@ -217,7 +217,7 @@ export function FlightResultsPage() {
 
         <ResultsSortTabs value={sort} onChange={handleSortChange} className="hidden sm:flex" />
 
-        <div className="grid gap-3 lg:grid-cols-[minmax(14rem,15rem)_minmax(0,1fr)]">
+        <div className="grid gap-4 lg:grid-cols-[minmax(13.5rem,14.5rem)_minmax(0,1fr)]">
           <div className="hidden lg:block">
             <ResultsFilterPanel
               facets={results.data?.filters}

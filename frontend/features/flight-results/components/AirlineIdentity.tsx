@@ -21,7 +21,7 @@ export function AirlineIdentity({ code, name, logoUrl, size = "md", className }:
   const alt = name ? `${name} logo` : code ? `${code} airline logo` : "Airline";
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-2.5", className)}>
       <div
         className={cn(
           "relative flex shrink-0 items-center justify-center overflow-hidden rounded-jp-sm border border-jp-border bg-jp-surface-muted",
@@ -43,8 +43,8 @@ export function AirlineIdentity({ code, name, logoUrl, size = "md", className }:
         )}
       </div>
       <div className="min-w-0">
-        {name ? <p className="truncate text-sm font-medium text-jp-text">{name}</p> : null}
-        {code ? <p className="text-xs text-jp-text-muted">{code}</p> : null}
+        {name ? <p className="truncate text-sm font-semibold leading-tight text-jp-text" title={name}>{name}</p> : null}
+        {code ? <p className="mt-0.5 text-[11px] font-medium tracking-wide text-jp-text-muted">{code}</p> : null}
       </div>
     </div>
   );

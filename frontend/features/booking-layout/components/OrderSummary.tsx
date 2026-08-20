@@ -15,6 +15,15 @@ export type OrderSummaryProps = {
   variant?: "order" | "flight-preview";
 };
 
+function segmentValue(segment: Record<string, unknown> | undefined, keys: string[]): string | null {
+  if (!segment) return null;
+  for (const key of keys) {
+    const value = segment[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 function ItineraryRows({ itinerary, travellerTotal }: { itinerary: SelectedFlightSummary; travellerTotal?: number }) {
   return (
     <div className="space-y-2 text-jp-sm">
@@ -69,6 +78,35 @@ function ItineraryRows({ itinerary, travellerTotal }: { itinerary: SelectedFligh
   );
 }
 
+function PreviewRoute({ itinerary }: { itinerary: SelectedFlightSummary }) {
+  const first = itinerary.segments?.[0];
+  const last = itinerary.segments?.[itinerary.segments.length - 1];
+  const departure = segmentValue(first, ["departure_time_display", "departure_time", "depart"]);
+  const arrival = segmentValue(last, ["arrival_time_display", "arrival_time", "arrive"]);
+  const origin = segmentValue(first, ["origin_airport_code", "origin"]) ?? itinerary.origin;
+  const destination = segmentValue(last, ["destination_airport_code", "destination"]) ?? itinerary.destination;
+
+  if (!departure && !arrival) return null;
+
+  return (
+    <div className="mb-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-jp-md border border-jp-border-soft bg-jp-page px-3 py-3" data-testid="flight-preview-route">
+      <div>
+        <p className="text-base font-bold tabular-nums text-jp-text">{departure ?? "—"}</p>
+        <p className="text-xs font-semibold text-jp-muted">{origin}</p>
+      </div>
+      <div className="flex min-w-16 items-center" aria-hidden="true">
+        <span className="h-px flex-1 bg-jp-border" />
+        <span className="mx-1 text-xs text-jp-primary">●</span>
+        <span className="h-px flex-1 bg-jp-border" />
+      </div>
+      <div className="text-right">
+        <p className="text-base font-bold tabular-nums text-jp-text">{arrival ?? "—"}</p>
+        <p className="text-xs font-semibold text-jp-muted">{destination}</p>
+      </div>
+    </div>
+  );
+}
+
 function PriceRows({ pricing }: { pricing: AuthoritativePricing }) {
   return (
     <dl className="mt-4 space-y-2 border-t border-jp-border pt-3 text-jp-sm">
@@ -86,9 +124,9 @@ function PriceRows({ pricing }: { pricing: AuthoritativePricing }) {
           <dd>{pricing.currency} {pricing.service_charges.toLocaleString()}</dd>
         </div>
       ) : null}
-      <div className="flex justify-between gap-4 border-t border-jp-border pt-2 font-semibold text-jp-text">
+      <div className="mt-3 flex items-center justify-between gap-4 rounded-jp-md bg-jp-primary/5 px-3 py-3 font-semibold text-jp-text">
         <dt>Total</dt>
-        <dd data-testid="order-summary-total">{pricing.formatted_total}</dd>
+        <dd className="text-lg font-bold text-jp-primary" data-testid="order-summary-total">{pricing.formatted_total}</dd>
       </div>
     </dl>
   );
@@ -136,6 +174,7 @@ export function OrderSummary({
               <div className="min-w-0"><p className="truncate text-sm font-semibold text-jp-text">{itinerary.airline_name ?? itinerary.airline_code}</p><p className="text-xs text-jp-muted">{itinerary.flight_number ?? "Flight number not supplied"}</p></div>
             </div>
           ) : null}
+          {preview ? <PreviewRoute itinerary={itinerary} /> : null}
           <ItineraryRows itinerary={itinerary} travellerTotal={travellerTotal} />
           {preview && (itinerary.duration || itinerary.stops != null || itinerary.cabin) ? (
             <div className="mt-3 flex flex-wrap gap-2 border-t border-jp-border pt-3 text-xs text-jp-muted">
@@ -150,7 +189,7 @@ export function OrderSummary({
       {pricing ? <PriceRows pricing={pricing} /> : null}
 
       {!pricing && itinerary?.total_formatted ? (
-        <p className="mt-3 border-t border-jp-border pt-3 text-lg font-semibold text-jp-text" data-testid="order-summary-total">
+        <p className="mt-3 rounded-jp-md bg-jp-primary/5 px-3 py-3 text-lg font-bold text-jp-primary" data-testid="order-summary-total">
           {itinerary.currency} {itinerary.total_formatted}
         </p>
       ) : null}

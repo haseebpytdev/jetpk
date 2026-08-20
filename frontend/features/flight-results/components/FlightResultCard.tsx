@@ -54,12 +54,12 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
 
   return (
     <article
-      className="rounded-jp-card border border-jp-border bg-jp-surface p-3 shadow-jp-card transition-shadow hover:shadow-md sm:p-4"
+      className="overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface p-3 shadow-jp-card transition-all hover:border-jp-primary/30 hover:shadow-md focus-within:border-jp-primary/40 sm:px-4"
       data-testid="flight-result-card"
       aria-label={`${offer.airline_name ?? offer.airline_code ?? "Flight"} ${offer.departure_time ?? ""} to ${offer.arrival_time ?? ""}`}
     >
-      <div className="grid items-center gap-3 sm:grid-cols-[minmax(8rem,0.8fr)_minmax(18rem,2.2fr)_minmax(9rem,1fr)] lg:gap-5">
-        <div className="min-w-0">
+      <div className="grid items-center gap-3 md:grid-cols-[minmax(8rem,0.85fr)_minmax(16rem,2fr)_minmax(10.5rem,0.95fr)] lg:gap-4 xl:grid-cols-[minmax(10.5rem,1fr)_minmax(20rem,2.35fr)_minmax(12.5rem,0.95fr)]">
+        <div className="min-w-0 md:pr-1">
           <AirlineIdentity code={offer.airline_code} name={offer.airline_name} logoUrl={offer.airline_logo_url} size="md" />
           <p className="mt-1 truncate text-xs text-jp-text-muted">
             {offer.flight_number ?? "Flight number not supplied"}
@@ -78,7 +78,7 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
               destinationCode={lastSegment?.destination_airport_code ?? lastSegment?.destination}
               duration={offer.duration ?? offer.segments?.map((segment) => segment.duration_display).filter(Boolean).join(" + ")}
             />
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <StopsAndLayover
               stops={offer.stops ?? 0}
               stopsLabel={offer.stops_label_display}
@@ -88,7 +88,6 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
             <FareBadge refundable={offer.refundable} seatsLeft={offer.seats_left} />
             <BaggageSummary offer={offer} />
           </div>
-          {viaCodes.length > 0 ? <p className="text-xs text-jp-text-muted">Connection via {viaCodes.join(", ")}</p> : null}
           {offer.multicity_inquiry_only ? (
             <MulticityInquiryActions
               searchId={searchId}
@@ -102,14 +101,14 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
           ) : null}
         </div>
 
-        <div className="flex min-w-0 items-end justify-between gap-3 border-t border-jp-border-soft pt-3 sm:flex-col sm:items-end sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+        <div className="flex min-w-0 items-end justify-between gap-3 border-t border-jp-border-soft pt-3 md:h-full md:min-w-[10.5rem] md:flex-col md:items-end md:justify-center md:border-l md:border-t-0 md:pl-3 md:pt-0 xl:min-w-[12.5rem] xl:pl-4">
           <div className="text-right">
             <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">{fareOptions.length > 1 ? "From" : "Total fare"}</p>
-            <p className="text-lg font-bold text-jp-text" data-testid="result-price-display">
+            <p className="whitespace-nowrap text-lg font-bold text-jp-text" data-testid="result-price-display">
               {displayPrice ?? (displayAmount != null ? `PKR ${displayAmount.toLocaleString()}` : "Price unavailable")}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
           <button
             type="button"
             className="rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"

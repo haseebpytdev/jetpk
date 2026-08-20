@@ -12,6 +12,8 @@ type PassengerCardProps = {
   onChange: (index: number, field: keyof PassengerFormValues, value: string) => void;
 };
 
+const fieldClass = "mt-1 h-10 w-full rounded-jp-md border border-jp-border bg-white px-3 text-sm text-jp-text shadow-sm outline-none transition-colors focus:border-jp-primary focus:ring-2 focus:ring-jp-primary/20 aria-[invalid=true]:border-red-600 aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-red-200";
+
 export function PassengerCard({
   index,
   label,
@@ -29,7 +31,7 @@ export function PassengerCard({
 
   return (
     <fieldset
-      className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-sm sm:p-5"
+      className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-card sm:p-5"
       data-testid={`passenger-card-${index}`}
     >
       <legend className="flex items-center gap-2 px-1 text-jp-sm font-semibold">
@@ -43,8 +45,8 @@ export function PassengerCard({
 
       <input type="hidden" name={`passengers[${index}][passenger_type]`} value={passenger.passenger_type} />
 
-      <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2">
-        <div className="border-b border-jp-border-soft pb-2 sm:col-span-2">
+      <div className="mt-4 grid gap-x-5 gap-y-4 sm:grid-cols-2">
+        <div className="border-b border-jp-border-soft pb-2.5 sm:col-span-2">
           <h3 className="text-sm font-semibold text-jp-text">Personal information</h3>
           <p className="mt-0.5 text-xs text-jp-muted">Enter names exactly as shown on the travel document.</p>
         </div>
@@ -53,7 +55,7 @@ export function PassengerCard({
           <select
             value={passenger.title}
             onChange={(e) => onChange(index, "title", e.target.value)}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+            className={fieldClass}
             aria-invalid={Boolean(fieldErrors[`passengers.${index}.title`])}
           >
             {TITLES.map((title) => (
@@ -70,7 +72,7 @@ export function PassengerCard({
           <select
             value={passenger.gender}
             onChange={(e) => onChange(index, "gender", e.target.value)}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+            className={fieldClass}
           >
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -85,7 +87,7 @@ export function PassengerCard({
             autoComplete={index === 0 ? "given-name" : "off"}
             value={passenger.first_name}
             onChange={(e) => onChange(index, "first_name", e.target.value)}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+            className={fieldClass}
             aria-invalid={Boolean(fieldErrors[`passengers.${index}.first_name`])}
           />
           {fieldErrors[`passengers.${index}.first_name`] ? (
@@ -100,7 +102,7 @@ export function PassengerCard({
             autoComplete={index === 0 ? "family-name" : "off"}
             value={passenger.last_name}
             onChange={(e) => onChange(index, "last_name", e.target.value)}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+            className={fieldClass}
           />
         </label>
 
@@ -111,7 +113,7 @@ export function PassengerCard({
             max={new Date().toISOString().slice(0, 10)}
             value={passenger.date_of_birth}
             onChange={(e) => onChange(index, "date_of_birth", e.target.value)}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+            className={fieldClass}
           />
           {fieldErrors[`passengers.${index}.date_of_birth`] ? (
             <p className="mt-1 text-jp-sm text-red-700">{fieldErrors[`passengers.${index}.date_of_birth`]}</p>
@@ -127,11 +129,11 @@ export function PassengerCard({
             autoComplete="off"
             value={passenger.nationality}
             onChange={(e) => onChange(index, "nationality", e.target.value.toUpperCase())}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2 uppercase"
+            className={`${fieldClass} uppercase`}
           />
         </label>
 
-        <div className="mt-2 border-b border-jp-border-soft pb-2 sm:col-span-2">
+        <div className="mt-2 border-b border-jp-border-soft pb-2.5 sm:col-span-2">
           <h3 className="text-sm font-semibold text-jp-text">Travel document</h3>
           <p className="mt-0.5 text-xs text-jp-muted">Document requirements are determined by the selected itinerary.</p>
         </div>
@@ -142,7 +144,7 @@ export function PassengerCard({
             <select
               value={passenger.document_type}
               onChange={(e) => onChange(index, "document_type", e.target.value)}
-              className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+              className={fieldClass}
             >
               <option value="passport">Passport</option>
               <option value="national_id">National ID / CNIC</option>
@@ -159,7 +161,7 @@ export function PassengerCard({
                 autoComplete="off"
                 value={passenger.passport_number}
                 onChange={(e) => onChange(index, "passport_number", e.target.value)}
-                className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+                className={fieldClass}
               />
             </label>
             <label className="text-jp-sm">
@@ -170,7 +172,7 @@ export function PassengerCard({
                 autoComplete="off"
                 value={passenger.passport_issuing_country}
                 onChange={(e) => onChange(index, "passport_issuing_country", e.target.value.toUpperCase())}
-                className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2 uppercase"
+                className={`${fieldClass} uppercase`}
               />
             </label>
             <label className="text-jp-sm">
@@ -179,7 +181,7 @@ export function PassengerCard({
                 type="date"
                 value={passenger.passport_expiry_date}
                 onChange={(e) => onChange(index, "passport_expiry_date", e.target.value)}
-                className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+                className={fieldClass}
               />
               {fieldErrors[`passengers.${index}.passport_expiry_date`] ? (
                 <p className="mt-1 text-jp-sm text-red-700">{fieldErrors[`passengers.${index}.passport_expiry_date`]}</p>
@@ -192,7 +194,7 @@ export function PassengerCard({
                 max={new Date().toISOString().slice(0, 10)}
                 value={passenger.passport_issue_date}
                 onChange={(e) => onChange(index, "passport_issue_date", e.target.value)}
-                className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+                className={fieldClass}
               />
             </label>
           </>
@@ -206,7 +208,7 @@ export function PassengerCard({
               autoComplete="off"
               value={passenger.national_id_number}
               onChange={(e) => onChange(index, "national_id_number", e.target.value)}
-              className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+              className={fieldClass}
             />
           </label>
         ) : null}

@@ -8,6 +8,8 @@ type ContactDetailsSectionProps = {
   onChange: (field: keyof ContactFormValues, value: string | boolean) => void;
 };
 
+const fieldClass = "mt-1 h-10 w-full rounded-jp-md border border-jp-border bg-white px-3 text-sm text-jp-text shadow-sm outline-none transition-colors focus:border-jp-primary focus:ring-2 focus:ring-jp-primary/20 disabled:bg-jp-surface-muted aria-[invalid=true]:border-red-600 aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-red-200";
+
 export function ContactDetailsSection({
   contact,
   locked,
@@ -16,13 +18,13 @@ export function ContactDetailsSection({
   onChange,
 }: ContactDetailsSectionProps) {
   return (
-    <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-sm sm:p-5" data-testid="contact-details">
+    <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-card sm:p-5" data-testid="contact-details">
       <div className="border-b border-jp-border-soft pb-3">
       <h2 className="text-base font-semibold text-jp-text">Contact details</h2>
       <p className="mt-1 text-jp-sm text-jp-muted">Booking confirmation will be sent to this contact.</p>
       </div>
 
-      <div className="mt-4 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+      <div className="mt-4 grid gap-x-5 gap-y-4 sm:grid-cols-2">
         <label className="text-jp-sm sm:col-span-2">
           Contact name <span className="text-jp-muted">(optional)</span>
           <input
@@ -30,7 +32,7 @@ export function ContactDetailsSection({
             disabled={locked}
             value={contact.contact_name}
             onChange={(e) => onChange("contact_name", e.target.value)}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2 disabled:bg-jp-surface-muted"
+            className={fieldClass}
           />
         </label>
 
@@ -42,7 +44,7 @@ export function ContactDetailsSection({
             disabled={locked}
             value={contact.email}
             onChange={(e) => onChange("email", e.target.value)}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2 disabled:bg-jp-surface-muted"
+            className={fieldClass}
             aria-invalid={Boolean(fieldErrors.email)}
           />
           {fieldErrors.email ? <p className="mt-1 text-jp-sm text-red-700">{fieldErrors.email}</p> : null}
@@ -56,7 +58,7 @@ export function ContactDetailsSection({
             disabled={locked}
             value={contact.phone}
             onChange={(e) => onChange("phone", e.target.value)}
-            className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2 disabled:bg-jp-surface-muted"
+            className={fieldClass}
             aria-invalid={Boolean(fieldErrors.phone)}
           />
           {fieldErrors.phone ? <p className="mt-1 text-jp-sm text-red-700">{fieldErrors.phone}</p> : null}
@@ -81,7 +83,7 @@ export function ContactDetailsSection({
                     autoComplete="new-password"
                     value={contact.password ?? ""}
                     onChange={(e) => onChange("password", e.target.value)}
-                    className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+                    className={fieldClass}
                   />
                 </label>
                 <label className="text-jp-sm">
@@ -91,7 +93,7 @@ export function ContactDetailsSection({
                     autoComplete="new-password"
                     value={contact.password_confirmation ?? ""}
                     onChange={(e) => onChange("password_confirmation", e.target.value)}
-                    className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2"
+                    className={fieldClass}
                   />
                 </label>
               </>

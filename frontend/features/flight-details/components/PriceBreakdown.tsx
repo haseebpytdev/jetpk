@@ -34,16 +34,16 @@ export function PriceBreakdown({ offer, breakdown }: PriceBreakdownProps) {
       <h3 id="price-breakdown-heading" className="text-sm font-semibold text-jp-text">
         Price breakdown
       </h3>
-      <dl className="mt-2 space-y-2 text-sm">
+      <dl className="mt-2.5 space-y-2 text-sm">
         {rows.map((row) => (
           <div key={row.label} className="flex flex-wrap items-center justify-between gap-2">
             <dt className="text-jp-text-muted">{row.label}</dt>
             <dd className="font-medium text-jp-text">{row.value}</dd>
           </div>
         ))}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-jp-border pt-2">
-          <dt className="font-semibold text-jp-text">Total</dt>
-          <dd className="text-base font-semibold text-jp-text">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-jp-md bg-jp-primary/5 px-3 py-3">
+          <dt className="font-semibold text-jp-text">Grand total</dt>
+          <dd className="text-xl font-bold text-jp-primary">
             {offer.price_display ?? formatPkr(total) ?? "Fare unavailable"}
           </dd>
         </div>

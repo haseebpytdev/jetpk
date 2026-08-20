@@ -105,7 +105,7 @@ export function FlightDetailsDrawer({
           aria-labelledby="flight-details-title"
           className="relative flex max-h-[94dvh] w-full flex-col rounded-t-2xl bg-jp-page shadow-jp-card sm:h-full sm:max-h-none sm:max-w-4xl sm:rounded-none lg:max-w-5xl"
         >
-          <header className="flex items-start justify-between gap-4 border-b border-jp-border bg-jp-surface px-4 py-3 sm:px-6">
+          <header className="flex items-start justify-between gap-4 border-b border-jp-border bg-jp-surface px-4 py-2.5 sm:px-5">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-jp-primary">JetPakistan</p>
               <h2 id="flight-details-title" className="mt-0.5 text-lg font-semibold text-jp-text sm:text-xl">
@@ -128,7 +128,7 @@ export function FlightDetailsDrawer({
             </button>
           </header>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
+          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
             {details.loadState === "loading" ? <ResultSkeleton count={2} /> : null}
             {details.loadState === "error" ? (
               <SearchErrorState message={details.message ?? "Unable to load details."} onRetry={details.reload} />
@@ -142,18 +142,18 @@ export function FlightDetailsDrawer({
             ) : null}
 
             {details.loadState === "ready" && offer ? (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {isInquiry ? (
                   <p className="text-sm text-jp-text-muted" role="note">
                     {details.data?.inquiry_only_notice ?? offer.inquiry_only_notice ?? "Multi-city inquiry only."}
                   </p>
                 ) : null}
 
-                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-4" aria-labelledby="journey-details-heading">
+                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" aria-labelledby="journey-details-heading">
                   <h3 id="journey-details-heading" className="mb-3 text-sm font-semibold text-jp-text">Journey details</h3>
                   <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
                   <RouteTimeline segments={segments} layovers={offer.layovers_display} />
-                  <div className="mt-4"><SegmentDetails segments={segments} /></div>
+                  <div className="mt-3"><SegmentDetails segments={segments} /></div>
                 </section>
 
                 <FareFamilyDetails
@@ -164,8 +164,7 @@ export function FlightDetailsDrawer({
                 />
 
                 <div className="grid gap-4 lg:grid-cols-2">
-                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-4" data-testid="fare-details-baggage">
-                  <h3 className="text-sm font-semibold text-jp-text">Baggage Policy</h3>
+                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" data-testid="fare-details-baggage">
                   <BaggageDetails
                     baggage={fallback?.baggage}
                     summaryDisplay={offer.baggage_summary_display ?? offer.baggage}
@@ -174,8 +173,7 @@ export function FlightDetailsDrawer({
                   />
                 </section>
 
-                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-4" data-testid="fare-details-policy">
-                  <h3 className="text-sm font-semibold text-jp-text">Fare Policy</h3>
+                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" data-testid="fare-details-policy">
                   <FareRulesAccordion
                     rules={fallback?.fare_rules}
                     refundRule={offer.refund_rule}
@@ -185,8 +183,7 @@ export function FlightDetailsDrawer({
                 </section>
                 </div>
 
-                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-4" data-testid="fare-details-breakdown">
-                  <h3 className="text-sm font-semibold text-jp-text">Fare Details</h3>
+                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" data-testid="fare-details-breakdown">
                   <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />
                 </section>
 

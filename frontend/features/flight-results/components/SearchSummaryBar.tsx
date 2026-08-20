@@ -31,13 +31,13 @@ export function SearchSummaryBar({ summary, onModifyClick, className }: SearchSu
   return (
     <div
       className={cn(
-        "sticky top-0 z-30 rounded-jp-card border border-jp-border bg-jp-surface/95 p-3 shadow-jp-card backdrop-blur sm:p-4",
+        "sticky top-0 z-30 rounded-jp-card border border-jp-border bg-jp-surface/95 p-3 shadow-jp-card backdrop-blur",
         className,
       )}
       data-testid="search-summary-bar"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0 space-y-1.5">
+        <div className="min-w-0 space-y-1">
           <p className="text-jp-xs font-medium uppercase tracking-wide text-jp-muted">{summary.tripType}</p>
           <p className="text-jp-base font-semibold text-jp-text sm:text-lg">
             {summary.origin}

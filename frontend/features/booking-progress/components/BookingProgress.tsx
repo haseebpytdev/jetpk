@@ -37,7 +37,7 @@ function StepIndicator({
         "inline-flex items-center justify-center rounded-full font-bold transition-colors motion-reduce:transition-none",
         compact ? "h-6 w-6 text-[0.65rem]" : "h-8 w-8 text-jp-xs",
         isComplete && "bg-jp-primary text-white",
-        isCurrent && "bg-jp-primary text-white ring-2 ring-jp-primary ring-offset-2 ring-offset-jp-bg",
+        isCurrent && "scale-110 bg-jp-primary text-white shadow-md ring-2 ring-jp-primary/30 ring-offset-2 ring-offset-jp-bg",
         isUpcoming && "border border-jp-border bg-jp-surface-muted text-jp-muted",
       )}
     >
@@ -131,7 +131,7 @@ export function BookingProgress({
                   className={cn(
                     "mt-1 text-center text-jp-xs",
                     compact ? "sr-only" : "hidden min-[480px]:block",
-                    step.state === "current" && "font-semibold text-jp-text",
+                    step.state === "current" && "font-bold text-jp-primary",
                     step.state === "completed" && "text-jp-text",
                     step.state === "upcoming" && "text-jp-muted",
                   )}
