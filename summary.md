@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-20 (JetPakistan visual refinement V2)
+**Last updated:** 2026-08-20 (JetPakistan fare modal mobile scroll closure)
 
 ---
 
@@ -19,6 +19,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
+| 2026-08-20 | JETPK FARE MODAL MOBILE SCROLL | **Next Flight Details drawer:** opening the modal now locks root/body overflow, guards the captured page coordinates, and cancels wheel/touch gestures only outside the drawer scroll surface, compensating for scrollbar removal without offsetting the viewport-fixed drawer. Cleanup restores the original document styles and coordinates; native modal vertical scrolling, fare-family horizontal scrolling, Escape/backdrop close, focus restoration, and the sticky continuation action remain intact. |
 | 2026-08-20 | JETPK VISUAL REFINEMENT V2 | **Next public booking presentation:** refined compact result alignment, responsive card columns, cohesive dense filters, and tighter results composition. The shared fare modal now presents an unclipped three-up desktop carousel, stronger selected-fare hierarchy, cleaner baggage/policy accordions, and a dominant grand total. Travelers fields, current progress step, and the authoritative Flight Preview route/time/total hierarchy received a consumer-facing polish pass; booking and supplier contracts are unchanged. |
 | 2026-08-20 | JETPK RESULTS / FARE / TRAVELERS UX | **Next public booking flow:** ordinary result cards are compact and never render branded-fare cards inline; Details and Book Now share the authoritative read-only Flight Details surface, with actual branded choices in a responsive three-up carousel and passenger handoff only after explicit fare confirmation. Filters are denser with a mobile drawer. Travelers groups personal/document/contact fields and renders an authoritative sticky Flight Preview without supplier revalidation. |
 | 2026-08-20 | JETPK FLIGHT DETAILS 422 CLOSURE | **Next Flight Details request contract:** ordinary offers send `search_id` + `offer_id` without the card's booking fallback as `fare_option_key`; branded offers send only a selected key present in the offer's real fare-family options. Laravel `invalid_fare_option` validation remains fail-closed; Details stays GET/read-only. Focused PHPUnit and Playwright coverage includes ordinary/branded keys, expired search, cache immutability, URL safety, and stable async request capture. |

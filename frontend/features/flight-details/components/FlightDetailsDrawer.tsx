@@ -38,8 +38,58 @@ export function FlightDetailsDrawer({
   onNewSearch,
 }: FlightDetailsDrawerProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const scrollSurfaceRef = useRef<HTMLDivElement>(null);
   const details = useFlightDetails(open ? context : null);
   const revalidation = useRevalidation();
+
+  useEffect(() => {
+    if (!open) return;
+
+    const root = document.documentElement;
+    const body = document.body;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const previousRootOverflow = root.style.overflow;
+    const previousRootOverscrollBehavior = root.style.overscrollBehavior;
+    const previousRootScrollBehavior = root.style.scrollBehavior;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyOverscrollBehavior = body.style.overscrollBehavior;
+    const previousBodyPaddingRight = body.style.paddingRight;
+    const scrollbarWidth = Math.max(0, window.innerWidth - root.clientWidth);
+    const bodyPaddingRight = Number.parseFloat(window.getComputedStyle(body).paddingRight) || 0;
+
+    root.style.overflow = "hidden";
+    root.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    if (scrollbarWidth > 0) body.style.paddingRight = `${bodyPaddingRight + scrollbarWidth}px`;
+
+    const preventBackgroundScroll = (event: WheelEvent | TouchEvent) => {
+      if (event.target instanceof Node && scrollSurfaceRef.current?.contains(event.target)) return;
+      event.preventDefault();
+    };
+    const restoreLockedScroll = () => {
+      if (window.scrollX !== scrollX || window.scrollY !== scrollY) window.scrollTo(scrollX, scrollY);
+    };
+    document.addEventListener("wheel", preventBackgroundScroll, { passive: false });
+    document.addEventListener("touchmove", preventBackgroundScroll, { passive: false });
+    window.addEventListener("scroll", restoreLockedScroll, { passive: true });
+
+    return () => {
+      document.removeEventListener("wheel", preventBackgroundScroll);
+      document.removeEventListener("touchmove", preventBackgroundScroll);
+      window.removeEventListener("scroll", restoreLockedScroll);
+      root.style.overflow = previousRootOverflow;
+      root.style.overscrollBehavior = previousRootOverscrollBehavior;
+      body.style.overflow = previousBodyOverflow;
+      body.style.overscrollBehavior = previousBodyOverscrollBehavior;
+      body.style.paddingRight = previousBodyPaddingRight;
+
+      root.style.scrollBehavior = "auto";
+      window.scrollTo(scrollX, scrollY);
+      root.style.scrollBehavior = previousRootScrollBehavior;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -89,7 +139,7 @@ export function FlightDetailsDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-end justify-end sm:items-stretch" data-testid="flight-details-drawer">
+      <div className="fixed inset-0 z-50 flex items-end justify-end overscroll-none sm:items-stretch" data-testid="flight-details-drawer">
         <button
           type="button"
           className="absolute inset-0 bg-black/40"
@@ -128,7 +178,11 @@ export function FlightDetailsDrawer({
             </button>
           </header>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+          <div
+            ref={scrollSurfaceRef}
+            className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 py-4 sm:px-5"
+            data-testid="flight-details-scroll-surface"
+          >
             {details.loadState === "loading" ? <ResultSkeleton count={2} /> : null}
             {details.loadState === "error" ? (
               <SearchErrorState message={details.message ?? "Unable to load details."} onRetry={details.reload} />

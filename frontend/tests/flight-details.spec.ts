@@ -576,4 +576,88 @@ test.describe("JP-FE-06 flight details", () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
     expect(overflow).toBe(false);
   });
+
+  test("mobile fare modal locks the page while its content and fare carousel remain scrollable", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const brandedOptions = ["Saver", "Value", "Flex", "Comfort"].map((name, index) => ({
+      option_key: `economy-${name.toLowerCase()}`,
+      name: `Economy ${name}`,
+      displayed_price: 120000 + index * 10000,
+      price_display: `${120 + index * 10},000 PKR`,
+      baggage: `${23 + index * 5}kg checked`,
+      cabin_baggage: "7kg cabin",
+      refundable: index >= 2,
+      changeable: index >= 1,
+    }));
+
+    await setupResultsAndDetails(page, {
+      detailsBody: mockDetailsBody({
+        offer: mockOfferWithDetails({
+          has_branded_fares: true,
+          branded_fares_display_options: brandedOptions,
+          fare_family_options_display: brandedOptions,
+        }),
+      }),
+    });
+    const priorScrollY = await page.getByTestId("book-now-trigger").evaluate((button) => {
+      const spacer = document.createElement("div");
+      spacer.style.height = "1800px";
+      spacer.style.width = "1px";
+      spacer.style.pointerEvents = "none";
+      document.body.appendChild(spacer);
+      void spacer.offsetHeight;
+      window.scrollTo(0, 420);
+      const scrollY = window.scrollY;
+      if (button instanceof HTMLElement) button.click();
+      return scrollY;
+    });
+    await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+    await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe("hidden");
+    await expect(page.getByRole("list", { name: "Fare family options" })).toBeVisible();
+
+    const lockedScrollY = await page.evaluate(() => window.scrollY);
+    await page.mouse.move(4, 4);
+    await page.mouse.wheel(0, 600);
+    expect(await page.evaluate(() => window.scrollY)).toBe(lockedScrollY);
+
+    const scrollSurface = page.getByTestId("flight-details-scroll-surface");
+    const modalScroll = await scrollSurface.evaluate((node) => {
+      node.scrollTop = Math.min(360, node.scrollHeight - node.clientHeight);
+      return {
+        scrollTop: node.scrollTop,
+        scrollHeight: node.scrollHeight,
+        clientHeight: node.clientHeight,
+      };
+    });
+    expect(modalScroll.scrollHeight).toBeGreaterThan(modalScroll.clientHeight);
+    expect(modalScroll.scrollTop).toBeGreaterThan(0);
+    expect(await page.evaluate(() => window.scrollY)).toBe(lockedScrollY);
+
+    const fareList = page.getByRole("list", { name: "Fare family options" });
+    await expect(fareList.locator("[data-fare-family-card]")).toHaveCount(4);
+    const carousel = await fareList.evaluate((node) => {
+      const firstCard = node.querySelector<HTMLElement>("[data-fare-family-card]");
+      node.scrollLeft = Math.min(180, node.scrollWidth - node.clientWidth);
+      return {
+        scrollLeft: node.scrollLeft,
+        scrollWidth: node.scrollWidth,
+        clientWidth: node.clientWidth,
+        firstCardWidth: firstCard?.getBoundingClientRect().width ?? 0,
+      };
+    });
+    expect(carousel.scrollWidth).toBeGreaterThan(carousel.clientWidth);
+    expect(carousel.scrollLeft).toBeGreaterThan(0);
+    expect(carousel.firstCardWidth).toBeGreaterThan(carousel.clientWidth * 0.8);
+    expect(carousel.firstCardWidth).toBeLessThan(carousel.clientWidth);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("flight-details-drawer")).toHaveCount(0);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(priorScrollY);
+    expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
+    expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe("");
+    await page.evaluate(() => window.scrollTo(0, 100));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  });
 });
