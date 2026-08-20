@@ -179,7 +179,7 @@ export function OrderSummary({
           {preview && (itinerary.duration || itinerary.stops != null || itinerary.cabin) ? (
             <div className="mt-3 flex flex-wrap gap-2 border-t border-jp-border pt-3 text-xs text-jp-muted">
               {itinerary.duration ? <span className="rounded-full bg-jp-page px-2 py-1">{itinerary.duration}</span> : null}
-              {itinerary.stops != null ? <span className="rounded-full bg-jp-page px-2 py-1">{itinerary.stops === 0 ? "Nonstop" : `${itinerary.stops} stop${itinerary.stops === 1 ? "" : "s"}`}</span> : null}
+              {itinerary.stops != null ? <span className="rounded-full bg-jp-page px-2 py-1">{itinerary.stops === 0 ? "Direct" : `${itinerary.stops} Stop${itinerary.stops === 1 ? "" : "s"}`}</span> : null}
               {itinerary.cabin ? <span className="rounded-full bg-jp-page px-2 py-1">{itinerary.cabin}</span> : null}
             </div>
           ) : null}

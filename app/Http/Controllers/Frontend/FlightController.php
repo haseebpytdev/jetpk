@@ -1821,7 +1821,7 @@ class FlightController extends Controller
     {
         return array_values(array_filter($offers, function (array $offer) use ($filters, $criteria): bool {
             if (($filters['airline'] ?? '') !== '') {
-                $want = strtoupper((string) $filters['airline']);
+                $wanted = $this->filterValues((string) $filters['airline'], true);
                 $codes = $offer['all_airline_codes'] ?? null;
                 if (! is_array($codes) || $codes === []) {
                     $codes = [strtoupper((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')))];
@@ -1830,20 +1830,18 @@ class FlightController extends Controller
                     static fn (mixed $c): string => strtoupper(trim((string) $c)),
                     $codes
                 ))));
-                if (! in_array($want, $codes, true)) {
+                if (array_intersect($wanted, $codes) === []) {
                     return false;
                 }
             }
 
             if (($filters['stops'] ?? '') !== '') {
                 $stops = (int) ($offer['stops'] ?? 0);
-                if ($filters['stops'] === 'direct' && $stops !== 0) {
-                    return false;
-                }
-                if ($filters['stops'] === '1_stop' && $stops !== 1) {
-                    return false;
-                }
-                if ($filters['stops'] === '2_plus' && $stops < 2) {
+                $wanted = $this->filterValues((string) $filters['stops']);
+                $matches = ($stops === 0 && in_array('direct', $wanted, true))
+                    || ($stops === 1 && in_array('1_stop', $wanted, true))
+                    || ($stops >= 2 && in_array('2_plus', $wanted, true));
+                if (! $matches) {
                     return false;
                 }
             }
@@ -1875,7 +1873,9 @@ class FlightController extends Controller
             }
 
             if (($filters['refundable'] ?? '') !== '') {
-                if (! ItineraryFareConsolidator::offerMatchesRefundableFilter($offer, (string) $filters['refundable'])) {
+                $matches = collect($this->filterValues((string) $filters['refundable']))
+                    ->contains(fn (string $value): bool => ItineraryFareConsolidator::offerMatchesRefundableFilter($offer, $value));
+                if (! $matches) {
                     return false;
                 }
             }
@@ -1903,11 +1903,11 @@ class FlightController extends Controller
                 }
             }
 
-            if (($filters['departure_window'] ?? '') !== '' && ! $this->matchesTimeWindow((string) ($offer['depart_at'] ?? ''), (string) $filters['departure_window'])) {
+            if (($filters['departure_window'] ?? '') !== '' && ! collect($this->filterValues((string) $filters['departure_window']))->contains(fn (string $value): bool => $this->matchesTimeWindow((string) ($offer['depart_at'] ?? ''), $value))) {
                 return false;
             }
 
-            if (($filters['arrival_window'] ?? '') !== '' && ! $this->matchesTimeWindow((string) ($offer['arrive_at'] ?? ''), (string) $filters['arrival_window'])) {
+            if (($filters['arrival_window'] ?? '') !== '' && ! collect($this->filterValues((string) $filters['arrival_window']))->contains(fn (string $value): bool => $this->matchesTimeWindow((string) ($offer['arrive_at'] ?? ''), $value))) {
                 return false;
             }
 
@@ -1938,6 +1938,15 @@ class FlightController extends Controller
 
             return true;
         }));
+    }
+
+    /** @return list<string> */
+    protected function filterValues(string $value, bool $uppercase = false): array
+    {
+        return array_values(array_unique(array_filter(array_map(
+            static fn (string $item): string => $uppercase ? strtoupper(trim($item)) : trim($item),
+            explode(',', $value)
+        ), static fn (string $item): bool => $item !== '')));
     }
 
     /**
@@ -2070,13 +2079,13 @@ class FlightController extends Controller
         return [
             'airlines' => array_values($airlineCounts),
             'stops' => [
-                ['value' => 'direct', 'count' => $direct],
-                ['value' => '1_stop', 'count' => $oneStop],
-                ['value' => '2_plus', 'count' => $twoPlus],
+                ['value' => 'direct', 'label' => 'Direct', 'count' => $direct],
+                ['value' => '1_stop', 'label' => '1 Stop', 'count' => $oneStop],
+                ['value' => '2_plus', 'label' => '2+ Stops', 'count' => $twoPlus],
             ],
             'refundable' => [
-                ['value' => true, 'count' => $refundable],
-                ['value' => false, 'count' => $nonRefundable],
+                ['value' => '1', 'label' => 'Refundable', 'count' => $refundable],
+                ['value' => '0', 'label' => 'Non-refundable', 'count' => $nonRefundable],
             ],
             'price_range' => [
                 'min' => $prices === [] ? 0 : min($prices),

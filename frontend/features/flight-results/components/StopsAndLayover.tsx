@@ -30,7 +30,7 @@ export function StopsAndLayover({ stops, stopsLabel, layoverSummary, viaCodes, c
   const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipId = useId();
   const isDirect = stops <= 0;
-  const label = stopsLabel ?? (isDirect ? "Nonstop" : stops === 1 ? "1 stop" : `${stops} stops`);
+  const label = isDirect ? "Direct" : stops === 1 ? "1 Stop" : `${stops} Stops`;
   const parsed = parseLayoverLine(layoverSummary);
   const hasDetail = !isDirect && Boolean(parsed);
 
@@ -49,7 +49,7 @@ export function StopsAndLayover({ stops, stopsLabel, layoverSummary, viaCodes, c
   if (isDirect) {
     return (
       <span className={cn("inline-flex rounded-full bg-jp-primary-soft px-2 py-0.5 text-xs font-medium text-jp-primary-active", className)}>
-        Nonstop
+        Direct
       </span>
     );
   }

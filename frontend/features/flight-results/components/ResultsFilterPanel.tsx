@@ -1,6 +1,7 @@
 "use client";
 
 import type { ActiveResultsFilters, ResultsFilterMeta } from "../types";
+import { formatWholePkr } from "../utils/price";
 
 type ResultsFilterPanelProps = {
   facets: ResultsFilterMeta | undefined;
@@ -33,17 +34,19 @@ function FacetChoice({
   onChange,
   label,
   count,
+  multiple = true,
 }: {
   name: string;
   checked: boolean;
   onChange: () => void;
   label: string;
   count: number;
+  multiple?: boolean;
 }) {
   return (
     <label className="group flex min-h-7 cursor-pointer items-center gap-2 text-[13px] text-jp-text">
       <input
-        type="radio"
+        type={multiple ? "checkbox" : "radio"}
         name={name}
         checked={checked}
         onChange={onChange}
@@ -59,13 +62,45 @@ function FacetChoice({
   );
 }
 
+function selectedValues(value?: string): string[] {
+  return value?.split(",").map((item) => item.trim()).filter(Boolean) ?? [];
+}
+
+function toggleValue(current: string | undefined, value: string): string | undefined {
+  const next = new Set(selectedValues(current));
+  if (next.has(value)) next.delete(value); else next.add(value);
+  return next.size ? [...next].join(",") : undefined;
+}
+
+const STOP_LABELS: Record<string, string> = { direct: "Direct", "1_stop": "1 Stop", "2_plus": "2+ Stops" };
+const REFUND_LABELS: Record<string, string> = { true: "Refundable", false: "Non-refundable", "1": "Refundable", "0": "Non-refundable" };
+
+function PriceRange({ min, max, filters, onChange }: { min: number; max: number; filters: ActiveResultsFilters; onChange: (filters: ActiveResultsFilters) => void }) {
+  const floor = Math.round(min);
+  const ceiling = Math.max(floor + 1, Math.round(max));
+  const selectedMin = Math.min(Number(filters.min_price ?? floor), Number(filters.max_price ?? ceiling));
+  const selectedMax = Math.max(Number(filters.max_price ?? ceiling), selectedMin);
+  const span = ceiling - floor;
+  const left = ((selectedMin - floor) / span) * 100;
+  const right = 100 - ((selectedMax - floor) / span) * 100;
+  return <div data-testid="price-range-slider">
+    <div className="flex justify-between gap-3 text-[11px] font-semibold text-jp-text"><span>{formatWholePkr(selectedMin)}</span><span>{formatWholePkr(selectedMax)}</span></div>
+    <div className="relative mt-3 h-6">
+      <div className="absolute left-0 right-0 top-2 h-1 rounded-full bg-jp-border-soft" />
+      <div className="absolute top-2 h-1 rounded-full bg-jp-primary" style={{ left: `${left}%`, right: `${right}%` }} />
+      <input type="range" min={floor} max={ceiling} value={selectedMin} aria-label="Minimum price" className="jp-dual-range absolute inset-x-0 top-0 w-full" onChange={(event) => { const value = Math.min(Number(event.target.value), selectedMax); onChange({ ...filters, min_price: String(value) }); }} />
+      <input type="range" min={floor} max={ceiling} value={selectedMax} aria-label="Maximum price" className="jp-dual-range absolute inset-x-0 top-0 w-full" onChange={(event) => { const value = Math.max(Number(event.target.value), selectedMin); onChange({ ...filters, max_price: String(value) }); }} />
+    </div>
+  </div>;
+}
+
 export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, loading, variant = "sidebar" }: ResultsFilterPanelProps) {
   const activeCount = Object.values(filters).filter(Boolean).length;
 
   return (
     <aside
       id={id}
-      className={`${variant === "sidebar" ? "sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-jp-card border border-jp-border shadow-sm" : ""} space-y-2.5 bg-jp-surface p-3.5`}
+      className={`${variant === "sidebar" ? "sticky top-20 rounded-jp-card border border-jp-border shadow-sm" : ""} space-y-2.5 bg-jp-surface p-3.5`}
       aria-label="Filter results"
       data-testid="results-filter-panel"
     >
@@ -108,29 +143,22 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.stops?.length ? (
         <FacetGroup legend="Stops">
           {facets.stops.map((item) => (
-            <FacetChoice key={item.value} name="stops-filter" checked={filters.stops === item.value} onChange={() => onChange({ ...filters, stops: item.value })} label={item.label} count={item.count} />
+            <FacetChoice key={item.value} name="stops-filter" checked={selectedValues(filters.stops).includes(item.value)} onChange={() => onChange({ ...filters, stops: toggleValue(filters.stops, item.value) })} label={item.label || STOP_LABELS[item.value] || item.value} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}
 
       {facets?.price_range ? (
         <FacetGroup legend="Price range">
-          <div className="grid grid-cols-2 gap-2">
-            <label className="text-[10px] font-medium text-jp-text-muted">Minimum (PKR)
-              <input type="number" aria-label="Minimum price" className="mt-1 w-full rounded-jp-md border border-jp-border px-2 py-1.5 text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary" value={filters.min_price ?? ""} placeholder={String(facets.price_range.min)} onChange={(event) => onChange({ ...filters, min_price: event.target.value || undefined })} />
-            </label>
-            <label className="text-[10px] font-medium text-jp-text-muted">Maximum (PKR)
-              <input type="number" aria-label="Maximum price" className="mt-1 w-full rounded-jp-md border border-jp-border px-2 py-1.5 text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary" value={filters.max_price ?? ""} placeholder={String(facets.price_range.max)} onChange={(event) => onChange({ ...filters, max_price: event.target.value || undefined })} />
-            </label>
-          </div>
+          <PriceRange min={facets.price_range.min} max={facets.price_range.max} filters={filters} onChange={onChange} />
         </FacetGroup>
       ) : null}
 
       {facets?.airlines?.length ? (
         <FacetGroup legend="Airlines">
-          <div className="max-h-40 space-y-2 overflow-y-auto">
+          <div className="space-y-2">
             {facets.airlines.map((item) => (
-              <FacetChoice key={item.code} name="airline-filter" checked={filters.airline === item.code} onChange={() => onChange({ ...filters, airline: item.code })} label={item.name} count={item.count} />
+              <FacetChoice key={item.code} name="airline-filter" checked={selectedValues(filters.airline).includes(item.code)} onChange={() => onChange({ ...filters, airline: toggleValue(filters.airline, item.code) })} label={item.name || item.code} count={item.count} />
             ))}
           </div>
         </FacetGroup>
@@ -139,7 +167,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.departure_windows?.length ? (
         <FacetGroup legend="Departure time">
           {facets.departure_windows.map((item) => (
-            <FacetChoice key={item.value} name="departure-window-filter" checked={filters.departure_window === item.value} onChange={() => onChange({ ...filters, departure_window: item.value })} label={item.label} count={item.count} />
+            <FacetChoice key={item.value} name="departure-window-filter" checked={selectedValues(filters.departure_window).includes(item.value)} onChange={() => onChange({ ...filters, departure_window: toggleValue(filters.departure_window, item.value) })} label={item.label || item.value.replaceAll("_", " ")} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}
@@ -147,7 +175,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.arrival_windows?.length ? (
         <FacetGroup legend="Arrival time">
           {facets.arrival_windows.map((item) => (
-            <FacetChoice key={item.value} name="arrival-window-filter" checked={filters.arrival_window === item.value} onChange={() => onChange({ ...filters, arrival_window: item.value })} label={item.label} count={item.count} />
+            <FacetChoice key={item.value} name="arrival-window-filter" checked={selectedValues(filters.arrival_window).includes(item.value)} onChange={() => onChange({ ...filters, arrival_window: toggleValue(filters.arrival_window, item.value) })} label={item.label || item.value.replaceAll("_", " ")} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}
@@ -155,7 +183,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.refundable?.length ? (
         <FacetGroup legend="Refundability">
           {facets.refundable.map((item) => (
-            <FacetChoice key={item.value} name="refundable-filter" checked={filters.refundable === item.value} onChange={() => onChange({ ...filters, refundable: item.value })} label={item.label} count={item.count} />
+            <FacetChoice key={String(item.value)} name="refundable-filter" checked={selectedValues(filters.refundable).includes(String(item.value))} onChange={() => onChange({ ...filters, refundable: toggleValue(filters.refundable, String(item.value)) })} label={item.label || REFUND_LABELS[String(item.value)] || String(item.value)} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}
@@ -163,7 +191,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.cabin_classes?.length ? (
         <FacetGroup legend="Cabin">
           {facets.cabin_classes.map((item) => (
-            <FacetChoice key={item.value} name="cabin-filter" checked={filters.cabin === item.value} onChange={() => onChange({ ...filters, cabin: item.value })} label={item.label} count={item.count} />
+            <FacetChoice key={item.value} name="cabin-filter" multiple={false} checked={filters.cabin === item.value} onChange={() => onChange({ ...filters, cabin: item.value })} label={item.label || item.value} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}

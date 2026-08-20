@@ -17,6 +17,8 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-08-20 | JETPK OWNER RETEST V3 FLIGHT UI REMEDIATION | **Results/fare presentation and read-only filtering:** compact Next result cards now center `Direct` / stop labels in the route connector, omit baggage externally, and use whole-rupee `PKR` display. Desktop filters expand with page scroll, expose readable checkbox multi-select facets backed by comma-separated server OR filtering, and use an accessible dual-ended price range. The shared details drawer now provides authoritative fare-card selection (synthetic options fail closed), selected-fare Baggage Policy / Fare Policy / Fare Details tabs, and passenger-level fare rows when trustworthy PKR data is supplied. Booking/revalidation authority and commercial mutation boundaries remain unchanged. |
+
 | Date       | Area                         | Note |
 |------------|------------------------------|------|
 | 2026-08-20 | JETPK SYNTHETIC FARE AUTHORITY | **Flight Details selection-key contract:** `FlightOfferDisplayPresenter` emits explicit `selection_key_authoritative` metadata—false for synthetic Standard/default display fares and true only for backend-resolvable supplier/grouped/PIA options. Next Details and Book Now read-only requests require that exact marker before serializing `fare_option_key`; display-array membership alone is never authority. Synthetic fare UI and later booking/revalidation handoff remain intact; Laravel `invalid_fare_option` stays fail-closed. |

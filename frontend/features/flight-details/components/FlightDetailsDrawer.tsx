@@ -6,18 +6,16 @@ import { SearchErrorState } from "@/features/flight-results/components/SearchErr
 import { useFlightDetails } from "../hooks/use-flight-details";
 import { useRevalidation } from "../hooks/use-revalidation";
 import type { FlightDetailsContext } from "../types";
-import { BaggageDetails } from "./BaggageDetails";
 import { ContinueToPassengersButton } from "./ContinueToPassengersButton";
 import { FareChangeDialog } from "./FareChangeDialog";
 import { FareFamilyDetails } from "./FareFamilyDetails";
-import { FareRulesAccordion } from "./FareRulesAccordion";
+import { FareSummaryTabs } from "./FareSummaryTabs";
 import {
   OfferExpiredState,
   OfferUnavailableState,
   RevalidationPanel,
   SupplierTimeoutState,
 } from "./OfferStatePanels";
-import { PriceBreakdown } from "./PriceBreakdown";
 import { ReturnJourneyDetails } from "./ReturnJourneyDetails";
 import { RouteTimeline } from "./RouteTimeline";
 import { SegmentDetails } from "./SegmentDetails";
@@ -55,6 +53,10 @@ export function FlightDetailsDrawer({
     const previousBodyOverflow = body.style.overflow;
     const previousBodyOverscrollBehavior = body.style.overscrollBehavior;
     const previousBodyPaddingRight = body.style.paddingRight;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyLeft = body.style.left;
+    const previousBodyWidth = body.style.width;
     const scrollbarWidth = Math.max(0, window.innerWidth - root.clientWidth);
     const bodyPaddingRight = Number.parseFloat(window.getComputedStyle(body).paddingRight) || 0;
 
@@ -62,6 +64,10 @@ export function FlightDetailsDrawer({
     root.style.overscrollBehavior = "none";
     body.style.overflow = "hidden";
     body.style.overscrollBehavior = "none";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = `-${scrollX}px`;
+    body.style.width = "100%";
     if (scrollbarWidth > 0) body.style.paddingRight = `${bodyPaddingRight + scrollbarWidth}px`;
 
     const preventBackgroundScroll = (event: WheelEvent | TouchEvent) => {
@@ -84,6 +90,10 @@ export function FlightDetailsDrawer({
       body.style.overflow = previousBodyOverflow;
       body.style.overscrollBehavior = previousBodyOverscrollBehavior;
       body.style.paddingRight = previousBodyPaddingRight;
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.left = previousBodyLeft;
+      body.style.width = previousBodyWidth;
 
       root.style.scrollBehavior = "auto";
       window.scrollTo(scrollX, scrollY);
@@ -217,29 +227,7 @@ export function FlightDetailsDrawer({
                   disabled={revalidation.state === "loading"}
                 />
 
-                <div className="grid gap-4 lg:grid-cols-2">
-                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" data-testid="fare-details-baggage">
-                  <BaggageDetails
-                    baggage={fallback?.baggage}
-                    summaryDisplay={offer.baggage_summary_display ?? offer.baggage}
-                    checkedDisplay={offer.baggage_checked_display}
-                    cabinDisplay={offer.baggage_cabin_display}
-                  />
-                </section>
-
-                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" data-testid="fare-details-policy">
-                  <FareRulesAccordion
-                    rules={fallback?.fare_rules}
-                    refundRule={offer.refund_rule}
-                    changeRule={offer.change_rule}
-                    refundable={offer.refundable}
-                  />
-                </section>
-                </div>
-
-                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" data-testid="fare-details-breakdown">
-                  <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />
-                </section>
+                <FareSummaryTabs key={details.selectedFareKey || offer.offer_id} offer={offer} fallback={fallback} />
 
                 {revalidation.state === "loading" ? (
                   <RevalidationPanel message="Confirming fare with the airline…" />

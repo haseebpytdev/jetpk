@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn";
 import { shouldUseFareCarousel } from "@/lib/fare-selection-authority";
 import { useCallback, useRef } from "react";
 import type { FareFamilyOption } from "../types";
+import { formatWholePkr } from "@/features/flight-results/utils/price";
 
 type FareFamilyDetailsProps = {
   options: FareFamilyOption[];
@@ -73,23 +74,20 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
           >
           {options.map((option) => {
             const selected = option.option_key === selectedKey;
+            const selectable = option.selection_key_authoritative === true && option.can_select !== false;
             return (
               <div key={option.option_key} data-fare-family-card role="listitem" className="w-[88%] shrink-0 snap-start sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]">
-                <button
-                  type="button"
-                  disabled={disabled}
-                  aria-pressed={selected}
-                  onClick={() => onSelect(option.option_key)}
+                <div
                   className={cn(
-                    "h-full w-full rounded-jp-md border p-3.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary",
+                    "flex h-full w-full flex-col rounded-jp-md border p-3.5 text-left text-sm transition-colors",
                     selected ? "border-jp-primary bg-jp-primary/5 ring-1 ring-jp-primary/20" : "border-jp-border bg-jp-surface hover:border-jp-primary/50",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="font-semibold text-jp-text">{option.brand_name ?? option.name ?? "Fare"}</p>
-                    <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", selected ? "bg-jp-primary text-white" : "bg-jp-page text-jp-text-muted")}>{selected ? "Selected" : "Select"}</span>
+                    <p className="font-semibold text-jp-text"><span aria-hidden className={cn("mr-2 inline-flex h-4 w-4 items-center justify-center rounded-full border", selected ? "border-jp-primary bg-jp-primary text-white" : "border-jp-border")}>{selected ? "✓" : ""}</span>{option.brand_name ?? option.name ?? "Fare"}</p>
+                    <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", selected ? "bg-jp-primary text-white" : "bg-jp-page text-jp-text-muted")}>{selected ? "Selected" : selectable ? "Select" : "Unavailable"}</span>
                   </div>
-                  {option.price_display ? <p className="mt-3 text-lg font-bold text-jp-text">{option.price_display}</p> : <p className="mt-3 text-xs text-jp-text-muted">Price not supplied</p>}
+                  {formatWholePkr(option.displayed_price) ? <p className="mt-3 text-lg font-bold text-jp-text">{formatWholePkr(option.displayed_price)}</p> : <p className="mt-3 text-xs text-jp-text-muted">Price not supplied</p>}
                   <dl className="mt-3 divide-y divide-jp-border-soft text-xs">
                     {option.baggage ? <div className="grid grid-cols-[4.5rem_1fr] gap-2 py-1.5"><dt className="text-jp-text-muted">Baggage</dt><dd className="text-jp-text">{option.baggage}</dd></div> : null}
                     {option.refund_rule ? <div className="grid grid-cols-[4.5rem_1fr] gap-2 py-1.5"><dt className="text-jp-text-muted">Refund</dt><dd className="text-jp-text">{option.refund_rule}</dd></div> : null}
@@ -97,7 +95,9 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
                     {option.meal ? <div className="grid grid-cols-[4.5rem_1fr] gap-2 py-1.5"><dt className="text-jp-text-muted">Meal</dt><dd className="text-jp-text">{option.meal}</dd></div> : null}
                     {option.seat_selection ? <div className="grid grid-cols-[4.5rem_1fr] gap-2 py-1.5"><dt className="text-jp-text-muted">Seats</dt><dd className="text-jp-text">{option.seat_selection}</dd></div> : null}
                   </dl>
-                </button>
+                  <button type="button" disabled={disabled || !selectable} aria-pressed={selected} onClick={() => onSelect(option.option_key)} className="mt-auto w-full rounded-jp-md bg-jp-primary px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-jp-border disabled:text-jp-text-muted">{selected ? "Selected" : selectable ? "Select fare" : "Not selectable"}</button>
+                  <button type="button" className="mt-2 w-full rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-primary" onClick={() => document.querySelector('[data-testid="fare-summary-tabs"]')?.scrollIntoView({ behavior: "smooth", block: "start" })}>View Details</button>
+                </div>
               </div>
             );
           })}

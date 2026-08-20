@@ -65,7 +65,7 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
       if (opts.length > 0) {
         const key =
           resolveAuthoritativeFareOptionKey(fareOptionKey ?? context.fareOptionKey, opts) ??
-          opts[0]?.option_key ??
+          resolveAuthoritativeFareOptionKey(opts[0]?.option_key, opts) ??
           "";
         setSelectedFareKey(key);
       } else {
@@ -90,6 +90,7 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
 
   const handleFareOptionChange = useCallback(
     (key: string) => {
+      if (!resolveAuthoritativeFareOptionKey(key, fareOptionsRef.current)) return;
       setSelectedFareKey(key);
       void loadDetails(key);
     },

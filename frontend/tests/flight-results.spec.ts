@@ -59,7 +59,7 @@ function mockResultsBody(overrides: Record<string, unknown> = {}) {
     total: 1,
     has_more: false,
     filters: {
-      stops: [{ value: "direct", label: "Nonstop", count: 1 }],
+      stops: [{ value: "direct", label: "Direct", count: 1 }],
       airlines: [{ code: "EK", name: "Emirates", count: 1 }],
       departure_windows: [{ value: "morning", label: "Morning", count: 1 }],
       refundable: [{ value: "0", label: "Non-refundable", count: 1 }],
@@ -166,13 +166,13 @@ test("failed search shows error with retry", async ({ page }) => {
 
 test("stops filter triggers refetch", async ({ page }) => {
   await gotoResults(page);
-  await page.getByLabel("Nonstop").check();
+  await page.getByRole("checkbox", { name: "Direct (1)" }).check();
   await expect(page.getByTestId("flight-result-card")).toBeVisible();
 });
 
 test("airline filter and clear all", async ({ page }) => {
   await gotoResults(page);
-  await page.getByRole("radio", { name: "Emirates (1)" }).check();
+  await page.getByRole("checkbox", { name: "Emirates (1)" }).check();
   await page.getByTestId("clear-all-filters").click();
   await expect(page.getByTestId("flight-result-card")).toBeVisible();
 });
@@ -232,7 +232,7 @@ test("changing sort in UI triggers Laravel refetch with mapped value", async ({ 
 test("compact result card shows price and Book Now without expanded fare families", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await gotoResults(page);
-  await expect(page.getByTestId("result-price-display")).toHaveText("134,047 PKR");
+  await expect(page.getByTestId("result-price-display")).toHaveText("PKR 134,047");
   await expect(page.getByTestId("book-now-trigger")).toBeVisible();
   await expect(page.getByTestId("branded-fare-carousel")).toHaveCount(0);
   await expect(page.locator("[data-fare-family-card]")).toHaveCount(0);
@@ -244,9 +244,24 @@ test("airline logo fallback shows initials", async ({ page }) => {
   await expect(page.getByTestId("flight-result-card").getByText("EK", { exact: true }).first()).toBeVisible();
 });
 
-test("nonstop card label", async ({ page }) => {
+test("zero-stop card uses Direct in the centered route and omits baggage", async ({ page }) => {
   await gotoResults(page);
-  await expect(page.getByTestId("flight-result-card").getByText("Nonstop")).toBeVisible();
+  const card = page.getByTestId("flight-result-card");
+  await expect(card.getByTestId("center-route-block").getByText("Direct")).toBeVisible();
+  await expect(card).not.toContainText("Nonstop");
+  await expect(card).not.toContainText("30kg checked");
+});
+
+test("desktop filters use page scroll, readable multi-selects, and a dual price range", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.route("**/laravel/flights/results/data**", async (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockResultsBody({ filters: { ...mockResultsBody().filters, price_range: { min: 78812.4, max: 312025.2 } } })) }));
+  await page.goto(`/flights/results?${baseResultsQuery()}`);
+  const panel = page.getByTestId("results-filter-panel");
+  await expect(panel).not.toHaveClass(/overflow-y-auto|max-h-/);
+  await expect(panel.getByRole("checkbox", { name: "Direct (1)" })).toBeVisible();
+  await expect(panel.getByRole("checkbox", { name: "Non-refundable (1)" })).toBeVisible();
+  await expect(panel.getByTestId("price-range-slider").getByRole("slider")).toHaveCount(2);
+  await expect(panel).toContainText("PKR 78,812");
 });
 
 test("one-stop card and layover keyboard tooltip", async ({ page }) => {
@@ -380,9 +395,10 @@ test("branded fare carousel with more than three fares", async ({ page }) => {
   await page.getByTestId("book-now-trigger").click();
   await expect(page.locator("[data-fare-family-card]")).toHaveCount(4);
   await expect(page.getByLabel("Next fare options")).toBeVisible();
-  const secondFare = page.locator("[data-fare-family-card] button").nth(1);
+  const secondCard = page.locator("[data-fare-family-card]").nth(1);
+  const secondFare = secondCard.getByRole("button", { name: "Select fare" });
   await secondFare.press("Enter");
-  await expect(secondFare).toHaveAttribute("aria-pressed", "true");
+  await expect(secondCard.getByRole("button", { name: "Selected" })).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => detailsUrls.some((url) => url.includes("fare_option_key=fare-1"))).toBe(true);
   for (const [width, height] of [[1440, 900], [1366, 768], [1024, 768], [768, 900], [390, 844], [320, 800]]) {
     await page.setViewportSize({ width, height });

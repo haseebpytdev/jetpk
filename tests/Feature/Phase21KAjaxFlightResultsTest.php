@@ -312,6 +312,20 @@ class Phase21KAjaxFlightResultsTest extends TestCase
         }
     }
 
+    public function test_results_filters_support_comma_separated_multi_select_values(): void
+    {
+        $this->mockFlightSearch(10);
+        $page = $this->get('/flights/results?'.$this->validOneWayQuery())->assertOk();
+        preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
+        $searchId = $matches[1] ?? '';
+
+        $response = $this->getJson('/flights/results/data?search_id='.$searchId.'&airline=TA,TB&stops=direct,1_stop&refundable=1,0')->assertOk();
+
+        $this->assertCount(10, $response->json('offers'));
+        $response->assertJsonPath('filters.stops.0.label', 'Direct');
+        $response->assertJsonPath('filters.refundable.0.label', 'Refundable');
+    }
+
     public function test_results_page_contains_collapsible_details_toggle_markup(): void
     {
         $src = file_get_contents(resource_path('views/frontend/flights/partials/results-page.blade.php'));

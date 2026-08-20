@@ -5,11 +5,10 @@ import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/uti
 import { useMemo } from "react";
 import type { FlightOffer } from "../types";
 import { AirlineIdentity } from "./AirlineIdentity";
-import { BaggageSummary } from "./BaggageSummary";
 import { FareBadge } from "./FareBadge";
 import { MulticityInquiryActions } from "./MulticityInquiryActions";
-import { StopsAndLayover } from "./StopsAndLayover";
 import { TimeRouteBlock } from "./TimeRouteBlock";
+import { formatWholePkr } from "../utils/price";
 
 type FlightResultCardProps = {
   offer: FlightOffer;
@@ -47,7 +46,7 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
 
   const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey);
   const displayAmount = selectedOption?.displayed_price ?? offer.displayed_price;
-  const displayPrice = selectedOption?.price_display ?? offer.price_display;
+  const displayPrice = formatWholePkr(displayAmount ?? offer.final_customer_price);
   const viaCodes = extractViaCodes(offer);
 
   const firstSegment = offer.segments?.[0];
@@ -78,16 +77,13 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
               originCode={firstSegment?.origin_airport_code ?? firstSegment?.origin}
               destinationCode={lastSegment?.destination_airport_code ?? lastSegment?.destination}
               duration={offer.duration ?? offer.segments?.map((segment) => segment.duration_display).filter(Boolean).join(" + ")}
-            />
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <StopsAndLayover
               stops={offer.stops ?? 0}
               stopsLabel={offer.stops_label_display}
-              layoverSummary={offer.layover_summary_display}
               viaCodes={viaCodes}
+              layoverSummary={offer.layover_summary_display}
             />
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <FareBadge refundable={offer.refundable} seatsLeft={offer.seats_left} />
-            <BaggageSummary offer={offer} />
           </div>
           {offer.multicity_inquiry_only ? (
             <MulticityInquiryActions
@@ -106,7 +102,7 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
           <div className="text-right">
             <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">{fareOptions.length > 1 ? "From" : "Total fare"}</p>
             <p className="whitespace-nowrap text-lg font-bold text-jp-text" data-testid="result-price-display">
-              {displayPrice ?? (displayAmount != null ? `PKR ${displayAmount.toLocaleString()}` : "Price unavailable")}
+              {displayPrice ?? "Price unavailable"}
             </p>
           </div>
           <div className="flex flex-wrap justify-end gap-2">

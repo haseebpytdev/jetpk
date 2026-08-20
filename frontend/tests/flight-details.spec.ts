@@ -154,12 +154,14 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
     await expect(page.getByTestId("route-timeline")).toBeVisible();
     await expect(page.getByTestId("baggage-details")).toBeVisible();
+    await page.getByRole("tab", { name: "Fare Details" }).click();
     await expect(page.getByTestId("price-breakdown")).toBeVisible();
   });
 
   test("renders fare rules accordion and segment details", async ({ page }) => {
     await setupResultsAndDetails(page);
     await page.getByTestId("flight-details-trigger").click();
+    await page.getByRole("tab", { name: "Fare Policy" }).click();
     await expect(page.getByTestId("fare-rules-accordion")).toBeVisible();
     await expect(page.getByTestId("segment-details")).toBeVisible();
     await expect(page.getByTestId("fare-rules-accordion").getByText("Non-refundable")).toBeVisible();
@@ -192,6 +194,7 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
     await expect.poll(() => resolveDetails).toBeTruthy();
     resolveDetails?.();
+    await page.getByRole("tab", { name: "Fare Details" }).click();
     await expect(page.getByTestId("price-breakdown")).toBeVisible();
   });
 
@@ -522,7 +525,9 @@ test.describe("JP-FE-06 flight details", () => {
 
     await page.getByTestId("flight-details-trigger").click();
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
-    await expect(page.getByText("Economy Fare", { exact: true })).toBeVisible();
+    await expect(page.getByRole("listitem").filter({ hasText: "Economy Fare" })).toBeVisible();
+    await expect(page.getByRole("listitem").filter({ hasText: "Economy Fare" }).getByRole("button", { name: "Not selectable" })).toBeDisabled();
+    await expect(page.getByRole("listitem").filter({ hasText: "Economy Fare" })).toContainText("Unavailable");
     await expect.poll(() => detailsUrls.length).toBe(1);
     expect(new URL(detailsUrls[0]).searchParams.has("fare_option_key")).toBe(false);
   });
@@ -559,7 +564,7 @@ test.describe("JP-FE-06 flight details", () => {
     await page.getByTestId("book-now-trigger").click();
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Choose your flight & fare" })).toBeVisible();
-    await expect(page.getByText("Standard Fare", { exact: true })).toBeVisible();
+    await expect(page.getByRole("listitem").filter({ hasText: "Standard Fare" })).toBeVisible();
     await expect.poll(() => detailsUrl).not.toBe("");
     expect(new URL(detailsUrl).searchParams.has("fare_option_key")).toBe(false);
     await expect(page).toHaveURL(/\/flights\/results/);
@@ -647,7 +652,7 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
     await expect.poll(() => detailsUrls.length).toBeGreaterThan(0);
     expect(detailsUrls[0]).toContain("fare_option_key=eco-basic");
-    await page.getByText("Economy Flex", { exact: true }).click();
+    await page.getByRole("listitem").filter({ hasText: "Economy Flex" }).getByRole("button", { name: "Select fare" }).click();
     await expect.poll(() => detailsUrls.some((url) => url.includes("fare_option_key=eco-flex"))).toBe(true);
   });
 

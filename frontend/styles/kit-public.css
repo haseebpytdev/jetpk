@@ -130,3 +130,7 @@
     padding-inline: var(--jp-space-md, 1rem);
   }
 }
+/* Two overlapping native ranges provide an accessible dual-ended control. */
+.jp-dual-range { appearance: none; background: transparent; pointer-events: none; }
+.jp-dual-range::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border: 3px solid var(--jp-primary, #087a4b); border-radius: 999px; background: #fff; pointer-events: auto; cursor: grab; }
+.jp-dual-range::-moz-range-thumb { width: 14px; height: 14px; border: 3px solid var(--jp-primary, #087a4b); border-radius: 999px; background: #fff; pointer-events: auto; cursor: grab; }

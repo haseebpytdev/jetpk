@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import { StopsAndLayover } from "./StopsAndLayover";
 
 type TimeRouteBlockProps = {
   departureTime?: string;
@@ -7,6 +8,10 @@ type TimeRouteBlockProps = {
   originCode?: string;
   destinationCode?: string;
   duration?: string;
+  stops?: number;
+  stopsLabel?: string;
+  viaCodes?: string[];
+  layoverSummary?: string[];
   className?: string;
 };
 
@@ -17,6 +22,10 @@ export function TimeRouteBlock({
   originCode,
   destinationCode,
   duration,
+  stops = 0,
+  stopsLabel,
+  viaCodes,
+  layoverSummary,
   className,
 }: TimeRouteBlockProps) {
   return (
@@ -25,9 +34,10 @@ export function TimeRouteBlock({
         <p className="text-lg font-semibold text-jp-text sm:text-xl">{departureTime ?? "—"}</p>
         <p className="text-xs text-jp-text-muted sm:text-sm">{originCode ?? "—"}</p>
       </div>
-      <div className="flex flex-col items-center px-1 text-center">
+      <div className="flex min-w-[7rem] flex-col items-center px-1 text-center" data-testid="center-route-block">
         <span className="text-[10px] text-jp-text-muted sm:text-xs">{duration ?? ""}</span>
-        <span className="mt-1 h-px w-10 bg-jp-border sm:w-16" aria-hidden="true" />
+        <span className="mt-1 flex w-full items-center" aria-hidden="true"><span className="h-px flex-1 bg-jp-border" /><span className="px-1 text-jp-primary">✈</span><span className="h-px flex-1 bg-jp-border" /></span>
+        <StopsAndLayover stops={stops} stopsLabel={stopsLabel} viaCodes={viaCodes} layoverSummary={layoverSummary} className="mt-1" />
       </div>
       <div className="text-right">
         <p className="text-lg font-semibold text-jp-text sm:text-xl">
