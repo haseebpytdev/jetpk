@@ -462,6 +462,109 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page).toHaveURL(/\/flights\/results/);
   });
 
+  test("details request omits fare_option_key for standard offers", async ({ page }) => {
+    let detailsUrl = "";
+    await setupResultsAndDetails(page);
+    await page.unroute("**/laravel/flights/results/offer**");
+    await page.route("**/laravel/flights/results/offer**", async (route) => {
+      detailsUrl = route.request().url();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockDetailsBody()),
+      });
+    });
+    await page.getByTestId("flight-details-trigger").click();
+    await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+    const parsed = new URL(detailsUrl);
+    expect(parsed.pathname).toContain("/laravel/flights/results/offer");
+    expect(parsed.searchParams.get("search_id")).toBeTruthy();
+    expect(parsed.searchParams.get("offer_id")).toBeTruthy();
+    expect(parsed.searchParams.has("fare_option_key")).toBe(false);
+    expect(parsed.search).not.toMatch(/localhost|127\.0\.0\.1/);
+  });
+
+  test("details request sends branded fare_option_key when families exist", async ({ page }) => {
+    const brandedOptions = [
+      {
+        option_key: "eco-basic",
+        name: "Economy Basic",
+        displayed_price: 120000,
+        price_display: "120,000 PKR",
+        baggage: "23kg checked",
+      },
+      {
+        option_key: "eco-flex",
+        name: "Economy Flex",
+        displayed_price: 135000,
+        price_display: "135,000 PKR",
+        baggage: "30kg checked",
+      },
+    ];
+    let detailsUrl = "";
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const depart = tomorrow.toISOString().slice(0, 10);
+    const query = new URLSearchParams({
+      search_id: MOCK_SEARCH_ID,
+      trip_type: "one_way",
+      from: "ISB",
+      to: "DXB",
+      depart,
+      adults: "1",
+      children: "0",
+      infants: "0",
+      cabin: "economy",
+    });
+
+    await page.route("**/laravel/flights/results/data**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          search_id: MOCK_SEARCH_ID,
+          page: 1,
+          per_page: 12,
+          total: 1,
+          has_more: false,
+          offers: [
+            mockOfferWithDetails({
+              has_branded_fares: true,
+              branded_fares_display_options: brandedOptions,
+              fare_family_options_display: brandedOptions,
+            }),
+          ],
+          filters: {},
+          warnings: [],
+          search_freshness: {},
+        }),
+      });
+    });
+
+    await page.route("**/laravel/flights/results/offer**", async (route) => {
+      detailsUrl = route.request().url();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          mockDetailsBody({
+            offer: mockOfferWithDetails({
+              has_branded_fares: true,
+              branded_fares_display_options: brandedOptions,
+              fare_family_options_display: brandedOptions,
+            }),
+          }),
+        ),
+      });
+    });
+
+    await page.goto(`/flights/results?${query.toString()}`);
+    await expect(page.getByTestId("flight-result-card")).toBeVisible();
+    await page.getByTestId("flight-details-trigger").click();
+    await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+    expect(detailsUrl).toContain("fare_option_key=eco-basic");
+  });
+
   test("mobile viewport renders details without horizontal scroll", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 800 });
     await setupResultsAndDetails(page);

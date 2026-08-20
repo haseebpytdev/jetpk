@@ -66,6 +66,37 @@ class JpFe06FlightOfferDetailsJsonTest extends TestCase
             ->assertJsonPath('status', 'expired_search');
     }
 
+    public function test_offer_details_rejects_offer_id_used_as_fare_option_key(): void
+    {
+        [$searchId, $offer] = $this->storeSearchPayload();
+
+        $this->getJson('/flights/results/offer?search_id='.$searchId.'&offer_id='.$offer['offer_id'].'&fare_option_key='.$offer['offer_id'].'&format=json')
+            ->assertStatus(422)
+            ->assertJsonPath('status', 'invalid_fare_option');
+    }
+
+    public function test_offer_details_without_fare_option_key_returns_base_offer(): void
+    {
+        [$searchId, $offer] = $this->storeSearchPayload();
+
+        $this->getJson('/flights/results/offer?search_id='.$searchId.'&offer_id='.$offer['offer_id'].'&format=json')
+            ->assertOk()
+            ->assertJsonPath('success', true);
+    }
+
+    public function test_offer_details_does_not_mutate_search_store(): void
+    {
+        [$searchId, $offer] = $this->storeSearchPayload();
+        $before = Cache::get('flight_search:'.$searchId);
+        $this->assertIsArray($before);
+
+        $this->getJson('/flights/results/offer?search_id='.$searchId.'&offer_id='.$offer['offer_id'].'&format=json')
+            ->assertOk();
+
+        $after = Cache::get('flight_search:'.$searchId);
+        $this->assertSame($before, $after);
+    }
+
     public function test_blade_offer_route_still_redirects_for_html(): void
     {
         [$searchId] = $this->storeSearchPayload();

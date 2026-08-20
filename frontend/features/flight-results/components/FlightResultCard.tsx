@@ -124,7 +124,12 @@ export function FlightResultCard({ offer, searchId, selecting, onSelect, onOpenD
             className="rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
             data-testid="flight-details-trigger"
             aria-label={`View details for ${offer.airline_name ?? "flight"}`}
-            onClick={() => onOpenDetails?.(offer, selectedFareKey)}
+            onClick={() => {
+              const fareKeyForDetails = fareOptions.some((item) => item.option_key === selectedFareKey)
+                ? selectedFareKey
+                : undefined;
+              onOpenDetails?.(offer, fareKeyForDetails ?? "");
+            }}
           >
             Details
           </button>
