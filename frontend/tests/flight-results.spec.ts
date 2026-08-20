@@ -274,8 +274,8 @@ test("one-stop card and layover keyboard tooltip", async ({ page }) => {
 
 test("Book Now opens shared modal and branded fares appear only inside it", async ({ page }) => {
   const fares = [
-    { option_key: "eco", name: "Economy Saver", displayed_price: 100000, price_display: "100,000 PKR" },
-    { option_key: "flex", name: "Economy Flex", displayed_price: 112000, price_display: "112,000 PKR" },
+    { option_key: "eco", name: "Economy Saver", displayed_price: 100000, price_display: "100,000 PKR", selection_key_authoritative: true },
+    { option_key: "flex", name: "Economy Flex", displayed_price: 112000, price_display: "112,000 PKR", selection_key_authoritative: true },
   ];
   await page.route("**/laravel/flights/results/data**", async (route) => {
     await route.fulfill({
@@ -335,6 +335,7 @@ test("branded fare carousel with more than three fares", async ({ page }) => {
     name: `Fare ${index + 1}`,
     displayed_price: 100000 + index * 1000,
     price_display: `${100000 + index * 1000} PKR`,
+    selection_key_authoritative: true,
   }));
   await page.route("**/laravel/flights/results/data**", async (route) => {
     await route.fulfill({

@@ -72,7 +72,11 @@ function mockDetailsBody(overrides: Record<string, unknown> = {}) {
 
 async function setupResultsAndDetails(
   page: import("@playwright/test").Page,
-  options?: { detailsStatus?: number; detailsBody?: Record<string, unknown> },
+  options?: {
+    detailsStatus?: number;
+    detailsBody?: Record<string, unknown>;
+    offerOverrides?: Record<string, unknown>;
+  },
 ) {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -99,7 +103,7 @@ async function setupResultsAndDetails(
         per_page: 12,
         total: 1,
         has_more: false,
-        offers: [mockOfferWithDetails()],
+        offers: [mockOfferWithDetails(options?.offerOverrides)],
         filters: {},
         warnings: [],
         search_freshness: {},
@@ -486,6 +490,81 @@ test.describe("JP-FE-06 flight details", () => {
     expect(parsed.search).not.toMatch(/localhost|127\.0\.0\.1/);
   });
 
+  test("synthetic display option renders but Details never serializes its option_key", async ({ page }) => {
+    const syntheticOption = {
+      option_key: "standard-fare-display-only",
+      name: "Economy Fare",
+      displayed_price: 134047,
+      price_display: "134,047 PKR",
+      baggage: "30kg checked",
+      is_synthetic_default: true,
+      selection_key_authoritative: false,
+    };
+    const offerOverrides = {
+      has_fare_choice_options: true,
+      branded_fares_display_options: [syntheticOption],
+      fare_family_options_display: [syntheticOption],
+    };
+    const detailsUrls: string[] = [];
+    await setupResultsAndDetails(page, {
+      offerOverrides,
+      detailsBody: mockDetailsBody({ offer: mockOfferWithDetails(offerOverrides) }),
+    });
+    await page.unroute("**/laravel/flights/results/offer**");
+    await page.route("**/laravel/flights/results/offer**", async (route) => {
+      detailsUrls.push(route.request().url());
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockDetailsBody({ offer: mockOfferWithDetails(offerOverrides) })),
+      });
+    });
+
+    await page.getByTestId("flight-details-trigger").click();
+    await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+    await expect(page.getByText("Economy Fare", { exact: true })).toBeVisible();
+    await expect.poll(() => detailsUrls.length).toBe(1);
+    expect(new URL(detailsUrls[0]).searchParams.has("fare_option_key")).toBe(false);
+  });
+
+  test("synthetic display option renders but Book Now initial fetch omits its option_key", async ({ page }) => {
+    const syntheticOption = {
+      option_key: "standard-fare-display-only",
+      name: "Standard Fare",
+      displayed_price: 134047,
+      price_display: "134,047 PKR",
+      is_synthetic_default: true,
+      selection_key_authoritative: false,
+    };
+    const offerOverrides = {
+      has_fare_choice_options: true,
+      branded_fares_display_options: [syntheticOption],
+      fare_family_options_display: [syntheticOption],
+    };
+    let detailsUrl = "";
+    await setupResultsAndDetails(page, {
+      offerOverrides,
+      detailsBody: mockDetailsBody({ offer: mockOfferWithDetails(offerOverrides) }),
+    });
+    await page.unroute("**/laravel/flights/results/offer**");
+    await page.route("**/laravel/flights/results/offer**", async (route) => {
+      detailsUrl = route.request().url();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockDetailsBody({ offer: mockOfferWithDetails(offerOverrides) })),
+      });
+    });
+
+    await page.getByTestId("book-now-trigger").click();
+    await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Choose your flight & fare" })).toBeVisible();
+    await expect(page.getByText("Standard Fare", { exact: true })).toBeVisible();
+    await expect.poll(() => detailsUrl).not.toBe("");
+    expect(new URL(detailsUrl).searchParams.has("fare_option_key")).toBe(false);
+    await expect(page).toHaveURL(/\/flights\/results/);
+  });
+
   test("details request sends branded fare_option_key when families exist", async ({ page }) => {
     const brandedOptions = [
       {
@@ -494,6 +573,7 @@ test.describe("JP-FE-06 flight details", () => {
         displayed_price: 120000,
         price_display: "120,000 PKR",
         baggage: "23kg checked",
+        selection_key_authoritative: true,
       },
       {
         option_key: "eco-flex",
@@ -501,9 +581,10 @@ test.describe("JP-FE-06 flight details", () => {
         displayed_price: 135000,
         price_display: "135,000 PKR",
         baggage: "30kg checked",
+        selection_key_authoritative: true,
       },
     ];
-    let detailsUrl = "";
+    const detailsUrls: string[] = [];
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const depart = tomorrow.toISOString().slice(0, 10);
@@ -544,7 +625,7 @@ test.describe("JP-FE-06 flight details", () => {
     });
 
     await page.route("**/laravel/flights/results/offer**", async (route) => {
-      detailsUrl = route.request().url();
+      detailsUrls.push(route.request().url());
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -564,8 +645,10 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page.getByTestId("flight-result-card")).toBeVisible();
     await page.getByTestId("flight-details-trigger").click();
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
-    await expect.poll(() => detailsUrl).not.toBe("");
-    expect(detailsUrl).toContain("fare_option_key=eco-basic");
+    await expect.poll(() => detailsUrls.length).toBeGreaterThan(0);
+    expect(detailsUrls[0]).toContain("fare_option_key=eco-basic");
+    await page.getByText("Economy Flex", { exact: true }).click();
+    await expect.poll(() => detailsUrls.some((url) => url.includes("fare_option_key=eco-flex"))).toBe(true);
   });
 
   test("mobile viewport renders details without horizontal scroll", async ({ page }) => {
@@ -588,6 +671,7 @@ test.describe("JP-FE-06 flight details", () => {
       cabin_baggage: "7kg cabin",
       refundable: index >= 2,
       changeable: index >= 1,
+      selection_key_authoritative: true,
     }));
 
     await setupResultsAndDetails(page, {

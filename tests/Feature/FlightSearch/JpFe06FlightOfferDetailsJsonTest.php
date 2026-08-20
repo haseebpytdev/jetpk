@@ -84,6 +84,62 @@ class JpFe06FlightOfferDetailsJsonTest extends TestCase
             ->assertJsonPath('success', true);
     }
 
+    public function test_synthetic_display_option_is_non_authoritative_and_does_not_require_selection(): void
+    {
+        [$searchId, $offer] = $this->storeSearchPayload();
+
+        $mapped = $this->getJson('/flights/results/data?search_id='.$searchId)
+            ->assertOk()
+            ->json('offers.0');
+        $this->assertTrue($mapped['has_synthetic_default_fare'] ?? false);
+        $this->assertNotEmpty(data_get($mapped, 'fare_family_options_display.0.option_key'));
+        $this->assertTrue(data_get($mapped, 'fare_family_options_display.0.is_synthetic_default', false));
+        $this->assertFalse(data_get($mapped, 'fare_family_options_display.0.selection_key_authoritative', true));
+
+        $this->getJson('/flights/results/offer?search_id='.$searchId.'&offer_id='.$offer['offer_id'].'&format=json')
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('fare_option_key', null);
+    }
+
+    public function test_real_supplier_fare_option_is_authoritative_and_resolves_successfully(): void
+    {
+        [$searchId, $offer] = $this->storeSearchPayload();
+        $payload = Cache::get('flight_search:'.$searchId);
+        $this->assertIsArray($payload);
+        $offer['supplier_provider'] = 'iati';
+        $offer['branded_fares'] = [
+            [
+                'name' => 'Economy Basic',
+                'brand_code' => 'BASIC',
+                'departure_fare_key' => 'supplier-basic-key',
+                'price_total' => 110000,
+                'currency' => 'PKR',
+            ],
+            [
+                'name' => 'Economy Flex',
+                'brand_code' => 'FLEX',
+                'departure_fare_key' => 'supplier-flex-key',
+                'price_total' => 120000,
+                'currency' => 'PKR',
+            ],
+        ];
+        $payload['offers'] = [$offer];
+        Cache::put('flight_search:'.$searchId, $payload, 1800);
+
+        $mapped = $this->getJson('/flights/results/data?search_id='.$searchId)
+            ->assertOk()
+            ->json('offers.0');
+        $optionKey = (string) data_get($mapped, 'fare_family_options_display.0.option_key', '');
+        $this->assertNotSame('', $optionKey);
+        $this->assertTrue(data_get($mapped, 'fare_family_options_display.0.selection_key_authoritative', false));
+
+        $this->getJson('/flights/results/offer?search_id='.$searchId.'&offer_id='.$offer['offer_id'].'&fare_option_key='.urlencode($optionKey).'&format=json')
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('fare_option_key', $optionKey);
+    }
+
     public function test_offer_details_does_not_mutate_search_store(): void
     {
         [$searchId, $offer] = $this->storeSearchPayload();

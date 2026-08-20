@@ -115,6 +115,7 @@ class IatiBrandedFarePresentationTest extends TestCase
         $this->assertTrue($option['is_synthetic_default']);
         $this->assertTrue($option['selectable']);
         $this->assertFalse($option['display_only']);
+        $this->assertFalse($option['selection_key_authoritative']);
         $this->assertStringStartsWith('standard-fare-', (string) $option['option_key']);
         $this->assertSame('20 kg', $option['check_in_summary'] ?? null);
         $this->assertSame(52000, $option['displayed_price'] ?? null);
@@ -170,9 +171,9 @@ class IatiBrandedFarePresentationTest extends TestCase
     {
         $offer = ['supplier_provider' => 'iati'];
         $presentation = FlightOfferDisplayPresenter::buildBrandedFaresPresentationFields([
-            ['name' => 'Fare 1', 'option_key' => 'iati-fare-1', 'price_total' => 80294, 'currency' => 'PKR'],
-            ['name' => 'Fare 2', 'option_key' => 'iati-fare-2-85158-1', 'price_total' => 85158, 'currency' => 'PKR'],
-            ['name' => 'Fare 3', 'option_key' => 'iati-fare-3', 'price_total' => 90000, 'currency' => 'PKR'],
+            ['name' => 'Fare 1', 'option_key' => 'iati-fare-1', 'departure_fare_key' => 'supplier-fare-1', 'price_total' => 80294, 'currency' => 'PKR'],
+            ['name' => 'Fare 2', 'option_key' => 'iati-fare-2-85158-1', 'departure_fare_key' => 'supplier-fare-2', 'price_total' => 85158, 'currency' => 'PKR'],
+            ['name' => 'Fare 3', 'option_key' => 'iati-fare-3', 'departure_fare_key' => 'supplier-fare-3', 'price_total' => 90000, 'currency' => 'PKR'],
         ], $offer);
 
         $this->assertTrue($presentation['has_branded_fares']);
@@ -180,5 +181,6 @@ class IatiBrandedFarePresentationTest extends TestCase
         $this->assertFalse($presentation['has_synthetic_default_fare']);
         $this->assertCount(3, $presentation['fare_family_options_display']);
         $this->assertSame('iati-fare-2-85158-1', $presentation['fare_family_options_display'][1]['option_key'] ?? null);
+        $this->assertTrue($presentation['fare_family_options_display'][1]['selection_key_authoritative'] ?? false);
     }
 }

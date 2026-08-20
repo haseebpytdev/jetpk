@@ -644,6 +644,7 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $this->assertCount(1, $p['fare_family_options_display']);
         $this->assertTrue($p['fare_family_options_display'][0]['is_synthetic_default'] ?? false);
         $this->assertTrue($p['fare_family_options_display'][0]['selectable'] ?? false);
+        $this->assertFalse($p['fare_family_options_display'][0]['selection_key_authoritative'] ?? true);
     }
 
     public function test_fare_family_options_display_empty_when_universal_choice_disabled(): void

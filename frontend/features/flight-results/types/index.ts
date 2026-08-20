@@ -53,6 +53,7 @@ export type FareFamilyOption = {
   is_synthetic_default?: boolean;
   is_grouped_offer_option?: boolean;
   source_offer_id?: string;
+  selection_key_authoritative?: boolean;
   can_select?: boolean;
 };
 

@@ -1603,7 +1603,10 @@ class FlightOfferDisplayPresenter
         $selectionEnabled = self::brandedFaresSelectionEnabledForOffer($offer);
         $selectionActive = $displayEnabled && $selectionEnabled;
         $allOptions = self::applyFareFamilySelectionGate(
-            self::enrichFareFamilyOptionsWithDisplayPrices($fareFamilyOptionsDisplay, $offer),
+            self::enrichFareFamilyOptionsWithDisplayPrices(
+                self::applyFareOptionSelectionAuthorityContract($fareFamilyOptionsDisplay),
+                $offer,
+            ),
             $selectionActive,
         );
         $hasBrandedFares = count($allOptions) >= 2;
@@ -1750,6 +1753,7 @@ class FlightOfferDisplayPresenter
             $enriched[$idx] = OfferBaggageResolver::enrichFareOptionRow($option, $memberOffer ?? $offer);
             $optionReady = $readinessService->isOptionStructurallyReady($enriched[$idx], $offer);
             $enriched[$idx]['pia_ndc_pnr_ready'] = $optionReady;
+            $enriched[$idx]['selection_key_authoritative'] = $optionReady;
         }
         $selectionEnabled = count(array_filter(
             $enriched,
@@ -1847,6 +1851,7 @@ class FlightOfferDisplayPresenter
             'cabin' => $cabin !== '' ? $cabin : null,
             'is_default' => true,
             'is_synthetic_default' => true,
+            'selection_key_authoritative' => false,
             'option_key' => 'standard-fare-'.$offerId,
         ];
 
@@ -1859,6 +1864,7 @@ class FlightOfferDisplayPresenter
         $mapped['is_default'] = true;
         $mapped['is_synthetic_default'] = true;
         $mapped['branded_fare_supported'] = false;
+        $mapped['selection_key_authoritative'] = false;
         $mapped['selectable'] = true;
         $mapped['display_only'] = false;
         $mapped = array_merge($mapped, self::deriveBrandedFareOptionDisplayPrice($mapped, $offer));
@@ -2351,6 +2357,33 @@ class FlightOfferDisplayPresenter
     }
 
     /**
+     * Display presence is not selection authority. Preserve an explicit marker,
+     * otherwise derive it only from backend-resolvable supplier/grouped context.
+     *
+     * @param  list<array<string, mixed>>  $options
+     * @return list<array<string, mixed>>
+     */
+    protected static function applyFareOptionSelectionAuthorityContract(array $options): array
+    {
+        foreach ($options as $idx => $option) {
+            if (array_key_exists('selection_key_authoritative', $option)) {
+                $options[$idx]['selection_key_authoritative'] = $option['selection_key_authoritative'] === true;
+
+                continue;
+            }
+
+            $isSyntheticDefault = ($option['is_synthetic_default'] ?? false) === true;
+            $departureFareKey = self::nullableTrimmedString($option['departure_fare_key'] ?? null);
+            $sourceOfferId = self::nullableTrimmedString($option['source_offer_id'] ?? null);
+            $isGroupedOfferOption = ($option['is_grouped_offer_option'] ?? false) === true;
+            $options[$idx]['selection_key_authoritative'] = ! $isSyntheticDefault
+                && ($departureFareKey !== null || ($isGroupedOfferOption && $sourceOfferId !== null));
+        }
+
+        return $options;
+    }
+
+    /**
      * Compact card-chip row for collapsed search results.
      *
      * @param  array<string, mixed>  $option
@@ -2396,6 +2429,7 @@ class FlightOfferDisplayPresenter
             'source_offer_id' => self::nullableTrimmedString($option['source_offer_id'] ?? null),
             'is_grouped_offer_option' => (bool) ($option['is_grouped_offer_option'] ?? false),
             'is_synthetic_default' => (bool) ($option['is_synthetic_default'] ?? false),
+            'selection_key_authoritative' => ($option['selection_key_authoritative'] ?? false) === true,
             'fare_product_disambiguator' => self::nullableTrimmedString($option['fare_product_disambiguator'] ?? null),
             'fare_variant_subtitle' => self::nullableTrimmedString($option['fare_variant_subtitle'] ?? $option['fare_product_disambiguator'] ?? null),
             'selectable' => (bool) ($option['selectable'] ?? $selectionActive),
@@ -2929,6 +2963,13 @@ class FlightOfferDisplayPresenter
         }
 
         $explicitOptionKey = self::nullableTrimmedString($row['option_key'] ?? null);
+        $isSyntheticDefault = ($row['is_synthetic_default'] ?? false) === true;
+        $departureFareKey = self::nullableTrimmedString($row['departure_fare_key'] ?? null);
+        $sourceOfferId = self::nullableTrimmedString($row['source_offer_id'] ?? null);
+        $isGroupedOfferOption = ($row['is_grouped_offer_option'] ?? false) === true;
+        $selectionKeyAuthoritative = array_key_exists('selection_key_authoritative', $row)
+            ? ($row['selection_key_authoritative'] === true)
+            : (! $isSyntheticDefault && ($departureFareKey !== null || ($isGroupedOfferOption && $sourceOfferId !== null)));
 
         $mapped = [
             'option_key' => $explicitOptionKey ?? self::buildFareFamilyOptionKey($row, $index, $name, $priceTotal),
@@ -2953,10 +2994,11 @@ class FlightOfferDisplayPresenter
             'brand_code' => self::nullableTrimmedString($row['brand_code'] ?? $row['supplier_brand_code'] ?? null),
             'is_cheapest' => (bool) ($row['is_cheapest'] ?? false),
             'supplier_brand_code' => self::nullableTrimmedString($row['supplier_brand_code'] ?? $row['brand_code'] ?? null),
-            'source_offer_id' => self::nullableTrimmedString($row['source_offer_id'] ?? null),
-            'is_grouped_offer_option' => (bool) ($row['is_grouped_offer_option'] ?? false),
-            'departure_fare_key' => self::nullableTrimmedString($row['departure_fare_key'] ?? null),
+            'source_offer_id' => $sourceOfferId,
+            'is_grouped_offer_option' => $isGroupedOfferOption,
+            'departure_fare_key' => $departureFareKey,
             'return_fare_key' => self::nullableTrimmedString($row['return_fare_key'] ?? null),
+            'selection_key_authoritative' => $selectionKeyAuthoritative,
             'selectable' => (bool) ($row['selectable'] ?? false),
             'provider_context' => is_array($row['provider_context'] ?? null) ? $row['provider_context'] : null,
             'pia_ndc_provider_backed' => (bool) ($row['pia_ndc_provider_backed'] ?? false),

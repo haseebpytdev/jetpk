@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
 import { useMemo } from "react";
 import type { FlightOffer } from "../types";
 import { AirlineIdentity } from "./AirlineIdentity";
@@ -115,9 +116,7 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
             data-testid="flight-details-trigger"
             aria-label={`View details for ${offer.airline_name ?? "flight"}`}
             onClick={() => {
-              const fareKeyForDetails = fareOptions.some((item) => item.option_key === selectedFareKey)
-                ? selectedFareKey
-                : undefined;
+              const fareKeyForDetails = resolveAuthoritativeFareOptionKey(selectedFareKey, fareOptions);
               onOpenDetails?.(offer, fareKeyForDetails ?? "", "details");
             }}
           >
@@ -128,7 +127,10 @@ export function FlightResultCard({ offer, searchId, onOpenDetails }: FlightResul
             className="rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             data-testid="book-now-trigger"
             disabled={!offer.can_book || offer.multicity_inquiry_only}
-            onClick={() => onOpenDetails?.(offer, fareOptions[0]?.option_key ?? "", "booking")}
+            onClick={() => {
+              const fareKeyForDetails = resolveAuthoritativeFareOptionKey(fareOptions[0]?.option_key, fareOptions);
+              onOpenDetails?.(offer, fareKeyForDetails ?? "", "booking");
+            }}
           >
             Book Now
           </button>

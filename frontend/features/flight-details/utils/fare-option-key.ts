@@ -1,8 +1,9 @@
 import type { FareFamilyOption } from "../types";
 
 /**
- * Only send fare_option_key when it matches a known branded fare family on the offer.
- * Sending offer_id (card fallback) causes Laravel to return 422 invalid_fare_option.
+ * Only send fare_option_key when the exact displayed option is explicitly marked
+ * authoritative by the backend. Display-array membership and option_key presence
+ * alone do not prove supplier selection authority.
  */
 export function resolveAuthoritativeFareOptionKey(
   candidate: string | undefined,
@@ -13,11 +14,6 @@ export function resolveAuthoritativeFareOptionKey(
     return undefined;
   }
 
-  const knownKeys = new Set(
-    knownOptions
-      .map((option) => option.option_key?.trim() ?? "")
-      .filter((optionKey) => optionKey !== ""),
-  );
-
-  return knownKeys.has(key) ? key : undefined;
+  const matchingOption = knownOptions.find((option) => option.option_key?.trim() === key);
+  return matchingOption?.selection_key_authoritative === true ? key : undefined;
 }
