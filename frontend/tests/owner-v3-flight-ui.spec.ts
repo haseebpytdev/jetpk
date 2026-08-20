@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import path from "node:path";
 
 const searchId = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
-const output = path.resolve(process.cwd(), "..", "tmp", "owner-v3-flight-ui-v4");
+const output = path.resolve(process.cwd(), "..", "tmp", "owner-v3-flight-ui-v5");
 const fares = [
   ["Eco Light", 78812, "7kg cabin · checked bag not included", "Non-refundable", "Changes with fee"],
   ["Smart", 86932, "7kg cabin · 23kg checked", "Refundable with fee", "Changes with fee"],
@@ -21,26 +21,20 @@ function details(selected = fares[0]) {
 }
 
 test("owner V3 local visual proof", async ({ page }) => {
-  await page.route("**/laravel/flights/results/data**", async (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ search_id: searchId, page: 1, per_page: 12, total: 4, has_more: false, offers: [0, 1, 2, 3].map(offer), filters: { stops: [{ value: "direct", label: "Direct", count: 3 }, { value: "1_stop", label: "1 Stop", count: 1 }, { value: "2_plus", label: "2+ Stops", count: 0 }], airlines: ["PK", "EK", "QR", "SV"].map((code, index) => ({ code, name: offer(index).airline_name, count: 1 })), departure_windows: [{ value: "early_morning", label: "Before 6AM", count: 0 }, { value: "morning", label: "6AM–12PM", count: 2 }, { value: "afternoon", label: "12PM–6PM", count: 1 }, { value: "evening", label: "After 6PM", count: 1 }], refundable: [{ value: "1", label: "Refundable", count: 2 }, { value: "0", label: "Non-refundable", count: 2 }], price_range: { min: 78812, max: 112450 } }, warnings: [] }) }));
+  await page.route("**/laravel/flights/results/data**", async (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ search_id: searchId, page: 1, per_page: 12, total: 4, has_more: false, offers: [0, 1, 2, 3].map(offer), filters: { stops: [{ value: "direct", label: "Direct", count: 3 }, { value: "1_stop", label: "1 Stop", count: 1 }, { value: "2_plus", label: "2+ Stops", count: 0 }], airlines: ["PK", "EK", "QR", "SV"].map((code, index) => ({ code, name: offer(index).airline_name, count: 1 })), departure_windows: [{ value: "morning", label: "6AM–12PM", count: 2 }], arrival_windows: [{ value: "afternoon", label: "12PM–6PM", count: 2 }], refundable: [{ value: "1", label: "Refundable", count: 2 }, { value: "0", label: "Non-refundable", count: 2 }], baggage_options: [{ value: "checked_baggage", label: "Checked baggage included", count: 4 }], fare_families: [{ value: "Flex", label: "Flex", count: 2 }], duration_buckets: [{ value: "under_6h", label: "Under 6 hours", count: 4 }], layover_airports: [{ code: "DOH", name: "Doha", count: 1 }], price_range: { min: 78812, max: 112450 } }, warnings: [] }) }));
   await page.route("**/laravel/flights/results/nearby-dates**", async (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ available: false, dates: [] }) }));
   await page.route("**/laravel/flights/results/offer**", async (route) => { const key = new URL(route.request().url()).searchParams.get("fare_option_key"); await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(details(fares.find((fare) => fare.option_key === key) ?? fares[0])) }); });
   const query = new URLSearchParams({ search_id: searchId, trip_type: "one_way", from: "ISB", to: "DXB", depart: "2026-09-18", adults: "1", cabin: "economy" });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`/flights/results?${query}`);
   await expect(page.getByTestId("flight-result-card")).toHaveCount(4);
-  await page.screenshot({ path: path.join(output, "01-results-desktop.png"), fullPage: true });
-  await page.getByTestId("results-filter-panel").screenshot({ path: path.join(output, "02-filter-desktop.png") });
+  await page.getByTestId("results-filter-panel").screenshot({ path: path.join(output, "03-filter-semantics.png") });
   await page.getByTestId("book-now-trigger").first().click();
   await expect(page.getByTestId("fare-family-details")).toBeVisible();
-  await page.screenshot({ path: path.join(output, "03-branded-fares-desktop.png") });
-  await page.getByRole("listitem").filter({ hasText: "Smart" }).getByRole("button", { name: "Select fare" }).click();
+  await page.getByRole("listitem").filter({ hasText: "Smart" }).getByRole("button", { name: "View Details" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: "Smart" })).toContainText("Selected");
-  await page.screenshot({ path: path.join(output, "04-branded-fare-selected-second.png") });
-  await page.getByRole("tab", { name: "Baggage Policy" }).click(); await page.screenshot({ path: path.join(output, "05-fare-summary-baggage.png") });
-  await page.getByRole("tab", { name: "Fare Policy" }).click(); await page.screenshot({ path: path.join(output, "06-fare-summary-policy.png") });
-  await page.getByRole("tab", { name: "Fare Details" }).click(); await page.screenshot({ path: path.join(output, "07-fare-summary-details.png") });
-  await page.keyboard.press("Escape"); await page.getByTestId("flight-details-trigger").first().click(); await page.screenshot({ path: path.join(output, "08-flight-details-desktop.png") });
-  await page.keyboard.press("Escape"); await page.setViewportSize({ width: 390, height: 844 }); await page.screenshot({ path: path.join(output, "09-results-mobile.png"), fullPage: true });
-  await page.getByTestId("book-now-trigger").first().click(); await page.screenshot({ path: path.join(output, "10-fare-modal-mobile.png") });
-  await page.keyboard.press("Escape"); await page.getByRole("button", { name: /filters/i }).click(); await page.screenshot({ path: path.join(output, "11-filter-mobile.png") });
+  await page.screenshot({ path: path.join(output, "01-branded-fare-view-details.png") });
+  await page.getByRole("tab", { name: "Fare Details" }).click();
+  await expect(page.getByTestId("price-breakdown")).not.toContainText("Agency markup");
+  await page.getByTestId("price-breakdown").screenshot({ path: path.join(output, "02-fare-details-price.png") });
 });

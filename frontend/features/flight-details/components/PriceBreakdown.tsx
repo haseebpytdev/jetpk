@@ -14,7 +14,6 @@ function formatPkr(amount: number | null | undefined): string | null {
 export function PriceBreakdown({ offer, breakdown }: PriceBreakdownProps) {
   const base = breakdown?.base_fare ?? offer.base_fare;
   const taxes = breakdown?.taxes ?? offer.taxes;
-  const markup = breakdown?.markup ?? offer.markup;
   const serviceFee = breakdown?.service_fee ?? offer.service_fee;
   const total =
     breakdown?.displayed_price ??
@@ -25,7 +24,6 @@ export function PriceBreakdown({ offer, breakdown }: PriceBreakdownProps) {
   const rows = [
     { label: "Base fare", value: formatPkr(base) },
     { label: "Taxes & fees", value: formatPkr(taxes) },
-    { label: "Agency markup", value: formatPkr(markup) },
     { label: "Service fee", value: formatPkr(serviceFee) },
   ].filter((row) => row.value);
   const passengerRows = (breakdown?.passenger_pricing ?? []).map((row) => {

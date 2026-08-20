@@ -10,10 +10,11 @@ type FareFamilyDetailsProps = {
   options: FareFamilyOption[];
   selectedKey: string;
   onSelect: (key: string) => void;
+  onViewDetails: (key: string) => Promise<void>;
   disabled?: boolean;
 };
 
-export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: FareFamilyDetailsProps) {
+export function FareFamilyDetails({ options, selectedKey, onSelect, onViewDetails, disabled }: FareFamilyDetailsProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const scrollBy = useCallback((direction: -1 | 1) => {
@@ -96,7 +97,17 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
                     {option.seat_selection ? <div className="grid grid-cols-[4.5rem_1fr] gap-2 py-1.5"><dt className="text-jp-text-muted">Seats</dt><dd className="text-jp-text">{option.seat_selection}</dd></div> : null}
                   </dl>
                   <button type="button" disabled={disabled || !selectable} aria-pressed={selected} onClick={() => onSelect(option.option_key)} className="mt-auto w-full rounded-jp-md bg-jp-primary px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-jp-border disabled:text-jp-text-muted">{selected ? "Selected" : selectable ? "Select fare" : "Not selectable"}</button>
-                  <button type="button" className="mt-2 w-full rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-primary" onClick={() => document.querySelector('[data-testid="fare-summary-tabs"]')?.scrollIntoView({ behavior: "smooth", block: "start" })}>View Details</button>
+                  <button
+                    type="button"
+                    disabled={disabled || !selectable}
+                    className="mt-2 w-full rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-primary disabled:cursor-not-allowed disabled:text-jp-text-muted"
+                    onClick={async () => {
+                      await onViewDetails(option.option_key);
+                      document.querySelector('[data-testid="fare-summary-tabs"]')?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             );

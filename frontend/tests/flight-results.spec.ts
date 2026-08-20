@@ -177,6 +177,28 @@ test("airline filter and clear all", async ({ page }) => {
   await expect(page.getByTestId("flight-result-card")).toBeVisible();
 });
 
+test("filter control types match backend selection semantics", async ({ page }) => {
+  await page.route("**/laravel/flights/results/data**", async (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify(mockResultsBody({ filters: {
+      ...mockResultsBody().filters,
+      arrival_windows: [{ value: "afternoon", label: "Afternoon", count: 1 }],
+      baggage_options: [{ value: "checked_baggage", label: "Checked baggage included", count: 1 }],
+      fare_families: [{ value: "Flex", label: "Flex", count: 1 }],
+      duration_buckets: [{ value: "under_6h", label: "Under 6 hours", count: 1 }],
+      layover_airports: [{ code: "DXB", name: "Dubai", count: 1 }],
+    } })),
+  }));
+  await page.goto(`/flights/results?${baseResultsQuery()}`);
+  for (const label of ["Direct (1)", "Emirates (1)", "Morning (1)", "Afternoon (1)", "Non-refundable (1)"]) {
+    await expect(page.getByRole("checkbox", { name: label })).toBeVisible();
+  }
+  for (const label of ["Checked baggage included (1)", "Flex (1)", "Under 6 hours (1)", "Dubai (1)"]) {
+    await expect(page.getByRole("radio", { name: label })).toBeVisible();
+  }
+});
+
 test("sort control is present", async ({ page }) => {
   await gotoResults(page);
   await expect(page.getByTestId("sort-control")).toBeVisible();

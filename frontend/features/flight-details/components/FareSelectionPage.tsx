@@ -140,6 +140,7 @@ export function FareSelectionPage() {
                 options={details.fareOptions}
                 selectedKey={details.selectedFareKey}
                 onSelect={details.handleFareOptionChange}
+                onViewDetails={details.handleFareOptionChange}
                 disabled={revalidation.state === "loading"}
               />
 

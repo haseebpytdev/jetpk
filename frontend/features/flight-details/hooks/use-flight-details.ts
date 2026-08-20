@@ -89,10 +89,10 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
   }, [context, loadDetails]);
 
   const handleFareOptionChange = useCallback(
-    (key: string) => {
+    async (key: string) => {
       if (!resolveAuthoritativeFareOptionKey(key, fareOptionsRef.current)) return;
       setSelectedFareKey(key);
-      void loadDetails(key);
+      await loadDetails(key);
     },
     [loadDetails],
   );

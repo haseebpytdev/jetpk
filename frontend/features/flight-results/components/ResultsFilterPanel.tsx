@@ -199,7 +199,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.baggage_options?.length ? (
         <FacetGroup legend="Baggage">
           {facets.baggage_options.map((item) => (
-            <FacetChoice key={item.value} name="baggage-filter" checked={filters.baggage === item.value} onChange={() => onChange({ ...filters, baggage: item.value })} label={item.label} count={item.count} />
+            <FacetChoice key={item.value} name="baggage-filter" multiple={false} checked={filters.baggage === item.value} onChange={() => onChange({ ...filters, baggage: item.value })} label={item.label} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}
@@ -207,7 +207,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.fare_families?.length ? (
         <FacetGroup legend="Fare family">
           {facets.fare_families.map((item) => (
-            <FacetChoice key={item.value} name="fare-family-filter" checked={filters.fare_family === item.value} onChange={() => onChange({ ...filters, fare_family: item.value })} label={item.label} count={item.count} />
+            <FacetChoice key={item.value} name="fare-family-filter" multiple={false} checked={filters.fare_family === item.value} onChange={() => onChange({ ...filters, fare_family: item.value })} label={item.label} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}
@@ -215,7 +215,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.duration_buckets?.length ? (
         <FacetGroup legend="Duration">
           {facets.duration_buckets.map((item) => (
-            <FacetChoice key={item.value} name="duration-filter" checked={filters.duration_bucket === item.value} onChange={() => onChange({ ...filters, duration_bucket: item.value })} label={item.label} count={item.count} />
+            <FacetChoice key={item.value} name="duration-filter" multiple={false} checked={filters.duration_bucket === item.value} onChange={() => onChange({ ...filters, duration_bucket: item.value })} label={item.label} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}
@@ -223,7 +223,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
       {facets?.layover_airports?.length ? (
         <FacetGroup legend="Layover airport">
           {facets.layover_airports.map((item) => (
-            <FacetChoice key={item.code} name="layover-filter" checked={filters.layover_airport === item.code} onChange={() => onChange({ ...filters, layover_airport: item.code })} label={item.name} count={item.count} />
+            <FacetChoice key={item.code} name="layover-filter" multiple={false} checked={filters.layover_airport === item.code} onChange={() => onChange({ ...filters, layover_airport: item.code })} label={item.name} count={item.count} />
           ))}
         </FacetGroup>
       ) : null}

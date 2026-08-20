@@ -156,6 +156,8 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page.getByTestId("baggage-details")).toBeVisible();
     await page.getByRole("tab", { name: "Fare Details" }).click();
     await expect(page.getByTestId("price-breakdown")).toBeVisible();
+    await expect(page.getByTestId("price-breakdown")).not.toContainText("Agency markup");
+    await expect(page.getByTestId("price-breakdown")).toContainText("PKR 134,047");
   });
 
   test("renders fare rules accordion and segment details", async ({ page }) => {
@@ -590,6 +592,7 @@ test.describe("JP-FE-06 flight details", () => {
       },
     ];
     const detailsUrls: string[] = [];
+    let releaseStaleBasic: (() => void) | undefined;
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const depart = tomorrow.toISOString().slice(0, 10);
@@ -631,12 +634,25 @@ test.describe("JP-FE-06 flight details", () => {
 
     await page.route("**/laravel/flights/results/offer**", async (route) => {
       detailsUrls.push(route.request().url());
+      const fareKey = new URL(route.request().url()).searchParams.get("fare_option_key");
+      if (fareKey === "eco-basic" && detailsUrls.length > 1) {
+        await new Promise<void>((resolve) => { releaseStaleBasic = resolve; });
+      }
+      const selected = fareKey === "eco-flex" ? brandedOptions[1] : brandedOptions[0];
       await route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify(
           mockDetailsBody({
             offer: mockOfferWithDetails({
+              displayed_price: selected.displayed_price,
+              final_customer_price: selected.displayed_price,
+              baggage: selected.baggage,
+              fallback_details: {
+                baggage: { checked: selected.baggage, cabin: "7kg" },
+                fare_breakdown: { base_fare: Number(selected.displayed_price) - 20000, taxes: 20000, grand_total: selected.displayed_price, displayed_price: selected.displayed_price },
+                fare_rules: { refund_rule: fareKey === "eco-flex" ? "Refundable with fee" : "Non-refundable", change_rule: "Changes with penalty" },
+              },
               has_branded_fares: true,
               branded_fares_display_options: brandedOptions,
               fare_family_options_display: brandedOptions,
@@ -652,8 +668,20 @@ test.describe("JP-FE-06 flight details", () => {
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
     await expect.poll(() => detailsUrls.length).toBeGreaterThan(0);
     expect(detailsUrls[0]).toContain("fare_option_key=eco-basic");
-    await page.getByRole("listitem").filter({ hasText: "Economy Flex" }).getByRole("button", { name: "Select fare" }).click();
+    await page.evaluate(() => {
+      const cards = [...document.querySelectorAll<HTMLElement>('[data-fare-family-card]')];
+      for (const card of cards.slice(0, 2)) {
+        [...card.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.trim() === "View Details")?.click();
+      }
+    });
     await expect.poll(() => detailsUrls.some((url) => url.includes("fare_option_key=eco-flex"))).toBe(true);
+    await expect(page.getByRole("listitem").filter({ hasText: "Economy Flex" }).getByRole("button", { name: "Selected" })).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("tab", { name: "Fare Details" }).click();
+    await expect(page.getByTestId("price-breakdown")).toContainText("PKR 135,000");
+    releaseStaleBasic?.();
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("listitem").filter({ hasText: "Economy Flex" }).getByRole("button", { name: "Selected" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("price-breakdown")).toContainText("PKR 135,000");
   });
 
   test("mobile viewport renders details without horizontal scroll", async ({ page }) => {

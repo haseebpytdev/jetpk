@@ -17,6 +17,8 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-08-20 | JETPK OWNER V3 FINAL CONTRACT CLOSURE | **Public fare-details and filter semantics:** customer fare summaries no longer expose internal agency markup while authoritative totals remain unchanged. Branded `View Details` now selects and loads the clicked real supplier fare through the existing stale-response guard before focusing its summary. Single-value baggage, fare-family, duration, and layover facets render as radios; genuine multi-value facets remain server-backed checkboxes. |
+
 | 2026-08-20 | JETPK OWNER RETEST V3 FLIGHT UI REMEDIATION | **Results/fare presentation and read-only filtering:** compact Next result cards now center `Direct` / stop labels in the route connector, omit baggage externally, and use whole-rupee `PKR` display. Desktop filters expand with page scroll, expose readable checkbox multi-select facets backed by comma-separated server OR filtering, and use an accessible dual-ended price range. The shared details drawer now provides authoritative fare-card selection (synthetic options fail closed), selected-fare Baggage Policy / Fare Policy / Fare Details tabs, and passenger-level fare rows when trustworthy PKR data is supplied. Booking/revalidation authority and commercial mutation boundaries remain unchanged. |
 
 | Date       | Area                         | Note |
