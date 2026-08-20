@@ -14,6 +14,7 @@ Master roadmap: [../JETPK-V1-CLIENT-UI-COMPLETION-ROADMAP.md](../JETPK-V1-CLIENT
 | Document | Use when |
 |----------|----------|
 | [DEPLOYMENT-CONTEXT.md](DEPLOYMENT-CONTEXT.md) | Current host, topology, protected deploy route |
+| [deployments/JETPAKISTAN-PK-OWNER-V3-FLIGHT-UI-CLOSURE-DEPLOYMENT-20260820.md](deployments/JETPAKISTAN-PK-OWNER-V3-FLIGHT-UI-CLOSURE-DEPLOYMENT-20260820.md) | 2026-08-20 Owner V3 flight results, filters, fare modal, and mobile closure production deployment |
 | [deployments/JETPAKISTAN-PK-FLIGHT-RESULTS-FARE-AUTHORITY-DEPLOYMENT-20260820.md](deployments/JETPAKISTAN-PK-FLIGHT-RESULTS-FARE-AUTHORITY-DEPLOYMENT-20260820.md) | 2026-08-20 flight results, fare modal, Travelers, and synthetic fare-authority production deployment |
 | [deployments/JETPAKISTAN-PK-FLIGHT-RESULTS-BOOKING-FLOW-DEPLOYMENT-20260820.md](deployments/JETPAKISTAN-PK-FLIGHT-RESULTS-BOOKING-FLOW-DEPLOYMENT-20260820.md) | 2026-08-20 flight results + return view + booking-flow production deployment |
 | [deployments/JETPAKISTAN-PK-SEARCH-INPUT-FLOW-DEPLOYMENT-20260819.md](deployments/JETPAKISTAN-PK-SEARCH-INPUT-FLOW-DEPLOYMENT-20260819.md) | 2026-08-19 search field flow + dropdown layering production deployment |
