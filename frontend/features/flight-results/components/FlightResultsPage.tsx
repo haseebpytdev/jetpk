@@ -6,7 +6,6 @@ import { FlightDetailsDrawer, type FlightDetailsContext } from "@/features/fligh
 import { SearchModule } from "@/features/search";
 import { submitReturnComboSelection } from "../services/flight-results-api";
 import { buildSearchSummaryFromParams, useFlightResults } from "../hooks/use-flight-results";
-import { useOfferSelection } from "../hooks/use-offer-selection";
 import { parseFiltersFromSearchParams } from "../utils/filters";
 import { parseUiSort, type UiSortKey } from "../utils/sorting";
 import { EmptyResultsState } from "./EmptyResultsState";
@@ -55,15 +54,6 @@ export function FlightResultsPage() {
     filters,
     view: viewParam,
   });
-
-  const selection = useOfferSelection(results.resolvedSearchId ?? searchId ?? "");
-
-  const handleSelectOffer = useCallback(
-    (offer: import("../types").FlightOffer, fareOptionKey: string) => {
-      void selection.selectOffer(offer, fareOptionKey);
-    },
-    [selection],
-  );
 
   const syncUrl = useCallback(
     (nextFilters: typeof filters, nextSort: UiSortKey, extra?: Record<string, string | null>) => {
@@ -124,7 +114,7 @@ export function FlightResultsPage() {
   );
 
   const openDetails = useCallback(
-    (offer: import("../types").FlightOffer, fareOptionKey: string) => {
+    (offer: import("../types").FlightOffer, fareOptionKey: string, intent: "details" | "booking") => {
       const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
       if (!resolvedSearchId) return;
       setDetailsContext({
@@ -133,6 +123,7 @@ export function FlightResultsPage() {
         fareOptionKey,
         initialOffer: offer,
         initialFareOptions: offer.branded_fares_display_options ?? offer.fare_family_options_display,
+        intent,
       });
     },
     [results.resolvedSearchId, searchId],
@@ -300,19 +291,11 @@ export function FlightResultsPage() {
                           <FlightResultCard
                             offer={offer}
                             searchId={results.resolvedSearchId ?? ""}
-                            selecting={selection.selectingId === offer.offer_id}
-                            onSelect={handleSelectOffer}
                             onOpenDetails={openDetails}
                           />
                         </div>
                       ))}
               </div>
-            ) : null}
-
-            {selection.error ? (
-              <p className="text-sm text-red-700" role="alert">
-                {selection.error}
-              </p>
             ) : null}
 
             {results.status === "ready" ? (

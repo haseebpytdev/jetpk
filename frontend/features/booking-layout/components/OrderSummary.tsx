@@ -12,6 +12,7 @@ export type OrderSummaryProps = {
   onEdit?: () => void;
   className?: string;
   testId?: string;
+  variant?: "order" | "flight-preview";
 };
 
 function ItineraryRows({ itinerary, travellerTotal }: { itinerary: SelectedFlightSummary; travellerTotal?: number }) {
@@ -103,14 +104,19 @@ export function OrderSummary({
   onEdit,
   className,
   testId = "order-summary",
+  variant = "order",
 }: OrderSummaryProps) {
+  const preview = variant === "flight-preview";
   return (
     <article
-      className={cn("rounded-jp-lg border border-jp-border bg-jp-surface p-4", className)}
+      className={cn("rounded-jp-lg border border-jp-border bg-jp-surface p-4", preview && "overflow-hidden shadow-jp-card", className)}
       data-testid={testId}
     >
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-jp-sm font-semibold text-jp-text">Order summary</h2>
+        <div>
+          {preview ? <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-jp-primary">Your selection</p> : null}
+          <h2 className={cn("font-semibold text-jp-text", preview ? "mt-0.5 text-lg" : "text-jp-sm")}>{preview ? "Flight preview" : "Order summary"}</h2>
+        </div>
         {showEdit && onEdit ? (
           <button
             type="button"
@@ -122,7 +128,24 @@ export function OrderSummary({
         ) : null}
       </div>
 
-      {!collapsed && itinerary ? <div className="mt-3"><ItineraryRows itinerary={itinerary} travellerTotal={travellerTotal} /></div> : null}
+      {!collapsed && itinerary ? (
+        <div className="mt-3">
+          {preview && (itinerary.airline_name || itinerary.airline_code) ? (
+            <div className="mb-3 flex items-center gap-3 rounded-jp-md bg-jp-page p-3">
+              {itinerary.airline_logo_url ? <img src={itinerary.airline_logo_url} alt="" className="h-9 w-9 object-contain" /> : null}
+              <div className="min-w-0"><p className="truncate text-sm font-semibold text-jp-text">{itinerary.airline_name ?? itinerary.airline_code}</p><p className="text-xs text-jp-muted">{itinerary.flight_number ?? "Flight number not supplied"}</p></div>
+            </div>
+          ) : null}
+          <ItineraryRows itinerary={itinerary} travellerTotal={travellerTotal} />
+          {preview && (itinerary.duration || itinerary.stops != null || itinerary.cabin) ? (
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-jp-border pt-3 text-xs text-jp-muted">
+              {itinerary.duration ? <span className="rounded-full bg-jp-page px-2 py-1">{itinerary.duration}</span> : null}
+              {itinerary.stops != null ? <span className="rounded-full bg-jp-page px-2 py-1">{itinerary.stops === 0 ? "Nonstop" : `${itinerary.stops} stop${itinerary.stops === 1 ? "" : "s"}`}</span> : null}
+              {itinerary.cabin ? <span className="rounded-full bg-jp-page px-2 py-1">{itinerary.cabin}</span> : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {pricing ? <PriceRows pricing={pricing} /> : null}
 

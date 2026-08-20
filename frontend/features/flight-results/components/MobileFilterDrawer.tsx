@@ -25,7 +25,7 @@ export function MobileFilterDrawer({
   return (
     <Drawer open={open} onClose={onClose} title="Filters" className="lg:hidden max-w-full">
       <div data-testid="mobile-filter-drawer">
-        <ResultsFilterPanel facets={facets} filters={filters} onChange={onChange} onClearAll={onClearAll} />
+        <ResultsFilterPanel facets={facets} filters={filters} onChange={onChange} onClearAll={onClearAll} variant="drawer" />
       </div>
     </Drawer>
   );

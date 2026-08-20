@@ -29,7 +29,7 @@ export function PassengerCard({
 
   return (
     <fieldset
-      className="rounded-jp-lg border border-jp-border bg-jp-surface p-4"
+      className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-sm sm:p-5"
       data-testid={`passenger-card-${index}`}
     >
       <legend className="flex items-center gap-2 px-1 text-jp-sm font-semibold">
@@ -43,7 +43,11 @@ export function PassengerCard({
 
       <input type="hidden" name={`passengers[${index}][passenger_type]`} value={passenger.passenger_type} />
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+        <div className="border-b border-jp-border-soft pb-2 sm:col-span-2">
+          <h3 className="text-sm font-semibold text-jp-text">Personal information</h3>
+          <p className="mt-0.5 text-xs text-jp-muted">Enter names exactly as shown on the travel document.</p>
+        </div>
         <label className="text-jp-sm">
           Title <span className="text-red-700">*</span>
           <select
@@ -126,6 +130,11 @@ export function PassengerCard({
             className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2 uppercase"
           />
         </label>
+
+        <div className="mt-2 border-b border-jp-border-soft pb-2 sm:col-span-2">
+          <h3 className="text-sm font-semibold text-jp-text">Travel document</h3>
+          <p className="mt-0.5 text-xs text-jp-muted">Document requirements are determined by the selected itinerary.</p>
+        </div>
 
         {nationalIdAllowed ? (
           <label className="text-jp-sm sm:col-span-2">

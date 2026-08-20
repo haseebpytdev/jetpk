@@ -18,7 +18,7 @@ export function SegmentDetails({ segments }: SegmentDetailsProps) {
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-medium text-jp-text">
-              {segment.marketing_carrier_code ?? ""} {segment.flight_number ?? "Flight"}
+              {segment.airline_name ?? segment.airline_code ?? segment.marketing_carrier_code ?? "Airline not supplied"} · {segment.flight_number ?? "Flight number not supplied"}
             </p>
             {segment.duration_display ? (
               <span className="text-xs text-jp-text-muted">{segment.duration_display}</span>
@@ -28,7 +28,7 @@ export function SegmentDetails({ segments }: SegmentDetailsProps) {
             <div>
               <p className="text-jp-text-muted">Departure</p>
               <p className="font-medium text-jp-text">
-                {segment.departure_time_display ?? "—"}
+                {segment.departure_date_display ? `${segment.departure_date_display} · ` : ""}{segment.departure_time_display ?? "Not supplied"}
                 {segment.origin_airport_code || segment.origin ? (
                   <span className="text-jp-text-muted">
                     {" "}
@@ -50,22 +50,25 @@ export function SegmentDetails({ segments }: SegmentDetailsProps) {
                     · {segment.destination_airport_code ?? segment.destination}
                   </span>
                 ) : null}
+                {segment.arrival_date_display ? <span className="block text-xs font-normal text-jp-text-muted">{segment.arrival_date_display}</span> : null}
               </p>
             </div>
           </div>
           <dl className="mt-2 grid gap-1 text-xs text-jp-text-muted sm:grid-cols-2">
-            {segment.operating_carrier_code ? (
+            {segment.operating_airline_name || segment.operating_airline_code || segment.operating_carrier_code ? (
               <div>
                 <dt className="inline">Operating carrier: </dt>
-                <dd className="inline text-jp-text">{segment.operating_carrier_code}</dd>
+                <dd className="inline text-jp-text">{segment.operating_airline_name ?? segment.operating_airline_code ?? segment.operating_carrier_code}</dd>
               </div>
             ) : null}
-            {segment.cabin ? (
+            {segment.cabin_display || segment.cabin || segment.booking_class ? (
               <div>
-                <dt className="inline">Cabin: </dt>
-                <dd className="inline text-jp-text">{segment.cabin}</dd>
+                <dt className="inline">Cabin / class: </dt>
+                <dd className="inline text-jp-text">{[segment.cabin_display ?? segment.cabin, segment.booking_class].filter(Boolean).join(" · ")}</dd>
               </div>
             ) : null}
+            {segment.aircraft_display ? <div><dt className="inline">Aircraft: </dt><dd className="inline text-jp-text">{segment.aircraft_display}</dd></div> : null}
+            {segment.terminal_departure || segment.terminal_arrival ? <div><dt className="inline">Terminal: </dt><dd className="inline text-jp-text">{segment.terminal_departure ? `Depart ${segment.terminal_departure}` : "Departure not supplied"}{segment.terminal_arrival ? ` · Arrive ${segment.terminal_arrival}` : ""}</dd></div> : null}
           </dl>
         </li>
       ))}

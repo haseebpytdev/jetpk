@@ -229,11 +229,14 @@ test("changing sort in UI triggers Laravel refetch with mapped value", async ({ 
   await expect.poll(() => captured.filter((value) => value === "cheapest").length).toBeGreaterThan(0);
 });
 
-test("price button visible text is price only", async ({ page }) => {
+test("compact result card shows price and Book Now without expanded fare families", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await gotoResults(page);
-  const button = page.getByTestId("result-price-button");
-  await expect(button).toHaveText("134,047 PKR");
-  await expect(button).toHaveAttribute("aria-label", /Select fare for/);
+  await expect(page.getByTestId("result-price-display")).toHaveText("134,047 PKR");
+  await expect(page.getByTestId("book-now-trigger")).toBeVisible();
+  await expect(page.getByTestId("branded-fare-carousel")).toHaveCount(0);
+  await expect(page.locator("[data-fare-family-card]")).toHaveCount(0);
+  await page.screenshot({ path: "tmp/flight-results-fare-travelers-refinement-desktop.png", fullPage: true });
 });
 
 test("airline logo fallback shows initials", async ({ page }) => {
@@ -269,7 +272,7 @@ test("one-stop card and layover keyboard tooltip", async ({ page }) => {
   await expect(page.getByRole("tooltip")).toContainText("DXB");
 });
 
-test("branded fare selection stays on results", async ({ page }) => {
+test("Book Now opens shared modal and branded fares appear only inside it", async ({ page }) => {
   const fares = [
     { option_key: "eco", name: "Economy Saver", displayed_price: 100000, price_display: "100,000 PKR" },
     { option_key: "flex", name: "Economy Flex", displayed_price: 112000, price_display: "112,000 PKR" },
@@ -318,9 +321,12 @@ test("branded fare selection stays on results", async ({ page }) => {
       }),
     });
   });
-  await page.getByRole("button", { name: /Economy Saver/ }).click();
-  await expect(page).not.toHaveURL(/fare-selection/);
-  await expect(page.getByTestId("branded-fare-carousel")).toBeVisible();
+  await expect(page.locator("[data-fare-family-card]")).toHaveCount(0);
+  await page.getByTestId("book-now-trigger").click();
+  await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Choose your flight & fare" })).toBeVisible();
+  await expect(page.locator("[data-fare-family-card]")).toHaveCount(2);
+  await expect(page).toHaveURL(/\/flights\/results/);
 });
 
 test("branded fare carousel with more than three fares", async ({ page }) => {
@@ -348,9 +354,74 @@ test("branded fare carousel with more than three fares", async ({ page }) => {
       ),
     });
   });
+  const detailsUrls: string[] = [];
+  await page.route("**/laravel/flights/results/offer?**", async (route) => {
+    detailsUrls.push(route.request().url());
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        search_id: MOCK_SEARCH_ID,
+        offer_id: "offer-1",
+        offer: {
+          ...mockOffer(),
+          has_branded_fares: true,
+          branded_fares_display_options: fares,
+          fare_family_options_display: fares,
+          can_book: true,
+        },
+      }),
+    });
+  });
   await page.goto(`/flights/results?${baseResultsQuery()}`);
-  await expect(page.getByTestId("branded-fare-carousel")).toBeVisible();
+  await expect(page.locator("[data-fare-family-card]")).toHaveCount(0);
+  await page.getByTestId("book-now-trigger").click();
+  await expect(page.locator("[data-fare-family-card]")).toHaveCount(4);
   await expect(page.getByLabel("Next fare options")).toBeVisible();
+  const secondFare = page.locator("[data-fare-family-card] button").nth(1);
+  await secondFare.press("Enter");
+  await expect(secondFare).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => detailsUrls.some((url) => url.includes("fare_option_key=fare-1"))).toBe(true);
+  for (const [width, height] of [[1440, 900], [1366, 768], [1024, 768], [768, 900], [390, 844], [320, 800]]) {
+    await page.setViewportSize({ width, height });
+    await expect(page.getByTestId("continue-to-passengers")).toBeVisible();
+    const overflows = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    expect(overflows, `${width}px fare modal should not overflow`).toBe(false);
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.screenshot({ path: "tmp/flight-results-fare-modal-desktop.png", fullPage: true });
+});
+
+test("opening Book Now is read-only until fare confirmation", async ({ page }) => {
+  let mutationCount = 0;
+  await gotoResults(page);
+  await page.route("**/laravel/flights/results/offer?**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ success: true, search_id: MOCK_SEARCH_ID, offer_id: "offer-1", offer: { ...mockOffer(), can_book: true } }),
+    });
+  });
+  await page.route("**/laravel/flights/results/select**", async (route) => {
+    mutationCount += 1;
+    await route.abort();
+  });
+  await page.getByTestId("book-now-trigger").click();
+  await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
+  expect(mutationCount).toBe(0);
+  await expect(page).toHaveURL(/\/flights\/results/);
+});
+
+test("result card remains usable without body overflow at target breakpoints", async ({ page }) => {
+  await gotoResults(page);
+  for (const [width, height] of [[1440, 900], [1366, 768], [1024, 768], [768, 900], [390, 844], [320, 800]]) {
+    await page.setViewportSize({ width, height });
+    await expect(page.getByTestId("flight-result-card")).toBeVisible();
+    await expect(page.getByTestId("book-now-trigger")).toBeVisible();
+    const overflows = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    expect(overflows, `${width}px viewport should not overflow`).toBe(false);
+  }
 });
 
 test("mobile filter drawer at 320px", async ({ page }) => {

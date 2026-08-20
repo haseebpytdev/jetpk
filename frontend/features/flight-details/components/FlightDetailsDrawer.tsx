@@ -65,6 +65,7 @@ export function FlightDetailsDrawer({
   const segments = offer?.segments ?? [];
   const isInquiry = details.data?.multicity_inquiry_only ?? offer?.multicity_inquiry_only;
   const canContinue = offer?.can_book && !isInquiry;
+  const isBookingIntent = context.intent === "booking";
 
   const handleContinue = () => {
     if (!offer) return;
@@ -88,7 +89,7 @@ export function FlightDetailsDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex justify-end" data-testid="flight-details-drawer">
+      <div className="fixed inset-0 z-50 flex items-end justify-end sm:items-stretch" data-testid="flight-details-drawer">
         <button
           type="button"
           className="absolute inset-0 bg-black/40"
@@ -102,12 +103,18 @@ export function FlightDetailsDrawer({
           role="dialog"
           aria-modal="true"
           aria-labelledby="flight-details-title"
-          className="relative flex h-full w-full max-w-lg flex-col bg-jp-page shadow-jp-card sm:max-w-xl"
+          className="relative flex max-h-[94dvh] w-full flex-col rounded-t-2xl bg-jp-page shadow-jp-card sm:h-full sm:max-h-none sm:max-w-4xl sm:rounded-none lg:max-w-5xl"
         >
-          <header className="flex items-center justify-between border-b border-jp-border px-4 py-3">
-            <h2 id="flight-details-title" className="text-lg font-semibold text-jp-text">
-              Flight details
-            </h2>
+          <header className="flex items-start justify-between gap-4 border-b border-jp-border bg-jp-surface px-4 py-3 sm:px-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-jp-primary">JetPakistan</p>
+              <h2 id="flight-details-title" className="mt-0.5 text-lg font-semibold text-jp-text sm:text-xl">
+                {isBookingIntent ? "Choose your flight & fare" : "Flight details"}
+              </h2>
+              <p className="mt-1 text-xs text-jp-text-muted">
+                {isBookingIntent ? "Review the journey and confirm an available fare before continuing." : "Review the complete available journey and fare information."}
+              </p>
+            </div>
             <button
               ref={closeRef}
               type="button"
@@ -121,7 +128,7 @@ export function FlightDetailsDrawer({
             </button>
           </header>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4">
+          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
             {details.loadState === "loading" ? <ResultSkeleton count={2} /> : null}
             {details.loadState === "error" ? (
               <SearchErrorState message={details.message ?? "Unable to load details."} onRetry={details.reload} />
@@ -135,17 +142,19 @@ export function FlightDetailsDrawer({
             ) : null}
 
             {details.loadState === "ready" && offer ? (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {isInquiry ? (
                   <p className="text-sm text-jp-text-muted" role="note">
                     {details.data?.inquiry_only_notice ?? offer.inquiry_only_notice ?? "Multi-city inquiry only."}
                   </p>
                 ) : null}
 
-                <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
-
-                <RouteTimeline segments={segments} layovers={offer.layovers_display} />
-                <SegmentDetails segments={segments} />
+                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-4" aria-labelledby="journey-details-heading">
+                  <h3 id="journey-details-heading" className="mb-3 text-sm font-semibold text-jp-text">Journey details</h3>
+                  <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
+                  <RouteTimeline segments={segments} layovers={offer.layovers_display} />
+                  <div className="mt-4"><SegmentDetails segments={segments} /></div>
+                </section>
 
                 <FareFamilyDetails
                   options={details.fareOptions}
@@ -154,7 +163,8 @@ export function FlightDetailsDrawer({
                   disabled={revalidation.state === "loading"}
                 />
 
-                <section data-testid="fare-details-baggage">
+                <div className="grid gap-4 lg:grid-cols-2">
+                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-4" data-testid="fare-details-baggage">
                   <h3 className="text-sm font-semibold text-jp-text">Baggage Policy</h3>
                   <BaggageDetails
                     baggage={fallback?.baggage}
@@ -164,7 +174,7 @@ export function FlightDetailsDrawer({
                   />
                 </section>
 
-                <section data-testid="fare-details-policy">
+                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-4" data-testid="fare-details-policy">
                   <h3 className="text-sm font-semibold text-jp-text">Fare Policy</h3>
                   <FareRulesAccordion
                     rules={fallback?.fare_rules}
@@ -173,8 +183,9 @@ export function FlightDetailsDrawer({
                     refundable={offer.refundable}
                   />
                 </section>
+                </div>
 
-                <section data-testid="fare-details-breakdown">
+                <section className="rounded-jp-card border border-jp-border bg-jp-surface p-4" data-testid="fare-details-breakdown">
                   <h3 className="text-sm font-semibold text-jp-text">Fare Details</h3>
                   <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />
                 </section>
@@ -217,10 +228,11 @@ export function FlightDetailsDrawer({
           </div>
 
           {details.loadState === "ready" && offer && !showRevalidationError ? (
-            <footer className="sticky bottom-0 border-t border-jp-border bg-jp-page p-4">
+            <footer className="sticky bottom-0 border-t border-jp-border bg-jp-surface p-4 sm:px-6">
               <ContinueToPassengersButton
                 loading={revalidation.state === "loading"}
                 disabled={!canContinue}
+                label={details.fareOptions.length > 1 ? "Continue with this fare" : "Continue with this flight"}
                 onClick={handleContinue}
               />
               {!canContinue && offer.disabled_reason ? (

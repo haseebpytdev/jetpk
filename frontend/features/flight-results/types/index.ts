@@ -17,13 +17,24 @@ export type FlightSegmentDisplay = {
   origin_airport_code?: string;
   destination_airport_code?: string;
   departure_time_display?: string;
+  departure_date_display?: string;
   arrival_time_display?: string;
+  arrival_date_display?: string;
   arrival_day_offset_display?: string;
   duration_display?: string;
   flight_number?: string;
   marketing_carrier_code?: string;
+  airline_code?: string;
+  airline_name?: string;
   operating_carrier_code?: string;
+  operating_airline_code?: string;
+  operating_airline_name?: string;
   cabin?: string;
+  cabin_display?: string;
+  booking_class?: string;
+  aircraft_display?: string | null;
+  terminal_departure?: string | null;
+  terminal_arrival?: string | null;
   layover_after_display?: string;
 };
 

@@ -16,11 +16,13 @@ export function ContactDetailsSection({
   onChange,
 }: ContactDetailsSectionProps) {
   return (
-    <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4" data-testid="contact-details">
-      <h2 className="text-jp-sm font-semibold text-jp-text">Contact details</h2>
+    <section className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-sm sm:p-5" data-testid="contact-details">
+      <div className="border-b border-jp-border-soft pb-3">
+      <h2 className="text-base font-semibold text-jp-text">Contact details</h2>
       <p className="mt-1 text-jp-sm text-jp-muted">Booking confirmation will be sent to this contact.</p>
+      </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid gap-x-4 gap-y-3 sm:grid-cols-2">
         <label className="text-jp-sm sm:col-span-2">
           Contact name <span className="text-jp-muted">(optional)</span>
           <input

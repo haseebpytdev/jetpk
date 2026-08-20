@@ -105,6 +105,7 @@ export type FlightDetailsContext = {
   comboId?: string;
   initialOffer?: FlightOffer;
   initialFareOptions?: FareFamilyOption[];
+  intent?: "details" | "booking";
 };
 
 export type { FareFamilyOption, FlightOffer };

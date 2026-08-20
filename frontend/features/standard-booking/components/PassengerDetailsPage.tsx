@@ -243,7 +243,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   const typeOrdinals: Record<string, number> = { adult: 0, child: 0, infant: 0 };
 
   const summarySidebar = (
-    <OrderSummary itinerary={context.itinerary} travellerTotal={context.travellers.total} />
+    <OrderSummary itinerary={context.itinerary} travellerTotal={context.travellers.total} variant="flight-preview" testId="flight-preview" />
   );
 
   return (

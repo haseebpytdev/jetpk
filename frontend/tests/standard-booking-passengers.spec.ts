@@ -33,7 +33,13 @@ const mockContext = {
     destination: "DXB",
     depart_date: "2026-08-15",
     airline_name: "TestAir",
+    airline_code: "TA",
+    flight_number: "TA 204",
     cabin: "economy",
+    fare_family: "Economy Flex",
+    stops: 0,
+    duration: "3h 20m",
+    baggage: "30kg checked",
     total_formatted: "114,999",
     currency: "PKR",
     segments: [],
@@ -101,7 +107,13 @@ test("passenger page loads with authoritative traveller counts", async ({ page }
   await expect(page.getByTestId("passenger-card-1")).toBeVisible();
   await expect(page.getByText("Lead passenger")).toBeVisible();
   await expect(page.getByTestId("seat-extras-readiness")).toBeVisible();
+  await expect(page.getByTestId("flight-preview")).toContainText("Flight preview");
+  await expect(page.getByTestId("flight-preview")).toContainText("TA 204");
+  await expect(page.getByTestId("flight-preview")).toContainText("Economy Flex");
+  await expect(page.getByRole("heading", { name: "Personal information" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Travel document" }).first()).toBeVisible();
   expect(page.url()).not.toMatch(/passport/i);
+  await page.screenshot({ path: "tmp/flight-results-travelers-refinement-desktop.png", fullPage: true });
 });
 
 test("booking progress shows connected stepper with canonical labels", async ({ page }) => {
@@ -187,4 +199,19 @@ test("no passport data in localStorage", async ({ page }) => {
   await page.goto("/booking/passengers?search_id=search-1&offer_id=offer-1");
   const storage = await page.evaluate(() => JSON.stringify({ local: localStorage, session: sessionStorage }));
   expect(storage).not.toContain("passport");
+});
+
+test("Travelers form and flight preview remain responsive", async ({ page }) => {
+  await mockCsrf(page);
+  await page.route("**/laravel/booking/passengers?**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockContext) });
+  });
+  await page.goto("/booking/passengers?search_id=search-1&offer_id=offer-1");
+
+  for (const [width, height] of [[1440, 900], [1366, 768], [1024, 768], [768, 900], [390, 844], [320, 800]]) {
+    await page.setViewportSize({ width, height });
+    await expect(page.getByTestId("standard-passengers-form")).toBeVisible();
+    const overflows = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    expect(overflows, `${width}px Travelers viewport should not overflow`).toBe(false);
+  }
 });

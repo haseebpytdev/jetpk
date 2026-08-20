@@ -9,6 +9,7 @@ type ResultsFilterPanelProps = {
   onClearAll: () => void;
   id?: string;
   loading?: boolean;
+  variant?: "sidebar" | "drawer";
 };
 
 function FacetGroup({
@@ -19,25 +20,28 @@ function FacetGroup({
   children: React.ReactNode;
 }) {
   return (
-    <fieldset className="space-y-2 border-b border-jp-border-soft pb-3 last:border-b-0">
-      <legend className="text-xs font-semibold uppercase tracking-wide text-jp-text-muted">{legend}</legend>
+    <fieldset className="space-y-1.5 border-b border-jp-border-soft pb-2.5 last:border-b-0">
+      <legend className="mb-1 text-[11px] font-bold uppercase tracking-[0.1em] text-jp-text-muted">{legend}</legend>
       {children}
     </fieldset>
   );
 }
 
-export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, loading }: ResultsFilterPanelProps) {
+export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, loading, variant = "sidebar" }: ResultsFilterPanelProps) {
   const activeCount = Object.values(filters).filter(Boolean).length;
 
   return (
     <aside
       id={id}
-      className="sticky top-20 space-y-3 rounded-jp-card border border-jp-border bg-jp-surface p-3"
+      className={`${variant === "sidebar" ? "sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-jp-card border border-jp-border shadow-sm" : ""} space-y-2.5 bg-jp-surface p-3`}
       aria-label="Filter results"
       data-testid="results-filter-panel"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-jp-text">Filters</h2>
+        <div>
+          <h2 className="text-sm font-semibold text-jp-text">Filter results</h2>
+          <p className="text-[11px] text-jp-text-muted">{activeCount ? `${activeCount} active` : "Refine your options"}</p>
+        </div>
         {activeCount > 0 ? (
           <button
             type="button"
@@ -63,7 +67,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
           type="search"
           value={filters.flight_number ?? ""}
           onChange={(event) => onChange({ ...filters, flight_number: event.target.value || undefined })}
-          className="mt-1 w-full rounded-jp-md border border-jp-border px-2 py-1.5 text-sm text-jp-text"
+          className="mt-1 w-full rounded-jp-md border border-jp-border px-2 py-1.5 text-sm text-jp-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
           placeholder="e.g. EK612"
           data-testid="filter-flight-number"
         />
@@ -87,11 +91,11 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
 
       {facets?.price_range ? (
         <FacetGroup legend="Price range">
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <input
               type="number"
               aria-label="Minimum price"
-              className="w-full rounded-jp-md border border-jp-border px-2 py-1 text-sm"
+              className="w-full rounded-jp-md border border-jp-border px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
               value={filters.min_price ?? ""}
               placeholder={String(facets.price_range.min)}
               onChange={(event) => onChange({ ...filters, min_price: event.target.value || undefined })}
@@ -99,7 +103,7 @@ export function ResultsFilterPanel({ facets, filters, onChange, onClearAll, id, 
             <input
               type="number"
               aria-label="Maximum price"
-              className="w-full rounded-jp-md border border-jp-border px-2 py-1 text-sm"
+              className="w-full rounded-jp-md border border-jp-border px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
               value={filters.max_price ?? ""}
               placeholder={String(facets.price_range.max)}
               onChange={(event) => onChange({ ...filters, max_price: event.target.value || undefined })}
