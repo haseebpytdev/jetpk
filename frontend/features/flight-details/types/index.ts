@@ -30,6 +30,8 @@ export type PriceBreakdownContract = {
   currency?: string | null;
   passenger_pricing?: Record<string, unknown>[] | null;
   price_note?: string | null;
+  component_breakdown_available?: boolean | null;
+  component_breakdown_unavailable?: boolean | null;
 };
 
 export type FareRulesContract = {

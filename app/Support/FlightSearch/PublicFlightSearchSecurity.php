@@ -28,6 +28,7 @@ class PublicFlightSearchSecurity
         'pricing_components',
         'expected_ui_price',
         'fare_debug',
+        'markup',
     ];
 
     public static function allowsDebugFares(Request $request): bool

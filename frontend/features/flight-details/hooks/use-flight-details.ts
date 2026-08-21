@@ -97,6 +97,19 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
     [loadDetails],
   );
 
+  const handleViewDetails = useCallback(
+    async (key: string) => {
+      if (!resolveAuthoritativeFareOptionKey(key, fareOptionsRef.current)) {
+        document.querySelector('[data-testid="fare-summary-tabs"]')?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      setSelectedFareKey(key);
+      await loadDetails(key);
+      document.querySelector('[data-testid="fare-summary-tabs"]')?.scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+    [loadDetails],
+  );
+
   return {
     loadState,
     message,
@@ -104,6 +117,7 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
     fareOptions,
     selectedFareKey,
     handleFareOptionChange,
+    handleViewDetails,
     reload: () => loadDetails(selectedFareKey),
   };
 }

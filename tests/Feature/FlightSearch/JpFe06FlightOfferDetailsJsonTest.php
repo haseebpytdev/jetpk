@@ -4,6 +4,7 @@ namespace Tests\Feature\FlightSearch;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -138,6 +139,53 @@ class JpFe06FlightOfferDetailsJsonTest extends TestCase
             ->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonPath('fare_option_key', $optionKey);
+    }
+
+    public function test_sabre_pricing_information_index_fare_option_resolves_successfully(): void
+    {
+        [$searchId, $offer] = $this->storeSearchPayload();
+        $payload = Cache::get('flight_search:'.$searchId);
+        $this->assertIsArray($payload);
+        $offer['supplier_provider'] = 'sabre';
+        $offer['final_customer_price'] = 90000;
+        $offer['supplier_total_source'] = 300;
+        $offer['branded_fares'] = [
+            [
+                'name' => 'ECOLIGHT',
+                'brand_code' => 'LT',
+                'price_total' => 280,
+                'currency' => 'USD',
+                'pricing_information_index' => 0,
+            ],
+            [
+                'name' => 'SMART',
+                'brand_code' => 'SM',
+                'price_total' => 320,
+                'currency' => 'USD',
+                'pricing_information_index' => 1,
+                'check_in_summary' => '1 checked bag up to 23kg',
+            ],
+        ];
+        $payload['offers'] = [$offer];
+        Cache::put('flight_search:'.$searchId, $payload, 1800);
+
+        Config::set('suppliers.sabre.branded_fares_display_enabled', true);
+
+        $mapped = $this->getJson('/flights/results/data?search_id='.$searchId)
+            ->assertOk()
+            ->json('offers.0');
+        $optionKey = (string) data_get($mapped, 'fare_family_options_display.1.option_key', '');
+        $this->assertNotSame('', $optionKey);
+        $this->assertTrue(data_get($mapped, 'fare_family_options_display.1.selection_key_authoritative', false));
+        $this->assertTrue(data_get($mapped, 'fare_family_options_display.1.can_select', false));
+
+        $details = $this->getJson('/flights/results/offer?search_id='.$searchId.'&offer_id='.$offer['offer_id'].'&fare_option_key='.urlencode($optionKey).'&format=json')
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('fare_option_key', $optionKey)
+            ->json('offer');
+        $this->assertSame('SMART', $details['fare_family'] ?? null);
+        $this->assertArrayNotHasKey('markup', $details);
     }
 
     public function test_offer_details_does_not_mutate_search_store(): void

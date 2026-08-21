@@ -183,31 +183,73 @@ class FlightOfferFallbackDetailsPresenter
         $base = (float) ($offer['base_fare'] ?? data_get($offer, 'fare_breakdown.base_fare', 0));
         $taxes = (float) ($offer['taxes'] ?? data_get($offer, 'fare_breakdown.taxes', 0));
         $supplierTotal = (float) ($offer['supplier_total'] ?? data_get($offer, 'fare_breakdown.supplier_total', $base + $taxes));
-        $markup = (float) ($offer['markup'] ?? 0);
         $serviceFee = (float) ($offer['service_fee'] ?? 0);
         $displayedPrice = isset($offer['displayed_price']) ? (int) round((float) $offer['displayed_price']) : null;
         $grandTotal = $displayedPrice !== null && $displayedPrice > 0
             ? (float) $displayedPrice
             : (float) ($offer['final_customer_price'] ?? 0);
-        if ($grandTotal <= 0 && $supplierTotal > 0) {
-            $grandTotal = $supplierTotal + $markup + $serviceFee;
+        if ($grandTotal <= 0 && $supplierTotal > 0 && $currency === 'PKR') {
+            $grandTotal = $supplierTotal + $serviceFee;
         }
+
+        $componentsArePkr = $currency === 'PKR';
+        $componentSum = $base + $taxes + ($serviceFee > 0 ? $serviceFee : 0);
+        $componentsReconcile = $componentsArePkr
+            && $base > 0
+            && $grandTotal > 0
+            && abs($componentSum - $grandTotal) <= max(2.0, $grandTotal * 0.02);
+
         $passengerPricing = is_array($offer['passenger_pricing'] ?? null)
             ? $offer['passenger_pricing']
             : (is_array(data_get($offer, 'fare_breakdown.passenger_pricing')) ? data_get($offer, 'fare_breakdown.passenger_pricing') : []);
+        $trustedPassengerPricing = [];
+        foreach ($passengerPricing as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $rowCurrency = strtoupper(trim((string) ($row['currency'] ?? $currency)));
+            if ($rowCurrency !== 'PKR') {
+                continue;
+            }
+            $rowBase = (float) ($row['base_amount'] ?? $row['base_fare'] ?? 0);
+            $rowTaxes = (float) ($row['tax_amount'] ?? $row['taxes'] ?? 0);
+            $rowTotal = (float) ($row['total_amount'] ?? $row['total'] ?? 0);
+            if ($rowTotal <= 0) {
+                continue;
+            }
+            if ($rowBase > 0 && abs(($rowBase + $rowTaxes) - $rowTotal) > max(2.0, $rowTotal * 0.02)) {
+                $rowBase = 0;
+                $rowTaxes = 0;
+            }
+            $trustedPassengerPricing[] = array_filter([
+                'passenger_type' => strtoupper(trim((string) ($row['passenger_type'] ?? $row['ptc'] ?? 'ADULT'))) ?: 'ADULT',
+                'passenger_count' => max(1, (int) ($row['passenger_count'] ?? $row['quantity'] ?? 1)),
+                'base_amount' => $rowBase > 0 ? $rowBase : null,
+                'tax_amount' => $rowTaxes > 0 ? $rowTaxes : null,
+                'total_amount' => $rowTotal,
+                'currency' => 'PKR',
+            ], static fn (mixed $v): bool => $v !== null && $v !== '');
+        }
+
+        $priceNote = self::nullableString($offer['price_note'] ?? null);
+        if (! $componentsReconcile && $grandTotal > 0) {
+            $priceNote = $priceNote
+                ?? 'Component fare breakdown is unavailable for this fare. Grand total is the authoritative customer price.';
+        }
 
         return array_filter([
-            'base_fare' => $base > 0 ? $base : null,
-            'taxes' => $taxes > 0 ? $taxes : null,
-            'supplier_total' => $supplierTotal > 0 ? $supplierTotal : null,
-            'markup' => $markup > 0 ? $markup : null,
-            'service_fee' => $serviceFee > 0 ? $serviceFee : null,
+            'base_fare' => $componentsReconcile ? $base : null,
+            'taxes' => $componentsReconcile && $taxes > 0 ? $taxes : null,
+            'supplier_total' => null,
+            'service_fee' => $componentsReconcile && $serviceFee > 0 ? $serviceFee : null,
             'grand_total' => $grandTotal > 0 ? $grandTotal : null,
             'displayed_price' => $displayedPrice,
             'displayed_currency' => $displayedPrice !== null ? 'PKR' : null,
-            'currency' => $currency !== '' ? $currency : null,
-            'passenger_pricing' => $passengerPricing !== [] ? $passengerPricing : null,
-            'price_note' => self::nullableString($offer['price_note'] ?? null),
+            'currency' => 'PKR',
+            'component_breakdown_available' => $componentsReconcile,
+            'component_breakdown_unavailable' => ! $componentsReconcile && $grandTotal > 0,
+            'passenger_pricing' => $trustedPassengerPricing !== [] ? $trustedPassengerPricing : null,
+            'price_note' => $priceNote,
         ], fn ($v) => $v !== null && $v !== '' && $v !== []);
     }
 

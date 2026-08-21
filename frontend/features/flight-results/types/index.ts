@@ -46,6 +46,10 @@ export type FareFamilyOption = {
   price_display?: string;
   displayed_price?: number | null;
   baggage?: string;
+  cabin_baggage?: string | null;
+  checked_baggage?: string | null;
+  carry_on_summary?: string | null;
+  check_in_summary?: string | null;
   refund_rule?: string;
   change_rule?: string;
   meal?: string;
@@ -55,6 +59,7 @@ export type FareFamilyOption = {
   source_offer_id?: string;
   selection_key_authoritative?: boolean;
   can_select?: boolean;
+  selectable?: boolean;
 };
 
 export type FlightOffer = {

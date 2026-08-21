@@ -1609,6 +1609,18 @@ class FlightOfferDisplayPresenter
             ),
             $selectionActive,
         );
+        // Details selection follows resolvable supplier identity, not only the BF6 booking env gate.
+        $allOptions = self::promoteAuthoritativeFareOptionsToSelectable($allOptions);
+        $hasAuthoritativeSelectable = false;
+        foreach ($allOptions as $option) {
+            if (($option['selection_key_authoritative'] ?? false) === true && ($option['can_select'] ?? false) === true) {
+                $hasAuthoritativeSelectable = true;
+                break;
+            }
+        }
+        if ($hasAuthoritativeSelectable) {
+            $selectionActive = true;
+        }
         $hasBrandedFares = count($allOptions) >= 2;
         $universalActive = self::universalFareChoiceEnabledForOffer($offer);
 
@@ -2350,7 +2362,39 @@ class FlightOfferDisplayPresenter
     {
         foreach ($options as $idx => $option) {
             $options[$idx]['selectable'] = $selectionActive;
+            $options[$idx]['can_select'] = $selectionActive;
             $options[$idx]['display_only'] = ! $selectionActive;
+        }
+
+        return $options;
+    }
+
+    /**
+     * Authoritative supplier fare rows remain selectable for Details even when the
+     * Sabre BF6 booking selection env flag is off. Synthetic defaults stay locked.
+     *
+     * @param  list<array<string, mixed>>  $options
+     * @return list<array<string, mixed>>
+     */
+    protected static function promoteAuthoritativeFareOptionsToSelectable(array $options): array
+    {
+        foreach ($options as $idx => $option) {
+            if (($option['is_synthetic_default'] ?? false) === true) {
+                $options[$idx]['selection_key_authoritative'] = false;
+                $options[$idx]['selectable'] = false;
+                $options[$idx]['can_select'] = false;
+                $options[$idx]['display_only'] = true;
+                continue;
+            }
+
+            $authoritative = ($option['selection_key_authoritative'] ?? false) === true
+                || self::optionHasResolvableSelectionIdentity($option);
+            $options[$idx]['selection_key_authoritative'] = $authoritative;
+            if ($authoritative) {
+                $options[$idx]['selectable'] = true;
+                $options[$idx]['can_select'] = true;
+                $options[$idx]['display_only'] = false;
+            }
         }
 
         return $options;
@@ -2372,15 +2416,46 @@ class FlightOfferDisplayPresenter
                 continue;
             }
 
-            $isSyntheticDefault = ($option['is_synthetic_default'] ?? false) === true;
-            $departureFareKey = self::nullableTrimmedString($option['departure_fare_key'] ?? null);
-            $sourceOfferId = self::nullableTrimmedString($option['source_offer_id'] ?? null);
-            $isGroupedOfferOption = ($option['is_grouped_offer_option'] ?? false) === true;
-            $options[$idx]['selection_key_authoritative'] = ! $isSyntheticDefault
-                && ($departureFareKey !== null || ($isGroupedOfferOption && $sourceOfferId !== null));
+            $options[$idx]['selection_key_authoritative'] = self::optionHasResolvableSelectionIdentity($option);
         }
 
         return $options;
+    }
+
+    /**
+     * True when Details GET can resolve this option_key without inventing supplier identity.
+     * Synthetic defaults never qualify. Sabre BFM PI rows qualify via pricing_information_index.
+     *
+     * @param  array<string, mixed>  $option
+     */
+    public static function optionHasResolvableSelectionIdentity(array $option): bool
+    {
+        if (($option['is_synthetic_default'] ?? false) === true) {
+            return false;
+        }
+
+        if (self::nullableTrimmedString($option['departure_fare_key'] ?? null) !== null) {
+            return true;
+        }
+
+        $sourceOfferId = self::nullableTrimmedString($option['source_offer_id'] ?? null);
+        if (($option['is_grouped_offer_option'] ?? false) === true && $sourceOfferId !== null) {
+            return true;
+        }
+
+        if (isset($option['pricing_information_index']) && is_numeric($option['pricing_information_index'])) {
+            return true;
+        }
+
+        if (
+            ($option['pia_ndc_provider_backed'] ?? false) === true
+            && is_array($option['provider_context'] ?? null)
+            && PiaNdcFareFamilyPolicy::hasOrderCreateReadyContext($option['provider_context'])
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2433,7 +2508,16 @@ class FlightOfferDisplayPresenter
             'fare_product_disambiguator' => self::nullableTrimmedString($option['fare_product_disambiguator'] ?? null),
             'fare_variant_subtitle' => self::nullableTrimmedString($option['fare_variant_subtitle'] ?? $option['fare_product_disambiguator'] ?? null),
             'selectable' => (bool) ($option['selectable'] ?? $selectionActive),
+            'can_select' => (bool) ($option['can_select'] ?? $option['selectable'] ?? $selectionActive),
             'display_only' => (bool) ($option['display_only'] ?? ! $selectionActive),
+            'baggage' => self::nullableTrimmedString($option['baggage'] ?? $option['baggage_summary'] ?? null),
+            'cabin_baggage' => self::nullableTrimmedString($option['cabin_baggage'] ?? $option['carry_on_summary'] ?? null),
+            'checked_baggage' => self::nullableTrimmedString($option['checked_baggage'] ?? $option['check_in_summary'] ?? null),
+            'refund_rule' => self::nullableTrimmedString($option['refund_rule'] ?? $option['refundable_display'] ?? null),
+            'change_rule' => self::nullableTrimmedString($option['change_rule'] ?? $option['modification_rule'] ?? null),
+            'brand_name' => self::nullableTrimmedString($option['brand_name'] ?? $option['name'] ?? null),
+            'meal' => self::nullableTrimmedString($option['meal'] ?? $option['meal_included'] ?? null),
+            'seat_selection' => self::nullableTrimmedString($option['seat_selection'] ?? $option['seat_selection_rule'] ?? null),
         ];
     }
 
@@ -2727,6 +2811,15 @@ class FlightOfferDisplayPresenter
 
         $brand = $resolved['brand'];
         $departureKey = trim((string) ($brand['departure_fare_key'] ?? $option['departure_fare_key'] ?? ''));
+        $piIndex = isset($option['pricing_information_index']) && is_numeric($option['pricing_information_index'])
+            ? (int) $option['pricing_information_index']
+            : null;
+        $isSabre = strcasecmp((string) ($offer['supplier_provider'] ?? ''), 'sabre') === 0;
+
+        if ($departureKey === '' && $isSabre && $piIndex !== null) {
+            return self::applySabreSelectedFareFamilyOptionToOffer($offer, $resolved, $selectedId);
+        }
+
         if ($departureKey === '') {
             return [
                 'offer' => $offer,
@@ -2750,6 +2843,7 @@ class FlightOfferDisplayPresenter
             $offer['fare_family'] = (string) $brand['name'];
         }
         $offer['selected_fare_family_option'] = $selectedId;
+        $offer = self::overlaySelectedFareFamilyDisplayFields($offer, $option, $brand);
 
         $supplierTotal = self::selectedFareFamilySupplierTotal($resolved['option'], $brand);
         if ($supplierTotal !== null && $supplierTotal > 0) {
@@ -2764,6 +2858,96 @@ class FlightOfferDisplayPresenter
             'error_code' => null,
             'error_message' => null,
         ];
+    }
+
+    /**
+     * Sabre BFM: resolve branded fare via pricing_information_index (no IATI-style departure_fare_key).
+     *
+     * @param  array<string, mixed>  $offer
+     * @param  array{match_field: string, option: array<string, mixed>, brand: array<string, mixed>, index: int}  $resolved
+     * @return array{
+     *     offer: array<string, mixed>,
+     *     resolved: array<string, mixed>,
+     *     error_code: string|null,
+     *     error_message: string|null
+     * }
+     */
+    protected static function applySabreSelectedFareFamilyOptionToOffer(array $offer, array $resolved, string $selectedId): array
+    {
+        $option = $resolved['option'];
+        if (! isset($option['pricing_information_index']) || ! is_numeric($option['pricing_information_index'])) {
+            return [
+                'offer' => $offer,
+                'resolved' => $resolved,
+                'error_code' => 'selected_fare_option_missing_fare_key',
+                'error_message' => 'Selected fare option could not be confirmed. Please choose the fare again.',
+            ];
+        }
+
+        $normalizer = app(SabreFlightSearchNormalizer::class);
+        $offer = $normalizer->applyBrandedFareOptionToOfferSnapshot($offer, $option);
+        $offer['selected_fare_family_option'] = $selectedId;
+        $offer = self::overlaySelectedFareFamilyDisplayFields(
+            $offer,
+            $option,
+            self::brandContextFromFareFamilyOptionRow($option),
+        );
+
+        return [
+            'offer' => $offer,
+            'resolved' => $resolved,
+            'error_code' => null,
+            'error_message' => null,
+        ];
+    }
+
+    /**
+     * Overlay customer-visible price/baggage/policy from the selected branded row onto the offer.
+     *
+     * @param  array<string, mixed>  $offer
+     * @param  array<string, mixed>  $option
+     * @param  array<string, mixed>  $brand
+     * @return array<string, mixed>
+     */
+    protected static function overlaySelectedFareFamilyDisplayFields(array $offer, array $option, array $brand): array
+    {
+        $display = self::deriveBrandedFareOptionDisplayPrice($option, $offer);
+        if (isset($display['displayed_price']) && is_numeric($display['displayed_price']) && (int) $display['displayed_price'] > 0) {
+            $offer['final_customer_price'] = (float) (int) $display['displayed_price'];
+            $offer['displayed_price'] = (int) $display['displayed_price'];
+        }
+
+        $name = trim((string) ($brand['name'] ?? $option['name'] ?? $option['brand_name'] ?? ''));
+        if ($name !== '') {
+            $offer['fare_family'] = $name;
+        }
+
+        $baggage = self::nullableTrimmedString($option['baggage_summary'] ?? $option['baggage'] ?? null);
+        $cabin = self::nullableTrimmedString($option['carry_on_summary'] ?? $option['cabin_baggage'] ?? null);
+        $checked = self::nullableTrimmedString($option['check_in_summary'] ?? $option['checked_baggage'] ?? null);
+        if ($baggage !== null) {
+            $offer['baggage'] = $baggage;
+        }
+        if ($cabin !== null) {
+            $offer['baggage_cabin'] = $cabin;
+        }
+        if ($checked !== null) {
+            $offer['baggage_checked'] = $checked;
+        }
+
+        $refund = self::nullableTrimmedString($option['refund_rule'] ?? $option['refundable_display'] ?? null);
+        if ($refund !== null) {
+            $offer['refund_rule'] = $refund;
+        }
+        if (array_key_exists('refundable', $option)) {
+            $offer['refundable'] = (bool) $option['refundable'];
+        }
+        $change = self::nullableTrimmedString($option['change_rule'] ?? $option['modification_rule'] ?? null);
+        if ($change !== null) {
+            $offer['change_rule'] = $change;
+        }
+
+        return $offer;
     }
 
     /**
@@ -2969,24 +3153,37 @@ class FlightOfferDisplayPresenter
         $isGroupedOfferOption = ($row['is_grouped_offer_option'] ?? false) === true;
         $selectionKeyAuthoritative = array_key_exists('selection_key_authoritative', $row)
             ? ($row['selection_key_authoritative'] === true)
-            : (! $isSyntheticDefault && ($departureFareKey !== null || ($isGroupedOfferOption && $sourceOfferId !== null)));
+            : self::optionHasResolvableSelectionIdentity(array_merge($row, [
+                'is_synthetic_default' => $isSyntheticDefault,
+                'departure_fare_key' => $departureFareKey,
+                'source_offer_id' => $sourceOfferId,
+                'is_grouped_offer_option' => $isGroupedOfferOption,
+            ]));
 
+        $selectable = (bool) ($row['selectable'] ?? false);
         $mapped = [
             'option_key' => $explicitOptionKey ?? self::buildFareFamilyOptionKey($row, $index, $name, $priceTotal),
             'name' => $name,
+            'brand_name' => self::nullableTrimmedString($row['brand_name'] ?? $name),
             'price_total' => $priceTotal,
             'currency' => $currency !== '' ? $currency : null,
             'baggage_summary' => $baggageSummary,
+            'baggage' => $baggageSummary,
             'baggage_lines' => $baggageLines,
             'carry_on_summary' => $carryOn,
             'check_in_summary' => $checkIn,
+            'cabin_baggage' => $carryOn,
+            'checked_baggage' => $checkIn,
             'checked_baggage_source' => self::nullableTrimmedString($row['checked_baggage_source'] ?? null),
             'cabin_baggage_source' => self::nullableTrimmedString($row['cabin_baggage_source'] ?? null),
             'meal_included' => self::nullableTrimmedString($row['meal_included'] ?? $row['meal'] ?? null),
+            'meal' => self::nullableTrimmedString($row['meal'] ?? $row['meal_included'] ?? null),
             'seat_selection_rule' => self::nullableTrimmedString($row['seat_selection_rule'] ?? $row['seat_selection'] ?? null),
+            'seat_selection' => self::nullableTrimmedString($row['seat_selection'] ?? $row['seat_selection_rule'] ?? null),
             'modification_rule' => self::nullableTrimmedString($row['modification_rule'] ?? $row['modification'] ?? null),
+            'change_rule' => self::nullableTrimmedString($row['change_rule'] ?? $row['modification_rule'] ?? $row['modification'] ?? null),
             'cancellation_rule' => self::nullableTrimmedString($row['cancellation_rule'] ?? $row['cancellation'] ?? null),
-            'refund_rule' => self::nullableTrimmedString($row['refund_rule'] ?? $row['refund'] ?? null),
+            'refund_rule' => self::nullableTrimmedString($row['refund_rule'] ?? $row['refund'] ?? $refundableDisplay),
             'refundable_display' => $refundableDisplay,
             'cabin' => $cabin,
             'booking_class' => $bookingClass,
@@ -2996,10 +3193,12 @@ class FlightOfferDisplayPresenter
             'supplier_brand_code' => self::nullableTrimmedString($row['supplier_brand_code'] ?? $row['brand_code'] ?? null),
             'source_offer_id' => $sourceOfferId,
             'is_grouped_offer_option' => $isGroupedOfferOption,
+            'is_synthetic_default' => $isSyntheticDefault,
             'departure_fare_key' => $departureFareKey,
             'return_fare_key' => self::nullableTrimmedString($row['return_fare_key'] ?? null),
             'selection_key_authoritative' => $selectionKeyAuthoritative,
-            'selectable' => (bool) ($row['selectable'] ?? false),
+            'selectable' => $selectable,
+            'can_select' => (bool) ($row['can_select'] ?? $selectable),
             'provider_context' => is_array($row['provider_context'] ?? null) ? $row['provider_context'] : null,
             'pia_ndc_provider_backed' => (bool) ($row['pia_ndc_provider_backed'] ?? false),
         ];

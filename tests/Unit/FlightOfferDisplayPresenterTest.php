@@ -744,6 +744,64 @@ class FlightOfferDisplayPresenterTest extends TestCase
         }
     }
 
+    public function test_sabre_pricing_information_index_makes_branded_fare_authoritative_and_selectable(): void
+    {
+        Config::set('suppliers.sabre.branded_fares_display_enabled', true);
+        Config::set('suppliers.sabre.branded_fares_selection_enabled', false);
+
+        $offer = [
+            'origin' => 'LHE',
+            'destination' => 'DXB',
+            'supplier_provider' => 'sabre',
+            'final_customer_price' => 90000,
+            'supplier_total_source' => 300,
+            'pricing_currency' => 'PKR',
+            'branded_fares' => [
+                [
+                    'name' => 'ECOLIGHT',
+                    'brand_code' => 'LT',
+                    'price_total' => 280,
+                    'currency' => 'USD',
+                    'pricing_information_index' => 0,
+                    'carry_on_summary' => '1 hand bag up to 7kg',
+                    'check_in_summary' => 'Checked baggage not included',
+                    'refundable_display' => 'Non-refundable',
+                ],
+                [
+                    'name' => 'SMART',
+                    'brand_code' => 'SM',
+                    'price_total' => 320,
+                    'currency' => 'USD',
+                    'pricing_information_index' => 1,
+                    'carry_on_summary' => '1 hand bag up to 7kg',
+                    'check_in_summary' => '1 checked bag up to 23kg',
+                    'refundable_display' => 'Refundable with fee',
+                ],
+            ],
+            'segments' => [
+                ['origin' => 'LHE', 'destination' => 'DXB', 'departure_at' => '2026-06-10T08:00:00', 'arrival_at' => '2026-06-10T11:00:00', 'duration_minutes' => 180],
+            ],
+        ];
+
+        $p = FlightOfferDisplayPresenter::buildPresentation($offer, ['origin' => 'LHE', 'destination' => 'DXB'], []);
+
+        $this->assertTrue($p['branded_fares_selection_active']);
+        $this->assertTrue($p['fare_family_options_display'][0]['selection_key_authoritative']);
+        $this->assertTrue($p['fare_family_options_display'][1]['selection_key_authoritative']);
+        $this->assertTrue($p['fare_family_options_display'][1]['can_select']);
+        $this->assertTrue($p['fare_family_options_display'][1]['selectable']);
+        $this->assertSame('SMART', $p['fare_family_options_display'][1]['brand_name']);
+        $this->assertStringContainsString('7', (string) ($p['fare_family_options_display'][1]['cabin_baggage'] ?? ''));
+        $this->assertStringContainsString('hand', strtolower((string) ($p['fare_family_options_display'][1]['cabin_baggage'] ?? '')));
+
+        $smartKey = (string) $p['fare_family_options_display'][1]['option_key'];
+        $applied = FlightOfferDisplayPresenter::applySelectedFareFamilyOptionToOffer($offer, $smartKey);
+        $this->assertNull($applied['error_code']);
+        $this->assertSame('SMART', $applied['offer']['fare_family'] ?? null);
+        $this->assertSame($smartKey, $applied['offer']['selected_fare_family_option'] ?? null);
+        $this->assertGreaterThan(0, (float) ($applied['offer']['final_customer_price'] ?? 0));
+    }
+
     public function test_branded_fares_selection_active_when_both_gates_enabled(): void
     {
         Config::set('suppliers.sabre.branded_fares_display_enabled', true);

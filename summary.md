@@ -11,11 +11,13 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-20 (JetPakistan synthetic fare authority closure)
+**Last updated:** 2026-08-21 (JetPakistan Owner V3 branded fare authority + fare arithmetic)
 
 ---
 
 ## Changelog (high level)
+
+| 2026-08-21 | JETPK OWNER V3 BRANDED FARE AUTHORITY | **Sabre BFM PI selection + honest fare arithmetic:** `selection_key_authoritative` now includes resolvable `pricing_information_index` rows (not only IATI `departure_fare_key` / grouped / PIA). Details applies Sabre brands via `applyBrandedFareOptionToOfferSnapshot` + customer price/baggage overlay; synthetic defaults remain non-authoritative. Customer fare Details omit mismatched non-PKR component amounts and never expose agency `markup`. FE fare cards emit `can_select` / cabin+checked rows; View Details targets the clicked authoritative key with stale-response protection. |
 
 | 2026-08-20 | JETPK OWNER V3 FINAL CONTRACT CLOSURE | **Public fare-details and filter semantics:** customer fare summaries no longer expose internal agency markup while authoritative totals remain unchanged. Branded `View Details` now selects and loads the clicked real supplier fare through the existing stale-response guard before focusing its summary. Single-value baggage, fare-family, duration, and layover facets render as radios; genuine multi-value facets remain server-backed checkboxes. |
 
