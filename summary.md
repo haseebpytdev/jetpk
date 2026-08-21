@@ -11,11 +11,13 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-21 (JetPakistan Owner V3 branded fare authority + fare arithmetic)
+**Last updated:** 2026-08-21 (Owner Retest V3 CLUSTER D — Flight Preview + client Document Reader)
 
 ---
 
 ## Changelog (high level)
+
+| 2026-08-21 | JETPK CLUSTER D FLIGHT PREVIEW + DOCUMENT READER | **Travelers checkout:** `OrderSummary` `flight-preview` is a compact sticky itinerary card (airline, flight no., O&D times/dates, route line, Direct/Stops, duration, fare, baggage, pax, whole PKR total) with no supplier revalidation. **Privacy-first Document Reader** (`features/standard-booking/document-reader`, architecture `CLIENT_SIDE`): browser MRZ parse + optional lazy `tesseract.js` OCR; images never leave the device; issue date never invented from expiry; confirm-before-fill with conflict protection. Synthetic MRZ fixtures + unit/Playwright coverage. |
 
 | 2026-08-21 | JETPK OWNER V3 BRANDED FARE AUTHORITY | **Sabre BFM PI selection + honest fare arithmetic:** `selection_key_authoritative` now includes resolvable `pricing_information_index` rows (not only IATI `departure_fare_key` / grouped / PIA). Details applies Sabre brands via `applyBrandedFareOptionToOfferSnapshot` + customer price/baggage overlay; synthetic defaults remain non-authoritative. Customer fare Details omit mismatched non-PKR component amounts and never expose agency `markup`. FE fare cards emit `can_select` / cabin+checked rows; View Details targets the clicked authoritative key with stale-response protection. |
 

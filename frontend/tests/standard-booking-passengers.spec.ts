@@ -34,6 +34,7 @@ const mockContext = {
     depart_date: "2026-08-15",
     airline_name: "TestAir",
     airline_code: "TA",
+    airline_logo_url: null,
     flight_number: "TA 204",
     cabin: "economy",
     fare_family: "Economy Flex",
@@ -42,7 +43,15 @@ const mockContext = {
     baggage: "30kg checked",
     total_formatted: "114,999",
     currency: "PKR",
-    segments: [],
+    segments: [
+      {
+        origin_airport_code: "LHE",
+        destination_airport_code: "DXB",
+        departure_time_display: "08:15",
+        arrival_time_display: "10:35",
+        flight_number: "TA 204",
+      },
+    ],
     return_segments: [],
   },
   travellers: {
@@ -110,10 +119,73 @@ test("passenger page loads with authoritative traveller counts", async ({ page }
   await expect(page.getByTestId("flight-preview")).toContainText("Flight preview");
   await expect(page.getByTestId("flight-preview")).toContainText("TA 204");
   await expect(page.getByTestId("flight-preview")).toContainText("Economy Flex");
+  await expect(page.getByTestId("flight-preview")).toContainText("Direct");
+  await expect(page.getByTestId("flight-preview")).toContainText("3h 20m");
+  await expect(page.getByTestId("flight-preview")).toContainText("30kg checked");
+  await expect(page.getByTestId("order-summary-total")).toContainText("PKR");
+  await expect(page.getByTestId("order-summary-total")).toContainText("114,999");
+  await expect(page.getByTestId("flight-preview-route")).toContainText("08:15");
+  await expect(page.getByTestId("flight-preview-route")).toContainText("LHE");
+  await expect(page.getByTestId("document-reader-0")).toBeVisible();
+  await expect(page.getByTestId("document-reader-0")).toContainText(
+    "Please verify extracted details against the passport before continuing.",
+  );
   await expect(page.getByRole("heading", { name: "Personal information" }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Travel document" }).first()).toBeVisible();
   expect(page.url()).not.toMatch(/passport/i);
   await page.screenshot({ path: "tmp/flight-results-travelers-refinement-desktop.png", fullPage: true });
+});
+
+test("document reader paste confirms MRZ without overwriting existing values silently", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await mockCsrf(page);
+  await page.route("**/laravel/booking/passengers?**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockContext) });
+  });
+  await page.goto("/booking/passengers?search_id=search-1&offer_id=offer-1&from=LHE&to=DXB&depart=2026-08-15&adults=1&children=1");
+
+  await page.getByTestId("passenger-card-0").getByLabel(/First name/i).fill("TYPED");
+  await page.getByTestId("passenger-card-0").getByLabel(/Last name/i).fill("PERSON");
+
+  await page.getByTestId("document-reader-paste-toggle-0").click();
+  const { SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY } = await import("../features/standard-booking/document-reader/mrz/fixtures");
+  await page.getByTestId("document-reader-paste-0").fill(SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY);
+  await page.getByTestId("document-reader-parse-paste-0").click();
+  await expect(page.getByTestId("document-reader-preview-0")).toBeVisible();
+  await expect(page.getByTestId("document-reader-conflicts-0")).toBeVisible();
+
+  const conflictRows = page.getByTestId("document-reader-conflicts-0").locator("[data-testid^='document-reader-conflict-0-']");
+  const count = await conflictRows.count();
+  for (let i = 0; i < count; i += 1) {
+    await conflictRows.nth(i).getByRole("button", { name: "Keep" }).click();
+  }
+  await page.getByTestId("document-reader-confirm-0").click();
+  await expect(page.getByTestId("passenger-card-0").getByLabel(/First name/i)).toHaveValue("TYPED");
+  await expect(page.getByTestId("passenger-card-0").getByLabel(/Last name/i)).toHaveValue("PERSON");
+  await expect(page.getByTestId("passenger-card-0").getByLabel(/Passport number/i)).not.toHaveValue("");
+});
+
+test("document reader confirms synthetic MRZ into empty passenger fields", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await mockCsrf(page);
+  await page.route("**/laravel/booking/passengers?**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockContext) });
+  });
+  await page.goto("/booking/passengers?search_id=search-1&offer_id=offer-1&from=LHE&to=DXB&depart=2026-08-15&adults=1&children=1");
+
+  await page.getByTestId("document-reader-paste-toggle-0").click();
+  const { SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY } = await import("../features/standard-booking/document-reader/mrz/fixtures");
+  await page.getByTestId("document-reader-paste-0").fill(SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY);
+  await page.getByTestId("document-reader-parse-paste-0").click();
+  await expect(page.getByTestId("document-reader-preview-0")).toBeVisible();
+  await expect(page.getByTestId("document-reader-preview-0")).toContainText(
+    "Please verify extracted details against the passport before continuing.",
+  );
+  await page.getByTestId("document-reader-confirm-0").click();
+  await expect(page.getByTestId("passenger-card-0").getByLabel(/Last name/i)).toHaveValue("SAMPLE");
+  await expect(page.getByTestId("passenger-card-0").getByLabel(/First name/i)).toHaveValue("TRAVELER");
+  await expect(page.getByTestId("passenger-card-0").getByLabel(/Passport number/i)).toHaveValue("X1234567");
+  await expect(page.getByTestId("passenger-card-0").getByLabel(/Passport issue date/i)).toHaveValue("");
 });
 
 test("booking progress shows connected stepper with canonical labels", async ({ page }) => {

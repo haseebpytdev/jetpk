@@ -1,5 +1,6 @@
 import type { PassengerFormValues, TravelDocumentRequirement } from "../types";
 import { TITLES } from "../utils/passenger-form";
+import { DocumentReader } from "../document-reader";
 
 type PassengerCardProps = {
   index: number;
@@ -10,6 +11,7 @@ type PassengerCardProps = {
   nationalIdAllowed: boolean;
   fieldErrors: Record<string, string>;
   onChange: (index: number, field: keyof PassengerFormValues, value: string) => void;
+  onReplacePassenger?: (index: number, next: PassengerFormValues) => void;
 };
 
 const fieldClass = "mt-1 h-10 w-full rounded-jp-md border border-jp-border bg-white px-3 text-sm text-jp-text shadow-sm outline-none transition-colors focus:border-jp-primary focus:ring-2 focus:ring-jp-primary/20 aria-[invalid=true]:border-red-600 aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-red-200";
@@ -23,6 +25,7 @@ export function PassengerCard({
   nationalIdAllowed,
   fieldErrors,
   onChange,
+  onReplacePassenger,
 }: PassengerCardProps) {
   const showPassport =
     documentRequirements.passport_required || passenger.document_type === "passport";
@@ -137,6 +140,14 @@ export function PassengerCard({
           <h3 className="text-sm font-semibold text-jp-text">Travel document</h3>
           <p className="mt-0.5 text-xs text-jp-muted">Document requirements are determined by the selected itinerary.</p>
         </div>
+
+        {showPassport && onReplacePassenger ? (
+          <DocumentReader
+            passengerIndex={index}
+            passenger={passenger}
+            onApply={(next) => onReplacePassenger(index, next)}
+          />
+        ) : null}
 
         {nationalIdAllowed ? (
           <label className="text-jp-sm sm:col-span-2">

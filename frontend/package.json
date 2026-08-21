@@ -9,6 +9,7 @@
     "start:smoke": "node scripts/start-smoke.mjs",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test:document-reader": "npx tsx --test tests/regression/document-reader-mrz.test.ts",
     "test:jp-ops-02-api-errors": "node tests/regression/jp-ops-02-api-errors.test.mjs",
     "test:jp-ops-02-csrf-replay": "node tests/regression/jp-ops-02-csrf-replay.test.mjs",
     "test:jp-ops-02-client-security": "node tests/regression/run-jp-ops-02-client-security.mjs",
@@ -42,7 +43,8 @@
     "next": "^15.1.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -55,6 +57,7 @@
     "eslint-config-next": "^15.1.9",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.16",
+    "tsx": "^4.23.12",
     "typescript": "^5.7.2"
   }
 }
