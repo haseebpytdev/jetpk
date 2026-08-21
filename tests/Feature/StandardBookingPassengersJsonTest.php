@@ -49,6 +49,80 @@ class StandardBookingPassengersJsonTest extends TestCase
             ]);
     }
 
+    public function test_passengers_json_preserves_selected_branded_fare_over_base_offer(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+
+        $presenter = app(\App\Support\Booking\StandardBookingJsonPresenter::class);
+        $payload = $presenter->presentPassengersContext([
+            'draft' => [
+                'search_id' => 'search-branded-1',
+                'fare_option_key' => 'economy-comfort',
+                'selected_fare_family_option' => [
+                    'option_key' => 'economy-comfort',
+                    'name' => 'ECONOMY COMFORT',
+                    'brand_name' => 'ECONOMY COMFORT',
+                    'displayed_price' => 168478,
+                    'displayed_currency' => 'PKR',
+                    'price_display' => 'PKR 168,478',
+                    'baggage_summary' => '30 kg',
+                    'price_is_approximate' => false,
+                    'is_price_approximate' => false,
+                    'validation_note' => 'Estimated selected fare pending airline confirmation.',
+                ],
+                'search_from' => 'ISB',
+                'search_to' => 'DXB',
+                'search_depart' => now()->addWeek()->format('Y-m-d'),
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+            ],
+            'flightId' => 'offer-base',
+            // Base/validated offer deliberately still looks like BASIC / 0 kg.
+            'offer' => [
+                'airline_name' => 'Etihad Airways',
+                'airline_code' => 'EY',
+                'flight_number' => 'EY231',
+                'fare_family' => 'ECONOMY BASIC',
+                'baggage' => '0 kg',
+                'currency' => 'PKR',
+                'final_customer_price' => 150766,
+                'stops' => 0,
+                'segments' => [],
+            ],
+            'criteria' => [
+                'origin' => 'ISB',
+                'destination' => 'DXB',
+                'depart_date' => now()->addWeek()->format('Y-m-d'),
+                'trip_type' => 'one_way',
+                'cabin' => 'economy',
+            ],
+            'checkoutPresentation' => [
+                'route_label' => 'ISB → DXB',
+                'duration_label' => '3h 30m',
+                'segments' => [],
+                'return_segments' => [],
+            ],
+            'checkoutFareBreakdown' => [
+                'total_formatted' => 'PKR 150,766',
+                'currency' => 'PKR',
+            ],
+            'passengerCountSummary' => ['adults' => 1, 'children' => 0, 'infants' => 0, 'total' => 1],
+            'expectedPassengers' => [['index' => 0, 'type' => 'adult', 'label' => 'Adult']],
+            'checkoutCountries' => [],
+            'checkoutPhoneDialCodes' => [],
+            'checkoutContactPrefill' => [],
+            'checkoutContactPhone' => [],
+        ], request());
+
+        $this->assertTrue($payload['ok']);
+        $this->assertSame('ECONOMY COMFORT', $payload['itinerary']['fare_family']);
+        $this->assertSame('30 kg', $payload['itinerary']['baggage']);
+        $this->assertSame('PKR 168,478', $payload['itinerary']['total_formatted']);
+        $this->assertSame('economy-comfort', $payload['itinerary']['selected_fare_option_key']);
+        $this->assertNotSame('ECONOMY BASIC', $payload['itinerary']['fare_family']);
+        $this->assertNotSame('0 kg', $payload['itinerary']['baggage']);
+    }
+
     public function test_passengers_get_json_missing_session_returns_404(): void
     {
         $this->seed(OtaFoundationSeeder::class);

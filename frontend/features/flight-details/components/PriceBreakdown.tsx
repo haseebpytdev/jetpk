@@ -55,15 +55,19 @@ export function PriceBreakdown({ offer, breakdown }: PriceBreakdownProps) {
     if (rowCurrency !== "PKR") return null;
     const rowTotal = Number(value.total_amount ?? value.total ?? 0);
     if (rowTotal <= 0) return null;
+    const quantity = Math.max(1, Number(value.passenger_count ?? value.quantity ?? 1));
     const rowBase = Number(value.base_amount ?? value.base_fare ?? 0);
     const rowTaxes = Number(value.tax_amount ?? value.taxes ?? 0);
     const rowShowsParts = rowBase > 0 && Math.abs(rowBase + rowTaxes - rowTotal) <= Math.max(2, rowTotal * 0.02);
+    const eachTotal = quantity > 1 ? Math.round(rowTotal / quantity) : Math.round(rowTotal);
     return {
       type: String(value.passenger_type ?? value.ptc ?? "Passenger").toUpperCase(),
-      quantity: Math.max(1, Number(value.passenger_count ?? value.quantity ?? 1)),
+      quantity,
       base: rowShowsParts ? formatPkr(rowBase) : null,
       taxes: rowShowsParts ? formatPkr(rowTaxes) : null,
       total: formatPkr(rowTotal),
+      eachLabel: formatPkr(eachTotal),
+      showComponents: rowShowsParts,
     };
   }).filter((row): row is NonNullable<typeof row> => row !== null && row.total !== null);
 
@@ -74,31 +78,46 @@ export function PriceBreakdown({ offer, breakdown }: PriceBreakdownProps) {
       </h3>
       <dl className="mt-2.5 space-y-2 text-sm">
         {passengerRows.length ? (
-          <div className="overflow-x-auto rounded-jp-md border border-jp-border" data-testid="passenger-fare-breakdown">
-            <table className="w-full min-w-[32rem] text-left text-xs">
-              <thead className="bg-jp-surface-muted text-[10px] uppercase tracking-wide text-jp-text-muted">
-                <tr>
-                  <th className="px-3 py-2 font-semibold">Passenger</th>
-                  <th className="px-3 py-2 text-right font-semibold">Base price</th>
-                  <th className="px-3 py-2 text-right font-semibold">Taxes &amp; fees</th>
-                  <th className="px-3 py-2 text-right font-semibold">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {passengerRows.map((row, index) => (
-                  <tr key={`${row.type}-${index}`} className="border-t border-jp-border-soft">
-                    <td className="px-3 py-2 font-medium">
-                      {row.type}
-                      <span className="block font-normal text-jp-text-muted">Qty: {row.quantity}</span>
-                    </td>
-                    <td className="px-3 py-2 text-right">{row.base ?? "Not supplied"}</td>
-                    <td className="px-3 py-2 text-right">{row.taxes ?? "Not supplied"}</td>
-                    <td className="px-3 py-2 text-right font-semibold">{row.total}</td>
+          passengerRows.some((row) => row.showComponents) ? (
+            <div className="overflow-x-auto rounded-jp-md border border-jp-border" data-testid="passenger-fare-breakdown">
+              <table className="w-full min-w-[32rem] text-left text-xs">
+                <thead className="bg-jp-surface-muted text-[10px] uppercase tracking-wide text-jp-text-muted">
+                  <tr>
+                    <th className="px-3 py-2 font-semibold">Passenger</th>
+                    <th className="px-3 py-2 text-right font-semibold">Base price</th>
+                    <th className="px-3 py-2 text-right font-semibold">Taxes &amp; fees</th>
+                    <th className="px-3 py-2 text-right font-semibold">Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {passengerRows.map((row, index) => (
+                    <tr key={`${row.type}-${index}`} className="border-t border-jp-border-soft">
+                      <td className="px-3 py-2 font-medium">
+                        {row.type}
+                        <span className="block font-normal text-jp-text-muted">Qty: {row.quantity}</span>
+                      </td>
+                      <td className="px-3 py-2 text-right">{row.base ?? "Not supplied"}</td>
+                      <td className="px-3 py-2 text-right">{row.taxes ?? "Not supplied"}</td>
+                      <td className="px-3 py-2 text-right font-semibold">{row.total}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="space-y-2" data-testid="passenger-fare-breakdown-compact">
+              {passengerRows.map((row, index) => (
+                <div key={`${row.type}-${index}`} className="flex flex-wrap items-center justify-between gap-2">
+                  <dt className="text-jp-text-muted">
+                    {row.type} × {row.quantity}
+                  </dt>
+                  <dd className="font-medium text-jp-text">
+                    {row.quantity > 1 ? `${row.eachLabel} each / ${row.total} total` : row.total}
+                  </dd>
+                </div>
+              ))}
+            </div>
+          )
         ) : null}
         {rows.map((row) => (
           <div key={row.label} className="flex flex-wrap items-center justify-between gap-2">

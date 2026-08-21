@@ -11,11 +11,13 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-21 (Owner Retest V3 Wave-6 CLUSTER A — branded fare price immutability)
+**Last updated:** 2026-08-21 (Owner Retest V3 Wave-6 CLUSTER B — checkout selected-fare handoff)
 
 ---
 
 ## Changelog (high level)
+
+| 2026-08-21 | JETPK WAVE-6 CLUSTER B CHECKOUT FARE HANDOFF | **Travelers Flight Preview selected-fare truth:** `StandardBookingJsonPresenter::presentItinerary` now prefers `draft.selected_fare_family_option` (same Blade checkout contract) for fare family name, baggage, and estimated total instead of the base/validated offer row. Fixes Owner UAT where Continue handoff showed ECONOMY BASIC / 0 kg after selecting a higher branded fare. Compact multipax each/total rows when component columns are not authoritative. |
 
 | 2026-08-21 | JETPK WAVE-6 CLUSTER A BRANDED FARE IMMUTABILITY | **Deterministic branded-fare card prices:** `FlightOfferDisplayPresenter` stamps an immutable `branded_fare_display_pricing_baseline` before selected-fare overlays mutate offer totals, and `deriveBrandedFareOptionDisplayPrice` always prices sibling A/B/C cards from that baseline (never from the currently selected customer total). Fixes Owner UAT price drift and selected-card vs Fare Summary parity. Baseline stripped from public JSON. `PriceBreakdown` prefers offer-level selected total. Synthetic/non-authoritative and invalid-key fail-closed unchanged. |
 

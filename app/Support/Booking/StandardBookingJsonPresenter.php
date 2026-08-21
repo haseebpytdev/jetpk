@@ -10,6 +10,7 @@ use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\CheckoutFareBreakdownPresenter;
 use App\Support\Bookings\PublicCheckoutFareChangeState;
 use App\Support\Branding\PublicAgencyContactResolver;
+use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\Payments\PublicAbhiPayCheckoutPresenter;
 use App\Support\PublicBooking;
 use Illuminate\Http\Request;
@@ -144,6 +145,36 @@ class StandardBookingJsonPresenter
         $presentation = is_array($viewData['checkoutPresentation'] ?? null) ? $viewData['checkoutPresentation'] : [];
         $fareBreakdown = is_array($viewData['checkoutFareBreakdown'] ?? null) ? $viewData['checkoutFareBreakdown'] : [];
         $returnSplit = is_array($viewData['returnSplitSummary'] ?? null) ? $viewData['returnSplitSummary'] : null;
+        $draft = is_array($viewData['draft'] ?? null) ? $viewData['draft'] : [];
+        $selectedIntent = is_array($draft['selected_fare_family_option'] ?? null)
+            ? $draft['selected_fare_family_option']
+            : (is_array($viewData['selected_fare_family_option'] ?? null) ? $viewData['selected_fare_family_option'] : null);
+
+        // Prefer authoritative selected branded-fare intent (same contract as Blade checkout).
+        // Validated/base offer rows must never silently replace a higher selected fare/baggage.
+        $selectedCheckout = FlightOfferDisplayPresenter::buildSelectedFareFamilyCheckoutView($selectedIntent);
+        $selectedEstimate = FlightOfferDisplayPresenter::buildCheckoutSelectedFareEstimatePresentation($selectedIntent);
+        $fareRules = FlightOfferDisplayPresenter::buildCheckoutFareRulesSidebar($offer, $selectedIntent);
+
+        $fareFamily = trim((string) ($selectedCheckout['name'] ?? ''));
+        if ($fareFamily === '') {
+            $fareFamily = trim((string) ($offer['fare_family'] ?? ($offer['branded_fare_label'] ?? '')));
+        }
+
+        $baggage = trim((string) ($fareRules['baggage_display'] ?? ''));
+        if ($baggage === '') {
+            $baggage = is_array($offer['baggage'] ?? null)
+                ? trim((string) (($offer['baggage']['summary'] ?? '') ?: ($offer['baggage']['checked'] ?? '')))
+                : trim((string) ($offer['baggage'] ?? ''));
+        }
+
+        $totalFormatted = $fareBreakdown['total_formatted'] ?? null;
+        if (is_array($selectedEstimate) && ! empty($selectedEstimate['has_checkout_estimate'])) {
+            $estimateDisplay = trim((string) ($selectedEstimate['price_display'] ?? ''));
+            if ($estimateDisplay !== '') {
+                $totalFormatted = $estimateDisplay;
+            }
+        }
 
         return [
             'trip_type' => (string) ($criteria['trip_type'] ?? 'one_way'),
@@ -157,15 +188,18 @@ class StandardBookingJsonPresenter
             'airline_logo_url' => $viewData['airlineLogo'] ?? null,
             'flight_number' => $offer['flight_number'] ?? null,
             'cabin' => (string) ($criteria['cabin'] ?? 'economy'),
-            'fare_family' => $offer['fare_family'] ?? ($offer['branded_fare_label'] ?? null),
+            'fare_family' => $fareFamily !== '' ? $fareFamily : null,
             'stops' => $offer['stops'] ?? null,
             'duration' => $presentation['duration_label'] ?? null,
-            'baggage' => $offer['baggage'] ?? null,
+            'baggage' => $baggage !== '' ? $baggage : null,
             'segments' => $presentation['segments'] ?? ($offer['segments'] ?? []),
             'return_segments' => $presentation['return_segments'] ?? [],
-            'total_formatted' => $fareBreakdown['total_formatted'] ?? null,
-            'currency' => $fareBreakdown['currency'] ?? ($offer['currency'] ?? 'PKR'),
+            'total_formatted' => $totalFormatted,
+            'currency' => $fareBreakdown['currency']
+                ?? ($selectedEstimate['displayed_currency'] ?? null)
+                ?? ($offer['currency'] ?? 'PKR'),
             'return_split' => $returnSplit,
+            'selected_fare_option_key' => trim((string) ($draft['fare_option_key'] ?? '')) ?: null,
         ];
     }
 
