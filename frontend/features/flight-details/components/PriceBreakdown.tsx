@@ -24,11 +24,12 @@ function componentsReconcile(
 
 export function PriceBreakdown({ offer, breakdown }: PriceBreakdownProps) {
   const currency = String(breakdown?.currency ?? breakdown?.displayed_currency ?? "PKR").toUpperCase();
+  // Offer-level selected total is authoritative; breakdown may lag or reflect a prior fare.
   const total =
-    breakdown?.displayed_price ??
-    breakdown?.grand_total ??
     offer.displayed_price ??
-    offer.final_customer_price;
+    offer.final_customer_price ??
+    breakdown?.displayed_price ??
+    breakdown?.grand_total;
 
   const base = breakdown?.base_fare ?? offer.base_fare;
   const taxes = breakdown?.taxes ?? offer.taxes;

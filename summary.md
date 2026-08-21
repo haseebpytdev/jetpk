@@ -11,11 +11,13 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-21 (Owner Retest V3 CLUSTER D — Flight Preview + client Document Reader)
+**Last updated:** 2026-08-21 (Owner Retest V3 Wave-6 CLUSTER A — branded fare price immutability)
 
 ---
 
 ## Changelog (high level)
+
+| 2026-08-21 | JETPK WAVE-6 CLUSTER A BRANDED FARE IMMUTABILITY | **Deterministic branded-fare card prices:** `FlightOfferDisplayPresenter` stamps an immutable `branded_fare_display_pricing_baseline` before selected-fare overlays mutate offer totals, and `deriveBrandedFareOptionDisplayPrice` always prices sibling A/B/C cards from that baseline (never from the currently selected customer total). Fixes Owner UAT price drift and selected-card vs Fare Summary parity. Baseline stripped from public JSON. `PriceBreakdown` prefers offer-level selected total. Synthetic/non-authoritative and invalid-key fail-closed unchanged. |
 
 | 2026-08-21 | JETPK CLUSTER D FLIGHT PREVIEW + DOCUMENT READER | **Travelers checkout:** `OrderSummary` `flight-preview` is a compact sticky itinerary card (airline, flight no., O&D times/dates, route line, Direct/Stops, duration, fare, baggage, pax, whole PKR total) with no supplier revalidation. **Privacy-first Document Reader** (`features/standard-booking/document-reader`, architecture `CLIENT_SIDE`): browser MRZ parse + optional lazy `tesseract.js` OCR; images never leave the device; issue date never invented from expiry; confirm-before-fill with conflict protection. Synthetic MRZ fixtures + unit/Playwright coverage. |
 

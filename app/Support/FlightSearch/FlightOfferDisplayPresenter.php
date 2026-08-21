@@ -1974,7 +1974,84 @@ class FlightOfferDisplayPresenter
     }
 
     /**
+     * Immutable customer/supplier totals used to price sibling branded fares.
+     *
+     * Selected-fare overlays must never become the ratio base for A/B/C card prices.
+     *
+     * @param  array<string, mixed>  $offer
+     * @return array{
+     *     supplier_total_source: float,
+     *     final_customer_price: float,
+     *     displayed_price: float,
+     *     pricing_currency: string,
+     *     fx_rate: float
+     * }
+     */
+    public static function captureBrandedFareDisplayPricingBaseline(array $offer): array
+    {
+        $existing = is_array($offer['branded_fare_display_pricing_baseline'] ?? null)
+            ? $offer['branded_fare_display_pricing_baseline']
+            : null;
+        if (is_array($existing)
+            && isset($existing['supplier_total_source'], $existing['final_customer_price'])
+            && (float) $existing['supplier_total_source'] > 0
+            && (float) $existing['final_customer_price'] > 0
+        ) {
+            return [
+                'supplier_total_source' => (float) $existing['supplier_total_source'],
+                'final_customer_price' => (float) $existing['final_customer_price'],
+                'displayed_price' => (float) ($existing['displayed_price'] ?? $existing['final_customer_price']),
+                'pricing_currency' => strtoupper(trim((string) ($existing['pricing_currency'] ?? $offer['pricing_currency'] ?? $offer['currency'] ?? 'PKR'))),
+                'fx_rate' => (float) ($existing['fx_rate'] ?? data_get($offer, 'pricing_components.fx_rate') ?? 0),
+            ];
+        }
+
+        $supplierTotalSource = (float) ($offer['supplier_total_source'] ?? 0);
+        if ($supplierTotalSource <= 0) {
+            $supplierTotalSource = self::resolveOfferSupplierTotalForSyntheticFare($offer);
+        }
+        if ($supplierTotalSource <= 0) {
+            $supplierTotalSource = (float) (($offer['base_fare'] ?? 0) + ($offer['taxes'] ?? 0));
+        }
+
+        $finalCustomerPrice = (float) ($offer['final_customer_price'] ?? 0);
+        if ($finalCustomerPrice <= 0) {
+            $finalCustomerPrice = (float) ($offer['displayed_price'] ?? 0);
+        }
+
+        return [
+            'supplier_total_source' => $supplierTotalSource,
+            'final_customer_price' => $finalCustomerPrice,
+            'displayed_price' => (float) ($offer['displayed_price'] ?? $finalCustomerPrice),
+            'pricing_currency' => strtoupper(trim((string) ($offer['pricing_currency'] ?? $offer['currency'] ?? 'PKR'))),
+            'fx_rate' => (float) (data_get($offer, 'pricing_components.fx_rate') ?? 0),
+        ];
+    }
+
+    /**
+     * Stamp immutable branded-fare pricing baseline before selected-fare overlays mutate totals.
+     *
+     * @param  array<string, mixed>  $offer
+     * @return array<string, mixed>
+     */
+    public static function withBrandedFareDisplayPricingBaseline(array $offer): array
+    {
+        if (is_array($offer['branded_fare_display_pricing_baseline'] ?? null)
+            && (float) ($offer['branded_fare_display_pricing_baseline']['supplier_total_source'] ?? 0) > 0
+            && (float) ($offer['branded_fare_display_pricing_baseline']['final_customer_price'] ?? 0) > 0
+        ) {
+            return $offer;
+        }
+
+        $offer['branded_fare_display_pricing_baseline'] = self::captureBrandedFareDisplayPricingBaseline($offer);
+
+        return $offer;
+    }
+
+    /**
      * Display PKR (or approximate) for branded fare option rows without mutating supplier amounts.
+     *
+     * Always prices from the immutable offer baseline (never from a previously selected fare overlay).
      *
      * @param  array<string, mixed>  $option
      * @param  array<string, mixed>  $offer
@@ -1999,8 +2076,10 @@ class FlightOfferDisplayPresenter
             ];
         }
 
+        $baseline = self::captureBrandedFareDisplayPricingBaseline($offer);
+
         if (! empty($option['is_synthetic_default'])) {
-            $customerPrice = (int) round((float) ($offer['final_customer_price'] ?? $offer['displayed_price'] ?? 0));
+            $customerPrice = (int) round((float) ($baseline['final_customer_price'] ?: ($baseline['displayed_price'] ?? 0)));
             if ($customerPrice > 0) {
                 return [
                     'displayed_price' => $customerPrice,
@@ -2012,16 +2091,10 @@ class FlightOfferDisplayPresenter
         }
 
         $optionCurrency = strtoupper(trim((string) ($option['currency'] ?? '')));
-        $pricingCurrency = strtoupper(trim((string) ($offer['pricing_currency'] ?? $offer['currency'] ?? 'PKR')));
-        $finalCustomerPrice = (float) ($offer['final_customer_price'] ?? 0);
-        $supplierTotalSource = (float) ($offer['supplier_total_source'] ?? 0);
-        if ($supplierTotalSource <= 0) {
-            $supplierTotalSource = self::resolveOfferSupplierTotalForSyntheticFare($offer);
-        }
-        if ($supplierTotalSource <= 0) {
-            $supplierTotalSource = (float) (($offer['base_fare'] ?? 0) + ($offer['taxes'] ?? 0));
-        }
-        $fxRate = (float) (data_get($offer, 'pricing_components.fx_rate') ?? 0);
+        $pricingCurrency = strtoupper(trim((string) ($baseline['pricing_currency'] ?? 'PKR')));
+        $finalCustomerPrice = (float) ($baseline['final_customer_price'] ?? 0);
+        $supplierTotalSource = (float) ($baseline['supplier_total_source'] ?? 0);
+        $fxRate = (float) ($baseline['fx_rate'] ?? 0);
 
         if ($optionCurrency === 'PKR' || ($optionCurrency !== '' && $optionCurrency === $pricingCurrency && $pricingCurrency === 'PKR')) {
             if ($finalCustomerPrice > 0 && $supplierTotalSource > 0 && $priceTotal > 0) {
@@ -2769,6 +2842,9 @@ class FlightOfferDisplayPresenter
                 'error_message' => null,
             ];
         }
+
+        // Freeze supplier/customer ratio before overlays mutate totals used by sibling cards.
+        $offer = self::withBrandedFareDisplayPricingBaseline($offer);
 
         $resolved = self::resolveSelectedFareFamilyOption($offer, $selectedId);
         if ($resolved === null) {

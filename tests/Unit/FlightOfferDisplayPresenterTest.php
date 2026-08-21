@@ -802,6 +802,110 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $this->assertGreaterThan(0, (float) ($applied['offer']['final_customer_price'] ?? 0));
     }
 
+    public function test_branded_fare_card_prices_remain_stable_across_selection_order(): void
+    {
+        Config::set('suppliers.sabre.branded_fares_display_enabled', true);
+        Config::set('suppliers.sabre.branded_fares_selection_enabled', true);
+
+        // Additive markup (not proportional) — this is the drift-prone ratio case.
+        $offer = [
+            'origin' => 'ISB',
+            'destination' => 'DXB',
+            'supplier_provider' => 'sabre',
+            'supplier_total_source' => 140000,
+            'final_customer_price' => 150766,
+            'displayed_price' => 150766,
+            'markup' => 10766,
+            'service_fee' => 0,
+            'pricing_currency' => 'PKR',
+            'currency' => 'PKR',
+            'branded_fares' => [
+                [
+                    'name' => 'ECONOMY BASIC',
+                    'brand_code' => 'BASIC',
+                    'price_total' => 140000,
+                    'currency' => 'PKR',
+                    'pricing_information_index' => 0,
+                    'check_in_summary' => '0 kg',
+                    'refundable_display' => 'Non-refundable',
+                ],
+                [
+                    'name' => 'ECONOMY VALUE',
+                    'brand_code' => 'VALUE',
+                    'price_total' => 144500,
+                    'currency' => 'PKR',
+                    'pricing_information_index' => 1,
+                    'check_in_summary' => '23 kg',
+                    'refundable_display' => 'Non-refundable',
+                ],
+                [
+                    'name' => 'ECONOMY COMFORT',
+                    'brand_code' => 'COMFORT',
+                    'price_total' => 148200,
+                    'currency' => 'PKR',
+                    'pricing_information_index' => 2,
+                    'check_in_summary' => '30 kg',
+                    'refundable_display' => 'Refundable with fee',
+                ],
+            ],
+            'segments' => [
+                [
+                    'origin' => 'ISB',
+                    'destination' => 'DXB',
+                    'departure_at' => '2026-09-10T08:00:00',
+                    'arrival_at' => '2026-09-10T11:00:00',
+                    'duration_minutes' => 180,
+                ],
+            ],
+        ];
+
+        $criteria = ['origin' => 'ISB', 'destination' => 'DXB'];
+        $baseline = FlightOfferDisplayPresenter::buildPresentation($offer, $criteria, []);
+        $baselinePrices = [];
+        foreach ($baseline['fare_family_options_display'] as $option) {
+            $key = (string) ($option['option_key'] ?? '');
+            $this->assertNotSame('', $key);
+            $this->assertGreaterThan(0, (int) ($option['displayed_price'] ?? 0));
+            $baselinePrices[$key] = (int) $option['displayed_price'];
+        }
+        $this->assertCount(3, $baselinePrices);
+
+        $keys = array_keys($baselinePrices);
+        $selectionOrders = [
+            [$keys[0], $keys[1], $keys[2], $keys[0]],
+            [$keys[2], $keys[0], $keys[1]],
+            [$keys[0], $keys[1], $keys[0]],
+            [$keys[1], $keys[2], $keys[1]],
+        ];
+
+        foreach ($selectionOrders as $order) {
+            foreach ($order as $selectedKey) {
+                $applied = FlightOfferDisplayPresenter::applySelectedFareFamilyOptionToOffer($offer, $selectedKey);
+                $this->assertNull($applied['error_code'], 'selection must remain valid for '.$selectedKey);
+                $selectedOffer = $applied['offer'];
+                $after = FlightOfferDisplayPresenter::buildPresentation($selectedOffer, $criteria, []);
+
+                $afterPrices = [];
+                foreach ($after['fare_family_options_display'] as $option) {
+                    $afterPrices[(string) $option['option_key']] = (int) $option['displayed_price'];
+                }
+                $this->assertSame($baselinePrices, $afterPrices, 'canonical A/B/C prices must not drift after selecting '.$selectedKey);
+
+                $selectedCardPrice = $afterPrices[$selectedKey] ?? null;
+                $selectedTotal = (int) round((float) ($selectedOffer['final_customer_price'] ?? $selectedOffer['displayed_price'] ?? 0));
+                $this->assertSame($selectedCardPrice, $selectedTotal, 'selected card price must equal offer grand total');
+
+                $fallback = \App\Support\FlightSearch\FlightOfferFallbackDetailsPresenter::buildForOffer($selectedOffer, $after);
+                $summaryTotal = (int) round((float) (
+                    $fallback['fallback_details']['fare_breakdown']['displayed_price']
+                    ?? $fallback['fallback_details']['fare_breakdown']['grand_total']
+                    ?? 0
+                ));
+                $this->assertSame($selectedTotal, $summaryTotal, 'Fare Summary grand total must equal selected total');
+            }
+        }
+    }
+
     public function test_branded_fares_selection_active_when_both_gates_enabled(): void
     {
         Config::set('suppliers.sabre.branded_fares_display_enabled', true);
