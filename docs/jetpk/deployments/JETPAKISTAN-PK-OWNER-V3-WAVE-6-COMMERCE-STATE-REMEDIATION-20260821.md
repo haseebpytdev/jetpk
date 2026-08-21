@@ -4,7 +4,7 @@
 **Canonical host:** https://jetpakistan.pk  
 **Branch:** `feat/jetpk-flight-results-booking-flow-20260819`  
 **Owner Retest V3 state:** `RETEST_REQUIRED`  
-**Deployment status:** `NOT_STARTED` (source/test/visual gates green; stopped before protected production deploy)
+**Deployment status:** `DEPLOYED` (protected scripts; live restrained verification complete)
 
 ## Prior / final SHAs
 
@@ -17,11 +17,11 @@
 | Cluster C (stop/layover tooltip crash) | `4b32e71d` |
 | Cluster D (fare UX / booking width / passport autofill) | `ea991853` |
 | Cluster E (visual proof + Playwright regression) | `9653d5ab` |
-| Final engineering SHA | `9653d5ab488ec6ba971ff76324894057ca8c3ffb` |
-| Deployed runtime source | `PENDING_PROTECTED_DEPLOY` |
-| Final docs SHA | _(this commit)_ |
+| Final engineering / deployed runtime | `9653d5ab488ec6ba971ff76324894057ca8c3ffb` |
+| Pre-deploy docs SHA | `750782b5eb2a2e40c085ccf7ce63998c77127fe5` |
+| Final docs SHA | _(this production-evidence commit)_ |
 
-`GIT_0_0=YES` at docs-prep time (local HEAD == `jetpk/feat/jetpk-flight-results-booking-flow-20260819`).
+`GIT_0_0` re-verified after this docs-only push.
 
 ## Root causes (engineering)
 
@@ -32,19 +32,65 @@
 | Stop/layover hover crashes page | Tooltip placement effect deps + malformed layover metadata caused render loop into global error | C — stabilize deps, harden metadata, improve Try again |
 | Fare card / passport UX noise | Per-card View Details, synthetic presented as broken branded product, MRZ jargon, narrow booking shell | D — Current fare truthfulness, Autofill from passport, wider booking layout |
 
-## Runtime staging plan (protected deploy)
+## Protected production deployment (executed)
 
-Stage **Git objects only** from `FINAL_ENGINEERING_SHA=9653d5ab` (never dirty worktree).
+### Predeploy checkpoint
 
-Diff vs prior production runtime `49e81401` (tests/docs/tmp/screenshots excluded):
+- Homepage HTTP `200`
+- Public + dashboard PM2 online as `pkjetp`
+- Old public build `ThWGV5yRx2xRKtsKhR8Da`
+- `OLS_HASH=PASS` (`612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`)
+- `OTA_CLIENT_REQUIRE_LOGIN_OTP=false` preserved
+- OTP demo keys present (`4`)
+- Sabre cancel safety keys present (`SET`)
 
-### Laravel (3)
+### Backup
+
+| Field | Value |
+|---|---|
+| `BACKUP` | `PASS` |
+| `BACKUP_ID` | `20260821T180118Z` |
+| `BACKUP_INTEGRITY` | `PASS` (db gzip -t + app/html tar -tzf) |
+| Artifacts | `/home/pkjetp/backups/jetpk-db-20260821T180118Z.sql.gz`, `jetpk_app-…`, `public_html-…` |
+| Rollback package | `/home/pkjetp/releases/jetpk-rollback-20260821T180118Z-owner-v3-wave6` |
+
+### Staging (exact Git object)
+
+- `AUTHORIZED_SHA=9653d5ab488ec6ba971ff76324894057ca8c3ffb`
+- `BASE_SHA=49e81401586db7e75c37fa28b4e6644375e681dc`
+- `STAGED_SOURCE_SHA` matched authorized SHA
+- Release: `/home/pkjetp/releases/jetpk-20260821T180159Z`
+- Manifest: 9 frontend + 3 Laravel = 12 runtime files
+- `UNEXPECTED_RUNTIME_FILES=0`
+- Staged from Git objects only (not docs HEAD `750782b5`, not dirty worktree)
+
+### Activation
+
+| Field | Value |
+|---|---|
+| Build user | `pkjetp` |
+| `npm ci` / public Next build | `PASS` (`PUBLIC_ONLY=1`) |
+| Old public build | `ThWGV5yRx2xRKtsKhR8Da` |
+| New public build | `JK8nDb8vrOeyjOA4Ue1Jg` |
+| `NODE_MODULES_NON_PKJETP` | `0` |
+| `NEXT_NON_PKJETP` | `0` |
+| Public PM2 | online (`jetpk-public-frontend`) |
+| Dashboard PM2 | unchanged PID `153096` |
+| `OLS_HASH` | `PASS` (unchanged) |
+| `LIVE_SOURCE_DRIFT` | `0` |
+| Pending migrations | `0` |
+| Post-activate `optimize:clear` | `PASS` |
+| `ROLLBACK_USED` | `NO` |
+
+### Runtime files activated
+
+Laravel:
 
 - `app/Support/Booking/StandardBookingJsonPresenter.php`
 - `app/Support/FlightSearch/FlightOfferDisplayPresenter.php`
 - `app/Support/FlightSearch/PublicFlightSearchSecurity.php`
 
-### Frontend (9)
+Frontend:
 
 - `frontend/app/error.tsx`
 - `frontend/features/booking-layout/components/BookingLayout.tsx`
@@ -56,72 +102,52 @@ Diff vs prior production runtime `49e81401` (tests/docs/tmp/screenshots excluded
 - `frontend/features/standard-booking/document-reader/components/DocumentReader.tsx`
 - `frontend/styles/tokens.css`
 
-`UNEXPECTED_RUNTIME_SUBSYSTEM=NONE`
+## Live restrained verification (read-only)
 
-Excluded from runtime stage: tests, docs, summary, tmp, screenshots, `.next`, private tooling.
+Host: `https://jetpakistan.pk` only. Search ISB→DXB one-way; no PNR/hold/ticket/payment/refund.
 
-## Backup / build / PM2 (production)
-
-Pending protected deploy workflow:
-
-| Field | Value |
-|---|---|
-| `BACKUP` | `PENDING` |
-| `BACKUP_ID` | `PENDING` |
-| Old public build | `ThWGV5yRx2xRKtsKhR8Da` (Wave-5) |
-| New public build | `PENDING` |
-| Public PM2 | `PENDING` reactivation as `pkjetp` |
-| OLS hash | verify after activate |
-| Dashboard | must remain unchanged |
-
-Do **not** reuse Wave-5 backup `20260821T091457Z` as the Wave-6 deployment backup.
-
-## Feature gate results (local engineering)
+Evidence: `tmp/owner-v3-flight-wave-6-live/live-proof.json` (+ screenshots).
 
 | Gate | Result |
 |---|---|
-| `BRANDED_FARE_PRICE_STABILITY` | `PASS` |
-| `SELECTED_PRICE_PARITY` | `PASS` |
-| `CHECKOUT_FARE_HANDOFF` | `PASS` |
-| `CHECKOUT_BAGGAGE_HANDOFF` | `PASS` |
-| `CHECKOUT_PRICE_HANDOFF` | `PASS` |
-| `MULTIPAX_BREAKDOWN` | `PASS` |
-| `SYNTHETIC_FARE_AUTHORITY_PRESERVED` | `YES` |
-| `VIEW_DETAILS_CARD_ACTION_REMOVED` | `YES` |
-| `STOP_TOOLTIP` | `PASS` / crash `FIXED` |
-| `GLOBAL_PAGE_CRASH` | `FIXED` |
-| `TRY_AGAIN_RECOVERY` | `PASS` |
-| `PASSPORT_UX_SIMPLIFIED` | `YES` |
-| `DOCUMENT_READER_ARCHITECTURE` | `CLIENT_SIDE` |
-| `CUSTOMER_MRZ_UI` | `HIDDEN` |
-| `PII_THIRD_PARTY_TRANSMISSION` | `0` |
-| `DOCUMENT_PERSISTENCE` | `NONE` |
-| `PASSENGER_LAYOUT` / typography | `PASS` |
-| `SOURCE_GREEN` / `VISUAL_GREEN` / `TESTS_GREEN` | `YES` |
+| `BRANDED_FARE_PRICE_STABILITY` | `PASS` (live selectable brands; A/B/C card prices immutable across selection) |
+| `REAL_BRANDED_FARE_SELECTION` | `PASS` |
+| `SYNTHETIC_FARE_AUTHORITY` | `PASS_BRANDED_PRESENT` |
+| `VIEW_DETAILS_REMOVED` | `YES` |
+| `SELECTED_PRICE_PARITY` | `PASS_NO_BREAKDOWN` (Fare Details breakdown panel not asserted on this live offer; card prices stayed stable) |
+| `CHECKOUT_FARE_HANDOFF` | `PASS_REACHED_TRAVELERS` |
+| `STOP_TOOLTIP` | `PASS` (repeated hover/focus/tap; no global crash) |
+| `ERROR_RECOVERY` | `PASS` |
+| `RESPONSIVE` | `PASS` |
+| `PUBLIC_SMOKE` `/` `/login` `/faq` | `PASS` |
+| Document/XHR/fetch `PUBLIC_5XX` | `0` |
+| `PUBLIC_URL_LEAKS` | `0` |
+| `COMMERCIAL_SIDE_EFFECTS` | `0` |
+| `SECRET_EXPOSURE` | `0` |
+| `LIVE_SOURCE_DRIFT` | `0` |
 
-## Tests executed (local)
+### Observations (non-blocking / follow-ups)
 
-- Frontend typecheck: `PASS`
-- Frontend production build: `PASS`
-- Document reader unit: `8/8 PASS`
-- Playwright: `owner-v3-flight-wave-6`, stop-tooltip, flight-details, flight-results, owner-v3-flight-ui, return pair/segmented, flight-return-options
-- PHPUnit focused: `FlightOfferDisplayPresenterTest` 48/48; `StandardBookingPassengersJsonTest` 4/4; branded checkout / public security / revalidation filter 19/19
+- Intermittent headless `503` on `_next/static/media/*.woff2` under Playwright concurrency; same fonts return `200` via server-side and Windows curl. Recorded as `STATIC_ASSET_5XX` observation, not document/API failures.
+- One React hydration warning `#418` observed in headless notes (theme/HTML mismatch class); pages remained usable; no global error boundary crash.
+- Passport autofill control was not always captured in the automated travelers screenshot path; Wave-6 source deploys Autofill from passport (client-side) and hides customer MRZ paste jargon. Owner manual confirm recommended on Travelers.
 
-## Visual proofs
+## Safety
 
-Directory: `tmp/owner-v3-flight-wave-6/`
+- No commercial supplier booking/PNR/ticket/payment/refund mutations during deploy verification
+- Sabre cancel safety env keys preserved
+- OTP client requirement remains `false`; OTP demo keys preserved
+- Dashboard process identity unchanged
 
-Required frames `01`–`20` present; each `> 8KB` (genuine passenger/doc navigation; synthetic MRZ fixture only; no real passport PII).
+## Rollback
 
-## Safety constraints for upcoming deploy
+```bash
+SCOPED_FRONTEND_ONLY=1 APPLY_DELETIONS=1 bash /tmp/jetpk-deploy.sh \
+  /home/pkjetp/releases/jetpk-rollback-20260821T180118Z-owner-v3-wave6 \
+  20260821T180118Z-rollback
+sudo -u pkjetp -H bash -lc 'export NPM_CONFIG_PREFIX=$HOME/.npm-global PATH=$HOME/.npm-global/bin:/usr/bin:/bin:$PATH PM2_HOME=$HOME/.pm2; PUBLIC_ONLY=1 bash /tmp/jetpk-next-build.sh'
+```
 
-- No commercial supplier mutations during verification
-- Restrained read-only live searches only after activate
-- `OWNER_RETEST_V3` remains `RETEST_REQUIRED` (do not mark PASS)
-- Rollback package must be created as part of protected Wave-6 backup/stage (not Wave-5 reuse)
+## Owner Retest
 
-## Next
-
-1. Owner/ChatGPT authorize continuation into protected JetPakistan deploy scripts for this exact SHA only.  
-2. Fresh backup → stage Git objects at `9653d5ab` → `pkjetp` Next build → PM2 → OLS/parity → read-only live proof.  
-3. Append production evidence (backup ID, build IDs, OLS, live fare stability) to this document in a follow-up docs-only commit.
+`OWNER_RETEST_V3=RETEST_REQUIRED` — do **not** mark PASS. Owner should retest branded-fare price stability, Travelers handoff, stop tooltip, and passport autofill on https://jetpakistan.pk.
