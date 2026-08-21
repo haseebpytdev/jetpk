@@ -186,7 +186,12 @@ test("filter control types match backend selection semantics", async ({ page }) 
       arrival_windows: [{ value: "afternoon", label: "Afternoon", count: 1 }],
       baggage_options: [{ value: "checked_baggage", label: "Checked baggage included", count: 1 }],
       fare_families: [{ value: "Flex", label: "Flex", count: 1 }],
-      duration_buckets: [{ value: "under_6h", label: "Under 6 hours", count: 1 }],
+      duration_buckets: [
+        { value: "under_6h", label: "Under 6 hours", count: 1 },
+        { value: "6_12h", label: "6–12 hours", count: 1 },
+        { value: "12_18h", label: "12–18 hours", count: 1 },
+        { value: "over_18h", label: "18+ hours", count: 1 },
+      ],
       layover_airports: [{ code: "DXB", name: "Dubai", count: 1 }],
     } })),
   }));
@@ -194,7 +199,15 @@ test("filter control types match backend selection semantics", async ({ page }) 
   for (const label of ["Direct (1)", "Emirates (1)", "Morning (1)", "Afternoon (1)", "Non-refundable (1)"]) {
     await expect(page.getByRole("checkbox", { name: label })).toBeVisible();
   }
-  for (const label of ["Checked baggage included (1)", "Flex (1)", "Under 6 hours (1)", "Dubai (1)"]) {
+  for (const label of [
+    "Checked baggage included (1)",
+    "Flex (1)",
+    "Under 6 hours (1)",
+    "6–12 hours (1)",
+    "12–18 hours (1)",
+    "18+ hours (1)",
+    "Dubai (1)",
+  ]) {
     await expect(page.getByRole("radio", { name: label })).toBeVisible();
   }
 });
@@ -280,10 +293,13 @@ test("desktop filters use page scroll, readable multi-selects, and a dual price 
   await page.goto(`/flights/results?${baseResultsQuery()}`);
   const panel = page.getByTestId("results-filter-panel");
   await expect(panel).not.toHaveClass(/overflow-y-auto|max-h-/);
+  await expect(panel).toHaveClass(/overflow-x-hidden|min-w-0/);
   await expect(panel.getByRole("checkbox", { name: "Direct (1)" })).toBeVisible();
   await expect(panel.getByRole("checkbox", { name: "Non-refundable (1)" })).toBeVisible();
   await expect(panel.getByTestId("price-range-slider").getByRole("slider")).toHaveCount(2);
   await expect(panel).toContainText("PKR 78,812");
+  const overflowX = await panel.evaluate((node) => getComputedStyle(node).overflowX);
+  expect(overflowX === "hidden" || overflowX === "clip").toBeTruthy();
 });
 
 test("one-stop card and layover keyboard tooltip", async ({ page }) => {
@@ -296,8 +312,9 @@ test("one-stop card and layover keyboard tooltip", async ({ page }) => {
           offers: [
             mockOffer({
               stops: 1,
-              stops_label_display: "1 stop",
+              stops_label_display: "1 Stop",
               layover_summary_display: ["1h 15m layover · DXB"],
+              layovers_display: [{ airport_code: "DXB", airport_city: "Dubai", duration_minutes: 75 }],
             }),
           ],
         }),
@@ -305,8 +322,36 @@ test("one-stop card and layover keyboard tooltip", async ({ page }) => {
     });
   });
   await page.goto(`/flights/results?${baseResultsQuery()}`);
-  await page.getByRole("button", { name: /layover in DXB/i }).click();
+  const stopTag = page.getByRole("button", { name: /layover/i });
+  await stopTag.focus();
   await expect(page.getByRole("tooltip")).toContainText("DXB");
+  await expect(page.getByRole("tooltip")).toContainText("1h 15m");
+  await stopTag.click();
+  await expect(page.getByRole("tooltip")).toBeVisible();
+});
+
+test("result card copy and whatsapp share use safe public search URL", async ({ page }) => {
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(mockResultsBody()),
+    });
+  });
+  await page.goto(`/flights/results?${baseResultsQuery()}`);
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  const card = page.getByTestId("flight-result-card");
+  await expect(card.getByTestId("result-share-actions")).toBeVisible();
+  await card.getByTestId("result-copy-share").click();
+  await expect(card.getByText("Copied")).toBeVisible();
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toContain("Your Flight Details");
+  expect(copied).toContain("/flights/results?");
+  expect(copied).not.toContain("search_id=");
+  expect(copied).not.toContain("offer_id=");
+  const href = await card.getByTestId("result-whatsapp-share").getAttribute("href");
+  expect(href).toMatch(/^https:\/\/wa\.me\/\?text=/);
+  expect(decodeURIComponent(href ?? "")).not.toContain("search_id=");
 });
 
 test("Book Now opens shared modal and branded fares appear only inside it", async ({ page }) => {

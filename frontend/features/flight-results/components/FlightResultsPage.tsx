@@ -217,8 +217,8 @@ export function FlightResultsPage() {
 
         <ResultsSortTabs value={sort} onChange={handleSortChange} className="hidden sm:flex" />
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(13.5rem,14.5rem)_minmax(0,1fr)]">
-          <div className="hidden lg:block">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,14.5rem)_minmax(0,1fr)]">
+          <div className="hidden min-w-0 max-w-full lg:block">
             <ResultsFilterPanel
               facets={results.data?.filters}
               filters={filters}
@@ -291,6 +291,7 @@ export function FlightResultsPage() {
                           <FlightResultCard
                             offer={offer}
                             searchId={results.resolvedSearchId ?? ""}
+                            searchParams={params}
                             onOpenDetails={openDetails}
                           />
                         </div>

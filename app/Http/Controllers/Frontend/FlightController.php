@@ -1986,7 +1986,7 @@ class FlightController extends Controller
         $departureWindows = ['early_morning' => 0, 'morning' => 0, 'afternoon' => 0, 'evening' => 0];
         $arrivalWindows = ['early_morning' => 0, 'morning' => 0, 'afternoon' => 0, 'evening' => 0];
         $durations = [];
-        $durationBuckets = ['under_6h' => 0, '6_12h' => 0, '12_20h' => 0, 'over_20h' => 0];
+        $durationBuckets = ['under_6h' => 0, '6_12h' => 0, '12_18h' => 0, 'over_18h' => 0];
         $layovers = [];
         $fareFamilies = [];
         $operatingCounts = [];
@@ -2114,10 +2114,10 @@ class FlightController extends Controller
                 'max_duration_minutes' => $durations === [] ? 0 : max($durations),
             ],
             'duration_buckets' => [
-                ['value' => 'under_6h', 'count' => $durationBuckets['under_6h']],
-                ['value' => '6_12h', 'count' => $durationBuckets['6_12h']],
-                ['value' => '12_20h', 'count' => $durationBuckets['12_20h']],
-                ['value' => 'over_20h', 'count' => $durationBuckets['over_20h']],
+                ['value' => 'under_6h', 'label' => 'Under 6 hours', 'count' => $durationBuckets['under_6h']],
+                ['value' => '6_12h', 'label' => '6–12 hours', 'count' => $durationBuckets['6_12h']],
+                ['value' => '12_18h', 'label' => '12–18 hours', 'count' => $durationBuckets['12_18h']],
+                ['value' => 'over_18h', 'label' => '18+ hours', 'count' => $durationBuckets['over_18h']],
             ],
             'layover_airports' => array_values(array_map(fn (string $code, int $count): array => ['code' => $code, 'name' => $code, 'count' => $count], array_keys($layovers), $layovers)),
             'fare_families' => array_values(array_map(fn (string $value, int $count): array => ['value' => $value, 'label' => ucwords(str_replace('_', ' ', $value)), 'count' => $count], array_keys($fareFamilies), $fareFamilies)),
@@ -2283,7 +2283,16 @@ class FlightController extends Controller
 
     private function matchesDurationBucket(int $minutes, string $bucket): bool
     {
-        return $this->durationBucket($minutes) === $bucket;
+        return match ($bucket) {
+            'under_6h' => $minutes < 360,
+            '6_12h' => $minutes >= 360 && $minutes < 720,
+            '12_18h' => $minutes >= 720 && $minutes < 1080,
+            'over_18h' => $minutes >= 1080,
+            // Legacy singular-bucket keys from prior owner builds.
+            '12_20h' => $minutes >= 720 && $minutes < 1200,
+            'over_20h' => $minutes >= 1200,
+            default => false,
+        };
     }
 
     private function durationBucket(int $minutes): string
@@ -2291,8 +2300,8 @@ class FlightController extends Controller
         return match (true) {
             $minutes < 360 => 'under_6h',
             $minutes < 720 => '6_12h',
-            $minutes < 1200 => '12_20h',
-            default => 'over_20h',
+            $minutes < 1080 => '12_18h',
+            default => 'over_18h',
         };
     }
 

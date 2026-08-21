@@ -12,20 +12,25 @@ export type SearchFreshness = {
 };
 
 export type FlightSegmentDisplay = {
+  segment_number?: number;
   origin?: string;
   destination?: string;
   origin_airport_code?: string;
   destination_airport_code?: string;
+  origin_city?: string;
+  destination_city?: string;
   departure_time_display?: string;
   departure_date_display?: string;
   arrival_time_display?: string;
   arrival_date_display?: string;
   arrival_day_offset_display?: string;
+  arrival_day_offset?: string;
   duration_display?: string;
   flight_number?: string;
   marketing_carrier_code?: string;
   airline_code?: string;
   airline_name?: string;
+  airline_logo_url?: string | null;
   operating_carrier_code?: string;
   operating_airline_code?: string;
   operating_airline_name?: string;
@@ -74,10 +79,18 @@ export type FlightOffer = {
   departure_time?: string;
   arrival_time?: string;
   arrival_day_offset_display?: string;
+  arrival_day_offset?: string;
+  departure_city?: string;
+  arrival_city?: string;
+  departure_airport_code?: string;
+  arrival_airport_code?: string;
   duration?: string;
   stops?: number;
   stops_label_display?: string;
+  stops_display?: string;
   layover_summary_display?: string[];
+  /** Laravel presentation field alias for layover_summary_display. */
+  layover_summary?: string[];
   baggage?: string;
   refundable?: boolean;
   currency?: string;
@@ -111,9 +124,12 @@ export type FlightOffer = {
   layovers_display?: Array<{
     airport_code?: string;
     city?: string;
+    airport_city?: string;
     duration_display?: string;
+    duration_minutes?: number | null;
     overnight?: boolean;
     terminal_change?: boolean;
+    label?: string;
   }>;
   baggage_checked_display?: string | null;
   baggage_cabin_display?: string | null;
