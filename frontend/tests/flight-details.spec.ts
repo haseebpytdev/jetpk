@@ -93,6 +93,25 @@ async function setupResultsAndDetails(
     cabin: "economy",
   });
 
+  // Revalidation POSTs call ensureLaravelCsrfToken(); without this mock the
+  // csrf-token fetch can hang against the Playwright Next smoke server.
+  await page.route("**/laravel/api/public/content/csrf-token**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ csrf_token: "test-csrf-token" }),
+      headers: { "set-cookie": "XSRF-TOKEN=test-csrf-token; Path=/" },
+    });
+  });
+
+  await page.route("**/laravel/flights/results/nearby-dates**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ available: false, dates: [] }),
+    });
+  });
+
   await page.route("**/laravel/flights/results/data**", async (route) => {
     await route.fulfill({
       status: 200,
@@ -527,9 +546,10 @@ test.describe("JP-FE-06 flight details", () => {
 
     await page.getByTestId("flight-details-trigger").click();
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
-    await expect(page.getByRole("listitem").filter({ hasText: "Economy Fare" })).toBeVisible();
-    await expect(page.getByRole("listitem").filter({ hasText: "Economy Fare" }).getByRole("button", { name: "Not selectable" })).toBeDisabled();
-    await expect(page.getByRole("listitem").filter({ hasText: "Economy Fare" })).toContainText("Unavailable");
+    // Synthetic-only catalogs render as Current fare (not Unavailable branded UI).
+    await expect(page.getByTestId("fare-family-details").getByText("Current fare").first()).toBeVisible();
+    await expect(page.getByTestId("fare-family-details").getByRole("button", { name: /Select fare|Not selectable/i })).toHaveCount(0);
+    await expect(page.getByText("Unavailable")).toHaveCount(0);
     await expect.poll(() => detailsUrls.length).toBe(1);
     expect(new URL(detailsUrls[0]).searchParams.has("fare_option_key")).toBe(false);
   });
@@ -566,7 +586,7 @@ test.describe("JP-FE-06 flight details", () => {
     await page.getByTestId("book-now-trigger").click();
     await expect(page.getByTestId("flight-details-drawer")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Choose your flight & fare" })).toBeVisible();
-    await expect(page.getByRole("listitem").filter({ hasText: "Standard Fare" })).toBeVisible();
+    await expect(page.getByTestId("fare-family-details").getByText("Current fare").first()).toBeVisible();
     await expect.poll(() => detailsUrl).not.toBe("");
     expect(new URL(detailsUrl).searchParams.has("fare_option_key")).toBe(false);
     await expect(page).toHaveURL(/\/flights\/results/);

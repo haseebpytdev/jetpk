@@ -118,7 +118,9 @@ test("running search shows skeleton then results", async ({ page }) => {
   let delay = true;
   await page.route("**/laravel/flights/results/data**", async (route) => {
     if (delay) {
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      // Keep the first response slow enough that the loading skeleton is observable
+      // on a warm Playwright Next smoke server (400ms races under CI-like warm starts).
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
       delay = false;
     }
     await route.fulfill({
@@ -128,7 +130,7 @@ test("running search shows skeleton then results", async ({ page }) => {
     });
   });
   await page.goto(`/flights/results?${baseResultsQuery()}`);
-  await expect(page.getByTestId("result-skeleton")).toBeVisible();
+  await expect(page.getByTestId("result-skeleton")).toBeVisible({ timeout: 5_000 });
   await expect(page.getByTestId("flight-result-card")).toBeVisible({ timeout: 15_000 });
 });
 
@@ -523,7 +525,8 @@ test("mobile filter drawer at 320px", async ({ page }) => {
 test("reduced motion skeleton has no animation class dependency", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.route("**/laravel/flights/results/data**", async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Keep loading long enough that the skeleton is observable under reduce-motion.
+    await new Promise((resolve) => setTimeout(resolve, 2_500));
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -531,7 +534,7 @@ test("reduced motion skeleton has no animation class dependency", async ({ page 
     });
   });
   await page.goto(`/flights/results?${baseResultsQuery()}`);
-  await expect(page.getByTestId("result-skeleton")).toBeVisible();
+  await expect(page.getByTestId("result-skeleton")).toBeVisible({ timeout: 5_000 });
 });
 
 test("homepage search stays on Next results route", async ({ page }) => {
