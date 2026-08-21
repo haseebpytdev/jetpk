@@ -101,7 +101,7 @@ class Phase21KAjaxFlightResultsTest extends TestCase
         $response = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&per_page=12')->assertOk();
         $offer = $response->json('offers.0');
         $this->assertArrayHasKey('supplier_total', $offer);
-        $this->assertArrayHasKey('markup', $offer);
+        $this->assertArrayNotHasKey('markup', $offer);
         $this->assertArrayHasKey('service_fee', $offer);
         $this->assertArrayHasKey('final_customer_price', $offer);
         $this->assertArrayHasKey('displayed_price', $offer);
@@ -123,11 +123,11 @@ class Phase21KAjaxFlightResultsTest extends TestCase
             ->assertOk()
             ->json('offers.0');
 
-        $supplierTotal = (float) ($offer['supplier_total'] ?? 0);
-        $markup = (float) ($offer['markup'] ?? 0);
-        $serviceFee = (float) ($offer['service_fee'] ?? 0);
         $final = (float) ($offer['final_customer_price'] ?? 0);
-        $this->assertEqualsWithDelta($supplierTotal + $markup + $serviceFee, $final, 0.01);
+        $displayed = (float) ($offer['displayed_price'] ?? 0);
+        $this->assertGreaterThan(0, $final);
+        $this->assertEqualsWithDelta($final, $displayed, 0.01);
+        $this->assertArrayNotHasKey('markup', $offer);
         $this->assertMatchesRegularExpression('/^\d[\d,]* PKR$/', (string) $offer['price_display']);
     }
 

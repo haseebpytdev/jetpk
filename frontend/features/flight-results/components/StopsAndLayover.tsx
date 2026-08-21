@@ -188,10 +188,14 @@ export function StopsAndLayover({
       if (buttonRef.current?.contains(target) || tooltipRef.current?.contains(target)) return;
       setOpen(false);
     };
+    // Defer listener so the opening click/tap does not immediately close the tooltip.
+    const timer = window.setTimeout(() => {
+      document.addEventListener("mousedown", onPointer);
+      document.addEventListener("touchstart", onPointer);
+    }, 250);
     document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("touchstart", onPointer);
     return () => {
+      window.clearTimeout(timer);
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("mousedown", onPointer);
       document.removeEventListener("touchstart", onPointer);
@@ -230,6 +234,13 @@ export function StopsAndLayover({
         aria-expanded={hasDetail ? open : undefined}
         aria-controls={hasDetail ? tooltipId : undefined}
         aria-label={ariaLabel}
+        onKeyDown={(event) => {
+          if (!hasDetail) return;
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setOpen((value) => !value);
+          }
+        }}
         onClick={(event) => {
           if (!hasDetail) return;
           event.preventDefault();

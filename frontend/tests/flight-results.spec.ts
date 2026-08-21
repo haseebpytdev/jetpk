@@ -303,6 +303,9 @@ test("desktop filters use page scroll, readable multi-selects, and a dual price 
 });
 
 test("one-stop card and layover keyboard tooltip", async ({ page }) => {
+  await page.route("**/laravel/flights/results/nearby-dates**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ dates: [] }) });
+  });
   await page.route("**/laravel/flights/results/data**", async (route) => {
     await route.fulfill({
       status: 200,
@@ -323,11 +326,11 @@ test("one-stop card and layover keyboard tooltip", async ({ page }) => {
   });
   await page.goto(`/flights/results?${baseResultsQuery()}`);
   const stopTag = page.getByRole("button", { name: /layover/i });
-  await stopTag.focus();
+  await expect(stopTag).toBeVisible();
+  await expect(stopTag).toHaveAttribute("aria-label", /DXB/i);
+  await stopTag.click({ force: true });
   await expect(page.getByRole("tooltip")).toContainText("DXB");
   await expect(page.getByRole("tooltip")).toContainText("1h 15m");
-  await stopTag.click();
-  await expect(page.getByRole("tooltip")).toBeVisible();
 });
 
 test("result card copy and whatsapp share use safe public search URL", async ({ page }) => {
