@@ -226,7 +226,6 @@ export function FlightDetailsDrawer({
                   options={details.fareOptions}
                   selectedKey={details.selectedFareKey}
                   onSelect={details.handleFareOptionChange}
-                  onViewDetails={details.handleViewDetails}
                   disabled={revalidation.state === "loading"}
                 />
 

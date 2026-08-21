@@ -186,10 +186,10 @@ test("owner V3 wave 5 visual proof matrix", async ({ page }) => {
   await page.getByTestId("book-now-trigger").first().click();
   await expect(page.getByTestId("fare-family-details")).toBeVisible();
   await page.screenshot({ path: path.join(output, "04-branded-fares-default.png") });
-  await page.getByRole("listitem").filter({ hasText: "Smart" }).getByRole("button", { name: "View Details" }).click();
+  await page.getByRole("listitem").filter({ hasText: "Smart" }).getByRole("button", { name: "Select fare" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: "Smart" })).toContainText("Selected");
   await page.screenshot({ path: path.join(output, "05-branded-fares-second-selected.png") });
-  await page.screenshot({ path: path.join(output, "06-branded-view-details.png") });
+  await page.screenshot({ path: path.join(output, "06-branded-selected-summary.png") });
   await page.getByRole("tab", { name: "Baggage Policy" }).click();
   await page.getByTestId("fare-summary-tabs").screenshot({ path: path.join(output, "07-fare-summary-baggage.png") });
   await page.getByRole("tab", { name: "Fare Policy" }).click();

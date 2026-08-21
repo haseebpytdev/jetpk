@@ -671,7 +671,7 @@ test.describe("JP-FE-06 flight details", () => {
     await page.evaluate(() => {
       const cards = [...document.querySelectorAll<HTMLElement>('[data-fare-family-card]')];
       for (const card of cards.slice(0, 2)) {
-        [...card.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.trim() === "View Details")?.click();
+        [...card.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.trim() === "Select fare")?.click();
       }
     });
     await expect.poll(() => detailsUrls.some((url) => url.includes("fare_option_key=eco-flex"))).toBe(true);

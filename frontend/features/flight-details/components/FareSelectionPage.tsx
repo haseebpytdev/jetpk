@@ -108,7 +108,7 @@ export function FareSelectionPage() {
         </p>
       </header>
 
-      <div className="grid gap-jp-xl lg:grid-cols-[minmax(0,1fr)_minmax(280px,330px)]">
+            <div className="grid gap-jp-xl lg:grid-cols-[minmax(0,1fr)_minmax(300px,360px)]">
         <div className="space-y-jp-lg">
           {details.loadState === "loading" ? <ResultSkeleton count={3} /> : null}
           {details.loadState === "error" ? (
@@ -148,7 +148,6 @@ export function FareSelectionPage() {
                 options={details.fareOptions}
                 selectedKey={details.selectedFareKey}
                 onSelect={details.handleFareOptionChange}
-                onViewDetails={details.handleViewDetails}
                 disabled={revalidation.state === "loading"}
               />
 

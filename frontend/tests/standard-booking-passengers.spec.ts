@@ -147,10 +147,8 @@ test("document reader paste confirms MRZ without overwriting existing values sil
   await page.getByTestId("passenger-card-0").getByLabel(/First name/i).fill("TYPED");
   await page.getByTestId("passenger-card-0").getByLabel(/Last name/i).fill("PERSON");
 
-  await page.getByTestId("document-reader-paste-toggle-0").click();
   const { SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY } = await import("../features/standard-booking/document-reader/mrz/fixtures");
   await page.getByTestId("document-reader-paste-0").fill(SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY);
-  await page.getByTestId("document-reader-parse-paste-0").click();
   await expect(page.getByTestId("document-reader-preview-0")).toBeVisible();
   await expect(page.getByTestId("document-reader-conflicts-0")).toBeVisible();
 
@@ -173,10 +171,8 @@ test("document reader confirms synthetic MRZ into empty passenger fields", async
   });
   await page.goto("/booking/passengers?search_id=search-1&offer_id=offer-1&from=LHE&to=DXB&depart=2026-08-15&adults=1&children=1");
 
-  await page.getByTestId("document-reader-paste-toggle-0").click();
   const { SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY } = await import("../features/standard-booking/document-reader/mrz/fixtures");
   await page.getByTestId("document-reader-paste-0").fill(SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY);
-  await page.getByTestId("document-reader-parse-paste-0").click();
   await expect(page.getByTestId("document-reader-preview-0")).toBeVisible();
   await expect(page.getByTestId("document-reader-preview-0")).toContainText(
     "Please verify extracted details against the passport before continuing.",

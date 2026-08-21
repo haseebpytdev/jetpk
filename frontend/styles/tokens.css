@@ -150,7 +150,7 @@
   --jp-control-height: var(--jp-button-height);
   --jp-maxw: clamp(1160px, calc(71.25rem + 1.5625vw), 1240px);
   --jp-maxw-narrow: clamp(480px, calc(30rem + 2vw), 560px);
-  --jp-maxw-booking: clamp(960px, calc(60rem + 2vw), 1080px);
+  --jp-maxw-booking: clamp(1080px, calc(70rem + 2vw), 1240px);
   --jp-container-pad-x: var(--jp-page-gutter);
   --jp-sidebar-width: 15rem;
 

@@ -31,7 +31,7 @@ test("owner V3 local visual proof", async ({ page }) => {
   await page.getByTestId("results-filter-panel").screenshot({ path: path.join(output, "03-filter-semantics.png") });
   await page.getByTestId("book-now-trigger").first().click();
   await expect(page.getByTestId("fare-family-details")).toBeVisible();
-  await page.getByRole("listitem").filter({ hasText: "Smart" }).getByRole("button", { name: "View Details" }).click();
+  await page.getByRole("listitem").filter({ hasText: "Smart" }).getByRole("button", { name: "Select fare" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: "Smart" })).toContainText("Selected");
   await page.screenshot({ path: path.join(output, "01-branded-fare-view-details.png") });
   await page.getByRole("tab", { name: "Fare Details" }).click();

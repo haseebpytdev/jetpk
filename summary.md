@@ -11,11 +11,15 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-21 (Owner Retest V3 Wave-6 CLUSTER B — checkout selected-fare handoff)
+**Last updated:** 2026-08-21 (Owner Retest V3 Wave-6 CLUSTER D — UX cleanup)
 
 ---
 
 ## Changelog (high level)
+
+| 2026-08-21 | JETPK WAVE-6 CLUSTER D UX CLEANUP | **Branded cards / booking shell / passport autofill:** removed per-card View Details (Select fare updates Fare Summary). Synthetic-only offers show Current fare instead of broken branded Unavailable. Booking max width expanded (~1080–1240px) with ~300–360px Flight Preview column. Document Reader simplified to Autofill from passport icon CTA; customer MRZ/OCR jargon hidden; client-side architecture preserved. |
+
+| 2026-08-21 | JETPK WAVE-6 CLUSTER C STOP TOOLTIP CRASH | **Results stop/layover tooltip:** fixed infinite re-render loop (`details` array identity → `useLayoutEffect` → `setPlacement`) that crashed connected-flight cards into the global error page on hover/click. Hardened malformed layover metadata, unmount-safe timers, and `:focus-visible` keyboard open without mouse focus→click close race. Global `app/error.tsx` Try again resets once then hard-reloads clean route state. |
 
 | 2026-08-21 | JETPK WAVE-6 CLUSTER B CHECKOUT FARE HANDOFF | **Travelers Flight Preview selected-fare truth:** `StandardBookingJsonPresenter::presentItinerary` now prefers `draft.selected_fare_family_option` (same Blade checkout contract) for fare family name, baggage, and estimated total instead of the base/validated offer row. Fixes Owner UAT where Continue handoff showed ECONOMY BASIC / 0 kg after selecting a higher branded fare. Compact multipax each/total rows when component columns are not authoritative. |
 
