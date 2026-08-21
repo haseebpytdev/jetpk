@@ -20,11 +20,11 @@ import {
 } from "@/features/flight-details/components/OfferStatePanels";
 import { PriceBreakdown } from "@/features/flight-details/components/PriceBreakdown";
 import { ReturnJourneyDetails } from "@/features/flight-details/components/ReturnJourneyDetails";
-import { RouteTimeline } from "@/features/flight-details/components/RouteTimeline";
 import { SegmentDetails } from "@/features/flight-details/components/SegmentDetails";
 import { useFlightDetails } from "@/features/flight-details/hooks/use-flight-details";
 import { useRevalidation } from "@/features/flight-details/hooks/use-revalidation";
 import type { FlightDetailsContext } from "@/features/flight-details/types";
+import { buildFareRouteLabel } from "@/features/flight-details/utils/route-label";
 
 export function FareSelectionPage() {
   const router = useRouter();
@@ -132,9 +132,17 @@ export function FareSelectionPage() {
                 />
               ) : null}
 
-              <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
-              <RouteTimeline segments={segments} layovers={offer.layovers_display} />
-              <SegmentDetails segments={segments} />
+              <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" aria-labelledby="fare-selection-journey-heading">
+                <h2 id="fare-selection-journey-heading" className="mb-3 text-sm font-semibold text-jp-text">
+                  Journey details
+                </h2>
+                <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
+                <SegmentDetails
+                  segments={segments}
+                  layovers={offer.layovers_display}
+                  airlineLogoUrl={offer.airline_logo_url}
+                />
+              </section>
 
               <FareFamilyDetails
                 options={details.fareOptions}
@@ -149,6 +157,7 @@ export function FareSelectionPage() {
                 summaryDisplay={offer.baggage_summary_display ?? offer.baggage}
                 checkedDisplay={offer.baggage_checked_display}
                 cabinDisplay={offer.baggage_cabin_display}
+                routeLabel={buildFareRouteLabel(offer)}
               />
 
               <FareRulesAccordion
@@ -156,6 +165,7 @@ export function FareSelectionPage() {
                 refundRule={offer.refund_rule}
                 changeRule={offer.change_rule}
                 refundable={offer.refundable}
+                routeLabel={buildFareRouteLabel(offer)}
               />
 
               <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />

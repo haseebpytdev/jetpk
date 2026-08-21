@@ -75,12 +75,12 @@ export function PriceBreakdown({ offer, breakdown }: PriceBreakdownProps) {
         {passengerRows.length ? (
           <div className="overflow-x-auto rounded-jp-md border border-jp-border" data-testid="passenger-fare-breakdown">
             <table className="w-full min-w-[32rem] text-left text-xs">
-              <thead className="bg-jp-surface-muted text-jp-text-muted">
+              <thead className="bg-jp-surface-muted text-[10px] uppercase tracking-wide text-jp-text-muted">
                 <tr>
-                  <th className="px-3 py-2">Passenger</th>
-                  <th className="px-3 py-2 text-right">Base price</th>
-                  <th className="px-3 py-2 text-right">Taxes &amp; fees</th>
-                  <th className="px-3 py-2 text-right">Total</th>
+                  <th className="px-3 py-2 font-semibold">Passenger</th>
+                  <th className="px-3 py-2 text-right font-semibold">Base price</th>
+                  <th className="px-3 py-2 text-right font-semibold">Taxes &amp; fees</th>
+                  <th className="px-3 py-2 text-right font-semibold">Total</th>
                 </tr>
               </thead>
               <tbody>

@@ -17,7 +17,6 @@ import {
   SupplierTimeoutState,
 } from "./OfferStatePanels";
 import { ReturnJourneyDetails } from "./ReturnJourneyDetails";
-import { RouteTimeline } from "./RouteTimeline";
 import { SegmentDetails } from "./SegmentDetails";
 
 type FlightDetailsDrawerProps = {
@@ -216,8 +215,11 @@ export function FlightDetailsDrawer({
                 <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" aria-labelledby="journey-details-heading">
                   <h3 id="journey-details-heading" className="mb-3 text-sm font-semibold text-jp-text">Journey details</h3>
                   <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
-                  <RouteTimeline segments={segments} layovers={offer.layovers_display} />
-                  <div className="mt-3"><SegmentDetails segments={segments} /></div>
+                  <SegmentDetails
+                    segments={segments}
+                    layovers={offer.layovers_display}
+                    airlineLogoUrl={offer.airline_logo_url}
+                  />
                 </section>
 
                 <FareFamilyDetails

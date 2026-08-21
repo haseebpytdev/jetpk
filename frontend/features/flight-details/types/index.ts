@@ -41,6 +41,9 @@ export type FareRulesContract = {
   change_rule?: string | null;
   refund_rule?: string | null;
   penalty?: string | null;
+  no_show?: string | null;
+  before_departure?: string | null;
+  after_departure?: string | null;
   fare_basis?: string | null;
   booking_class?: string | null;
   cabin?: string | null;
