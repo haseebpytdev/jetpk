@@ -52,11 +52,12 @@ None.
 - `git diff --check` on intended paths
 
 ## Screenshots
-`tmp/owner-v3-flight-wave-8/` â€” required states 01â€“20; synthetic passport only.
+`tmp/owner-v3-flight-wave-8/` — required states 01–20; synthetic passport only.
 
 ## SHA pins
 - Production baseline runtime: `a9ec8f18745c8b9db3ce62504efd485a1bb8df3e`
-- `FINAL_WAVE8_ENGINEERING_SHA` = tip after Cluster E engineering commit (see gate/manifest)
+- `FINAL_WAVE8_ENGINEERING_SHA` = `8cf657d7d35cc97848318f56184825ac49af6225`
+- Docs/visual tip: branch HEAD after Wave-8 docs commits
 
 ## Known limitations / risks
 - Live Sabre SMART PTC still needs owner UAT after protected deploy.
