@@ -621,11 +621,14 @@ class BookingController extends Controller
 
                 $mappedPassengers = collect($passengersInput)->values()->map(
                     function (array $passenger, int $idx) use ($leadIdx): array {
+                        $rawTitle = trim((string) ($passenger['title'] ?? ''));
+                        $sanitizedTitle = $this->sanitizePersistedPassengerTitle($rawTitle);
+
                         return [
                             'passenger_index' => $idx + 1,
                             'passenger_type' => (string) ($passenger['passenger_type'] ?? 'adult'),
                             'is_lead_passenger' => $idx === $leadIdx,
-                            'title' => $passenger['title'] ?? null,
+                            'title' => $sanitizedTitle,
                             'first_name' => (string) ($passenger['first_name'] ?? ''),
                             'last_name' => (string) ($passenger['last_name'] ?? ''),
                             'date_of_birth' => $passenger['date_of_birth'] ?? null,
@@ -674,13 +677,22 @@ class BookingController extends Controller
                 }
                 $this->bookingService->attachContact($booking, $contactPayload);
 
+                $authoritativeFareTotal = $selectedFareTotal > 0
+                    ? $selectedFareTotal
+                    : (float) ($pricing['final_total'] ?? 0);
+                $selectedPassengerPricing = is_array($selectedFareFamilyOption['passenger_pricing'] ?? null)
+                    ? $selectedFareFamilyOption['passenger_pricing']
+                    : null;
+                $fareBreakdownPassengerPricing = is_array($selectedPassengerPricing) && $selectedPassengerPricing !== []
+                    ? $selectedPassengerPricing
+                    : $passengerPricing;
                 $this->bookingService->attachFareBreakdown($booking, [
                     'base_fare' => $pricing['base_fare'],
                     'taxes' => $pricing['taxes'],
                     'fees' => $pricing['service_fee'],
                     'markup' => (float) ($pricing['admin_markup'] ?? 0),
                     'discount' => 0,
-                    'total' => $pricing['final_total'],
+                    'total' => $authoritativeFareTotal,
                     'currency' => $offer['currency'] ?? 'PKR',
                     'breakdown' => [
                         ['label' => 'Base fare', 'amount' => $pricing['base_fare']],
@@ -691,8 +703,8 @@ class BookingController extends Controller
                         ['label' => 'Channel/agent markup', 'amount' => $pricing['agent_markup_or_commission']],
                         ['label' => 'Service fee', 'amount' => $pricing['service_fee']],
                         [
-                            'passenger_pricing' => $passengerPricing,
-                            'passenger_pricing_available' => $passengerPricingAvailable,
+                            'passenger_pricing' => $fareBreakdownPassengerPricing,
+                            'passenger_pricing_available' => $passengerPricingAvailable || (is_array($selectedPassengerPricing) && $selectedPassengerPricing !== []),
                             'passenger_counts' => [
                                 'adults' => (int) ($validated['adults'] ?? 1),
                                 'children' => (int) ($validated['children'] ?? 0),
@@ -1452,6 +1464,25 @@ class BookingController extends Controller
             return $this->clientRedirect()->route('flights.search');
         }
 
+        $durableSelectedFare = $this->resolveDurableSelectedFareFromBookingMeta($meta);
+        if (($durableSelectedFare['fail_closed'] ?? false) === true) {
+            $failMessage = __('Your selected fare is no longer available. Please select a fare again.');
+            if ($this->wantsBookingJson($request)) {
+                return response()->json(
+                    $this->standardBookingJsonPresenter->presentError(
+                        'selected_fare_unavailable',
+                        $failMessage,
+                        '/flights/results',
+                    ),
+                    409,
+                );
+            }
+
+            return $this->clientRedirect()
+                ->route('flights.results', $this->buildFlightsResultsQuery(is_array($criteria) ? $criteria : []))
+                ->withErrors(['fare_option_key' => $failMessage]);
+        }
+
         $leadPassenger = $booking->passengers->firstWhere('is_lead_passenger', true) ?? $booking->passengers->first();
         $contact = $booking->contact;
         $draft = [
@@ -1468,6 +1499,9 @@ class BookingController extends Controller
             'search_from' => $criteria['origin'] ?? '',
             'search_to' => $criteria['destination'] ?? '',
             'search_depart' => $criteria['depart_date'] ?? '',
+            'search_id' => trim((string) ($meta['checkout_search_id'] ?? '')),
+            'fare_option_key' => (string) ($durableSelectedFare['fare_option_key'] ?? ''),
+            'selected_fare_family_option' => $durableSelectedFare['selected_fare_family_option'] ?? null,
         ];
 
         $supplierForReview = strtolower(trim((string) ($meta['supplier_provider'] ?? $booking->supplier ?? '')));
@@ -1589,6 +1623,9 @@ class BookingController extends Controller
             'checkoutFareBreakdown' => $checkoutFareBreakdown,
             'abhiPayCheckout' => $this->publicAbhiPayCheckoutPresenter->forBooking($booking, afterSubmission: false),
             'isPiaNdcReview' => $supplierForReview === SupplierProvider::PiaNdc->value,
+            // Authoritative persisted branded-fare intent (same contract as Blade review-body).
+            'fare_option_key' => (string) ($durableSelectedFare['fare_option_key'] ?? ''),
+            'selected_fare_family_option' => $durableSelectedFare['selected_fare_family_option'] ?? null,
         ];
 
         if ($this->wantsBookingJson($request)) {
@@ -2953,6 +2990,89 @@ class BookingController extends Controller
         }
 
         return $selected;
+    }
+
+    /**
+     * Authoritative selected branded-fare contract from persisted booking meta.
+     *
+     * Review/Payment must never silently fall back to base offer fare_family when a branded
+     * selection was stored. Missing or inconsistent durable selection fails closed.
+     *
+     * @param  array<string, mixed>  $meta
+     * @return array{
+     *     fare_option_key: string,
+     *     selected_fare_family_option: ?array,
+     *     fail_closed: bool,
+     * }
+     */
+    protected function resolveDurableSelectedFareFromBookingMeta(array $meta): array
+    {
+        $fareOptionKey = trim((string) ($meta['fare_option_key'] ?? ''));
+        $intent = is_array($meta['selected_fare_family_option'] ?? null)
+            ? $meta['selected_fare_family_option']
+            : null;
+
+        if ($fareOptionKey === '' && ($intent === null || $intent === [])) {
+            return [
+                'fare_option_key' => '',
+                'selected_fare_family_option' => null,
+                'fail_closed' => false,
+            ];
+        }
+
+        if ($fareOptionKey !== '' && ($intent === null || $intent === [])) {
+            return [
+                'fare_option_key' => $fareOptionKey,
+                'selected_fare_family_option' => null,
+                'fail_closed' => true,
+            ];
+        }
+
+        if (is_array($intent) && $intent !== []) {
+            $intentKey = trim((string) ($intent['option_key'] ?? $intent['fare_option_key'] ?? ''));
+            if ($fareOptionKey !== '' && $intentKey !== '' && strcasecmp($fareOptionKey, $intentKey) !== 0) {
+                return [
+                    'fare_option_key' => $fareOptionKey,
+                    'selected_fare_family_option' => $intent,
+                    'fail_closed' => true,
+                ];
+            }
+
+            if ($fareOptionKey === '' && $intentKey !== '') {
+                $fareOptionKey = $intentKey;
+            }
+        }
+
+        return [
+            'fare_option_key' => $fareOptionKey,
+            'selected_fare_family_option' => $intent,
+            'fail_closed' => false,
+        ];
+    }
+
+    /**
+     * Persist only supplier-compatible titles; never store literal "null"/"undefined".
+     */
+    protected function sanitizePersistedPassengerTitle(string $title): ?string
+    {
+        $normalized = trim($title);
+        if ($normalized === '') {
+            return null;
+        }
+
+        $blocked = ['null', 'undefined', 'none', 'nil'];
+        if (in_array(strtolower($normalized), $blocked, true)) {
+            return null;
+        }
+
+        $allowed = ['Mr', 'Mrs', 'Ms', 'Miss', 'Dr', 'Mstr'];
+        foreach ($allowed as $candidate) {
+            if (strcasecmp($normalized, $candidate) === 0) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 
     protected function reconcilePiaNdcBookingFareFamily(Booking $booking): void

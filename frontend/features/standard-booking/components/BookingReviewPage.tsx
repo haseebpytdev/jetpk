@@ -156,7 +156,7 @@ export function BookingReviewPage() {
         onClick={() => void handleSubmit()}
         data-testid="review-continue-button"
       >
-        {submitting ? "Submitting…" : selectedMethod === "card" ? "Continue to payment" : "Confirm booking (manual payment)"}
+        {submitting ? "Submitting…" : selectedMethod === "card" ? "Continue to payment" : "Confirm booking"}
       </PrimaryButton>
       <p className="text-jp-xs text-jp-muted">No payment is taken on this step for manual payment.</p>
     </>

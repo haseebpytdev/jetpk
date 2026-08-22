@@ -59,7 +59,18 @@ class StoreBookingPassengersRequest extends FormRequest
             'lead_passenger_index' => ['nullable', 'integer', 'min:0'],
             'passengers' => ['required', 'array', 'min:1', 'max:9'],
             'passengers.*.passenger_type' => ['required', 'string', 'in:adult,child,infant'],
-            'passengers.*.title' => ['required', 'string', 'max:16'],
+            'passengers.*.title' => [
+                'required',
+                'string',
+                'max:16',
+                Rule::in(['Mr', 'Mrs', 'Ms', 'Miss', 'Dr', 'Mstr']),
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $normalized = strtolower(trim((string) $value));
+                    if (in_array($normalized, ['null', 'undefined', 'none', 'nil', ''], true)) {
+                        $fail(__('Please select a valid title.'));
+                    }
+                },
+            ],
             'passengers.*.first_name' => ['required', 'string', 'max:120'],
             'passengers.*.last_name' => ['required', 'string', 'max:120'],
             'passengers.*.date_of_birth' => ['required', 'date', 'before:today'],

@@ -126,6 +126,8 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
                 'children' => 0,
                 'infants' => 0,
                 'email' => 'freedom.checkout@example.com',
+                'terms_accepted' => '1',
+                'terms_version' => (string) config('ota_checkout_consent.terms_version'),
             ]),
             PublicBookingPassengersPayload::internationalDocuments(),
         );
@@ -1043,5 +1045,54 @@ class BookingBrandedFareSelectionIntentTest extends TestCase
                 ],
             ], 422);
         });
+    }
+
+    public function test_review_json_preserves_freedom_selected_fare_not_base_economy(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        Config::set('suppliers.sabre.branded_fares_display_enabled', true);
+        Config::set('suppliers.sabre.branded_fares_selection_enabled', true);
+
+        $depart = now()->addWeek()->format('Y-m-d');
+        $this->submitPassengersWithFreedomFare($depart, ['baggage' => '0 KG', 'fare_family' => 'ECONOMY BASIC']);
+
+        $response = $this->getJson('/booking/review?format=json');
+        $response->assertOk()
+            ->assertJsonPath('ok', true);
+
+        $fareFamily = (string) $response->json('itinerary.fare_family');
+        $this->assertStringContainsStringIgnoringCase('Freedom', $fareFamily);
+        $this->assertStringNotContainsStringIgnoringCase('ECONOMY BASIC', $fareFamily);
+        $this->assertStringNotContainsStringIgnoringCase('ECO LT', $fareFamily);
+        $this->assertSame('frd-pi1', (string) $response->json('itinerary.selected_fare_option_key'));
+        $this->assertStringContainsStringIgnoringCase('30', (string) $response->json('itinerary.checked_baggage'));
+        $this->assertGreaterThan(0, (float) $response->json('pricing.total'));
+        $selectedFareTotal = (float) $response->json('pricing.selected_fare_total');
+        if ($selectedFareTotal > 0) {
+            $this->assertEqualsWithDelta($selectedFareTotal, (float) $response->json('pricing.total'), 0.01);
+        }
+    }
+
+    public function test_review_json_fails_closed_when_fare_option_key_missing_intent(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        Config::set('suppliers.sabre.branded_fares_display_enabled', true);
+        Config::set('suppliers.sabre.branded_fares_selection_enabled', true);
+
+        $depart = now()->addWeek()->format('Y-m-d');
+        $this->submitPassengersWithFreedomFare($depart);
+
+        $booking = Booking::query()->firstOrFail();
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $meta['fare_option_key'] = 'frd-pi1';
+        $meta['selected_fare_family_option'] = null;
+        $booking->forceFill(['meta' => $meta])->save();
+
+        $response = $this->getJson('/booking/review?format=json');
+        $response->assertStatus(409)
+            ->assertJsonPath('ok', false)
+            ->assertJsonPath('status', 'selected_fare_unavailable');
     }
 }

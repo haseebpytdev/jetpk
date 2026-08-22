@@ -33,6 +33,8 @@ class StandardBookingReviewJsonTest extends TestCase
                 'first_name' => 'Review',
                 'last_name' => 'Json',
                 'email' => 'review-json@example.com',
+                'terms_accepted' => '1',
+                'terms_version' => (string) config('ota_checkout_consent.terms_version'),
             ]),
             PublicBookingPassengersPayload::internationalDocuments(),
         ));

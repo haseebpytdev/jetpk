@@ -164,9 +164,7 @@ class StandardBookingJsonPresenter
         $fareBreakdown = is_array($viewData['checkoutFareBreakdown'] ?? null) ? $viewData['checkoutFareBreakdown'] : [];
         $returnSplit = is_array($viewData['returnSplitSummary'] ?? null) ? $viewData['returnSplitSummary'] : null;
         $draft = is_array($viewData['draft'] ?? null) ? $viewData['draft'] : [];
-        $selectedIntent = is_array($draft['selected_fare_family_option'] ?? null)
-            ? $draft['selected_fare_family_option']
-            : (is_array($viewData['selected_fare_family_option'] ?? null) ? $viewData['selected_fare_family_option'] : null);
+        $selectedIntent = $this->resolveSelectedFareFamilyIntent($viewData, $draft);
 
         // Prefer authoritative selected branded-fare intent (same contract as Blade checkout).
         // Validated/base offer rows must never silently replace a higher selected fare/baggage.
@@ -194,6 +192,17 @@ class StandardBookingJsonPresenter
             $estimateDisplay = trim((string) ($selectedEstimate['price_display'] ?? ''));
             if ($estimateDisplay !== '') {
                 $totalFormatted = $estimateDisplay;
+            }
+        }
+
+        $selectedFareOptionKey = trim((string) ($draft['fare_option_key'] ?? $viewData['fare_option_key'] ?? ''));
+        if ($selectedFareOptionKey === '' && is_array($canonicalSelectedFare)) {
+            $selectedFareOptionKey = trim((string) ($canonicalSelectedFare['fare_option_key'] ?? ''));
+        }
+        if ($selectedFareOptionKey === '') {
+            $booking = $viewData['booking'] ?? null;
+            if ($booking instanceof Booking) {
+                $selectedFareOptionKey = trim((string) data_get($booking->meta, 'fare_option_key', ''));
             }
         }
 
@@ -225,9 +234,37 @@ class StandardBookingJsonPresenter
                 ?? ($selectedEstimate['displayed_currency'] ?? null)
                 ?? ($offer['currency'] ?? 'PKR'),
             'return_split' => $returnSplit,
-            'selected_fare_option_key' => trim((string) ($draft['fare_option_key'] ?? '')) ?: null,
+            'selected_fare_option_key' => $selectedFareOptionKey !== '' ? $selectedFareOptionKey : null,
             'selected_fare' => $canonicalSelectedFare,
         ];
+    }
+
+    /**
+     * Resolve durable selected branded-fare intent: draft → viewData → booking.meta.
+     *
+     * @param  array<string, mixed>  $viewData
+     * @param  array<string, mixed>  $draft
+     * @return array<string, mixed>|null
+     */
+    private function resolveSelectedFareFamilyIntent(array $viewData, array $draft): ?array
+    {
+        if (is_array($draft['selected_fare_family_option'] ?? null)) {
+            return $draft['selected_fare_family_option'];
+        }
+
+        if (is_array($viewData['selected_fare_family_option'] ?? null)) {
+            return $viewData['selected_fare_family_option'];
+        }
+
+        $booking = $viewData['booking'] ?? null;
+        if ($booking instanceof Booking) {
+            $metaIntent = data_get($booking->meta, 'selected_fare_family_option');
+            if (is_array($metaIntent) && $metaIntent !== []) {
+                return $metaIntent;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -725,7 +762,7 @@ class StandardBookingJsonPresenter
                 'code' => 'manual',
                 'canonical' => 'pay_later',
                 'label' => 'Manual Payment',
-                'description' => 'Submit your booking request and pay using the instructions on the confirmation page.',
+                'description' => 'Submit your booking and follow the provided payment instructions.',
                 'available' => true,
                 'fee' => null,
                 'currency' => (string) ($abhiPay['currency'] ?? 'PKR'),
@@ -737,7 +774,7 @@ class StandardBookingJsonPresenter
                 'code' => 'card',
                 'canonical' => 'online_card',
                 'label' => 'Pay by Card',
-                'description' => 'Pay securely online by debit or credit card after submitting your booking.',
+                'description' => 'Debit / credit card through secure online payment.',
                 'available' => true,
                 'fee' => null,
                 'currency' => (string) ($abhiPay['currency'] ?? 'PKR'),
@@ -754,17 +791,37 @@ class StandardBookingJsonPresenter
     private function presentAuthoritativePricing(array $checkoutFareBreakdown, Booking $booking): array
     {
         $currency = (string) ($checkoutFareBreakdown['currency'] ?? $booking->currency ?? 'PKR');
-        $total = (float) ($checkoutFareBreakdown['total'] ?? $booking->fareBreakdown?->total ?? 0);
+        $selectedTotal = (float) ($booking->selected_fare_total ?? 0);
+        $breakdownTotal = (float) ($checkoutFareBreakdown['total'] ?? $booking->fareBreakdown?->total ?? 0);
+        $total = $selectedTotal > 0 ? $selectedTotal : $breakdownTotal;
+
+        $baseFare = (float) ($booking->fareBreakdown?->base_fare ?? 0);
+        $taxes = (float) ($booking->fareBreakdown?->taxes ?? 0);
+        $serviceCharges = (float) ($booking->fareBreakdown?->service_fee ?? 0);
+
+        $selectedIntent = is_array(data_get($booking->meta, 'selected_fare_family_option'))
+            ? data_get($booking->meta, 'selected_fare_family_option')
+            : null;
+        $selectedPassengerPricing = is_array($selectedIntent['passenger_pricing'] ?? null)
+            ? $selectedIntent['passenger_pricing']
+            : null;
+
+        // Prefer whole-PKR customer presentation.
+        $formatPkr = static fn (float $amount): string => 'PKR '.number_format((int) round($amount), 0, '.', ',');
 
         return [
             'currency' => $currency,
-            'base_fare' => (float) ($booking->fareBreakdown?->base_fare ?? 0),
-            'taxes' => (float) ($booking->fareBreakdown?->taxes ?? 0),
-            'service_charges' => (float) ($booking->fareBreakdown?->service_fee ?? 0),
+            'base_fare' => $baseFare,
+            'taxes' => $taxes,
+            'service_charges' => $serviceCharges,
             'total' => $total,
-            'formatted_total' => 'Rs. '.number_format($total, 0),
+            'formatted_total' => $formatPkr($total),
+            'formatted_base_fare' => $formatPkr($baseFare),
+            'formatted_taxes' => $formatPkr($taxes),
             'rows' => $checkoutFareBreakdown['rows'] ?? [],
             'passenger_mix' => $checkoutFareBreakdown['passenger_mix'] ?? null,
+            'passenger_pricing' => $selectedPassengerPricing,
+            'selected_fare_total' => $selectedTotal > 0 ? $selectedTotal : null,
         ];
     }
 
@@ -778,7 +835,7 @@ class StandardBookingJsonPresenter
             ->values()
             ->map(fn ($passenger): array => [
                 'passenger_type' => (string) $passenger->passenger_type,
-                'title' => (string) $passenger->title,
+                'title' => $this->sanitizeDisplayTitle((string) $passenger->title),
                 'first_name' => (string) $passenger->first_name,
                 'last_name' => (string) $passenger->last_name,
                 'gender' => (string) $passenger->gender,
@@ -787,8 +844,35 @@ class StandardBookingJsonPresenter
                 'document_type' => (string) $passenger->document_type,
                 'passport_number_masked' => $this->maskDocumentNumber((string) $passenger->passport_number),
                 'national_id_masked' => $this->maskDocumentNumber((string) $passenger->national_id_number),
+                'passport_issuing_country' => (string) ($passenger->passport_issuing_country ?? ''),
+                'passport_expiry_date' => $passenger->passport_expiry_date?->format('Y-m-d'),
             ])
             ->all();
+    }
+
+    /**
+     * Never render literal "null"/"undefined" titles on Review.
+     */
+    private function sanitizeDisplayTitle(string $title): ?string
+    {
+        $normalized = trim($title);
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (in_array(strtolower($normalized), ['null', 'undefined', 'none', 'nil'], true)) {
+            return null;
+        }
+
+        $allowed = ['Mr', 'Mrs', 'Ms', 'Miss', 'Dr', 'Mstr'];
+        foreach ($allowed as $candidate) {
+            if (strcasecmp($normalized, $candidate) === 0) {
+                return $candidate;
+            }
+        }
+
+        // Unknown legacy values: omit from display rather than inventing a title.
+        return null;
     }
 
     /**
