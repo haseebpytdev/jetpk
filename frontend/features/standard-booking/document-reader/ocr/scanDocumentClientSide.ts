@@ -21,6 +21,12 @@ const MIN_DIMENSION = 200;
 /** Self-hosted OCR assets under /tesseract (never third-party CDN at runtime). */
 const TESSERACT_ASSET_PATH = "/tesseract";
 
+type LocalOcrWorker = {
+  recognize: (image: string) => Promise<{ data: { text: string } }>;
+  terminate: () => Promise<unknown>;
+  setParameters?: (params: Record<string, unknown>) => Promise<unknown>;
+};
+
 function fail(message: string): MrzParseResult {
   return {
     ok: false,
@@ -160,7 +166,7 @@ export async function scanDocumentClientSide(
   }
 
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  let worker: { recognize: (image: string) => Promise<{ data: { text: string } }>; terminate: () => Promise<void>; setParameters?: (p: Record<string, unknown>) => Promise<void> } | null = null;
+  let worker: LocalOcrWorker | null = null;
 
   try {
     assertNotAborted(options.signal);
@@ -172,7 +178,7 @@ export async function scanDocumentClientSide(
     const { createWorker } = await import("tesseract.js");
     assertNotAborted(options.signal);
 
-    worker = await withTimeout(
+    worker = (await withTimeout(
       createWorker("eng", 1, {
         workerPath: `${TESSERACT_ASSET_PATH}/worker.min.js`,
         corePath: `${TESSERACT_ASSET_PATH}/tesseract-core-simd-lstm.wasm.js`,
@@ -186,20 +192,21 @@ export async function scanDocumentClientSide(
             });
           }
         },
-      }) as Promise<NonNullable<typeof worker>>,
+      }),
       timeoutMs,
       options.signal,
-    );
+    )) as unknown as LocalOcrWorker;
 
-    await worker.setParameters?.({
-      tessedit_pageseg_mode: "6",
-      preserve_interword_spaces: "1",
-    });
+    if (worker.setParameters) {
+      await worker.setParameters({
+        tessedit_pageseg_mode: "6",
+        preserve_interword_spaces: "1",
+      });
+    }
 
     options.onProgress?.({ status: "recognizing", progress: 0.35 });
-    const {
-      data: { text },
-    } = await withTimeout(worker.recognize(prepared.dataUrl), timeoutMs, options.signal);
+    const recognized = await withTimeout(worker.recognize(prepared.dataUrl), timeoutMs, options.signal);
+    const text = recognized.data.text;
 
     options.onProgress?.({ status: "parsing", progress: 0.95 });
     const result = parseTd3Mrz(text);

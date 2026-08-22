@@ -1,0 +1,32 @@
+# Owner Retest V3 Wave-7 — Final Gate
+
+Engineering HEAD: see `WAVE7_ENGINEERING_SHA` in sibling manifest.
+Deployed runtime (unchanged): `9653d5ab488ec6ba971ff76324894057ca8c3ffb`
+Public build (unchanged until deploy): `JK8nDb8vrOeyjOA4Ue1Jg`
+
+```
+SELECTED_FARE_PERSISTENCE=PASS
+TRAVELERS_FARE_PARITY=PASS
+TRAVELERS_BAGGAGE_PARITY=PASS
+TRAVELERS_PRICE_PARITY=PASS
+PASSENGER_BREAKDOWN=PASS
+BRANDED_BENEFIT_MAPPING=PASS
+PASSPORT_AUTOFILL=PASS
+OCR_TIMEOUT_RECOVERY=PASS
+TITLE_AUTOFILL_SAFE=PASS
+CHANGE_FLIGHT=PASS
+TERMS_ACCEPTANCE=PASS
+FLIGHT_SUMMARY=PASS
+TYPECHECK=PASS
+TESTS_GREEN=YES
+VISUAL_GREEN=PARTIAL
+SOURCE_GREEN=YES
+GIT_0_0=YES
+```
+
+Notes:
+- `VISUAL_GREEN=PARTIAL` until full screenshot matrix under `tmp/owner-v3-flight-wave-7/` is refreshed on owner review hardware; mock Playwright covers selected fare, terms/Change flight, multipax Fare Details.
+- Do **not** set `OWNER_RETEST_V3=PASS`.
+- **STOP BEFORE PRODUCTION DEPLOYMENT** — prepare runtime manifest only.
+
+`OWNER_RETEST_V3=FAILED_REMEDIATION_REQUIRED`

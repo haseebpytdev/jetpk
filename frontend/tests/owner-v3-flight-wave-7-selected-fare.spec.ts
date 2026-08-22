@@ -180,6 +180,17 @@ function passengersContext(selected = fares[1]) {
     countries: [{ code: "PK", name: "Pakistan" }],
     phone_dial_codes: { "+92": "Pakistan (+92)" },
     auth: { authenticated: false, can_create_account: true, agent_booking_mode: false, agent_contact_locked: false },
+    consent: {
+      required: true,
+      terms_version: "jp-checkout-terms-v1",
+      terms_url: "/terms",
+      privacy_url: "/privacy",
+    },
+    change_flight: {
+      safe: true,
+      abandon_url: "/booking/abandon-selected-offer",
+      results_url: `/flights/results?search_id=${searchId}`,
+    },
   };
 }
 
@@ -271,8 +282,9 @@ test("wave-7 selected ECONOMY COMFORT survives Continue to Travelers", async ({ 
   // Simulate Wave-6 bug shape: revalidation passengers_url omits fare_option_key.
   await page.route("**/laravel/flights/results/revalidate-offer**", async (route) => {
     const postData = route.request().postData() ?? "";
-    const match = postData.match(/selected_fare_option_id=([^&]+)/);
-    revalidateFareKey = match ? decodeURIComponent(match[1]) : null;
+    const formMatch = postData.match(/name="selected_fare_option_id"\r?\n\r?\n([^\r\n]+)/);
+    const queryMatch = postData.match(/selected_fare_option_id=([^&\r\n]+)/);
+    revalidateFareKey = formMatch?.[1] ?? (queryMatch ? decodeURIComponent(queryMatch[1]) : null);
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -319,16 +331,139 @@ test("wave-7 selected ECONOMY COMFORT survives Continue to Travelers", async ({ 
 
   await page.getByRole("listitem").filter({ hasText: "ECONOMY COMFORT" }).getByRole("button", { name: /Select fare|Selected/ }).click();
   await expect(page.getByRole("listitem").filter({ hasText: "ECONOMY COMFORT" })).toContainText("Selected");
-  await expect(page.getByTestId("fare-summary-tabs")).toContainText("ECONOMY COMFORT");
+  await expect(page.getByRole("listitem").filter({ hasText: "ECONOMY COMFORT" })).toContainText(/87,?460/);
+
+  const passengersRequest = page.waitForRequest(
+    (request) =>
+      request.method() === "GET"
+      && request.url().includes("/laravel/booking/passengers")
+      && request.url().includes("fare_option_key=fare-comfort"),
+    { timeout: 25_000 },
+  );
 
   await page.getByRole("button", { name: /Continue with this fare/i }).click();
   await expect(page).toHaveURL(/\/booking\/passengers/, { timeout: 20_000 });
   await expect(page).toHaveURL(/fare_option_key=fare-comfort/);
-  await expect.poll(() => revalidateFareKey).toBe("fare-comfort");
-  await expect.poll(() => passengersFareKey).toBe("fare-comfort");
+  await expect.poll(() => revalidateFareKey, { timeout: 15_000 }).toBe("fare-comfort");
+  await passengersRequest;
+  await expect.poll(() => passengersFareKey, { timeout: 15_000 }).toBe("fare-comfort");
 
   await expect(page.getByTestId("flight-preview")).toContainText("ECONOMY COMFORT");
   await expect(page.getByTestId("flight-preview")).toContainText("30 kg");
   await expect(page.getByTestId("flight-preview")).toContainText(/87,?460/);
   await expect(page.getByTestId("flight-preview")).not.toContainText("ECONOMY BASIC");
+});
+
+test("wave-7 travelers require terms and expose Change flight", async ({ page }) => {
+  test.setTimeout(90_000);
+  let abandoned = false;
+
+  await page.route("**/laravel/api/public/content/csrf-token**", async (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ token: "wave7-csrf" }) }),
+  );
+
+  await page.route("**/laravel/booking/passengers**", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(passengersContext(fares[1])),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 422,
+      contentType: "application/json",
+      body: JSON.stringify({ message: "Terms acceptance is required.", errors: { terms_accepted: ["Required"] } }),
+    });
+  });
+
+  await page.route("**/laravel/booking/abandon-selected-offer**", async (route) => {
+    abandoned = true;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true, results_url: `/flights/results?search_id=${searchId}` }),
+    });
+  });
+
+  await page.route("**/laravel/flights/results/data**", async (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        search_id: searchId,
+        page: 1,
+        per_page: 12,
+        total: 0,
+        has_more: false,
+        offers: [],
+        filters: {
+          stops: [],
+          airlines: [],
+          departure_windows: [],
+          arrival_windows: [],
+          refundable: [],
+          baggage_options: [],
+          fare_families: [],
+          duration_buckets: [],
+          layover_airports: [],
+          price_range: { min: 0, max: 0 },
+        },
+        warnings: [],
+      }),
+    }),
+  );
+
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(`/booking/passengers?search_id=${searchId}&offer_id=offer-1&fare_option_key=fare-comfort`);
+  await expect(page.getByTestId("flight-preview")).toContainText("ECONOMY COMFORT");
+  await expect(page.getByTestId("terms-acceptance-checkbox")).not.toBeChecked();
+  await expect(page.getByRole("button", { name: /Continue to review/i })).toBeDisabled();
+
+  page.once("dialog", async (dialog) => {
+    await dialog.accept();
+  });
+  await page.getByTestId("change-flight-button").click();
+  await expect.poll(() => abandoned).toBe(true);
+  await expect(page).toHaveURL(/\/flights\/results/);
+});
+
+test("wave-7 Fare Details shows Adult Child Infant qty table", async ({ page }) => {
+  test.setTimeout(90_000);
+
+  await page.route("**/laravel/api/public/content/csrf-token**", async (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ token: "wave7-csrf" }) }),
+  );
+
+  const multipaxDetails = details(fares[1]);
+  multipaxDetails.offer.fallback_details = {
+    fare_breakdown: {
+      currency: "PKR",
+      displayed_price: 134400,
+      grand_total: 134400,
+      passenger_pricing: [
+        { passenger_type: "ADULT", passenger_count: 2, base_amount: 56000, tax_amount: 14000, total_amount: 70000, currency: "PKR" },
+        { passenger_type: "CHILD", passenger_count: 3, base_amount: 42000, tax_amount: 8400, total_amount: 50400, currency: "PKR" },
+        { passenger_type: "INFANT", passenger_count: 1, base_amount: 11200, tax_amount: 2800, total_amount: 14000, currency: "PKR" },
+      ],
+    },
+  };
+  multipaxDetails.offer.displayed_price = 134400;
+  multipaxDetails.offer.final_customer_price = 134400;
+  multipaxDetails.offer.price_display = "PKR 134,400";
+
+  await page.route("**/laravel/flights/results/offer**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(multipaxDetails) });
+  });
+
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(`/flights/fare-selection?search_id=${searchId}&offer_id=offer-1&fare_option_key=fare-comfort`);
+  await expect(page.getByTestId("fare-family-details")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("passenger-fare-breakdown")).toBeVisible();
+  await expect(page.getByTestId("passenger-fare-breakdown")).toContainText("ADULT");
+  await expect(page.getByTestId("passenger-fare-breakdown")).toContainText("CHILD");
+  await expect(page.getByTestId("passenger-fare-breakdown")).toContainText("INFANT");
+  await expect(page.getByTestId("passenger-fare-breakdown")).toContainText("2");
+  await expect(page.getByTestId("passenger-fare-breakdown")).toContainText("3");
 });

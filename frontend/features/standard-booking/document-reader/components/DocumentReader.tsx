@@ -121,7 +121,7 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
       if (plan.conflicts.length > 0) {
         // Apply empty-field fills immediately; only ask about conflicts.
         if (Object.keys(plan.toApply).length > 0) {
-          let partial = { ...passenger, ...plan.toApply, document_type: "passport" as const };
+          let partial: PassengerFormValues = { ...passenger, ...plan.toApply, document_type: "passport" };
           partial = applyTitleAssistance(partial, { gender: parsed.fields.gender });
           onApply(partial);
         }
