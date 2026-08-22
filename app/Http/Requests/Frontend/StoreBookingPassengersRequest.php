@@ -82,7 +82,18 @@ class StoreBookingPassengersRequest extends FormRequest
             'create_account' => ['sometimes', 'boolean'],
             'password' => $passwordRules,
             'terms_accepted' => ['accepted'],
-            'terms_version' => ['required', 'string', 'max:64'],
+            // Client may echo the version for stale-page detection; server config is authoritative.
+            'terms_version' => [
+                'required',
+                'string',
+                'max:64',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $expected = trim((string) config('ota_checkout_consent.terms_version'));
+                    if ($expected === '' || trim((string) $value) !== $expected) {
+                        $fail(__('The Terms & Conditions on this page are out of date. Please reload and review the current terms before continuing.'));
+                    }
+                },
+            ],
         ];
 
         return $rules;
@@ -144,6 +155,7 @@ class StoreBookingPassengersRequest extends FormRequest
             'password.confirmed' => __('Passwords do not match.'),
             'phone_number.regex' => __('Mobile number must contain digits only.'),
             'terms_accepted.accepted' => __('Please confirm the traveler information and accept the Terms & Conditions and Privacy Policy to continue.'),
+            'terms_version.required' => __('The Terms & Conditions on this page are out of date. Please reload and review the current terms before continuing.'),
         ];
     }
 

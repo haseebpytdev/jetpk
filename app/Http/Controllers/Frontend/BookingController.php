@@ -454,12 +454,11 @@ class BookingController extends Controller
             );
             $this->bookingDraft->merge([
                 'checkout_protection' => $protection,
-                'checkout_terms_acceptance' => [
-                    'accepted' => true,
-                    'terms_version' => (string) ($validated['terms_version'] ?? config('ota_checkout_consent.terms_version')),
-                    'privacy_version' => (string) config('ota_checkout_consent.privacy_version'),
-                    'accepted_at' => now()->toIso8601String(),
-                ],
+                'checkout_terms_acceptance' => $this->checkoutTermsAcceptanceRecord(
+                    $searchId,
+                    $selectedOfferId,
+                    null,
+                ),
             ]);
 
             if (strtolower((string) $checkoutSupplier['supplier_provider']) === SupplierProvider::PiaNdc->value) {
@@ -607,13 +606,11 @@ class BookingController extends Controller
                             'fare_option_key' => trim((string) ($validated['fare_option_key'] ?? '')),
                             'selected_fare_family_option' => $selectedFareFamilyOption,
                             'sabre_booking_context' => $sabreBookingContext,
-                            'checkout_terms_acceptance' => [
-                                'accepted' => true,
-                                'terms_version' => (string) ($validated['terms_version'] ?? config('ota_checkout_consent.terms_version')),
-                                'privacy_version' => (string) config('ota_checkout_consent.privacy_version'),
-                                'accepted_at' => now()->toIso8601String(),
-                                'booking_session_association' => substr(hash('sha256', $searchId.'|'.$selectedOfferId.'|'.$holdSessionId), 0, 32),
-                            ],
+                            'checkout_terms_acceptance' => $this->checkoutTermsAcceptanceRecord(
+                                $searchId,
+                                $selectedOfferId,
+                                $holdSessionId,
+                            ),
                             ...$this->sabreOfferFreshnessMetaPatchForBooking($offer, $searchId),
                             ...$this->sabreSafeRefreshContextMetaPatchForBooking($offer, $criteria, $checkoutSupplier, $selectedOfferId, $searchId, $protection, $sabreBookingContext, $validated),
                         ],
@@ -1285,6 +1282,31 @@ class BookingController extends Controller
     }
 
     /**
+     * Server-authoritative checkout consent evidence (never trust client legal version strings).
+     *
+     * @return array{accepted: bool, terms_version: string, privacy_version: string, accepted_at: string, booking_session_association?: string}
+     */
+    protected function checkoutTermsAcceptanceRecord(string $searchId, string $selectedOfferId, int|string|null $holdSessionId = null): array
+    {
+        $record = [
+            'accepted' => true,
+            'terms_version' => (string) config('ota_checkout_consent.terms_version'),
+            'privacy_version' => (string) config('ota_checkout_consent.privacy_version'),
+            'accepted_at' => now()->toIso8601String(),
+        ];
+
+        if ($holdSessionId !== null) {
+            $record['booking_session_association'] = substr(
+                hash('sha256', $searchId.'|'.$selectedOfferId.'|'.$holdSessionId),
+                0,
+                32,
+            );
+        }
+
+        return $record;
+    }
+
+    /**
      * @param  array<string, mixed>  $draft
      */
     protected function isPreHoldChangeFlightSafe(array $draft): bool
@@ -1297,7 +1319,7 @@ class BookingController extends Controller
         $protection = is_array($draft['checkout_protection'] ?? null) ? $draft['checkout_protection'] : [];
         $holdStatus = strtolower(trim((string) ($protection['hold_status'] ?? '')));
 
-        // Pending/not_started local checkout locks are still pre-commercial for this path.
+        // Pending/not-started local checkout locks are still pre-commercial for this path.
         return in_array($holdStatus, ['', 'not_started', 'pending', 'failed'], true);
     }
 

@@ -436,7 +436,9 @@ test("wave-7 Fare Details shows Adult Child Infant qty table", async ({ page }) 
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ token: "wave7-csrf" }) }),
   );
 
-  const multipaxDetails = details(fares[1]);
+  const multipaxDetails = details(fares[1]) as ReturnType<typeof details> & {
+    offer: ReturnType<typeof details>["offer"] & { fallback_details?: Record<string, unknown> };
+  };
   multipaxDetails.offer.fallback_details = {
     fare_breakdown: {
       currency: "PKR",

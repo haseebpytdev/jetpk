@@ -1,11 +1,12 @@
 /**
  * Copies self-hosted tesseract.js worker/core assets into public/tesseract.
- * Language data is fetched once into the same folder (never at customer OCR runtime from a third party).
+ *
+ * Language data MUST already be committed at public/tesseract/eng.traineddata.gz.
+ * Postinstall never downloads from CDN/GitHub — missing assets fail the build gate.
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { request } from "node:https";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = join(root, "public", "tesseract");
@@ -18,7 +19,10 @@ function copyIfPresent(from, toName) {
 }
 
 const worker = join(root, "node_modules", "tesseract.js", "dist", "worker.min.js");
-copyIfPresent(worker, "worker.min.js");
+if (!copyIfPresent(worker, "worker.min.js") && !existsSync(join(outDir, "worker.min.js"))) {
+  console.error("STOP: missing tesseract worker.min.js (node_modules or public/tesseract).");
+  process.exit(1);
+}
 
 const coreDir = join(root, "node_modules", "tesseract.js-core");
 if (existsSync(coreDir)) {
@@ -31,58 +35,22 @@ if (existsSync(coreDir)) {
   }
 }
 
-const langPath = join(outDir, "eng.traineddata.gz");
-const langUrls = [
-  "https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng@1.0.0/4.0.0_best_int/eng.traineddata.gz",
-  "https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng@1.0.0/4.0.0/eng.traineddata.gz",
-  "https://raw.githubusercontent.com/naptha/tessdata/gh-pages/4.0.0/eng.traineddata.gz",
+const required = [
+  "worker.min.js",
+  "tesseract-core-simd-lstm.wasm.js",
+  "tesseract-core-simd-lstm.wasm",
+  "eng.traineddata.gz",
 ];
 
-function download(url) {
-  return new Promise((resolve, reject) => {
-    const req = request(url, { method: "GET", timeout: 60_000 }, (res) => {
-      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        download(res.headers.location).then(resolve, reject);
-        return;
-      }
-      if (res.statusCode !== 200) {
-        reject(new Error(`HTTP ${res.statusCode} for ${url}`));
-        return;
-      }
-      const chunks = [];
-      res.on("data", (c) => chunks.push(c));
-      res.on("end", () => resolve(Buffer.concat(chunks)));
-    });
-    req.on("error", reject);
-    req.on("timeout", () => {
-      req.destroy();
-      reject(new Error(`timeout ${url}`));
-    });
-    req.end();
-  });
+for (const name of required) {
+  const full = join(outDir, name);
+  if (!existsSync(full) || statSync(full).size < 1000) {
+    console.error(
+      `STOP: missing or empty committed OCR asset public/tesseract/${name}. ` +
+        "Do not download language data during postinstall; restore the committed Wave-7 asset.",
+    );
+    process.exit(1);
+  }
 }
 
-async function ensureLang() {
-  if (existsSync(langPath) && statSync(langPath).size > 1000) {
-    console.log("tesseract eng.traineddata.gz already present");
-    return;
-  }
-  let lastError = null;
-  for (const url of langUrls) {
-    try {
-      const buf = await download(url);
-      if (buf.length < 1000) throw new Error("too small");
-      const { writeFileSync } = await import("node:fs");
-      writeFileSync(langPath, buf);
-      console.log(`downloaded eng.traineddata.gz (${buf.length} bytes) from ${url}`);
-      return;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  console.warn("WARNING: could not download eng.traineddata.gz", lastError);
-  console.warn("OCR will fail until public/tesseract/eng.traineddata.gz is present.");
-}
-
-await ensureLang();
-console.log("tesseract assets ready in public/tesseract");
+console.log("tesseract self-hosted assets verified in public/tesseract (no CDN download)");

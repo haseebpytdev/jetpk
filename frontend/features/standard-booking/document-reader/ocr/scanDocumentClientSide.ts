@@ -14,6 +14,8 @@ export type DocumentScanOptions = {
 };
 
 const DEFAULT_TIMEOUT_MS = 45_000;
+/** Bound worker.terminate so a hung worker cannot keep the UI in Processing. */
+export const OCR_TERMINATE_TIMEOUT_MS = 2_000;
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 const MAX_DIMENSION = 1800;
 const MIN_DIMENSION = 200;
@@ -26,6 +28,38 @@ type LocalOcrWorker = {
   terminate: () => Promise<unknown>;
   setParameters?: (params: Record<string, unknown>) => Promise<unknown>;
 };
+
+export async function terminateWorkerSafely(
+  worker: LocalOcrWorker | null | undefined,
+  timeoutMs: number = OCR_TERMINATE_TIMEOUT_MS,
+): Promise<"terminated" | "timeout" | "failed" | "skipped"> {
+  if (!worker) return "skipped";
+  try {
+    let settled = false;
+    const result = await Promise.race([
+      worker
+        .terminate()
+        .then(() => {
+          settled = true;
+          return "terminated" as const;
+        })
+        .catch(() => {
+          settled = true;
+          return "failed" as const;
+        }),
+      new Promise<"timeout">((resolve) => {
+        setTimeout(() => resolve("timeout"), timeoutMs);
+      }),
+    ]);
+    // Detach a late terminate rejection so it cannot surface as unhandled.
+    if (result === "timeout" && !settled) {
+      void Promise.resolve(worker.terminate()).catch(() => undefined);
+    }
+    return result;
+  } catch {
+    return "failed";
+  }
+}
 
 function fail(message: string): MrzParseResult {
   return {
@@ -231,12 +265,7 @@ export async function scanDocumentClientSide(
       "Could not read the passport on this device. Try a clearer photo — images are never uploaded.",
     );
   } finally {
-    if (worker) {
-      try {
-        await worker.terminate();
-      } catch {
-        // Deterministic cleanup: ignore terminate failures after timeout/abort.
-      }
-    }
+    await terminateWorkerSafely(worker);
+    worker = null;
   }
 }
