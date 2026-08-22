@@ -19,7 +19,6 @@ import { PairReturnCard } from "./PairReturnCard";
 import { PartialResultsNotice } from "./PartialResultsNotice";
 import { ResultSkeleton } from "./ResultSkeleton";
 import { ResultsFilterPanel } from "./ResultsFilterPanel";
-import { ResultsSortTabs } from "./ResultsSortTabs";
 import { ResultsToolbar } from "./ResultsToolbar";
 import { ReturnViewSelector } from "./ReturnViewSelector";
 import { SearchErrorState } from "./SearchErrorState";
@@ -147,12 +146,12 @@ export function FlightResultsPage() {
 
       <div className="relative">
         <ResultsHeroBand />
-        <div className="relative z-10 mx-auto -mt-11 max-w-7xl px-4 sm:-mt-12 sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-1 pt-3 sm:px-6 lg:px-8">
           <SearchSummaryBar summary={summary} onModifyClick={() => setEditOpen((open) => !open)} />
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-7xl space-y-2.5 px-4 pb-6 pt-3 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl space-y-2.5 px-4 pb-6 pt-2.5 sm:px-6 lg:px-8">
         {editOpen ? (
           <div data-testid="inline-edit-search">
             <SearchModule
@@ -214,8 +213,6 @@ export function FlightResultsPage() {
           status={results.status}
           loadingMessage={results.message}
         />
-
-        <ResultsSortTabs value={sort} onChange={handleSortChange} className="hidden sm:flex" />
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,14.5rem)_minmax(0,1fr)]">
           <div className="hidden min-w-0 max-w-full lg:block">

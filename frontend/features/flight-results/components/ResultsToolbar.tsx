@@ -40,8 +40,11 @@ export function ResultsToolbar({
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-jp-card border border-jp-border bg-jp-surface px-3 py-2 sm:px-4">
-      <p className="text-sm text-jp-text-muted" data-testid="results-count-label">
+    <div
+      className="flex flex-wrap items-center justify-between gap-3 rounded-jp-card border border-jp-border bg-jp-surface px-3 py-2.5 sm:px-4"
+      data-testid="results-control-bar"
+    >
+      <p className="text-sm font-medium text-jp-text" data-testid="results-count-label">
         {countLabel}
       </p>
       <div className="flex items-center gap-2">
