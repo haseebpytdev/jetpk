@@ -8,7 +8,8 @@ OWNER_RETEST_V3 Wave-9 — Review integrity, selected-fare durability, AbhiPay h
 
 ## Objective
 Fix P0 selected branded fare loss on Review JSON, title/`null` integrity, premium Review IA,
-traveler edit idempotency, order-summary/pricing parity, and complete existing AbhiPay review options.
+traveler edit idempotency, order-summary/pricing parity, complete existing AbhiPay review options,
+and close AbhiPay **v3 major-unit amount** payment-safety before any deploy.
 
 ## Included scope
 - Durable selected fare from `booking.meta` into Review draft/viewData/JSON
@@ -70,6 +71,11 @@ Passengers POST always `createDraftBooking` (edit created duplicates / lost draf
 - `tmp/owner-v3-flight-wave-9/*` (visual proof)
 - this summary
 
+### Payment-safety (pre-deploy)
+- `app/Services/Payments/Gateways/AbhiPayGateway.php` — major-unit create amount; strict verify; `currencyType`
+- `tests/Feature/Payments/AbhiPayGatewayTest.php` — 100× reject, PKR 79089 fixture, by-rrn, idempotency, secret exposure
+- `docs/phases/OWNER-RETEST-V3-WAVE-9-RUNTIME-MANIFEST.md`
+
 ## Routes changed
 None (behavior on existing `/booking/review`, `/booking/passengers`, `/booking/payment/card`).
 
@@ -126,10 +132,13 @@ Do not roll production until a Wave-9 deploy is authorized.
 
 ## Commit SHAs
 - Cluster A: `baa60350`
-- Clusters B/C/D: `1c846fa8`
-- Cluster E / FINAL_WAVE9_ENGINEERING_SHA: dfc70e7492aaec429f25f5b27392d2bc04fda11a
+- Clusters B/C/D (pre payment-fix eng): `1c846fa8438483aea213400bbba26760aecfee1a`
+- Cluster E docs/visual (not ENGINEERING): `8db2fe84…` / later docs tips `dfc70e74…`, `10392382…`
+- `FINAL_WAVE9_ENGINEERING_SHA` (runtime/payment-safety): `67417d225fcd70e8e8cb1a1b535ec0ed8eee0877`
+- Exact runtime manifest: `docs/phases/OWNER-RETEST-V3-WAVE-9-RUNTIME-MANIFEST.md`
 
 ## Final status
 ENGINEERING_COMPLETE_PENDING_OWNER_RETEST  
 OWNER_RETEST_V3=FAILED_REMEDIATION_REQUIRED  
-DO_NOT_DEPLOY until owner authorizes.
+DO_NOT_DEPLOY until owner authorizes.  
+ABHIPAY_CHECKOUT_AVAILABLE=NO (no production gateway row).
