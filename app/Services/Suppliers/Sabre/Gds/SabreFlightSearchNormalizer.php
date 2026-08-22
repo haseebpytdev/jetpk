@@ -6719,57 +6719,79 @@ class SabreFlightSearchNormalizer
                 static fn ($v): string => strtoupper(trim((string) $v)),
                 $fbcList
             ), static fn (string $s): bool => $s !== ''));
-            $offer['fare_breakdown'] = $fare;
         }
 
-        $priceTotal = (float) ($sourceRow['price_total'] ?? 0);
+        $priceTotal = (float) ($sourceRow['price_total'] ?? $selectedOption['price_total'] ?? 0);
+        $pricingComponents = is_array($offer['pricing_components'] ?? null) ? $offer['pricing_components'] : [];
+        $fx = (float) ($pricingComponents['fx_rate'] ?? 0);
+        $conversionStatus = (string) ($pricingComponents['conversion_status'] ?? ($offer['conversion_status'] ?? 'same_currency'));
+        $optionCurrency = strtoupper(trim((string) ($sourceRow['currency'] ?? $selectedOption['currency'] ?? $offer['supplier_currency'] ?? '')));
+
+        // Never keep a previous brand's PTC rows after switching brands.
+        $fare['passenger_pricing'] = null;
+        $fare['passenger_pricing_available'] = false;
+        $fare['passenger_pricing_components_trusted'] = false;
+
+        $customerSupplierTotal = null;
         if ($priceTotal > 0) {
-            $fare['supplier_total'] = $priceTotal;
-            $offer['fare_breakdown'] = $fare;
+            if ($optionCurrency === 'PKR' || $conversionStatus === 'same_currency' || $fx <= 0) {
+                $customerSupplierTotal = round($priceTotal, 2);
+            } elseif ($conversionStatus === 'converted' && $fx > 0) {
+                $customerSupplierTotal = round($priceTotal * $fx, 2);
+            } else {
+                $customerSupplierTotal = round($priceTotal, 2);
+            }
+            $fare['supplier_total'] = $customerSupplierTotal;
+            $pricingComponents['supplier_total'] = $customerSupplierTotal;
+            if ($conversionStatus === 'converted' && $fx > 0 && $optionCurrency !== '' && $optionCurrency !== 'PKR') {
+                $pricingComponents['conversion_status'] = 'converted';
+                $pricingComponents['fx_rate'] = $fx;
+                $pricingComponents['pricing_currency'] = 'PKR';
+            }
+            $offer['pricing_components'] = $pricingComponents;
+            $offer['supplier_total'] = $customerSupplierTotal;
         }
 
+        $passengerRows = null;
         if (is_array($sourceRow['passenger_pricing'] ?? null) && $sourceRow['passenger_pricing'] !== []) {
-            $pricingComponents = is_array($offer['pricing_components'] ?? null) ? $offer['pricing_components'] : [];
+            $passengerRows = $sourceRow['passenger_pricing'];
+        } elseif (is_array($selectedOption['passenger_pricing'] ?? null) && $selectedOption['passenger_pricing'] !== []) {
+            $passengerRows = $selectedOption['passenger_pricing'];
+        }
+
+        if (is_array($passengerRows) && $passengerRows !== []) {
+            $normalizeComponents = array_merge($pricingComponents, [
+                'pricing_currency' => (string) ($pricingComponents['pricing_currency'] ?? $offer['pricing_currency'] ?? 'PKR'),
+                'conversion_status' => $conversionStatus,
+                'fx_rate' => $fx,
+                'supplier_total' => $customerSupplierTotal ?? (float) ($pricingComponents['supplier_total'] ?? 0),
+            ]);
             $pack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
-                $sourceRow['passenger_pricing'],
-                array_merge([
-                    'pricing_currency' => (string) ($offer['pricing_currency'] ?? 'PKR'),
-                    'conversion_status' => (string) ($offer['conversion_status'] ?? 'same_currency'),
-                    'fx_rate' => (float) ($pricingComponents['fx_rate'] ?? 0),
-                    'supplier_total' => $priceTotal > 0
-                        ? (float) ($pricingComponents['supplier_total'] ?? 0)
-                        : (float) ($pricingComponents['supplier_total'] ?? 0),
-                ], $pricingComponents),
-                $priceTotal > 0 && strtoupper((string) ($sourceRow['currency'] ?? '')) === 'PKR'
-                    ? $priceTotal
-                    : (isset($pricingComponents['supplier_total']) ? (float) $pricingComponents['supplier_total'] : null),
+                $passengerRows,
+                $normalizeComponents,
+                $customerSupplierTotal,
             );
-            // When option currency is supplier FX, scale option total with the same rate for reconcile.
-            if (! $pack['passenger_pricing_available'] && $priceTotal > 0 && ($pricingComponents['conversion_status'] ?? '') === 'converted') {
-                $fx = (float) ($pricingComponents['fx_rate'] ?? 0);
-                if ($fx > 0) {
-                    $pack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
-                        $sourceRow['passenger_pricing'],
-                        array_merge($pricingComponents, [
-                            'pricing_currency' => 'PKR',
-                            'conversion_status' => 'converted',
-                            'fx_rate' => $fx,
-                            'supplier_total' => round($priceTotal * $fx, 2),
-                        ]),
-                        round($priceTotal * $fx, 2),
-                    );
-                }
+            // Retry with explicit FX when option currency is still supplier currency.
+            if (! $pack['passenger_pricing_available'] && $priceTotal > 0 && $fx > 0 && $optionCurrency !== '' && $optionCurrency !== 'PKR') {
+                $pack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
+                    $passengerRows,
+                    array_merge($normalizeComponents, [
+                        'pricing_currency' => 'PKR',
+                        'conversion_status' => 'converted',
+                        'fx_rate' => $fx,
+                        'supplier_total' => round($priceTotal * $fx, 2),
+                    ]),
+                    round($priceTotal * $fx, 2),
+                );
             }
             if ($pack['passenger_pricing_available']) {
                 $fare['passenger_pricing'] = $pack['passenger_pricing'];
                 $fare['passenger_pricing_available'] = true;
                 $fare['passenger_pricing_components_trusted'] = $pack['components_trusted'];
-                if ($priceTotal > 0 && ($pricingComponents['conversion_status'] ?? '') === 'converted' && (float) ($pricingComponents['fx_rate'] ?? 0) > 0) {
-                    $fare['supplier_total'] = round($priceTotal * (float) $pricingComponents['fx_rate'], 2);
-                }
-                $offer['fare_breakdown'] = $fare;
             }
         }
+
+        $offer['fare_breakdown'] = $fare;
 
         $readiness = (new SabreStoredPricingContextDigest)->assessBrandedFareOptionReadiness($sourceRow);
         $handoff = $this->buildSabreBookingContextHandoff(

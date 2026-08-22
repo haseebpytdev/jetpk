@@ -421,9 +421,6 @@ test("wave-7 travelers require terms and expose Change flight", async ({ page })
   await expect(page.getByTestId("terms-acceptance-checkbox")).not.toBeChecked();
   await expect(page.getByRole("button", { name: /Continue to review/i })).toBeDisabled();
 
-  page.once("dialog", async (dialog) => {
-    await dialog.accept();
-  });
   await page.getByTestId("change-flight-button").click();
   await expect.poll(() => abandoned).toBe(true);
   await expect(page).toHaveURL(/\/flights\/results/);

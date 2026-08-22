@@ -116,7 +116,7 @@ export function PriceBreakdown({ offer, breakdown }: PriceBreakdownProps) {
         ))}
         {!showComponents && !passengerRows.length ? (
           <p className="text-xs text-jp-text-muted" data-testid="fare-component-unavailable">
-            Component fare breakdown is unavailable for this fare. Grand total is the authoritative customer price.
+            Detailed fare and tax split was not provided for this fare.
           </p>
         ) : null}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-jp-md bg-jp-primary/5 px-3 py-3">

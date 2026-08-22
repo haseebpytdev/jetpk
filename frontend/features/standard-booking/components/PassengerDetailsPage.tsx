@@ -12,7 +12,9 @@ import {
   MobileOrderSummary,
   OrderSummary,
 } from "@/features/booking-layout";
+import { Dialog } from "@/components/ui/Dialog";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { SecondaryButton } from "@/components/ui/SecondaryButton";
 import { mapFieldErrors, ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
 import { fetchStandardPassengersContext, submitStandardPassengers } from "../services/standard-booking-api";
 import type { ContactFormValues, PassengerFormValues, StandardPassengersContext } from "../types";
@@ -53,6 +55,8 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   const [submitting, setSubmitting] = useState(false);
   const [expired, setExpired] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [changeFlightOpen, setChangeFlightOpen] = useState(false);
+  const [changeFlightBusy, setChangeFlightBusy] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
   const [errorRedirect, setErrorRedirect] = useState<string | null>(null);
   const submitLock = useRef(false);
@@ -200,21 +204,17 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     return passengerFilled || contactFilled;
   }, [contact, passengers]);
 
-  const handleChangeFlight = useCallback(async () => {
+  const executeChangeFlight = useCallback(async () => {
     if (!context) return;
     if (context.change_flight && context.change_flight.safe === false) {
       setFormError("This booking already has a supplier hold. Changing the flight requires the authorized booking lifecycle.");
+      setChangeFlightOpen(false);
       return;
-    }
-    if (formHasPassengerOrContactData()) {
-      const confirmed = window.confirm(
-        "Changing flight may discard the traveler and contact details you have entered. Continue?",
-      );
-      if (!confirmed) return;
     }
 
     const abandonUrl = context.change_flight?.abandon_url ?? "/booking/abandon-selected-offer";
     const csrf = await ensureLaravelCsrfToken();
+    setChangeFlightBusy(true);
     try {
       const response = await fetch(laravelApiPath(`${abandonUrl}?format=json`), {
         method: "POST",
@@ -230,9 +230,11 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         results_url?: string;
         message?: string;
         status?: string;
+        fresh_search?: boolean;
       } | null;
       if (!response.ok || !body?.ok) {
         setFormError(body?.message ?? "Unable to change flight right now.");
+        setChangeFlightBusy(false);
         return;
       }
       const next = body.results_url || context.change_flight?.results_url || context.booking_session.previous_url || "/flights/results";
@@ -240,8 +242,22 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       window.location.assign(resolved);
     } catch {
       setFormError("Unable to change flight right now.");
+      setChangeFlightBusy(false);
     }
-  }, [context, formHasPassengerOrContactData]);
+  }, [context]);
+
+  const handleChangeFlight = useCallback(() => {
+    if (!context) return;
+    if (context.change_flight && context.change_flight.safe === false) {
+      setFormError("This booking already has a supplier hold. Changing the flight requires the authorized booking lifecycle.");
+      return;
+    }
+    if (formHasPassengerOrContactData()) {
+      setChangeFlightOpen(true);
+      return;
+    }
+    void executeChangeFlight();
+  }, [context, executeChangeFlight, formHasPassengerOrContactData]);
 
   const fallbackProgress = [
     { key: "search", label: "Search", state: "completed" as const },
@@ -316,13 +332,47 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       travellerTotal={context.travellers.total}
       variant="flight-preview"
       testId="flight-preview"
-      onChangeFlight={() => void handleChangeFlight()}
+      onChangeFlight={() => handleChangeFlight()}
       changeFlightDisabled={context.change_flight?.safe === false}
     />
   );
 
   return (
     <BookingPageShell testId="passenger-details-page">
+      <Dialog
+        open={changeFlightOpen}
+        onClose={() => {
+          if (!changeFlightBusy) setChangeFlightOpen(false);
+        }}
+        title="Change your flight?"
+        description="The traveler details you've entered on this page will be cleared. Your route, dates and passenger search will be kept."
+        footer={
+          <>
+            <SecondaryButton
+              type="button"
+              data-testid="change-flight-keep"
+              disabled={changeFlightBusy}
+              onClick={() => setChangeFlightOpen(false)}
+            >
+              Keep this flight
+            </SecondaryButton>
+            <PrimaryButton
+              type="button"
+              data-testid="change-flight-search-other"
+              disabled={changeFlightBusy}
+              aria-busy={changeFlightBusy}
+              onClick={() => void executeChangeFlight()}
+            >
+              Search other flights
+            </PrimaryButton>
+          </>
+        }
+      >
+        <p className="text-sm text-jp-muted" data-testid="change-flight-confirm-copy">
+          A fresh flight search will run with your current route, dates, cabin and passenger counts. Your previous fare selection will not be kept.
+        </p>
+      </Dialog>
+
       <BookingProgress steps={context.booking_session.progress} className="mb-6" />
 
       <BookingPageHeader

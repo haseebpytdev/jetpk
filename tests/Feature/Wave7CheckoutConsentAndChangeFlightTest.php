@@ -165,16 +165,21 @@ class Wave7CheckoutConsentAndChangeFlightTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('ok', true)
             ->assertJsonPath('status', 'abandoned')
-            ->assertJsonPath('preserved_search.search_id', 'wave7-search')
+            ->assertJsonPath('fresh_search', true)
+            ->assertJsonPath('previous_search_id', 'wave7-search')
             ->assertJsonPath('preserved_search.search_from', 'ISB')
-            ->assertJsonPath('preserved_search.adults', 2);
+            ->assertJsonPath('preserved_search.adults', 2)
+            ->assertJsonMissingPath('preserved_search.search_id');
 
         $draft = app(BookingDraftService::class)->current();
-        $this->assertSame('wave7-search', $draft['search_id'] ?? null);
+        $this->assertArrayNotHasKey('search_id', $draft);
         $this->assertSame('ISB', $draft['search_from'] ?? null);
         $this->assertArrayNotHasKey('offer_id', $draft);
         $this->assertArrayNotHasKey('fare_option_key', $draft);
         $this->assertArrayNotHasKey('selected_fare_family_option', $draft);
-        $this->assertNotEmpty($response->json('results_url'));
+        $resultsUrl = (string) $response->json('results_url');
+        $this->assertNotEmpty($resultsUrl);
+        $this->assertStringNotContainsString('search_id=', $resultsUrl);
+        $this->assertStringContainsString('from=ISB', $resultsUrl);
     }
 }

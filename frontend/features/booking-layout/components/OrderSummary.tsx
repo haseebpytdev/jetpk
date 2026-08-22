@@ -334,11 +334,13 @@ export function OrderSummary({
       {onChangeFlight ? (
         <button
           type="button"
-          className="mt-3 w-full rounded-jp-md border border-jp-border bg-white px-3 py-2 text-sm font-semibold text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:shadow-jp-focus disabled:opacity-60"
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-jp-md border border-jp-border bg-white px-3 py-2.5 text-sm font-semibold text-jp-text hover:border-jp-primary hover:text-jp-primary focus-visible:outline-none focus-visible:shadow-jp-focus disabled:cursor-not-allowed disabled:opacity-50"
           data-testid="change-flight-button"
           onClick={onChangeFlight}
           disabled={changeFlightDisabled}
+          aria-disabled={changeFlightDisabled}
         >
+          <span aria-hidden="true">↔</span>
           Change flight
         </button>
       ) : null}

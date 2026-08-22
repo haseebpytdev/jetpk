@@ -3137,33 +3137,65 @@ class FlightOfferDisplayPresenter
             $optionTotal = isset($option['price_total']) && is_numeric($option['price_total'])
                 ? (float) $option['price_total']
                 : null;
+            $fxRate = (float) ($pricingComponents['fx_rate'] ?? 0);
+            $conversionStatus = (string) ($offer['conversion_status'] ?? ($pricingComponents['conversion_status'] ?? 'same_currency'));
+            $optionCurrency = strtoupper(trim((string) ($option['currency'] ?? '')));
             $customerSupplierTotal = null;
             if ($optionTotal !== null && $optionTotal > 0) {
-                if (($pricingComponents['conversion_status'] ?? '') === 'converted' && (float) ($pricingComponents['fx_rate'] ?? 0) > 0
-                    && strtoupper((string) ($option['currency'] ?? '')) !== 'PKR') {
-                    $customerSupplierTotal = round($optionTotal * (float) $pricingComponents['fx_rate'], 2);
-                } elseif (strtoupper((string) ($option['currency'] ?? $offer['pricing_currency'] ?? 'PKR')) === 'PKR') {
-                    $customerSupplierTotal = $optionTotal;
+                if ($optionCurrency === 'PKR' || $conversionStatus === 'same_currency' || $fxRate <= 0) {
+                    $customerSupplierTotal = round($optionTotal, 2);
+                } elseif ($conversionStatus === 'converted' && $fxRate > 0) {
+                    $customerSupplierTotal = round($optionTotal * $fxRate, 2);
+                } else {
+                    $customerSupplierTotal = round($optionTotal, 2);
                 }
             }
             $pack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
                 $option['passenger_pricing'],
                 array_merge([
                     'pricing_currency' => (string) ($offer['pricing_currency'] ?? 'PKR'),
-                    'conversion_status' => (string) ($offer['conversion_status'] ?? 'same_currency'),
-                    'fx_rate' => (float) ($pricingComponents['fx_rate'] ?? 0),
+                    'conversion_status' => $conversionStatus,
+                    'fx_rate' => $fxRate,
                     'supplier_total' => $customerSupplierTotal ?? (float) ($pricingComponents['supplier_total'] ?? 0),
                 ], $pricingComponents),
                 $customerSupplierTotal,
             );
+            if (! $pack['passenger_pricing_available'] && $optionTotal !== null && $optionTotal > 0 && $fxRate > 0 && $optionCurrency !== '' && $optionCurrency !== 'PKR') {
+                $pack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
+                    $option['passenger_pricing'],
+                    array_merge($pricingComponents, [
+                        'pricing_currency' => 'PKR',
+                        'conversion_status' => 'converted',
+                        'fx_rate' => $fxRate,
+                        'supplier_total' => round($optionTotal * $fxRate, 2),
+                    ]),
+                    round($optionTotal * $fxRate, 2),
+                );
+            }
             if ($pack['passenger_pricing_available']) {
                 $fareBreakdown['passenger_pricing'] = $pack['passenger_pricing'];
                 $fareBreakdown['passenger_pricing_available'] = true;
                 if ($customerSupplierTotal !== null) {
                     $fareBreakdown['supplier_total'] = $customerSupplierTotal;
+                    $pricingComponents['supplier_total'] = $customerSupplierTotal;
+                    $offer['pricing_components'] = $pricingComponents;
+                }
+                $offer['fare_breakdown'] = $fareBreakdown;
+            } else {
+                // Do not retain a previous brand's PTC rows when this brand cannot supply them.
+                $fareBreakdown['passenger_pricing'] = null;
+                $fareBreakdown['passenger_pricing_available'] = false;
+                if ($customerSupplierTotal !== null) {
+                    $fareBreakdown['supplier_total'] = $customerSupplierTotal;
                 }
                 $offer['fare_breakdown'] = $fareBreakdown;
             }
+        } elseif (isset($display['displayed_price']) && is_numeric($display['displayed_price']) && (int) $display['displayed_price'] > 0) {
+            // Selected brand has a new total but no PTC rows — clear stale prior-brand breakdown.
+            $fareBreakdown = is_array($offer['fare_breakdown'] ?? null) ? $offer['fare_breakdown'] : [];
+            $fareBreakdown['passenger_pricing'] = null;
+            $fareBreakdown['passenger_pricing_available'] = false;
+            $offer['fare_breakdown'] = $fareBreakdown;
         }
 
         return $offer;

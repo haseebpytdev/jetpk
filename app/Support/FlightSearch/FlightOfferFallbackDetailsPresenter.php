@@ -263,7 +263,7 @@ class FlightOfferFallbackDetailsPresenter
         $priceNote = self::nullableString($offer['price_note'] ?? null);
         if (! $componentsReconcile && $grandTotal > 0) {
             $priceNote = $priceNote
-                ?? 'Component fare breakdown is unavailable for this fare. Grand total is the authoritative customer price.';
+                ?? 'Detailed fare and tax split was not provided for this fare.';
         }
 
         return array_filter([

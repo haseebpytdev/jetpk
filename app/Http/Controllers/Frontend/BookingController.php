@@ -1225,8 +1225,9 @@ class BookingController extends Controller
     }
 
     /**
-     * Pre-hold abandonment: clear selected-offer draft state and return to Results.
+     * Pre-commercial abandonment: clear selected-offer draft state and start a FRESH search.
      * Does not create/cancel PNR, hold, ticket, or payment state.
+     * Local checkout locks / hold_session_id alone never block this path.
      */
     public function abandonSelectedOffer(Request $request): RedirectResponse|JsonResponse
     {
@@ -1244,12 +1245,22 @@ class BookingController extends Controller
                 ->withErrors(['flight_id' => $message]);
         }
 
-        $criteria = $this->resolveCheckoutSearchCriteria($draft, (string) ($draft['search_id'] ?? ''));
+        $previousSearchId = trim((string) ($draft['search_id'] ?? ''));
+        $criteria = $this->resolveCheckoutSearchCriteria($draft, $previousSearchId);
+        // Criteria-only results URL (no search_id) forces initFlightSearch → NEW search_id.
         $resultsQuery = $this->buildFlightsResultsQuery($criteria);
+        unset(
+            $resultsQuery['search_id'],
+            $resultsQuery['offer_id'],
+            $resultsQuery['flight_id'],
+            $resultsQuery['fare_option_key'],
+            $resultsQuery['combo_id'],
+            $resultsQuery['outbound_key'],
+        );
         $resultsUrl = client_safe_route('flights.results', $resultsQuery);
 
+        // Preserve ONLY safe search criteria — never prior offer/fare/search identity.
         $preserved = [
-            'search_id' => (string) ($draft['search_id'] ?? ''),
             'search_from' => (string) ($draft['search_from'] ?? $criteria['origin'] ?? ''),
             'search_to' => (string) ($draft['search_to'] ?? $criteria['destination'] ?? ''),
             'search_depart' => (string) ($draft['search_depart'] ?? $criteria['depart_date'] ?? ''),
@@ -1260,19 +1271,26 @@ class BookingController extends Controller
             'children' => max(0, (int) ($draft['children'] ?? $criteria['children'] ?? 0)),
             'infants' => max(0, (int) ($draft['infants'] ?? $criteria['infants'] ?? 0)),
         ];
+        if (($preserved['trip_type'] ?? '') === 'round_trip' && trim((string) $preserved['return_date']) === '') {
+            unset($preserved['return_date']);
+        }
 
         $this->bookingDraft->clear();
         $this->bookingDraft->merge($preserved);
 
         Log::info('checkout_change_flight_abandoned', [
-            'search_id' => $preserved['search_id'],
+            'previous_search_id' => $previousSearchId !== '' ? $previousSearchId : null,
+            'fresh_search' => true,
             'had_offer' => trim((string) ($draft['offer_id'] ?? $draft['flight_id'] ?? '')) !== '',
+            'had_local_hold_session' => (int) ($draft['hold_session_id'] ?? 0) > 0,
         ]);
 
         if ($this->wantsBookingJson($request)) {
             return response()->json([
                 'ok' => true,
                 'status' => 'abandoned',
+                'fresh_search' => true,
+                'previous_search_id' => $previousSearchId !== '' ? $previousSearchId : null,
                 'results_url' => $resultsUrl,
                 'preserved_search' => $preserved,
             ]);
@@ -1307,20 +1325,66 @@ class BookingController extends Controller
     }
 
     /**
+     * Change Flight is safe until a genuine supplier commercial state exists.
+     * Local hold_session_id / checkout locks / not_supported pending rows are NOT commercial.
+     *
      * @param  array<string, mixed>  $draft
      */
     protected function isPreHoldChangeFlightSafe(array $draft): bool
     {
-        $holdSessionId = (int) ($draft['hold_session_id'] ?? 0);
-        if ($holdSessionId <= 0) {
+        return ! $this->draftHasGenuineSupplierCommercialState($draft);
+    }
+
+    /**
+     * Genuine supplier commercial state (PNR / locator / confirmed remote hold), not local checkout.
+     *
+     * @param  array<string, mixed>  $draft
+     */
+    protected function draftHasGenuineSupplierCommercialState(array $draft): bool
+    {
+        $protection = is_array($draft['checkout_protection'] ?? null) ? $draft['checkout_protection'] : [];
+        $holdStatus = strtolower(trim((string) ($protection['hold_status'] ?? $draft['supplier_hold_status'] ?? '')));
+
+        if (in_array($holdStatus, ['held', 'confirmed', 'booked', 'ticketed', 'reserved'], true)) {
             return true;
         }
 
-        $protection = is_array($draft['checkout_protection'] ?? null) ? $draft['checkout_protection'] : [];
-        $holdStatus = strtolower(trim((string) ($protection['hold_status'] ?? '')));
+        if ((bool) ($protection['supplier_hold_success'] ?? $draft['supplier_hold_success'] ?? false) === true) {
+            return true;
+        }
 
-        // Pending/not-started local checkout locks are still pre-commercial for this path.
-        return in_array($holdStatus, ['', 'not_started', 'pending', 'failed'], true);
+        foreach ([
+            $draft['supplier_hold_pnr'] ?? null,
+            $draft['supplier_pnr'] ?? null,
+            $draft['pnr'] ?? null,
+            $protection['supplier_hold_pnr'] ?? null,
+            $protection['pnr'] ?? null,
+            data_get($protection, 'supplier_hold.pnr'),
+            data_get($protection, 'validated_offer_snapshot.pnr'),
+        ] as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return true;
+            }
+        }
+
+        foreach ([
+            $draft['supplier_hold_reference'] ?? null,
+            $draft['supplier_reference'] ?? null,
+            $draft['supplier_locator'] ?? null,
+            $draft['locator'] ?? null,
+            $protection['supplier_hold_reference'] ?? null,
+            $protection['supplier_reference'] ?? null,
+            $protection['supplier_locator'] ?? null,
+            $protection['locator'] ?? null,
+            data_get($protection, 'supplier_hold.supplier_reference'),
+        ] as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return true;
+            }
+        }
+
+        // Local BookingHoldSession / checkout lock alone is never commercial.
+        return false;
     }
 
     public function review(Request $request): View|RedirectResponse|JsonResponse

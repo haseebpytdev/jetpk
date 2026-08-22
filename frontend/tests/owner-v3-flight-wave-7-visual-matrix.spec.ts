@@ -460,47 +460,21 @@ test("wave-7 visual matrix captures required states", async ({ page }) => {
   await expect(page.getByTestId("document-reader-conflicts-0")).toBeVisible({ timeout: 10_000 });
   await shot(page, "10-passport-uncertain-conflict");
 
-  // 11 Change flight confirmation — native dialog does not rasterize; surface the real confirm copy
-  // after form data exists so window.confirm actually runs.
+  // 11 Change flight confirmation — in-app dialog after form data exists
   conflictMode = false;
   await page.goto(`/booking/passengers?search_id=${searchId}&offer_id=offer-1&fare_option_key=fare-comfort`);
   await expect(page.getByTestId("passenger-details-page")).toBeVisible({ timeout: 25_000 });
   await page.getByLabel(/^First name/).fill("Visual");
   await page.getByLabel(/^Last name/).fill("Traveler");
-  const changeFlightDialog = new Promise<string>((resolve) => {
-    page.once("dialog", async (dialog) => {
-      const message = dialog.message();
-      await dialog.dismiss();
-      resolve(message);
-    });
-  });
   await page.getByTestId("change-flight-button").click();
-  const changeFlightConfirmMessage = await changeFlightDialog;
-  expect(changeFlightConfirmMessage).toMatch(/Changing flight may discard/i);
-  await page.evaluate((message) => {
-    const existing = document.querySelector("[data-testid='change-flight-confirm-visual']");
-    existing?.remove();
-    const panel = document.createElement("div");
-    panel.setAttribute("data-testid", "change-flight-confirm-visual");
-    panel.setAttribute("role", "alertdialog");
-    panel.style.cssText =
-      "position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.45);padding:24px;";
-    const box = document.createElement("div");
-    box.style.cssText =
-      "max-width:420px;background:#fff;border-radius:12px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.2);font:14px/1.45 system-ui,sans-serif;color:#0f172a";
-    const title = document.createElement("strong");
-    title.style.cssText = "display:block;margin-bottom:8px";
-    title.textContent = "Change flight";
-    const body = document.createElement("p");
-    body.style.margin = "0";
-    body.textContent = message;
-    box.append(title, body);
-    panel.append(box);
-    document.body.appendChild(panel);
-  }, changeFlightConfirmMessage);
-  await expect(page.getByTestId("change-flight-confirm-visual")).toBeVisible({ timeout: 8_000 });
+  await expect(page.getByTestId("dialog-panel")).toBeVisible({ timeout: 8_000 });
+  await expect(page.getByText(/Change your flight\?/i)).toBeVisible();
+  await expect(page.getByTestId("change-flight-confirm-copy")).toBeVisible();
+  await expect(page.getByTestId("change-flight-keep")).toBeVisible();
+  await expect(page.getByTestId("change-flight-search-other")).toBeVisible();
   await shot(page, "11-change-flight-confirmation");
-  await page.evaluate(() => document.querySelector("[data-testid='change-flight-confirm-visual']")?.remove());
+  await page.getByTestId("change-flight-keep").click();
+  await expect(page.getByTestId("dialog-panel")).toHaveCount(0);
 
   await page.getByTestId("terms-acceptance-checkbox").scrollIntoViewIfNeeded();
   await expect(page.getByTestId("terms-acceptance-checkbox")).not.toBeChecked();
