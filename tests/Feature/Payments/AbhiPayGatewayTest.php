@@ -125,7 +125,7 @@ class AbhiPayGatewayTest extends TestCase
         Http::assertSent(function ($request) {
             $body = $request->data();
 
-            return ($body['amount'] ?? null) === 4500000;
+            return ($body['amount'] ?? null) === 45000;
         });
     }
 
@@ -154,7 +154,7 @@ class AbhiPayGatewayTest extends TestCase
                 'payload' => [
                     'orderId' => 'ORD-PENDING',
                     'paymentStatus' => 'pending',
-                    'amount' => 100000,
+                    'amount' => 1000,
                     'currency' => 'PKR',
                     'clientTransactionId' => 'OTA-ABHIPAY01-test',
                 ],
@@ -197,7 +197,7 @@ class AbhiPayGatewayTest extends TestCase
                 'payload' => [
                     'orderId' => 'ORD-PAID',
                     'paymentStatus' => 'paid',
-                    'amount' => 250000,
+                    'amount' => 2500,
                     'currency' => 'PKR',
                     'clientTransactionId' => 'OTA-PAID-1',
                 ],
@@ -293,6 +293,277 @@ class AbhiPayGatewayTest extends TestCase
         app(PaymentTransactionService::class)->verifyTransaction($transaction);
         $transaction->refresh();
         $this->assertSame(PaymentTransactionStatus::VerificationFailed, $transaction->status);
+    }
+
+    public function test_v3_create_order_sends_major_units_for_wave9_fixture(): void
+    {
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
+        $this->configureGateway($agency);
+        // Selected branded fare / review / payable fixture: PKR 79,089
+        $booking = $this->createPayableBooking($agency, $customer, 79089);
+
+        Http::fake([
+            'api.abhipay.com.pk/api/v3/orders' => Http::response([
+                'code' => AbhiPayGateway::SUCCESS_RESULT_CODE,
+                'message' => 'Operation performed successfully',
+                'payload' => [
+                    'orderId' => 'ORD-79089',
+                    'paymentUrl' => 'https://pay.abhipay.com.pk/checkout/ORD-79089',
+                ],
+            ], 200),
+        ]);
+
+        $this->actingAs($customer)
+            ->post(route('payments.abhipay.start', $booking))
+            ->assertRedirect('https://pay.abhipay.com.pk/checkout/ORD-79089');
+
+        $transaction = PaymentTransaction::query()->firstOrFail();
+        $this->assertSame('79089.00', $transaction->amount);
+
+        Http::assertSent(function ($request) {
+            $body = $request->data();
+            $amount = $body['amount'] ?? null;
+
+            // ABHIPAY_V3_AMOUNT_MAJOR_UNITS + ABHIPAY_AMOUNT_PARITY
+            return $amount === 79089
+                && $amount !== 7908900
+                && ($body['currency'] ?? null) === 'PKR'
+                && ($body['language'] ?? null) === 'EN'
+                && ($body['operation'] ?? null) === 'PURCHASE'
+                && ($body['cardSave'] ?? null) === false
+                && filled($body['clientTransactionId'] ?? null)
+                && filled($body['callbackUrl'] ?? null)
+                && filled($body['description'] ?? null)
+                && str_contains($request->url(), '/api/v3/orders')
+                && $request->hasHeader('Authorization');
+        });
+    }
+
+    public function test_v3_rejects_100x_remote_amount_without_silent_normalization(): void
+    {
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
+        $this->configureGateway($agency);
+        $booking = $this->createPayableBooking($agency, $customer, 79089);
+
+        $transaction = PaymentTransaction::query()->create([
+            'booking_id' => $booking->id,
+            'user_id' => $customer->id,
+            'gateway' => PaymentGateway::CODE_ABHIPAY,
+            'environment' => 'test',
+            'amount' => 79089.00,
+            'currency' => 'PKR',
+            'client_transaction_id' => 'OTA-100X-REJECT',
+            'gateway_order_id' => 'ORD-100X',
+            'status' => PaymentTransactionStatus::Created,
+        ]);
+
+        Http::fake([
+            'api.abhipay.com.pk/api/v3/orders/ORD-100X' => Http::response([
+                'code' => AbhiPayGateway::SUCCESS_RESULT_CODE,
+                'message' => 'Operation performed successfully',
+                'payload' => [
+                    'orderId' => 'ORD-100X',
+                    'paymentStatus' => 'paid',
+                    'amount' => 7908900,
+                    'currencyType' => 'PKR',
+                    'clientTransactionId' => 'OTA-100X-REJECT',
+                ],
+            ], 200),
+        ]);
+
+        app(PaymentTransactionService::class)->verifyTransaction($transaction);
+        $transaction->refresh();
+
+        // ABHIPAY_100X_AMOUNT_REJECTED — must not silently divide by 100
+        $this->assertSame(PaymentTransactionStatus::VerificationFailed, $transaction->status);
+        $this->assertNotSame(PaymentTransactionStatus::Paid, $transaction->status);
+    }
+
+    public function test_v3_amount_match_passes_for_matching_major_units(): void
+    {
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
+        $this->configureGateway($agency);
+        $booking = $this->createPayableBooking($agency, $customer, 79089);
+
+        $transaction = PaymentTransaction::query()->create([
+            'booking_id' => $booking->id,
+            'user_id' => $customer->id,
+            'gateway' => PaymentGateway::CODE_ABHIPAY,
+            'environment' => 'test',
+            'amount' => 79089.00,
+            'currency' => 'PKR',
+            'client_transaction_id' => 'OTA-MATCH-79089',
+            'gateway_order_id' => 'ORD-MATCH-79089',
+            'status' => PaymentTransactionStatus::Created,
+        ]);
+
+        Http::fake([
+            'api.abhipay.com.pk/api/v3/orders/ORD-MATCH-79089' => Http::response([
+                'code' => AbhiPayGateway::SUCCESS_RESULT_CODE,
+                'message' => 'Operation performed successfully',
+                'payload' => [
+                    'orderId' => 'ORD-MATCH-79089',
+                    'paymentStatus' => 'paid',
+                    'amount' => 79089.00,
+                    'currencyType' => 'PKR',
+                    'clientTransactionId' => 'OTA-MATCH-79089',
+                ],
+            ], 200),
+        ]);
+
+        app(PaymentTransactionService::class)->verifyTransaction($transaction);
+        $transaction->refresh();
+        $this->assertSame(PaymentTransactionStatus::Paid, $transaction->status);
+    }
+
+    public function test_v3_currency_type_mismatch_fails_verification(): void
+    {
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
+        $this->configureGateway($agency);
+        $booking = $this->createPayableBooking($agency, $customer, 79089);
+
+        $transaction = PaymentTransaction::query()->create([
+            'booking_id' => $booking->id,
+            'user_id' => $customer->id,
+            'gateway' => PaymentGateway::CODE_ABHIPAY,
+            'environment' => 'test',
+            'amount' => 79089.00,
+            'currency' => 'PKR',
+            'client_transaction_id' => 'OTA-CURR-MISMATCH',
+            'gateway_order_id' => 'ORD-CURR',
+            'status' => PaymentTransactionStatus::Created,
+        ]);
+
+        Http::fake([
+            'api.abhipay.com.pk/api/v3/orders/ORD-CURR' => Http::response([
+                'code' => AbhiPayGateway::SUCCESS_RESULT_CODE,
+                'message' => 'Operation performed successfully',
+                'payload' => [
+                    'orderId' => 'ORD-CURR',
+                    'paymentStatus' => 'paid',
+                    'amount' => 79089.00,
+                    'currencyType' => 'USD',
+                    'clientTransactionId' => 'OTA-CURR-MISMATCH',
+                ],
+            ], 200),
+        ]);
+
+        app(PaymentTransactionService::class)->verifyTransaction($transaction);
+        $transaction->refresh();
+
+        // ABHIPAY_CURRENCYTYPE_VERIFIED
+        $this->assertSame(PaymentTransactionStatus::VerificationFailed, $transaction->status);
+        $this->assertNotSame(PaymentTransactionStatus::Paid, $transaction->status);
+    }
+
+    public function test_v3_verify_by_rrn_uses_client_transaction_id(): void
+    {
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
+        $this->configureGateway($agency);
+        $booking = $this->createPayableBooking($agency, $customer, 1.00);
+
+        $transaction = PaymentTransaction::query()->create([
+            'booking_id' => $booking->id,
+            'user_id' => $customer->id,
+            'gateway' => PaymentGateway::CODE_ABHIPAY,
+            'environment' => 'test',
+            'amount' => 1.00,
+            'currency' => 'PKR',
+            'client_transaction_id' => 'OTA-BY-RRN-1',
+            'gateway_order_id' => null,
+            'status' => PaymentTransactionStatus::Created,
+        ]);
+
+        Http::fake([
+            'api.abhipay.com.pk/api/v3/orders/by-rrn/OTA-BY-RRN-1' => Http::response([
+                'code' => AbhiPayGateway::SUCCESS_RESULT_CODE,
+                'message' => 'Operation performed successfully',
+                'payload' => [
+                    'orderId' => 'ORD-BY-RRN',
+                    'paymentStatus' => 'paid',
+                    'amount' => 1.00,
+                    'currencyType' => 'PKR',
+                    'clientTransactionId' => 'OTA-BY-RRN-1',
+                ],
+            ], 200),
+        ]);
+
+        app(PaymentTransactionService::class)->verifyTransaction($transaction);
+        $transaction->refresh();
+
+        // ABHIPAY_BY_RRN_VERIFY + ABHIPAY_CLIENT_TRANSACTION_ID
+        $this->assertSame(PaymentTransactionStatus::Paid, $transaction->status);
+        $this->assertSame('ORD-BY-RRN', $transaction->gateway_order_id);
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/orders/by-rrn/OTA-BY-RRN-1'));
+    }
+
+    public function test_create_payment_is_idempotent_for_existing_redirectable_transaction(): void
+    {
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
+        $this->configureGateway($agency);
+        $booking = $this->createPayableBooking($agency, $customer, 79089);
+
+        Http::fake([
+            'api.abhipay.com.pk/api/v3/orders' => Http::response([
+                'code' => AbhiPayGateway::SUCCESS_RESULT_CODE,
+                'message' => 'Operation performed successfully',
+                'payload' => [
+                    'orderId' => 'ORD-IDEM-CREATE',
+                    'paymentUrl' => 'https://pay.abhipay.com.pk/checkout/ORD-IDEM-CREATE',
+                ],
+            ], 200),
+        ]);
+
+        $this->actingAs($customer)
+            ->post(route('payments.abhipay.start', $booking))
+            ->assertRedirect('https://pay.abhipay.com.pk/checkout/ORD-IDEM-CREATE');
+
+        $this->actingAs($customer)
+            ->post(route('payments.abhipay.start', $booking))
+            ->assertRedirect('https://pay.abhipay.com.pk/checkout/ORD-IDEM-CREATE');
+
+        // ABHIPAY_CREATE_IDEMPOTENT — one PaymentTransaction
+        $this->assertSame(1, PaymentTransaction::query()->where('booking_id', $booking->id)->count());
+    }
+
+    public function test_abhipay_secret_never_exposed_in_start_response_or_payload(): void
+    {
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::query()->where('email', 'customer@ota.demo')->firstOrFail();
+        $this->configureGateway($agency);
+        $booking = $this->createPayableBooking($agency, $customer, 1.00);
+
+        Http::fake([
+            'api.abhipay.com.pk/api/v3/orders' => Http::response([
+                'code' => AbhiPayGateway::SUCCESS_RESULT_CODE,
+                'payload' => [
+                    'orderId' => 'ORD-SECRET',
+                    'paymentUrl' => 'https://pay.abhipay.com.pk/checkout/ORD-SECRET',
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->actingAs($customer)
+            ->post(route('payments.abhipay.start', $booking));
+
+        $response->assertRedirect('https://pay.abhipay.com.pk/checkout/ORD-SECRET');
+        $this->assertStringNotContainsString('secret-key-test-value', $response->headers->get('Location') ?? '');
+        $this->assertStringNotContainsString('secret-key-test-value', $response->getContent());
+
+        Http::assertSent(function ($request) {
+            $serialized = json_encode($request->data());
+
+            // Authorization header is server-side only; body must not include the secret.
+            return $request->hasHeader('Authorization')
+                && ! str_contains((string) $serialized, 'secret-key-test-value')
+                && ($request->data()['amount'] ?? null) === 1;
+        });
     }
 
     public function test_missing_configuration_hides_abhipay_from_checkout_card(): void

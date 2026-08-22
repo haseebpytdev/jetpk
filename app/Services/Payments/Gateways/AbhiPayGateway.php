@@ -59,7 +59,8 @@ class AbhiPayGateway implements PaymentGatewayInterface
             : 'OTA Payment '.$transaction->client_transaction_id;
 
         $payload = [
-            'amount' => $this->toMinorUnits((float) $transaction->amount),
+            // AbhiPay v3 documents amount in major currency units (e.g. PKR 79089 → 79089), not paisa.
+            'amount' => $this->toMajorUnits((float) $transaction->amount),
             'language' => 'EN',
             'currency' => strtoupper((string) $transaction->currency),
             'description' => $description,
@@ -89,17 +90,19 @@ class AbhiPayGateway implements PaymentGatewayInterface
             'response' => PaymentGatewayPayloadRedactor::redact(is_array($body) ? $body : ['raw' => $response->body()]),
         ];
 
+        $resultCode = $this->extractResultCode(is_array($body) ? $body : []);
+        $resultMessage = $this->extractResultMessage(is_array($body) ? $body : []);
+
         if (! $response->successful()) {
             return new PaymentGatewayCreateResult(
                 success: false,
-                gatewayCode: (string) data_get($body, 'resultCode', ''),
-                gatewayMessage: (string) data_get($body, 'resultMessage', 'AbhiPay order creation failed.'),
+                gatewayCode: $resultCode,
+                gatewayMessage: $resultMessage !== '' ? $resultMessage : 'AbhiPay order creation failed.',
                 safeResponse: $safeResponse,
                 errorMessage: 'AbhiPay could not create the payment order.',
             );
         }
 
-        $resultCode = (string) data_get($body, 'resultCode', '');
         $orderId = (string) data_get($body, 'payload.orderId', data_get($body, 'orderId', ''));
         $paymentUrl = (string) data_get($body, 'payload.paymentUrl', data_get($body, 'paymentUrl', ''));
 
@@ -108,7 +111,7 @@ class AbhiPayGateway implements PaymentGatewayInterface
                 success: false,
                 gatewayOrderId: filled($orderId) ? $orderId : null,
                 gatewayCode: $resultCode,
-                gatewayMessage: (string) data_get($body, 'resultMessage', 'Unexpected AbhiPay response.'),
+                gatewayMessage: $resultMessage !== '' ? $resultMessage : 'Unexpected AbhiPay response.',
                 safeResponse: $safeResponse,
                 errorMessage: 'AbhiPay did not return a payment URL.',
             );
@@ -119,7 +122,7 @@ class AbhiPayGateway implements PaymentGatewayInterface
             redirectUrl: $paymentUrl,
             gatewayOrderId: $orderId,
             gatewayCode: $resultCode,
-            gatewayMessage: (string) data_get($body, 'resultMessage', ''),
+            gatewayMessage: $resultMessage,
             safeResponse: $safeResponse,
         );
     }
@@ -224,7 +227,6 @@ class AbhiPayGateway implements PaymentGatewayInterface
      */
     protected function interpretVerificationPayload(PaymentTransaction $transaction, array $body): PaymentGatewayVerifyResult
     {
-        $resultCode = (string) data_get($body, 'resultCode', '');
         $payload = data_get($body, 'payload', $body);
         if (! is_array($payload)) {
             $payload = [];
@@ -236,8 +238,14 @@ class AbhiPayGateway implements PaymentGatewayInterface
             'paymentStatus',
             data_get($payload, 'status', data_get($payload, 'orderStatus', ''))
         ));
-        $gatewayCode = $resultCode !== '' ? $resultCode : (string) data_get($payload, 'resultCode', '');
-        $gatewayMessage = (string) data_get($body, 'resultMessage', data_get($payload, 'message', ''));
+        $gatewayCode = $this->extractResultCode($body);
+        if ($gatewayCode === '') {
+            $gatewayCode = $this->extractResultCode($payload);
+        }
+        $gatewayMessage = $this->extractResultMessage($body);
+        if ($gatewayMessage === '') {
+            $gatewayMessage = (string) data_get($payload, 'message', '');
+        }
 
         $remoteClientId = (string) data_get(
             $payload,
@@ -257,18 +265,22 @@ class AbhiPayGateway implements PaymentGatewayInterface
             );
         }
 
-        $remoteCurrency = strtoupper((string) data_get($payload, 'currency', $transaction->currency));
-        if ($remoteCurrency !== '' && $remoteCurrency !== strtoupper((string) $transaction->currency)) {
-            return new PaymentGatewayVerifyResult(
-                verified: false,
-                status: PaymentTransactionStatus::VerificationFailed,
-                gatewayOrderId: filled($gatewayOrderId) ? $gatewayOrderId : null,
-                gatewayStatus: $gatewayStatus,
-                gatewayCode: $gatewayCode,
-                gatewayMessage: $gatewayMessage,
-                safeResponse: PaymentGatewayPayloadRedactor::redact($body),
-                failureReason: 'Currency mismatch.',
-            );
+        // Official v3 getOrder/by-rrn examples use currencyType; keep currency as known alternate.
+        $remoteCurrencyRaw = data_get($payload, 'currencyType', data_get($payload, 'currency'));
+        if ($remoteCurrencyRaw !== null && $remoteCurrencyRaw !== '') {
+            $remoteCurrency = strtoupper((string) $remoteCurrencyRaw);
+            if ($remoteCurrency !== strtoupper((string) $transaction->currency)) {
+                return new PaymentGatewayVerifyResult(
+                    verified: false,
+                    status: PaymentTransactionStatus::VerificationFailed,
+                    gatewayOrderId: filled($gatewayOrderId) ? $gatewayOrderId : null,
+                    gatewayStatus: $gatewayStatus,
+                    gatewayCode: $gatewayCode,
+                    gatewayMessage: $gatewayMessage,
+                    safeResponse: PaymentGatewayPayloadRedactor::redact($body),
+                    failureReason: 'Currency mismatch.',
+                );
+            }
         }
 
         $remoteAmount = data_get($payload, 'amount');
@@ -360,23 +372,49 @@ class AbhiPayGateway implements PaymentGatewayInterface
             ->timeout(20);
     }
 
-    protected function toMinorUnits(float $amount): int
+    /**
+     * Format amount for AbhiPay v3 create-order (major currency units).
+     * Whole amounts are sent as integers (docs example: amount=1); fractional PKR keep 2dp.
+     */
+    protected function toMajorUnits(float $amount): int|float
     {
-        return (int) round($amount * 100);
-    }
+        $rounded = round($amount, 2);
 
-    protected function amountMatches(float $localAmount, mixed $remoteAmount): bool
-    {
-        if (is_numeric($remoteAmount)) {
-            $remote = (float) $remoteAmount;
-            if ($remote > $localAmount * 10) {
-                $remote = $remote / 100;
-            }
-
-            return abs($localAmount - $remote) < 0.01;
+        if (abs($rounded - round($rounded)) < 0.00001) {
+            return (int) round($rounded);
         }
 
-        return false;
+        return $rounded;
+    }
+
+    /**
+     * Strict major-unit comparison for AbhiPay v3.
+     * Never silently normalize a 100× discrepancy (that would mask create-order unit bugs).
+     */
+    protected function amountMatches(float $localAmount, mixed $remoteAmount): bool
+    {
+        if (! is_numeric($remoteAmount)) {
+            return false;
+        }
+
+        return abs(round($localAmount, 2) - round((float) $remoteAmount, 2)) < 0.01;
+    }
+
+    /**
+     * @param  array<string, mixed>  $body
+     */
+    protected function extractResultCode(array $body): string
+    {
+        // Official v3 examples use top-level "code"; legacy/test fixtures may use "resultCode".
+        return (string) data_get($body, 'resultCode', data_get($body, 'code', ''));
+    }
+
+    /**
+     * @param  array<string, mixed>  $body
+     */
+    protected function extractResultMessage(array $body): string
+    {
+        return (string) data_get($body, 'resultMessage', data_get($body, 'message', ''));
     }
 
     protected function isPaidStatus(string $status): bool
