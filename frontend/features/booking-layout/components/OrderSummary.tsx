@@ -228,31 +228,22 @@ function FlightPreviewCard({
 }
 
 function PriceRows({ pricing }: { pricing: AuthoritativePricing }) {
+  const whole = (amount: number) =>
+    `${pricing.currency || "PKR"} ${Math.round(amount).toLocaleString("en-PK")}`;
+
   return (
-    <dl className="mt-4 space-y-2 border-t border-jp-border pt-3 text-jp-sm">
+    <dl className="mt-4 space-y-2 border-t border-jp-border pt-3 text-jp-sm" data-testid="review-price-summary">
       <div className="flex justify-between gap-4">
-        <dt className="text-jp-muted">Base fare</dt>
-        <dd>
-          {pricing.currency} {pricing.base_fare.toLocaleString()}
-        </dd>
+        <dt className="text-jp-muted">Fare</dt>
+        <dd className="tabular-nums">{pricing.formatted_base_fare ?? whole(pricing.base_fare)}</dd>
       </div>
       <div className="flex justify-between gap-4">
         <dt className="text-jp-muted">Taxes &amp; fees</dt>
-        <dd>
-          {pricing.currency} {pricing.taxes.toLocaleString()}
-        </dd>
+        <dd className="tabular-nums">{pricing.formatted_taxes ?? whole(pricing.taxes + (pricing.service_charges || 0))}</dd>
       </div>
-      {pricing.service_charges > 0 ? (
-        <div className="flex justify-between gap-4">
-          <dt className="text-jp-muted">Service charges</dt>
-          <dd>
-            {pricing.currency} {pricing.service_charges.toLocaleString()}
-          </dd>
-        </div>
-      ) : null}
       <div className="mt-3 flex items-center justify-between gap-4 rounded-jp-md bg-jp-primary/5 px-3 py-3 font-semibold text-jp-text">
         <dt>Total</dt>
-        <dd className="text-lg font-bold text-jp-primary" data-testid="order-summary-total">
+        <dd className="text-lg font-bold tabular-nums text-jp-primary" data-testid="order-summary-total">
           {pricing.formatted_total}
         </dd>
       </div>
@@ -288,7 +279,7 @@ export function OrderSummary({
       <div className="flex items-center justify-between gap-2">
         <div>
           {preview ? (
-            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-jp-primary">Your selection</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-jp-primary">Your booking</p>
           ) : null}
           <h2 className={cn("font-semibold text-jp-text", preview ? "mt-0.5 text-lg" : "text-jp-sm")}>
             {preview ? "Flight summary" : "Order summary"}

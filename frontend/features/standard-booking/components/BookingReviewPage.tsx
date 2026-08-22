@@ -32,6 +32,7 @@ import type { BookingReviewContext, PaymentMethodCode, ReviewPaymentMethod } fro
 import { resolveBookingNextUrl } from "../utils/allowlist";
 import { ReviewPassengerList } from "./ReviewPassengerList";
 import { PaymentMethodSelector } from "./PaymentMethodSelector";
+import { ItineraryTimeline } from "../itinerary/ItineraryTimeline";
 
 export function BookingReviewPage() {
   const router = useRouter();
@@ -125,6 +126,11 @@ export function BookingReviewPage() {
     router.push("/flights/results");
   };
 
+  const handleEditTravelers = () => {
+    const url = context?.next_actions?.edit_passengers_url || "/booking/passengers";
+    router.push(url);
+  };
+
   if (loading) return <BookingLoadingState message="Loading review…" testId="review-loading" />;
   if (error === "missing_session") return <div className="mx-auto max-w-jp-booking p-8"><MissingBookingSessionState /></div>;
   if (expired) return <div className="mx-auto max-w-jp-booking p-8"><BookingSessionExpiredState /></div>;
@@ -138,17 +144,12 @@ export function BookingReviewPage() {
         itinerary={context.itinerary}
         travellerTotal={context.passengers.length}
         pricing={context.pricing}
-      />
-      <PaymentMethodSelector
-        methods={visibleMethods}
-        selected={selectedMethod}
-        onSelect={setSelectedMethod}
-        disabled={context.submit_blocked || submitting}
+        variant="flight-preview"
+        testId="review-order-summary"
       />
       {context.submit_blocked_reason ? (
         <p className="text-jp-sm text-amber-800 dark:text-amber-200" role="alert">{context.submit_blocked_reason}</p>
       ) : null}
-      {error && error !== "missing_session" ? <p className="text-jp-sm text-red-700 dark:text-red-300" role="alert">{error}</p> : null}
       <PrimaryButton
         type="button"
         className="w-full"
@@ -158,7 +159,11 @@ export function BookingReviewPage() {
       >
         {submitting ? "Submitting…" : selectedMethod === "card" ? "Continue to payment" : "Confirm booking"}
       </PrimaryButton>
-      <p className="text-jp-xs text-jp-muted">No payment is taken on this step for manual payment.</p>
+      <p className="text-jp-xs text-jp-muted">
+        {selectedMethod === "card"
+          ? "You will continue to our secure card payment step. No card details are collected on Review."
+          : "No payment is taken on this step for manual payment."}
+      </p>
     </>
   );
 
@@ -167,8 +172,8 @@ export function BookingReviewPage() {
       <BookingProgress steps={context.booking_session.progress} className="mb-6" />
 
       <BookingPageHeader
-        title="Review & confirm booking"
-        description="Confirm itinerary, travellers, and payment option before submitting."
+        title="Review your booking"
+        description="Confirm itinerary, travelers, contact details, and payment option before continuing."
         actions={
           <BookingSessionCountdown
             expiresAt={context.booking_session.expires_at}
@@ -199,26 +204,83 @@ export function BookingReviewPage() {
         </div>
       ) : null}
 
+      {error && error !== "missing_session" ? <p className="mt-4 text-jp-sm text-red-700 dark:text-red-300" role="alert">{error}</p> : null}
+
       <BookingLayout
         mobileSummary={<MobileOrderSummary label="Review summary">{summarySidebar}</MobileOrderSummary>}
         main={
           <BookingMainColumn>
             <BookingSection>
-              <BookingSectionHeader title="Itinerary" />
-              <OrderSummary itinerary={context.itinerary} travellerTotal={context.passengers.length} collapsed />
+              <BookingSectionHeader title="Full itinerary" />
+              <div data-testid="review-itinerary">
+                <ItineraryTimeline itinerary={context.itinerary} />
+              </div>
             </BookingSection>
             <BookingSection>
-              <BookingSectionHeader title="Travelers" />
-              <ReviewPassengerList passengers={context.passengers} documents={context.documents} />
+              <BookingSectionHeader
+                title="Travelers"
+                actions={
+                  <button
+                    type="button"
+                    className="text-jp-sm font-semibold text-jp-primary hover:underline focus-visible:outline-none focus-visible:shadow-jp-focus"
+                    onClick={handleEditTravelers}
+                    data-testid="edit-traveler-details"
+                  >
+                    Edit traveler details
+                  </button>
+                }
+              />
+              <ReviewPassengerList
+                passengers={context.passengers}
+                documents={context.documents}
+                onEdit={handleEditTravelers}
+              />
             </BookingSection>
             <BookingSection>
-              <BookingSectionHeader title="Contact" />
-              <p className="text-jp-sm text-jp-muted">{context.contact.email}</p>
-              <p className="text-jp-sm text-jp-muted">{context.contact.phone}</p>
+              <BookingSectionHeader
+                title="Contact details"
+                actions={
+                  <button
+                    type="button"
+                    className="text-jp-sm font-semibold text-jp-primary hover:underline focus-visible:outline-none focus-visible:shadow-jp-focus"
+                    onClick={handleEditTravelers}
+                    data-testid="edit-contact-details"
+                  >
+                    Edit
+                  </button>
+                }
+              />
+              <article className="rounded-jp-lg border border-jp-border bg-jp-surface p-4" data-testid="review-contact">
+                <dl className="space-y-2 text-jp-sm">
+                  {context.contact.name ? (
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-jp-muted">Contact name</dt>
+                      <dd className="font-medium text-jp-text">{context.contact.name}</dd>
+                    </div>
+                  ) : null}
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-jp-muted">Email</dt>
+                    <dd className="font-medium text-jp-text">{context.contact.email || "—"}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-jp-muted">Mobile</dt>
+                    <dd className="font-medium text-jp-text">{context.contact.phone || "—"}</dd>
+                  </div>
+                </dl>
+              </article>
+            </BookingSection>
+            <BookingSection>
+              <BookingSectionHeader title="Payment method" />
+              <PaymentMethodSelector
+                methods={visibleMethods}
+                selected={selectedMethod}
+                onSelect={setSelectedMethod}
+                disabled={context.submit_blocked || submitting}
+              />
             </BookingSection>
           </BookingMainColumn>
         }
-        sidebar={<BookingSidebar>{summarySidebar}</BookingSidebar>}
+        sidebar={<BookingSidebar sticky>{summarySidebar}</BookingSidebar>}
       />
     </BookingPageShell>
   );

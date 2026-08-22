@@ -20,8 +20,12 @@ export type AuthoritativePricing = {
   service_charges: number;
   total: number;
   formatted_total: string;
+  formatted_base_fare?: string;
+  formatted_taxes?: string;
   rows?: Array<Record<string, unknown>>;
   passenger_mix?: Record<string, number> | null;
+  passenger_pricing?: Array<Record<string, unknown>> | null;
+  selected_fare_total?: number | null;
 };
 
 export type FareChangeState = {

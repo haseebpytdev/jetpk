@@ -540,7 +540,8 @@ class BookingController extends Controller
                     );
                 }
 
-                $booking = $this->bookingService->createDraftBooking($agency, $customer, $agent);
+                $booking = $this->resolveEditableSessionDraftBooking($request, $agency, $customer, $agent, $selectedOfferId)
+                    ?? $this->bookingService->createDraftBooking($agency, $customer, $agent);
                 $selectedFareTotal = $this->resolveAuthoritativeSelectedBrandedFareTotal($selectedFareFamilyOption, $protection, $pricing);
                 $validatedFareTotal = $selectedFareTotal > 0
                     ? $selectedFareTotal
@@ -839,6 +840,9 @@ class BookingController extends Controller
         }
 
         $this->mergeReturnSplitCheckoutDraft($request);
+
+        // Review → Edit travelers: restore draft + passenger prefill from durable session booking.
+        $this->hydrateCheckoutDraftFromSessionBooking($request);
 
         $flightId = $request->string('flight_id')->toString();
         $offerId = $request->string('offer_id')->toString();
@@ -3073,6 +3077,144 @@ class BookingController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * When editing from Review, restore bookingDraft from persisted booking meta
+     * and attach passenger/contact values for JSON/Blade prefill.
+     */
+    protected function hydrateCheckoutDraftFromSessionBooking(Request $request): void
+    {
+        $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
+        if ($bookingId === null) {
+            return;
+        }
+
+        $booking = Booking::query()
+            ->with(['passengers', 'contact'])
+            ->find($bookingId);
+        if ($booking === null || $booking->status !== BookingStatus::Draft) {
+            return;
+        }
+
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $criteria = is_array($meta['search_criteria'] ?? null) ? $meta['search_criteria'] : [];
+        $offerId = trim((string) ($meta['checkout_offer_id'] ?? $booking->flight_offer_id ?? data_get($meta, 'flight_offer_snapshot.id', '')));
+        $searchId = trim((string) ($meta['checkout_search_id'] ?? ''));
+        $draft = $this->bookingDraft->current();
+        $needsHydration = trim((string) ($draft['flight_id'] ?? $draft['offer_id'] ?? '')) === '';
+
+        if ($needsHydration && $offerId !== '') {
+            $this->bookingDraft->merge([
+                'flight_id' => $offerId,
+                'offer_id' => $offerId,
+                'search_id' => $searchId,
+                'search_from' => (string) ($criteria['origin'] ?? ''),
+                'search_to' => (string) ($criteria['destination'] ?? ''),
+                'search_depart' => (string) ($criteria['depart_date'] ?? ''),
+                'return_date' => (string) ($criteria['return_date'] ?? ''),
+                'trip_type' => (string) ($criteria['trip_type'] ?? 'one_way'),
+                'cabin' => (string) ($criteria['cabin'] ?? 'economy'),
+                'adults' => max(1, (int) ($criteria['adults'] ?? 1)),
+                'children' => max(0, (int) ($criteria['children'] ?? 0)),
+                'infants' => max(0, (int) ($criteria['infants'] ?? 0)),
+                'fare_option_key' => trim((string) ($meta['fare_option_key'] ?? '')),
+                'selected_fare_family_option' => is_array($meta['selected_fare_family_option'] ?? null)
+                    ? $meta['selected_fare_family_option']
+                    : null,
+            ]);
+        } elseif (trim((string) ($draft['fare_option_key'] ?? '')) === '' && trim((string) ($meta['fare_option_key'] ?? '')) !== '') {
+            $this->bookingDraft->merge([
+                'fare_option_key' => trim((string) $meta['fare_option_key']),
+                'selected_fare_family_option' => is_array($meta['selected_fare_family_option'] ?? null)
+                    ? $meta['selected_fare_family_option']
+                    : null,
+            ]);
+        }
+
+        $persistedPassengers = $booking->passengers
+            ->sortBy('passenger_index')
+            ->values()
+            ->map(static function ($passenger): array {
+                return [
+                    'title' => $passenger->title,
+                    'first_name' => $passenger->first_name,
+                    'last_name' => $passenger->last_name,
+                    'gender' => $passenger->gender,
+                    'date_of_birth' => $passenger->date_of_birth?->format('Y-m-d'),
+                    'nationality' => $passenger->nationality,
+                    'document_type' => $passenger->document_type,
+                    'passport_number' => $passenger->passport_number,
+                    'passport_issuing_country' => $passenger->passport_issuing_country,
+                    'passport_expiry_date' => $passenger->passport_expiry_date?->format('Y-m-d'),
+                    'passport_issue_date' => $passenger->passport_issue_date?->format('Y-m-d'),
+                    'national_id_number' => $passenger->national_id_number,
+                ];
+            })
+            ->all();
+
+        $contact = $booking->contact;
+        $contactMeta = is_array($contact?->meta) ? $contact->meta : [];
+        $request->attributes->set('wave9_persisted_passenger_values', [
+            'passengers' => $persistedPassengers,
+            'contact' => [
+                'contact_name' => (string) ($contactMeta['contact_name'] ?? ''),
+                'email' => (string) ($contact?->email ?? ''),
+                'phone' => (string) ($contact?->phone ?? ''),
+                'country' => (string) ($contact?->country ?? ''),
+            ],
+        ]);
+    }
+
+    /**
+     * Reuse an existing Draft booking when editing travelers from Review (idempotent).
+     */
+    protected function resolveEditableSessionDraftBooking(
+        Request $request,
+        Agency $agency,
+        ?User $customer,
+        ?\App\Models\Agent $agent,
+        string $selectedOfferId,
+    ): ?Booking {
+        $bookingId = $request->session()->get(PublicBooking::SESSION_BOOKING_ID);
+        if ($bookingId === null) {
+            return null;
+        }
+
+        $booking = Booking::query()->find($bookingId);
+        if ($booking === null) {
+            return null;
+        }
+
+        if ($booking->status !== BookingStatus::Draft) {
+            return null;
+        }
+
+        if ((int) $booking->agency_id !== (int) $agency->id) {
+            return null;
+        }
+
+        // Do not reuse once supplier commercial state exists.
+        $hasCommercial = filled($booking->pnr)
+            || in_array((string) ($booking->supplier_hold_status ?? ''), ['held', 'confirmed', 'ticketed'], true)
+            || (string) ($booking->payment_status ?? '') === 'paid';
+        if ($hasCommercial) {
+            return null;
+        }
+
+        $metaOfferId = trim((string) data_get($booking->meta, 'checkout_offer_id', data_get($booking->meta, 'flight_offer_snapshot.id', '')));
+        if ($selectedOfferId !== '' && $metaOfferId !== '' && $selectedOfferId !== $metaOfferId) {
+            return null;
+        }
+
+        if ($customer !== null && $booking->customer_id === null) {
+            $booking->forceFill(['customer_id' => $customer->id])->save();
+        }
+        if ($agent !== null && $booking->agent_id === null) {
+            $booking->forceFill(['agent_id' => $agent->id])->save();
+        }
+
+        return $booking->fresh();
     }
 
     protected function reconcilePiaNdcBookingFareFamily(Booking $booking): void

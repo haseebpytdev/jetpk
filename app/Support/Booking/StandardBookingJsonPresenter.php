@@ -206,9 +206,48 @@ class StandardBookingJsonPresenter
             }
         }
 
+        $segments = [];
+        if (is_array($presentation['segments_display'] ?? null) && $presentation['segments_display'] !== []) {
+            $segments = $presentation['segments_display'];
+        } elseif (is_array($presentation['segments'] ?? null) && $presentation['segments'] !== []) {
+            $segments = $presentation['segments'];
+        } elseif (is_array($offer['segments'] ?? null)) {
+            $segments = $offer['segments'];
+        }
+
+        $returnSegments = [];
+        if (is_array($presentation['return_segments_display'] ?? null) && $presentation['return_segments_display'] !== []) {
+            $returnSegments = $presentation['return_segments_display'];
+        } elseif (is_array($presentation['return_segments'] ?? null) && $presentation['return_segments'] !== []) {
+            $returnSegments = $presentation['return_segments'];
+        } elseif (is_array($presentation['journeys_display'] ?? null)) {
+            foreach ($presentation['journeys_display'] as $journey) {
+                if (! is_array($journey)) {
+                    continue;
+                }
+                $direction = strtolower(trim((string) ($journey['direction'] ?? $journey['leg'] ?? '')));
+                $journeySegments = is_array($journey['segments'] ?? null) ? $journey['segments'] : [];
+                if (in_array($direction, ['return', 'inbound'], true) && $journeySegments !== []) {
+                    $returnSegments = $journeySegments;
+                } elseif ($segments === [] && $journeySegments !== []) {
+                    $segments = $journeySegments;
+                }
+            }
+        }
+
+        $duration = trim((string) ($presentation['duration_label'] ?? $presentation['itinerary_duration_display'] ?? ''));
+        if ($duration === '') {
+            $duration = null;
+        }
+
+        $routeLabel = trim((string) ($presentation['route_label'] ?? ''));
+        if ($routeLabel === '') {
+            $routeLabel = null;
+        }
+
         return [
             'trip_type' => (string) ($criteria['trip_type'] ?? 'one_way'),
-            'route_label' => $presentation['route_label'] ?? null,
+            'route_label' => $routeLabel,
             'origin' => (string) ($criteria['origin'] ?? ''),
             'destination' => (string) ($criteria['destination'] ?? ''),
             'depart_date' => (string) ($criteria['depart_date'] ?? ''),
@@ -220,15 +259,15 @@ class StandardBookingJsonPresenter
             'cabin' => (string) ($criteria['cabin'] ?? 'economy'),
             'fare_family' => $fareFamily !== '' ? $fareFamily : null,
             'stops' => $offer['stops'] ?? null,
-            'duration' => $presentation['duration_label'] ?? null,
+            'duration' => $duration,
             'baggage' => $baggage !== '' ? $baggage : null,
             'cabin_baggage' => $cabinBaggage !== '' ? $cabinBaggage : null,
             'checked_baggage' => $baggage !== '' ? $baggage : null,
             'meal' => is_array($canonicalSelectedFare) ? ($canonicalSelectedFare['meal'] ?? null) : null,
             'refund_rule' => is_array($canonicalSelectedFare) ? ($canonicalSelectedFare['refund_rule'] ?? null) : null,
             'change_rule' => is_array($canonicalSelectedFare) ? ($canonicalSelectedFare['change_rule'] ?? null) : null,
-            'segments' => $presentation['segments'] ?? ($offer['segments'] ?? []),
-            'return_segments' => $presentation['return_segments'] ?? [],
+            'segments' => $segments,
+            'return_segments' => $returnSegments,
             'total_formatted' => $totalFormatted,
             'currency' => $fareBreakdown['currency']
                 ?? ($selectedEstimate['displayed_currency'] ?? null)
@@ -392,35 +431,42 @@ class StandardBookingJsonPresenter
      */
     private function existingValues(Request $request, array $contactPrefill, array $contactPhone, array $expectedPassengers): array
     {
+        $persisted = is_array($request->attributes->get('wave9_persisted_passenger_values'))
+            ? $request->attributes->get('wave9_persisted_passenger_values')
+            : [];
+        $persistedPassengers = is_array($persisted['passengers'] ?? null) ? $persisted['passengers'] : [];
+        $persistedContact = is_array($persisted['contact'] ?? null) ? $persisted['contact'] : [];
+
         $passengers = [];
         foreach ($expectedPassengers as $expected) {
             $idx = (int) ($expected['index'] ?? 0);
+            $stored = is_array($persistedPassengers[$idx] ?? null) ? $persistedPassengers[$idx] : [];
             $passengers[] = [
                 'passenger_type' => (string) ($expected['type'] ?? 'adult'),
-                'title' => old("passengers.$idx.title"),
-                'first_name' => old("passengers.$idx.first_name"),
-                'last_name' => old("passengers.$idx.last_name"),
-                'gender' => old("passengers.$idx.gender"),
-                'date_of_birth' => old("passengers.$idx.date_of_birth"),
-                'nationality' => old("passengers.$idx.nationality"),
-                'document_type' => old("passengers.$idx.document_type", 'passport'),
-                'passport_number' => old("passengers.$idx.passport_number"),
-                'passport_issuing_country' => old("passengers.$idx.passport_issuing_country"),
-                'passport_expiry_date' => old("passengers.$idx.passport_expiry_date"),
-                'passport_issue_date' => old("passengers.$idx.passport_issue_date"),
-                'national_id_number' => old("passengers.$idx.national_id_number"),
+                'title' => old("passengers.$idx.title", $stored['title'] ?? null),
+                'first_name' => old("passengers.$idx.first_name", $stored['first_name'] ?? null),
+                'last_name' => old("passengers.$idx.last_name", $stored['last_name'] ?? null),
+                'gender' => old("passengers.$idx.gender", $stored['gender'] ?? null),
+                'date_of_birth' => old("passengers.$idx.date_of_birth", $stored['date_of_birth'] ?? null),
+                'nationality' => old("passengers.$idx.nationality", $stored['nationality'] ?? null),
+                'document_type' => old("passengers.$idx.document_type", $stored['document_type'] ?? 'passport'),
+                'passport_number' => old("passengers.$idx.passport_number", $stored['passport_number'] ?? null),
+                'passport_issuing_country' => old("passengers.$idx.passport_issuing_country", $stored['passport_issuing_country'] ?? null),
+                'passport_expiry_date' => old("passengers.$idx.passport_expiry_date", $stored['passport_expiry_date'] ?? null),
+                'passport_issue_date' => old("passengers.$idx.passport_issue_date", $stored['passport_issue_date'] ?? null),
+                'national_id_number' => old("passengers.$idx.national_id_number", $stored['national_id_number'] ?? null),
             ];
         }
 
         return [
             'passengers' => $passengers,
             'contact' => [
-                'contact_name' => old('contact_name', $contactPrefill['name'] ?? ''),
-                'email' => old('email', $contactPrefill['email'] ?? ''),
-                'phone' => old('phone', trim(($contactPhone['country_code'] ?? '').' '.($contactPhone['number'] ?? ''))),
-                'phone_country_code' => old('phone_country_code', $contactPhone['country_code'] ?? ''),
-                'phone_number' => old('phone_number', $contactPhone['number'] ?? ''),
-                'country' => old('country', $contactPrefill['country'] ?? ''),
+                'contact_name' => old('contact_name', $persistedContact['contact_name'] ?? ($contactPrefill['name'] ?? '')),
+                'email' => old('email', $persistedContact['email'] ?? ($contactPrefill['email'] ?? '')),
+                'phone' => old('phone', $persistedContact['phone'] ?? trim(($contactPhone['country_code'] ?? '').' '.($contactPhone['number'] ?? ''))),
+                'phone_country_code' => old('phone_country_code', $persistedContact['phone_country_code'] ?? ($contactPhone['country_code'] ?? '')),
+                'phone_number' => old('phone_number', $persistedContact['phone_number'] ?? ($contactPhone['number'] ?? '')),
+                'country' => old('country', $persistedContact['country'] ?? ($contactPrefill['country'] ?? '')),
             ],
         ];
     }

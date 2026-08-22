@@ -89,16 +89,18 @@ export function CardPaymentPage() {
     <BookingPageShell testId="card-payment-page">
       <BookingProgress steps={state.booking_session.progress} className="mb-6" />
       <BookingPageHeader
-        title="Pay with AbhiPay"
-        description={`Reference: ${state.booking_reference ?? "—"}`}
+        title="Secure card payment"
+        description={`Booking reference: ${state.booking_reference ?? "—"}`}
       />
 
       <BookingLayout
         main={
           <BookingMainColumn>
             <BookingSection>
-              <BookingSectionHeader title="Card payment" />
-              <p className="text-2xl font-semibold text-jp-text">{card?.formatted_amount ?? state.pricing.formatted_total}</p>
+              <BookingSectionHeader title="Amount due" />
+              <p className="text-2xl font-semibold tabular-nums text-jp-text" data-testid="card-payment-amount">
+                {card?.formatted_amount ?? state.pricing.formatted_total}
+              </p>
               <p className="mt-2 text-jp-sm text-jp-muted">{card?.ticketing_note}</p>
               <p className="mt-2 text-jp-sm">
                 Payment status: <strong data-testid="card-payment-status">{card?.payment_status_label ?? state.payment_status.label}</strong>
@@ -114,14 +116,15 @@ export function CardPaymentPage() {
                   onClick={() => void handlePay()}
                   data-testid="card-pay-button"
                 >
-                  {starting ? "Starting payment…" : "Pay securely with AbhiPay"}
+                  {starting ? "Starting payment…" : "Pay securely"}
                 </PrimaryButton>
               ) : (
                 <p className="mt-4 text-jp-sm text-jp-muted">Online payment is not available for this booking right now.</p>
               )}
-              <p className="mt-3 text-jp-xs text-jp-muted">
-                You will be redirected to the secure AbhiPay checkout. Card details are not collected on this page.
+              <p className="mt-3 text-jp-sm text-jp-muted">
+                You&apos;ll continue to our secure card payment provider. JetPakistan does not collect or store your card details.
               </p>
+              <p className="mt-2 text-jp-xs text-jp-muted">Powered by AbhiPay</p>
             </BookingSection>
           </BookingMainColumn>
         }
@@ -132,6 +135,8 @@ export function CardPaymentPage() {
               travellerTotal={state.passengers.length}
               pricing={state.pricing}
               paymentStatus={state.payment_status}
+              variant="flight-preview"
+              testId="card-payment-order-summary"
             />
           </BookingSidebar>
         }

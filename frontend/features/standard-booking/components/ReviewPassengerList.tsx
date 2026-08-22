@@ -1,49 +1,113 @@
 type ReviewPassengerListProps = {
   passengers: Array<Record<string, unknown>>;
   documents: Array<Record<string, unknown>>;
+  onEdit?: () => void;
 };
 
-export function ReviewPassengerList({ passengers, documents }: ReviewPassengerListProps) {
-  const displayTitle = (raw: unknown): string => {
-    const value = typeof raw === "string" ? raw.trim() : "";
-    if (!value) return "";
-    const blocked = new Set(["null", "undefined", "none", "nil"]);
-    if (blocked.has(value.toLowerCase())) return "";
-    return value;
-  };
+function displayTitle(raw: unknown): string {
+  const value = typeof raw === "string" ? raw.trim() : "";
+  if (!value) return "";
+  const blocked = new Set(["null", "undefined", "none", "nil"]);
+  if (blocked.has(value.toLowerCase())) return "";
+  return value;
+}
 
+function typeLabel(type: string, index: number, passengers: Array<Record<string, unknown>>): string {
+  const normalized = (type || "adult").toLowerCase();
+  const label =
+    normalized === "child" ? "Child" : normalized === "infant" ? "Infant" : "Adult";
+  const sameTypeIndex =
+    passengers
+      .slice(0, index + 1)
+      .filter((p) => String(p.passenger_type ?? "adult").toLowerCase() === normalized).length;
+  return `${label} ${sameTypeIndex}`;
+}
+
+function Row({ label, value }: { label: string; value?: string | null }) {
+  if (!value || !String(value).trim()) return null;
   return (
-    <article className="rounded-jp-lg border border-jp-border bg-jp-surface p-4" data-testid="review-passenger-list">
-      <h2 className="text-jp-base font-semibold">Passengers</h2>
-      <ul className="mt-3 space-y-3">
-        {passengers.map((passenger, index) => {
-          const title = displayTitle(passenger.title);
-          const first = String(passenger.first_name ?? "").trim();
-          const last = String(passenger.last_name ?? "").trim();
-          const fullName = [title, first, last].filter(Boolean).join(" ");
+    <div className="flex justify-between gap-3 text-jp-sm">
+      <dt className="text-jp-muted">{label}</dt>
+      <dd className="text-right font-medium text-jp-text">{value}</dd>
+    </div>
+  );
+}
 
-          return (
-            <li key={index} className="rounded-jp-md border border-jp-border p-3 text-jp-sm">
-              <p className="font-semibold text-jp-text">{fullName}</p>
-              <p className="text-jp-muted capitalize">{(passenger.passenger_type as string) ?? "adult"}</p>
-            </li>
-          );
-        })}
-      </ul>
-      {documents.length > 0 ? (
-        <div className="mt-4">
-          <h3 className="text-jp-sm font-semibold">Travel documents</h3>
-          <ul className="mt-2 space-y-1 text-jp-sm text-jp-muted">
-            {documents.map((doc, index) => (
-              <li key={index} data-testid="masked-document">
-                {(doc.passenger_label as string) ?? "Passenger"} · {(doc.document_type as string) ?? "document"}
-                {(doc.passport_number_masked as string) ? ` · ${doc.passport_number_masked as string}` : ""}
-                {(doc.national_id_masked as string) ? ` · ${doc.national_id_masked as string}` : ""}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-    </article>
+export function ReviewPassengerList({ passengers, documents, onEdit }: ReviewPassengerListProps) {
+  return (
+    <div className="space-y-3" data-testid="review-passenger-list">
+      {passengers.map((passenger, index) => {
+        const title = displayTitle(passenger.title);
+        const first = String(passenger.first_name ?? "").trim();
+        const last = String(passenger.last_name ?? "").trim();
+        const fullName = [title, first, last].filter(Boolean).join(" ");
+        const doc =
+          documents.find((d) => {
+            const label = String(d.passenger_label ?? "").trim().toLowerCase();
+            return label === `${first} ${last}`.trim().toLowerCase();
+          }) ?? documents[index];
+
+        return (
+          <article
+            key={index}
+            className="rounded-jp-lg border border-jp-border bg-jp-surface p-4"
+            data-testid="review-traveler-card"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-jp-primary">
+                  {typeLabel(String(passenger.passenger_type ?? "adult"), index, passengers)}
+                </p>
+                <h3 className="mt-1 text-jp-base font-semibold text-jp-text">{fullName || "Traveler"}</h3>
+              </div>
+              {onEdit ? (
+                <button
+                  type="button"
+                  className="text-jp-xs font-semibold text-jp-primary hover:underline focus-visible:outline-none focus-visible:shadow-jp-focus"
+                  onClick={onEdit}
+                >
+                  Edit
+                </button>
+              ) : null}
+            </div>
+            <dl className="mt-3 space-y-1.5">
+              <Row label="Title" value={title || null} />
+              <Row label="Gender" value={String(passenger.gender ?? "") || null} />
+              <Row label="Date of birth" value={String(passenger.date_of_birth ?? "") || null} />
+              <Row label="Nationality" value={String(passenger.nationality ?? "") || null} />
+            </dl>
+            <div className="mt-3 border-t border-jp-border pt-3">
+              <p className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Travel document</p>
+              <dl className="mt-2 space-y-1.5">
+                <Row
+                  label="Document"
+                  value={String(passenger.document_type ?? doc?.document_type ?? "passport")}
+                />
+                <Row
+                  label="Number"
+                  value={
+                    String(
+                      passenger.passport_number_masked ??
+                        doc?.passport_number_masked ??
+                        passenger.national_id_masked ??
+                        doc?.national_id_masked ??
+                        "",
+                    ) || null
+                  }
+                />
+                <Row
+                  label="Issuing country"
+                  value={String(passenger.passport_issuing_country ?? doc?.passport_issuing_country ?? "") || null}
+                />
+                <Row
+                  label="Expiry"
+                  value={String(passenger.passport_expiry_date ?? doc?.passport_expiry_date ?? "") || null}
+                />
+              </dl>
+            </div>
+          </article>
+        );
+      })}
+    </div>
   );
 }
