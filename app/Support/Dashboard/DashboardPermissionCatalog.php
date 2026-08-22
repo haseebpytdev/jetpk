@@ -54,6 +54,8 @@ final class DashboardPermissionCatalog
             'cms.publish.approve',
             'users.suspend',
             'audit.export',
+            'integrations.activate',
+            'integrations.test-payment',
         ];
     }
 
@@ -84,6 +86,12 @@ final class DashboardPermissionCatalog
             ['id' => 'roles.assignPermissions', 'key' => 'roles.assignPermissions', 'label' => 'Assign role permissions', 'category' => 'roles', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => true, 'description' => 'Assign permissions to roles.', 'risk' => 'high'],
             ['id' => 'settings.view', 'key' => 'settings.view', 'label' => 'View settings', 'category' => 'settings', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => false, 'description' => 'View system settings metadata.', 'risk' => 'standard'],
             ['id' => 'settings.update', 'key' => 'settings.update', 'label' => 'Update settings', 'category' => 'settings', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => true, 'description' => 'Update settings metadata.', 'risk' => 'high'],
+            ['id' => 'integrations.view', 'key' => 'integrations.view', 'label' => 'View integrations', 'category' => 'integrations', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => false, 'description' => 'View Integration Hub status and configuration summaries.', 'risk' => 'standard'],
+            ['id' => 'integrations.manage', 'key' => 'integrations.manage', 'label' => 'Manage integrations', 'category' => 'integrations', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => false, 'description' => 'Update integration settings and replace secrets.', 'risk' => 'elevated'],
+            ['id' => 'integrations.test', 'key' => 'integrations.test', 'label' => 'Test integrations', 'category' => 'integrations', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => false, 'description' => 'Run non-commercial connection tests.', 'risk' => 'elevated'],
+            ['id' => 'integrations.activate', 'key' => 'integrations.activate', 'label' => 'Activate integrations', 'category' => 'integrations', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => true, 'description' => 'Enable or disable runtime integrations.', 'risk' => 'high'],
+            ['id' => 'integrations.test-payment', 'key' => 'integrations.test-payment', 'label' => 'Integration test payments', 'category' => 'integrations', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => true, 'description' => 'Create test-mode diagnostic payment transactions.', 'risk' => 'high'],
+            ['id' => 'integrations.audit', 'key' => 'integrations.audit', 'label' => 'View integration audit', 'category' => 'integrations', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => false, 'description' => 'View sanitized integration audit history.', 'risk' => 'standard'],
             ['id' => 'audit.view', 'key' => 'audit.view', 'label' => 'View audit log', 'category' => 'audit', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => false, 'description' => 'View audit event history.', 'risk' => 'standard'],
             ['id' => 'audit.export', 'key' => 'audit.export', 'label' => 'Export audit log', 'category' => 'audit', 'scope' => 'allRecords', 'channel' => 'all', 'highRisk' => true, 'description' => 'Export audit events.', 'risk' => 'high'],
         ];

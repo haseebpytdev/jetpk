@@ -159,6 +159,19 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         return redirect()->to($this->pathWithQuery('/admin/dashboard/api-connections', $request->query()));
     }
 
+    public function adminIntegrationsIndex(Request $request): RedirectResponse
+    {
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/integrations', $request->query()));
+    }
+
+    public function adminIntegrationsAbhiPay(Request $request): RedirectResponse
+    {
+        $query = $request->query();
+        $query['provider'] = 'abhipay';
+
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/integrations', $query));
+    }
+
     public function adminStaffIndex(Request $request): RedirectResponse
     {
         return redirect()->to($this->pathWithQuery('/admin/dashboard/staff', $request->query()));

@@ -252,6 +252,35 @@ export function apiSettingsTestPath(connectionId: string): string {
   return laravelPortalPath("admin", `/api-settings/${encodeURIComponent(connectionId)}/test?format=json`);
 }
 
+export function integrationsIndexPath(category?: string): string {
+  const qs = category && category !== "all" ? `&category=${encodeURIComponent(category)}` : "";
+  return laravelPortalPath("admin", `/integrations?format=json${qs}`);
+}
+
+export function integrationShowPath(code: string): string {
+  return laravelPortalPath("admin", `/integrations/${encodeURIComponent(code)}?format=json`);
+}
+
+export function integrationUpdatePath(code: string): string {
+  return laravelPortalPath("admin", `/integrations/${encodeURIComponent(code)}?format=json`);
+}
+
+export function integrationActivatePath(code: string): string {
+  return laravelPortalPath("admin", `/integrations/${encodeURIComponent(code)}/activate?format=json`);
+}
+
+export function integrationDeactivatePath(code: string): string {
+  return laravelPortalPath("admin", `/integrations/${encodeURIComponent(code)}/deactivate?format=json`);
+}
+
+export function integrationTestConnectionPath(code: string): string {
+  return laravelPortalPath("admin", `/integrations/${encodeURIComponent(code)}/test-connection?format=json`);
+}
+
+export function integrationTestPaymentPath(code: string): string {
+  return laravelPortalPath("admin", `/integrations/${encodeURIComponent(code)}/test-payment?format=json`);
+}
+
 export function notificationEventsUpdatePath(): string {
   return laravelPortalPath("admin", "/settings/communications/notification-events?format=json");
 }

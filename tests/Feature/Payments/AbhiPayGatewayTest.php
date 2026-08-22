@@ -97,6 +97,7 @@ class AbhiPayGatewayTest extends TestCase
         $this->assertSame('super-secret-key', $gateway->merchant_secret_key);
         $this->assertStringNotContainsString('super-secret-key', $this->get(route('admin.settings.payments.index'))->getContent());
         $this->assertTrue(AuditLog::query()->where('action', 'payment_gateway.abhipay.updated')->exists());
+        $this->assertTrue(AuditLog::query()->where('action', 'payment_gateway.abhipay.secret_replaced')->exists());
     }
 
     public function test_start_uses_booking_amount_not_request_amount(): void

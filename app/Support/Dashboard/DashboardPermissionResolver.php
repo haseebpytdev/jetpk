@@ -66,6 +66,9 @@ final class DashboardPermissionResolver
         if (self::canViewSettings($user)) {
             $keys[] = 'settings.view';
         }
+        if (self::canViewIntegrations($user)) {
+            $keys[] = 'integrations.view';
+        }
         if (self::canViewAudit($user)) {
             $keys[] = 'audit.view';
         }
@@ -186,6 +189,11 @@ final class DashboardPermissionResolver
         return Gate::forUser($user)->allows('client.page-settings.manage');
     }
 
+    public static function canViewIntegrations(User $user): bool
+    {
+        return $user->isPlatformAdmin();
+    }
+
     public static function canViewAudit(User $user): bool
     {
         return $user->isPlatformAdmin()
@@ -212,6 +220,7 @@ final class DashboardPermissionResolver
             'roles.view' => self::canViewRoles($user),
             'permissions.view' => self::canViewPermissions($user),
             'settings.view' => self::canViewSettings($user),
+            'integrations.view' => self::canViewIntegrations($user),
             'audit.view' => self::canViewAudit($user),
             default => false,
         };

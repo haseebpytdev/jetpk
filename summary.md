@@ -11,12 +11,13 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-21 (Owner Retest V3 Wave-6 CLUSTER D — UX cleanup)
+**Last updated:** 2026-08-22 (JP-INT-01 Integrations Hub)
 
 ---
 
 ## Changelog (high level)
 
+| 2026-08-22 | JP-INT-01 Integrations Hub | Admin **Integrations** control plane: `IntegrationRegistry` + manager facade over suppliers/AbhiPay; health history; encrypted AbhiPay settings; non-commercial Test Connection; test-mode diagnostic Test Payment (`purpose=integration_test`, PKR 1.00); legacy payments settings redirect; RBAC `integrations.*`. Docs: `docs/phases/JP-INT-01-*`. |
 | 2026-08-21 | JETPK WAVE-6 CLUSTER D UX CLEANUP | **Branded cards / booking shell / passport autofill:** removed per-card View Details (Select fare updates Fare Summary). Synthetic-only offers show Current fare instead of broken branded Unavailable. Booking max width expanded (~1080–1240px) with ~300–360px Flight Preview column. Document Reader simplified to Autofill from passport icon CTA; customer MRZ/OCR jargon hidden; client-side architecture preserved. |
 
 | 2026-08-21 | JETPK WAVE-6 CLUSTER C STOP TOOLTIP CRASH | **Results stop/layover tooltip:** fixed infinite re-render loop (`details` array identity → `useLayoutEffect` → `setPlacement`) that crashed connected-flight cards into the global error page on hover/click. Hardened malformed layover metadata, unmount-safe timers, and `:focus-visible` keyboard open without mouse focus→click close race. Global `app/error.tsx` Try again resets once then hard-reloads clean route state. |
@@ -1272,6 +1273,7 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 **Phase complete after:** SFTP upload + **`php artisan view:clear`** + **`php artisan cache:clear`** + spot-send welcome/manual/abandoned on staging + registry admin check.
 | `Support/` | **`SupportTicketService`** — ticket create/reply/status/assign; E6 events for created/replied/status-changed. |
 | `Payments/` | `BookingPaymentService`, `BookingRefundService`, `PaymentTransactionService`, `PaymentGatewaySettingsService`, `Gateways/AbhiPayGateway`, `PaymentGatewayResolver`. **`Support/Payments/PublicAbhiPayCheckoutPresenter`** — confirmation/review AbhiPay CTA state (PIA NDC active-PNR gating, payment status labels, guest token). **`Services/Suppliers/PiaNdc/PiaNdcBookingStatusRefreshService`** — controlled DoOrderRetrieve refresh + local reconciliation (R12L). |
+| `Integrations/` | **JP-INT-01** Admin hub facade: `IntegrationRegistry`, `IntegrationHubService`, `IntegrationManagerResolver`, `IntegrationHealthRecorder`, `AbhiPayDiagnosticPaymentService`, managers (`AbhiPay`, `Supplier`, `Draft`). Controller `Admin\IntegrationsController`. Dashboard `/integrations`. |
 | `Promos/` | **`PromoCodeService`** — validate/apply/remove/redeem promo on flight booking checkout payables; **`PromoCodeCalculator`** — percent/fixed discount math (supplier fares unchanged). **`Promo/PromoCodeValidationService`** — admin preview validation. |
 | `Documents/` | `BookingDocumentService` — PDFs / document lifecycle. |
 | `Dashboard/` | `AgencyDashboardService` — `build()`, `operationalCountsForAgency()`, `buildAdminCommandCenter()` (PNR/payment/staff/agent/failures panels). |
@@ -1289,7 +1291,7 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 | `Auth/` | Login/register, password reset, email verification, **Socialite** (`SocialAuthController`, **`SocialOAuthClientContext`** shared callback client slug), **Google profile onboarding** (`GoogleOnboarding`, `GoogleOnboardingController`, `GoogleCustomerWelcomeMail`). |
 | `Customer/`, `Agent/` | **`SavedTravelerController`** (E11) — saved traveler CRUD; policy-scoped by user (and agency for agents). |
 | `Customer/`, `Agent/`, `Staff/`, `Admin/` | **`SupportTicketController`** (E7) — scoped ticket list/create/show/reply; staff/admin status + admin assign. |
-| `Admin/` | Dashboard, bookings CRUD/refund/payment/cancel, **`AgencyManagementController`** (agency company index/profile), agents (legacy list/preview), supplier connections, agency comms + **notification settings**, message templates, delivery logs, markup, branding, **`AdminSettingsHubController`**, **`AgencyPaymentSettingsController`**, **`CmsPageController`** (static CMS pages), **`PromoCodeController`**, **`CustomerManagementController`** (customer CRM list/profile), safety. |
+| `Admin/` | Dashboard, bookings CRUD/refund/payment/cancel, **`AgencyManagementController`** (agency company index/profile), agents (legacy list/preview), supplier connections, **`IntegrationsController`** (JP-INT-01 hub), agency comms + **notification settings**, message templates, delivery logs, markup, branding, **`AdminSettingsHubController`**, **`AgencyPaymentSettingsController`**, **`CmsPageController`** (static CMS pages), **`PromoCodeController`**, **`CustomerManagementController`** (customer CRM list/profile), safety. |
 | `Agent/` | Agent dashboard, bookings, payments/cancellation/commission, **wallet/deposits**, **agency details** (`AgentAgencyController` show/edit/update), **staff** (`AgentStaffController`, `AgentPermission`, `AgentStaffPolicy`), **saved travelers**; middleware **`EnsureAgentPermission`**, **`EnsureAgentAdmin`**. |
 | `Agents/` | **`AgentWalletService`** (canonical agency wallet resolve/create, deposit submit/approve/reject; **`canonicalWalletForAgency`**, **`getOrCreateCanonicalWalletForAgency`**, **`canonicalWalletSummary`**; **`agencyWalletSummary`** / **`agencyBalanceSummary`** sum all rows). |
 | `Finance/Wallets/` | **`WalletAuditService`** — duplicate wallet classification + audit UI (`build`, `csvRows`, `classificationForWallet`). **`DuplicateWalletArchiveService`** — admin/CLI archive of zero-balance cleanup candidates (status → `archived` only). Artisan **`agent-wallets:audit`**, **`agent-wallets:archive-candidates`**; admin wallet audit + archive preview/POST + CSV export. |

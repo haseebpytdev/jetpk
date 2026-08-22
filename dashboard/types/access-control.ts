@@ -164,6 +164,7 @@ export type PermissionGroup =
   | "users"
   | "roles"
   | "settings"
+  | "integrations"
   | "audit";
 
 export type PermissionScope =

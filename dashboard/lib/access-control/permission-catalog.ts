@@ -24,6 +24,8 @@ const HIGH_RISK_KEYS = new Set([
   "cms.publish.approve",
   "users.suspend",
   "audit.export",
+  "integrations.activate",
+  "integrations.test-payment",
 ]);
 
 const PERMISSION_SEEDS: PermissionSeed[] = [
@@ -83,6 +85,13 @@ const PERMISSION_SEEDS: PermissionSeed[] = [
 
   { key: "settings.view", domain: "settings", action: "view", label: "View settings", description: "View system settings metadata.", risk: "standard", laravelPolicyHint: "SettingPolicy::view" },
   { key: "settings.update", domain: "settings", action: "update", label: "Update settings", description: "Update system settings.", risk: "high", isHighRisk: true, laravelPolicyHint: "SettingPolicy::update" },
+
+  { key: "integrations.view", domain: "integrations", action: "view", label: "View integrations", description: "View Integration Hub status and configuration summaries.", risk: "standard", laravelPolicyHint: "Gate::define('integrations.view')" },
+  { key: "integrations.manage", domain: "integrations", action: "manage", label: "Manage integrations", description: "Update integration settings and replace secrets.", risk: "elevated", laravelPolicyHint: "Gate::define('integrations.manage')" },
+  { key: "integrations.test", domain: "integrations", action: "manage", label: "Test integrations", description: "Run non-commercial connection tests.", risk: "elevated", laravelPolicyHint: "Gate::define('integrations.test')" },
+  { key: "integrations.activate", domain: "integrations", action: "manage", label: "Activate integrations", description: "Enable or disable runtime integrations.", risk: "high", isHighRisk: true, laravelPolicyHint: "Gate::define('integrations.activate')" },
+  { key: "integrations.test-payment", domain: "integrations", action: "manage", label: "Integration test payments", description: "Create test-mode diagnostic payment transactions.", risk: "high", isHighRisk: true, laravelPolicyHint: "Gate::define('integrations.test-payment')" },
+  { key: "integrations.audit", domain: "integrations", action: "view", label: "View integration audit", description: "View sanitized integration audit history.", risk: "standard", laravelPolicyHint: "Gate::define('integrations.audit')" },
 
   { key: "audit.view", domain: "audit", action: "view", label: "View audit log", description: "View audit event history.", risk: "standard", laravelPolicyHint: "AuditPolicy::view" },
   { key: "audit.export", domain: "audit", action: "export", label: "Export audit log", description: "Export audit events.", risk: "high", isHighRisk: true, laravelPolicyHint: "AuditPolicy::export" },

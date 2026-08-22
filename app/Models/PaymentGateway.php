@@ -54,9 +54,54 @@ class PaymentGateway extends Model
         return filled($this->merchant_id) && filled($this->merchant_secret_key);
     }
 
+    public function isBaseUrlV3(): bool
+    {
+        $base = strtolower(rtrim((string) $this->base_url, '/'));
+
+        return str_contains($base, '/api/v3');
+    }
+
+    public function hasCallbackConfigured(): bool
+    {
+        return filled($this->callback_url);
+    }
+
+    /**
+     * Public Review "Pay by Card" readiness flags (admin Integrations + checkout).
+     *
+     * @return array{
+     *   ABHIPAY_RECORD_PRESENT: string,
+     *   ABHIPAY_ACTIVE: string,
+     *   ABHIPAY_CONFIGURED: string,
+     *   ABHIPAY_CHECKOUT_AVAILABLE: string,
+     *   ABHIPAY_BASE_URL_IS_V3: string,
+     *   ABHIPAY_CALLBACK_CONFIGURED: string
+     * }
+     */
+    public function checkoutReadinessFlags(): array
+    {
+        $configured = $this->isConfigured();
+        $active = (bool) $this->is_active;
+        $v3 = $this->isBaseUrlV3();
+        $callback = $this->hasCallbackConfigured();
+        $checkout = $active && $configured && $v3 && $callback;
+
+        return [
+            'ABHIPAY_RECORD_PRESENT' => $this->exists ? 'YES' : 'NO',
+            'ABHIPAY_ACTIVE' => $active ? 'YES' : 'NO',
+            'ABHIPAY_CONFIGURED' => $configured ? 'YES' : 'NO',
+            'ABHIPAY_CHECKOUT_AVAILABLE' => $checkout ? 'YES' : 'NO',
+            'ABHIPAY_BASE_URL_IS_V3' => $v3 ? 'YES' : 'NO',
+            'ABHIPAY_CALLBACK_CONFIGURED' => $callback ? 'YES' : 'NO',
+        ];
+    }
+
     public function isAvailableForCheckout(): bool
     {
-        return $this->is_active && $this->isConfigured();
+        return $this->is_active
+            && $this->isConfigured()
+            && $this->isBaseUrlV3()
+            && $this->hasCallbackConfigured();
     }
 
     public function maskedMerchantId(): ?string

@@ -167,6 +167,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('platform.admin', [PlatformAdminPolicy::class, 'accessAdminTools']);
         Gate::define('client.page-settings.manage', [ClientPageSettingsPolicy::class, 'manage']);
 
+        foreach (\App\Support\Integrations\IntegrationAuthorization::allKeys() as $integrationPermission) {
+            Gate::define($integrationPermission, static function (\App\Models\User $user) use ($integrationPermission): bool {
+                return \App\Support\Integrations\IntegrationAuthorization::can($user, $integrationPermission);
+            });
+        }
+
         Blade::anonymousComponentPath(
             resource_path('views/themes/admin/jetpakistan/components'),
             'themes.admin.jetpakistan.components'

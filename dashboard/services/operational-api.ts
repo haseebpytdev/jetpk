@@ -13,6 +13,13 @@ import {
   apiSettingsTestPath,
   apiSettingsTogglePath,
   apiSettingsUpdatePath,
+  integrationsIndexPath,
+  integrationShowPath,
+  integrationUpdatePath,
+  integrationActivatePath,
+  integrationDeactivatePath,
+  integrationTestConnectionPath,
+  integrationTestPaymentPath,
   brandingSettingsPath,
   bookingAssignStaffPath,
   bookingContactPath,
@@ -594,6 +601,66 @@ export async function toggleApiConnection(connectionId: string): Promise<Mutatio
 export async function testApiConnection(connectionId: string): Promise<MutationResponse<{ test?: Record<string, unknown> }>> {
   return laravelRequest(apiSettingsTestPath(connectionId), {
     method: "PATCH",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function listIntegrations(category?: string): Promise<MutationResponse<{ hub?: Record<string, unknown>; permissions?: Record<string, boolean> }>> {
+  return laravelRequest(integrationsIndexPath(category), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function showIntegration(code: string): Promise<MutationResponse<{ integration?: Record<string, unknown> }>> {
+  return laravelRequest(integrationShowPath(code), {
+    method: "GET",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function updateIntegration(
+  code: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ configuration?: Record<string, unknown> }>> {
+  return laravelRequest(integrationUpdatePath(code), {
+    method: "PATCH",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function activateIntegration(code: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(integrationActivatePath(code), {
+    method: "POST",
+    json: {},
+    retryCsrfOnce: false,
+  });
+}
+
+export async function deactivateIntegration(code: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(integrationDeactivatePath(code), {
+    method: "POST",
+    json: {},
+    retryCsrfOnce: false,
+  });
+}
+
+export async function testIntegrationConnection(code: string): Promise<MutationResponse<{ result?: Record<string, unknown> }>> {
+  return laravelRequest(integrationTestConnectionPath(code), {
+    method: "POST",
+    json: {},
+    retryCsrfOnce: false,
+  });
+}
+
+export async function testIntegrationPayment(
+  code: string,
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ result?: Record<string, unknown> }>> {
+  return laravelRequest(integrationTestPaymentPath(code), {
+    method: "POST",
+    json: payload,
     retryCsrfOnce: false,
   });
 }

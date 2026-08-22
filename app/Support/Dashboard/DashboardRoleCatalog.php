@@ -139,7 +139,16 @@ final class DashboardRoleCatalog
         $allView = [
             'dashboard.view', 'bookings.view', 'payments.view', 'customers.view',
             'suppliers.view', 'agents.view', 'pnrs.view', 'tickets.view', 'reports.view',
-            'cms.view', 'users.view', 'roles.view', 'settings.view', 'audit.view',
+            'cms.view', 'users.view', 'roles.view', 'settings.view', 'integrations.view', 'audit.view',
+        ];
+
+        $integrationAdmin = [
+            'integrations.view',
+            'integrations.manage',
+            'integrations.test',
+            'integrations.activate',
+            'integrations.test-payment',
+            'integrations.audit',
         ];
 
         return [
@@ -151,8 +160,8 @@ final class DashboardRoleCatalog
                 'category' => 'system',
                 'isProtected' => true,
                 'scope' => 'allRecords',
-                'permissionGroups' => ['dashboard', 'bookings', 'payments', 'customers', 'suppliers', 'agents', 'pnrs', 'tickets', 'reports', 'cms', 'users', 'roles', 'settings', 'audit'],
-                'permissionKeys' => array_merge($allView, ['users.assignRoles', 'roles.assignPermissions', 'settings.update', 'audit.export']),
+                'permissionGroups' => ['dashboard', 'bookings', 'payments', 'customers', 'suppliers', 'agents', 'pnrs', 'tickets', 'reports', 'cms', 'users', 'roles', 'settings', 'integrations', 'audit'],
+                'permissionKeys' => array_merge($allView, $integrationAdmin, ['users.assignRoles', 'roles.assignPermissions', 'settings.update', 'audit.export']),
                 'accountTypes' => [AccountType::PlatformAdmin],
             ],
             [

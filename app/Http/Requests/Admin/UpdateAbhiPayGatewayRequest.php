@@ -23,6 +23,9 @@ class UpdateAbhiPayGatewayRequest extends FormRequest
             'merchant_id' => ['nullable', 'string', 'max:120'],
             'merchant_secret_key' => ['nullable', 'string', 'max:255'],
             'base_url' => ['nullable', 'url', 'max:255'],
+            'success_url' => ['nullable', 'url', 'max:255'],
+            'cancel_url' => ['nullable', 'url', 'max:255'],
+            'decline_url' => ['nullable', 'url', 'max:255'],
         ];
     }
 

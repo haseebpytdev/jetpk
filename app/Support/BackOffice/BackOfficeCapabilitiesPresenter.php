@@ -248,6 +248,9 @@ class BackOfficeCapabilitiesPresenter
         }
 
         $system = [];
+        if ($isAdmin && ($has('integrations.view') || $has('suppliers.view'))) {
+            $system[] = $this->dashboardNav('Integrations', 'integrations', '/integrations');
+        }
         if ($isAdmin && $has('suppliers.view')) {
             $system[] = $this->dashboardNav('API Connections', 'api-settings', '/api-connections');
         }

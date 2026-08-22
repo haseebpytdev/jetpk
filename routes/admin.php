@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AgencyMediaController;
 use App\Http\Controllers\Admin\AgencyMessageTemplateController;
 use App\Http\Controllers\Admin\AgencyNotificationSettingController;
 use App\Http\Controllers\Admin\AgencyPaymentSettingsController;
+use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\AgencyUserAgencyRoleController;
 use App\Http\Controllers\Admin\AgencyUserAgentPermissionController;
 use App\Http\Controllers\Admin\AgentApplicationController;
@@ -239,11 +240,27 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     });
     Route::get('/settings', [BackOfficeLegacyViewRedirectController::class, 'adminSettingsIndex'])->name('settings.index');
 
-    Route::get('/settings/payments', [BackOfficeLegacyViewRedirectController::class, 'adminSettingsIndex'])->name('settings.payments.index');
+    Route::get('/settings/payments', [BackOfficeLegacyViewRedirectController::class, 'adminIntegrationsAbhiPay'])->name('settings.payments.index');
     Route::patch('/settings/payments/abhipay', [AgencyPaymentSettingsController::class, 'updateAbhiPay'])->name('settings.payments.abhipay.update');
     Route::post('/settings/payments/abhipay/test', [AgencyPaymentSettingsController::class, 'testAbhiPay'])
         ->middleware('throttle:6,1')
         ->name('settings.payments.abhipay.test');
+
+    Route::middleware('platform.module:api_settings')->group(function (): void {
+        Route::get('/integrations', [IntegrationsController::class, 'index'])->name('integrations.index');
+        Route::get('/integrations/{code}', [IntegrationsController::class, 'show'])->name('integrations.show');
+        Route::patch('/integrations/{code}', [IntegrationsController::class, 'update'])->name('integrations.update');
+        Route::post('/integrations/{code}/activate', [IntegrationsController::class, 'activate'])->name('integrations.activate');
+        Route::post('/integrations/{code}/deactivate', [IntegrationsController::class, 'deactivate'])->name('integrations.deactivate');
+        Route::post('/integrations/{code}/test-connection', [IntegrationsController::class, 'testConnection'])
+            ->middleware('throttle:12,1')
+            ->name('integrations.test-connection');
+        Route::post('/integrations/{code}/test-payment', [IntegrationsController::class, 'testPayment'])
+            ->middleware('throttle:6,1')
+            ->name('integrations.test-payment');
+        Route::get('/integrations/{code}/health', [IntegrationsController::class, 'health'])->name('integrations.health');
+        Route::get('/integrations/{code}/docs', [IntegrationsController::class, 'docs'])->name('integrations.docs');
+    });
     Route::middleware('platform.module:branding_settings')->group(function (): void {
         Route::get('/settings/branding', [BackOfficeLegacyViewRedirectController::class, 'adminBrandingSettings'])->name('settings.branding.edit');
         Route::patch('/settings/branding', [AgencyBrandingController::class, 'update'])->name('settings.branding.update');

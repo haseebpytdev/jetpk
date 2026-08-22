@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
     'group_booking_id',
     'user_id',
     'gateway',
+    'purpose',
     'environment',
     'amount',
     'currency',
