@@ -2167,7 +2167,22 @@ class FlightOfferDisplayPresenter
             return is_array($sanitized) ? $sanitized : [];
         }
 
-        $enriched = array_merge($resolved, self::deriveBrandedFareOptionDisplayPrice($resolved, $offer));
+        $derived = self::deriveBrandedFareOptionDisplayPrice($resolved, $offer);
+        if (($derived['displayed_price'] ?? null) === null
+            && isset($resolved['displayed_price'])
+            && is_numeric($resolved['displayed_price'])
+            && (int) $resolved['displayed_price'] > 0
+        ) {
+            $fallbackDisplay = (int) $resolved['displayed_price'];
+            $derived = [
+                'displayed_price' => $fallbackDisplay,
+                'displayed_currency' => self::nullableTrimmedString($resolved['displayed_currency'] ?? null) ?? 'PKR',
+                'price_display' => self::nullableTrimmedString($resolved['price_display'] ?? null)
+                    ?? ('PKR '.number_format($fallbackDisplay, 0, '.', ',')),
+                'price_is_approximate' => (bool) ($resolved['price_is_approximate'] ?? false),
+            ];
+        }
+        $enriched = array_merge($resolved, $derived);
         $priceIsApproximate = (bool) ($enriched['price_is_approximate'] ?? false);
         $name = (string) ($enriched['name'] ?? '');
         $baggageSummary = self::nullableTrimmedString($enriched['baggage_summary'] ?? null);
@@ -2232,6 +2247,22 @@ class FlightOfferDisplayPresenter
                 : null,
             'baggage_summary' => $baggageSummary,
             'baggage' => $baggageSummary,
+            'cabin_baggage' => self::nullableTrimmedString($enriched['cabin_baggage'] ?? $enriched['carry_on_summary'] ?? null),
+            'checked_baggage' => self::nullableTrimmedString($enriched['checked_baggage'] ?? $enriched['check_in_summary'] ?? null),
+            'refund_rule' => self::nullableTrimmedString($enriched['refund_rule'] ?? $enriched['refundable_display'] ?? $enriched['cancellation_rule'] ?? null),
+            'change_rule' => self::nullableTrimmedString($enriched['change_rule'] ?? $enriched['modification_rule'] ?? null),
+            'meal' => self::nullableTrimmedString($enriched['meal'] ?? $enriched['meal_included'] ?? null),
+            'seat_selection' => self::nullableTrimmedString($enriched['seat_selection'] ?? $enriched['seat_selection_rule'] ?? null),
+            'passenger_pricing' => is_array($enriched['passenger_pricing'] ?? null) && $enriched['passenger_pricing'] !== []
+                ? $enriched['passenger_pricing']
+                : null,
+            'supplier_pricing_identity' => self::nullableTrimmedString(
+                $enriched['supplier_pricing_identity']
+                ?? $enriched['source_offer_id']
+                ?? null
+            ) ?? (isset($enriched['pricing_information_index']) && is_numeric($enriched['pricing_information_index'])
+                ? 'pricing_index:'.(int) $enriched['pricing_information_index']
+                : null),
             'branded_fare_supported' => empty($enriched['is_synthetic_default']),
             'selectable' => self::brandedFaresSelectionActive(),
         ], static fn (mixed $v): bool => $v !== null && $v !== '');
@@ -2298,18 +2329,31 @@ class FlightOfferDisplayPresenter
 
         $usesSelected = is_array($selectedIntent) && trim((string) ($selectedIntent['name'] ?? '')) !== '';
         if ($usesSelected) {
-            $selectedBaggage = self::nullableTrimmedString($selectedIntent['baggage'] ?? $selectedIntent['baggage_summary'] ?? null);
-            $selectedCabin = self::nullableTrimmedString($selectedIntent['cabin'] ?? null);
+            $selectedChecked = self::nullableTrimmedString(
+                $selectedIntent['checked_baggage']
+                ?? $selectedIntent['check_in_summary']
+                ?? $selectedIntent['baggage']
+                ?? $selectedIntent['baggage_summary']
+                ?? null
+            );
+            $selectedCabinBag = self::nullableTrimmedString(
+                $selectedIntent['cabin_baggage']
+                ?? $selectedIntent['carry_on_summary']
+                ?? null
+            );
+            $selectedCabinClass = self::nullableTrimmedString($selectedIntent['cabin'] ?? null);
 
             return [
-                'baggage_display' => $selectedBaggage ?? ($baseBaggage !== '' ? $baseBaggage : 'Baggage per fare rules'),
-                'cabin_display' => $selectedCabin ?? ($baseCabin !== '' ? ucfirst(str_replace('_', ' ', $baseCabin)) : null),
+                'baggage_display' => $selectedChecked ?? ($baseBaggage !== '' ? $baseBaggage : 'Baggage per fare rules'),
+                'cabin_baggage_display' => $selectedCabinBag,
+                'cabin_display' => $selectedCabinClass ?? ($baseCabin !== '' ? ucfirst(str_replace('_', ' ', $baseCabin)) : null),
                 'uses_selected_fare_family' => true,
             ];
         }
 
         return [
             'baggage_display' => $baseBaggage !== '' ? $baseBaggage : 'Baggage per fare rules',
+            'cabin_baggage_display' => null,
             'cabin_display' => $baseCabin !== '' ? ucfirst(str_replace('_', ' ', $baseCabin)) : null,
             'uses_selected_fare_family' => false,
         ];
@@ -2346,10 +2390,61 @@ class FlightOfferDisplayPresenter
             'displayed_currency' => self::nullableTrimmedString($intent['displayed_currency'] ?? null),
             'validation_note' => self::nullableTrimmedString($intent['validation_note'] ?? null) ?? self::SELECTED_FARE_VALIDATION_NOTE,
             'has_checkout_estimate' => $displayedPrice !== null && $displayedPrice > 0,
-            'baggage_summary' => self::nullableTrimmedString($intent['baggage_summary'] ?? null),
+            'baggage_summary' => self::nullableTrimmedString($intent['baggage_summary'] ?? $intent['baggage'] ?? null),
+            'cabin_baggage' => self::nullableTrimmedString($intent['cabin_baggage'] ?? $intent['carry_on_summary'] ?? null),
+            'checked_baggage' => self::nullableTrimmedString($intent['checked_baggage'] ?? $intent['check_in_summary'] ?? null),
+            'refund_rule' => self::nullableTrimmedString($intent['refund_rule'] ?? null),
+            'change_rule' => self::nullableTrimmedString($intent['change_rule'] ?? null),
+            'meal' => self::nullableTrimmedString($intent['meal'] ?? null),
+            'seat_selection' => self::nullableTrimmedString($intent['seat_selection'] ?? null),
             'cabin' => self::nullableTrimmedString($intent['cabin'] ?? null),
             'booking_class' => self::nullableTrimmedString($intent['booking_class'] ?? null),
             'fare_basis' => self::nullableTrimmedString($intent['fare_basis'] ?? null),
+            'option_key' => self::nullableTrimmedString($intent['option_key'] ?? null),
+            'supplier_pricing_identity' => self::nullableTrimmedString($intent['supplier_pricing_identity'] ?? null),
+            'passenger_pricing' => is_array($intent['passenger_pricing'] ?? null) && $intent['passenger_pricing'] !== []
+                ? $intent['passenger_pricing']
+                : null,
+        ], static fn (mixed $v): bool => $v !== null && $v !== '' && $v !== false);
+    }
+
+    /**
+     * Canonical selected-fare contract for checkout JSON (Travelers / Review).
+     *
+     * @param  array<string, mixed>|null  $intent
+     * @return array<string, mixed>|null
+     */
+    public static function buildCanonicalSelectedFare(?array $intent): ?array
+    {
+        $view = self::buildSelectedFareFamilyCheckoutView($intent);
+        if ($view === null) {
+            return null;
+        }
+
+        $checked = self::nullableTrimmedString($view['checked_baggage'] ?? $view['baggage_summary'] ?? null);
+        $cabinBag = self::nullableTrimmedString($view['cabin_baggage'] ?? null);
+
+        return array_filter([
+            'fare_option_key' => self::nullableTrimmedString($view['option_key'] ?? $intent['option_key'] ?? null),
+            'supplier_pricing_identity' => self::nullableTrimmedString($view['supplier_pricing_identity'] ?? null),
+            'fare_family' => self::nullableTrimmedString($view['name'] ?? null),
+            'brand_name' => self::nullableTrimmedString($view['name'] ?? null),
+            'brand_code' => self::nullableTrimmedString($view['brand_code'] ?? null),
+            'customer_total' => isset($view['displayed_price']) && is_numeric($view['displayed_price'])
+                ? (int) $view['displayed_price']
+                : null,
+            'currency' => self::nullableTrimmedString($view['displayed_currency'] ?? null) ?? 'PKR',
+            'price_display' => self::nullableTrimmedString($view['price_display'] ?? null),
+            'cabin_baggage' => $cabinBag,
+            'checked_baggage' => $checked,
+            'baggage' => $checked,
+            'refund_rule' => self::nullableTrimmedString($view['refund_rule'] ?? null),
+            'change_rule' => self::nullableTrimmedString($view['change_rule'] ?? null),
+            'meal' => self::nullableTrimmedString($view['meal'] ?? null),
+            'seat_selection' => self::nullableTrimmedString($view['seat_selection'] ?? null),
+            'cabin' => self::nullableTrimmedString($view['cabin'] ?? null),
+            'passenger_pricing' => is_array($view['passenger_pricing'] ?? null) ? $view['passenger_pricing'] : null,
+            'price_is_approximate' => (bool) ($view['price_is_approximate'] ?? false),
         ], static fn (mixed $v): bool => $v !== null && $v !== '' && $v !== false);
     }
 
@@ -3191,9 +3286,15 @@ class FlightOfferDisplayPresenter
             $priceTotal = (float) $row['price_total'];
         } elseif (isset($row['total']) && is_numeric($row['total'])) {
             $priceTotal = (float) $row['total'];
+        } elseif (isset($row['displayed_price']) && is_numeric($row['displayed_price']) && (float) $row['displayed_price'] > 0) {
+            // Authoritative customer-currency card totals (e.g. PKR branded options).
+            $priceTotal = (float) $row['displayed_price'];
         }
 
-        $currency = trim((string) ($row['currency'] ?? ''));
+        $currency = trim((string) ($row['currency'] ?? $row['displayed_currency'] ?? ''));
+        if ($currency === '' && isset($row['displayed_price']) && is_numeric($row['displayed_price'])) {
+            $currency = 'PKR';
+        }
         $cabin = self::nullableTrimmedString($row['cabin'] ?? $row['cabin_class'] ?? $row['class'] ?? null);
         $bookingClass = self::extractBookingClassForDisplay($row);
         $fareBasis = self::extractFareBasisForDisplay($row);
@@ -3215,8 +3316,12 @@ class FlightOfferDisplayPresenter
             self::nullableTrimmedString($row['cancellation_rule'] ?? $row['cancellation'] ?? null),
         ], fn (?string $line): bool => $line !== null));
 
-        $carryOn = BaggageDisplayNormalizer::normalizeLabel(self::nullableTrimmedString($row['carry_on_summary'] ?? $row['carry_on'] ?? null));
-        $checkIn = BaggageDisplayNormalizer::normalizeLabel(self::nullableTrimmedString($row['check_in_summary'] ?? $row['checked_baggage'] ?? null));
+        $carryOn = BaggageDisplayNormalizer::normalizeLabel(self::nullableTrimmedString(
+            $row['carry_on_summary'] ?? $row['cabin_baggage'] ?? $row['carry_on'] ?? null
+        ));
+        $checkIn = BaggageDisplayNormalizer::normalizeLabel(self::nullableTrimmedString(
+            $row['check_in_summary'] ?? $row['checked_baggage'] ?? $row['check_in'] ?? null
+        ));
         $baggageSummary = BaggageDisplayNormalizer::normalizeLabel(self::nullableTrimmedString($row['baggage_summary'] ?? $row['baggage'] ?? null));
         if ($baggageSummary === null) {
             $baggageSummary = BaggageDisplayNormalizer::formatAllowance($checkIn, $carryOn)['summary'];
@@ -3277,6 +3382,12 @@ class FlightOfferDisplayPresenter
             'can_select' => (bool) ($row['can_select'] ?? $selectable),
             'provider_context' => is_array($row['provider_context'] ?? null) ? $row['provider_context'] : null,
             'pia_ndc_provider_backed' => (bool) ($row['pia_ndc_provider_backed'] ?? false),
+            'displayed_price' => isset($row['displayed_price']) && is_numeric($row['displayed_price'])
+                ? (int) $row['displayed_price']
+                : null,
+            'displayed_currency' => self::nullableTrimmedString($row['displayed_currency'] ?? null),
+            'price_display' => self::nullableTrimmedString($row['price_display'] ?? null),
+            'price_is_approximate' => (bool) ($row['price_is_approximate'] ?? false),
         ];
 
         return array_merge(

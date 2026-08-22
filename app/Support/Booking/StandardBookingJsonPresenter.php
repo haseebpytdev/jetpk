@@ -101,6 +101,11 @@ class StandardBookingJsonPresenter
             'validation_alert' => $viewData['validationAlert'] ?? null,
             'fare_estimate_drift' => (bool) ($viewData['selectedFareEstimateDriftDetected'] ?? false),
             'complex_itinerary_notice' => (bool) ($viewData['complexItineraryNotice'] ?? false),
+            'selected_fare' => FlightOfferDisplayPresenter::buildCanonicalSelectedFare(
+                is_array($draft['selected_fare_family_option'] ?? null)
+                    ? $draft['selected_fare_family_option']
+                    : (is_array($viewData['selected_fare_family_option'] ?? null) ? $viewData['selected_fare_family_option'] : null)
+            ),
         ];
     }
 
@@ -154,6 +159,7 @@ class StandardBookingJsonPresenter
         // Validated/base offer rows must never silently replace a higher selected fare/baggage.
         $selectedCheckout = FlightOfferDisplayPresenter::buildSelectedFareFamilyCheckoutView($selectedIntent);
         $selectedEstimate = FlightOfferDisplayPresenter::buildCheckoutSelectedFareEstimatePresentation($selectedIntent);
+        $canonicalSelectedFare = FlightOfferDisplayPresenter::buildCanonicalSelectedFare($selectedIntent);
         $fareRules = FlightOfferDisplayPresenter::buildCheckoutFareRulesSidebar($offer, $selectedIntent);
 
         $fareFamily = trim((string) ($selectedCheckout['name'] ?? ''));
@@ -167,6 +173,8 @@ class StandardBookingJsonPresenter
                 ? trim((string) (($offer['baggage']['summary'] ?? '') ?: ($offer['baggage']['checked'] ?? '')))
                 : trim((string) ($offer['baggage'] ?? ''));
         }
+
+        $cabinBaggage = trim((string) ($fareRules['cabin_baggage_display'] ?? ($canonicalSelectedFare['cabin_baggage'] ?? '')));
 
         $totalFormatted = $fareBreakdown['total_formatted'] ?? null;
         if (is_array($selectedEstimate) && ! empty($selectedEstimate['has_checkout_estimate'])) {
@@ -192,6 +200,11 @@ class StandardBookingJsonPresenter
             'stops' => $offer['stops'] ?? null,
             'duration' => $presentation['duration_label'] ?? null,
             'baggage' => $baggage !== '' ? $baggage : null,
+            'cabin_baggage' => $cabinBaggage !== '' ? $cabinBaggage : null,
+            'checked_baggage' => $baggage !== '' ? $baggage : null,
+            'meal' => is_array($canonicalSelectedFare) ? ($canonicalSelectedFare['meal'] ?? null) : null,
+            'refund_rule' => is_array($canonicalSelectedFare) ? ($canonicalSelectedFare['refund_rule'] ?? null) : null,
+            'change_rule' => is_array($canonicalSelectedFare) ? ($canonicalSelectedFare['change_rule'] ?? null) : null,
             'segments' => $presentation['segments'] ?? ($offer['segments'] ?? []),
             'return_segments' => $presentation['return_segments'] ?? [],
             'total_formatted' => $totalFormatted,
@@ -200,6 +213,7 @@ class StandardBookingJsonPresenter
                 ?? ($offer['currency'] ?? 'PKR'),
             'return_split' => $returnSplit,
             'selected_fare_option_key' => trim((string) ($draft['fare_option_key'] ?? '')) ?: null,
+            'selected_fare' => $canonicalSelectedFare,
         ];
     }
 

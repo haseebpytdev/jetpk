@@ -121,6 +121,12 @@ class StandardBookingPassengersJsonTest extends TestCase
         $this->assertSame('economy-comfort', $payload['itinerary']['selected_fare_option_key']);
         $this->assertNotSame('ECONOMY BASIC', $payload['itinerary']['fare_family']);
         $this->assertNotSame('0 kg', $payload['itinerary']['baggage']);
+        $this->assertIsArray($payload['selected_fare']);
+        $this->assertSame('ECONOMY COMFORT', $payload['selected_fare']['fare_family']);
+        $this->assertSame('30 kg', $payload['selected_fare']['checked_baggage']);
+        $this->assertSame(168478, $payload['selected_fare']['customer_total']);
+        $this->assertSame('economy-comfort', $payload['selected_fare']['fare_option_key']);
+        $this->assertSame('ECONOMY COMFORT', $payload['itinerary']['selected_fare']['fare_family']);
     }
 
     public function test_passengers_get_json_missing_session_returns_404(): void

@@ -86,10 +86,26 @@ export function useRevalidation() {
     };
   }, []);
 
-  const navigateHandoff = useCallback((url: string) => {
+  const navigateHandoff = useCallback((url: string, fareOptionKey?: string) => {
+    let handoffUrl = url;
+    const key = (fareOptionKey ?? "").trim();
+    if (key) {
+      try {
+        const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "https://jetpakistan.pk");
+        if (!parsed.searchParams.get("fare_option_key")) {
+          parsed.searchParams.set("fare_option_key", key);
+        }
+        handoffUrl = `${parsed.pathname}${parsed.search}`;
+      } catch {
+        if (!/[?&]fare_option_key=/.test(url)) {
+          handoffUrl = `${url}${url.includes("?") ? "&" : "?"}fare_option_key=${encodeURIComponent(key)}`;
+        }
+      }
+    }
+
     const resolved =
-      resolvePassengerCheckoutHandoffUrl(url) ??
-      (isAllowedInternalHandoffUrl(url) ? absoluteLaravelHandoffUrl(url) : null);
+      resolvePassengerCheckoutHandoffUrl(handoffUrl) ??
+      (isAllowedInternalHandoffUrl(handoffUrl) ? absoluteLaravelHandoffUrl(handoffUrl) : null);
     if (!resolved) {
       setState("error");
       setMessage("Unable to continue to checkout. Please try again.");
@@ -162,7 +178,10 @@ export function useRevalidation() {
 
           const passengersUrl = result.data.passengers_url;
           if (passengersUrl) {
-            navigateHandoff(passengersUrl);
+            navigateHandoff(
+              passengersUrl,
+              params.fareOptionKey || result.data.selected_fare_option_id || undefined,
+            );
             setState("success");
             return;
           }
@@ -180,7 +199,7 @@ export function useRevalidation() {
           params.fareOptionKey ?? params.offerId,
           params.searchId,
         );
-        navigateHandoff(checkoutUrl);
+        navigateHandoff(checkoutUrl, params.fareOptionKey);
         setState("success");
       } finally {
         inFlightRef.current = false;
@@ -222,7 +241,7 @@ export function useRevalidation() {
         }
 
         const passengersUrl = result.data.passengers_url ?? pendingHandoffRef.current;
-        if (!passengersUrl || !navigateHandoff(passengersUrl)) {
+        if (!passengersUrl || !navigateHandoff(passengersUrl, params.fareOptionKey)) {
           setState("error");
           setMessage("Unable to accept the updated fare. Please try again.");
           return;
@@ -232,7 +251,7 @@ export function useRevalidation() {
       }
 
       const handoff = pendingHandoffRef.current ?? fareChange?.passengersUrl ?? null;
-      if (!handoff || !navigateHandoff(handoff)) {
+      if (!handoff || !navigateHandoff(handoff, params.fareOptionKey)) {
         setState("error");
         setMessage("Unable to accept the updated fare. Please try again.");
       } else {

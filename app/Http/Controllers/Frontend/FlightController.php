@@ -19,6 +19,7 @@ use App\Enums\SupportTicketCategory;
 use App\Services\Suppliers\Iati\IatiSelectedOfferRevalidationGate;
 use App\Services\Suppliers\Sabre\Gds\SabreSelectedOfferRevalidationGate;
 use App\Services\TravelData\AirlineBrandingService;
+use App\Services\Booking\BookingDraftService;
 use App\Support\Booking\AgentBookingContext;
 use App\Support\Client\ClientCheckoutContextResolver;
 use App\Support\Bookings\CheckoutFareBreakdownPresenter;
@@ -301,11 +302,20 @@ class FlightController extends Controller
                 $fareChangeRevalidation ?? [],
                 $requiresAcceptance,
             );
+            $selectedFareOptionId = trim((string) $request->input('selected_fare_option_id', ''));
+            $this->persistSelectedFareIntoBookingDraft(
+                $offer,
+                $criteria,
+                $searchId,
+                $offerId,
+                $selectedFareOptionId,
+            );
             $passengersUrl = $this->buildCustomerSelectUrl(
                 $this->offerIsCustomerBookable($offer, $criteria),
                 $offer,
                 $searchId,
                 $criteria,
+                $selectedFareOptionId !== '' ? $selectedFareOptionId : null,
             );
 
             Log::info('flight_search.selected_offer_refresh.success', [
@@ -314,6 +324,7 @@ class FlightController extends Controller
                 'reason' => (string) ($metaPatch['selected_offer_refresh_reason'] ?? ''),
                 'fare_changed' => $fareChangeRevalidation !== null,
                 'requires_acceptance' => $requiresAcceptance,
+                'fare_option_key' => FlightOfferDisplayPresenter::safeFareOptionKeyForLog($selectedFareOptionId),
             ]);
 
             return response()->json([
@@ -331,6 +342,7 @@ class FlightController extends Controller
                 'offer_freshness' => $freshnessMeta,
                 'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
                 'passengers_url' => $passengersUrl,
+                'selected_fare_option_id' => $selectedFareOptionId !== '' ? $selectedFareOptionId : null,
             ]);
         }
 
@@ -426,11 +438,20 @@ class FlightController extends Controller
             );
             $apiStatus = PublicOfferRevalidationPresenter::resolveApiStatus($revalidation, $requiresAcceptance);
 
+            $this->persistSelectedFareIntoBookingDraft(
+                $offer,
+                $criteria,
+                $searchId,
+                $offerId,
+                (string) ($selectedFareOptionId ?? ''),
+            );
+
             Log::info('flight_search.iati_selected_offer_refresh.success', [
                 'search_id' => $searchId,
                 'offer_id' => $offerId,
                 'revalidation_status' => $publicStatus,
                 'requires_acceptance' => $requiresAcceptance,
+                'fare_option_key' => FlightOfferDisplayPresenter::safeFareOptionKeyForLog((string) ($selectedFareOptionId ?? '')),
             ]);
 
             return response()->json([
@@ -453,7 +474,9 @@ class FlightController extends Controller
                     $offer,
                     $searchId,
                     $criteria,
+                    $selectedFareOptionId,
                 ),
+                'selected_fare_option_id' => $selectedFareOptionId,
             ]);
         }
 
@@ -1585,8 +1608,17 @@ class FlightController extends Controller
      * @param  array<string, mixed>  $offer
      * @param  array<string, mixed>  $criteria
      */
-    protected function buildCustomerSelectUrl(bool $canSelect, array $offer, string $searchId, array $criteria): ?string
-    {
+    /**
+     * @param  array<string, mixed>  $offer
+     * @param  array<string, mixed>  $criteria
+     */
+    protected function buildCustomerSelectUrl(
+        bool $canSelect,
+        array $offer,
+        string $searchId,
+        array $criteria,
+        ?string $fareOptionKey = null,
+    ): ?string {
         if (! $canSelect) {
             return null;
         }
@@ -1605,11 +1637,72 @@ class FlightController extends Controller
             'infants' => (int) ($criteria['infants'] ?? 0),
         ], (($returnDate = trim((string) ($criteria['return_date'] ?? ''))) !== '' ? ['return_date' => $returnDate] : []));
 
+        $normalizedFareKey = trim((string) ($fareOptionKey ?? ''));
+        if ($normalizedFareKey !== '') {
+            $params['fare_option_key'] = $normalizedFareKey;
+        }
+
         $checkoutContext = app(ClientCheckoutContextResolver::class);
         $checkoutContext->persist(request());
         $url = $checkoutContext->passengersUrl($params, request());
 
         return PublicFlightSearchSecurity::isAllowedInternalUrl($url) ? $url : null;
+    }
+
+    /**
+     * Persist the customer-selected branded fare into the booking draft during revalidation handoff
+     * so Travelers/Review consume the same canonical selection as Fare Summary.
+     *
+     * @param  array<string, mixed>  $offer
+     * @param  array<string, mixed>  $criteria
+     */
+    protected function persistSelectedFareIntoBookingDraft(
+        array $offer,
+        array $criteria,
+        string $searchId,
+        string $offerId,
+        string $fareOptionKey,
+    ): void {
+        $fareOptionKey = trim($fareOptionKey);
+        if ($fareOptionKey === '' || $searchId === '' || $offerId === '') {
+            return;
+        }
+
+        $draftMerge = [
+            'search_id' => $searchId,
+            'offer_id' => $offerId,
+            'flight_id' => $offerId,
+            'search_from' => (string) ($criteria['origin'] ?? ''),
+            'search_to' => (string) ($criteria['destination'] ?? ''),
+            'search_depart' => (string) ($criteria['depart_date'] ?? ''),
+            'trip_type' => (string) ($criteria['trip_type'] ?? 'one_way'),
+            'return_date' => (string) ($criteria['return_date'] ?? ''),
+            'cabin' => (string) ($criteria['cabin'] ?? 'economy'),
+            'adults' => max(1, (int) ($criteria['adults'] ?? 1)),
+            'children' => max(0, (int) ($criteria['children'] ?? 0)),
+            'infants' => max(0, (int) ($criteria['infants'] ?? 0)),
+            'fare_option_key' => $fareOptionKey,
+        ];
+
+        if (! FlightOfferDisplayPresenter::brandedFaresSelectionActiveForOffer($offer)) {
+            app(BookingDraftService::class)->merge($draftMerge);
+
+            return;
+        }
+
+        $resolved = FlightOfferDisplayPresenter::findFareFamilyOptionByKey($offer, $fareOptionKey);
+        if ($resolved === null) {
+            app(BookingDraftService::class)->merge($draftMerge);
+
+            return;
+        }
+
+        $intent = FlightOfferDisplayPresenter::sanitizeSelectedFareFamilyIntent($resolved, $offer);
+        if ($intent !== []) {
+            $draftMerge['selected_fare_family_option'] = $intent;
+        }
+
+        app(BookingDraftService::class)->merge($draftMerge);
     }
 
     protected function sessionFlightIdErrorMessage(Request $request): string

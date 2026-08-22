@@ -262,6 +262,7 @@ export type RevalidateOfferResponse = {
   status?: string;
   message?: string;
   passengers_url?: string;
+  selected_fare_option_id?: string | null;
   requires_fare_change_acceptance?: boolean;
   offer_freshness?: Record<string, unknown>;
   search_freshness?: SearchFreshness;
