@@ -9,8 +9,8 @@ Do **not** mark PASS. Stop before production deployment.
 `FINAL_WAVE8_ENGINEERING_SHA=8cf657d7d35cc97848318f56184825ac49af6225`  
 (last product/runtime commit — Change Flight, branded PTC, Results UI, Travelers/OCR)
 
-`FINAL_WAVE8_DOCS_SHA=05ab97324d87bb286359aee792b7e7c13b11907b`  
-(branch tip after Wave-8 gate/summary/manifest + visual matrix test)
+`FINAL_WAVE8_DOCS_SHA=53022458ec14de7bf30bba82c7238752a06dee06`  
+(branch tip after Wave-8 gate/summary/manifest + visual matrix)
 
 ## Production baseline (unchanged this loop)
 - Runtime: `a9ec8f18745c8b9db3ce62504efd485a1bb8df3e`
