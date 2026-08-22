@@ -44,7 +44,7 @@ Engineering loop complete. **DO NOT DEPLOY** until owner authorizes.
 | Pre-wave docs/expected | `3b419460a770928827877160b4c7cb3c230dae8d` |
 | Cluster A | `baa60350dc067a3b0a9a9947c41c5154a6f3db92` |
 | Clusters B/C/D | `1c846fa8438483aea213400bbba26760aecfee1a` |
-| FINAL_WAVE9_ENGINEERING_SHA | 8db2fe84593e92192e9b0f090f58b7894218bf47 |
+| FINAL_WAVE9_ENGINEERING_SHA | dfc70e7492aaec429f25f5b27392d2bc04fda11a |
 | Current production runtime | `8cf657d7d35cc97848318f56184825ac49af6225` |
 | Current public build | `H5Lgd0EQ6sVIiknlFwJh2` |
 
