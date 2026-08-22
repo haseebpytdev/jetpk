@@ -46,9 +46,9 @@ function PassportIcon({ className }: { className?: string }) {
 function progressLabel(status: string, progress: number): string {
   if (status === "preparing") return "Preparing passport image…";
   if (status === "loading_ocr") return "Starting on-device reader…";
-  if (status === "recognizing") return `Reading passport on this device… ${Math.round(progress * 100)}%`;
+  if (status === "recognizing") return `Reading passport… ${Math.round(progress * 100)}%`;
   if (status === "parsing") return "Checking passport details…";
-  return "Reading passport on this device…";
+  return "Reading passport…";
 }
 
 export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentReaderProps) {
@@ -99,7 +99,7 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
     setConflicts([]);
     setChoices({});
     setUncertainFields([]);
-    setProgressText("Reading passport on this device…");
+    setProgressText("Reading passport…");
 
     try {
       const parsed = await scanDocumentClientSide(source, {
@@ -113,7 +113,10 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
 
       if (!parsed.ok && Object.keys(parsed.fields).length === 0) {
         setPhase("error");
-        setStatusMessage(parsed.warnings[0] ?? "Could not read passport details from that image.");
+        setStatusMessage(
+          parsed.warnings[0] ??
+            "We couldn't clearly read the passport. Try a sharper photo with the full data page visible.",
+        );
         return;
       }
 
@@ -134,7 +137,9 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
       applyExtraction(parsed);
     } catch {
       setPhase("error");
-      setStatusMessage("Could not read the passport on this device. Try a clearer photo of the data page.");
+      setStatusMessage(
+        "We couldn't clearly read the passport. Try a sharper photo with the full data page visible.",
+      );
     } finally {
       if (abortRef.current === controller) {
         abortRef.current = null;
@@ -221,10 +226,23 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
       />
 
       {phase === "processing" ? (
-        <div className="mt-2 space-y-2" data-testid={`document-reader-processing-${passengerIndex}`}>
-          <p className="text-sm text-jp-muted" role="status">
-            {progressText}
-          </p>
+        <div
+          className="mt-2 flex flex-wrap items-center gap-3 rounded-jp-md border border-jp-border bg-jp-page/50 px-3 py-3"
+          data-testid={`document-reader-processing-${passengerIndex}`}
+        >
+          <PassportIcon className="h-5 w-5 shrink-0 text-jp-primary" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-jp-text" role="status">
+              Reading passport…
+            </p>
+            <p className="text-xs text-jp-muted">{progressText}</p>
+            <div
+              className="mt-2 h-1.5 overflow-hidden rounded-full bg-jp-border"
+              aria-hidden="true"
+            >
+              <div className="h-full w-2/3 animate-pulse rounded-full bg-jp-primary" />
+            </div>
+          </div>
           <button
             type="button"
             className="rounded-jp-md border border-jp-border bg-white px-3 py-1.5 text-xs font-semibold text-jp-text"
@@ -247,7 +265,7 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
             data-testid={`document-reader-retry-${passengerIndex}`}
             onClick={() => fileRef.current?.click()}
           >
-            Retry with a clearer image
+            Try another photo
           </button>
         </div>
       ) : null}

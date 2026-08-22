@@ -23,10 +23,21 @@ const MIN_DIMENSION = 200;
 /** Self-hosted OCR assets under /tesseract (never third-party CDN at runtime). */
 const TESSERACT_ASSET_PATH = "/tesseract";
 
+const CUSTOMER_FAILURE =
+  "We couldn't clearly read the passport. Try a sharper photo with the full data page visible.";
+
 type LocalOcrWorker = {
   recognize: (image: string) => Promise<{ data: { text: string } }>;
   terminate: () => Promise<unknown>;
   setParameters?: (params: Record<string, unknown>) => Promise<unknown>;
+};
+
+export type PassportImageVariants = {
+  fullPage: string;
+  mrzCrop: string;
+  mrzHighContrast: string;
+  width: number;
+  height: number;
 };
 
 export async function terminateWorkerSafely(
@@ -51,7 +62,6 @@ export async function terminateWorkerSafely(
         setTimeout(() => resolve("timeout"), timeoutMs);
       }),
     ]);
-    // Detach a late terminate rejection so it cannot surface as unhandled.
     if (result === "timeout" && !settled) {
       void Promise.resolve(worker.terminate()).catch(() => undefined);
     }
@@ -117,11 +127,38 @@ async function loadImageElement(file: File): Promise<HTMLImageElement> {
   }
 }
 
+function canvasToJpeg(canvas: HTMLCanvasElement, quality = 0.92): string {
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
+function applyGrayscaleContrast(ctx: CanvasRenderingContext2D, width: number, height: number, mode: "soft" | "hard"): void {
+  try {
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+      let value: number;
+      if (mode === "hard") {
+        // High-contrast threshold for MRZ OCR on shadowed phone photos.
+        value = gray < 150 ? 0 : 255;
+      } else {
+        value = gray < 140 ? Math.max(0, gray * 0.85) : Math.min(255, gray * 1.08);
+      }
+      data[i] = value;
+      data[i + 1] = value;
+      data[i + 2] = value;
+    }
+    ctx.putImageData(imageData, 0, 0);
+  } catch {
+    // Some browsers block getImageData; keep the drawn image.
+  }
+}
+
 /**
- * Downscale large passport photos for OCR reliability and bounded runtime.
- * Returns a canvas data URL suitable for tesseract.recognize.
+ * Build OCR image variants without uploading or persisting the passport photo.
+ * Pass 1: normalized full page · Pass 2: bottom MRZ crop · Pass 3: high-contrast MRZ crop.
  */
-export async function preprocessPassportImage(file: File): Promise<{ dataUrl: string; width: number; height: number }> {
+export async function preprocessPassportImageVariants(file: File): Promise<PassportImageVariants> {
   if (!file.type.startsWith("image/")) {
     throw new Error("Please choose a passport photo (JPG or PNG).");
   }
@@ -133,54 +170,80 @@ export async function preprocessPassportImage(file: File): Promise<{ dataUrl: st
   }
 
   const image = await loadImageElement(file);
-  const width = image.naturalWidth || image.width;
-  const height = image.naturalHeight || image.height;
+  let width = image.naturalWidth || image.width;
+  let height = image.naturalHeight || image.height;
   if (width < MIN_DIMENSION || height < MIN_DIMENSION) {
     throw new Error("Image is too small. Capture the full passport data page more clearly.");
   }
 
+  // Prefer landscape MRZ orientation: if portrait and taller than wide, keep as-is
+  // (phone photos of data pages are often portrait and still readable).
   const scale = Math.min(1, MAX_DIMENSION / Math.max(width, height));
   const targetW = Math.max(1, Math.round(width * scale));
   const targetH = Math.max(1, Math.round(height * scale));
 
-  const canvas = document.createElement("canvas");
-  canvas.width = targetW;
-  canvas.height = targetH;
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) {
+  const fullCanvas = document.createElement("canvas");
+  fullCanvas.width = targetW;
+  fullCanvas.height = targetH;
+  const fullCtx = fullCanvas.getContext("2d", { willReadFrequently: true });
+  if (!fullCtx) {
     throw new Error("This device cannot process passport images.");
   }
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, targetW, targetH);
-  ctx.drawImage(image, 0, 0, targetW, targetH);
+  fullCtx.fillStyle = "#ffffff";
+  fullCtx.fillRect(0, 0, targetW, targetH);
+  fullCtx.drawImage(image, 0, 0, targetW, targetH);
+  applyGrayscaleContrast(fullCtx, targetW, targetH, "soft");
+  const fullPage = canvasToJpeg(fullCanvas);
 
-  // Mild contrast boost for MRZ OCR without shipping the image anywhere.
-  try {
-    const imageData = ctx.getImageData(0, 0, targetW, targetH);
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-      const boosted = gray < 140 ? Math.max(0, gray * 0.85) : Math.min(255, gray * 1.08);
-      data[i] = boosted;
-      data[i + 1] = boosted;
-      data[i + 2] = boosted;
-    }
-    ctx.putImageData(imageData, 0, 0);
-  } catch {
-    // Some browsers block getImageData on tainted canvases; keep the drawn image.
+  // Bottom ~38% of the page typically contains the TD3 MRZ.
+  const cropTop = Math.floor(targetH * 0.58);
+  const cropH = Math.max(80, targetH - cropTop);
+  const mrzCanvas = document.createElement("canvas");
+  mrzCanvas.width = targetW;
+  mrzCanvas.height = cropH;
+  const mrzCtx = mrzCanvas.getContext("2d", { willReadFrequently: true });
+  if (!mrzCtx) {
+    throw new Error("This device cannot process passport images.");
   }
+  mrzCtx.fillStyle = "#ffffff";
+  mrzCtx.fillRect(0, 0, targetW, cropH);
+  mrzCtx.drawImage(fullCanvas, 0, cropTop, targetW, cropH, 0, 0, targetW, cropH);
+  applyGrayscaleContrast(mrzCtx, targetW, cropH, "soft");
+  const mrzCrop = canvasToJpeg(mrzCanvas);
+
+  const hardCanvas = document.createElement("canvas");
+  hardCanvas.width = targetW;
+  hardCanvas.height = cropH;
+  const hardCtx = hardCanvas.getContext("2d", { willReadFrequently: true });
+  if (!hardCtx) {
+    throw new Error("This device cannot process passport images.");
+  }
+  hardCtx.drawImage(mrzCanvas, 0, 0);
+  applyGrayscaleContrast(hardCtx, targetW, cropH, "hard");
+  const mrzHighContrast = canvasToJpeg(hardCanvas);
 
   return {
-    dataUrl: canvas.toDataURL("image/jpeg", 0.92),
+    fullPage,
+    mrzCrop,
+    mrzHighContrast,
     width: targetW,
     height: targetH,
   };
 }
 
+/** @deprecated Prefer preprocessPassportImageVariants for multi-pass OCR. */
+export async function preprocessPassportImage(file: File): Promise<{ dataUrl: string; width: number; height: number }> {
+  const variants = await preprocessPassportImageVariants(file);
+  return { dataUrl: variants.fullPage, width: variants.width, height: variants.height };
+}
+
+function isStrongMrzParse(result: MrzParseResult): boolean {
+  return result.ok === true && result.checkDigitsValid === true;
+}
+
 /**
  * CLIENT_SIDE document scan. Images never leave the browser and are never persisted.
- * tesseract.js is loaded only when an image is provided (dynamic import).
- * Worker/core/lang assets are served from self-hosted /tesseract paths.
+ * Multi-pass OCR stops after the first valid TD3 parse with check digits.
  */
 export async function scanDocumentClientSide(
   source: DocumentScanSource,
@@ -206,8 +269,12 @@ export async function scanDocumentClientSide(
     assertNotAborted(options.signal);
     options.onProgress?.({ status: "preparing", progress: 0.05 });
 
-    const prepared = await withTimeout(preprocessPassportImage(source.file), Math.min(10_000, timeoutMs), options.signal);
-    options.onProgress?.({ status: "loading_ocr", progress: 0.15 });
+    const variants = await withTimeout(
+      preprocessPassportImageVariants(source.file),
+      Math.min(12_000, timeoutMs),
+      options.signal,
+    );
+    options.onProgress?.({ status: "loading_ocr", progress: 0.12 });
 
     const { createWorker } = await import("tesseract.js");
     assertNotAborted(options.signal);
@@ -222,7 +289,7 @@ export async function scanDocumentClientSide(
           if (typeof message.progress === "number") {
             options.onProgress?.({
               status: message.status ?? "recognizing",
-              progress: Math.min(0.95, 0.2 + message.progress * 0.75),
+              progress: Math.min(0.92, 0.15 + message.progress * 0.7),
             });
           }
         },
@@ -231,23 +298,41 @@ export async function scanDocumentClientSide(
       options.signal,
     )) as unknown as LocalOcrWorker;
 
-    if (worker.setParameters) {
-      await worker.setParameters({
-        tessedit_pageseg_mode: "6",
-        preserve_interword_spaces: "1",
-      });
+    const passes: Array<{ label: string; dataUrl: string; psm: string; progressAt: number }> = [
+      { label: "full", dataUrl: variants.fullPage, psm: "6", progressAt: 0.35 },
+      { label: "mrz", dataUrl: variants.mrzCrop, psm: "6", progressAt: 0.55 },
+      { label: "mrz_hard", dataUrl: variants.mrzHighContrast, psm: "7", progressAt: 0.75 },
+    ];
+
+    let bestPartial: MrzParseResult | null = null;
+
+    for (const pass of passes) {
+      assertNotAborted(options.signal);
+      if (worker.setParameters) {
+        await worker.setParameters({
+          tessedit_pageseg_mode: pass.psm,
+          preserve_interword_spaces: "1",
+          tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",
+        });
+      }
+      options.onProgress?.({ status: "recognizing", progress: pass.progressAt });
+      const remaining = Math.max(8_000, timeoutMs - 5_000);
+      const recognized = await withTimeout(worker.recognize(pass.dataUrl), remaining, options.signal);
+      const parsed = parseTd3Mrz(recognized.data.text);
+      if (isStrongMrzParse(parsed)) {
+        options.onProgress?.({ status: "parsing", progress: 0.95 });
+        options.onProgress?.({ status: "done", progress: 1 });
+        return parsed;
+      }
+      if (parsed.ok || Object.keys(parsed.fields).length > Object.keys(bestPartial?.fields ?? {}).length) {
+        bestPartial = parsed;
+      }
     }
 
-    options.onProgress?.({ status: "recognizing", progress: 0.35 });
-    const recognized = await withTimeout(worker.recognize(prepared.dataUrl), timeoutMs, options.signal);
-    const text = recognized.data.text;
-
     options.onProgress?.({ status: "parsing", progress: 0.95 });
-    const result = parseTd3Mrz(text);
-    if (!result.ok && result.warnings.length === 0) {
-      result.warnings.push("Could not read passport details. Try a clearer photo of the data page.");
-    } else if (!result.ok) {
-      result.warnings.push("Could not read a complete passport MRZ. Try a clearer photo and retry.");
+    const result = bestPartial ?? fail(CUSTOMER_FAILURE);
+    if (!result.ok) {
+      result.warnings = [CUSTOMER_FAILURE];
     }
     options.onProgress?.({ status: "done", progress: 1 });
     return result;
@@ -261,9 +346,7 @@ export async function scanDocumentClientSide(
     if (error instanceof Error && error.message && !error.message.includes("createWorker")) {
       return fail(error.message);
     }
-    return fail(
-      "Could not read the passport on this device. Try a clearer photo — images are never uploaded.",
-    );
+    return fail(CUSTOMER_FAILURE);
   } finally {
     await terminateWorkerSafely(worker);
     worker = null;

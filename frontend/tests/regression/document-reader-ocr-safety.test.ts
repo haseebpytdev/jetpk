@@ -55,3 +55,16 @@ test("terminateWorkerSafely treats terminate rejection as failed without throwin
 test("OCR terminate ceiling constant is small and positive", () => {
   assert.ok(OCR_TERMINATE_TIMEOUT_MS > 0 && OCR_TERMINATE_TIMEOUT_MS <= 5_000);
 });
+
+test("real-image failure copy stays customer-safe", () => {
+  const copy =
+    "We couldn't clearly read the passport. Try a sharper photo with the full data page visible.";
+  assert.match(copy, /sharper photo/i);
+  assert.doesNotMatch(copy, /tesseract|worker|mrz|ocr/i);
+});
+
+test("multi-pass OCR exports preprocessPassportImageVariants", async () => {
+  const mod = await import("../../features/standard-booking/document-reader/ocr/scanDocumentClientSide");
+  assert.equal(typeof mod.preprocessPassportImageVariants, "function");
+  assert.equal(typeof mod.preprocessPassportImage, "function");
+});

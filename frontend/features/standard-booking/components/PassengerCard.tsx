@@ -37,21 +37,21 @@ export function PassengerCard({
       className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-card sm:p-5"
       data-testid={`passenger-card-${index}`}
     >
-      <legend className="flex items-center gap-2 px-1 text-jp-sm font-semibold">
+      <legend className="flex flex-wrap items-center gap-2 px-1 text-sm font-semibold text-jp-text">
         <span>{label}</span>
         {isLead ? (
-          <span className="rounded-jp-pill bg-jp-primary-soft px-2 py-0.5 text-jp-xs font-medium text-jp-primary">
+          <span className="rounded-jp-md bg-jp-primary/10 px-2 py-0.5 text-[11px] font-semibold text-jp-primary">
             Lead passenger
           </span>
         ) : null}
       </legend>
+      <p className="mt-1 text-xs text-jp-muted">Enter details exactly as shown on the passport.</p>
 
       <input type="hidden" name={`passengers[${index}][passenger_type]`} value={passenger.passenger_type} />
 
-      <div className="mt-4 grid gap-x-5 gap-y-4 sm:grid-cols-2">
-        <div className="border-b border-jp-border-soft pb-2.5 sm:col-span-2">
+      <div className="mt-4 grid gap-x-5 gap-y-3.5 sm:grid-cols-2">
+        <div className="border-b border-jp-border-soft pb-2 sm:col-span-2">
           <h3 className="text-sm font-semibold text-jp-text">Personal information</h3>
-          <p className="mt-0.5 text-xs text-jp-muted">Enter names exactly as shown on the travel document.</p>
         </div>
         <label className="text-jp-sm">
           Title <span className="text-red-700">*</span>
@@ -136,9 +136,8 @@ export function PassengerCard({
           />
         </label>
 
-        <div className="mt-2 border-b border-jp-border-soft pb-2.5 sm:col-span-2">
+        <div className="mt-1 border-b border-jp-border-soft pb-2 sm:col-span-2">
           <h3 className="text-sm font-semibold text-jp-text">Travel document</h3>
-          <p className="mt-0.5 text-xs text-jp-muted">Document requirements are determined by the selected itinerary.</p>
         </div>
 
         {showPassport && onReplacePassenger ? (

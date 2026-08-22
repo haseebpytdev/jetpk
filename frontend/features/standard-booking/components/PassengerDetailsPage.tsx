@@ -377,7 +377,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
       <BookingPageHeader
         title="Traveler information"
-        description="Enter details exactly as shown on travel documents."
+        description="Enter details exactly as shown on the passport."
         actions={
           <BookingSessionCountdown
             expiresAt={context.booking_session.expires_at}
@@ -448,7 +448,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
               <SeatExtrasReadinessPanel message={context.seat_extras_capability.message} />
 
               <label
-                className="flex items-start gap-3 rounded-jp-md border border-jp-border bg-jp-page/50 p-3 text-sm text-jp-text"
+                className="flex items-start gap-3 rounded-jp-lg border border-jp-border bg-jp-surface p-4 text-sm text-jp-text shadow-jp-card"
                 data-testid="terms-acceptance"
               >
                 <input

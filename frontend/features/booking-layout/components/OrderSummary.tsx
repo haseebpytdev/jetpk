@@ -215,12 +215,13 @@ function FlightPreviewCard({
       </dl>
 
       {totalLabel ? (
-        <p
-          className="rounded-jp-md bg-jp-primary/5 px-3 py-3 text-lg font-bold tabular-nums text-jp-primary"
+        <div
+          className="rounded-jp-md bg-jp-primary/5 px-3 py-3"
           data-testid="order-summary-total"
         >
-          {totalLabel}
-        </p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-jp-text-muted">Total</p>
+          <p className="text-lg font-bold tabular-nums text-jp-primary">{totalLabel}</p>
+        </div>
       ) : null}
     </div>
   );
