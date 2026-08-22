@@ -142,6 +142,7 @@ export const PERMISSION_GROUP_LABELS: Record<PermissionGroup, string> = {
   users: "Users",
   roles: "Roles",
   settings: "Settings",
+  integrations: "Integrations",
   audit: "Audit",
 };
 

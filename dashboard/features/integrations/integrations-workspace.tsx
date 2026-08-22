@@ -12,40 +12,11 @@ import {
   testIntegrationPayment,
   updateIntegration,
 } from "@/services/operational-api";
-
-type IntegrationCard = {
-  code: string;
-  name: string;
-  category: string;
-  categoryLabel?: string;
-  icon: string;
-  status: string;
-  status_label?: string;
-  environment?: string | null;
-  configured?: boolean;
-  active?: boolean;
-  adapterInstalled?: boolean;
-  supportsConnectionTest?: boolean;
-  supportsTestTransaction?: boolean;
-  supportsEnableToggle?: boolean;
-  canActivateRuntime?: boolean;
-  docsUrl?: string | null;
-  summary?: Record<string, unknown>;
-  needs_attention?: boolean;
-};
-
-type HubPayload = {
-  subtitle?: string;
-  metrics?: { active?: number; configured?: number; needs_attention?: number; total?: number };
-  categories?: Array<{ key: string; label: string }>;
-  integrations?: IntegrationCard[];
-  wizard?: {
-    categories?: Array<{ key: string; label: string }>;
-    providers?: IntegrationCard[];
-    custom_api_activation_blocked?: boolean;
-    custom_api_message?: string;
-  };
-};
+import {
+  buildIntegrationDetailFixture,
+  buildIntegrationsFixture,
+} from "@/features/integrations/integrations-fixtures";
+import type { HubPayload, IntegrationCard } from "@/features/integrations/integrations-types";
 
 const STATUS_STYLES: Record<string, string> = {
   connected: "bg-emerald-50 text-emerald-800 border-emerald-200",
@@ -70,6 +41,7 @@ export function IntegrationsWorkspace() {
   const live = useDashboardLiveMode();
   const searchParams = useSearchParams();
   const initialProvider = searchParams.get("provider");
+  const scenario = searchParams.get("scenario");
 
   const [category, setCategory] = useState("all");
   const [hub, setHub] = useState<HubPayload | null>(null);
@@ -89,33 +61,14 @@ export function IntegrationsWorkspace() {
   const [wizardProvider, setWizardProvider] = useState("");
   const [testPaymentConfirm, setTestPaymentConfirm] = useState(false);
 
-  const loadHub = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const result = await listIntegrations(category);
-    if (!result.ok) {
-      setError(result.message || "Unable to load integrations.");
-      setLoading(false);
-      return;
-    }
-    setHub((result.data?.hub as HubPayload) ?? null);
-    setPermissions((result.data?.permissions as Record<string, boolean>) ?? {});
-    setLoading(false);
-  }, [category]);
-
-  const loadDetail = useCallback(async (code: string) => {
-    const result = await showIntegration(code);
-    if (!result.ok || !result.data?.integration) {
-      setError(result.message || "Unable to load integration detail.");
-      return;
-    }
-    const integration = result.data.integration as Record<string, unknown>;
+  const applyDetail = useCallback((integration: Record<string, unknown>) => {
     setDetail(integration);
     const values = ((integration.settings as { values?: Record<string, unknown> } | undefined)?.values ?? {}) as Record<string, unknown>;
+    const summary = (integration.summary as Record<string, unknown> | undefined) ?? {};
     setForm({
-      environment: String(values.environment ?? "test"),
-      is_active: Boolean(values.is_active),
-      base_url: String(values.base_url ?? ""),
+      environment: String(values.environment ?? summary.environment ?? "test"),
+      is_active: Boolean(values.is_active ?? summary.is_active),
+      base_url: String(values.base_url ?? summary.base_url ?? ""),
       merchant_id: "",
       merchant_secret_key: "",
       success_url: String(values.success_url ?? ""),
@@ -124,6 +77,57 @@ export function IntegrationsWorkspace() {
     });
     setReplaceSecret(false);
   }, []);
+
+  const loadHub = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    if (!live) {
+      const fixture = buildIntegrationsFixture(category);
+      setHub(fixture.hub);
+      setPermissions(fixture.permissions);
+      setLoading(false);
+      return;
+    }
+
+    const result = await listIntegrations(category);
+    if (!result.ok) {
+      setError(result.message || "Unable to load integrations.");
+      setLoading(false);
+      return;
+    }
+    setHub((result.hub as HubPayload) ?? null);
+    setPermissions(result.permissions ?? {});
+    setLoading(false);
+  }, [category, live]);
+
+  const loadDetail = useCallback(async (code: string) => {
+    if (!live) {
+      const fixture = buildIntegrationDetailFixture(code);
+      if (scenario === "live-abhipay" && code === "abhipay") {
+        const summary = { ...(fixture.summary as Record<string, unknown>), environment: "live" };
+        const settings = fixture.settings as { values?: Record<string, unknown> };
+        applyDetail({
+          ...fixture,
+          summary,
+          settings: {
+            ...settings,
+            values: { ...(settings?.values ?? {}), environment: "live" },
+          },
+        });
+        return;
+      }
+      applyDetail(fixture);
+      return;
+    }
+
+    const result = await showIntegration(code);
+    if (!result.ok || !result.integration) {
+      setError(result.message || "Unable to load integration detail.");
+      return;
+    }
+    applyDetail(result.integration as Record<string, unknown>);
+  }, [applyDetail, live, scenario]);
 
   useEffect(() => {
     void loadHub();
@@ -148,6 +152,15 @@ export function IntegrationsWorkspace() {
   async function runAction(label: string, fn: () => Promise<{ ok: boolean; message?: string }>) {
     setBusy(label);
     setFlash(null);
+    if (!live) {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      setBusy(null);
+      setFlash(`${label} completed (preview).`);
+      if (label === "Test Connection" && selected) {
+        await loadDetail(selected);
+      }
+      return;
+    }
     const result = await fn();
     setBusy(null);
     if (!result.ok) {
@@ -166,14 +179,6 @@ export function IntegrationsWorkspace() {
   const isAbhiPay = selected === "abhipay";
   const envIsLive = String(summary.environment ?? form.environment ?? "") === "live";
   const secretConfigured = Boolean(summary.merchant_secret_configured);
-
-  if (!live) {
-    return (
-      <div className="rounded-xl border border-jp-border bg-white p-6 text-sm text-jp-muted">
-        Integrations Hub requires live dashboard mode against Laravel.
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6" data-testid="integrations-hub">
