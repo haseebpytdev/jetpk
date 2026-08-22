@@ -14,6 +14,7 @@ Master roadmap: [../JETPK-V1-CLIENT-UI-COMPLETION-ROADMAP.md](../JETPK-V1-CLIENT
 | Document | Use when |
 |----------|----------|
 | [DEPLOYMENT-CONTEXT.md](DEPLOYMENT-CONTEXT.md) | Current host, topology, protected deploy route |
+| [deployments/JETPAKISTAN-PK-OWNER-V3-WAVE-7-CHECKOUT-AUTOFILL-20260822.md](deployments/JETPAKISTAN-PK-OWNER-V3-WAVE-7-CHECKOUT-AUTOFILL-20260822.md) | 2026-08-22 Owner V3 Wave-7 selected-fare persistence, multipax Fare Details, passport OCR, Terms/Change flight production deployment |
 | [deployments/JETPAKISTAN-PK-OWNER-V3-WAVE-6-COMMERCE-STATE-REMEDIATION-20260821.md](deployments/JETPAKISTAN-PK-OWNER-V3-WAVE-6-COMMERCE-STATE-REMEDIATION-20260821.md) | 2026-08-21 Owner V3 Wave-6 branded-fare commerce state + crash remediation production deployment |
 | [deployments/JETPAKISTAN-PK-OWNER-V3-FLIGHT-COMMERCE-DOCREADER-DEPLOYMENT-20260821.md](deployments/JETPAKISTAN-PK-OWNER-V3-FLIGHT-COMMERCE-DOCREADER-DEPLOYMENT-20260821.md) | 2026-08-21 Owner V3 flight commerce UX + client-side document reader production deployment |
 | [deployments/JETPAKISTAN-PK-OWNER-V3-FLIGHT-UI-CLOSURE-DEPLOYMENT-20260820.md](deployments/JETPAKISTAN-PK-OWNER-V3-FLIGHT-UI-CLOSURE-DEPLOYMENT-20260820.md) | 2026-08-20 Owner V3 flight results, filters, fare modal, and mobile closure production deployment |
