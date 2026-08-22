@@ -10,6 +10,8 @@ export type OrderSummaryProps = {
   collapsed?: boolean;
   showEdit?: boolean;
   onEdit?: () => void;
+  onChangeFlight?: () => void;
+  changeFlightDisabled?: boolean;
   className?: string;
   testId?: string;
   variant?: "order" | "flight-preview";
@@ -186,10 +188,22 @@ function FlightPreviewCard({
             </dd>
           </div>
         ) : null}
-        {itinerary.baggage ? (
+        {itinerary.cabin_baggage ? (
           <div className="flex justify-between gap-2">
-            <dt className="text-jp-muted">Baggage</dt>
-            <dd data-testid="flight-preview-baggage">{itinerary.baggage}</dd>
+            <dt className="text-jp-muted">Cabin baggage</dt>
+            <dd data-testid="flight-preview-cabin-baggage">{itinerary.cabin_baggage}</dd>
+          </div>
+        ) : null}
+        {itinerary.checked_baggage || itinerary.baggage ? (
+          <div className="flex justify-between gap-2">
+            <dt className="text-jp-muted">Checked baggage</dt>
+            <dd data-testid="flight-preview-baggage">{itinerary.checked_baggage ?? itinerary.baggage}</dd>
+          </div>
+        ) : null}
+        {itinerary.meal ? (
+          <div className="flex justify-between gap-2">
+            <dt className="text-jp-muted">Meal</dt>
+            <dd data-testid="flight-preview-meal">{itinerary.meal}</dd>
           </div>
         ) : null}
         {travellerTotal != null ? (
@@ -253,6 +267,8 @@ export function OrderSummary({
   collapsed = false,
   showEdit = false,
   onEdit,
+  onChangeFlight,
+  changeFlightDisabled = false,
   className,
   testId = "order-summary",
   variant = "order",
@@ -274,7 +290,7 @@ export function OrderSummary({
             <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-jp-primary">Your selection</p>
           ) : null}
           <h2 className={cn("font-semibold text-jp-text", preview ? "mt-0.5 text-lg" : "text-jp-sm")}>
-            {preview ? "Flight preview" : "Order summary"}
+            {preview ? "Flight summary" : "Order summary"}
           </h2>
         </div>
         {showEdit && onEdit ? (
@@ -313,6 +329,18 @@ export function OrderSummary({
         <p className="mt-3 text-jp-xs text-jp-muted">
           Payment: <span className="font-medium text-jp-text">{paymentStatus.label}</span>
         </p>
+      ) : null}
+
+      {onChangeFlight ? (
+        <button
+          type="button"
+          className="mt-3 w-full rounded-jp-md border border-jp-border bg-white px-3 py-2 text-sm font-semibold text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:shadow-jp-focus disabled:opacity-60"
+          data-testid="change-flight-button"
+          onClick={onChangeFlight}
+          disabled={changeFlightDisabled}
+        >
+          Change flight
+        </button>
       ) : null}
     </article>
   );

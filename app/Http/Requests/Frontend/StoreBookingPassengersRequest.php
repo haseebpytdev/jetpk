@@ -81,6 +81,8 @@ class StoreBookingPassengersRequest extends FormRequest
             'country' => ['nullable', 'string', 'max:120'],
             'create_account' => ['sometimes', 'boolean'],
             'password' => $passwordRules,
+            'terms_accepted' => ['accepted'],
+            'terms_version' => ['required', 'string', 'max:64'],
         ];
 
         return $rules;
@@ -124,6 +126,8 @@ class StoreBookingPassengersRequest extends FormRequest
             'country' => __('Country'),
             'create_account' => __('Create account'),
             'password' => __('Password'),
+            'terms_accepted' => __('Terms acceptance'),
+            'terms_version' => __('Terms version'),
         ];
     }
 
@@ -139,6 +143,7 @@ class StoreBookingPassengersRequest extends FormRequest
             'passengers.*.passport_issue_date.before_or_equal' => __('Passport issue date must be today or in the past.'),
             'password.confirmed' => __('Passwords do not match.'),
             'phone_number.regex' => __('Mobile number must contain digits only.'),
+            'terms_accepted.accepted' => __('Please confirm the traveler information and accept the Terms & Conditions and Privacy Policy to continue.'),
         ];
     }
 

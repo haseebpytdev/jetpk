@@ -104,11 +104,18 @@ export type SelectedFlightSummary = {
   stops?: number | null;
   duration?: string | null;
   baggage?: string | null;
+  cabin_baggage?: string | null;
+  checked_baggage?: string | null;
+  meal?: string | null;
+  refund_rule?: string | null;
+  change_rule?: string | null;
   segments: Array<Record<string, unknown>>;
   return_segments: Array<Record<string, unknown>>;
   total_formatted?: string | null;
   currency: string;
   return_split?: Record<string, unknown> | null;
+  selected_fare_option_key?: string | null;
+  selected_fare?: Record<string, unknown> | null;
 };
 
 export type SeatExtrasCapability = {
@@ -150,6 +157,20 @@ export type StandardPassengersContext = {
   validation_alert?: string | null;
   fare_estimate_drift?: boolean;
   complex_itinerary_notice?: boolean;
+  selected_fare?: Record<string, unknown> | null;
+  consent?: {
+    terms_version: string;
+    privacy_version: string;
+    terms_url: string;
+    privacy_url: string;
+    required: boolean;
+    prechecked: boolean;
+  };
+  change_flight?: {
+    safe: boolean;
+    results_url?: string | null;
+    abandon_url?: string;
+  };
 };
 
 export type StandardPassengersSubmitResponse = {

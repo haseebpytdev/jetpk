@@ -452,7 +452,15 @@ class BookingController extends Controller
                 $selectedOfferId,
                 trim((string) ($validated['fare_option_key'] ?? '')),
             );
-            $this->bookingDraft->merge(['checkout_protection' => $protection]);
+            $this->bookingDraft->merge([
+                'checkout_protection' => $protection,
+                'checkout_terms_acceptance' => [
+                    'accepted' => true,
+                    'terms_version' => (string) ($validated['terms_version'] ?? config('ota_checkout_consent.terms_version')),
+                    'privacy_version' => (string) config('ota_checkout_consent.privacy_version'),
+                    'accepted_at' => now()->toIso8601String(),
+                ],
+            ]);
 
             if (strtolower((string) $checkoutSupplier['supplier_provider']) === SupplierProvider::PiaNdc->value) {
                 $resolutionOffer = $this->offerSnapshotForBrandedFareResolution($offer, $searchId, $selectedOfferId);
@@ -599,6 +607,13 @@ class BookingController extends Controller
                             'fare_option_key' => trim((string) ($validated['fare_option_key'] ?? '')),
                             'selected_fare_family_option' => $selectedFareFamilyOption,
                             'sabre_booking_context' => $sabreBookingContext,
+                            'checkout_terms_acceptance' => [
+                                'accepted' => true,
+                                'terms_version' => (string) ($validated['terms_version'] ?? config('ota_checkout_consent.terms_version')),
+                                'privacy_version' => (string) config('ota_checkout_consent.privacy_version'),
+                                'accepted_at' => now()->toIso8601String(),
+                                'booking_session_association' => substr(hash('sha256', $searchId.'|'.$selectedOfferId.'|'.$holdSessionId), 0, 32),
+                            ],
                             ...$this->sabreOfferFreshnessMetaPatchForBooking($offer, $searchId),
                             ...$this->sabreSafeRefreshContextMetaPatchForBooking($offer, $criteria, $checkoutSupplier, $selectedOfferId, $searchId, $protection, $sabreBookingContext, $validated),
                         ],
@@ -1195,6 +1210,9 @@ class BookingController extends Controller
                 is_array($offer) ? $offer : null,
                 $effectiveFlightId,
             ),
+            'checkoutTermsVersion' => (string) config('ota_checkout_consent.terms_version'),
+            'checkoutPrivacyVersion' => (string) config('ota_checkout_consent.privacy_version'),
+            'changeFlightSafe' => $this->isPreHoldChangeFlightSafe($draft),
         ];
 
         if ($this->wantsBookingJson($request)) {
@@ -1207,6 +1225,80 @@ class BookingController extends Controller
         $this->logJetpkCheckoutPassengersRender($request, $resolvedView);
 
         return view($resolvedView, $viewData);
+    }
+
+    /**
+     * Pre-hold abandonment: clear selected-offer draft state and return to Results.
+     * Does not create/cancel PNR, hold, ticket, or payment state.
+     */
+    public function abandonSelectedOffer(Request $request): RedirectResponse|JsonResponse
+    {
+        $draft = $this->bookingDraft->current();
+        if (! $this->isPreHoldChangeFlightSafe($draft)) {
+            $message = __('This booking already has a supplier hold. Changing the flight requires the authorized booking lifecycle.');
+            if ($this->wantsBookingJson($request)) {
+                return response()->json(
+                    $this->standardBookingJsonPresenter->presentError('hold_active', $message),
+                    409,
+                );
+            }
+
+            return $this->clientRedirect()->route('booking.passengers')
+                ->withErrors(['flight_id' => $message]);
+        }
+
+        $criteria = $this->resolveCheckoutSearchCriteria($draft, (string) ($draft['search_id'] ?? ''));
+        $resultsQuery = $this->buildFlightsResultsQuery($criteria);
+        $resultsUrl = client_safe_route('flights.results', $resultsQuery);
+
+        $preserved = [
+            'search_id' => (string) ($draft['search_id'] ?? ''),
+            'search_from' => (string) ($draft['search_from'] ?? $criteria['origin'] ?? ''),
+            'search_to' => (string) ($draft['search_to'] ?? $criteria['destination'] ?? ''),
+            'search_depart' => (string) ($draft['search_depart'] ?? $criteria['depart_date'] ?? ''),
+            'trip_type' => (string) ($draft['trip_type'] ?? $criteria['trip_type'] ?? 'one_way'),
+            'return_date' => (string) ($draft['return_date'] ?? $criteria['return_date'] ?? ''),
+            'cabin' => (string) ($draft['cabin'] ?? $criteria['cabin'] ?? 'economy'),
+            'adults' => max(1, (int) ($draft['adults'] ?? $criteria['adults'] ?? 1)),
+            'children' => max(0, (int) ($draft['children'] ?? $criteria['children'] ?? 0)),
+            'infants' => max(0, (int) ($draft['infants'] ?? $criteria['infants'] ?? 0)),
+        ];
+
+        $this->bookingDraft->clear();
+        $this->bookingDraft->merge($preserved);
+
+        Log::info('checkout_change_flight_abandoned', [
+            'search_id' => $preserved['search_id'],
+            'had_offer' => trim((string) ($draft['offer_id'] ?? $draft['flight_id'] ?? '')) !== '',
+        ]);
+
+        if ($this->wantsBookingJson($request)) {
+            return response()->json([
+                'ok' => true,
+                'status' => 'abandoned',
+                'results_url' => $resultsUrl,
+                'preserved_search' => $preserved,
+            ]);
+        }
+
+        return redirect()->to($resultsUrl);
+    }
+
+    /**
+     * @param  array<string, mixed>  $draft
+     */
+    protected function isPreHoldChangeFlightSafe(array $draft): bool
+    {
+        $holdSessionId = (int) ($draft['hold_session_id'] ?? 0);
+        if ($holdSessionId <= 0) {
+            return true;
+        }
+
+        $protection = is_array($draft['checkout_protection'] ?? null) ? $draft['checkout_protection'] : [];
+        $holdStatus = strtolower(trim((string) ($protection['hold_status'] ?? '')));
+
+        // Pending/not_started local checkout locks are still pre-commercial for this path.
+        return in_array($holdStatus, ['', 'not_started', 'pending', 'failed'], true);
     }
 
     public function review(Request $request): View|RedirectResponse|JsonResponse
