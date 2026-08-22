@@ -127,7 +127,7 @@ Do not roll production until a Wave-9 deploy is authorized.
 ## Commit SHAs
 - Cluster A: `baa60350`
 - Clusters B/C/D: `1c846fa8`
-- Cluster E / FINAL_WAVE9_ENGINEERING_SHA: (pin after visual+docs commit)
+- Cluster E / FINAL_WAVE9_ENGINEERING_SHA: 8db2fe84593e92192e9b0f090f58b7894218bf47
 
 ## Final status
 ENGINEERING_COMPLETE_PENDING_OWNER_RETEST  
