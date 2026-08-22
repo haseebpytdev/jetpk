@@ -12,7 +12,7 @@ STOP BEFORE PRODUCTION DEPLOYMENT. Independent ChatGPT/owner review required.
 ## Wave-7 engineering tip (ready after review)
 - Branch: `feat/jetpk-flight-results-booking-flow-20260819`
 - Remote: `jetpk`
-- Engineering SHA: replace with final push SHA after Cluster E commit (see git log)
+- Engineering SHA: 1b0df8d464b07073aeafd6c5ac65090e762de105
 
 ## Delta intent
 Engineering remediation only from deployed `9653d5ab…` through Wave-7 tip:
