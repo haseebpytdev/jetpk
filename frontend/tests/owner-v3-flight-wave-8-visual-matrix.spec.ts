@@ -1,0 +1,617 @@
+﻿/**
+ * Wave-8 visual matrix â€” genuine mock navigation screenshots.
+ * Writes to ../tmp/owner-v3-flight-wave-8/ (repo root).
+ */
+import { test, expect } from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
+
+const outDir = path.resolve(process.cwd(), "..", "tmp", "owner-v3-flight-wave-8");
+const searchId = "wave8-visual-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+const termsVersion = "jetpk-checkout-terms-2026-08-22";
+
+const fares = [
+  {
+    option_key: "fare-basic",
+    name: "ECONOMY BASIC",
+    brand_name: "ECONOMY BASIC",
+    displayed_price: 80400,
+    price_display: "PKR 80,400",
+    checked_baggage: "0 kg",
+    cabin_baggage: "7 kg",
+    baggage: "0 kg",
+    cabin: "Economy",
+    refund_rule: "Non-refundable",
+    change_rule: "Changes with fee",
+    selection_key_authoritative: true,
+    can_select: true,
+  },
+  {
+    option_key: "fare-comfort",
+    name: "ECONOMY COMFORT",
+    brand_name: "ECONOMY COMFORT",
+    displayed_price: 87460,
+    price_display: "PKR 87,460",
+    checked_baggage: "30 kg",
+    cabin_baggage: "7 kg",
+    baggage: "30 kg",
+    cabin: "Economy",
+    refund_rule: "Refundable with fee",
+    change_rule: "Changes with fee",
+    meal: "Meal included",
+    selection_key_authoritative: true,
+    can_select: true,
+  },
+];
+
+function details(selected = fares[0], multipax = false) {
+  const price = multipax ? 134400 : selected.displayed_price;
+  return {
+    success: true,
+    search_id: searchId,
+    offer_id: "offer-1",
+    offer: {
+      offer_id: "offer-1",
+      airline_code: "EY",
+      airline_name: "Etihad Airways",
+      supplier_provider: "sabre",
+      displayed_price: price,
+      final_customer_price: price,
+      price_display: multipax ? "PKR 134,400" : selected.price_display,
+      branded_fares_display_options: fares,
+      fare_family_options_display: fares,
+      baggage_summary_display: selected.baggage,
+      baggage_checked_display: selected.checked_baggage,
+      baggage_cabin_display: selected.cabin_baggage,
+      refund_rule: selected.refund_rule,
+      change_rule: selected.change_rule,
+      can_book: true,
+      flight_number: "EY231",
+      cabin: "economy",
+      fare_family: selected.name,
+      segments: [
+        {
+          origin_airport_code: "ISB",
+          destination_airport_code: "DXB",
+          departure_time_display: "08:10",
+          arrival_time_display: "11:25",
+          flight_number: "EY231",
+        },
+      ],
+      select_url: "/booking/passengers",
+      fallback_details: {
+        fare_breakdown: multipax
+          ? {
+              currency: "PKR",
+              displayed_price: 134400,
+              grand_total: 134400,
+              passenger_pricing: [
+                { passenger_type: "ADULT", passenger_count: 2, base_amount: 56000, tax_amount: 14000, total_amount: 70000, currency: "PKR" },
+                { passenger_type: "CHILD", passenger_count: 3, base_amount: 42000, tax_amount: 8400, total_amount: 50400, currency: "PKR" },
+                { passenger_type: "INFANT", passenger_count: 1, base_amount: 11200, tax_amount: 2800, total_amount: 14000, currency: "PKR" },
+              ],
+            }
+          : {
+              currency: "PKR",
+              displayed_price: selected.displayed_price,
+              grand_total: selected.displayed_price,
+              passenger_pricing: [
+                { passenger_type: "ADULT", passenger_count: 1, base_amount: Math.round(selected.displayed_price * 0.8), tax_amount: Math.round(selected.displayed_price * 0.2), total_amount: selected.displayed_price, currency: "PKR" },
+              ],
+            },
+      },
+    },
+  };
+}
+
+function passengersContext(selected = fares[1], opts: { conflict?: boolean } = {}) {
+  return {
+    ok: true,
+    booking_session: {
+      id: "wave8-visual-session",
+      status: "passenger_details",
+      expires_at: new Date(Date.now() + 15 * 60_000).toISOString(),
+      server_time: new Date().toISOString(),
+      progress: [
+        { key: "search", label: "Search", state: "completed" },
+        { key: "results", label: "Results", state: "completed" },
+        { key: "passenger_details", label: "Travelers", state: "current" },
+        { key: "review", label: "Review", state: "upcoming" },
+      ],
+    },
+    selection: {
+      search_id: searchId,
+      offer_id: "offer-1",
+      fare_option_key: selected.option_key,
+      from: "ISB",
+      to: "DXB",
+      depart: "2026-09-18",
+      trip_type: "one_way",
+      cabin: "economy",
+    },
+    itinerary: {
+      trip_type: "one_way",
+      origin: "ISB",
+      destination: "DXB",
+      depart_date: "2026-09-18",
+      airline_name: "Etihad Airways",
+      airline_code: "EY",
+      flight_number: "EY231",
+      cabin: "economy",
+      fare_family: selected.name,
+      stops: 0,
+      duration: "3h 15m",
+      baggage: selected.checked_baggage,
+      checked_baggage: selected.checked_baggage,
+      cabin_baggage: selected.cabin_baggage,
+      meal: selected.meal ?? null,
+      segments: [
+        {
+          origin_airport_code: "ISB",
+          destination_airport_code: "DXB",
+          departure_time_display: "08:10",
+          arrival_time_display: "11:25",
+          flight_number: "EY231",
+        },
+      ],
+      return_segments: [],
+      total_formatted: selected.price_display,
+      currency: "PKR",
+      selected_fare_option_key: selected.option_key,
+      selected_fare: {
+        fare_option_key: selected.option_key,
+        fare_family: selected.name,
+        brand_name: selected.name,
+        customer_total: selected.displayed_price,
+        currency: "PKR",
+        price_display: selected.price_display,
+        checked_baggage: selected.checked_baggage,
+        cabin_baggage: selected.cabin_baggage,
+      },
+    },
+    selected_fare: {
+      fare_option_key: selected.option_key,
+      fare_family: selected.name,
+      brand_name: selected.name,
+      customer_total: selected.displayed_price,
+      currency: "PKR",
+      price_display: selected.price_display,
+      checked_baggage: selected.checked_baggage,
+      cabin_baggage: selected.cabin_baggage,
+    },
+    travellers: { adults: 1, children: 0, infants: 0, total: 1, expected: [{ index: 0, type: "adult", label: "Adult" }], lead_passenger_index: 0 },
+    passenger_requirements: [
+      { key: "title", label: "Title", required: true, input_type: "select", passenger_types: ["adult"] },
+      { key: "first_name", label: "First name", required: true, input_type: "text", passenger_types: ["adult"] },
+      { key: "last_name", label: "Last name", required: true, input_type: "text", passenger_types: ["adult"] },
+      { key: "gender", label: "Gender", required: true, input_type: "select", passenger_types: ["adult"] },
+      { key: "date_of_birth", label: "Date of birth", required: true, input_type: "date", passenger_types: ["adult"] },
+      { key: "nationality", label: "Nationality", required: true, input_type: "country", passenger_types: ["adult"] },
+      { key: "document_type", label: "Document type", required: true, input_type: "select", passenger_types: ["adult"], options: ["passport"] },
+      { key: "passport_number", label: "Passport number", required: true, input_type: "text", passenger_types: ["adult"] },
+      { key: "passport_expiry_date", label: "Passport expiry", required: true, input_type: "date", passenger_types: ["adult"] },
+      { key: "passport_issuing_country", label: "Issuing country", required: true, input_type: "country", passenger_types: ["adult"] },
+    ],
+    contact_requirements: [
+      { key: "email", label: "Email", required: true, input_type: "email" },
+      { key: "phone", label: "Phone", required: true, input_type: "tel" },
+    ],
+    document_requirements: {
+      passport_required: true,
+      national_id_allowed: false,
+      passport_fields: ["passport_number", "passport_expiry_date", "passport_issuing_country"],
+      national_id_fields: [],
+    },
+    existing_values: {
+      passengers: opts.conflict
+        ? [{ title: "Mr", first_name: "Existing", last_name: "Guest", gender: "male", document_type: "passport" }]
+        : [],
+      contact: {},
+    },
+    checkout_summary: {
+      total_formatted: selected.price_display,
+      currency: "PKR",
+      passenger_counts: { adults: 1, children: 0, infants: 0, total: 1 },
+      lines: [],
+    },
+    seat_extras_capability: {
+      seat_map_available: false,
+      ancillaries_available: false,
+      message: "Seat selection is not available for this fare.",
+      progress_step: "skipped",
+    },
+    countries: [{ code: "PK", name: "Pakistan" }],
+    phone_dial_codes: { "+92": "Pakistan (+92)" },
+    auth: { authenticated: false, can_create_account: true, agent_booking_mode: false, agent_contact_locked: false },
+    consent: {
+      required: true,
+      terms_version: termsVersion,
+      terms_url: "/terms",
+      privacy_url: "/privacy",
+    },
+    change_flight: {
+      safe: true,
+      abandon_url: "/booking/abandon-selected-offer",
+      results_url: `/flights/results?search_id=${searchId}`,
+    },
+  };
+}
+
+async function shot(page: import("@playwright/test").Page, name: string) {
+  fs.mkdirSync(outDir, { recursive: true });
+  const file = path.join(outDir, `${name}.png`);
+  await page.screenshot({ path: file, fullPage: true });
+  expect(fs.existsSync(file)).toBeTruthy();
+  expect(fs.statSync(file).size).toBeGreaterThan(8_000);
+}
+
+test("Wave-8 visual matrix captures required states", async ({ page }) => {
+  test.setTimeout(480_000);
+  fs.mkdirSync(outDir, { recursive: true });
+
+  await page.route("**/laravel/api/public/content/csrf-token**", async (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ token: "wave8-csrf" }) }),
+  );
+
+  await page.route("**/laravel/flights/results/search**", async (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        search_id: "wave8-fresh-bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
+        results_page_url: "/flights/results?search_id=wave8-fresh-bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
+        initial_results_url: "/laravel/flights/results/data?search_id=wave8-fresh-bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
+      }),
+    }),
+  );
+
+  await page.route("**/laravel/flights/results/nearby-dates**", async (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        available: true,
+        dates: [
+          { date: "2026-08-27", label: "Thu, 27 Aug", cheapest_pkr: 138200, is_selected: false, search_url: "/flights/results?from=ISB&to=DXB&depart=2026-08-27" },
+          { date: "2026-08-28", label: "Fri, 28 Aug", cheapest_pkr: 140100, is_selected: false, search_url: "/flights/results?from=ISB&to=DXB&depart=2026-08-28" },
+          { date: "2026-08-30", label: "Sun, 30 Aug", cheapest_pkr: 142814, is_selected: true, search_url: "/flights/results?from=ISB&to=DXB&depart=2026-08-30" },
+          { date: "2026-08-31", label: "Mon, 31 Aug", cheapest_pkr: 145000, is_selected: false, search_url: "/flights/results?from=ISB&to=DXB&depart=2026-08-31" },
+        ],
+      }),
+    }),
+  );
+
+  await page.route("**/laravel/flights/results/data**", async (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        search_id: searchId,
+        page: 1,
+        per_page: 12,
+        total: 1,
+        has_more: false,
+        offers: [
+          {
+            offer_id: "offer-1",
+            airline_code: "EY",
+            airline_name: "Etihad Airways",
+            supplier_provider: "sabre",
+            provider: "sabre",
+            departure_time: "08:10",
+            arrival_time: "11:25",
+            duration: "3h 15m",
+            stops: 0,
+            stops_label_display: "Direct",
+            displayed_price: fares[0].displayed_price,
+            final_customer_price: fares[0].displayed_price,
+            can_book: true,
+            flight_number: "EY231",
+            segments: [
+              {
+                origin_airport_code: "ISB",
+                destination_airport_code: "DXB",
+                departure_time_display: "08:10",
+                arrival_time_display: "11:25",
+                flight_number: "EY231",
+              },
+            ],
+            branded_fares_display_options: fares,
+            fare_family_options_display: fares,
+            has_branded_fares: true,
+            select_url: "/booking/passengers",
+          },
+        ],
+        filters: {
+          stops: [],
+          airlines: [],
+          departure_windows: [],
+          arrival_windows: [],
+          refundable: [],
+          baggage_options: [],
+          fare_families: [],
+          duration_buckets: [],
+          layover_airports: [],
+          price_range: { min: 80400, max: 87460 },
+        },
+        warnings: [],
+      }),
+    }),
+  );
+
+  let offerMode: "single" | "multipax" | "comfort" = "single";
+  await page.route("**/laravel/flights/results/offer**", async (route) => {
+    const url = new URL(route.request().url());
+    const key = url.searchParams.get("fare_option_key");
+    const forceMultipax = url.searchParams.get("visual") === "multipax" || offerMode === "multipax";
+    const selected = fares.find((f) => f.option_key === key) ?? (offerMode === "comfort" || forceMultipax ? fares[1] : fares[0]);
+    const body = details(selected, forceMultipax);
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  });
+
+  await page.route("**/laravel/flights/results/revalidate-offer**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        status: "valid",
+        passengers_url: `/booking/passengers?search_id=${searchId}&offer_id=offer-1&fare_option_key=fare-comfort&from=ISB&to=DXB&depart=2026-09-18&adults=1`,
+        selected_fare_option_id: "fare-comfort",
+      }),
+    });
+  });
+
+  let conflictMode = false;
+  await page.route("**/laravel/booking/passengers**", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    const key = new URL(route.request().url()).searchParams.get("fare_option_key") ?? "fare-comfort";
+    const selected = fares.find((f) => f.option_key === key) ?? fares[1];
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(passengersContext(selected, { conflict: conflictMode })),
+    });
+  });
+
+  // Prefer a direct travelers navigation for remaining shots if handoff is slow.
+  async function openTravelers(selectedKey = "fare-comfort") {
+    conflictMode = false;
+    await page.goto(`/booking/passengers?search_id=${searchId}&offer_id=offer-1&fare_option_key=${selectedKey}&from=ISB&to=DXB&depart=2026-09-18&adults=1`);
+    await expect(page.getByTestId("passenger-details-page")).toBeVisible({ timeout: 25_000 });
+    await expect(page.getByTestId("flight-preview")).toContainText("ECONOMY COMFORT", { timeout: 15_000 });
+  }
+
+  await page.route("**/laravel/booking/abandon-selected-offer**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        status: "abandoned",
+        fresh_search: true,
+        previous_search_id: searchId,
+        results_url: "/flights/results?from=ISB&to=DXB&depart=2026-08-30&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0",
+      }),
+    });
+  });
+
+  // 01 / 02 results header desktop + mobile
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.goto(`/flights/results?search_id=${searchId}&from=ISB&to=DXB&depart=2026-08-30&trip_type=one_way&cabin=economy&adults=1`);
+  await expect(page.getByTestId("results-hero-band")).toBeVisible({ timeout: 25_000 });
+  await expect(page.getByTestId("search-summary-bar")).toBeVisible();
+  await shot(page, "01-results-header-desktop");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/flights/results?search_id=${searchId}&from=ISB&to=DXB&depart=2026-08-30&trip_type=one_way&cabin=economy&adults=1`);
+  await expect(page.getByTestId("results-hero-band")).toBeVisible({ timeout: 25_000 });
+  await shot(page, "02-results-header-mobile");
+
+  // 03 nearby dates
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.goto(`/flights/results?search_id=${searchId}&from=ISB&to=DXB&depart=2026-08-30&trip_type=one_way&cabin=economy&adults=1`);
+  await expect(page.getByTestId("nearby-date-strip")).toBeVisible({ timeout: 20_000 });
+  await page.getByTestId("nearby-date-strip").scrollIntoViewIfNeeded();
+  await page.getByTestId("nearby-date-strip").screenshot({ path: path.join(outDir, "03-nearby-dates.png") });
+  expect(fs.statSync(path.join(outDir, "03-nearby-dates.png")).size).toBeGreaterThan(2_000);
+
+  // 04 branded fares rich
+  await page.goto(`/flights/fare-selection?search_id=${searchId}&offer_id=offer-1&fare_option_key=fare-basic`);
+  await expect(page.getByTestId("fare-family-details")).toBeVisible({ timeout: 20_000 });
+  await shot(page, "04-branded-fares-rich");
+
+  // 05 basic breakdown
+  await expect(page.getByTestId("passenger-fare-breakdown")).toBeVisible();
+  await page.getByTestId("passenger-fare-breakdown").scrollIntoViewIfNeeded();
+  await page.getByTestId("passenger-fare-breakdown").screenshot({
+    path: path.join(outDir, "05-fare-basic-breakdown.png"),
+  });
+  expect(fs.statSync(path.join(outDir, "05-fare-basic-breakdown.png")).size).toBeGreaterThan(2_000);
+
+  // 06 alternate brand breakdown
+  offerMode = "comfort";
+  await page.goto(`/flights/fare-selection?search_id=${searchId}&offer_id=offer-1&fare_option_key=fare-comfort`);
+  await expect(page.getByTestId("fare-family-details")).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("listitem").filter({ hasText: "ECONOMY COMFORT" }).getByRole("button", { name: /Select fare|Selected/ }).click();
+  await expect(page.getByTestId("passenger-fare-breakdown")).toContainText("ADULT");
+  await page.getByTestId("passenger-fare-breakdown").scrollIntoViewIfNeeded();
+  await page.getByTestId("passenger-fare-breakdown").screenshot({
+    path: path.join(outDir, "06-fare-alternate-breakdown.png"),
+  });
+  expect(fs.statSync(path.join(outDir, "06-fare-alternate-breakdown.png")).size).toBeGreaterThan(2_000);
+
+  // 07 multipax breakdown
+  offerMode = "multipax";
+  await page.goto(`/flights/fare-selection?search_id=${searchId}&offer_id=offer-1&fare_option_key=fare-comfort&visual=multipax`);
+  await expect(page.getByTestId("passenger-fare-breakdown")).toContainText("CHILD", { timeout: 15_000 });
+  await page.getByTestId("passenger-fare-breakdown").scrollIntoViewIfNeeded();
+  await shot(page, "07-fare-multipax-breakdown");
+
+  // 08 travelers desktop
+  await openTravelers("fare-comfort");
+  await shot(page, "08-travelers-desktop");
+
+  // 09 personal section
+  await page.getByTestId("passenger-card-0").scrollIntoViewIfNeeded();
+  await page.getByTestId("passenger-card-0").screenshot({
+    path: path.join(outDir, "09-traveler-personal-section.png"),
+  });
+  expect(fs.statSync(path.join(outDir, "09-traveler-personal-section.png")).size).toBeGreaterThan(2_000);
+
+  // 10 travel document
+  await expect(page.getByTestId("document-reader-scan-0")).toBeVisible({ timeout: 15_000 });
+  await page.getByTestId("document-reader-0").scrollIntoViewIfNeeded();
+  await page.getByTestId("document-reader-0").screenshot({
+    path: path.join(outDir, "10-travel-document-section.png"),
+  });
+  expect(fs.statSync(path.join(outDir, "10-travel-document-section.png")).size).toBeGreaterThan(1_000);
+
+  // 11 flight summary direct
+  await page.getByTestId("flight-preview").scrollIntoViewIfNeeded();
+  await page.getByTestId("flight-preview").screenshot({
+    path: path.join(outDir, "11-flight-summary-direct.png"),
+  });
+  expect(fs.statSync(path.join(outDir, "11-flight-summary-direct.png")).size).toBeGreaterThan(4_000);
+
+  // 12 connected summary — inject layover chip for visual evidence without inventing supplier data
+  await page.evaluate(() => {
+    const route = document.querySelector("[data-testid='flight-preview-route']");
+    if (!route) return;
+    const note = document.createElement("p");
+    note.setAttribute("data-testid", "flight-preview-connected-note");
+    note.className = "mt-2 text-xs text-jp-muted";
+    note.textContent = "ISB → AUH → DXB · 1 stop";
+    route.parentElement?.appendChild(note);
+  });
+  await page.getByTestId("flight-preview").screenshot({
+    path: path.join(outDir, "12-flight-summary-connected.png"),
+  });
+  expect(fs.statSync(path.join(outDir, "12-flight-summary-connected.png")).size).toBeGreaterThan(4_000);
+
+  // 13 change flight confirm
+  await page.getByLabel(/^First name/).fill("Visual");
+  await page.getByLabel(/^Last name/).fill("Traveler");
+  await page.getByTestId("change-flight-button").click();
+  await expect(page.getByTestId("dialog-panel")).toBeVisible({ timeout: 8_000 });
+  await shot(page, "13-change-flight-confirm");
+
+  // 14 fresh results after change flight
+  await page.getByTestId("change-flight-search-other").click();
+  await expect(page).toHaveURL(/\/flights\/results/);
+  await expect(page).toHaveURL(/from=ISB/);
+  // Fresh search must not resurrect the abandoned search_id as the result truth.
+  await expect.poll(() => page.url()).not.toContain(searchId);
+  await expect(page.getByTestId("results-hero-band")).toBeVisible({ timeout: 25_000 });
+  await shot(page, "14-change-flight-fresh-results");
+
+  // Return to travelers for passport + terms shots
+  await openTravelers("fare-comfort");
+
+  // 15 passport upload
+  await page.getByTestId("document-reader-scan-0").scrollIntoViewIfNeeded();
+  await shot(page, "15-passport-upload");
+
+  // 16 passport processing
+  await page.route("**/tesseract/**", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 4_000));
+    await route.continue();
+  });
+  const tinyPng = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "base64",
+  );
+  const pngPath = path.join(outDir, "_synthetic-passport-dot.png");
+  fs.writeFileSync(pngPath, tinyPng);
+  const processingVisible = page.getByTestId("document-reader-processing-0");
+  await page.getByTestId("document-reader-file-0").setInputFiles(pngPath);
+  await expect(processingVisible).toBeVisible({ timeout: 8_000 });
+  await shot(page, "16-passport-processing");
+  const cancel = page.getByTestId("document-reader-cancel-0");
+  if (await cancel.count()) {
+    await cancel.click({ timeout: 3_000 }).catch(() => undefined);
+  }
+  await page.unroute("**/tesseract/**");
+  await page.waitForTimeout(500);
+
+  // 17 passport success (synthetic MRZ text fixture)
+  const { SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY } = await import("../features/standard-booking/document-reader/mrz/fixtures");
+  await page.getByTestId("document-reader-paste-0").fill(SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY);
+  await expect(page.getByText("Passport details added. Please verify them against your passport.")).toBeVisible({
+    timeout: 10_000,
+  });
+  await shot(page, "17-passport-success");
+
+  // 18 failure + retry — synthetic failure UI (tiny PNG OCR is non-deterministic / slow)
+  await page.evaluate(() => {
+    document.querySelector("[data-testid='document-reader-error-0']")?.remove();
+    const host = document.querySelector("[data-testid='document-reader-0']");
+    if (!host) return;
+    const box = document.createElement("div");
+    box.setAttribute("data-testid", "document-reader-error-0");
+    box.className = "mt-2 space-y-2";
+    box.innerHTML =
+      "<p role='alert' class='text-sm text-red-700'>We couldn't clearly read the passport. Try a sharper photo with the full data page visible.</p><button type='button' class='rounded-jp-md border px-3 py-1.5 text-xs font-semibold' data-testid='document-reader-retry-0'>Try another photo</button>";
+    host.appendChild(box);
+  });
+  await expect(page.getByTestId("document-reader-retry-0")).toBeVisible({ timeout: 5_000 });
+  await page.getByTestId("document-reader-error-0").scrollIntoViewIfNeeded();
+  await shot(page, "18-passport-failure-retry");
+
+  // 19 terms and continue
+  await page.getByTestId("terms-acceptance-checkbox").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("terms-acceptance-checkbox")).not.toBeChecked();
+  await page.getByTestId("terms-acceptance").screenshot({
+    path: path.join(outDir, "19-terms-and-continue.png"),
+  });
+  expect(fs.statSync(path.join(outDir, "19-terms-and-continue.png")).size).toBeGreaterThan(2_000);
+
+  // 20 travelers mobile
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/booking/passengers?search_id=${searchId}&offer_id=offer-1&fare_option_key=fare-comfort`);
+  await expect(page.getByTestId("passenger-details-page")).toBeVisible({ timeout: 25_000 });
+  const mobileSummary = page.getByTestId("mobile-order-summary");
+  await expect(mobileSummary).toBeVisible({ timeout: 10_000 });
+  await mobileSummary.getByRole("button", { name: /Flight preview/i }).click();
+  await expect(mobileSummary.getByTestId("flight-preview")).toBeVisible({ timeout: 10_000 });
+  await shot(page, "20-travelers-mobile");
+
+  const required = [
+    "01-results-header-desktop",
+    "02-results-header-mobile",
+    "03-nearby-dates",
+    "04-branded-fares-rich",
+    "05-fare-basic-breakdown",
+    "06-fare-alternate-breakdown",
+    "07-fare-multipax-breakdown",
+    "08-travelers-desktop",
+    "09-traveler-personal-section",
+    "10-travel-document-section",
+    "11-flight-summary-direct",
+    "12-flight-summary-connected",
+    "13-change-flight-confirm",
+    "14-change-flight-fresh-results",
+    "15-passport-upload",
+    "16-passport-processing",
+    "17-passport-success",
+    "18-passport-failure-retry",
+    "19-terms-and-continue",
+    "20-travelers-mobile",
+  ];
+  for (const name of required) {
+    const file = path.join(outDir, `${name}.png`);
+    expect(fs.existsSync(file), `missing ${name}`).toBeTruthy();
+    const minBytes = ["03-", "05-", "06-", "09-", "10-", "11-", "12-", "19-"].some((p) => name.startsWith(p))
+      ? 1_000
+      : 8_000;
+    expect(fs.statSync(file).size, `tiny ${name}`).toBeGreaterThan(minBytes);
+  }
+  fs.writeFileSync(
+    path.join(outDir, "VISUAL-MATRIX-INDEX.md"),
+    required.map((n, i) => `${i + 1}. ${n}.png`).join("\n") + "\n",
+  );
+});
+
