@@ -12,6 +12,7 @@ Admin → Integrations becomes the primary operational control plane for supplie
 ## Included scope
 - Integration registry + manager facade (supplier / AbhiPay / draft)
 - Admin Integrations hub (Laravel JSON + Next dashboard UI)
+- Preview fixtures for Dashboard smoke/E2E verification
 - RBAC keys: integrations.view|manage|test|activate|test-payment|audit
 - Encrypted AbhiPay credential save/mask/replace + checkout readiness flags
 - Sanitized health history table + throttled Test Connection
@@ -31,6 +32,7 @@ Admin → Integrations becomes the primary operational control plane for supplie
 - Prior partial JP-INT-01 work existed (registry, health model, PaymentGateway readiness) — preserved
 - Production admin surfaces were split: API Connections (suppliers) + Blade AbhiPay PATCH
 - Dashboard API is GET-oriented; mutations use admin portal JSON routes
+- Verification closure required preview fixtures so Playwright could exercise hub UI without live Laravel
 
 ## Root causes addressed
 - Scattered editable configuration
@@ -39,12 +41,7 @@ Admin → Integrations becomes the primary operational control plane for supplie
 - AbhiPay checkout readiness needed explicit v3 + callback gates in hub
 
 ## Exact files changed
-See git commit file list. Major clusters:
-- `app/Support/Integrations/*`, `app/Services/Integrations/*`, `app/Contracts/Integrations/*`
-- `app/Http/Controllers/Admin/IntegrationsController.php`
-- `dashboard/features/integrations/*`, `dashboard/app/[portal]/dashboard/integrations/page.tsx`
-- Migrations `2026_08_22_220000_*`, `2026_08_22_220100_*`
-- RBAC catalogs + nav + routes
+See git commits `0e07af92` (hub) and `26ff1032` (verification fixtures/typecheck/Playwright).
 
 ## Routes changed
 - Added `admin.integrations.*`
@@ -56,39 +53,38 @@ See git commit file list. Major clusters:
 
 ## Backend / frontend changes
 - Management facade only; AbhiPayGateway / supplier adapters reused
-- Dashboard Integrations workspace with cards, drawer, wizard
+- Dashboard Integrations workspace with cards, drawer, wizard + preview fixtures
 
 ## Tests executed
-- `JpInt01IntegrationHubTest` — 13 passed
-- `JpInt01HealthAndThrottleTest` — 4 passed
-- `Wave9ReviewPaymentMethodsTest` + AbhiPay save regression — passed (16 combined filter run)
-
-## Assertion counts
-- Hub feature: 56 assertions (initial), later re-run 75 with Wave9 combo
-- Health unit: 8 assertions
+- `JpInt01IntegrationHubTest` + `JpInt01HealthAndThrottleTest` + Wave-9/AbhiPay filter — **20 passed / 83 assertions**
+- Dashboard Playwright `tests/jp-int-01-integrations.spec.ts` — **7 passed**
+- Dashboard + public `npm run typecheck` — PASS
+- Dashboard + public `npm run build` — PASS
 
 ## Screenshots
 `tmp/jp-int-01/01` … `24` (24 PNG states)
 
 ## Responsive / a11y
 - Desktop 4-col / tablet 2 / mobile 1 via CSS grid
+- Playwright mobile viewport check included
 - Drawer dialog + focusable controls; `:focus-visible` inherits dashboard system
 
 ## Known limitations
 - Supplier credential field editing still via API Connections (linked from hub)
 - Flight Test Connection remains readiness-only (no live supplier ping commercial side effects)
 - Visual proofs are synthetic JetPakistan-styled fixtures (no real secrets)
+- Preview fixtures are UI verification only; live Laravel remains authoritative in production mode
 
 ## Risks
 - Role catalog permission key list grew (super admin only)
-- Checkout availability now also requires v3 base URL + callback (Wave-9 aligned)
+- Checkout availability also requires v3 base URL + callback (Wave-9 aligned)
 
 ## Rollback instructions
-- Revert JP-INT-01 commits; roll back the two migrations if deployed
-- Restore `admin.settings.payments.index` redirect target if needed
+- Revert to `8cf657d7…` for full Wave-9+JP-INT-01 rollback, or `0e07af92` / pre-JP-INT docs head as needed
+- Roll back the two migrations if deployed
 
 ## Commit SHA
-`0e07af92880dbe38dcfd80d362f2193030eb903b`
+- FINAL_JP_INT01_ENGINEERING_SHA=`26ff103287437b995074847a74be1cd227404594`
 
 ## Final status
-SOURCE engineering complete for JP-INT-01 — **STOP BEFORE PRODUCTION DEPLOYMENT**. OWNER_RETEST_V3 remains RETEST_REQUIRED.
+SOURCE + VERIFICATION gates green for JP-INT-01 — **STOP BEFORE PRODUCTION DEPLOYMENT**. OWNER_RETEST_V3 remains RETEST_REQUIRED.

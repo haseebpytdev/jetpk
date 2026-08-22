@@ -1,0 +1,58 @@
+# JP-INT-01 FINAL VERIFICATION GATE
+
+Date: 2026-08-22
+
+## Pins
+
+```
+PRODUCTION_BASE_SHA=8cf657d7d35cc97848318f56184825ac49af6225
+WAVE9_ENGINEERING_SHA=67417d225fcd70e8e8cb1a1b535ec0ed8eee0877
+FINAL_JP_INT01_ENGINEERING_SHA=26ff103287437b995074847a74be1cd227404594
+```
+
+## Gate results
+
+```
+TYPECHECK=PASS (dashboard + public frontend)
+PLAYWRIGHT=PASS (jp-int-01-integrations.spec.ts 7/7)
+DASHBOARD_BUILD=PASS
+PUBLIC_BUILD=PASS
+LARAVEL_TESTS=PASS (20 / 83)
+WAVE9_REGRESSION=PASS
+
+INTEGRATION_HUB=PASS
+API_CONFIGURATION_CENTRALIZED=PASS
+SECRET_ENCRYPTION=PASS
+SECRET_MASKING=PASS
+SECRET_PUBLIC_EXPOSURE=0
+INTEGRATION_RBAC=PASS
+HEALTH_TESTING=PASS
+ABHIPAY_SETTINGS_UI=PASS
+ABHIPAY_TEST_CONNECTION=PASS
+ABHIPAY_TEST_CONNECTION_CREATES_ORDER=NO
+ABHIPAY_TEST_PAYMENT_TEST_MODE_ONLY=PASS
+ABHIPAY_LIVE_DIAGNOSTIC_BLOCKED=PASS
+
+SOURCE_GREEN=YES
+TESTS_GREEN=YES
+VISUAL_GREEN=YES
+GIT_0_0=YES (after docs pin)
+
+OWNER_RETEST_V3_STATE=RETEST_REQUIRED
+COMMERCIAL_SIDE_EFFECTS=0
+```
+
+## Commands run
+
+- `npm run typecheck` in `dashboard/` and `frontend/`
+- `npm run build` in `dashboard/` and `frontend/`
+- `npx playwright test tests/jp-int-01-integrations.spec.ts -c playwright.config.ts`
+- `php artisan test --filter=JpInt01IntegrationHubTest|JpInt01HealthAndThrottleTest|Wave9ReviewPaymentMethodsTest|test_admin_can_save_abhipay_settings`
+
+## Deploy delta note
+
+Production upload must use:
+
+`8cf657d7…` → `26ff1032…`
+
+so Wave-9 + JP-INT-01 ship together.

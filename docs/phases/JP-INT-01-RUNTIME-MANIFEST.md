@@ -7,13 +7,26 @@
 | PRODUCTION_BASE_SHA | `8cf657d7d35cc97848318f56184825ac49af6225` |
 | WAVE9_ENGINEERING_SHA | `67417d225fcd70e8e8cb1a1b535ec0ed8eee0877` |
 | START_BRANCH_HEAD (docs head before JP-INT-01) | `745bd2cd79dd1e9090f0581f72e7c1f01233fc0d` |
-| FINAL_JP_INT01_ENGINEERING_SHA | `0e07af92880dbe38dcfd80d362f2193030eb903b` |
+| FINAL_JP_INT01_ENGINEERING_SHA | `26ff103287437b995074847a74be1cd227404594` |
 
 ## Deployment comparison guidance
 
-- **A (Wave-9 delta):** `67417d22…` → FINAL_JP_INT01_ENGINEERING_SHA
-- **B (actual production deploy delta):** `8cf657d7…` → FINAL_JP_INT01_ENGINEERING_SHA  
+- **A (Wave-9 delta):** `67417d225fcd70e8e8cb1a1b535ec0ed8eee0877` → `26ff103287437b995074847a74be1cd227404594`
+- **B (actual production deploy delta):** `8cf657d7d35cc97848318f56184825ac49af6225` → `26ff103287437b995074847a74be1cd227404594`  
   Use **B** for production upload because production has not yet received Wave-9.
+
+Exact runtime path list for B (excluding tests/docs/tmp): see engineering commit range / `tmp/jp-int-01-deploy-runtime-files.txt` generated at closure (**53** runtime paths).
+
+## Verification closure gates (2026-08-22)
+
+| Gate | Result |
+|---|---|
+| Dashboard typecheck | PASS |
+| Public frontend typecheck | PASS |
+| Dashboard production build | PASS |
+| Public frontend production build | PASS |
+| Playwright `tests/jp-int-01-integrations.spec.ts` | PASS (7/7) |
+| Laravel JP-INT-01 + Wave-9 filter | PASS (20 tests / 83 assertions) |
 
 ## Migrations (2)
 
@@ -57,7 +70,7 @@ Legacy: `GET admin/settings/payments` → `/admin/dashboard/integrations?provide
 - `App\Services\Integrations\AbhiPayDiagnosticPaymentService`
 - `App\Services\Integrations\Managers\*`
 - `App\Http\Controllers\Admin\IntegrationsController`
-- Dashboard: `dashboard/features/integrations/*`, `dashboard/app/[portal]/dashboard/integrations/page.tsx`
+- Dashboard: `dashboard/features/integrations/*` (including preview fixtures), `dashboard/app/[portal]/dashboard/integrations/page.tsx`
 
 ## Modified runtime (shared)
 
@@ -67,6 +80,7 @@ Legacy: `GET admin/settings/payments` → `/admin/dashboard/integrations?provide
 - Dashboard nav / RBAC catalogs / portal paths / operational-api
 - `BackOfficeCapabilitiesPresenter`, legacy redirect controller
 - `routes/admin.php`, `AppServiceProvider` gates
+- Plus Wave-9 Review/payment runtime paths included in production delta B
 
 ## Dashboard path
 
@@ -74,16 +88,18 @@ Legacy: `GET admin/settings/payments` → `/admin/dashboard/integrations?provide
 
 ## Public frontend dependencies
 
-- None new (Wave-9 public checkout reused)
+- None new for JP-INT-01 alone (Wave-9 public checkout included in delta B)
 
 ## Rollback base
 
-- `745bd2cd79dd1e9090f0581f72e7c1f01233fc0d` (pre JP-INT-01 docs/engineering head on this branch)
-- Or production `8cf657d7…` if rolling back a full Wave-9+JP-INT-01 deploy
+- Engineering tip before verification fix: `0e07af92880dbe38dcfd80d362f2193030eb903b`
+- Pre JP-INT-01 branch docs head: `745bd2cd79dd1e9090f0581f72e7c1f01233fc0d`
+- Production: `8cf657d7d35cc97848318f56184825ac49af6225`
 
 ## Explicit exclusions from runtime upload
 
 - tests/, docs/, tmp/, screenshots, .next, private tooling, playwright captures
+- `dashboard/tests/jp-int-01-integrations.spec.ts`
 
 ## Unexpected runtime subsystems
 
