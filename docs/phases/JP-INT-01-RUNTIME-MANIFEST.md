@@ -7,7 +7,7 @@
 | PRODUCTION_BASE_SHA | `8cf657d7d35cc97848318f56184825ac49af6225` |
 | WAVE9_ENGINEERING_SHA | `67417d225fcd70e8e8cb1a1b535ec0ed8eee0877` |
 | START_BRANCH_HEAD (docs head before JP-INT-01) | `745bd2cd79dd1e9090f0581f72e7c1f01233fc0d` |
-| FINAL_JP_INT01_ENGINEERING_SHA | *(set to commit SHA after engineering commit)* |
+| FINAL_JP_INT01_ENGINEERING_SHA | `0e07af92880dbe38dcfd80d362f2193030eb903b` |
 
 ## Deployment comparison guidance
 

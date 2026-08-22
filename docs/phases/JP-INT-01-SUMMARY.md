@@ -88,7 +88,7 @@ See git commit file list. Major clusters:
 - Restore `admin.settings.payments.index` redirect target if needed
 
 ## Commit SHA
-Pending commit on branch tip after this summary.
+`0e07af92880dbe38dcfd80d362f2193030eb903b`
 
 ## Final status
 SOURCE engineering complete for JP-INT-01 — **STOP BEFORE PRODUCTION DEPLOYMENT**. OWNER_RETEST_V3 remains RETEST_REQUIRED.
