@@ -3118,6 +3118,54 @@ class FlightOfferDisplayPresenter
             $offer['change_rule'] = $change;
         }
 
+        $meal = self::nullableTrimmedString($option['meal'] ?? $option['meal_included'] ?? null);
+        if ($meal !== null) {
+            $offer['meal'] = $meal;
+        }
+        $seat = self::nullableTrimmedString($option['seat_selection'] ?? $option['seat_selection_rule'] ?? null);
+        if ($seat !== null) {
+            $offer['seat_selection'] = $seat;
+        }
+        $cabinClass = self::nullableTrimmedString($option['cabin'] ?? $option['cabin_class'] ?? null);
+        if ($cabinClass !== null) {
+            $offer['cabin'] = $cabinClass;
+        }
+
+        if (is_array($option['passenger_pricing'] ?? null) && $option['passenger_pricing'] !== []) {
+            $fareBreakdown = is_array($offer['fare_breakdown'] ?? null) ? $offer['fare_breakdown'] : [];
+            $pricingComponents = is_array($offer['pricing_components'] ?? null) ? $offer['pricing_components'] : [];
+            $optionTotal = isset($option['price_total']) && is_numeric($option['price_total'])
+                ? (float) $option['price_total']
+                : null;
+            $customerSupplierTotal = null;
+            if ($optionTotal !== null && $optionTotal > 0) {
+                if (($pricingComponents['conversion_status'] ?? '') === 'converted' && (float) ($pricingComponents['fx_rate'] ?? 0) > 0
+                    && strtoupper((string) ($option['currency'] ?? '')) !== 'PKR') {
+                    $customerSupplierTotal = round($optionTotal * (float) $pricingComponents['fx_rate'], 2);
+                } elseif (strtoupper((string) ($option['currency'] ?? $offer['pricing_currency'] ?? 'PKR')) === 'PKR') {
+                    $customerSupplierTotal = $optionTotal;
+                }
+            }
+            $pack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
+                $option['passenger_pricing'],
+                array_merge([
+                    'pricing_currency' => (string) ($offer['pricing_currency'] ?? 'PKR'),
+                    'conversion_status' => (string) ($offer['conversion_status'] ?? 'same_currency'),
+                    'fx_rate' => (float) ($pricingComponents['fx_rate'] ?? 0),
+                    'supplier_total' => $customerSupplierTotal ?? (float) ($pricingComponents['supplier_total'] ?? 0),
+                ], $pricingComponents),
+                $customerSupplierTotal,
+            );
+            if ($pack['passenger_pricing_available']) {
+                $fareBreakdown['passenger_pricing'] = $pack['passenger_pricing'];
+                $fareBreakdown['passenger_pricing_available'] = true;
+                if ($customerSupplierTotal !== null) {
+                    $fareBreakdown['supplier_total'] = $customerSupplierTotal;
+                }
+                $offer['fare_breakdown'] = $fareBreakdown;
+            }
+        }
+
         return $offer;
     }
 
@@ -3388,6 +3436,10 @@ class FlightOfferDisplayPresenter
             'displayed_currency' => self::nullableTrimmedString($row['displayed_currency'] ?? null),
             'price_display' => self::nullableTrimmedString($row['price_display'] ?? null),
             'price_is_approximate' => (bool) ($row['price_is_approximate'] ?? false),
+            'passenger_pricing' => is_array($row['passenger_pricing'] ?? null) && $row['passenger_pricing'] !== []
+                ? $row['passenger_pricing']
+                : null,
+            'passenger_pricing_available' => (bool) ($row['passenger_pricing_available'] ?? false),
         ];
 
         return array_merge(

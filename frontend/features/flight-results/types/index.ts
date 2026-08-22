@@ -50,6 +50,7 @@ export type FareFamilyOption = {
   brand_name?: string;
   price_display?: string;
   displayed_price?: number | null;
+  cabin?: string | null;
   baggage?: string;
   cabin_baggage?: string | null;
   checked_baggage?: string | null;

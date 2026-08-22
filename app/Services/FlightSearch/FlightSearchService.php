@@ -439,6 +439,27 @@ class FlightSearchService
             ? (float) $fare['display_taxes']
             : (float) ($pricing['taxes'] ?? ($fare['taxes'] ?? 0));
 
+        $rawPassengerPricing = is_array($fare['passenger_pricing'] ?? null) ? $fare['passenger_pricing'] : null;
+        $passengerPack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
+            $rawPassengerPricing,
+            $pricing,
+            isset($pricing['supplier_total']) && is_numeric($pricing['supplier_total'])
+                ? (float) $pricing['supplier_total']
+                : null,
+        );
+        if ($passengerPack['passenger_pricing_available']) {
+            $fare['passenger_pricing'] = $passengerPack['passenger_pricing'];
+            $fare['passenger_pricing_available'] = true;
+            $fare['passenger_pricing_components_trusted'] = $passengerPack['components_trusted'];
+            $offer['fare_breakdown'] = $fare;
+        } elseif (array_key_exists('passenger_pricing', $fare)) {
+            // Drop untrusted foreign-currency PTC rows rather than leaking them into PKR UI.
+            $fare['passenger_pricing'] = null;
+            $fare['passenger_pricing_available'] = false;
+            $fare['passenger_pricing_components_trusted'] = false;
+            $offer['fare_breakdown'] = $fare;
+        }
+
         return array_merge($offer, [
             'id' => $offer['offer_id'],
             'depart_at' => $offer['departure_at'],

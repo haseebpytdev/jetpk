@@ -1309,8 +1309,13 @@ class SabreFlightSearchNormalizer
                 'baggage_summary' => $baggage->summary,
                 'check_in_summary' => $baggage->checked,
                 'carry_on_summary' => $baggage->cabin,
+                'checked_baggage' => $baggage->checked,
+                'cabin_baggage' => $baggage->cabin,
                 'refundable' => $refundable,
                 'refundable_display' => $refundable ? 'Refundable' : 'Non-refundable',
+                'refund_rule' => $refundable ? 'Refundable' : 'Non-refundable',
+                'passenger_pricing' => is_array($fareBreak['passenger_pricing'] ?? null) ? $fareBreak['passenger_pricing'] : null,
+                'passenger_pricing_available' => (bool) ($fareBreak['passenger_pricing_available'] ?? false),
                 'fare_basis_codes' => $fareBasisCodes,
                 'pricing_information_index' => $piIndex,
                 'pricing_information_ref' => $piScalars['pricing_information_ref'] !== '' ? $piScalars['pricing_information_ref'] : null,
@@ -6721,6 +6726,49 @@ class SabreFlightSearchNormalizer
         if ($priceTotal > 0) {
             $fare['supplier_total'] = $priceTotal;
             $offer['fare_breakdown'] = $fare;
+        }
+
+        if (is_array($sourceRow['passenger_pricing'] ?? null) && $sourceRow['passenger_pricing'] !== []) {
+            $pricingComponents = is_array($offer['pricing_components'] ?? null) ? $offer['pricing_components'] : [];
+            $pack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
+                $sourceRow['passenger_pricing'],
+                array_merge([
+                    'pricing_currency' => (string) ($offer['pricing_currency'] ?? 'PKR'),
+                    'conversion_status' => (string) ($offer['conversion_status'] ?? 'same_currency'),
+                    'fx_rate' => (float) ($pricingComponents['fx_rate'] ?? 0),
+                    'supplier_total' => $priceTotal > 0
+                        ? (float) ($pricingComponents['supplier_total'] ?? 0)
+                        : (float) ($pricingComponents['supplier_total'] ?? 0),
+                ], $pricingComponents),
+                $priceTotal > 0 && strtoupper((string) ($sourceRow['currency'] ?? '')) === 'PKR'
+                    ? $priceTotal
+                    : (isset($pricingComponents['supplier_total']) ? (float) $pricingComponents['supplier_total'] : null),
+            );
+            // When option currency is supplier FX, scale option total with the same rate for reconcile.
+            if (! $pack['passenger_pricing_available'] && $priceTotal > 0 && ($pricingComponents['conversion_status'] ?? '') === 'converted') {
+                $fx = (float) ($pricingComponents['fx_rate'] ?? 0);
+                if ($fx > 0) {
+                    $pack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
+                        $sourceRow['passenger_pricing'],
+                        array_merge($pricingComponents, [
+                            'pricing_currency' => 'PKR',
+                            'conversion_status' => 'converted',
+                            'fx_rate' => $fx,
+                            'supplier_total' => round($priceTotal * $fx, 2),
+                        ]),
+                        round($priceTotal * $fx, 2),
+                    );
+                }
+            }
+            if ($pack['passenger_pricing_available']) {
+                $fare['passenger_pricing'] = $pack['passenger_pricing'];
+                $fare['passenger_pricing_available'] = true;
+                $fare['passenger_pricing_components_trusted'] = $pack['components_trusted'];
+                if ($priceTotal > 0 && ($pricingComponents['conversion_status'] ?? '') === 'converted' && (float) ($pricingComponents['fx_rate'] ?? 0) > 0) {
+                    $fare['supplier_total'] = round($priceTotal * (float) $pricingComponents['fx_rate'], 2);
+                }
+                $offer['fare_breakdown'] = $fare;
+            }
         }
 
         $readiness = (new SabreStoredPricingContextDigest)->assessBrandedFareOptionReadiness($sourceRow);

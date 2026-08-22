@@ -14,15 +14,16 @@ type FareFamilyDetailsProps = {
 };
 
 function benefitRows(option: FareFamilyOption): Array<{ label: string; value: string }> {
-  const cabin = option.cabin_baggage ?? option.carry_on_summary ?? null;
+  const cabinBag = option.cabin_baggage ?? option.carry_on_summary ?? null;
   const checked = option.checked_baggage ?? option.check_in_summary ?? null;
   const rows: Array<{ label: string; value: string }> = [];
+  if (option.cabin) rows.push({ label: "Cabin class", value: option.cabin });
   if (checked) rows.push({ label: "Checked baggage", value: checked });
-  if (cabin) rows.push({ label: "Cabin baggage", value: cabin });
-  if (!cabin && !checked && option.baggage) rows.push({ label: "Baggage", value: option.baggage });
+  if (cabinBag) rows.push({ label: "Cabin baggage", value: cabinBag });
+  if (!cabinBag && !checked && option.baggage) rows.push({ label: "Baggage", value: option.baggage });
+  if (option.meal) rows.push({ label: "Meal", value: option.meal });
   if (option.refund_rule) rows.push({ label: "Refund", value: option.refund_rule });
   if (option.change_rule) rows.push({ label: "Changes", value: option.change_rule });
-  if (option.meal) rows.push({ label: "Meal", value: option.meal });
   if (option.seat_selection) rows.push({ label: "Seat", value: option.seat_selection });
   return rows;
 }

@@ -202,12 +202,33 @@ class FlightOfferFallbackDetailsPresenter
         $passengerPricing = is_array($offer['passenger_pricing'] ?? null)
             ? $offer['passenger_pricing']
             : (is_array(data_get($offer, 'fare_breakdown.passenger_pricing')) ? data_get($offer, 'fare_breakdown.passenger_pricing') : []);
+        $pricingComponents = is_array($offer['pricing_components'] ?? null) ? $offer['pricing_components'] : [];
+        if ($pricingComponents === [] && is_array(data_get($offer, 'fare_breakdown'))) {
+            $pricingComponents = [
+                'pricing_currency' => 'PKR',
+                'conversion_status' => (string) ($offer['conversion_status'] ?? 'same_currency'),
+                'fx_rate' => data_get($offer, 'pricing_components.fx_rate'),
+                'supplier_total' => (float) ($offer['supplier_total'] ?? data_get($offer, 'fare_breakdown.supplier_total', 0)),
+            ];
+        }
+        $normalizedPack = \App\Support\Pricing\PassengerPricingCustomerCurrencyNormalizer::normalize(
+            is_array($passengerPricing) ? $passengerPricing : null,
+            array_merge([
+                'pricing_currency' => 'PKR',
+                'conversion_status' => (string) ($offer['conversion_status'] ?? ($pricingComponents['conversion_status'] ?? 'same_currency')),
+                'fx_rate' => (float) ($pricingComponents['fx_rate'] ?? 0),
+                'supplier_total' => (float) ($pricingComponents['supplier_total'] ?? ($offer['supplier_total'] ?? data_get($offer, 'fare_breakdown.supplier_total', 0))),
+            ], $pricingComponents),
+            isset($pricingComponents['supplier_total']) && is_numeric($pricingComponents['supplier_total'])
+                ? (float) $pricingComponents['supplier_total']
+                : null,
+        );
         $trustedPassengerPricing = [];
-        foreach ($passengerPricing as $row) {
+        foreach ($normalizedPack['passenger_pricing'] ?? [] as $row) {
             if (! is_array($row)) {
                 continue;
             }
-            $rowCurrency = strtoupper(trim((string) ($row['currency'] ?? $currency)));
+            $rowCurrency = strtoupper(trim((string) ($row['currency'] ?? 'PKR')));
             if ($rowCurrency !== 'PKR') {
                 continue;
             }
@@ -221,8 +242,16 @@ class FlightOfferFallbackDetailsPresenter
                 $rowBase = 0;
                 $rowTaxes = 0;
             }
+            $type = strtoupper(trim((string) ($row['passenger_type'] ?? $row['ptc'] ?? 'ADULT'))) ?: 'ADULT';
+            if ($type === 'ADULT' || $type === 'ADT') {
+                $type = 'ADULT';
+            } elseif ($type === 'CHILD' || $type === 'CHD' || $type === 'CNN') {
+                $type = 'CHILD';
+            } elseif ($type === 'INFANT' || $type === 'INF' || $type === 'INS') {
+                $type = 'INFANT';
+            }
             $trustedPassengerPricing[] = array_filter([
-                'passenger_type' => strtoupper(trim((string) ($row['passenger_type'] ?? $row['ptc'] ?? 'ADULT'))) ?: 'ADULT',
+                'passenger_type' => $type,
                 'passenger_count' => max(1, (int) ($row['passenger_count'] ?? $row['quantity'] ?? 1)),
                 'base_amount' => $rowBase > 0 ? $rowBase : null,
                 'tax_amount' => $rowTaxes > 0 ? $rowTaxes : null,

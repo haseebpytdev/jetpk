@@ -484,10 +484,6 @@ class CheckoutFareBreakdownPresenter
      */
     public static function passengerPricingCurrencyTrusted(array $context, string $displayCurrency, string $conversionStatus): bool
     {
-        if ($conversionStatus === 'converted') {
-            return false;
-        }
-
         $rows = data_get($context, 'fare_breakdown.passenger_pricing');
         if (! is_array($rows) || $rows === []) {
             $rows = $context['passenger_pricing'] ?? null;
@@ -496,6 +492,8 @@ class CheckoutFareBreakdownPresenter
             return false;
         }
 
+        // Converted offers are trusted only when every PTC row is already in display currency
+        // (FX-normalized via PassengerPricingCustomerCurrencyNormalizer). Foreign-currency rows stay hidden.
         foreach ($rows as $row) {
             if (! is_array($row)) {
                 continue;
@@ -503,6 +501,18 @@ class CheckoutFareBreakdownPresenter
             $rowCurrency = strtoupper(trim((string) ($row['currency'] ?? $displayCurrency)));
             if ($rowCurrency !== '' && $rowCurrency !== $displayCurrency) {
                 return false;
+            }
+        }
+
+        if ($conversionStatus === 'converted') {
+            foreach ($rows as $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                $rowCurrency = strtoupper(trim((string) ($row['currency'] ?? '')));
+                if ($rowCurrency === '' || $rowCurrency !== $displayCurrency) {
+                    return false;
+                }
             }
         }
 

@@ -21,6 +21,21 @@ class ResultsPassengerPricingTrustTest extends TestCase
         $this->assertFalse($trusted);
     }
 
+    public function test_passenger_pricing_trusted_when_converted_rows_already_pkr(): void
+    {
+        $trusted = CheckoutFareBreakdownPresenter::passengerPricingTrustedForResultsRow([
+            'passenger_pricing_available' => true,
+            'passenger_pricing' => [
+                ['passenger_type' => 'adult', 'passenger_count' => 2, 'total_amount' => 70000, 'currency' => 'PKR'],
+                ['passenger_type' => 'child', 'passenger_count' => 3, 'total_amount' => 50400, 'currency' => 'PKR'],
+            ],
+            'pricing_currency' => 'PKR',
+            'conversion_status' => 'converted',
+        ]);
+
+        $this->assertTrue($trusted);
+    }
+
     public function test_passenger_pricing_trusted_for_native_pkr_rows(): void
     {
         $trusted = CheckoutFareBreakdownPresenter::passengerPricingTrustedForResultsRow([
