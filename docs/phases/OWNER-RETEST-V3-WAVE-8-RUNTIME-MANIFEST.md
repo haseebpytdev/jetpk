@@ -1,4 +1,4 @@
-# OWNER-RETEST-V3 WAVE-8 RUNTIME MANIFEST
+﻿# OWNER-RETEST-V3 WAVE-8 RUNTIME MANIFEST
 
 ## Pins
 - Production runtime (current): `a9ec8f18745c8b9db3ce62504efd485a1bb8df3e`
@@ -6,7 +6,7 @@
 - Wave-8 engineering tip (pre-docs or with docs): see `FINAL_WAVE8_ENGINEERING_SHA` below after Cluster E commit.
 
 ## Delta
-`a9ec8f18745c8b9db3ce62504efd485a1bb8df3e` → `FINAL_WAVE8_ENGINEERING_SHA`
+`a9ec8f18745c8b9db3ce62504efd485a1bb8df3e` â†’ `FINAL_WAVE8_ENGINEERING_SHA`
 
 ### Runtime / product files (deploy candidates after owner authorization)
 
@@ -47,8 +47,9 @@ tmp/owner-v3-flight-wave-8/
 ```
 
 ## Visual proof
-`tmp/owner-v3-flight-wave-8/` states 01–20 present (Playwright Wave-8 matrix).
+`tmp/owner-v3-flight-wave-8/` states 01â€“20 present (Playwright Wave-8 matrix).
 
 ## Deploy
 **STOP BEFORE PRODUCTION DEPLOYMENT.**
 Do not activate this SHA on production in this engineering loop.
+

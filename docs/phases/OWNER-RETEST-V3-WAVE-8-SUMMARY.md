@@ -1,7 +1,7 @@
-# Wave-8 Phase Summary — Owner Retest V3
+﻿# Wave-8 Phase Summary â€” Owner Retest V3
 
 ## Phase name
-Owner Retest V3 Wave-8 — Change Flight fresh search + branded PTC transparency + Results/Travelers modernisation + passport OCR robustness
+Owner Retest V3 Wave-8 â€” Change Flight fresh search + branded PTC transparency + Results/Travelers modernisation + passport OCR robustness
 
 ## Branch name
 `feat/jetpk-flight-results-booking-flow-20260819`
@@ -11,7 +11,7 @@ Close Wave-8 engineering remediation for Change Flight commercial semantics, sel
 
 ## Included scope
 - Cluster A: Change Flight commercial-state guard + criteria-only fresh search (new search_id)
-- Cluster B: Selected-brand PTC rows / no stale ECOLIGHT→SMART breakdown
+- Cluster B: Selected-brand PTC rows / no stale ECOLIGHTâ†’SMART breakdown
 - Cluster C: Results hero, search-context card, nearby dates strip, single Sort control
 - Cluster D: Travelers form hierarchy, Flight Summary Total label, multi-pass OCR UX
 - Cluster E: Wave-8 visual matrix, gate/manifest docs
@@ -52,7 +52,7 @@ None.
 - `git diff --check` on intended paths
 
 ## Screenshots
-`tmp/owner-v3-flight-wave-8/` — required states 01–20; synthetic passport only.
+`tmp/owner-v3-flight-wave-8/` â€” required states 01â€“20; synthetic passport only.
 
 ## SHA pins
 - Production baseline runtime: `a9ec8f18745c8b9db3ce62504efd485a1bb8df3e`
@@ -70,3 +70,4 @@ Redeploy prior runtime SHA `a9ec8f18745c8b9db3ce62504efd485a1bb8df3e` (build `i4
 `OWNER_RETEST_V3=FAILED_REMEDIATION_REQUIRED`  
 Wave-8 **pre-deploy** engineering ready for independent review.  
 **STOP BEFORE PRODUCTION DEPLOYMENT**.
+

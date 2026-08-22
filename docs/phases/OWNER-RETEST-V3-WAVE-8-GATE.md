@@ -1,4 +1,4 @@
-# OWNER-RETEST-V3 WAVE-8 GATE
+﻿# OWNER-RETEST-V3 WAVE-8 GATE
 
 ## Status
 `OWNER_RETEST_V3=FAILED_REMEDIATION_REQUIRED`
@@ -6,7 +6,7 @@
 Do **not** mark PASS. Stop before production deployment.
 
 ## Engineering SHA
-`FINAL_WAVE8_ENGINEERING_SHA=<pending after Cluster E commit>`
+`FINAL_WAVE8_ENGINEERING_SHA=eb76f56cc759558c80122cdb716b5ae14509df96`
 
 ## Production baseline (unchanged this loop)
 - Runtime: `a9ec8f18745c8b9db3ce62504efd485a1bb8df3e`
@@ -57,3 +57,4 @@ Do **not** mark PASS. Stop before production deployment.
 
 ## Deploy
 **STOP BEFORE PRODUCTION DEPLOYMENT.**
+
