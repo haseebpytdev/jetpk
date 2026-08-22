@@ -404,6 +404,7 @@ test("owner V3 wave 6 commerce state + visual proof", async ({ page }) => {
   await expect(preview).toContainText("30 kg");
   await preview.screenshot({ path: path.join(output, "12-passenger-flight-preview-selected-fare.png") });
 
+  await page.getByTestId("document-reader-scan-0").scrollIntoViewIfNeeded();
   await expect(page.getByTestId("document-reader-scan-0")).toContainText("Autofill from passport");
   await expect(page.getByText("Paste MRZ")).toHaveCount(0);
   // Capture the full reader chrome (not just the icon button) so visual proof exceeds size gates.
@@ -411,11 +412,11 @@ test("owner V3 wave 6 commerce state + visual proof", async ({ page }) => {
 
   const { SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY } = await import("../features/standard-booking/document-reader/mrz/fixtures");
   await page.getByTestId("document-reader-paste-0").fill(SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY);
-  await expect(page.getByTestId("document-reader-preview-0")).toBeVisible();
-  await page.screenshot({ path: path.join(output, "14-passport-upload.png") });
-  await page.getByTestId("document-reader-preview-0").screenshot({ path: path.join(output, "15-passport-review.png") });
-  await page.getByTestId("document-reader-confirm-0").click();
+  // Wave-7: high-confidence empty-field extraction autofills without a technical preview.
+  await expect(page.getByTestId("document-reader-status-0")).toContainText(/Passport details added/i, { timeout: 10_000 });
   await expect(page.getByTestId("passenger-card-0").getByLabel(/Last name/i)).not.toHaveValue("");
+  await page.getByTestId("passenger-card-0").screenshot({ path: path.join(output, "14-passport-upload.png") });
+  await page.getByTestId("passenger-card-0").screenshot({ path: path.join(output, "15-passport-review.png") });
   await page.getByTestId("passenger-card-0").screenshot({ path: path.join(output, "16-passport-fields-filled.png") });
 
   await page.setViewportSize({ width: 390, height: 844 });

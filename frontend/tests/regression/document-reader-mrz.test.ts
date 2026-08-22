@@ -19,6 +19,10 @@ import {
   planExtractedFieldMerge,
 } from "../../features/standard-booking/document-reader/applyExtractedFields";
 import type { PassengerFormValues } from "../../features/standard-booking/types";
+import {
+  applyTitleAssistance,
+  suggestTitleFromPassport,
+} from "../../features/standard-booking/document-reader/titleFromPassport";
 
 const emptyPassenger: PassengerFormValues = {
   passenger_type: "adult",
@@ -89,6 +93,30 @@ test("confirmation applies extracted fields to empty passenger", () => {
   assert.equal(next.passport_number, "X1234567");
   assert.equal(next.passport_issue_date, "");
   assert.equal(next.document_type, "passport");
+});
+
+test("male gender suggests Mr and female suggests Ms without inventing Mrs/Miss", () => {
+  assert.equal(suggestTitleFromPassport({ gender: "male" }), "Mr");
+  assert.equal(suggestTitleFromPassport({ gender: "female" }), "Ms");
+  assert.equal(suggestTitleFromPassport({ gender: "female", msSupported: false }), null);
+  assert.equal(suggestTitleFromPassport({ explicitTitle: "Dr" }), "Dr");
+
+  const male = applyTitleAssistance({ ...emptyPassenger, title: "", gender: "male" }, { gender: "male" });
+  assert.equal(male.title, "Mr");
+  const female = applyTitleAssistance({ ...emptyPassenger, title: "Mr", first_name: "", last_name: "" }, { gender: "female" });
+  assert.equal(female.title, "Ms");
+  const kept = applyTitleAssistance({ ...emptyPassenger, title: "Miss", first_name: "A", last_name: "B" }, { gender: "female" });
+  assert.equal(kept.title, "Miss");
+});
+
+test("issue date is never fabricated from expiry during merge", () => {
+  const parsed = parseTd3Mrz(SYNTHETIC_VALID_MRZ_FUTURE_EXPIRY);
+  assert.equal(parsed.fields.passport_issue_date, undefined);
+  const next = applyConfirmedExtraction(emptyPassenger, {
+    ...parsed.fields,
+    // Deliberately omit issue date — merge must not invent from expiry.
+  });
+  assert.equal(next.passport_issue_date, "");
 });
 
 test("existing filled fields are protected until user chooses", () => {

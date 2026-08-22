@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PassengerFormValues } from "../../types";
 import {
   applyConfirmedExtraction,
@@ -9,6 +9,7 @@ import {
 } from "../applyExtractedFields";
 import type { MrzExtractedFields, MrzParseResult } from "../mrz/parseMrz";
 import { scanDocumentClientSide } from "../ocr/scanDocumentClientSide";
+import { applyTitleAssistance } from "../titleFromPassport";
 
 type DocumentReaderProps = {
   passengerIndex: number;
@@ -16,9 +17,9 @@ type DocumentReaderProps = {
   onApply: (next: PassengerFormValues) => void;
 };
 
-type ReaderPhase = "idle" | "processing" | "preview" | "error";
+type ReaderPhase = "idle" | "processing" | "conflicts" | "error";
 
-const VERIFY_COPY = "Please verify extracted details against the passport before continuing.";
+const SUCCESS_COPY = "Passport details added. Please verify them against your passport.";
 
 const FIELD_LABELS: Record<keyof MrzExtractedFields, string> = {
   last_name: "Surname",
@@ -42,8 +43,17 @@ function PassportIcon({ className }: { className?: string }) {
   );
 }
 
+function progressLabel(status: string, progress: number): string {
+  if (status === "preparing") return "Preparing passport image…";
+  if (status === "loading_ocr") return "Starting on-device reader…";
+  if (status === "recognizing") return `Reading passport on this device… ${Math.round(progress * 100)}%`;
+  if (status === "parsing") return "Checking passport details…";
+  return "Reading passport on this device…";
+}
+
 export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentReaderProps) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const [phase, setPhase] = useState<ReaderPhase>("idle");
   const [result, setResult] = useState<MrzParseResult | null>(null);
   const [conflicts, setConflicts] = useState<FieldConflict[]>([]);
@@ -51,27 +61,84 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
     Partial<Record<keyof MrzExtractedFields, "keep" | "use_extracted">>
   >({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [progressText, setProgressText] = useState("Reading passport on this device…");
+  const [uncertainFields, setUncertainFields] = useState<Array<keyof MrzExtractedFields>>([]);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
+  const applyExtraction = (parsed: MrzParseResult, conflictChoices?: Partial<Record<keyof MrzExtractedFields, "keep" | "use_extracted">>) => {
+    let next = applyConfirmedExtraction(passenger, parsed.fields, conflictChoices);
+    next = applyTitleAssistance(next, {
+      gender: parsed.fields.gender,
+    });
+    onApply(next);
+    const uncertain = parsed.confidence
+      .filter((row) => row.confidence === "low" || row.confidence === "medium")
+      .map((row) => row.field)
+      .filter((field): field is keyof MrzExtractedFields => field in FIELD_LABELS);
+    setUncertainFields(uncertain);
+    setStatusMessage(SUCCESS_COPY);
+    setPhase("idle");
+    setResult(null);
+    setConflicts([]);
+    setChoices({});
+  };
 
   const runParse = async (source: Parameters<typeof scanDocumentClientSide>[0]) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setPhase("processing");
     setStatusMessage(null);
     setResult(null);
     setConflicts([]);
     setChoices({});
+    setUncertainFields([]);
+    setProgressText("Reading passport on this device…");
+
     try {
-      const parsed = await scanDocumentClientSide(source);
+      const parsed = await scanDocumentClientSide(source, {
+        signal: controller.signal,
+        timeoutMs: 45_000,
+        onProgress: ({ status, progress }) => {
+          setProgressText(progressLabel(status, progress));
+        },
+      });
       setResult(parsed);
+
       if (!parsed.ok && Object.keys(parsed.fields).length === 0) {
         setPhase("error");
         setStatusMessage(parsed.warnings[0] ?? "Could not read passport details from that image.");
         return;
       }
+
       const plan = planExtractedFieldMerge(passenger, parsed.fields);
-      setConflicts(plan.conflicts);
-      setPhase("preview");
+      if (plan.conflicts.length > 0) {
+        // Apply empty-field fills immediately; only ask about conflicts.
+        if (Object.keys(plan.toApply).length > 0) {
+          let partial = { ...passenger, ...plan.toApply, document_type: "passport" as const };
+          partial = applyTitleAssistance(partial, { gender: parsed.fields.gender });
+          onApply(partial);
+        }
+        setConflicts(plan.conflicts);
+        setPhase("conflicts");
+        setStatusMessage("Some fields already have values. Choose keep or replace — nothing is overwritten silently.");
+        return;
+      }
+
+      applyExtraction(parsed);
     } catch {
       setPhase("error");
       setStatusMessage("Could not read the passport on this device. Try a clearer photo of the data page.");
+    } finally {
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+      }
     }
   };
 
@@ -80,11 +147,11 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
     void runParse({ kind: "image", file });
   };
 
-  const handleConfirm = () => {
+  const handleConfirmConflicts = () => {
     if (!result) return;
     const unresolved = conflicts.filter((conflict) => choices[conflict.field] == null);
     if (unresolved.length > 0) {
-      setStatusMessage("Resolve each highlighted field before applying extracted details.");
+      setStatusMessage("Resolve each highlighted field before continuing.");
       return;
     }
     const resolvedChoices: Partial<Record<keyof MrzExtractedFields, "keep" | "use_extracted">> = {
@@ -93,13 +160,17 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
     for (const conflict of conflicts) {
       resolvedChoices[conflict.field] = choices[conflict.field] ?? "keep";
     }
-    const next = applyConfirmedExtraction(passenger, result.fields, resolvedChoices);
-    onApply(next);
+    applyExtraction(result, resolvedChoices);
+  };
+
+  const handleCancel = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
     setPhase("idle");
     setResult(null);
     setConflicts([]);
     setChoices({});
-    setStatusMessage("Passport details applied. Please verify against the passport before continuing.");
+    setStatusMessage("Passport scan cancelled.");
   };
 
   return (
@@ -150,113 +221,88 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
       />
 
       {phase === "processing" ? (
-        <p className="mt-2 text-sm text-jp-muted" role="status" data-testid={`document-reader-processing-${passengerIndex}`}>
-          Reading passport on this device…
-        </p>
+        <div className="mt-2 space-y-2" data-testid={`document-reader-processing-${passengerIndex}`}>
+          <p className="text-sm text-jp-muted" role="status">
+            {progressText}
+          </p>
+          <button
+            type="button"
+            className="rounded-jp-md border border-jp-border bg-white px-3 py-1.5 text-xs font-semibold text-jp-text"
+            data-testid={`document-reader-cancel-${passengerIndex}`}
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+        </div>
       ) : null}
 
       {phase === "error" && statusMessage ? (
-        <p className="mt-2 text-sm text-red-700" role="alert" data-testid={`document-reader-error-${passengerIndex}`}>
-          {statusMessage}
-        </p>
+        <div className="mt-2 space-y-2" data-testid={`document-reader-error-${passengerIndex}`}>
+          <p className="text-sm text-red-700" role="alert">
+            {statusMessage}
+          </p>
+          <button
+            type="button"
+            className="rounded-jp-md border border-jp-border bg-white px-3 py-1.5 text-xs font-semibold text-jp-text"
+            data-testid={`document-reader-retry-${passengerIndex}`}
+            onClick={() => fileRef.current?.click()}
+          >
+            Retry with a clearer image
+          </button>
+        </div>
       ) : null}
 
-      {phase === "preview" && result ? (
+      {phase === "conflicts" && result ? (
         <div
           className="mt-2 space-y-3 rounded-jp-md border border-jp-border bg-jp-page/60 p-3"
-          data-testid={`document-reader-preview-${passengerIndex}`}
+          data-testid={`document-reader-conflicts-${passengerIndex}`}
         >
-          <p className="rounded-jp-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950" role="status">
-            {VERIFY_COPY}
+          <p className="text-xs font-semibold text-jp-text" role="status">
+            {statusMessage}
           </p>
-
-          {!result.checkDigitsValid ? (
-            <p className="text-xs font-medium text-amber-800" data-testid={`document-reader-checkdigit-warning-${passengerIndex}`}>
-              Some passport details could not be fully verified. Review every field carefully.
-            </p>
-          ) : null}
-
-          {result.warnings.length > 0 ? (
-            <ul className="list-disc space-y-1 pl-4 text-xs text-jp-muted" data-testid={`document-reader-warnings-${passengerIndex}`}>
-              {result.warnings.map((warning) => (
-                <li key={warning}>{warning}</li>
-              ))}
-            </ul>
-          ) : null}
-
-          <dl className="grid gap-2 sm:grid-cols-2">
-            {(Object.keys(result.fields) as Array<keyof MrzExtractedFields>).map((field) => {
-              const value = result.fields[field];
-              if (value == null || value === "") return null;
-              return (
-                <div key={field} className="rounded-jp-md border border-jp-border-soft bg-white px-3 py-2">
-                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-jp-muted">
-                    {FIELD_LABELS[field]}
-                  </dt>
-                  <dd className="mt-0.5 text-sm font-medium text-jp-text">{String(value)}</dd>
-                </div>
-              );
-            })}
-          </dl>
-
-          {conflicts.length > 0 ? (
+          {conflicts.map((conflict) => (
             <div
-              className="space-y-2 rounded-jp-md border border-jp-border bg-white p-3"
-              data-testid={`document-reader-conflicts-${passengerIndex}`}
+              key={conflict.field}
+              className="grid gap-2 border-t border-jp-border-soft pt-2 sm:grid-cols-[1fr_auto]"
+              data-testid={`document-reader-conflict-${passengerIndex}-${conflict.field}`}
             >
-              <p className="text-xs font-semibold text-jp-text">
-                Some fields already have values. Choose keep or replace — nothing is overwritten silently.
-              </p>
-              {conflicts.map((conflict) => (
-                <div
-                  key={conflict.field}
-                  className="grid gap-2 border-t border-jp-border-soft pt-2 sm:grid-cols-[1fr_auto]"
-                  data-testid={`document-reader-conflict-${passengerIndex}-${conflict.field}`}
+              <div>
+                <p className="text-xs font-medium text-jp-text">{FIELD_LABELS[conflict.field]}</p>
+                <p className="text-xs text-jp-muted">Current: {conflict.existing}</p>
+                <p className="text-xs text-jp-muted">Extracted: {conflict.extracted}</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className={`rounded-jp-md border px-2 py-1 text-xs ${choices[conflict.field] === "keep" ? "border-jp-primary bg-jp-primary-soft text-jp-primary" : "border-jp-border"}`}
+                  onClick={() => setChoices((current) => ({ ...current, [conflict.field]: "keep" }))}
                 >
-                  <div>
-                    <p className="text-xs font-medium text-jp-text">{FIELD_LABELS[conflict.field]}</p>
-                    <p className="text-xs text-jp-muted">Current: {conflict.existing}</p>
-                    <p className="text-xs text-jp-muted">Extracted: {conflict.extracted}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      className={`rounded-jp-md border px-2 py-1 text-xs ${choices[conflict.field] === "keep" ? "border-jp-primary bg-jp-primary-soft text-jp-primary" : "border-jp-border"}`}
-                      onClick={() => setChoices((current) => ({ ...current, [conflict.field]: "keep" }))}
-                    >
-                      Keep
-                    </button>
-                    <button
-                      type="button"
-                      className={`rounded-jp-md border px-2 py-1 text-xs ${choices[conflict.field] === "use_extracted" ? "border-jp-primary bg-jp-primary-soft text-jp-primary" : "border-jp-border"}`}
-                      onClick={() => setChoices((current) => ({ ...current, [conflict.field]: "use_extracted" }))}
-                    >
-                      Use extracted
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  Keep
+                </button>
+                <button
+                  type="button"
+                  className={`rounded-jp-md border px-2 py-1 text-xs ${choices[conflict.field] === "use_extracted" ? "border-jp-primary bg-jp-primary-soft text-jp-primary" : "border-jp-border"}`}
+                  onClick={() => setChoices((current) => ({ ...current, [conflict.field]: "use_extracted" }))}
+                >
+                  Use extracted
+                </button>
+              </div>
             </div>
-          ) : null}
-
+          ))}
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               className="rounded-jp-md bg-jp-primary px-3 py-2 text-xs font-semibold text-white focus-visible:outline-none focus-visible:shadow-jp-focus"
               data-testid={`document-reader-confirm-${passengerIndex}`}
-              onClick={handleConfirm}
+              onClick={handleConfirmConflicts}
             >
-              Confirm and fill form
+              Apply choices
             </button>
             <button
               type="button"
               className="rounded-jp-md border border-jp-border bg-white px-3 py-2 text-xs font-semibold text-jp-text"
               data-testid={`document-reader-discard-${passengerIndex}`}
-              onClick={() => {
-                setPhase("idle");
-                setResult(null);
-                setConflicts([]);
-              }}
+              onClick={handleCancel}
             >
               Discard
             </button>
@@ -267,6 +313,16 @@ export function DocumentReader({ passengerIndex, passenger, onApply }: DocumentR
       {phase === "idle" && statusMessage ? (
         <p className="mt-2 text-xs text-jp-muted" role="status" data-testid={`document-reader-status-${passengerIndex}`}>
           {statusMessage}
+        </p>
+      ) : null}
+
+      {uncertainFields.length > 0 ? (
+        <p
+          className="mt-2 rounded-jp-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950"
+          role="status"
+          data-testid={`document-reader-uncertain-${passengerIndex}`}
+        >
+          Please double-check: {uncertainFields.map((field) => FIELD_LABELS[field]).join(", ")}.
         </p>
       ) : null}
     </div>
