@@ -107,8 +107,8 @@ export function normalizeHydratedPassenger(
   const defaults = emptyPassenger(slotType);
   const src = existing ?? {};
 
-  const gender = isNullish((src as { gender?: unknown }).gender)
-    ? defaults.gender
+  const gender: "male" | "female" = isNullish((src as { gender?: unknown }).gender)
+    ? normalizeGender(undefined, slotType)
     : normalizeGender((src as { gender?: unknown }).gender, slotType);
 
   const title = normalizePassengerTitle(

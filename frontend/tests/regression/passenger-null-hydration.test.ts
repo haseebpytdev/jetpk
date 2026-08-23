@@ -59,10 +59,26 @@ function baseContext(
       passengers: passengers as never,
       contact: {},
     },
-    checkout_summary: { total_formatted: "PKR 88,114", currency: "PKR" },
-    notices: [],
-    next_actions: {},
-  } as StandardPassengersContext;
+    checkout_summary: {
+      total_formatted: "PKR 88,114",
+      currency: "PKR",
+      passenger_counts: { adults: 1, children: 0, infants: 0, total: 1, expected: [], lead_passenger_index: 0 },
+    },
+    seat_extras_capability: {
+      seat_map_available: false,
+      ancillaries_available: false,
+      message: "",
+      progress_step: "",
+    },
+    countries: [],
+    phone_dial_codes: [],
+    auth: {
+      authenticated: false,
+      can_create_account: false,
+      agent_booking_mode: false,
+      agent_contact_locked: false,
+    },
+  } as unknown as StandardPassengersContext;
 }
 
 test("null title hydrates to Mr for adult male and submits Mr", () => {
