@@ -49,6 +49,26 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
   }
 }
 
+function managedPageRequestUrl(apiPath: string): string {
+  // Browser: same-origin /laravel proxy. Server: prefer absolute LARAVEL_URL when set
+  // (matches homepage SSR, enables production-like local CMS stubs). Otherwise keep
+  // relative /laravel so OLS can proxy when LARAVEL_URL is unset.
+  //
+  // Use dynamic env access so Next does not bake an empty LARAVEL_URL at build time
+  // (local production-like harness sets LARAVEL_URL only at `next start`).
+  if (typeof window !== "undefined") {
+    return laravelApiPath(apiPath);
+  }
+  const env = process.env as Record<string, string | undefined>;
+  const laravelBase = (env["LARAVEL_URL"] ?? env["NEXT_PUBLIC_LARAVEL_URL"] ?? "")
+    .trim()
+    .replace(/\/$/, "");
+  if (laravelBase !== "") {
+    return `${laravelBase}${apiPath.startsWith("/") ? apiPath : `/${apiPath}`}`;
+  }
+  return laravelApiPath(apiPath);
+}
+
 export async function fetchManagedPage(
   pageKey: string,
   options?: { preview?: boolean; headers?: Record<string, string>; previewToken?: string | null },
@@ -64,7 +84,7 @@ export async function fetchManagedPage(
     }
     const query = params.toString();
     const path = `/api/public/content/pages/${pageKey}${query ? `?${query}` : ""}`;
-    const response = await fetchWithTimeout(laravelApiPath(path), {
+    const response = await fetchWithTimeout(managedPageRequestUrl(path), {
       headers: {
         Accept: "application/json",
         ...(options?.headers ?? {}),

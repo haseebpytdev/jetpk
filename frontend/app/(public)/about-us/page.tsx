@@ -7,12 +7,16 @@ import {
 } from "@/features/public-content/utils/cms-preview";
 
 export const dynamic = "force-dynamic";
+/** Explicit CMS freshness: bare /about-us must never reuse a full-route payload. */
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 type AboutUsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Segment fetchCache + no-store managed-page fetch apply here (SEO must track publish).
   const page = await PublicPageService.getAboutPage();
   return publicSeoToMetadata(page.seo, "/about-us");
 }
