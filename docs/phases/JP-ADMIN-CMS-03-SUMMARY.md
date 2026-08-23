@@ -87,7 +87,7 @@ Focused PHPUnit batches: 23 + 17 assertions suites passed (see command logs).
 Revert branch / redeploy prior SHA `8911d208be9b42330c2157e6cd3d4a288c643d94`.
 
 ## Commit SHA
-Filled at pin time: `FINAL_ADMIN_CMS03_ENGINEERING_SHA`
+`f129bc5eebebcf23c5eb7806506c2525ed392b0d`
 
 ## Final status
 `JP_ADMIN_CMS03_PREDEPLOY` — STOP BEFORE DEPLOYMENT. `OWNER_RETEST_V3=RETEST_REQUIRED`.
