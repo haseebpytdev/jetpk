@@ -14,6 +14,7 @@ Master roadmap: [../JETPK-V1-CLIENT-UI-COMPLETION-ROADMAP.md](../JETPK-V1-CLIENT
 | Document | Use when |
 |----------|----------|
 | [DEPLOYMENT-CONTEXT.md](DEPLOYMENT-CONTEXT.md) | Current host, topology, protected deploy route |
+| [deployments/JETPAKISTAN-PK-OWNER-V3-POSTDEPLOY-REMEDIATION-20260823.md](deployments/JETPAKISTAN-PK-OWNER-V3-POSTDEPLOY-REMEDIATION-20260823.md) | 2026-08-23 Owner V3 post-deploy remediation (Integrations/CMS/Checkout) production deployment |
 | [deployments/JETPAKISTAN-PK-WAVE9-JP-INT-01-INTEGRATION-HUB-20260822.md](deployments/JETPAKISTAN-PK-WAVE9-JP-INT-01-INTEGRATION-HUB-20260822.md) | 2026-08-22 Wave-9 Review/payment + JP-INT-01 Integration Hub production deployment |
 | [deployments/JETPAKISTAN-PK-OWNER-V3-WAVE-8-RESULTS-TRAVELERS-CLOSURE-20260822.md](deployments/JETPAKISTAN-PK-OWNER-V3-WAVE-8-RESULTS-TRAVELERS-CLOSURE-20260822.md) | 2026-08-22 Owner V3 Wave-8 Change Flight fresh search, branded PTC, Results/Travelers UI, passport OCR production deployment |
 | [deployments/JETPAKISTAN-PK-OWNER-V3-WAVE-7-CHECKOUT-AUTOFILL-20260822.md](deployments/JETPAKISTAN-PK-OWNER-V3-WAVE-7-CHECKOUT-AUTOFILL-20260822.md) | 2026-08-22 Owner V3 Wave-7 selected-fare persistence, multipax Fare Details, passport OCR, Terms/Change flight production deployment |
