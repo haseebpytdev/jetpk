@@ -96,13 +96,16 @@ Fixes reproducing production defects from the live round-trip:
 1. **Integrations ApiResult unwrap** — `dashboard/services/operational-api.ts` flattens `{ ok, data, status }` so IntegrationsWorkspace reads `hub` / `permissions` / `integration` (13 providers + Settings + Test Connection contract).
 2. **Featured deal publish fields** — `JetpkHomepageContentValidator::normalizeFeaturedDeals()` preserves `id`, editorial fields, and safe `image_asset_key` / `image_alt`; path-like asset keys rejected.
 3. **CMS managed-page freshness** — managed/CMS/custom public fetches use `cache: "no-store"`; About/FAQ routes `force-dynamic`.
-4. **Preview session contract** — preview JSON returns `jp_preview=1` URL; public homepage/about/faq forward browser cookies to Laravel only when `jp_preview=1` (auth unchanged).
+4. **Preview contract** — admin `beginPreview` mints a short-lived page-scoped HMAC `jp_preview_token` (plus `jp_preview=1`). Public Next forwards token via query/`X-JP-Preview-Token` and optional cookies. Laravel accepts token **or** admin session for draft read only; normal public stays published; no auth bypass / no publish required.
 
-`FINAL_CMS03_BLOCKER_ENGINEERING_SHA=eb5067e4a3ff0c96242b3d3e972fd0998d02115c` (pinned below after docs commit).
+Prior eng slice: `eb5067e4` (Integrations unwrap + featured-deal fields + no-store). Preview-token eng: `49be311d`.
 
 ## Final status
 `JP_ADMIN_CMS03_BLOCKER_CLOSURE_PREDEPLOY` — STOP BEFORE DEPLOYMENT. `OWNER_RETEST_V3=RETEST_REQUIRED`.
 
 ### Blocker-closure pins
 - PRODUCTION_BASE_SHA=`f129bc5eebebcf23c5eb7806506c2525ed392b0d`
-- FINAL_CMS03_BLOCKER_ENGINEERING_SHA=`eb5067e4a3ff0c96242b3d3e972fd0998d02115c`
+- FINAL_CMS03_BLOCKER_ENGINEERING_SHA=`49be311deb993b7b87644f27c75d883af574c997`
+- Evidence (local, untracked): `tmp/jp-admin-cms-03-blocker-closure/`
+- Gates: Laravel JpAdminCms03 13 PASS; Playwright CMS-03 13 PASS; dashboard+frontend tsc/build PASS
+- MIGRATIONS=0; production NOT deployed
