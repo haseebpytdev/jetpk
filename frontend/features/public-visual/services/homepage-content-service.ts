@@ -342,10 +342,13 @@ export const HomepageContentService = {
   heroFallbackImage: HERO_FALLBACK_IMAGE,
   heroFallbackAlt: HERO_FALLBACK_ALT,
 
-  async getHomepage(): Promise<HomepageContent> {
+  async getHomepage(options?: { preview?: boolean; headers?: Record<string, string> }): Promise<HomepageContent> {
     try {
       const response = await fetchWithTimeout(resolveHomepageApiUrl(), {
-        headers: { Accept: "application/json" },
+        headers: {
+          Accept: "application/json",
+          ...(options?.headers ?? {}),
+        },
         cache: "no-store",
         next: { tags: ["homepage-cms"] },
       });

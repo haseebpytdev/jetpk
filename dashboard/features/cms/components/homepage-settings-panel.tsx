@@ -360,6 +360,7 @@ export function HomepageSettingsPanel() {
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
   const [previewReady, setPreviewReady] = useState(false);
   const [previewNonce, setPreviewNonce] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const activeHash = useMemo(
@@ -367,11 +368,15 @@ export function HomepageSettingsPanel() {
     [activeSection],
   );
 
-  /** Same-origin public homepage; nonce remounts iframe via key after preview/refresh. */
+  /** Prefer Laravel-issued public preview URL (includes jp_preview=1); fall back to same-origin path. */
   const iframeSrc = useMemo(() => {
-    if (previewReady) return `/?jp_preview=1#${activeHash}`;
-    return `/#${activeHash}`;
-  }, [previewReady, activeHash]);
+    if (!previewReady) return `/#${activeHash}`;
+    if (previewUrl) {
+      const base = previewUrl.split("#")[0];
+      return `${base}#${activeHash}`;
+    }
+    return `/?jp_preview=1#${activeHash}`;
+  }, [previewReady, previewUrl, activeHash]);
 
   async function reloadHome() {
     const result = await loadPageSettings("home");
@@ -458,6 +463,12 @@ export function HomepageSettingsPanel() {
       setError(preview.message ?? "Preview session failed");
       return;
     }
+    const payload =
+      "data" in preview && preview.data && typeof preview.data === "object"
+        ? (preview.data as { previewUrl?: string; preview_url?: string })
+        : (preview as { previewUrl?: string; preview_url?: string });
+    const url = payload.previewUrl ?? payload.preview_url ?? null;
+    setPreviewUrl(url);
     setPreviewReady(true);
     setPreviewNonce((n) => n + 1);
     setSuccess("Draft saved. Live preview session ready in the iframe.");
@@ -466,9 +477,9 @@ export function HomepageSettingsPanel() {
   const refreshPreview = useCallback(() => {
     setPreviewNonce((n) => n + 1);
     if (iframeRef.current) {
-      iframeRef.current.src = previewReady ? `/?jp_preview=1#${activeHash}` : `/#${activeHash}`;
+      iframeRef.current.src = iframeSrc;
     }
-  }, [previewReady, activeHash]);
+  }, [iframeSrc]);
 
   async function uploadAsset(assetKey: string, file: File, altText?: string) {
     const formData = new FormData();
@@ -597,7 +608,7 @@ export function HomepageSettingsPanel() {
         </div>
       </div>
       <p className="border-t border-jp-border px-3 py-2 text-[11px] text-jp-muted">
-        Preview URL: {previewReady ? `/?jp_preview=1#${activeHash}` : `/#${activeHash}`}
+        Preview URL: {iframeSrc}
         {!previewReady ? " — click Preview to start a draft session." : null}
       </p>
     </div>

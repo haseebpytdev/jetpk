@@ -383,11 +383,14 @@ class ClientPageSettingsController extends Controller
         $this->contentResolver->beginDraftPreview($pageKey);
         $route = ClientPageKeys::previewRoutes()[$pageKey] ?? 'home';
         $previewUrl = client_route($route);
+        $separator = str_contains($previewUrl, '?') ? '&' : '?';
+        $previewUrl .= $separator.'jp_preview=1';
 
         if ($this->wantsBackOfficeJson($request)) {
             return $this->backOfficeJson([
                 'ok' => true,
                 'previewUrl' => $previewUrl,
+                'preview_url' => $previewUrl,
                 'message' => 'Draft preview session started.',
             ]);
         }

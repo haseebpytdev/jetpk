@@ -49,11 +49,17 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
   }
 }
 
-export async function fetchManagedPage(pageKey: string): Promise<LaravelManagedPageResponse | null> {
+export async function fetchManagedPage(
+  pageKey: string,
+  options?: { preview?: boolean; headers?: Record<string, string> },
+): Promise<LaravelManagedPageResponse | null> {
   try {
     const response = await fetchWithTimeout(laravelApiPath(`/api/public/content/pages/${pageKey}`), {
-      headers: { Accept: "application/json" },
-      next: { revalidate: 60 },
+      headers: {
+        Accept: "application/json",
+        ...(options?.headers ?? {}),
+      },
+      cache: "no-store",
     });
     if (!response.ok) return null;
     return (await response.json()) as LaravelManagedPageResponse;

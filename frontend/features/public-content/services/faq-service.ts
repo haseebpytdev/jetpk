@@ -37,8 +37,8 @@ function mapCategories(content: Record<string, unknown>): FaqCategory[] {
 }
 
 export const FaqService = {
-  async getFaqPage(): Promise<FaqPageContent> {
-    const remote = await fetchManagedPage("faq");
+  async getFaqPage(options?: { preview?: boolean; headers?: Record<string, string> }): Promise<FaqPageContent> {
+    const remote = await fetchManagedPage("faq", options);
     if (!remote || remote.source === "empty") {
       if (allowContentFixtures()) {
         return FAQ_PAGE_FIXTURE;

@@ -8,9 +8,13 @@ import {
   RoutesSection,
   WhyJetPakistanSection,
 } from "@/features/public-visual";
+import { cmsPreviewRequestHeaders } from "@/features/public-content/utils/cms-preview";
 
-export async function HomepageContent() {
-  const content = await HomepageContentService.getHomepage();
+export async function HomepageContent({ preview = false }: { preview?: boolean }) {
+  const content = await HomepageContentService.getHomepage({
+    preview,
+    headers: await cmsPreviewRequestHeaders(preview),
+  });
 
   return (
     <>

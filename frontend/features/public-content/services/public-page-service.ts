@@ -42,8 +42,8 @@ function mapContentGrid(content: Record<string, unknown>): ContentCard[] {
 }
 
 export const PublicPageService = {
-  async getAboutPage(): Promise<PublicPage> {
-    const remote = await fetchManagedPage("about");
+  async getAboutPage(options?: { preview?: boolean; headers?: Record<string, string> }): Promise<PublicPage> {
+    const remote = await fetchManagedPage("about", options);
     if (!remote || remote.source === "empty" || !remote.content?.hero) {
       if (allowContentFixtures()) {
         return ABOUT_PAGE_FIXTURE;

@@ -254,7 +254,13 @@ final class JetpkHomepageContentValidator
                 $errors["content.featured_deals.items.{$index}.price"] = 'Price must be a positive number when provided.';
             }
 
+            $id = trim((string) ($raw['id'] ?? ''));
+            if ($id === '') {
+                $id = (string) Str::uuid();
+            }
+
             $normalized[] = [
+                'id' => $id,
                 'airline' => $airline,
                 'from' => $from,
                 'to' => $to,
@@ -263,8 +269,13 @@ final class JetpkHomepageContentValidator
                 'dur' => $this->sanitize($raw['dur'] ?? ''),
                 'stops' => max(0, min(9, (int) ($raw['stops'] ?? 0))),
                 'price' => $price === false ? 0 : (int) round((float) ($price ?? 0)),
+                'title' => $this->sanitize($raw['title'] ?? ''),
+                'badge' => $this->sanitize($raw['badge'] ?? ''),
+                'description' => $this->sanitize($raw['description'] ?? ''),
                 'sort_order' => (int) ($raw['sort_order'] ?? $index),
                 'enabled' => $this->boolString($raw['enabled'] ?? '1'),
+                'image_asset_key' => $this->sanitizeAssetKey($raw['image_asset_key'] ?? ''),
+                'image_alt' => $this->sanitize($raw['image_alt'] ?? ($raw['alt'] ?? '')),
             ];
         }
 
@@ -412,9 +423,19 @@ final class JetpkHomepageContentValidator
 
     private function sanitizeAssetKey(mixed $value): string
     {
-        $key = Str::slug((string) $value, '_');
+        $raw = trim((string) $value);
+        if ($raw === '' || str_contains($raw, '/') || str_contains($raw, '\\') || str_contains($raw, '..')) {
+            return '';
+        }
 
-        return preg_match('/^[a-z0-9_\-]{1,64}$/', $key) ? $key : '';
+        // Preserve already-safe CMS asset keys (e.g. featured_deal_<id>).
+        if (preg_match('/^[a-z0-9_\-]{1,64}$/', $raw) === 1) {
+            return $raw;
+        }
+
+        $key = Str::slug($raw, '_');
+
+        return preg_match('/^[a-z0-9_\-]{1,64}$/', $key) === 1 ? $key : '';
     }
 
     private function isSafeUrl(string $url): bool

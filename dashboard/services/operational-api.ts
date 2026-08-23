@@ -83,7 +83,35 @@ type MutationResponse<T> = {
   ok: boolean;
   message?: string;
   code?: string;
+  status?: number;
 } & T;
+
+/**
+ * laravelRequest returns ApiResult `{ ok, data, status }`.
+ * Domain callers expect a flattened payload (`hub`, `integration`, `previewUrl`, …).
+ */
+async function unwrapLaravelData<T extends Record<string, unknown>>(
+  result: Awaited<ReturnType<typeof laravelRequest<T>>>,
+): Promise<MutationResponse<T>> {
+  if (!result.ok) {
+    return {
+      ok: false,
+      message: result.message,
+      code: result.code,
+      status: result.status,
+    } as MutationResponse<T>;
+  }
+
+  const payload = (result.data ?? {}) as T;
+  const payloadMessage = (payload as Record<string, unknown>).message;
+
+  return {
+    ...payload,
+    ok: true,
+    status: result.status,
+    message: typeof payloadMessage === "string" ? payloadMessage : undefined,
+  };
+}
 
 export async function verifyPaymentReview(
   portal: DashboardPortal,
@@ -612,63 +640,80 @@ export async function testApiConnection(connectionId: string): Promise<MutationR
 }
 
 export async function listIntegrations(category?: string): Promise<MutationResponse<{ hub?: Record<string, unknown>; permissions?: Record<string, boolean> }>> {
-  return laravelRequest(integrationsIndexPath(category), {
-    method: "GET",
-    retryCsrfOnce: false,
-  });
+  return unwrapLaravelData(
+    await laravelRequest<{ hub?: Record<string, unknown>; permissions?: Record<string, boolean> }>(
+      integrationsIndexPath(category),
+      {
+        method: "GET",
+        retryCsrfOnce: false,
+      },
+    ),
+  );
 }
 
 export async function showIntegration(code: string): Promise<MutationResponse<{ integration?: Record<string, unknown> }>> {
-  return laravelRequest(integrationShowPath(code), {
-    method: "GET",
-    retryCsrfOnce: false,
-  });
+  return unwrapLaravelData(
+    await laravelRequest<{ integration?: Record<string, unknown> }>(integrationShowPath(code), {
+      method: "GET",
+      retryCsrfOnce: false,
+    }),
+  );
 }
 
 export async function updateIntegration(
   code: string,
   payload: Record<string, unknown>,
 ): Promise<MutationResponse<{ configuration?: Record<string, unknown> }>> {
-  return laravelRequest(integrationUpdatePath(code), {
-    method: "PATCH",
-    json: payload,
-    retryCsrfOnce: false,
-  });
+  return unwrapLaravelData(
+    await laravelRequest<{ configuration?: Record<string, unknown> }>(integrationUpdatePath(code), {
+      method: "PATCH",
+      json: payload,
+      retryCsrfOnce: false,
+    }),
+  );
 }
 
 export async function activateIntegration(code: string): Promise<MutationResponse<Record<string, unknown>>> {
-  return laravelRequest(integrationActivatePath(code), {
-    method: "POST",
-    json: {},
-    retryCsrfOnce: false,
-  });
+  return unwrapLaravelData(
+    await laravelRequest<Record<string, unknown>>(integrationActivatePath(code), {
+      method: "POST",
+      json: {},
+      retryCsrfOnce: false,
+    }),
+  );
 }
 
 export async function deactivateIntegration(code: string): Promise<MutationResponse<Record<string, unknown>>> {
-  return laravelRequest(integrationDeactivatePath(code), {
-    method: "POST",
-    json: {},
-    retryCsrfOnce: false,
-  });
+  return unwrapLaravelData(
+    await laravelRequest<Record<string, unknown>>(integrationDeactivatePath(code), {
+      method: "POST",
+      json: {},
+      retryCsrfOnce: false,
+    }),
+  );
 }
 
 export async function testIntegrationConnection(code: string): Promise<MutationResponse<{ result?: Record<string, unknown> }>> {
-  return laravelRequest(integrationTestConnectionPath(code), {
-    method: "POST",
-    json: {},
-    retryCsrfOnce: false,
-  });
+  return unwrapLaravelData(
+    await laravelRequest<{ result?: Record<string, unknown> }>(integrationTestConnectionPath(code), {
+      method: "POST",
+      json: {},
+      retryCsrfOnce: false,
+    }),
+  );
 }
 
 export async function testIntegrationPayment(
   code: string,
   payload: Record<string, unknown>,
 ): Promise<MutationResponse<{ result?: Record<string, unknown> }>> {
-  return laravelRequest(integrationTestPaymentPath(code), {
-    method: "POST",
-    json: payload,
-    retryCsrfOnce: false,
-  });
+  return unwrapLaravelData(
+    await laravelRequest<{ result?: Record<string, unknown> }>(integrationTestPaymentPath(code), {
+      method: "POST",
+      json: payload,
+      retryCsrfOnce: false,
+    }),
+  );
 }
 
 export async function updateNotificationCategories(
@@ -810,10 +855,12 @@ export async function attachPageSettingsAsset(
 }
 
 export async function beginPageSettingsPreview(pageKey: string): Promise<MutationResponse<Record<string, unknown>>> {
-  return laravelRequest(pageSettingsPreviewPath(pageKey), {
-    method: "POST",
-    retryCsrfOnce: false,
-  });
+  return unwrapLaravelData(
+    await laravelRequest<Record<string, unknown>>(pageSettingsPreviewPath(pageKey), {
+      method: "POST",
+      retryCsrfOnce: false,
+    }),
+  );
 }
 
 export async function unpublishPageSettings(pageKey: string): Promise<MutationResponse<Record<string, unknown>>> {

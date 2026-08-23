@@ -49,7 +49,7 @@ export const CustomPageService = {
         laravelApiPath(`/api/public/content/custom/${encodeURIComponent(slug)}`),
         {
           headers: { Accept: "application/json" },
-          next: { revalidate: 60 },
+          cache: "no-store",
         },
       );
       if (response.status === 404) return null;
