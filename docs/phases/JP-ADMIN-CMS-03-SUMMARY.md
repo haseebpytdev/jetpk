@@ -107,5 +107,18 @@ Prior eng slice: `eb5067e4` (Integrations unwrap + featured-deal fields + no-sto
 - PRODUCTION_BASE_SHA=`f129bc5eebebcf23c5eb7806506c2525ed392b0d`
 - FINAL_CMS03_BLOCKER_ENGINEERING_SHA=`49be311deb993b7b87644f27c75d883af574c997`
 - Evidence (local, untracked): `tmp/jp-admin-cms-03-blocker-closure/`
+
+## About Next-cache residual (engineering, stop before deploy)
+
+Post live residual diagnostic: legacy api-connections redirect **PASS** (auth-probe false negative). About API/preview/draft **PASS**. Canonical `/about-us` HTML stale while query/API fresh → **NEXT_CACHE** (OLS unchanged).
+
+Minimal eng `cbe445e35da33468834dcbf95aaf19b2eb3123ff`:
+- `revalidate = 0` + `fetchCache = "force-no-store"` on About route (keep `force-dynamic`)
+- managed-page SSR absolute `LARAVEL_URL` when set (dynamic env read)
+- bare-URL regression test + local `next start` freshness harness (**0.367s**, query bust not required)
+
+Predeploy note: `docs/jetpk/deployments/JETPAKISTAN-PK-JP-ADMIN-CMS-03-ABOUT-NEXT-CACHE-PREDEPLOY-20260824.md`
+
+`OWNER_RETEST_V3=RETEST_REQUIRED` — STOP BEFORE DEPLOYMENT.
 - Gates: Laravel JpAdminCms03 13 PASS; Playwright CMS-03 13 PASS; dashboard+frontend tsc/build PASS
 - MIGRATIONS=0; production NOT deployed
