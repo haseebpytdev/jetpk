@@ -2117,7 +2117,7 @@ class FlightOfferDisplayPresenter
             return [
                 'displayed_price' => $approx,
                 'displayed_currency' => 'PKR',
-                'price_display' => 'Approx. PKR '.number_format($approx, 0, '.', ','),
+                'price_display' => 'PKR '.number_format($approx, 0, '.', ','),
                 'price_is_approximate' => true,
             ];
         }
@@ -2128,7 +2128,7 @@ class FlightOfferDisplayPresenter
             return [
                 'displayed_price' => $approx,
                 'displayed_currency' => 'PKR',
-                'price_display' => 'Approx. PKR '.number_format($approx, 0, '.', ','),
+                'price_display' => 'PKR '.number_format($approx, 0, '.', ','),
                 'price_is_approximate' => true,
             ];
         }
@@ -2303,6 +2303,10 @@ class FlightOfferDisplayPresenter
             }
         }
 
+        if (isset($merged['price_display']) && is_string($merged['price_display'])) {
+            $merged['price_display'] = preg_replace('/^Approx\.\s*/i', '', trim($merged['price_display'])) ?? $merged['price_display'];
+        }
+
         return ['intent' => $merged, 'estimate_drift_detected' => $estimateDriftDetected];
     }
 
@@ -2465,17 +2469,19 @@ class FlightOfferDisplayPresenter
         $currency = strtoupper(trim((string) ($view['displayed_currency'] ?? 'PKR')));
         $priceIsApproximate = (bool) ($view['price_is_approximate'] ?? false);
         $priceDisplay = trim((string) ($view['price_display'] ?? ''));
+        // Never emit customer-facing "Approx." — keep the approximate flag for checkout gating.
+        $priceDisplay = preg_replace('/^Approx\.\s*/i', '', $priceDisplay) ?? $priceDisplay;
         if ($priceDisplay === '' && $displayedPrice > 0) {
-            $prefix = $priceIsApproximate ? 'Approx. ' : '';
-            $priceDisplay = $prefix.$currency.' '.number_format($displayedPrice, 0, '.', ',');
+            $priceDisplay = $currency.' '.number_format($displayedPrice, 0, '.', ',');
         }
 
         return [
-            'label' => 'Estimated selected fare',
+            'label' => $priceIsApproximate ? 'Selected fare (needs confirmation)' : 'Selected fare',
             'displayed_price' => $displayedPrice,
             'displayed_currency' => $currency,
             'price_display' => $priceDisplay,
             'price_is_approximate' => $priceIsApproximate,
+            'price_needs_refresh' => $priceIsApproximate,
             'validation_note' => (string) ($view['validation_note'] ?? self::SELECTED_FARE_VALIDATION_NOTE),
             'has_checkout_estimate' => true,
         ];
@@ -2502,16 +2508,19 @@ class FlightOfferDisplayPresenter
             : $name;
 
         $estimatedFareDisplay = trim((string) ($estimate['price_display'] ?? $view['price_display'] ?? ''));
+        $estimatedFareDisplay = preg_replace('/^Approx\.\s*/i', '', $estimatedFareDisplay) ?? $estimatedFareDisplay;
         if ($estimatedFareDisplay === '' && is_array($estimate) && ! empty($estimate['displayed_price'])) {
-            $prefix = ! empty($estimate['price_is_approximate']) ? 'Approx. ' : '';
             $currency = strtoupper(trim((string) ($estimate['displayed_currency'] ?? 'PKR')));
-            $estimatedFareDisplay = $prefix.$currency.' '.number_format((int) $estimate['displayed_price'], 0, '.', ',');
+            $estimatedFareDisplay = $currency.' '.number_format((int) $estimate['displayed_price'], 0, '.', ',');
         }
+
+        $priceNeedsRefresh = is_array($estimate) && ! empty($estimate['price_is_approximate']);
 
         return array_filter([
             'fare_family_label' => $fareFamilyLabel !== '' ? $fareFamilyLabel : null,
-            'estimated_fare_label' => 'Estimated selected fare',
-            'estimated_fare_display' => $estimatedFareDisplay !== '' ? $estimatedFareDisplay : null,
+            'estimated_fare_label' => $priceNeedsRefresh ? 'Selected fare (needs confirmation)' : 'Selected fare',
+            'estimated_fare_display' => $priceNeedsRefresh ? null : ($estimatedFareDisplay !== '' ? $estimatedFareDisplay : null),
+            'price_needs_refresh' => $priceNeedsRefresh ? true : null,
             'baggage' => self::nullableTrimmedString($view['baggage_summary'] ?? null),
             'cabin' => self::nullableTrimmedString($view['cabin'] ?? null),
             'booking_class' => self::nullableTrimmedString($view['booking_class'] ?? null),

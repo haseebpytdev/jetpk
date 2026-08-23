@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import { formatWholePkr, normalizeCustomerPriceLabel } from "@/lib/money/format-pkr";
 import type { AuthoritativePricing } from "@/features/standard-booking/types/review-payment";
 import type { SelectedFlightSummary } from "@/features/standard-booking/types";
 
@@ -31,12 +32,17 @@ function formatStops(stops: number | null | undefined): string | null {
   return stops === 0 ? "Direct" : `${stops} Stop${stops === 1 ? "" : "s"}`;
 }
 
-function formatWholePkr(currency: string, amount: string | null | undefined): string | null {
+function customerTotalLabel(
+  currency: string | null | undefined,
+  amount: string | null | undefined,
+): string | null {
+  const normalized = normalizeCustomerPriceLabel(amount);
+  if (normalized) return normalized;
   if (!amount) return null;
   const trimmed = amount.trim();
   if (!trimmed) return null;
-  if (/pkr/i.test(trimmed)) return trimmed;
-  return `${currency || "PKR"} ${trimmed}`;
+  if (/pkr/i.test(trimmed)) return normalizeCustomerPriceLabel(trimmed);
+  return formatWholePkr(Number(trimmed.replace(/,/g, ""))) ?? `${currency || "PKR"} ${trimmed}`;
 }
 
 function ItineraryRows({ itinerary, travellerTotal }: { itinerary: SelectedFlightSummary; travellerTotal?: number }) {
@@ -109,7 +115,10 @@ function FlightPreviewCard({
   const destination =
     segmentValue(last, ["destination_airport_code", "destination"]) ?? itinerary.destination;
   const stopsLabel = formatStops(itinerary.stops);
-  const totalLabel = formatWholePkr(itinerary.currency, itinerary.total_formatted);
+  const needsRefresh = Boolean(itinerary.price_needs_refresh || itinerary.price_is_approximate);
+  const totalLabel = needsRefresh
+    ? null
+    : customerTotalLabel(itinerary.currency, itinerary.total_formatted);
   const airline = itinerary.airline_name ?? itinerary.airline_code ?? "Airline";
 
   return (
@@ -214,7 +223,20 @@ function FlightPreviewCard({
         ) : null}
       </dl>
 
-      {totalLabel ? (
+      {needsRefresh ? (
+        <div
+          className="rounded-jp-md border border-amber-300 bg-amber-50 px-3 py-3 dark:border-amber-800 dark:bg-amber-950/30"
+          data-testid="order-summary-price-refresh"
+          role="status"
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-100">
+            Price needs to be refreshed
+          </p>
+          <p className="mt-1 text-jp-xs text-amber-900/80 dark:text-amber-100/80">
+            Confirm the selected fare before continuing. Return to fare selection or refresh the offer.
+          </p>
+        </div>
+      ) : totalLabel ? (
         <div
           className="rounded-jp-md bg-jp-primary/5 px-3 py-3"
           data-testid="order-summary-total"
@@ -228,23 +250,27 @@ function FlightPreviewCard({
 }
 
 function PriceRows({ pricing }: { pricing: AuthoritativePricing }) {
-  const whole = (amount: number) =>
-    `${pricing.currency || "PKR"} ${Math.round(amount).toLocaleString("en-PK")}`;
+  const whole = (amount: number) => formatWholePkr(amount) ?? `PKR ${Math.round(amount).toLocaleString("en-US")}`;
 
   return (
     <dl className="mt-4 space-y-2 border-t border-jp-border pt-3 text-jp-sm" data-testid="review-price-summary">
       <div className="flex justify-between gap-4">
         <dt className="text-jp-muted">Fare</dt>
-        <dd className="tabular-nums">{pricing.formatted_base_fare ?? whole(pricing.base_fare)}</dd>
+        <dd className="tabular-nums">
+          {normalizeCustomerPriceLabel(pricing.formatted_base_fare) ?? whole(pricing.base_fare)}
+        </dd>
       </div>
       <div className="flex justify-between gap-4">
         <dt className="text-jp-muted">Taxes &amp; fees</dt>
-        <dd className="tabular-nums">{pricing.formatted_taxes ?? whole(pricing.taxes + (pricing.service_charges || 0))}</dd>
+        <dd className="tabular-nums">
+          {normalizeCustomerPriceLabel(pricing.formatted_taxes) ??
+            whole(pricing.taxes + (pricing.service_charges || 0))}
+        </dd>
       </div>
       <div className="mt-3 flex items-center justify-between gap-4 rounded-jp-md bg-jp-primary/5 px-3 py-3 font-semibold text-jp-text">
         <dt>Total</dt>
         <dd className="text-lg font-bold tabular-nums text-jp-primary" data-testid="order-summary-total">
-          {pricing.formatted_total}
+          {normalizeCustomerPriceLabel(pricing.formatted_total) ?? whole(pricing.total)}
         </dd>
       </div>
     </dl>

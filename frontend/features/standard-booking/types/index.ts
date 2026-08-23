@@ -113,6 +113,8 @@ export type SelectedFlightSummary = {
   return_segments: Array<Record<string, unknown>>;
   total_formatted?: string | null;
   currency: string;
+  price_is_approximate?: boolean;
+  price_needs_refresh?: boolean;
   return_split?: Record<string, unknown> | null;
   selected_fare_option_key?: string | null;
   selected_fare?: Record<string, unknown> | null;

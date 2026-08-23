@@ -147,6 +147,18 @@ export function BookingReviewPage() {
         variant="flight-preview"
         testId="review-order-summary"
       />
+      <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-3" data-testid="review-payment-method-sidebar">
+        <h2 className="text-jp-sm font-semibold text-jp-text">Payment method</h2>
+        <div className="mt-2">
+          <PaymentMethodSelector
+            methods={visibleMethods}
+            selected={selectedMethod}
+            onSelect={setSelectedMethod}
+            disabled={context.submit_blocked || submitting}
+            compact
+          />
+        </div>
+      </div>
       {context.submit_blocked_reason ? (
         <p className="text-jp-sm text-amber-800 dark:text-amber-200" role="alert">{context.submit_blocked_reason}</p>
       ) : null}
@@ -268,15 +280,6 @@ export function BookingReviewPage() {
                   </div>
                 </dl>
               </article>
-            </BookingSection>
-            <BookingSection>
-              <BookingSectionHeader title="Payment method" />
-              <PaymentMethodSelector
-                methods={visibleMethods}
-                selected={selectedMethod}
-                onSelect={setSelectedMethod}
-                disabled={context.submit_blocked || submitting}
-              />
             </BookingSection>
           </BookingMainColumn>
         }

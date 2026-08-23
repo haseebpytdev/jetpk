@@ -188,11 +188,22 @@ class StandardBookingJsonPresenter
         $cabinBaggage = trim((string) ($fareRules['cabin_baggage_display'] ?? ($canonicalSelectedFare['cabin_baggage'] ?? '')));
 
         $totalFormatted = $fareBreakdown['total_formatted'] ?? null;
+        $priceNeedsRefresh = false;
         if (is_array($selectedEstimate) && ! empty($selectedEstimate['has_checkout_estimate'])) {
-            $estimateDisplay = trim((string) ($selectedEstimate['price_display'] ?? ''));
-            if ($estimateDisplay !== '') {
-                $totalFormatted = $estimateDisplay;
+            $estimateApproximate = ! empty($selectedEstimate['price_is_approximate']);
+            if ($estimateApproximate) {
+                // Do not present an FX-derived estimate as a certain checkout total.
+                $priceNeedsRefresh = true;
+            } else {
+                $estimateDisplay = trim((string) ($selectedEstimate['price_display'] ?? ''));
+                $estimateDisplay = preg_replace('/^Approx\.\s*/i', '', $estimateDisplay) ?? $estimateDisplay;
+                if ($estimateDisplay !== '') {
+                    $totalFormatted = $estimateDisplay;
+                }
             }
+        }
+        if (is_string($totalFormatted)) {
+            $totalFormatted = preg_replace('/^Approx\.\s*/i', '', $totalFormatted) ?? $totalFormatted;
         }
 
         $selectedFareOptionKey = trim((string) ($draft['fare_option_key'] ?? $viewData['fare_option_key'] ?? ''));
@@ -272,6 +283,8 @@ class StandardBookingJsonPresenter
             'currency' => $fareBreakdown['currency']
                 ?? ($selectedEstimate['displayed_currency'] ?? null)
                 ?? ($offer['currency'] ?? 'PKR'),
+            'price_is_approximate' => $priceNeedsRefresh,
+            'price_needs_refresh' => $priceNeedsRefresh,
             'return_split' => $returnSplit,
             'selected_fare_option_key' => $selectedFareOptionKey !== '' ? $selectedFareOptionKey : null,
             'selected_fare' => $canonicalSelectedFare,
@@ -884,14 +897,14 @@ class StandardBookingJsonPresenter
                 'title' => $this->sanitizeDisplayTitle((string) $passenger->title),
                 'first_name' => (string) $passenger->first_name,
                 'last_name' => (string) $passenger->last_name,
-                'gender' => (string) $passenger->gender,
-                'date_of_birth' => $passenger->date_of_birth?->format('Y-m-d'),
-                'nationality' => (string) $passenger->nationality,
+                'gender' => $this->sanitizeDisplayGender((string) $passenger->gender),
+                'date_of_birth' => $this->formatDisplayDate($passenger->date_of_birth),
+                'nationality' => $this->sanitizeOptionalString((string) $passenger->nationality),
                 'document_type' => (string) $passenger->document_type,
                 'passport_number_masked' => $this->maskDocumentNumber((string) $passenger->passport_number),
                 'national_id_masked' => $this->maskDocumentNumber((string) $passenger->national_id_number),
-                'passport_issuing_country' => (string) ($passenger->passport_issuing_country ?? ''),
-                'passport_expiry_date' => $passenger->passport_expiry_date?->format('Y-m-d'),
+                'passport_issuing_country' => $this->sanitizeOptionalString((string) ($passenger->passport_issuing_country ?? '')),
+                'passport_expiry_date' => $this->formatDisplayDate($passenger->passport_expiry_date),
             ])
             ->all();
     }
@@ -921,6 +934,51 @@ class StandardBookingJsonPresenter
         return null;
     }
 
+    private function sanitizeDisplayGender(string $gender): ?string
+    {
+        $normalized = strtolower(trim($gender));
+        if ($normalized === '' || in_array($normalized, ['null', 'undefined', 'none', 'nil'], true)) {
+            return null;
+        }
+        if (in_array($normalized, ['male', 'm'], true)) {
+            return 'Male';
+        }
+        if (in_array($normalized, ['female', 'f'], true)) {
+            return 'Female';
+        }
+
+        return null;
+    }
+
+    private function sanitizeOptionalString(string $value): ?string
+    {
+        $normalized = trim($value);
+        if ($normalized === '' || in_array(strtolower($normalized), ['null', 'undefined', 'none', 'nil'], true)) {
+            return null;
+        }
+
+        return $normalized;
+    }
+
+    private function formatDisplayDate(mixed $date): ?string
+    {
+        if ($date instanceof \Carbon\CarbonInterface) {
+            return $date->format('j M Y');
+        }
+        if ($date instanceof \DateTimeInterface) {
+            return \Carbon\Carbon::instance(\DateTimeImmutable::createFromInterface($date))->format('j M Y');
+        }
+        if (is_string($date) && trim($date) !== '') {
+            try {
+                return \Carbon\Carbon::parse($date)->format('j M Y');
+            } catch (\Throwable) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -932,7 +990,7 @@ class StandardBookingJsonPresenter
             'name' => trim((string) ($contact?->name ?? '')),
             'email' => (string) ($contact?->email ?? ''),
             'phone' => (string) ($contact?->phone ?? ''),
-            'country' => (string) ($contact?->country ?? ''),
+            'country' => $this->sanitizeOptionalString((string) ($contact?->country ?? '')),
         ];
     }
 

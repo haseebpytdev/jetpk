@@ -953,7 +953,8 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $p = FlightOfferDisplayPresenter::buildPresentation($offer, ['origin' => 'LHE', 'destination' => 'DXB'], []);
 
         $this->assertTrue($p['branded_fares_display_options'][0]['price_is_approximate']);
-        $this->assertStringStartsWith('Approx. PKR', (string) $p['branded_fares_display_options'][0]['price_display']);
+        $this->assertStringStartsWith('PKR', (string) $p['branded_fares_display_options'][0]['price_display']);
+        $this->assertStringNotContainsString('Approx.', (string) $p['branded_fares_display_options'][0]['price_display']);
         $this->assertSame(120000, $p['branded_fares_display_options'][0]['displayed_price']);
     }
 
@@ -1077,10 +1078,12 @@ class FlightOfferDisplayPresenterTest extends TestCase
 
         $this->assertIsArray($estimate);
         $this->assertTrue($estimate['has_checkout_estimate']);
-        $this->assertSame('Estimated selected fare', $estimate['label']);
+        $this->assertSame('Selected fare (needs confirmation)', $estimate['label']);
         $this->assertSame(83865, $estimate['displayed_price']);
         $this->assertTrue($estimate['price_is_approximate']);
+        $this->assertTrue($estimate['price_needs_refresh']);
         $this->assertStringContainsString('83,865', $estimate['price_display']);
+        $this->assertStringNotContainsString('Approx.', $estimate['price_display']);
 
         $this->assertNull(FlightOfferDisplayPresenter::buildCheckoutSelectedFareEstimatePresentation(null));
         $this->assertNull(FlightOfferDisplayPresenter::buildCheckoutSelectedFareEstimatePresentation([
@@ -1106,8 +1109,9 @@ class FlightOfferDisplayPresenterTest extends TestCase
 
         $this->assertIsArray($section);
         $this->assertSame('FREEDOM (FL)', $section['fare_family_label']);
-        $this->assertSame('Estimated selected fare', $section['estimated_fare_label']);
-        $this->assertSame('Approx. PKR 90,062', $section['estimated_fare_display']);
+        $this->assertSame('Selected fare (needs confirmation)', $section['estimated_fare_label']);
+        $this->assertArrayNotHasKey('estimated_fare_display', $section);
+        $this->assertTrue($section['price_needs_refresh']);
         $this->assertSame('30 KG', $section['baggage']);
         $this->assertSame('economy', $section['cabin']);
         $this->assertSame('V', $section['booking_class']);
@@ -1144,7 +1148,7 @@ class FlightOfferDisplayPresenterTest extends TestCase
         $result = FlightOfferDisplayPresenter::preserveStickySelectedFareFamilyDisplay($stored, $fresh);
 
         $this->assertTrue($result['estimate_drift_detected']);
-        $this->assertSame('Approx. PKR 165,000', $result['intent']['price_display']);
+        $this->assertSame('PKR 165,000', $result['intent']['price_display']);
         $this->assertSame(165000, $result['intent']['displayed_price']);
         $this->assertSame('30kg', $result['intent']['baggage_summary']);
     }
