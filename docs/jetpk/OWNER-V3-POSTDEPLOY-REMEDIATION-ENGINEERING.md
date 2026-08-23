@@ -15,9 +15,10 @@
 | CLUSTER_C_SHA | `9719f7c0` |
 | CLUSTER_D_SHA | `e16d67877bfec4681a9547c53e150d61d20ac901` |
 | FINAL_REMEDIATION_ENGINEERING_SHA | `8911d208be9b42330c2157e6cd3d4a288c643d94` |
+| FINAL_TEST_HARNESS_SHA (Playwright/visual only) | see HEAD after test commits (no runtime delta) |
 
 Branch: `feat/jetpk-flight-results-booking-flow-20260819`  
-Remote parity at engineering pin: `0/0`
+Remote parity: `0/0` (reconcile after each push)
 
 ## Live Integrations failure — root cause
 
@@ -88,7 +89,10 @@ Do not clear or manipulate production logs. See also:
 | Frontend `tsc --noEmit` | PASS (after narrow gender typing fix in `8911d208`) |
 | Dashboard `npm run build` | PASS |
 | Frontend `npm run build` | See build log under tmp evidence |
-| Playwright visual matrix 01–18 | Captured under `tmp/owner-v3-postdeploy-remediation/` when available; otherwise marked in report |
+| Playwright `cms-pages.smoke` | **28/28 PASS** (preview admin harness; H1 + URL-wait harness aligned) |
+| Playwright Cluster E pack | cms-overview + jp-int-01 + read-only-cms **PASS** |
+| Visual matrix 01–18 | **YES** — `tmp/owner-v3-postdeploy-remediation/` (see `VISUAL_PROOF_INDEX.md`) |
+| PLAYWRIGHT / VISUAL_GREEN | **PASS** / **YES** |
 
 ## Deployment delta (runtime only)
 

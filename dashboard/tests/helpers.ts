@@ -312,7 +312,9 @@ export async function applyCmsFiltersAndWait(page: Page, urlPattern: RegExp): Pr
   for (let attempt = 0; attempt < 3; attempt += 1) {
     await expect(apply).toBeEnabled();
     try {
-      await Promise.all([page.waitForURL(urlPattern, CMS_URL_WAIT), apply.click()]);
+      // Prefer poll over waitForURL+click race: Next soft navigations may miss "commit".
+      await apply.click();
+      await expect.poll(() => page.url(), { timeout: CMS_URL_WAIT.timeout }).toMatch(urlPattern);
       await expectCmsReady(page);
       return;
     } catch (error) {
@@ -330,13 +332,12 @@ export async function clickCmsSortHeader(page: Page, columnLabel: string, sortKe
   const table = page.getByTestId("cms-table");
   await expectTableReady(table);
   const header = table.getByRole("button", { name: columnLabel });
+  const sortPattern = new RegExp(`sort=${sortKey}`);
   for (let attempt = 0; attempt < 3; attempt += 1) {
     await expect(header).toBeEnabled();
     try {
-      await Promise.all([
-        page.waitForURL(new RegExp(`sort=${sortKey}`), CMS_URL_WAIT),
-        header.click(),
-      ]);
+      await header.click();
+      await expect.poll(() => page.url(), { timeout: CMS_URL_WAIT.timeout }).toMatch(sortPattern);
       return;
     } catch (error) {
       if (attempt === 2) {
