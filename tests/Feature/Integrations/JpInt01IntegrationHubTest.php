@@ -64,6 +64,131 @@ class JpInt01IntegrationHubTest extends TestCase
         $this->assertNotEmpty($hub['categories']);
     }
 
+    public function test_hub_survives_when_one_provider_manager_throws(): void
+    {
+        $codes = array_map(static fn ($d) => $d->code, IntegrationRegistry::all());
+        $this->assertGreaterThanOrEqual(10, count($codes));
+        $this->assertContains('abhipay', $codes);
+
+        $inner = app(IntegrationManagerResolver::class);
+
+        $throwingSabre = new class implements \App\Contracts\Integrations\IntegrationManager {
+            public function code(): string
+            {
+                return 'sabre';
+            }
+
+            public function getStatus(?int $agencyId = null): \App\Enums\IntegrationOperationalStatus
+            {
+                throw new \Error('Undefined constant App\\Enums\\SupplierConnectionStatus::Disabled');
+            }
+
+            public function getConfigurationSummary(?int $agencyId = null): array
+            {
+                throw new \Error('Undefined constant App\\Enums\\SupplierConnectionStatus::Disabled');
+            }
+
+            public function getSettingsDefinition(): array
+            {
+                return [];
+            }
+
+            public function saveSettings(\App\Models\User $actor, array $data, ?int $agencyId = null): array
+            {
+                return [];
+            }
+
+            public function testConnection(\App\Models\User $actor, ?int $agencyId = null): array
+            {
+                return [];
+            }
+
+            public function activate(\App\Models\User $actor, ?int $agencyId = null): void {}
+
+            public function deactivate(\App\Models\User $actor, ?int $agencyId = null): void {}
+
+            public function getHealth(?int $agencyId = null): array
+            {
+                return [];
+            }
+
+            public function supportsTestTransaction(): bool
+            {
+                return false;
+            }
+
+            public function createTestTransaction(\App\Models\User $actor, array $options = [], ?int $agencyId = null): array
+            {
+                return [];
+            }
+        };
+
+        $resolver = new class($inner, $throwingSabre) extends IntegrationManagerResolver {
+            public function __construct(
+                private readonly IntegrationManagerResolver $inner,
+                private readonly \App\Contracts\Integrations\IntegrationManager $sabreOverride,
+            ) {}
+
+            public function forDefinition(\App\Support\Integrations\IntegrationDefinition $definition): \App\Contracts\Integrations\IntegrationManager
+            {
+                if ($definition->code === 'sabre') {
+                    return $this->sabreOverride;
+                }
+
+                return $this->inner->forDefinition($definition);
+            }
+        };
+
+        $hub = (new IntegrationHubService($resolver))->overview(null, $this->agency->id);
+
+        $this->assertSame(count($codes), $hub['metrics']['total']);
+        $this->assertCount(count($codes), $hub['integrations']);
+        $this->assertGreaterThanOrEqual(1, $hub['metrics']['needs_attention']);
+
+        $sabre = collect($hub['integrations'])->firstWhere('code', 'sabre');
+        $this->assertNotNull($sabre);
+        $this->assertTrue((bool) ($sabre['resolution_error'] ?? false));
+        $this->assertSame('degraded', $sabre['status']);
+        $this->assertTrue((bool) ($sabre['needs_attention'] ?? false));
+        $encoded = (string) json_encode($sabre);
+        $this->assertStringNotContainsString('SupplierConnectionStatus', $encoded);
+        $this->assertStringNotContainsString('Undefined constant', $encoded);
+
+        $others = collect($hub['integrations'])->where('code', '!=', 'sabre');
+        $this->assertTrue($others->isNotEmpty());
+        $this->assertTrue($others->contains(fn (array $row) => ! ($row['resolution_error'] ?? false)));
+
+        $abhipay = collect($hub['integrations'])->firstWhere('code', 'abhipay');
+        $this->assertNotNull($abhipay);
+        $this->assertFalse((bool) ($abhipay['resolution_error'] ?? false));
+    }
+
+    public function test_inactive_supplier_status_maps_without_undefined_disabled_case(): void
+    {
+        $manager = app(IntegrationManagerResolver::class)->resolve('sabre');
+        // Must not throw Error for missing SupplierConnectionStatus::Disabled
+        $status = $manager->getStatus($this->agency->id);
+        $this->assertInstanceOf(\App\Enums\IntegrationOperationalStatus::class, $status);
+    }
+
+    public function test_legacy_api_settings_html_redirects_to_integrations(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('admin.api-settings'))
+            ->assertRedirect('/admin/dashboard/integrations');
+    }
+
+    public function test_abhipay_visible_when_unconfigured(): void
+    {
+        PaymentGateway::query()->where('code', 'abhipay')->delete();
+
+        $hub = app(IntegrationHubService::class)->overview('payments', $this->agency->id);
+        $abhi = collect($hub['integrations'])->firstWhere('code', 'abhipay');
+        $this->assertNotNull($abhi);
+        $this->assertSame('abhipay', $abhi['code']);
+        $this->assertFalse((bool) ($abhi['configured'] ?? true));
+    }
+
     public function test_rbac_platform_admin_can_view_integrations_route(): void
     {
         $this->actingAs($this->admin)

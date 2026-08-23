@@ -10,7 +10,7 @@ use App\Support\Integrations\IntegrationDefinition;
 use App\Support\Integrations\IntegrationRegistry;
 use InvalidArgumentException;
 
-final class IntegrationManagerResolver
+class IntegrationManagerResolver
 {
     public function resolve(string $code): IntegrationManager
     {

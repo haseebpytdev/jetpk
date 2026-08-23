@@ -396,8 +396,8 @@ export function IntegrationsWorkspace() {
               {detailTab === "configuration" && !isAbhiPay ? (
                 <div className="space-y-3 text-sm text-jp-muted">
                   <p>Supplier credentials remain encrypted in Supplier Connections.</p>
-                  <a className="inline-flex rounded-lg border border-jp-border px-3 py-2 text-xs text-jp-ink" href="/admin/dashboard/api-connections">
-                    Open API Connections
+                  <a className="inline-flex rounded-lg border border-jp-border px-3 py-2 text-xs text-jp-ink" href="/admin/dashboard/integrations">
+                    Open Integrations
                   </a>
                   {!detail.canActivateRuntime ? (
                     <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900" data-testid="custom-api-adapter-block">

@@ -48,7 +48,7 @@ final class SupplierIntegrationManager implements IntegrationManager
             return IntegrationOperationalStatus::NotConfigured;
         }
 
-        if (! $connection->is_active || $connection->status === SupplierConnectionStatus::Disabled) {
+        if (! $connection->is_active || $connection->status === SupplierConnectionStatus::Inactive) {
             return IntegrationOperationalStatus::Disabled;
         }
 
@@ -100,7 +100,7 @@ final class SupplierIntegrationManager implements IntegrationManager
             'last_test_status' => $connection?->last_test_status ?? $latest?->status?->value,
             'last_error' => $connection?->last_error ?? $latest?->sanitized_message,
             'capabilities' => $this->definition->capabilities,
-            'legacy_manage_path' => '/admin/dashboard/api-connections',
+            'legacy_manage_path' => '/admin/dashboard/integrations?provider='.$this->code(),
         ];
     }
 

@@ -89,7 +89,6 @@ export const navGroups: NavGroup[] = [
     label: "System",
     items: [
       { label: "Integrations", href: "/integrations", laravelRoute: "admin.integrations.index" },
-      { label: "API Connections", href: "/api-connections", laravelRoute: "admin.api-settings" },
       {
         label: "Settings",
         href: "/settings",

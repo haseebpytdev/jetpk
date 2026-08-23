@@ -156,7 +156,7 @@ final class BackOfficeLegacyViewRedirectController extends Controller
 
     public function adminApiSettingsIndex(Request $request): RedirectResponse
     {
-        return redirect()->to($this->pathWithQuery('/admin/dashboard/api-connections', $request->query()));
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/integrations', $request->query()));
     }
 
     public function adminIntegrationsIndex(Request $request): RedirectResponse

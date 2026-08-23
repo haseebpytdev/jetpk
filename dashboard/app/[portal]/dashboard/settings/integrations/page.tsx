@@ -21,5 +21,5 @@ export default async function SettingsIntegrationsRedirectPage({
   }
   const suffix = qs.toString() ? `?${qs.toString()}` : "";
 
-  redirect(`/${portal}/dashboard/api-connections${suffix}`);
+  redirect(`/${portal}/dashboard/integrations${suffix}`);
 }

@@ -55,7 +55,9 @@ class SupplierConnectionController extends Controller
             ]);
         }
 
-        return redirect()->to('/admin/dashboard/api-connections');
+        // Legacy HTML entry: Integrations Hub is the authoritative configuration surface.
+        // JSON/API consumers of this action remain unchanged above.
+        return redirect()->to('/admin/dashboard/integrations');
     }
 
     public function create(Request $request): View
