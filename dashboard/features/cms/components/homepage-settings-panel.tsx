@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CmsMediaPickerDialog } from "@/features/cms/components/cms-media-picker-dialog";
 import {
+  attachPageSettingsAsset,
   beginPageSettingsPreview,
   loadPageSettings,
   publishPageSettings,
@@ -100,31 +101,34 @@ export function HomepageSettingsPanel() {
   const [success, setSuccess] = useState<string | null>(null);
   const [pickerKey, setPickerKey] = useState<string | null>(null);
 
-  useEffect(() => {
-    void loadPageSettings("home").then((result) => {
-      if (!result.ok) {
-        setError(result.message ?? "Could not load homepage settings.");
-        return;
-      }
-      const payload = ("data" in result ? result.data : result) as {
-        content?: Record<string, unknown>;
-        assets?: Array<Record<string, unknown>>;
-        editorMeta?: { form_source?: string; effective_source?: string };
+  async function reloadHome() {
+    const result = await loadPageSettings("home");
+    if (!result.ok) {
+      setError(result.message ?? "Could not load homepage settings.");
+      return;
+    }
+    const payload = ("data" in result ? result.data : result) as {
+      content?: Record<string, unknown>;
+      assets?: Array<Record<string, unknown>>;
+      editorMeta?: { form_source?: string; effective_source?: string };
+    };
+    setContent(asRecord(payload.content));
+    const mapped: AssetMap = {};
+    for (const row of payload.assets ?? []) {
+      const key = String(row.asset_key ?? "");
+      if (!key) continue;
+      mapped[key] = {
+        id: typeof row.id === "number" ? row.id : undefined,
+        url: typeof row.url === "string" ? row.url : typeof row.public_url === "string" ? row.public_url : undefined,
+        alt: typeof row.alt_text === "string" ? row.alt_text : undefined,
       };
-      setContent(asRecord(payload.content));
-      const mapped: AssetMap = {};
-      for (const row of payload.assets ?? []) {
-        const key = String(row.asset_key ?? "");
-        if (!key) continue;
-        mapped[key] = {
-          id: typeof row.id === "number" ? row.id : undefined,
-          url: typeof row.url === "string" ? row.url : typeof row.public_url === "string" ? row.public_url : undefined,
-          alt: typeof row.alt_text === "string" ? row.alt_text : undefined,
-        };
-      }
-      setAssets(mapped);
-      setFormSource(payload.editorMeta?.effective_source ?? payload.editorMeta?.form_source ?? "");
-    });
+    }
+    setAssets(mapped);
+    setFormSource(payload.editorMeta?.effective_source ?? payload.editorMeta?.form_source ?? "");
+  }
+
+  useEffect(() => {
+    void reloadHome();
   }, []);
 
   const hero = content.hero ?? {};
@@ -506,12 +510,25 @@ export function HomepageSettingsPanel() {
           if (!pickerKey) return;
           await uploadAsset(pickerKey, file);
         }}
-        onSelect={() => {
-          // Library select still uses upload-to-page-asset path for canonical ClientPageAsset storage.
-          // Selecting an existing library item currently requires re-upload into the page asset slot
-          // until a dedicated attach-from-library endpoint is authorized.
-          setPickerKey(null);
-          setSuccess("Use Upload on the hero media card to attach media into the homepage asset slot (canonical ClientPageAsset). Media Library remains available for browsing.");
+        onSelect={(item) => {
+          if (!pickerKey) return;
+          void (async () => {
+            setBusy(true);
+            setError(null);
+            const result = await attachPageSettingsAsset("home", {
+              asset_key: pickerKey,
+              agency_media_id: item.id,
+              alt_text: item.alt_text,
+            });
+            setBusy(false);
+            if (!result.ok) {
+              setError(result.message ?? "Could not attach media from library.");
+              return;
+            }
+            setPickerKey(null);
+            setSuccess("Media attached from library without re-upload.");
+            await reloadHome();
+          })();
         }}
       />
     </section>

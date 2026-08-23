@@ -54,9 +54,12 @@ import {
   notificationEventsUpdatePath,
   pageSettingsEditPath,
   pageSettingsPublishPath,
+  pageSettingsUnpublishPath,
   pageSettingsAssetsPath,
+  pageSettingsAttachAssetPath,
   pageSettingsPreviewPath,
   pageSettingsIndexPath,
+  pageSettingsDuplicatePath,
   paymentRejectPath,
   paymentStorePath,
   paymentVerifyPath,
@@ -795,8 +798,33 @@ export async function uploadPageSettingsAsset(
   });
 }
 
+export async function attachPageSettingsAsset(
+  pageKey: string,
+  payload: { asset_key: string; agency_media_id: number | string; alt_text?: string },
+): Promise<MutationResponse<{ asset?: Record<string, unknown> }>> {
+  return laravelRequest(pageSettingsAttachAssetPath(pageKey), {
+    method: "POST",
+    json: payload,
+    retryCsrfOnce: false,
+  });
+}
+
 export async function beginPageSettingsPreview(pageKey: string): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(pageSettingsPreviewPath(pageKey), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function unpublishPageSettings(pageKey: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(pageSettingsUnpublishPath(pageKey), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function duplicatePageSettings(pageKey: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(pageSettingsDuplicatePath(pageKey), {
     method: "POST",
     retryCsrfOnce: false,
   });

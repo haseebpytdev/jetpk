@@ -122,6 +122,116 @@ final class ClientPageAssetService
     }
 
     /**
+     * Attach an existing AgencyMedia file into a page asset slot without requiring a re-upload.
+     * Copies bytes onto the page-asset path and records agency_media_id in meta for canonical reference.
+     */
+    public function attachFromAgencyMedia(
+        ClientProfile $profile,
+        string $pageKey,
+        string $assetKey,
+        \App\Models\AgencyMedia $media,
+        ?int $userId = null,
+        ?string $altText = null,
+    ): ClientPageAsset {
+        $sourcePath = trim((string) $media->file_path);
+        if ($sourcePath === '') {
+            throw ValidationException::withMessages([
+                'agency_media_id' => 'The selected media file path is missing.',
+            ]);
+        }
+
+        // Prevent path traversal — only allow relative public-disk media paths.
+        if (str_contains($sourcePath, '..') || str_starts_with($sourcePath, '/') || str_contains($sourcePath, '\\')) {
+            throw ValidationException::withMessages([
+                'agency_media_id' => 'The selected media path is invalid.',
+            ]);
+        }
+
+        $disk = Storage::disk('public');
+        if (! $disk->exists($sourcePath)) {
+            throw ValidationException::withMessages([
+                'agency_media_id' => 'The selected media file could not be found.',
+            ]);
+        }
+
+        $absolute = $disk->path($sourcePath);
+        if (! is_readable($absolute)) {
+            throw ValidationException::withMessages([
+                'agency_media_id' => 'The selected media file could not be read.',
+            ]);
+        }
+
+        $extension = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION) ?: 'jpg');
+        if (! in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
+            throw ValidationException::withMessages([
+                'agency_media_id' => 'The selected media type is not allowed for page assets.',
+            ]);
+        }
+
+        $profileSlug = trim((string) $profile->asset_profile) !== ''
+            ? trim((string) $profile->asset_profile)
+            : trim((string) $profile->slug);
+
+        $safeKey = Str::slug($assetKey, '_');
+        $filename = $safeKey.'-'.now()->format('YmdHis').'.'.$extension;
+        $directory = 'client-assets/'.$profileSlug.'/pages/'.$pageKey;
+        $relativePath = $directory.'/'.$filename;
+
+        $existing = ClientPageAsset::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', $pageKey)
+            ->where('asset_key', $assetKey)
+            ->first();
+        $previousPath = $existing?->path;
+
+        $disk->makeDirectory($directory);
+        if (! $disk->copy($sourcePath, $relativePath) && ! $disk->exists($relativePath)) {
+            // Fallback: stream copy when driver copy is unavailable.
+            $disk->put($relativePath, $disk->get($sourcePath));
+        }
+
+        if (! $disk->exists($relativePath)) {
+            throw ValidationException::withMessages([
+                'agency_media_id' => 'Could not attach the selected media to this page.',
+            ]);
+        }
+
+        $publicUrl = $disk->url($relativePath);
+        $resolvedAlt = $altText !== null && trim($altText) !== ''
+            ? trim($altText)
+            : (trim((string) ($media->alt_text ?? '')) ?: null);
+
+        $asset = ClientPageAsset::query()->updateOrCreate(
+            [
+                'client_profile_id' => $profile->id,
+                'page_key' => $pageKey,
+                'asset_key' => $assetKey,
+            ],
+            [
+                'disk' => 'public',
+                'path' => $relativePath,
+                'public_url' => $publicUrl,
+                'alt_text' => $resolvedAlt,
+                'meta_json' => [
+                    'mime' => $media->mime_type,
+                    'size' => $media->size_bytes,
+                    'original_name' => $media->file_name,
+                    'extension' => $extension,
+                    'agency_media_id' => $media->id,
+                    'attached_from_library' => true,
+                ],
+                'created_by' => $userId,
+            ],
+        );
+
+        if ($previousPath !== null && $previousPath !== '' && $previousPath !== $relativePath) {
+            $this->deleteStoredFile($previousPath, (string) ($existing?->disk ?: 'public'));
+        }
+
+        return $this->finalizeHeroOptimization($asset, $profile, $pageKey, $assetKey, $existing);
+    }
+
+    /**
      * Mirror every stored asset for a page into Laravel public/storage and the live webroot.
      *
      * @return int number of assets mirrored

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\ClientPageSettingStatus;
 use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
+use App\Models\AgencyMedia;
 use App\Models\ClientPageAsset;
 use App\Models\ClientPageSetting;
 use App\Models\ClientThemePalette;
@@ -19,6 +20,7 @@ use App\Services\Homepage\JetpkHomepageContentMergeService;
 use App\Services\Homepage\JetpkHomepageContentValidator;
 use App\Services\Homepage\JetpkHomepageRouteFareRefreshService;
 use App\Support\Client\ClientPageKeys;
+use App\Support\Client\ClientPageSectionSchema;
 use App\Services\Client\CurrentClientContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -90,14 +92,60 @@ class ClientPageSettingsController extends Controller
         if ($this->wantsBackOfficeJson($request)) {
             $profile = $this->requireProfile();
             $previewRoute = ClientPageKeys::previewRoutes()[$pageKey] ?? 'home';
+            $assets = ClientPageAsset::query()
+                ->where('client_profile_id', $profile->id)
+                ->where('page_key', $pageKey)
+                ->orderBy('asset_key')
+                ->get()
+                ->map(static fn (ClientPageAsset $asset): array => [
+                    'id' => $asset->id,
+                    'asset_key' => $asset->asset_key,
+                    'alt_text' => $asset->alt_text,
+                    'url' => $asset->public_url,
+                    'public_url' => $asset->public_url,
+                    'meta' => $asset->meta_json,
+                ])
+                ->values()
+                ->all();
+
+            $publishedRow = ClientPageSetting::query()
+                ->where('client_profile_id', $profile->id)
+                ->where('page_key', $pageKey)
+                ->where('status', ClientPageSettingStatus::Published)
+                ->first();
+            $draftRow = ClientPageSetting::query()
+                ->where('client_profile_id', $profile->id)
+                ->where('page_key', $pageKey)
+                ->where('status', ClientPageSettingStatus::Draft)
+                ->first();
+            $draftSettings = is_array($draftRow?->settings_json) ? $draftRow->settings_json : [];
+            $archived = (bool) ($draftSettings['archived'] ?? false);
+            $content = $this->adminContentResolver->formContentFor($profile, $pageKey);
 
             return $this->backOfficeJson([
                 'ok' => true,
+                'page_key' => $pageKey,
                 'pageKey' => $pageKey,
                 'pageLabel' => ClientPageKeys::labels()[$pageKey] ?? $pageKey,
-                'content' => $this->adminContentResolver->formContentFor($profile, $pageKey),
+                'content' => $content,
+                'draft' => $draftRow !== null ? $content : null,
+                'published' => $publishedRow !== null
+                    ? (is_array($publishedRow->content_json) ? $publishedRow->content_json : null)
+                    : null,
                 'editorMeta' => $this->adminContentResolver->editorMeta($profile, $pageKey),
+                'sections' => ClientPageSectionSchema::sectionsFor($pageKey),
+                'assets' => $assets,
+                'publishing' => [
+                    'has_draft' => $draftRow !== null,
+                    'has_published' => $publishedRow !== null,
+                    'archived' => $archived,
+                    'can_unpublish' => $pageKey !== ClientPageKeys::HOME && $publishedRow !== null,
+                    'status' => $publishedRow !== null
+                        ? ($draftRow !== null ? 'draft_ahead' : 'published')
+                        : ($draftRow !== null ? 'draft' : 'empty'),
+                ],
                 'previewUrl' => client_route($previewRoute),
+                'preview_url' => client_route($previewRoute),
             ]);
         }
 
@@ -327,15 +375,321 @@ class ClientPageSettingsController extends Controller
             ->with('status', $status);
     }
 
-    public function beginPreview(string $pageKey): RedirectResponse
+    public function beginPreview(Request $request, string $pageKey): RedirectResponse|JsonResponse
     {
         Gate::authorize('client.page-settings.manage');
         abort_unless(ClientPageKeys::isValid($pageKey), 404);
 
         $this->contentResolver->beginDraftPreview($pageKey);
         $route = ClientPageKeys::previewRoutes()[$pageKey] ?? 'home';
+        $previewUrl = client_route($route);
 
-        return redirect()->to(client_route($route));
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'previewUrl' => $previewUrl,
+                'message' => 'Draft preview session started.',
+            ]);
+        }
+
+        return redirect()->to($previewUrl);
+    }
+
+    public function catalog(Request $request): JsonResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+        $profile = $this->requireProfile();
+
+        $managed = [
+            ClientPageKeys::HOME,
+            ClientPageKeys::ABOUT,
+            ClientPageKeys::FAQ,
+            ClientPageKeys::SUPPORT,
+            ClientPageKeys::TERMS,
+            ClientPageKeys::PRIVACY,
+        ];
+
+        $pages = [];
+        foreach ($managed as $key) {
+            $published = ClientPageSetting::query()
+                ->where('client_profile_id', $profile->id)
+                ->where('page_key', $key)
+                ->where('status', ClientPageSettingStatus::Published)
+                ->exists();
+            $draftRow = ClientPageSetting::query()
+                ->where('client_profile_id', $profile->id)
+                ->where('page_key', $key)
+                ->where('status', ClientPageSettingStatus::Draft)
+                ->first();
+            $draft = $draftRow !== null;
+            $draftSettings = is_array($draftRow?->settings_json) ? $draftRow->settings_json : [];
+            $archived = (bool) ($draftSettings['archived'] ?? false);
+            $previewRoute = ClientPageKeys::previewRoutes()[$key] ?? 'home';
+            $updatedAt = $draftRow?->updated_at?->toIso8601String()
+                ?? ClientPageSetting::query()
+                    ->where('client_profile_id', $profile->id)
+                    ->where('page_key', $key)
+                    ->where('status', ClientPageSettingStatus::Published)
+                    ->value('updated_at');
+            $pages[] = [
+                'key' => $key,
+                'label' => ClientPageKeys::labels()[$key] ?? $key,
+                'type' => 'page_settings',
+                'route' => client_route($previewRoute),
+                'public_path' => client_route($previewRoute),
+                'published' => $published && ! $archived,
+                'draft' => $draft,
+                'archived' => $archived,
+                'status' => $archived
+                    ? 'archived'
+                    : ($published ? ($draft ? 'draft_ahead' : 'published') : ($draft ? 'draft' : 'empty')),
+                'updated_at' => is_string($updatedAt) ? $updatedAt : ($updatedAt?->toIso8601String() ?? null),
+                'sections' => ClientPageSectionSchema::sectionsFor($key),
+            ];
+        }
+
+        if (Schema::hasTable('client_pages')) {
+            $custom = \App\Models\ClientPage::query()
+                ->where('client_profile_id', $profile->id)
+                ->orderBy('public_title')
+                ->get();
+            foreach ($custom as $page) {
+                $pageKey = $page->pageKey();
+                $published = ClientPageSetting::query()
+                    ->where('client_profile_id', $profile->id)
+                    ->where('page_key', $pageKey)
+                    ->where('status', ClientPageSettingStatus::Published)
+                    ->exists();
+                $draft = ClientPageSetting::query()
+                    ->where('client_profile_id', $profile->id)
+                    ->where('page_key', $pageKey)
+                    ->where('status', ClientPageSettingStatus::Draft)
+                    ->exists();
+                $pages[] = [
+                    'key' => $pageKey,
+                    'label' => (string) $page->public_title,
+                    'type' => 'custom_page',
+                    'route' => '/pages/'.$page->slug,
+                    'public_path' => '/pages/'.$page->slug,
+                    'published' => $published && (bool) $page->enabled,
+                    'draft' => $draft,
+                    'archived' => ! (bool) $page->enabled,
+                    'status' => ! (bool) $page->enabled
+                        ? 'archived'
+                        : ($published ? 'published' : ($draft ? 'draft' : 'empty')),
+                    'updated_at' => $page->updated_at?->toIso8601String(),
+                    'sections' => ClientPageSectionSchema::sectionsFor($pageKey),
+                ];
+            }
+        }
+
+        return $this->backOfficeJson([
+            'ok' => true,
+            'pages' => $pages,
+        ]);
+    }
+
+    public function duplicate(Request $request, string $pageKey): JsonResponse|RedirectResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+        abort_unless(ClientPageKeys::isValid($pageKey), 404);
+        abort_if($pageKey === ClientPageKeys::HOME, 422, 'Homepage cannot be duplicated into another canonical route.');
+
+        $profile = $this->requireProfile();
+        $sourceContent = $this->adminContentResolver->formContentFor($profile, $pageKey);
+
+        $baseSlug = ClientPageKeys::isCustom($pageKey)
+            ? ClientPageKeys::customSlug($pageKey)
+            : $pageKey;
+        $slug = $baseSlug.'-copy';
+        $i = 2;
+        while (
+            \App\Models\ClientPage::query()
+                ->where('client_profile_id', $profile->id)
+                ->where('slug', $slug)
+                ->exists()
+            || \App\Support\Client\ClientManagedPageReservedSlugs::isReserved($slug)
+        ) {
+            $slug = $baseSlug.'-copy-'.$i;
+            $i++;
+            if ($i > 50) {
+                abort(422, 'Unable to allocate a unique slug for the duplicate.');
+            }
+        }
+
+        $label = ClientPageKeys::labels()[$pageKey] ?? $pageKey;
+        $title = $label.' (copy)';
+
+        $page = \App\Models\ClientPage::query()->create([
+            'client_profile_id' => $profile->id,
+            'slug' => $slug,
+            'internal_name' => $title,
+            'public_title' => $title,
+            'nav_label' => $title,
+            'enabled' => true,
+            'show_header' => true,
+            'show_footer' => true,
+        ]);
+
+        $newKey = ClientPageKeys::customKey($slug);
+        $content = $sourceContent;
+        $content['identity'] = [
+            'title' => $title,
+            'slug' => $slug,
+            'nav_label' => $title,
+        ];
+        if (! isset($content['seo']) || ! is_array($content['seo'])) {
+            $content['seo'] = [];
+        }
+        $content['seo']['title'] = $title;
+        $content['seo']['robots'] = 'noindex,nofollow';
+
+        $this->contentResolver->saveDraft($profile, $newKey, $content, auth()->id());
+
+        // Copy ClientPageAsset rows by re-attaching from existing public disk paths via meta agency_media when present.
+        $sourceAssets = ClientPageAsset::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', $pageKey)
+            ->get();
+        foreach ($sourceAssets as $asset) {
+            $meta = is_array($asset->meta_json) ? $asset->meta_json : [];
+            $agencyMediaId = isset($meta['agency_media_id']) ? (int) $meta['agency_media_id'] : 0;
+            if ($agencyMediaId > 0) {
+                $media = AgencyMedia::query()->find($agencyMediaId);
+                if ($media !== null) {
+                    try {
+                        $this->assetService->attachFromAgencyMedia(
+                            $profile,
+                            $newKey,
+                            (string) $asset->asset_key,
+                            $media,
+                            auth()->id(),
+                            $asset->alt_text,
+                        );
+                    } catch (Throwable) {
+                        // Non-fatal — content duplicate still succeeds without media.
+                    }
+                }
+            }
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Page duplicated as draft.',
+                'page_key' => $newKey,
+                'slug' => $slug,
+                'status' => 'draft',
+                'page' => [
+                    'id' => $page->id,
+                    'key' => $newKey,
+                    'slug' => $slug,
+                    'title' => $title,
+                ],
+            ]);
+        }
+
+        return redirect()
+            ->to(client_route('admin.page-settings.edit', ['pageKey' => $newKey]))
+            ->with('status', 'Page duplicated as draft.');
+    }
+
+    public function unpublish(Request $request, string $pageKey): RedirectResponse|JsonResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+        abort_unless(ClientPageKeys::isValid($pageKey), 404);
+
+        // Never destroy homepage published content via unpublish — use archive semantics of removing public authority only for non-home pages.
+        if ($pageKey === ClientPageKeys::HOME) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson([
+                    'ok' => false,
+                    'message' => 'Homepage cannot be unpublished from this action. Use draft/preview/publish safely.',
+                ], 422);
+            }
+
+            return back()->withErrors(['unpublish' => 'Homepage cannot be unpublished from this action.']);
+        }
+
+        $profile = $this->requireProfile();
+        $deleted = ClientPageSetting::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', $pageKey)
+            ->where('status', ClientPageSettingStatus::Published)
+            ->delete();
+
+        // Soft archive flag on draft settings_json when draft exists.
+        $draft = ClientPageSetting::query()
+            ->where('client_profile_id', $profile->id)
+            ->where('page_key', $pageKey)
+            ->where('status', ClientPageSettingStatus::Draft)
+            ->first();
+        if ($draft !== null) {
+            $settings = is_array($draft->settings_json) ? $draft->settings_json : [];
+            $settings['archived'] = true;
+            $settings['archived_at'] = now()->toIso8601String();
+            $draft->settings_json = $settings;
+            $draft->save();
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Page unpublished (archived from public). Draft retained.',
+                'removed_published' => (int) $deleted,
+            ]);
+        }
+
+        return back()->with('status', 'Page unpublished.');
+    }
+
+    public function attachAsset(Request $request, string $pageKey): JsonResponse|RedirectResponse
+    {
+        Gate::authorize('client.page-settings.manage');
+        abort_unless(ClientPageKeys::isValid($pageKey), 404);
+
+        $validated = $request->validate([
+            'asset_key' => ['required', 'string', 'max:64'],
+            'agency_media_id' => ['required', 'integer', 'exists:agency_media,id'],
+            'alt_text' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $profile = $this->requireProfile();
+        $media = AgencyMedia::query()->findOrFail((int) $validated['agency_media_id']);
+
+        try {
+            $asset = $this->assetService->attachFromAgencyMedia(
+                $profile,
+                $pageKey,
+                $validated['asset_key'],
+                $media,
+                auth()->id(),
+                $validated['alt_text'] ?? null,
+            );
+        } catch (ValidationException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson(['ok' => false, 'message' => 'Attach failed.', 'errors' => $e->errors()], 422);
+            }
+            throw $e;
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Media attached from library.',
+                'asset' => [
+                    'id' => $asset->id,
+                    'asset_key' => $asset->asset_key,
+                    'alt_text' => $asset->alt_text,
+                    'url' => $asset->public_url,
+                    'agency_media_id' => $media->id,
+                ],
+            ]);
+        }
+
+        return redirect()
+            ->to($this->mediaTabEditUrl($pageKey))
+            ->with('status', 'Media attached from library.');
     }
 
     public function storeAsset(Request $request, string $pageKey): RedirectResponse|JsonResponse

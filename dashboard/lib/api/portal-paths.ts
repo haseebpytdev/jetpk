@@ -329,8 +329,20 @@ export function pageSettingsPublishPath(pageKey: string): string {
   return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/publish?format=json`);
 }
 
+export function pageSettingsUnpublishPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/unpublish?format=json`);
+}
+
+export function pageSettingsDuplicatePath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/duplicate?format=json`);
+}
+
 export function pageSettingsAssetsPath(pageKey: string): string {
   return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/assets?format=json`);
+}
+
+export function pageSettingsAttachAssetPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/assets/attach?format=json`);
 }
 
 export function pageSettingsPreviewPath(pageKey: string): string {
@@ -338,5 +350,5 @@ export function pageSettingsPreviewPath(pageKey: string): string {
 }
 
 export function pageSettingsIndexPath(): string {
-  return laravelPortalPath("admin", `/page-settings?format=json`);
+  return laravelPortalPath("admin", `/page-settings/catalog?format=json`);
 }

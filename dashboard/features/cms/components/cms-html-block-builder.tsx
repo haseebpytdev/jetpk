@@ -32,6 +32,10 @@ const CATALOGUE: { key: string; label: string; html: string }[] = [
   { key: "testimonials", label: "Testimonials", html: '<section data-jp-block="testimonials"><blockquote><p>Traveler quote</p><cite>Customer name, title</cite></blockquote></section>' },
   { key: "steps", label: "Steps", html: '<section data-jp-block="steps"><ol><li><strong>Search</strong><p>Find flights</p></li><li><strong>Hold</strong><p>Reserve the fare</p></li></ol></section>' },
   { key: "callout", label: "Support callout", html: '<section data-jp-block="callout"><h3>Need help?</h3><p>Contact JetPakistan support.</p><p><a href="/support">Contact support</a></p></section>' },
+  { key: "comparison", label: "Comparison cards", html: '<section data-jp-block="comparison"><article><h3>Option A</h3><p>Details</p></article><article><h3>Option B</h3><p>Details</p></article></section>' },
+  { key: "tabs", label: "Tabs", html: '<section data-jp-block="tabs"><div data-jp-tab="Overview"><p>Overview content</p></div><div data-jp-tab="Details"><p>Details content</p></div></section>' },
+  { key: "divider", label: "Divider", html: '<section data-jp-block="divider" aria-hidden="true"><hr /></section>' },
+  { key: "spacer", label: "Safe spacer", html: '<section data-jp-block="spacer" data-size="md" aria-hidden="true"></section>' },
 ];
 
 function escapeHtml(value: string): string {

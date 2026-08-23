@@ -9,6 +9,11 @@ type MediaItem = {
   alt_text?: string;
   original_name?: string;
   name?: string;
+  mime_type?: string;
+  type?: string;
+  width?: number;
+  height?: number;
+  dimensions?: string;
 };
 
 type Props = {
@@ -113,6 +118,15 @@ export function CmsMediaPickerDialog({ open, title, onClose, onSelect, onUploadF
                 )}
               </div>
               <p className="mt-2 truncate text-xs font-medium">{item.original_name || item.name || `Media #${item.id}`}</p>
+              <p className="truncate text-[11px] text-jp-muted">
+                {item.mime_type || item.type || "image"}
+                {item.dimensions
+                  ? ` · ${item.dimensions}`
+                  : item.width && item.height
+                    ? ` · ${item.width}×${item.height}`
+                    : ""}
+              </p>
+              {item.alt_text ? <p className="mt-1 truncate text-[11px] text-jp-muted">Alt: {item.alt_text}</p> : null}
               <button
                 type="button"
                 className="mt-2 min-h-9 w-full rounded-lg bg-jp-accent px-2 text-xs text-white"

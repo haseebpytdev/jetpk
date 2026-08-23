@@ -24,6 +24,16 @@ final class ClientCanonicalPageSchema
         'timeline',
         'content_grid',
         'department_cards',
+        'gallery',
+        'video',
+        'testimonials',
+        'steps',
+        'comparison_cards',
+        'destination_cards',
+        'offer_cards',
+        'tabs',
+        'divider',
+        'spacer',
     ];
 
     /** @var list<string> */
