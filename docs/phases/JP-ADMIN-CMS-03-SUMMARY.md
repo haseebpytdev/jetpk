@@ -87,7 +87,22 @@ Focused PHPUnit batches: 23 + 17 assertions suites passed (see command logs).
 Revert branch / redeploy prior SHA `8911d208be9b42330c2157e6cd3d4a288c643d94`.
 
 ## Commit SHA
-`f129bc5eebebcf23c5eb7806506c2525ed392b0d`
+Production base (pre-blocker-closure): `f129bc5eebebcf23c5eb7806506c2525ed392b0d`
+
+## Live-blocker closure (engineering, stop before deploy)
+
+Fixes reproducing production defects from the live round-trip:
+
+1. **Integrations ApiResult unwrap** — `dashboard/services/operational-api.ts` flattens `{ ok, data, status }` so IntegrationsWorkspace reads `hub` / `permissions` / `integration` (13 providers + Settings + Test Connection contract).
+2. **Featured deal publish fields** — `JetpkHomepageContentValidator::normalizeFeaturedDeals()` preserves `id`, editorial fields, and safe `image_asset_key` / `image_alt`; path-like asset keys rejected.
+3. **CMS managed-page freshness** — managed/CMS/custom public fetches use `cache: "no-store"`; About/FAQ routes `force-dynamic`.
+4. **Preview session contract** — preview JSON returns `jp_preview=1` URL; public homepage/about/faq forward browser cookies to Laravel only when `jp_preview=1` (auth unchanged).
+
+`FINAL_CMS03_BLOCKER_ENGINEERING_SHA=eb5067e4a3ff0c96242b3d3e972fd0998d02115c` (pinned below after docs commit).
 
 ## Final status
-`JP_ADMIN_CMS03_PREDEPLOY` — STOP BEFORE DEPLOYMENT. `OWNER_RETEST_V3=RETEST_REQUIRED`.
+`JP_ADMIN_CMS03_BLOCKER_CLOSURE_PREDEPLOY` — STOP BEFORE DEPLOYMENT. `OWNER_RETEST_V3=RETEST_REQUIRED`.
+
+### Blocker-closure pins
+- PRODUCTION_BASE_SHA=`f129bc5eebebcf23c5eb7806506c2525ed392b0d`
+- FINAL_CMS03_BLOCKER_ENGINEERING_SHA=`eb5067e4a3ff0c96242b3d3e972fd0998d02115c`
