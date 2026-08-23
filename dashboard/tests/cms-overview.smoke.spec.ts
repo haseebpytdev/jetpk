@@ -67,8 +67,8 @@ test("attention queue links correctly", async ({ page }) => {
 test("cms navigation between sections", async ({ page }) => {
   await page.goto("/admin/dashboard/cms", { waitUntil: "load" });
   await navigateCmsSection(page, "Pages", /\/admin\/dashboard\/cms\/pages/);
-  await navigateCmsSection(page, "Sections", /\/admin\/dashboard\/cms\/sections/);
-  await navigateCmsSection(page, "Assets", /\/admin\/dashboard\/cms\/assets/);
+  await navigateCmsSection(page, "Homepage", /\/admin\/dashboard\/cms\/sections/);
+  await navigateCmsSection(page, "Media library", /\/admin\/dashboard\/cms\/assets/);
 });
 
 for (const viewport of viewports.filter((v) => v.width <= 390)) {

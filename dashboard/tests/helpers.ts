@@ -277,7 +277,10 @@ export async function closeExportDrawerWithEscape(page: Page): Promise<void> {
 
 /** Wait until a CMS route transition finishes and workspace content is interactive. */
 export async function expectCmsReady(page: Page): Promise<void> {
-  await expect(page.getByRole("heading", { name: "CMS", level: 1 })).toBeVisible({ timeout: 60_000 });
+  // Module shell uses the section label as H1 (Pages / Homepage / Media library); overview keeps "CMS".
+  await expect(
+    page.getByRole("heading", { level: 1 }).filter({ hasText: /^(CMS|Pages|Homepage|Media library)$/ }),
+  ).toBeVisible({ timeout: 60_000 });
 
   const routeLoading = page
     .getByTestId("cms-loading-state")
@@ -286,9 +289,8 @@ export async function expectCmsReady(page: Page): Promise<void> {
     await expect(routeLoading.first()).toBeHidden({ timeout: 30_000 });
   }
 
-  await expect(
-    page.getByTestId("cms-workspace").or(page.getByText(/Unable to load CMS/i)),
-  ).toBeVisible({ timeout: 30_000 });
+  // Workspace remains present; operational panels (pages/homepage) may also be visible.
+  await expect(page.getByTestId("cms-workspace")).toBeVisible({ timeout: 30_000 });
 }
 
 /** Navigate within the CMS section nav and wait for the destination route. */
