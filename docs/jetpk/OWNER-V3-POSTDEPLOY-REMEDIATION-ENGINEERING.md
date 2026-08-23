@@ -15,10 +15,13 @@
 | CLUSTER_C_SHA | `9719f7c0` |
 | CLUSTER_D_SHA | `e16d67877bfec4681a9547c53e150d61d20ac901` |
 | FINAL_REMEDIATION_ENGINEERING_SHA | `8911d208be9b42330c2157e6cd3d4a288c643d94` |
-| FINAL_TEST_HARNESS_SHA (Playwright/visual only) | see HEAD after test commits (no runtime delta) |
+| FINAL_TEST_HARNESS_SHA (Playwright/visual only) | `93452d9b23608eba39467a9bca4ef621ec25d9b2` |
 
 Branch: `feat/jetpk-flight-results-booking-flow-20260819`  
-Remote parity: `0/0` (reconcile after each push)
+Current branch HEAD: `93452d9b23608eba39467a9bca4ef621ec25d9b2` (test harness only)  
+Remote parity: `0/0`
+
+**Deployment target:** production deploy must checkout **`8911d208`** (engineering SHA), **not** branch HEAD `93452d9b` (test harness / docs only after engineering pin).
 
 ## Live Integrations failure — root cause
 
@@ -89,22 +92,40 @@ Do not clear or manipulate production logs. See also:
 | Frontend `tsc --noEmit` | PASS (after narrow gender typing fix in `8911d208`) |
 | Dashboard `npm run build` | PASS |
 | Frontend `npm run build` | See build log under tmp evidence |
-| Playwright `cms-pages.smoke` | **28/28 PASS** (preview admin harness; H1 + URL-wait harness aligned) |
-| Playwright Cluster E pack | cms-overview + jp-int-01 + read-only-cms **PASS** |
-| Visual matrix 01–18 | **YES** — `tmp/owner-v3-postdeploy-remediation/` (see `VISUAL_PROOF_INDEX.md`) |
-| PLAYWRIGHT / VISUAL_GREEN | **PASS** / **YES** |
+| PLAYWRIGHT | **PASS** |
+| CMS_PW (`cms-pages.smoke`) | **28/28 PASS** (preview admin harness; H1 + URL-wait harness aligned) |
+| CLUSTER_E_PW (cms-overview + jp-int-01 + read-only-cms) | **42/42 PASS** |
+| VISUAL_GREEN | **YES** — matrix 01–18 under `tmp/owner-v3-postdeploy-remediation/` (`VISUAL_PROOF_INDEX.md`) |
+| TYPECHECK (Dashboard + Public) | **PASS** |
+| LARAVEL_TESTS (focused remediation filter) | **PASS** (41 tests) |
+| DASHBOARD_BUILD / PUBLIC_BUILD | **PASS** |
+
+## Test-harness separation (engineering → harness)
+
+Diff `8911d208` → `93452d9b` (6 paths, **RUNTIME_FILES_AFTER_ENGINEERING_SHA=0**):
+
+| Path | Class |
+|------|-------|
+| `dashboard/tests/cms-overview.smoke.spec.ts` | Playwright harness |
+| `dashboard/tests/helpers.ts` | Playwright harness |
+| `dashboard/tests/owner-v3-postdeploy-visual-matrix.spec.ts` | Playwright visual spec |
+| `frontend/tests/owner-v3-postdeploy-visual-matrix.spec.ts` | Playwright visual spec |
+| `frontend/tests/owner-v3-postdeploy-wave9-reuse.spec.ts` | Playwright visual spec |
+| `docs/jetpk/OWNER-V3-POSTDEPLOY-REMEDIATION-ENGINEERING.md` | Predeploy evidence doc |
+
+No application/runtime/build source changed after engineering pin.
 
 ## Deployment delta (runtime only)
 
-Base: `26ff1032` → Final engineering: `8911d208`
+Git range: `26ff1032` (PRODUCTION_BASE_SHA) → `8911d208` (FINAL_REMEDIATION_ENGINEERING_SHA)
 
-- **EXACT_RUNTIME_FILE_COUNT:** 39
+- **EXACT_RUNTIME_FILE_COUNT:** 39 (recalculated from Git; manifest: `tmp/owner-v3-postdeploy-remediation/runtime-manifest-filtered-8911d208.txt`)
 - **MIGRATIONS:** 0
 - **UNEXPECTED_RUNTIME_SUBSYSTEMS:** NONE
 
 Runtime subsystems touched: Integrations, Checkout/Review display, CMS Page Settings / Homepage / Media attach, Dashboard CMS/Integrations surfaces, Public hero.
 
-Excluded from count: tests, docs, tmp, screenshots, `.next`, private tooling.
+Excluded from count: `tests/**`, `frontend/tests/**`, `dashboard/tests/**`, `docs/**`, `tmp/**`, screenshots, `.next`, private tooling.
 
 ## Security
 
