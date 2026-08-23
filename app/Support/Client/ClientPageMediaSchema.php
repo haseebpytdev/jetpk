@@ -44,7 +44,8 @@ final class ClientPageMediaSchema
 
         return [
             ClientPageKeys::HOME => [
-                $imageField('hero_background', 'Hero image', 'hero', '16:9', 'Homepage hero background'),
+                $imageField('hero_background', 'Hero image (desktop)', 'hero', '16:9', 'Homepage hero background desktop'),
+                $imageField('hero_background_mobile', 'Hero image (mobile)', 'hero', '4:5', 'Homepage hero background mobile'),
                 $imageField('support_cta_background', 'Support CTA background', 'support_cta', '21:9', 'Pre-footer support callout desktop background'),
                 $imageField('support_cta_background_mobile', 'Support CTA mobile background', 'support_cta', '4:5', 'Pre-footer support callout mobile background'),
                 $imageField('group_card_1', 'Group card 1 image', 'group_cards', '4:3', 'First group travel package card'),

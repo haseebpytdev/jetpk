@@ -328,3 +328,15 @@ export function pageSettingsEditPath(pageKey: string): string {
 export function pageSettingsPublishPath(pageKey: string): string {
   return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/publish?format=json`);
 }
+
+export function pageSettingsAssetsPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/assets?format=json`);
+}
+
+export function pageSettingsPreviewPath(pageKey: string): string {
+  return laravelPortalPath("admin", `/page-settings/${encodeURIComponent(pageKey)}/preview?format=json`);
+}
+
+export function pageSettingsIndexPath(): string {
+  return laravelPortalPath("admin", `/page-settings?format=json`);
+}

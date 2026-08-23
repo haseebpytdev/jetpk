@@ -54,6 +54,9 @@ import {
   notificationEventsUpdatePath,
   pageSettingsEditPath,
   pageSettingsPublishPath,
+  pageSettingsAssetsPath,
+  pageSettingsPreviewPath,
+  pageSettingsIndexPath,
   paymentRejectPath,
   paymentStorePath,
   paymentVerifyPath,
@@ -777,6 +780,31 @@ export async function savePageSettings(
 export async function publishPageSettings(pageKey: string): Promise<MutationResponse<Record<string, unknown>>> {
   return laravelRequest(pageSettingsPublishPath(pageKey), {
     method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function uploadPageSettingsAsset(
+  pageKey: string,
+  formData: FormData,
+): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(pageSettingsAssetsPath(pageKey), {
+    method: "POST",
+    formData,
+    retryCsrfOnce: false,
+  });
+}
+
+export async function beginPageSettingsPreview(pageKey: string): Promise<MutationResponse<Record<string, unknown>>> {
+  return laravelRequest(pageSettingsPreviewPath(pageKey), {
+    method: "POST",
+    retryCsrfOnce: false,
+  });
+}
+
+export async function loadPageSettingsIndex(): Promise<MutationResponse<{ pages?: Array<Record<string, unknown>> }>> {
+  return laravelRequest(pageSettingsIndexPath(), {
+    method: "GET",
     retryCsrfOnce: false,
   });
 }

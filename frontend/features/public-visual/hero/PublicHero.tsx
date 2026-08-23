@@ -20,23 +20,31 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
   const subtitle =
     hero.subtitle ||
     "Compare flights, pay in PKR, and book with a Pakistan-focused travel platform you can trust.";
+  const desktopSrc = hero.image?.url ?? fallbackImage;
+  const mobileSrc = hero.imageMobile?.url ?? desktopSrc;
+  const objectPosition =
+    hero.focalPoint === "left" ? "left center" : hero.focalPoint === "right" ? "right center" : "center";
 
   return (
     <section className="relative overflow-hidden border-b border-jp-border bg-jp-page">
       <div className="relative min-h-[clamp(20rem,42vh,30rem)]">
         <div className="absolute inset-0" data-testid="homepage-hero-image">
-          <ImageSlot
-            src={hero.image?.url ?? fallbackImage}
-            alt={hero.image?.alt ?? "JetPakistan flights"}
-            width={1440}
-            height={560}
-            priority
-            sizes="100vw"
-            className="!max-w-none !rounded-none h-full w-full"
-            objectFit="cover"
-            fallbackLabel="JetPakistan hero"
-            brandedFallback
-          />
+          <picture>
+            <source media="(max-width: 767px)" srcSet={mobileSrc} />
+            <ImageSlot
+              src={desktopSrc}
+              alt={hero.image?.alt ?? hero.imageMobile?.alt ?? "JetPakistan flights"}
+              width={1440}
+              height={560}
+              priority
+              sizes="100vw"
+              className="!max-w-none !rounded-none h-full w-full"
+              objectFit="cover"
+              objectPosition={objectPosition}
+              fallbackLabel="JetPakistan hero"
+              brandedFallback
+            />
+          </picture>
           <div
             className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-jp-page/95 dark:from-black/55 dark:via-black/35 dark:to-jp-page"
             aria-hidden="true"

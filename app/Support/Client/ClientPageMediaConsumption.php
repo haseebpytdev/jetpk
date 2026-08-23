@@ -24,6 +24,15 @@ final class ClientPageMediaConsumption
             ],
             [
                 'page_key' => ClientPageKeys::HOME,
+                'asset_key' => 'hero_background_mobile',
+                'blade' => 'themes/frontend/jetpakistan/sections/hero.blade.php',
+                'element' => 'picture.hero-media source[media]',
+                'collection' => 'Homepage',
+                'owner' => 'Page Settings',
+                'status' => 'used',
+            ],
+            [
+                'page_key' => ClientPageKeys::HOME,
                 'asset_key' => 'support_cta_background',
                 'blade' => 'themes/frontend/jetpakistan/sections/support-cta.blade.php',
                 'element' => '--jp-support-bg',

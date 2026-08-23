@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { CmsWorkspace } from "@/features/cms/cms-workspace";
 import { HomepageSettingsPanel } from "@/features/cms/components/homepage-settings-panel";
+import { PageSettingsPagesPanel } from "@/features/cms/components/page-settings-pages-panel";
 import type { CmsModuleKey, CmsModuleResult } from "@/types/cms";
 
 const SUBROUTES: { key: CmsModuleKey; label: string; href: string }[] = [
@@ -56,6 +57,7 @@ export function CmsModuleShell({ module, result }: Props) {
       </nav>
 
       {module === "sections" ? <HomepageSettingsPanel /> : null}
+      {module === "pages" ? <PageSettingsPagesPanel /> : null}
 
       {result.state === "loading" ? (
         <div aria-busy="true" aria-label="Loading CMS foundation" data-testid="cms-loading-state">

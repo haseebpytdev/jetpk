@@ -49,6 +49,8 @@ final class HomepagePublicContentPresenter
         }
 
         $imageUrl = $this->homepage->assetUrl('hero_background');
+        $mobileImageUrl = $this->homepage->assetUrl('hero_background_mobile');
+        $alt = trim((string) ($hero['image_alt'] ?? 'JetPakistan flights'));
 
         return [
             'eyebrow' => $hasCms ? trim((string) ($hero['eyebrow'] ?? '')) : '',
@@ -56,8 +58,13 @@ final class HomepagePublicContentPresenter
             'headline_highlight' => $hasCms ? trim((string) ($hero['headline_highlight'] ?? '')) : '',
             'subtitle' => $hasCms ? trim((string) ($hero['subtitle'] ?? '')) : '',
             'search_visible' => ($hero['search_visible'] ?? '1') !== '0',
+            'focal_point' => trim((string) ($hero['focal_point'] ?? 'center')) ?: 'center',
+            'overlay_strength' => trim((string) ($hero['overlay_strength'] ?? 'medium')) ?: 'medium',
             'image' => $imageUrl !== null && $imageUrl !== ''
-                ? ['url' => PublicMediaUrl::normalize($imageUrl), 'alt' => trim((string) ($hero['image_alt'] ?? 'JetPakistan flights'))]
+                ? ['url' => PublicMediaUrl::normalize($imageUrl), 'alt' => $alt]
+                : null,
+            'image_mobile' => $mobileImageUrl !== null && $mobileImageUrl !== ''
+                ? ['url' => PublicMediaUrl::normalize($mobileImageUrl), 'alt' => $alt]
                 : null,
         ];
     }

@@ -338,7 +338,7 @@ class ClientPageSettingsController extends Controller
         return redirect()->to(client_route($route));
     }
 
-    public function storeAsset(Request $request, string $pageKey): RedirectResponse
+    public function storeAsset(Request $request, string $pageKey): RedirectResponse|JsonResponse
     {
         Gate::authorize('client.page-settings.manage');
         abort_unless(ClientPageKeys::isValid($pageKey), 404);
@@ -352,6 +352,10 @@ class ClientPageSettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson(['ok' => false, 'message' => 'Asset validation failed.', 'errors' => $validator->errors()], 422);
+            }
+
             return redirect()
                 ->to($mediaEditUrl)
                 ->withErrors($validator)
@@ -372,14 +376,34 @@ class ClientPageSettingsController extends Controller
                 $validated['alt_text'] ?? null,
             );
         } catch (ValidationException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson(['ok' => false, 'message' => 'Asset validation failed.', 'errors' => $e->errors()], 422);
+            }
             $e->redirectTo($mediaEditUrl);
             throw $e;
         } catch (Throwable $e) {
             report($e);
 
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson(['ok' => false, 'message' => 'Upload failed. Please try again.'], 500);
+            }
+
             return redirect()
                 ->to($mediaEditUrl)
                 ->withErrors(['file' => 'Upload failed. Please try again.']);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Asset uploaded.',
+                'asset' => [
+                    'id' => $asset->id,
+                    'asset_key' => $asset->asset_key,
+                    'alt_text' => $asset->alt_text,
+                    'url' => $asset->public_url ?? $asset->url ?? null,
+                ],
+            ]);
         }
 
         $warning = is_array($asset->meta_json) ? ($asset->meta_json['hero_lcp_warning'] ?? null) : null;

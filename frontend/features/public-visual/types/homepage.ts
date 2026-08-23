@@ -4,7 +4,10 @@ export type HomepageHeroContent = {
   headlineHighlight: string;
   subtitle: string;
   searchVisible: boolean;
+  focalPoint?: "left" | "center" | "right" | string;
+  overlayStrength?: string;
   image: { url: string; alt: string } | null;
+  imageMobile?: { url: string; alt: string } | null;
 };
 
 export type HomepageTrustChip = {

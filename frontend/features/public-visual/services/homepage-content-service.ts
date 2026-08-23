@@ -49,19 +49,26 @@ function emptyHero(): HomepageHeroContent {
     subtitle: "",
     searchVisible: true,
     image: null,
+    imageMobile: null,
   };
 }
 
 function mapHero(remote?: Record<string, unknown>): HomepageHeroContent {
   const image = remote?.image as { url?: string; alt?: string } | null | undefined;
+  const imageMobile = remote?.image_mobile as { url?: string; alt?: string } | null | undefined;
   return {
     eyebrow: String(remote?.eyebrow ?? ""),
     headline: String(remote?.headline ?? ""),
     headlineHighlight: String(remote?.headline_highlight ?? ""),
     subtitle: String(remote?.subtitle ?? ""),
     searchVisible: remote?.search_visible !== false,
+    focalPoint: String(remote?.focal_point ?? "center"),
+    overlayStrength: String(remote?.overlay_strength ?? "medium"),
     image: image?.url
       ? { url: image.url, alt: String(image.alt ?? "JetPakistan flights") }
+      : null,
+    imageMobile: imageMobile?.url
+      ? { url: imageMobile.url, alt: String(imageMobile.alt ?? "JetPakistan flights") }
       : null,
   };
 }
