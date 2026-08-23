@@ -32,6 +32,7 @@ export type HomepageDestinationCard = {
   country?: string;
   text?: string;
   image: string | null;
+  imageAlt?: string;
   priceLabel: string;
   href: string | null;
 };

@@ -103,8 +103,9 @@ function mapDestinations(items: Array<Record<string, unknown>> = []): HomepageDe
     code: String(item.code ?? ""),
     title: String(item.title ?? ""),
     country: item.country ? String(item.country) : undefined,
-    text: item.text ? String(item.text) : undefined,
+    text: item.text ? String(item.text) : item.subtitle ? String(item.subtitle) : undefined,
     image: item.image ? String(item.image) : null,
+    imageAlt: item.image_alt ? String(item.image_alt) : undefined,
     priceLabel: String(item.price_label ?? ""),
     href: item.href ? String(item.href) : item.link ? String(item.link) : null,
   }));
@@ -345,7 +346,8 @@ export const HomepageContentService = {
     try {
       const response = await fetchWithTimeout(resolveHomepageApiUrl(), {
         headers: { Accept: "application/json" },
-        next: { revalidate: 120 },
+        cache: "no-store",
+        next: { tags: ["homepage-cms"] },
       });
 
       if (!response.ok) {

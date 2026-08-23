@@ -36,6 +36,7 @@ type EditPayload = {
     has_published?: boolean;
     archived?: boolean;
     can_unpublish?: boolean;
+    status?: string;
   };
   preview_url?: string;
   previewUrl?: string;
@@ -63,6 +64,8 @@ export function PageSettingsPagesPanel() {
   const [content, setContent] = useState<Record<string, unknown>>({});
   const [sections, setSections] = useState<SectionDef[]>([]);
   const [canUnpublish, setCanUnpublish] = useState(false);
+  const [publishing, setPublishing] = useState<EditPayload["publishing"] | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -108,7 +111,11 @@ export function PageSettingsPagesPanel() {
     const payload = unwrapData<EditPayload>(result as { ok: boolean; data?: EditPayload });
     setContent(payload.draft ?? payload.content ?? {});
     setSections(Array.isArray(payload.sections) ? payload.sections : []);
+    setPublishing(payload.publishing ?? null);
     setCanUnpublish(Boolean(payload.publishing?.can_unpublish));
+    const fromPayload = payload.preview_url ?? payload.previewUrl ?? null;
+    const fromCatalog = pages.find((p) => p.key === pageKey);
+    setPreviewUrl(fromPayload ?? fromCatalog?.public_path ?? fromCatalog?.route ?? null);
   }
 
   async function saveDraft() {
@@ -166,7 +173,10 @@ export function PageSettingsPagesPanel() {
       preview as { ok: boolean; data?: { preview_url?: string; previewUrl?: string } },
     );
     const url = payload.preview_url ?? payload.previewUrl;
-    if (url) window.open(url, "_blank", "noopener,noreferrer");
+    if (url) {
+      setPreviewUrl(url);
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
   }
 
   async function archiveSelected() {
@@ -312,6 +322,8 @@ export function PageSettingsPagesPanel() {
               void openEditor(selected);
             }}
             disabled={busy}
+            previewUrl={previewUrl}
+            publishing={publishing}
           />
         </div>
       ) : null}

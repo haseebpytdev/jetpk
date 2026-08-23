@@ -138,24 +138,38 @@ class BackOfficeCapabilitiesPresenter
             $groups[] = ['label' => 'Overview', 'items' => $overview];
         }
 
-        $bookingOps = [];
+        $operations = [];
         if ($has('bookings.view')) {
-            $bookingOps[] = $this->dashboardNav('Bookings', 'bookings', '/bookings');
+            $operations[] = $this->dashboardNav('Bookings', 'bookings', '/bookings');
             if ($isAdmin || $user->hasStaffPermission(StaffPermission::BookingsUpdateStatus)) {
-                $bookingOps[] = $this->dashboardNav('Execution', 'execution', '/operations/execution');
+                $operations[] = $this->dashboardNav('Execution', 'execution', '/operations/execution');
             }
             if ($isAdmin || $user->hasStaffPermission(StaffPermission::CancellationsApprove)) {
-                $bookingOps[] = $this->dashboardNav('Cancellations', 'cancellations', '/operations/review');
+                $operations[] = $this->dashboardNav('Cancellations', 'cancellations', '/operations/review');
             }
         }
         if ($has('pnrs.view')) {
-            $bookingOps[] = $this->dashboardNav('PNRs', 'pnrs', '/pnrs');
+            $operations[] = $this->dashboardNav('PNRs', 'pnrs', '/pnrs');
         }
         if ($has('tickets.view')) {
-            $bookingOps[] = $this->dashboardNav('Tickets', 'tickets', '/tickets');
+            $operations[] = $this->dashboardNav('Tickets', 'tickets', '/tickets');
         }
-        if ($bookingOps !== []) {
-            $groups[] = ['label' => 'Booking operations', 'items' => array_values(array_filter($bookingOps))];
+        if ($operations !== []) {
+            $groups[] = ['label' => 'Operations', 'items' => array_values(array_filter($operations))];
+        }
+
+        $customers = [];
+        if ($has('customers.view')) {
+            $customers[] = $this->dashboardNav('Customers', 'customers', '/customers');
+        }
+        if ($has('agents.view')) {
+            $customers[] = $this->dashboardNav('Agents', 'agents', '/agents');
+        }
+        if ($isAdmin) {
+            $customers[] = $this->dashboardNav('Agent applications', 'agent-applications', '/agents/applications');
+        }
+        if ($customers !== []) {
+            $groups[] = ['label' => 'Customers', 'items' => array_values(array_filter($customers))];
         }
 
         $finance = [];
@@ -175,53 +189,50 @@ class BackOfficeCapabilitiesPresenter
             $groups[] = ['label' => 'Finance', 'items' => array_values(array_filter($finance))];
         }
 
-        $customers = [];
-        if ($has('customers.view')) {
-            $customers[] = $this->dashboardNav('Customers', 'customers', '/customers');
-        }
-        if ($has('agents.view')) {
-            $customers[] = $this->dashboardNav('Agents', 'agents', '/agents');
-        }
-        if ($isAdmin) {
-            $customers[] = $this->dashboardNav('Agent applications', 'agent-applications', '/agents/applications');
-        }
-        if ($customers !== []) {
-            $groups[] = ['label' => 'Customers & distribution', 'items' => array_values(array_filter($customers))];
-        }
-
+        // Suppliers = operational supplier management; Integrations = technical API connectivity.
         $suppliers = [];
         if ($has('suppliers.view')) {
             $suppliers[] = $this->dashboardNav('Suppliers', 'suppliers', '/suppliers');
+        }
+        if ($isAdmin && ($has('integrations.view') || $has('suppliers.view'))) {
+            $suppliers[] = $this->dashboardNav('Integrations', 'integrations', '/integrations');
         }
         if ($suppliers !== []) {
             $groups[] = ['label' => 'Suppliers', 'items' => array_values(array_filter($suppliers))];
         }
 
-        $content = [];
-        if ($has('cms.view')) {
-            $content[] = $this->dashboardNav('CMS', 'cms', '/cms');
+        // Website children only — no redundant CMS parent (legacy /cms redirects to Homepage).
+        $website = [];
+        if ($isAdmin || $has('cms.view')) {
+            if ($isAdmin) {
+                $website[] = $this->dashboardNav('Homepage', 'homepage', '/cms/sections');
+                $website[] = $this->dashboardNav('Pages', 'cms-pages', '/cms/pages');
+                $website[] = $this->dashboardNav('Media library', 'media', '/cms/assets');
+            } elseif ($has('cms.view')) {
+                $website[] = $this->dashboardNav('Homepage', 'homepage', '/cms/sections');
+            }
         }
-        if ($isAdmin && ($modules['branding_settings'] ?? false)) {
-            $content[] = $this->dashboardNav('Branding', 'branding', '/settings/general');
-        }
-        if ($isAdmin) {
-            $content[] = $this->dashboardNav('Pages', 'cms-pages', '/cms/pages');
-            $content[] = $this->dashboardNav('Homepage', 'homepage', '/cms/sections');
-            $content[] = $this->dashboardNav('Media library', 'media', '/cms/assets');
-        }
-        if ($content !== []) {
-            $groups[] = ['label' => 'Content & website', 'items' => array_values(array_filter($content))];
+        if ($website !== []) {
+            $groups[] = ['label' => 'Website', 'items' => array_values(array_filter($website))];
         }
 
         $communications = [];
         if (($isAdmin || $user->hasStaffPermission(StaffPermission::SupportView)) && ($modules['agent_support'] ?? false)) {
             $communications[] = $this->dashboardNav('Support', 'support', '/support');
         }
-        if ($isAdmin && ($modules['notifications'] ?? false)) {
-            $communications[] = $this->dashboardNav('Communications', 'communications', '/settings/notifications');
-        }
         if ($communications !== []) {
             $groups[] = ['label' => 'Communications', 'items' => array_values(array_filter($communications))];
+        }
+
+        $reporting = [];
+        if ($has('reports.view')) {
+            $reporting[] = $this->dashboardNav('Reports', 'reports', '/reports');
+        }
+        if ($has('audit.view')) {
+            $reporting[] = $this->dashboardNav('Audit', 'audit', '/audit');
+        }
+        if ($reporting !== []) {
+            $groups[] = ['label' => 'Reporting', 'items' => array_values(array_filter($reporting))];
         }
 
         $administration = [];
@@ -236,30 +247,13 @@ class BackOfficeCapabilitiesPresenter
             $groups[] = ['label' => 'Administration', 'items' => array_values(array_filter($administration))];
         }
 
-        $reporting = [];
-        if ($has('reports.view')) {
-            $reporting[] = $this->dashboardNav('Reports', 'reports', '/reports');
-        }
-        if ($has('audit.view')) {
-            $reporting[] = $this->dashboardNav('Audit', 'audit', '/audit');
-        }
-        if ($reporting !== []) {
-            $groups[] = ['label' => 'Reporting', 'items' => array_values(array_filter($reporting))];
-        }
-
         $system = [];
-        if ($isAdmin && ($has('integrations.view') || $has('suppliers.view'))) {
-            $system[] = $this->dashboardNav('Integrations', 'integrations', '/integrations');
-        }
-        if ($isAdmin && $has('suppliers.view')) {
-            $system[] = $this->dashboardNav('API Connections', 'api-settings', '/api-connections');
-        }
         if ($has('settings.view')) {
             $system[] = $this->dashboardNav('Settings', 'settings', '/settings');
         }
         if ($isAdmin) {
-            $system[] = $this->dashboardNav('Go-live checklist', 'go-live', '/system/go-live');
             $system[] = $this->dashboardNav('System health', 'system-health', '/system/health');
+            $system[] = $this->dashboardNav('Go-live checklist', 'go-live', '/system/go-live');
         }
         if ($system !== []) {
             $groups[] = ['label' => 'System', 'items' => array_values(array_filter($system))];

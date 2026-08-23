@@ -32,12 +32,15 @@ class DashboardNavigationOperationalTest extends TestCase
         $keys = collect($navigation)->pluck('key')->all();
         $this->assertContains('dashboard', $keys);
         $this->assertContains('bookings', $keys);
-        $this->assertContains('cms', $keys);
+        $this->assertContains('homepage', $keys);
+        $this->assertContains('integrations', $keys);
         $this->assertContains('support', $keys);
+        $this->assertNotContains('cms', $keys);
+        $this->assertNotContains('api-settings', $keys);
 
-        $cms = collect($navigation)->firstWhere('key', 'cms');
-        $this->assertSame('dashboard', $cms['target'] ?? null);
-        $this->assertStringContainsString('/cms', $cms['href'] ?? '');
+        $homepage = collect($navigation)->firstWhere('key', 'homepage');
+        $this->assertSame('dashboard', $homepage['target'] ?? null);
+        $this->assertStringContainsString('/cms/sections', $homepage['href'] ?? '');
 
         $support = collect($navigation)->firstWhere('key', 'support');
         $this->assertSame('dashboard', $support['target'] ?? null);
@@ -72,10 +75,11 @@ class DashboardNavigationOperationalTest extends TestCase
         $this->assertSame('/staff', $staff['href']);
         $this->assertSame('dashboard', $staff['target']);
 
-        $apiSettings = collect($navigation)->firstWhere('key', 'api-settings');
-        $this->assertNotNull($apiSettings);
-        $this->assertSame('/api-connections', $apiSettings['href']);
-        $this->assertSame('dashboard', $apiSettings['target']);
+        $this->assertNull(collect($navigation)->firstWhere('key', 'api-settings'));
+        $integrations = collect($navigation)->firstWhere('key', 'integrations');
+        $this->assertNotNull($integrations);
+        $this->assertSame('/integrations', $integrations['href']);
+        $this->assertSame('dashboard', $integrations['target']);
     }
 
     public function test_staff_navigation_omits_admin_only_laravel_modules(): void

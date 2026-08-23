@@ -83,7 +83,8 @@ final class JetpkHomepageSectionData
             $routeId = (string) ($item['id'] ?? '');
             $fare = JetpkHomepageFareDisplay::resolve($item, $fareCache[$routeId] ?? null);
             $priceLabel = $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel();
-            $image = PublicMediaUrl::normalize($this->routeImageUrl($item, $routeId)) ?? '';
+            $cmsImage = PublicMediaUrl::normalize($this->routeImageUrl($item, $routeId));
+            $image = $cmsImage ?? '';
 
             $routes[] = array_merge($item, [
                 'from' => $from,
@@ -95,6 +96,7 @@ final class JetpkHomepageSectionData
                 'search_url' => $this->routeSearchUrl($item),
                 'image' => $image !== '' ? $image : null,
                 'image_alt' => trim((string) ($item['image_alt'] ?? $item['alt'] ?? "{$from} to {$to}")),
+                'media_source' => $image !== '' ? 'cms' : 'none',
             ]);
         }
 
@@ -126,13 +128,22 @@ final class JetpkHomepageSectionData
             }
 
             $fare = JetpkHomepageFareDisplay::resolve($item, null);
-            $image = PublicMediaUrl::normalize($this->destinationImageUrl($item, $index)) ?? '';
+            $cmsImage = PublicMediaUrl::normalize($this->destinationCmsImageUrl($item, $index));
+            $image = $cmsImage ?? '';
+            $mediaSource = 'cms';
+            if ($image === '') {
+                $image = $this->destinationFallbackImageUrl();
+                $mediaSource = 'fallback';
+            }
             $link = trim((string) ($item['link'] ?? $item['cta_url'] ?? ''));
+            $imageAlt = trim((string) ($item['image_alt'] ?? $item['alt'] ?? $title));
 
             $destinations[] = array_merge($item, [
                 'code' => $code,
                 'title' => $title !== '' ? $title : $code,
                 'image' => $image,
+                'image_alt' => $imageAlt,
+                'media_source' => $mediaSource,
                 'price' => $fare !== null ? (int) round($fare['amount']) : null,
                 'price_label' => $fare['label'] ?? JetpkHomepageFareDisplay::neutralAvailabilityLabel(),
                 'link' => $link,
@@ -162,7 +173,15 @@ final class JetpkHomepageSectionData
                 if ($from === '' && $to === '') {
                     continue;
                 }
+                $itemId = trim((string) ($item['id'] ?? ''));
+                $image = PublicMediaUrl::normalize($this->featuredDealImageUrl($item, $itemId)) ?? '';
+                $imageAlt = trim((string) ($item['image_alt'] ?? $item['alt'] ?? ''));
+                if ($imageAlt === '') {
+                    $imageAlt = trim((string) ($item['title'] ?? '')).($from !== '' && $to !== '' ? " {$from} to {$to}" : '');
+                }
+
                 $deals[] = [
+                    'id' => $itemId !== '' ? $itemId : null,
                     'airline' => trim((string) ($item['airline'] ?? '')),
                     'from' => $from,
                     'to' => $to,
@@ -171,6 +190,13 @@ final class JetpkHomepageSectionData
                     'dur' => trim((string) ($item['dur'] ?? '')),
                     'stops' => (int) ($item['stops'] ?? 0),
                     'price' => (int) ($item['price'] ?? 0),
+                    'title' => trim((string) ($item['title'] ?? '')),
+                    'badge' => trim((string) ($item['badge'] ?? '')),
+                    'description' => trim((string) ($item['description'] ?? $item['text'] ?? '')),
+                    'image' => $image !== '' ? $image : null,
+                    'image_alt' => $imageAlt,
+                    'image_asset_key' => trim((string) ($item['image_asset_key'] ?? '')),
+                    'media_source' => $image !== '' ? 'cms' : 'none',
                 ];
             }
 
@@ -268,6 +294,32 @@ final class JetpkHomepageSectionData
     /**
      * @param  array<string, mixed>  $item
      */
+    private function featuredDealImageUrl(array $item, string $itemId): ?string
+    {
+        $candidates = [];
+
+        $assetKey = trim((string) ($item['image_asset_key'] ?? ''));
+        if ($assetKey !== '') {
+            $candidates[] = $assetKey;
+        }
+
+        if ($itemId !== '') {
+            $candidates[] = JetpkHomepageAssetService::featuredDealAssetKey($itemId);
+        }
+
+        foreach (array_unique($candidates) as $key) {
+            $url = $this->assetUrl($key);
+            if ($url !== null) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
     private function routeImageUrl(array $item, string $routeId): ?string
     {
         $candidates = [];
@@ -294,7 +346,7 @@ final class JetpkHomepageSectionData
     /**
      * @param  array<string, mixed>  $item
      */
-    private function destinationImageUrl(array $item, int $index): string
+    private function destinationCmsImageUrl(array $item, int $index): ?string
     {
         $candidates = [];
 
@@ -318,12 +370,25 @@ final class JetpkHomepageSectionData
             }
         }
 
+        return null;
+    }
+
+    private function destinationFallbackImageUrl(): string
+    {
         $fallback = (string) config('jetpk_homepage.destination_fallback_image', '');
         if ($fallback !== '' && is_file(public_path($fallback))) {
             return PublicMediaUrl::normalize(asset($fallback)) ?? '/'.ltrim($fallback, '/');
         }
 
         return '/themes/frontend/jetpakistan/images/homepage-destination-fallback.svg';
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function destinationImageUrl(array $item, int $index): string
+    {
+        return $this->destinationCmsImageUrl($item, $index) ?? $this->destinationFallbackImageUrl();
     }
 
     /**

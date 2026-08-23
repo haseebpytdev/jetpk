@@ -18,13 +18,13 @@ class ApiConnectionsHubTest extends TestCase
         $this->seed(OtaFoundationSeeder::class);
     }
 
-    public function test_api_settings_index_redirects_to_canonical_api_connections_hub(): void
+    public function test_api_settings_index_redirects_to_integrations_hub(): void
     {
         $admin = $this->platformAdmin();
 
         $this->actingAs($admin)
             ->get('/admin/api-settings')
-            ->assertRedirect('/admin/dashboard/api-connections');
+            ->assertRedirect('/admin/dashboard/integrations');
     }
 
     public function test_json_list_includes_provider_catalog_and_provider_cards(): void
@@ -50,7 +50,7 @@ class ApiConnectionsHubTest extends TestCase
         $this->assertArrayHasKey('label', $cards[0]);
     }
 
-    public function test_admin_navigation_exposes_single_api_connections_entry(): void
+    public function test_admin_navigation_exposes_integrations_not_api_connections(): void
     {
         $admin = $this->platformAdmin();
 
@@ -59,12 +59,13 @@ class ApiConnectionsHubTest extends TestCase
             ->assertOk();
 
         $navigation = collect($response->json('data.navigation'));
-        $apiSettings = $navigation->firstWhere('key', 'api-settings');
-        $this->assertNotNull($apiSettings);
-        $this->assertSame('/api-connections', $apiSettings['href']);
-        $this->assertSame('dashboard', $apiSettings['target']);
+        $this->assertNull($navigation->firstWhere('key', 'api-settings'));
+        $this->assertSame(0, $navigation->where('label', 'API Connections')->count());
 
-        $suppliersNav = $navigation->where('key', 'api-settings')->count();
-        $this->assertSame(1, $suppliersNav);
+        $integrations = $navigation->firstWhere('key', 'integrations');
+        $this->assertNotNull($integrations);
+        $this->assertSame('/integrations', $integrations['href']);
+        $this->assertSame('dashboard', $integrations['target']);
+        $this->assertSame(1, $navigation->where('key', 'integrations')->count());
     }
 }

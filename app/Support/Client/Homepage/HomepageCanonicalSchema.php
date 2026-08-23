@@ -176,9 +176,9 @@ final class HomepageCanonicalSchema
                 self::field('featured_deals.cta_url', 'CTA URL', 'url'),
                 self::field('featured_deals.card_count', 'Card count', 'int', default: 3, validation: 'min:1,max:6'),
                 self::field('featured_deals.items', 'Deal cards', 'repeating', repeating: [
-                    'item_fields' => ['airline', 'from', 'to', 'depart', 'arrive', 'dur', 'stops', 'price', 'enabled', 'sort_order'],
+                    'item_fields' => ['id', 'airline', 'from', 'to', 'depart', 'arrive', 'dur', 'stops', 'price', 'title', 'badge', 'description', 'enabled', 'sort_order', 'image_asset_key', 'image_alt'],
                     'max_items_config' => 'jetpk_homepage.max_featured_deals',
-                ], note: 'Editorial CMS items — no supplier calls on homepage render.'),
+                ], note: 'Editorial CMS items — no supplier calls on homepage render. image_asset_key uses featured_deal_<item-id>.'),
             ],
 
             'routes' => [
@@ -189,9 +189,9 @@ final class HomepageCanonicalSchema
                 self::field('routes.cta_text', 'CTA label', 'string', default: 'Search routes'),
                 self::field('routes.cta_url', 'CTA URL', 'url'),
                 self::field('routes.items', 'Route cards', 'repeating', repeating: [
-                    'item_fields' => ['from', 'to', 'trip_type', 'return_stay_days', 'manual_fallback_price', 'badge', 'enabled', 'dynamic_fare_enabled', 'adults', 'cabin', 'sort_order'],
+                    'item_fields' => ['id', 'from', 'to', 'title', 'trip_type', 'return_stay_days', 'manual_fallback_price', 'badge', 'enabled', 'dynamic_fare_enabled', 'adults', 'cabin', 'sort_order', 'image_asset_key', 'image_alt', 'cta_url'],
                     'max_items_config' => 'jetpk_homepage.max_routes',
-                ], note: 'Reference-quality section (Task 2/3/4) — validated server-side, live fare refresh wired correctly. No changes recommended.'),
+                ], note: 'Reference-quality section — route media uses route_<item-id> asset keys.'),
             ],
 
             'destinations' => [
@@ -202,7 +202,7 @@ final class HomepageCanonicalSchema
                 self::field('destinations.cta_text', 'Section CTA label', 'string', default: 'Explore fares'),
                 self::field('destinations.cta_url', 'Section CTA URL', 'url'),
                 self::field('destinations.items', 'Destination cards', 'repeating', repeating: [
-                    'item_fields' => ['code', 'title', 'country', 'manual_fallback_price', 'link', 'alt', 'enabled', 'sort_order', 'image_asset_key'],
+                    'item_fields' => ['id', 'code', 'title', 'country', 'subtitle', 'manual_fallback_price', 'link', 'alt', 'image_alt', 'enabled', 'sort_order', 'image_asset_key'],
                     'max_items_config' => 'jetpk_homepage.max_destinations',
                     'field_status' => [
                         'badge' => ['status' => 'connected', 'note' => 'Task 9: badge slot added to x-jp.dest-card, matching the sibling group-card component.'],

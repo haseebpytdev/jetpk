@@ -187,11 +187,11 @@ class Phase20BProductUiWiringTest extends TestCase
             ->pluck('label')
             ->all();
 
-        $this->assertContains('Booking operations', $labels);
+        $this->assertContains('Operations', $labels);
         $this->assertContains('Finance', $labels);
-        $this->assertContains('Customers & distribution', $labels);
+        $this->assertContains('Customers', $labels);
         $this->assertContains('Suppliers', $labels);
-        $this->assertContains('Content & website', $labels);
+        $this->assertContains('Website', $labels);
         $this->assertContains('Communications', $labels);
         $this->assertContains('System', $labels);
         $this->assertNotContains('PLANNED', $labels);

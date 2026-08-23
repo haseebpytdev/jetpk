@@ -40,6 +40,13 @@ final class JetpkHomepageAssetService
         return 'route_'.($slug !== '' ? $slug : 'item');
     }
 
+    public static function featuredDealAssetKey(string $itemId): string
+    {
+        $slug = Str::slug($itemId, '_');
+
+        return 'featured_deal_'.($slug !== '' ? $slug : 'item');
+    }
+
     public function storeRouteImage(
         ClientProfile $profile,
         string $itemId,
@@ -69,6 +76,23 @@ final class JetpkHomepageAssetService
             self::destinationAssetKey($itemId),
             $file,
             (string) config('jetpk_homepage.destination_storage_prefix', 'jetpk/homepage/popular-destinations'),
+            $userId,
+            $altText,
+        );
+    }
+
+    public function storeFeaturedDealImage(
+        ClientProfile $profile,
+        string $itemId,
+        UploadedFile $file,
+        ?int $userId = null,
+        ?string $altText = null,
+    ): ClientPageAsset {
+        return $this->storeScopedImage(
+            $profile,
+            self::featuredDealAssetKey($itemId),
+            $file,
+            (string) config('jetpk_homepage.featured_deal_storage_prefix', 'jetpk/homepage/featured-deals'),
             $userId,
             $altText,
         );

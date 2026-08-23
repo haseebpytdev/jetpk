@@ -60,7 +60,7 @@ class BackOfficeSessionContractTest extends TestCase
 
         $groupLabels = collect($groups)->pluck('label')->all();
         $this->assertContains('Overview', $groupLabels);
-        $this->assertContains('Booking operations', $groupLabels);
+        $this->assertContains('Operations', $groupLabels);
 
         $itemLabels = collect($groups)
             ->flatMap(static fn (array $group): array => collect($group['items'] ?? [])->pluck('label')->all())
@@ -70,6 +70,8 @@ class BackOfficeSessionContractTest extends TestCase
         $this->assertNotContains('Markups', $itemLabels);
         $this->assertNotContains('Go-live checklist', $itemLabels);
         $this->assertNotContains('Staff', $itemLabels);
+        $this->assertNotContains('API Connections', $itemLabels);
+        $this->assertNotContains('CMS', $itemLabels);
     }
 
     public function test_admin_session_includes_grouped_navigation(): void
@@ -85,7 +87,16 @@ class BackOfficeSessionContractTest extends TestCase
 
         $groupLabels = collect($groups)->pluck('label')->all();
         $this->assertContains('Finance', $groupLabels);
-        $this->assertContains('Booking operations', $groupLabels);
+        $this->assertContains('Operations', $groupLabels);
+        $this->assertContains('Website', $groupLabels);
+        $this->assertContains('Suppliers', $groupLabels);
+
+        $itemLabels = collect($groups)
+            ->flatMap(static fn (array $group): array => collect($group['items'] ?? [])->pluck('label')->all())
+            ->all();
+        $this->assertContains('Integrations', $itemLabels);
+        $this->assertNotContains('API Connections', $itemLabels);
+        $this->assertNotContains('CMS', $itemLabels);
     }
 
     public function test_customer_is_denied_dashboard_session(): void

@@ -140,8 +140,13 @@ final class HomepagePublicContentPresenter
             'cta_text' => trim((string) $this->homepage->field('featured_deals.cta_text', '')),
             'cta_url' => trim((string) $this->homepage->field('featured_deals.cta_url', '')),
             'items' => array_map(static function (array $item): array {
+                $id = trim((string) ($item['id'] ?? ''));
+                $image = isset($item['image']) && is_string($item['image']) && $item['image'] !== ''
+                    ? $item['image']
+                    : null;
+
                 return [
-                    'id' => md5(($item['from'] ?? '').($item['to'] ?? '').($item['airline'] ?? '')),
+                    'id' => $id !== '' ? $id : md5(($item['from'] ?? '').($item['to'] ?? '').($item['airline'] ?? '')),
                     'airline' => (string) ($item['airline'] ?? ''),
                     'from' => (string) ($item['from'] ?? ''),
                     'to' => (string) ($item['to'] ?? ''),
@@ -153,6 +158,12 @@ final class HomepagePublicContentPresenter
                     'price_label' => ((int) ($item['price'] ?? 0)) > 0
                         ? 'PKR '.number_format((int) $item['price'])
                         : '',
+                    'title' => (string) ($item['title'] ?? ''),
+                    'badge' => (string) ($item['badge'] ?? ''),
+                    'description' => (string) ($item['description'] ?? ''),
+                    'image' => $image,
+                    'image_alt' => (string) ($item['image_alt'] ?? ''),
+                    'media_source' => $image !== null ? 'cms' : 'none',
                 ];
             }, $items),
         ];

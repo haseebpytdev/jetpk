@@ -187,6 +187,8 @@ export function IntegrationsWorkspace() {
           <h1 className="text-2xl font-semibold text-jp-ink">Integrations</h1>
           <p className="mt-1 max-w-2xl text-sm text-jp-muted">
             {hub?.subtitle ?? "Configure, test and monitor every external service connected to JetPakistan."}
+            {" "}
+            Integrations is technical API connectivity (credentials and health); Suppliers is operational supplier management.
           </p>
         </div>
         <button
