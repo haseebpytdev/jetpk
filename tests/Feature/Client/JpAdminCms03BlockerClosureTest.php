@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Client;
 
-use App\Models\ClientPageSetting;
 use App\Enums\ClientPageSettingStatus;
+use App\Models\ClientPageSetting;
 use App\Services\Client\ClientPageContentResolver;
+use App\Services\Client\CmsDraftPreviewToken;
 use App\Services\Homepage\JetpkHomepageContentValidator;
 use App\Support\Client\ClientPageKeys;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -61,7 +62,6 @@ class JpAdminCms03BlockerClosureTest extends TestCase
             ],
         ]);
 
-        // Corrupt draft with editorial/media fields, then publish through validator path.
         $resolver = app(ClientPageContentResolver::class);
         $resolver->saveDraft($profile, ClientPageKeys::HOME, [
             'featured_deals' => [
@@ -127,7 +127,7 @@ class JpAdminCms03BlockerClosureTest extends TestCase
         $this->assertNotEmpty(data_get($normalized, 'featured_deals.items.0.id'));
     }
 
-    public function test_preview_session_json_returns_jp_preview_query_without_publishing(): void
+    public function test_preview_session_json_returns_jp_preview_query_and_token_without_publishing(): void
     {
         $profile = $this->makeJetpkProfile();
         $this->seedPublishedHome($profile, ['hero' => ['headline' => 'Published Only']]);
@@ -145,6 +145,10 @@ class JpAdminCms03BlockerClosureTest extends TestCase
         $url = (string) ($response->json('previewUrl') ?? $response->json('preview_url') ?? '');
         $this->assertNotSame('', $url);
         $this->assertStringContainsString('jp_preview=1', $url);
+        $this->assertStringContainsString('jp_preview_token=', $url);
+        $token = (string) ($response->json('preview_token') ?? '');
+        $this->assertNotSame('', $token);
+        $this->assertTrue(app(CmsDraftPreviewToken::class)->verify($token, ClientPageKeys::HOME));
 
         $published = ClientPageSetting::query()
             ->where('client_profile_id', $profile->id)
@@ -152,5 +156,45 @@ class JpAdminCms03BlockerClosureTest extends TestCase
             ->where('status', ClientPageSettingStatus::Published)
             ->first();
         $this->assertSame('Published Only', data_get($published?->content_json, 'hero.headline'));
+    }
+
+    public function test_signed_preview_token_unlocks_draft_without_admin_session_and_isolates_pages(): void
+    {
+        $profile = $this->makeJetpkProfile();
+        $this->seedPublishedHome($profile, ['hero' => ['headline' => 'Published Home']]);
+        app(ClientPageContentResolver::class)->saveDraft(
+            $profile,
+            ClientPageKeys::HOME,
+            ['hero' => ['headline' => 'Draft Home Marker']],
+            1,
+        );
+
+        $token = app(CmsDraftPreviewToken::class)->mint(ClientPageKeys::HOME, 42);
+
+        $homeWithToken = $this->getJson('/api/public/content/homepage?jp_preview=1&jp_preview_token='.rawurlencode($token));
+        $homeWithToken->assertOk();
+        $draftHeadline = data_get($homeWithToken->json(), 'hero.headline')
+            ?? data_get($homeWithToken->json(), 'content.hero.headline');
+        $this->assertSame('Draft Home Marker', $draftHeadline);
+
+        $public = $this->getJson('/api/public/content/homepage');
+        $public->assertOk();
+        $publishedHeadline = data_get($public->json(), 'hero.headline')
+            ?? data_get($public->json(), 'content.hero.headline');
+        $this->assertSame('Published Home', $publishedHeadline);
+
+        $wrongPage = $this->getJson('/api/public/content/pages/about?jp_preview=1&jp_preview_token='.rawurlencode($token));
+        $wrongPage->assertOk();
+        $this->assertNotSame('draft', (string) data_get($wrongPage->json(), 'source'));
+    }
+
+    public function test_preview_token_rejects_wrong_page_and_tampered_signature(): void
+    {
+        $service = app(CmsDraftPreviewToken::class);
+        $token = $service->mint(ClientPageKeys::HOME, 7);
+        $this->assertTrue($service->verify($token, ClientPageKeys::HOME));
+        $this->assertFalse($service->verify($token, ClientPageKeys::ABOUT));
+        $this->assertFalse($service->verify($token.'x', ClientPageKeys::HOME));
+        $this->assertFalse($service->verify(null, ClientPageKeys::HOME));
     }
 }

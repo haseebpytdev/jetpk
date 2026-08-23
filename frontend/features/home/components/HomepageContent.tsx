@@ -10,10 +10,17 @@ import {
 } from "@/features/public-visual";
 import { cmsPreviewRequestHeaders } from "@/features/public-content/utils/cms-preview";
 
-export async function HomepageContent({ preview = false }: { preview?: boolean }) {
+export async function HomepageContent({
+  preview = false,
+  previewToken = null,
+}: {
+  preview?: boolean;
+  previewToken?: string | null;
+}) {
   const content = await HomepageContentService.getHomepage({
     preview,
-    headers: await cmsPreviewRequestHeaders(preview),
+    previewToken,
+    headers: await cmsPreviewRequestHeaders(preview, previewToken),
   });
 
   return (

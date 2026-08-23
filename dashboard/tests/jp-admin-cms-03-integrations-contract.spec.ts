@@ -57,6 +57,68 @@ test("integrations detail ApiResult unwrap exposes integration for Settings", ()
   expect(result.integration?.code).toBe("abhipay");
 });
 
+test("integrations mutation ApiResult unwrap exposes integration", () => {
+  const result = unwrapLaravelDataForTest({
+    ok: true,
+    status: 200,
+    data: {
+      ok: true,
+      message: "Saved",
+      integration: { code: "sabre", active: true },
+    },
+  });
+
+  expect(result.ok).toBe(true);
+  expect(result.message).toBe("Saved");
+  expect(result.integration?.code).toBe("sabre");
+});
+
+test("integrations activation ApiResult unwrap exposes integration", () => {
+  const result = unwrapLaravelDataForTest({
+    ok: true,
+    status: 200,
+    data: {
+      ok: true,
+      integration: { code: "pia", active: false },
+    },
+  });
+
+  expect(result.ok).toBe(true);
+  expect(result.integration?.active).toBe(false);
+});
+
+test("integrations test-connection ApiResult unwrap exposes result", () => {
+  const result = unwrapLaravelDataForTest({
+    ok: true,
+    status: 200,
+    data: {
+      ok: true,
+      result: { success: true, latency_ms: 12 },
+      integration: { code: "sabre" },
+    },
+  });
+
+  expect(result.ok).toBe(true);
+  expect(result.result?.success).toBe(true);
+  expect(result.integration?.code).toBe("sabre");
+});
+
+test("integrations test-payment ApiResult unwrap exposes result envelope", () => {
+  const result = unwrapLaravelDataForTest({
+    ok: true,
+    status: 200,
+    data: {
+      ok: true,
+      result: { success: false, message: "not configured" },
+      integration: { code: "abhipay" },
+    },
+  });
+
+  expect(result.ok).toBe(true);
+  expect(result.result?.success).toBe(false);
+  expect(result.integration?.code).toBe("abhipay");
+});
+
 test("integrations unwrap preserves failure without inventing hub", () => {
   const result = unwrapLaravelDataForTest({
     ok: false,

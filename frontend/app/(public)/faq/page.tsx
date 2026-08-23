@@ -3,7 +3,11 @@ import Link from "next/link";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMetadata } from "@/features/public-content";
-import { cmsPreviewRequestHeaders, isCmsPreviewFlag } from "@/features/public-content/utils/cms-preview";
+import {
+  cmsPreviewRequestHeaders,
+  isCmsPreviewFlag,
+  readCmsPreviewToken,
+} from "@/features/public-content/utils/cms-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -19,9 +23,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FaqPage({ searchParams }: FaqPageProps) {
   const params = searchParams ? await searchParams : {};
   const preview = isCmsPreviewFlag(params.jp_preview);
+  const previewToken = readCmsPreviewToken(params.jp_preview_token);
   const page = await FaqService.getFaqPage({
     preview,
-    headers: await cmsPreviewRequestHeaders(preview),
+    previewToken,
+    headers: await cmsPreviewRequestHeaders(preview, previewToken),
   });
 
   return (

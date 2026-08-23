@@ -32,6 +32,10 @@ final class ClientPageContentResolver
 
     public function isDraftPreview(string $pageKey): bool
     {
+        if ($this->hasValidPreviewToken($pageKey)) {
+            return true;
+        }
+
         if (! Auth::check() || ! $this->canPreview()) {
             return false;
         }
@@ -42,6 +46,22 @@ final class ClientPageContentResolver
         }
 
         return ($preview['page_key'] ?? '') === $pageKey && ($preview['mode'] ?? '') === 'draft';
+    }
+
+    /**
+     * Accept a short-lived signed preview token from query/header so public Next
+     * SSR can resolve draft without requiring the admin PHP session cookie.
+     */
+    private function hasValidPreviewToken(string $pageKey): bool
+    {
+        $request = request();
+        $token = $request->query('jp_preview_token');
+        if (! is_string($token) || $token === '') {
+            $header = $request->header('X-JP-Preview-Token');
+            $token = is_string($header) ? $header : null;
+        }
+
+        return app(CmsDraftPreviewToken::class)->verify($token, $pageKey);
     }
 
     /**

@@ -42,7 +42,11 @@ function mapContentGrid(content: Record<string, unknown>): ContentCard[] {
 }
 
 export const PublicPageService = {
-  async getAboutPage(options?: { preview?: boolean; headers?: Record<string, string> }): Promise<PublicPage> {
+  async getAboutPage(options?: {
+    preview?: boolean;
+    headers?: Record<string, string>;
+    previewToken?: string | null;
+  }): Promise<PublicPage> {
     const remote = await fetchManagedPage("about", options);
     if (!remote || remote.source === "empty" || !remote.content?.hero) {
       if (allowContentFixtures()) {

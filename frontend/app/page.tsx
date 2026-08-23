@@ -1,7 +1,7 @@
 import { PublicShell } from "@/components/layout/PublicShell";
 import { HomepageContent } from "@/features/home";
 import { PublicConfigService } from "@/features/public-content/services/public-config-service";
-import { isCmsPreviewFlag } from "@/features/public-content/utils/cms-preview";
+import { isCmsPreviewFlag, readCmsPreviewToken } from "@/features/public-content/utils/cms-preview";
 import { getPublicSession } from "@/services/session";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,7 @@ type HomePageProps = {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = searchParams ? await searchParams : {};
   const preview = isCmsPreviewFlag(params.jp_preview);
+  const previewToken = readCmsPreviewToken(params.jp_preview_token);
   const session = await getPublicSession();
   const config = await PublicConfigService.getConfig();
 
@@ -29,7 +30,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           : null
       }
     >
-      <HomepageContent preview={preview} />
+      <HomepageContent preview={preview} previewToken={previewToken} />
     </PublicShell>
   );
 }

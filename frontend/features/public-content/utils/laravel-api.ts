@@ -51,10 +51,20 @@ export async function ensureLaravelCsrfToken(): Promise<string | null> {
 
 export async function fetchManagedPage(
   pageKey: string,
-  options?: { preview?: boolean; headers?: Record<string, string> },
+  options?: { preview?: boolean; headers?: Record<string, string>; previewToken?: string | null },
 ): Promise<LaravelManagedPageResponse | null> {
   try {
-    const response = await fetchWithTimeout(laravelApiPath(`/api/public/content/pages/${pageKey}`), {
+    const params = new URLSearchParams();
+    if (options?.preview) {
+      params.set("jp_preview", "1");
+    }
+    const token = options?.previewToken?.trim();
+    if (token) {
+      params.set("jp_preview_token", token);
+    }
+    const query = params.toString();
+    const path = `/api/public/content/pages/${pageKey}${query ? `?${query}` : ""}`;
+    const response = await fetchWithTimeout(laravelApiPath(path), {
       headers: {
         Accept: "application/json",
         ...(options?.headers ?? {}),

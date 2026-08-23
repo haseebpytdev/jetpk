@@ -384,13 +384,18 @@ class ClientPageSettingsController extends Controller
         $route = ClientPageKeys::previewRoutes()[$pageKey] ?? 'home';
         $previewUrl = client_route($route);
         $separator = str_contains($previewUrl, '?') ? '&' : '?';
-        $previewUrl .= $separator.'jp_preview=1';
+        $previewToken = app(\App\Services\Client\CmsDraftPreviewToken::class)->mint(
+            $pageKey,
+            (int) $request->user()->id,
+        );
+        $previewUrl .= $separator.'jp_preview=1&jp_preview_token='.rawurlencode($previewToken);
 
         if ($this->wantsBackOfficeJson($request)) {
             return $this->backOfficeJson([
                 'ok' => true,
                 'previewUrl' => $previewUrl,
                 'preview_url' => $previewUrl,
+                'preview_token' => $previewToken,
                 'message' => 'Draft preview session started.',
             ]);
         }

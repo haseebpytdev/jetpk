@@ -342,9 +342,24 @@ export const HomepageContentService = {
   heroFallbackImage: HERO_FALLBACK_IMAGE,
   heroFallbackAlt: HERO_FALLBACK_ALT,
 
-  async getHomepage(options?: { preview?: boolean; headers?: Record<string, string> }): Promise<HomepageContent> {
+  async getHomepage(options?: {
+    preview?: boolean;
+    headers?: Record<string, string>;
+    previewToken?: string | null;
+  }): Promise<HomepageContent> {
     try {
-      const response = await fetchWithTimeout(resolveHomepageApiUrl(), {
+      const params = new URLSearchParams();
+      if (options?.preview) {
+        params.set("jp_preview", "1");
+      }
+      const token = options?.previewToken?.trim();
+      if (token) {
+        params.set("jp_preview_token", token);
+      }
+      const query = params.toString();
+      const url = `${resolveHomepageApiUrl()}${query ? `?${query}` : ""}`;
+
+      const response = await fetchWithTimeout(url, {
         headers: {
           Accept: "application/json",
           ...(options?.headers ?? {}),
