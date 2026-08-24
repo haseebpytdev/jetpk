@@ -63,13 +63,22 @@ Cabin facet isolation; branded fare selection on OW/outbound/return/pair cards; 
 ## Tests executed
 | Gate | Result |
 | --- | --- |
-| Laravel CommerceCheckoutSettingsTest + ReturnSplitSelectFlowTest | **23 passed / 88 assertions** |
+| Laravel CommerceCheckoutSettingsTest | **18 passed / 75 assertions** (save/reload/restore, AuditLog, RBAC, residue 0) |
+| Laravel ReturnSplitSelectFlowTest | **9 passed / 48 assertions** |
 | Frontend cabin-filter node test | **3 passed** |
 | Frontend typecheck | **PASS** |
 | Frontend Playwright jp-bo-04g-commerce-matrix | **4 passed** |
 | Frontend production build | **PASS** |
 | Dashboard typecheck | **PASS** |
-| Dashboard production build | **PASS** |
+| Dashboard gate UI Playwright (`playwright.jp-bo-04g-gates.config.ts`) | **1 passed** (live Dashboard build; toggle save/reload/restore) |
+| Dashboard production build (`NEXT_PUBLIC_DASHBOARD_MODE=live`) | **PASS** |
+
+### Dashboard gate UI proof
+- Path: Admin → Settings → Booking & checkout (`/admin/dashboard/settings/booking-checkout`)
+- Controls: `guest-booking-enabled-toggle`, `card-payment-enabled-toggle`, `booking-checkout-save`
+- Browser: live Dashboard UI exercises toggle → Save → API success → reload persistence → restore baseline
+- Authoritative persistence / AuditLog / non-admin RBAC: Laravel `CommerceCheckoutSettingsTest` (not browser-only mocks as sole proof)
+- Flags: `DASHBOARD_GUEST_GATE_UI_TEST=PASS`, `DASHBOARD_CARD_GATE_UI_TEST=PASS`, `DASHBOARD_GATE_SAVE_RELOAD=PASS`, `DASHBOARD_GATE_RBAC=PASS`, `DASHBOARD_GATE_AUDIT=PASS`, `DASHBOARD_GATE_TEST_RESIDUE=0`
 
 ## Screenshots
 `frontend/tmp/jp-bo-04g/playwright/` and `tmp/jp-bo-04g/playwright/`:
@@ -81,11 +90,28 @@ Cabin facet isolation; branded fare selection on OW/outbound/return/pair cards; 
 Remaining matrix shots (review/guest/card) covered by PHPUnit gate matrix; full browser matrix completion deferred to Stage-B live proof with Laravel fixtures.
 
 ## Performance evidence
-`tmp/jp-bo-04g/jp-bo-04g-performance.json` (fixture/fake-supplier app timings; supplier separated).
+`tmp/jp-bo-04g/jp-bo-04g-performance.json` — Stage-A/04G harness uses **deterministic/fake supplier** responses.
+
+Classification (do not treat `SUPPLIER_FIRST_RESPONSE_P95_MS=0` as live Sabre latency):
+
+| Flag | Value |
+| --- | --- |
+| `LOCAL_APP_PERFORMANCE` | **PASS** (application-controlled timings meet targets) |
+| `LOCAL_SUPPLIER_LATENCY_MEASUREMENT` | **SYNTHETIC_NOT_LIVE** |
+| `LIVE_SUPPLIER_PERFORMANCE` | **PENDING_STAGE_B** |
+
+## Migration safety
+- File: `database/migrations/2026_08_24_120000_create_commerce_checkout_settings_table.php`
+- `MIGRATION_ADDITIVE_ONLY=YES` (create table only)
+- `MIGRATION_DESTRUCTIVE_OPERATIONS=0`
+- `MIGRATION_ROLLBACK_DEFINED=YES` (`down()` drops table)
+- Production defaults preserve current operational behavior:
+  - `GUEST_GATE_PRODUCTION_DEFAULT=ON` (`guest_booking_enabled` default `true`; service firstOrCreate also seeds both ON)
+  - `CARD_GATE_PRODUCTION_DEFAULT=ON` (`card_payment_enabled` default `true`; AbhiPay still must be active for card UX, but the gate itself defaults ON so existing card flow is not silently disabled)
 
 ## Known limitations
-- Full 14-shot browser matrix not fully captured in this pass (4 primary commerce shots + PHPUnit gate matrix).
-- Live supplier latency not measured (SUPPLIER_LATENCY_BLOCKED=NO for fixtures).
+- Full 14-shot browser matrix not fully captured in this pass (4 primary commerce shots + PHPUnit gate matrix + Dashboard gate UI proof).
+- Live supplier latency not measured — synthetic harness only (`LOCAL_SUPPLIER_LATENCY_MEASUREMENT=SYNTHETIC_NOT_LIVE`).
 - Stage B live proof not run.
 
 ## Risks
@@ -99,8 +125,11 @@ Combined BO-04 + 04G deploy surface is large; requires owner/ChatGPT SHA review 
 | --- | --- |
 | Prior FINAL_ENGINEERING_SHA (superseded) | `ec9f0ba257a4ef96149bd8474627beec2e2d5a4d` |
 | **FINAL_ENGINEERING_SHA (JP-BO-04G)** | `d3dd484cd65f1a2a372fe6d4cb574316b69efa4e` |
+| Prior docs SHA | `6af6b66a7c7cef2d70bc6c941cd139460414a5e5` |
+| **FINAL_DOCS_SHA** | Docs-only tip of `phase/jp-bo-04` after remote review-gate update (performance classification + Dashboard gate UI proof). |
 
 ## Final status
 `SOURCE_GREEN=YES` for engineering gates run in this phase.  
 `OWNER_RETEST_V3_STATE=BLOCKED_PENDING_JP_BO04G_STAGE_B_LIVE_PROOF`  
-**DO NOT DEPLOY** until owner/ChatGPT independently verifies `FINAL_ENGINEERING_SHA`.
+**DO NOT DEPLOY** until owner/ChatGPT independently verifies `FINAL_ENGINEERING_SHA`.  
+**DO NOT** treat synthetic `SUPPLIER_FIRST_RESPONSE_P95_MS=0` as live supplier latency.

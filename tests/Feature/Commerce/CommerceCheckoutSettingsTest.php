@@ -151,6 +151,155 @@ class CommerceCheckoutSettingsTest extends TestCase
         );
     }
 
+    public function test_admin_can_read_booking_checkout_settings_json(): void
+    {
+        $this->setGates(true, false);
+        $admin = $this->platformAdmin();
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.settings.booking-checkout.show', ['format' => 'json']))
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('settings.guest_booking_enabled', true)
+            ->assertJsonPath('settings.card_payment_enabled', false);
+    }
+
+    public function test_guest_gate_toggle_save_reload_restore_leaves_zero_residue(): void
+    {
+        $admin = $this->platformAdmin();
+        $baselineGuest = true;
+        $baselineCard = true;
+        $this->setGates($baselineGuest, $baselineCard);
+        AuditLog::query()->delete();
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.settings.booking-checkout.show', ['format' => 'json']))
+            ->assertOk()
+            ->assertJsonPath('settings.guest_booking_enabled', $baselineGuest);
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.settings.booking-checkout.update'), [
+                'guest_booking_enabled' => false,
+                'card_payment_enabled' => $baselineCard,
+            ])
+            ->assertOk()
+            ->assertJsonPath('settings.guest_booking_enabled', false);
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.settings.booking-checkout.show', ['format' => 'json']))
+            ->assertOk()
+            ->assertJsonPath('settings.guest_booking_enabled', false)
+            ->assertJsonPath('settings.card_payment_enabled', $baselineCard);
+
+        $this->assertTrue(
+            AuditLog::query()->where('action', 'commerce_checkout.settings_updated')->exists()
+        );
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.settings.booking-checkout.update'), [
+                'guest_booking_enabled' => $baselineGuest,
+                'card_payment_enabled' => $baselineCard,
+            ])
+            ->assertOk()
+            ->assertJsonPath('settings.guest_booking_enabled', $baselineGuest);
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.settings.booking-checkout.show', ['format' => 'json']))
+            ->assertOk()
+            ->assertJsonPath('settings.guest_booking_enabled', $baselineGuest)
+            ->assertJsonPath('settings.card_payment_enabled', $baselineCard);
+
+        $this->assertDatabaseHas('commerce_checkout_settings', [
+            'agency_id' => $this->agency->id,
+            'guest_booking_enabled' => 1,
+            'card_payment_enabled' => 1,
+        ]);
+    }
+
+    public function test_card_gate_toggle_save_reload_restore_leaves_zero_residue(): void
+    {
+        $admin = $this->platformAdmin();
+        $baselineGuest = true;
+        $baselineCard = true;
+        $this->setGates($baselineGuest, $baselineCard);
+        AuditLog::query()->delete();
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.settings.booking-checkout.show', ['format' => 'json']))
+            ->assertOk()
+            ->assertJsonPath('settings.card_payment_enabled', $baselineCard);
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.settings.booking-checkout.update'), [
+                'guest_booking_enabled' => $baselineGuest,
+                'card_payment_enabled' => false,
+            ])
+            ->assertOk()
+            ->assertJsonPath('settings.card_payment_enabled', false);
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.settings.booking-checkout.show', ['format' => 'json']))
+            ->assertOk()
+            ->assertJsonPath('settings.card_payment_enabled', false)
+            ->assertJsonPath('settings.guest_booking_enabled', $baselineGuest);
+
+        $this->assertTrue(
+            AuditLog::query()->where('action', 'commerce_checkout.settings_updated')->exists()
+        );
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.settings.booking-checkout.update'), [
+                'guest_booking_enabled' => $baselineGuest,
+                'card_payment_enabled' => $baselineCard,
+            ])
+            ->assertOk()
+            ->assertJsonPath('settings.card_payment_enabled', $baselineCard);
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.settings.booking-checkout.show', ['format' => 'json']))
+            ->assertOk()
+            ->assertJsonPath('settings.card_payment_enabled', $baselineCard)
+            ->assertJsonPath('settings.guest_booking_enabled', $baselineGuest);
+
+        $this->assertDatabaseHas('commerce_checkout_settings', [
+            'agency_id' => $this->agency->id,
+            'guest_booking_enabled' => 1,
+            'card_payment_enabled' => 1,
+        ]);
+    }
+
+    public function test_non_admin_roles_cannot_mutate_booking_checkout_settings(): void
+    {
+        $this->setGates(true, true);
+
+        $staff = User::factory()->create([
+            'account_type' => AccountType::Staff,
+            'current_agency_id' => $this->agency->id,
+            'email_verified_at' => now(),
+        ]);
+        $customer = $this->customer();
+
+        $this->actingAs($staff)
+            ->patchJson(route('admin.settings.booking-checkout.update'), [
+                'guest_booking_enabled' => false,
+                'card_payment_enabled' => false,
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($customer)
+            ->patchJson(route('admin.settings.booking-checkout.update'), [
+                'guest_booking_enabled' => false,
+                'card_payment_enabled' => false,
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('commerce_checkout_settings', [
+            'agency_id' => $this->agency->id,
+            'guest_booking_enabled' => 1,
+            'card_payment_enabled' => 1,
+        ]);
+    }
+
     public function test_guest_booking_disabled_blocks_unauthenticated_passengers_json(): void
     {
         $this->setGates(false, true);
