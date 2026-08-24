@@ -112,6 +112,88 @@ class SupplierConnectionJsonManagementTest extends TestCase
         $this->assertSame('v2', $apiVersion['default'] ?? null);
     }
 
+    public function test_inactive_supplier_connection_can_persist_without_credentials(): void
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $admin = $this->platformAdmin();
+
+        $create = $this->actingAs($admin)->postJson('/admin/api-settings?format=json', [
+            'provider' => SupplierProvider::Sabre->value,
+            'name' => 'Wizard shell Sabre A',
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'credentials' => [],
+            'sabre_gds_enabled' => true,
+            'sabre_ndc_enabled' => false,
+        ]);
+
+        $create->assertOk()->assertJsonPath('ok', true);
+        $create->assertJsonPath('connection.provider', 'sabre');
+        $create->assertJsonPath('connection.enabled', false);
+        $create->assertJsonPath('connection.sabreGdsEnabled', true);
+        $create->assertJsonPath('connection.sabreNdcEnabled', false);
+        $this->assertFalse((bool) $create->json('connection.credentialsConfigured'));
+    }
+
+    public function test_two_sabre_connections_are_independent_with_channel_toggles(): void
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $admin = $this->platformAdmin();
+
+        $a = $this->actingAs($admin)->postJson('/admin/api-settings?format=json', [
+            'provider' => SupplierProvider::Sabre->value,
+            'name' => 'Sabre CERT GDS',
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'credentials' => [],
+            'sabre_gds_enabled' => true,
+            'sabre_ndc_enabled' => false,
+        ])->assertOk();
+
+        $b = $this->actingAs($admin)->postJson('/admin/api-settings?format=json', [
+            'provider' => SupplierProvider::Sabre->value,
+            'name' => 'Sabre CERT NDC',
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'credentials' => [],
+            'sabre_gds_enabled' => false,
+            'sabre_ndc_enabled' => true,
+        ])->assertOk();
+
+        $idA = (string) $a->json('connection.id');
+        $idB = (string) $b->json('connection.id');
+        $this->assertNotSame($idA, $idB);
+
+        $this->actingAs($admin)->patchJson('/admin/api-settings/'.$idA.'?format=json', [
+            'provider' => SupplierProvider::Sabre->value,
+            'name' => 'Sabre CERT GDS',
+            'environment' => SupplierEnvironment::Sandbox->value,
+            'status' => SupplierConnectionStatus::Inactive->value,
+            'sabre_gds_enabled' => true,
+            'sabre_ndc_enabled' => true,
+        ])->assertOk()->assertJsonPath('connection.sabreNdcEnabled', true);
+
+        $listed = $this->actingAs($admin)->getJson('/admin/api-settings?format=json')->assertOk();
+        $rows = collect($listed->json('connections') ?? $listed->json('data.connections'))
+            ->where('provider', 'sabre')
+            ->values();
+        $this->assertGreaterThanOrEqual(2, $rows->count());
+
+        $rowA = $rows->firstWhere('id', $idA);
+        $rowB = $rows->firstWhere('id', $idB);
+        $this->assertTrue((bool) ($rowA['sabreGdsEnabled'] ?? false));
+        $this->assertTrue((bool) ($rowA['sabreNdcEnabled'] ?? false));
+        $this->assertFalse((bool) ($rowB['sabreGdsEnabled'] ?? true));
+        $this->assertTrue((bool) ($rowB['sabreNdcEnabled'] ?? false));
+
+        $hub = $this->actingAs($admin)->getJson('/admin/integrations?format=json&category=flights')->assertOk();
+        $sabre = collect($hub->json('hub.integrations') ?? [])
+            ->firstWhere('code', 'sabre');
+        $this->assertNotNull($sabre);
+        $this->assertGreaterThanOrEqual(2, (int) ($sabre['summary']['connection_count'] ?? 0));
+        $this->assertTrue((bool) ($sabre['summary']['supports_multiple_connections'] ?? false));
+    }
+
     protected function platformAdmin(): User
     {
         $this->seed(OtaFoundationSeeder::class);

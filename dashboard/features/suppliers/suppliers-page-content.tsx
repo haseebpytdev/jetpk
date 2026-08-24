@@ -68,12 +68,12 @@ export async function SuppliersPageContent({ searchParams }: Props) {
             />
           }
           title="Suppliers"
-          description="Business vendor records grouped from connected providers. Configure technical channels on API Connections."
+          description="Business vendor records grouped from connected providers. Configure technical channels on Integrations."
         />
         <DataSourceNoticeSlot />
         <p className="text-sm">
-          <Link className="font-medium text-jp-accent-muted hover:underline" href="/api-connections">
-            View / configure API connections
+          <Link className="font-medium text-jp-accent-muted hover:underline" href="/integrations">
+            View / configure Integrations
           </Link>
         </p>
         <SuppliersWorkspace query={query} result={result} selectedSupplier={selectedSupplier} />

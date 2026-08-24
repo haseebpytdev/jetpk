@@ -15,6 +15,7 @@ export type IntegrationCard = {
   supportsEnableToggle?: boolean;
   canActivateRuntime?: boolean;
   docsUrl?: string | null;
+  manager?: string;
   summary?: Record<string, unknown>;
   needs_attention?: boolean;
 };

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-export const metadata = { title: "API Connections — JetPakistan Dashboard" };
+export const metadata = { title: "Integrations — JetPakistan Dashboard" };
 
 /**
  * Legacy bookmark: /admin/dashboard/api-connections

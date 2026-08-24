@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import {
   activateIntegration,
+  createApiConnection,
   deactivateIntegration,
   listIntegrations,
   showIntegration,
@@ -17,6 +18,7 @@ import {
   buildIntegrationsFixture,
 } from "@/features/integrations/integrations-fixtures";
 import type { HubPayload, IntegrationCard } from "@/features/integrations/integrations-types";
+import { ApiConnectionsWorkspace } from "@/features/settings/components/api-connections-workspace";
 
 const STATUS_STYLES: Record<string, string> = {
   connected: "bg-emerald-50 text-emerald-800 border-emerald-200",
@@ -59,6 +61,8 @@ export function IntegrationsWorkspace() {
   const [wizardStep, setWizardStep] = useState(1);
   const [wizardCategory, setWizardCategory] = useState("flights");
   const [wizardProvider, setWizardProvider] = useState("");
+  const [wizardBusy, setWizardBusy] = useState(false);
+  const [openCreatePanel, setOpenCreatePanel] = useState(false);
   const [testPaymentConfirm, setTestPaymentConfirm] = useState(false);
 
   const applyDetail = useCallback((integration: Record<string, unknown>) => {
@@ -177,8 +181,66 @@ export function IntegrationsWorkspace() {
   const summary = (detail?.summary as Record<string, unknown> | undefined) ?? {};
   const health = (detail?.health as { history?: Array<Record<string, unknown>>; status?: string } | undefined) ?? {};
   const isAbhiPay = selected === "abhipay";
+  const managerKind = String(
+    (detail?.manager as string | undefined)
+      ?? selectedCard?.manager
+      ?? (isAbhiPay ? "abhipay" : ""),
+  );
+  const isSupplierProvider = managerKind === "supplier";
   const envIsLive = String(summary.environment ?? form.environment ?? "") === "live";
   const secretConfigured = Boolean(summary.merchant_secret_configured);
+  const connectionCount = Number(summary.connection_count ?? 0);
+
+  async function finishAddIntegrationWizard() {
+    if (!wizardProvider || wizardProvider === "custom_api") {
+      setFlash("Custom API registered as draft shell only — runtime activation blocked.");
+      setWizardOpen(false);
+      return;
+    }
+
+    const providerMeta = (hub?.wizard?.providers ?? []).find((p) => p.code === wizardProvider);
+    const isSupplierBacked = providerMeta?.manager === "supplier";
+
+    if (!isSupplierBacked || wizardProvider === "abhipay") {
+      setSelected(wizardProvider);
+      setWizardOpen(false);
+      return;
+    }
+
+    if (!live) {
+      setFlash(`Add Integration preview: would create inactive ${wizardProvider} SupplierConnection.`);
+      setSelected(wizardProvider);
+      setOpenCreatePanel(true);
+      setWizardOpen(false);
+      return;
+    }
+
+    setWizardBusy(true);
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const result = await createApiConnection({
+      provider: wizardProvider,
+      name: `${providerMeta?.name ?? wizardProvider} · ${stamp}`,
+      environment: "sandbox",
+      status: "inactive",
+      credentials: {},
+      ...(wizardProvider === "sabre"
+        ? { sabre_gds_enabled: true, sabre_ndc_enabled: false }
+        : {}),
+    });
+    setWizardBusy(false);
+
+    if (!result.ok) {
+      setFlash(result.message || "Could not persist SupplierConnection.");
+      return;
+    }
+
+    setFlash("SupplierConnection created (inactive). Add credentials and enable when ready.");
+    setSelected(wizardProvider);
+    setDetailTab("configuration");
+    setOpenCreatePanel(false);
+    setWizardOpen(false);
+    await loadHub();
+  }
 
   return (
     <div className="space-y-6" data-testid="integrations-hub">
@@ -257,6 +319,11 @@ export function IntegrationsWorkspace() {
               <div className="mt-3 space-y-1 text-xs text-jp-muted">
                 {card.environment ? <div>Environment: <span className="text-jp-ink">{String(card.environment).toUpperCase()}</span></div> : null}
                 <div>Configured: {card.configured ? "Yes" : "No"}</div>
+                {typeof card.summary?.connection_count === "number" ? (
+                  <div data-testid={`integration-connection-count-${card.code}`}>
+                    Connections: {String(card.summary.connection_count)}
+                  </div>
+                ) : null}
                 {!card.adapterInstalled ? <div className="text-amber-700">Runtime adapter not installed</div> : null}
               </div>
 
@@ -319,6 +386,7 @@ export function IntegrationsWorkspace() {
               ))}
             </div>
 
+            <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex-1 overflow-y-auto px-5 py-4 text-sm">
               {detailTab === "overview" ? (
                 <dl className="space-y-2">
@@ -335,25 +403,14 @@ export function IntegrationsWorkspace() {
               ) : null}
 
               {detailTab === "configuration" && isAbhiPay ? (
-                <form
-                  className="space-y-3"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void runAction("Save settings", async () => {
-                      const payload: Record<string, unknown> = {
-                        environment: form.environment,
-                        is_active: Boolean(form.is_active),
-                        base_url: form.base_url,
-                        success_url: form.success_url || undefined,
-                        cancel_url: form.cancel_url || undefined,
-                        decline_url: form.decline_url || undefined,
-                      };
-                      if (form.merchant_id) payload.merchant_id = form.merchant_id;
-                      if (replaceSecret && form.merchant_secret_key) payload.merchant_secret_key = form.merchant_secret_key;
-                      return updateIntegration("abhipay", payload);
-                    });
-                  }}
-                >
+                <div className="space-y-3" data-testid="abhipay-config-form">
+                  <div className="rounded-lg border border-jp-border bg-slate-50 p-3 text-xs text-jp-muted">
+                    <div>Configured: {secretConfigured || Boolean(summary.merchant_id_masked) ? "Yes" : "No"}</div>
+                    <div>Environment: {String(form.environment || summary.environment || "—")}</div>
+                    <div>Active: {Boolean(form.is_active) ? "Yes" : "No"}</div>
+                    <div>Last changed: {String(summary.updated_at ?? summary.last_changed_at ?? "—")}</div>
+                    <div>Secret: {secretConfigured ? "•••••••••• (masked)" : "Not set"}</div>
+                  </div>
                   <label className="block text-xs">Environment
                     <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1.5" value={String(form.environment)} onChange={(e) => setForm((f) => ({ ...f, environment: e.target.value }))}>
                       <option value="test">Test</option>
@@ -374,8 +431,8 @@ export function IntegrationsWorkspace() {
                     <div className="text-xs font-medium">Merchant Secret Key</div>
                     {secretConfigured && !replaceSecret ? (
                       <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className="text-sm tracking-widest text-jp-muted">•••••••••• configured</span>
-                        <button type="button" className="text-xs text-jp-green" onClick={() => setReplaceSecret(true)}>Replace</button>
+                        <span className="text-sm tracking-widest text-jp-muted">•••••••••• configured — blank edit keeps existing</span>
+                        <button type="button" className="text-xs text-jp-green" onClick={() => setReplaceSecret(true)}>Replace Secret</button>
                       </div>
                     ) : (
                       <input
@@ -389,23 +446,40 @@ export function IntegrationsWorkspace() {
                     )}
                   </div>
                   <div className="text-xs text-jp-muted">Callback URL (read-only): {String(summary.callback_url ?? "")}</div>
-                  <button type="submit" disabled={!permissions.manage || busy !== null} className="rounded-lg bg-jp-green px-3 py-2 text-xs font-medium text-white disabled:opacity-50">
-                    Save settings
-                  </button>
-                </form>
+                </div>
               ) : null}
 
               {detailTab === "configuration" && !isAbhiPay ? (
-                <div className="space-y-3 text-sm text-jp-muted">
-                  <p>Supplier credentials remain encrypted in Supplier Connections.</p>
-                  <a className="inline-flex rounded-lg border border-jp-border px-3 py-2 text-xs text-jp-ink" href="/admin/dashboard/integrations">
-                    Open Integrations
-                  </a>
-                  {!detail.canActivateRuntime ? (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900" data-testid="custom-api-adapter-block">
-                      Runtime activation is blocked until an approved JetPakistan adapter exists for this provider.
-                    </div>
-                  ) : null}
+                <div className="space-y-3" data-testid="supplier-connections-config">
+                  {isSupplierProvider ? (
+                    <>
+                      <p className="text-xs text-jp-muted">
+                        {connectionCount > 0
+                          ? `${connectionCount} SupplierConnection${connectionCount === 1 ? "" : "s"} for this provider.`
+                          : "No SupplierConnection yet — add one below or use Add Integration."}
+                      </p>
+                      <ApiConnectionsWorkspace
+                        key={selected ?? "supplier"}
+                        providerFilter={selected ?? undefined}
+                        embedded
+                        initialShowCreate={openCreatePanel}
+                        onChanged={() => {
+                          void loadHub();
+                          if (selected) void loadDetail(selected);
+                          setOpenCreatePanel(false);
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-jp-muted">This provider does not use SupplierConnection rows.</p>
+                      {!detail.canActivateRuntime ? (
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900" data-testid="custom-api-adapter-block">
+                          Runtime activation is blocked until an approved JetPakistan adapter exists for this provider.
+                        </div>
+                      ) : null}
+                    </>
+                  )}
                 </div>
               ) : null}
 
@@ -454,6 +528,59 @@ export function IntegrationsWorkspace() {
                   )}
                 </div>
               ) : null}
+            </div>
+
+            {detailTab === "configuration" && isAbhiPay ? (
+              <div className="flex shrink-0 items-center justify-between gap-3 border-t border-jp-border bg-white px-5 py-3" data-testid="abhipay-save-action-bar">
+                <button
+                  type="button"
+                  className="rounded-lg border border-jp-border px-3 py-2 text-xs"
+                  disabled={busy !== null}
+                  onClick={() => {
+                    if (detail) applyDetail(detail);
+                  }}
+                >
+                  Cancel / Revert
+                </button>
+                <div className="flex flex-col items-end gap-1">
+                  {!permissions.manage ? (
+                    <span className="text-[11px] text-amber-700">No permission</span>
+                  ) : busy === "Save Configuration" ? (
+                    <span className="text-[11px] text-jp-muted">Saving…</span>
+                  ) : null}
+                  <button
+                    type="button"
+                    data-testid="abhipay-save-configuration"
+                    disabled={!permissions.manage || busy !== null}
+                    className="rounded-lg bg-jp-green px-3 py-2 text-xs font-medium text-white disabled:opacity-50"
+                    onClick={() => {
+                      void runAction("Save Configuration", async () => {
+                        const payload: Record<string, unknown> = {
+                          environment: form.environment,
+                          is_active: Boolean(form.is_active),
+                          base_url: form.base_url,
+                          success_url: form.success_url || undefined,
+                          cancel_url: form.cancel_url || undefined,
+                          decline_url: form.decline_url || undefined,
+                        };
+                        if (form.merchant_id) payload.merchant_id = form.merchant_id;
+                        if (replaceSecret && form.merchant_secret_key) payload.merchant_secret_key = form.merchant_secret_key;
+                        const result = await updateIntegration("abhipay", payload);
+                        if (result.ok && selected) {
+                          const refreshed = await showIntegration(selected);
+                          if (refreshed.ok && refreshed.integration) {
+                            applyDetail(refreshed.integration as Record<string, unknown>);
+                          }
+                        }
+                        return result;
+                      });
+                    }}
+                  >
+                    Save Configuration
+                  </button>
+                </div>
+              </div>
+            ) : null}
             </div>
           </div>
         </div>
@@ -530,25 +657,20 @@ export function IntegrationsWorkspace() {
               </div>
             ) : null}
             <div className="mt-5 flex justify-between">
-              <button type="button" className="rounded-md border border-jp-border px-3 py-1.5 text-xs" disabled={wizardStep === 1} onClick={() => setWizardStep((s) => Math.max(1, s - 1))}>Back</button>
+              <button type="button" className="rounded-md border border-jp-border px-3 py-1.5 text-xs" disabled={wizardStep === 1 || wizardBusy} onClick={() => setWizardStep((s) => Math.max(1, s - 1))}>Back</button>
               <button
                 type="button"
-                className="rounded-md bg-jp-green px-3 py-1.5 text-xs text-white"
+                className="rounded-md bg-jp-green px-3 py-1.5 text-xs text-white disabled:opacity-50"
+                disabled={wizardBusy || (wizardStep === 2 && !wizardProvider)}
                 onClick={() => {
                   if (wizardStep < 7) {
                     setWizardStep((s) => s + 1);
                     return;
                   }
-                  if (wizardProvider && wizardProvider !== "custom_api") {
-                    setSelected(wizardProvider);
-                    setWizardOpen(false);
-                  } else {
-                    setFlash("Custom API registered as draft shell only — runtime activation blocked.");
-                    setWizardOpen(false);
-                  }
+                  void finishAddIntegrationWizard();
                 }}
               >
-                {wizardStep === 7 ? "Finish" : "Next"}
+                {wizardStep === 7 ? (wizardBusy ? "Saving…" : "Finish") : "Next"}
               </button>
             </div>
           </div>

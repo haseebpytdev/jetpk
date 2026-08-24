@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\SupplierConnectionStatus;
 use App\Enums\SupplierProvider;
 use App\Support\Suppliers\AlHaiderSupplierConnectionNormalizer;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
@@ -39,6 +40,12 @@ class UpdateSupplierConnectionRequest extends StoreSupplierConnectionRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
+            $status = (string) ($this->input('status')
+                ?: ($this->route('supplierConnection')?->status?->value ?? ''));
+            if ($status === SupplierConnectionStatus::Inactive->value) {
+                return;
+            }
+
             $provider = (string) $this->input('provider');
             $providerFields = (array) config('supplier_credentials.providers.'.$provider.'.fields', []);
             $credentials = $this->input('credentials', []);

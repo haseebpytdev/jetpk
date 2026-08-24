@@ -12,6 +12,7 @@ export type ApiConnectionRow = {
   registryLabel?: string | null;
   channel?: string;
   sabreGdsSupported?: boolean | null;
+  sabreGdsEnabled?: boolean | null;
   sabreNdcSupported?: boolean | null;
   sabreNdcEnabled?: boolean | null;
 };

@@ -59,6 +59,7 @@ type WorkspaceConnectionRow = ApiConnectionRow & {
   lastTestStatus?: string | null;
   lastFailure?: string | null;
   sabreGdsSupported?: boolean | null;
+  sabreGdsEnabled?: boolean | null;
   sabreNdcSupported?: boolean | null;
   sabreNdcEnabled?: boolean | null;
   registryLabel?: string | null;
@@ -81,6 +82,16 @@ type WorkspaceConnectionRow = ApiConnectionRow & {
     baseUrlOverridable?: boolean;
     readOnly?: Array<{ key: string; label: string; value: string }>;
   };
+};
+
+export type ApiConnectionsWorkspaceProps = {
+  /** When set, only show/create connections for this provider (Integrations detail). */
+  providerFilter?: string;
+  /** Compact embedded layout inside Integrations drawer. */
+  embedded?: boolean;
+  /** Open create panel on mount (e.g. after Add Integration). */
+  initialShowCreate?: boolean;
+  onChanged?: () => void;
 };
 
 function currentChannel(credentials: Record<string, string>, row?: WorkspaceConnectionRow): string {
@@ -149,12 +160,17 @@ function extractConnections(result: { ok: boolean; data?: unknown }): WorkspaceC
   return Array.isArray(rows) ? rows : [];
 }
 
-export function ApiConnectionsWorkspace() {
+export function ApiConnectionsWorkspace({
+  providerFilter,
+  embedded = false,
+  initialShowCreate = false,
+  onChanged,
+}: ApiConnectionsWorkspaceProps = {}) {
   const isLive = useDashboardLiveMode();
   const [rows, setRows] = useState<WorkspaceConnectionRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [provider, setProvider] = useState("sabre");
+  const [provider, setProvider] = useState(providerFilter ?? "sabre");
   const [name, setName] = useState("");
   const [environment, setEnvironment] = useState("sandbox");
   const [credentials, setCredentials] = useState<Record<string, string>>({});
@@ -164,9 +180,11 @@ export function ApiConnectionsWorkspace() {
   const [manageEnv, setManageEnv] = useState("sandbox");
   const [providers, setProviders] = useState<ProviderCatalog[]>([]);
   const [providerCards, setProviderCards] = useState<ProviderCardMeta[]>([]);
-  const [showCreate, setShowCreate] = useState(false);
+  const [showCreate, setShowCreate] = useState(Boolean(initialShowCreate));
   const [manageTab, setManageTab] = useState<"overview" | "environment" | "endpoints" | "credentials" | "capabilities" | "advanced" | "health" | "audit">("overview");
   const [manageBaseUrl, setManageBaseUrl] = useState("");
+  const [manageSabreGds, setManageSabreGds] = useState(true);
+  const [manageSabreNdc, setManageSabreNdc] = useState(false);
 
   const adapter = providers.find((item) => item.key === provider);
   const installed = Boolean(adapter?.installed);
@@ -177,10 +195,11 @@ export function ApiConnectionsWorkspace() {
     }
     const result = await listApiConnections();
     if (!result.ok) {
-      setError(result.message ?? "Could not load API connections.");
+      setError(result.message ?? "Could not load supplier connections.");
       return;
     }
-    setRows(extractConnections(result));
+    const allRows = extractConnections(result);
+    setRows(providerFilter ? allRows.filter((row) => row.provider === providerFilter) : allRows);
     const catalog = ((result as { data?: { providers?: ProviderCatalog[] } }).data?.providers
       ?? (result as { providers?: ProviderCatalog[] }).providers
       ?? []) as ProviderCatalog[];
@@ -193,11 +212,17 @@ export function ApiConnectionsWorkspace() {
     if (Array.isArray(cards) && cards.length > 0) {
       setProviderCards(cards);
     }
-  }, [isLive]);
+  }, [isLive, providerFilter]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (providerFilter) {
+      setProvider(providerFilter);
+    }
+  }, [providerFilter]);
 
   async function run(action: () => Promise<{ ok: boolean; message?: string }>) {
     setBusy(true);
@@ -209,6 +234,7 @@ export function ApiConnectionsWorkspace() {
       return;
     }
     await refresh();
+    onChanged?.();
   }
 
   const providerLabelByKey = useMemo(() => {
@@ -239,16 +265,25 @@ export function ApiConnectionsWorkspace() {
   }, [rows]);
 
   return (
-    <div className="space-y-6" data-testid="api-connections-workspace">
-      <p className="text-sm text-jp-muted">
-        Manage technical supplier channels from one hub. Business supplier records remain under Suppliers for operational reporting.
-        Secrets are never shown after save.
-      </p>
+    <div className="space-y-6" data-testid={embedded ? "integrations-connections-panel" : "api-connections-workspace"}>
+      {embedded ? (
+        <p className="text-sm text-jp-muted">
+          Multiple independent connections are supported for this provider. List, add, edit, test, and disable each channel here.
+          Secrets are never shown after save.
+        </p>
+      ) : (
+        <p className="text-sm text-jp-muted">
+          Manage technical supplier channels from Integrations. Business supplier records remain under Suppliers for operational reporting.
+          Secrets are never shown after save.
+        </p>
+      )}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
       <section className="space-y-4" data-testid="api-connections-card-grid">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-gray-900">Connections</h2>
+          <h2 className="text-sm font-semibold text-gray-900">
+            {providerFilter ? `${providerLabelByKey.get(providerFilter) ?? providerFilter} connections` : "Connections"}
+          </h2>
           <p className="text-xs text-jp-muted">{rows.length} connection{rows.length === 1 ? "" : "s"}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -267,6 +302,8 @@ export function ApiConnectionsWorkspace() {
                 setManageTab("overview");
                 setCredentials({});
                 setManageBaseUrl(row.baseUrl ?? "");
+                setManageSabreGds(row.sabreGdsEnabled !== false);
+                setManageSabreNdc(Boolean(row.sabreNdcEnabled));
                 setCredentials(row.advanced?.values?.api_channel ? { api_channel: row.advanced.values.api_channel } : {});
               }}
               onTest={() => run(() => testApiConnection(String(row.id)))}
@@ -275,7 +312,7 @@ export function ApiConnectionsWorkspace() {
           ))}
           <AddApiConnectionCard onClick={() => setShowCreate(true)} />
         </div>
-        {connectionsByProvider.size > 0 ? (
+        {!providerFilter && connectionsByProvider.size > 0 ? (
           <div className="rounded-xl border border-jp-border bg-gray-50 p-3 text-xs text-jp-muted">
             {Array.from(connectionsByProvider.entries()).map(([providerKey, items]) => (
               <p key={providerKey}>
@@ -367,10 +404,32 @@ export function ApiConnectionsWorkspace() {
                   </>
                 ) : null}
                 {manageTab === "capabilities" && row.provider === "sabre" ? (
-                  <ul className="text-sm">
-                    <li>GDS: {row.sabreGdsSupported ? "supported" : "not supported"}</li>
-                    <li>NDC: {row.sabreNdcSupported ? "supported" : "not supported"} ({row.sabreNdcEnabled ? "enabled" : "off"})</li>
-                  </ul>
+                  <div className="space-y-3" data-testid="sabre-channel-toggles">
+                    <p className="text-xs text-jp-muted">
+                      Per-connection GDS/NDC lanes (stored in connection settings). Adapter support is independent of these toggles.
+                    </p>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={manageSabreGds}
+                        disabled={!row.sabreGdsSupported}
+                        onChange={(e) => setManageSabreGds(e.target.checked)}
+                      />
+                      Sabre GDS {row.sabreGdsSupported ? "" : "(adapter not installed)"}
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={manageSabreNdc}
+                        disabled={!row.sabreNdcSupported}
+                        onChange={(e) => setManageSabreNdc(e.target.checked)}
+                      />
+                      Sabre NDC {row.sabreNdcSupported ? "" : "(adapter not installed)"}
+                    </label>
+                    {!manageSabreGds && !manageSabreNdc ? (
+                      <p className="text-xs text-amber-700">Both channels off — this connection will be skipped in search.</p>
+                    ) : null}
+                  </div>
                 ) : null}
                 {manageTab === "capabilities" && row.provider !== "sabre" ? (
                   <p className="text-sm text-jp-muted">Capabilities follow the installed adapter. No extra channel toggles for this provider.</p>
@@ -434,6 +493,12 @@ export function ApiConnectionsWorkspace() {
                           status: row.status || (row.enabled ? "active" : "inactive"),
                           credentials: Object.fromEntries(Object.entries(credentials).filter(([, value]) => value.trim() !== "")),
                           ...(row.baseUrlOverridable ? { base_url: manageBaseUrl.trim() || null } : {}),
+                          ...(row.provider === "sabre"
+                            ? {
+                                sabre_gds_enabled: manageSabreGds,
+                                sabre_ndc_enabled: manageSabreNdc,
+                              }
+                            : {}),
                         }),
                       )
                     }
@@ -451,33 +516,39 @@ export function ApiConnectionsWorkspace() {
       ) : null}
       <section className={`space-y-3 rounded-xl border border-jp-border bg-white p-4 ${showCreate ? "" : "hidden"}`} data-testid="api-connection-create-panel">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold">Add API Connection</h2>
+          <h2 className="text-sm font-semibold">Add connection</h2>
           <button type="button" className="text-xs text-jp-muted hover:underline" onClick={() => setShowCreate(false)}>
             Close
           </button>
         </div>
-        <ProviderCatalogCards
-          providers={providers}
-          providerCards={providerCards}
-          selectedKey={provider}
-          onSelect={(key) => {
-            setProvider(key);
-            setCredentials({});
-            setCreateBaseUrl("");
-          }}
-        />
-        <label className="block text-xs">
-          Provider
-          <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={provider} onChange={(e) => {
-            setProvider(e.target.value);
-            setCredentials({});
-            setCreateBaseUrl("");
-          }}>
-            {providers.map((item) => (
-              <option key={item.key} value={item.key}>{item.label}{item.installed ? "" : " (not installed)"}</option>
-            ))}
-          </select>
-        </label>
+        {providerFilter ? null : (
+          <ProviderCatalogCards
+            providers={providers}
+            providerCards={providerCards}
+            selectedKey={provider}
+            onSelect={(key) => {
+              setProvider(key);
+              setCredentials({});
+              setCreateBaseUrl("");
+            }}
+          />
+        )}
+        {providerFilter ? (
+          <p className="text-xs text-jp-muted">Provider: {providerLabelByKey.get(provider) ?? provider}</p>
+        ) : (
+          <label className="block text-xs">
+            Provider
+            <select className="mt-1 w-full rounded-lg border border-jp-border px-2 py-1" value={provider} onChange={(e) => {
+              setProvider(e.target.value);
+              setCredentials({});
+              setCreateBaseUrl("");
+            }}>
+              {providers.map((item) => (
+                <option key={item.key} value={item.key}>{item.label}{item.installed ? "" : " (not installed)"}</option>
+              ))}
+            </select>
+          </label>
+        )}
         {!installed ? (
           <p className="text-sm text-amber-700">Provider adapter not installed. Engineering integration required. Credential entry is disabled.</p>
         ) : (

@@ -30,7 +30,10 @@ export function buildIntegrationsFixture(category = "all"): {
         configured: true,
         is_active: true,
         last_test_status: "ready_for_review",
+        connection_count: 2,
+        supports_multiple_connections: true,
       },
+      manager: "supplier",
     },
     {
       code: "iati",

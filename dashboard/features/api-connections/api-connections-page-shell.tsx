@@ -8,9 +8,9 @@ export function ApiConnectionsPageShell() {
       <PreviewModeBadgeSlot />
       <PageHeader
         breadcrumb={
-          <Breadcrumb items={[{ label: "Home" }, { label: "System" }, { label: "API Connections" }]} />
+          <Breadcrumb items={[{ label: "Home" }, { label: "System" }, { label: "Integrations" }]} />
         }
-        title="API Connections"
+        title="Integrations"
         description="Canonical technical integration management for supplier channels. Secrets are masked after save and never returned to the browser."
       />
       <DataSourceNoticeSlot />

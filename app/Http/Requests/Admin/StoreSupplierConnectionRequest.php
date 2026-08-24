@@ -51,6 +51,13 @@ class StoreSupplierConnectionRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
+            // Inactive shells may be registered from Add Integration without credentials;
+            // activation / readiness still requires credentials later.
+            $status = (string) ($this->input('status') ?: SupplierConnectionStatus::Inactive->value);
+            if ($status === SupplierConnectionStatus::Inactive->value) {
+                return;
+            }
+
             $provider = (string) $this->input('provider');
             $credentials = $this->input('credentials', []);
             if (! is_array($credentials)) {

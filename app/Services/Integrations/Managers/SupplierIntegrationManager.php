@@ -79,6 +79,7 @@ final class SupplierIntegrationManager implements IntegrationManager
     public function getConfigurationSummary(?int $agencyId = null): array
     {
         $connection = $this->connection($agencyId);
+        $connections = $this->connectionsForProvider($agencyId);
         $provider = SupplierProvider::tryFrom($this->code());
         $registryState = $connection !== null
             ? SupplierRegistry::stateForConnection($connection)
@@ -91,6 +92,19 @@ final class SupplierIntegrationManager implements IntegrationManager
             'adapter_installed' => $this->definition->adapterInstalled,
             'configured' => $connection !== null,
             'connection_id' => $connection?->id,
+            'connection_count' => $connections->count(),
+            'supports_multiple_connections' => true,
+            'connections' => $connections->map(static function (SupplierConnection $row): array {
+                return [
+                    'id' => (string) $row->id,
+                    'name' => (string) ($row->display_name ?: $row->name),
+                    'environment' => $row->environment?->value,
+                    'is_active' => (bool) $row->is_active,
+                    'status' => $row->status?->value,
+                    'credentials_configured' => is_array($row->credentials) && $row->credentials !== [],
+                    'last_test_status' => $row->last_test_status,
+                ];
+            })->values()->all(),
             'environment' => $connection?->environment?->value,
             'is_active' => (bool) ($connection?->is_active),
             'status' => $this->getStatus($agencyId)->value,
@@ -304,9 +318,19 @@ final class SupplierIntegrationManager implements IntegrationManager
 
     private function connection(?int $agencyId): ?SupplierConnection
     {
+        return $this->connectionsForProvider($agencyId)->first();
+    }
+
+    /**
+     * All agency-scoped connections for this provider (multi-connection aware).
+     *
+     * @return \Illuminate\Support\Collection<int, SupplierConnection>
+     */
+    private function connectionsForProvider(?int $agencyId)
+    {
         $provider = SupplierProvider::tryFrom($this->code());
         if ($provider === null) {
-            return null;
+            return collect();
         }
 
         $query = SupplierConnection::query()->where('provider', $provider);
@@ -316,7 +340,7 @@ final class SupplierIntegrationManager implements IntegrationManager
             });
         }
 
-        return $query->orderByDesc('is_active')->orderBy('id')->first();
+        return $query->orderByDesc('is_active')->orderBy('id')->get();
     }
 
     private function requireConnection(?int $agencyId): SupplierConnection

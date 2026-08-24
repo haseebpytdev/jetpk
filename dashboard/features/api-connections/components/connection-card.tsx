@@ -51,7 +51,7 @@ export function ApiConnectionCard({
   const operationalStatus = resolveConnectionOperationalStatus(row);
   const capabilities: string[] = [];
   if (row.provider === "sabre") {
-    if (row.sabreGdsSupported) capabilities.push("GDS");
+    if (row.sabreGdsSupported) capabilities.push(`GDS ${row.sabreGdsEnabled === false ? "off" : "on"}`);
     if (row.sabreNdcSupported) capabilities.push(`NDC ${row.sabreNdcEnabled ? "on" : "off"}`);
   } else if (row.registryLabel) {
     capabilities.push(row.registryLabel);

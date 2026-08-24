@@ -80,7 +80,7 @@ export function AddApiConnectionCard({ onClick }: { onClick: () => void }) {
       data-testid="api-connection-add-card"
     >
       <span className="text-2xl font-light text-jp-accent">+</span>
-      <p className="mt-2 text-sm font-semibold text-gray-900">Add API Connection</p>
+      <p className="mt-2 text-sm font-semibold text-gray-900">Add connection</p>
       <p className="mt-1 text-xs text-jp-muted">Choose a provider from the catalog and configure credentials securely.</p>
     </button>
   );
