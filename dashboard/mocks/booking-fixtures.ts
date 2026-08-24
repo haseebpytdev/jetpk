@@ -699,9 +699,10 @@ export function buildBookingManagementFixture(summary: BookingRecord): BookingMa
       can_generate_receipt: summary.amountPaid > 0,
       can_export_audit: true,
       latest_payment_id: summary.amountPaid > 0 ? `pay-${summary.id}` : null,
-      sabre_void_support: "DEFERRED_PROVIDER_CAPABILITY",
+      sabre_void_support: "SUPPORTED_EXISTING_LIVE_GATE_DISABLED",
       reasons: {
-        can_void_ticket: "Void is not supported by the current Sabre servicing adapter.",
+        can_void_ticket:
+          "Sabre ticket void is available but live void execution is currently disabled by the production safety gate.",
       },
       allowed_status_values: [
         "draft",

@@ -179,7 +179,7 @@ test.describe("JP-BO-04 B — Booking lifecycle", () => {
     await expect(page.getByTestId("booking-payment-panel")).toBeVisible();
     await expect(page.getByTestId("booking-admin-mark-paid")).toBeVisible();
     await expect(page.getByTestId("booking-void-ticket-ineligible")).toContainText(
-      /Void is not supported by the current Sabre servicing adapter/i,
+      /live void execution is currently disabled by the production safety gate/i,
     );
     await shot(page, "03-booking-no-pnr-actions.png");
   });

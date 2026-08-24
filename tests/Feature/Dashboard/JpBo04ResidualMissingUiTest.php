@@ -98,12 +98,12 @@ class JpBo04ResidualMissingUiTest extends TestCase
         $caps = (new BookingOperationalCapabilitiesPresenter)->present($admin, $booking);
 
         $this->assertFalse($caps['can_void_ticket']);
-        $this->assertSame('DEFERRED_PROVIDER_CAPABILITY', $caps['sabre_void_support']);
+        $this->assertSame('SUPPORTED_EXISTING_LIVE_GATE_DISABLED', $caps['sabre_void_support']);
         $this->assertNotNull($caps['reasons']['can_void_ticket'] ?? null);
-        // Without ticket rows the reason is eligibility (no_tickets); with tickets it cites adapter deferral.
+        // Without ticket rows the reason is eligibility (no_tickets); with tickets it cites the live gate.
         if (($caps['reasons']['can_void_ticket'] ?? '') !== 'no_tickets') {
             $this->assertStringContainsString(
-                'Void is not supported by the current Sabre servicing adapter',
+                'live void execution is currently disabled by the production safety gate',
                 (string) $caps['reasons']['can_void_ticket'],
             );
         }

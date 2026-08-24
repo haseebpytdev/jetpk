@@ -122,10 +122,10 @@ final class BookingOperationalCapabilitiesPresenter
         if (! $sabreVoidServiceExists || ! $isAdmin) {
             $sabreVoidSupport = 'BLOCKED';
         } elseif ($voidLiveEnabled) {
-            $sabreVoidSupport = 'IMPLEMENTED_JP_BO04';
+            $sabreVoidSupport = 'IMPLEMENTED_PRODUCTION_GATED';
         } else {
-            // Service class exists but live void gate is off — UI must stay disabled.
-            $sabreVoidSupport = 'DEFERRED_PROVIDER_CAPABILITY';
+            // Adapter/service exists; production live void gate is off — UI must stay disabled.
+            $sabreVoidSupport = 'SUPPORTED_EXISTING_LIVE_GATE_DISABLED';
         }
 
         $canGenerateDocuments = Gate::forUser($user)->allows('create', [BookingDocument::class, $booking]);
@@ -162,7 +162,7 @@ final class BookingOperationalCapabilitiesPresenter
                         ? 'admin_only'
                         : (! $sabreVoidServiceExists
                             ? 'Void is not supported by the current Sabre servicing adapter.'
-                            : 'Void is not supported by the current Sabre servicing adapter.'))),
+                            : 'Sabre ticket void is available but live void execution is currently disabled by the production safety gate.'))),
             'can_request_cancellation' => $canRequestCancellation ? null : 'booking_not_cancellable',
             'can_cancel_supplier_booking' => $canCancelSupplier ? null : 'admin_supplier_cancel_not_eligible',
             'can_request_refund' => $canRequestRefund ? null : 'refund_not_eligible',
