@@ -33,6 +33,7 @@ Close the owner-reported Return empty-results commerce blocker, restore branded-
 5. Return options UI read `return_journey_display` while Laravel emits `journey_display`.
 6. Result cards froze `fareOptions[0]`; pair cards lacked details/brand wiring.
 7. No Admin `guest_booking_enabled` / `card_payment_enabled` runtime gates existed (AbhiPay `is_active` alone controlled card).
+8. **Independent GitHub review (post-`d3dd484c`):** `ReturnOptionsPage.handleSelect` resolved return fare from `selectedFareByCombo[comboId]` before `combo.fare_option_key`. `BrandedFareCarousel.onBook` called `setSelectedFareByCombo` then immediately `handleSelect`, so a direct Book on a non-default return brand could submit the previous/default key (visible Comfort, submitted Basic).
 
 ## Root causes
 `RETURN_RESULTS_ROOT_CAUSE=SEARCH_CABIN_LEAKED_AS_RESULTS_FACET_EMPTYING_RETURN_SPLIT_OPTIONS`
@@ -42,9 +43,11 @@ Supporting defects:
 - Implicit `fareOptions[0]` selection without authoritative selection state
 - Missing independent outbound/return fare keys in split UI (backend already supported them)
 - Missing commerce Admin gates
+- Split return Book race: async React fare state stale vs explicit clicked key (`RETURN_SPLIT_EXPLICIT_KEY_FIX`)
 
 ## Exact files changed
-See engineering commit `d3dd484cd65f1a2a372fe6d4cb574316b69efa4e` (41 files).
+- Combined BO-04G engineering: `d3dd484cd65f1a2a372fe6d4cb574316b69efa4e` (41 files)
+- **Split return explicit-key fix:** `7459e76b2b52f95912d3cf38d3b2e747745a456f` (`ReturnOptionsPage.tsx` + commerce Playwright matrix)
 
 ## Routes changed
 - `GET/PATCH admin/settings/booking-checkout`
@@ -60,25 +63,24 @@ CommerceCheckoutSettingsService + enforcement in BookingController / PaymentTran
 ## Frontend changes
 Cabin facet isolation; branded fare selection on OW/outbound/return/pair cards; OrderSummary return-split legs; guest gate redirect on continue-to-passengers.
 
+**Split return Book fix (`7459e76b`):** `handleSelect(combo, explicitReturnFareKey?)` — clicked carousel Book key has highest authority; do not wait for `selectedFareByCombo` React commit. Outbound `outbound_fare_option_key` unchanged.
+
 ## Tests executed
 | Gate | Result |
 | --- | --- |
-| Laravel CommerceCheckoutSettingsTest | **18 passed / 75 assertions** (save/reload/restore, AuditLog, RBAC, residue 0) |
+| Laravel CommerceCheckoutSettingsTest | **18 passed / 75 assertions** (prior gate proof; unchanged this pass) |
 | Laravel ReturnSplitSelectFlowTest | **9 passed / 48 assertions** |
 | Frontend cabin-filter node test | **3 passed** |
 | Frontend typecheck | **PASS** |
-| Frontend Playwright jp-bo-04g-commerce-matrix | **4 passed** |
+| Frontend Playwright jp-bo-04g-commerce-matrix | **8 passed** (includes split direct-book race + preselect + OW/paired explicit) |
 | Frontend production build | **PASS** |
-| Dashboard typecheck | **PASS** |
-| Dashboard gate UI Playwright (`playwright.jp-bo-04g-gates.config.ts`) | **1 passed** (live Dashboard build; toggle save/reload/restore) |
-| Dashboard production build (`NEXT_PUBLIC_DASHBOARD_MODE=live`) | **PASS** |
+| Dashboard gate UI / typecheck / live build | **PASS** (prior; no Dashboard runtime change this pass) |
 
-### Dashboard gate UI proof
-- Path: Admin → Settings → Booking & checkout (`/admin/dashboard/settings/booking-checkout`)
-- Controls: `guest-booking-enabled-toggle`, `card-payment-enabled-toggle`, `booking-checkout-save`
-- Browser: live Dashboard UI exercises toggle → Save → API success → reload persistence → restore baseline
-- Authoritative persistence / AuditLog / non-admin RBAC: Laravel `CommerceCheckoutSettingsTest` (not browser-only mocks as sole proof)
-- Flags: `DASHBOARD_GUEST_GATE_UI_TEST=PASS`, `DASHBOARD_CARD_GATE_UI_TEST=PASS`, `DASHBOARD_GATE_SAVE_RELOAD=PASS`, `DASHBOARD_GATE_RBAC=PASS`, `DASHBOARD_GATE_AUDIT=PASS`, `DASHBOARD_GATE_TEST_RESIDUE=0`
+### Split return branded-fare race regression
+- Direct Book on `return-flex` without first selecting the card → POST must send `return_fare_option_key=return-flex` (not default `return-basic`) while preserving `outbound_fare_option_key=fare-comfort`
+- Preselect-then-Book still submits `return-flex`
+- Summary/review fixtures assert Economy Comfort outbound + Economy Flex return brand/price parity
+- Flags: `RETURN_SPLIT_DIRECT_BOOK_NON_DEFAULT=PASS`, `RETURN_SPLIT_PRESELECT_THEN_BOOK=PASS`, `RETURN_SPLIT_NO_STALE_STATE_SELECTION=PASS`, `ONE_WAY_EXPLICIT_FARE_BOOK=PASS`, `RETURN_PAIRED_EXPLICIT_FARE_BOOK=PASS`
 
 ## Screenshots
 `frontend/tmp/jp-bo-04g/playwright/` and `tmp/jp-bo-04g/playwright/`:
@@ -86,6 +88,7 @@ Cabin facet isolation; branded fare selection on OW/outbound/return/pair cards; 
 - 02-one-way-brand-selected.png
 - 04-return-paired-results.png
 - 07-return-split-outbound-brand.png
+- 10-return-split-direct-book-non-default.png
 
 Remaining matrix shots (review/guest/card) covered by PHPUnit gate matrix; full browser matrix completion deferred to Stage-B live proof with Laravel fixtures.
 
@@ -118,18 +121,20 @@ Classification (do not treat `SUPPLIER_FIRST_RESPONSE_P95_MS=0` as live Sabre la
 Combined BO-04 + 04G deploy surface is large; requires owner/ChatGPT SHA review before protected deploy.
 
 ## Rollback
-`git revert d3dd484c` (and prior 04A–04F engineering commits if rolling back full BO-04).
+`git revert 7459e76b` for the split explicit-key fix only; `git revert d3dd484c` (and prior 04A–04F) if rolling back full BO-04G.
 
 ## Commit SHAs
 | Slice | SHA |
 | --- | --- |
-| Prior FINAL_ENGINEERING_SHA (superseded) | `ec9f0ba257a4ef96149bd8474627beec2e2d5a4d` |
-| **FINAL_ENGINEERING_SHA (JP-BO-04G)** | `d3dd484cd65f1a2a372fe6d4cb574316b69efa4e` |
-| Prior docs SHA | `6af6b66a7c7cef2d70bc6c941cd139460414a5e5` |
-| **FINAL_DOCS_SHA** | Docs-only tip of `phase/jp-bo-04` after remote review-gate update (performance classification + Dashboard gate UI proof). |
+| Prior BO-04 engineering (superseded) | `ec9f0ba257a4ef96149bd8474627beec2e2d5a4d` |
+| Prior 04G engineering (superseded for deploy) | `d3dd484cd65f1a2a372fe6d4cb574316b69efa4e` |
+| **FINAL_ENGINEERING_SHA (JP-BO-04G + split explicit key)** | `7459e76b2b52f95912d3cf38d3b2e747745a456f` |
+| Prior verification/docs head | `05891780b876015e0e4a6ac7ffff1dc3cb4a1abb` |
+| **FINAL_VERIFICATION_HEAD** | Docs tip of `phase/jp-bo-04` after this summary update |
 
 ## Final status
 `SOURCE_GREEN=YES` for engineering gates run in this phase.  
-`OWNER_RETEST_V3_STATE=BLOCKED_PENDING_JP_BO04G_STAGE_B_LIVE_PROOF`  
-**DO NOT DEPLOY** until owner/ChatGPT independently verifies `FINAL_ENGINEERING_SHA`.  
-**DO NOT** treat synthetic `SUPPLIER_FIRST_RESPONSE_P95_MS=0` as live supplier latency.
+`OWNER_RETEST_V3_STATE=BLOCKED_PENDING_COMBINED_STAGE_B_LIVE_PROOF`  
+**DO NOT DEPLOY** until owner/ChatGPT independently verifies `FINAL_ENGINEERING_SHA=7459e76b`.  
+**DO NOT** treat synthetic `SUPPLIER_FIRST_RESPONSE_P95_MS=0` as live supplier latency.  
+Production pin must be the engineering SHA, not the verification/docs tip.
