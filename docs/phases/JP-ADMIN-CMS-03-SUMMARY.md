@@ -119,6 +119,8 @@ Minimal eng `cbe445e35da33468834dcbf95aaf19b2eb3123ff`:
 
 Predeploy note: `docs/jetpk/deployments/JETPAKISTAN-PK-JP-ADMIN-CMS-03-ABOUT-NEXT-CACHE-PREDEPLOY-20260824.md`
 
-`OWNER_RETEST_V3=RETEST_REQUIRED` — STOP BEFORE DEPLOYMENT.
-- Gates: Laravel JpAdminCms03 13 PASS; Playwright CMS-03 13 PASS; dashboard+frontend tsc/build PASS
-- MIGRATIONS=0; production NOT deployed
+### About Next-cache LIVE closure (2026-08-24)
+
+Deployed `cbe445e35da33468834dcbf95aaf19b2eb3123ff` (2 runtime files, 0 migrations). Public build `1lWou15gFxTK0yaJzfmMV` → `aUP_Aw-A7rAGdK1g2eY48`. Bare `/about-us` propagation **0.716s**; `Cache-Control: no-store`. FAQ + 5 managed-page smokes PASS. Backup `jp-admin-cms-03-about-cache-20260824T034352Z`. Live note: `docs/jetpk/deployments/JETPAKISTAN-PK-JP-ADMIN-CMS-03-ABOUT-CACHE-LIVE-CLOSURE-20260824.md`
+
+`OWNER_RETEST_V3=RETEST_REQUIRED` — engineering closure complete; owner manual retest next.
