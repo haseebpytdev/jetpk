@@ -74,8 +74,8 @@ Sanitized under `tmp/jp-bo-04/playwright/` (01–15 matrix proofs). Untracked ev
 Sidebar desktop + mobile matrix in Playwright; `:focus-visible` preserved (no global focus suppression).
 
 ## Known limitations
-- `FINANCE_PARITY=PASS_WITH_APPROVED_EXCLUSIONS` (see master parity doc)
-- `SABRE_VOID_SUPPORT=DEFERRED_PROVIDER_CAPABILITY`
+- `FINANCE_PARITY=PASS_WITH_NON_CRITICAL_DIFFERENCES` (no owner-unapproved exclusions; see master parity doc)
+- `SABRE_VOID_SUPPORT=SUPPORTED_EXISTING_LIVE_GATE_DISABLED` (service exists; live gate remains off)
 - Stage B live proof not run
 - Last Sabre booking read-only baseline pending Stage B Tier 1
 
@@ -94,7 +94,8 @@ Large back-office delta; requires owner/ChatGPT SHA review before protected depl
 | 04D | `3154f7e082985419e36a2ec0b38e2791b79ec3b7` |
 | 04E | `f22c87bd0fcb32fa41a204a3cadc625ae7df7ff1` |
 | 04F | `f70e56b30705e32613dbe6316c2a5fb97d6f17bd` |
-| **FINAL_ENGINEERING_SHA** | `f70e56b30705e32613dbe6316c2a5fb97d6f17bd` |
+| Classification correction | `ec9f0ba257a4ef96149bd8474627beec2e2d5a4d` |
+| **FINAL_ENGINEERING_SHA** | `ec9f0ba257a4ef96149bd8474627beec2e2d5a4d` |
 
 ## Final status
-**STAGE_A_ENGINEERING_COMPLETE — AWAITING OWNER/CHATGPT REVIEW — DEPLOY=NO**
+**STAGE_A_CLASSIFICATION_CORRECTED — AWAITING OWNER/CHATGPT STAGE-B AUTHORIZATION — DEPLOY=NO**

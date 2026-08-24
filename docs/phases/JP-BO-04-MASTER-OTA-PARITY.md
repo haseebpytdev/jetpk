@@ -5,7 +5,8 @@
 - Branch: `phase/jp-bo-04`
 - Production base SHA: `cbe445e35da33468834dcbf95aaf19b2eb3123ff`
 - Starting docs SHA: `c7c2b3e2152ac94b3e7bbe11f344a611a09606ca`
-- FINAL_ENGINEERING_SHA: `f70e56b30705e32613dbe6316c2a5fb97d6f17bd`
+- PREVIOUS_ENGINEERING_SHA: `f70e56b30705e32613dbe6316c2a5fb97d6f17bd`
+- FINAL_ENGINEERING_SHA: `ec9f0ba257a4ef96149bd8474627beec2e2d5a4d`
 - Master OTA reference: `C:/Users/khadi/ota` (**READ-ONLY**)
 - `MAIN_OTA_READ_ONLY=YES`
 - `OWNER_RETEST_V3_STATE=BLOCKED_PENDING_JP_BO04_LIVE_PROOF`
@@ -24,7 +25,7 @@ Evidence-backed reconciliation of master OTA admin workflows against JetPakistan
 | MISSING_BACKEND_COUNT | 0 |
 | UNEXPLAINED_PARITY_GAPS | 0 |
 | UNEXPLAINED_FINANCE_GAPS | 0 |
-| INTENTIONALLY_EXCLUDED_COUNT | (group ticketing + approved finance exclusions) |
+| INTENTIONALLY_EXCLUDED_COUNT | group ticketing deferred; finance uses honest statuses (no owner-unapproved exclusions) |
 | DEAD_PRIMARY_ACTIONS | 0 |
 | NOOP_ACTIONS | 0 |
 
@@ -39,22 +40,25 @@ Evidence-backed reconciliation of master OTA admin workflows against JetPakistan
 | Proof queue (separate) | `/payments?reconciliation=pending_review` |
 
 ## Sabre void
-- `SABRE_VOID_SUPPORT=DEFERRED_PROVIDER_CAPABILITY`
-- Service class exists; `void_live_call_enabled` default false
-- UI: Void disabled; reason: "Void is not supported by the current Sabre servicing adapter."
+- `SABRE_VOID_SUPPORT=SUPPORTED_EXISTING_LIVE_GATE_DISABLED`
+- `SabreGdsVoidTicketService` implements readiness, voidFlightTickets path, persistence, audit
+- Live execution gated by `void_live_call_enabled` (default false; **not enabled** in this phase)
+- UI: `can_void_ticket=false` while gate off; reason: "Sabre ticket void is available but live void execution is currently disabled by the production safety gate."
 - `VOID_TICKET_FALSE_CAPABILITY=0`
+- `VOID_TICKET_GATE_PRESERVED=YES`
 
 ## Finance parity
-`FINANCE_PARITY=PASS_WITH_APPROVED_EXCLUSIONS`
+`FINANCE_PARITY=PASS_WITH_NON_CRITICAL_DIFFERENCES`  
+`OWNER_UNAPPROVED_EXCLUSIONS=0` (do not attribute exclusions to owner without explicit approval)
 
-Remaining non-PASS items (all explained):
-1. Booking-level payment status depth polish — INTENTIONALLY_DEFERRED_BY_OWNER
-2. Mark refund paid settlement — INTENTIONALLY_DEFERRED_BY_OWNER (Stage B)
-3. Deposit proof download depth — INTENTIONALLY_DEFERRED_BY_OWNER
+Honest classifications:
+1. Booking-level payment status depth — NON_CRITICAL_PRESENTATION_DIFFERENCE
+2. Mark refund paid settlement — LIVE_PROOF_OWNER_GATED
+3. Deposit proof download depth — NON_CRITICAL_PRESENTATION_DIFFERENCE (approve/reject wired)
 4. Legacy admin ledger — LEGACY_NOT_REQUIRED
-5. Accounting ledger table polish / reconciliation workspace depth — INTENTIONALLY_DEFERRED_BY_OWNER
-6. Finance KPI/FX presentation polish — INTENTIONALLY_DEFERRED_BY_OWNER
-7. Wallet audit archive depth — INTENTIONALLY_DEFERRED_BY_OWNER
+5. Accounting ledger / reconciliation read depth — NON_CRITICAL_PRESENTATION_DIFFERENCE
+6. Finance KPI/FX presentation — NON_CRITICAL_PRESENTATION_DIFFERENCE
+7. Wallet audit archive depth — SAFETY_DEFERRED
 
 ## Integrations
 - `MULTIPLE_CONNECTIONS_PER_PROVIDER=PASS`
@@ -86,6 +90,7 @@ Remaining non-PASS items (all explained):
 | 04D | feat(backoffice): JP-BO-04D finance operational parity | 3154f7e0… |
 | 04E | feat(backoffice): JP-BO-04E admin communications and operational parity | f22c87bd… |
 | 04F | test(backoffice): JP-BO-04F operational coverage closure | f70e56b3… |
+| Classification | fix(backoffice): JP-BO-04 correct finance and Sabre void capability truth | ec9f0ba2… |
 
 ## Stage B proof plan (NOT EXECUTED)
 Ready to prove under separate owner prompt:
