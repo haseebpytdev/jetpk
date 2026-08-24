@@ -43,6 +43,9 @@ final class DashboardOverviewResource
             'supplierStatus' => $supplierStatus,
             'systemHealth' => self::systemHealth((bool) ($dashboard['hasLiveData'] ?? false)),
             'operationalCounts' => $commandSummary,
+            'operationalInbox' => is_array($commandSummary['operational_inbox'] ?? null)
+                ? $commandSummary['operational_inbox']
+                : [],
             'failedNotifications' => (int) ($commandSummary['failed_notifications'] ?? 0),
             'failedNotificationsQaHistorical' => (int) ($commandSummary['failed_notifications_qa'] ?? 0),
             'supplierFailures' => self::supplierFailureCount($dashboard),
@@ -103,11 +106,20 @@ final class DashboardOverviewResource
         }
         if (isset($commandSummary['payment_review'])) {
             $cards[] = [
-                'key' => 'payment_review',
-                'label' => 'Payments to review',
+                'key' => 'bookings_awaiting_payment',
+                'label' => 'Bookings awaiting payment',
                 'value' => (string) ((int) $commandSummary['payment_review']),
                 'delta' => '',
                 'tone' => ((int) $commandSummary['payment_review']) > 0 ? 'warn' : 'up',
+            ];
+        }
+        if (isset($commandSummary['payment_proof_review']) && (int) $commandSummary['payment_proof_review'] > 0) {
+            $cards[] = [
+                'key' => 'payment_proof_review',
+                'label' => 'Payment proofs to review',
+                'value' => (string) ((int) $commandSummary['payment_proof_review']),
+                'delta' => '',
+                'tone' => 'warn',
             ];
         }
         if (isset($commandSummary['commissions_requiring_review'])) {
@@ -193,11 +205,18 @@ final class DashboardOverviewResource
 
         return array_values(array_filter([
             isset($commandSummary['payment_review']) ? [
-                'key' => 'payment_review',
-                'label' => 'Payment review',
+                'key' => 'bookings_awaiting_payment',
+                'label' => 'Bookings awaiting payment',
                 'count' => (int) $commandSummary['payment_review'],
                 'laravelRoute' => $routePrefix.'.bookings',
                 'queue' => 'payment_review',
+                'href' => '/bookings?queue=payment_review',
+            ] : null,
+            isset($commandSummary['payment_proof_review']) && (int) $commandSummary['payment_proof_review'] > 0 ? [
+                'key' => 'payment_proof_review',
+                'label' => 'Payment proof review',
+                'count' => (int) $commandSummary['payment_proof_review'],
+                'href' => '/payments?reconciliation=pending_review',
             ] : null,
             isset($commandSummary['pending_deposits']) && (int) $commandSummary['pending_deposits'] > 0 ? [
                 'key' => 'pending_deposits',

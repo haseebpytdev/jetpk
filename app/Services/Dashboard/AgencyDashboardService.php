@@ -18,6 +18,7 @@ use App\Models\CommunicationLog;
 use App\Models\SupplierBookingAttempt;
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Services\Dashboard\Authority\OperationalInboxAuthority;
 use App\Support\Dashboard\BookingOperationalMoneyResolver;
 use App\Support\Dashboard\CommunicationFailureClassifier;
 use App\Support\Dashboard\DashboardMoneyPresenter;
@@ -31,9 +32,14 @@ use Illuminate\Support\Str;
 /**
  * Agency-scoped dashboard aggregates for admin/staff home pages.
  * Admin command-center panels: {@see buildAdminCommandCenter()}.
+ * Inbox badge/queue eligibility: {@see OperationalInboxAuthority}.
  */
 class AgencyDashboardService
 {
+    public function __construct(
+        protected OperationalInboxAuthority $inboxAuthority = new OperationalInboxAuthority,
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -99,9 +105,17 @@ class AgencyDashboardService
             'pending_refund_count' => $this->pendingRefundCount($user),
         ];
 
+        $bookingsAwaitingPayment = $this->countPaymentReview($baseQuery);
+        $paymentProofReview = $this->inboxAuthority->countPaymentProofReview(
+            $this->inboxAuthority->paymentProofBaseQuery($user)
+        );
+
         $operationalCounts = [
             'needs_action' => $this->countNeedsAction($baseQuery),
-            'payment_review' => $this->countPaymentReview($baseQuery),
+            // Legacy key: booking unpaid/partial (not BookingPayment proof review).
+            'payment_review' => $bookingsAwaitingPayment,
+            'bookings_awaiting_payment' => $bookingsAwaitingPayment,
+            'payment_proof_review' => $paymentProofReview,
             'supplier_pnr_pending' => $this->countSupplierPnrPending($baseQuery),
             'manual_review' => $this->countManualReview($baseQuery),
             'ticketing_pending' => $this->countTicketingPending($baseQuery),
@@ -229,6 +243,10 @@ class AgencyDashboardService
         return [
             'needs_action' => $this->countNeedsAction($baseQuery),
             'payment_review' => $this->countPaymentReview($baseQuery),
+            'bookings_awaiting_payment' => $this->countPaymentReview($baseQuery),
+            'payment_proof_review' => $this->inboxAuthority->countPaymentProofReview(
+                $this->inboxAuthority->paymentProofBaseQuery($user)
+            ),
             'supplier_pnr_pending' => $this->countSupplierPnrPending($baseQuery),
             'ticketing_pending' => $this->countTicketingPending($baseQuery),
             'cancellations_pending' => $this->countCancellationsPending($baseQuery),
@@ -401,7 +419,7 @@ class AgencyDashboardService
 
     protected function countPaymentReview(Builder $baseQuery): int
     {
-        return (int) (clone $baseQuery)->whereIn('payment_status', ['unpaid', 'partial'])->count();
+        return $this->inboxAuthority->countBookingsAwaitingPayment($baseQuery);
     }
 
     protected function countManualReview(Builder $baseQuery): int
@@ -472,13 +490,13 @@ class AgencyDashboardService
             ],
             [
                 'key' => 'payment_review',
-                'label' => 'Payment review',
+                'label' => 'Bookings awaiting payment',
                 'count' => $counts['payment_review'],
                 'route' => 'admin.bookings',
                 'route_params' => ['queue' => 'payment_review'],
                 'tone' => 'info',
                 'icon' => 'ti-cash',
-                'helper' => 'Unpaid or partial balances.',
+                'helper' => 'Bookings with unpaid or partial payment status.',
             ],
             [
                 'key' => 'supplier_pnr_pending',
@@ -558,11 +576,18 @@ class AgencyDashboardService
             ],
             [
                 'key' => 'payment_review',
-                'label' => 'Payment review',
+                'label' => 'Bookings awaiting payment',
                 'count' => $counts['payment_review'],
-                'helper' => 'Confirm payment proofs and balances.',
+                'helper' => 'Bookings with unpaid or partial payment status.',
                 'route' => 'admin.bookings',
                 'route_params' => ['queue' => 'payment_review'],
+            ],
+            [
+                'key' => 'payment_proof_review',
+                'label' => 'Payment proof review',
+                'count' => (int) ($counts['payment_proof_review'] ?? 0),
+                'helper' => 'Submitted or pending payment proofs awaiting verify/reject.',
+                'dashboard_href' => '/payments?reconciliation=pending_review',
             ],
             [
                 'key' => 'supplier_pnr_pending',
@@ -622,7 +647,10 @@ class AgencyDashboardService
 
         return [
             'needs_action' => $counts['needs_action'],
+            // Legacy key retained for clients; semantic = bookings awaiting payment.
             'payment_review' => $counts['payment_review'],
+            'bookings_awaiting_payment' => (int) ($counts['bookings_awaiting_payment'] ?? $counts['payment_review'] ?? 0),
+            'payment_proof_review' => (int) ($counts['payment_proof_review'] ?? 0),
             'ticketing_pending' => $counts['ticketing_pending'],
             'today_departures' => $counts['today_departures'],
             'pending_deposits' => $counts['pending_deposits'] ?? 0,
@@ -635,6 +663,14 @@ class AgencyDashboardService
             'gross_sales_currency_label' => (string) ($currencyMeta['label'] ?? 'PKR'),
             'gross_sales_excluded_count' => (int) ($currencyMeta['excluded_count'] ?? 0),
             'failed_notifications_qa' => (int) ($counts['failed_notifications_qa'] ?? 0),
+            'operational_inbox' => $this->inboxAuthority->inboxItems([
+                'agency_applications_pending' => (int) ($counts['agency_applications_pending'] ?? 0),
+                'pending_deposits' => (int) ($counts['pending_deposits'] ?? 0),
+                'bookings_awaiting_payment' => (int) ($counts['bookings_awaiting_payment'] ?? $counts['payment_review'] ?? 0),
+                'payment_review' => (int) ($counts['payment_review'] ?? 0),
+                'payment_proof_review' => (int) ($counts['payment_proof_review'] ?? 0),
+                'commissions_requiring_review' => (int) ($counts['commissions_requiring_review'] ?? 0),
+            ]),
         ];
     }
 
@@ -1116,6 +1152,10 @@ class AgencyDashboardService
         return [
             'needs_action' => 0,
             'payment_review' => 0,
+            'bookings_awaiting_payment' => 0,
+            'payment_proof_review' => $this->inboxAuthority->countPaymentProofReview(
+                $this->inboxAuthority->paymentProofBaseQuery($user)
+            ),
             'ticketing_pending' => 0,
             'today_departures' => 0,
             'pending_deposits' => $this->countPendingAgentDeposits($user),
@@ -1123,6 +1163,16 @@ class AgencyDashboardService
             'active_agents' => $this->countActiveAgents($user),
             'commissions_requiring_review' => $this->countPendingCommissions($user),
             'gross_sales' => 0,
+            'operational_inbox' => $this->inboxAuthority->inboxItems([
+                'agency_applications_pending' => $this->countPendingAgencyApplications($user),
+                'pending_deposits' => $this->countPendingAgentDeposits($user),
+                'bookings_awaiting_payment' => 0,
+                'payment_review' => 0,
+                'payment_proof_review' => $this->inboxAuthority->countPaymentProofReview(
+                    $this->inboxAuthority->paymentProofBaseQuery($user)
+                ),
+                'commissions_requiring_review' => $this->countPendingCommissions($user),
+            ]),
         ];
     }
 

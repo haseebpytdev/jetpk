@@ -12,14 +12,37 @@ type AlertItem = {
   href: string;
 };
 
-function hrefForKey(key: string): string {
+type OverviewInboxBody = {
+  data?: {
+    operationalInbox?: AlertItem[];
+    operationalCounts?: Record<string, number | unknown>;
+  };
+};
+
+/** Fallback only if older overview payloads omit operationalInbox. */
+function legacyHrefForKey(key: string): string {
   return (
     {
       agency_applications_pending: "/agents/applications",
       pending_deposits: "/deposits",
-      payment_review: "/payments",
+      bookings_awaiting_payment: "/bookings?queue=payment_review",
+      payment_review: "/bookings?queue=payment_review",
+      payment_proof_review: "/payments?reconciliation=pending_review",
       commissions_requiring_review: "/commissions",
     }[key] ?? "/dashboard"
+  );
+}
+
+function legacyLabelForKey(key: string): string {
+  return (
+    {
+      agency_applications_pending: "Agency applications pending",
+      pending_deposits: "Pending deposits",
+      bookings_awaiting_payment: "Bookings awaiting payment",
+      payment_review: "Bookings awaiting payment",
+      payment_proof_review: "Payment proof review",
+      commissions_requiring_review: "Commissions requiring review",
+    }[key] ?? key.replaceAll("_", " ")
   );
 }
 
@@ -38,19 +61,45 @@ export function OperationalInboxBadge() {
       cache: "no-store",
     })
       .then((response) => response.json())
-      .then((body: { data?: { operationalCounts?: Record<string, number> } }) => {
+      .then((body: OverviewInboxBody) => {
+        const serverInbox = Array.isArray(body.data?.operationalInbox)
+          ? body.data.operationalInbox
+          : [];
+        if (serverInbox.length > 0) {
+          setAlerts(
+            serverInbox
+              .map((item) => ({
+                key: String(item.key),
+                label: String(item.label),
+                count: Number(item.count ?? 0),
+                href: String(item.href || legacyHrefForKey(String(item.key))),
+              }))
+              .filter((item) => item.count > 0),
+          );
+          return;
+        }
+
         const counts = body.data?.operationalCounts ?? {};
         const items: AlertItem[] = [
           "agency_applications_pending",
           "pending_deposits",
+          "bookings_awaiting_payment",
           "payment_review",
+          "payment_proof_review",
           "commissions_requiring_review",
         ]
+          .filter((key, index, all) => {
+            // Prefer bookings_awaiting_payment; skip legacy payment_review if both present.
+            if (key === "payment_review" && Number(counts.bookings_awaiting_payment ?? 0) > 0) {
+              return false;
+            }
+            return all.indexOf(key) === index;
+          })
           .map((key) => ({
             key,
-            label: key.replaceAll("_", " "),
+            label: legacyLabelForKey(key),
             count: Number(counts[key] ?? 0),
-            href: hrefForKey(key),
+            href: legacyHrefForKey(key),
           }))
           .filter((item) => item.count > 0);
         setAlerts(items);
@@ -84,9 +133,10 @@ export function OperationalInboxBadge() {
                 <DashboardLink
                   href={alert.href}
                   className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
+                  data-testid={`operational-inbox-item-${alert.key}`}
                   onClick={() => setOpen(false)}
                 >
-                  <span className="capitalize">{alert.label}</span>
+                  <span>{alert.label}</span>
                   <span className="font-semibold tabular-nums">{alert.count}</span>
                 </DashboardLink>
               </li>

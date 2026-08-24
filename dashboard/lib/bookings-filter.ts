@@ -38,9 +38,36 @@ function inDateRange(value: string, from: string, to: string): boolean {
   return true;
 }
 
+/**
+ * Mirror Laravel DashboardBookingsReadService::applyQueueFilter for fixture/preview parity.
+ */
+function matchesQueue(booking: BookingRecord, queue: BookingsQuery["queue"]): boolean {
+  if (!queue || queue === "all") {
+    return true;
+  }
+  const payment = booking.paymentStatus;
+  const hasPnr = Boolean(booking.pnr && booking.pnr.trim());
+  switch (queue) {
+    case "payment_review":
+      return payment === "unpaid" || payment === "partial";
+    case "supplier_pnr":
+      return (payment === "paid" && !hasPnr) || booking.bookingStatus === "failed";
+    case "ticketing":
+      return payment === "paid" && hasPnr && booking.ticketingStatus !== "ticketed";
+    case "cancellations":
+      return booking.bookingStatus === "cancelled";
+    case "refunds":
+      // Fixture list has no refund-request graph; Laravel filters via refunds relation.
+      return false;
+    default:
+      return true;
+  }
+}
+
 export function filterBookings(all: BookingRecord[], query: BookingsQuery): BookingRecord[] {
   return all.filter((b) => {
     if (!matchesSearch(b, query.q)) return false;
+    if (!matchesQueue(b, query.queue)) return false;
     if (query.status !== "all" && b.bookingStatus !== query.status) return false;
     if (query.payment !== "all" && b.paymentStatus !== query.payment) return false;
     if (query.ticketing !== "all" && b.ticketingStatus !== query.ticketing) return false;

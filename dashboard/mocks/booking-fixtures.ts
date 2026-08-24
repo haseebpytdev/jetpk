@@ -219,11 +219,11 @@ export const mockBookings: BookingRecord[] = [
     airline: "Turkish Airlines",
     supplier: "Duffel",
     bookingStatus: "pending",
-    paymentStatus: "partial",
+    paymentStatus: "paid",
     ticketingStatus: "pending",
     currency: "PKR",
     totalAmount: 412000,
-    amountPaid: 200000,
+    amountPaid: 412000,
     agentOrSource: "Web — Direct",
     lastUpdated: "2026-01-23T15:10:00Z",
   },
@@ -269,7 +269,7 @@ export const mockBookings: BookingRecord[] = [
     airline: "Emirates",
     supplier: "Duffel",
     bookingStatus: "cancelled",
-    paymentStatus: "unpaid",
+    paymentStatus: "paid",
     ticketingStatus: "unticketed",
     currency: "PKR",
     totalAmount: 520000,
@@ -354,7 +354,7 @@ export const mockBookings: BookingRecord[] = [
   },
   {
     id: "JP-BK-10015",
-    pnr: "QRS345",
+    pnr: "",
     supplierReference: null,
     bookingDate: "2026-02-03",
     departureDate: "2026-02-20",
@@ -394,11 +394,11 @@ export const mockBookings: BookingRecord[] = [
     airline: "British Airways",
     supplier: "Sabre",
     bookingStatus: "confirmed",
-    paymentStatus: "partial",
+    paymentStatus: "paid",
     ticketingStatus: "pending",
     currency: "PKR",
     totalAmount: 1050000,
-    amountPaid: 350000,
+    amountPaid: 1050000,
     agentOrSource: "Agent — Islamabad",
     lastUpdated: "2026-02-06T09:00:00Z",
   },
@@ -619,11 +619,11 @@ export const mockBookings: BookingRecord[] = [
     airline: "Turkish Airlines",
     supplier: "Sabre",
     bookingStatus: "pending",
-    paymentStatus: "partial",
+    paymentStatus: "paid",
     ticketingStatus: "pending",
     currency: "PKR",
     totalAmount: 502000,
-    amountPaid: 150000,
+    amountPaid: 502000,
     agentOrSource: "Web — Direct",
     lastUpdated: "2026-02-24T11:20:00Z",
   },
@@ -635,6 +635,24 @@ export function getBookingById(id: string): BookingRecord | undefined {
 
 /** Deterministic preview management detail — supplements list fixtures with lifecycle depth. */
 export function buildBookingManagementFixture(summary: BookingRecord): BookingManagementDetail {
+  const hasPnr = Boolean(summary.pnr && summary.pnr.trim());
+  const isCancelled = summary.bookingStatus === "cancelled";
+  const isFailed = summary.bookingStatus === "failed";
+  const paymentOpen = summary.paymentStatus === "unpaid" || summary.paymentStatus === "partial";
+  const outstanding = Math.max(0, summary.totalAmount - summary.amountPaid);
+  const ticketed = summary.ticketingStatus === "ticketed";
+  const canGeneratePnr = !isCancelled && !isFailed && !hasPnr;
+  const canRetryPnr = canGeneratePnr;
+  const canSyncPnr = hasPnr && !isCancelled;
+  const canRecordPayment = !isCancelled && !isFailed && paymentOpen;
+  const canAdminMarkPaid = canRecordPayment && outstanding > 0;
+  const canIssueTicket =
+    !isCancelled && !isFailed && summary.paymentStatus === "paid" && hasPnr && !ticketed;
+  const canRequestCancellation = !isCancelled && !isFailed;
+  const canCancelSupplier = canRequestCancellation && hasPnr;
+  const canRequestRefund =
+    !isFailed && summary.amountPaid > 0 && (summary.paymentStatus === "paid" || summary.paymentStatus === "partial");
+
   return {
     summary,
     passengers: [
@@ -662,6 +680,39 @@ export function buildBookingManagementFixture(summary: BookingRecord): BookingMa
     ticketReadiness: {
       ticketingStatus: summary.ticketingStatus,
       ticketCount: summary.ticketingStatus === "ticketed" ? summary.passengerCount : 0,
+    },
+    operationalCapabilities: {
+      can_update_status: !isCancelled,
+      can_prepare_pnr_context: canGeneratePnr,
+      can_generate_pnr: canGeneratePnr,
+      can_retry_pnr: canRetryPnr,
+      can_sync_pnr: canSyncPnr,
+      can_record_payment: canRecordPayment,
+      can_admin_mark_paid: canAdminMarkPaid,
+      can_issue_ticket: canIssueTicket,
+      can_void_ticket: false,
+      can_request_cancellation: canRequestCancellation,
+      can_cancel_supplier_booking: canCancelSupplier,
+      can_request_refund: canRequestRefund,
+      can_generate_documents: true,
+      can_download_documents: true,
+      can_generate_receipt: summary.amountPaid > 0,
+      can_export_audit: true,
+      latest_payment_id: summary.amountPaid > 0 ? `pay-${summary.id}` : null,
+      sabre_void_support: "DEFERRED_PROVIDER_CAPABILITY",
+      reasons: {
+        can_void_ticket: "Void is not supported by the current Sabre servicing adapter.",
+      },
+      allowed_status_values: [
+        "draft",
+        "pending",
+        "confirmed",
+        "paid",
+        "ticketed",
+        "cancelled",
+        "failed",
+        "refunded",
+      ],
     },
     auditMetadata: {
       createdAt: summary.bookingDate,
