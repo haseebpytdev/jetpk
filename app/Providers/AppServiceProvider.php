@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Agency;
 use App\Models\AgencyCommunicationSetting;
+use App\Models\CommerceCheckoutSetting;
 use App\Models\AgencyMedia;
 use App\Models\AgencyMessageTemplate;
 use App\Models\Agent;
@@ -29,6 +30,7 @@ use App\Models\User;
 use App\Policies\AccountingLedgerPolicy;
 use App\Policies\AgencyBrandingPolicy;
 use App\Policies\AgencyCommunicationSettingPolicy;
+use App\Policies\CommerceCheckoutSettingPolicy;
 use App\Policies\AgencyMediaPolicy;
 use App\Policies\AgencyMessageTemplatePolicy;
 use App\Policies\AgentCommissionPolicy;
@@ -138,6 +140,7 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Agency::class, AgencyBrandingPolicy::class);
         Gate::policy(AgencyCommunicationSetting::class, AgencyCommunicationSettingPolicy::class);
+        Gate::policy(CommerceCheckoutSetting::class, CommerceCheckoutSettingPolicy::class);
         Gate::policy(AgencyMedia::class, AgencyMediaPolicy::class);
         Gate::policy(AgencyMessageTemplate::class, AgencyMessageTemplatePolicy::class);
         Gate::policy(Booking::class, BookingPolicy::class);

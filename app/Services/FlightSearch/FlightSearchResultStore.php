@@ -374,7 +374,9 @@ class FlightSearchResultStore
      */
     public function getReturnSplitIndex(string $searchId): ?array
     {
-        $payload = $this->get($searchId, true);
+        // Browse/list the split index without selection-freshness gating.
+        // Selection endpoints still use get($id, forSelection: true).
+        $payload = $this->get($searchId, false);
         if ($payload === null) {
             return null;
         }

@@ -1,9 +1,11 @@
 "use client";
 
 import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
+import { FARE_SELECTION_ROUTE, resolveBrandedFareSurface } from "@/lib/fare-selection-authority";
 import { useMemo, useState } from "react";
-import type { FlightOffer } from "../types";
+import type { FareFamilyOption, FlightOffer } from "../types";
 import { AirlineIdentity } from "./AirlineIdentity";
+import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { FareBadge } from "./FareBadge";
 import { MulticityInquiryActions } from "./MulticityInquiryActions";
 import { TimeRouteBlock } from "./TimeRouteBlock";
@@ -37,7 +39,7 @@ function extractViaCodes(offer: FlightOffer): string[] {
   return codes;
 }
 
-function resolveFareOptions(offer: FlightOffer) {
+function resolveFareOptions(offer: FlightOffer): FareFamilyOption[] {
   const branded = offer.branded_fares_display_options ?? offer.fare_family_options_display ?? [];
   if (branded.length > 0) return branded;
   if (offer.has_fare_choice_options || offer.has_branded_fares) {
@@ -73,14 +75,18 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails }: FlightResultCardProps) {
   const fareOptions = useMemo(() => resolveFareOptions(offer), [offer]);
-  const selectedFareKey = fareOptions[0]?.option_key ?? "";
+  const [selectedFareKey, setSelectedFareKey] = useState(() => fareOptions[0]?.option_key ?? "");
+  const [bookingOptionKey, setBookingOptionKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey);
+  const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey) ?? fareOptions[0];
+  const effectiveFareKey = selectedOption?.option_key ?? selectedFareKey;
   const displayAmount = selectedOption?.displayed_price ?? offer.displayed_price;
   const displayPrice = formatWholePkr(displayAmount ?? offer.final_customer_price);
   const viaCodes = extractViaCodes(offer);
   const layoverSummary = resolveLayoverSummary(offer);
+  const fareSurface = resolveBrandedFareSurface(fareOptions.length);
+  const showInlineCarousel = fareOptions.length > 1 && fareSurface !== "dedicated_route";
 
   const firstSegment = offer.segments?.[0];
   const lastSegment = offer.segments?.[offer.segments.length - 1];
@@ -103,10 +109,26 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
     window.setTimeout(() => setCopied(false), 2000);
   };
 
+  const openWithSelectedFare = (intent: "details" | "booking") => {
+    const fareKeyForDetails = resolveAuthoritativeFareOptionKey(effectiveFareKey, fareOptions) ?? "";
+    if (intent === "booking" && fareSurface === "dedicated_route" && fareOptions.length > 1) {
+      const qs = new URLSearchParams({
+        search_id: searchId,
+        offer_id: offer.offer_id,
+      });
+      if (fareKeyForDetails) qs.set("fare_option_key", fareKeyForDetails);
+      window.location.assign(`${FARE_SELECTION_ROUTE}?${qs.toString()}`);
+      return;
+    }
+    setBookingOptionKey(intent === "booking" ? effectiveFareKey || null : null);
+    onOpenDetails?.(offer, fareKeyForDetails, intent);
+  };
+
   return (
     <article
       className="overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface p-3 shadow-jp-card transition-all hover:border-jp-primary/30 hover:shadow-md focus-within:border-jp-primary/40 sm:px-4"
       data-testid="flight-result-card"
+      data-selected-fare-key={effectiveFareKey || undefined}
       aria-label={`${offer.airline_name ?? offer.airline_code ?? "Flight"} ${offer.departure_time ?? ""} to ${offer.arrival_time ?? ""}`}
     >
       <div className="grid items-center gap-3 md:grid-cols-[minmax(8rem,0.85fr)_minmax(16rem,2fr)_minmax(10.5rem,0.95fr)] lg:gap-4 xl:grid-cols-[minmax(10.5rem,1fr)_minmax(20rem,2.35fr)_minmax(12.5rem,0.95fr)]">
@@ -136,6 +158,11 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
           />
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <FareBadge refundable={offer.refundable} seatsLeft={offer.seats_left} />
+            {selectedOption?.name || selectedOption?.brand_name ? (
+              <span className="text-xs font-medium text-jp-text" data-testid="selected-fare-brand">
+                {selectedOption.name ?? selectedOption.brand_name}
+              </span>
+            ) : null}
           </div>
           {offer.multicity_inquiry_only ? (
             <MulticityInquiryActions
@@ -152,7 +179,9 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
 
         <div className="flex min-w-0 items-end justify-between gap-3 border-t border-jp-border-soft pt-3 md:h-full md:min-w-[10.5rem] md:flex-col md:items-end md:justify-center md:border-l md:border-t-0 md:pl-3 md:pt-0 xl:min-w-[12.5rem] xl:pl-4">
           <div className="text-right">
-            <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">{fareOptions.length > 1 ? "From" : "Total fare"}</p>
+            <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">
+              {fareOptions.length > 1 && !selectedOption ? "From" : "Total fare"}
+            </p>
             <p className="whitespace-nowrap text-lg font-bold text-jp-text" data-testid="result-price-display">
               {displayPrice ?? "Price unavailable"}
             </p>
@@ -192,10 +221,7 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
                 className="rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
                 data-testid="flight-details-trigger"
                 aria-label={`View details for ${offer.airline_name ?? "flight"}`}
-                onClick={() => {
-                  const fareKeyForDetails = resolveAuthoritativeFareOptionKey(selectedFareKey, fareOptions);
-                  onOpenDetails?.(offer, fareKeyForDetails ?? "", "details");
-                }}
+                onClick={() => openWithSelectedFare("details")}
               >
                 Details
               </button>
@@ -204,10 +230,7 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
                 className="rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 data-testid="book-now-trigger"
                 disabled={!offer.can_book || offer.multicity_inquiry_only}
-                onClick={() => {
-                  const fareKeyForDetails = resolveAuthoritativeFareOptionKey(fareOptions[0]?.option_key, fareOptions);
-                  onOpenDetails?.(offer, fareKeyForDetails ?? "", "booking");
-                }}
+                onClick={() => openWithSelectedFare("booking")}
               >
                 Book Now
               </button>
@@ -215,6 +238,22 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
           </div>
         </div>
       </div>
+
+      {showInlineCarousel ? (
+        <BrandedFareCarousel
+          options={fareOptions}
+          selectedKey={effectiveFareKey}
+          onSelect={setSelectedFareKey}
+          onBook={(optionKey) => {
+            setSelectedFareKey(optionKey);
+            const fareKeyForDetails = resolveAuthoritativeFareOptionKey(optionKey, fareOptions) ?? "";
+            setBookingOptionKey(optionKey);
+            onOpenDetails?.(offer, fareKeyForDetails, "booking");
+          }}
+          bookingOptionKey={bookingOptionKey}
+          disabled={!offer.can_book || offer.multicity_inquiry_only}
+        />
+      ) : null}
     </article>
   );
 }

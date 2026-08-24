@@ -31,6 +31,7 @@ class AdminSettingsHubController extends Controller
             ])),
             'Commerce' => array_values(array_filter([
                 $this->card('Payment methods', 'Gateways, manual payments, and proof policy.', 'admin.settings.payments.index'),
+                $this->card('Booking & Checkout', 'Guest booking and card payment availability.', 'admin.settings.booking-checkout.show'),
                 $this->card('Promo codes', 'Discount codes and usage limits.', 'admin.promo-codes.index'),
                 $this->card('Markup rules', 'Agency pricing markups on new bookings.', 'admin.markups'),
             ])),

@@ -190,6 +190,65 @@ class ReturnSplitSelectFlowTest extends TestCase
             ->assertStatus(410);
     }
 
+    public function test_search_criteria_cabin_query_does_not_empty_return_split_results(): void
+    {
+        // JP-BO-04G: Next.js always sends search cabin=economy on the results URL.
+        // That must not be treated as a results facet (offers often omit cabin).
+        $this->mockFlightSearch($this->roundTripOffers(2));
+
+        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-07-01&return_date=2026-07-08&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0')
+            ->assertOk();
+        preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
+        $searchId = $matches[1] ?? '';
+        $this->assertNotSame('', $searchId);
+
+        $leakingCabin = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&cabin=economy')
+            ->assertOk()
+            ->assertJsonPath('flow', 'return_split_outbound');
+        $this->assertNotEmpty($leakingCabin->json('outbound_options'));
+        $this->assertGreaterThan(0, (int) $leakingCabin->json('total'));
+
+        $explicitFacet = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&cabin_filter=business')
+            ->assertOk();
+        $this->assertSame(0, (int) $explicitFacet->json('total'));
+        $this->assertEmpty($explicitFacet->json('outbound_options') ?? []);
+    }
+
+    public function test_paired_view_includes_branded_fare_fields_when_present(): void
+    {
+        $offers = $this->roundTripOffers(1);
+        $offers[0]['cabin'] = 'economy';
+        $offers[0]['fare_family_options'] = [
+            [
+                'option_key' => 'fare-basic',
+                'name' => 'Economy Basic',
+                'selection_key_authoritative' => true,
+                'displayed_price' => 100100,
+            ],
+            [
+                'option_key' => 'fare-flex',
+                'name' => 'Economy Flex',
+                'selection_key_authoritative' => true,
+                'displayed_price' => 120100,
+            ],
+        ];
+        $this->mockFlightSearch($offers);
+
+        $page = $this->get('/flights/results?from=LHE&to=DXB&depart=2026-07-01&return_date=2026-07-08&trip_type=round_trip&cabin=economy&adults=1')
+            ->assertOk();
+        preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
+        $searchId = $matches[1] ?? '';
+
+        $response = $this->getJson('/flights/results/data?search_id='.$searchId.'&view=pair&page=1')
+            ->assertOk()
+            ->assertJsonPath('flow', 'return_pair');
+
+        $paired = $response->json('paired_options');
+        $this->assertNotEmpty($paired);
+        $this->assertArrayHasKey('outbound_journey', $paired[0]);
+        $this->assertArrayHasKey('return_journey', $paired[0]);
+    }
+
     /**
      * @param  list<array<string, mixed>>  $offers
      */

@@ -308,6 +308,15 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/promo-codes', $request->query()));
     }
 
+    public function adminBookingCheckoutSettings(Request $request): RedirectResponse|JsonResponse
+    {
+        if ($this->wantsBackOfficeJson($request)) {
+            return app(\App\Http\Controllers\Admin\CommerceCheckoutSettingsController::class)->show($request);
+        }
+
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/booking-checkout', $request->query()));
+    }
+
     public function adminAgenciesIndex(Request $request): RedirectResponse
     {
         return redirect()->to($this->pathWithQuery('/admin/dashboard/agents', $request->query()));

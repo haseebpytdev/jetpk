@@ -527,11 +527,15 @@ class FlightController extends Controller
         }
         $perPage = min($perPage, 25);
         $sort = (string) $request->query('sort', 'recommended');
+        // Prefer cabin_filter — search criteria also uses query key `cabin`.
+        // Treating search cabin as a facet empties return-split results when
+        // offer cabin codes do not exactly match the criteria string.
+        $cabinFacet = trim((string) $request->query('cabin_filter', ''));
         $filters = [
             'airline' => strtoupper(trim((string) $request->query('airline', ''))),
             'stops' => trim((string) $request->query('stops', '')),
             'refundable' => trim((string) $request->query('refundable', '')),
-            'cabin' => trim((string) $request->query('cabin', '')),
+            'cabin' => $cabinFacet,
             'baggage' => trim((string) $request->query('baggage', '')),
             'departure_window' => trim((string) $request->query('departure_window', '')),
             'arrival_window' => trim((string) $request->query('arrival_window', '')),

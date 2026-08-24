@@ -3,6 +3,7 @@
 namespace App\Services\PublicContent;
 
 use App\Enums\SupportTicketCategory;
+use App\Models\Agency;
 use App\Models\ClientPage;
 use App\Models\CmsPage;
 use App\Services\Agencies\AboutUsContentPresenter;
@@ -161,6 +162,9 @@ final class PublicContentApiPresenter
             'booking_lookup_path' => '/lookup-booking',
             'groups_path' => '/groups/search',
             'social_links' => $this->normalizeSocialLinks($social),
+            'commerce_gates' => app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->gates(
+                Agency::query()->where('slug', (string) config('ota.default_agency_slug', 'asif-travels'))->value('id')
+            ),
             'default_seo' => [
                 'title' => 'JetPakistan',
                 'description' => 'Book flights, hotels, and travel services with JetPakistan.',

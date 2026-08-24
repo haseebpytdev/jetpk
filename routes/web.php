@@ -184,6 +184,7 @@ Route::middleware('platform.module:public_umrah_groups')->group(function (): voi
 });
 
 Route::middleware('platform.module:customer_checkout')->group(function (): void {
+    Route::get('/booking/commerce-gates', [BookingController::class, 'commerceGates'])->name('booking.commerce-gates');
     Route::match(['get', 'post'], '/booking/passengers', [BookingController::class, 'passengers'])->middleware('throttle:public-booking-submit')->name('booking.passengers');
     Route::post('/booking/abandon-selected-offer', [BookingController::class, 'abandonSelectedOffer'])->middleware('throttle:public-booking-submit')->name('booking.abandon-selected-offer');
     Route::match(['get', 'post'], '/booking/review', [BookingController::class, 'review'])->middleware('throttle:public-booking-submit')->name('booking.review');

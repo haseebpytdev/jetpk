@@ -66,6 +66,10 @@ class PaymentTransactionService
 
     public function isAbhiPayAvailableForBooking(Booking $booking): bool
     {
+        if (! app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->isCardPaymentEnabled($booking->agency_id)) {
+            return false;
+        }
+
         return $this->activeAbhiPayGateway($booking->agency_id) !== null;
     }
 

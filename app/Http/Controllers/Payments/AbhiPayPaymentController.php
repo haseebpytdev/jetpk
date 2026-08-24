@@ -42,15 +42,19 @@ class AbhiPayPaymentController extends Controller
         }
 
         if (! $this->paymentTransactionService->isAbhiPayAvailableForBooking($booking)) {
+            $message = app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->isCardPaymentEnabled($booking->agency_id)
+                ? 'Online card payment is not available right now.'
+                : 'Card payments are currently disabled.';
+
             if ($this->wantsPaymentJson($request)) {
                 return response()->json([
                     'ok' => false,
                     'status' => 'unavailable',
-                    'message' => 'Online card payment is not available right now.',
+                    'message' => $message,
                 ], 422);
             }
 
-            return $this->paymentStartErrorRedirect($request, $booking, $token, 'Online card payment is not available right now.');
+            return $this->paymentStartErrorRedirect($request, $booking, $token, $message);
         }
 
         try {

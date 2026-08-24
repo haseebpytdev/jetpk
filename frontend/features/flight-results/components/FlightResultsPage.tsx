@@ -62,7 +62,7 @@ export function FlightResultsPage() {
         "airline",
         "stops",
         "refundable",
-        "cabin",
+        "cabin_filter",
         "baggage",
         "departure_window",
         "arrival_window",
@@ -76,8 +76,14 @@ export function FlightResultsPage() {
         "operating_airline",
         "flight_number",
       ].forEach((key) => next.delete(key));
+      // Never delete search criteria `cabin` — only sync facet `cabin_filter`.
       Object.entries(nextFilters).forEach(([key, value]) => {
-        if (value) next.set(key, value);
+        if (!value) return;
+        if (key === "cabin") {
+          next.set("cabin_filter", value);
+          return;
+        }
+        next.set(key, value);
       });
       if (extra) {
         Object.entries(extra).forEach(([key, value]) => {
@@ -266,12 +272,26 @@ export function FlightResultsPage() {
                         <PairReturnCard
                           option={option}
                           selecting={selectingCombo === option.combo_id}
-                          onSelect={(pair) => {
+                          onDetails={(pair, fareOptionKey) => {
+                            const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
+                            if (!resolvedSearchId) return;
+                            setDetailsContext({
+                              searchId: resolvedSearchId,
+                              offerId: pair.combo_id,
+                              comboId: pair.combo_id,
+                              outboundKey: pair.outbound_key,
+                              fareOptionKey,
+                              intent: "details",
+                            });
+                          }}
+                          onSelect={(pair, fareOptionKey) => {
                             setSelectingCombo(pair.combo_id);
                             void submitReturnComboSelection({
                               searchId: results.resolvedSearchId ?? "",
                               comboId: pair.combo_id,
                               outboundKey: pair.outbound_key ?? "",
+                              fareOptionKey,
+                              returnFareOptionKey: fareOptionKey,
                             });
                           }}
                         />

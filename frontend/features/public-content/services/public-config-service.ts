@@ -26,6 +26,10 @@ export type PublicConfig = {
     robots: string;
   };
   source: "laravel";
+  commerce_gates?: {
+    guest_booking_enabled: boolean;
+    card_payment_enabled: boolean;
+  };
 };
 
 function publicConfigEndpoint(): string {

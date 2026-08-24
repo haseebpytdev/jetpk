@@ -10,6 +10,7 @@ import {
 import type { RevalidateOfferResponse } from "@/features/flight-results/types";
 import type { RevalidationState } from "../types";
 import { isAllowedInternalHandoffUrl, providerRequiresRevalidation, resolvePassengerCheckoutHandoffUrl } from "../utils/handoff";
+import { redirectIfGuestBookingBlocked } from "@/features/standard-booking/services/commerce-gates-service";
 
 export type RevalidationParams = {
   searchId: string;
@@ -86,7 +87,7 @@ export function useRevalidation() {
     };
   }, []);
 
-  const navigateHandoff = useCallback((url: string, fareOptionKey?: string) => {
+  const navigateHandoff = useCallback(async (url: string, fareOptionKey?: string) => {
     let handoffUrl = url;
     const key = (fareOptionKey ?? "").trim();
     if (key) {
@@ -109,6 +110,9 @@ export function useRevalidation() {
     if (!resolved) {
       setState("error");
       setMessage("Unable to continue to checkout. Please try again.");
+      return false;
+    }
+    if (await redirectIfGuestBookingBlocked(resolved)) {
       return false;
     }
     window.location.assign(resolved);
@@ -178,10 +182,13 @@ export function useRevalidation() {
 
           const passengersUrl = result.data.passengers_url;
           if (passengersUrl) {
-            navigateHandoff(
+            const ok = await navigateHandoff(
               passengersUrl,
               params.fareOptionKey || result.data.selected_fare_option_id || undefined,
             );
+            if (!ok) {
+              return;
+            }
             setState("success");
             return;
           }
@@ -199,7 +206,10 @@ export function useRevalidation() {
           params.fareOptionKey ?? params.offerId,
           params.searchId,
         );
-        navigateHandoff(checkoutUrl, params.fareOptionKey);
+        const ok = await navigateHandoff(checkoutUrl, params.fareOptionKey);
+        if (!ok) {
+          return;
+        }
         setState("success");
       } finally {
         inFlightRef.current = false;
@@ -241,7 +251,7 @@ export function useRevalidation() {
         }
 
         const passengersUrl = result.data.passengers_url ?? pendingHandoffRef.current;
-        if (!passengersUrl || !navigateHandoff(passengersUrl, params.fareOptionKey)) {
+        if (!passengersUrl || !(await navigateHandoff(passengersUrl, params.fareOptionKey))) {
           setState("error");
           setMessage("Unable to accept the updated fare. Please try again.");
           return;
@@ -251,7 +261,7 @@ export function useRevalidation() {
       }
 
       const handoff = pendingHandoffRef.current ?? fareChange?.passengersUrl ?? null;
-      if (!handoff || !navigateHandoff(handoff, params.fareOptionKey)) {
+      if (!handoff || !(await navigateHandoff(handoff, params.fareOptionKey))) {
         setState("error");
         setMessage("Unable to accept the updated fare. Please try again.");
       } else {

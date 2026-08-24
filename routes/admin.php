@@ -241,6 +241,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     });
     Route::get('/settings', [BackOfficeLegacyViewRedirectController::class, 'adminSettingsIndex'])->name('settings.index');
 
+    Route::get('/settings/booking-checkout', [BackOfficeLegacyViewRedirectController::class, 'adminBookingCheckoutSettings'])->name('settings.booking-checkout.show');
+    Route::patch('/settings/booking-checkout', [\App\Http\Controllers\Admin\CommerceCheckoutSettingsController::class, 'update'])->name('settings.booking-checkout.update');
+
     Route::get('/settings/payments', [BackOfficeLegacyViewRedirectController::class, 'adminIntegrationsAbhiPay'])->name('settings.payments.index');
     Route::patch('/settings/payments/abhipay', [AgencyPaymentSettingsController::class, 'updateAbhiPay'])->name('settings.payments.abhipay.update');
     Route::post('/settings/payments/abhipay/test', [AgencyPaymentSettingsController::class, 'testAbhiPay'])

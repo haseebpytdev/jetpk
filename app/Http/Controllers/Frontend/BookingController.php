@@ -19,6 +19,7 @@ use App\Models\User;
 use App\Services\Booking\BookingDraftService;
 use App\Services\Booking\BookingProviderRouter;
 use App\Services\Booking\BookingService;
+use App\Services\Commerce\CommerceCheckoutSettingsService;
 use App\Services\Booking\InternationalRouteDetector;
 use App\Services\Bookings\FareHoldService;
 use App\Services\Communication\BookingCommunicationService;
@@ -120,10 +121,27 @@ class BookingController extends Controller
         protected PiaNdcOptionPnrService $piaNdcOptionPnrService,
         protected PiaNdcSelectedFareReadinessService $piaNdcSelectedFareReadinessService,
         protected StandardBookingJsonPresenter $standardBookingJsonPresenter,
+        protected CommerceCheckoutSettingsService $commerceCheckoutSettings,
     ) {}
+
+    public function commerceGates(Request $request): JsonResponse
+    {
+        $agencyId = null;
+        $channel = $this->checkoutChannelContext($request);
+        $agency = $channel['agency'] ?? null;
+        if ($agency instanceof Agency) {
+            $agencyId = $agency->id;
+        }
+
+        return response()->json($this->commerceCheckoutSettings->gates($agencyId));
+    }
 
     public function passengers(StoreBookingPassengersRequest $request): View|RedirectResponse|JsonResponse
     {
+        if ($gate = $this->guestCheckoutGateResponse($request)) {
+            return $gate;
+        }
+
         $checkoutContext = app(ClientCheckoutContextResolver::class);
         $checkoutContext->persist($request);
 
@@ -1406,6 +1424,10 @@ class BookingController extends Controller
     public function review(Request $request): View|RedirectResponse|JsonResponse
     {
         $this->logBookingRouteEntry($request);
+
+        if ($gate = $this->guestCheckoutGateResponse($request)) {
+            return $gate;
+        }
 
         if ($request->isMethod('post')) {
             return $this->reviewJsonOrRedirect($request, $this->processReviewSubmit($request));
@@ -4493,6 +4515,19 @@ class BookingController extends Controller
     {
         return $request->wantsJson() || $request->query('format') === 'json';
     }
+
+    protected function guestCheckoutGateResponse(Request $request): RedirectResponse|JsonResponse|null
+    {
+        $agencyId = null;
+        $channel = $this->checkoutChannelContext($request);
+        $agency = $channel['agency'] ?? null;
+        if ($agency instanceof Agency) {
+            $agencyId = $agency->id;
+        }
+
+        return $this->commerceCheckoutSettings->guestBookingGateResponse($request, $agencyId);
+    }
+
     protected function processReviewSubmit(Request $request): RedirectResponse
     {
             $validated = $request->validate([
@@ -4597,6 +4632,11 @@ class BookingController extends Controller
             }
 
             $method = (string) $validated['booking_method'];
+            if ($method === 'online_card' && ! $this->commerceCheckoutSettings->isCardPaymentEnabled($booking->agency_id)) {
+                return $this->clientRedirect()->route('booking.review')
+                    ->withErrors(['booking_method' => 'Card payments are currently disabled.']);
+            }
+
             $canonical = match ($method) {
                 'pay_later', 'pay_later_booking_request' => 'pay_later_booking_request',
                 'bank_transfer', 'offline_bank_transfer' => 'offline_bank_transfer',

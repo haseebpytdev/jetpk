@@ -1,9 +1,12 @@
 "use client";
 
+import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
 import { useRouter } from "next/navigation";
-import type { OutboundOption } from "../types";
+import { useMemo, useState } from "react";
+import type { FareFamilyOption, OutboundOption } from "../types";
 import { formatDisplayPrice } from "../utils/price";
 import { AirlineIdentity } from "./AirlineIdentity";
+import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { PriceBlock } from "./PriceBlock";
 import { StopsAndLayover } from "./StopsAndLayover";
 import { TimeRouteBlock } from "./TimeRouteBlock";
@@ -13,12 +16,26 @@ type OutboundOptionCardProps = {
   searchId: string;
 };
 
+function resolveFareOptions(option: OutboundOption): FareFamilyOption[] {
+  return option.branded_fares_display_options ?? option.fare_family_options_display ?? [];
+}
+
 export function OutboundOptionCard({ option, searchId }: OutboundOptionCardProps) {
   const router = useRouter();
   const journey = option.journey_display;
+  const fareOptions = useMemo(() => resolveFareOptions(option), [option]);
+  const [selectedFareKey, setSelectedFareKey] = useState(() => fareOptions[0]?.option_key ?? "");
+  const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey) ?? fareOptions[0];
+  const effectiveFareKey = selectedOption?.option_key ?? selectedFareKey;
 
-  const handleSelect = () => {
-    router.push(`/flights/return-options?search_id=${encodeURIComponent(searchId)}&outbound_key=${encodeURIComponent(option.outbound_key)}`);
+  const handleSelect = (fareKey?: string) => {
+    const key = resolveAuthoritativeFareOptionKey(fareKey ?? effectiveFareKey, fareOptions);
+    const qs = new URLSearchParams({
+      search_id: searchId,
+      outbound_key: option.outbound_key,
+    });
+    if (key) qs.set("outbound_fare_option_key", key);
+    router.push(`/flights/return-options?${qs.toString()}`);
   };
 
   return (
@@ -43,16 +60,33 @@ export function OutboundOptionCard({ option, searchId }: OutboundOptionCardProps
           {option.combo_count ? (
             <p className="text-xs text-jp-text-muted">{option.combo_count} return option{option.combo_count === 1 ? "" : "s"}</p>
           ) : null}
+          {selectedOption?.name || selectedOption?.brand_name ? (
+            <p className="text-xs font-medium text-jp-text" data-testid="outbound-selected-brand">
+              Outbound fare: {selectedOption.name ?? selectedOption.brand_name}
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-col items-stretch gap-1 sm:items-end">
           <p className="text-xs text-jp-text-muted">From total return fare</p>
           <PriceBlock
-            amount={option.from_total_amount}
-            priceDisplay={option.from_total_display ?? formatDisplayPrice(option.from_total_amount)}
-            onSelect={handleSelect}
+            amount={selectedOption?.displayed_price ?? option.from_total_amount}
+            priceDisplay={
+              selectedOption?.price_display
+              ?? option.from_total_display
+              ?? formatDisplayPrice(option.from_total_amount)
+            }
+            onSelect={() => handleSelect()}
           />
         </div>
       </div>
+      {fareOptions.length > 1 ? (
+        <BrandedFareCarousel
+          options={fareOptions}
+          selectedKey={effectiveFareKey}
+          onSelect={setSelectedFareKey}
+          onBook={(optionKey) => handleSelect(optionKey)}
+        />
+      ) : null}
     </article>
   );
 }

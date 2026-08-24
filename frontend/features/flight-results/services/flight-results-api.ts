@@ -9,6 +9,7 @@ import type {
   RevalidateOfferResponse,
   ReturnOptionsDataResponse,
 } from "../types";
+import { appendFiltersToQuery } from "../utils/filters";
 
 const JSON_HEADERS = {
   Accept: "application/json",
@@ -42,9 +43,7 @@ export async function fetchFlightResultsData(
     query.set("view", params.view);
   }
   if (params.filters) {
-    Object.entries(params.filters).forEach(([key, value]) => {
-      if (value) query.set(key, value);
-    });
+    appendFiltersToQuery(query, params.filters);
   }
 
   try {

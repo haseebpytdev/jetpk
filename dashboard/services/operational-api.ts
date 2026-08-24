@@ -70,6 +70,7 @@ import {
   financeAdjustmentIndexPath,
   financeAdjustmentCreatePath,
   communicationsSettingsPath,
+  bookingCheckoutSettingsPath,
   communicationsTestEmailPath,
   communicationsTestWhatsappPath,
   groupBookingRejectPaymentPath,
@@ -814,6 +815,29 @@ export async function updateCommunicationSettings(
 ): Promise<MutationResponse<{ settings?: Record<string, unknown> }>> {
   return unwrapLaravelData(
     await laravelRequest<{ settings?: Record<string, unknown> }>(communicationsSettingsPath(), {
+      method: "PATCH",
+      json: payload,
+      retryCsrfOnce: false,
+    }),
+  );
+}
+
+export async function loadBookingCheckoutSettings(): Promise<
+  MutationResponse<{ settings?: Record<string, unknown> }>
+> {
+  return unwrapLaravelData(
+    await laravelRequest<{ settings?: Record<string, unknown> }>(bookingCheckoutSettingsPath(), {
+      method: "GET",
+      retryCsrfOnce: false,
+    }),
+  );
+}
+
+export async function updateBookingCheckoutSettings(
+  payload: Record<string, unknown>,
+): Promise<MutationResponse<{ settings?: Record<string, unknown> }>> {
+  return unwrapLaravelData(
+    await laravelRequest<{ settings?: Record<string, unknown> }>(bookingCheckoutSettingsPath(), {
       method: "PATCH",
       json: payload,
       retryCsrfOnce: false,

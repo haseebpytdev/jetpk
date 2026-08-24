@@ -84,6 +84,7 @@ export const navGroups: NavGroup[] = [
     label: "System",
     items: [
       { label: "Settings", href: "/settings", laravelRoute: "admin.settings.index" },
+      { label: "Booking & Checkout", href: "/settings/booking-checkout", laravelRoute: "admin.settings.booking-checkout.show" },
       { label: "Promo codes", href: "/settings/promo-codes", laravelRoute: "admin.promo-codes.index" },
       { label: "System health", href: "/system/health" },
       { label: "Go-live checklist", href: "/system/go-live" },

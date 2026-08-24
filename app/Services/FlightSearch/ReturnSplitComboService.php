@@ -202,7 +202,7 @@ class ReturnSplitComboService
             }
             $total = $this->comboFinalPrice($combo);
             $code = strtoupper((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')));
-            $rows[] = [
+            $rows[] = array_merge([
                 'combo_id' => $comboId,
                 'outbound_key' => (string) ($combo['outbound_key'] ?? ''),
                 'return_key' => (string) ($combo['return_key'] ?? ''),
@@ -219,7 +219,7 @@ class ReturnSplitComboService
                 'refundable' => (bool) ($offer['refundable'] ?? false),
                 'can_book' => $total !== null && $total > 0,
                 'pairing_authority' => 'SUPPLIER_RETURNED',
-            ];
+            ], $this->mapSplitOptionFields($offer, $criteria, $comboId, $cityMap, $airlineNameMap));
         }
 
         usort($rows, function (array $a, array $b): int {

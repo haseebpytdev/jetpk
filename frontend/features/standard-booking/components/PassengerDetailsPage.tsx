@@ -81,8 +81,13 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       setLoading(false);
 
       if (!response.ok) {
-        const data = response.data as { status?: string; redirect_url?: string } | undefined;
+        const data = response.data as { status?: string; redirect_url?: string; register_url?: string } | undefined;
         const apiStatus = (data?.status ?? "").toLowerCase();
+        if (response.status === 401 || apiStatus === "guest_booking_disabled") {
+          const authRedirect = data?.redirect_url ?? `/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+          window.location.assign(authRedirect);
+          return;
+        }
         if (response.status === 0) {
           setErrorStatus("network_error");
         } else if (response.status === 404 || apiStatus === "missing_session") {

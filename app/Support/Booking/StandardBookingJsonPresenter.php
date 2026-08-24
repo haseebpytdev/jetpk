@@ -97,6 +97,7 @@ class StandardBookingJsonPresenter
                 'agent_booking_mode' => (bool) ($viewData['agentBookingMode'] ?? false),
                 'agent_contact_locked' => (bool) ($viewData['agentBookingContactLocked'] ?? false),
             ],
+            'commerce_gates' => app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->gates(),
             'validation_result' => $viewData['validationResult'] ?? null,
             'validation_alert' => $viewData['validationAlert'] ?? null,
             'fare_estimate_drift' => (bool) ($viewData['selectedFareEstimateDriftDetected'] ?? false),
@@ -542,6 +543,7 @@ class StandardBookingJsonPresenter
             'documents' => $this->presentDocumentSummary($booking),
             'pricing' => $this->presentAuthoritativePricing($checkoutFareBreakdown, $booking),
             'payment_methods' => $this->presentPaymentMethods($abhiPay),
+            'commerce_gates' => app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->gates($booking->agency_id),
             'terms' => [
                 'required' => false,
                 'terms_url' => '/terms',

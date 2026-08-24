@@ -159,6 +159,10 @@ export type PairedReturnOption = {
   airline_name?: string;
   airline_code?: string;
   pairing_authority?: string;
+  branded_fares_display_options?: FareFamilyOption[];
+  fare_family_options_display?: FareFamilyOption[];
+  has_branded_fares?: boolean;
+  has_fare_choice_options?: boolean;
 };
 
 export type OutboundOption = {
@@ -182,6 +186,10 @@ export type OutboundOption = {
   from_total_display?: string;
   combo_count?: number;
   select_return_url?: string;
+  branded_fares_display_options?: FareFamilyOption[];
+  fare_family_options_display?: FareFamilyOption[];
+  has_branded_fares?: boolean;
+  has_fare_choice_options?: boolean;
 };
 
 export type ResultsFilterMeta = {
@@ -230,6 +238,7 @@ export type ReturnOptionsDataResponse = {
   per_page: number;
   total: number;
   has_more: boolean;
+  empty_message?: string;
   search_freshness?: SearchFreshness;
 };
 

@@ -307,6 +307,10 @@ export function communicationsSettingsPath(): string {
   return laravelPortalPath("admin", "/settings/communications?format=json");
 }
 
+export function bookingCheckoutSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/booking-checkout?format=json");
+}
+
 export function communicationsTestEmailPath(): string {
   return laravelPortalPath("admin", "/settings/communications/test-email?format=json");
 }

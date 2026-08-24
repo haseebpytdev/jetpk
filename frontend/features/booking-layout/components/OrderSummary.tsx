@@ -45,7 +45,127 @@ function customerTotalLabel(
   return formatWholePkr(Number(trimmed.replace(/,/g, ""))) ?? `${currency || "PKR"} ${trimmed}`;
 }
 
+function ReturnSplitLegs({ returnSplit }: { returnSplit: Record<string, unknown> }) {
+  const outbound = (returnSplit.outbound ?? null) as Record<string, unknown> | null;
+  const inbound = (returnSplit.return ?? null) as Record<string, unknown> | null;
+  const totals = (returnSplit.totals ?? null) as Record<string, unknown> | null;
+
+  const renderLeg = (label: string, leg: Record<string, unknown> | null, testId: string) => {
+    if (!leg) return null;
+    const brand = String(
+      leg.branded_fare_title
+      ?? leg.fare_family_title
+      ?? leg.fare_family
+      ?? leg.brand_name
+      ?? leg.selected_fare_name
+      ?? "",
+    ).trim();
+    const baggage = String(leg.baggage ?? leg.baggage_summary ?? "").trim();
+    const flight = String(leg.flight_number ?? "").trim();
+    const cabin = String(leg.cabin ?? "").trim();
+    const route = String(
+      leg.route_label
+      ?? `${leg.departure_airport ?? leg.origin ?? ""} → ${leg.arrival_airport ?? leg.destination ?? ""}`,
+    ).trim();
+    const date = String(leg.date_label ?? leg.date_display ?? leg.depart_date ?? leg.date ?? "").trim();
+    const times = [leg.departure_time ?? leg.departure_time_display, leg.arrival_time ?? leg.arrival_time_display]
+      .map((v) => (typeof v === "string" ? v.trim() : ""))
+      .filter(Boolean)
+      .join(" → ");
+    const stops = String(leg.stops_label ?? leg.stops_label_display ?? "").trim();
+    const aircraft = String(leg.aircraft ?? "").trim();
+    const duration = String(leg.duration ?? "").trim();
+
+    return (
+      <div className="rounded-jp-md border border-jp-border-soft bg-jp-page px-3 py-2" data-testid={testId}>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-jp-primary">{label}</p>
+        {route ? <p className="mt-1 text-sm font-medium text-jp-text">{route}</p> : null}
+        {date || times ? (
+          <p className="text-xs text-jp-muted">
+            {[date, times].filter(Boolean).join(" · ")}
+          </p>
+        ) : null}
+        <dl className="mt-1 space-y-0.5 text-xs text-jp-muted">
+          {flight ? (
+            <div className="flex justify-between gap-2">
+              <dt>Flight</dt>
+              <dd className="text-jp-text">{flight}</dd>
+            </div>
+          ) : null}
+          {duration ? (
+            <div className="flex justify-between gap-2">
+              <dt>Duration</dt>
+              <dd className="text-jp-text">{duration}</dd>
+            </div>
+          ) : null}
+          {stops ? (
+            <div className="flex justify-between gap-2">
+              <dt>Stops</dt>
+              <dd className="text-jp-text">{stops}</dd>
+            </div>
+          ) : null}
+          {aircraft ? (
+            <div className="flex justify-between gap-2">
+              <dt>Aircraft</dt>
+              <dd className="text-jp-text">{aircraft}</dd>
+            </div>
+          ) : null}
+          {cabin ? (
+            <div className="flex justify-between gap-2">
+              <dt>Cabin</dt>
+              <dd className="capitalize text-jp-text">{cabin}</dd>
+            </div>
+          ) : null}
+          {brand ? (
+            <div className="flex justify-between gap-2">
+              <dt>Selected fare</dt>
+              <dd className="text-jp-text">{brand}</dd>
+            </div>
+          ) : null}
+          {baggage ? (
+            <div className="flex justify-between gap-2">
+              <dt>Baggage</dt>
+              <dd className="text-jp-text">{baggage}</dd>
+            </div>
+          ) : null}
+        </dl>
+      </div>
+    );
+  };
+
+  return (
+    <div className="mt-3 space-y-2" data-testid="return-split-summary">
+      {renderLeg("Outbound", outbound, "return-split-outbound")}
+      {renderLeg("Return", inbound, "return-split-return")}
+      {totals?.grand_total_display || totals?.selected_total_display ? (
+        <p className="text-sm font-semibold text-jp-text" data-testid="return-split-total">
+          Fare total: {String(totals.grand_total_display ?? totals.selected_total_display)}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function ItineraryRows({ itinerary, travellerTotal }: { itinerary: SelectedFlightSummary; travellerTotal?: number }) {
+  const returnSplit = itinerary.return_split && typeof itinerary.return_split === "object"
+    ? itinerary.return_split
+    : null;
+  const isReturnSplit = Boolean(returnSplit?.is_return_split);
+
+  if (isReturnSplit && returnSplit) {
+    return (
+      <div className="space-y-2 text-jp-sm">
+        <p className="font-medium text-jp-text">
+          {itinerary.route_label ?? `${itinerary.origin} ⇄ ${itinerary.destination}`}
+        </p>
+        <ReturnSplitLegs returnSplit={returnSplit} />
+        {travellerTotal != null ? (
+          <p className="text-xs text-jp-muted">Passengers: {travellerTotal}</p>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2 text-jp-sm">
       <p className="font-medium text-jp-text">
@@ -106,6 +226,49 @@ function FlightPreviewCard({
   itinerary: SelectedFlightSummary;
   travellerTotal?: number;
 }) {
+  const returnSplit = itinerary.return_split && typeof itinerary.return_split === "object"
+    ? itinerary.return_split
+    : null;
+  const isReturnSplit = Boolean(returnSplit?.is_return_split);
+
+  if (isReturnSplit && returnSplit) {
+    const needsRefresh = Boolean(itinerary.price_needs_refresh || itinerary.price_is_approximate);
+    const totalLabel = needsRefresh
+      ? null
+      : customerTotalLabel(itinerary.currency, itinerary.total_formatted)
+        ?? String((returnSplit.totals as Record<string, unknown> | undefined)?.grand_total_display ?? "");
+
+    return (
+      <div className="mt-3 space-y-3" data-testid="flight-preview-body">
+        <p className="text-sm font-semibold text-jp-text">
+          {itinerary.route_label ?? `${itinerary.origin} ⇄ ${itinerary.destination}`}
+        </p>
+        <ReturnSplitLegs returnSplit={returnSplit} />
+        {travellerTotal != null ? (
+          <p className="text-xs text-jp-muted" data-testid="flight-preview-pax">
+            Passengers: {travellerTotal}
+          </p>
+        ) : null}
+        {needsRefresh ? (
+          <div
+            className="rounded-jp-md border border-amber-300 bg-amber-50 px-3 py-3 dark:border-amber-800 dark:bg-amber-950/30"
+            data-testid="order-summary-price-refresh"
+            role="status"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-100">
+              Price needs to be refreshed
+            </p>
+          </div>
+        ) : totalLabel ? (
+          <div className="rounded-jp-md bg-jp-primary/5 px-3 py-3" data-testid="order-summary-total">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-jp-text-muted">Total</p>
+            <p className="text-lg font-bold tabular-nums text-jp-primary">{totalLabel}</p>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   const first = itinerary.segments?.[0];
   const last = itinerary.segments?.[itinerary.segments.length - 1];
   const departure =
@@ -174,7 +337,7 @@ function FlightPreviewCard({
 
       <div className="flex flex-wrap gap-1.5 text-xs text-jp-muted">
         {itinerary.duration ? (
-          <span className="rounded-jp-pill bg-jp-page px-2 py-1" data-testid="flight-preview-duration">
+          <span className="rounded-jp-md bg-jp-page px-2 py-1" data-testid="flight-preview-duration">
             {itinerary.duration}
           </span>
         ) : null}
