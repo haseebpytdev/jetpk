@@ -39,21 +39,10 @@ export default async function CommissionsPage() {
             </div>
           ))}
         </div>
-        <CommissionsWorkspace pendingEntries={overview.pendingEntries ?? []} />
+        <CommissionsWorkspace pendingEntries={overview.pendingEntries ?? []} agents={overview.agents} />
         {overview.agents.length === 0 ? (
           <EmptyState title="No agents" description="No commission agents are available for this agency." />
-        ) : (
-          <ul className="mt-4 divide-y divide-jp-border rounded-xl border border-jp-border bg-white" data-testid="commissions-agents">
-            {overview.agents.map((agent) => (
-              <li key={agent.id} className="p-4 text-sm">
-                <p className="font-medium text-gray-900">
-                  {agent.name} <span className="text-jp-muted">({agent.code})</span>
-                </p>
-                <p className="text-jp-muted">Balance snapshot available from Laravel commission service.</p>
-              </li>
-            ))}
-          </ul>
-        )}
+        ) : null}
       </PageContainer>
     );
   } catch (error) {

@@ -101,41 +101,69 @@ class AgentCommissionController extends Controller
         return back()->with('status', 'commission-entry-rejected');
     }
 
-    public function adjustment(Request $request, Agent $agent): RedirectResponse
+    public function adjustment(Request $request, Agent $agent): RedirectResponse|JsonResponse
     {
         Gate::authorize('commission.adjust', $agent);
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'amount' => ['required', 'numeric'],
             'description' => ['nullable', 'string', 'max:255'],
         ]);
         $entry = $this->commissionService->recordAdjustment($agent, $request->user(), $validated);
         $this->commissionService->writeAudit($agent, $request->user(), 'agent.commission_adjustment_recorded', ['entry_id' => $entry->id]);
+        $entry->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'entry' => $this->presentEntry($entry),
+            ]);
+        }
 
         return back()->with('status', 'commission-adjustment-recorded');
     }
 
-    public function payout(Request $request, Agent $agent): RedirectResponse
+    public function payout(Request $request, Agent $agent): RedirectResponse|JsonResponse
     {
         Gate::authorize('commission.payout', $agent);
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'amount' => ['required', 'numeric', 'min:0.01'],
             'description' => ['nullable', 'string', 'max:255'],
         ]);
         $entry = $this->commissionService->recordPayout($agent, $request->user(), $validated);
         $this->commissionService->writeAudit($agent, $request->user(), 'agent.commission_payout_recorded', ['entry_id' => $entry->id]);
+        $entry->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'entry' => $this->presentEntry($entry),
+            ]);
+        }
 
         return back()->with('status', 'commission-payout-recorded');
     }
 
-    public function statement(Request $request, Agent $agent): RedirectResponse
+    public function statement(Request $request, Agent $agent): RedirectResponse|JsonResponse
     {
         Gate::authorize('commission.statement', $agent);
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'period_start' => ['nullable', 'date'],
             'period_end' => ['nullable', 'date'],
         ]);
         $statement = $this->commissionService->buildStatement($agent, $request->user(), $validated['period_start'] ?? null, $validated['period_end'] ?? null);
         $this->commissionService->writeAudit($agent, $request->user(), 'agent.commission_statement_generated', ['statement_id' => $statement->id]);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'statement' => [
+                    'id' => (string) $statement->id,
+                    'agent_id' => (string) $agent->id,
+                    'period_start' => $statement->period_start?->toDateString(),
+                    'period_end' => $statement->period_end?->toDateString(),
+                ],
+            ]);
+        }
 
         return back()->with('status', 'commission-statement-generated');
     }

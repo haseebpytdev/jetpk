@@ -11,6 +11,13 @@ import {
   verifyGroupBookingPayment,
 } from "@/services/operational-api";
 
+function newIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `ops07-${Date.now()}`;
+}
+
 export function FinanceOperationalPanel() {
   const isLive = useDashboardLiveMode();
   const [busy, setBusy] = useState<string | null>(null);
@@ -41,6 +48,10 @@ export function FinanceOperationalPanel() {
   return (
     <div className="space-y-3 rounded-xl border border-jp-border p-4" data-testid="finance-operational-panel">
       <h2 className="text-sm font-semibold text-gray-900">Finance operations</h2>
+      <p className="text-xs text-jp-muted">
+        Smoke controls for connected mutation routes. Prefer Accounting, Deposits, and Commissions workspaces for
+        operator work.
+      </p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {message ? <p className="text-sm text-green-700">{message}</p> : null}
       <div className="flex flex-wrap gap-2">
@@ -88,11 +99,13 @@ export function FinanceOperationalPanel() {
           onClick={() =>
             run("finance-store", () =>
               storeFinanceAdjustment({
-                agent_id: 1,
+                agency_id: 1,
+                adjustment_type: "manual_credit",
                 amount: 100,
-                currency: "PKR",
-                reason: "ops-07-test",
-                direction: "credit",
+                adjustment_reason: "other",
+                adjustment_note: "ops-07-test",
+                idempotency_key: newIdempotencyKey(),
+                confirmation: true,
               }),
             )
           }
@@ -104,7 +117,7 @@ export function FinanceOperationalPanel() {
           className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
           disabled={busy !== null}
           data-testid="finance-adjustment-reverse"
-          onClick={() => run("finance-reverse", () => reverseFinanceAdjustment("1"))}
+          onClick={() => run("finance-reverse", () => reverseFinanceAdjustment("1", "ops-07 reverse", true))}
         >
           Reverse adjustment
         </button>

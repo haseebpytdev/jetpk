@@ -33,7 +33,7 @@ class FinanceAdjustmentController extends Controller
         protected ManualWalletAdjustmentExportService $exportService,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         abort_unless($this->policy->viewAny($request->user()), 403);
 
@@ -56,6 +56,24 @@ class FinanceAdjustmentController extends Controller
             ? array_fill_keys(array_values($reversalOfIds), true)
             : [];
 
+        if ($this->wantsBackOfficeJson($request)) {
+            $items = [];
+            foreach ($transactions as $tx) {
+                $items[] = $this->presentWalletTransactionForDashboard($request, $tx);
+            }
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'transactions' => $items,
+                'reason_categories' => ManualWalletAdjustmentService::REASON_CATEGORIES,
+                'pagination' => [
+                    'current_page' => $transactions->currentPage(),
+                    'last_page' => $transactions->lastPage(),
+                    'total' => $transactions->total(),
+                ],
+            ]);
+        }
+
         return view('dashboard.admin.finance.adjustments.index', [
             'transactions' => $transactions,
             'reversalOfIds' => $reversalOfIds,
@@ -74,7 +92,7 @@ class FinanceAdjustmentController extends Controller
         );
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): View|JsonResponse
     {
         abort_unless($this->policy->create($request->user()), 403);
 
@@ -83,13 +101,28 @@ class FinanceAdjustmentController extends Controller
         $canonicalSummary = $selectedAgencyId > 0
             ? $this->walletService->canonicalWalletSummary($selectedAgencyId)
             : null;
+        $idempotencyKey = old('idempotency_key', ManualWalletAdjustmentService::generateIdempotencyKey());
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'agencies' => $agencies->map(static fn (Agency $agency): array => [
+                    'id' => (string) $agency->id,
+                    'name' => (string) $agency->name,
+                ])->values()->all(),
+                'selected_agency_id' => $selectedAgencyId > 0 ? (string) $selectedAgencyId : null,
+                'canonical_summary' => $canonicalSummary,
+                'reason_categories' => ManualWalletAdjustmentService::REASON_CATEGORIES,
+                'idempotency_key' => $idempotencyKey,
+            ]);
+        }
 
         return view('dashboard.admin.finance.adjustments.create', [
             'agencies' => $agencies,
             'selectedAgencyId' => $selectedAgencyId,
             'canonicalSummary' => $canonicalSummary,
             'reasonCategories' => ManualWalletAdjustmentService::REASON_CATEGORIES,
-            'idempotencyKey' => old('idempotency_key', ManualWalletAdjustmentService::generateIdempotencyKey()),
+            'idempotencyKey' => $idempotencyKey,
         ]);
     }
 
@@ -135,7 +168,7 @@ class FinanceAdjustmentController extends Controller
             ->with('status', $status);
     }
 
-    public function show(Request $request, AgentWalletTransaction $walletTransaction): View
+    public function show(Request $request, AgentWalletTransaction $walletTransaction): View|JsonResponse
     {
         abort_unless($this->policy->view($request->user(), $walletTransaction), 403);
 
@@ -171,6 +204,23 @@ class FinanceAdjustmentController extends Controller
             }
         }
 
+        $canReverse = $this->policy->reverse($request->user(), $walletTransaction);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'wallet_transaction' => $this->presentWalletTransactionForDashboard($request, $walletTransaction),
+                'ledger_transaction_id' => $ledgerTransaction?->id !== null ? (string) $ledgerTransaction->id : null,
+                'reversal' => $reversalTransaction !== null
+                    ? $this->presentWalletTransactionForDashboard($request, $reversalTransaction)
+                    : null,
+                'original' => $originalTransaction !== null
+                    ? $this->presentWalletTransactionForDashboard($request, $originalTransaction)
+                    : null,
+                'can_reverse' => $canReverse,
+            ]);
+        }
+
         return view('dashboard.admin.finance.adjustments.show', [
             'transaction' => $walletTransaction,
             'ledgerTransaction' => $ledgerTransaction,
@@ -178,15 +228,23 @@ class FinanceAdjustmentController extends Controller
             'reversalLedgerTransaction' => $reversalLedgerTransaction,
             'originalTransaction' => $originalTransaction,
             'originalLedgerTransaction' => $originalLedgerTransaction,
-            'canReverse' => $this->policy->reverse($request->user(), $walletTransaction),
+            'canReverse' => $canReverse,
         ]);
     }
 
-    public function reverseConfirm(Request $request, AgentWalletTransaction $walletTransaction): View
+    public function reverseConfirm(Request $request, AgentWalletTransaction $walletTransaction): View|JsonResponse
     {
         abort_unless($this->policy->reverse($request->user(), $walletTransaction), 403);
 
         $walletTransaction->load(['agency', 'wallet.agent.user', 'creator']);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'wallet_transaction' => $this->presentWalletTransactionForDashboard($request, $walletTransaction),
+                'can_reverse' => true,
+            ]);
+        }
 
         return view('dashboard.admin.finance.adjustments.reverse', [
             'transaction' => $walletTransaction,
@@ -239,5 +297,29 @@ class FinanceAdjustmentController extends Controller
             'amount' => (float) $transaction->amount,
             'currency' => $transaction->currency,
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentWalletTransactionForDashboard(Request $request, AgentWalletTransaction $transaction): array
+    {
+        $meta = is_array($transaction->meta) ? $transaction->meta : [];
+        $transaction->loadMissing(['agency', 'creator']);
+
+        return array_merge($this->presentWalletTransaction($transaction), [
+            'agency_name' => $transaction->agency?->name,
+            'status' => $transaction->status?->value ?? (string) $transaction->status,
+            'reference' => $transaction->reference,
+            'note' => $transaction->description,
+            'adjustment_reason' => $meta['adjustment_reason'] ?? null,
+            'is_reversal' => $this->adjustments->isReversalTransaction($transaction),
+            'reversal_of_wallet_transaction_id' => isset($meta['reversal_of_wallet_transaction_id'])
+                ? (string) $meta['reversal_of_wallet_transaction_id']
+                : null,
+            'can_reverse' => $this->policy->reverse($request->user(), $transaction),
+            'created_at' => $transaction->created_at?->toIso8601String(),
+            'created_by' => $transaction->creator?->name,
+        ]);
     }
 }
