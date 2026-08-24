@@ -345,11 +345,11 @@ class BookingManagementController extends Controller
         return response()->json(['suggestions' => $rows]);
     }
 
-    public function createSupplierBooking(Request $request, Booking $booking): RedirectResponse
+    public function createSupplierBooking(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('createSupplierBooking', $booking);
 
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'admin_override' => ['nullable', 'boolean'],
         ]);
 
@@ -358,6 +358,10 @@ class BookingManagementController extends Controller
             $this->bookingProviderRouter->isBookingEligible($booking),
         );
         if ($postBlock !== null) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($postBlock, 409, 'supplier_booking_blocked');
+            }
+
             return back()->withErrors(['supplier_booking' => $postBlock]);
         }
 
@@ -368,31 +372,69 @@ class BookingManagementController extends Controller
             allowControlledStaffPnr: true,
         );
         if (! $result->success) {
+            $message = $result->error_message ?: ($result->warnings[0] ?? 'Supplier booking could not be created.');
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($message, 409, 'supplier_booking_failed');
+            }
+
             return back()->withErrors([
-                'supplier_booking' => $result->error_message ?: ($result->warnings[0] ?? 'Supplier booking could not be created.'),
+                'supplier_booking' => $message,
+            ]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            $booking->refresh();
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Supplier booking / PNR action completed.',
+                'booking' => [
+                    'id' => (string) $booking->id,
+                    'pnr' => $booking->pnr,
+                    'supplier_booking_status' => $booking->supplier_booking_status,
+                ],
             ]);
         }
 
         return back()->with('status', 'supplier-booking-created');
     }
 
-    public function prepareSupplierPnrContext(Request $request, Booking $booking): RedirectResponse
+    public function prepareSupplierPnrContext(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('createSupplierBooking', $booking);
 
         $postBlock = $this->adminBookingSupplierActions->assertPrepareSupplierContextPostAllowed($booking);
         if ($postBlock !== null) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($postBlock, 409, 'supplier_context_blocked');
+            }
+
             return back()->withErrors(['supplier_context' => $postBlock]);
         }
 
         $result = app(SabrePnrCertificationSupport::class)->prepareSabrePricingContext($booking);
 
         if (($result['success'] ?? false) === true) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJson([
+                    'ok' => true,
+                    'message' => 'Supplier PNR pricing context prepared.',
+                    'booking' => [
+                        'id' => (string) $booking->id,
+                    ],
+                ]);
+            }
+
             return back()->with('status', 'supplier-pnr-context-prepared');
         }
 
+        $message = (string) ($result['message'] ?? 'Could not prepare Sabre pricing context.');
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJsonError($message, 409, 'supplier_context_failed');
+        }
+
         return back()->withErrors([
-            'supplier_context' => (string) ($result['message'] ?? 'Could not prepare Sabre pricing context.'),
+            'supplier_context' => $message,
         ]);
     }
 
@@ -420,11 +462,11 @@ class BookingManagementController extends Controller
         return back()->with('status', 'manual-pnr-marked');
     }
 
-    public function updateStatus(Request $request, Booking $booking): RedirectResponse
+    public function updateStatus(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('changeStatus', $booking);
 
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'status' => ['required', Rule::enum(BookingStatus::class)],
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -439,7 +481,26 @@ class BookingManagementController extends Controller
                 $validated['note'] ?? null,
             );
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 422, 'status_transition_blocked');
+            }
+
             return back()->withErrors(['status' => $e->getMessage()]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            $booking->refresh();
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Booking status updated.',
+                'booking' => [
+                    'id' => (string) $booking->id,
+                    'status' => $booking->status instanceof BookingStatus
+                        ? $booking->status->value
+                        : (string) $booking->status,
+                ],
+            ]);
         }
 
         return back()->with('status', 'booking-status-updated');

@@ -205,11 +205,11 @@ class BookingController extends Controller
         return back()->with('status', 'manual-pnr-marked');
     }
 
-    public function updateStatus(Request $request, Booking $booking): RedirectResponse
+    public function updateStatus(Request $request, Booking $booking): RedirectResponse|JsonResponse
     {
         Gate::authorize('changeStatus', $booking);
 
-        $validated = $request->validate([
+        $validated = $this->validateBackOffice($request, [
             'status' => ['required', Rule::enum(BookingStatus::class)],
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -224,7 +224,26 @@ class BookingController extends Controller
                 $validated['note'] ?? null,
             );
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 422, 'status_transition_blocked');
+            }
+
             return back()->withErrors(['status' => $e->getMessage()]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            $booking->refresh();
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'Booking status updated.',
+                'booking' => [
+                    'id' => (string) $booking->id,
+                    'status' => $booking->status instanceof BookingStatus
+                        ? $booking->status->value
+                        : (string) $booking->status,
+                ],
+            ]);
         }
 
         return back()->with('status', 'booking-status-updated');

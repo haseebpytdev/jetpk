@@ -65,7 +65,7 @@ class DashboardBookingsReadService
 
         Gate::authorize('view', $booking);
 
-        return DashboardBookingDetailResource::fromModel($booking);
+        return DashboardBookingDetailResource::fromModel($booking, $user);
     }
 
     protected function resolveBooking(User $user, string $id): ?Booking

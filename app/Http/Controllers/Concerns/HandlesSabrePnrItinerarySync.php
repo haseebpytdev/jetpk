@@ -8,7 +8,9 @@ use App\Services\Communication\OtaNotificationService;
 use App\Services\Suppliers\Sabre\SabrePnrItinerarySyncService;
 use App\Support\Bookings\AdminBookingSupplierActions;
 use App\Support\Sabre\SabreReadinessReasonPresenter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -16,20 +18,32 @@ use Illuminate\Support\Str;
 
 trait HandlesSabrePnrItinerarySync
 {
-    public function syncPnrItinerary(Booking $booking, SabrePnrItinerarySyncService $syncService): RedirectResponse
-    {
+    public function syncPnrItinerary(
+        Request $request,
+        Booking $booking,
+        SabrePnrItinerarySyncService $syncService,
+    ): RedirectResponse|JsonResponse {
         Gate::authorize('createSupplierBooking', $booking);
 
         $lock = Cache::lock('ota:pnr-itinerary-sync:'.$booking->id, 120);
         if (! $lock->get()) {
+            $message = 'PNR itinerary sync is already in progress.';
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($message, 409, 'pnr_sync_in_progress');
+            }
+
             return back()->withErrors([
-                'pnr_itinerary_sync' => 'PNR itinerary sync is already in progress.',
+                'pnr_itinerary_sync' => $message,
             ]);
         }
 
         $blockReason = app(AdminBookingSupplierActions::class)->assertSyncPnrItineraryPostAllowed($booking);
         if ($blockReason !== null) {
             $lock->release();
+
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($blockReason, 409, 'pnr_sync_blocked');
+            }
 
             return back()->withErrors([
                 'pnr_itinerary_sync' => $blockReason,
@@ -45,14 +59,23 @@ trait HandlesSabrePnrItinerarySync
                 'message' => Str::limit($e->getMessage(), 120, ''),
             ]);
 
+            $message = 'Could not sync PNR itinerary from Sabre. Please try again later or verify manually.';
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($message, 409, 'pnr_sync_failed');
+            }
+
             return back()->withErrors([
-                'pnr_itinerary_sync' => 'Could not sync PNR itinerary from Sabre. Please try again later or verify manually.',
+                'pnr_itinerary_sync' => $message,
             ]);
         } finally {
             $lock->release();
         }
 
         $this->notifyPnrItinerarySyncResult($booking, $result);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->jsonFromPnrItinerarySyncResult($result);
+        }
 
         return $this->redirectFromPnrItinerarySyncResult($result);
     }
@@ -101,13 +124,30 @@ trait HandlesSabrePnrItinerarySync
     /**
      * @param  array<string, mixed>  $result
      */
+    protected function jsonFromPnrItinerarySyncResult(array $result): JsonResponse
+    {
+        if (($result['synced'] ?? false) === true) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'PNR itinerary retrieve/sync completed successfully.',
+                'synced' => true,
+            ]);
+        }
+
+        $message = $this->messageFromPnrItinerarySyncResult($result);
+
+        return $this->backOfficeJsonError($message, 409, 'pnr_sync_incomplete');
+    }
+
+    /**
+     * @param  array<string, mixed>  $result
+     */
     protected function redirectFromPnrItinerarySyncResult(array $result): RedirectResponse
     {
         if (($result['synced'] ?? false) === true) {
             return back()->with('status', 'PNR itinerary retrieve/sync completed successfully.');
         }
 
-        $presenter = app(SabreReadinessReasonPresenter::class);
         $reason = (string) ($result['reason_code'] ?? '');
         if ($reason === 'partial_resource_unavailable') {
             $hasLocator = (bool) data_get($result, 'airline_locator_observability.airline_locator_present', false);
@@ -120,7 +160,26 @@ trait HandlesSabrePnrItinerarySync
             );
         }
 
-        $message = match ($reason) {
+        return back()->withErrors(['pnr_itinerary_sync' => $this->messageFromPnrItinerarySyncResult($result)]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $result
+     */
+    protected function messageFromPnrItinerarySyncResult(array $result): string
+    {
+        $presenter = app(SabreReadinessReasonPresenter::class);
+        $reason = (string) ($result['reason_code'] ?? '');
+
+        if ($reason === 'partial_resource_unavailable') {
+            $hasLocator = (bool) data_get($result, 'airline_locator_observability.airline_locator_present', false);
+
+            return $hasLocator
+                ? 'PNR retrieve returned partial verification: carrier locator detected. Full itinerary was not synced — verify with airline/carrier before ticketing.'
+                : 'PNR retrieve returned partial verification data. Full itinerary was not synced — verify manually before ticketing.';
+        }
+
+        return match ($reason) {
             'blocked_resource_unavailable' => 'Sabre returned resource unavailable; final itinerary could not be retrieved/synced. Verify manually.',
             'blocked_segment_status' => 'PNR itinerary contains non-active segment status; verify manually.',
             'unmappable' => 'Unable to map Sabre PNR itinerary safely.',
@@ -129,7 +188,5 @@ trait HandlesSabrePnrItinerarySync
                 default => 'Could not retrieve/sync PNR itinerary from Sabre. Please try again later or verify manually.',
             },
         };
-
-        return back()->withErrors(['pnr_itinerary_sync' => $message]);
     }
 }

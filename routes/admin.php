@@ -100,6 +100,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::patch('/bookings/payments/{bookingPayment}/verify', [BookingPaymentController::class, 'verify'])->name('bookings.payments.verify');
     Route::patch('/bookings/payments/{bookingPayment}/reject', [BookingPaymentController::class, 'reject'])->name('bookings.payments.reject');
     Route::post('/bookings/{booking}/cancellations', [BookingCancellationController::class, 'store'])->name('bookings.cancellations.store');
+    Route::post('/bookings/{booking}/admin-direct-cancel', [BookingCancellationController::class, 'adminDirectCancel'])->name('bookings.admin-direct-cancel');
     Route::patch('/bookings/cancellations/{cancellationRequest}/approve', [BookingCancellationController::class, 'approve'])->name('bookings.cancellations.approve');
     Route::patch('/bookings/cancellations/{cancellationRequest}/reject', [BookingCancellationController::class, 'reject'])->name('bookings.cancellations.reject');
     Route::patch('/bookings/cancellations/{cancellationRequest}/process', [BookingCancellationController::class, 'process'])->name('bookings.cancellations.process');
@@ -229,8 +230,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/finance/adjustments/{walletTransaction}', [BackOfficeLegacyViewRedirectController::class, 'adminAccountingIndex'])->name('finance.adjustments.show');
         Route::get('/finance/adjustments/{walletTransaction}/reverse', [BackOfficeLegacyViewRedirectController::class, 'adminAccountingIndex'])->name('finance.adjustments.reverse.confirm');
         Route::post('/finance/adjustments/{walletTransaction}/reverse', [FinanceAdjustmentController::class, 'reverse'])->name('finance.adjustments.reverse');
-        Route::get('/finance/statements', [BackOfficeLegacyViewRedirectController::class, 'adminAccountingIndex'])->name('finance.statements.index');
-        Route::get('/finance/statements/{agency}', [BackOfficeLegacyViewRedirectController::class, 'adminAccountingIndex'])->name('finance.statements.show');
+        Route::get('/finance/statements', [FinanceStatementController::class, 'index'])->name('finance.statements.index');
+        Route::get('/finance/statements/{agency}', [FinanceStatementController::class, 'show'])->name('finance.statements.show');
         Route::get('/finance/statements/{agency}/export', [FinanceStatementController::class, 'export'])->name('finance.statements.export');
         Route::get('/reports', [BackOfficeLegacyViewRedirectController::class, 'adminReportsIndex'])->name('reports');
         Route::get('/reports/supplier-diagnostics', [BackOfficeLegacyViewRedirectController::class, 'adminReportsIndex'])->name('reports.supplier-diagnostics');

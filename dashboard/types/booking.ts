@@ -114,6 +114,29 @@ export type BookingFareSummary = {
   total: number;
 };
 
+export type BookingOperationalCapabilities = {
+  can_update_status?: boolean;
+  can_prepare_pnr_context?: boolean;
+  can_generate_pnr: boolean;
+  can_retry_pnr: boolean;
+  can_sync_pnr: boolean;
+  can_record_payment: boolean;
+  can_admin_mark_paid: boolean;
+  can_issue_ticket: boolean;
+  can_void_ticket: boolean;
+  can_request_cancellation: boolean;
+  can_cancel_supplier_booking: boolean;
+  can_request_refund: boolean;
+  can_generate_documents?: boolean;
+  can_download_documents?: boolean;
+  can_generate_receipt?: boolean;
+  can_export_audit?: boolean;
+  latest_payment_id?: string | null;
+  reasons?: Record<string, string | null>;
+  sabre_void_support?: string;
+  allowed_status_values?: string[];
+};
+
 export type BookingManagementDetail = {
   summary: BookingRecord;
   localContact?: {
@@ -141,6 +164,7 @@ export type BookingManagementDetail = {
     ticketingStatus: BookingRecord["ticketingStatus"];
     ticketCount: number;
   } | null;
+  operationalCapabilities?: BookingOperationalCapabilities | null;
   auditMetadata: {
     createdAt: string | null;
     updatedAt: string | null;
@@ -186,4 +210,5 @@ export type BookingDocumentEntry = {
   status: string;
   generatedAt: string | null;
   generatedBy: string;
+  downloadUrl?: string | null;
 };

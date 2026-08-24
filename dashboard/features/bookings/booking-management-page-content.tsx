@@ -117,6 +117,8 @@ export async function BookingManagementPageContent({ bookingId }: Props) {
                   bookingStatus={booking.bookingStatus}
                   paymentStatus={booking.paymentStatus}
                   amountPaid={booking.amountPaid}
+                  totalAmount={booking.totalAmount}
+                  capabilities={detail.operationalCapabilities ?? null}
                 />
               </div>
             </section>

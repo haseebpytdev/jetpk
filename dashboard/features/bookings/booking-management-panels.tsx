@@ -1,7 +1,13 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { MoneyDisplay } from "@/components/ui/money-display";
 import { formatDateTime } from "@/lib/format";
 import { BookingLocalContactEditor } from "@/features/bookings/booking-local-contact-editor";
+import { BookingDocumentsPanel } from "@/features/bookings/booking-documents-panel";
+import { useDashboardPortal } from "@/lib/portal-context";
+import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
+import { buildBookingAuditExportHref } from "@/services/operational-api";
 import type { BookingManagementDetail } from "@/types/booking";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -14,6 +20,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function BookingManagementPanels({ detail }: { detail: BookingManagementDetail }) {
+  const portal = useDashboardPortal();
+  const isLive = useDashboardLiveMode();
   const {
     summary,
     localContact,
@@ -27,7 +35,9 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
     internalNotes,
     communications,
     documents,
+    operationalCapabilities,
   } = detail;
+  const canExportAudit = Boolean(operationalCapabilities?.can_export_audit ?? true);
 
   return (
     <div className="space-y-4" data-testid="booking-management-panels">
@@ -163,6 +173,15 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
               <dd className="font-mono text-xs">{summary.id}</dd>
             </div>
           </dl>
+          {isLive && canExportAudit ? (
+            <a
+              href={buildBookingAuditExportHref(portal, summary.id)}
+              className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-jp-border px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+              data-testid="booking-audit-export"
+            >
+              Export booking audit CSV
+            </a>
+          ) : null}
         </Section>
       ) : null}
 
@@ -229,23 +248,11 @@ export function BookingManagementPanels({ detail }: { detail: BookingManagementD
       </Section>
 
       <Section title="Documents">
-        {documents.length > 0 ? (
-          <ul className="space-y-2 text-sm" data-testid="booking-documents">
-            {documents.map((document) => (
-              <li key={document.documentId} className="flex justify-between gap-3">
-                <span>{document.title}</span>
-                <span className="text-xs text-jp-muted capitalize">
-                  {document.documentType.replace(/_/g, " ")} · {document.status}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-jp-muted" data-testid="booking-documents">
-            No document metadata attached yet.
-          </p>
-        )}
-        <p className="mt-3 text-xs text-jp-muted">Document downloads remain on the Laravel booking workspace.</p>
+        <BookingDocumentsPanel
+          bookingId={summary.id}
+          documents={documents}
+          capabilities={operationalCapabilities}
+        />
       </Section>
     </div>
   );

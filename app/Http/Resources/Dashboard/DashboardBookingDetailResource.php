@@ -3,7 +3,9 @@
 namespace App\Http\Resources\Dashboard;
 
 use App\Models\Booking;
+use App\Models\User;
 use App\Support\Bookings\BookingLocalAmendmentPolicy;
+use App\Support\Dashboard\BookingOperationalCapabilitiesPresenter;
 use App\Support\Dashboard\DashboardMoneyPresenter;
 
 final class DashboardBookingDetailResource
@@ -11,7 +13,7 @@ final class DashboardBookingDetailResource
     /**
      * @return array<string, mixed>
      */
-    public static function fromModel(Booking $booking): array
+    public static function fromModel(Booking $booking, ?User $user = null): array
     {
         $summary = DashboardBookingResource::fromModel($booking);
         $booking->loadMissing([
@@ -27,6 +29,9 @@ final class DashboardBookingDetailResource
             'documents.generatedBy',
         ]);
         $amendment = BookingLocalAmendmentPolicy::evaluate($booking);
+        $capabilities = $user instanceof User
+            ? (new BookingOperationalCapabilitiesPresenter)->present($user, $booking)
+            : null;
 
         $passengers = $booking->passengers
             ->map(static fn ($p): array => [
@@ -92,6 +97,7 @@ final class DashboardBookingDetailResource
                 'ticketingStatus' => $summary['ticketingStatus'],
                 'ticketCount' => $booking->tickets->count(),
             ],
+            'operationalCapabilities' => $capabilities,
             'auditMetadata' => [
                 'createdAt' => $booking->created_at?->toIso8601String(),
                 'updatedAt' => $booking->updated_at?->toIso8601String(),
@@ -140,14 +146,19 @@ final class DashboardBookingDetailResource
                 ->sortByDesc('generated_at')
                 ->take(30)
                 ->values()
-                ->map(static fn ($document): array => [
-                    'documentId' => (string) $document->id,
-                    'documentType' => (string) ($document->document_type?->value ?? $document->document_type ?? 'document'),
-                    'title' => (string) ($document->title ?: $document->document_number ?: 'Document'),
-                    'status' => (string) ($document->status?->value ?? $document->status ?? 'generated'),
-                    'generatedAt' => $document->generated_at?->toIso8601String(),
-                    'generatedBy' => (string) ($document->generatedBy?->name ?? 'System'),
-                ])
+                ->map(static function ($document) use ($user): array {
+                    $portal = $user?->isStaff() ? 'staff' : 'admin';
+
+                    return [
+                        'documentId' => (string) $document->id,
+                        'documentType' => (string) ($document->document_type?->value ?? $document->document_type ?? 'document'),
+                        'title' => (string) ($document->title ?: $document->document_number ?: 'Document'),
+                        'status' => (string) ($document->status?->value ?? $document->status ?? 'generated'),
+                        'generatedAt' => $document->generated_at?->toIso8601String(),
+                        'generatedBy' => (string) ($document->generatedBy?->name ?? 'System'),
+                        'downloadUrl' => route("{$portal}.bookings.documents.download", $document),
+                    ];
+                })
                 ->all(),
         ];
     }

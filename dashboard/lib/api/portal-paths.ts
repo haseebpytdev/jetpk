@@ -1,6 +1,18 @@
 import { getLaravelApiBase } from "@/lib/read-only/laravel/api-base";
 import type { DashboardPortal } from "@/lib/portal-path";
 
+/**
+ * Normalize Next public IDs (JP-USR-0001, AG-00012) to Laravel route keys.
+ */
+export function laravelModelKey(id: string): string {
+  const trimmed = id.trim();
+  const prefixed = /^(?:JP-USR|JP-BKG|JP-PMT|JP-TKT|JP-PNR|JP-CMS|AG)-0*(\d+)$/i.exec(trimmed);
+  if (prefixed) {
+    return prefixed[1];
+  }
+  return trimmed;
+}
+
 export function laravelPortalPath(portal: DashboardPortal, path: string): string {
   const base = getLaravelApiBase().replace(/\/$/, "");
   const normalized = path.startsWith("/") ? path : `/${path}`;
@@ -115,37 +127,72 @@ export function paymentStorePath(portal: DashboardPortal, bookingId: string): st
   return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/payments?format=json`);
 }
 
+export function supplierBookingCreatePath(portal: DashboardPortal, bookingId: string): string {
+  return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/supplier-booking?format=json`);
+}
+
+export function bookingStatusUpdatePath(portal: DashboardPortal, bookingId: string): string {
+  return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/status?format=json`);
+}
+
+export function prepareSupplierPnrContextPath(portal: DashboardPortal, bookingId: string): string {
+  return laravelPortalPath(
+    portal,
+    `/bookings/${encodeURIComponent(bookingId)}/prepare-supplier-pnr-context?format=json`,
+  );
+}
+
+export function syncPnrItineraryPath(portal: DashboardPortal, bookingId: string): string {
+  return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/sync-pnr-itinerary?format=json`);
+}
+
+export function bookingAuditExportPath(portal: DashboardPortal, bookingId: string): string {
+  return laravelPortalPath(portal, `/bookings/${encodeURIComponent(bookingId)}/audit/export`);
+}
+
+export function reconciliationExportPath(): string {
+  return laravelPortalPath("admin", `/accounting/reconciliation/export`);
+}
+
+export function financeDashboardExportPath(): string {
+  return laravelPortalPath("admin", `/finance/dashboard/export`);
+}
+
+export function adminDirectCancelPath(bookingId: string): string {
+  return laravelPortalPath("admin", `/bookings/${encodeURIComponent(bookingId)}/admin-direct-cancel?format=json`);
+}
+
 export function userActivatePath(userId: string): string {
-  return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}/activate?format=json`);
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(laravelModelKey(userId))}/activate?format=json`);
 }
 
 export function userSuspendPath(userId: string): string {
-  return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}/suspend?format=json`);
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(laravelModelKey(userId))}/suspend?format=json`);
 }
 
 export function agencyUserRolePath(agencyId: string, userId: string): string {
   return laravelPortalPath(
     "admin",
-    `/agencies/${encodeURIComponent(agencyId)}/users/${encodeURIComponent(userId)}/agency-role?format=json`,
+    `/agencies/${encodeURIComponent(laravelModelKey(agencyId))}/users/${encodeURIComponent(laravelModelKey(userId))}/agency-role?format=json`,
   );
 }
 
 export function agencyUserPermissionsPath(agencyId: string, userId: string): string {
   return laravelPortalPath(
     "admin",
-    `/agencies/${encodeURIComponent(agencyId)}/users/${encodeURIComponent(userId)}/agent-permissions?format=json`,
+    `/agencies/${encodeURIComponent(laravelModelKey(agencyId))}/users/${encodeURIComponent(laravelModelKey(userId))}/agent-permissions?format=json`,
   );
 }
 
 export function agencyUserPermissionsApplyTemplatePath(agencyId: string, userId: string): string {
   return laravelPortalPath(
     "admin",
-    `/agencies/${encodeURIComponent(agencyId)}/users/${encodeURIComponent(userId)}/agent-permissions/apply-template?format=json`,
+    `/agencies/${encodeURIComponent(laravelModelKey(agencyId))}/users/${encodeURIComponent(laravelModelKey(userId))}/agent-permissions/apply-template?format=json`,
   );
 }
 
 export function agencyPrefixPath(agencyId: string): string {
-  return laravelPortalPath("admin", `/agencies/${encodeURIComponent(agencyId)}/prefix?format=json`);
+  return laravelPortalPath("admin", `/agencies/${encodeURIComponent(laravelModelKey(agencyId))}/prefix?format=json`);
 }
 
 export function agentApplicationApprovePath(applicationId: string): string {
@@ -180,11 +227,46 @@ export function supportTicketStatusPath(portal: DashboardPortal, ticketId: strin
 }
 
 export function commissionEntryApprovePath(entryId: string): string {
-  return laravelPortalPath("admin", `/commissions/entries/${encodeURIComponent(entryId)}/approve?format=json`);
+  return laravelPortalPath("admin", `/commissions/entries/${encodeURIComponent(laravelModelKey(entryId))}/approve?format=json`);
 }
 
 export function commissionEntryRejectPath(entryId: string): string {
-  return laravelPortalPath("admin", `/commissions/entries/${encodeURIComponent(entryId)}/reject?format=json`);
+  return laravelPortalPath("admin", `/commissions/entries/${encodeURIComponent(laravelModelKey(entryId))}/reject?format=json`);
+}
+
+export function commissionAdjustmentPath(agentId: string): string {
+  return laravelPortalPath("admin", `/commissions/${encodeURIComponent(laravelModelKey(agentId))}/adjustments?format=json`);
+}
+
+export function commissionPayoutPath(agentId: string): string {
+  return laravelPortalPath("admin", `/commissions/${encodeURIComponent(laravelModelKey(agentId))}/payouts?format=json`);
+}
+
+export function commissionStatementPath(agentId: string): string {
+  return laravelPortalPath("admin", `/commissions/${encodeURIComponent(laravelModelKey(agentId))}/statements?format=json`);
+}
+
+export function deliveryLogResendPath(communicationLogId: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/settings/communications/delivery-log/${encodeURIComponent(laravelModelKey(communicationLogId))}/resend?format=json`,
+  );
+}
+
+export function reportsExportPath(type: string, query: Record<string, string | undefined> = {}): string {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  const qs = params.toString();
+  return laravelPortalPath(
+    "admin",
+    `/reports/export/${encodeURIComponent(type)}${qs ? `?${qs}` : ""}`,
+  );
+}
+
+export function pageSettingsRefreshHomeFaresPath(): string {
+  return laravelPortalPath("admin", "/page-settings/home/refresh-fares?format=json");
 }
 
 export function groupBookingVerifyPaymentPath(groupBookingId: string): string {
@@ -205,11 +287,32 @@ export function financeAdjustmentStorePath(): string {
   return laravelPortalPath("admin", "/finance/adjustments?format=json");
 }
 
+export function financeAdjustmentIndexPath(): string {
+  return laravelPortalPath("admin", "/finance/adjustments?format=json");
+}
+
+export function financeAdjustmentCreatePath(agencyId?: string): string {
+  const query = agencyId ? `&agency_id=${encodeURIComponent(agencyId)}` : "";
+  return laravelPortalPath("admin", `/finance/adjustments/create?format=json${query}`);
+}
+
 export function financeAdjustmentReversePath(walletTransactionId: string): string {
   return laravelPortalPath(
     "admin",
     `/finance/adjustments/${encodeURIComponent(walletTransactionId)}/reverse?format=json`,
   );
+}
+
+export function communicationsSettingsPath(): string {
+  return laravelPortalPath("admin", "/settings/communications?format=json");
+}
+
+export function communicationsTestEmailPath(): string {
+  return laravelPortalPath("admin", "/settings/communications/test-email?format=json");
+}
+
+export function communicationsTestWhatsappPath(): string {
+  return laravelPortalPath("admin", "/settings/communications/test-whatsapp?format=json");
 }
 
 export function markupLookupsPath(type: string, q: string): string {
@@ -289,20 +392,121 @@ export function brandingSettingsPath(): string {
   return laravelPortalPath("admin", "/settings/branding?format=json");
 }
 
+export function brandingFooterUpdatePath(): string {
+  return laravelPortalPath("admin", "/settings/branding/footer?format=json");
+}
+
+export function brandingAboutUpdatePath(): string {
+  return laravelPortalPath("admin", "/settings/branding/about-us?format=json");
+}
+
+export function messageTemplatesIndexPath(query: Record<string, string | undefined> = {}): string {
+  const params = new URLSearchParams({ format: "json" });
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  return laravelPortalPath("admin", `/settings/communications/templates?${params.toString()}`);
+}
+
+export function messageTemplateUpdatePath(event: string, channel: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/settings/communications/templates/${encodeURIComponent(event)}/${encodeURIComponent(channel)}?format=json`,
+  );
+}
+
+export function promoCodesIndexPath(query: Record<string, string | undefined> = {}): string {
+  const params = new URLSearchParams({ format: "json" });
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  return laravelPortalPath("admin", `/promo-codes?${params.toString()}`);
+}
+
+export function promoCodesStorePath(): string {
+  return laravelPortalPath("admin", "/promo-codes?format=json");
+}
+
+export function promoCodeUpdatePath(promoId: string): string {
+  return laravelPortalPath("admin", `/promo-codes/${encodeURIComponent(laravelModelKey(promoId))}?format=json`);
+}
+
+export function promoCodeTogglePath(promoId: string): string {
+  return laravelPortalPath(
+    "admin",
+    `/promo-codes/${encodeURIComponent(laravelModelKey(promoId))}/toggle-status?format=json`,
+  );
+}
+
+export function financeStatementsIndexPath(): string {
+  return laravelPortalPath("admin", "/finance/statements?format=json");
+}
+
+export function financeStatementShowPath(
+  agencyId: string,
+  query: Record<string, string | undefined> = {},
+): string {
+  const params = new URLSearchParams({ format: "json" });
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  return laravelPortalPath(
+    "admin",
+    `/finance/statements/${encodeURIComponent(laravelModelKey(agencyId))}?${params.toString()}`,
+  );
+}
+
+export function financeStatementExportPath(
+  agencyId: string,
+  query: Record<string, string | undefined> = {},
+): string {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  const qs = params.toString();
+  return laravelPortalPath(
+    "admin",
+    `/finance/statements/${encodeURIComponent(laravelModelKey(agencyId))}/export${qs ? `?${qs}` : ""}`,
+  );
+}
+
+export function bookingDocumentGeneratePath(
+  portal: DashboardPortal,
+  bookingId: string,
+  kind: "confirmation" | "invoice" | "ticket-itinerary" | "refund-note" | "cancellation-confirmation",
+): string {
+  return laravelPortalPath(
+    portal,
+    `/bookings/${encodeURIComponent(laravelModelKey(bookingId))}/documents/${kind}?format=json`,
+  );
+}
+
+export function bookingPaymentReceiptPath(portal: DashboardPortal, paymentId: string): string {
+  return laravelPortalPath(
+    portal,
+    `/bookings/payments/${encodeURIComponent(laravelModelKey(paymentId))}/documents/receipt?format=json`,
+  );
+}
+
+export function bookingDocumentDownloadPath(portal: DashboardPortal, documentId: string): string {
+  return laravelPortalPath(portal, `/bookings/documents/${encodeURIComponent(laravelModelKey(documentId))}/download`);
+}
+
 export function usersStorePath(): string {
   return laravelPortalPath("admin", "/users?format=json");
 }
 
 export function userInvitePath(userId: string): string {
-  return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}/send-invite?format=json`);
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(laravelModelKey(userId))}/send-invite?format=json`);
 }
 
 export function userResetPasswordPath(userId: string): string {
-  return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}/reset-password-link?format=json`);
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(laravelModelKey(userId))}/reset-password-link?format=json`);
 }
 
 export function userUpdatePath(userId: string): string {
-  return laravelPortalPath("admin", `/users/${encodeURIComponent(userId)}?format=json`);
+  return laravelPortalPath("admin", `/users/${encodeURIComponent(laravelModelKey(userId))}?format=json`);
 }
 
 export function mediaLibraryIndexPath(): string {

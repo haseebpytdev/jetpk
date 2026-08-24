@@ -39,6 +39,21 @@ class BookingPaymentController extends Controller
             'verify_now' => ['nullable', 'boolean'],
         ]);
 
+        if ((bool) ($validated['admin_override'] ?? false)) {
+            if (! $request->user()?->isPlatformAdmin()) {
+                abort(403);
+            }
+            $reason = trim((string) ($validated['notes'] ?? ''));
+            if ($reason === '') {
+                if ($this->wantsBackOfficeJson($request)) {
+                    return $this->backOfficeJsonError('Admin override requires a reason in notes.', 422, 'admin_override_reason_required');
+                }
+
+                return back()->withErrors(['notes' => 'Admin override requires a reason.']);
+            }
+            $validated['payment_reference'] = $validated['payment_reference'] ?: 'admin_override';
+        }
+
         if ($request->hasFile('payment_proof')) {
             $path = $request->file('payment_proof')->store('booking-payments/proofs', 'local');
             $validated['proof_path'] = $path;

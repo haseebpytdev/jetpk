@@ -152,4 +152,67 @@ class BookingCancellationController extends Controller
             ->with('status', $message)
             ->with('cancellation_warning', $processed->meta['manual_warning'] ?? null);
     }
+
+    /**
+     * Platform-admin one-shot: request → approve → process supplier cancellation.
+     * Domain audit events remain separate for each step inside BookingCancellationService.
+     */
+    public function adminDirectCancel(Request $request, Booking $booking): RedirectResponse|JsonResponse
+    {
+        if (! $request->user()?->isPlatformAdmin()) {
+            abort(403);
+        }
+
+        Gate::authorize('request', [BookingCancellationRequest::class, $booking]);
+
+        $validated = $this->validateBackOffice($request, [
+            'reason' => ['required', 'string', 'min:3', 'max:5000'],
+            'cancellation_type' => ['nullable', Rule::enum(BookingCancellationType::class)],
+        ]);
+
+        try {
+            $cancellationRequest = $this->service->requestCancellation($booking, $request->user(), [
+                'reason' => $validated['reason'],
+                'cancellation_type' => $validated['cancellation_type'] ?? BookingCancellationType::BookingCancel->value,
+                'request_source' => 'admin_direct',
+            ]);
+            Gate::authorize('approve', $cancellationRequest);
+            $cancellationRequest = $this->service->approveCancellation($cancellationRequest, $request->user());
+            Gate::authorize('process', $cancellationRequest);
+            $processed = $this->service->processCancellation($cancellationRequest, $request->user(), true, 'admin');
+        } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                $code = str_contains(strtolower($e->getMessage()), 'pending supplier reconciliation')
+                    ? 'pending_reconciliation'
+                    : 'admin_direct_cancel_blocked';
+
+                return $this->backOfficeJsonError($e->getMessage(), 409, $code);
+            }
+
+            return back()->withErrors(['cancellation' => $e->getMessage()]);
+        }
+
+        $processed->refresh();
+        $booking->refresh();
+        $pendingReconciliation = ($processed->meta['sabre_cancel_manual_review'] ?? false) === true
+            || filled($processed->meta['manual_warning'] ?? null);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => $pendingReconciliation
+                    ? 'Admin direct cancel requires manual reconciliation. Booking was not falsely marked cancelled.'
+                    : 'Admin direct cancel workflow completed.',
+                'execution_state' => $pendingReconciliation ? 'pending_reconciliation' : 'success',
+                'cancellation_request' => BackOfficeCancellationPresenter::present($processed),
+                'booking' => BackOfficeBookingPresenter::present($booking),
+                'capabilities' => $this->capabilitiesPresenter->presentCancellationCapabilities($request->user(), $processed),
+                'manual_warning' => $processed->meta['manual_warning'] ?? null,
+            ]);
+        }
+
+        return back()->with('status', $pendingReconciliation
+            ? 'admin-direct-cancel-manual-review'
+            : 'admin-direct-cancel-completed');
+    }
 }
