@@ -75,11 +75,16 @@ export function ReturnOptionsPage() {
     return () => controller.abort();
   }, [outboundKey, searchId]);
 
-  const handleSelect = (combo: Record<string, unknown>) => {
+  const handleSelect = (combo: Record<string, unknown>, explicitReturnFareKey?: string) => {
     const comboId = String(combo.combo_id ?? "");
     if (!comboId || selectingId) return;
     const fareOptions = resolveFareOptions(combo);
-    const rawReturnKey = selectedFareByCombo[comboId] ?? String(combo.fare_option_key ?? "");
+    // Explicit Book click key wins — do not wait for selectedFareByCombo React state.
+    const rawReturnKey =
+      explicitReturnFareKey
+      ?? selectedFareByCombo[comboId]
+      ?? String(combo.fare_option_key ?? "")
+      ?? "";
     const returnFareKey = resolveAuthoritativeFareOptionKey(rawReturnKey, fareOptions) ?? rawReturnKey;
     const outboundKeyAuth = outboundFareOptionKey.trim();
 
@@ -171,7 +176,7 @@ export function ReturnOptionsPage() {
                     onSelect={(optionKey) => setSelectedFareByCombo((current) => ({ ...current, [comboId]: optionKey }))}
                     onBook={(optionKey) => {
                       setSelectedFareByCombo((current) => ({ ...current, [comboId]: optionKey }));
-                      handleSelect({ ...option, fare_option_key: optionKey });
+                      handleSelect(option, optionKey);
                     }}
                     bookingOptionKey={selectingId === comboId ? selectedKey : null}
                   />
