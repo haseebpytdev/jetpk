@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\CommunicationLog;
 use App\Services\Communication\OtaNotificationService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -13,6 +15,8 @@ use InvalidArgumentException;
 
 class CommunicationDeliveryLogController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected OtaNotificationService $notificationService,
     ) {}
@@ -47,7 +51,7 @@ class CommunicationDeliveryLogController extends Controller
         ]);
     }
 
-    public function resend(Request $request, CommunicationLog $communicationLog): RedirectResponse
+    public function resend(Request $request, CommunicationLog $communicationLog): RedirectResponse|JsonResponse
     {
         Gate::authorize('resend', $communicationLog);
 
@@ -59,7 +63,19 @@ class CommunicationDeliveryLogController extends Controller
         try {
             $this->notificationService->resendCommunicationLog($communicationLog, $request->user());
         } catch (InvalidArgumentException $e) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($e->getMessage(), 422, 'resend_not_eligible');
+            }
+
             return back()->withErrors(['resend' => $e->getMessage()]);
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'communication_log_id' => (string) $communicationLog->id,
+                'message' => 'communication-resend-queued',
+            ]);
         }
 
         return back()->with('status', 'communication-resend-queued');

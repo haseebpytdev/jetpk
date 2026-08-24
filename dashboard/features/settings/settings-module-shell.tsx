@@ -72,7 +72,7 @@ export function SettingsModuleShell({ section, result }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Settings" }, { label: current.label }]} />
         }
         title="Settings"
-        description="Organization, security, notifications, and API connection management. Secrets are never displayed after save."
+        description="Organization, security, notifications, and Integrations management. Secrets are never displayed after save."
       />
       <DataSourceNoticeSlot />
 

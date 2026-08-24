@@ -2,28 +2,39 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateFooterSettingsRequest;
 use App\Models\Agency;
 use App\Services\Agencies\AgencyBrandingService;
 use App\Services\Agencies\FooterSettingsPresenter;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class AgencyFooterSettingsController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AgencyBrandingService $brandingService,
         protected FooterSettingsPresenter $presenter,
     ) {}
 
-    public function edit(Request $request): View
+    public function edit(Request $request): View|JsonResponse
     {
         $agency = $this->resolveAgency($request);
         Gate::authorize('view', $agency);
         $settings = $this->brandingService->getSettingsForAgency($agency);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'footer' => $this->presenter->presentForAdmin($settings),
+            ]);
+        }
 
         return view('dashboard.admin.settings.footer', [
             'agency' => $agency,
@@ -35,7 +46,7 @@ class AgencyFooterSettingsController extends Controller
         ]);
     }
 
-    public function update(UpdateFooterSettingsRequest $request): RedirectResponse
+    public function update(UpdateFooterSettingsRequest $request): RedirectResponse|JsonResponse
     {
         $agency = $this->resolveAgency($request);
         Gate::authorize('update', $agency);
@@ -56,6 +67,16 @@ class AgencyFooterSettingsController extends Controller
         }
 
         $this->brandingService->updateFooterSettings($agency, $request->user(), $payload, $footerLogoPath);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            $fresh = $this->brandingService->getSettingsForAgency($agency)->fresh();
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'footer-settings-updated',
+                'footer' => $this->presenter->presentForAdmin($fresh),
+            ]);
+        }
 
         return back()->with('status', 'footer-settings-updated');
     }

@@ -4,7 +4,6 @@ import { Suspense, useState, type ReactNode } from "react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DataSourcePreviewGate } from "@/components/dashboard/data-source-preview-gate";
-import { getDashboardMode } from "@/lib/preview";
 import type { DashboardBranding } from "@/services/branding-service";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
@@ -30,11 +29,9 @@ export function DashboardShell({
       <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} session={session} />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6">
-          {getDashboardMode() === "preview" ? (
-            <Suspense fallback={null}>
-              <DataSourcePreviewGate />
-            </Suspense>
-          ) : null}
+          <Suspense fallback={null}>
+            <DataSourcePreviewGate />
+          </Suspense>
           {children}
         </main>
         <footer className="flex flex-col gap-2 border-t border-jp-border bg-jp-surface px-4 py-4 text-jp-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">

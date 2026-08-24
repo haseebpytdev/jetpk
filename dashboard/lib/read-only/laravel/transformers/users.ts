@@ -117,5 +117,7 @@ export function transformUserDetail(payload: Record<string, unknown>): User {
     createdBy: "system",
     updatedBy: "system",
     notes: null,
+    agencyId: base.agencyId != null ? String(base.agencyId) : null,
+    laravelUserId: base.laravelUserId != null ? String(base.laravelUserId) : null,
   };
 }

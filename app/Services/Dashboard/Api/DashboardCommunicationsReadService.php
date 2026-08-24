@@ -159,7 +159,9 @@ class DashboardCommunicationsReadService
             'sentAt' => optional($log->sent_at)?->toIso8601String(),
             'classificationHint' => $qaLike ? 'qa_or_test_like' : ($log->booking_id ? 'booking_linked' : 'unlinked'),
             'retryEligible' => in_array($status, ['failed', 'skipped'], true),
-            'operatorAction' => 'Review only — no automatic retry from this surface.',
+            'operatorAction' => in_array($status, ['failed', 'skipped'], true)
+                ? 'Eligible for guarded resend'
+                : 'Review only — no automatic retry from this surface.',
         ];
     }
 

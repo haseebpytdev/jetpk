@@ -12,6 +12,7 @@ import { EffectiveAccessSummaryPanel } from "@/features/users/components/effecti
 import { RoleAssignmentPreview } from "@/features/users/components/role-assignment-preview";
 import { StaffPermissionEditor } from "@/features/users/components/staff-permission-editor";
 import { UserLifecycleActions } from "@/features/users/components/user-lifecycle-actions";
+import { AgencyUserAccessPanel } from "@/features/users/components/agency-user-access-panel";
 import { UserSecuritySummary } from "@/features/users/components/user-security-summary";
 
 export function UserDetailDrawerContent({ user }: { user: User }) {
@@ -135,6 +136,7 @@ export function UserDetailDrawerContent({ user }: { user: User }) {
         <div className="mt-2">
           <UserLifecycleActions userId={user.id} status={user.security.status} />
           <StaffPermissionEditor user={user} />
+          <AgencyUserAccessPanel user={user} />
         </div>
       </section>
 

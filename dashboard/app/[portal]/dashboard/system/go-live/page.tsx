@@ -72,9 +72,12 @@ export default async function GoLiveChecklistPage() {
         <PageHeader
           breadcrumb={<Breadcrumb items={[{ label: "Home" }, { label: "System" }, { label: "Go-live" }]} />}
           title="Go-live checklist"
-          description="Live validators with links to the setting that must be fixed. Refresh this page to re-run. Commercial UAT is never auto-completed."
+          description="Live validators with links to the setting that must be fixed. Also covers the legacy deployment checklist route (/admin/deployment-checklist → this page). Refresh to re-run. Commercial UAT is never auto-completed."
         />
         <DataSourceNoticeSlot />
+        <p className="mb-3 text-xs text-jp-muted" data-testid="deployment-checklist-mapping">
+          Deployment checklist is mapped here (system go-live). System health remains at /system/health.
+        </p>
         <ul className="divide-y divide-jp-border rounded-xl border border-jp-border bg-white" data-testid="go-live-checklist">
           {(health.checklist ?? []).map((item) => (
             <li key={item.key || item.label} className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm">

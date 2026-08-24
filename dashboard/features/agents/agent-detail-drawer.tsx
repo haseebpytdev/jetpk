@@ -9,6 +9,7 @@ import {
   SettlementStatusBadge,
   VerificationStatusBadge,
 } from "@/components/ui/status-badge";
+import { AgencyOperationalPanel } from "@/features/agents/agency-operational-panel";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { AgentRecord } from "@/types/agent";
 
@@ -202,6 +203,22 @@ export function AgentDetailDrawerContent({ agent }: { agent: AgentRecord }) {
             </dd>
           </div>
         </dl>
+      </section>
+
+      <Divider />
+
+      <section aria-labelledby="agent-agency-admin-heading">
+        <h3 id="agent-agency-admin-heading" className="text-sm font-semibold text-gray-900">
+          Agency prefix and access
+        </h3>
+        <div className="mt-2">
+          <AgencyOperationalPanel
+            compact
+            agencyId={agent.agencyId}
+            userId={agent.primaryUserId}
+            initialPrefix={agent.codePrefix}
+          />
+        </div>
       </section>
 
       <Divider />

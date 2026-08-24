@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\BackOffice;
 
 use App\Http\Controllers\Admin\AgencyBrandingController;
+use App\Http\Controllers\Admin\AgencyCommunicationSettingsController;
+use App\Http\Controllers\Admin\AgencyMessageTemplateController;
 use App\Http\Controllers\Admin\AgencyNotificationSettingController;
+use App\Http\Controllers\Admin\FinanceAdjustmentController;
+use App\Http\Controllers\Admin\PromoCodeController;
 use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Dashboard\DashboardBookingResource;
 use App\Models\Agent;
+use App\Models\AgentWalletTransaction;
 use App\Models\Booking;
 use App\Models\User;
 use App\Support\Branding\PlatformBrandingResolver;
@@ -233,8 +238,12 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         return redirect()->to($this->pathWithQuery('/staff/dashboard/reports', $request->query()));
     }
 
-    public function adminAccountingIndex(Request $request): RedirectResponse
+    public function adminAccountingIndex(Request $request): RedirectResponse|JsonResponse|View
     {
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->dispatchFinanceAdjustmentJson($request);
+        }
+
         return redirect()->to($this->pathWithQuery('/admin/dashboard/accounting', $request->query()));
     }
 
@@ -265,7 +274,16 @@ final class BackOfficeLegacyViewRedirectController extends Controller
     public function adminCommunicationsSettings(Request $request): RedirectResponse|JsonResponse|View
     {
         if ($this->wantsBackOfficeJson($request)) {
-            return app(AgencyNotificationSettingController::class)->index($request);
+            $path = trim($request->path(), '/');
+            if (preg_match('#(?:^|/)settings/communications$#', $path) === 1) {
+                return app(AgencyCommunicationSettingsController::class)->index($request);
+            }
+            if (str_contains($path, 'notification-events')) {
+                return app(AgencyNotificationSettingController::class)->index($request);
+            }
+            if (str_contains($path, 'communications/templates')) {
+                return app(AgencyMessageTemplateController::class)->index($request);
+            }
         }
 
         return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/notifications', $request->query()));
@@ -281,9 +299,13 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         return redirect()->to($this->pathWithQuery('/admin/dashboard/customers', $request->query()));
     }
 
-    public function adminPromoCodesIndex(Request $request): RedirectResponse
+    public function adminPromoCodesIndex(Request $request): RedirectResponse|JsonResponse|View
     {
-        return redirect()->to($this->pathWithQuery('/admin/dashboard/cms', $request->query()));
+        if ($this->wantsBackOfficeJson($request)) {
+            return app(PromoCodeController::class)->index($request);
+        }
+
+        return redirect()->to($this->pathWithQuery('/admin/dashboard/settings/promo-codes', $request->query()));
     }
 
     public function adminAgenciesIndex(Request $request): RedirectResponse
@@ -399,6 +421,40 @@ final class BackOfficeLegacyViewRedirectController extends Controller
         }
 
         return $query;
+    }
+
+    private function dispatchFinanceAdjustmentJson(Request $request): JsonResponse|View
+    {
+        $controller = app(FinanceAdjustmentController::class);
+        $path = trim($request->path(), '/');
+
+        if (preg_match('#finance/adjustments/create$#', $path) === 1) {
+            return $controller->create($request);
+        }
+
+        if (preg_match('#finance/adjustments/(\d+)/reverse$#', $path, $matches) === 1) {
+            $transaction = AgentWalletTransaction::query()->findOrFail((int) $matches[1]);
+
+            return $controller->reverseConfirm($request, $transaction);
+        }
+
+        if (preg_match('#finance/adjustments/(\d+)$#', $path, $matches) === 1) {
+            $transaction = AgentWalletTransaction::query()->findOrFail((int) $matches[1]);
+
+            return $controller->show($request, $transaction);
+        }
+
+        if (preg_match('#finance/adjustments$#', $path) === 1) {
+            return $controller->index($request);
+        }
+
+        return $this->backOfficeJson([
+            'ok' => true,
+            'surface' => 'accounting',
+            'message' => 'Manual wallet adjustments are available at /admin/finance/adjustments?format=json.',
+            'adjustment_index' => '/admin/finance/adjustments?format=json',
+            'adjustment_create' => '/admin/finance/adjustments/create?format=json',
+        ]);
     }
 
     /**

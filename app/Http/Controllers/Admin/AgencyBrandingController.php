@@ -41,6 +41,8 @@ class AgencyBrandingController extends Controller
 
         if ($this->wantsBackOfficeJson($request)) {
             $branding = PlatformBrandingResolver::forAgency($agency);
+            $footerPresenter = app(\App\Services\Agencies\FooterSettingsPresenter::class);
+            $aboutPresenter = app(\App\Services\Agencies\AboutUsContentPresenter::class);
 
             return $this->backOfficeJson([
                 'ok' => true,
@@ -55,6 +57,26 @@ class AgencyBrandingController extends Controller
                     'country' => (string) ($settings->country ?? ''),
                     'timezone' => (string) ($settings->timezone ?: 'Asia/Karachi'),
                     'logo_url' => is_string($logoPath) && $logoPath !== '' ? asset('storage/'.$logoPath) : null,
+                    'tagline' => (string) ($settings->tagline ?? ''),
+                    'color_scheme' => BrandDisplayResolver::colorSchemeKey($settings),
+                    'primary_color' => (string) ($settings->primary_color ?? ''),
+                    'secondary_color' => (string) ($settings->secondary_color ?? ''),
+                    'accent_color' => (string) ($settings->accent_color ?? ''),
+                ],
+                'theme' => [
+                    'color_scheme' => BrandDisplayResolver::colorSchemeKey($settings),
+                    'color_scheme_options' => array_keys(config('ota-brand-schemes.presets', [])),
+                    'primary_color' => (string) ($settings->primary_color ?? ''),
+                    'secondary_color' => (string) ($settings->secondary_color ?? ''),
+                    'accent_color' => (string) ($settings->accent_color ?? ''),
+                    'tagline' => (string) ($settings->tagline ?? ''),
+                ],
+                'footer' => $footerPresenter->presentForAdmin($settings),
+                'about' => $aboutPresenter->presentForAdmin($settings),
+                'background_removal' => [
+                    'enabled' => (bool) $bgSettings->is_enabled,
+                    'default_for_logos' => (bool) $bgSettings->default_for_logos,
+                    'laravel_settings_url' => client_route('admin.settings.background-removal.edit'),
                 ],
             ]);
         }

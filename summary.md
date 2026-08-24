@@ -11,12 +11,13 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-22 (JP-INT-01 Integrations Hub)
+**Last updated:** 2026-08-24 (JP-BO-04D/E accounting + SMTP)
 
 ---
 
 ## Changelog (high level)
 
+| 2026-08-24 | JP-BO-04D / JP-BO-04E (partial) | Next **Accounting** workspace: audited wallet credit/debit/reversal via `FinanceAdjustmentController` JSON + `operational-api`. Settings **SMTP** Save/Test via `AgencyCommunicationSettingsController` (masked secrets, confirmed recipient only). Legacy redirect JSON dispatch fixed for adjustments + communications. Evidence `tmp/jp-bo-04/14-16-*.txt`. |
 | 2026-08-22 | JP-INT-01 Integrations Hub | Admin **Integrations** control plane: `IntegrationRegistry` + manager facade over suppliers/AbhiPay; health history; encrypted AbhiPay settings; non-commercial Test Connection; test-mode diagnostic Test Payment (`purpose=integration_test`, PKR 1.00); legacy payments settings redirect; RBAC `integrations.*`. Docs: `docs/phases/JP-INT-01-*`. |
 | 2026-08-21 | JETPK WAVE-6 CLUSTER D UX CLEANUP | **Branded cards / booking shell / passport autofill:** removed per-card View Details (Select fare updates Fare Summary). Synthetic-only offers show Current fare instead of broken branded Unavailable. Booking max width expanded (~1080–1240px) with ~300–360px Flight Preview column. Document Reader simplified to Autofill from passport icon CTA; customer MRZ/OCR jargon hidden; client-side architecture preserved. |
 

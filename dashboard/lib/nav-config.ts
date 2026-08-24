@@ -43,6 +43,7 @@ export const navGroups: NavGroup[] = [
       { label: "Deposits", href: "/deposits", laravelRoute: "admin.agent-deposits.index" },
       { label: "Markups", href: "/markups", laravelRoute: "admin.markups" },
       { label: "Commissions", href: "/commissions", laravelRoute: "admin.commissions.index" },
+      { label: "Accounting", href: "/accounting", laravelRoute: "admin.finance.adjustments.index" },
     ],
   },
   {
@@ -83,6 +84,7 @@ export const navGroups: NavGroup[] = [
     label: "System",
     items: [
       { label: "Settings", href: "/settings", laravelRoute: "admin.settings.index" },
+      { label: "Promo codes", href: "/settings/promo-codes", laravelRoute: "admin.promo-codes.index" },
       { label: "System health", href: "/system/health" },
       { label: "Go-live checklist", href: "/system/go-live" },
     ],

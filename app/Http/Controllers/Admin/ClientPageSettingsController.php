@@ -234,21 +234,31 @@ class ClientPageSettingsController extends Controller
             ->with('status', 'Draft saved.');
     }
 
-    public function refreshHomeRouteFares(): RedirectResponse
+    public function refreshHomeRouteFares(Request $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('client.page-settings.manage');
         $profile = $this->requireProfile();
         $summary = $this->routeFareRefreshService->refreshProfile($profile, true);
 
+        $message = sprintf(
+            'Route fare refresh complete: %d refreshed, %d success, %d failed, %d skipped.',
+            $summary['refreshed'],
+            $summary['success'],
+            $summary['failed'],
+            $summary['skipped'],
+        );
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => $message,
+                'summary' => $summary,
+            ]);
+        }
+
         return redirect()
             ->to(client_route('admin.page-settings.edit', ['pageKey' => ClientPageKeys::HOME]).'#section-routes')
-            ->with('status', sprintf(
-                'Route fare refresh complete: %d refreshed, %d success, %d failed, %d skipped.',
-                $summary['refreshed'],
-                $summary['success'],
-                $summary['failed'],
-                $summary['skipped'],
-            ));
+            ->with('status', $message);
     }
 
     public function publish(Request $request, string $pageKey): RedirectResponse|JsonResponse

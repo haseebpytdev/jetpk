@@ -6,6 +6,7 @@ import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
 import { useMockData } from "@/lib/preview";
 import { OrganizationProfileForm } from "@/features/settings/components/organization-profile-form";
+import { BrandingSettingsWorkspace } from "@/features/settings/components/branding-settings-workspace";
 import type { GeneralSettingsValues, SettingsModuleResult } from "@/types/settings-module";
 
 const GENERAL_FIELDS: SettingsPreviewField[] = [
@@ -75,6 +76,7 @@ export function GeneralSettingsWorkspace({ result }: Props) {
   return (
     <div className="space-y-4" data-testid="general-settings-workspace">
       <OrganizationProfileForm />
+      <BrandingSettingsWorkspace />
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
 
       {allowLocalPreview ? (

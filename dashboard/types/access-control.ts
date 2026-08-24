@@ -311,6 +311,8 @@ export type User = {
   createdBy: string;
   updatedBy: string;
   notes: string | null;
+  agencyId?: string | null;
+  laravelUserId?: string | null;
 };
 
 export type AuditSeverity = "info" | "notice" | "warning" | "critical";

@@ -7,6 +7,7 @@ import {
   beginPageSettingsPreview,
   loadPageSettings,
   publishPageSettings,
+  refreshHomepageRouteFares,
   savePageSettings,
   uploadPageSettingsAsset,
 } from "@/services/operational-api";
@@ -511,6 +512,20 @@ export function HomepageSettingsPanel() {
     await reloadHome();
   }
 
+  async function refreshRouteFares() {
+    setBusy(true);
+    setError(null);
+    setSuccess(null);
+    const result = await refreshHomepageRouteFares();
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.message ?? "Route fare refresh failed.");
+      return;
+    }
+    setSuccess(result.message ?? "Route fares refreshed.");
+    await reloadHome();
+  }
+
   function selectSection(id: SectionId) {
     setActiveSection(id);
     setPreviewNonce((n) => n + 1);
@@ -753,6 +768,18 @@ export function HomepageSettingsPanel() {
       {activeSection === "routes" ? (
         <fieldset className="space-y-3 rounded-lg border border-jp-border p-3" data-testid="cms-trending-routes-repeater">
           <legend className="text-sm font-medium">Trending Routes</legend>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className="rounded-lg border border-jp-border px-2.5 py-1 text-xs disabled:opacity-60"
+              disabled={busy}
+              data-testid="homepage-refresh-fares"
+              onClick={() => void refreshRouteFares()}
+            >
+              Refresh route fares
+            </button>
+            <p className="text-xs text-jp-muted">Runs Laravel page-settings home/refresh-fares for active routes.</p>
+          </div>
           <SectionHeaderFields
             meta={content.routes ?? {}}
             onChange={(meta) => setContent({ ...content, routes: { ...content.routes, ...meta, items: routes } })}

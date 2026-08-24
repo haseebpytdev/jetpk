@@ -5,6 +5,8 @@ import { CmsStatusBadge } from "@/components/ui/status-badge";
 import { validateNotificationSettings } from "@/lib/access-control/settings-validation";
 import { SettingsLocalPreviewForm, type SettingsPreviewField } from "@/features/settings/components/settings-local-preview-form";
 import { SettingsValidationSummary } from "@/features/settings/components/settings-validation-summary";
+import { CommunicationsSmtpWorkspace } from "@/features/settings/components/communications-smtp-workspace";
+import { EmailTemplatesWorkspace } from "@/features/settings/components/email-templates-workspace";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { useMockData } from "@/lib/preview";
 import { updateNotificationCategories } from "@/services/operational-api";
@@ -101,6 +103,9 @@ export function NotificationSettingsWorkspace({ result }: Props) {
   return (
     <div className="space-y-4" data-testid="notification-settings-workspace">
       <SettingsValidationSummary issues={issues} filter={result.query.validationState} />
+
+      <CommunicationsSmtpWorkspace />
+      <EmailTemplatesWorkspace />
 
       {allowLocalPreview && initialCategory ? (
         <SettingsLocalPreviewForm

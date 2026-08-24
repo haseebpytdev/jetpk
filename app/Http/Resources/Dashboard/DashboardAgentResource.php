@@ -4,6 +4,7 @@ namespace App\Http\Resources\Dashboard;
 
 use App\Models\Agent;
 use App\Services\Agents\AgentWalletService;
+use App\Support\Agencies\AgencyPrefixService;
 
 final class DashboardAgentResource
 {
@@ -59,6 +60,12 @@ final class DashboardAgentResource
             'linkedPnrIds' => [],
             'linkedTicketIds' => [],
             'currency' => $currency,
+            'agencyId' => $agent->agency_id !== null ? (string) $agent->agency_id : null,
+            'agentId' => (string) $agent->id,
+            'primaryUserId' => $user?->id !== null ? (string) $user->id : null,
+            'codePrefix' => $agent->agency
+                ? AgencyPrefixService::resolvePrefix($agent->agency)
+                : null,
             'staffCount' => 0,
             'applicationState' => 'approved',
             'reviewFlags' => [

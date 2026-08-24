@@ -51,6 +51,8 @@ final class DashboardUserResource
             'activeSessionCount' => 0,
             'validationState' => 'valid',
             'accountType' => $user->account_type->value,
+            'agencyId' => $user->current_agency_id !== null ? (string) $user->current_agency_id : null,
+            'laravelUserId' => (string) $user->id,
             'effectiveAccessSummary' => [
                 'roleLabel' => $role['name'],
                 'scope' => $role['scope'],

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { formatDateTime } from "@/lib/format";
 import { DashboardLink } from "@/components/dashboard/dashboard-link";
+import { resendDeliveryLog } from "@/services/operational-api";
 
 type FailureLog = {
   id: string;
@@ -67,8 +68,11 @@ export function NotificationFailuresWorkspace() {
   const [payload, setPayload] = useState<FailurePayload | null>(null);
   const [pagination, setPagination] = useState<Pagination | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,6 +118,34 @@ export function NotificationFailuresWorkspace() {
     };
   }, [isLive, page]);
 
+  async function onResend(log: FailureLog) {
+    if (!log.retryEligible || busyId) {
+      return;
+    }
+    setBusyId(log.id);
+    setActionError(null);
+    setActionSuccess(null);
+    const result = await resendDeliveryLog(log.id);
+    setBusyId(null);
+    if (!result.ok) {
+      setActionError(result.message ?? "Resend failed.");
+      return;
+    }
+    setActionSuccess(`Resend queued for log ${log.id}.`);
+    setPayload((current) =>
+      current
+        ? {
+            ...current,
+            logs: current.logs.map((row) =>
+              row.id === log.id
+                ? { ...row, operatorAction: "Resend queued", retryEligible: false, status: "queued" }
+                : row,
+            ),
+          }
+        : current,
+    );
+  }
+
   return (
     <div className="space-y-4" data-testid="notification-failures-workspace">
       <section className="rounded-2xl border border-jp-border bg-white p-4 shadow-sm">
@@ -140,6 +172,8 @@ export function NotificationFailuresWorkspace() {
       </section>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {actionError ? <p className="text-sm text-red-600">{actionError}</p> : null}
+      {actionSuccess ? <p className="text-sm text-emerald-700">{actionSuccess}</p> : null}
       {loading ? <p className="text-sm text-jp-muted">Loading failures…</p> : null}
 
       <div className="overflow-x-auto rounded-2xl border border-jp-border bg-white shadow-sm">
@@ -178,7 +212,21 @@ export function NotificationFailuresWorkspace() {
                   <td className="px-3 py-2">{log.recipientMasked}</td>
                   <td className="px-3 py-2 capitalize">{log.classificationHint.replaceAll("_", " ")}</td>
                   <td className="px-3 py-2 max-w-xs text-xs text-jp-muted">{log.errorMessage || "—"}</td>
-                  <td className="px-3 py-2 text-xs text-jp-muted">{log.operatorAction}</td>
+                  <td className="px-3 py-2 text-xs">
+                    {log.retryEligible ? (
+                      <button
+                        type="button"
+                        className="rounded-lg border border-jp-border px-2 py-1 text-xs disabled:opacity-60"
+                        disabled={busyId === log.id}
+                        data-testid={`delivery-log-resend-${log.id}`}
+                        onClick={() => void onResend(log)}
+                      >
+                        {busyId === log.id ? "Resending…" : "Resend"}
+                      </button>
+                    ) : (
+                      <span className="text-jp-muted">{log.operatorAction || "No retry"}</span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
@@ -217,7 +265,7 @@ export function NotificationFailuresWorkspace() {
         <DashboardLink href="/settings/notifications" className="underline">
           Notification policy
         </DashboardLink>
-        . Resend remains an authorized Laravel-only action and is not offered here.
+        . Resend uses Laravel CommunicationDeliveryLogController and remains platform-admin gated.
       </p>
     </div>
   );

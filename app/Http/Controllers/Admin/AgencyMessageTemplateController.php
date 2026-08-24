@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\CommunicationChannel;
+use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\AgencyMessageTemplate;
@@ -12,6 +13,7 @@ use App\Support\Emails\EmailTemplatePreviewRenderer;
 use App\Support\Emails\EmailTemplateRegistry;
 use App\Support\Emails\JetpkEmailEventContentRegistry;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -19,11 +21,13 @@ use Illuminate\Support\Facades\Schema;
 
 class AgencyMessageTemplateController extends Controller
 {
+    use RespondsWithBackOfficeJson;
+
     public function __construct(
         protected AgencyCommunicationSettingsService $settingsService,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', AgencyMessageTemplate::class);
 
@@ -81,6 +85,40 @@ class AgencyMessageTemplateController extends Controller
             if ($rows !== []) {
                 $eventContentGroups[$categoryKey] = $rows;
             }
+        }
+
+        if ($this->wantsBackOfficeJson($request)) {
+            $templates = [];
+            foreach ($eventContentGroups as $categoryKey => $rows) {
+                foreach ($rows as $row) {
+                    $content = $row['content'];
+                    $templates[] = [
+                        'event' => $content->eventKey,
+                        'channel' => 'email',
+                        'category' => $categoryKey,
+                        'name' => $content->name,
+                        'has_override' => (bool) $row['has_override'],
+                        'is_enabled' => (bool) $row['is_enabled'],
+                        'subject' => (string) ($row['subject'] ?? ''),
+                        'preheader' => (string) ($row['preheader'] ?? ''),
+                        'heading' => (string) ($row['heading'] ?? ''),
+                        'status_label' => (string) ($row['status_label'] ?? ''),
+                        'status_type' => (string) ($row['status_type'] ?? ''),
+                        'cta_label' => (string) ($row['cta_label'] ?? ''),
+                    ];
+                }
+            }
+
+            return $this->backOfficeJson([
+                'ok' => true,
+                'filters' => $filters,
+                'total' => $eventContentTotal,
+                'category_counts' => $categoryCounts,
+                'templates' => $templates,
+                'company' => [
+                    'name' => (string) ($companyProfile->name ?? ''),
+                ],
+            ]);
         }
 
         return view(client_view('settings.communications.templates', 'admin'), [
@@ -156,7 +194,7 @@ class AgencyMessageTemplateController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $event, string $channel): RedirectResponse
+    public function update(Request $request, string $event, string $channel): RedirectResponse|JsonResponse
     {
         $agency = $this->resolveTemplateAgency($request);
         $existing = AgencyMessageTemplate::query()->firstOrNew([
@@ -166,20 +204,35 @@ class AgencyMessageTemplateController extends Controller
         ]);
         Gate::authorize('update', $existing);
 
-        $validated = $request->validate([
-            'subject' => ['nullable', 'string', 'max:255'],
-            'preheader' => ['nullable', 'string', 'max:255'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['required', 'string', 'max:10000'],
-            'status_label' => ['nullable', 'string', 'max:120'],
-            'status_type' => ['nullable', 'string', 'in:info,success,warning,error,neutral'],
-            'cta_label' => ['nullable', 'string', 'max:120'],
-            'cta_url_key' => ['nullable', 'string', 'max:120'],
-            'is_enabled' => ['nullable', 'boolean'],
-            'full_html_override_enabled' => ['nullable', 'boolean'],
-            'full_html' => ['nullable', 'string', 'max:50000'],
-            'variables' => ['nullable', 'array'],
-        ]);
+        $validated = $this->wantsBackOfficeJson($request)
+            ? $this->validateBackOffice($request, [
+                'subject' => ['nullable', 'string', 'max:255'],
+                'preheader' => ['nullable', 'string', 'max:255'],
+                'heading' => ['nullable', 'string', 'max:255'],
+                'body' => ['required', 'string', 'max:10000'],
+                'status_label' => ['nullable', 'string', 'max:120'],
+                'status_type' => ['nullable', 'string', 'in:info,success,warning,error,neutral'],
+                'cta_label' => ['nullable', 'string', 'max:120'],
+                'cta_url_key' => ['nullable', 'string', 'max:120'],
+                'is_enabled' => ['nullable', 'boolean'],
+                'full_html_override_enabled' => ['nullable', 'boolean'],
+                'full_html' => ['nullable', 'string', 'max:50000'],
+                'variables' => ['nullable', 'array'],
+            ])
+            : $request->validate([
+                'subject' => ['nullable', 'string', 'max:255'],
+                'preheader' => ['nullable', 'string', 'max:255'],
+                'heading' => ['nullable', 'string', 'max:255'],
+                'body' => ['required', 'string', 'max:10000'],
+                'status_label' => ['nullable', 'string', 'max:120'],
+                'status_type' => ['nullable', 'string', 'in:info,success,warning,error,neutral'],
+                'cta_label' => ['nullable', 'string', 'max:120'],
+                'cta_url_key' => ['nullable', 'string', 'max:120'],
+                'is_enabled' => ['nullable', 'boolean'],
+                'full_html_override_enabled' => ['nullable', 'boolean'],
+                'full_html' => ['nullable', 'string', 'max:50000'],
+                'variables' => ['nullable', 'array'],
+            ]);
         $validated['is_enabled'] = $request->boolean('is_enabled');
 
         $meta = is_array($existing->meta) ? $existing->meta : [];
@@ -207,10 +260,19 @@ class AgencyMessageTemplateController extends Controller
 
         $this->settingsService->updateTemplate($agency, $request->user(), $event, $channel, $payload);
 
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'communication-template-updated',
+                'event' => $event,
+                'channel' => $channel,
+            ]);
+        }
+
         return redirect()->route('admin.settings.communications.templates.index')->with('status', 'communication-template-updated');
     }
 
-    public function reset(Request $request, string $event, string $channel): RedirectResponse
+    public function reset(Request $request, string $event, string $channel): RedirectResponse|JsonResponse
     {
         $agency = $this->resolveTemplateAgency($request);
         $existing = AgencyMessageTemplate::query()->firstOrNew([
@@ -221,6 +283,15 @@ class AgencyMessageTemplateController extends Controller
         Gate::authorize('update', $existing);
 
         $this->settingsService->resetTemplate($agency, $request->user(), $event, $channel);
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'message' => 'communication-template-reset',
+                'event' => $event,
+                'channel' => $channel,
+            ]);
+        }
 
         return redirect()->route('admin.settings.communications.templates.index')->with('status', 'communication-template-reset');
     }

@@ -67,6 +67,10 @@ export type AgentRecord = {
   linkedPnrIds: string[];
   linkedTicketIds: string[];
   currency: string;
+  agencyId?: string | null;
+  agentId?: string | null;
+  primaryUserId?: string | null;
+  codePrefix?: string | null;
 };
 
 export type AgentSortField =
