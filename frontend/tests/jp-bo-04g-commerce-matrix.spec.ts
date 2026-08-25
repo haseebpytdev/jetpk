@@ -461,6 +461,16 @@ test("07 return split outbound brand", async ({ page }) => {
 
 test("08 one-way explicit fare book", async ({ page }) => {
   await mockCsrf(page);
+  await mockResults(page, {
+    search_id: SEARCH_ID,
+    flow: "one_way",
+    page: 1,
+    per_page: 12,
+    total: 1,
+    has_more: false,
+    offers: [brandedOffer],
+    status: "ready",
+  });
   await page.route("**/flights/results/offer**", async (route: Route) => {
     await route.fulfill({
       status: 200,
@@ -499,9 +509,14 @@ test("08 one-way explicit fare book", async ({ page }) => {
     });
   });
 
-  // One-way branded path uses dedicated fare-selection (inline carousel suppressed when >1 family).
-  await page.goto(`/flights/fare-selection?search_id=${SEARCH_ID}&offer_id=offer-1&fare_option_key=fare-basic`);
-  await expect(page.getByTestId("fare-selection-page")).toBeVisible({ timeout: 15000 });
+  // One-way branded path: Book Now opens Details drawer for explicit fare confirmation.
+  await page.goto(
+    `/flights/results?search_id=${SEARCH_ID}&trip_type=one_way&from=LHE&to=DXB&depart=2026-09-01&cabin=economy&adults=1`,
+  );
+  await expect(page.getByTestId("book-now-trigger").first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("selected-fare-brand")).toHaveCount(0);
+  await page.getByTestId("book-now-trigger").first().click();
+  await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
   await expect(page.getByTestId("fare-family-details")).toBeVisible();
 
   // Explicitly choose non-default comfort, then continue — selected key must be fare-comfort.
@@ -509,7 +524,7 @@ test("08 one-way explicit fare book", async ({ page }) => {
     .locator("[data-fare-family-card]", { hasText: "Economy Comfort" })
     .getByRole("button", { name: /Select fare/i })
     .click();
-  await page.getByRole("button", { name: /continue to passengers/i }).click();
+  await page.getByTestId("continue-to-passengers").click();
   await expect.poll(() => continueRaw).not.toBeNull();
   expect(continueRaw!).toContain("selected_fare_option_id");
   expect(continueRaw!).toContain("fare-comfort");
@@ -552,12 +567,31 @@ test("09 return paired explicit fare book", async ({ page }) => {
     ],
     status: "ready",
   });
+  await page.route("**/flights/results/offer**", async (route: Route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        search_id: SEARCH_ID,
+        offer_id: "combo-1",
+        offer: {
+          offer_id: "combo-1",
+          can_book: true,
+          select_url: "/booking/passengers",
+          branded_fares_display_options: brandedOffer.branded_fares_display_options,
+        },
+      }),
+    });
+  });
   const intercept = await interceptSelectReturnCombo(page);
   await page.goto(
     `/flights/results?search_id=${SEARCH_ID}&trip_type=round_trip&view=pair&from=LHE&to=DXB&depart=2026-09-01&return_date=2026-09-08&cabin=economy&adults=1`,
   );
   await expect(page.getByTestId("pair-return-card").first()).toBeVisible({ timeout: 15000 });
   await page.getByTestId("fare-price-fare-comfort").click();
+  await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
+  await page.getByTestId("continue-to-passengers").click();
   await expect.poll(() => intercept.getPosted()).not.toBeNull();
   const posted = intercept.getPosted()!;
   expect(posted.fare_option_key).toBe("fare-comfort");
@@ -579,8 +613,41 @@ test("10 return split direct book non-default", async ({ page }) => {
   await expect(page.getByTestId("return-option-card").first()).toBeVisible({ timeout: 15000 });
   await expect(page.getByTestId("outbound-fare-preserved")).toBeVisible();
 
+  await page.route("**/flights/results/offer**", async (route: Route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        search_id: SEARCH_ID,
+        offer_id: "combo-1",
+        offer: {
+          offer_id: "combo-1",
+          can_book: true,
+          select_url: "/booking/passengers",
+          branded_fares_display_options: [
+            {
+              option_key: "return-basic",
+              name: "Economy Basic",
+              displayed_price: 180000,
+              selection_key_authoritative: true,
+            },
+            {
+              option_key: "return-flex",
+              name: "Economy Flex",
+              displayed_price: 195000,
+              selection_key_authoritative: true,
+            },
+          ],
+        },
+      }),
+    });
+  });
+
   // CRITICAL: do NOT click return-flex card first — Book directly (stale-state race).
   await page.getByTestId("fare-price-return-flex").click();
+  await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
+  await page.getByTestId("continue-to-passengers").click();
   await expect.poll(() => intercept.getPosted()).not.toBeNull();
   const posted = intercept.getPosted()!;
   expect(posted.outbound_fare_option_key).toBe("fare-comfort");
@@ -607,15 +674,46 @@ test("11 return split preselect then book", async ({ page }) => {
   await mockReturnOptions(page);
   const intercept = await interceptSelectReturnCombo(page);
 
+  await page.route("**/flights/results/offer**", async (route: Route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        search_id: SEARCH_ID,
+        offer_id: "combo-1",
+        offer: {
+          offer_id: "combo-1",
+          can_book: true,
+          select_url: "/booking/passengers",
+          branded_fares_display_options: [
+            {
+              option_key: "return-basic",
+              name: "Economy Basic",
+              displayed_price: 180000,
+              selection_key_authoritative: true,
+            },
+            {
+              option_key: "return-flex",
+              name: "Economy Flex",
+              displayed_price: 195000,
+              selection_key_authoritative: true,
+            },
+          ],
+        },
+      }),
+    });
+  });
+
   await page.goto(
     `/flights/return-options?search_id=${SEARCH_ID}&outbound_key=out-1&outbound_fare_option_key=fare-comfort`,
   );
   await expect(page.getByTestId("return-option-card").first()).toBeVisible({ timeout: 15000 });
 
-  // Normal path: select return-flex card, then Book.
-  await page.getByText("Economy Flex").first().click();
-  await expect(page.getByTestId("return-selected-brand")).toContainText("Economy Flex");
+  // Normal path: select return-flex card, then Book → Details confirmation.
   await page.getByTestId("fare-price-return-flex").click();
+  await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
+  await page.getByTestId("continue-to-passengers").click();
 
   await expect.poll(() => intercept.getPosted()).not.toBeNull();
   const posted = intercept.getPosted()!;
