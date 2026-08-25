@@ -230,6 +230,7 @@ export type ReturnOptionsDataResponse = {
   flow: "return_split_return";
   search_id: string;
   outbound_key: string;
+  status?: string;
   outbound_journey?: Record<string, unknown>;
   outbound_meta?: Record<string, unknown>;
   cheapest_total?: number;
@@ -309,6 +310,8 @@ export type ResultsPageStatus =
   | "idle"
   | "initializing"
   | "loading"
+  | "searching"
+  | "partial"
   | "ready"
   | "empty"
   | "expired"

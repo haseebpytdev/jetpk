@@ -13,6 +13,7 @@ export type LaravelValidationErrors = Record<string, string[]>;
 
 export type FlightSearchInitResponse = {
   search_id: string;
+  status?: string;
   results_page_url: string;
   initial_results_url: string;
   summary?: { text?: string };

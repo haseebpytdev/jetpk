@@ -15,6 +15,7 @@ type ResultsToolbarProps = {
   total: number;
   status: ResultsPageStatus;
   loadingMessage?: string;
+  searchStillActive?: boolean;
 };
 
 export function ResultsToolbar({
@@ -26,15 +27,22 @@ export function ResultsToolbar({
   total,
   status,
   loadingMessage,
+  searchStillActive = false,
 }: ResultsToolbarProps) {
   const internalRef = useRef<HTMLButtonElement>(null);
   const buttonRef = filterButtonRef ?? internalRef;
   const activeFilters = countActiveFilters(filters);
-  const searching = status === "idle" || status === "initializing" || status === "loading";
+  const searching =
+    status === "idle" ||
+    status === "initializing" ||
+    status === "loading" ||
+    status === "searching";
 
   let countLabel = `${total} flight${total === 1 ? "" : "s"}`;
-  if (searching) {
+  if (searching && total === 0) {
     countLabel = loadingMessage || "Searching flights…";
+  } else if (status === "partial" || searchStillActive) {
+    countLabel = `${total} flight${total === 1 ? "" : "s"} found`;
   } else if (status === "empty") {
     countLabel = "0 flights";
   }

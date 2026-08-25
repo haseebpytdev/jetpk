@@ -190,8 +190,13 @@ class StandardBookingJsonPresenter
 
         $totalFormatted = $fareBreakdown['total_formatted'] ?? null;
         $priceNeedsRefresh = false;
+        $authoritativeAfterRevalidation = is_array($selectedIntent)
+            && (
+                ! empty($selectedIntent['authoritative_after_revalidation'])
+                || (is_array($selectedCheckout) && ! empty($selectedCheckout['authoritative_after_revalidation']))
+            );
         if (is_array($selectedEstimate) && ! empty($selectedEstimate['has_checkout_estimate'])) {
-            $estimateApproximate = ! empty($selectedEstimate['price_is_approximate']);
+            $estimateApproximate = ! empty($selectedEstimate['price_is_approximate']) && ! $authoritativeAfterRevalidation;
             if ($estimateApproximate) {
                 // Do not present an FX-derived estimate as a certain checkout total.
                 $priceNeedsRefresh = true;

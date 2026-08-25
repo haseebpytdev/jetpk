@@ -176,23 +176,77 @@ class FlightController extends Controller
     public function resultsSearchData(PublicFlightSearchRequest $request): JsonResponse
     {
         $criteria = $request->criteria();
-        [, $searchId, $warnings] = $this->runSearch($criteria, $request);
-
         $freshness = app(SabreOfferFreshness::class);
+        $progressive = (bool) config('ota.progressive_flight_search', true);
+
+        if (! $progressive) {
+            [, $searchId, $warnings] = $this->runSearch($criteria, $request);
+
+            return response()->json([
+                'search_id' => $searchId,
+                'status' => 'ready',
+                'summary' => [
+                    'text' => $this->formatSearchSummary($criteria),
+                ],
+                'inline_display' => $this->buildInlineSearchDisplay($criteria),
+                'criteria' => $criteria,
+                'warnings' => $warnings,
+                'initial_results_url' => client_route('flights.results.data', ['search_id' => $searchId]),
+                'results_page_url' => client_route('flights.results', $request->query()),
+                'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta([
+                    'search_created_at' => now()->toIso8601String(),
+                    'created_at' => now()->toIso8601String(),
+                ])),
+            ]);
+        }
+
+        $channel = AgentBookingContext::resolveCheckoutChannel($request);
+        $agency = $channel['agency'];
+        $searchId = $this->searchStore->beginSearch($criteria, [
+            'criteria_cache_context' => [
+                'client_slug' => current_client_slug(),
+                'agency_id' => $agency?->id,
+                'source_channel' => $channel['source_channel'],
+                'agent_id' => $channel['agent_id'],
+            ],
+        ]);
+
+        $sourceChannel = $channel['source_channel'];
+        $agentId = $channel['agent_id'];
+        $agencyId = $agency?->id;
+
+        dispatch(function () use ($searchId, $criteria, $agencyId, $sourceChannel, $agentId): void {
+            try {
+                $agency = $agencyId !== null ? Agency::query()->find($agencyId) : null;
+                $this->completeSearchInto($searchId, $criteria, $agency, $sourceChannel, $agentId);
+            } catch (\Throwable $e) {
+                Log::error('flight_search.progressive.failed', [
+                    'search_id' => $searchId,
+                    'exception_class' => $e::class,
+                    'message' => $e->getMessage(),
+                ]);
+                $this->searchStore->markFailed(
+                    $searchId,
+                    'We could not complete your flight search. Please try again.',
+                );
+            }
+        })->afterResponse();
 
         return response()->json([
             'search_id' => $searchId,
+            'status' => FlightSearchResultStore::SEARCH_STATUS_SEARCHING,
             'summary' => [
                 'text' => $this->formatSearchSummary($criteria),
             ],
             'inline_display' => $this->buildInlineSearchDisplay($criteria),
             'criteria' => $criteria,
-            'warnings' => $warnings,
+            'warnings' => [],
             'initial_results_url' => client_route('flights.results.data', ['search_id' => $searchId]),
             'results_page_url' => client_route('flights.results', $request->query()),
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta([
                 'search_created_at' => now()->toIso8601String(),
                 'created_at' => now()->toIso8601String(),
+                'search_status' => FlightSearchResultStore::SEARCH_STATUS_SEARCHING,
             ])),
         ]);
     }
@@ -309,6 +363,8 @@ class FlightController extends Controller
                 $searchId,
                 $offerId,
                 $selectedFareOptionId,
+                PublicOfferRevalidationPresenter::customerDisplayTotal($offer),
+                true,
             );
             $passengersUrl = $this->buildCustomerSelectUrl(
                 $this->offerIsCustomerBookable($offer, $criteria),
@@ -444,6 +500,8 @@ class FlightController extends Controller
                 $searchId,
                 $offerId,
                 (string) ($selectedFareOptionId ?? ''),
+                PublicOfferRevalidationPresenter::customerDisplayTotal($offer),
+                true,
             );
 
             Log::info('flight_search.iati_selected_offer_refresh.success', [
@@ -648,13 +706,14 @@ class FlightController extends Controller
 
         $response = [
             'search_id' => $searchId,
+            'status' => $this->searchStore->resolveSearchStatus($payload),
             'page' => $page,
             'per_page' => $perPage,
             'total' => $total,
             'has_more' => ($offset + $perPage) < $total,
             'filters' => $filterMeta,
             'offers' => $data,
-            'warnings' => [],
+            'warnings' => is_array($payload['warnings'] ?? null) ? array_values($payload['warnings']) : [],
             'empty_message' => $this->resolveResultsEmptyMessage($payload, $total),
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
         ];
@@ -847,10 +906,13 @@ class FlightController extends Controller
 
         $freshness = app(SabreOfferFreshness::class);
 
+        $searchStatus = $this->searchStore->resolveSearchStatus($payload);
+
         return response()->json([
             'flow' => 'return_split_return',
             'search_id' => $searchId,
             'outbound_key' => $outboundKey,
+            'status' => $searchStatus,
             'outbound_journey' => $built['outbound_journey'] ?? null,
             'outbound_meta' => [
                 'outbound_key' => $outboundKey,
@@ -863,6 +925,14 @@ class FlightController extends Controller
             'per_page' => $perPage,
             'total' => $total,
             'has_more' => ($offset + $perPage) < $total,
+            'empty_message' => $total === 0
+                && ! in_array($searchStatus, [
+                    FlightSearchResultStore::SEARCH_STATUS_QUEUED,
+                    FlightSearchResultStore::SEARCH_STATUS_SEARCHING,
+                    FlightSearchResultStore::SEARCH_STATUS_PARTIAL,
+                ], true)
+                ? 'No return flights match this outbound selection.'
+                : '',
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
         ]);
     }
@@ -1013,6 +1083,7 @@ class FlightController extends Controller
             'flow' => 'return_pair',
             'pairing_authority' => $total > 0 ? 'SUPPLIER_RETURNED' : 'UNAVAILABLE',
             'search_id' => $searchId,
+            'status' => $this->searchStore->resolveSearchStatus($payload),
             'page' => $page,
             'per_page' => $perPage,
             'total' => $total,
@@ -1021,7 +1092,7 @@ class FlightController extends Controller
             'paired_options' => $slice,
             'offers' => [],
             'outbound_options' => [],
-            'warnings' => [],
+            'warnings' => is_array($payload['warnings'] ?? null) ? array_values($payload['warnings']) : [],
             'empty_message' => $total === 0 ? 'No paired return options are currently available.' : '',
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
         ]);
@@ -1096,13 +1167,14 @@ class FlightController extends Controller
         return response()->json([
             'flow' => 'return_split_outbound',
             'search_id' => $searchId,
+            'status' => $this->searchStore->resolveSearchStatus($payload),
             'page' => $page,
             'per_page' => $perPage,
             'total' => $total,
             'has_more' => ($offset + $perPage) < $total,
             'filters' => $filterMeta,
             'outbound_options' => $slice,
-            'warnings' => [],
+            'warnings' => is_array($payload['warnings'] ?? null) ? array_values($payload['warnings']) : [],
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
         ]);
     }
@@ -1666,6 +1738,8 @@ class FlightController extends Controller
         string $searchId,
         string $offerId,
         string $fareOptionKey,
+        ?int $authoritativeTotal = null,
+        bool $markAuthoritative = false,
     ): void {
         $fareOptionKey = trim($fareOptionKey);
         if ($fareOptionKey === '' || $searchId === '' || $offerId === '') {
@@ -1702,6 +1776,13 @@ class FlightController extends Controller
         }
 
         $intent = FlightOfferDisplayPresenter::sanitizeSelectedFareFamilyIntent($resolved, $offer);
+        if ($intent !== [] && $markAuthoritative) {
+            $intent = FlightOfferDisplayPresenter::markSelectedFareAuthoritative(
+                $intent,
+                $authoritativeTotal,
+                PublicOfferRevalidationPresenter::customerDisplayCurrency($offer),
+            );
+        }
         if ($intent !== []) {
             $draftMerge['selected_fare_family_option'] = $intent;
         }
@@ -2428,13 +2509,189 @@ class FlightController extends Controller
         $request = $request ?? request();
         $channel = AgentBookingContext::resolveCheckoutChannel($request);
         $agency = $channel['agency'];
-        $result = $this->flightSearch->searchWithMeta(
+        [$storedOffers, $safeWarnings, $meta] = $this->executePublicSearchPipeline(
             $criteria,
             $agency,
             $channel['source_channel'],
             $channel['agent_id'],
         );
+
+        $searchId = $this->searchStore->store($criteria, $storedOffers, $safeWarnings, $meta);
+        $this->captureMarketingSearchSnapshot($agency, $searchId, $criteria, $storedOffers, $safeWarnings);
+        if (function_exists('session')) {
+            session()->put('home_recent_fares', [
+                'criteria' => $criteria,
+                'offers' => array_slice($storedOffers, 0, 3),
+                'captured_at' => now()->toIso8601String(),
+            ]);
+        }
+
+        return [[
+            'offers' => $storedOffers,
+            'warnings' => $safeWarnings,
+        ], $searchId, array_values(array_unique($safeWarnings))];
+    }
+
+    /**
+     * Progressive completion into an already-allocated search_id.
+     *
+     * @param  array<string, mixed>  $criteria
+     */
+    protected function completeSearchInto(
+        string $searchId,
+        array $criteria,
+        ?Agency $agency,
+        string $sourceChannel,
+        ?int $agentId,
+    ): void {
+        $onProgress = function (array $offersSoFar, array $warningsSoFar) use ($searchId, $criteria, $agency, $sourceChannel, $agentId): void {
+            [$gatedOffers, $safeWarnings] = $this->applyPublicResultsProviderGate(
+                $offersSoFar,
+                $warningsSoFar,
+                $agency,
+                $sourceChannel,
+            );
+            if ($gatedOffers === []) {
+                return;
+            }
+
+            $mixed = app(SabreMixedCarrierSearchResultsFilter::class)->filterDisplayOffers($gatedOffers);
+            $gatedOffers = $mixed['offers'];
+            if ($gatedOffers === []) {
+                return;
+            }
+
+            $this->searchStore->publishProgress(
+                $searchId,
+                $criteria,
+                $gatedOffers,
+                $safeWarnings,
+                FlightSearchResultStore::SEARCH_STATUS_PARTIAL,
+                [
+                    'criteria_cache_context' => [
+                        'client_slug' => current_client_slug(),
+                        'agency_id' => $agency?->id,
+                        'source_channel' => $sourceChannel,
+                        'agent_id' => $agentId,
+                    ],
+                    'mixed_carrier_filter' => $mixed['diagnostics'] ?? [],
+                ],
+            );
+        };
+
+        [$storedOffers, $safeWarnings, $meta] = $this->executePublicSearchPipeline(
+            $criteria,
+            $agency,
+            $sourceChannel,
+            $agentId,
+            $onProgress,
+        );
+
+        $finalStatus = $storedOffers === []
+            ? FlightSearchResultStore::SEARCH_STATUS_EMPTY
+            : FlightSearchResultStore::SEARCH_STATUS_READY;
+
+        $this->searchStore->publishProgress(
+            $searchId,
+            $criteria,
+            $storedOffers,
+            $safeWarnings,
+            $finalStatus,
+            $meta,
+        );
+
+        $this->captureMarketingSearchSnapshot($agency, $searchId, $criteria, $storedOffers, $safeWarnings);
+        if (function_exists('session')) {
+            session()->put('home_recent_fares', [
+                'criteria' => $criteria,
+                'offers' => array_slice($storedOffers, 0, 3),
+                'captured_at' => now()->toIso8601String(),
+            ]);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $criteria
+     * @param  (callable(list<array<string, mixed>>, list<string>): void)|null  $onProgress
+     * @return array{0: list<array<string, mixed>>, 1: list<string>, 2: array<string, mixed>}
+     */
+    protected function executePublicSearchPipeline(
+        array $criteria,
+        ?Agency $agency,
+        string $sourceChannel,
+        ?int $agentId,
+        ?callable $onProgress = null,
+    ): array {
+        $progressGate = $onProgress === null
+            ? null
+            : function (array $offersSoFar, array $warningsSoFar) use ($onProgress): void {
+                $onProgress($offersSoFar, $warningsSoFar);
+            };
+
+        $result = $this->flightSearch->searchWithMeta(
+            $criteria,
+            $agency,
+            $sourceChannel,
+            $agentId,
+            $progressGate,
+        );
         $allOffers = is_array($result['offers'] ?? null) ? $result['offers'] : [];
+        $warnings = is_array($result['warnings'] ?? null) ? $result['warnings'] : [];
+
+        [$storedOffers, $safeWarnings] = $this->applyPublicResultsProviderGate(
+            $allOffers,
+            $warnings,
+            $agency,
+            $sourceChannel,
+        );
+
+        $serviceMixedFilter = is_array($result['mixed_carrier_filter'] ?? null)
+            ? $result['mixed_carrier_filter']
+            : [];
+        $postGateMixedFilter = app(SabreMixedCarrierSearchResultsFilter::class)->filterDisplayOffers($storedOffers);
+        $storedOffers = $postGateMixedFilter['offers'];
+        $postGateDiagnostics = $postGateMixedFilter['diagnostics'];
+        $mixedCarrierFilter = ($postGateDiagnostics['mixed_carrier_offers_filtered_count'] ?? 0) > 0
+            ? $postGateDiagnostics
+            : ($serviceMixedFilter !== [] ? $serviceMixedFilter : $postGateDiagnostics);
+        if (app(SabreMixedCarrierSearchResultsFilter::class)->allOffersFilteredByPolicy($mixedCarrierFilter)
+            && ! in_array(SabreMixedCarrierSearchResultsFilter::EMPTY_RESULTS_CUSTOMER_MESSAGE, $safeWarnings, true)) {
+            $safeWarnings[] = SabreMixedCarrierSearchResultsFilter::EMPTY_RESULTS_CUSTOMER_MESSAGE;
+        }
+
+        $multicityDiagnostics = is_array($result['multicity_diagnostics'] ?? null)
+            ? $result['multicity_diagnostics']
+            : [];
+
+        $meta = [
+            'mixed_carrier_filter' => $mixedCarrierFilter,
+            'multicity_diagnostics' => $multicityDiagnostics,
+            'criteria_cache' => is_array($result['criteria_cache'] ?? null) ? $result['criteria_cache'] : null,
+            'criteria_cache_context' => [
+                'client_slug' => current_client_slug(),
+                'agency_id' => $agency?->id,
+                'source_channel' => $sourceChannel,
+                'agent_id' => $agentId,
+            ],
+            'search_status' => $storedOffers === []
+                ? FlightSearchResultStore::SEARCH_STATUS_EMPTY
+                : FlightSearchResultStore::SEARCH_STATUS_READY,
+        ];
+
+        return [$storedOffers, array_values(array_unique($safeWarnings)), $meta];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $allOffers
+     * @param  list<string>  $warnings
+     * @return array{0: list<array<string, mixed>>, 1: list<string>}
+     */
+    protected function applyPublicResultsProviderGate(
+        array $allOffers,
+        array $warnings,
+        ?Agency $agency,
+        string $sourceChannel,
+    ): array {
         $restrictPublicSuppliers = ! app()->environment('testing');
         /** @var list<string> $allowedList */
         $allowedList = config('ota.public_flight_results_suppliers', ['duffel', 'sabre']);
@@ -2482,7 +2739,7 @@ class FlightController extends Controller
             'stage' => 'public_results_provider_gate',
             'agency_id' => $agency?->id,
             'agency_slug' => $agency?->slug,
-            'source_channel' => $channel['source_channel'],
+            'source_channel' => $sourceChannel,
             'allowed_suppliers' => $allowed,
             'pre_gate_offer_count_by_provider' => $preGateByProvider,
             'post_gate_offer_count_by_provider' => $postGateByProvider,
@@ -2492,48 +2749,11 @@ class FlightController extends Controller
                 : null,
         ]);
 
-        $warnings = is_array($result['warnings'] ?? null) ? $result['warnings'] : [];
         if ($restrictPublicSuppliers && $allOffers !== [] && $storedOffers === []) {
             $warnings[] = 'Flight provider fares are currently unavailable. Please try again shortly.';
         }
         $warnings = $this->filterProviderFailureWarningsWhenOffersPresent($warnings, $storedOffers);
 
-        $serviceMixedFilter = is_array($result['mixed_carrier_filter'] ?? null)
-            ? $result['mixed_carrier_filter']
-            : [];
-        $postGateMixedFilter = app(SabreMixedCarrierSearchResultsFilter::class)->filterDisplayOffers($storedOffers);
-        $storedOffers = $postGateMixedFilter['offers'];
-        $postGateDiagnostics = $postGateMixedFilter['diagnostics'];
-        $mixedCarrierFilter = ($postGateDiagnostics['mixed_carrier_offers_filtered_count'] ?? 0) > 0
-            ? $postGateDiagnostics
-            : ($serviceMixedFilter !== [] ? $serviceMixedFilter : $postGateDiagnostics);
-        if (app(SabreMixedCarrierSearchResultsFilter::class)->allOffersFilteredByPolicy($mixedCarrierFilter)
-            && ! in_array(SabreMixedCarrierSearchResultsFilter::EMPTY_RESULTS_CUSTOMER_MESSAGE, $warnings, true)) {
-            $warnings[] = SabreMixedCarrierSearchResultsFilter::EMPTY_RESULTS_CUSTOMER_MESSAGE;
-        }
-
-        $multicityDiagnostics = is_array($result['multicity_diagnostics'] ?? null)
-            ? $result['multicity_diagnostics']
-            : [];
-        $searchId = $this->searchStore->store($criteria, $storedOffers, $warnings, [
-            'mixed_carrier_filter' => $mixedCarrierFilter,
-            'multicity_diagnostics' => $multicityDiagnostics,
-            'criteria_cache' => is_array($result['criteria_cache'] ?? null) ? $result['criteria_cache'] : null,
-            'criteria_cache_context' => [
-                'client_slug' => current_client_slug(),
-                'agency_id' => $agency?->id,
-                'source_channel' => $channel['source_channel'],
-                'agent_id' => $channel['agent_id'],
-            ],
-        ]);
-        $this->captureMarketingSearchSnapshot($agency, $searchId, $criteria, $storedOffers, $warnings);
-        if (function_exists('session')) {
-            session()->put('home_recent_fares', [
-                'criteria' => $criteria,
-                'offers' => array_slice($storedOffers, 0, 3),
-                'captured_at' => now()->toIso8601String(),
-            ]);
-        }
         $safeWarnings = [];
         foreach ($warnings as $w) {
             $line = (string) $w;
@@ -2551,10 +2771,7 @@ class FlightController extends Controller
             }
         }
 
-        return [[
-            'offers' => $storedOffers,
-            'warnings' => $safeWarnings,
-        ], $searchId, array_values(array_unique($safeWarnings))];
+        return [$storedOffers, array_values(array_unique($safeWarnings))];
     }
 
     /**
@@ -2770,6 +2987,15 @@ class FlightController extends Controller
     protected function resolveResultsEmptyMessage(?array $payload, int $total): ?string
     {
         if ($total > 0 || $payload === null) {
+            return null;
+        }
+
+        $status = $this->searchStore->resolveSearchStatus($payload);
+        if (in_array($status, [
+            FlightSearchResultStore::SEARCH_STATUS_QUEUED,
+            FlightSearchResultStore::SEARCH_STATUS_SEARCHING,
+            FlightSearchResultStore::SEARCH_STATUS_PARTIAL,
+        ], true)) {
             return null;
         }
 

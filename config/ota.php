@@ -95,6 +95,12 @@ return [
     ))),
 
     /**
+     * Progressive public flight search: return search_id immediately and publish
+     * supplier batches into the result store while the search continues.
+     */
+    'progressive_flight_search' => filter_var(env('OTA_PROGRESSIVE_FLIGHT_SEARCH', true), FILTER_VALIDATE_BOOL),
+
+    /**
      * RETURN-SPLIT-SELECT-R1: two-step outbound/return selection for round-trip searches.
      */
     'return_split_select_enabled' => filter_var(env('OTA_RETURN_SPLIT_SELECT_ENABLED', true), FILTER_VALIDATE_BOOL),

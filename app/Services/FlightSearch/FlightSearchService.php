@@ -53,9 +53,16 @@ class FlightSearchService
 
     /**
      * @param  array<string, mixed>  $criteria
+     * @param  (callable(list<array<string, mixed>> $offersSoFar, list<string> $warnings): void)|null  $onProgress
      * @return array{offers: list<array<string, mixed>>, warnings: list<string>}
      */
-    public function searchWithMeta(array $criteria, ?Agency $agency = null, string $sourceChannel = 'public_guest', ?int $agentId = null): array
+    public function searchWithMeta(
+        array $criteria,
+        ?Agency $agency = null,
+        string $sourceChannel = 'public_guest',
+        ?int $agentId = null,
+        ?callable $onProgress = null,
+    ): array
     {
         $agency ??= Agency::query()->where('slug', config('ota.default_agency_slug'))->first();
         $criteria = $this->ensureSearchCriteriaId($criteria);
@@ -140,10 +147,18 @@ class FlightSearchService
                     $agency,
                     $sourceChannel,
                     $agentId,
+                    $onProgress === null ? null : function (array $batchOffers, array $batchWarnings) use (&$offers, &$warnings, $onProgress): void {
+                        $merged = [...$offers, ...$batchOffers];
+                        $mergedWarnings = [...$warnings, ...$batchWarnings];
+                        $onProgress($merged, $mergedWarnings);
+                    },
                 );
                 $offers = [...$offers, ...$variantResult['offers']];
                 $warnings = [...$warnings, ...$variantResult['warnings']];
                 $supplierCallSummaries = [...$supplierCallSummaries, ...$variantResult['supplier_call_summaries']];
+                if ($onProgress !== null && $variantResult['offers'] !== []) {
+                    $onProgress($offers, $warnings);
+                }
             }
         }
 
@@ -866,6 +881,7 @@ class FlightSearchService
     /**
      * @param  Collection<int, SupplierConnection>  $connections
      * @param  array<string, mixed>  $variantCriteria
+     * @param  (callable(list<array<string, mixed>> $offersSoFar, list<string> $warnings): void)|null  $onProgress
      * @return array{offers: list<array<string, mixed>>, warnings: list<string>, supplier_call_summaries: list<array<string, mixed>>}
      */
     protected function collectOffersFromConnections(
@@ -874,6 +890,7 @@ class FlightSearchService
         ?Agency $agency,
         string $sourceChannel,
         ?int $agentId,
+        ?callable $onProgress = null,
     ): array {
         $request = FlightSearchRequestData::fromArray($variantCriteria, $agency?->id, $sourceChannel);
         $offers = [];
@@ -902,6 +919,7 @@ class FlightSearchService
             $result = $adapter->search($request, $connection);
             $warnings = [...$warnings, ...$result->warnings];
             $acceptedForMerge = 0;
+            $batchOffers = [];
 
             Log::info('flight_search.pipeline', [
                 'stage' => 'supplier_adapter_returned',
@@ -991,6 +1009,7 @@ class FlightSearchService
                 }
 
                 $offers[] = $displayRow;
+                $batchOffers[] = $displayRow;
                 $acceptedForMerge++;
             }
 
@@ -1027,6 +1046,10 @@ class FlightSearchService
                 'normalize_issue_histogram' => $normalizeRejectHistogram,
                 'post_pricing_issue_histogram' => $postPricingRejectHistogram,
             ]);
+
+            if ($onProgress !== null && $batchOffers !== []) {
+                $onProgress($offers, $warnings);
+            }
         }
 
         return [

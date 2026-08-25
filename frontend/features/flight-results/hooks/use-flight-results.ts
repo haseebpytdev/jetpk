@@ -7,6 +7,11 @@ import type { ActiveResultsFilters, FlightResultsDataResponse, ResultsPageStatus
 import { resolveLaravelSort, type UiSortKey } from "../utils/sorting";
 import { criteriaFromSearchParams } from "../utils/criteria-from-params";
 import { searchIdentityKey } from "../utils/search-identity";
+import {
+  isActiveSearchStatus,
+  mergeProgressiveResults,
+  resolvePipelineStatus,
+} from "../utils/merge-results";
 
 export type UseFlightResultsOptions = {
   searchId: string | null;
@@ -16,14 +21,49 @@ export type UseFlightResultsOptions = {
   view?: string | null;
 };
 
-function isAuthoritativeEmpty(payload: FlightResultsDataResponse): boolean {
-  const status = (payload.status ?? payload.search_freshness?.status ?? "").toLowerCase();
-  if (status === "searching" || status === "partial" || status === "in_progress") {
-    return false;
+const POLL_INTERVAL_MS = 750;
+const TERMINAL_STATUSES = new Set(["ready", "empty", "failed", "expired", "error"]);
+
+function stagedSearchMessage(elapsedMs: number, tripType: string, hasResults: boolean): string {
+  if (hasResults) {
+    return "Still checking for more flights…";
   }
-  const total = payload.total ?? 0;
-  const count = (payload.offers ?? []).length + (payload.outbound_options ?? []).length + (payload.paired_options ?? []).length;
-  return total === 0 && count === 0;
+  if (tripType === "round_trip") {
+    if (elapsedMs < 2000) return "Finding outbound and return options…";
+    if (elapsedMs < 6000) return "Checking live airline fares…";
+    if (elapsedMs < 12000) return "Still searching — live airline responses can take a few moments.";
+    return "Some airlines are taking longer to respond. We'll show each flight as soon as it becomes available.";
+  }
+  if (elapsedMs < 2000) return "Searching live flights…";
+  if (elapsedMs < 6000) return "Checking available fares…";
+  if (elapsedMs < 12000) return "Still searching — live airline responses can take a few moments.";
+  return "Some airlines are taking longer to respond. We'll show each flight as soon as it becomes available.";
+}
+
+function countVisibleResults(payload: FlightResultsDataResponse | null): number {
+  if (!payload) return 0;
+  return (
+    (payload.offers ?? []).length +
+    (payload.outbound_options ?? []).length +
+    (payload.paired_options ?? []).length
+  );
+}
+
+function mapPipelineToPageStatus(
+  pipeline: string,
+  payload: FlightResultsDataResponse,
+): ResultsPageStatus {
+  if (pipeline === "failed") return "failed";
+  if (pipeline === "searching" || pipeline === "queued" || pipeline === "in_progress") {
+    return countVisibleResults(payload) > 0 ? "partial" : "searching";
+  }
+  if (pipeline === "partial") return "partial";
+  if (pipeline === "empty") return "empty";
+  if (pipeline === "ready") {
+    return countVisibleResults(payload) === 0 && (payload.total ?? 0) === 0 ? "empty" : "ready";
+  }
+  if (countVisibleResults(payload) > 0 || (payload.total ?? 0) > 0) return "ready";
+  return "empty";
 }
 
 export function useFlightResults({ searchId, searchParams, sort, filters, view }: UseFlightResultsOptions) {
@@ -33,27 +73,86 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   const [data, setData] = useState<FlightResultsDataResponse | null>(null);
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchStillActive, setSearchStillActive] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const pollAbortRef = useRef<AbortController | null>(null);
   const requestSeq = useRef(0);
   const readyRef = useRef(false);
   const lastBootstrappedId = useRef<string | null>(null);
   const skipNextRefresh = useRef(true);
+  const searchStartedAt = useRef<number>(Date.now());
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filtersKey = JSON.stringify(filters);
   const laravelSort = resolveLaravelSort(sort);
   const identity = searchIdentityKey(searchParams);
   const viewKey = view ?? "";
+  const tripType = searchParams.get("trip_type") ?? "one_way";
+
+  const stopPolling = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+    pollAbortRef.current?.abort();
+    pollAbortRef.current = null;
+    setSearchStillActive(false);
+  }, []);
+
+  const applyPayload = useCallback(
+    (payload: FlightResultsDataResponse, mode: "replace" | "merge") => {
+      const pipeline = resolvePipelineStatus(payload);
+      let merged: FlightResultsDataResponse = payload;
+      setData((current) => {
+        merged = mode === "merge" ? mergeProgressiveResults(current, payload) : payload;
+        return merged;
+      });
+      const visible = countVisibleResults(merged);
+      const nextStatus = mapPipelineToPageStatus(pipeline, merged);
+      const elapsed = Date.now() - searchStartedAt.current;
+
+      if (isActiveSearchStatus(pipeline)) {
+        setStatus(visible > 0 ? "partial" : "searching");
+        setMessage(stagedSearchMessage(elapsed, tripType, visible > 0));
+        setSearchStillActive(true);
+        readyRef.current = visible > 0;
+        return { shouldPoll: true, nextStatus: visible > 0 ? "partial" : "searching" };
+      }
+
+      setSearchStillActive(false);
+      if (nextStatus === "empty") {
+        setStatus("empty");
+        setMessage(payload.empty_message ?? "No flights match your search.");
+      } else if (nextStatus === "failed") {
+        setStatus("failed");
+        setMessage(payload.message ?? "We could not complete your flight search. Please try again.");
+      } else {
+        setStatus("ready");
+        setMessage("");
+      }
+      readyRef.current = true;
+      return { shouldPoll: false, nextStatus };
+    },
+    [tripType],
+  );
 
   const loadPage = useCallback(
-    async (id: string, targetPage: number, append: boolean, phase: "init" | "refresh") => {
-      abortRef.current?.abort();
+    async (id: string, targetPage: number, append: boolean, phase: "init" | "refresh" | "poll") => {
+      if (phase !== "poll") {
+        abortRef.current?.abort();
+      }
       const controller = new AbortController();
-      abortRef.current = controller;
+      if (phase === "poll") {
+        pollAbortRef.current?.abort();
+        pollAbortRef.current = controller;
+      } else {
+        abortRef.current = controller;
+      }
       const seq = ++requestSeq.current;
 
-      if (!append) {
+      if (!append && phase !== "poll") {
         setStatus(phase === "init" ? "initializing" : "loading");
         setMessage(phase === "init" ? "Searching flights…" : "Finding the best available flights…");
-      } else {
+      } else if (append) {
         setIsLoadingMore(true);
       }
 
@@ -68,42 +167,51 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       });
 
       if (seq !== requestSeq.current || controller.signal.aborted) {
-        return;
+        return { shouldPoll: false };
       }
 
       if (!response.ok) {
         if (response.status === 0 && response.message === "Request cancelled.") {
-          return;
+          return { shouldPoll: false };
+        }
+        if (phase === "poll") {
+          return { shouldPoll: true };
         }
         setStatus(response.status === 410 ? "expired" : "error");
         setMessage(response.message);
         setIsLoadingMore(false);
-        return;
+        setSearchStillActive(false);
+        return { shouldPoll: false };
       }
 
       const payload = response.data;
-      setData((current) => {
-        if (!append || !current) return payload;
-        return {
-          ...payload,
-          offers: [...(current.offers ?? []), ...(payload.offers ?? [])],
-          outbound_options: [...(current.outbound_options ?? []), ...(payload.outbound_options ?? [])],
-          paired_options: [...(current.paired_options ?? []), ...(payload.paired_options ?? [])],
-        };
-      });
-
-      if (isAuthoritativeEmpty(payload) && !append) {
-        setStatus("empty");
-        setMessage(payload.empty_message ?? "No flights match your search.");
-      } else {
-        setStatus("ready");
-        setMessage("");
-      }
+      const result = applyPayload(payload, append || phase === "poll" ? "merge" : "replace");
       setPage(targetPage);
       setIsLoadingMore(false);
-      readyRef.current = true;
+      return result;
     },
-    [filters, laravelSort, viewKey],
+    [applyPayload, filters, laravelSort, viewKey],
+  );
+
+  const schedulePoll = useCallback(
+    (id: string) => {
+      stopPolling();
+      setSearchStillActive(true);
+      const tick = async () => {
+        const result = await loadPage(id, 1, false, "poll");
+        if (!result?.shouldPoll) {
+          stopPolling();
+          return;
+        }
+        pollTimerRef.current = setTimeout(() => {
+          void tick();
+        }, POLL_INTERVAL_MS);
+      };
+      pollTimerRef.current = setTimeout(() => {
+        void tick();
+      }, POLL_INTERVAL_MS);
+    },
+    [loadPage, stopPolling],
   );
 
   useEffect(() => {
@@ -114,6 +222,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         return;
       }
 
+      stopPolling();
+      searchStartedAt.current = Date.now();
       setStatus("initializing");
       setMessage("Searching flights…");
       setData(null);
@@ -146,8 +256,11 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         setResolvedSearchId(id);
       }
 
-      await loadPage(id, 1, false, "init");
+      const result = await loadPage(id, 1, false, "init");
       lastBootstrappedId.current = id;
+      if (!cancelled && result?.shouldPoll) {
+        schedulePoll(id);
+      }
     };
 
     void bootstrap();
@@ -155,26 +268,28 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     return () => {
       cancelled = true;
       abortRef.current?.abort();
+      stopPolling();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- bootstrap only when search identity changes
   }, [identity]);
 
   useEffect(() => {
     if (!resolvedSearchId) return;
-    // Consume the post-bootstrap skip even if results are not ready yet.
-    // Previously this waited for readyRef, so the skip flag was never cleared
-    // and the first sort/filter change after load was dropped.
     if (skipNextRefresh.current) {
       skipNextRefresh.current = false;
       return;
     }
-    if (!readyRef.current) return;
+    if (!readyRef.current && status !== "partial" && status !== "ready") return;
     void loadPage(resolvedSearchId, 1, false, "refresh");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey, laravelSort, resolvedSearchId, viewKey]);
 
+  useEffect(() => () => stopPolling(), [stopPolling]);
+
   const retry = useCallback(async () => {
+    stopPolling();
     readyRef.current = false;
+    searchStartedAt.current = Date.now();
     const criteria = criteriaFromSearchParams(searchParams);
     if (!criteria) {
       setStatus("error");
@@ -189,13 +304,19 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     }
     const id = init.data.search_id;
     setResolvedSearchId(id);
-    await loadPage(id, 1, false, "init");
-  }, [loadPage, searchParams]);
+    lastBootstrappedId.current = id;
+    const result = await loadPage(id, 1, false, "init");
+    if (result?.shouldPoll) {
+      schedulePoll(id);
+    }
+  }, [loadPage, schedulePoll, searchParams, stopPolling]);
 
   const loadMore = useCallback(() => {
     if (!resolvedSearchId || !data?.has_more || isLoadingMore) return;
     void loadPage(resolvedSearchId, page + 1, true, "refresh");
   }, [data?.has_more, isLoadingMore, loadPage, page, resolvedSearchId]);
+
+  const visibleCount = useMemo(() => countVisibleResults(data), [data]);
 
   return {
     status,
@@ -211,8 +332,10 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     freshness: data?.search_freshness ?? null,
     page,
     hasMore: Boolean(data?.has_more),
-    total: data?.total ?? 0,
+    total: data?.total ?? visibleCount,
     isLoadingMore,
+    searchStillActive,
+    visibleCount,
     retry,
     loadMore,
   };
@@ -240,3 +363,5 @@ export function buildSearchSummaryFromParams(params: URLSearchParams) {
     flexibleDates: params.get("flexible_dates") === "1",
   };
 }
+
+export { TERMINAL_STATUSES };

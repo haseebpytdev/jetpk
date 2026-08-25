@@ -8,6 +8,7 @@ import { fetchReturnOptionsData, submitReturnComboSelection } from "@/features/f
 import { ResultSkeleton } from "@/features/flight-results/components/ResultSkeleton";
 import { SearchErrorState } from "@/features/flight-results/components/SearchErrorState";
 import { ExpiredSearchState } from "@/features/flight-results/components/ExpiredSearchState";
+import { SearchProgress } from "@/features/flight-results/components/SearchProgress";
 import { BrandedFareCarousel } from "@/features/flight-results/components/BrandedFareCarousel";
 import { PriceBlock } from "@/features/flight-results/components/PriceBlock";
 import type { FareFamilyOption } from "@/features/flight-results/types";
@@ -47,16 +48,36 @@ export function ReturnOptionsPage() {
       return;
     }
 
+    let cancelled = false;
+    let attempts = 0;
     const controller = new AbortController();
-    void fetchReturnOptionsData({ searchId, outboundKey, signal: controller.signal }).then((response) => {
-      if (controller.signal.aborted) return;
+
+    const load = async () => {
+      const response = await fetchReturnOptionsData({ searchId, outboundKey, signal: controller.signal });
+      if (cancelled || controller.signal.aborted) return;
       if (!response.ok) {
         setStatus(response.status === 410 ? "expired" : "error");
         setMessage(response.message);
         return;
       }
       const list = response.data.return_options ?? [];
-      setOptions(list);
+      if (list.length === 0 && attempts < 20) {
+        attempts += 1;
+        setStatus("loading");
+        setMessage("Finding return flights for your selected outbound…");
+        window.setTimeout(() => {
+          if (!cancelled) void load();
+        }, 750);
+        return;
+      }
+      setOptions((current) => {
+        if (current.length === 0) return list;
+        const byId = new Map(current.map((row) => [String(row.combo_id ?? ""), row]));
+        for (const row of list) {
+          byId.set(String(row.combo_id ?? ""), row);
+        }
+        return Array.from(byId.values());
+      });
       const defaults: Record<string, string> = {};
       list.forEach((option) => {
         const comboId = String(option.combo_id ?? "");
@@ -65,14 +86,21 @@ export function ReturnOptionsPage() {
           defaults[comboId] = fares[0].option_key;
         }
       });
-      setSelectedFareByCombo(defaults);
+      setSelectedFareByCombo((prev) => ({ ...defaults, ...prev }));
       setStatus(list.length === 0 ? "empty" : "ready");
       if (list.length === 0) {
         setMessage(response.data.empty_message ?? "No return flights match this outbound selection.");
       }
-    });
+    };
 
-    return () => controller.abort();
+    setStatus("loading");
+    setMessage("Finding return flights for your selected outbound…");
+    void load();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [outboundKey, searchId]);
 
   const handleSelect = (combo: Record<string, unknown>, explicitReturnFareKey?: string) => {
@@ -116,7 +144,12 @@ export function ReturnOptionsPage() {
           Outbound branded fare preserved for checkout.
         </p>
       ) : null}
-      {status === "loading" ? <ResultSkeleton count={3} /> : null}
+      {status === "loading" ? (
+        <>
+          <SearchProgress message={message || "Finding return flights for your selected outbound…"} />
+          <ResultSkeleton count={3} />
+        </>
+      ) : null}
       {status === "error" ? <SearchErrorState message={message} /> : null}
       {status === "expired" ? <ExpiredSearchState message={message} /> : null}
       {status === "empty" ? emptyState : null}

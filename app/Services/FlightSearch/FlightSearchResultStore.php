@@ -21,6 +21,18 @@ class FlightSearchResultStore
 
     public const PAYLOAD_SCHEMA_VERSION = 'v1';
 
+    public const SEARCH_STATUS_QUEUED = 'queued';
+
+    public const SEARCH_STATUS_SEARCHING = 'searching';
+
+    public const SEARCH_STATUS_PARTIAL = 'partial';
+
+    public const SEARCH_STATUS_READY = 'ready';
+
+    public const SEARCH_STATUS_EMPTY = 'empty';
+
+    public const SEARCH_STATUS_FAILED = 'failed';
+
     /**
      * @param  list<array<string, mixed>>  $offers
      * @param  list<string>  $warnings
@@ -30,6 +42,187 @@ class FlightSearchResultStore
     public function store(array $criteria, array $offers, array $warnings, array $meta = []): string
     {
         $searchId = (string) Str::uuid();
+        $status = $offers === []
+            ? self::SEARCH_STATUS_EMPTY
+            : self::SEARCH_STATUS_READY;
+        $this->writePayload($searchId, $criteria, $offers, $warnings, array_merge($meta, [
+            'search_status' => $meta['search_status'] ?? $status,
+        ]));
+
+        return $searchId;
+    }
+
+    /**
+     * Allocate a search_id immediately so the results shell can poll while suppliers run.
+     *
+     * @param  array<string, mixed>  $criteria
+     * @param  array<string, mixed>  $meta
+     */
+    public function beginSearch(array $criteria, array $meta = []): string
+    {
+        $searchId = (string) Str::uuid();
+        $this->writePayload($searchId, $criteria, [], [], array_merge($meta, [
+            'search_status' => self::SEARCH_STATUS_SEARCHING,
+        ]));
+
+        return $searchId;
+    }
+
+    /**
+     * Replace offers for an in-flight progressive search (same search_id).
+     *
+     * @param  list<array<string, mixed>>  $offers
+     * @param  list<string>  $warnings
+     * @param  array<string, mixed>  $meta
+     */
+    public function publishProgress(
+        string $searchId,
+        array $criteria,
+        array $offers,
+        array $warnings,
+        string $status,
+        array $meta = [],
+    ): bool {
+        $searchId = trim($searchId);
+        if ($searchId === '') {
+            return false;
+        }
+
+        $existing = Cache::get($this->key($searchId));
+        if (! is_array($existing)) {
+            return false;
+        }
+
+        $mergedMeta = array_merge(
+            array_intersect_key($existing, array_flip([
+                'criteria_cache_context',
+                'criteria_cache',
+                'mixed_carrier_filter',
+                'multicity_diagnostics',
+            ])),
+            $meta,
+            ['search_status' => $status],
+        );
+
+        $this->writePayload($searchId, $criteria, $offers, $warnings, $mergedMeta, is_array($existing) ? $existing : null);
+
+        return true;
+    }
+
+    public function markFailed(string $searchId, string $message = ''): bool
+    {
+        $searchId = trim($searchId);
+        if ($searchId === '') {
+            return false;
+        }
+
+        $existing = Cache::get($this->key($searchId));
+        if (! is_array($existing)) {
+            return false;
+        }
+
+        $criteria = is_array($existing['criteria'] ?? null) ? $existing['criteria'] : [];
+        $offers = is_array($existing['offers'] ?? null) ? $existing['offers'] : [];
+        $warnings = is_array($existing['warnings'] ?? null) ? $existing['warnings'] : [];
+        if ($message !== '') {
+            $warnings[] = $message;
+        }
+
+        return $this->publishProgress(
+            $searchId,
+            $criteria,
+            $offers,
+            $warnings,
+            self::SEARCH_STATUS_FAILED,
+            ['search_error' => $message !== '' ? $message : 'search_failed'],
+        );
+    }
+
+    /**
+     * Resolve progressive/search pipeline status from a cached payload.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function resolveSearchStatus(array $payload): string
+    {
+        $explicit = strtolower(trim((string) ($payload['search_status'] ?? '')));
+        if (in_array($explicit, [
+            self::SEARCH_STATUS_QUEUED,
+            self::SEARCH_STATUS_SEARCHING,
+            self::SEARCH_STATUS_PARTIAL,
+            self::SEARCH_STATUS_READY,
+            self::SEARCH_STATUS_EMPTY,
+            self::SEARCH_STATUS_FAILED,
+        ], true)) {
+            return $explicit;
+        }
+
+        $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
+
+        return $offers === [] ? self::SEARCH_STATUS_EMPTY : self::SEARCH_STATUS_READY;
+    }
+
+    /**
+     * Stable offer identity for progressive merge / dedupe.
+     *
+     * @param  array<string, mixed>  $offer
+     */
+    public function offerIdentityKey(array $offer): string
+    {
+        $id = trim((string) ($offer['offer_id'] ?? $offer['id'] ?? ''));
+        if ($id !== '') {
+            return strtolower($id);
+        }
+
+        $provider = strtolower(trim((string) ($offer['supplier_provider'] ?? '')));
+        $raw = trim((string) ($offer['raw_reference'] ?? $offer['supplier_offer_id'] ?? ''));
+
+        return $provider.'|'.$raw.'|'.md5(json_encode([
+            $offer['flight_number'] ?? null,
+            $offer['depart_at'] ?? null,
+            $offer['final_customer_price'] ?? null,
+        ]) ?: '');
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $existing
+     * @param  list<array<string, mixed>>  $incoming
+     * @return list<array<string, mixed>>
+     */
+    public function mergeOffersByIdentity(array $existing, array $incoming): array
+    {
+        $byKey = [];
+        foreach ($existing as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $byKey[$this->offerIdentityKey($row)] = $row;
+        }
+        foreach ($incoming as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $byKey[$this->offerIdentityKey($row)] = $row;
+        }
+
+        return array_values($byKey);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $offers
+     * @param  list<string>  $warnings
+     * @param  array<string, mixed>  $criteria
+     * @param  array<string, mixed>  $meta
+     * @param  array<string, mixed>|null  $existingPayload
+     */
+    protected function writePayload(
+        string $searchId,
+        array $criteria,
+        array $offers,
+        array $warnings,
+        array $meta = [],
+        ?array $existingPayload = null,
+    ): void {
         $trimmedOffers = array_slice($offers, 0, self::MAX_STORED_OFFERS);
         $normalizer = app(SabreFlightSearchNormalizer::class);
         foreach ($trimmedOffers as $idx => $row) {
@@ -41,16 +234,23 @@ class FlightSearchResultStore
             }
         }
 
+        $createdAt = is_array($existingPayload) && isset($existingPayload['created_at'])
+            ? (string) $existingPayload['created_at']
+            : now()->toIso8601String();
+
         $payload = [
             'schema_version' => self::PAYLOAD_SCHEMA_VERSION,
             'search_id' => $searchId,
             'criteria' => $criteria,
             'offers' => $trimmedOffers,
             'warnings' => array_values(array_unique($warnings)),
-            'created_at' => now()->toIso8601String(),
+            'created_at' => $createdAt,
+            'updated_at' => now()->toIso8601String(),
+            'search_status' => (string) ($meta['search_status'] ?? self::SEARCH_STATUS_READY),
         ];
         if ($meta !== []) {
             $payload = array_merge($payload, $meta);
+            $payload['search_status'] = (string) ($meta['search_status'] ?? $payload['search_status']);
         }
 
         $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
@@ -69,8 +269,6 @@ class FlightSearchResultStore
         }
 
         Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);
-
-        return $searchId;
     }
 
     /**

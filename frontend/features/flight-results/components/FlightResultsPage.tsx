@@ -144,7 +144,12 @@ export function FlightResultsPage() {
     : results.isReturnSplit
       ? results.outboundOptions.length
       : results.offers.length;
-  const isLoading = results.status === "idle" || results.status === "loading" || results.status === "initializing";
+  const isBootstrapping =
+    results.status === "idle" || results.status === "loading" || results.status === "initializing";
+  const isSearchingMask = results.status === "searching" || (isBootstrapping && shownCount === 0);
+  const showResultsList =
+    results.status === "ready" || results.status === "partial" || (shownCount > 0 && results.status !== "empty");
+  const isLoading = isBootstrapping && shownCount === 0;
 
   return (
     <div className="w-full">
@@ -218,6 +223,7 @@ export function FlightResultsPage() {
           total={results.total}
           status={results.status}
           loadingMessage={results.message}
+          searchStillActive={results.searchStillActive}
         />
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,14.5rem)_minmax(0,1fr)]">
@@ -227,16 +233,27 @@ export function FlightResultsPage() {
               filters={filters}
               onChange={handleFiltersChange}
               onClearAll={handleClearFilters}
-              loading={isLoading}
+              loading={isLoading || isSearchingMask}
             />
           </div>
 
           <div className="min-w-0 space-y-3">
-            {isLoading ? (
+            {isSearchingMask ? (
               <>
-                <SearchProgress message={results.message || "Searching flights…"} />
+                <SearchProgress message={results.message || "Searching flights…"} summary={summary} />
                 <ResultSkeleton />
               </>
+            ) : null}
+
+            {results.searchStillActive && shownCount > 0 ? (
+              <SearchProgress
+                compact
+                message={
+                  results.total > 0
+                    ? `${results.total} flights found · checking for more`
+                    : results.message || "Searching for more flights…"
+                }
+              />
             ) : null}
 
             {results.status === "error" || results.status === "failed" ? (
@@ -264,7 +281,7 @@ export function FlightResultsPage() {
               <EmptyResultsState message={results.message} onNewSearch={() => setEditOpen(true)} />
             ) : null}
 
-            {results.status === "ready" ? (
+            {showResultsList ? (
               <div role="list" className="space-y-3" aria-label="Flight results">
                 {results.isReturnPair
                   ? results.pairedOptions.map((option) => (

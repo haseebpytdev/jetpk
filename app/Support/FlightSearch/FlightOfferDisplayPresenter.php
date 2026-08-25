@@ -2269,6 +2269,44 @@ class FlightOfferDisplayPresenter
     }
 
     /**
+     * After successful selected-offer revalidation, pin an authoritative customer total
+     * so checkout no longer treats FX shop estimates as "needs refresh".
+     *
+     * @param  array<string, mixed>  $intent
+     * @return array<string, mixed>
+     */
+    public static function markSelectedFareAuthoritative(
+        array $intent,
+        ?int $authoritativeTotal,
+        string $currency = 'PKR',
+    ): array {
+        $currency = strtoupper(trim($currency));
+        if ($currency === '') {
+            $currency = 'PKR';
+        }
+
+        $total = $authoritativeTotal;
+        if ($total === null || $total <= 0) {
+            $existing = isset($intent['displayed_price']) && is_numeric($intent['displayed_price'])
+                ? (int) $intent['displayed_price']
+                : 0;
+            $total = $existing > 0 ? $existing : null;
+        }
+
+        $intent['price_is_approximate'] = false;
+        $intent['is_price_approximate'] = false;
+        $intent['authoritative_after_revalidation'] = true;
+        $intent['displayed_currency'] = $currency;
+
+        if ($total !== null && $total > 0) {
+            $intent['displayed_price'] = $total;
+            $intent['price_display'] = $currency.' '.number_format($total, 0, '.', ',');
+        }
+
+        return $intent;
+    }
+
+    /**
      * BF6-FIX4: keep first-resolved display price when reaffirming from a different offer ratio.
      *
      * @param  array<string, mixed>  $stored
@@ -2384,12 +2422,16 @@ class FlightOfferDisplayPresenter
             ? (int) $intent['displayed_price']
             : null;
         $priceIsApproximate = (bool) ($intent['price_is_approximate'] ?? $intent['is_price_approximate'] ?? false);
+        if (! empty($intent['authoritative_after_revalidation'])) {
+            $priceIsApproximate = false;
+        }
 
         return array_filter([
             'name' => $name,
             'brand_code' => self::nullableTrimmedString($intent['brand_code'] ?? null),
             'price_display' => self::nullableTrimmedString($intent['price_display'] ?? null),
             'price_is_approximate' => $priceIsApproximate,
+            'authoritative_after_revalidation' => ! empty($intent['authoritative_after_revalidation']),
             'displayed_price' => $displayedPrice,
             'displayed_currency' => self::nullableTrimmedString($intent['displayed_currency'] ?? null),
             'validation_note' => self::nullableTrimmedString($intent['validation_note'] ?? null) ?? self::SELECTED_FARE_VALIDATION_NOTE,
@@ -2468,6 +2510,9 @@ class FlightOfferDisplayPresenter
         $displayedPrice = (int) ($view['displayed_price'] ?? 0);
         $currency = strtoupper(trim((string) ($view['displayed_currency'] ?? 'PKR')));
         $priceIsApproximate = (bool) ($view['price_is_approximate'] ?? false);
+        if (is_array($intent) && ! empty($intent['authoritative_after_revalidation'])) {
+            $priceIsApproximate = false;
+        }
         $priceDisplay = trim((string) ($view['price_display'] ?? ''));
         // Never emit customer-facing "Approx." — keep the approximate flag for checkout gating.
         $priceDisplay = preg_replace('/^Approx\.\s*/i', '', $priceDisplay) ?? $priceDisplay;
@@ -2484,6 +2529,7 @@ class FlightOfferDisplayPresenter
             'price_needs_refresh' => $priceIsApproximate,
             'validation_note' => (string) ($view['validation_note'] ?? self::SELECTED_FARE_VALIDATION_NOTE),
             'has_checkout_estimate' => true,
+            'authoritative_after_revalidation' => is_array($intent) && ! empty($intent['authoritative_after_revalidation']),
         ];
     }
 
