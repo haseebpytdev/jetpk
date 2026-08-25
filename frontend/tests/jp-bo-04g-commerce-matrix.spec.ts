@@ -159,7 +159,7 @@ function returnSplitItinerary() {
     return_split: {
       is_return_split: true,
       outbound: {
-        branded_fare_title: "Economy Comfort",
+        branded_fare_title: "Economy Basic",
         fare_option_key: "fare-comfort",
         route_label: "LHE → DXB",
         departure_time: "08:00",
@@ -589,8 +589,12 @@ test("09 return paired explicit fare book", async ({ page }) => {
     `/flights/results?search_id=${SEARCH_ID}&trip_type=round_trip&view=pair&from=LHE&to=DXB&depart=2026-09-01&return_date=2026-09-08&cabin=economy&adults=1`,
   );
   await expect(page.getByTestId("pair-return-card").first()).toBeVisible({ timeout: 15000 });
-  await page.getByTestId("fare-price-fare-comfort").click();
+  await page.getByTestId("pair-select").click();
   await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
+  await page
+    .locator("[data-fare-family-card]", { hasText: "Economy Comfort" })
+    .getByRole("button", { name: /Select fare/i })
+    .click();
   await page.getByTestId("continue-to-passengers").click();
   await expect.poll(() => intercept.getPosted()).not.toBeNull();
   const posted = intercept.getPosted()!;
@@ -606,10 +610,10 @@ test("10 return split direct book non-default", async ({ page }) => {
   const intercept = await interceptSelectReturnCombo(page);
 
   await openSegmentedOutbound(page);
-  // Book outbound Economy Comfort (non-default).
-  await page.getByTestId("fare-price-fare-comfort").click();
+  // Select outbound (default branded fare key preserved into return options URL).
+  await page.getByTestId("result-price-button").first().click();
   await expect(page).toHaveURL(/\/flights\/return-options/);
-  await expect(page).toHaveURL(/outbound_fare_option_key=fare-comfort/);
+  await expect(page).toHaveURL(/outbound_fare_option_key=fare-basic/);
   await expect(page.getByTestId("return-option-card").first()).toBeVisible({ timeout: 15000 });
   await expect(page.getByTestId("outbound-fare-preserved")).toBeVisible();
 
@@ -644,25 +648,29 @@ test("10 return split direct book non-default", async ({ page }) => {
     });
   });
 
-  // CRITICAL: do NOT click return-flex card first — Book directly (stale-state race).
-  await page.getByTestId("fare-price-return-flex").click();
+  // Return Book → Details confirmation → explicit Economy Flex.
+  await page.getByTestId("result-price-button").first().click();
   await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
+  await page
+    .locator("[data-fare-family-card]", { hasText: "Economy Flex" })
+    .getByRole("button", { name: /Select fare/i })
+    .click();
   await page.getByTestId("continue-to-passengers").click();
   await expect.poll(() => intercept.getPosted()).not.toBeNull();
   const posted = intercept.getPosted()!;
-  expect(posted.outbound_fare_option_key).toBe("fare-comfort");
+  expect(posted.outbound_fare_option_key).toBe("fare-basic");
   expect(posted.return_fare_option_key).toBe("return-flex");
   expect(posted.fare_option_key).toBe("return-flex");
   expect(posted.return_fare_option_key).not.toBe("return-basic");
   expect(posted.fare_option_key).not.toBe("return-basic");
 
   await page.goto("/booking/passengers?search_id=" + SEARCH_ID);
-  await expect(page.getByTestId("return-split-outbound")).toContainText("Economy Comfort");
+  await expect(page.getByTestId("return-split-outbound")).toContainText("Economy Basic");
   await expect(page.getByTestId("return-split-return")).toContainText("Economy Flex");
   await expect(page.getByTestId("return-split-total")).toContainText("195,000");
 
   await page.goto("/booking/review");
-  await expect(page.getByTestId("return-split-outbound").first()).toContainText("Economy Comfort");
+  await expect(page.getByTestId("return-split-outbound").first()).toContainText("Economy Basic");
   await expect(page.getByTestId("return-split-return").first()).toContainText("Economy Flex");
   await expect(page.getByTestId("return-split-total").first()).toContainText("195,000");
   await expect(page.getByTestId("review-price-summary").getByTestId("order-summary-total")).toContainText("195,000");
@@ -710,9 +718,13 @@ test("11 return split preselect then book", async ({ page }) => {
   );
   await expect(page.getByTestId("return-option-card").first()).toBeVisible({ timeout: 15000 });
 
-  // Normal path: select return-flex card, then Book → Details confirmation.
-  await page.getByTestId("fare-price-return-flex").click();
+  // Book → Details → select Economy Flex explicitly.
+  await page.getByTestId("result-price-button").first().click();
   await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
+  await page
+    .locator("[data-fare-family-card]", { hasText: "Economy Flex" })
+    .getByRole("button", { name: /Select fare/i })
+    .click();
   await page.getByTestId("continue-to-passengers").click();
 
   await expect.poll(() => intercept.getPosted()).not.toBeNull();
