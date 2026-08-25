@@ -4,7 +4,6 @@ import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/uti
 import { useMemo, useState } from "react";
 import type { FareFamilyOption, FlightOffer } from "../types";
 import { AirlineIdentity } from "./AirlineIdentity";
-import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { FareBadge } from "./FareBadge";
 import { MulticityInquiryActions } from "./MulticityInquiryActions";
 import { SupplierSourceBadge } from "./SupplierSourceBadge";
@@ -85,8 +84,6 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
   const displayPrice = formatWholePkr(displayAmount ?? offer.final_customer_price);
   const viaCodes = extractViaCodes(offer);
   const layoverSummary = resolveLayoverSummary(offer);
-  // Book Now always opens Details for branded-fare confirmation (even with one family).
-  const showInlineCarousel = fareOptions.length > 1;
 
   const firstSegment = offer.segments?.[0];
   const lastSegment = offer.segments?.[offer.segments.length - 1];
@@ -225,22 +222,6 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
           </div>
         </div>
       </div>
-
-      {showInlineCarousel ? (
-        <BrandedFareCarousel
-          options={fareOptions}
-          selectedKey={effectiveFareKey}
-          onSelect={setSelectedFareKey}
-          onBook={(optionKey) => {
-            setSelectedFareKey(optionKey);
-            const fareKeyForDetails = resolveAuthoritativeFareOptionKey(optionKey, fareOptions) ?? "";
-            setBookingOptionKey(optionKey);
-            onOpenDetails?.(offer, fareKeyForDetails, "booking");
-          }}
-          bookingOptionKey={bookingOptionKey}
-          disabled={!offer.can_book || offer.multicity_inquiry_only}
-        />
-      ) : null}
     </article>
   );
 }

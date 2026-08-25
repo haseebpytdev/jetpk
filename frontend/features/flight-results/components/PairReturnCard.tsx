@@ -3,7 +3,6 @@
 import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
 import { useMemo, useState } from "react";
 import type { FareFamilyOption, PairedReturnOption } from "../types";
-import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 
@@ -110,20 +109,6 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
           </button>
         </div>
       </div>
-
-      {fareOptions.length > 1 ? (
-        <BrandedFareCarousel
-          options={fareOptions}
-          selectedKey={effectiveFareKey}
-          onSelect={setSelectedFareKey}
-          onBook={(optionKey) => {
-            setSelectedFareKey(optionKey);
-            openFareConfirmation(optionKey);
-          }}
-          bookingOptionKey={selecting ? effectiveFareKey : null}
-          disabled={!option.can_book}
-        />
-      ) : null}
     </article>
   );
 }

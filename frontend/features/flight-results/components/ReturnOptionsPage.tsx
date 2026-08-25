@@ -9,7 +9,6 @@ import { ResultSkeleton } from "@/features/flight-results/components/ResultSkele
 import { SearchErrorState } from "@/features/flight-results/components/SearchErrorState";
 import { ExpiredSearchState } from "@/features/flight-results/components/ExpiredSearchState";
 import { SearchProgress } from "@/features/flight-results/components/SearchProgress";
-import { BrandedFareCarousel } from "@/features/flight-results/components/BrandedFareCarousel";
 import { PriceBlock } from "@/features/flight-results/components/PriceBlock";
 import { SupplierSourceBadge } from "@/features/flight-results/components/SupplierSourceBadge";
 import type { FareFamilyOption } from "@/features/flight-results/types";
@@ -218,17 +217,6 @@ export function ReturnOptionsPage() {
                     onSelect={() => openFareConfirmation(option)}
                   />
                 </div>
-                {fareOptions.length > 1 ? (
-                  <BrandedFareCarousel
-                    options={fareOptions}
-                    selectedKey={selectedKey}
-                    onSelect={(optionKey) => setSelectedFareByCombo((current) => ({ ...current, [comboId]: optionKey }))}
-                    onBook={(optionKey) => {
-                      setSelectedFareByCombo((current) => ({ ...current, [comboId]: optionKey }));
-                      openFareConfirmation(option, optionKey);
-                    }}
-                  />
-                ) : null}
               </article>
             );
           })}

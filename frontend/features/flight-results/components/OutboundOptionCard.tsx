@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import type { FareFamilyOption, OutboundOption } from "../types";
 import { formatDisplayPrice } from "../utils/price";
 import { AirlineIdentity } from "./AirlineIdentity";
-import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { PriceBlock } from "./PriceBlock";
 import { StopsAndLayover } from "./StopsAndLayover";
 import { SupplierSourceBadge } from "./SupplierSourceBadge";
@@ -76,14 +75,6 @@ export function OutboundOptionCard({ option, searchId }: OutboundOptionCardProps
           />
         </div>
       </div>
-      {fareOptions.length > 1 ? (
-        <BrandedFareCarousel
-          options={fareOptions}
-          selectedKey={effectiveFareKey}
-          onSelect={setSelectedFareKey}
-          onBook={(optionKey) => handleSelect(optionKey)}
-        />
-      ) : null}
     </article>
   );
 }
