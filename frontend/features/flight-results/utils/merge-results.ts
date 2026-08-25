@@ -35,12 +35,57 @@ function mergeByKey<T>(existing: T[], incoming: T[], keyFn: (row: T) => string):
   return Array.from(map.values());
 }
 
-/** Merge progressive poll payloads without wiping earlier offers or duplicating identities. */
+export function isActiveSearchStatus(status: string | undefined | null): boolean {
+  const normalized = (status ?? "").toLowerCase();
+  return (
+    normalized === "queued" ||
+    normalized === "searching" ||
+    normalized === "partial" ||
+    normalized === "in_progress"
+  );
+}
+
+export function isTerminalSearchStatus(status: string | undefined | null): boolean {
+  const normalized = (status ?? "").toLowerCase();
+  return (
+    normalized === "ready" ||
+    normalized === "empty" ||
+    normalized === "failed" ||
+    normalized === "expired" ||
+    normalized === "error"
+  );
+}
+
+export function resolvePipelineStatus(payload: FlightResultsDataResponse): string {
+  return (payload.status ?? payload.search_freshness?.status ?? "").toLowerCase();
+}
+
+/**
+ * Merge progressive poll payloads.
+ *
+ * Active statuses (searching/partial): append/merge by identity.
+ * Terminal ready/empty: canonical replacement — never retain rejected partial rows.
+ * Terminal failed/expired/error: trust backend payload (do not invent completed inventory).
+ */
 export function mergeProgressiveResults(
   current: FlightResultsDataResponse | null,
   incoming: FlightResultsDataResponse,
 ): FlightResultsDataResponse {
   if (!current) return incoming;
+
+  const incomingStatus = resolvePipelineStatus(incoming);
+
+  if (incomingStatus === "ready" || incomingStatus === "empty") {
+    return canonicalizeTerminalPayload(incoming);
+  }
+
+  if (
+    incomingStatus === "failed" ||
+    incomingStatus === "expired" ||
+    incomingStatus === "error"
+  ) {
+    return canonicalizeTerminalPayload(incoming);
+  }
 
   const offers = mergeByKey(current.offers ?? [], incoming.offers ?? [], offerIdentityKey);
   const outbound = mergeByKey(
@@ -69,16 +114,20 @@ export function mergeProgressiveResults(
   };
 }
 
-export function isActiveSearchStatus(status: string | undefined | null): boolean {
-  const normalized = (status ?? "").toLowerCase();
-  return (
-    normalized === "queued" ||
-    normalized === "searching" ||
-    normalized === "partial" ||
-    normalized === "in_progress"
-  );
-}
+function canonicalizeTerminalPayload(
+  incoming: FlightResultsDataResponse,
+): FlightResultsDataResponse {
+  const offers = incoming.offers ?? [];
+  const outbound = incoming.outbound_options ?? [];
+  const paired = incoming.paired_options ?? [];
 
-export function resolvePipelineStatus(payload: FlightResultsDataResponse): string {
-  return (payload.status ?? payload.search_freshness?.status ?? "").toLowerCase();
+  return {
+    ...incoming,
+    offers,
+    outbound_options: outbound,
+    paired_options: paired,
+    total:
+      incoming.total ??
+      Math.max(offers.length, outbound.length, paired.length),
+  };
 }

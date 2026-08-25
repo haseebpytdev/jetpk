@@ -12,6 +12,7 @@ import { SearchProgress } from "@/features/flight-results/components/SearchProgr
 import { BrandedFareCarousel } from "@/features/flight-results/components/BrandedFareCarousel";
 import { PriceBlock } from "@/features/flight-results/components/PriceBlock";
 import type { FareFamilyOption } from "@/features/flight-results/types";
+import { mergeProgressiveReturnOptions } from "@/features/flight-results/utils/merge-return-options";
 
 type JourneyDisplay = {
   departure_time_display?: string;
@@ -72,33 +73,34 @@ export function ReturnOptionsPage() {
       }
       const list = response.data.return_options ?? [];
       const pipeline = String(response.data.status ?? "").toLowerCase();
+      const terminal =
+        pipeline === "ready" ||
+        pipeline === "empty" ||
+        pipeline === "failed" ||
+        pipeline === "expired" ||
+        pipeline === "error";
 
-      if (list.length > 0) {
-        setOptions((current) => {
-          if (current.length === 0) return list;
-          const byId = new Map(current.map((row) => [String(row.combo_id ?? ""), row]));
-          for (const row of list) {
-            byId.set(String(row.combo_id ?? ""), row);
+      if (list.length > 0 || terminal) {
+        setOptions((current) => mergeProgressiveReturnOptions(current, list, pipeline));
+        if (list.length > 0) {
+          const defaults: Record<string, string> = {};
+          list.forEach((option) => {
+            const comboId = String(option.combo_id ?? "");
+            const fares = resolveFareOptions(option);
+            if (comboId && fares[0]?.option_key) {
+              defaults[comboId] = fares[0].option_key;
+            }
+          });
+          setSelectedFareByCombo((prev) => (terminal ? { ...defaults } : { ...defaults, ...prev }));
+          setStatus("ready");
+          setMessage("");
+          if (isActiveSearch(pipeline)) {
+            timer = setTimeout(() => {
+              if (!cancelled) void load();
+            }, 750);
           }
-          return Array.from(byId.values());
-        });
-        const defaults: Record<string, string> = {};
-        list.forEach((option) => {
-          const comboId = String(option.combo_id ?? "");
-          const fares = resolveFareOptions(option);
-          if (comboId && fares[0]?.option_key) {
-            defaults[comboId] = fares[0].option_key;
-          }
-        });
-        setSelectedFareByCombo((prev) => ({ ...defaults, ...prev }));
-        setStatus("ready");
-        setMessage("");
-        if (isActiveSearch(pipeline)) {
-          timer = setTimeout(() => {
-            if (!cancelled) void load();
-          }, 750);
+          return;
         }
-        return;
       }
 
       if (isActiveSearch(pipeline)) {

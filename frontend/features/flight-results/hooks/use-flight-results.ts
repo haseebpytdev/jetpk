@@ -9,6 +9,7 @@ import { criteriaFromSearchParams } from "../utils/criteria-from-params";
 import { searchIdentityKey } from "../utils/search-identity";
 import {
   isActiveSearchStatus,
+  isTerminalSearchStatus,
   mergeProgressiveResults,
   resolvePipelineStatus,
 } from "../utils/merge-results";
@@ -185,7 +186,12 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       }
 
       const payload = response.data;
-      const result = applyPayload(payload, append || phase === "poll" ? "merge" : "replace");
+      const pipeline = resolvePipelineStatus(payload);
+      // Progressive polls merge while search is ACTIVE; terminal ready/empty/failed
+      // must reconcile to canonical backend truth (never permanently retain rejected partials).
+      const shouldMerge =
+        append || (phase === "poll" && isActiveSearchStatus(pipeline) && !isTerminalSearchStatus(pipeline));
+      const result = applyPayload(payload, shouldMerge ? "merge" : "replace");
       setPage(targetPage);
       setIsLoadingMore(false);
       return result;

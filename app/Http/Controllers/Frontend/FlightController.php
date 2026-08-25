@@ -29,6 +29,7 @@ use App\Support\FlightSearch\ItineraryFareConsolidator;
 use App\Support\FlightSearch\PublicFlightSearchSecurity;
 use App\Support\FlightSearch\PublicMulticityInquiryPolicy;
 use App\Support\FlightSearch\PublicOfferRevalidationPresenter;
+use App\Support\FlightSearch\PublicProgressiveSearchSnapshotPreparer;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use App\Support\FlightSearch\SabreOfferFreshness;
@@ -2555,8 +2556,15 @@ class FlightController extends Controller
                 return;
             }
 
-            $mixed = app(SabreMixedCarrierSearchResultsFilter::class)->filterDisplayOffers($gatedOffers);
-            $gatedOffers = $mixed['offers'];
+            // Apply the same customer-visible eligibility policies as final output so
+            // partial never flashes an offer that canonical final processing would reject.
+            $prepared = app(PublicProgressiveSearchSnapshotPreparer::class)->prepare(
+                $criteria,
+                $gatedOffers,
+                $safeWarnings,
+            );
+            $gatedOffers = $prepared['offers'];
+            $safeWarnings = $prepared['warnings'];
             if ($gatedOffers === []) {
                 return;
             }
@@ -2574,7 +2582,10 @@ class FlightController extends Controller
                         'source_channel' => $sourceChannel,
                         'agent_id' => $agentId,
                     ],
-                    'mixed_carrier_filter' => $mixed['diagnostics'] ?? [],
+                    'mixed_carrier_filter' => is_array($prepared['diagnostics']['mixed_carrier'] ?? null)
+                        ? $prepared['diagnostics']['mixed_carrier']
+                        : [],
+                    'progressive_snapshot' => $prepared['diagnostics'],
                 ],
             );
         };
