@@ -4,6 +4,7 @@ import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/uti
 import { useMemo, useState } from "react";
 import type { FareFamilyOption, PairedReturnOption } from "../types";
 import { BrandedFareCarousel } from "./BrandedFareCarousel";
+import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 
 type PairReturnCardProps = {
@@ -37,6 +38,16 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
   const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey) ?? fareOptions[0];
   const effectiveFareKey = selectedOption?.option_key ?? selectedFareKey;
   const priceLabel = selectedOption?.price_display ?? option.total_display ?? "Fare unavailable";
+  const refundLabel = option.refundable === true ? "Refundable" : option.refundable === false ? "Non-refundable" : null;
+
+  const openFareConfirmation = (fareKey?: string) => {
+    const key = resolveAuthoritativeFareOptionKey(fareKey ?? effectiveFareKey, fareOptions) ?? fareKey ?? effectiveFareKey;
+    if (onDetails) {
+      onDetails(option, key || undefined);
+      return;
+    }
+    onSelect(option, key || undefined);
+  };
 
   return (
     <article
@@ -69,16 +80,13 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-lg font-semibold text-jp-text">{priceLabel}</p>
-          <p className="text-xs text-jp-text-muted">
-            {[
-              option.airline_name,
-              selectedOption?.name ?? selectedOption?.brand_name ?? option.fare_family,
-              option.cabin,
-              option.baggage,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-jp-text-muted">
+            {[option.airline_name, option.cabin, option.baggage].filter(Boolean).join(" · ") ? (
+              <span>{[option.airline_name, option.cabin, option.baggage].filter(Boolean).join(" · ")}</span>
+            ) : null}
+            {refundLabel ? <span data-testid="pair-refundability">{refundLabel}</span> : null}
+            <SupplierSourceBadge label={option.supplier_source_label} />
+          </div>
         </div>
         <div className="flex gap-2">
           {onDetails ? (
@@ -86,10 +94,7 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
               type="button"
               className="rounded-jp-md border border-jp-border px-3 py-2 text-sm"
               data-testid="pair-details"
-              onClick={() => {
-                const key = resolveAuthoritativeFareOptionKey(effectiveFareKey, fareOptions) ?? effectiveFareKey;
-                onDetails(option, key || undefined);
-              }}
+              onClick={() => openFareConfirmation()}
             >
               Details
             </button>
@@ -98,13 +103,10 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
             type="button"
             className="rounded-jp-md bg-jp-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
             disabled={!option.can_book || selecting}
-            onClick={() => {
-              const key = resolveAuthoritativeFareOptionKey(effectiveFareKey, fareOptions) ?? effectiveFareKey;
-              onSelect(option, key || undefined);
-            }}
+            onClick={() => openFareConfirmation()}
             data-testid="pair-select"
           >
-            {selecting ? "…" : "Select"}
+            {selecting ? "…" : "Book Now"}
           </button>
         </div>
       </div>
@@ -116,8 +118,7 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
           onSelect={setSelectedFareKey}
           onBook={(optionKey) => {
             setSelectedFareKey(optionKey);
-            const key = resolveAuthoritativeFareOptionKey(optionKey, fareOptions) ?? optionKey;
-            onSelect(option, key || undefined);
+            openFareConfirmation(optionKey);
           }}
           bookingOptionKey={selecting ? effectiveFareKey : null}
           disabled={!option.can_book}

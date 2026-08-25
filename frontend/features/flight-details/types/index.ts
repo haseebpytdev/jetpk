@@ -107,6 +107,7 @@ export type FlightDetailsContext = {
   offerId: string;
   fareOptionKey?: string;
   outboundKey?: string;
+  outboundFareOptionKey?: string;
   comboId?: string;
   initialOffer?: FlightOffer;
   initialFareOptions?: FareFamilyOption[];

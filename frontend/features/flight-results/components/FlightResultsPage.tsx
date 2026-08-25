@@ -1,13 +1,17 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FlightDetailsDrawer, type FlightDetailsContext } from "@/features/flight-details";
 import { SearchModule } from "@/features/search";
-import { submitReturnComboSelection } from "../services/flight-results-api";
 import { buildSearchSummaryFromParams, useFlightResults } from "../hooks/use-flight-results";
 import { parseFiltersFromSearchParams } from "../utils/filters";
 import { parseUiSort, type UiSortKey } from "../utils/sorting";
+import {
+  buildFreshResultsSearchParams,
+  clearResultsLeftForCheckout,
+  shouldRefreshResultsAfterCheckoutReturn,
+} from "../utils/checkout-nav";
 import { EmptyResultsState } from "./EmptyResultsState";
 import { ExpiredSearchState } from "./ExpiredSearchState";
 import { NearbyDateStrip } from "./NearbyDateStrip";
@@ -40,9 +44,10 @@ export function FlightResultsPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailsContext, setDetailsContext] = useState<FlightDetailsContext | null>(null);
-  const [selectingCombo, setSelectingCombo] = useState<string | null>(null);
+  const [resultsStaleLocked, setResultsStaleLocked] = useState(false);
   const detailsTriggerRef = useRef<HTMLElement | null>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const freshSearchInFlight = useRef(false);
 
   const summary = useMemo(() => buildSearchSummaryFromParams(params), [params]);
 
@@ -53,6 +58,34 @@ export function FlightResultsPage() {
     filters,
     view: viewParam,
   });
+
+  const startFreshSearchFromCheckoutReturn = useCallback(() => {
+    if (freshSearchInFlight.current) return;
+    freshSearchInFlight.current = true;
+    setResultsStaleLocked(true);
+    setDetailsContext(null);
+    clearResultsLeftForCheckout();
+    const next = buildFreshResultsSearchParams(params);
+    router.replace(`/flights/results?${next.toString()}`, { scroll: false });
+    window.setTimeout(() => {
+      freshSearchInFlight.current = false;
+    }, 1500);
+  }, [params, router]);
+
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!shouldRefreshResultsAfterCheckoutReturn(event)) return;
+      startFreshSearchFromCheckoutReturn();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, [startFreshSearchFromCheckoutReturn]);
+
+  useEffect(() => {
+    if (results.resolvedSearchId && results.status !== "idle" && results.status !== "initializing") {
+      setResultsStaleLocked(false);
+    }
+  }, [results.resolvedSearchId, results.status]);
 
   const syncUrl = useCallback(
     (nextFilters: typeof filters, nextSort: UiSortKey, extra?: Record<string, string | null>) => {
@@ -120,6 +153,7 @@ export function FlightResultsPage() {
 
   const openDetails = useCallback(
     (offer: import("../types").FlightOffer, fareOptionKey: string, intent: "details" | "booking") => {
+      if (resultsStaleLocked) return;
       const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
       if (!resolvedSearchId) return;
       setDetailsContext({
@@ -131,7 +165,24 @@ export function FlightResultsPage() {
         intent,
       });
     },
-    [results.resolvedSearchId, searchId],
+    [results.resolvedSearchId, resultsStaleLocked, searchId],
+  );
+
+  const openPairFareConfirmation = useCallback(
+    (pair: import("../types").PairedReturnOption, fareOptionKey?: string) => {
+      if (resultsStaleLocked) return;
+      const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
+      if (!resolvedSearchId) return;
+      setDetailsContext({
+        searchId: resolvedSearchId,
+        offerId: pair.combo_id,
+        comboId: pair.combo_id,
+        outboundKey: pair.outbound_key,
+        fareOptionKey,
+        intent: "booking",
+      });
+    },
+    [results.resolvedSearchId, resultsStaleLocked, searchId],
   );
 
   const closeDetails = useCallback(() => {
@@ -148,7 +199,8 @@ export function FlightResultsPage() {
     results.status === "idle" || results.status === "loading" || results.status === "initializing";
   const isSearchingMask = results.status === "searching" || (isBootstrapping && shownCount === 0);
   const showResultsList =
-    results.status === "ready" || results.status === "partial" || (shownCount > 0 && results.status !== "empty");
+    !resultsStaleLocked &&
+    (results.status === "ready" || results.status === "partial" || (shownCount > 0 && results.status !== "empty"));
   const isLoading = isBootstrapping && shownCount === 0;
 
   return (
@@ -238,9 +290,16 @@ export function FlightResultsPage() {
           </div>
 
           <div className="min-w-0 space-y-3">
-            {isSearchingMask ? (
+            {isSearchingMask || resultsStaleLocked ? (
               <>
-                <SearchProgress message={results.message || "Searching flights…"} summary={summary} />
+                <SearchProgress
+                  message={
+                    resultsStaleLocked
+                      ? "Refreshing live fares for your search…"
+                      : results.message || "Searching flights…"
+                  }
+                  summary={summary}
+                />
                 <ResultSkeleton />
               </>
             ) : null}
@@ -288,29 +347,8 @@ export function FlightResultsPage() {
                       <div key={option.combo_id} role="listitem">
                         <PairReturnCard
                           option={option}
-                          selecting={selectingCombo === option.combo_id}
-                          onDetails={(pair, fareOptionKey) => {
-                            const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
-                            if (!resolvedSearchId) return;
-                            setDetailsContext({
-                              searchId: resolvedSearchId,
-                              offerId: pair.combo_id,
-                              comboId: pair.combo_id,
-                              outboundKey: pair.outbound_key,
-                              fareOptionKey,
-                              intent: "details",
-                            });
-                          }}
-                          onSelect={(pair, fareOptionKey) => {
-                            setSelectingCombo(pair.combo_id);
-                            void submitReturnComboSelection({
-                              searchId: results.resolvedSearchId ?? "",
-                              comboId: pair.combo_id,
-                              outboundKey: pair.outbound_key ?? "",
-                              fareOptionKey,
-                              returnFareOptionKey: fareOptionKey,
-                            });
-                          }}
+                          onDetails={openPairFareConfirmation}
+                          onSelect={openPairFareConfirmation}
                         />
                       </div>
                     ))

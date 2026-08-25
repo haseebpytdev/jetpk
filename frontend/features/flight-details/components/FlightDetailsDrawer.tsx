@@ -137,6 +137,7 @@ export function FlightDetailsDrawer({
       isReturnCombo: Boolean(context.comboId),
       comboId: context.comboId,
       outboundKey: context.outboundKey,
+      outboundFareOptionKey: context.outboundFareOptionKey,
     });
   };
 
@@ -228,6 +229,11 @@ export function FlightDetailsDrawer({
                   onSelect={details.handleFareOptionChange}
                   disabled={revalidation.state === "loading"}
                 />
+                {details.fareOptions.length === 1 ? (
+                  <p className="mt-2 text-xs text-jp-text-muted" data-testid="single-fare-confirmation-hint">
+                    Confirm this fare to continue. Booking does not start until you continue.
+                  </p>
+                ) : null}
 
                 <FareSummaryTabs key={details.selectedFareKey || offer.offer_id} offer={offer} fallback={fallback} />
 

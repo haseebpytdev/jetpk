@@ -9,6 +9,7 @@ import { AirlineIdentity } from "./AirlineIdentity";
 import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { PriceBlock } from "./PriceBlock";
 import { StopsAndLayover } from "./StopsAndLayover";
+import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 
 type OutboundOptionCardProps = {
@@ -60,11 +61,7 @@ export function OutboundOptionCard({ option, searchId }: OutboundOptionCardProps
           {option.combo_count ? (
             <p className="text-xs text-jp-text-muted">{option.combo_count} return option{option.combo_count === 1 ? "" : "s"}</p>
           ) : null}
-          {selectedOption?.name || selectedOption?.brand_name ? (
-            <p className="text-xs font-medium text-jp-text" data-testid="outbound-selected-brand">
-              Outbound fare: {selectedOption.name ?? selectedOption.brand_name}
-            </p>
-          ) : null}
+          <SupplierSourceBadge label={option.supplier_source_label} />
         </div>
         <div className="flex flex-col items-stretch gap-1 sm:items-end">
           <p className="text-xs text-jp-text-muted">From total return fare</p>

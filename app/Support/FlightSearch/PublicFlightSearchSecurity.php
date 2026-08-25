@@ -3,6 +3,7 @@
 namespace App\Support\FlightSearch;
 
 use App\Models\User;
+use App\Support\Suppliers\SupplierSourceVisibility;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -151,7 +152,47 @@ class PublicFlightSearchSecurity
             unset($offer['details_url']);
         }
 
-        return $offer;
+        return self::applySupplierSourceVisibility($offer);
+    }
+
+    /**
+     * Privileged supplier display labels are agent/admin only.
+     * Keep operational provider keys for checkout stickiness/revalidation.
+     *
+     * @param  array<string, mixed>  $row
+     * @return array<string, mixed>
+     */
+    public static function applySupplierSourceVisibility(array $row): array
+    {
+        if (SupplierSourceVisibility::canCurrentUser()) {
+            if (! array_key_exists('supplier_source_label', $row) || $row['supplier_source_label'] === null) {
+                return $row;
+            }
+            $label = trim((string) $row['supplier_source_label']);
+            if ($label === '') {
+                unset($row['supplier_source_label']);
+            } else {
+                $row['supplier_source_label'] = self::sanitizeDisplayText($label);
+            }
+
+            return $row;
+        }
+
+        unset($row['supplier_source_label']);
+
+        return $row;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    public static function sanitizeResultsOptionRows(array $rows): array
+    {
+        return array_values(array_map(
+            static fn (array $row): array => self::applySupplierSourceVisibility($row),
+            $rows
+        ));
     }
 
     public static function sanitizeDisplayText(string $value): string

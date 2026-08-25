@@ -4,13 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FlightDetailsDrawer, type FlightDetailsContext } from "@/features/flight-details";
 import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
-import { fetchReturnOptionsData, submitReturnComboSelection } from "@/features/flight-results/services/flight-results-api";
+import { fetchReturnOptionsData } from "@/features/flight-results/services/flight-results-api";
 import { ResultSkeleton } from "@/features/flight-results/components/ResultSkeleton";
 import { SearchErrorState } from "@/features/flight-results/components/SearchErrorState";
 import { ExpiredSearchState } from "@/features/flight-results/components/ExpiredSearchState";
 import { SearchProgress } from "@/features/flight-results/components/SearchProgress";
 import { BrandedFareCarousel } from "@/features/flight-results/components/BrandedFareCarousel";
 import { PriceBlock } from "@/features/flight-results/components/PriceBlock";
+import { SupplierSourceBadge } from "@/features/flight-results/components/SupplierSourceBadge";
 import type { FareFamilyOption } from "@/features/flight-results/types";
 import { mergeProgressiveReturnOptions } from "@/features/flight-results/utils/merge-return-options";
 
@@ -37,7 +38,6 @@ export function ReturnOptionsPage() {
   const [status, setStatus] = useState<"loading" | "ready" | "error" | "expired" | "empty">("loading");
   const [message, setMessage] = useState("");
   const [options, setOptions] = useState<Array<Record<string, unknown>>>([]);
-  const [selectingId, setSelectingId] = useState<string | null>(null);
   const [selectedFareByCombo, setSelectedFareByCombo] = useState<Record<string, string>>({});
   const [detailsContext, setDetailsContext] = useState<FlightDetailsContext | null>(null);
   const detailsTriggerRef = useRef<HTMLElement | null>(null);
@@ -128,27 +128,25 @@ export function ReturnOptionsPage() {
     };
   }, [outboundKey, searchId]);
 
-  const handleSelect = (combo: Record<string, unknown>, explicitReturnFareKey?: string) => {
+  const openFareConfirmation = (combo: Record<string, unknown>, explicitReturnFareKey?: string) => {
     const comboId = String(combo.combo_id ?? "");
-    if (!comboId || selectingId) return;
+    if (!comboId) return;
     const fareOptions = resolveFareOptions(combo);
-    // Explicit Book click key wins — do not wait for selectedFareByCombo React state.
     const rawReturnKey =
       explicitReturnFareKey
       ?? selectedFareByCombo[comboId]
       ?? String(combo.fare_option_key ?? "")
       ?? "";
     const returnFareKey = resolveAuthoritativeFareOptionKey(rawReturnKey, fareOptions) ?? rawReturnKey;
-    const outboundKeyAuth = outboundFareOptionKey.trim();
 
-    setSelectingId(comboId);
-    void submitReturnComboSelection({
+    setDetailsContext({
       searchId,
+      offerId: comboId,
       comboId,
       outboundKey,
+      outboundFareOptionKey: outboundFareOptionKey || undefined,
       fareOptionKey: returnFareKey || undefined,
-      returnFareOptionKey: returnFareKey || undefined,
-      outboundFareOptionKey: outboundKeyAuth || undefined,
+      intent: "booking",
     });
   };
 
@@ -187,6 +185,8 @@ export function ReturnOptionsPage() {
             const selectedFare = fareOptions.find((item) => item.option_key === selectedKey);
             const price = selectedFare?.displayed_price ?? (option.displayed_price as number | undefined) ?? (option.total_amount as number | undefined);
             const journey = resolveJourneyDisplay(option);
+            const supplierLabel =
+              typeof option.supplier_source_label === "string" ? option.supplier_source_label : undefined;
             return (
               <article key={comboId} className="rounded-jp-card border border-jp-border bg-jp-surface p-4" role="listitem" data-testid="return-option-card">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -197,24 +197,16 @@ export function ReturnOptionsPage() {
                       {" → "}
                       {journey?.arrival_time_display ?? ""}
                     </p>
-                    {selectedFare?.name || selectedFare?.brand_name ? (
-                      <p className="mt-1 text-xs font-medium text-jp-text" data-testid="return-selected-brand">
-                        Return fare: {selectedFare.name ?? selectedFare.brand_name}
-                      </p>
-                    ) : null}
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <SupplierSourceBadge label={supplierLabel} />
+                    </div>
                     <button
                       type="button"
                       className="mt-2 text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
                       data-testid="return-details-trigger"
                       onClick={(event) => {
                         detailsTriggerRef.current = event.currentTarget;
-                        setDetailsContext({
-                          searchId,
-                          offerId: comboId,
-                          comboId,
-                          outboundKey,
-                          fareOptionKey: selectedKey || undefined,
-                        });
+                        openFareConfirmation(option);
                       }}
                     >
                       Details
@@ -223,8 +215,7 @@ export function ReturnOptionsPage() {
                   <PriceBlock
                     amount={price}
                     priceDisplay={(selectedFare?.price_display as string | undefined) ?? (option.price_display as string | undefined) ?? (option.total_display as string | undefined)}
-                    loading={selectingId === comboId}
-                    onSelect={() => handleSelect(option)}
+                    onSelect={() => openFareConfirmation(option)}
                   />
                 </div>
                 {fareOptions.length > 1 ? (
@@ -234,9 +225,8 @@ export function ReturnOptionsPage() {
                     onSelect={(optionKey) => setSelectedFareByCombo((current) => ({ ...current, [comboId]: optionKey }))}
                     onBook={(optionKey) => {
                       setSelectedFareByCombo((current) => ({ ...current, [comboId]: optionKey }));
-                      handleSelect(option, optionKey);
+                      openFareConfirmation(option, optionKey);
                     }}
-                    bookingOptionKey={selectingId === comboId ? selectedKey : null}
                   />
                 ) : null}
               </article>

@@ -1,13 +1,13 @@
 "use client";
 
 import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
-import { FARE_SELECTION_ROUTE, resolveBrandedFareSurface } from "@/lib/fare-selection-authority";
 import { useMemo, useState } from "react";
 import type { FareFamilyOption, FlightOffer } from "../types";
 import { AirlineIdentity } from "./AirlineIdentity";
 import { BrandedFareCarousel } from "./BrandedFareCarousel";
 import { FareBadge } from "./FareBadge";
 import { MulticityInquiryActions } from "./MulticityInquiryActions";
+import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 import { formatWholePkr } from "../utils/price";
 import {
@@ -85,8 +85,8 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
   const displayPrice = formatWholePkr(displayAmount ?? offer.final_customer_price);
   const viaCodes = extractViaCodes(offer);
   const layoverSummary = resolveLayoverSummary(offer);
-  const fareSurface = resolveBrandedFareSurface(fareOptions.length);
-  const showInlineCarousel = fareOptions.length > 1 && fareSurface !== "dedicated_route";
+  // Book Now always opens Details for branded-fare confirmation (even with one family).
+  const showInlineCarousel = fareOptions.length > 1;
 
   const firstSegment = offer.segments?.[0];
   const lastSegment = offer.segments?.[offer.segments.length - 1];
@@ -111,15 +111,6 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
 
   const openWithSelectedFare = (intent: "details" | "booking") => {
     const fareKeyForDetails = resolveAuthoritativeFareOptionKey(effectiveFareKey, fareOptions) ?? "";
-    if (intent === "booking" && fareSurface === "dedicated_route" && fareOptions.length > 1) {
-      const qs = new URLSearchParams({
-        search_id: searchId,
-        offer_id: offer.offer_id,
-      });
-      if (fareKeyForDetails) qs.set("fare_option_key", fareKeyForDetails);
-      window.location.assign(`${FARE_SELECTION_ROUTE}?${qs.toString()}`);
-      return;
-    }
     setBookingOptionKey(intent === "booking" ? effectiveFareKey || null : null);
     onOpenDetails?.(offer, fareKeyForDetails, intent);
   };
@@ -158,11 +149,7 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
           />
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <FareBadge refundable={offer.refundable} seatsLeft={offer.seats_left} />
-            {selectedOption?.name || selectedOption?.brand_name ? (
-              <span className="text-xs font-medium text-jp-text" data-testid="selected-fare-brand">
-                {selectedOption.name ?? selectedOption.brand_name}
-              </span>
-            ) : null}
+            <SupplierSourceBadge label={offer.supplier_source_label} />
           </div>
           {offer.multicity_inquiry_only ? (
             <MulticityInquiryActions

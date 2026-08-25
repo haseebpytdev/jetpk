@@ -34,6 +34,7 @@ use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use App\Support\FlightSearch\SabreOfferFreshness;
 use App\Support\Suppliers\SupplierSourcePresenter;
+use App\Support\Suppliers\SupplierSourceVisibility;
 use Carbon\Carbon;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
@@ -903,7 +904,9 @@ class FlightController extends Controller
         $options = is_array($built['options'] ?? null) ? $built['options'] : [];
         $total = count($options);
         $offset = ($page - 1) * $perPage;
-        $slice = array_slice($options, $offset, $perPage);
+        $slice = PublicFlightSearchSecurity::sanitizeResultsOptionRows(
+            array_slice($options, $offset, $perPage)
+        );
 
         $freshness = app(SabreOfferFreshness::class);
 
@@ -1077,7 +1080,9 @@ class FlightController extends Controller
 
         $total = count($paired);
         $offset = ($page - 1) * $perPage;
-        $slice = array_slice($paired, $offset, $perPage);
+        $slice = PublicFlightSearchSecurity::sanitizeResultsOptionRows(
+            array_slice($paired, $offset, $perPage)
+        );
         $freshness = app(SabreOfferFreshness::class);
 
         return response()->json([
@@ -1162,7 +1167,9 @@ class FlightController extends Controller
 
         $total = count($outboundOptions);
         $offset = ($page - 1) * $perPage;
-        $slice = array_slice($outboundOptions, $offset, $perPage);
+        $slice = PublicFlightSearchSecurity::sanitizeResultsOptionRows(
+            array_slice($outboundOptions, $offset, $perPage)
+        );
         $freshness = app(SabreOfferFreshness::class);
 
         return response()->json([
@@ -1458,12 +1465,14 @@ class FlightController extends Controller
             'offer_id' => (string) ($offer['id'] ?? $offer['offer_id'] ?? ''),
             'supplier_provider' => (string) ($offer['supplier_provider'] ?? ''),
             'provider' => (string) ($offer['supplier_provider'] ?? 'unknown'),
-            'supplier_source_label' => (string) ($offer['supplier_source_label'] ?? SupplierSourcePresenter::labelForOffer(
-                (string) ($offer['supplier_provider'] ?? ''),
-                isset($offer['source_type']) ? (string) $offer['source_type'] : null,
-                isset($offer['provider_channel']) ? (string) $offer['provider_channel'] : ($offer['distribution_channel'] ?? null),
-                null,
-            )),
+            'supplier_source_label' => SupplierSourceVisibility::canCurrentUser()
+                ? (string) ($offer['supplier_source_label'] ?? SupplierSourcePresenter::labelForOffer(
+                    (string) ($offer['supplier_provider'] ?? ''),
+                    isset($offer['source_type']) ? (string) $offer['source_type'] : null,
+                    isset($offer['provider_channel']) ? (string) $offer['provider_channel'] : ($offer['distribution_channel'] ?? null),
+                    null,
+                ))
+                : null,
             'airline_code' => $code,
             'airline_name' => $airlineDisplayName,
             'airline_logo_url' => $airlineLogos[$code] ?? null,

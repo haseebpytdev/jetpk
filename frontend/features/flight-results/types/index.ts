@@ -159,6 +159,7 @@ export type PairedReturnOption = {
   airline_name?: string;
   airline_code?: string;
   pairing_authority?: string;
+  supplier_source_label?: string;
   branded_fares_display_options?: FareFamilyOption[];
   fare_family_options_display?: FareFamilyOption[];
   has_branded_fares?: boolean;
@@ -167,6 +168,7 @@ export type PairedReturnOption = {
 
 export type OutboundOption = {
   outbound_key: string;
+  supplier_source_label?: string;
   journey_display?: {
     departure_time_display?: string;
     arrival_time_display?: string;

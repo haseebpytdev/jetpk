@@ -56,18 +56,21 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
 
   const syntheticOnly = isSyntheticOnlyCatalog(options);
   const showNav = !syntheticOnly && shouldUseFareCarousel(options.length);
+  const singleConfirm = !syntheticOnly && options.length === 1;
 
   return (
     <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5 font-sans" data-testid="fare-family-details" aria-labelledby="fare-family-heading">
       <div className="flex items-end justify-between gap-3">
         <div>
           <h3 id="fare-family-heading" className="text-sm font-semibold text-jp-text">
-            {syntheticOnly ? "Current fare" : "Choose a fare"}
+            {syntheticOnly ? "Current fare" : singleConfirm ? "Confirm your fare" : "Choose a fare"}
           </h3>
           <p className="mt-1 text-xs text-jp-text-muted">
             {syntheticOnly
               ? "Fare family selection was not supplied by the airline."
-              : "Selecting a fare updates the Fare Summary below."}
+              : singleConfirm
+                ? "Review this fare, then continue to confirm it for booking."
+                : "Selecting a fare updates the Fare Summary below."}
           </p>
         </div>
         {!syntheticOnly ? <p className="shrink-0 text-xs text-jp-text-muted">{options.length} options</p> : null}
