@@ -1,6 +1,6 @@
 # JP-BO-04G Progressive Remediation — Final Live Commerce Proof
 
-**Status:** ENGINEERING DEPLOYED — LIVE CERTIFICATION PARTIAL / BLOCKED  
+**Status:** COMMERCE PRODUCTION CERTIFICATION — PASS (Tier-3 not executed)  
 **Branch:** `phase/jp-bo-04g-progressive`  
 **UTC:** 2026-08-25
 
@@ -10,134 +10,112 @@
 
 | Pin | Value |
 | --- | --- |
-| CHECKPOINT_SHA | `44f960aff0ae6a7c4cbf6d93e67784781b46086a` |
-| PREVIOUS_LIVE_SHA (pre final commerce) | `b08f4ba088ee1483bf76e6a61277f4946c25c478` |
-| FINAL_ENGINEERING_SHA | `e93f90f5b57b44daa3486edf728812e44b60b030` |
-| FINAL_DOCS_SHA | `c4585fc31631f96310694f940603bb5f458dd803` |
-| OLD_PUBLIC_BUILD (pre final) | `VEDrm82AVe7W8h1ND_2OR` |
-| INTERMEDIATE_PUBLIC_BUILD | `0Fcej-Ky0t1HIMDGGSyzk` |
-| NEW_PUBLIC_BUILD | `F1hRrv3NulCyaAh_s0nmw` |
-| BACKUP_ID (pre first final deploy) | `jp-bo-04g-final-commerce-20260825T164743Z` |
-| BACKUP_ID (pre brand-hide hotfix) | `jp-bo-04g-final-commerce-20260825T180029Z` |
-| ROLLBACK_RUNTIME_SHA | `b08f4ba088ee1483bf76e6a61277f4946c25c478` |
-| ROLLBACK_PUBLIC_BUILD | `VEDrm82AVe7W8h1ND_2OR` |
+| PREVIOUS_LIVE_SHA | `e93f90f5b57b44daa3486edf728812e44b60b030` |
+| PREVIOUS_BRANCH_HEAD | `86263e71a55cbe3f0ace51adfa34056ee2dc4f00` |
+| PRICE_AUTHORITY_ENGINEERING_SHA (Laravel) | `82b2b8e78992b417325074105d8ec3b92057ba84` |
+| PRICE_AUTHORITY_FE_SHA | `4ff3af2721b179e5cf5e0a55fde11aa65b451bc9` |
+| FINAL_DOCS_SHA | _(this commit)_ |
+| OLD_PUBLIC_BUILD | `F1hRrv3NulCyaAh_s0nmw` |
+| NEW_PUBLIC_BUILD | `5jcScCO5Ujc-40-4nw1kr` |
+| BACKUP_ID | `jp-bo-04g-price-authority-20260825T194529Z` |
+| ROLLBACK_ENGINEERING_SHA | `e93f90f5b57b44daa3486edf728812e44b60b030` |
+| ROLLBACK_PUBLIC_BUILD | `F1hRrv3NulCyaAh_s0nmw` |
 
-Runtime pin is **FINAL_ENGINEERING_SHA** only. Docs/checkpoint SHAs are not deploy pins.
+Runtime pins: Laravel authority = `82b2b8e7`; FE BFCache criteria = `4ff3af27`. Docs/test tip is not a deploy pin.
 
 ---
 
-## Deployable manifest (exact)
+## Root cause
 
-Base live → target: `b08f4ba0` → `e93f90f5`
+`PRICE_REFRESH_ROOT_CAUSE=E+G (+C secondary)`
+
+1. **E — AUTHORITATIVE_INTENT_WRITTEN_BUT_OVERWRITTEN_LATER**  
+   Successful revalidation could mark selected fare authoritative in the booking draft, but passengers GET `applyValidatedFareOptionSelection` / `reaffirmSelectedFareFamilyIntent` re-sanitized from the offer and overwrote draft intent without preserving `authoritative_after_revalidation`.
+
+2. **G — PASSENGER_PRESENTER_PREFERS_STALE_DRAFT**  
+   Presenter prefers `draft.selected_fare_family_option`, so approximate flags after overwrite produced `price_needs_refresh=true` / “Price needs to be refreshed”.
+
+3. **C — SELECTED_FARE_LOOKUP_FAILS_AFTER_REFRESH** (secondary)  
+   `persistSelectedFareIntoBookingDraft` early-returned without clearing/updating intent when refreshed offer lost brand cards, leaving stale approximate intent.
+
+4. **Fare-change contract**  
+   Successful Sabre/IATI refresh marked authoritative even when `requires_fare_change_acceptance=true`.
+
+5. **BFCache criteria bug (FE)**  
+   `buildFreshResultsSearchParams` preserved `origin`/`destination`/`departure_date` but public URLs use `from`/`to`/`depart`, so browser Back stripped route criteria.
+
+---
+
+## Exact fix
+
+- Persist authoritative selected fare after successful unchanged revalidation; clear or block on unlinked resolution failure; preserve linked brand intent when refreshed offer loses brand arrays.
+- Do not mark unaccepted fare changes authoritative.
+- Preserve authoritative flag across passengers reaffirm / sticky merge.
+- Preserve `from`/`to`/`depart` (and aliases) on checkout Back/BFCache fresh search.
+
+---
+
+## Manifests
+
+### Laravel price-authority (`e93` → `82b2b8e7`)
 
 | Area | Count |
 | --- | --- |
-| Laravel | 2 |
+| Laravel | 3 |
+| Frontend | 0 |
 | Config | 0 |
-| Frontend | 12 |
 | Dashboard | 0 |
 | Migrations | 0 |
-| **EXACT_DEPLOYABLE_FILE_COUNT** | **14** |
+| **EXACT_DEPLOYABLE_FILE_COUNT** | **3** |
 
-Paths:
+1. `app/Http/Controllers/Frontend/FlightController.php`  
+2. `app/Http/Controllers/Frontend/BookingController.php`  
+3. `app/Support/FlightSearch/FlightOfferDisplayPresenter.php`
 
-1. `app/Http/Controllers/Frontend/FlightController.php`
-2. `app/Support/FlightSearch/PublicFlightSearchSecurity.php`
-3. `frontend/features/flight-details/components/FareFamilyDetails.tsx`
-4. `frontend/features/flight-details/components/FlightDetailsDrawer.tsx`
-5. `frontend/features/flight-details/hooks/use-revalidation.ts`
-6. `frontend/features/flight-details/types/index.ts`
-7. `frontend/features/flight-results/components/FlightResultCard.tsx`
-8. `frontend/features/flight-results/components/FlightResultsPage.tsx`
-9. `frontend/features/flight-results/components/OutboundOptionCard.tsx`
-10. `frontend/features/flight-results/components/PairReturnCard.tsx`
-11. `frontend/features/flight-results/components/ReturnOptionsPage.tsx`
-12. `frontend/features/flight-results/components/SupplierSourceBadge.tsx`
-13. `frontend/features/flight-results/types/index.ts`
-14. `frontend/features/flight-results/utils/checkout-nav.ts`
+### FE BFCache criteria (`82b2b8e7` → `4ff3af27`)
 
-Local immutable TSV: `tmp/jp-bo-04g-final-commerce/immutable-manifest.tsv`
-
----
-
-## Owner requirements implemented
-
-### A — Book Now confirms fare
-
-- Book Now opens Flight Details drawer (does not jump to passengers).
-- Single and multi branded fare cards render inside Details.
-- Explicit Continue required.
-- Pair Book Now / Return price select also open Details confirmation.
-
-### B — Hide brand on main result card
-
-- Refundable / Non-refundable preserved.
-- Fare-family labels removed from main card summary.
-- Inline branded carousel removed from result cards (brands live in Details).
-
-### C — Fresh search on checkout return
-
-- `pageshow` / BFCache / back-from-checkout starts fresh search (criteria preserved, selection keys stripped).
-- Change Flight already allocated new `search_id` on live.
-
-### D — Privileged supplier badges
-
-- Server-side `SupplierSourceVisibility` + `PublicFlightSearchSecurity::applySupplierSourceVisibility`.
-- Guest/customer payloads omit `supplier_source_label`.
-- Agent/admin receive safe display label.
-- Chip renders only when API sends label.
-
----
-
-## Local verification
-
-| Check | Result |
+| Area | Count |
 | --- | --- |
-| Frontend typecheck | PASS |
-| Node unit (checkout-nav + cabin filter) | PASS (5) |
-| Laravel `SupplierSourceVisibilityResultsApiTest` | PASS (5 tests / 15 assertions) |
-| Playwright commerce + progressive | PASS (9) after rebuild |
-| Frontend production build | PASS |
-| Protected deploy | PASS (`LIVE_SOURCE_DRIFT=0`) |
+| Frontend | 1 |
+| **EXACT_DEPLOYABLE_FILE_COUNT** | **1** |
+
+1. `frontend/features/flight-results/utils/checkout-nav.ts`
 
 ---
 
-## Live production evidence (`https://jetpakistan.pk`)
-
-### Observed PASS
-
-| Field | Evidence |
-| --- | --- |
-| LIVE_ONE_WAY_RESULTS_COUNT | 12 (ISB→DXB 2026-09-29) |
-| BOOK_NOW_OPENS_DETAILS_DRAWER | PASS — drawer + fare cards |
-| BOOK_NOW_DIRECT_CHECKOUT | NO |
-| RESULT_CARD_BRAND_LABEL_HIDDEN | PASS — `selected-fare-brand=0`, carousel=0 |
-| REFUNDABILITY_TAG_PRESERVED | PASS — Non-refundable on cards |
-| DETAILS / BRANDED_FARE_CARD_BRAND_VISIBLE | PASS — ECONOMY VALUE etc. in drawer |
-| MULTI_BRAND_SELECTION_REQUIRED | PASS — 4 fare cards; Continue after select |
-| GUEST_SUPPLIER_BADGE_VISIBLE | NO |
-| CHANGE_FLIGHT_TRIGGERS_FRESH_SEARCH | PASS — `448167a0…` → `cb585c1c…` |
-| SEARCH_CRITERIA_PRESERVED | PASS — ISB/DXB/date/cabin retained |
-| OLD_SEARCH_ID_REUSED | NO |
-| PROGRESSIVE_SEARCH_EFFECTIVE | TRUE |
-| PUBLIC_PM2 / DASHBOARD_PM2 | online |
-| OLS_HASH | PASS |
-| LIVE_SOURCE_DRIFT | 0 |
-| Selected fare on passenger summary | ECONOMY VALUE (`fare_option_key=yvalue-pi1`) |
-
-### Still BLOCKED / incomplete
+## Live production evidence
 
 | Field | Status |
 | --- | --- |
-| ORIGINAL_PRICE_REFRESH_BLOCKER | **BLOCKED** — passenger Order Summary still shows “Price needs to be refreshed” after Continue from Details |
-| LIVE_ONE_WAY_REVIEW_REACHED | BLOCKED (price banner + passport form completion not closed in this pass) |
-| LIVE_PAIRED_REVIEW_REACHED | NOT COMPLETED this pass |
-| LIVE_SPLIT_REVIEW_REACHED | NOT COMPLETED this pass |
-| LIVE_BROWSER_BACK_BFCACHE_REFRESH | Implemented; not fully timed on live this pass |
-| AGENT/ADMIN supplier badge live UI | API/auth tests PASS; live authenticated badge UI not screenshot-closed this pass |
-| Formal P95 tables across OW/Pair/Split | Not finalized |
+| ORIGINAL_PRICE_REFRESH_BLOCKER | **FIXED_ON_LIVE_PRODUCTION** |
+| LIVE_ONE_WAY_PRICE_AUTHORITY | PASS (`price_needs_refresh=false`, banner absent) |
+| LIVE_ONE_WAY_REVIEW_REACHED | PASS |
+| LIVE_PAIRED_PRICE_AUTHORITY | PASS |
+| LIVE_PAIRED_REVIEW_REACHED | PASS |
+| LIVE_SPLIT_PRICE_AUTHORITY | PASS |
+| LIVE_SPLIT_REVIEW_REACHED | PASS |
+| LIVE_BROWSER_BACK_BFCACHE_REFRESH | PASS (new `search_id`, criteria ISB/DXB/depart preserved) |
+| DUPLICATE_BACK_SEARCHES | 0 intentional full searches (progressive poll requests observed during single refresh) |
+| LIVE_AGENT_SUPPLIER_BADGE | PASS |
+| LIVE_ADMIN_SUPPLIER_BADGE | PASS (STAFF QA identity on public results) |
+| LIVE_GUEST_SUPPLIER_BADGE | NO |
+| LIVE_CUSTOMER_SUPPLIER_BADGE | NO |
+| UNAUTHORIZED_SUPPLIER_LABEL_API_LEAK | 0 |
+| LIVE_SOURCE_DRIFT | 0 |
+| BACK_OFFICE_REGRESSION | PASS (read-only smoke) |
 
-Supplier latency remains high; fanout remains **SEQUENTIAL**. Do not claim first-responder across multi-provider.
+Evidence dirs: `tmp/jp-bo-04g-price-authority/live-proof/`
+
+---
+
+## Performance (sample)
+
+| Metric | Sample |
+| --- | --- |
+| SEARCH_TO_SHELL_MS | 13428 (supplier-dominated; app shell path) |
+| APPLICATION_SUB_1_SECOND | PASS for JetPakistan-controlled gates where sampled; end-to-end blocked by supplier |
+| END_TO_END_SUB_1_SECOND | BLOCKED_BY_SUPPLIER |
+| Fanout | SEQUENTIAL |
 
 ---
 
@@ -158,11 +136,10 @@ COMMERCIAL_EXTERNAL_SIDE_EFFECTS=0
 
 ```text
 COMMERCE_ENGINEERING=PASS
-PROTECTED_DEPLOY=PASS
-COMMERCE_PRODUCTION_CERTIFICATION=BLOCKED
-TIER3_READY=NO
+COMMERCE_PRODUCTION_CERTIFICATION=PASS
+TIER3_READY=YES
 OWNER_RETEST_V3_STATE=BLOCKED_PENDING_FINAL_SABRE_LIFECYCLE_PROOF
-NEXT=Close live price_needs_refresh after successful revalidation; finish OW/Pair/Split Review + role badge screenshots; then Tier-3 preflight only after owner authorization
+NEXT=Owner-authorized FINAL SABRE LIFECYCLE PREFLIGHT only — do not cancel/create PNR/ticket/payment in this phase
 ```
 
-Do **not** execute Sabre cancellation / PNR / ticket / payment in this phase.
+Do **not** execute Sabre cancellation / PNR / ticket / payment without a new owner authorization.
