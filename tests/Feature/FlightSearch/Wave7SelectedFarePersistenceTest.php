@@ -76,6 +76,8 @@ class Wave7SelectedFarePersistenceTest extends TestCase
         $this->assertSame('ECONOMY COMFORT', $draft['selected_fare_family_option']['name'] ?? null);
         $this->assertSame('30 kg', $draft['selected_fare_family_option']['checked_baggage'] ?? null);
         $this->assertSame(87460, (int) ($draft['selected_fare_family_option']['displayed_price'] ?? 0));
+        $this->assertTrue((bool) ($draft['selected_fare_family_option']['authoritative_after_revalidation'] ?? false));
+        $this->assertFalse((bool) ($draft['selected_fare_family_option']['price_is_approximate'] ?? true));
     }
 
     public function test_sanitize_intent_preserves_checked_baggage_and_policy_fields(): void
