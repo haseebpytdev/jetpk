@@ -1,0 +1,36 @@
+{
+  "checkpoint": "JP-BO-04G-PROGRESSIVE-REMEDIATION",
+  "paused_utc": "2026-08-25T14:00:00Z",
+  "branch": "phase/jp-bo-04g-progressive",
+  "previous_live_sha": "7459e76b2b52f95912d3cf38d3b2e747745a456f",
+  "deployed_engineering_sha": "b08f4ba088ee1483bf76e6a61277f4946c25c478",
+  "backup_id": "jp-bo-04g-progressive-20260825T112700Z",
+  "old_public_build": "Kcx0WsAt3al_ZoNv2P-W_",
+  "new_public_build": "VEDrm82AVe7W8h1ND_2OR",
+  "progressive_search_effective": true,
+  "progressive_flag_env_override": false,
+  "live_eligible_public_supplier_connections": 2,
+  "live_public_supplier_providers": ["sabre", "pia_ndc"],
+  "supplier_fanout_model": "SEQUENTIAL",
+  "multi_provider_first_responder_limitation": true,
+  "deploy": "PASS",
+  "back_office_live_proof": "PASS",
+  "live_connection_crud": "PASS",
+  "commerce_production_certification": "BLOCKED",
+  "tier3_ready": "NO",
+  "best_search_to_shell_ms": 504,
+  "best_partial_snapshot_to_visible_ms": 1,
+  "observed_status_sequences": [
+    ["searching", "partial", "ready"],
+    ["searching", "ready"]
+  ],
+  "one_way_results_count_sample": 12,
+  "left": [
+    "OW/Pair/Split to Booking Review with full passport fields",
+    "Confirm price refresh banner cleared after revalidation",
+    "Direct-only partial parity sample",
+    "P95 performance tables",
+    "JP-BO-04G-PROGRESSIVE-REMEDIATION-LIVE-PROOF.md",
+    "Final section-41 report"
+  ]
+}
