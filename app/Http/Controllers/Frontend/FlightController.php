@@ -359,15 +359,30 @@ class FlightController extends Controller
                 $requiresAcceptance,
             );
             $selectedFareOptionId = trim((string) $request->input('selected_fare_option_id', ''));
-            $this->persistSelectedFareIntoBookingDraft(
+            $persistedSelectedFare = $this->persistSelectedFareIntoBookingDraft(
                 $offer,
                 $criteria,
                 $searchId,
                 $offerId,
                 $selectedFareOptionId,
                 PublicOfferRevalidationPresenter::customerDisplayTotal($offer),
-                true,
+                // Unaccepted fare changes must not become final checkout authority.
+                ! $requiresAcceptance,
             );
+            if ($persistedSelectedFare === false && $selectedFareOptionId !== '') {
+                Log::warning('flight_search.selected_offer_refresh.selected_fare_resolution_failed', [
+                    'search_id' => $searchId,
+                    'offer_id' => $offerId,
+                    'fare_option_key' => FlightOfferDisplayPresenter::safeFareOptionKeyForLog($selectedFareOptionId),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'status' => 'selected_fare_resolution_failed',
+                    'message' => (string) __('Your selected fare could not be confirmed. Please choose another fare or flight.'),
+                    'offer_freshness' => $freshnessMeta,
+                ], 422);
+            }
             $passengersUrl = $this->buildCustomerSelectUrl(
                 $this->offerIsCustomerBookable($offer, $criteria),
                 $offer,
@@ -496,15 +511,28 @@ class FlightController extends Controller
             );
             $apiStatus = PublicOfferRevalidationPresenter::resolveApiStatus($revalidation, $requiresAcceptance);
 
-            $this->persistSelectedFareIntoBookingDraft(
+            $persistedSelectedFare = $this->persistSelectedFareIntoBookingDraft(
                 $offer,
                 $criteria,
                 $searchId,
                 $offerId,
                 (string) ($selectedFareOptionId ?? ''),
                 PublicOfferRevalidationPresenter::customerDisplayTotal($offer),
-                true,
+                ! $requiresAcceptance,
             );
+            if ($persistedSelectedFare === false && trim((string) ($selectedFareOptionId ?? '')) !== '') {
+                Log::warning('flight_search.iati_selected_offer_refresh.selected_fare_resolution_failed', [
+                    'search_id' => $searchId,
+                    'offer_id' => $offerId,
+                    'fare_option_key' => FlightOfferDisplayPresenter::safeFareOptionKeyForLog((string) ($selectedFareOptionId ?? '')),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'status' => 'selected_fare_resolution_failed',
+                    'message' => (string) __('Your selected fare could not be confirmed. Please choose another fare or flight.'),
+                ], 422);
+            }
 
             Log::info('flight_search.iati_selected_offer_refresh.success', [
                 'search_id' => $searchId,
@@ -1742,6 +1770,13 @@ class FlightController extends Controller
      * @param  array<string, mixed>  $offer
      * @param  array<string, mixed>  $criteria
      */
+    /**
+     * Persist selected branded-fare intent into the booking draft after revalidation.
+     *
+     * @param  array<string, mixed>  $offer
+     * @param  array<string, mixed>  $criteria
+     * @return bool false when a selected branded fare cannot be resolved safely after refresh
+     */
     protected function persistSelectedFareIntoBookingDraft(
         array $offer,
         array $criteria,
@@ -1750,12 +1785,14 @@ class FlightController extends Controller
         string $fareOptionKey,
         ?int $authoritativeTotal = null,
         bool $markAuthoritative = false,
-    ): void {
+    ): bool {
         $fareOptionKey = trim($fareOptionKey);
         if ($fareOptionKey === '' || $searchId === '' || $offerId === '') {
-            return;
+            return true;
         }
 
+        $draftService = app(BookingDraftService::class);
+        $currentDraft = $draftService->current();
         $draftMerge = [
             'search_id' => $searchId,
             'offer_id' => $offerId,
@@ -1772,32 +1809,90 @@ class FlightController extends Controller
             'fare_option_key' => $fareOptionKey,
         ];
 
-        if (! FlightOfferDisplayPresenter::brandedFaresSelectionActiveForOffer($offer)) {
-            app(BookingDraftService::class)->merge($draftMerge);
-
-            return;
+        $intent = [];
+        $resolvedFromOffer = false;
+        $resolved = null;
+        if (FlightOfferDisplayPresenter::brandedFaresSelectionActiveForOffer($offer)) {
+            $resolved = FlightOfferDisplayPresenter::findFareFamilyOptionByKey($offer, $fareOptionKey);
+            if ($resolved !== null) {
+                $intent = FlightOfferDisplayPresenter::sanitizeSelectedFareFamilyIntent($resolved, $offer);
+                $resolvedFromOffer = $intent !== [];
+            }
         }
 
-        $resolved = FlightOfferDisplayPresenter::findFareFamilyOptionByKey($offer, $fareOptionKey);
-        if ($resolved === null) {
-            app(BookingDraftService::class)->merge($draftMerge);
-
-            return;
+        if ($intent === []) {
+            $existing = is_array($currentDraft['selected_fare_family_option'] ?? null)
+                ? $currentDraft['selected_fare_family_option']
+                : [];
+            if (
+                $existing !== []
+                && FlightOfferDisplayPresenter::selectedFareIntentLinkedToDraft(
+                    $existing,
+                    $currentDraft,
+                    $fareOptionKey,
+                    $searchId,
+                    $offerId,
+                )
+            ) {
+                // Refreshed offer lost brand cards, but identity remains proven — preserve benefits, take price authority.
+                $intent = $existing;
+            }
         }
 
-        $intent = FlightOfferDisplayPresenter::sanitizeSelectedFareFamilyIntent($resolved, $offer);
-        if ($intent !== [] && $markAuthoritative) {
+        if ($intent === []) {
+            // Never leave a stale approximate branded intent after a successful refresh.
+            $draftMerge['selected_fare_family_option'] = null;
+            $draftService->merge($draftMerge);
+
+            return false;
+        }
+
+        if ($markAuthoritative) {
+            // Prefer selected brand card total when still resolvable; otherwise pin revalidated offer total.
+            $pinTotal = $authoritativeTotal;
+            if ($resolvedFromOffer
+                && isset($intent['displayed_price'])
+                && is_numeric($intent['displayed_price'])
+                && (int) $intent['displayed_price'] > 0
+            ) {
+                $pinTotal = (int) $intent['displayed_price'];
+            } elseif (
+                ! $resolvedFromOffer
+                && $authoritativeTotal !== null
+                && $authoritativeTotal > 0
+            ) {
+                $pinTotal = $authoritativeTotal;
+            }
+
             $intent = FlightOfferDisplayPresenter::markSelectedFareAuthoritative(
                 $intent,
-                $authoritativeTotal,
+                $pinTotal,
                 PublicOfferRevalidationPresenter::customerDisplayCurrency($offer),
             );
-        }
-        if ($intent !== []) {
-            $draftMerge['selected_fare_family_option'] = $intent;
+        } else {
+            // Pending fare-change acceptance must not remain final checkout authority.
+            $intent['authoritative_after_revalidation'] = false;
+            if ($authoritativeTotal !== null && $authoritativeTotal > 0) {
+                $currency = PublicOfferRevalidationPresenter::customerDisplayCurrency($offer);
+                // Keep brand card total when resolved; only force offer total on preserved-without-brands path.
+                if (! $resolvedFromOffer
+                    || ! isset($intent['displayed_price'])
+                    || ! is_numeric($intent['displayed_price'])
+                    || (int) $intent['displayed_price'] <= 0
+                ) {
+                    $intent['displayed_price'] = $authoritativeTotal;
+                    $intent['displayed_currency'] = $currency;
+                    $intent['price_display'] = $currency.' '.number_format($authoritativeTotal, 0, '.', ',');
+                }
+            }
+            $intent['price_is_approximate'] = true;
+            $intent['is_price_approximate'] = true;
         }
 
-        app(BookingDraftService::class)->merge($draftMerge);
+        $draftMerge['selected_fare_family_option'] = $intent;
+        $draftService->merge($draftMerge);
+
+        return true;
     }
 
     protected function sessionFlightIdErrorMessage(Request $request): string

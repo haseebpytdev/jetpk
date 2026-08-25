@@ -2692,6 +2692,33 @@ class BookingController extends Controller
             );
         }
 
+        $draft = $this->bookingDraft->current();
+        $existingIntent = is_array($draft['selected_fare_family_option'] ?? null)
+            ? $draft['selected_fare_family_option']
+            : [];
+        if (
+            $existingIntent !== []
+            && FlightOfferDisplayPresenter::selectedFareIntentLinkedToDraft(
+                $existingIntent,
+                $draft,
+                $fareOptionKey,
+                $searchId,
+                $offerId,
+            )
+        ) {
+            $sticky = FlightOfferDisplayPresenter::preserveStickySelectedFareFamilyDisplay($existingIntent, $intent);
+            $intent = $sticky['intent'];
+            if (! empty($existingIntent['authoritative_after_revalidation'])) {
+                $authoritativeTotal = isset($existingIntent['displayed_price']) && is_numeric($existingIntent['displayed_price'])
+                    ? (int) $existingIntent['displayed_price']
+                    : (isset($intent['displayed_price']) && is_numeric($intent['displayed_price'])
+                        ? (int) $intent['displayed_price']
+                        : null);
+                $currency = trim((string) ($existingIntent['displayed_currency'] ?? $intent['displayed_currency'] ?? 'PKR'));
+                $intent = FlightOfferDisplayPresenter::markSelectedFareAuthoritative($intent, $authoritativeTotal, $currency);
+            }
+        }
+
         $this->bookingDraft->merge([
             'fare_option_key' => $fareOptionKey,
             'selected_fare_family_option' => $intent,
@@ -2716,6 +2743,7 @@ class BookingController extends Controller
             'baggage' => (string) ($intent['baggage_summary'] ?? ''),
             'booking_class' => (string) ($intent['booking_class'] ?? ''),
             'fare_basis' => (string) ($intent['fare_basis'] ?? ''),
+            'authoritative_after_revalidation' => ! empty($intent['authoritative_after_revalidation']),
         ]);
 
         return null;

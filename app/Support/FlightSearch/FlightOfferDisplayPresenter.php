@@ -2341,11 +2341,63 @@ class FlightOfferDisplayPresenter
             }
         }
 
+        // Never drop checkout price authority when reaffirming the same branded fare key.
+        if (! empty($stored['authoritative_after_revalidation'])) {
+            $authoritativeTotal = isset($stored['displayed_price']) && is_numeric($stored['displayed_price'])
+                ? (int) $stored['displayed_price']
+                : null;
+            $currency = self::nullableTrimmedString($stored['displayed_currency'] ?? $merged['displayed_currency'] ?? null) ?? 'PKR';
+            $merged = self::markSelectedFareAuthoritative($merged, $authoritativeTotal, $currency);
+        }
+
         if (isset($merged['price_display']) && is_string($merged['price_display'])) {
             $merged['price_display'] = preg_replace('/^Approx\.\s*/i', '', trim($merged['price_display'])) ?? $merged['price_display'];
         }
 
         return ['intent' => $merged, 'estimate_drift_detected' => $estimateDriftDetected];
+    }
+
+    /**
+     * True when stored branded-fare intent still matches the active checkout selection.
+     *
+     * @param  array<string, mixed>  $intent
+     * @param  array<string, mixed>  $draft
+     */
+    public static function selectedFareIntentLinkedToDraft(
+        array $intent,
+        array $draft,
+        string $fareOptionKey,
+        string $searchId = '',
+        string $offerId = '',
+    ): bool {
+        $intentKey = trim((string) ($intent['option_key'] ?? $intent['fare_option_key'] ?? ''));
+        $fareOptionKey = trim($fareOptionKey);
+        if ($intentKey === '' || $fareOptionKey === '' || $intentKey !== $fareOptionKey) {
+            return false;
+        }
+
+        $draftKey = trim((string) ($draft['fare_option_key'] ?? ''));
+        if ($draftKey !== '' && $draftKey !== $fareOptionKey) {
+            return false;
+        }
+
+        $searchId = trim($searchId);
+        if ($searchId !== '') {
+            $draftSearchId = trim((string) ($draft['search_id'] ?? ''));
+            if ($draftSearchId !== '' && $draftSearchId !== $searchId) {
+                return false;
+            }
+        }
+
+        $offerId = trim($offerId);
+        if ($offerId !== '') {
+            $draftOfferId = trim((string) ($draft['offer_id'] ?? $draft['flight_id'] ?? ''));
+            if ($draftOfferId !== '' && $draftOfferId !== $offerId) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
