@@ -49,8 +49,18 @@ export function ReturnOptionsPage() {
     }
 
     let cancelled = false;
-    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     const controller = new AbortController();
+
+    const isActiveSearch = (pipeline: string): boolean => {
+      const normalized = pipeline.toLowerCase();
+      return (
+        normalized === "queued" ||
+        normalized === "searching" ||
+        normalized === "partial" ||
+        normalized === "in_progress"
+      );
+    };
 
     const load = async () => {
       const response = await fetchReturnOptionsData({ searchId, outboundKey, signal: controller.signal });
@@ -61,36 +71,48 @@ export function ReturnOptionsPage() {
         return;
       }
       const list = response.data.return_options ?? [];
-      if (list.length === 0 && attempts < 20) {
-        attempts += 1;
+      const pipeline = String(response.data.status ?? "").toLowerCase();
+
+      if (list.length > 0) {
+        setOptions((current) => {
+          if (current.length === 0) return list;
+          const byId = new Map(current.map((row) => [String(row.combo_id ?? ""), row]));
+          for (const row of list) {
+            byId.set(String(row.combo_id ?? ""), row);
+          }
+          return Array.from(byId.values());
+        });
+        const defaults: Record<string, string> = {};
+        list.forEach((option) => {
+          const comboId = String(option.combo_id ?? "");
+          const fares = resolveFareOptions(option);
+          if (comboId && fares[0]?.option_key) {
+            defaults[comboId] = fares[0].option_key;
+          }
+        });
+        setSelectedFareByCombo((prev) => ({ ...defaults, ...prev }));
+        setStatus("ready");
+        setMessage("");
+        if (isActiveSearch(pipeline)) {
+          timer = setTimeout(() => {
+            if (!cancelled) void load();
+          }, 750);
+        }
+        return;
+      }
+
+      if (isActiveSearch(pipeline)) {
         setStatus("loading");
         setMessage("Finding return flights for your selected outbound…");
-        window.setTimeout(() => {
+        timer = setTimeout(() => {
           if (!cancelled) void load();
         }, 750);
         return;
       }
-      setOptions((current) => {
-        if (current.length === 0) return list;
-        const byId = new Map(current.map((row) => [String(row.combo_id ?? ""), row]));
-        for (const row of list) {
-          byId.set(String(row.combo_id ?? ""), row);
-        }
-        return Array.from(byId.values());
-      });
-      const defaults: Record<string, string> = {};
-      list.forEach((option) => {
-        const comboId = String(option.combo_id ?? "");
-        const fares = resolveFareOptions(option);
-        if (comboId && fares[0]?.option_key) {
-          defaults[comboId] = fares[0].option_key;
-        }
-      });
-      setSelectedFareByCombo((prev) => ({ ...defaults, ...prev }));
-      setStatus(list.length === 0 ? "empty" : "ready");
-      if (list.length === 0) {
-        setMessage(response.data.empty_message ?? "No return flights match this outbound selection.");
-      }
+
+      setOptions([]);
+      setStatus("empty");
+      setMessage(response.data.empty_message ?? "No return flights match this outbound selection.");
     };
 
     setStatus("loading");
@@ -99,6 +121,7 @@ export function ReturnOptionsPage() {
 
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
       controller.abort();
     };
   }, [outboundKey, searchId]);

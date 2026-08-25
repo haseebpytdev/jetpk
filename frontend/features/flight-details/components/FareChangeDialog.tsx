@@ -35,12 +35,12 @@ export function FareChangeDialog({
     <Dialog
       open={open}
       onClose={onCancel}
-      title="Fare has changed"
-      description="The airline updated the price. Review the new total before continuing."
+      title="Fare updated"
+      description="The airline updated this fare during verification. Review the new total before continuing."
       footer={
         <>
           <SecondaryButton type="button" disabled={loading} onClick={onCancel}>
-            Go back
+            Choose another flight
           </SecondaryButton>
           <PrimaryButton type="button" disabled={loading} onClick={onAccept}>
             {loading ? "Continuing…" : "Accept new fare"}
@@ -50,11 +50,11 @@ export function FareChangeDialog({
     >
       <dl className="space-y-2 text-sm" data-testid="fare-change-dialog">
         <div className="flex justify-between gap-2">
-          <dt className="text-jp-text-muted">Previous price</dt>
+          <dt className="text-jp-text-muted">Previous total</dt>
           <dd>{formatAmount(originalTotal, currency)}</dd>
         </div>
         <div className="flex justify-between gap-2 font-semibold">
-          <dt>New price</dt>
+          <dt>Current total</dt>
           <dd>{formatAmount(confirmedTotal, currency)}</dd>
         </div>
         {difference != null ? (
