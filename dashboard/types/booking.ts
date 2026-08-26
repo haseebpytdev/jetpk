@@ -114,6 +114,17 @@ export type BookingFareSummary = {
   total: number;
 };
 
+export type BookingCancelPnrContext = {
+  booking_reference_safe?: string;
+  supplier?: string;
+  environment?: string;
+  environment_is_sandbox?: boolean;
+  environment_label?: string;
+  payment_label?: string;
+  ticket_label?: string;
+  connection_alias_safe?: string | null;
+};
+
 export type BookingOperationalCapabilities = {
   can_update_status?: boolean;
   can_prepare_pnr_context?: boolean;
@@ -135,6 +146,7 @@ export type BookingOperationalCapabilities = {
   reasons?: Record<string, string | null>;
   sabre_void_support?: string;
   allowed_status_values?: string[];
+  cancel_pnr_context?: BookingCancelPnrContext | null;
 };
 
 export type BookingManagementDetail = {

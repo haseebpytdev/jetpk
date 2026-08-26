@@ -101,9 +101,41 @@ final class BookingOperationalCapabilitiesPresenter
             && $outstanding > 0;
 
         $canRequestCancellation = $canView && ! $isCancelled && ! $isFailed;
+
+        $ticketCount = $booking->relationLoaded('tickets')
+            ? $booking->tickets->count()
+            : (int) $booking->tickets()->count();
+        $paymentCaptured = $amountPaid > 0 || in_array($paymentStatus, ['paid', 'partial', 'captured'], true);
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $supplierProvider = strtolower(trim((string) ($booking->supplier ?? $meta['supplier_provider'] ?? '')));
+        $supplierConnectionId = (int) ($meta['supplier_connection_id'] ?? 0);
+        $connection = $supplierConnectionId > 0
+            ? \App\Models\SupplierConnection::query()->find($supplierConnectionId)
+            : null;
+        $connectionEnvironment = $connection?->environment?->value ?? null;
+        $pendingCancellationCount = $booking->relationLoaded('cancellationRequests')
+            ? $booking->cancellationRequests->whereIn('status', ['requested', 'approved'])->count()
+            : (int) $booking->cancellationRequests()
+                ->whereIn('status', ['requested', 'approved'])
+                ->count();
+        $cancellationStatus = strtolower((string) ($booking->cancellation_status ?? ''));
+        $cancellationAmbiguous = in_array($cancellationStatus, ['manual_review', 'pending_reconciliation'], true)
+            || $pendingCancellationCount > 1;
+        $refundPending = in_array(strtolower((string) ($booking->refund_status ?? '')), ['pending', 'requested', 'processing'], true);
+        $voidPending = false;
+
         $canCancelSupplier = $isAdmin
             && $canRequestCancellation
-            && ($hasPnr || in_array($supplierStatus, ['created', 'confirmed', 'ticketed'], true));
+            && $hasPnr
+            && $supplierProvider === 'sabre'
+            && $ticketCount === 0
+            && ! $paymentCaptured
+            && ! $refundPending
+            && ! $voidPending
+            && ! $cancellationAmbiguous
+            && $supplierConnectionId > 0
+            && $connection !== null
+            && in_array($connectionEnvironment, ['sandbox', 'demo', 'live'], true);
 
         $canRequestRefund = $canView
             && ! $isFailed
@@ -164,13 +196,25 @@ final class BookingOperationalCapabilitiesPresenter
                             ? 'Void is not supported by the current Sabre servicing adapter.'
                             : 'Sabre ticket void is available but live void execution is currently disabled by the production safety gate.'))),
             'can_request_cancellation' => $canRequestCancellation ? null : 'booking_not_cancellable',
-            'can_cancel_supplier_booking' => $canCancelSupplier ? null : 'admin_supplier_cancel_not_eligible',
+            'can_cancel_supplier_booking' => $this->cancelSupplierDenialReason(
+                $canCancelSupplier,
+                $isAdmin,
+                $hasPnr,
+                $supplierProvider,
+                $ticketCount,
+                $paymentCaptured,
+                $cancellationAmbiguous,
+                $supplierConnectionId,
+            ),
             'can_request_refund' => $canRequestRefund ? null : 'refund_not_eligible',
             'can_generate_documents' => $canGenerateDocuments ? null : 'not_permitted',
             'can_download_documents' => $canDownloadDocuments ? null : 'not_permitted',
             'can_generate_receipt' => $canGenerateReceipt ? null : ($canGenerateDocuments ? 'no_payment' : 'not_permitted'),
             'can_export_audit' => $canExportAudit ? null : 'not_permitted',
         ];
+
+        $safeReference = $this->maskBookingReference((string) ($booking->booking_reference ?? $booking->reference ?? $booking->id));
+        $isSandboxEnv = in_array($connectionEnvironment, ['sandbox', 'demo'], true);
 
         return [
             'can_update_status' => $canUpdateStatus,
@@ -196,6 +240,67 @@ final class BookingOperationalCapabilitiesPresenter
                 static fn (BookingStatus $case): string => $case->value,
                 BookingStatus::cases(),
             ),
+            'cancel_pnr_context' => [
+                'booking_reference_safe' => $safeReference,
+                'supplier' => $supplierProvider !== '' ? ucfirst($supplierProvider) : 'Unknown',
+                'environment' => $connectionEnvironment ?? 'unknown',
+                'environment_is_sandbox' => $isSandboxEnv,
+                'environment_label' => $isSandboxEnv ? 'TEST / SANDBOX' : ($connectionEnvironment === 'live' ? 'Live' : 'Unknown'),
+                'payment_label' => $paymentCaptured ? 'Payment captured' : 'Unpaid',
+                'ticket_label' => $ticketCount > 0 ? 'Ticket issued' : 'Not issued',
+                'connection_alias_safe' => $connection?->name,
+            ],
         ];
+    }
+
+    private function cancelSupplierDenialReason(
+        bool $canCancelSupplier,
+        bool $isAdmin,
+        bool $hasPnr,
+        string $supplierProvider,
+        int $ticketCount,
+        bool $paymentCaptured,
+        bool $cancellationAmbiguous,
+        int $supplierConnectionId,
+    ): ?string {
+        if ($canCancelSupplier) {
+            return null;
+        }
+        if (! $isAdmin) {
+            return 'admin_only';
+        }
+        if (! $hasPnr) {
+            return 'pnr_missing';
+        }
+        if ($supplierProvider !== 'sabre') {
+            return 'supplier_not_sabre';
+        }
+        if ($ticketCount > 0) {
+            return 'tickets_present';
+        }
+        if ($paymentCaptured) {
+            return 'payment_captured';
+        }
+        if ($cancellationAmbiguous) {
+            return 'cancellation_ambiguous';
+        }
+        if ($supplierConnectionId <= 0) {
+            return 'supplier_connection_missing';
+        }
+
+        return 'admin_supplier_cancel_not_eligible';
+    }
+
+    private function maskBookingReference(string $reference): string
+    {
+        $reference = trim($reference);
+        if ($reference === '') {
+            return 'N/A';
+        }
+        if (strlen($reference) <= 4) {
+            return str_repeat('*', strlen($reference));
+        }
+
+        return substr($reference, 0, 2).str_repeat('*', max(2, strlen($reference) - 4)).substr($reference, -2);
     }
 }

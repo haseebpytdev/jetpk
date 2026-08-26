@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BookingCancellationStatus;
 use App\Enums\BookingCancellationType;
 use App\Http\Controllers\Concerns\RespondsWithBackOfficeJson;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingCancellationRequest;
+use App\Models\SupplierConnection;
 use App\Services\Bookings\BookingCancellationService;
 use App\Support\BackOffice\BackOfficeCancellationPresenter;
 use App\Support\BackOffice\BackOfficeBookingPresenter;
 use App\Support\BackOffice\BackOfficeCapabilitiesPresenter;
+use App\Support\Sabre\SabreSandboxQaLifecycleGuard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -171,20 +174,27 @@ class BookingCancellationController extends Controller
         ]);
 
         try {
-            $cancellationRequest = $this->service->requestCancellation($booking, $request->user(), [
-                'reason' => $validated['reason'],
-                'cancellation_type' => $validated['cancellation_type'] ?? BookingCancellationType::BookingCancel->value,
-                'request_source' => 'admin_direct',
-            ]);
-            Gate::authorize('approve', $cancellationRequest);
-            $cancellationRequest = $this->service->approveCancellation($cancellationRequest, $request->user());
+            $this->assertAdminDirectCancelConnectionGuard($booking);
+
+            $cancellationRequest = $this->resolveOrCreateAdminDirectCancellationRequest(
+                $booking,
+                $request->user(),
+                $validated,
+            );
+            if ($cancellationRequest->status === BookingCancellationStatus::Requested) {
+                Gate::authorize('approve', $cancellationRequest);
+                $cancellationRequest = $this->service->approveCancellation($cancellationRequest, $request->user());
+            }
             Gate::authorize('process', $cancellationRequest);
             $processed = $this->service->processCancellation($cancellationRequest, $request->user(), true, 'admin');
         } catch (InvalidArgumentException $e) {
             if ($this->wantsBackOfficeJson($request)) {
-                $code = str_contains(strtolower($e->getMessage()), 'pending supplier reconciliation')
+                $message = strtolower($e->getMessage());
+                $code = str_contains($message, 'pending supplier reconciliation')
                     ? 'pending_reconciliation'
-                    : 'admin_direct_cancel_blocked';
+                    : (str_contains($message, 'qa_lifecycle') || str_contains($message, 'production_host')
+                        ? 'qa_lifecycle_production_host_guard'
+                        : 'admin_direct_cancel_blocked');
 
                 return $this->backOfficeJsonError($e->getMessage(), 409, $code);
             }
@@ -214,5 +224,56 @@ class BookingCancellationController extends Controller
         return back()->with('status', $pendingReconciliation
             ? 'admin-direct-cancel-manual-review'
             : 'admin-direct-cancel-completed');
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function resolveOrCreateAdminDirectCancellationRequest(
+        Booking $booking,
+        $actor,
+        array $validated,
+    ): BookingCancellationRequest {
+        $open = BookingCancellationRequest::query()
+            ->where('booking_id', $booking->id)
+            ->whereIn('status', [
+                BookingCancellationStatus::Requested->value,
+                BookingCancellationStatus::Approved->value,
+            ])
+            ->orderByDesc('id')
+            ->first();
+
+        if ($open !== null) {
+            return $open;
+        }
+
+        return $this->service->requestCancellation($booking, $actor, [
+            'reason' => $validated['reason'],
+            'cancellation_type' => $validated['cancellation_type'] ?? BookingCancellationType::BookingCancel->value,
+            'request_source' => 'admin_direct',
+        ]);
+    }
+
+    private function assertAdminDirectCancelConnectionGuard(Booking $booking): void
+    {
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $connectionId = (int) ($meta['supplier_connection_id'] ?? 0);
+        if ($connectionId <= 0) {
+            throw new InvalidArgumentException('Supplier cancellation requires supplier_connection_id on the booking.');
+        }
+
+        $connection = SupplierConnection::query()->find($connectionId);
+        if ($connection === null) {
+            throw new InvalidArgumentException('Supplier connection for this booking was not found.');
+        }
+
+        if ($connection->isSandbox()) {
+            $guard = SabreSandboxQaLifecycleGuard::assertSandboxQaAllowed($connection);
+            if (! ($guard['allowed'] ?? false)) {
+                throw new InvalidArgumentException(
+                    'QA_LIFECYCLE_PRODUCTION_HOST_GUARD: '.($guard['block_reason'] ?? 'blocked')
+                );
+            }
+        }
     }
 }

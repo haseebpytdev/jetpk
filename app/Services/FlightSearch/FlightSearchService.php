@@ -20,6 +20,7 @@ use App\Support\Pricing\IatiFarePricingResolver;
 use App\Support\Pricing\PublicCustomerPricing;
 use App\Support\Suppliers\SabreChannelGateResolver;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
+use App\Support\Suppliers\SupplierPublicRoutingGuard;
 use App\Support\Suppliers\SupplierSourcePresenter;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -137,7 +138,7 @@ class FlightSearchService
         $warnings = [];
         $supplierCallSummaries = [];
 
-        $this->logSupplierProviderSelection($criteria, $connections);
+        $this->logSupplierProviderSelection($criteria, $connections, $sourceChannel);
 
         foreach ($this->expandDepartDateVariants($criteria) as $dateCriteria) {
             foreach ($this->expandOriginVariants($dateCriteria) as $variantCriteria) {
@@ -594,8 +595,14 @@ class FlightSearchService
         return null;
     }
 
-    protected function shouldSkipSupplierConnection(SupplierConnection $connection): bool
-    {
+    protected function shouldSkipSupplierConnection(
+        SupplierConnection $connection,
+        string $sourceChannel = 'public_guest',
+    ): bool {
+        if (SupplierPublicRoutingGuard::shouldSkipForChannel($connection, $sourceChannel)) {
+            return true;
+        }
+
         if (! $connection->isEligibleForSupplierSearch()) {
             return true;
         }
@@ -607,8 +614,14 @@ class FlightSearchService
         return ! $this->platformModuleEnforcer->providerChannelEnabled($connection->provider->value);
     }
 
-    protected function resolveConnectionSkipReason(SupplierConnection $connection): string
-    {
+    protected function resolveConnectionSkipReason(
+        SupplierConnection $connection,
+        string $sourceChannel = 'public_guest',
+    ): string {
+        if (SupplierPublicRoutingGuard::shouldSkipForChannel($connection, $sourceChannel)) {
+            return 'sandbox_excluded_from_production_fanout';
+        }
+
         if (! $connection->isEligibleForSupplierSearch()) {
             return 'connection_inactive';
         }
@@ -642,7 +655,7 @@ class FlightSearchService
     ): array {
         $scope = [];
         foreach ($connections as $connection) {
-            if ($this->shouldSkipSupplierConnection($connection)) {
+            if ($this->shouldSkipSupplierConnection($connection, $sourceChannel)) {
                 continue;
             }
             $lanes = $connection->provider === SupplierProvider::Sabre
@@ -683,17 +696,20 @@ class FlightSearchService
      * @param  array<string, mixed>  $criteria
      * @param  Collection<int, SupplierConnection>  $connections
      */
-    protected function logSupplierProviderSelection(array $criteria, Collection $connections): void
-    {
+    protected function logSupplierProviderSelection(
+        array $criteria,
+        Collection $connections,
+        string $sourceChannel = 'public_guest',
+    ): void {
         $enabledSuppliers = $connections
-            ->filter(fn (SupplierConnection $connection): bool => ! $this->shouldSkipSupplierConnection($connection))
+            ->filter(fn (SupplierConnection $connection): bool => ! $this->shouldSkipSupplierConnection($connection, $sourceChannel))
             ->map(fn (SupplierConnection $connection): string => $connection->provider->value)
             ->values()
             ->all();
 
         $sabreConnection = $connections->first(
             fn (SupplierConnection $connection): bool => $connection->provider === SupplierProvider::Sabre
-                && ! $this->shouldSkipSupplierConnection($connection),
+                && ! $this->shouldSkipSupplierConnection($connection, $sourceChannel),
         );
 
         $payload = [
@@ -719,8 +735,8 @@ class FlightSearchService
             $skippedSabre = $connections->first(fn (SupplierConnection $c): bool => $c->provider === SupplierProvider::Sabre);
             if ($skippedSabre !== null) {
                 $payload['sabre_connection_id'] = $skippedSabre->id;
-                $payload['sabre_ndc_excluded_reason'] = $this->resolveConnectionSkipReason($skippedSabre);
-                $payload['sabre_gds_excluded_reason'] = $this->resolveConnectionSkipReason($skippedSabre);
+                $payload['sabre_ndc_excluded_reason'] = $this->resolveConnectionSkipReason($skippedSabre, $sourceChannel);
+                $payload['sabre_gds_excluded_reason'] = $this->resolveConnectionSkipReason($skippedSabre, $sourceChannel);
             }
         }
 
@@ -743,11 +759,11 @@ class FlightSearchService
             'provider' => $connection->provider->value,
             'is_active' => (bool) $connection->is_active,
             'status' => $connection->status?->value ?? (string) $connection->status,
-            'eligible' => ! $this->shouldSkipSupplierConnection($connection),
+            'eligible' => ! $this->shouldSkipSupplierConnection($connection, $sourceChannel),
             'connection_active' => $connection->isEligibleForSupplierSearch(),
             'supplier_health_healthy' => $connection->supplierHealthHealthy(),
-            'skip_reason' => $this->shouldSkipSupplierConnection($connection)
-                ? $this->resolveConnectionSkipReason($connection)
+            'skip_reason' => $this->shouldSkipSupplierConnection($connection, $sourceChannel)
+                ? $this->resolveConnectionSkipReason($connection, $sourceChannel)
                 : null,
         ])->values()->all();
 
@@ -898,8 +914,8 @@ class FlightSearchService
         $supplierCallSummaries = [];
 
         foreach ($connections as $connection) {
-            if ($this->shouldSkipSupplierConnection($connection)) {
-                $skipReason = $this->resolveConnectionSkipReason($connection);
+            if ($this->shouldSkipSupplierConnection($connection, $sourceChannel)) {
+                $skipReason = $this->resolveConnectionSkipReason($connection, $sourceChannel);
                 Log::info('flight_search.public_diagnostics', [
                     'stage' => 'connection_skipped',
                     'search_id' => (string) ($variantCriteria['search_id'] ?? ''),

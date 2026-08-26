@@ -67,6 +67,7 @@ export function BookingOperationalActions({
   const [refundReason, setRefundReason] = useState("");
   const [overrideReason, setOverrideReason] = useState("");
   const [cancelReason, setCancelReason] = useState("");
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -325,9 +326,6 @@ export function BookingOperationalActions({
       setError("Cancellation reason is required.");
       return;
     }
-    if (!window.confirm("Cancel PNR / Booking via authoritative supplier workflow? This cannot be undone from the Dashboard alone.")) {
-      return;
-    }
     setBusy(true);
     setError(null);
     setSuccess(null);
@@ -336,6 +334,7 @@ export function BookingOperationalActions({
       cancellation_type: "booking_cancel",
     });
     setBusy(false);
+    setCancelModalOpen(false);
     if (!result.ok) {
       setError(result.message ?? "Cancel failed");
       return;
@@ -347,6 +346,8 @@ export function BookingOperationalActions({
         : result.message ?? "Admin direct cancel completed.",
     );
   }
+
+  const cancelCtx = capabilities?.cancel_pnr_context;
 
   return (
     <div className="space-y-4" data-testid="booking-operational-actions">
@@ -663,8 +664,16 @@ export function BookingOperationalActions({
 
         {canCancelSupplier ? (
           <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3" data-testid="booking-admin-direct-cancel">
+            {cancelCtx?.environment_is_sandbox ? (
+              <p
+                className="rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-amber-900"
+                data-testid="booking-admin-direct-cancel-sandbox-badge"
+              >
+                {cancelCtx.environment_label ?? "TEST / SANDBOX"}
+              </p>
+            ) : null}
             <label className="block text-xs font-medium text-red-950">
-              Cancel PNR / Booking — reason
+              Cancel PNR — reason
               <input
                 type="text"
                 className="mt-1 w-full rounded-lg border border-red-300 bg-white p-2 text-sm"
@@ -677,11 +686,82 @@ export function BookingOperationalActions({
               type="button"
               className="min-h-11 w-full rounded-xl bg-red-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
               disabled={busy}
-              onClick={() => void handleAdminDirectCancel()}
+              onClick={() => {
+                if (cancelReason.trim().length < 3) {
+                  setError("Cancellation reason is required.");
+                  return;
+                }
+                setError(null);
+                setCancelModalOpen(true);
+              }}
               data-testid="booking-admin-direct-cancel-submit"
             >
-              Cancel PNR / Booking
+              Cancel PNR
             </button>
+          </div>
+        ) : null}
+
+        {cancelModalOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cancel-pnr-modal-title"
+            data-testid="booking-admin-direct-cancel-modal"
+          >
+            <div className="w-full max-w-md rounded-2xl border border-jp-border bg-white p-5 shadow-lg">
+              <h3 id="cancel-pnr-modal-title" className="text-base font-semibold text-jp-ink">
+                Cancel PNR?
+              </h3>
+              <p className="mt-2 text-sm text-jp-muted">This will cancel the airline reservation.</p>
+              {cancelCtx?.environment_is_sandbox ? (
+                <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-amber-900">
+                  {cancelCtx.environment_label ?? "TEST / SANDBOX"}
+                </p>
+              ) : null}
+              <dl className="mt-3 space-y-1 text-sm text-jp-ink">
+                <div className="flex justify-between gap-3">
+                  <dt className="text-jp-muted">Booking</dt>
+                  <dd>{cancelCtx?.booking_reference_safe ?? bookingId}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-jp-muted">Supplier</dt>
+                  <dd>{cancelCtx?.supplier ?? "Sabre"}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-jp-muted">Environment</dt>
+                  <dd>{cancelCtx?.environment_label ?? cancelCtx?.environment ?? "Unknown"}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-jp-muted">Payment</dt>
+                  <dd>{cancelCtx?.payment_label ?? "Unpaid"}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-jp-muted">Ticket</dt>
+                  <dd>{cancelCtx?.ticket_label ?? "Not issued"}</dd>
+                </div>
+              </dl>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="min-h-11 rounded-xl bg-red-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                  disabled={busy}
+                  onClick={() => void handleAdminDirectCancel()}
+                  data-testid="booking-admin-direct-cancel-confirm"
+                >
+                  Cancel PNR
+                </button>
+                <button
+                  type="button"
+                  className="min-h-11 rounded-xl border border-jp-border px-3 py-2 text-sm disabled:opacity-60"
+                  disabled={busy}
+                  onClick={() => setCancelModalOpen(false)}
+                  data-testid="booking-admin-direct-cancel-back"
+                >
+                  Go Back
+                </button>
+              </div>
+            </div>
           </div>
         ) : null}
 
