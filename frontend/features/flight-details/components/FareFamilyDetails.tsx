@@ -5,6 +5,7 @@ import { shouldUseFareCarousel } from "@/lib/fare-selection-authority";
 import { useCallback, useRef } from "react";
 import type { FareFamilyOption } from "../types";
 import { formatWholePkr } from "@/features/flight-results/utils/price";
+import { BASE_FARE_LABEL, isBaseOfferFareOption } from "../utils/base-offer-fare";
 
 type FareFamilyDetailsProps = {
   options: FareFamilyOption[];
@@ -28,8 +29,9 @@ function benefitRows(option: FareFamilyOption): Array<{ label: string; value: st
   return rows;
 }
 
-function isSyntheticOnlyCatalog(options: FareFamilyOption[]): boolean {
-  return options.length === 1 && options[0]?.is_synthetic_default === true;
+function displayFareTitle(option: FareFamilyOption, baseOnly: boolean): string {
+  if (baseOnly || isBaseOfferFareOption(option)) return BASE_FARE_LABEL;
+  return option.brand_name ?? option.name ?? "Fare";
 }
 
 export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: FareFamilyDetailsProps) {
@@ -46,34 +48,34 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
   if (options.length === 0) {
     return (
       <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5 font-sans" data-testid="standard-fare-details">
-        <h3 className="text-sm font-semibold text-jp-text">Current fare</h3>
+        <h3 className="text-sm font-semibold text-jp-text">{BASE_FARE_LABEL}</h3>
         <p className="mt-1 text-sm text-jp-text-muted">
-          Fare family selection was not supplied by the airline. Review baggage, policy and price details below.
+          No selectable fare card is available for this offer yet. Try again or choose another flight.
         </p>
       </section>
     );
   }
 
-  const syntheticOnly = isSyntheticOnlyCatalog(options);
-  const showNav = !syntheticOnly && shouldUseFareCarousel(options.length);
-  const singleConfirm = !syntheticOnly && options.length === 1;
+  const baseOnly = options.length === 1 && isBaseOfferFareOption(options[0]);
+  const showNav = !baseOnly && shouldUseFareCarousel(options.length);
+  const singleConfirm = options.length === 1;
 
   return (
     <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5 font-sans" data-testid="fare-family-details" aria-labelledby="fare-family-heading">
       <div className="flex items-end justify-between gap-3">
         <div>
           <h3 id="fare-family-heading" className="text-sm font-semibold text-jp-text">
-            {syntheticOnly ? "Current fare" : singleConfirm ? "Confirm your fare" : "Choose a fare"}
+            {baseOnly ? BASE_FARE_LABEL : singleConfirm ? "Confirm your fare" : "Choose a fare"}
           </h3>
           <p className="mt-1 text-xs text-jp-text-muted">
-            {syntheticOnly
-              ? "Fare family selection was not supplied by the airline."
+            {baseOnly
+              ? "Airline branded fare families were not supplied. Confirm this base offer fare to continue."
               : singleConfirm
                 ? "Review this fare, then continue to confirm it for booking."
                 : "Selecting a fare updates the Fare Summary below."}
           </p>
         </div>
-        {!syntheticOnly ? <p className="shrink-0 text-xs text-jp-text-muted">{options.length} options</p> : null}
+        {!baseOnly ? <p className="shrink-0 text-xs text-jp-text-muted">{options.length} options</p> : null}
       </div>
       <div className="relative mt-3">
         {showNav ? (
@@ -105,10 +107,11 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
           >
             {options.map((option) => {
               const selected = option.option_key === selectedKey;
+              const baseFare = isBaseOfferFareOption(option);
               const selectable =
-                option.selection_key_authoritative === true
-                && option.can_select !== false
+                option.can_select !== false
                 && option.selectable !== false
+                && (baseFare || option.selection_key_authoritative === true)
                 && option.is_synthetic_default !== true;
               const benefits = benefitRows(option);
               const minBenefitSlots = 3;
@@ -117,10 +120,11 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
                 <div
                   key={option.option_key}
                   data-fare-family-card
+                  data-base-offer-fare={baseFare ? "true" : "false"}
                   role="listitem"
                   className={cn(
                     "shrink-0 snap-start",
-                    syntheticOnly ? "w-full max-w-md" : "w-[88%] sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]",
+                    baseOnly || singleConfirm ? "w-full max-w-md" : "w-[88%] sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]",
                   )}
                 >
                   <div
@@ -145,9 +149,9 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
                         >
                           {selected ? "✓" : ""}
                         </span>
-                        {syntheticOnly ? "Current fare" : (option.brand_name ?? option.name ?? "Fare")}
+                        {displayFareTitle(option, baseOnly)}
                       </p>
-                      {syntheticOnly ? null : selected ? (
+                      {selected ? (
                         <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white">Selected</span>
                       ) : (
                         <span className="rounded-full bg-jp-page px-2 py-0.5 text-[11px] font-semibold text-jp-text-muted">
@@ -174,21 +178,16 @@ export function FareFamilyDetails({ options, selectedKey, onSelect, disabled }: 
                         </div>
                       ))}
                     </dl>
-                    {syntheticOnly ? (
-                      <p className="mt-auto pt-3 text-xs text-jp-text-muted">
-                        Continue uses this fare. Airline branded alternatives were not supplied.
-                      </p>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={disabled || !selectable}
-                        aria-pressed={selected}
-                        onClick={() => onSelect(option.option_key)}
-                        className="mt-auto w-full rounded-jp-md bg-jp-primary px-3 py-2 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary disabled:cursor-not-allowed disabled:bg-jp-border disabled:text-jp-text-muted"
-                      >
-                        {selected ? "Selected" : selectable ? "Select fare" : "Not selectable"}
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      disabled={disabled || !selectable}
+                      aria-pressed={selected}
+                      onClick={() => onSelect(option.option_key)}
+                      className="mt-auto w-full rounded-jp-md bg-jp-primary px-3 py-2 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary disabled:cursor-not-allowed disabled:bg-jp-border disabled:text-jp-text-muted"
+                      data-testid={baseFare ? "base-fare-select" : "fare-select"}
+                    >
+                      {selected ? "Selected" : selectable ? "Select fare" : "Not selectable"}
+                    </button>
                   </div>
                 </div>
               );

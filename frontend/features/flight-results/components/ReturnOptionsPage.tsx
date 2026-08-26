@@ -9,14 +9,28 @@ import { ResultSkeleton } from "@/features/flight-results/components/ResultSkele
 import { SearchErrorState } from "@/features/flight-results/components/SearchErrorState";
 import { ExpiredSearchState } from "@/features/flight-results/components/ExpiredSearchState";
 import { SearchProgress } from "@/features/flight-results/components/SearchProgress";
-import { PriceBlock } from "@/features/flight-results/components/PriceBlock";
+import { AirlineIdentity } from "@/features/flight-results/components/AirlineIdentity";
+import { FareBadge } from "@/features/flight-results/components/FareBadge";
 import { SupplierSourceBadge } from "@/features/flight-results/components/SupplierSourceBadge";
-import type { FareFamilyOption } from "@/features/flight-results/types";
+import { TimeRouteBlock } from "@/features/flight-results/components/TimeRouteBlock";
+import type { FareFamilyOption, FlightOffer } from "@/features/flight-results/types";
+import { formatWholePkr } from "@/features/flight-results/utils/price";
 import { mergeProgressiveReturnOptions } from "@/features/flight-results/utils/merge-return-options";
 
 type JourneyDisplay = {
   departure_time_display?: string;
   arrival_time_display?: string;
+  duration_display?: string;
+  stops?: number;
+  stops_label_display?: string;
+  layover_summary_display?: string[];
+  airline_code?: string;
+  airline_name?: string;
+  airline_logo_url?: string | null;
+  origin_airport_code?: string;
+  destination_airport_code?: string;
+  arrival_day_offset_display?: string;
+  flight_number?: string;
 };
 
 function resolveJourneyDisplay(option: Record<string, unknown>): JourneyDisplay | undefined {
@@ -27,6 +41,51 @@ function resolveJourneyDisplay(option: Record<string, unknown>): JourneyDisplay 
 function resolveFareOptions(option: Record<string, unknown>): FareFamilyOption[] {
   const branded = option.branded_fares_display_options ?? option.fare_family_options_display;
   return Array.isArray(branded) ? (branded as FareFamilyOption[]) : [];
+}
+
+function returnOptionToOffer(option: Record<string, unknown>, comboId: string): FlightOffer {
+  const journey = resolveJourneyDisplay(option);
+  const price =
+    (option.displayed_price as number | undefined)
+    ?? (option.total_amount as number | undefined);
+  return {
+    offer_id: comboId,
+    airline_code: journey?.airline_code,
+    airline_name: journey?.airline_name,
+    airline_logo_url: journey?.airline_logo_url,
+    flight_number: journey?.flight_number,
+    departure_time: journey?.departure_time_display,
+    arrival_time: journey?.arrival_time_display,
+    departure_airport_code: journey?.origin_airport_code,
+    arrival_airport_code: journey?.destination_airport_code,
+    duration: journey?.duration_display,
+    stops: journey?.stops ?? 0,
+    stops_label_display: journey?.stops_label_display,
+    layover_summary_display: journey?.layover_summary_display,
+    arrival_day_offset_display: journey?.arrival_day_offset_display,
+    displayed_price: price,
+    price_display: (option.price_display as string | undefined) ?? (option.total_display as string | undefined),
+    final_customer_price: price,
+    supplier_source_label: typeof option.supplier_source_label === "string" ? option.supplier_source_label : undefined,
+    can_book: option.can_book !== false,
+    refundable: typeof option.refundable === "boolean" ? option.refundable : undefined,
+    branded_fares_display_options: resolveFareOptions(option),
+    fare_family_options_display: resolveFareOptions(option),
+    segments: [
+      {
+        origin_airport_code: journey?.origin_airport_code,
+        destination_airport_code: journey?.destination_airport_code,
+        departure_time_display: journey?.departure_time_display,
+        arrival_time_display: journey?.arrival_time_display,
+        duration_display: journey?.duration_display,
+        airline_code: journey?.airline_code,
+        airline_name: journey?.airline_name,
+        airline_logo_url: journey?.airline_logo_url,
+        flight_number: journey?.flight_number,
+        arrival_day_offset_display: journey?.arrival_day_offset_display,
+      },
+    ],
+  };
 }
 
 export function ReturnOptionsPage() {
@@ -127,16 +186,16 @@ export function ReturnOptionsPage() {
     };
   }, [outboundKey, searchId]);
 
-  const openFareConfirmation = (combo: Record<string, unknown>, explicitReturnFareKey?: string) => {
+  const openFareConfirmation = (combo: Record<string, unknown>, intent: "details" | "booking" = "booking") => {
     const comboId = String(combo.combo_id ?? "");
     if (!comboId) return;
     const fareOptions = resolveFareOptions(combo);
     const rawReturnKey =
-      explicitReturnFareKey
-      ?? selectedFareByCombo[comboId]
+      selectedFareByCombo[comboId]
       ?? String(combo.fare_option_key ?? "")
       ?? "";
     const returnFareKey = resolveAuthoritativeFareOptionKey(rawReturnKey, fareOptions) ?? rawReturnKey;
+    const offer = returnOptionToOffer(combo, comboId);
 
     setDetailsContext({
       searchId,
@@ -145,7 +204,10 @@ export function ReturnOptionsPage() {
       outboundKey,
       outboundFareOptionKey: outboundFareOptionKey || undefined,
       fareOptionKey: returnFareKey || undefined,
-      intent: "booking",
+      initialOffer: offer,
+      initialFareOptions: fareOptions,
+      intent,
+      legMode: "return_confirm",
     });
   };
 
@@ -182,40 +244,89 @@ export function ReturnOptionsPage() {
             const fareOptions = resolveFareOptions(option);
             const selectedKey = selectedFareByCombo[comboId] ?? fareOptions[0]?.option_key ?? "";
             const selectedFare = fareOptions.find((item) => item.option_key === selectedKey);
-            const price = selectedFare?.displayed_price ?? (option.displayed_price as number | undefined) ?? (option.total_amount as number | undefined);
+            const price =
+              selectedFare?.displayed_price
+              ?? (option.displayed_price as number | undefined)
+              ?? (option.total_amount as number | undefined);
             const journey = resolveJourneyDisplay(option);
             const supplierLabel =
               typeof option.supplier_source_label === "string" ? option.supplier_source_label : undefined;
+            const refundable = typeof option.refundable === "boolean" ? option.refundable : undefined;
             return (
-              <article key={comboId} className="rounded-jp-card border border-jp-border bg-jp-surface p-4" role="listitem" data-testid="return-option-card">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-medium text-jp-text">Return option</p>
-                    <p className="text-sm text-jp-text-muted" data-testid="return-option-times">
-                      {journey?.departure_time_display ?? ""}
-                      {" → "}
-                      {journey?.arrival_time_display ?? ""}
-                    </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
+              <article
+                key={comboId}
+                className="overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface p-3 shadow-jp-card transition-all hover:border-jp-primary/30 hover:shadow-md sm:px-4"
+                role="listitem"
+                data-testid="return-option-card"
+              >
+                <div className="grid items-center gap-3 md:grid-cols-[minmax(8rem,0.85fr)_minmax(16rem,2fr)_minmax(10.5rem,0.95fr)] lg:gap-4">
+                  <div className="min-w-0">
+                    <AirlineIdentity
+                      code={journey?.airline_code}
+                      name={journey?.airline_name}
+                      logoUrl={journey?.airline_logo_url}
+                      size="md"
+                    />
+                    {journey?.flight_number ? (
+                      <p className="mt-1 truncate text-xs text-jp-text-muted">{journey.flight_number}</p>
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 space-y-2">
+                    <TimeRouteBlock
+                      departureTime={journey?.departure_time_display}
+                      arrivalTime={journey?.arrival_time_display}
+                      arrivalDayOffset={journey?.arrival_day_offset_display}
+                      originCode={journey?.origin_airport_code}
+                      destinationCode={journey?.destination_airport_code}
+                      duration={journey?.duration_display}
+                      stops={journey?.stops ?? 0}
+                      stopsLabel={journey?.stops_label_display}
+                      layoverSummary={journey?.layover_summary_display}
+                    />
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <FareBadge refundable={refundable} />
                       <SupplierSourceBadge label={supplierLabel} />
                     </div>
-                    <button
-                      type="button"
-                      className="mt-2 text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-                      data-testid="return-details-trigger"
-                      onClick={(event) => {
-                        detailsTriggerRef.current = event.currentTarget;
-                        openFareConfirmation(option);
-                      }}
-                    >
-                      Details
-                    </button>
+                    <p className="sr-only" data-testid="return-option-times">
+                      {journey?.departure_time_display ?? ""} → {journey?.arrival_time_display ?? ""}
+                    </p>
                   </div>
-                  <PriceBlock
-                    amount={price}
-                    priceDisplay={(selectedFare?.price_display as string | undefined) ?? (option.price_display as string | undefined) ?? (option.total_display as string | undefined)}
-                    onSelect={() => openFareConfirmation(option)}
-                  />
+                  <div className="flex min-w-0 items-end justify-between gap-3 border-t border-jp-border-soft pt-3 md:flex-col md:items-end md:border-l md:border-t-0 md:pl-3 md:pt-0">
+                    <div className="text-right">
+                      <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">Total fare</p>
+                      <p className="whitespace-nowrap text-lg font-bold text-jp-text" data-testid="result-price-display">
+                        {formatWholePkr(price)
+                          ?? (selectedFare?.price_display as string | undefined)
+                          ?? (option.price_display as string | undefined)
+                          ?? (option.total_display as string | undefined)
+                          ?? "Price unavailable"}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+                        data-testid="return-details-trigger"
+                        onClick={(event) => {
+                          detailsTriggerRef.current = event.currentTarget;
+                          openFareConfirmation(option, "details");
+                        }}
+                      >
+                        Details
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+                        data-testid="result-price-button"
+                        onClick={(event) => {
+                          detailsTriggerRef.current = event.currentTarget;
+                          openFareConfirmation(option, "booking");
+                        }}
+                      >
+                        Book Now
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </article>
             );

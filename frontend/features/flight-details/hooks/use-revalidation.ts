@@ -23,6 +23,7 @@ export type RevalidationParams = {
   comboId?: string;
   outboundKey?: string;
   outboundFareOptionKey?: string;
+  returnFareOptionKey?: string;
 };
 
 function readTotal(value: unknown): number | undefined {
@@ -151,7 +152,7 @@ export function useRevalidation() {
             comboId: params.comboId,
             outboundKey: params.outboundKey,
             fareOptionKey: params.fareOptionKey,
-            returnFareOptionKey: params.fareOptionKey,
+            returnFareOptionKey: params.returnFareOptionKey ?? params.fareOptionKey,
             outboundFareOptionKey: params.outboundFareOptionKey,
           });
           return;

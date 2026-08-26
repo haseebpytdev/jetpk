@@ -163,6 +163,31 @@ export function FlightResultsPage() {
         initialOffer: offer,
         initialFareOptions: offer.branded_fares_display_options ?? offer.fare_family_options_display,
         intent,
+        legMode: "one_way",
+      });
+    },
+    [results.resolvedSearchId, resultsStaleLocked, searchId],
+  );
+
+  const openOutboundFareConfirmation = useCallback(
+    (
+      option: import("../types").OutboundOption,
+      offer: import("../types").FlightOffer,
+      fareOptionKey: string,
+      intent: "details" | "booking",
+    ) => {
+      if (resultsStaleLocked) return;
+      const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
+      if (!resolvedSearchId) return;
+      setDetailsContext({
+        searchId: resolvedSearchId,
+        offerId: option.outbound_key,
+        outboundKey: option.outbound_key,
+        fareOptionKey,
+        initialOffer: offer,
+        initialFareOptions: offer.branded_fares_display_options ?? offer.fare_family_options_display,
+        intent,
+        legMode: "outbound_confirm",
       });
     },
     [results.resolvedSearchId, resultsStaleLocked, searchId],
@@ -180,6 +205,7 @@ export function FlightResultsPage() {
         outboundKey: pair.outbound_key,
         fareOptionKey,
         intent: "booking",
+        legMode: "pair",
       });
     },
     [results.resolvedSearchId, resultsStaleLocked, searchId],
@@ -355,7 +381,11 @@ export function FlightResultsPage() {
                   : results.isReturnSplit
                     ? results.outboundOptions.map((option) => (
                         <div key={option.outbound_key} role="listitem">
-                          <OutboundOptionCard option={option} searchId={results.resolvedSearchId ?? ""} />
+                          <OutboundOptionCard
+                            option={option}
+                            searchId={results.resolvedSearchId ?? ""}
+                            onOpenDetails={openOutboundFareConfirmation}
+                          />
                         </div>
                       ))
                     : results.offers.map((offer) => (

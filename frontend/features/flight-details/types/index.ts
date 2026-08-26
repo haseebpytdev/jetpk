@@ -55,8 +55,11 @@ export type LayoverDisplay = {
   airport_code?: string;
   city?: string;
   duration_display?: string;
+  duration_minutes?: number | null;
   overnight?: boolean;
   terminal_change?: boolean;
+  /** Connection layover vs destination stay between outbound arrival and return departure. */
+  kind?: "connection" | "destination_stay";
 };
 
 export type ReturnComboDetails = {
@@ -102,6 +105,8 @@ export type RevalidationState =
   | "timeout"
   | "error";
 
+export type FlightDetailsLegMode = "one_way" | "outbound_confirm" | "return_confirm" | "pair";
+
 export type FlightDetailsContext = {
   searchId: string;
   offerId: string;
@@ -112,6 +117,8 @@ export type FlightDetailsContext = {
   initialOffer?: FlightOffer;
   initialFareOptions?: FareFamilyOption[];
   intent?: "details" | "booking";
+  /** Segmented outbound fare confirm → return list; return/pair → checkout. */
+  legMode?: FlightDetailsLegMode;
 };
 
 export type { FareFamilyOption, FlightOffer };

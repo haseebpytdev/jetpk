@@ -61,6 +61,8 @@ export type FareFamilyOption = {
   meal?: string;
   seat_selection?: string;
   is_synthetic_default?: boolean;
+  /** Truthful base-offer card when supplier has no branded fare catalog. Not a Sabre brand qualifier. */
+  is_base_offer_fare?: boolean;
   is_grouped_offer_option?: boolean;
   source_offer_id?: string;
   selection_key_authoritative?: boolean;

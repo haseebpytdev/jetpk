@@ -6,6 +6,7 @@ import { SearchErrorState } from "@/features/flight-results/components/SearchErr
 import { useFlightDetails } from "../hooks/use-flight-details";
 import { useRevalidation } from "../hooks/use-revalidation";
 import type { FlightDetailsContext } from "../types";
+import { BASE_FARE_OPTION_KEY, isBaseOfferFareOption } from "../utils/base-offer-fare";
 import { ContinueToPassengersButton } from "./ContinueToPassengersButton";
 import { FareChangeDialog } from "./FareChangeDialog";
 import { FareFamilyDetails } from "./FareFamilyDetails";
@@ -18,6 +19,14 @@ import {
 } from "./OfferStatePanels";
 import { ReturnJourneyDetails } from "./ReturnJourneyDetails";
 import { SegmentDetails } from "./SegmentDetails";
+
+function toSupplierFareKey(key: string | undefined, options: { option_key: string; is_base_offer_fare?: boolean; is_synthetic_default?: boolean }[]): string | undefined {
+  const trimmed = key?.trim() ?? "";
+  if (!trimmed || trimmed === BASE_FARE_OPTION_KEY) return undefined;
+  const match = options.find((o) => o.option_key === trimmed);
+  if (match && isBaseOfferFareOption(match)) return undefined;
+  return trimmed;
+}
 
 type FlightDetailsDrawerProps = {
   open: boolean;
@@ -128,16 +137,32 @@ export function FlightDetailsDrawer({
 
   const handleContinue = () => {
     if (!offer) return;
+
+    if (context.legMode === "outbound_confirm" && context.outboundKey) {
+      const qs = new URLSearchParams({
+        search_id: context.searchId,
+        outbound_key: context.outboundKey,
+      });
+      const outboundFare = toSupplierFareKey(details.selectedFareKey, details.fareOptions);
+      if (outboundFare) qs.set("outbound_fare_option_key", outboundFare);
+      window.location.assign(`/flights/return-options?${qs.toString()}`);
+      return;
+    }
+
+    const fareKey = toSupplierFareKey(details.selectedFareKey, details.fareOptions);
+    const isPair = context.legMode === "pair" || (Boolean(context.comboId) && context.legMode !== "return_confirm");
     void revalidation.continueToPassengers({
       searchId: context.searchId,
       offerId: offer.offer_id,
-      fareOptionKey: details.selectedFareKey,
+      fareOptionKey: fareKey,
       selectUrl: offer.select_url,
       supplierProvider: offer.supplier_provider ?? offer.provider,
       isReturnCombo: Boolean(context.comboId),
       comboId: context.comboId,
       outboundKey: context.outboundKey,
       outboundFareOptionKey: context.outboundFareOptionKey,
+      // Pair: one shared fare. Segmented return: fareKey is return-only.
+      returnFareOptionKey: context.legMode === "return_confirm" ? fareKey : isPair ? fareKey : fareKey,
     });
   };
 
@@ -220,6 +245,18 @@ export function FlightDetailsDrawer({
                     segments={segments}
                     layovers={offer.layovers_display}
                     airlineLogoUrl={offer.airline_logo_url}
+                    journeyBoundaryIndexes={
+                      details.data?.return_combo
+                        ? [
+                            Math.max(
+                              0,
+                              (Array.isArray((details.data.return_combo.outbound_journey as { segments?: unknown[] } | null)?.segments)
+                                ? ((details.data.return_combo.outbound_journey as { segments?: unknown[] }).segments?.length ?? 1)
+                                : Math.max(1, Math.floor(segments.length / 2))) - 1,
+                            ),
+                          ]
+                        : []
+                    }
                   />
                 </section>
 
@@ -278,8 +315,14 @@ export function FlightDetailsDrawer({
             <footer className="sticky bottom-0 border-t border-jp-border bg-jp-surface p-4 sm:px-6">
               <ContinueToPassengersButton
                 loading={revalidation.state === "loading"}
-                disabled={!canContinue}
-                label={details.fareOptions.length > 1 ? "Continue with this fare" : "Continue with this flight"}
+                disabled={!canContinue && context.legMode !== "outbound_confirm"}
+                label={
+                  context.legMode === "outbound_confirm"
+                    ? "Continue to return flights"
+                    : details.fareOptions.length > 1
+                      ? "Continue with this fare"
+                      : "Continue with this flight"
+                }
                 onClick={handleContinue}
               />
               {!canContinue && offer.disabled_reason ? (
