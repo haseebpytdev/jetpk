@@ -18,11 +18,10 @@ type Hero = {
   headline_highlight?: string;
   subtitle?: string;
   enabled?: string | boolean;
+  search_visible?: string | boolean;
   image_alt?: string;
   focal_point?: string;
   overlay_strength?: string;
-  cta_text?: string;
-  cta_link?: string;
 };
 
 type RouteItem = {
@@ -252,11 +251,23 @@ function Field({
   );
 }
 
-function EnabledToggle({ checked, onChange, id }: { checked: boolean; onChange: (v: boolean) => void; id?: string }) {
+function EnabledToggle({ checked, onChange, id, label = "Enabled" }: { checked: boolean; onChange: (v: boolean) => void; id?: string; label?: string }) {
   return (
-    <label className="flex items-center gap-2 text-xs" htmlFor={id}>
-      <input id={id} type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      Enabled
+    <label className="flex items-center justify-between gap-3 text-xs" htmlFor={id}>
+      <span className="font-medium text-jp-ink">{label}</span>
+      <button
+        id={id}
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition ${
+          checked ? "border-jp-green bg-jp-green" : "border-jp-border bg-slate-200"
+        }`}
+      >
+        <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${checked ? "translate-x-6" : "translate-x-1"}`} />
+      </button>
     </label>
   );
 }
@@ -649,15 +660,20 @@ export function HomepageSettingsPanel() {
       {activeSection === "hero" ? (
         <fieldset className="space-y-2 rounded-lg border border-jp-border p-3" data-testid="cms-hero-editor">
           <legend className="text-sm font-medium">Hero</legend>
+          <p className="text-[11px] text-jp-muted">
+            Controls the public homepage hero copy and media. Hero CTA labels are not rendered by the current JetPakistan theme.
+          </p>
           <EnabledToggle
-            checked={enabledValue(hero.enabled)}
-            onChange={(v) => setContent({ ...content, hero: { ...hero, enabled: v ? "1" : "0" } })}
+            id="hero-search-visible"
+            label="Show flight search on hero"
+            checked={enabledValue(hero.search_visible ?? "1")}
+            onChange={(v) => setContent({ ...content, hero: { ...hero, search_visible: v ? "1" : "0" } })}
           />
           <div className="grid gap-2 sm:grid-cols-2">
             <Field label="Eyebrow" value={hero.eyebrow ?? ""} onChange={(v) => setContent({ ...content, hero: { ...hero, eyebrow: v } })} />
             <Field label="Headline" value={hero.headline ?? ""} onChange={(v) => setContent({ ...content, hero: { ...hero, headline: v } })} />
             <Field
-              label="Highlighted text"
+              label="Highlighted brand text"
               value={hero.headline_highlight ?? ""}
               onChange={(v) => setContent({ ...content, hero: { ...hero, headline_highlight: v } })}
             />
@@ -667,8 +683,6 @@ export function HomepageSettingsPanel() {
               multiline
               onChange={(v) => setContent({ ...content, hero: { ...hero, subtitle: v } })}
             />
-            <Field label="CTA label" value={hero.cta_text ?? ""} onChange={(v) => setContent({ ...content, hero: { ...hero, cta_text: v } })} />
-            <Field label="CTA target" value={hero.cta_link ?? ""} onChange={(v) => setContent({ ...content, hero: { ...hero, cta_link: v } })} />
             <Field label="Alt text" value={hero.image_alt ?? ""} onChange={(v) => setContent({ ...content, hero: { ...hero, image_alt: v } })} />
             <label className="block text-xs">
               Focal point
@@ -1312,11 +1326,11 @@ export function HomepageSettingsPanel() {
       {activeSection === "feature_board" ? (
         <fieldset className="space-y-3 rounded-lg border border-jp-border p-3">
           <legend className="text-sm font-medium">Feature Board</legend>
-          <SectionHeaderFields
-            meta={featureBoard}
-            showCta={false}
-            onChange={(meta) =>
-              setContent({ ...content, feature_board: { ...featureBoard, ...meta, items: featureItems } })
+          <p className="text-[11px] text-jp-muted">Public theme renders value/label stats only — section titles are not shown.</p>
+          <EnabledToggle
+            checked={enabledValue(featureBoard.enabled)}
+            onChange={(v) =>
+              setContent({ ...content, feature_board: { ...featureBoard, enabled: v ? "1" : "0", items: featureItems } })
             }
           />
           {featureItems.map((row, index) => (
@@ -1361,9 +1375,10 @@ export function HomepageSettingsPanel() {
           <legend className="text-sm font-medium">Support CTA</legend>
           <SectionHeaderFields
             meta={support}
+            showCta={false}
             onChange={(meta) => setContent({ ...content, support_cta: { ...support, ...meta } })}
           />
-          <div className="grid gap-2 sm:grid-cols-2">
+          <p className="text-[11px] text-jp-muted">Public Support banner uses Call/Chat actions below — not a generic section CTA.</p>          <div className="grid gap-2 sm:grid-cols-2">
             <Field
               label="Phone"
               value={support.phone_value ?? ""}

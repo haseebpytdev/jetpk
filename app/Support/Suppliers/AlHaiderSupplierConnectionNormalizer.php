@@ -64,8 +64,24 @@ final class AlHaiderSupplierConnectionNormalizer
 
         $payload['credentials'] = $credentials;
 
-        if (trim((string) ($payload['base_url'] ?? '')) === '' && filled($existing?->base_url)) {
+        $incomingBase = trim((string) ($payload['base_url'] ?? ''));
+        $override = (bool) ($payload['advanced_base_url_override'] ?? false);
+        $defaultBase = rtrim((string) config('suppliers.al_haider.default_base_url', 'https://alhaidertravel.pk'), '/');
+
+        if ($override && $incomingBase !== '') {
+            $payload['base_url'] = $incomingBase;
+            $settings = is_array($payload['settings'] ?? null) ? $payload['settings'] : [];
+            $settings['base_url_mode'] = 'explicit_override';
+            $payload['settings'] = $settings;
+        } elseif ($incomingBase !== '') {
+            $payload['base_url'] = $incomingBase;
+        } elseif (filled($existing?->base_url)) {
             $payload['base_url'] = $existing->base_url;
+        } else {
+            $payload['base_url'] = $defaultBase;
+            $settings = is_array($payload['settings'] ?? null) ? $payload['settings'] : [];
+            $settings['base_url_mode'] = 'provider_default';
+            $payload['settings'] = $settings;
         }
 
         return $payload;

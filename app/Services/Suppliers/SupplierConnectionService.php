@@ -223,6 +223,8 @@ class SupplierConnectionService
                 && in_array('rest_auth_url', $keys, true)
                 && in_array('rest_search_url', $keys, true),
             SupplierProvider::AlHaider => self::alHaiderCredentialKeysComplete($credentials),
+            SupplierProvider::Smtp => trim((string) ($credentials['host'] ?? '')) !== ''
+                && trim((string) ($credentials['from_address'] ?? '')) !== '',
             default => true,
         };
     }

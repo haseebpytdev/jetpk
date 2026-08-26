@@ -14,4 +14,6 @@ enum SupplierProvider: string
     case AlHaider = 'al_haider';
     case Amadeus = 'amadeus';
     case Travelport = 'travelport';
+    /** Transactional email / SMTP module (not a flight adapter). */
+    case Smtp = 'smtp';
 }

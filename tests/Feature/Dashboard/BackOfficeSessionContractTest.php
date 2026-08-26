@@ -94,7 +94,7 @@ class BackOfficeSessionContractTest extends TestCase
         $itemLabels = collect($groups)
             ->flatMap(static fn (array $group): array => collect($group['items'] ?? [])->pluck('label')->all())
             ->all();
-        $this->assertContains('Integrations', $itemLabels);
+        $this->assertContains('API & Modules', $itemLabels);
         $this->assertNotContains('API Connections', $itemLabels);
         $this->assertNotContains('CMS', $itemLabels);
     }

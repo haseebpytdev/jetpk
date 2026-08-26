@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { IntegrationsPageShell } from "@/features/integrations/integrations-page-shell";
 
-export const metadata = { title: "Integrations — JetPakistan Dashboard" };
+export const metadata = { title: "API & Modules — JetPakistan Dashboard" };
 
 export default function IntegrationsPage() {
   return (

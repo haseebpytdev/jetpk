@@ -16,9 +16,11 @@ use App\Support\Suppliers\AirBlueSupplierConnectionNormalizer;
 use App\Support\Suppliers\IatiSupplierConnectionNormalizer;
 use App\Support\Suppliers\OneApiSupplierConnectionNormalizer;
 use App\Support\Suppliers\PiaNdcSupplierConnectionNormalizer;
+use App\Support\Suppliers\ProviderEndpointDefaults;
 use App\Support\Suppliers\SabreCapabilityTruth;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
+use App\Support\Suppliers\SmtpSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
 use App\Support\Suppliers\SupplierProviderFieldCatalog;
 use App\Models\AuditLog;
@@ -42,21 +44,22 @@ class SupplierConnectionController extends Controller
 
         $query = $this->scopedQuery($request->user())
             ->withStoredCredentials();
-        $connections = (clone $query)->orderBy('provider')->paginate(20);
+        $connections = (clone $query)->orderBy('provider')->paginate(100);
 
         if ($this->wantsBackOfficeJson($request)) {
             $existingProviders = (clone $query)->pluck('provider')->map(fn ($p) => $p->value ?? (string) $p)->all();
+            $presented = collect($connections->items())->map(fn ($row) => $this->presentConnection($row))->all();
 
             return $this->backOfficeJson([
                 'ok' => true,
-                'connections' => collect($connections->items())->map(fn ($row) => $this->presentConnection($row))->all(),
+                'connections' => $presented,
                 'providers' => $this->providerCatalog(),
                 'providerCards' => $this->providerCards($existingProviders),
+                'metrics' => $this->connectionMetrics($presented),
             ]);
         }
 
-        // Legacy HTML entry: Integrations Hub is the authoritative configuration surface.
-        // JSON/API consumers of this action remain unchanged above.
+        // Legacy HTML entry: API & Modules is the authoritative configuration surface.
         return redirect()->to('/admin/dashboard/integrations');
     }
 
@@ -99,15 +102,15 @@ class SupplierConnectionController extends Controller
     private function providerCards(array $configuredProviders): array
     {
         $catalog = [
-            ['key' => 'sabre', 'label' => 'Sabre', 'channel' => 'GDS / NDC', 'description' => 'Sabre GDS and NDC channels with CERT/LIVE environments.', 'icon' => 'SB', 'capabilities' => ['GDS', 'NDC', 'PNR'], 'readiness' => 'Recommended'],
-            ['key' => 'pia_ndc', 'label' => 'PIA NDC', 'channel' => 'NDC', 'description' => 'Pakistan International Airlines NDC direct connect.', 'icon' => 'PK', 'capabilities' => ['NDC', 'Direct'], 'readiness' => 'Live ready'],
-            ['key' => 'airblue', 'label' => 'AirBlue / Zapways', 'channel' => 'API', 'description' => 'AirBlue Zapways/Crane inventory channel.', 'icon' => 'AB', 'capabilities' => ['API', 'LCC'], 'readiness' => 'Sandbox'],
-            ['key' => 'iati', 'label' => 'IATI', 'channel' => 'API', 'description' => 'IATI consolidated inventory and booking API.', 'icon' => 'IA', 'capabilities' => ['API', 'Search'], 'readiness' => 'Sandbox'],
-            ['key' => 'duffel', 'label' => 'Duffel', 'channel' => 'API', 'description' => 'Duffel NDC aggregator for global content.', 'icon' => 'DF', 'capabilities' => ['NDC', 'Global'], 'readiness' => 'Sandbox'],
-            ['key' => 'airline_direct', 'label' => 'Airline Direct', 'channel' => 'Direct', 'description' => 'Direct airline API or portal integration.', 'icon' => 'AD', 'capabilities' => ['Direct'], 'readiness' => 'Custom'],
-            ['key' => 'airsial', 'label' => 'AirSial', 'channel' => 'Direct', 'description' => 'AirSial direct inventory and booking channel.', 'icon' => 'AS', 'capabilities' => ['Direct', 'LCC'], 'readiness' => 'Live ready'],
-            ['key' => 'al_haider', 'label' => 'Al-Haider', 'channel' => 'Group', 'description' => 'Al-Haider Umrah group ticketing and package inventory.', 'icon' => 'AH', 'capabilities' => ['Group', 'Umrah'], 'readiness' => 'Group'],
-            ['key' => 'generic', 'label' => 'Generic', 'channel' => 'Other', 'description' => 'Generic supplier connection for custom integrations.', 'icon' => 'GX', 'capabilities' => ['Custom'], 'readiness' => 'Advanced'],
+            ['key' => 'sabre', 'label' => 'Sabre', 'channel' => 'GDS / NDC', 'module' => 'flights', 'description' => 'Sabre GDS and NDC channels with CERT/LIVE environments.', 'icon' => 'SB', 'capabilities' => ['GDS', 'NDC', 'PNR'], 'readiness' => 'Recommended'],
+            ['key' => 'pia_ndc', 'label' => 'PIA NDC', 'channel' => 'NDC', 'module' => 'flights', 'description' => 'Pakistan International Airlines NDC direct connect.', 'icon' => 'PK', 'capabilities' => ['NDC', 'Direct'], 'readiness' => 'Live ready'],
+            ['key' => 'airblue', 'label' => 'AirBlue / Zapways', 'channel' => 'API', 'module' => 'flights', 'description' => 'AirBlue Zapways/Crane inventory channel.', 'icon' => 'AB', 'capabilities' => ['API', 'LCC'], 'readiness' => 'Sandbox'],
+            ['key' => 'iati', 'label' => 'IATI', 'channel' => 'API', 'module' => 'flights', 'description' => 'IATI consolidated inventory and booking API.', 'icon' => 'IA', 'capabilities' => ['API', 'Search'], 'readiness' => 'Sandbox'],
+            ['key' => 'duffel', 'label' => 'Duffel', 'channel' => 'API', 'module' => 'flights', 'description' => 'Duffel NDC aggregator for global content.', 'icon' => 'DF', 'capabilities' => ['NDC', 'Global'], 'readiness' => 'Sandbox'],
+            ['key' => 'airline_direct', 'label' => 'Airline Direct', 'channel' => 'Direct', 'module' => 'flights', 'description' => 'Direct airline API or portal integration.', 'icon' => 'AD', 'capabilities' => ['Direct'], 'readiness' => 'Custom'],
+            ['key' => 'al_haider', 'label' => 'Al-Haider', 'channel' => 'Group', 'module' => 'groups', 'description' => 'Al-Haider Umrah group ticketing and package inventory.', 'icon' => 'AH', 'capabilities' => ['Group', 'Umrah'], 'readiness' => 'Group'],
+            ['key' => 'smtp', 'label' => 'Transactional Email (SMTP)', 'channel' => 'Messaging', 'module' => 'messaging', 'description' => 'SMTP delivery for transactional JetPakistan email.', 'icon' => 'EM', 'capabilities' => ['Email'], 'readiness' => 'Live ready'],
+            ['key' => 'generic', 'label' => 'Generic', 'channel' => 'Other', 'module' => 'other', 'description' => 'Generic supplier connection for custom integrations.', 'icon' => 'GX', 'capabilities' => ['Custom'], 'readiness' => 'Advanced'],
         ];
 
         return array_map(static function (array $row) use ($configuredProviders): array {
@@ -233,10 +236,16 @@ class SupplierConnectionController extends Controller
             ? $connection->provider->value
             : (string) $connection->provider;
 
+        $settings = is_array($connection->settings) ? $connection->settings : [];
+        $endpointDefaults = ProviderEndpointDefaults::for($provider, (string) ($connection->environment?->value ?? 'sandbox'));
+        $baseUrlMode = (string) ($settings['base_url_mode'] ?? 'provider_default');
+
         return [
             'id' => (string) $connection->id,
             'name' => (string) ($connection->display_name ?: $connection->name),
             'provider' => $provider,
+            'module' => $this->moduleForProvider($provider),
+            'moduleLabel' => $this->moduleLabelForProvider($provider),
             'environment' => $connection->environment?->value ?? '',
             'status' => $connection->status?->value ?? '',
             'enabled' => (bool) $connection->is_active,
@@ -246,6 +255,8 @@ class SupplierConnectionController extends Controller
             'lastTestedAt' => $connection->last_tested_at?->toIso8601String(),
             'lastTestStatus' => $connection->last_test_status,
             'lastFailure' => $this->sanitizeFailure((string) ($connection->last_error ?? '')),
+            'lastSuccessfulUseAt' => $connection->latestSearchDiagnostic?->created_at?->toIso8601String()
+                ?? $connection->latestOrderDiagnostic?->created_at?->toIso8601String(),
             'sabreGdsSupported' => $provider === SupplierProvider::Sabre->value
                 ? SabreCapabilityTruth::gdsSupported()
                 : null,
@@ -262,13 +273,69 @@ class SupplierConnectionController extends Controller
             'registryLabel' => \App\Support\Suppliers\SupplierRegistry::businessLabel(
                 \App\Support\Suppliers\SupplierRegistry::stateForConnection($connection)
             ),
-            'baseUrl' => filled($connection->base_url) ? (string) $connection->base_url : null,
-            'baseUrlOverridable' => in_array($provider, [SupplierProvider::PiaNdc->value, SupplierProvider::Airblue->value], true),
+            'baseUrl' => filled($connection->base_url) ? (string) $connection->base_url : ($endpointDefaults['base_url'] ?? null),
+            'defaultBaseUrl' => $endpointDefaults['base_url'],
+            'baseUrlMode' => $baseUrlMode,
+            'baseUrlOverridable' => (bool) $endpointDefaults['overridable'],
             'credentialFields' => $this->credentialFieldsFor($provider),
-            'timeouts' => is_array($connection->settings) ? ($connection->settings['timeouts'] ?? null) : null,
+            'timeouts' => $settings['timeouts'] ?? null,
             'advanced' => $this->presentAdvanced($connection, $provider),
             'audit' => $this->presentAudit($connection),
+            'smtp' => $provider === SupplierProvider::Smtp->value
+                ? array_merge(SmtpSupplierConnectionNormalizer::safeSummary($connection), [
+                    'runtime_source' => app(\App\Services\Integrations\SmtpMailConfigResolver::class)->currentSource(),
+                ])
+                : null,
         ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $presented
+     * @return array{configured: int, active: int, needs_attention: int, modules: int}
+     */
+    protected function connectionMetrics(array $presented): array
+    {
+        $modules = [];
+        $active = 0;
+        $needsAttention = 0;
+        foreach ($presented as $row) {
+            $modules[(string) ($row['module'] ?? 'other')] = true;
+            if (! empty($row['enabled'])) {
+                $active++;
+            }
+            $configured = ! empty($row['credentialsConfigured']);
+            $failed = in_array((string) ($row['lastTestStatus'] ?? ''), ['failed', 'error', 'auth_failed'], true);
+            if (! $configured || $failed) {
+                $needsAttention++;
+            }
+        }
+
+        return [
+            'configured' => count($presented),
+            'active' => $active,
+            'needs_attention' => $needsAttention,
+            'modules' => count($modules),
+        ];
+    }
+
+    protected function moduleForProvider(string $provider): string
+    {
+        return match ($provider) {
+            SupplierProvider::AlHaider->value => 'groups',
+            SupplierProvider::Smtp->value => 'messaging',
+            default => 'flights',
+        };
+    }
+
+    protected function moduleLabelForProvider(string $provider): string
+    {
+        return match ($this->moduleForProvider($provider)) {
+            'groups' => 'Groups',
+            'messaging' => 'Messaging',
+            'payments' => 'Payments',
+            'hotels' => 'Hotels',
+            default => 'Flights',
+        };
     }
 
     /**
@@ -279,15 +346,16 @@ class SupplierConnectionController extends Controller
         $catalog = [];
         foreach (SupplierProvider::cases() as $provider) {
             $fields = SupplierProviderFieldCatalog::fieldsFor($provider->value);
+            $defaults = ProviderEndpointDefaults::for($provider->value, 'sandbox');
+            $liveDefaults = ProviderEndpointDefaults::for($provider->value, 'live');
             $catalog[] = [
                 'key' => $provider->value,
-                'label' => $provider->name,
+                'label' => $provider === SupplierProvider::Smtp ? 'Transactional Email (SMTP)' : $provider->name,
                 'installed' => \App\Support\Suppliers\SupplierRegistry::adapterInstalled($provider),
-                'baseUrlOverridable' => in_array($provider->value, [
-                    SupplierProvider::PiaNdc->value,
-                    SupplierProvider::Airblue->value,
-                    SupplierProvider::AlHaider->value,
-                ], true),
+                'module' => $this->moduleForProvider($provider->value),
+                'baseUrlOverridable' => (bool) $defaults['overridable'],
+                'defaultBaseUrlSandbox' => $defaults['base_url'],
+                'defaultBaseUrlLive' => $liveDefaults['base_url'],
                 'credentialFields' => $fields,
                 'advancedFields' => array_values(array_filter(
                     $fields,
@@ -355,7 +423,7 @@ class SupplierConnectionController extends Controller
             'values' => $values,
             'timeouts' => $settings['timeouts'] ?? null,
             'timeoutsUserConfigurable' => false,
-            'baseUrlOverridable' => in_array($provider, [SupplierProvider::PiaNdc->value, SupplierProvider::Airblue->value], true),
+            'baseUrlOverridable' => (bool) ProviderEndpointDefaults::for($provider, (string) ($connection->environment?->value ?? 'sandbox'))['overridable'],
             'readOnly' => $readOnly,
         ];
     }
@@ -535,9 +603,10 @@ class SupplierConnectionController extends Controller
             'settings' => $settings,
             'meta' => $meta,
             'is_active' => $status === SupplierConnectionStatus::Active->value,
-            'advanced_base_url_override' => $existing !== null && ! $request->exists('advanced_base_url_override')
-                ? true
-                : $request->boolean('advanced_base_url_override'),
+            'advanced_base_url_override' => $request->boolean('advanced_base_url_override'),
+            'base_url_mode' => $request->filled('base_url_mode')
+                ? $request->string('base_url_mode')->toString()
+                : null,
         ];
 
         if ($provider === SupplierProvider::Sabre->value) {
@@ -549,12 +618,15 @@ class SupplierConnectionController extends Controller
             }
         }
 
-        return AlHaiderSupplierConnectionNormalizer::normalizePayload(
-            OneApiSupplierConnectionNormalizer::normalizePayload(
-                AirBlueSupplierConnectionNormalizer::normalizePayload(
-                    PiaNdcSupplierConnectionNormalizer::normalizePayload(
-                        IatiSupplierConnectionNormalizer::normalizePayload(
-                            SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+        return SmtpSupplierConnectionNormalizer::normalizePayload(
+            AlHaiderSupplierConnectionNormalizer::normalizePayload(
+                OneApiSupplierConnectionNormalizer::normalizePayload(
+                    AirBlueSupplierConnectionNormalizer::normalizePayload(
+                        PiaNdcSupplierConnectionNormalizer::normalizePayload(
+                            IatiSupplierConnectionNormalizer::normalizePayload(
+                                SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+                                $existing
+                            ),
                             $existing
                         ),
                         $existing

@@ -17,7 +17,7 @@ const SUBROUTES: { section: SettingsSection | "overview"; label: string; href: s
   { section: "general", label: "General", href: "/settings/general" },
   { section: "security", label: "Security", href: "/settings/security" },
   { section: "notifications", label: "Notifications", href: "/settings/notifications" },
-  { section: "integrations", label: "Integrations", href: "/integrations" },
+  { section: "integrations", label: "API & Modules", href: "/integrations" },
 ];
 
 type Props = {
@@ -72,7 +72,7 @@ export function SettingsModuleShell({ section, result }: Props) {
           <Breadcrumb items={[{ label: "Home" }, { label: "Insights & system" }, { label: "Settings" }, { label: current.label }]} />
         }
         title="Settings"
-        description="Organization, security, notifications, and Integrations management. Secrets are never displayed after save."
+        description="Organization, security, notifications, and API & Modules management. Secrets are never displayed after save."
       />
       <DataSourceNoticeSlot />
 

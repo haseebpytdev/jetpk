@@ -449,5 +449,60 @@ return [
                 ],
             ],
         ],
+        'smtp' => [
+            'fields' => [
+                'host' => [
+                    'label' => 'Host',
+                    'type' => 'text',
+                    'required' => true,
+                    'placeholder' => 'smtp.example.com',
+                    'help' => 'SMTP hostname from your mail provider.',
+                ],
+                'port' => [
+                    'label' => 'Port',
+                    'type' => 'text',
+                    'required' => true,
+                    'default' => '587',
+                ],
+                'encryption' => [
+                    'label' => 'Security / encryption',
+                    'type' => 'select',
+                    'required' => true,
+                    'default' => 'tls',
+                    'options' => [
+                        'tls' => 'TLS',
+                        'ssl' => 'SSL',
+                        'none' => 'None',
+                    ],
+                ],
+                'username' => [
+                    'label' => 'Username',
+                    'type' => 'text',
+                    'required' => false,
+                ],
+                'password' => [
+                    'label' => 'Password',
+                    'type' => 'password',
+                    'required' => false,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                ],
+                'from_address' => [
+                    'label' => 'From address',
+                    'type' => 'text',
+                    'required' => true,
+                ],
+                'from_name' => [
+                    'label' => 'From name',
+                    'type' => 'text',
+                    'required' => false,
+                ],
+                'timeout' => [
+                    'label' => 'Timeout (seconds)',
+                    'type' => 'text',
+                    'required' => false,
+                    'help' => 'Optional SMTP timeout when supported by the mailer.',
+                ],
+            ],
+        ],
     ],
 ];

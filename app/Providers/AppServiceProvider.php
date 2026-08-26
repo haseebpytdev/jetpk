@@ -105,6 +105,15 @@ class AppServiceProvider extends ServiceProvider
     {
         PlatformBrandingResolver::applyRuntimeConfig();
 
+        try {
+            app(\App\Services\Integrations\SmtpEnvironmentImportService::class)->importIfNeeded();
+            app(\App\Services\Integrations\SmtpMailConfigResolver::class)->applyRuntimeConfig();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('smtp.bootstrap_skipped', [
+                'message' => $e->getMessage(),
+            ]);
+        }
+
         Event::listen(Registered::class, SendEmailVerificationNotification::class);
 
         RateLimiter::for('lookup-booking', fn (Request $request): Limit => Limit::perMinute(20)->by($request->ip()));

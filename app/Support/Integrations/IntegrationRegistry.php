@@ -130,20 +130,6 @@ final class IntegrationRegistry
                 docsUrl: null,
                 manager: 'draft',
             ),
-            new IntegrationDefinition(
-                code: 'smtp_mail',
-                name: 'Transactional Email (SMTP)',
-                category: IntegrationCategory::Messaging,
-                icon: 'EM',
-                capabilities: ['notify'],
-                adapterInstalled: false,
-                supportsConnectionTest: false,
-                supportsTestTransaction: false,
-                supportsEnableToggle: false,
-                canActivateRuntime: false,
-                docsUrl: null,
-                manager: 'draft',
-            ),
         ];
     }
 }

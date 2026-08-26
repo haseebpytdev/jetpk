@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { SwitchToggle } from "@/components/ui/switch-toggle";
 import {
   connectionStatusLabel,
   environmentBadgeLabel,
@@ -8,8 +9,14 @@ import {
   type ApiConnectionRow,
 } from "@/features/api-connections/lib/connection-status";
 
+type ExtendedRow = ApiConnectionRow & {
+  moduleLabel?: string;
+  lastSuccessfulUseAt?: string | null;
+  smtp?: { runtime_source?: string } | null;
+};
+
 type Props = {
-  row: ApiConnectionRow;
+  row: ExtendedRow;
   providerLabel: string;
   providerIcon?: string;
   busy: boolean;
@@ -69,7 +76,10 @@ export function ApiConnectionCard({
           </div>
           <div className="min-w-0">
             <p className="truncate font-semibold text-gray-900">{row.name}</p>
-            <p className="text-xs text-jp-muted">{providerLabel}</p>
+            <p className="text-xs text-jp-muted">
+              {providerLabel}
+              {row.moduleLabel ? ` · ${row.moduleLabel}` : ""}
+            </p>
           </div>
         </div>
         <StatusBadge status={operationalStatus} />
@@ -80,11 +90,13 @@ export function ApiConnectionCard({
           {environmentBadgeLabel(row.environment)}
         </span>
         <span className="rounded-full border border-jp-border bg-white px-2 py-0.5">
-          {row.enabled ? "Enabled" : "Disabled"}
-        </span>
-        <span className="rounded-full border border-jp-border bg-white px-2 py-0.5">
           {row.credentialsConfigured ? "Credentials configured" : "Credentials missing"}
         </span>
+        {row.smtp?.runtime_source ? (
+          <span className="rounded-full border border-jp-border bg-white px-2 py-0.5">
+            Mail: {row.smtp.runtime_source.replaceAll("_", " ")}
+          </span>
+        ) : null}
       </div>
 
       {capabilities.length > 0 ? (
@@ -93,47 +105,49 @@ export function ApiConnectionCard({
 
       <dl className="grid gap-1 text-xs text-jp-muted">
         <div>
-          <dt className="sr-only">Last test</dt>
+          <dt className="sr-only">Last health</dt>
           <dd>
             {row.lastTestStatus
-              ? `Last test: ${row.lastTestStatus}${row.lastTestedAt ? ` · ${row.lastTestedAt}` : ""}`
+              ? `Last health: ${row.lastTestStatus}${row.lastTestedAt ? ` · ${row.lastTestedAt}` : ""}`
               : "Not tested yet"}
           </dd>
         </div>
-        {row.channel ? (
+        {row.lastSuccessfulUseAt ? (
           <div>
-            <dt className="sr-only">Channel</dt>
-            <dd>Channel: {row.channel}</dd>
+            <dt className="sr-only">Last successful use</dt>
+            <dd>Last successful use: {row.lastSuccessfulUseAt}</dd>
           </div>
         ) : null}
       </dl>
 
       {isLive ? (
-        <div className="mt-auto flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="min-h-10 rounded-xl border border-jp-border px-3 text-sm font-medium hover:bg-gray-50"
+        <div className="mt-auto space-y-3">
+          <SwitchToggle
+            id={`card-enable-${row.id}`}
+            label={row.enabled ? "Enabled" : "Disabled"}
+            checked={row.enabled}
             disabled={busy}
-            onClick={onConfigure}
-          >
-            Configure
-          </button>
-          <button
-            type="button"
-            className="min-h-10 rounded-xl border border-jp-border px-3 text-sm"
-            disabled={busy}
-            onClick={onTest}
-          >
-            Test
-          </button>
-          <button
-            type="button"
-            className="min-h-10 rounded-xl border border-jp-border px-3 text-sm"
-            disabled={busy}
-            onClick={onToggle}
-          >
-            {row.enabled ? "Disable" : "Enable"}
-          </button>
+            onChange={() => onToggle()}
+            data-testid={`api-connection-toggle-${row.id}`}
+          />
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="min-h-10 rounded-xl border border-jp-border px-3 text-sm font-medium hover:bg-gray-50"
+              disabled={busy}
+              onClick={onConfigure}
+            >
+              Configure
+            </button>
+            <button
+              type="button"
+              className="min-h-10 rounded-xl border border-jp-border px-3 text-sm"
+              disabled={busy}
+              onClick={onTest}
+            >
+              Test
+            </button>
+          </div>
         </div>
       ) : null}
     </Card>

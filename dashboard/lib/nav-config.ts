@@ -50,7 +50,7 @@ export const navGroups: NavGroup[] = [
     label: "Suppliers",
     items: [
       { label: "Suppliers", href: "/suppliers", laravelRoute: "admin.suppliers" },
-      { label: "Integrations", href: "/integrations", laravelRoute: "admin.integrations.index" },
+      { label: "API & Modules", href: "/integrations", laravelRoute: "admin.integrations.index" },
     ],
   },
   {

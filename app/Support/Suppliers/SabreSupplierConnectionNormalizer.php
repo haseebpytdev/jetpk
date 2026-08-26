@@ -49,13 +49,23 @@ final class SabreSupplierConnectionNormalizer
         }
 
         $environment = (string) ($payload['environment'] ?? 'sandbox');
-        $overrideBaseUrl = (bool) ($payload['advanced_base_url_override'] ?? false);
+        $settings = is_array($payload['settings'] ?? null) ? $payload['settings'] : [];
+        $existingSettings = ($existing !== null && is_array($existing->settings)) ? $existing->settings : [];
+
+        $mode = (string) ($payload['base_url_mode']
+            ?? $settings['base_url_mode']
+            ?? $existingSettings['base_url_mode']
+            ?? 'provider_default');
+        $overrideBaseUrl = (bool) ($payload['advanced_base_url_override'] ?? false)
+            || $mode === 'explicit_override';
         $incomingBaseUrl = trim((string) ($payload['base_url'] ?? ''));
 
         if ($overrideBaseUrl && $incomingBaseUrl !== '') {
             $payload['base_url'] = $incomingBaseUrl;
+            $settings['base_url_mode'] = 'explicit_override';
         } else {
             $payload['base_url'] = self::baseUrlForEnvironment($environment);
+            $settings['base_url_mode'] = 'provider_default';
         }
 
         $credentials = is_array($payload['credentials'] ?? null) ? $payload['credentials'] : [];
@@ -93,7 +103,10 @@ final class SabreSupplierConnectionNormalizer
 
         $payload['credentials'] = $merged;
 
-        $settings = is_array($payload['settings'] ?? null) ? $payload['settings'] : [];
+        $settings = array_merge(
+            is_array($payload['settings'] ?? null) ? $payload['settings'] : [],
+            $settings,
+        );
         if ($pcc !== '') {
             unset($settings['pcc'], $settings['PCC'], $settings['pseudo_city_code'], $settings['pseudoCityCode']);
         }
@@ -107,7 +120,7 @@ final class SabreSupplierConnectionNormalizer
             : SabreSupplierChannelConfig::readBoolSetting($existingSettings, SabreSupplierChannelConfig::SETTING_NDC, false);
         $payload['settings'] = SabreSupplierChannelConfig::mergeIntoSettings($settings, $gdsEnabled, $ndcEnabled);
 
-        unset($payload['sabre_gds_enabled'], $payload['sabre_ndc_enabled']);
+        unset($payload['sabre_gds_enabled'], $payload['sabre_ndc_enabled'], $payload['advanced_base_url_override'], $payload['base_url_mode']);
 
         return $payload;
     }

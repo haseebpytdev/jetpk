@@ -31,6 +31,11 @@ final class SupplierRegistry
             return class_exists(AlHaiderClient::class);
         }
 
+        // SMTP is a messaging module managed via SupplierConnection — not a flight adapter.
+        if ($provider === SupplierProvider::Smtp) {
+            return true;
+        }
+
         try {
             app(SupplierAdapterResolver::class)->resolve($provider);
 
