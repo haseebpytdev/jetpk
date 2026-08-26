@@ -29,11 +29,14 @@ class AlHaiderClient
         private readonly AlHaiderTokenStore $tokenStore,
         private readonly AlHaiderTokenExpiryResolver $tokenExpiryResolver,
         private readonly AlHaiderConnectionAuthResolver $connectionAuthResolver,
+        private readonly AlHaiderManagedTokenRenewalService $managedTokenRenewalService,
     ) {}
 
     private ?string $resolvedAuthMode = null;
 
     private ?string $connectionBaseUrl = null;
+
+    private ?int $resolvedConnectionId = null;
 
     /**
      * @param  array<string, mixed>  $filters
@@ -99,7 +102,8 @@ class AlHaiderClient
             );
         }
 
-        $path = str_replace('{id}', rawurlencode($groupId), $this->path('reserve_path'));
+        // Official docs: POST /api/create/booking (not /api/group/reserve).
+        $path = $this->path('reserve_path');
 
         return $this->sendAuthenticated('POST', $path, array_merge($payload, [
             'group_id' => $groupId,
@@ -119,9 +123,10 @@ class AlHaiderClient
             return ['skipped' => true, 'reason' => 'booking_disabled'];
         }
 
+        // Official docs: PATCH /api/cancel/booking/{id}
         $path = str_replace('{id}', rawurlencode($reservationId), $this->path('cancel_path'));
 
-        return $this->sendAuthenticated('POST', $path, array_merge($payload, [
+        return $this->sendAuthenticated('PATCH', $path, array_merge($payload, [
             'reservation_id' => $reservationId,
         ]), [], [
             'request_context' => 'cancel_reservation',
@@ -151,8 +156,14 @@ class AlHaiderClient
 
     public function isConfigured(): bool
     {
+        // Global emergency kill switch — ENV remains fallback/kill-switch only.
         if (! (bool) config('suppliers.al_haider.enabled')) {
             return false;
+        }
+
+        $connectionAuth = $this->connectionAuthResolver->resolveConnectionAuth();
+        if ($connectionAuth !== null) {
+            return $this->connectionAuthResolver->connectionAuthIsConfigured($connectionAuth);
         }
 
         $staticToken = trim((string) config('suppliers.al_haider.token'));
@@ -183,7 +194,11 @@ class AlHaiderClient
 
         $connectionAuth = $this->connectionAuthResolver->resolveConnectionAuth();
         if ($connectionAuth !== null) {
-            if ($connectionAuth['mode'] === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL) {
+            $mode = $connectionAuth['mode'];
+            if (in_array($mode, [
+                AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL,
+                AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANAGED,
+            ], true)) {
                 if ($this->connectionAuthResolver->manualTokenExpired($connectionAuth['token_expires_at'])) {
                     return [
                         'http_status' => 401,
@@ -302,7 +317,18 @@ class AlHaiderClient
                 throw $exception;
             }
 
-            if ($this->resolvedAuthMode === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL) {
+            // Manual / managed: 401 before known expiry (or with current token) fails closed — never mint.
+            if (in_array($this->resolvedAuthMode, [
+                AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL,
+                AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANAGED,
+            ], true)) {
+                Log::warning('alhaider.auth.fail_closed_401', [
+                    'supplier' => 'alhaider',
+                    'auth_mode' => $this->resolvedAuthMode,
+                    'connection_id' => $this->resolvedConnectionId,
+                    'request_context' => $context['request_context'] ?? null,
+                ]);
+
                 throw new AlHaiderProviderException(
                     'supplier_auth_token_rejected',
                     401,
@@ -341,9 +367,11 @@ class AlHaiderClient
 
         try {
             $request = $this->http($token);
-            $response = $method === 'GET'
-                ? $request->get($url, $query)
-                : $request->post($url, $payload);
+            $response = match (strtoupper($method)) {
+                'GET' => $request->get($url, $query),
+                'PATCH' => $request->patch($url, $payload),
+                default => $request->post($url, $payload),
+            };
         } catch (ConnectionException $exception) {
             $this->logFailure($path, 0, $context, 'connection_exception');
 
@@ -394,10 +422,12 @@ class AlHaiderClient
     {
         $this->resolvedAuthMode = null;
         $this->connectionBaseUrl = null;
+        $this->resolvedConnectionId = null;
 
         $connectionAuth = $this->connectionAuthResolver->resolveConnectionAuth();
         if ($connectionAuth !== null) {
             $this->resolvedAuthMode = $connectionAuth['mode'];
+            $this->resolvedConnectionId = (int) ($connectionAuth['connection_id'] ?? 0) ?: null;
             if ($connectionAuth['base_url'] !== '') {
                 $this->connectionBaseUrl = $connectionAuth['base_url'];
             }
@@ -421,6 +451,49 @@ class AlHaiderClient
                 }
 
                 return $manualToken;
+            }
+
+            if ($connectionAuth['mode'] === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANAGED) {
+                $managedToken = trim($connectionAuth['existing_token']);
+                $expired = $this->connectionAuthResolver->manualTokenExpired($connectionAuth['token_expires_at']);
+
+                if ($managedToken !== '' && ! $expired) {
+                    return $managedToken;
+                }
+
+                // Genuine expiry only may enter auto-renew (never page-load / test / 401-before-expiry).
+                if ($expired) {
+                    $connection = $this->connectionAuthResolver->resolveActiveConnection();
+                    if ($connection === null) {
+                        throw new AlHaiderProviderException(
+                            'supplier_auth_token_expired',
+                            401,
+                            'Token expired / rejected'
+                        );
+                    }
+
+                    $result = $this->managedTokenRenewalService->renewIfExpired($connection);
+                    $renewed = trim((string) ($result['token'] ?? ''));
+                    if ($renewed === '') {
+                        throw new AlHaiderProviderException(
+                            'supplier_auth_token_expired',
+                            401,
+                            'Token expired / rejected'
+                        );
+                    }
+
+                    return $renewed;
+                }
+
+                if ($managedToken === '') {
+                    throw new AlHaiderProviderException(
+                        'supplier_auth_token_missing',
+                        503,
+                        'Authentication required'
+                    );
+                }
+
+                return $managedToken;
             }
         }
 

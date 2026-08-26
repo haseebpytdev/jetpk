@@ -46,13 +46,12 @@ export const navGroups: NavGroup[] = [
       { label: "Accounting", href: "/accounting", laravelRoute: "admin.finance.adjustments.index" },
     ],
   },
-  {
-    label: "Suppliers",
-    items: [
-      { label: "Suppliers", href: "/suppliers", laravelRoute: "admin.suppliers" },
-      { label: "API & Modules", href: "/integrations", laravelRoute: "admin.integrations.index" },
-    ],
-  },
+    {
+      label: "Suppliers",
+      items: [
+        { label: "API & Modules", href: "/integrations", laravelRoute: "admin.integrations.index" },
+      ],
+    },
   {
     label: "Website",
     items: [
@@ -119,10 +118,10 @@ export const staffNavGroups: NavGroup[] = [
     label: "Finance",
     items: [{ label: "Payments", href: "/payments", laravelRoute: "staff.payments" }],
   },
-  {
-    label: "Suppliers",
-    items: [{ label: "Suppliers", href: "/suppliers", laravelRoute: "staff.suppliers" }],
-  },
+    {
+      label: "Suppliers",
+      items: [{ label: "API & Modules", href: "/integrations", laravelRoute: "staff.suppliers" }],
+    },
   {
     label: "Website",
     items: [{ label: "Homepage", href: "/cms/sections", laravelRoute: "staff.page-settings.index" }],

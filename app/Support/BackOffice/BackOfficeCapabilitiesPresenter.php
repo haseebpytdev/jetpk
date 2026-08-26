@@ -189,12 +189,12 @@ class BackOfficeCapabilitiesPresenter
             $groups[] = ['label' => 'Finance', 'items' => array_values(array_filter($finance))];
         }
 
-        // Suppliers = operational supplier management; API & Modules = technical connectivity.
+        // API & Modules is the single technical-management entry.
+        // Operational Supplier Management remains at /suppliers as an in-workspace subsection.
         $suppliers = [];
-        if ($has('suppliers.view')) {
-            $suppliers[] = $this->dashboardNav('Suppliers', 'suppliers', '/suppliers');
-        }
         if ($isAdmin && ($has('integrations.view') || $has('suppliers.view'))) {
+            $suppliers[] = $this->dashboardNav('API & Modules', 'api-modules', '/integrations');
+        } elseif ($has('suppliers.view')) {
             $suppliers[] = $this->dashboardNav('API & Modules', 'api-modules', '/integrations');
         }
         if ($suppliers !== []) {

@@ -193,6 +193,78 @@ class ApiModulesSmtpAndConnectionsTest extends TestCase
         $this->assertSame('env_fallback', $resolver->currentSource());
     }
 
+    public function test_smtp_active_invalid_falls_back_to_env(): void
+    {
+        $admin = $this->seededAdmin();
+
+        Config::set('mail.default', 'smtp');
+        Config::set('mail.mailers.smtp.host', 'env-smtp.jetpakistan.test');
+        Config::set('mail.from.address', 'noreply@jetpakistan.pk');
+
+        SupplierConnection::query()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Smtp,
+            'name' => 'SMTP Invalid',
+            'environment' => SupplierEnvironment::Live,
+            'status' => SupplierConnectionStatus::Active,
+            'is_active' => true,
+            'credentials' => [
+                'host' => 'not a host!!',
+                'port' => '587',
+                'encryption' => 'tls',
+                'username' => 'only-user',
+                'password' => '',
+                'from_address' => 'bad-from',
+            ],
+        ]);
+
+        $resolver = app(SmtpMailConfigResolver::class);
+        $this->assertSame('env_fallback', $resolver->applyRuntimeConfig());
+        $this->assertSame('env_fallback', $resolver->currentSource());
+    }
+
+    public function test_smtp_blank_password_on_edit_preserves_existing(): void
+    {
+        $admin = $this->seededAdmin();
+        $connection = SupplierConnection::query()->create([
+            'agency_id' => $admin->current_agency_id,
+            'provider' => SupplierProvider::Smtp,
+            'name' => 'SMTP Keep Pass',
+            'environment' => SupplierEnvironment::Live,
+            'status' => SupplierConnectionStatus::Active,
+            'is_active' => true,
+            'credentials' => [
+                'host' => 'smtp.mailprovider.test',
+                'port' => '587',
+                'encryption' => 'tls',
+                'username' => 'mailer',
+                'password' => 'keep-me-secret',
+                'from_address' => 'noreply@jetpakistan.pk',
+                'from_name' => 'JetPakistan',
+            ],
+        ]);
+
+        $this->actingAs($admin)->patchJson('/admin/api-settings/'.$connection->id.'?format=json', [
+            'provider' => 'smtp',
+            'name' => 'SMTP Keep Pass',
+            'environment' => 'live',
+            'status' => 'active',
+            'credentials' => [
+                'host' => 'smtp.mailprovider.test',
+                'port' => '587',
+                'encryption' => 'tls',
+                'username' => 'mailer',
+                'password' => '',
+                'from_address' => 'noreply@jetpakistan.pk',
+                'from_name' => 'JetPakistan',
+            ],
+            'settings_json' => '{}',
+        ])->assertOk();
+
+        $connection->refresh();
+        $this->assertSame('keep-me-secret', $connection->credentials['password']);
+    }
+
     public function test_provider_catalog_includes_smtp_and_endpoint_defaults(): void
     {
         $admin = $this->seededAdmin();

@@ -96,6 +96,10 @@ class SupplierConnectionService
             $lastError = null;
             $lastTestStatus = null;
 
+            if ($connection->provider === SupplierProvider::AlHaider) {
+                return $this->testAlHaiderConnection($connection, $actor, $old);
+            }
+
             if ($hasCreds && $this->hasRequiredCredentialKeys($connection->provider, $credentials)) {
                 $lastTestStatus = 'ready_for_review';
             } else {
@@ -134,6 +138,116 @@ class SupplierConnectionService
                 'last_error' => $connection->last_error,
             ];
         });
+    }
+
+    /**
+     * Al-Haider Test Connection: existing token only, read-only inventory probe, never login.
+     *
+     * @param  array<string, mixed>  $old
+     * @return array<string, mixed>
+     */
+    protected function testAlHaiderConnection(SupplierConnection $connection, User $actor, array $old): array
+    {
+        $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+        $token = trim((string) ($credentials['existing_token'] ?? ''));
+        $mode = strtolower(trim((string) ($credentials['auth_mode'] ?? AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL)));
+
+        if ($token === '' || ! in_array($mode, [
+            AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANUAL,
+            AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANAGED,
+        ], true)) {
+            $connection->last_tested_at = now();
+            $connection->last_test_status = 'missing_credentials';
+            $connection->last_error = 'Existing Al-Haider token is required for Test Connection.';
+            $connection->save();
+
+            $this->writeAudit($connection, $actor, 'supplier.connection_tested', $old, $this->auditPayload($connection));
+
+            return [
+                'status' => $connection->status->value,
+                'last_test_status' => $connection->last_test_status,
+                'last_error' => $connection->last_error,
+                'token_generation_calls' => 0,
+            ];
+        }
+
+        $base = rtrim((string) ($connection->base_url ?: config('suppliers.al_haider.default_base_url')), '/');
+        $path = (string) config('suppliers.al_haider.groups_path', '/api/available/groups');
+        $url = $base.'/'.ltrim($path, '/');
+
+        $httpStatus = 0;
+        $groupCount = null;
+        $lastError = null;
+        $lastTestStatus = 'failed';
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer '.$token,
+            ])
+                ->timeout((int) config('suppliers.al_haider.timeout_seconds', 20))
+                ->connectTimeout((int) config('suppliers.al_haider.connect_timeout_seconds', 10))
+                ->get($url);
+
+            $httpStatus = $response->status();
+            if ($httpStatus >= 200 && $httpStatus < 300) {
+                $decoded = $response->json();
+                $groups = is_array($decoded) ? ($decoded['groups'] ?? null) : null;
+                if (is_array($groups)) {
+                    $groupCount = count($groups);
+                    $lastTestStatus = 'ok';
+                    $connection->last_error = null;
+                    if ($connection->status === SupplierConnectionStatus::Error) {
+                        $connection->status = SupplierConnectionStatus::Active;
+                    }
+                } else {
+                    $lastTestStatus = 'invalid_schema';
+                    $lastError = 'Al-Haider response schema was unexpected.';
+                }
+            } elseif ($httpStatus === 401) {
+                $lastTestStatus = 'token_rejected';
+                $lastError = 'Al-Haider rejected the current token (401). No new token was generated.';
+            } else {
+                $lastTestStatus = 'http_error';
+                $lastError = 'Al-Haider returned HTTP '.$httpStatus.'.';
+            }
+        } catch (\Throwable $e) {
+            $lastTestStatus = 'transport_error';
+            $lastError = 'Al-Haider is temporarily unreachable.';
+            \Illuminate\Support\Facades\Log::warning('alhaider.test_connection_failed', [
+                'connection_id' => $connection->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        $connection->last_tested_at = now();
+        $connection->last_test_status = $lastTestStatus;
+        $connection->last_error = $lastError;
+        $connection->save();
+
+        $this->diagnosticLogger->log(
+            connection: $connection,
+            action: 'alhaider_read_only_test',
+            status: $lastError === null ? 'success' : 'failed',
+            safeMessage: $lastError,
+            meta: [
+                'last_test_status' => $lastTestStatus,
+                'http_status' => $httpStatus,
+                'group_count' => $groupCount,
+                'token_generation_calls' => 0,
+            ],
+        );
+
+        $this->writeAudit($connection, $actor, 'supplier.connection_tested', $old, $this->auditPayload($connection));
+
+        return [
+            'status' => $connection->status->value,
+            'last_test_status' => $connection->last_test_status,
+            'last_error' => $connection->last_error,
+            'http_status' => $httpStatus,
+            'group_count' => $groupCount,
+            'token_generation_calls' => 0,
+        ];
     }
 
     /**
@@ -238,6 +352,10 @@ class SupplierConnectionService
         if ($mode === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_AUTO) {
             return trim((string) ($credentials['username'] ?? '')) !== ''
                 && trim((string) ($credentials['password'] ?? '')) !== '';
+        }
+
+        if ($mode === AlHaiderSupplierConnectionNormalizer::AUTH_MODE_MANAGED) {
+            return trim((string) ($credentials['existing_token'] ?? '')) !== '';
         }
 
         return trim((string) ($credentials['existing_token'] ?? '')) !== '';

@@ -130,9 +130,19 @@ function isFieldVisible(field: FieldMeta, credentials: Record<string, string>, r
     return true;
   }
 
-  const authChannels = new Set(["manual_token", "credentials_auto_token"]);
+  const authMode =
+    credentials.auth_mode || row?.advanced?.values?.auth_mode || row?.maskedCredentials?.auth_mode || "manual_token";
+
+  if (field.channel === "token_modes") {
+    return authMode === "manual_token" || authMode === "managed_token";
+  }
+
+  if (field.channel === "renewal_credentials") {
+    return authMode === "managed_token" || authMode === "credentials_auto_token";
+  }
+
+  const authChannels = new Set(["manual_token", "managed_token", "credentials_auto_token"]);
   if (authChannels.has(field.channel)) {
-    const authMode = credentials.auth_mode || row?.advanced?.values?.auth_mode || row?.maskedCredentials?.auth_mode || "manual_token";
     return field.channel === authMode;
   }
 

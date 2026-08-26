@@ -538,7 +538,10 @@ return [
         'login_lock_wait_seconds' => (int) env('ALHAIDER_LOGIN_LOCK_WAIT_SECONDS', 10),
         'token_limit_block_seconds' => (int) env('ALHAIDER_TOKEN_LIMIT_BLOCK_SECONDS', 300),
         'booking_enabled' => (bool) env('ALHAIDER_BOOKING_ENABLED', false),
-        'reserve_path' => env('ALHAIDER_RESERVE_PATH', '/api/group/reserve'),
-        'cancel_path' => env('ALHAIDER_CANCEL_PATH', '/api/group/cancel'),
+        // Official Postman docs (alhaidertravel.pk → API Docs):
+        // POST /api/create/booking, PATCH /api/cancel/booking/{id}
+        'reserve_path' => env('ALHAIDER_RESERVE_PATH', '/api/create/booking'),
+        'cancel_path' => env('ALHAIDER_CANCEL_PATH', '/api/cancel/booking/{id}'),
+        'max_automatic_token_generations_per_365_days' => 1,
     ],
 ];
