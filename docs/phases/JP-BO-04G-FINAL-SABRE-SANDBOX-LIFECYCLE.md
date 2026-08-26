@@ -1,156 +1,189 @@
 # JP-BO-04G — Final Sabre Sandbox Lifecycle
 
-**Phase:** JP-BO-04G Final Sabre Sandbox Lifecycle + Admin One-Action Cancel PNR  
+**Phase:** JP-BO-04G Owner-authorized Sabre sandbox clone + isolation hardening + protected deploy  
 **Branch:** `phase/jp-bo-04g-progressive`  
-**Previous branch HEAD:** `93b21d0e4bf23ee402574283f044f399b24024ed`  
-**FINAL_CLOSURE_ENGINEERING_SHA:** `fc96b2cf51ccdbbe86f6a86790adfe29055f8dc6`  
-**FINAL_DOCS_SHA:** `87de4b1a6f0f4e4455e54d719f7f54ac3898baf8`  
-**GIT_0_0:** YES  
-**FINAL_COMBINED_COMMERCE_RUNTIME_REFERENCE:** `4ff3af2721b179e5cf5e0a55fde11aa65b451bc9`  
-**Mode:** Sandbox-only network lifecycle authorized; live Sabre mutation forbidden  
-**Hard stop reason:** dedicated Sabre CERT/sandbox credentials not present in secure config
+**PREVIOUS_ENGINEERING_SHA:** `fc96b2cf51ccdbbe86f6a86790adfe29055f8dc6`  
+**FINAL_SANDBOX_ENGINEERING_SHA:** `2e251067c33b7ed3912d4d387f5ab2903695849b`  
+**FINAL_DOCS_SHA:** _(pinned after docs commit)_  
+**GIT_0_0:** YES (after docs push)  
+**Production base (commerce):** `4ff3af2721b179e5cf5e0a55fde11aa65b451bc9`  
+**Public build (unchanged):** `5jcScCO5Ujc-40-4nw1kr`  
+**Backup:** `jp-bo-04g-sandbox-admin-cancel-20260826T091042Z`  
+**Release staged:** `/home/pkjetp/releases/jetpk-20260826T091342Z`  
+**Mode:** Owner-authorized credential clone into NEW sandbox row only; live Sabre mutation forbidden
+
+---
+
+## Outcome classification (B)
+
+CERT rejected cloned live credentials against the CERT/Sandbox host. Safe engineering is deployed. Network certification is deferred. No live PNR create/cancel occurred.
+
+| Gate | Result |
+| --- | --- |
+| SANDBOX_SABRE_LIFECYCLE | `DEFERRED_EXTERNAL_CERT_AUTH` |
+| FLIGHT_COMMERCE_IMPLEMENTATION | COMPLETE |
+| FLIGHT_COMMERCE_PRODUCTION | PASS |
+| COMMERCE_PRODUCTION_CERTIFICATION | PASS |
+| BACK_OFFICE_LIVE_PROOF | PASS |
+| OWNER_RETEST_V3 | `PASS_WITH_SANDBOX_NETWORK_CERTIFICATION_DEFERRED` |
+| GROUP_TICKETING_READY | YES |
+| JETPAKISTAN_FINAL_DEPLOYED_RUNTIME_SHA | `2e251067c33b7ed3912d4d387f5ab2903695849b` |
 
 ---
 
 ## Objective
 
-Prove one sandbox Sabre search → one sandbox QA PNR → one Admin Cancel PNR → local cancelled, without touching the live Sabre connection or ambiguous live PNR inventory.
+Harden sandbox QA to an exact CERT connection pin, support owner-authorized credential clone into a separate `sabre-sandbox-qa` row, deploy regardless of CERT auth, and hand off to Group Ticketing without live Sabre mutations.
 
 ## Included scope
 
-- Live Sabre connection read-only capture + config hash
-- Environment authority documentation
-- Sandbox public-routing exclusion
-- QA production-host guard
-- Admin one-action Cancel PNR confirmation modal + eligibility gates
-- Sandbox connection provisioner (CERT env profiles only)
-- Local unit/feature tests for guards and admin-direct-cancel failure contracts
-- Ownership drift precise correction
-- Final documentation
+- Exact sandbox connection pin (search / PNR create / cancel)
+- Owner-authorized `--clone-credentials-from-connection` (read → new row only)
+- CERT host-only guards; no live fallback
+- Protected deploy of sandbox/cancel engineering
+- Live Sabre immutability proof
+- Group Ticketing handoff readiness
 
-## Excluded / blocked scope
+## Excluded / deferred
 
-- Any live Sabre PNR create
-- Any live Sabre cancel send
+- Sandbox network search / PNR / cancel (blocked: CERT auth rejected cloned credentials)
+- Any live Sabre PNR create or cancel
 - Mutation of live SupplierConnection id=1
-- Use of ambiguous live booking inventory as cancel target
-- Sandbox network auth/search/PNR/cancel (**blocked**: credentials missing)
+- Group Ticket implementation (next dedicated phase)
 
 ---
 
-## Environment authority (canonical)
-
-| Concern | Authority |
-| --- | --- |
-| SABRE_ENVIRONMENT_AUTHORITY | `supplier_connections.environment` (`App\Enums\SupplierEnvironment`: demo/sandbox/live) |
-| SANDBOX_ENDPOINT_AUTHORITY | `supplier_connections.base_url` via `SabreSupplierConnectionNormalizer::baseUrlForEnvironment()` + `config('suppliers.sabre.cert_stl.base_url')` |
-| PUBLIC_ROUTING_AUTHORITY | `SupplierPublicRoutingGuard` + connection `settings.public_customer_routing` / `qa_sandbox_only` / `production_default_routing` |
-| CREDENTIALS_AUTHORITY | encrypted `supplier_connections.credentials` (runtime) OR CERT env profiles under `config('suppliers.sabre.cert_stl.profiles.*')` for QA provision only |
-| STICKINESS | booking `meta.supplier_connection_id` (no cross-connection fallback on cancel) |
-
----
-
-## Live Sabre protection proof
+## Live Sabre protection
 
 | Gate | Result |
 | --- | --- |
-| LIVE_SABRE_CONNECTION_CAPTURED | YES |
-| LIVE_SABRE_CONNECTION_ID | 1 (internal) |
+| LIVE_SABRE_CONNECTION_ID | 1 |
 | LIVE_SABRE_ALIAS_SAFE | JEtPK Binham Sabre |
 | LIVE_SABRE_ENVIRONMENT | live |
 | LIVE_SABRE_HOST | api.platform.sabre.com |
-| LIVE_SABRE_CONFIG_HASH | `4711feb2c5815804ce877c6823dea03e24d44558e0fd9c37683cc365755cd059` |
+| LIVE_SABRE_CONFIG_HASH_BEFORE | `4711feb2c5815804ce877c6823dea03e24d44558e0fd9c37683cc365755cd059` |
+| LIVE_SABRE_CONFIG_HASH_AFTER | `4711feb2c5815804ce877c6823dea03e24d44558e0fd9c37683cc365755cd059` |
 | LIVE_SABRE_CONNECTION_MUTATED | NO |
-| LIVE_CONNECTION_CONFIG_DRIFT | 0 (no mutation performed) |
-| LIVE_SABRE_NEW_PNR_COUNT | 0 |
-| LIVE_SABRE_CANCEL_SEND_COUNT | 0 |
-| LIVE_AMBIGUOUS_PNR_EXTERNAL_MUTATION | 0 |
-| LIVE_AMBIGUOUS_PNR_STATE | UNCHANGED |
-
-Private hash ledger: `/home/pkjetp/backups/jp-bo-04g-sandbox-private/live-sabre-config-hash-pre.txt`
+| LIVE_CONNECTION_CONFIG_DRIFT | 0 |
+| LIVE_QA_PNR_CREATED_COUNT | 0 |
+| LIVE_CANCEL_SEND_COUNT | 0 |
 
 ---
 
-## Sandbox credentials gate
+## Sandbox connection (clone)
 
-| Check | Local | Production |
-| --- | --- | --- |
-| CERT profile cert_6md8 | incomplete | incomplete |
-| CERT profile cert_lu6k | incomplete | incomplete |
-| CERT profile cert_test3 | incomplete | incomplete |
-| SABRE_SANDBOX_CREDENTIALS_REQUIRED | YES | YES |
-
-**STOP SANDBOX NETWORK EXECUTION** — never fell back to live credentials/endpoint.
-
-Required next owner action (outside chat paste): place dedicated Sabre CERT credentials into secure private env / server secret storage as `SABRE_CERT_*` profile values, then re-run `sabre:ensure-sandbox-qa-connection --test-auth` and the sandbox lifecycle.
-
----
-
-## Engineering delivered (source)
-
-1. `SupplierPublicRoutingGuard` — excludes sandbox/demo from public/agent production fanout  
-2. `FlightSearchService` — channel-aware skip (`sandbox_excluded_from_production_fanout`)  
-3. `SabreSandboxQaLifecycleGuard` — refuses sandbox QA when env=live or host=production  
-4. `SabreSandboxQaConnectionProvisioner` + `sabre:ensure-sandbox-qa-connection`  
-5. Admin Cancel PNR modal (TEST/SANDBOX badge + summary)  
-6. `BookingOperationalCapabilitiesPresenter` eligibility gates + `cancel_pnr_context`  
-7. `adminDirectCancel` reuses open request + sandbox host guard  
-
-### Agent cancel policy (canonical)
-
-Agents may **request** cancellation only. Approve/process/supplier execution remain admin/staff.  
-`AGENT_CANCEL_POLICY=request_only`  
-`CUSTOMER_DIRECT_CANCEL_PNR=NO`  
-`ADMIN_DIRECT_CANCEL_PNR=PASS` (source/orchestration; sandbox network cancel blocked pending credentials)
+| Gate | Result |
+| --- | --- |
+| SANDBOX_CONNECTION_CREATED | PASS |
+| SANDBOX_CONNECTION_ID | 4 |
+| SANDBOX_CONNECTION_ID_DIFFERS_FROM_LIVE | YES |
+| SANDBOX_ENVIRONMENT | SANDBOX |
+| SANDBOX_HOST | api.cert.platform.sabre.com |
+| SANDBOX_PUBLIC_ROUTING | NO |
+| SANDBOX_QA_ONLY | YES |
+| CREDENTIAL_SOURCE | owner_authorized_clone |
+| SANDBOX_AUTH | BLOCKED |
+| SANDBOX_ENDPOINT | BLOCKED |
+| SANDBOX_NETWORK_CERTIFICATION | `DEFERRED_CREDENTIALS_NOT_ACCEPTED_BY_CERT` |
+| Post-auth status | inactive / unhealthy (intentional) |
 
 ---
 
-## Tests executed
+## Isolation gates (source + tests)
+
+| Gate | Result |
+| --- | --- |
+| QA_SANDBOX_EXACT_CONNECTION_PIN | PASS |
+| QA_SANDBOX_SEARCH_CONNECTION_COUNT | 1 (contract) |
+| QA_SANDBOX_LIVE_CONNECTION_ELIGIBLE | NO |
+| PUBLIC_SANDBOX_FANOUT | 0 |
+| NORMAL_PUBLIC_LIVE_ROUTING_UNCHANGED | PASS |
+| QA_SANDBOX_PNR_CREATE_PRODUCTION_GUARD | PASS |
+| QA_SANDBOX_CANCEL_EXACT_CONNECTION_PIN | PASS |
+| ADMIN_DIRECT_CANCEL_PNR | PASS (deployed orchestration) |
+
+---
+
+## Sandbox lifecycle (network)
+
+| Gate | Result |
+| --- | --- |
+| SANDBOX_SEARCH | NOT_RUN |
+| SANDBOX_QA_PNR_CREATED_COUNT | 0 |
+| SANDBOX_CANCEL_SEND_COUNT | 0 |
+| SANDBOX_HOST_CANCEL_CONFIRMED | NOT_RUN |
+| LOCAL_BOOKING_CANCELLED | NOT_RUN |
+
+Do **not** claim `SANDBOX_SABRE_LIFECYCLE=PASS` — no sandbox PNR/cancel occurred.
+
+---
+
+## Deploy manifest
+
+| Class | Count |
+| --- | --- |
+| LARAVEL_RUNTIME_FILES | 11 |
+| DASHBOARD_RUNTIME_FILES | 2 |
+| FRONTEND_RUNTIME_FILES | 0 |
+| CONFIG_RUNTIME_FILES | 0 |
+| MIGRATIONS | 0 |
+| EXACT_DEPLOYABLE_FILE_COUNT | 13 |
+| UNEXPECTED_RUNTIME_SUBSYSTEMS | NONE |
+
+## Production health after deploy
+
+| Gate | Result |
+| --- | --- |
+| LIVE_SOURCE_DRIFT | 0 (13/13 SHA256 match) |
+| PUBLIC_PM2 | online (unchanged PID during Laravel/dashboard-only activate) |
+| DASHBOARD_PM2 | online (restarted) |
+| LARAVEL_HEALTH | PASS (HTTP 200 `/up`) |
+| PUBLIC_HOME | HTTP 200 |
+| PUBLIC_BUILD_UNCHANGED | PASS |
+| OWNERSHIP_DRIFT | 0 |
+| PUBLIC_5XX | 0 (smoke) |
+| LARAVEL_5XX | 0 (smoke) |
+| JS_FATAL_ERRORS | 0 (smoke) |
+
+---
+
+## Tests executed (local)
 
 | Suite | Result |
 | --- | --- |
+| `SabreSandboxQaExactConnectionPinTest` | PASS |
 | `SupplierPublicRoutingAndSandboxQaGuardTest` | PASS |
+| `SabreSandboxQaCredentialCloneTest` | PASS |
 | `AdminDirectCancelBookingTest` | PASS |
-| `BookingOperationalCapabilitiesPresenterTest` | PASS (rerun with guards) |
-| CancellationRefundWorkflow subset (agent/customer/gates/pnr/ticketed) | PASS |
+| CancellationRefundWorkflow / AdminDirectCancel filter | PASS (25) |
+| `BookingOperationalCapabilitiesPresenterTest` | PASS |
 
 ---
 
-## Ownership cleanup
+## Engineering delivered
 
-| Gate | Result |
-| --- | --- |
-| OWNERSHIP_DRIFT (before) | 6 |
-| Precise chown targets | Frontend dir, FlightSearch dir, utils dir + 3 TS files → `pkjetp:pkjetp` |
-| OWNERSHIP_DRIFT (after) | 0 |
-| LARAVEL_HEALTH | PASS |
-| No recursive chown / no 777 | YES |
-
----
-
-## Sandbox lifecycle results
-
-| Gate | Result |
-| --- | --- |
-| SANDBOX_CONNECTION_CREATED | BLOCKED |
-| SANDBOX_AUTH | BLOCKED |
-| SANDBOX_SEARCH | BLOCKED |
-| SANDBOX_QA_PNR_CREATED_COUNT | 0 |
-| SANDBOX_CANCEL_SEND_COUNT | 0 |
-| SANDBOX_HOST_CANCEL_CONFIRMED | BLOCKED |
-| LOCAL_BOOKING_CANCELLED | BLOCKED |
-| SANDBOX_SABRE_LIFECYCLE | BLOCKED |
+1. `SabreSandboxQaConnectionPin` + `SabreSandboxQaSearchService` — exact one-connection sandbox QA search  
+2. `FlightSearchService` — `admin_qa_sandbox` refuses fanout without internal pin  
+3. `SupplierPublicRoutingGuard` — live skipped on sandbox QA channel  
+4. `SabreSandboxQaLifecycleGuard` — PNR create + cancel exact-pin guards  
+5. `SabreBookingService` — pre-HTTP sandbox QA production guard  
+6. `SabreSandboxQaConnectionProvisioner` — CERT profile **or** owner-authorized clone  
+7. `sabre:ensure-sandbox-qa-connection --clone-credentials-from-connection=`  
+8. Admin Cancel PNR sandbox exact-pin retention  
 
 ---
 
-## Final status
+## Rollback
 
-**COMMERCE_PRODUCTION_CERTIFICATION=PASS** (prior pin retained)  
-**BACK_OFFICE_LIVE_PROOF=PASS** (prior pin retained)  
-**SANDBOX_SABRE_LIFECYCLE=BLOCKED**  
-**OWNER_RETEST_V3=BLOCKED** (sandbox lifecycle incomplete)  
-**JP_BO_04G=BLOCKED**  
-**FLIGHT_COMMERCE_CLOSURE=BLOCKED**  
-**GROUP_TICKETING_READY=NO**
+Restore the 13 staged paths from backup  
+`/home/pkjetp/backups/jp-bo-04g-sandbox-admin-cancel-<UTC>/`  
+(and/or release rollback package under `/home/pkjetp/releases/jetpk-rollback-*-jp-bo-04g-sandbox`).  
+Clear Laravel caches as `pkjetp`. Restart `jetpk-dashboard` if dashboard paths rolled back.  
+Do not touch live SupplierConnection credentials.
 
-**NEXT:** Owner installs dedicated Sabre CERT sandbox credentials into secure server/private env (`SABRE_CERT_*` profiles). Then resume with a dedicated prompt: ensure `sabre-sandbox-qa` connection → sandbox search → one sandbox PNR → Admin Cancel PNR → idempotency → live config hash re-check. Do not begin Group Ticketing until sandbox lifecycle PASS.
+---
+
+## NEXT
+
+Start dedicated Group Ticket phase.  
+Optional later: install dedicated Sabre CERT credentials (or Sabre-accepted cert EPR) and re-run one sandbox search → one sandbox PNR → Admin Cancel PNR.
