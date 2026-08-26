@@ -1,26 +1,27 @@
 # JP-BO-04G — UI Closure Heartbeat
 
-**Timestamp (UTC):** 2026-08-26T12:00:00Z  
+**Timestamp (UTC):** 2026-08-26T12:55:00Z  
 **Branch:** `phase/jp-bo-04g-progressive`  
-**HEARTBEAT_STAGE:** `PREDEPLOY_GREEN`
+**HEARTBEAT_STAGE:** `LIVE_EVIDENCE_CAPTURED`
 
 | Field | Value |
 | --- | --- |
 | FINAL_UI_ENGINEERING_SHA | `0cadd2082e39befe03c1cc089cfa53fee5377e6c` |
-| CURRENT_LIVE_BASE | `2e251067c33b7ed3912d4d387f5ab2903695849b` |
-| PAIR_SEGMENTED_PLAYWRIGHT | PASS (12/12 on isolated `PLAYWRIGHT_PORT=3012`) |
-| PLAYWRIGHT_SKIPPED_DUE_PORT_CONFLICT | NO |
-| PUBLIC_BUILD | PASS (`Jbh-pyYAnJMGYaVQZtcSg` local Next production build) |
-| DEPLOYABLE_FILES | 12 frontend runtime paths |
-| LARAVEL_RUNTIME_FILES | 0 |
-| DASHBOARD_RUNTIME_FILES | 0 |
-| CONFIG_RUNTIME_FILES | 0 |
-| MIGRATIONS | 0 |
-| EXACT_DEPLOYABLE_FILE_COUNT | 12 |
-| UNEXPECTED_RUNTIME_SUBSYSTEMS | NONE |
-| TESTS_GREEN | YES |
-| LIVE_SABRE_MUTATIONS | 0 |
+| LIVE_PUBLIC_BUILD | `N2UgmUu_xxKIyYUu2pLRo` |
+| LIVE_SOURCE_DRIFT | 0 (12/12 activated FE blobs) |
+| ONE_WAY | PASS |
+| SEGMENTED_OUTBOUND | PASS |
+| SEGMENTED_RETURN | PASS |
+| SPLIT_CHECKOUT | PASS (SMART outbound + FREEDOM return on passenger) |
+| PAIR | PASS (single card + one shared fare) |
+| FALLBACK_FARE | PASS (Available/Standard fare present in sample) |
+| LAYOVER | PASS (`Layover in GYD` + duration; direct layover blocks = 0) |
+| SCREENSHOT_EVIDENCE_DIR | `docs/evidence/jp-bo-04g-final-ui/20260826T123600Z/` |
 | SANDBOX_STATUS | DEFERRED_EXTERNAL_CERT_AUTH |
-| LIVE_NOT_ACTIVATED_YET | YES (`LIVE_PUBLIC_BUILD=5jcScCO5Ujc-40-4nw1kr`, `UI_ENG_PRESENT_ON_LIVE=NO`) |
+| LIVE_SABRE_NEW_PNR_COUNT | 0 |
+| LIVE_SABRE_CANCEL_SEND_COUNT | 0 |
+| PAIR_SEGMENTED_PLAYWRIGHT | PASS |
+| PLAYWRIGHT_SKIPPED_DUE_PORT_CONFLICT | NO |
+| PUBLIC_BUILD | PASS |
 
-Production runtime pin remains **FINAL_UI_ENGINEERING_SHA** (`0cadd208…`), not heartbeat or test-only SHAs.
+Production runtime pin remains **FINAL_UI_ENGINEERING_SHA** (`0cadd208…`).
