@@ -11,14 +11,30 @@ function mockReturnOptionsBody() {
     flow: "return_split_return",
     search_id: MOCK_SEARCH_ID,
     outbound_key: OUTBOUND_KEY,
+    status: "ready",
     return_options: [
       {
         combo_id: "combo-1",
         fare_option_key: "fare-1",
         displayed_price: 250000,
+        can_book: true,
+        airline_code: "PK",
+        airline_name: "Pakistan International",
         return_journey_display: {
           departure_time_display: "14:00",
           arrival_time_display: "18:30",
+          origin_airport_code: "DXB",
+          destination_airport_code: "LHE",
+          airline_code: "PK",
+          airline_name: "Pakistan International",
+        },
+        journey_display: {
+          departure_time_display: "14:00",
+          arrival_time_display: "18:30",
+          origin_airport_code: "DXB",
+          destination_airport_code: "LHE",
+          airline_code: "PK",
+          airline_name: "Pakistan International",
         },
       },
     ],
@@ -26,6 +42,30 @@ function mockReturnOptionsBody() {
     per_page: 12,
     total: 1,
     has_more: false,
+  };
+}
+
+function mockReturnOfferDetails() {
+  return {
+    success: true,
+    search_id: MOCK_SEARCH_ID,
+    offer_id: "combo-1",
+    offer: {
+      offer_id: "combo-1",
+      can_book: true,
+      displayed_price: 250000,
+      select_url: "/booking/passengers",
+      airline_code: "PK",
+      airline_name: "Pakistan International",
+      segments: [
+        {
+          origin_airport_code: "DXB",
+          destination_airport_code: "LHE",
+          departure_time_display: "14:00",
+          arrival_time_display: "18:30",
+        },
+      ],
+    },
   };
 }
 
@@ -54,6 +94,14 @@ test.describe("JP-FULLSTACK-01B return-options handoff", () => {
         headers: { "set-cookie": "XSRF-TOKEN=test-csrf-token; Path=/" },
       });
     });
+    await page.route("**/api/public/content/csrf-token", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ csrf_token: "test-csrf-token" }),
+        headers: { "set-cookie": "XSRF-TOKEN=test-csrf-token; Path=/" },
+      });
+    });
 
     await page.route("**/laravel/flights/return-options/data*", async (route) => {
       await route.fulfill({
@@ -62,9 +110,23 @@ test.describe("JP-FULLSTACK-01B return-options handoff", () => {
         body: JSON.stringify(mockReturnOptionsBody()),
       });
     });
+    await page.route("**/flights/return-options/data*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockReturnOptionsBody()),
+      });
+    });
+    await page.route("**/flights/results/offer**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockReturnOfferDetails()),
+      });
+    });
 
     let postedForm: { action: string; fields: Record<string, string> } | null = null;
-    await page.route("**/flights/select-return-combo", async (route) => {
+    await page.route("**/flights/select-return-combo**", async (route) => {
       const request = route.request();
       postedForm = {
         action: request.url(),
@@ -83,9 +145,12 @@ test.describe("JP-FULLSTACK-01B return-options handoff", () => {
     });
 
     await page.goto(`/flights/return-options?search_id=${MOCK_SEARCH_ID}&outbound_key=${OUTBOUND_KEY}`);
+    // Book Now opens Details; Continue confirms fare then posts select-return-combo.
     await page.getByTestId("result-price-button").click();
+    await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
+    await page.getByTestId("continue-to-passengers").click();
 
-    await expect.poll(() => postedForm).not.toBeNull();
+    await expect.poll(() => postedForm, { timeout: 15000 }).not.toBeNull();
     expect(postedForm!.action).toContain("/flights/select-return-combo");
     expect(postedForm!.fields.search_id).toBe(MOCK_SEARCH_ID);
     expect(postedForm!.fields.combo_id).toBe("combo-1");

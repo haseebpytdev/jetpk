@@ -316,14 +316,17 @@ async function mockReturnSplitCheckout(page: Page) {
 
 async function interceptSelectReturnCombo(page: Page) {
   let posted: Record<string, string> | null = null;
-  await page.route("**/flights/select-return-combo**", async (route: Route) => {
+  const capture = async (route: Route) => {
     posted = parseFormBody(route.request().postData());
     await route.fulfill({
       status: 200,
       contentType: "text/html",
-      body: "<html><body>select-return-combo accepted</body></html>",
+      body: "<html><body data-testid=\"select-return-combo-accepted\">select-return-combo accepted</body></html>",
     });
-  });
+  };
+  await page.route("**/flights/select-return-combo**", capture);
+  // Production smoke builds resolve Laravel handoffs to the public host; keep them local.
+  await page.route("https://jetpakistan.pk/flights/select-return-combo**", capture);
   return {
     getPosted: () => posted,
   };
@@ -610,9 +613,16 @@ test("10 return split direct book non-default", async ({ page }) => {
   const intercept = await interceptSelectReturnCombo(page);
 
   await openSegmentedOutbound(page);
-  // Select outbound (default branded fare key preserved into return options URL).
-  await page.getByTestId("result-price-button").first().click();
-  await expect(page).toHaveURL(/\/flights\/return-options/);
+  // Segmented outbound: Book Now → Details → confirm fare → Continue to return options.
+  await page.getByTestId("outbound-book-now").first().click();
+  await expect(page.getByTestId("flight-details-drawer")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("fare-family-details")).toBeVisible();
+  // Default brand Economy Basic is preselected; Continue still required.
+  await expect(
+    page.locator("[data-fare-family-card]", { hasText: "Economy Basic" }).getByRole("button", { name: /Selected/i }),
+  ).toBeVisible();
+  await page.getByTestId("continue-to-passengers").click();
+  await expect(page).toHaveURL(/\/flights\/return-options/, { timeout: 15000 });
   await expect(page).toHaveURL(/outbound_fare_option_key=fare-basic/);
   await expect(page.getByTestId("return-option-card").first()).toBeVisible({ timeout: 15000 });
   await expect(page.getByTestId("outbound-fare-preserved")).toBeVisible();
@@ -664,12 +674,14 @@ test("10 return split direct book non-default", async ({ page }) => {
   expect(posted.return_fare_option_key).not.toBe("return-basic");
   expect(posted.fare_option_key).not.toBe("return-basic");
 
-  await page.goto("/booking/passengers?search_id=" + SEARCH_ID);
+  // Wait out the select-return-combo form navigation before asserting passenger/review shells.
+  await page.waitForLoadState("domcontentloaded").catch(() => undefined);
+  await page.goto(`/booking/passengers?search_id=${SEARCH_ID}`, { waitUntil: "domcontentloaded" });
   await expect(page.getByTestId("return-split-outbound")).toContainText("Economy Basic");
   await expect(page.getByTestId("return-split-return")).toContainText("Economy Flex");
   await expect(page.getByTestId("return-split-total")).toContainText("195,000");
 
-  await page.goto("/booking/review");
+  await page.goto("/booking/review", { waitUntil: "domcontentloaded" });
   await expect(page.getByTestId("return-split-outbound").first()).toContainText("Economy Basic");
   await expect(page.getByTestId("return-split-return").first()).toContainText("Economy Flex");
   await expect(page.getByTestId("return-split-total").first()).toContainText("195,000");
