@@ -91,6 +91,10 @@ class AdminDirectCancelBookingTest extends TestCase
             'is_active' => true,
             'base_url' => 'https://api.platform.sabre.com',
             'name' => 'misconfigured-sandbox',
+            'settings' => [
+                'qa_sandbox_only' => true,
+                'public_customer_routing' => false,
+            ],
         ]);
         $booking = Booking::factory()->create([
             'agency_id' => $agency->id,
@@ -111,7 +115,7 @@ class AdminDirectCancelBookingTest extends TestCase
         );
 
         $response->assertStatus(409);
-        $this->assertStringContainsString('QA_LIFECYCLE_PRODUCTION_HOST_GUARD', (string) $response->json('message'));
+        $this->assertStringContainsString('QA_SANDBOX_CANCEL_EXACT_CONNECTION_PIN', (string) $response->json('message'));
         $booking->refresh();
         $this->assertNotSame(BookingStatus::Cancelled, $booking->status);
     }

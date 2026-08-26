@@ -33,6 +33,14 @@ class SupplierPublicRoutingAndSandboxQaGuardTest extends TestCase
         $this->assertTrue(SupplierPublicRoutingGuard::shouldSkipForChannel($connection, 'public_guest'));
         $this->assertTrue(SupplierPublicRoutingGuard::shouldSkipForChannel($connection, 'agent'));
         $this->assertFalse(SupplierPublicRoutingGuard::shouldSkipForChannel($connection, 'admin_qa_sandbox'));
+        $live = SupplierConnection::factory()->create([
+            'provider' => SupplierProvider::Sabre,
+            'environment' => SupplierEnvironment::Live,
+            'status' => SupplierConnectionStatus::Active,
+            'is_active' => true,
+            'base_url' => 'https://api.platform.sabre.com',
+        ]);
+        $this->assertTrue(SupplierPublicRoutingGuard::shouldSkipForChannel($live, 'admin_qa_sandbox'));
     }
 
     public function test_live_connection_remains_public_fanout_eligible(): void

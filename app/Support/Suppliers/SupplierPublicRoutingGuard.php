@@ -81,6 +81,25 @@ final class SupplierPublicRoutingGuard
 
     public static function shouldSkipForChannel(SupplierConnection $connection, string $sourceChannel): bool
     {
+        $channel = strtolower(trim($sourceChannel));
+
+        // Sandbox QA channel: never fan out to live/production-routed connections.
+        // Exact pin is enforced separately; this only blocks live eligibility.
+        if ($channel === 'admin_qa_sandbox') {
+            if ($connection->environment === SupplierEnvironment::Live) {
+                return true;
+            }
+            $settings = is_array($connection->settings) ? $connection->settings : [];
+            if (($settings['qa_sandbox_only'] ?? null) !== true) {
+                return true;
+            }
+            if (($settings['public_customer_routing'] ?? null) !== false) {
+                return true;
+            }
+
+            return false;
+        }
+
         if (! self::isProductionFanoutChannel($sourceChannel)) {
             return false;
         }

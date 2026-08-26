@@ -72,6 +72,8 @@ use App\Support\Sabre\SabrePassengerRecordsHttpValidationExcerptBuilder;
 use App\Support\Sabre\SabrePassengerRecordsPayloadDigest;
 use App\Support\Sabre\SabrePassengerRecordsV25WireSchemaValidator;
 use App\Support\Sabre\SabrePnrAttemptStructureSnapshot;
+use App\Support\Sabre\SabreSandboxQaConnectionPin;
+use App\Support\Sabre\SabreSandboxQaLifecycleGuard;
 use App\Support\Security\SensitiveDataRedactor;
 use App\Support\Suppliers\SabreItineraryTimingValidator;
 use App\Support\Suppliers\SabrePassengerRecordsMultiSegmentSellVerifier;
@@ -2950,6 +2952,37 @@ class SabreBookingService
                     'fare_amount' => $fareAmt,
                     'fare_currency' => $fareCur,
                 ];
+            }
+
+            // Sandbox QA lifecycle: STOP before HTTP if connection is not exact CERT sandbox pin.
+            $sandboxQaMode = ($options['sandbox_qa'] ?? false) === true
+                || strtolower((string) ($options['source_channel'] ?? '')) === SabreSandboxQaConnectionPin::SOURCE_CHANNEL
+                || ((is_array($connection->settings) ? $connection->settings : [])['qa_sandbox_only'] ?? null) === true;
+            if ($sandboxQaMode) {
+                $forbiddenLiveId = isset($options['forbid_live_connection_id'])
+                    ? (int) $options['forbid_live_connection_id']
+                    : null;
+                $qaGuard = SabreSandboxQaLifecycleGuard::assertSandboxQaPnrCreateAllowed($connection, $forbiddenLiveId);
+                if (! ($qaGuard['allowed'] ?? false)) {
+                    return [
+                        'success' => false,
+                        'status' => 'failed',
+                        'message' => 'QA_SANDBOX_PNR_CREATE_PRODUCTION_GUARD: '.($qaGuard['block_reason'] ?? 'blocked'),
+                        'live_call_attempted' => false,
+                        'live_call_allowed' => false,
+                        'reason_code' => 'qa_sandbox_pnr_create_blocked',
+                        'error_code' => (string) ($qaGuard['block_reason'] ?? 'qa_sandbox_pnr_create_blocked'),
+                        'passenger_count' => $paxCount,
+                        'segment_count' => $segCount,
+                        'supplier_connection_id' => $connId,
+                        'selected_offer_id' => $selectedOffer,
+                        'fare_amount' => $fareAmt,
+                        'fare_currency' => $fareCur,
+                        'resolved_host' => $qaGuard['resolved_host'] ?? null,
+                        'host_classification' => $qaGuard['host_classification'] ?? null,
+                        'production_sabre_host_selected' => (bool) ($qaGuard['production_sabre_host_selected'] ?? false),
+                    ];
+                }
             }
 
             $apiDraft = $draft;

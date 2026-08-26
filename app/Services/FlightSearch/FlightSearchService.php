@@ -18,6 +18,7 @@ use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\Pricing\IatiFarePricingResolver;
 use App\Support\Pricing\PublicCustomerPricing;
+use App\Support\Sabre\SabreSandboxQaConnectionPin;
 use App\Support\Suppliers\SabreChannelGateResolver;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use App\Support\Suppliers\SupplierPublicRoutingGuard;
@@ -89,6 +90,38 @@ class FlightSearchService
                 'offers' => [],
                 'warnings' => [],
             ];
+        }
+
+        // Sandbox QA must never fan out across active connections (incl. live Sabre).
+        // Prefer SabreSandboxQaSearchService; this path only allows an internal exact pin.
+        if (strtolower(trim($sourceChannel)) === SabreSandboxQaConnectionPin::SOURCE_CHANNEL) {
+            $pinId = (int) ($criteria['_internal_qa_sandbox_connection_id'] ?? 0);
+            $forbiddenLiveId = isset($criteria['_internal_forbid_live_connection_id'])
+                ? (int) $criteria['_internal_forbid_live_connection_id']
+                : null;
+            $pinned = SabreSandboxQaConnectionPin::resolveExact($pinId, $forbiddenLiveId);
+            if (! ($pinned['allowed'] ?? false) || ! ($pinned['connection'] instanceof SupplierConnection)) {
+                $this->logPublicSearchDiagnostics($criteria, $agency, $sourceChannel, $connections, [
+                    'blocking_reason' => 'qa_sandbox_exact_connection_pin_required',
+                    'pin_block_reason' => $pinned['block_reason'] ?? 'missing_pin',
+                    'qa_sandbox_connection_count' => 0,
+                    'qa_sandbox_live_connection_eligible' => (bool) ($pinned['live_connection_eligible'] ?? false),
+                ]);
+
+                return [
+                    'offers' => [],
+                    'warnings' => ['QA_SANDBOX_EXACT_CONNECTION_PIN: '.($pinned['block_reason'] ?? 'blocked')],
+                ];
+            }
+
+            $connections = collect([$pinned['connection']]);
+            Log::info('flight_search.pipeline', [
+                'stage' => 'qa_sandbox_exact_connection_pin',
+                'search_id' => (string) ($criteria['search_id'] ?? ''),
+                'connection_id' => $pinned['connection']->id,
+                'connection_count' => 1,
+                'live_connection_eligible' => false,
+            ]);
         }
 
         $supplierSearchEnabled = $this->platformModuleEnforcer->effectiveModuleEnabled('supplier_search');

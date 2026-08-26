@@ -268,10 +268,15 @@ class BookingCancellationController extends Controller
         }
 
         if ($connection->isSandbox()) {
-            $guard = SabreSandboxQaLifecycleGuard::assertSandboxQaAllowed($connection);
+            $settings = is_array($connection->settings) ? $connection->settings : [];
+            $isQaSandbox = ($settings['qa_sandbox_only'] ?? null) === true;
+            $guard = $isQaSandbox
+                ? SabreSandboxQaLifecycleGuard::assertSandboxQaCancelAllowed($connection)
+                : SabreSandboxQaLifecycleGuard::assertSandboxQaAllowed($connection);
             if (! ($guard['allowed'] ?? false)) {
                 throw new InvalidArgumentException(
-                    'QA_LIFECYCLE_PRODUCTION_HOST_GUARD: '.($guard['block_reason'] ?? 'blocked')
+                    ($isQaSandbox ? 'QA_SANDBOX_CANCEL_EXACT_CONNECTION_PIN: ' : 'QA_LIFECYCLE_PRODUCTION_HOST_GUARD: ')
+                    .($guard['block_reason'] ?? 'blocked')
                 );
             }
         }

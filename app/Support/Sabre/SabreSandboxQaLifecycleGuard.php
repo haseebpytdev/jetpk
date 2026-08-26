@@ -80,6 +80,59 @@ final class SabreSandboxQaLifecycleGuard
         ]);
     }
 
+    /**
+     * Pre-HTTP gate for sandbox QA PNR create. Ordinary production booking paths must not call this.
+     *
+     * @return array{
+     *     allowed: bool,
+     *     block_reason: string|null,
+     *     resolved_environment: string,
+     *     resolved_host: string,
+     *     host_classification: string,
+     *     production_sabre_host_selected: bool,
+     *     connection_id: int|null,
+     *     connection_alias_safe: string|null
+     * }
+     */
+    public static function assertSandboxQaPnrCreateAllowed(
+        ?SupplierConnection $connection,
+        ?int $forbiddenLiveConnectionId = null,
+    ): array {
+        $pin = SabreSandboxQaConnectionPin::resolveExact(
+            (int) ($connection?->id ?? 0),
+            $forbiddenLiveConnectionId,
+        );
+        if (! ($pin['allowed'] ?? false)) {
+            return array_merge(
+                self::blocked($pin['block_reason'] ?? 'qa_sandbox_pnr_create_blocked', $connection),
+                ['production_sabre_host_selected' => (bool) ($pin['live_connection_eligible'] ?? false)],
+            );
+        }
+
+        return self::assertSandboxQaAllowed($connection, $forbiddenLiveConnectionId);
+    }
+
+    /**
+     * Cancel path pin for sandbox QA bookings (exact sandbox connection + CERT host).
+     *
+     * @return array{
+     *     allowed: bool,
+     *     block_reason: string|null,
+     *     resolved_environment: string,
+     *     resolved_host: string,
+     *     host_classification: string,
+     *     production_sabre_host_selected: bool,
+     *     connection_id: int|null,
+     *     connection_alias_safe: string|null
+     * }
+     */
+    public static function assertSandboxQaCancelAllowed(
+        ?SupplierConnection $connection,
+        ?int $forbiddenLiveConnectionId = null,
+    ): array {
+        return self::assertSandboxQaPnrCreateAllowed($connection, $forbiddenLiveConnectionId);
+    }
+
     public static function resolvedHost(SupplierConnection $connection): string
     {
         $base = trim((string) ($connection->base_url ?: SabreSupplierConnectionNormalizer::CERT_BASE_URL));
