@@ -4,6 +4,8 @@
 **Branch:** `phase/jp-bo-04g-progressive`  
 **Previous branch HEAD:** `93b21d0e4bf23ee402574283f044f399b24024ed`  
 **FINAL_CLOSURE_ENGINEERING_SHA:** `fc96b2cf51ccdbbe86f6a86790adfe29055f8dc6`  
+**FINAL_DOCS_SHA:** `87de4b1a6f0f4e4455e54d719f7f54ac3898baf8`  
+**GIT_0_0:** YES  
 **FINAL_COMBINED_COMMERCE_RUNTIME_REFERENCE:** `4ff3af2721b179e5cf5e0a55fde11aa65b451bc9`  
 **Mode:** Sandbox-only network lifecycle authorized; live Sabre mutation forbidden  
 **Hard stop reason:** dedicated Sabre CERT/sandbox credentials not present in secure config
