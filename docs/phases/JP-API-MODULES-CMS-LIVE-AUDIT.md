@@ -120,32 +120,26 @@ None.
 
 ## Production deploy / live CMS matrices
 
-Filled after protected deploy + live browser verification:
+- Backup: `jp-api-modules-cms-20260826T160238Z`
+- Deployed runtime SHA: `d3bedc151997b9e8eabb058f9270cf18bdb0a1fd`
+- New dashboard build: `1wjGmmUpLjOVyY0CllBUo`
+- Public build unchanged: `N2UgmUu_xxKIyYUu2pLRo`
+- `LIVE_SOURCE_DRIFT=0`
 
-- `CMS_FIELD_*` / `CMS_MEDIA_*` counts
-- Live screenshot paths under `tmp/evidence/jp-api-modules-cms/`
-- `LIVE_SOURCE_DRIFT`
-- Al-Haider owner-assisted entry status
+Live evidence (`tmp/evidence/jp-api-modules-cms/`):
 
-## Al-Haider safety proof
-
-- Default `token_generation_enabled` = false
-- Manual mode probe does not login
-- This phase issues **zero** login/token-generation calls
-- No group reservation/booking
-
-## Rollback
-
-1. Redeploy previous engineering SHA via protected scripts.
-2. SMTP: disable DB SMTP connection → ENV fallback; do not delete ENV.
-3. CMS: republish prior homepage draft/revision if needed.
-
-## Remaining blockers
-
-- Live production deploy + field-by-field CMS browser matrix
-- Owner-assisted Al-Haider token entry (Cursor stops before secrets)
-- Optional read-only inventory only after owner save + contract confirmation
+| Gate | Result |
+|---|---|
+| API & Modules hub | PASS |
+| Unconfigured provider cards | 0 |
+| Sabre cards | 2 |
+| SMTP card | PASS |
+| Add Connection + Al-Haider endpoint/manual mode | PASS |
+| CMS eyebrow save → public render → restore | PASS / PASS / PASS |
+| Al-Haider token generation calls | 0 |
+| Owner Al-Haider secret entry | NOT_ENTERED (stopped before secrets) |
+| CMS media matrix | NOT_RUN this pass (text path proven; media deferred to follow-up) |
 
 ## Final status
 
-Engineering complete locally with automated tests green. Live deploy/verify section completed in the final report after protected production run.
+Engineering deployed and live API & Modules + representative CMS text truth verified. Owner-assisted Al-Haider token entry and full CMS media matrix remain next.
