@@ -4,7 +4,7 @@
 **Branch:** `phase/jp-bo-04g-progressive`  
 **PREVIOUS_ENGINEERING_SHA:** `fc96b2cf51ccdbbe86f6a86790adfe29055f8dc6`  
 **FINAL_SANDBOX_ENGINEERING_SHA:** `2e251067c33b7ed3912d4d387f5ab2903695849b`  
-**FINAL_DOCS_SHA:** _(pinned after docs commit)_  
+**FINAL_DOCS_SHA:** `83ff2bae45fc9399d003cfc548b82706ea2a7ea7`  
 **GIT_0_0:** YES (after docs push)  
 **Production base (commerce):** `4ff3af2721b179e5cf5e0a55fde11aa65b451bc9`  
 **Public build (unchanged):** `5jcScCO5Ujc-40-4nw1kr`  
