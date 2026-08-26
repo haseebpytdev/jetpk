@@ -11,7 +11,11 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-25 (JP-BO-04G progressive results + fare authority)
+**Last updated:** 2026-08-26 (JP-BO-04G sandbox-safe admin cancel + public routing guard)
+
+| Date | Phase | Notes |
+| --- | --- | --- |
+| 2026-08-26 | JP-BO-04G-SANDBOX-CANCEL | **Sandbox-safe admin Cancel PNR:** `SupplierPublicRoutingGuard` excludes non-live from public/agent fanout; `SabreSandboxQaLifecycleGuard` + `sabre:ensure-sandbox-qa-connection`; admin direct cancel modal + eligibility/`cancel_pnr_context`; request reuse. Network sandbox lifecycle **blocked** until CERT env credentials exist. Tests: `SupplierPublicRoutingAndSandboxQaGuardTest`, `AdminDirectCancelBookingTest`. |
 
 ---
 
