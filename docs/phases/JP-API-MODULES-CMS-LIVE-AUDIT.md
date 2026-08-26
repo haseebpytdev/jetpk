@@ -14,7 +14,7 @@
 
 ## Engineering SHA
 
-Recorded at docs commit time (see git log / final report).
+`d3bedc151997b9e8eabb058f9270cf18bdb0a1fd`
 
 ## Objective
 
