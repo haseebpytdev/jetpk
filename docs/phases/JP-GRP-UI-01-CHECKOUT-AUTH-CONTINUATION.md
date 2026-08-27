@@ -37,8 +37,16 @@ Live detail JSON for `ALH-*` 404ed under `route:cache` because `Route::bind` in 
 
 `docs/evidence/jp-grp-ui-01/20260827T150400Z/`
 
+## Local fake-supplier E2E
+
+`tests/Feature/GroupTicketing/LocalFakeSupplierCheckoutE2ETest.php` — PASS (37 assertions)
+
+Anonymous 401 → JSON login resume → 2 pax → price/seat guards → local hold → manual payment → admin verify → confirmation + IDOR. `ALHAIDER_BOOKING_ENABLED=false` throughout (`supplier_reservation_id` remains null).
+
 ## Hard stop
 
 STOP before real Al-Haider booking/payment and before enabling booking/reservation gates.
 
-Next owner step: provide a safe test customer login (or authorize use of an existing QA account) to complete live resume + checkout form UAT only — still no commercial mutation.
+**Blocked for full live matrix:** successful live login + post-login checkout screenshots.
+
+Next owner step: provide a **safe disposable test customer** login (email/password) for production UAT only — still no commercial mutation, gates remain OFF.
