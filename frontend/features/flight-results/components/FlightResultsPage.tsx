@@ -19,7 +19,7 @@ import { FlightResultCard } from "./FlightResultCard";
 import { LoadMoreControl } from "./LoadMoreControl";
 import { MobileFilterDrawer } from "./MobileFilterDrawer";
 import { OutboundOptionCard } from "./OutboundOptionCard";
-import { PairReturnCard } from "./PairReturnCard";
+import { PairReturnCard, pairedOptionToOffer } from "./PairReturnCard";
 import { PartialResultsNotice } from "./PartialResultsNotice";
 import { ResultSkeleton } from "./ResultSkeleton";
 import { ResultsFilterPanel } from "./ResultsFilterPanel";
@@ -198,12 +198,15 @@ export function FlightResultsPage() {
       if (resultsStaleLocked) return;
       const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
       if (!resolvedSearchId) return;
+      const seededOffer = pairedOptionToOffer(pair);
       setDetailsContext({
         searchId: resolvedSearchId,
         offerId: pair.combo_id,
         comboId: pair.combo_id,
         outboundKey: pair.outbound_key,
         fareOptionKey,
+        initialOffer: seededOffer,
+        initialFareOptions: seededOffer.branded_fares_display_options ?? seededOffer.fare_family_options_display,
         intent: "booking",
         legMode: "pair",
       });
@@ -223,10 +226,17 @@ export function FlightResultsPage() {
       : results.offers.length;
   const isBootstrapping =
     results.status === "idle" || results.status === "loading" || results.status === "initializing";
-  const isSearchingMask = results.status === "searching" || (isBootstrapping && shownCount === 0);
+  const isSearchingMask =
+    results.status === "searching" || results.status === "loading" || (isBootstrapping && shownCount === 0);
+  // Never show prior cards beside a fatal error/failed banner (stale mix blocker).
   const showResultsList =
     !resultsStaleLocked &&
-    (results.status === "ready" || results.status === "partial" || (shownCount > 0 && results.status !== "empty"));
+    results.status !== "error" &&
+    results.status !== "failed" &&
+    results.status !== "expired" &&
+    (results.status === "ready" ||
+      results.status === "partial" ||
+      (shownCount > 0 && results.status !== "empty" && results.status !== "loading"));
   const isLoading = isBootstrapping && shownCount === 0;
 
   return (

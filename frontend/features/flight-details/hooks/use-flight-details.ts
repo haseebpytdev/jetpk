@@ -52,7 +52,7 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
       if (requestId !== requestIdRef.current) return;
 
       if (!response.ok) {
-        if (context.initialOffer && context.legMode === "outbound_confirm") {
+        if (context.initialOffer && (context.legMode === "outbound_confirm" || context.legMode === "pair" || context.legMode === "return_confirm")) {
           const seeded: FlightOfferDetailsResponse = {
             success: true,
             search_id: context.searchId,

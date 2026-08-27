@@ -10,6 +10,7 @@ import { SearchErrorState } from "@/features/flight-results/components/SearchErr
 import { ExpiredSearchState } from "@/features/flight-results/components/ExpiredSearchState";
 import { SearchProgress } from "@/features/flight-results/components/SearchProgress";
 import { AirlineIdentity } from "@/features/flight-results/components/AirlineIdentity";
+import { normalizeJourneyDisplay } from "@/features/flight-results/utils/normalize-journey-display";
 import { FareBadge } from "@/features/flight-results/components/FareBadge";
 import { SupplierSourceBadge } from "@/features/flight-results/components/SupplierSourceBadge";
 import { TimeRouteBlock } from "@/features/flight-results/components/TimeRouteBlock";
@@ -17,25 +18,14 @@ import type { FareFamilyOption, FlightOffer } from "@/features/flight-results/ty
 import { formatWholePkr } from "@/features/flight-results/utils/price";
 import { mergeProgressiveReturnOptions } from "@/features/flight-results/utils/merge-return-options";
 
-type JourneyDisplay = {
-  departure_time_display?: string;
-  arrival_time_display?: string;
-  duration_display?: string;
-  stops?: number;
-  stops_label_display?: string;
-  layover_summary_display?: string[];
-  airline_code?: string;
-  airline_name?: string;
-  airline_logo_url?: string | null;
-  origin_airport_code?: string;
-  destination_airport_code?: string;
-  arrival_day_offset_display?: string;
-  flight_number?: string;
-};
-
-function resolveJourneyDisplay(option: Record<string, unknown>): JourneyDisplay | undefined {
-  const journey = option.journey_display ?? option.return_journey_display;
-  return journey && typeof journey === "object" ? (journey as JourneyDisplay) : undefined;
+function resolveJourneyDisplay(option: Record<string, unknown>) {
+  const raw = option.journey_display ?? option.return_journey_display;
+  if (!raw || typeof raw !== "object") return null;
+  return normalizeJourneyDisplay(raw as Record<string, unknown>, {
+    airline_code: typeof option.airline_code === "string" ? option.airline_code : undefined,
+    airline_name: typeof option.airline_name === "string" ? option.airline_name : undefined,
+    airline_logo_url: typeof option.airline_logo_url === "string" ? option.airline_logo_url : null,
+  });
 }
 
 function resolveFareOptions(option: Record<string, unknown>): FareFamilyOption[] {

@@ -131,12 +131,14 @@ class ReturnSplitComboService
                 ? 'PKR '.number_format((float) $fromAmount, 0)
                 : 'Fare unavailable';
 
+            $airlineName = AirlineDisplayNameResolver::resolveForOffer($sampleOffer, $airlineNameMap);
+            $logo = $airlineLogos[$code] ?? null;
             $options[] = array_merge([
                 'outbound_key' => (string) $group['outbound_key'],
-                'journey_display' => $outJourney,
+                'journey_display' => $this->enrichJourneyDisplayForUi($outJourney, $code, $airlineName, $logo),
                 'airline_code' => $code,
-                'airline_name' => AirlineDisplayNameResolver::resolveForOffer($sampleOffer, $airlineNameMap),
-                'airline_logo_url' => $airlineLogos[$code] ?? null,
+                'airline_name' => $airlineName,
+                'airline_logo_url' => $logo,
                 'from_total_amount' => $fromAmount,
                 'from_total_display' => $fromDisplay,
                 'combo_count' => count($group['combo_ids'] ?? []),
@@ -202,15 +204,47 @@ class ReturnSplitComboService
             }
             $total = $this->comboFinalPrice($combo);
             $code = strtoupper((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')));
+            $airlineName = AirlineDisplayNameResolver::resolveForOffer($offer, $airlineNameMap);
+            $logo = $airlineLogos[$code] ?? null;
+            $outCode = strtoupper(trim((string) ($outJourney['airline_code'] ?? '')));
+            if ($outCode === '' && is_array($outJourney['segments_display'][0] ?? null)) {
+                $outCode = strtoupper(trim((string) ($outJourney['segments_display'][0]['airline_code'] ?? '')));
+            }
+            if ($outCode === '') {
+                $outCode = $code;
+            }
+            $retCode = strtoupper(trim((string) ($retJourney['airline_code'] ?? '')));
+            if ($retCode === '' && is_array($retJourney['segments_display'][0] ?? null)) {
+                $retCode = strtoupper(trim((string) ($retJourney['segments_display'][0]['airline_code'] ?? '')));
+            }
+            if ($retCode === '') {
+                $retCode = $code;
+            }
+            $outName = $outCode === $code
+                ? $airlineName
+                : AirlineDisplayNameResolver::resolve($outCode, '', $airlineNameMap);
+            $retName = $retCode === $code
+                ? $airlineName
+                : AirlineDisplayNameResolver::resolve($retCode, '', $airlineNameMap);
             $rows[] = array_merge([
                 'combo_id' => $comboId,
                 'outbound_key' => (string) ($combo['outbound_key'] ?? ''),
                 'return_key' => (string) ($combo['return_key'] ?? ''),
-                'outbound_journey' => $outJourney,
-                'return_journey' => $retJourney,
+                'outbound_journey' => $this->enrichJourneyDisplayForUi(
+                    $outJourney,
+                    $outCode,
+                    $outName,
+                    $airlineLogos[$outCode] ?? $logo,
+                ),
+                'return_journey' => $this->enrichJourneyDisplayForUi(
+                    $retJourney,
+                    $retCode,
+                    $retName,
+                    $airlineLogos[$retCode] ?? $logo,
+                ),
                 'airline_code' => $code,
-                'airline_name' => AirlineDisplayNameResolver::resolveForOffer($offer, $airlineNameMap),
-                'airline_logo_url' => $airlineLogos[$code] ?? null,
+                'airline_name' => $airlineName,
+                'airline_logo_url' => $logo,
                 'total_amount' => $total,
                 'total_display' => $total !== null && $total > 0 ? 'PKR '.number_format((float) $total, 0) : 'Fare unavailable',
                 'cabin' => (string) ($offer['cabin'] ?? ''),
@@ -286,6 +320,8 @@ class ReturnSplitComboService
             }
 
             $code = strtoupper((string) ($offer['airline_code'] ?? ($offer['carrier_code'] ?? '')));
+            $airlineName = AirlineDisplayNameResolver::resolveForOffer($offer, $airlineNameMap);
+            $logo = $airlineLogos[$code] ?? null;
             $priceDisplay = $total !== null && $total > 0
                 ? 'PKR '.number_format((float) $total, 0)
                 : 'Fare unavailable';
@@ -298,10 +334,10 @@ class ReturnSplitComboService
             $rows[] = array_merge([
                 'combo_id' => $comboId,
                 'return_key' => (string) ($combo['return_key'] ?? ''),
-                'journey_display' => $returnJourney,
+                'journey_display' => $this->enrichJourneyDisplayForUi($returnJourney, $code, $airlineName, $logo),
                 'airline_code' => $code,
-                'airline_name' => AirlineDisplayNameResolver::resolveForOffer($offer, $airlineNameMap),
-                'airline_logo_url' => $airlineLogos[$code] ?? null,
+                'airline_name' => $airlineName,
+                'airline_logo_url' => $logo,
                 'total_amount' => $total,
                 'total_display' => $priceDisplay,
                 'fare_delta_display' => $fareDeltaDisplay,
@@ -394,9 +430,8 @@ class ReturnSplitComboService
             return null;
         }
 
-        if (! $this->passesSameCarrierGate($outboundSegs, $returnSegs, $offer)) {
-            return null;
-        }
+        // JP-COMBINED-01: supplier may return mixed marketing carriers on a complete
+        // round-trip combo. Do not drop those pairs — Pair UI renders both airlines.
 
         $outboundKey = $this->buildLegKey($outboundSegs, $offer);
         $returnKey = $this->buildLegKey($returnSegs, $offer);
@@ -504,13 +539,66 @@ class ReturnSplitComboService
     }
 
     /**
-     * RETURN-SPLIT-SELECT-R3 — enrich split card API rows with display/pricing fields.
+     * Emit both Laravel journey keys and FE card aliases so Pair/Segmented cards
+     * never fall back to "—" / "?" when supplier journey data exists.
      *
-     * @param  array<string, mixed>  $offer
-     * @param  array<string, mixed>  $criteria
+     * @param  array<string, mixed>  $journey
      * @return array<string, mixed>
      */
+    protected function enrichJourneyDisplayForUi(
+        array $journey,
+        string $fallbackAirlineCode = '',
+        string $fallbackAirlineName = '',
+        ?string $fallbackLogoUrl = null,
+    ): array {
+        $origin = strtoupper(trim((string) ($journey['origin_airport_code'] ?? $journey['origin'] ?? '')));
+        $destination = strtoupper(trim((string) ($journey['destination_airport_code'] ?? $journey['destination'] ?? '')));
+        $stops = (int) ($journey['stops'] ?? $journey['stops_count'] ?? 0);
+        $stopsLabel = trim((string) ($journey['stops_label_display'] ?? $journey['stops_display'] ?? ''));
+        if ($stopsLabel === '') {
+            $stopsLabel = $stops === 0 ? 'Direct' : ($stops === 1 ? '1 stop' : $stops.' stops');
+        }
+        $layovers = $journey['layover_summary_display'] ?? $journey['layover_summary'] ?? null;
+        $offset = $journey['arrival_day_offset_display'] ?? $journey['arrival_day_offset'] ?? null;
+
+        $segAirlineCode = '';
+        $segAirlineName = '';
+        $segments = is_array($journey['segments_display'] ?? null) ? $journey['segments_display'] : [];
+        if ($segments !== [] && is_array($segments[0] ?? null)) {
+            $segAirlineCode = strtoupper(trim((string) ($segments[0]['airline_code'] ?? '')));
+            $segAirlineName = trim((string) ($segments[0]['airline_name'] ?? ''));
+        }
+
+        $airlineCode = strtoupper(trim((string) ($journey['airline_code'] ?? '')));
+        if ($airlineCode === '') {
+            $airlineCode = $segAirlineCode !== '' ? $segAirlineCode : strtoupper(trim($fallbackAirlineCode));
+        }
+        $airlineName = trim((string) ($journey['airline_name'] ?? ''));
+        if ($airlineName === '') {
+            $airlineName = $segAirlineName !== '' ? $segAirlineName : trim($fallbackAirlineName);
+        }
+        $logo = array_key_exists('airline_logo_url', $journey) ? $journey['airline_logo_url'] : $fallbackLogoUrl;
+
+        return array_merge($journey, [
+            'origin' => $origin,
+            'destination' => $destination,
+            'origin_airport_code' => $origin,
+            'destination_airport_code' => $destination,
+            'stops' => $stops,
+            'stops_count' => $stops,
+            'stops_display' => $stopsLabel,
+            'stops_label_display' => $stopsLabel,
+            'layover_summary_display' => is_array($layovers) ? $layovers : null,
+            'arrival_day_offset_display' => is_string($offset) && $offset !== '' ? $offset : null,
+            'airline_code' => $airlineCode,
+            'airline_name' => $airlineName,
+            'airline_logo_url' => $logo,
+        ]);
+    }
+
     /**
+     * RETURN-SPLIT-SELECT-R3 — enrich split card API rows with display/pricing fields.
+     *
      * @param  array<string, mixed>  $offer
      * @param  array<string, mixed>  $criteria
      * @param  array<string, string>  $cityMap

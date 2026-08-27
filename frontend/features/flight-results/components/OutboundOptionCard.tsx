@@ -3,6 +3,7 @@
 import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
 import { useMemo, useState } from "react";
 import type { FareFamilyOption, FlightOffer, OutboundOption } from "../types";
+import { normalizeJourneyDisplay } from "../utils/normalize-journey-display";
 import { formatWholePkr } from "../utils/price";
 import { AirlineIdentity } from "./AirlineIdentity";
 import { FareBadge } from "./FareBadge";
@@ -24,22 +25,38 @@ function resolveFareOptions(option: OutboundOption): FareFamilyOption[] {
   return option.branded_fares_display_options ?? option.fare_family_options_display ?? [];
 }
 
+function optionAirlineFallback(option: OutboundOption) {
+  const extended = option as OutboundOption & {
+    airline_code?: string;
+    airline_name?: string;
+    airline_logo_url?: string | null;
+  };
+  return {
+    airline_code: extended.airline_code,
+    airline_name: extended.airline_name,
+    airline_logo_url: extended.airline_logo_url ?? null,
+  };
+}
+
 export function outboundOptionToOffer(option: OutboundOption): FlightOffer {
-  const journey = option.journey_display;
+  const journey = normalizeJourneyDisplay(
+    option.journey_display as Record<string, unknown> | undefined,
+    optionAirlineFallback(option),
+  );
   return {
     offer_id: option.outbound_key,
-    airline_code: journey?.airline_code,
-    airline_name: journey?.airline_name,
-    airline_logo_url: journey?.airline_logo_url,
-    departure_time: journey?.departure_time_display,
-    arrival_time: journey?.arrival_time_display,
-    departure_airport_code: journey?.origin_airport_code,
-    arrival_airport_code: journey?.destination_airport_code,
-    duration: journey?.duration_display,
-    stops: journey?.stops ?? 0,
-    stops_label_display: journey?.stops_label_display,
-    layover_summary_display: journey?.layover_summary_display,
-    arrival_day_offset_display: journey?.arrival_day_offset_display,
+    airline_code: journey.airline_code,
+    airline_name: journey.airline_name,
+    airline_logo_url: journey.airline_logo_url,
+    departure_time: journey.departure_time_display,
+    arrival_time: journey.arrival_time_display,
+    departure_airport_code: journey.origin_airport_code,
+    arrival_airport_code: journey.destination_airport_code,
+    duration: journey.duration_display,
+    stops: journey.stops,
+    stops_label_display: journey.stops_label_display,
+    layover_summary_display: journey.layover_summary_display,
+    arrival_day_offset_display: journey.arrival_day_offset_display,
     displayed_price: option.from_total_amount,
     price_display: option.from_total_display,
     final_customer_price: option.from_total_amount,
@@ -51,22 +68,25 @@ export function outboundOptionToOffer(option: OutboundOption): FlightOffer {
     has_fare_choice_options: option.has_fare_choice_options,
     segments: [
       {
-        origin_airport_code: journey?.origin_airport_code,
-        destination_airport_code: journey?.destination_airport_code,
-        departure_time_display: journey?.departure_time_display,
-        arrival_time_display: journey?.arrival_time_display,
-        duration_display: journey?.duration_display,
-        airline_code: journey?.airline_code,
-        airline_name: journey?.airline_name,
-        airline_logo_url: journey?.airline_logo_url,
-        arrival_day_offset_display: journey?.arrival_day_offset_display,
+        origin_airport_code: journey.origin_airport_code,
+        destination_airport_code: journey.destination_airport_code,
+        departure_time_display: journey.departure_time_display,
+        arrival_time_display: journey.arrival_time_display,
+        duration_display: journey.duration_display,
+        airline_code: journey.airline_code,
+        airline_name: journey.airline_name,
+        airline_logo_url: journey.airline_logo_url,
+        arrival_day_offset_display: journey.arrival_day_offset_display,
       },
     ],
   };
 }
 
 export function OutboundOptionCard({ option, searchId, onOpenDetails }: OutboundOptionCardProps) {
-  const journey = option.journey_display;
+  const journey = normalizeJourneyDisplay(
+    option.journey_display as Record<string, unknown> | undefined,
+    optionAirlineFallback(option),
+  );
   const fareOptions = useMemo(() => resolveFareOptions(option), [option]);
   const [selectedFareKey] = useState(() => fareOptions[0]?.option_key ?? "");
   const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey) ?? fareOptions[0];
@@ -84,14 +104,14 @@ export function OutboundOptionCard({ option, searchId, onOpenDetails }: Outbound
       className="overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface p-3 shadow-jp-card transition-all hover:border-jp-primary/30 hover:shadow-md focus-within:border-jp-primary/40 sm:px-4"
       data-testid="outbound-option-card"
       data-selected-fare-key={effectiveFareKey || undefined}
-      aria-label={`${journey?.airline_name ?? journey?.airline_code ?? "Flight"} ${journey?.departure_time_display ?? ""} to ${journey?.arrival_time_display ?? ""}`}
+      aria-label={`${journey.airline_name || journey.airline_code || "Flight"} ${journey.departure_time_display} to ${journey.arrival_time_display}`}
     >
       <div className="grid items-center gap-3 md:grid-cols-[minmax(8rem,0.85fr)_minmax(16rem,2fr)_minmax(10.5rem,0.95fr)] lg:gap-4 xl:grid-cols-[minmax(10.5rem,1fr)_minmax(20rem,2.35fr)_minmax(12.5rem,0.95fr)]">
         <div className="min-w-0 md:pr-1">
           <AirlineIdentity
-            code={journey?.airline_code}
-            name={journey?.airline_name}
-            logoUrl={journey?.airline_logo_url}
+            code={journey.airline_code}
+            name={journey.airline_name}
+            logoUrl={journey.airline_logo_url}
             size="md"
           />
           {option.combo_count ? (
@@ -103,15 +123,15 @@ export function OutboundOptionCard({ option, searchId, onOpenDetails }: Outbound
 
         <div className="min-w-0 space-y-2">
           <TimeRouteBlock
-            departureTime={journey?.departure_time_display}
-            arrivalTime={journey?.arrival_time_display}
-            arrivalDayOffset={journey?.arrival_day_offset_display}
-            originCode={journey?.origin_airport_code}
-            destinationCode={journey?.destination_airport_code}
-            duration={journey?.duration_display}
-            stops={journey?.stops ?? 0}
-            stopsLabel={journey?.stops_label_display}
-            layoverSummary={journey?.layover_summary_display}
+            departureTime={journey.departure_time_display}
+            arrivalTime={journey.arrival_time_display}
+            arrivalDayOffset={journey.arrival_day_offset_display}
+            originCode={journey.origin_airport_code}
+            destinationCode={journey.destination_airport_code}
+            duration={journey.duration_display}
+            stops={journey.stops}
+            stopsLabel={journey.stops_label_display}
+            layoverSummary={journey.layover_summary_display}
           />
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <FareBadge />

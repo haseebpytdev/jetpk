@@ -160,6 +160,7 @@ export type PairedReturnOption = {
   can_book?: boolean;
   airline_name?: string;
   airline_code?: string;
+  airline_logo_url?: string | null;
   pairing_authority?: string;
   supplier_source_label?: string;
   branded_fares_display_options?: FareFamilyOption[];

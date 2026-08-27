@@ -178,6 +178,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         if (phase === "poll") {
           return { shouldPoll: true };
         }
+        // Primary search/refresh failure: do not keep prior inventory visible as current.
+        setData(null);
         setStatus(response.status === 410 ? "expired" : "error");
         setMessage(response.message);
         setIsLoadingMore(false);
@@ -286,6 +288,10 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       return;
     }
     if (!readyRef.current && status !== "partial" && status !== "ready") return;
+    // View / filter / sort changes must not leave the prior flow's cards on screen.
+    setData(null);
+    setStatus("loading");
+    setMessage("Finding the best available flights…");
     void loadPage(resolvedSearchId, 1, false, "refresh");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey, laravelSort, resolvedSearchId, viewKey]);

@@ -42,7 +42,7 @@ class ReturnSplitComboServiceTest extends TestCase
         $this->assertNotSame('', $index['combos'][0]['return_key']);
     }
 
-    public function test_mixed_carrier_combo_is_excluded(): void
+    public function test_mixed_carrier_combo_is_included_for_paired_view(): void
     {
         $criteria = [
             'trip_type' => 'round_trip',
@@ -56,8 +56,9 @@ class ReturnSplitComboServiceTest extends TestCase
 
         $index = $this->service->buildIndex($criteria, [$offer]);
 
-        $this->assertSame(0, $index['combo_count']);
-        $this->assertSame(1, $index['excluded_count']);
+        $this->assertSame(1, $index['combo_count']);
+        $this->assertSame(0, $index['excluded_count']);
+        $this->assertSame('combo-mixed', $index['combos'][0]['combo_id']);
     }
 
     public function test_outbound_grouping_uses_lowest_total_return_fare(): void
