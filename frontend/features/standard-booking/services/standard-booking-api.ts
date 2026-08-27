@@ -70,7 +70,7 @@ export async function fetchStandardPassengersContext(
 }
 
 export async function submitStandardPassengers(formData: FormData) {
-  return standardFetch<StandardPassengersSubmitResponse>("/booking/passengers", {
+  return standardFetch<StandardPassengersSubmitResponse>("/booking/passengers?format=json", {
     method: "POST",
     body: formData,
   });
