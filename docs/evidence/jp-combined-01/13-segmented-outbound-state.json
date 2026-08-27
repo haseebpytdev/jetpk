@@ -1,0 +1,21 @@
+{
+  "phase": "JP-COMBINED-01-R2",
+  "proof": "segmented_outbound_state_before_return",
+  "search_id": "ba03534a-7c9c-4eb0-9ee5-eb1511692fd9",
+  "outbound": {
+    "outbound_key": "a37590bc034affff49ab080d01d1223378c7d22d34cf3cd8568022854632c720",
+    "airline": "Pakistan International Airlines",
+    "airline_code": "PK",
+    "schedule": "01:10 ISB → 03:35 DXB Direct",
+    "brand_label": "SMART",
+    "outbound_fare_option_key": "sm-pi1",
+    "fare_authority_pkr": 127361,
+    "baggage_checked": "20 kg"
+  },
+  "return_options_url_preserved": {
+    "outbound_key": "a37590bc034affff49ab080d01d1223378c7d22d34cf3cd8568022854632c720",
+    "outbound_fare_option_key": "sm-pi1",
+    "banner": "Outbound branded fare preserved for checkout."
+  },
+  "note": "Search later expired before return brand→checkout handoff completed; will re-run on post-deploy fresh search."
+}

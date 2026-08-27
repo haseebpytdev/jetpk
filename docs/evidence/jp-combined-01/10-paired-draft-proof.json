@@ -1,0 +1,30 @@
+{
+  "phase": "JP-COMBINED-01-R2",
+  "proof": "paired_qa_draft",
+  "booking_reference": null,
+  "pnr": null,
+  "supplier_booking": null,
+  "payment": null,
+  "ticket": null,
+  "selection_mode": "paired",
+  "trip_type": "round_trip",
+  "brand_label": "SMART",
+  "brand_code": "SM",
+  "fare_option_key": "sm-pi1",
+  "booking_class": "U/V",
+  "fare_basis": "USM/U/VSM",
+  "currency": "PKR",
+  "authoritative_total": 127361,
+  "checked_baggage": "20 kg",
+  "refundability": "Refundable",
+  "offer_id": "4c55ebd7dc8254a038bac35d5aed94980190ac6cdc8291c0b4e3808331838ff9",
+  "combo_id": "4c55ebd7dc8254a038bac35d5aed94980190ac6cdc8291c0b4e3808331838ff9",
+  "outbound": "ISB→DXB PK233 01:10-03:35",
+  "return": "DXB→ISB PK212 14:30-18:35",
+  "price_matrix": {
+    "drawer_fare_details": 127361,
+    "checkout_selected_fare": 127361,
+    "review_pricing_total": 127361
+  },
+  "commercial_qa_side_effects": 0
+}

@@ -1,0 +1,35 @@
+{
+  "phase": "JP-COMBINED-01-R2",
+  "proof": "segmented_qa_draft",
+  "booking_reference": null,
+  "pnr": null,
+  "selection_mode": "segmented",
+  "trip_type": "round_trip",
+  "outbound": {
+    "key": "1b5415d4cf8626f6c86a7c8b013d542ed97215e3da0454378f8d1d309add641d",
+    "airline": "Gulf Air Bahrain",
+    "brand_label": "ECONOMY SMART",
+    "brand_code": "ECOSMART",
+    "fare_option_key": "ecosmart-pi1",
+    "booking_class": "W",
+    "baggage": "30 kg",
+    "schedule": "15:30 ISB → 22:35 DXB"
+  },
+  "return": {
+    "brand_label": "ECONOMY SMART",
+    "brand_code": "ECOSMART",
+    "fare_option_key": "ecosmart-pi1",
+    "booking_class": "W",
+    "baggage": "30 kg",
+    "schedule": "07:55 DXB → 14:30 ISB"
+  },
+  "combined_total_pkr": 135302,
+  "currency": "PKR",
+  "price_matrix": {
+    "checkout_selected_fare": 135302,
+    "review_pricing_total": 135302
+  },
+  "outbound_state_preserved_on_return_url": true,
+  "cleanup": "abandon-selected-offer",
+  "commercial_qa_side_effects": 0
+}
