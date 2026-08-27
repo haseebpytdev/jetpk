@@ -7,6 +7,7 @@ use App\Models\GroupBooking;
 use App\Models\GroupInventory;
 use App\Models\User;
 use App\Services\Suppliers\AlHaider\AlHaiderClient;
+use App\Services\Suppliers\AlHaider\AlHaiderGroupBookingPayloadBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -21,6 +22,7 @@ class GroupReservationService
         private readonly GroupBookingRestrictionService $restrictionService,
         private readonly GroupTicketingCommunicationService $communicationService,
         private readonly GroupInventoryAvailabilityService $availabilityService,
+        private readonly AlHaiderGroupBookingPayloadBuilder $alHaiderBookingPayloadBuilder,
     ) {}
 
     public function holdMinutes(): int
@@ -110,10 +112,10 @@ class GroupReservationService
 
             if ($this->client->isConfigured() && (bool) config('suppliers.al_haider.booking_enabled')) {
                 try {
-                    $response = $this->client->reserveGroup($inventory->supplier_package_id, [
-                        'seats' => $booking->seat_count,
-                        'reference' => $booking->reference,
-                    ]);
+                    $response = $this->client->reserveGroup(
+                        $inventory->supplier_package_id,
+                        $this->alHaiderBookingPayloadBuilder->build($booking, $inventory),
+                    );
                     $supplierReservationId = (string) ($response['reservation_id'] ?? $response['id'] ?? '');
                     if ($supplierReservationId !== '') {
                         $providerHoldStatus = 'provider_held';

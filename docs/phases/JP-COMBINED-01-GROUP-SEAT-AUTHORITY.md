@@ -17,7 +17,7 @@
 ## Al-Haider create/booking
 
 ```
-ALHAIDER_CREATE_BOOKING_SEMANTICS=RESERVATION_HOLD_AWAITING_PAYMENT (JetPK mapping of POST /api/create/booking via AlHaiderClient::reserveGroup). Not final ticketed booking.
+ALHAIDER_CREATE_BOOKING_SEMANTICS=RESERVATION_HOLD_AWAITING_PAYMENT via POST /api/create/booking with official payload: group_id, agency_info (adults/child/infant counts + agency contact), booking_details[] (passenger rows). JetPK maps via AlHaiderGroupBookingPayloadBuilder.
 ALHAIDER_HOLD_SUPPORTED=YES_LOCAL_ALWAYS; SUPPLIER_ONLY_WHEN_BOOKING_ENABLED
 ALHAIDER_HOLD_EXPIRY=LOCAL_25_MIN (OTA_GROUP_BOOKING_HOLD_MINUTES); supplier TTL not documented in-repo
 ALHAIDER_MULTI_SEAT_SUPPORTED=YES (seat_count payload; passengers must match)

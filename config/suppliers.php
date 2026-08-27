@@ -542,6 +542,10 @@ return [
         // POST /api/create/booking, PATCH /api/cancel/booking/{id}
         'reserve_path' => env('ALHAIDER_RESERVE_PATH', '/api/create/booking'),
         'cancel_path' => env('ALHAIDER_CANCEL_PATH', '/api/cancel/booking/{id}'),
+        'booking_agency_name' => env('ALHAIDER_BOOKING_AGENCY_NAME', 'JetPakistan'),
+        'booking_agent_name' => env('ALHAIDER_BOOKING_AGENT_NAME', 'JetPakistan'),
+        'booking_contact_email' => env('ALHAIDER_BOOKING_CONTACT_EMAIL', 'groups@jetpakistan.pk'),
+        'booking_contact_mobile' => env('ALHAIDER_BOOKING_CONTACT_MOBILE', '03000000000'),
         'max_automatic_token_generations_per_365_days' => 1,
     ],
 ];
