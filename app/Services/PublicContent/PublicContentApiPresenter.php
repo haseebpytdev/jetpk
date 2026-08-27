@@ -132,6 +132,7 @@ final class PublicContentApiPresenter
             ClientPageKeys::TERMS,
             ClientPageKeys::PRIVACY,
             ClientPageKeys::GLOBAL,
+            ClientPageKeys::GROUP_SEARCH,
         ];
     }
 

@@ -28,7 +28,7 @@ test.describe("JP-UI-03 public pages visual audit", () => {
     await capture(page, "homepage-search-return-tab");
     await page.getByRole("tab", { name: "Multi-City" }).click();
     await capture(page, "homepage-search-multicity-tab");
-    await page.getByRole("tab", { name: "Group Ticketing" }).click();
+    await page.getByRole("tab", { name: "Groups" }).click();
     await capture(page, "homepage-search-group-tab");
   });
 

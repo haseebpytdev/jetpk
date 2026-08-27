@@ -111,13 +111,15 @@ test.describe("Laravel flight search payload contract", () => {
     expect(multiCity.getAll("multi_from[]")).toEqual(["LHE", "DXB"]);
   });
 
-  test("group ticketing payload maps sector, date_from and category", () => {
+  test("group ticketing payload maps airline, sector, date_from and category", () => {
     const params = buildGroupSearchQueryParams({
+      airline: "Emirates",
       sector: "UAE — Dubai",
       category: "uae",
       travelDate: "2026-09-01",
     });
 
+    expect(params.get("airline")).toBe("Emirates");
     expect(params.get("sector")).toBe("UAE — Dubai");
     expect(params.get("date_from")).toBe("2026-09-01");
     expect(params.get("category")).toBe("uae");
@@ -125,11 +127,13 @@ test.describe("Laravel flight search payload contract", () => {
 
   test("group ticketing omits category when all is selected", () => {
     const params = buildGroupSearchQueryParams({
+      airline: "",
       sector: "KSA — Jeddah",
       category: "all",
       travelDate: "2026-09-01",
     });
 
+    expect(params.get("airline")).toBeNull();
     expect(params.get("sector")).toBe("KSA — Jeddah");
     expect(params.get("date_from")).toBe("2026-09-01");
     expect(params.get("category")).toBeNull();

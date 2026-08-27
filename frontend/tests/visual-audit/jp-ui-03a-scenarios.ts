@@ -108,14 +108,14 @@ function buildHomepageSearchStates(): JpUi03aScenario[] {
       action: async (page) => {
         const { mockGroupFacets } = await import("./jp-ui-03a-fixtures");
         await mockGroupFacets(page);
-        await page.getByRole("tab", { name: "Group Ticketing" }).click();
+        await page.getByRole("tab", { name: "Groups" }).click();
       },
     }),
   hp("hp-30", "dark", desktop, "search-tab-group-ticketing", {
       action: async (page) => {
         const { mockGroupFacets } = await import("./jp-ui-03a-fixtures");
         await mockGroupFacets(page);
-        await page.getByRole("tab", { name: "Group Ticketing" }).click();
+        await page.getByRole("tab", { name: "Groups" }).click();
       },
     }),
     hp("hp-31", "light", desktop, "autocomplete-origin-open", {

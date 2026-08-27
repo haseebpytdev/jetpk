@@ -72,9 +72,13 @@ export function buildFlightSearchQueryParams(input: FlightSearchPayloadInput): U
  * `GroupTicketingSearchRequest`).
  */
 export function buildGroupSearchQueryParams(
-  input: Pick<GroupSearchDraft, "sector" | "category" | "travelDate">,
+  input: Pick<GroupSearchDraft, "airline" | "sector" | "category" | "travelDate">,
 ): URLSearchParams {
   const params = new URLSearchParams();
+
+  if (input.airline) {
+    params.set("airline", input.airline);
+  }
 
   if (input.sector) {
     params.set("sector", input.sector);

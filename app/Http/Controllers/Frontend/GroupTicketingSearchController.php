@@ -59,8 +59,8 @@ class GroupTicketingSearchController extends Controller
             $statusMessage = GroupTicketingLivePolicy::PUBLIC_SEARCH_UNAVAILABLE_MESSAGE;
         } elseif ($results->isEmpty()) {
             $statusMessage = $facets['sectors'] === [] && $facets['airlines'] === []
-                ? 'Group ticketing inventory is not available yet. Please check back soon.'
-                : 'No group tickets matched your search.';
+                ? 'Group inventory is not available yet. Please check back soon.'
+                : 'No group departures matched your search.';
         }
 
         $payload = [
@@ -214,8 +214,8 @@ class GroupTicketingSearchController extends Controller
             $statusMessage = GroupTicketingLivePolicy::PUBLIC_SEARCH_UNAVAILABLE_MESSAGE;
         } elseif ($results->isEmpty()) {
             $statusMessage = $facets['sectors'] === [] && $facets['airlines'] === []
-                ? 'Group ticketing inventory is not available yet. Please check back soon.'
-                : 'No group tickets matched your search.';
+                ? 'Group inventory is not available yet. Please check back soon.'
+                : 'No group departures matched your search.';
         }
 
         return view(client_view('frontend.group-ticketing.search', 'frontend'), [

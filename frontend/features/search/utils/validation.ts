@@ -59,12 +59,26 @@ export function validateFlightSearch(
 
 export function validateGroupSearch(
   draft: Omit<GroupSearchDraft, "submittedAt">,
-  facets?: { sectorValues: string[]; categoryValues: string[] },
+  facets?: {
+    airlineValues?: string[];
+    sectorValues: string[];
+    categoryValues: string[];
+  },
 ): ValidationResult {
   const errors: string[] = [];
-  if (!draft.sector) errors.push("Sector is required.");
-  if (!draft.travelDate) errors.push("Travel date is required.");
-  if (!draft.category) errors.push("Category is required.");
+  const hasFilter =
+    Boolean(draft.airline) ||
+    Boolean(draft.sector) ||
+    Boolean(draft.travelDate) ||
+    Boolean(draft.category && draft.category !== "all");
+
+  if (!hasFilter) {
+    errors.push("Choose an airline, sector, travel date, or category to search.");
+  }
+
+  if (facets && draft.airline && facets.airlineValues && !facets.airlineValues.includes(draft.airline)) {
+    errors.push("Selected airline is not available. Please choose an airline from the list.");
+  }
 
   if (facets && draft.sector && !facets.sectorValues.includes(draft.sector)) {
     errors.push("Selected sector is not available. Please choose a sector from the list.");

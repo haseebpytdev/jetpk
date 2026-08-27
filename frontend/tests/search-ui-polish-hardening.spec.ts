@@ -88,7 +88,7 @@ test.describe("Search UI portal keyboard and focus", () => {
     const groupTab = page.getByTestId("product-tab-group");
     await expect(groupTab).toBeFocused();
     await expect(groupTab).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByRole("button", { name: "Search Group Fares" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Search Groups" })).toBeVisible();
 
     await page.keyboard.press("ArrowLeft");
     await expect(flightsTab).toBeFocused();
@@ -121,7 +121,7 @@ test.describe("Search UI geometry assertions", () => {
 
       await expect(page.getByTestId("homepage-hero-image")).toBeVisible();
       await expect(page.getByTestId("homepage-hero-image").locator("img")).toHaveAttribute("src", /hero-pakistan/);
-      await expect(page.getByTestId("product-tab-group")).toContainText("Group Ticketing");
+      await expect(page.getByTestId("product-tab-group")).toContainText("Groups");
 
       await page.getByTestId("trip-type-trigger").click();
       await page.getByRole("menuitem", { name: "Return" }).click();

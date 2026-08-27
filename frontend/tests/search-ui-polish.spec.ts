@@ -158,7 +158,7 @@ test.describe("Search UI polish cluster", () => {
     if (box) expect(box.height).toBeGreaterThanOrEqual(40);
   });
 
-  test("flights and group ticketing are separate product tabs", async ({ page }) => {
+  test("flights and Groups are separate product tabs", async ({ page }) => {
     await page.goto("/", { waitUntil: "load" });
     await expect(page.getByTestId("product-tab-flights")).toHaveAttribute("aria-selected", "true");
     await expect(page.getByTestId("trip-type-trigger")).toBeVisible();
@@ -166,7 +166,7 @@ test.describe("Search UI polish cluster", () => {
     await page.getByTestId("product-tab-group").click();
     await expect(page.getByTestId("product-tab-group")).toHaveAttribute("aria-selected", "true");
     await expect(page.getByTestId("trip-type-trigger")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Search Group Fares" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Search Groups" })).toBeVisible();
   });
 
   test("traveler counts and cabin class remain available", async ({ page }) => {
@@ -209,7 +209,7 @@ test.describe("Search UI polish cluster", () => {
     await expect(page.getByRole("button", { name: "Increase infants" })).toBeDisabled();
   });
 
-  test("group ticketing routing remains intact", async ({ page }) => {
+  test("Groups routing remains intact", async ({ page }) => {
     await page.route("**/laravel/groups/search/facets**", async (route) => {
       await route.fulfill({
         status: 200,

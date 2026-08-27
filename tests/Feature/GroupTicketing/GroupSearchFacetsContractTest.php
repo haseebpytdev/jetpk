@@ -30,6 +30,7 @@ class GroupSearchFacetsContractTest extends TestCase
             'group_category_id' => $category->id,
             'title' => 'Facet Test',
             'sector' => 'LHE-JED',
+            'airline_name' => 'Saudi Arabian Airlines',
             'departure_date' => '2026-08-15',
             'total_seats' => 10,
             'held_seats' => 0,
@@ -43,10 +44,15 @@ class GroupSearchFacetsContractTest extends TestCase
             ->assertOk()
             ->assertJsonPath('sectors.0.value', 'LHE-JED')
             ->assertJsonPath('sectors.0.label', 'LHE-JED')
+            ->assertJsonPath('airlines.0.value', 'Saudi Arabian Airlines')
+            ->assertJsonPath('airlines.0.label', 'Saudi Arabian Airlines')
             ->assertJsonPath('categories.0.value', 'ksa')
             ->assertJsonPath('categories.0.label', 'KSA')
+            ->assertJsonPath('categories.0.inventory_count', 1)
             ->assertJsonPath('date_bounds.minimum', '2026-08-15')
-            ->assertJsonPath('date_bounds.maximum', '2026-08-15');
+            ->assertJsonPath('date_bounds.maximum', '2026-08-15')
+            ->assertJsonPath('travel_date_match.mode', 'EXACT_THEN_NEARBY')
+            ->assertJsonPath('travel_date_match.tolerance_days', 3);
     }
 
     public function test_search_facets_excludes_unavailable_inventory(): void

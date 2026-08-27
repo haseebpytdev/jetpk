@@ -211,8 +211,10 @@ class GroupInventoryFacetService
     /**
      * @return array{
      *     sectors: list<array{value: string, label: string}>,
-     *     categories: list<array{value: string, label: string}>,
-     *     date_bounds: ?array{minimum: string, maximum: string}
+     *     airlines: list<array{value: string, label: string}>,
+     *     categories: list<array{value: string, label: string, inventory_count: int}>,
+     *     date_bounds: ?array{minimum: string, maximum: string},
+     *     travel_date_match: array{mode: string, tolerance_days: int}
      * }
      */
     public function forPublicSearch(): array
@@ -230,19 +232,33 @@ class GroupInventoryFacetService
             ];
         }
 
+        $categoriesWithCounts = $this->categoriesWithInventory();
+
         return [
             'sectors' => array_map(
                 fn (string $sector): array => ['value' => $sector, 'label' => $sector],
                 $all['sectors'] ?? [],
             ),
+            'airlines' => array_map(
+                fn (array $airline): array => [
+                    'value' => (string) ($airline['name'] ?? ''),
+                    'label' => (string) ($airline['name'] ?? ''),
+                ],
+                $all['airlines'] ?? [],
+            ),
             'categories' => array_map(
                 fn (array $category): array => [
                     'value' => (string) ($category['slug'] ?? ''),
                     'label' => (string) ($category['name'] ?? ''),
+                    'inventory_count' => (int) ($category['inventory_count'] ?? 0),
                 ],
-                $all['categories'] ?? [],
+                $categoriesWithCounts,
             ),
             'date_bounds' => $dateBounds,
+            'travel_date_match' => [
+                'mode' => GroupInventorySearchService::TRAVEL_DATE_MATCH_MODE,
+                'tolerance_days' => GroupInventorySearchService::TRAVEL_DATE_TOLERANCE_DAYS,
+            ],
         ];
     }
 

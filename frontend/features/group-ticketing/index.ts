@@ -1,4 +1,6 @@
 export { GroupSearchPage } from "./components/GroupSearchPage";
+export { SharedGroupSearch } from "./components/SharedGroupSearch";
+export { GroupCategoryCards } from "./components/GroupCategoryCards";
 export { useGroupSearchFacets } from "./hooks/use-group-search-facets";
 export { GroupPackageDetailsPage } from "./components/GroupPackageDetailsPage";
 export { GroupPassengersPage } from "./components/GroupPassengersPage";

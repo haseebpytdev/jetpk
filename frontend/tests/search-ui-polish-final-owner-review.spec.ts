@@ -128,14 +128,14 @@ test.describe("Final owner review — light grey glass search panel", () => {
     });
   });
 
-  test("5. desktop Group Ticketing success state", async ({ page }) => {
+  test("5. desktop Groups success state", async ({ page }) => {
     await mockGroupFacets(page);
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto("/", { waitUntil: "load" });
     await page.getByTestId("product-tab-group").click();
 
     await expect(page.getByTestId("trip-type-trigger")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Search Group Fares" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Search Groups" })).toBeVisible();
     await expect(page.getByLabel("Sector")).toBeEnabled();
     await expect(page.getByRole("radio", { name: "KSA" })).toBeVisible();
     await expect(page.getByText("Request failed")).toHaveCount(0);

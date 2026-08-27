@@ -78,7 +78,7 @@ export function GroupEmptyResultsState() {
     <GroupStateCard
       testId="group-empty-results-state"
       title="No group departures found"
-      message="Try another sector, travel date, or category."
+      message="Try another airline, sector, travel date, or category."
       actionLabel="Modify search"
       actionHref="/groups/search"
     />

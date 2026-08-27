@@ -103,7 +103,7 @@ test("multi-city add and remove segments", async ({ page }) => {
   await expect(page.getByText("Flight 3")).toBeHidden();
 });
 
-test("group ticketing product tab renders Laravel search fields only", async ({ page }) => {
+test("Groups product tab renders Laravel search fields only", async ({ page }) => {
   await page.route("**/laravel/groups/search/facets**", async (route) => {
     await route.fulfill({
       status: 200,
@@ -123,7 +123,7 @@ test("group ticketing product tab renders Laravel search fields only", async ({ 
   await page.goto("/", { waitUntil: "load" });
 
   await page.getByTestId("product-tab-group").click();
-  await expect(page.getByRole("button", { name: "Search Group Fares" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Search Groups" })).toBeVisible();
   await expect(page.getByLabel("Sector")).toBeVisible();
   await expect(page.getByLabel("Travel date")).toBeVisible();
   await expect(page.getByLabel("Group category")).toBeVisible();

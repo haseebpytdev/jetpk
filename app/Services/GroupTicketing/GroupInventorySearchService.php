@@ -16,6 +16,11 @@ class GroupInventorySearchService
 {
     public const DEFAULT_PER_PAGE = 15;
 
+    /** Exact departure match first; if none, allow nearby departures within tolerance. */
+    public const TRAVEL_DATE_MATCH_MODE = 'EXACT_THEN_NEARBY';
+
+    public const TRAVEL_DATE_TOLERANCE_DAYS = 3;
+
     /**
      * @param  array<string, mixed>  $filters
      * @return Collection<int, GroupInventory>
@@ -136,35 +141,76 @@ class GroupInventorySearchService
 
         $dateFrom = trim((string) ($filters['date_from'] ?? ''));
         $dateTo = trim((string) ($filters['date_to'] ?? ''));
+        $deptDate = trim((string) ($filters['dept_date'] ?? $filters['departure_date'] ?? ''));
+        $flexible = filter_var($filters['flexible'] ?? false, FILTER_VALIDATE_BOOL);
 
-        if ($dateFrom !== '' || $dateTo !== '') {
-            if ($dateFrom !== '' && $dateTo !== '') {
-                $query->whereBetween('departure_date', [$dateFrom, $dateTo]);
-            } elseif ($dateFrom !== '') {
-                $query->whereDate('departure_date', '>=', $dateFrom);
-            } else {
-                $query->whereDate('departure_date', '<=', $dateTo);
-            }
-        } else {
-            $flexible = filter_var($filters['flexible'] ?? false, FILTER_VALIDATE_BOOL);
-            $deptDate = trim((string) ($filters['dept_date'] ?? $filters['departure_date'] ?? ''));
+        if ($dateFrom !== '' && $dateTo !== '') {
+            $query->whereBetween('departure_date', [$dateFrom, $dateTo]);
 
-            if ($deptDate !== '') {
-                if ($flexible) {
-                    try {
-                        $date = Carbon::parse($deptDate);
-                        $query->whereBetween('departure_date', [
-                            $date->copy()->startOfMonth()->toDateString(),
-                            $date->copy()->endOfMonth()->toDateString(),
-                        ]);
-                    } catch (\Throwable) {
-                        $query->whereDate('departure_date', $deptDate);
-                    }
-                } else {
-                    $query->whereDate('departure_date', $deptDate);
-                }
-            }
+            return;
         }
+
+        if ($dateFrom !== '') {
+            $this->applyExactThenNearbyTravelDate($query, $dateFrom);
+
+            return;
+        }
+
+        if ($dateTo !== '') {
+            $query->whereDate('departure_date', '<=', $dateTo);
+
+            return;
+        }
+
+        if ($deptDate === '') {
+            return;
+        }
+
+        if ($flexible) {
+            try {
+                $date = Carbon::parse($deptDate);
+                $query->whereBetween('departure_date', [
+                    $date->copy()->startOfMonth()->toDateString(),
+                    $date->copy()->endOfMonth()->toDateString(),
+                ]);
+            } catch (\Throwable) {
+                $query->whereDate('departure_date', $deptDate);
+            }
+
+            return;
+        }
+
+        $this->applyExactThenNearbyTravelDate($query, $deptDate);
+    }
+
+    /**
+     * TRAVEL_DATE_MATCH_MODE=EXACT_THEN_NEARBY (±TRAVEL_DATE_TOLERANCE_DAYS).
+     *
+     * @param  Builder<GroupInventory>  $query
+     */
+    private function applyExactThenNearbyTravelDate(Builder $query, string $travelDate): void
+    {
+        try {
+            $target = Carbon::parse($travelDate)->toDateString();
+        } catch (\Throwable) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $exactExists = (clone $query)->whereDate('departure_date', $target)->exists();
+
+        if ($exactExists) {
+            $query->whereDate('departure_date', $target);
+
+            return;
+        }
+
+        $center = Carbon::parse($target);
+        $query->whereBetween('departure_date', [
+            $center->copy()->subDays(self::TRAVEL_DATE_TOLERANCE_DAYS)->toDateString(),
+            $center->copy()->addDays(self::TRAVEL_DATE_TOLERANCE_DAYS)->toDateString(),
+        ]);
     }
 
     /**

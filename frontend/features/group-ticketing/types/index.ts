@@ -14,17 +14,21 @@ export type GroupFacets = {
 export type GroupSearchFacetOption = {
   value: string;
   label: string;
+  inventory_count?: number;
 };
 
 export type GroupSearchFacetsResponse = {
   sectors: GroupSearchFacetOption[];
+  airlines: GroupSearchFacetOption[];
   categories: GroupSearchFacetOption[];
   date_bounds: { minimum: string; maximum: string } | null;
+  travel_date_match?: { mode: string; tolerance_days: number };
 };
 
 export type GroupSearchFacetsLoadState = "loading" | "loaded" | "empty" | "error";
 
 export type GroupSearchFilters = {
+  airline?: string;
   sector?: string;
   date_from?: string;
   category?: string;

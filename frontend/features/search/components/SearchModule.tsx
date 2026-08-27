@@ -21,7 +21,7 @@ import {
   type TripType,
 } from "../types";
 import { validateFlightSearch, validateGroupSearch } from "../utils/validation";
-import { GroupTicketingForm } from "./GroupTicketingForm";
+import { SharedGroupSearch } from "@/features/group-ticketing/components/SharedGroupSearch";
 import { useGroupSearchFacets } from "@/features/group-ticketing/hooks/use-group-search-facets";
 import { MultiCityForm } from "./MultiCityForm";
 import { OneWayForm } from "./OneWayForm";
@@ -94,6 +94,7 @@ export function SearchModule({
     }
     return [createSegment("segment-1"), createSegment("segment-2")];
   });
+  const [groupAirline, setGroupAirline] = useState("");
   const [groupSector, setGroupSector] = useState("");
   const [groupCategory, setGroupCategory] = useState("all");
   const [groupTravelDate, setGroupTravelDate] = useState("");
@@ -116,6 +117,7 @@ export function SearchModule({
 
   const isSubmitting = submitState.status === "submitting" || submitState.status === "redirecting";
   const groupFacets = useGroupSearchFacets(mode === "group");
+  const groupAirlineValues = groupFacets.airlines.map((item) => item.value);
   const groupSectorValues = groupFacets.sectors.map((item) => item.value);
   const groupCategoryValues = groupFacets.categories.map((item) => item.value);
 
@@ -212,11 +214,13 @@ export function SearchModule({
 
   const handleGroupSubmit = () => {
     const draftInput = {
+      airline: groupAirline,
       sector: groupSector,
       category: groupCategory,
       travelDate: groupTravelDate,
     };
     const result = validateGroupSearch(draftInput, {
+      airlineValues: groupAirlineValues,
       sectorValues: groupSectorValues,
       categoryValues: groupCategoryValues,
     });
@@ -229,6 +233,14 @@ export function SearchModule({
     setErrors([]);
     setSubmitState({ status: "redirecting", targetUrl: "/groups/search" });
     handoffToGroupSearch(buildGroupHandoffQuery(draftInput));
+  };
+
+  const handleGroupClear = () => {
+    setGroupAirline("");
+    setGroupSector("");
+    setGroupCategory("all");
+    setGroupTravelDate("");
+    setErrors([]);
   };
 
   const updateSegment = (index: number, segment: FlightSegment) => {
@@ -335,20 +347,28 @@ export function SearchModule({
         ) : null}
 
         {productTab === "group" ? (
-          <GroupTicketingForm
-            sector={groupSector}
-            category={groupCategory}
-            travelDate={groupTravelDate}
+          <SharedGroupSearch
+            values={{
+              airline: groupAirline,
+              sector: groupSector,
+              category: groupCategory,
+              travelDate: groupTravelDate,
+            }}
             facetsState={groupFacets.state}
+            airlines={groupFacets.airlines}
             sectors={groupFacets.sectors}
             categories={groupFacets.categories}
             dateBounds={groupFacets.dateBounds}
             facetsError={groupFacets.errorMessage}
             onRetryFacets={groupFacets.retry}
-            onSectorChange={setGroupSector}
-            onCategoryChange={setGroupCategory}
-            onTravelDateChange={setGroupTravelDate}
+            onChange={(next) => {
+              setGroupAirline(next.airline);
+              setGroupSector(next.sector);
+              setGroupCategory(next.category);
+              setGroupTravelDate(next.travelDate);
+            }}
             onSubmit={handleGroupSubmit}
+            onClear={handleGroupClear}
             errors={errors}
             disabled={isSubmitting}
           />

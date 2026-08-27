@@ -26,6 +26,7 @@ test.beforeEach(async ({ page }) => {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
+        airlines: [],
         sectors: [{ value: "SKT-SHJ", label: "SKT-SHJ" }],
         categories: [],
         date_bounds: { minimum: "2026-08-01", maximum: "2026-12-31" },
@@ -64,7 +65,7 @@ test("group search category All omits category param on navigation", async ({ pa
   await page.goto("/groups/search");
   await page.getByTestId("group-sector-select").selectOption({ index: 1 });
   await page.getByLabel("Travel date").fill("2026-08-15");
-  await page.getByRole("button", { name: "Search Group Fares" }).click();
+  await page.getByRole("button", { name: "Search Groups" }).click();
   await page.waitForURL(/\/groups\/search\?/);
   expect(page.url()).toContain("sector=");
   expect(page.url()).toContain("date_from=");
