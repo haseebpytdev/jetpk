@@ -41,8 +41,16 @@ final class GroupBookingListPresenter
             GroupBookingStatus::Confirmed => 'bg-success',
             GroupBookingStatus::ReservedAwaitingPayment, GroupBookingStatus::PaymentPending => 'bg-warning',
             GroupBookingStatus::Expired, GroupBookingStatus::Released, GroupBookingStatus::Cancelled => 'bg-secondary',
-            GroupBookingStatus::Failed => 'bg-danger',
+            GroupBookingStatus::Failed, GroupBookingStatus::SupplierReleaseFailed => 'bg-danger',
             default => 'bg-info',
         };
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function supplierReleasePanel(GroupBooking $booking): array
+    {
+        return $booking->supplierReleaseReconciliationPanel();
     }
 }

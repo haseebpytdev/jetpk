@@ -73,6 +73,9 @@ class GroupBookingManagementController extends Controller
             'booking' => $groupBooking,
             'listRow' => GroupBookingListPresenter::toListRow($groupBooking),
             'userRestriction' => $userRestriction,
+            'supplierReleasePanel' => $groupBooking->needsSupplierReleaseReconciliation()
+                ? GroupBookingListPresenter::supplierReleasePanel($groupBooking)
+                : null,
         ]);
     }
 
@@ -169,14 +172,82 @@ class GroupBookingManagementController extends Controller
         return back()->with('success', 'Payment rejected and booking released.');
     }
 
+    public function retrySupplierRelease(Request $request, GroupBooking $groupBooking): RedirectResponse|JsonResponse
+    {
+        Gate::authorize('platform.admin');
+
+        try {
+            $this->reservationService->retrySupplierRelease($groupBooking);
+        } catch (\Throwable $exception) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($exception->getMessage(), 422, 'supplier_release_retry_failed');
+            }
+
+            return back()->withErrors(['supplier_release' => $exception->getMessage()]);
+        }
+
+        $groupBooking->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'group_booking' => $this->presentGroupBooking($groupBooking),
+            ]);
+        }
+
+        return back()->with('success', 'Supplier release retry completed.');
+    }
+
+    public function reconcileManualSupplierCancel(Request $request, GroupBooking $groupBooking): RedirectResponse|JsonResponse
+    {
+        Gate::authorize('platform.admin');
+
+        $this->validateBackOffice($request, [
+            'confirmation' => ['required', 'string', 'in:SUPPLIER_MANUAL_CANCEL_CONFIRMED'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        try {
+            $this->reservationService->reconcileAfterManualSupplierCancel(
+                $groupBooking,
+                $request->input('note', 'owner_manual_supplier_cancel'),
+            );
+        } catch (\Throwable $exception) {
+            if ($this->wantsBackOfficeJson($request)) {
+                return $this->backOfficeJsonError($exception->getMessage(), 422, 'manual_reconcile_failed');
+            }
+
+            return back()->withErrors(['supplier_release' => $exception->getMessage()]);
+        }
+
+        $groupBooking->refresh();
+
+        if ($this->wantsBackOfficeJson($request)) {
+            return $this->backOfficeJson([
+                'ok' => true,
+                'group_booking' => $this->presentGroupBooking($groupBooking),
+            ]);
+        }
+
+        return back()->with('success', 'Local booking reconciled after confirmed manual supplier cancel.');
+    }
+
     /**
      * @return array<string, mixed>
      */
     private function presentGroupBooking(GroupBooking $groupBooking): array
     {
+        $panel = $groupBooking->needsSupplierReleaseReconciliation()
+            ? $groupBooking->supplierReleaseReconciliationPanel()
+            : null;
+
         return [
             'id' => (string) $groupBooking->id,
+            'reference' => $groupBooking->reference,
             'status' => $groupBooking->status->value,
+            'seat_count' => (int) $groupBooking->seat_count,
+            'supplier_reservation_id' => $groupBooking->supplier_reservation_id,
+            'supplier_release_panel' => $panel,
         ];
     }
 }

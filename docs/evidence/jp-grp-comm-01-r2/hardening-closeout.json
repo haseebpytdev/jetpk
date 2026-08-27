@@ -1,0 +1,44 @@
+{
+  "phase": "JP-GRP-COMM-01-R2",
+  "branch": "phase/jp-grp-commercial-seat-sync-01",
+  "supersedes_engineering_sha": "3062567bdc45d9ac9a06bac2a850671cc832584d",
+  "deployed_runtime_sha_before": "460cdae0441d0e07c563e636280c0e552481ac92",
+  "docs_head_before": "c4101c99f5988af03515b305b1cbab3ccb5cb5f8",
+  "alhaider_create_calls_this_r2": 0,
+  "alhaider_cancel_api_calls_this_r2": 0,
+  "token_generation_calls": 0,
+  "payment_executed": false,
+  "ticket_issued": false,
+  "supplier_reservation_60175_manual_cancel": "PENDING_OWNER_CONFIRMATION",
+  "group_3348_seats_after_cleanup": "PENDING_OWNER_CONFIRMATION",
+  "gates": {
+    "ALHAIDER_BOOKING_ENABLED": false,
+    "ALHAIDER_CANCEL_ENABLED": false
+  },
+  "test_matrix": {
+    "AlHaiderGroupBookingPayloadBuilderTest": "PASS",
+    "GroupReservationSupplierReleaseAtomicityTest": "PASS",
+    "assertions": 73,
+    "tests": 17
+  },
+  "requirements": {
+    "PRODUCTION_SYNTHETIC_PASSENGER_DATA": 0,
+    "MISSING_SUPPLIER_REQUIRED_FIELDS_FAIL_CLOSED": "PASS",
+    "SUPPLIER_RELEASE_ATOMICITY": "PASS",
+    "CREATE_GATE_SEPARATED": "PASS",
+    "CANCEL_GATE_SEPARATED": "PASS",
+    "SUPPLIER_PAYLOAD_COUNT_PARITY": "PASS",
+    "MULTI_SEAT_PAYLOAD_TEST": "PASS",
+    "ALL_AVAILABLE_SEAT_PAYLOAD_TEST": "PASS",
+    "SUPPLIER_RELEASE_FAILED_ADMIN_VISIBILITY": "PASS",
+    "SUPPLIER_CANCEL_FAILURE_LOCAL_SEAT_RELEASE": 0,
+    "LOCAL_SUPPLIER_AVAILABILITY_DIVERGENCE": 0
+  },
+  "owner_actions_required": [
+    "Manually cancel Al-Haider reservation 60175",
+    "Confirm supplier group 3348 seats restored to 5",
+    "Authorize protected deploy of FINAL_ENGINEERING_SHA with ALHAIDER_BOOKING_ENABLED=false",
+    "After deploy: admin reconcile local booking via reconcile-manual-supplier-cancel (no API cancel)",
+    "Owner UI UAT without new supplier reservation unless separately authorized"
+  ]
+}

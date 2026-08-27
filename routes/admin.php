@@ -348,6 +348,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/{groupBooking}', [BackOfficeLegacyViewRedirectController::class, 'adminGroupBookingsIndex'])->name('show');
         Route::post('/{groupBooking}/verify-payment', [GroupBookingManagementController::class, 'verifyPayment'])->name('verify-payment');
         Route::post('/{groupBooking}/reject-payment', [GroupBookingManagementController::class, 'rejectPayment'])->name('reject-payment');
+        Route::post('/{groupBooking}/retry-supplier-release', [GroupBookingManagementController::class, 'retrySupplierRelease'])->name('retry-supplier-release');
+        Route::post('/{groupBooking}/reconcile-manual-supplier-cancel', [GroupBookingManagementController::class, 'reconcileManualSupplierCancel'])->name('reconcile-manual-supplier-cancel');
     });
 
     Route::middleware('platform.module:support_system')->group(function (): void {

@@ -9,10 +9,13 @@
 | Local draft (passenger submit) | always local; no seat hold | Allowed |
 | Local temporary seat hold | review confirm → `held_seats` + `expires_at` | Allowed |
 | Supplier reservation mutation | `ALHAIDER_BOOKING_ENABLED` / `booking_enabled` | **OFF** (no create/booking) |
+| Supplier cancel / release | `ALHAIDER_CANCEL_ENABLED` / `cancel_enabled` | **OFF** (independent of create) |
 | Payment | manual payment + admin verify | Manual only |
 | Ticketing/fulfillment | local confirmed after admin verify; no Al-Haider ticket API | Local |
 
 `GROUP_BOOKING_GATE=OFF` / `GROUP_RESERVATION_GATE=OFF` in prior UAT labels map to **supplier write gate OFF**, not public checkout OFF.
+
+Create and cancel gates are independent: disabling new bookings must never block cleanup of an existing `supplier_reservation_id`. When a supplier reservation exists, local `held_seats` decrement only after confirmed supplier cancel (or admin-confirmed manual supplier cancel reconcile).
 
 ## Al-Haider create/booking
 
@@ -20,10 +23,11 @@
 ALHAIDER_CREATE_BOOKING_SEMANTICS=RESERVATION_HOLD_AWAITING_PAYMENT via POST /api/create/booking with official payload: group_id, agency_info (adults/child/infant counts + agency contact), booking_details[] (passenger rows). JetPK maps via AlHaiderGroupBookingPayloadBuilder.
 ALHAIDER_HOLD_SUPPORTED=YES_LOCAL_ALWAYS; SUPPLIER_ONLY_WHEN_BOOKING_ENABLED
 ALHAIDER_HOLD_EXPIRY=LOCAL_25_MIN (OTA_GROUP_BOOKING_HOLD_MINUTES); supplier TTL not documented in-repo
-ALHAIDER_MULTI_SEAT_SUPPORTED=YES (seat_count payload; passengers must match)
-ALHAIDER_CANCEL_RELEASES_SEATS=LOCAL_YES; SUPPLIER_PATCH_CANCEL_WHEN_ENABLED (supplier restore unproven live)
+ALHAIDER_MULTI_SEAT_SUPPORTED=YES (seat_count = adults + children; infants do not consume seats)
+ALHAIDER_CANCEL_RELEASES_SEATS=LOCAL_ONLY_AFTER_SUPPLIER_CANCEL_SUCCESS_OR_MANUAL_RECONCILE; gated by ALHAIDER_CANCEL_ENABLED
 ```
 
+Production payload builder is fail-closed (no synthetic Guest/Passenger/QA passport/DOB fallbacks).
 ## Seat authority design (supplier truth wins)
 
 Persisted concepts (actual columns / meta):

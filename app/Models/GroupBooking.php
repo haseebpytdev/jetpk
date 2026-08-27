@@ -128,11 +128,45 @@ class GroupBooking extends Model
 
     public function isReleased(): bool
     {
+        // SupplierReleaseFailed keeps local held_seats — not a completed release.
+        if ($this->status === GroupBookingStatus::SupplierReleaseFailed) {
+            return false;
+        }
+
         return in_array($this->status, [
             GroupBookingStatus::Released,
-            GroupBookingStatus::SupplierReleaseFailed,
             GroupBookingStatus::Expired,
         ], true) || $this->released_at !== null;
+    }
+
+    public function needsSupplierReleaseReconciliation(): bool
+    {
+        return $this->status === GroupBookingStatus::SupplierReleaseFailed
+            && trim((string) ($this->supplier_reservation_id ?? '')) !== '';
+    }
+
+    /**
+     * Safe non-secret admin panel fields for SupplierReleaseFailed reconciliation.
+     *
+     * @return array<string, mixed>
+     */
+    public function supplierReleaseReconciliationPanel(): array
+    {
+        $meta = is_array($this->meta) ? $this->meta : [];
+
+        return [
+            'booking_reference' => $this->reference,
+            'supplier' => $this->inventory?->supplier ?? 'alhaider',
+            'supplier_reservation_id' => $this->supplier_reservation_id,
+            'requested_seats' => (int) $this->seat_count,
+            'failure_at' => $this->supplier_release_failed_at?->toIso8601String(),
+            'error_class' => $meta['supplier_release_error_class'] ?? null,
+            'safe_status' => $this->supplier_release_response,
+            'reconciliation_state' => $meta['reconciliation_state'] ?? (
+                $this->needsSupplierReleaseReconciliation() ? 'pending_supplier_release' : null
+            ),
+            'cancel_gate_enabled' => (bool) config('suppliers.al_haider.cancel_enabled'),
+        ];
     }
 
     /** @return BelongsTo<User, $this> */

@@ -8,11 +8,16 @@ use App\Models\GroupInventory;
 use App\Models\User;
 use App\Services\Suppliers\AlHaider\AlHaiderClient;
 use App\Services\Suppliers\AlHaider\AlHaiderGroupBookingPayloadBuilder;
+use App\Services\Suppliers\AlHaider\AlHaiderGroupBookingPayloadException;
+use App\Services\Suppliers\AlHaider\AlHaiderProviderException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Group seat holds, supplier reserve/cancel, manual payment, and payment window expiry.
+ *
+ * Supplier release atomicity: when supplier_reservation_id exists, local held_seats
+ * decrement and Released status happen only after confirmed supplier cancel success.
  */
 class GroupReservationService
 {
@@ -88,6 +93,10 @@ class GroupReservationService
             $booking = GroupBooking::query()->lockForUpdate()->findOrFail($booking->id);
             $inventory = GroupInventory::query()->lockForUpdate()->findOrFail($booking->group_inventory_id);
 
+            if ($booking->supplier_reservation_id) {
+                return $booking->fresh(['passengers', 'inventory', 'user']);
+            }
+
             if ($booking->status !== GroupBookingStatus::PendingPassengerDetails) {
                 throw new \RuntimeException('Booking is not ready for reservation.');
             }
@@ -112,14 +121,23 @@ class GroupReservationService
 
             if ($this->client->isConfigured() && (bool) config('suppliers.al_haider.booking_enabled')) {
                 try {
+                    $payload = $this->alHaiderBookingPayloadBuilder->build($booking, $inventory);
                     $response = $this->client->reserveGroup(
                         $inventory->supplier_package_id,
-                        $this->alHaiderBookingPayloadBuilder->build($booking, $inventory),
+                        $payload,
                     );
                     $supplierReservationId = (string) ($response['reservation_id'] ?? $response['id'] ?? '');
                     if ($supplierReservationId !== '') {
                         $providerHoldStatus = 'provider_held';
                     }
+                } catch (AlHaiderGroupBookingPayloadException $exception) {
+                    Log::warning('group_ticketing.reserve_payload_invalid', [
+                        'booking_id' => $booking->id,
+                        'error_code' => $exception->errorCode,
+                    ]);
+                    // Leave PendingPassengerDetails so the customer can correct details.
+                    // Do not mark Failed inside this transaction (would roll back anyway).
+                    throw new \RuntimeException($exception->getMessage(), 0, $exception);
                 } catch (\Throwable $exception) {
                     Log::warning('group_ticketing.reserve_failed', [
                         'booking_id' => $booking->id,
@@ -258,6 +276,8 @@ class GroupReservationService
 
     public function releaseUnpaidBooking(GroupBooking $booking, string $reason = 'unpaid_timeout', bool $force = false): GroupBooking
     {
+        $previousStatus = $booking->status;
+
         $result = DB::transaction(function () use ($booking, $reason, $force): GroupBooking {
             $booking = GroupBooking::query()->lockForUpdate()->findOrFail($booking->id);
 
@@ -265,57 +285,37 @@ class GroupReservationService
                 return $booking;
             }
 
-            if (! $force && $booking->payment_submitted_at !== null) {
-                return $booking;
-            }
+            if (! $force) {
+                // Do not auto-retry SupplierReleaseFailed (no rapid retry).
+                if ($booking->status === GroupBookingStatus::SupplierReleaseFailed) {
+                    return $booking;
+                }
 
-            if (! $force && ! $booking->isReleasable()) {
-                return $booking;
-            }
+                if ($booking->payment_submitted_at !== null) {
+                    return $booking;
+                }
 
-            $inventory = GroupInventory::query()->lockForUpdate()->find($booking->group_inventory_id);
-            if ($inventory !== null) {
-                $releaseSeats = min($booking->seat_count, $inventory->held_seats);
-                if ($releaseSeats > 0) {
-                    $inventory->decrement('held_seats', $releaseSeats);
+                if (! $booking->isReleasable()) {
+                    return $booking;
+                }
+            } else {
+                $forceAllowed = $booking->isReleasable()
+                    || $booking->status === GroupBookingStatus::SupplierReleaseFailed
+                    || $booking->status === GroupBookingStatus::ManualPaymentPendingReview
+                    || $booking->manual_payment_status === 'rejected';
+
+                if (! $forceAllowed) {
+                    return $booking;
                 }
             }
 
-            $supplierFailed = false;
-            $supplierResponse = null;
+            $supplierReservationId = trim((string) ($booking->supplier_reservation_id ?? ''));
 
-            if ($booking->supplier_reservation_id && $this->client->isConfigured() && (bool) config('suppliers.al_haider.booking_enabled')) {
-                $booking->update(['supplier_release_attempted_at' => now()]);
-                try {
-                    $response = $this->client->cancelReservation($booking->supplier_reservation_id, [
-                        'reference' => $booking->reference,
-                    ]);
-                    $supplierResponse = is_string($response) ? $response : json_encode($response);
-                    $booking->supplier_released_at = now();
-                } catch (\Throwable $exception) {
-                    $supplierFailed = true;
-                    $supplierResponse = $exception->getMessage();
-                    Log::warning('group_ticketing.cancel_failed', [
-                        'booking_id' => $booking->id,
-                        'message' => $exception->getMessage(),
-                    ]);
-                }
+            if ($supplierReservationId !== '') {
+                return $this->releaseWithSupplierReservation($booking, $supplierReservationId, $reason);
             }
 
-            $status = $supplierFailed
-                ? GroupBookingStatus::SupplierReleaseFailed
-                : GroupBookingStatus::Released;
-
-            $booking->update([
-                'status' => $status,
-                'released_at' => now(),
-                'release_reason' => $reason,
-                'supplier_release_response' => $supplierResponse,
-                'supplier_release_failed_at' => $supplierFailed ? now() : null,
-                'expires_at' => null,
-            ]);
-
-            return $booking->fresh(['passengers', 'inventory', 'user']);
+            return $this->finalizeLocalRelease($booking, $reason, null, false);
         });
 
         if ($result->released_at !== null && $result->release_reason === 'unpaid_timeout') {
@@ -329,16 +329,189 @@ class GroupReservationService
             $this->communicationService->sendReleasedUnpaid($result);
         }
 
-        if ($result->status === GroupBookingStatus::SupplierReleaseFailed) {
+        if ($result->status === GroupBookingStatus::SupplierReleaseFailed
+            && $previousStatus !== GroupBookingStatus::SupplierReleaseFailed) {
             $this->communicationService->sendSupplierReleaseFailed($result);
         }
 
         return $result;
     }
 
+    /**
+     * Manually retry supplier cancel when cancel gate is enabled (admin-triggered only).
+     */
+    public function retrySupplierRelease(GroupBooking $booking): GroupBooking
+    {
+        if ($booking->status !== GroupBookingStatus::SupplierReleaseFailed) {
+            throw new \RuntimeException('Booking is not awaiting supplier release reconciliation.');
+        }
+
+        if (trim((string) ($booking->supplier_reservation_id ?? '')) === '') {
+            throw new \RuntimeException('No supplier reservation is attached for reconciliation.');
+        }
+
+        if (! (bool) config('suppliers.al_haider.cancel_enabled')) {
+            throw new \RuntimeException('Supplier cancel is not enabled. Use manual supplier cancel reconciliation instead.');
+        }
+
+        return $this->releaseUnpaidBooking(
+            $booking,
+            $booking->release_reason ?: 'supplier_release_retry',
+            force: true,
+        );
+    }
+
+    /**
+     * Local-only reconcile after owner confirms the supplier reservation was cancelled outside the API.
+     * Does not call Al-Haider.
+     */
+    public function reconcileAfterManualSupplierCancel(GroupBooking $booking, string $note = 'owner_manual_supplier_cancel'): GroupBooking
+    {
+        return DB::transaction(function () use ($booking, $note): GroupBooking {
+            $booking = GroupBooking::query()->lockForUpdate()->findOrFail($booking->id);
+
+            if ($booking->isReleased()) {
+                return $booking;
+            }
+
+            if (trim((string) ($booking->supplier_reservation_id ?? '')) === '') {
+                throw new \RuntimeException('Booking has no supplier reservation to reconcile.');
+            }
+
+            if (! in_array($booking->status, [
+                GroupBookingStatus::SupplierReleaseFailed,
+                GroupBookingStatus::ReservedAwaitingPayment,
+                GroupBookingStatus::PaymentPending,
+                GroupBookingStatus::ManualPaymentPendingReview,
+            ], true)) {
+                throw new \RuntimeException('Booking is not eligible for manual supplier-cancel reconciliation.');
+            }
+
+            $heldBefore = (int) (GroupInventory::query()->find($booking->group_inventory_id)?->held_seats ?? 0);
+
+            $released = $this->finalizeLocalRelease($booking, $note, 'manual_supplier_cancel_confirmed', true);
+
+            $released->update([
+                'meta' => array_merge($released->meta ?? [], [
+                    'reconciliation_state' => 'manual_supplier_cancel_reconciled',
+                    'manual_supplier_cancel_reconciled_at' => now()->toIso8601String(),
+                    'manual_supplier_cancel_note' => $note,
+                    'held_seats_before_manual_reconcile' => $heldBefore,
+                ]),
+            ]);
+
+            return $released->fresh(['passengers', 'inventory', 'user']);
+        });
+    }
+
     /** @deprecated Use releaseUnpaidBooking() */
     public function releaseExpired(GroupBooking $booking): GroupBooking
     {
         return $this->releaseUnpaidBooking($booking, 'unpaid_timeout');
+    }
+
+    private function releaseWithSupplierReservation(
+        GroupBooking $booking,
+        string $supplierReservationId,
+        string $reason,
+    ): GroupBooking {
+        $booking->update(['supplier_release_attempted_at' => now()]);
+
+        if (! $this->client->isConfigured()) {
+            return $this->markSupplierReleaseFailed($booking, $reason, 'supplier_not_configured', 'Supplier client is not configured.');
+        }
+
+        if (! (bool) config('suppliers.al_haider.cancel_enabled')) {
+            return $this->markSupplierReleaseFailed($booking, $reason, 'cancel_disabled', 'Supplier cancel is not enabled.');
+        }
+
+        try {
+            $response = $this->client->cancelReservation($supplierReservationId, [
+                'reference' => $booking->reference,
+            ]);
+            $supplierResponse = is_string($response) ? $response : json_encode($response);
+        } catch (AlHaiderProviderException $exception) {
+            Log::warning('group_ticketing.cancel_failed', [
+                'booking_id' => $booking->id,
+                'http_status' => $exception->httpStatus,
+                'error_code' => $exception->errorCode,
+            ]);
+
+            return $this->markSupplierReleaseFailed(
+                $booking,
+                $reason,
+                $exception->errorCode !== '' ? $exception->errorCode : 'supplier_cancel_failed',
+                'Supplier cancel failed (HTTP '.$exception->httpStatus.').',
+            );
+        } catch (\Throwable $exception) {
+            Log::warning('group_ticketing.cancel_failed', [
+                'booking_id' => $booking->id,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return $this->markSupplierReleaseFailed(
+                $booking,
+                $reason,
+                'supplier_cancel_failed',
+                'Supplier cancel failed.',
+            );
+        }
+
+        return $this->finalizeLocalRelease($booking, $reason, $supplierResponse, true);
+    }
+
+    private function markSupplierReleaseFailed(
+        GroupBooking $booking,
+        string $reason,
+        string $errorClass,
+        string $safeResponse,
+    ): GroupBooking {
+        // CRITICAL: do not decrement held_seats; keep supplier_reservation_id attached.
+        $booking->update([
+            'status' => GroupBookingStatus::SupplierReleaseFailed,
+            'release_reason' => $reason,
+            'released_at' => null,
+            'supplier_released_at' => null,
+            'supplier_release_failed_at' => now(),
+            'supplier_release_response' => $safeResponse,
+            'expires_at' => null,
+            'meta' => array_merge($booking->meta ?? [], [
+                'reconciliation_state' => 'pending_supplier_release',
+                'supplier_release_error_class' => $errorClass,
+            ]),
+        ]);
+
+        return $booking->fresh(['passengers', 'inventory', 'user']);
+    }
+
+    private function finalizeLocalRelease(
+        GroupBooking $booking,
+        string $reason,
+        ?string $supplierResponse,
+        bool $supplierReleased,
+    ): GroupBooking {
+        $inventory = GroupInventory::query()->lockForUpdate()->find($booking->group_inventory_id);
+        if ($inventory !== null) {
+            $releaseSeats = min($booking->seat_count, $inventory->held_seats);
+            if ($releaseSeats > 0) {
+                $inventory->decrement('held_seats', $releaseSeats);
+            }
+        }
+
+        $now = now();
+        $booking->update([
+            'status' => GroupBookingStatus::Released,
+            'released_at' => $now,
+            'release_reason' => $reason,
+            'supplier_release_response' => $supplierResponse,
+            'supplier_release_failed_at' => null,
+            'supplier_released_at' => $supplierReleased ? $now : $booking->supplier_released_at,
+            'expires_at' => null,
+            'meta' => array_merge($booking->meta ?? [], [
+                'reconciliation_state' => $supplierReleased ? 'supplier_released' : 'local_released',
+            ]),
+        ]);
+
+        return $booking->fresh(['passengers', 'inventory', 'user']);
     }
 }

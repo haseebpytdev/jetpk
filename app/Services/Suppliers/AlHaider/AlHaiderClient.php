@@ -119,8 +119,14 @@ class AlHaiderClient
      */
     public function cancelReservation(string $reservationId, array $payload = []): array
     {
-        if (! (bool) config('suppliers.al_haider.booking_enabled')) {
-            return ['skipped' => true, 'reason' => 'booking_disabled'];
+        // Cancel is gated independently of create/booking so cleanup can remain
+        // available when new supplier reservations are disabled.
+        if (! (bool) config('suppliers.al_haider.cancel_enabled')) {
+            throw new AlHaiderProviderException(
+                'cancel_disabled',
+                503,
+                'Al-Haider group cancel is not enabled.'
+            );
         }
 
         // Official docs: PATCH /api/cancel/booking/{id}

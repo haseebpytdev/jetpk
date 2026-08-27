@@ -11,10 +11,11 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-26 (JP-API-CMS final closeout — managed Al-Haider token + SMTP/CMS truth)
+**Last updated:** 2026-08-28 (JP-GRP-COMM-01-R2 Al-Haider release atomicity + create/cancel gates)
 
 | Date | Phase | Notes |
 | --- | --- | --- |
+| 2026-08-28 | JP-GRP-COMM-01-R2 | **`GroupReservationService`**: supplier cancel must succeed before local `held_seats` decrement; `SupplierReleaseFailed` keeps seats held. **`ALHAIDER_CANCEL_ENABLED`** separated from **`ALHAIDER_BOOKING_ENABLED`**. **`AlHaiderGroupBookingPayloadBuilder`**: fail-closed (no synthetic passenger/contact data); seat_count = adults+children. Admin manual reconcile + retry-supplier-release. Tests: `GroupReservationSupplierReleaseAtomicityTest`. |
 | 2026-08-26 | JP-API-CMS-FINAL-CLOSEOUT | **Al-Haider `managed_token`:** DB `SupplierConnection` is sole token authority; `AlHaiderManagedTokenRenewalService` renews only on genuine expiry with lock + persistent 1/365d issuance budget + ambiguous fail-closed; `AlHaiderClient::isConfigured()` recognizes DB tokens without ENV secrets; Test Connection uses read-only groups probe (zero login); official reserve/cancel paths corrected. **SMTP:** active-invalid DB → ENV fallback. **Nav:** single **API & Modules** sidebar entry. **CMS:** connected-field production-truth matrix tests. |
 | 2026-08-26 | JP-BO-04G-SANDBOX-CANCEL | **Sandbox-safe admin Cancel PNR:** `SupplierPublicRoutingGuard` excludes non-live from public/agent fanout; `SabreSandboxQaLifecycleGuard` + `sabre:ensure-sandbox-qa-connection`; admin direct cancel modal + eligibility/`cancel_pnr_context`; request reuse. Network sandbox lifecycle **blocked** until CERT env credentials exist. Tests: `SupplierPublicRoutingAndSandboxQaGuardTest`, `AdminDirectCancelBookingTest`. |
 

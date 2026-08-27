@@ -537,15 +537,17 @@ return [
         'login_lock_seconds' => (int) env('ALHAIDER_LOGIN_LOCK_SECONDS', 15),
         'login_lock_wait_seconds' => (int) env('ALHAIDER_LOGIN_LOCK_WAIT_SECONDS', 10),
         'token_limit_block_seconds' => (int) env('ALHAIDER_TOKEN_LIMIT_BLOCK_SECONDS', 300),
+        // Create gate: permission to create NEW supplier reservations only.
         'booking_enabled' => (bool) env('ALHAIDER_BOOKING_ENABLED', false),
+        // Cancel gate: permission to release/cancel EXISTING supplier reservations.
+        // Independent of booking_enabled so cleanup is never blocked by create-off.
+        'cancel_enabled' => (bool) env('ALHAIDER_CANCEL_ENABLED', false),
         // Official Postman docs (alhaidertravel.pk → API Docs):
         // POST /api/create/booking, PATCH /api/cancel/booking/{id}
         'reserve_path' => env('ALHAIDER_RESERVE_PATH', '/api/create/booking'),
         'cancel_path' => env('ALHAIDER_CANCEL_PATH', '/api/cancel/booking/{id}'),
         'booking_agency_name' => env('ALHAIDER_BOOKING_AGENCY_NAME', 'JetPakistan'),
         'booking_agent_name' => env('ALHAIDER_BOOKING_AGENT_NAME', 'JetPakistan'),
-        'booking_contact_email' => env('ALHAIDER_BOOKING_CONTACT_EMAIL', 'groups@jetpakistan.pk'),
-        'booking_contact_mobile' => env('ALHAIDER_BOOKING_CONTACT_MOBILE', '03000000000'),
         'max_automatic_token_generations_per_365_days' => 1,
     ],
 ];

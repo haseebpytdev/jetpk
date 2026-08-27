@@ -44,8 +44,38 @@ class GroupTicketingPassengersRequest extends FormRequest
         $validator->after(function (Validator $validator): void {
             $seatCount = (int) $this->input('seat_count', 0);
             $passengers = $this->input('passengers', []);
-            if (is_array($passengers) && count($passengers) !== $seatCount) {
-                $validator->errors()->add('passengers', 'Passenger details must match the number of seats selected.');
+            if (! is_array($passengers)) {
+                return;
+            }
+
+            $adults = 0;
+            $children = 0;
+            $infants = 0;
+            foreach ($passengers as $passenger) {
+                $type = strtolower(trim((string) ($passenger['passenger_type'] ?? 'adult')));
+                if ($type === 'child') {
+                    $children++;
+                } elseif ($type === 'infant') {
+                    $infants++;
+                } else {
+                    $adults++;
+                }
+            }
+
+            // Infants do not consume seats; seat_count must equal adults + children.
+            if (($adults + $children) !== $seatCount) {
+                $validator->errors()->add(
+                    'passengers',
+                    'Seat count must match the number of adults and children (infants do not require seats).',
+                );
+            }
+
+            if ($adults < 1) {
+                $validator->errors()->add('passengers', 'At least one adult passenger is required.');
+            }
+
+            if ($infants > $adults) {
+                $validator->errors()->add('passengers', 'Each infant must be accompanied by an adult.');
             }
 
             /** @var GroupInventory|null $inventory */
