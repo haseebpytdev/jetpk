@@ -1,0 +1,110 @@
+[
+  {
+    "CMS_KEY": "home.hero.eyebrow",
+    "ADMIN_LABEL": "Hero eyebrow",
+    "PERSISTENCE": "client_pages.content (page_key=home)",
+    "API_PRESENTER": "HomepagePublicContentPresenter /api/public/content/homepage",
+    "PUBLIC_COMPONENT": "PublicHero / HomepageContent",
+    "PUBLIC_LOCATION": "Homepage hero above search",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "home.hero.headline",
+    "ADMIN_LABEL": "Hero headline",
+    "PERSISTENCE": "client_pages.content (page_key=home)",
+    "API_PRESENTER": "HomepagePublicContentPresenter",
+    "PUBLIC_COMPONENT": "PublicHero",
+    "PUBLIC_LOCATION": "Homepage hero",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "home.hero.headline_highlight",
+    "ADMIN_LABEL": "Hero headline highlight",
+    "PERSISTENCE": "client_pages.content (page_key=home)",
+    "API_PRESENTER": "HomepagePublicContentPresenter",
+    "PUBLIC_COMPONENT": "PublicHero",
+    "PUBLIC_LOCATION": "Homepage hero",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "home.hero.subtitle",
+    "ADMIN_LABEL": "Hero subtitle",
+    "PERSISTENCE": "client_pages.content (page_key=home)",
+    "API_PRESENTER": "HomepagePublicContentPresenter",
+    "PUBLIC_COMPONENT": "PublicHero",
+    "PUBLIC_LOCATION": "Homepage hero",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "home.hero.search_visible",
+    "ADMIN_LABEL": "Show search module",
+    "PERSISTENCE": "client_pages.content (page_key=home)",
+    "API_PRESENTER": "HomepagePublicContentPresenter",
+    "PUBLIC_COMPONENT": "SearchModule",
+    "PUBLIC_LOCATION": "Homepage hero search card",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "home.media.hero_background",
+    "ADMIN_LABEL": "Hero image (desktop)",
+    "PERSISTENCE": "client_page_media / storage",
+    "API_PRESENTER": "HomepagePublicContentPresenter",
+    "PUBLIC_COMPONENT": "PublicHero",
+    "PUBLIC_LOCATION": "Homepage hero background",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "home.media.hero_background_mobile",
+    "ADMIN_LABEL": "Hero image (mobile)",
+    "PERSISTENCE": "client_page_media / storage",
+    "API_PRESENTER": "HomepagePublicContentPresenter",
+    "PUBLIC_COMPONENT": "PublicHero",
+    "PUBLIC_LOCATION": "Homepage hero background mobile",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "group-search.hero.kicker",
+    "ADMIN_LABEL": "Group search hero kicker",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage (to be exposed)",
+    "PUBLIC_COMPONENT": "GroupSearchPage header",
+    "PUBLIC_LOCATION": "/groups/search heading kicker",
+    "STATUS": "wire_in_jp_grp_ui_01"
+  },
+  {
+    "CMS_KEY": "group-search.hero.title",
+    "ADMIN_LABEL": "Group search hero title",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage",
+    "PUBLIC_COMPONENT": "GroupSearchPage header",
+    "PUBLIC_LOCATION": "/groups/search H1",
+    "STATUS": "wire_in_jp_grp_ui_01"
+  },
+  {
+    "CMS_KEY": "group-search.hero.description",
+    "ADMIN_LABEL": "Group search hero description",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage",
+    "PUBLIC_COMPONENT": "GroupSearchPage header",
+    "PUBLIC_LOCATION": "/groups/search subtitle",
+    "STATUS": "wire_in_jp_grp_ui_01"
+  },
+  {
+    "CMS_KEY": "home.group_cards.*",
+    "ADMIN_LABEL": "Editorial group package cards",
+    "PERSISTENCE": "client_pages.content (page_key=home)",
+    "API_PRESENTER": "Laravel Blade theme only",
+    "PUBLIC_COMPONENT": "themes/.../sections/groups.blade.php",
+    "PUBLIC_LOCATION": "Legacy Blade home section (not Next category tiles)",
+    "STATUS": "not_next_authority_inventory_tiles_preferred"
+  },
+  {
+    "CMS_KEY": "inventory.category_tiles",
+    "ADMIN_LABEL": "Dynamic category cards (not CMS)",
+    "PERSISTENCE": "group_categories + group_inventories",
+    "API_PRESENTER": "GroupInventoryFacetService.forPublicSearch / categoriesWithInventory",
+    "PUBLIC_COMPONENT": "GroupCategoryCards",
+    "PUBLIC_LOCATION": "Homepage Groups tab + /groups/search",
+    "STATUS": "authoritative_inventory"
+  }
+]
