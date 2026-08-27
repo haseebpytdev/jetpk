@@ -306,7 +306,20 @@ export function FlightResultsPage() {
           </p>
         ) : null}
 
-        <PartialResultsNotice warnings={results.data?.warnings} />
+        <PartialResultsNotice
+          warnings={
+            // Soft inventory path already explains partial supplier failure — do not also
+            // surface fatal "could not complete" pipeline warnings (STALE_RESULTS_ERROR_MIX).
+            (results.status === "ready" || results.status === "partial") && results.message
+              ? (results.data?.warnings ?? []).filter(
+                  (w) =>
+                    !/could not complete|unable to (load|complete)|search failed|please try again/i.test(
+                      w,
+                    ),
+                )
+              : results.data?.warnings
+          }
+        />
 
         {results.status === "ready" && !results.isReturnSplit && !results.isReturnPair ? (
           <NearbyDateStrip searchId={results.resolvedSearchId ?? ""} hidden={results.isReturnSplit} />

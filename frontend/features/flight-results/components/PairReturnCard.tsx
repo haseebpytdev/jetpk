@@ -43,6 +43,10 @@ export function pairedOptionToOffer(option: PairedReturnOption): FlightOffer {
     arrival_time: outbound.arrival_time_display,
     departure_airport_code: outbound.origin_airport_code,
     arrival_airport_code: outbound.destination_airport_code,
+    route:
+      outbound.origin_airport_code && outbound.destination_airport_code
+        ? `${outbound.origin_airport_code} → ${outbound.destination_airport_code}`
+        : undefined,
     duration: outbound.duration_display,
     stops: outbound.stops,
     stops_label_display: outbound.stops_label_display,
