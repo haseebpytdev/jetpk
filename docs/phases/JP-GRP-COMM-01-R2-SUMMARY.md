@@ -12,7 +12,7 @@
 | DOCS_HEAD_BEFORE | `c4101c99f5988af03515b305b1cbab3ccb5cb5f8` |
 | SUPERSEDED_ENGINEERING_SHA | `3062567bdc45d9ac9a06bac2a850671cc832584d` (do not deploy as-is) |
 | DEPLOYED_RUNTIME_SHA (current prod) | `460cdae0441d0e07c563e636280c0e552481ac92` |
-| FINAL_ENGINEERING_SHA | _(set after commit)_ |
+| FINAL_ENGINEERING_SHA | `faf99d514b0ceb48aa4920b0da7bd2121556dcfd` |
 
 ## Objective
 
