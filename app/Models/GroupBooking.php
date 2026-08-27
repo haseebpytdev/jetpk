@@ -57,6 +57,41 @@ class GroupBooking extends Model
         ];
     }
 
+    /**
+     * Prefer booking reference in generated URLs.
+     */
+    public function getRouteKey(): mixed
+    {
+        $reference = trim((string) ($this->reference ?? ''));
+
+        return $reference !== '' ? $reference : $this->getKey();
+    }
+
+    /**
+     * Resolve {groupBooking} by reference or numeric PK (route-cache safe).
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $key = trim((string) $value);
+        if ($key === '') {
+            return null;
+        }
+
+        if ($field !== null && $field !== $this->getRouteKeyName()) {
+            return static::query()->where($field, $key)->first();
+        }
+
+        return static::query()
+            ->where(function ($query) use ($key): void {
+                $query->where('reference', $key);
+
+                if (ctype_digit($key)) {
+                    $query->orWhere($query->getModel()->getQualifiedKeyName(), (int) $key);
+                }
+            })
+            ->first();
+    }
+
     public function isExpired(): bool
     {
         return $this->expires_at !== null && $this->expires_at->isPast();

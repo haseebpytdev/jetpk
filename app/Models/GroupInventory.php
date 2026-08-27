@@ -56,6 +56,46 @@ class GroupInventory extends Model
         ];
     }
 
+    /**
+     * Prefer stable public inventory references in generated URLs.
+     * Falls back to the primary key when public_id is empty.
+     */
+    public function getRouteKey(): mixed
+    {
+        $publicId = trim((string) ($this->public_id ?? ''));
+
+        return $publicId !== '' ? $publicId : $this->getKey();
+    }
+
+    /**
+     * Resolve {inventory} by public_id, supplier package id, or numeric PK.
+     *
+     * Must live on the model: production route:cache skips Route::bind closures
+     * defined inside routes/web.php, which caused live /groups/package/ALH-* 404s.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $key = trim((string) $value);
+        if ($key === '') {
+            return null;
+        }
+
+        if ($field !== null && $field !== $this->getRouteKeyName()) {
+            return static::query()->where($field, $key)->first();
+        }
+
+        return static::query()
+            ->where(function ($query) use ($key): void {
+                $query->where('public_id', $key)
+                    ->orWhere('supplier_package_id', $key);
+
+                if (ctype_digit($key)) {
+                    $query->orWhere($query->getModel()->getQualifiedKeyName(), (int) $key);
+                }
+            })
+            ->first();
+    }
+
     public function availableSeats(): int
     {
         return max(0, $this->total_seats - $this->held_seats - $this->sold_seats);
