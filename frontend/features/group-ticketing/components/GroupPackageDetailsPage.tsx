@@ -8,7 +8,11 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { fetchSessionBootstrap } from "@/features/auth/services/session-service";
 import { fetchGroupPackage } from "../services/group-ticketing-api";
 import type { GroupPackage } from "../types";
-import { GroupAvailabilityBadge, GroupPackageHero, GroupPriceBlock } from "./GroupPackageBlocks";
+import {
+  GroupAvailabilityBadge,
+  GroupBookingSummaryCard,
+  GroupPackageHero,
+} from "./GroupPackageBlocks";
 import { GroupCheckoutAuthModal } from "./GroupCheckoutAuthModal";
 import { GroupLockedState, GroupUnavailableState } from "./GroupStateCards";
 
@@ -59,7 +63,6 @@ export function GroupPackageDetailsPage({ packageId }: GroupPackageDetailsPagePr
     if (bookingBusy) return;
     setBookingBusy(true);
     try {
-      // Revalidate seats/fare read-only before entering checkout.
       await loadPackage();
       const bootstrap = await fetchSessionBootstrap();
       if (bootstrap.authenticated) {
@@ -93,61 +96,66 @@ export function GroupPackageDetailsPage({ packageId }: GroupPackageDetailsPagePr
     );
 
   return (
-    <div className="mx-auto w-full max-w-jp-container px-jp-xl py-8 font-[Inter,system-ui,sans-serif]" data-testid="group-package-details">
+    <div
+      className="mx-auto w-full max-w-jp-container px-jp-xl py-8 font-[Inter,system-ui,sans-serif]"
+      data-testid="group-package-details"
+    >
       <BookingProgress steps={progress} ariaLabel="Group booking progress" className="mb-6" />
-      <GroupPackageHero package={pkg} />
-      <div className="mt-6 grid gap-4 md:grid-cols-[2fr_1fr]">
-        <section className="space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-4">
-          <GroupAvailabilityBadge
-            availableSeats={pkg.available_seats}
-            seatLabel={pkg.seat_label}
-            variant={pkg.seats_badge_variant}
-          />
-          {refreshedAt ? (
-            <p className="text-jp-xs text-jp-muted" data-testid="group-seat-refreshed">
-              Availability refreshed for this view (read-only).
-            </p>
-          ) : null}
-          <dl className="grid gap-2 text-jp-sm text-jp-text sm:grid-cols-2">
-            <div>
-              <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Airline</dt>
-              <dd>{pkg.airline_name}</dd>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(17rem,0.9fr)] lg:items-start">
+        <div className="space-y-4">
+          <GroupPackageHero package={pkg} />
+          <section
+            className="space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm"
+            data-testid="group-detail-selected-preview"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <GroupAvailabilityBadge
+                availableSeats={pkg.available_seats}
+                seatLabel={pkg.seat_label}
+                variant={pkg.seats_badge_variant}
+              />
+              {refreshedAt ? (
+                <p className="text-jp-xs text-jp-muted" data-testid="group-seat-refreshed">
+                  Availability refreshed (read-only).
+                </p>
+              ) : null}
             </div>
-            <div>
-              <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Sector</dt>
-              <dd>{pkg.route_line}</dd>
-            </div>
-            <div>
-              <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Departure</dt>
-              <dd>{pkg.departure_datetime_display ?? pkg.departure_date_short ?? "—"}</dd>
-            </div>
-            {pkg.arrival_time_display ? (
+            <dl className="grid gap-3 text-jp-sm text-jp-text sm:grid-cols-2">
               <div>
-                <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Arrival</dt>
-                <dd>{pkg.arrival_time_display}</dd>
+                <dt className="text-jp-xs font-semibold uppercase tracking-[0.12em] text-jp-muted">From</dt>
+                <dd className="font-medium">{pkg.origin_label ?? pkg.route_line}</dd>
               </div>
-            ) : null}
-            {pkg.baggage_line ? (
-              <div className="sm:col-span-2">
-                <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Baggage</dt>
-                <dd>{pkg.baggage_line}</dd>
+              <div>
+                <dt className="text-jp-xs font-semibold uppercase tracking-[0.12em] text-jp-muted">To</dt>
+                <dd className="font-medium">{pkg.dest_label ?? "—"}</dd>
               </div>
-            ) : null}
-          </dl>
-          {pkg.package_notes ? <p className="text-jp-sm text-jp-muted">{pkg.package_notes}</p> : null}
-          <p className="text-jp-sm text-jp-muted">
-            Payment is manual only. Your seats will be held for {pkg.booking_conditions?.hold_minutes ?? 25} minutes
-            after you confirm on the review step. Supplier booking remains gated until authorized.
-          </p>
-          {pkg.seat_selection?.message ? <p className="text-jp-sm text-jp-muted">{pkg.seat_selection.message}</p> : null}
-        </section>
-        <div className="space-y-3">
-          <GroupPriceBlock
-            currency={pkg.currency}
-            priceFormatted={pkg.price_formatted}
-            explanation="Per-seat group fare"
-            breakdownSource="TOTAL_ONLY"
-          />
+              <div>
+                <dt className="text-jp-xs font-semibold uppercase tracking-[0.12em] text-jp-muted">Departure</dt>
+                <dd className="font-medium">{pkg.departure_datetime_display ?? pkg.departure_date_short ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-jp-xs font-semibold uppercase tracking-[0.12em] text-jp-muted">Arrival</dt>
+                <dd className="font-medium">{pkg.arrival_time_display ?? "TBA"}</dd>
+              </div>
+              <div>
+                <dt className="text-jp-xs font-semibold uppercase tracking-[0.12em] text-jp-muted">Sector</dt>
+                <dd className="font-medium">{pkg.sector_code || "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-jp-xs font-semibold uppercase tracking-[0.12em] text-jp-muted">Baggage</dt>
+                <dd className="font-medium">{pkg.baggage?.display ?? pkg.baggage_line ?? "—"}</dd>
+              </div>
+            </dl>
+            {pkg.package_notes ? <p className="text-jp-sm text-jp-muted">{pkg.package_notes}</p> : null}
+            <p className="text-jp-sm text-jp-muted">
+              Payment is manual only. Seats are held for {pkg.booking_conditions?.hold_minutes ?? 25} minutes after review
+              confirm. Supplier booking remains gated until authorized.
+            </p>
+          </section>
+        </div>
+
+        <div className="space-y-3 lg:sticky lg:top-24">
+          <GroupBookingSummaryCard package={pkg} />
           <PrimaryButton
             onClick={() => void handleBookNow()}
             disabled={bookingBusy}

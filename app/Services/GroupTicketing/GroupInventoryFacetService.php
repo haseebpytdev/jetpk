@@ -2,9 +2,10 @@
 
 namespace App\Services\GroupTicketing;
 
+use App\Enums\GroupHomepageTileTargetType;
 use App\Models\GroupCategory;
+use App\Models\GroupHomepageTile;
 use App\Models\GroupInventory;
-use App\Support\GroupTicketing\GroupHomepageTilePresenter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
 
@@ -233,6 +234,7 @@ class GroupInventoryFacetService
         }
 
         $categoriesWithCounts = $this->categoriesWithInventory();
+        $categoryImages = $this->categoryImageUrlsBySlug();
 
         return [
             'sectors' => array_map(
@@ -247,11 +249,17 @@ class GroupInventoryFacetService
                 $all['airlines'] ?? [],
             ),
             'categories' => array_map(
-                fn (array $category): array => [
-                    'value' => (string) ($category['slug'] ?? ''),
-                    'label' => (string) ($category['name'] ?? ''),
-                    'inventory_count' => (int) ($category['inventory_count'] ?? 0),
-                ],
+                function (array $category) use ($categoryImages): array {
+                    $slug = (string) ($category['slug'] ?? '');
+
+                    return [
+                        'value' => $slug,
+                        'label' => (string) ($category['name'] ?? ''),
+                        'inventory_count' => (int) ($category['inventory_count'] ?? 0),
+                        'image_url' => $categoryImages[$slug] ?? null,
+                        'subtitle' => null,
+                    ];
+                },
                 $categoriesWithCounts,
             ),
             'date_bounds' => $dateBounds,
@@ -260,6 +268,43 @@ class GroupInventoryFacetService
                 'tolerance_days' => GroupInventorySearchService::TRAVEL_DATE_TOLERANCE_DAYS,
             ],
         ];
+    }
+
+    /**
+     * CMS/admin homepage-tile media keyed by category slug (presentation enrichment only).
+     *
+     * @return array<string, string>
+     */
+    private function categoryImageUrlsBySlug(): array
+    {
+        if (! Schema::hasTable('group_homepage_tiles')) {
+            return [];
+        }
+
+        $out = [];
+        $tiles = GroupHomepageTile::query()
+            ->where('target_type', GroupHomepageTileTargetType::Category)
+            ->whereNotNull('image_path')
+            ->where('image_path', '!=', '')
+            ->get(['target_value', 'image_path']);
+
+        foreach ($tiles as $tile) {
+            $slug = trim((string) $tile->target_value);
+            $path = trim((string) $tile->image_path);
+            if ($slug === '' || $path === '') {
+                continue;
+            }
+            $path = ltrim($path, '/');
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                $out[$slug] = $path;
+            } elseif (str_starts_with($path, 'storage/')) {
+                $out[$slug] = asset($path);
+            } else {
+                $out[$slug] = asset('storage/'.$path);
+            }
+        }
+
+        return $out;
     }
 
     /**

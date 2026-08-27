@@ -1,10 +1,12 @@
 "use client";
 
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { Select } from "@/components/ui/FormControls";
 import { useId } from "react";
 import type { GroupSearchFacetsLoadState, GroupSearchFacetOption } from "@/features/group-ticketing/types";
 import { DateField } from "./DateField";
 import { todayIsoDate } from "../utils/dates";
+import { cn } from "@/lib/cn";
 
 type GroupTicketingFormProps = {
   airline: string;
@@ -69,7 +71,7 @@ export function GroupTicketingForm({
   const maxDate = dateBounds?.maximum;
   const submitDisabled = disabled || facetsLoading || facetsEmpty || facetsFailed || !facetsReady;
   const selectClass =
-    "w-full min-h-jp-tap rounded-jp-md border border-jp-border bg-jp-surface py-2.5 pl-9 pr-3 text-jp-sm font-[Inter,system-ui,sans-serif] focus-visible:outline-none focus-visible:shadow-jp-focus disabled:cursor-not-allowed disabled:bg-jp-surface-muted disabled:text-jp-muted";
+    "min-h-jp-tap py-2.5 pl-9 text-jp-sm font-[Inter,system-ui,sans-serif] disabled:bg-jp-surface-muted disabled:text-jp-muted";
 
   return (
     <form
@@ -114,13 +116,13 @@ export function GroupTicketingForm({
                 <path d="M21 4 10.5 14.5" />
               </svg>
             </FieldIcon>
-            <select
+            <Select
               id={`${id}-airline`}
               value={airline}
               disabled={!facetsReady || disabled}
               onChange={(event) => onAirlineChange(event.target.value)}
               aria-busy={facetsLoading}
-              className={selectClass}
+              className={cn(selectClass)}
               data-testid="group-airline-select"
             >
               <option value="">{facetsLoading ? "Loading airlines…" : "Any airline"}</option>
@@ -129,7 +131,7 @@ export function GroupTicketingForm({
                   {item.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -143,7 +145,7 @@ export function GroupTicketingForm({
                 <path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </FieldIcon>
-            <select
+            <Select
               id={`${id}-sector`}
               value={sector}
               disabled={!facetsReady || disabled}
@@ -151,7 +153,7 @@ export function GroupTicketingForm({
               aria-busy={facetsLoading}
               aria-invalid={facetsFailed || facetsEmpty}
               aria-describedby={facetsFailed ? `${id}-sector-error` : facetsEmpty ? `${id}-group-empty` : undefined}
-              className={selectClass}
+              className={cn(selectClass)}
               data-testid="group-sector-select"
             >
               <option value="">{facetsLoading ? "Loading sectors…" : "Any sector"}</option>
@@ -160,7 +162,7 @@ export function GroupTicketingForm({
                   {item.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           {facetsLoading ? (
             <p className="mt-1 text-jp-xs text-jp-muted" role="status" aria-live="polite">

@@ -59,7 +59,13 @@ class GroupInventoryCardPresenter
             'route_line' => (string) ($card['route_line'] ?? ''),
             'sector_code' => (string) ($card['sector_code'] ?? ''),
             'departure_date_short' => (string) ($card['departure_date_short'] ?? $card['departure_date'] ?? ''),
+            'departure_datetime_display' => (string) ($card['departure_datetime_display'] ?? ''),
+            'arrival_time_display' => $card['arrival_time_display'] ?? null,
             'baggage_display' => (string) ($baggage['display'] ?? ''),
+            'meal_label' => (string) ($card['meal_label'] ?? 'Meal info not provided'),
+            'trip_type' => (string) ($card['trip_type'] ?? 'unspecified'),
+            'trip_type_label' => (string) ($card['trip_type_label'] ?? 'Itinerary type TBA'),
+            'category_name' => $card['category_name'] ?? null,
             'airline_name' => (string) ($card['airline_name'] ?? ''),
             'airline_logo_url' => $card['airline_logo_url'] ?? null,
             'price_per_adult_formatted' => (string) ($card['price_formatted'] ?? number_format($pricePerAdult, 0)),
@@ -68,6 +74,7 @@ class GroupInventoryCardPresenter
             'seat_count' => $seatCount,
             'seats_selected' => $seatCount,
             'available_seats' => (int) ($card['available_seats'] ?? 0),
+            'manual_payment_only' => true,
         ];
     }
 
@@ -81,6 +88,9 @@ class GroupInventoryCardPresenter
             return collect();
         }
 
+        $inventories->each(static function (GroupInventory $inventory): void {
+            $inventory->loadMissing('category');
+        });
         $iataCodes = $this->collectIataCodes($inventories);
         $airports = $this->loadAirports($iataCodes);
         $airlines = $this->loadAirlines($inventories);
@@ -116,6 +126,9 @@ class GroupInventoryCardPresenter
         $snapshot = is_array($inventory->snapshot) ? $inventory->snapshot : [];
         $mealDisplay = $this->resolveMealDisplay($snapshot);
         $flightTimes = $this->resolveFlightTimes($snapshot, $inventory->departure_date?->format('j M Y'));
+        $tripType = $this->resolveTripType($inventory, $snapshot);
+        $categoryName = trim((string) ($inventory->category?->name ?? ''));
+        $categorySlug = trim((string) ($inventory->category?->slug ?? ''));
 
         return [
             'id' => $inventory->id,
@@ -133,6 +146,10 @@ class GroupInventoryCardPresenter
             'arrival_time_display' => $flightTimes['arrival_time_display'],
             'meal_status' => $mealDisplay['status'],
             'meal_label' => $mealDisplay['label'],
+            'trip_type' => $tripType['code'],
+            'trip_type_label' => $tripType['label'],
+            'category_name' => $categoryName !== '' ? $categoryName : null,
+            'category_slug' => $categorySlug !== '' ? $categorySlug : null,
             'baggage' => $baggage,
             'baggage_line' => $this->buildBaggageLine($baggage),
             'sector_line' => $sectorCode !== '' ? "Sector: {$sectorCode}" : '',
@@ -382,7 +399,29 @@ class GroupInventoryCardPresenter
             return ['status' => 'excluded', 'label' => 'No meal'];
         }
 
-        return ['status' => 'unspecified', 'label' => 'Meal: Not specified'];
+        return ['status' => 'unspecified', 'label' => 'Meal info not provided'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $snapshot
+     * @return array{code: string, label: string}
+     */
+    private function resolveTripType(GroupInventory $inventory, array $snapshot): array
+    {
+        if ($inventory->return_date !== null) {
+            return ['code' => 'return', 'label' => 'Return'];
+        }
+
+        $legs = $snapshot['legs'] ?? [];
+        if (is_array($legs)) {
+            foreach ($legs as $leg) {
+                if (is_array($leg) && ($leg['type'] ?? '') === 'inbound') {
+                    return ['code' => 'return', 'label' => 'Return'];
+                }
+            }
+        }
+
+        return ['code' => 'one_way', 'label' => 'One-way'];
     }
 
     /**

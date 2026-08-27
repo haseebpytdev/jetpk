@@ -49,6 +49,8 @@ class GroupSearchFacetsContractTest extends TestCase
             ->assertJsonPath('categories.0.value', 'ksa')
             ->assertJsonPath('categories.0.label', 'KSA')
             ->assertJsonPath('categories.0.inventory_count', 1)
+            ->assertJsonStructure(['categories' => [['value', 'label', 'inventory_count', 'image_url', 'subtitle']]])
+            ->assertJsonPath('categories.0.image_url', null)
             ->assertJsonPath('date_bounds.minimum', '2026-08-15')
             ->assertJsonPath('date_bounds.maximum', '2026-08-15')
             ->assertJsonPath('travel_date_match.mode', 'EXACT_THEN_NEARBY')
@@ -94,6 +96,56 @@ class GroupSearchFacetsContractTest extends TestCase
         $sectorValues = array_column($response['sectors'] ?? [], 'value');
         $this->assertContains('LHE-RUH', $sectorValues);
         $this->assertNotContains('LHE-DXB', $sectorValues);
+    }
+
+    public function test_search_facets_enrich_category_image_from_homepage_tile(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+
+        $category = GroupCategory::query()->create([
+            'slug' => 'umrah',
+            'name' => 'Umrah Groups',
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        GroupInventory::query()->create([
+            'supplier' => 'alhaider',
+            'supplier_package_id' => 'facet-img-1',
+            'public_id' => 'ALH-FACET-IMG-1',
+            'group_category_id' => $category->id,
+            'title' => 'Umrah Facet',
+            'sector' => 'LHE-JED',
+            'airline_name' => 'Saudi Arabian Airlines',
+            'departure_date' => '2026-11-01',
+            'total_seats' => 8,
+            'held_seats' => 0,
+            'sold_seats' => 0,
+            'price' => 180000,
+            'currency' => 'PKR',
+            'is_active' => true,
+        ]);
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('group_homepage_tiles')) {
+            \App\Models\GroupHomepageTile::query()->create([
+                'title' => 'Umrah Groups',
+                'target_type' => \App\Enums\GroupHomepageTileTargetType::Category,
+                'target_value' => 'umrah',
+                'image_path' => 'storage/group-tiles/umrah-qa.jpg',
+                'is_active' => true,
+                'sort_order' => 1,
+            ]);
+        }
+
+        $response = $this->getJson(route('group-ticketing.search.facets'))->assertOk();
+        $response->assertJsonPath('categories.0.value', 'umrah');
+        $imageUrl = $response->json('categories.0.image_url');
+        if (\Illuminate\Support\Facades\Schema::hasTable('group_homepage_tiles')) {
+            $this->assertIsString($imageUrl);
+            $this->assertStringContainsString('umrah-qa.jpg', (string) $imageUrl);
+        } else {
+            $this->assertNull($imageUrl);
+        }
     }
 
     public function test_search_facets_empty_when_no_active_inventory(): void

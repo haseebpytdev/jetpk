@@ -99,8 +99,47 @@ class GroupInventoryCardPresenterTest extends TestCase
         $card = $this->presenter->present($inventory);
 
         $this->assertSame('excluded', $card['meal_status']);
+        $this->assertSame('No meal', $card['meal_label']);
         $this->assertSame('21 Jun 2026', $card['departure_datetime_display']);
         $this->assertNull($card['arrival_time_display']);
+    }
+
+    public function test_meal_unspecified_uses_neutral_fallback_and_one_way_default(): void
+    {
+        $inventory = $this->makeInventory([
+            'supplier_package_id' => 'meal-unspec',
+            'snapshot' => [],
+        ]);
+
+        $card = $this->presenter->present($inventory);
+
+        $this->assertSame('unspecified', $card['meal_status']);
+        $this->assertSame('Meal info not provided', $card['meal_label']);
+        $this->assertSame('one_way', $card['trip_type']);
+        $this->assertSame('One-way', $card['trip_type_label']);
+    }
+
+    public function test_return_trip_from_return_date_and_category_name(): void
+    {
+        $category = \App\Models\GroupCategory::query()->create([
+            'slug' => 'uae',
+            'name' => 'UAE Groups',
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $inventory = $this->makeInventory([
+            'supplier_package_id' => 'return-cat',
+            'group_category_id' => $category->id,
+            'return_date' => '2026-07-01',
+        ]);
+
+        $card = $this->presenter->present($inventory);
+
+        $this->assertSame('return', $card['trip_type']);
+        $this->assertSame('Return', $card['trip_type_label']);
+        $this->assertSame('UAE Groups', $card['category_name']);
+        $this->assertSame('uae', $card['category_slug']);
     }
 
     public function test_falls_back_to_iata_codes_when_airports_missing(): void
@@ -170,7 +209,7 @@ class GroupInventoryCardPresenterTest extends TestCase
 
         $this->assertSame('Book now', $card['cta_label']);
         $this->assertStringContainsString('/login', $card['cta_url']);
-        $this->assertStringContainsString(urlencode('/groups/'.$inventory->id.'/passengers'), $card['cta_url']);
+        $this->assertStringContainsString(urlencode('/groups/'.$inventory->public_id.'/passengers'), $card['cta_url']);
     }
 
     public function test_isb_label_prefers_override_over_attock_db_city(): void

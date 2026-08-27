@@ -1,12 +1,16 @@
 app/Http/Controllers/Auth/AuthenticatedSessionController.php
 app/Http/Controllers/Frontend/GroupTicketingBookingController.php
+app/Services/GroupTicketing/GroupInventoryFacetService.php
 app/Support/Auth/AuthPostLoginRedirectResolver.php
 app/Support/Auth/CheckoutReturnIntent.php
 app/Support/Auth/PublicAuthRedirectAllowlist.php
 app/Support/Client/ClientPageBootstrapTemplate.php
 app/Support/Client/ClientPageKeys.php
+app/Support/GroupTicketing/GroupInventoryCardPresenter.php
+app/Support/GroupTicketing/GroupTicketingJsonPresenter.php
 frontend/app/(public)/groups/page.tsx
 frontend/components/layout/SiteHeader.tsx
+frontend/components/ui/FormControls.tsx
 frontend/features/auth/components/LoginForm.tsx
 frontend/features/auth/services/auth-service.ts
 frontend/features/auth/types/index.ts
@@ -23,6 +27,7 @@ frontend/features/group-ticketing/components/GroupSearchPage.tsx
 frontend/features/group-ticketing/components/GroupsLandingPage.tsx
 frontend/features/group-ticketing/components/SharedGroupSearch.tsx
 frontend/features/group-ticketing/index.ts
+frontend/features/group-ticketing/types/index.ts
 frontend/features/public-theme-v2/components/PublicFooterPrototype.tsx
 frontend/features/search/components/DateField.tsx
 frontend/features/search/components/GroupTicketingForm.tsx

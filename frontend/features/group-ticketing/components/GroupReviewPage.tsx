@@ -7,7 +7,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { confirmGroupReview, fetchGroupReview } from "../services/group-ticketing-api";
 import type { GroupBookingReview } from "../types";
 import { GroupHoldExpiredState } from "./GroupStateCards";
-import { GroupPriceBlock } from "./GroupPackageBlocks";
+import { GroupBookingSummaryCard } from "./GroupPackageBlocks";
 
 type GroupReviewPageProps = {
   bookingRef: string;
@@ -88,9 +88,8 @@ export function GroupReviewPage({ bookingRef }: GroupReviewPageProps) {
         </section>
 
         <aside>
-          <GroupPriceBlock
-            currency={booking.currency}
-            priceFormatted={booking.inventory.price_formatted}
+          <GroupBookingSummaryCard
+            package={booking.inventory}
             seatCount={booking.seat_count}
             totalFormatted={booking.total_formatted}
           />

@@ -9,7 +9,7 @@ type GroupResultCardProps = {
 };
 
 /**
- * Compact group result card — flight-inspired zones, shorter height.
+ * Compact premium group result card — flight-inspired zones.
  * Primary action: View details (Book Now lives on detail).
  */
 export function GroupResultCard({ card, className }: GroupResultCardProps) {
@@ -26,16 +26,16 @@ export function GroupResultCard({ card, className }: GroupResultCardProps) {
       )}
       data-testid="group-result-card"
     >
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,11rem)_minmax(0,1fr)_minmax(8.5rem,auto)] lg:items-center">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)_minmax(8.5rem,auto)] lg:items-center">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-jp-md border border-jp-border bg-white">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-jp-md border border-jp-border bg-white">
             {card.airline_logo_url ? (
               <Image
                 src={card.airline_logo_url}
                 alt=""
-                width={48}
-                height={48}
-                className="h-10 w-10 object-contain"
+                width={44}
+                height={44}
+                className="h-9 w-9 object-contain"
               />
             ) : (
               <span className="text-jp-xs font-bold text-jp-muted">
@@ -44,20 +44,34 @@ export function GroupResultCard({ card, className }: GroupResultCardProps) {
             )}
           </div>
           <div className="min-w-0">
-            <h2 className="truncate text-jp-sm font-semibold text-jp-text">{card.airline_name}</h2>
+            <h2 className="truncate text-jp-sm font-semibold tracking-[-0.01em] text-jp-text">
+              {card.airline_name}
+            </h2>
             {card.airline_code ? <p className="text-jp-xs text-jp-muted">{card.airline_code}</p> : null}
           </div>
         </div>
 
-        <div className="min-w-0 space-y-1">
-          <p className="text-jp-sm font-medium text-jp-text">{card.route_line}</p>
+        <div className="min-w-0 space-y-1.5">
+          <p className="text-jp-sm font-semibold text-jp-text">{card.route_line}</p>
           <p className="text-jp-xs text-jp-muted">
             {card.departure_datetime_display ?? card.departure_date_short ?? "Departure TBA"}
+            {card.arrival_time_display ? ` · Arr ${card.arrival_time_display}` : ""}
           </p>
-          <div className="flex flex-wrap items-center gap-2">
-            {card.baggage_line ? (
-              <span className="text-jp-xs text-jp-muted">{card.baggage_line}</span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {card.trip_type_label ? (
+              <span className="rounded-jp-pill bg-jp-surface-muted px-2 py-0.5 text-[11px] font-semibold text-jp-text">
+                {card.trip_type_label}
+              </span>
             ) : null}
+            {card.category_name ? (
+              <span className="rounded-jp-pill bg-jp-primary-soft px-2 py-0.5 text-[11px] font-semibold text-jp-primary">
+                {card.category_name}
+              </span>
+            ) : null}
+            {card.meal_label ? (
+              <span className="text-jp-xs text-jp-muted">{card.meal_label}</span>
+            ) : null}
+            {card.baggage_line ? <span className="text-jp-xs text-jp-muted">{card.baggage_line}</span> : null}
             <span
               className={cn(
                 "inline-flex rounded-jp-pill px-2 py-0.5 text-jp-xs font-medium",
@@ -73,10 +87,10 @@ export function GroupResultCard({ card, className }: GroupResultCardProps) {
         </div>
 
         <div className="flex shrink-0 flex-col items-stretch gap-1.5 sm:items-end">
-          <p className="text-right text-jp-base font-semibold text-jp-text" data-testid="group-result-price">
+          <p className="text-right text-jp-base font-semibold tracking-[-0.02em] text-jp-text" data-testid="group-result-price">
             {priceLabel}
           </p>
-          <p className="text-right text-jp-xs text-jp-muted">Per seat</p>
+          <p className="text-right text-jp-xs text-jp-muted">Per-seat fare</p>
           {unavailable ? (
             <span className="inline-flex min-h-[2.5rem] items-center justify-center rounded-jp-md border border-jp-border bg-jp-surface-muted px-3 text-jp-sm font-semibold text-jp-muted">
               {card.cta_label ?? "Unavailable"}

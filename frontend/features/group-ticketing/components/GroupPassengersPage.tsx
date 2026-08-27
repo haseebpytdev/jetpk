@@ -4,28 +4,65 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { FieldLabel, Select, TextInput } from "@/components/ui/FormControls";
 import { mapFieldErrors } from "@/features/auth/utils/laravel-auth-api";
+import { DocumentReader } from "@/features/standard-booking/document-reader";
+import type { PassengerFormValues } from "@/features/standard-booking/types";
 import { fetchGroupPassengersContext, submitGroupPassengers } from "../services/group-ticketing-api";
 import type { GroupContactDetails, GroupPassenger, GroupPassengersContext } from "../types";
 import { GroupCheckoutAuthModal } from "./GroupCheckoutAuthModal";
 import { GroupLockedState, GroupUnavailableState } from "./GroupStateCards";
-import { GroupPriceBlock } from "./GroupPackageBlocks";
+import { GroupBookingSummaryCard } from "./GroupPackageBlocks";
 
 const TITLES = ["Mr", "Mrs", "Ms", "Miss", "Dr", "Mstr"];
 
-function emptyPassenger(): GroupPassenger {
+function emptyPassenger(defaultNationality = "PK"): GroupPassenger {
   return {
     title: "Mr",
     first_name: "",
     last_name: "",
     gender: "male",
     date_of_birth: "",
-    nationality: "Pakistani",
+    nationality: defaultNationality,
     document_type: "passport",
     passport_number: "",
     passport_issue_date: "",
     passport_expiry: "",
     passenger_type: "adult",
+  };
+}
+
+function toFlightPassenger(p: GroupPassenger): PassengerFormValues {
+  return {
+    passenger_type: p.passenger_type || "adult",
+    title: p.title,
+    first_name: p.first_name,
+    last_name: p.last_name,
+    gender: p.gender,
+    date_of_birth: p.date_of_birth,
+    nationality: p.nationality,
+    document_type: p.document_type,
+    passport_number: p.passport_number,
+    passport_issuing_country: p.nationality,
+    passport_expiry_date: p.passport_expiry,
+    passport_issue_date: p.passport_issue_date || "",
+    national_id_number: "",
+  };
+}
+
+function fromFlightPassenger(next: PassengerFormValues, current: GroupPassenger): GroupPassenger {
+  return {
+    ...current,
+    title: next.title || current.title,
+    first_name: next.first_name,
+    last_name: next.last_name,
+    gender: next.gender || current.gender,
+    date_of_birth: next.date_of_birth,
+    nationality: next.nationality || current.nationality,
+    document_type: (next.document_type as GroupPassenger["document_type"]) || current.document_type,
+    passport_number: next.passport_number,
+    passport_expiry: next.passport_expiry_date,
+    passport_issue_date: next.passport_issue_date || current.passport_issue_date,
   };
 }
 
@@ -56,6 +93,7 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
     available_seats: number;
   } | null>(null);
   const [acceptPriceChange, setAcceptPriceChange] = useState(false);
+  const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     void fetchGroupPassengersContext(packageId).then((response) => {
@@ -70,7 +108,11 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
       }
       setContext(response.data);
       setSeatCount(response.data.seat_count);
-      setPassengers(Array.from({ length: response.data.seat_count }, () => emptyPassenger()));
+      const defaultNat =
+        response.data.countries.find((c) => c.code === "PK")?.code ??
+        response.data.countries[0]?.code ??
+        "PK";
+      setPassengers(Array.from({ length: response.data.seat_count }, () => emptyPassenger(defaultNat)));
     });
   }, [packageId]);
 
@@ -78,17 +120,22 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
     setPassengers((current) => {
       if (current.length === seatCount) return current;
       if (current.length < seatCount) {
-        return [...current, ...Array.from({ length: seatCount - current.length }, () => emptyPassenger())];
+        const defaultNat = context?.countries.find((c) => c.code === "PK")?.code ?? "PK";
+        return [...current, ...Array.from({ length: seatCount - current.length }, () => emptyPassenger(defaultNat))];
       }
       return current.slice(0, seatCount);
     });
-  }, [seatCount]);
+  }, [seatCount, context?.countries]);
 
   const totalFormatted = useMemo(() => {
     if (!context) return undefined;
     const perSeat = Number(String(context.inventory.price_formatted).replace(/,/g, ""));
     return Number.isFinite(perSeat) ? String(perSeat * seatCount) : undefined;
   }, [context, seatCount]);
+
+  const updatePassenger = (index: number, patch: Partial<GroupPassenger>) => {
+    setPassengers((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -156,88 +203,289 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
   }
 
   if (loading) return <p className="p-8 text-jp-sm text-jp-muted">Loading passenger form…</p>;
-  if (context?.lock_state?.locked) return <div className="p-8"><GroupLockedState message={context.lock_state.message ?? undefined} /></div>;
-  if (error && !context) return <div className="p-8"><GroupUnavailableState /></div>;
+  if (context?.lock_state?.locked) {
+    return (
+      <div className="p-8">
+        <GroupLockedState message={context.lock_state.message ?? undefined} />
+      </div>
+    );
+  }
+  if (error && !context) {
+    return (
+      <div className="p-8">
+        <GroupUnavailableState />
+      </div>
+    );
+  }
   if (!context) return null;
 
+  const countries = context.countries;
+
   return (
-    <div className="mx-auto max-w-jp-container px-jp-xl py-8 font-[Inter,system-ui,sans-serif]">
-      <BookingProgress steps={context.progress} className="mb-6" />
-      <h1 className="text-2xl font-semibold text-jp-text">Passenger details</h1>
-      <form onSubmit={(event) => void handleSubmit(event)} className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]" data-testid="group-passengers-form">
-        <div className="space-y-4">
-          <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
-            <label htmlFor="seat_count" className="mb-1 block text-jp-sm font-semibold">Number of seats</label>
-            <select
-              id="seat_count"
-              value={seatCount}
-              onChange={(event) => setSeatCount(Number(event.target.value))}
-              className="w-full rounded-jp-md border border-jp-border px-3 py-2"
-              data-testid="group-seat-count"
-            >
-              {Array.from({ length: context.max_seats }, (_, index) => index + 1).map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
+    <div className="mx-auto max-w-jp-container px-jp-xl py-6 font-[Inter,system-ui,sans-serif]" data-testid="group-passengers-page">
+      <BookingProgress steps={context.progress} className="mb-5" />
+      <h1 className="text-2xl font-semibold tracking-[-0.02em] text-jp-text">Passenger details</h1>
+      <p className="mt-1 text-jp-sm text-jp-muted">Enter traveler details for your group seats. Review OCR suggestions before continuing.</p>
+
+      <form
+        onSubmit={(event) => void handleSubmit(event)}
+        className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(17rem,0.9fr)] lg:items-start"
+        data-testid="group-passengers-form"
+      >
+        <div className="space-y-3">
+          <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-3 sm:p-4">
+            <FieldLabel htmlFor="seat_count" required>
+              Number of seats
+            </FieldLabel>
+            <div className="mt-1 max-w-[10rem]">
+              <Select
+                id="seat_count"
+                value={seatCount}
+                onChange={(event) => setSeatCount(Number(event.target.value))}
+                data-testid="group-seat-count"
+              >
+                {Array.from({ length: context.max_seats }, (_, index) => index + 1).map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </Select>
+            </div>
             {fieldErrors.seat_count ? <p className="mt-1 text-jp-sm text-red-700">{fieldErrors.seat_count}</p> : null}
           </div>
 
-          {passengers.map((passenger, index) => (
-            <fieldset key={index} className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
-              <legend className="px-1 text-jp-sm font-semibold">Passenger {index + 1}</legend>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <label className="text-jp-sm">Title
-                  <select value={passenger.title} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, title: e.target.value } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2">
-                    {TITLES.map((title) => <option key={title} value={title}>{title}</option>)}
-                  </select>
-                </label>
-                <label className="text-jp-sm">Gender
-                  <select value={passenger.gender} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, gender: e.target.value } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2">
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </label>
-                <label className="text-jp-sm">First name
-                  <input required value={passenger.first_name} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, first_name: e.target.value } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-                </label>
-                <label className="text-jp-sm">Last name
-                  <input required value={passenger.last_name} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, last_name: e.target.value } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-                </label>
-                <label className="text-jp-sm">Date of birth
-                  <input required type="date" value={passenger.date_of_birth} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, date_of_birth: e.target.value } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-                </label>
-                <label className="text-jp-sm">Nationality
-                  <input required value={passenger.nationality} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, nationality: e.target.value } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-                </label>
-                <label className="text-jp-sm">Document type
-                  <select value={passenger.document_type} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, document_type: e.target.value as GroupPassenger["document_type"] } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2">
-                    <option value="passport">Passport</option>
-                    <option value="national_id">National ID</option>
-                  </select>
-                </label>
-                <label className="text-jp-sm">Document number
-                  <input required value={passenger.passport_number} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, passport_number: e.target.value } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-                </label>
-                <label className="text-jp-sm">Document expiry
-                  <input required type="date" value={passenger.passport_expiry} onChange={(e) => setPassengers((rows) => rows.map((row, i) => i === index ? { ...row, passport_expiry: e.target.value } : row))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-                </label>
-              </div>
-            </fieldset>
-          ))}
+          {passengers.map((passenger, index) => {
+            const isCollapsed = seatCount > 1 && collapsed[index] === true;
+            const heading = `Passenger ${index + 1}`;
+            return (
+              <fieldset
+                key={index}
+                className="rounded-jp-lg border border-jp-border bg-jp-surface p-3 sm:p-4"
+                data-testid={`group-passenger-${index}`}
+              >
+                <legend className="flex w-full items-center justify-between gap-2 px-1">
+                  <span className="text-jp-sm font-semibold text-jp-text">{heading}</span>
+                  {seatCount > 1 ? (
+                    <button
+                      type="button"
+                      className="text-jp-xs font-semibold text-jp-primary"
+                      onClick={() => setCollapsed((prev) => ({ ...prev, [index]: !isCollapsed }))}
+                      data-testid={`group-passenger-toggle-${index}`}
+                    >
+                      {isCollapsed ? "Expand" : "Collapse"}
+                    </button>
+                  ) : null}
+                </legend>
 
-          <fieldset className="rounded-jp-lg border border-jp-border bg-jp-surface p-4">
-            <legend className="px-1 text-jp-sm font-semibold">Contact details</legend>
-            <div className="mt-3 grid gap-3">
-              <label className="text-jp-sm">Contact name
-                <input required value={contact.contact_name} onChange={(e) => setContact((value) => ({ ...value, contact_name: e.target.value }))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-              </label>
-              <label className="text-jp-sm">Email
-                <input required type="email" value={contact.contact_email} onChange={(e) => setContact((value) => ({ ...value, contact_email: e.target.value }))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-              </label>
-              <label className="text-jp-sm">Phone
-                <input required value={contact.contact_phone} onChange={(e) => setContact((value) => ({ ...value, contact_phone: e.target.value }))} className="mt-1 w-full rounded-jp-md border border-jp-border px-3 py-2" />
-              </label>
+                {!isCollapsed ? (
+                  <div className="mt-3 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-jp-xs font-medium text-jp-muted">Passport scan assist (optional)</p>
+                      <div data-testid={`group-passport-upload-${index}`}>
+                        <DocumentReader
+                          passengerIndex={index}
+                          passenger={toFlightPassenger(passenger)}
+                          onApply={(next) => updatePassenger(index, fromFlightPassenger(next, passenger))}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <div>
+                        <FieldLabel htmlFor={`p${index}-title`} required>
+                          Title
+                        </FieldLabel>
+                        <Select
+                          id={`p${index}-title`}
+                          value={passenger.title}
+                          onChange={(e) => updatePassenger(index, { title: e.target.value })}
+                          className="mt-1"
+                        >
+                          {TITLES.map((title) => (
+                            <option key={title} value={title}>
+                              {title}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                      <div>
+                        <FieldLabel htmlFor={`p${index}-gender`} required>
+                          Gender
+                        </FieldLabel>
+                        <Select
+                          id={`p${index}-gender`}
+                          value={passenger.gender}
+                          onChange={(e) => updatePassenger(index, { gender: e.target.value })}
+                          className="mt-1"
+                        >
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                          <option value="other">Other</option>
+                        </Select>
+                      </div>
+                      <div>
+                        <FieldLabel htmlFor={`p${index}-nationality`} required>
+                          Nationality
+                        </FieldLabel>
+                        <Select
+                          id={`p${index}-nationality`}
+                          value={passenger.nationality}
+                          onChange={(e) => updatePassenger(index, { nationality: e.target.value })}
+                          className="mt-1"
+                          data-testid={`group-nationality-${index}`}
+                        >
+                          {countries.map((country) => (
+                            <option key={country.code} value={country.code}>
+                              {country.name}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <FieldLabel htmlFor={`p${index}-first`} required>
+                          First name
+                        </FieldLabel>
+                        <TextInput
+                          id={`p${index}-first`}
+                          required
+                          value={passenger.first_name}
+                          onChange={(e) => updatePassenger(index, { first_name: e.target.value })}
+                          className="mt-1"
+                          autoComplete="given-name"
+                        />
+                      </div>
+                      <div>
+                        <FieldLabel htmlFor={`p${index}-last`} required>
+                          Last name
+                        </FieldLabel>
+                        <TextInput
+                          id={`p${index}-last`}
+                          required
+                          value={passenger.last_name}
+                          onChange={(e) => updatePassenger(index, { last_name: e.target.value })}
+                          className="mt-1"
+                          autoComplete="family-name"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <FieldLabel htmlFor={`p${index}-dob`} required>
+                        Date of birth
+                      </FieldLabel>
+                      <TextInput
+                        id={`p${index}-dob`}
+                        required
+                        type="date"
+                        value={passenger.date_of_birth}
+                        onChange={(e) => updatePassenger(index, { date_of_birth: e.target.value })}
+                        className="mt-1 max-w-xs"
+                      />
+                    </div>
+
+                    <div className="rounded-jp-md border border-jp-border/80 bg-jp-surface-muted/40 p-3">
+                      <p className="mb-2 text-jp-xs font-semibold uppercase tracking-[0.12em] text-jp-muted">Travel document</p>
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        <div>
+                          <FieldLabel htmlFor={`p${index}-doctype`} required>
+                            Type
+                          </FieldLabel>
+                          <Select
+                            id={`p${index}-doctype`}
+                            value={passenger.document_type}
+                            onChange={(e) =>
+                              updatePassenger(index, {
+                                document_type: e.target.value as GroupPassenger["document_type"],
+                              })
+                            }
+                            className="mt-1"
+                          >
+                            <option value="passport">Passport</option>
+                            <option value="national_id">National ID</option>
+                          </Select>
+                        </div>
+                        <div>
+                          <FieldLabel htmlFor={`p${index}-docnum`} required>
+                            Number
+                          </FieldLabel>
+                          <TextInput
+                            id={`p${index}-docnum`}
+                            required
+                            value={passenger.passport_number}
+                            onChange={(e) => updatePassenger(index, { passport_number: e.target.value })}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <FieldLabel htmlFor={`p${index}-docexp`} required>
+                            Expiry
+                          </FieldLabel>
+                          <TextInput
+                            id={`p${index}-docexp`}
+                            required
+                            type="date"
+                            value={passenger.passport_expiry}
+                            onChange={(e) => updatePassenger(index, { passport_expiry: e.target.value })}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-jp-sm text-jp-muted">
+                    {passenger.first_name || passenger.last_name
+                      ? `${passenger.title} ${passenger.first_name} ${passenger.last_name}`.trim()
+                      : "Details collapsed — expand to edit."}
+                  </p>
+                )}
+              </fieldset>
+            );
+          })}
+
+          <fieldset className="rounded-jp-lg border border-jp-border bg-jp-surface p-3 sm:p-4">
+            <legend className="px-1 text-jp-sm font-semibold text-jp-text">Contact details</legend>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              <div className="sm:col-span-1">
+                <FieldLabel htmlFor="contact_name" required>
+                  Name
+                </FieldLabel>
+                <TextInput
+                  id="contact_name"
+                  required
+                  value={contact.contact_name}
+                  onChange={(e) => setContact((value) => ({ ...value, contact_name: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <FieldLabel htmlFor="contact_email" required>
+                  Email
+                </FieldLabel>
+                <TextInput
+                  id="contact_email"
+                  required
+                  type="email"
+                  value={contact.contact_email}
+                  onChange={(e) => setContact((value) => ({ ...value, contact_email: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <FieldLabel htmlFor="contact_phone" required>
+                  Phone
+                </FieldLabel>
+                <TextInput
+                  id="contact_phone"
+                  required
+                  value={contact.contact_phone}
+                  onChange={(e) => setContact((value) => ({ ...value, contact_phone: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
             </div>
           </fieldset>
 
@@ -271,22 +519,23 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
             </div>
           ) : null}
 
-          {error ? <p className="text-jp-sm text-red-700" role="alert">{error}</p> : null}
-          <PrimaryButton type="submit" disabled={submitting || (Boolean(priceChange) && !acceptPriceChange)}>
+          {error ? (
+            <p className="text-jp-sm text-red-700" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <PrimaryButton type="submit" disabled={submitting || (Boolean(priceChange) && !acceptPriceChange)} className="w-full sm:w-auto">
             {submitting ? "Saving…" : "Continue to review"}
           </PrimaryButton>
         </div>
 
-        <aside>
-          <GroupPriceBlock
-            currency={context.inventory.currency}
-            priceFormatted={context.inventory.price_formatted}
+        <div className="lg:sticky lg:top-24">
+          <GroupBookingSummaryCard
+            package={context.inventory}
             seatCount={seatCount}
             totalFormatted={totalFormatted}
-            explanation="Per-seat group fare"
-            breakdownSource="TOTAL_ONLY"
           />
-        </aside>
+        </div>
       </form>
 
       <GroupCheckoutAuthModal

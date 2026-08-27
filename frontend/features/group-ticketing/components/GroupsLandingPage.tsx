@@ -97,15 +97,17 @@ export function GroupsLandingPage() {
 
   return (
     <div className="mx-auto w-full max-w-jp-container px-jp-xl py-8 font-[Inter,system-ui,sans-serif]" data-testid="groups-landing-page">
-      <header className="mb-6" data-testid="groups-landing-cms-hero">
+      <header className="mb-5" data-testid="groups-landing-cms-hero">
         {cms.hero.kicker ? (
-          <p className="text-jp-xs font-semibold uppercase tracking-wide text-jp-primary">{cms.hero.kicker}</p>
+          <p className="text-jp-xs font-semibold uppercase tracking-[0.14em] text-jp-primary">{cms.hero.kicker}</p>
         ) : null}
-        <h1 className="text-2xl font-semibold text-jp-text sm:text-3xl">{cms.hero.title}</h1>
-        {cms.hero.description ? <p className="mt-2 max-w-2xl text-jp-sm text-jp-muted">{cms.hero.description}</p> : null}
+        <h1 className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-jp-text sm:text-4xl">{cms.hero.title}</h1>
+        {cms.hero.description ? (
+          <p className="mt-2 max-w-2xl text-jp-sm leading-relaxed text-jp-muted">{cms.hero.description}</p>
+        ) : null}
       </header>
 
-      <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm" data-testid="groups-landing-search">
+      <div className="rounded-jp-xl border border-jp-border bg-jp-surface p-4 shadow-jp-sm sm:p-5" data-testid="groups-landing-search">
         <SharedGroupSearch
           values={{ airline, sector, category, travelDate }}
           facetsState={facets.state}
@@ -134,20 +136,21 @@ export function GroupsLandingPage() {
         />
       </div>
 
-      <section className="mt-10" aria-labelledby="groups-categories-heading" data-testid="groups-landing-categories">
+      <section className="mt-12" aria-labelledby="groups-categories-heading" data-testid="groups-landing-categories">
         {cms.categories.kicker ? (
-          <p className="text-jp-xs font-semibold uppercase tracking-wide text-jp-primary">{cms.categories.kicker}</p>
+          <p className="text-jp-xs font-semibold uppercase tracking-[0.14em] text-jp-primary">{cms.categories.kicker}</p>
         ) : null}
-        <h2 id="groups-categories-heading" className="mt-1 text-xl font-semibold text-jp-text">
+        <h2 id="groups-categories-heading" className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-jp-text">
           {cms.categories.title}
         </h2>
         {cms.categories.description ? (
-          <p className="mt-1 max-w-2xl text-jp-sm text-jp-muted">{cms.categories.description}</p>
+          <p className="mt-1 max-w-2xl text-jp-sm leading-relaxed text-jp-muted">{cms.categories.description}</p>
         ) : null}
 
         <GroupCategoryCards
           categories={facets.categories}
           mode="link"
+          variant="media"
           className="mt-5"
           disabled={facets.state !== "loaded"}
         />

@@ -15,6 +15,8 @@ export type GroupSearchFacetOption = {
   value: string;
   label: string;
   inventory_count?: number;
+  image_url?: string | null;
+  subtitle?: string | null;
 };
 
 export type GroupSearchFacetsResponse = {
@@ -49,6 +51,8 @@ export type GroupPackage = {
   title: string;
   sector_code: string;
   route_line: string;
+  origin_label?: string | null;
+  dest_label?: string | null;
   departure_date?: string | null;
   departure_date_short?: string | null;
   departure_datetime_display?: string | null;
@@ -59,6 +63,11 @@ export type GroupPackage = {
   baggage?: GroupBaggage;
   baggage_line?: string;
   meal_label?: string | null;
+  meal_status?: string | null;
+  trip_type?: string | null;
+  trip_type_label?: string | null;
+  category_name?: string | null;
+  category_slug?: string | null;
   price_formatted: string;
   currency: string;
   available_seats: number;

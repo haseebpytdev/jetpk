@@ -6,7 +6,7 @@ AUTHORIZED_SHA="${AUTHORIZED_SHA:?AUTHORIZED_SHA required}"
 BASE_SHA="${BASE_SHA:-636584a395cbc93221d7f005fcde7311915f973e}"
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel)}"
 MANIFEST="${REPO_ROOT}/tmp/jp-grp-ui-01/runtime-manifest.txt"
-EXPECTED_COUNT="${EXPECTED_COUNT:-30}"
+EXPECTED_COUNT="${EXPECTED_COUNT:-35}"
 
 cd "${REPO_ROOT}"
 AUTHORIZED_SHA="$(git rev-parse "${AUTHORIZED_SHA}")"
@@ -51,9 +51,9 @@ echo "STAGED_FRONTEND=${FE_COUNT}"
 echo "STAGED_TOTAL=${COUNT}"
 echo "EXACT_DEPLOYABLE_FILE_COUNT=${COUNT}"
 echo "MIGRATIONS=0"
-[[ "${LARAVEL_COUNT}" -eq 7 ]] || { echo "LARAVEL_COUNT_FAIL expected=7 got=${LARAVEL_COUNT}"; exit 1; }
+[[ "${LARAVEL_COUNT}" -eq 10 ]] || { echo "LARAVEL_COUNT_FAIL expected=10 got=${LARAVEL_COUNT}"; exit 1; }
 [[ "${CONFIG_COUNT}" -eq 0 ]] || { echo CONFIG_COUNT_FAIL; exit 1; }
-[[ "${FE_COUNT}" -eq 23 ]] || { echo "FE_COUNT_FAIL expected=23 got=${FE_COUNT}"; exit 1; }
+[[ "${FE_COUNT}" -eq 25 ]] || { echo "FE_COUNT_FAIL expected=25 got=${FE_COUNT}"; exit 1; }
 
 if git diff --name-only "${BASE_SHA}".."${AUTHORIZED_SHA}" | grep -E '^database/migrations/' >/dev/null; then
   echo "MIGRATION_IN_RUNTIME_DIFF_HARD_STOP"

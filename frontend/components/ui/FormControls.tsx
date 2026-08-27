@@ -10,9 +10,33 @@ export function TextInput({ className, ...props }: InputHTMLAttributes<HTMLInput
 
 export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select className={cn(controlClass, className)} {...props}>
-      {children}
-    </select>
+    <span className="relative block w-full">
+      <select
+        className={cn(
+          controlClass,
+          "appearance-none bg-jp-surface pr-10",
+          className,
+        )}
+        data-jp-select="modern"
+        {...props}
+      >
+        {children}
+      </select>
+      <span
+        className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-jp-muted"
+        aria-hidden="true"
+      >
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <path
+            d="M5 7.5L10 12.5L15 7.5"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+    </span>
   );
 }
 
