@@ -25,6 +25,7 @@ export function GroupReviewPage({ bookingRef }: GroupReviewPageProps) {
       setLoading(false);
       if (!response.ok) {
         if (response.status === 401) {
+          // Preserve return intent via allowlisted path; modal/full login both accept redirect.
           router.push(`/login?redirect=${encodeURIComponent(`/groups/booking/${bookingRef}/review`)}`);
           return;
         }
@@ -51,7 +52,7 @@ export function GroupReviewPage({ bookingRef }: GroupReviewPageProps) {
   if (!booking) return <p className="p-8 text-jp-sm text-red-700">{error ?? "Booking not found."}</p>;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto w-full max-w-jp-container px-jp-xl py-8 font-[Inter,system-ui,sans-serif]">
       <BookingProgress steps={booking.progress} className="mb-6" />
       <h1 className="text-2xl font-semibold text-jp-text">Review your booking</h1>
       <p className="mt-1 text-jp-sm text-jp-muted">Reference: {booking.reference}</p>

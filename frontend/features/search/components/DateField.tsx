@@ -52,7 +52,7 @@ export const DateField = forwardRef<DateFieldHandle, DateFieldProps>(function Da
 
   return (
     <div className={cn("min-w-0", className)}>
-      <label htmlFor={id} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-text/80">
+      <label htmlFor={id} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
         {label}
       </label>
       <input
@@ -69,7 +69,7 @@ export const DateField = forwardRef<DateFieldHandle, DateFieldProps>(function Da
           if (next) onSelectionComplete?.(next);
         }}
         className={cn(
-          "w-full rounded-jp-md border border-jp-border bg-white px-3 text-jp-sm text-jp-text dark:bg-jp-surface",
+          "w-full rounded-jp-md border border-jp-border bg-white px-3 font-[Inter,system-ui,sans-serif] text-jp-sm text-jp-text dark:bg-jp-surface",
           compact ? "min-h-[2.75rem] py-2" : "min-h-jp-tap py-2.5",
           "focus-visible:outline-none focus-visible:shadow-jp-focus",
           "[color-scheme:light] dark:[color-scheme:dark]",

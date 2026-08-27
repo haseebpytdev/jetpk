@@ -416,10 +416,15 @@ final class ClientPageBootstrapTemplate
         return [
             'hero' => [
                 'kicker' => 'Group travel',
-                'title' => 'Search group departures',
-                'description' => 'Find block-seat group inventory with transparent per-seat pricing.',
+                'title' => 'JetPakistan Groups',
+                'description' => 'Browse block-seat group departures with transparent per-seat pricing.',
             ],
-            'seo' => ['title' => 'Group travel search — JetPakistan', 'description' => 'Search JetPakistan group and series inventory.', 'robots' => 'index,follow'],
+            'categories' => [
+                'kicker' => 'Explore group fares',
+                'title' => 'Browse group categories',
+                'description' => 'Choose a destination category to view live inventory.',
+            ],
+            'seo' => ['title' => 'Group travel — JetPakistan', 'description' => 'Search JetPakistan group and series inventory.', 'robots' => 'index,follow'],
         ];
     }
 

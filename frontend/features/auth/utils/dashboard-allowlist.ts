@@ -1,3 +1,5 @@
+import { isAllowedCheckoutReturn } from "./checkout-return-allowlist";
+
 const EXACT_PATHS = new Set([
   "/",
   "/login",
@@ -33,10 +35,16 @@ export function sanitizeDashboardUrl(path: string | undefined | null, fallback =
     pathOnly = pathOnly.slice("/jetpk".length);
   }
   const suffix = query ? `?${query}` : "";
+  const candidate = `${pathOnly}${suffix}`;
 
-  if (EXACT_PATHS.has(pathOnly)) return `${pathOnly}${suffix}`;
+  if (EXACT_PATHS.has(pathOnly)) return candidate;
   if (PREFIXES.filter((prefix) => prefix !== "/jetpk/").some((prefix) => pathOnly.startsWith(prefix))) {
-    return `${pathOnly}${suffix}`;
+    return candidate;
+  }
+
+  // Group / flight checkout resume (Book Now modal → post-login).
+  if (isAllowedCheckoutReturn(candidate) || isAllowedCheckoutReturn(pathOnly)) {
+    return candidate;
   }
 
   return fallback;

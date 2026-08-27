@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { fetchSessionBootstrap } from "@/features/auth/services/session-service";
 import { fetchGroupPackage } from "../services/group-ticketing-api";
 import type { GroupPackage } from "../types";
 import { GroupAvailabilityBadge, GroupPackageHero, GroupPriceBlock } from "./GroupPackageBlocks";
+import { GroupCheckoutAuthModal } from "./GroupCheckoutAuthModal";
 import { GroupLockedState, GroupUnavailableState } from "./GroupStateCards";
 
 type GroupPackageDetailsPageProps = {
@@ -20,54 +22,158 @@ export function GroupPackageDetailsPage({ packageId }: GroupPackageDetailsPagePr
   const [available, setAvailable] = useState(true);
   const [locked, setLocked] = useState(false);
   const [lockedMessage, setLockedMessage] = useState<string | undefined>();
-  const [progress, setProgress] = useState<Array<{ key: string; label: string; state: "completed" | "current" | "upcoming"; href?: string | null }>>([]);
+  const [progress, setProgress] = useState<
+    Array<{ key: string; label: string; state: "completed" | "current" | "upcoming"; href?: string | null }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [bookingBusy, setBookingBusy] = useState(false);
+  const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
+
+  const passengersPath = `/groups/${encodeURIComponent(packageId)}/passengers`;
+
+  const loadPackage = async () => {
+    const response = await fetchGroupPackage(packageId);
+    if (!response.ok) {
+      setError(response.message);
+      setPkg(null);
+      return;
+    }
+    setError(null);
+    setPkg(response.data.package);
+    setAvailable(response.data.available);
+    setLocked(response.data.lock_state.locked);
+    setLockedMessage(response.data.lock_state.message ?? undefined);
+    setProgress(response.data.progress as typeof progress);
+    setRefreshedAt(new Date().toISOString());
+  };
 
   useEffect(() => {
-    void fetchGroupPackage(packageId).then((response) => {
-      setLoading(false);
-      if (!response.ok) {
-        setError(response.message);
-        return;
-      }
-      setPkg(response.data.package);
-      setAvailable(response.data.available);
-      setLocked(response.data.lock_state.locked);
-      setLockedMessage(response.data.lock_state.message ?? undefined);
-      setProgress(response.data.progress as typeof progress);
-    });
+    setLoading(true);
+    void loadPackage().finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per packageId
   }, [packageId]);
 
+  const handleBookNow = async () => {
+    if (bookingBusy) return;
+    setBookingBusy(true);
+    try {
+      // Revalidate seats/fare read-only before entering checkout.
+      await loadPackage();
+      const bootstrap = await fetchSessionBootstrap();
+      if (bootstrap.authenticated) {
+        router.push(passengersPath);
+        return;
+      }
+      setAuthOpen(true);
+    } finally {
+      setBookingBusy(false);
+    }
+  };
+
   if (loading) return <p className="p-8 text-jp-sm text-jp-muted">Loading package details…</p>;
-  if (locked) return <div className="p-8"><GroupLockedState message={lockedMessage} /></div>;
-  if (error || !pkg) return <div className="p-8"><GroupUnavailableState /></div>;
-  if (!available || pkg.available_seats <= 0) return <div className="p-8"><GroupUnavailableState /></div>;
+  if (locked)
+    return (
+      <div className="p-8">
+        <GroupLockedState message={lockedMessage} />
+      </div>
+    );
+  if (error || !pkg)
+    return (
+      <div className="p-8">
+        <GroupUnavailableState />
+      </div>
+    );
+  if (!available || pkg.available_seats <= 0)
+    return (
+      <div className="p-8">
+        <GroupUnavailableState />
+      </div>
+    );
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto w-full max-w-jp-container px-jp-xl py-8 font-[Inter,system-ui,sans-serif]" data-testid="group-package-details">
       <BookingProgress steps={progress} ariaLabel="Group booking progress" className="mb-6" />
       <GroupPackageHero package={pkg} />
       <div className="mt-6 grid gap-4 md:grid-cols-[2fr_1fr]">
         <section className="space-y-4 rounded-jp-lg border border-jp-border bg-jp-surface p-4">
-          <GroupAvailabilityBadge availableSeats={pkg.available_seats} seatLabel={pkg.seat_label} variant={pkg.seats_badge_variant} />
-          {pkg.baggage_line ? <p className="text-jp-sm text-jp-text">{pkg.baggage_line}</p> : null}
+          <GroupAvailabilityBadge
+            availableSeats={pkg.available_seats}
+            seatLabel={pkg.seat_label}
+            variant={pkg.seats_badge_variant}
+          />
+          {refreshedAt ? (
+            <p className="text-jp-xs text-jp-muted" data-testid="group-seat-refreshed">
+              Availability refreshed for this view (read-only).
+            </p>
+          ) : null}
+          <dl className="grid gap-2 text-jp-sm text-jp-text sm:grid-cols-2">
+            <div>
+              <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Airline</dt>
+              <dd>{pkg.airline_name}</dd>
+            </div>
+            <div>
+              <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Sector</dt>
+              <dd>{pkg.route_line}</dd>
+            </div>
+            <div>
+              <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Departure</dt>
+              <dd>{pkg.departure_datetime_display ?? pkg.departure_date_short ?? "—"}</dd>
+            </div>
+            {pkg.arrival_time_display ? (
+              <div>
+                <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Arrival</dt>
+                <dd>{pkg.arrival_time_display}</dd>
+              </div>
+            ) : null}
+            {pkg.baggage_line ? (
+              <div className="sm:col-span-2">
+                <dt className="text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Baggage</dt>
+                <dd>{pkg.baggage_line}</dd>
+              </div>
+            ) : null}
+          </dl>
           {pkg.package_notes ? <p className="text-jp-sm text-jp-muted">{pkg.package_notes}</p> : null}
           <p className="text-jp-sm text-jp-muted">
-            Payment is manual only. Your seats will be held for {pkg.booking_conditions?.hold_minutes ?? 25} minutes after you confirm on the review step.
+            Payment is manual only. Your seats will be held for {pkg.booking_conditions?.hold_minutes ?? 25} minutes
+            after you confirm on the review step. Supplier booking remains gated until authorized.
           </p>
           {pkg.seat_selection?.message ? <p className="text-jp-sm text-jp-muted">{pkg.seat_selection.message}</p> : null}
         </section>
-        <GroupPriceBlock currency={pkg.currency} priceFormatted={pkg.price_formatted} />
+        <div className="space-y-3">
+          <GroupPriceBlock
+            currency={pkg.currency}
+            priceFormatted={pkg.price_formatted}
+            explanation="Per-seat group fare"
+            breakdownSource="TOTAL_ONLY"
+          />
+          <PrimaryButton
+            onClick={() => void handleBookNow()}
+            disabled={bookingBusy}
+            className="w-full"
+            data-testid="group-book-now"
+          >
+            {bookingBusy ? "Checking…" : "Book Now"}
+          </PrimaryButton>
+          <Link
+            href="/groups/search"
+            className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-button border border-jp-border px-4 text-jp-sm font-semibold"
+          >
+            Back to search
+          </Link>
+        </div>
       </div>
-      <div className="mt-6 flex flex-wrap gap-3">
-        <PrimaryButton onClick={() => router.push(`/groups/${encodeURIComponent(packageId)}/passengers`)}>
-          Continue to passengers
-        </PrimaryButton>
-        <Link href="/groups/search" className="inline-flex min-h-jp-button items-center rounded-jp-button border border-jp-border px-4 text-jp-sm font-semibold">
-          Back to search
-        </Link>
-      </div>
+
+      <GroupCheckoutAuthModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        returnPath={passengersPath}
+        onAuthenticated={(path) => {
+          setAuthOpen(false);
+          window.location.assign(path);
+        }}
+      />
     </div>
   );
 }

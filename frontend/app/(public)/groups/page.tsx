@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
+import { GroupsLandingPage } from "@/features/group-ticketing/components/GroupsLandingPage";
 
-/** Bookmark-safe hub: Groups live at /groups/search (no bare presentation shell). */
+/** Groups discovery landing — search + dynamic categories. Results at /groups/search. */
 export default function GroupsHubPage() {
-  redirect("/groups/search");
+  return <GroupsLandingPage />;
 }

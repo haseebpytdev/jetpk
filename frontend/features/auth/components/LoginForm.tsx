@@ -5,6 +5,7 @@ import { ensureLaravelCsrfToken } from "@/lib/api";
 import { useState } from "react";
 import { useAuthSubmissionReady } from "../hooks/useAuthSubmissionReady";
 import { login } from "../services/auth-service";
+import { sanitizeCheckoutReturnUrl } from "../utils/checkout-return-allowlist";
 import { mapFieldErrors } from "../utils/laravel-auth-api";
 import { AuthStatusBanner } from "./AuthStatusBanner";
 import { PasswordField } from "./PasswordField";
@@ -25,7 +26,21 @@ function resolveLoginErrorMessage(result: Extract<Awaited<ReturnType<typeof logi
   return result.fieldErrors?.login?.[0] ?? result.message;
 }
 
-export function LoginForm() {
+type LoginFormProps = {
+  /** Safe internal path to resume after auth (e.g. /groups/{id}/passengers). */
+  returnPath?: string;
+  /** When set, called instead of hard navigation (modal can close then navigate). */
+  onSuccessNavigate?: (path: string) => void;
+  showRegisterLink?: boolean;
+  compact?: boolean;
+};
+
+export function LoginForm({
+  returnPath,
+  onSuccessNavigate,
+  showRegisterLink = true,
+  compact = false,
+}: LoginFormProps = {}) {
   const { ready, error: readinessError } = useAuthSubmissionReady();
   const [loginValue, setLoginValue] = useState("");
   const [password, setPassword] = useState("");
@@ -33,6 +48,8 @@ export function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const safeReturn = returnPath ? sanitizeCheckoutReturnUrl(returnPath, "") : "";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,8 +60,6 @@ export function LoginForm() {
     setFieldErrors({});
 
     try {
-      // Refresh CSRF immediately before credential POST so cookie/body token
-      // stay aligned with the Laravel session established through /laravel rewrite.
       const csrf = await ensureLaravelCsrfToken(true);
       if (!csrf) {
         setSubmitting(false);
@@ -52,7 +67,12 @@ export function LoginForm() {
         return;
       }
 
-      const result = await login({ login: loginValue.trim(), password, remember });
+      const result = await login({
+        login: loginValue.trim(),
+        password,
+        remember,
+        ...(safeReturn ? { redirect: safeReturn } : {}),
+      });
 
       if (!result.ok) {
         setSubmitting(false);
@@ -62,14 +82,20 @@ export function LoginForm() {
       }
 
       if (result.requires_otp) {
-        window.location.assign("/login/otp");
+        const otpUrl = safeReturn
+          ? `/login/otp?redirect=${encodeURIComponent(safeReturn)}`
+          : "/login/otp";
+        window.location.assign(otpUrl);
         return;
       }
 
-      // Hard navigation after session establishment — soft App Router transitions
-      // can race the Set-Cookie from /laravel/login and surface as a false
-      // client "network" failure while the session cookie is already valid.
-      window.location.assign(result.redirect);
+      const destination = safeReturn || result.redirect;
+      if (onSuccessNavigate) {
+        onSuccessNavigate(destination);
+        return;
+      }
+
+      window.location.assign(destination);
     } catch {
       setSubmitting(false);
       setFormError("Network error. Check your connection and try again.");
@@ -78,9 +104,17 @@ export function LoginForm() {
 
   const bannerError = readinessError ?? formError;
   const controlsDisabled = !ready || submitting;
+  const registerHref = safeReturn
+    ? `/register?redirect=${encodeURIComponent(safeReturn)}`
+    : "/register";
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className={compact ? "space-y-3 font-[Inter,system-ui,sans-serif]" : "space-y-4"}
+      data-testid="login-form"
+    >
       {bannerError ? <AuthStatusBanner tone="error" message={bannerError} live /> : null}
       {!ready && !readinessError ? (
         <AuthStatusBanner tone="info" message="Preparing secure sign-in…" live />
@@ -135,16 +169,27 @@ export function LoginForm() {
         </a>
       </div>
 
-      <PrimaryButton type="submit" className="w-full" disabled={controlsDisabled}>
+      <PrimaryButton type="submit" className="w-full" disabled={controlsDisabled} data-testid="login-submit">
         {!ready ? "Preparing secure sign-in…" : submitting ? "Signing in…" : "Sign in"}
       </PrimaryButton>
 
-      <p className="text-center text-jp-sm text-jp-muted">
-        Travel agency?{" "}
-        <a href="/agent/register" className="font-semibold text-jp-primary hover:underline">
-          Apply as an Agent
-        </a>
-      </p>
+      {showRegisterLink ? (
+        <p className="text-center text-jp-sm text-jp-muted">
+          No account?{" "}
+          <a href={registerHref} className="font-semibold text-jp-primary hover:underline" data-testid="login-register-link">
+            Create account
+          </a>
+        </p>
+      ) : null}
+
+      {!compact ? (
+        <p className="text-center text-jp-sm text-jp-muted">
+          Travel agency?{" "}
+          <a href="/agent/register" className="font-semibold text-jp-primary hover:underline">
+            Apply as an Agent
+          </a>
+        </p>
+      ) : null}
     </form>
   );
 }

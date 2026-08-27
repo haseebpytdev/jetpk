@@ -93,4 +93,44 @@ class CheckoutAuthTest extends TestCase
 
         $this->assertSame(0, GroupBooking::query()->count());
     }
+
+    public function test_json_login_with_group_redirect_resumes_passengers_checkout(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $inventory = $this->inventory();
+        $user = User::factory()->create([
+            'account_type' => AccountType::Customer,
+            'email_verified_at' => now(),
+        ]);
+
+        $passengersPath = '/groups/'.$inventory->public_id.'/passengers';
+
+        $response = $this->postJson(route('login'), [
+            'login' => $user->email,
+            'password' => 'password',
+            'redirect' => $passengersPath,
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('redirect', $passengersPath);
+    }
+
+    public function test_json_login_rejects_open_redirect(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $user = User::factory()->create([
+            'account_type' => AccountType::Customer,
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->postJson(route('login'), [
+            'login' => $user->email,
+            'password' => 'password',
+            'redirect' => 'https://evil.example/phish',
+        ]);
+
+        $response->assertOk()->assertJsonPath('ok', true);
+        $this->assertStringStartsWith('/customer', (string) $response->json('redirect'));
+    }
 }

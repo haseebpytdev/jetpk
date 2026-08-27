@@ -6,6 +6,7 @@ use App\Enums\AccountType;
 use App\Models\User;
 use App\Support\Auth\AuthPostLoginRedirectResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class AuthPostLoginRedirectResolverTest extends TestCase
@@ -77,5 +78,20 @@ class AuthPostLoginRedirectResolverTest extends TestCase
         $path = app(AuthPostLoginRedirectResolver::class)->resolvePath($user);
 
         $this->assertSame('/staff/dashboard', $path);
+    }
+
+    public function test_group_checkout_intended_resume_wins_over_dashboard(): void
+    {
+        $user = User::factory()->customer()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $request = Request::create('/login', 'POST');
+        $request->setLaravelSession($this->app['session']->driver());
+        $request->session()->put('url.intended', url('/groups/ALH-1/passengers'));
+
+        $path = app(AuthPostLoginRedirectResolver::class)->resolvePath($user, $request);
+
+        $this->assertSame('/groups/ALH-1/passengers', $path);
     }
 }

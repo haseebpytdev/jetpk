@@ -60,7 +60,7 @@ final class ClientPageKeys
             self::HOME => 'Home page',
             self::ABOUT => 'About page',
             self::SUPPORT => 'Support page',
-            self::GROUP_SEARCH => 'Group search hero',
+            self::GROUP_SEARCH => 'Groups landing & search',
             self::LOGIN => 'Login page',
             self::REGISTER => 'Register page',
             self::FOOTER => 'Footer & links',

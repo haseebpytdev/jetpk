@@ -7,7 +7,7 @@ const FOOTER_COLUMNS = [
     links: [
       { label: "Flight search", href: "/#flight-search" },
       { label: "Manage booking", href: "/lookup-booking" },
-      { label: "Groups", href: "/groups/search" },
+      { label: "Groups", href: "/groups" },
     ],
   },
   {

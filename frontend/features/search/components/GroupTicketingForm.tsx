@@ -102,15 +102,16 @@ export function GroupTicketingForm({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,1fr)_auto_auto] lg:items-end">
+      <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,1fr)_auto_auto]">
         <div>
           <label htmlFor={`${id}-airline`} className="mb-1 block text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">
             Airline
           </label>
           <div className="relative">
             <FieldIcon>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                <path d="M10.5 3.5 21 12l-10.5 8.5V14H3v-4h7.5V3.5Z" strokeLinejoin="round" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M2.5 12.5 21 4l-3.5 16-4.5-4.5L8.5 20l-1-4.5L2.5 12.5Z" />
+                <path d="M21 4 10.5 14.5" />
               </svg>
             </FieldIcon>
             <select
@@ -182,7 +183,7 @@ export function GroupTicketingForm({
           ) : null}
         </div>
 
-        <div>
+        <div className="flex flex-col justify-end">
           <DateField
             id={`${id}-date`}
             label="Travel date"
@@ -191,22 +192,27 @@ export function GroupTicketingForm({
             min={minDate}
             max={maxDate}
             disabled={!facetsReady || disabled}
+            density="compact"
           />
         </div>
 
-        <PrimaryButton type="submit" className="w-full min-w-[8.5rem] lg:w-auto" disabled={submitDisabled} data-testid="group-search-submit">
-          {disabled ? "Searching…" : "Search Groups"}
-        </PrimaryButton>
+        <div className="flex flex-col justify-end">
+          <PrimaryButton type="submit" className="w-full min-w-[8.5rem] lg:w-auto" disabled={submitDisabled} data-testid="group-search-submit">
+            {disabled ? "Searching…" : "Search Groups"}
+          </PrimaryButton>
+        </div>
 
-        <button
-          type="button"
-          onClick={onClear}
-          disabled={disabled}
-          className="inline-flex min-h-jp-tap w-full items-center justify-center rounded-jp-md border border-jp-border bg-jp-surface px-4 py-2.5 text-jp-sm font-semibold text-jp-text hover:bg-jp-surface-muted focus-visible:outline-none focus-visible:shadow-jp-focus disabled:opacity-60 lg:w-auto"
-          data-testid="group-search-clear"
-        >
-          Clear
-        </button>
+        <div className="flex flex-col justify-end">
+          <button
+            type="button"
+            onClick={onClear}
+            disabled={disabled}
+            className="inline-flex min-h-jp-tap w-full items-center justify-center rounded-jp-md border border-jp-border bg-jp-surface px-4 py-2.5 text-jp-sm font-semibold text-jp-text hover:bg-jp-surface-muted focus-visible:outline-none focus-visible:shadow-jp-focus disabled:opacity-60 lg:w-auto"
+            data-testid="group-search-clear"
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
       {showInlineCategory ? (

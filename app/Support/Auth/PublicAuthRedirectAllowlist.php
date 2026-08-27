@@ -100,6 +100,12 @@ final class PublicAuthRedirectAllowlist
             }
         }
 
+        // Safe group checkout resume paths (no open redirects).
+        if (CheckoutReturnIntent::isAllowedCheckoutReturn($pathOnly.$suffix)
+            || CheckoutReturnIntent::isAllowedCheckoutReturn($pathOnly)) {
+            return $pathOnly.$suffix;
+        }
+
         return null;
     }
 }

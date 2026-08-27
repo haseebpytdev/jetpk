@@ -5,6 +5,7 @@ namespace App\Support\Auth;
 use App\Enums\AccountType;
 use App\Models\User;
 use App\Services\Client\ClientRedirectResolver;
+use App\Support\Auth\CheckoutReturnIntent;
 use Illuminate\Http\Request;
 
 /**
@@ -46,10 +47,42 @@ final class AuthPostLoginRedirectResolver
             );
         }
 
+        if ($request !== null) {
+            $checkoutResume = $this->safeCheckoutResumePath($request);
+            if ($checkoutResume !== null) {
+                return $checkoutResume;
+            }
+        }
+
         return PublicAuthRedirectAllowlist::sanitize(
             $this->clientRedirectResolver->dashboardPathForUser($user),
             '/',
         );
+    }
+
+    private function safeCheckoutResumePath(Request $request): ?string
+    {
+        $intended = $request->session()->get('url.intended');
+        if (! is_string($intended) || $intended === '') {
+            return null;
+        }
+
+        $path = parse_url($intended, PHP_URL_PATH);
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        $query = parse_url($intended, PHP_URL_QUERY);
+        $candidate = $path.(is_string($query) && $query !== '' ? '?'.$query : '');
+
+        if (! CheckoutReturnIntent::isAllowedCheckoutReturn($candidate)
+            && ! CheckoutReturnIntent::isAllowedCheckoutReturn($path)) {
+            return null;
+        }
+
+        $sanitized = PublicAuthRedirectAllowlist::sanitize($candidate, '');
+
+        return $sanitized !== '' ? $sanitized : null;
     }
 
     private function hasIntendedEmailVerificationUrl(Request $request): bool

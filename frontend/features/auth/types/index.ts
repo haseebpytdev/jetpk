@@ -48,6 +48,8 @@ export type LoginPayload = {
   password: string;
   remember?: boolean;
   client_slug?: string;
+  /** Safe internal checkout resume path (validated server-side). */
+  redirect?: string;
 };
 
 export type LoginResponse =

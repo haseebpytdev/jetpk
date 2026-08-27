@@ -120,7 +120,9 @@ Route::middleware('platform.module:public_flight_search')->group(function (): vo
 });
 Route::get('/airports/search', AirportSearchController::class)->middleware('throttle:60,1')->name('airports.search');
 
-// Bookmark-safe hub: public OLS may hit Laravel for bare /groups; modern UI is Next /groups/search.
+// Named hub for generators / legacy OLS. Production public UI: Next `/groups` landing
+// (frontend/app/(public)/groups/page.tsx). When this Laravel route is hit directly,
+// fall back to search rather than self-redirect looping on `/groups`.
 Route::get('/groups', function () {
     return redirect()->away(rtrim((string) config('app.url'), '/').'/groups/search');
 })->name('group-ticketing.hub');

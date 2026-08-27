@@ -223,13 +223,18 @@ export function GroupSearchPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 font-[Inter,system-ui,sans-serif]">
+    <div className="mx-auto w-full max-w-jp-container px-jp-xl py-8 font-[Inter,system-ui,sans-serif]" data-testid="group-search-page">
       <header className="mb-6" data-testid="group-search-cms-hero">
         {cmsHero.kicker ? (
           <p className="text-jp-xs font-semibold uppercase tracking-wide text-jp-primary">{cmsHero.kicker}</p>
         ) : null}
         <h1 className="text-2xl font-semibold text-jp-text">{cmsHero.title}</h1>
         {cmsHero.description ? <p className="mt-1 text-jp-sm text-jp-muted">{cmsHero.description}</p> : null}
+        {filters.category ? (
+          <p className="mt-2 text-jp-sm text-jp-text" data-testid="group-active-category">
+            Category: <span className="font-semibold">{filters.category}</span>
+          </p>
+        ) : null}
       </header>
 
       <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm">
@@ -252,14 +257,18 @@ export function GroupSearchPage() {
           onClear={handleClear}
           errors={formErrors}
           disabled={loading}
+          showCategoryCards={false}
         />
       </div>
 
       {hasSearch ? (
         <section className="mt-8 space-y-4" aria-live="polite">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-jp-text">Results</h2>
-            <p className="text-jp-sm text-jp-muted">{countLabel}</p>
+            <p className="text-jp-sm text-jp-muted" data-testid="group-result-count">
+              {countLabel}
+              {hasMore ? " · more available" : ""}
+            </p>
           </div>
           {userNotice ? (
             <p className="rounded-jp-md border border-amber-200 bg-amber-50 px-3 py-2 text-jp-sm text-amber-900">{userNotice}</p>
@@ -270,7 +279,7 @@ export function GroupSearchPage() {
           ))}
           {hasMore ? (
             <div className="flex justify-center">
-              <PrimaryButton onClick={() => void handleLoadMore()} disabled={loading}>
+              <PrimaryButton onClick={() => void handleLoadMore()} disabled={loading} data-testid="group-load-more">
                 Load more
               </PrimaryButton>
             </div>

@@ -132,12 +132,41 @@ class GroupTicketingBookingController extends Controller
                     'errors' => [
                         'seat_count' => [GroupInventoryAvailabilityService::insufficientSeatsMessage($availability['available_seats'])],
                     ],
+                    'available_seats' => $availability['available_seats'],
                 ], 422);
             }
 
             return back()->withInput()->withErrors([
                 'seat_count' => GroupInventoryAvailabilityService::insufficientSeatsMessage($availability['available_seats']),
             ]);
+        }
+
+        $currentUnitPrice = round((float) $inventory->price, 2);
+        $quotedRaw = $request->input('quoted_unit_price');
+        $acceptPriceChange = $request->boolean('accept_price_change');
+        if (is_numeric($quotedRaw) && ! $acceptPriceChange) {
+            $quotedUnitPrice = round((float) $quotedRaw, 2);
+            if (abs($quotedUnitPrice - $currentUnitPrice) > 0.009) {
+                $payload = [
+                    'success' => false,
+                    'status' => 'price_changed',
+                    'message' => 'The per-seat group fare changed. Please review the updated price before continuing.',
+                    'price_change' => [
+                        'currency' => (string) ($inventory->currency ?: 'PKR'),
+                        'old_unit_price' => $quotedUnitPrice,
+                        'new_unit_price' => $currentUnitPrice,
+                        'available_seats' => $availability['available_seats'],
+                    ],
+                ];
+
+                if ($request->wantsJson()) {
+                    return response()->json($payload, 409);
+                }
+
+                return back()->withInput()->with('price_change', $payload['price_change'])->withErrors([
+                    'quoted_unit_price' => $payload['message'],
+                ]);
+            }
         }
 
         try {

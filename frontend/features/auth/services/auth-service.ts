@@ -13,6 +13,7 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
       password: payload.password,
       remember: payload.remember ? "1" : "0",
       client_slug: payload.client_slug ?? CLIENT_SLUG,
+      ...(payload.redirect ? { redirect: payload.redirect } : {}),
     },
   });
 

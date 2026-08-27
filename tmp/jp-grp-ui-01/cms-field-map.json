@@ -1,0 +1,74 @@
+[
+  {
+    "CMS_KEY": "group-search.hero.kicker",
+    "ADMIN_LABEL": "Groups page eyebrow",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage /api/public/content/pages/group-search",
+    "PUBLIC_COMPONENT": "GroupsLandingPage + GroupSearchPage header",
+    "LIVE_ROUTE": "/groups and /groups/search",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "group-search.hero.title",
+    "ADMIN_LABEL": "Groups page heading",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage",
+    "PUBLIC_COMPONENT": "GroupsLandingPage + GroupSearchPage",
+    "LIVE_ROUTE": "/groups",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "group-search.hero.description",
+    "ADMIN_LABEL": "Groups page intro",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage",
+    "PUBLIC_COMPONENT": "GroupsLandingPage + GroupSearchPage",
+    "LIVE_ROUTE": "/groups",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "group-search.categories.kicker",
+    "ADMIN_LABEL": "Category section eyebrow",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage",
+    "PUBLIC_COMPONENT": "GroupsLandingPage categories section",
+    "LIVE_ROUTE": "/groups",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "group-search.categories.title",
+    "ADMIN_LABEL": "Category section heading",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage",
+    "PUBLIC_COMPONENT": "GroupsLandingPage categories section",
+    "LIVE_ROUTE": "/groups",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "group-search.categories.description",
+    "ADMIN_LABEL": "Category section intro",
+    "PERSISTENCE": "client_pages.content (page_key=group-search)",
+    "API_PRESENTER": "PublicContentApiPresenter.managedPage",
+    "PUBLIC_COMPONENT": "GroupsLandingPage categories section",
+    "LIVE_ROUTE": "/groups",
+    "STATUS": "authoritative"
+  },
+  {
+    "CMS_KEY": "inventory.category_tiles",
+    "ADMIN_LABEL": "Dynamic category cards (API authority)",
+    "PERSISTENCE": "group_inventories / facets",
+    "API_PRESENTER": "GroupInventoryFacetService.forPublicSearch",
+    "PUBLIC_COMPONENT": "GroupCategoryCards",
+    "LIVE_ROUTE": "/groups",
+    "STATUS": "authoritative_inventory_not_cms"
+  },
+  {
+    "CMS_KEY": "category.presentation.media",
+    "ADMIN_LABEL": "Per-category CMS media",
+    "PERSISTENCE": "n/a",
+    "API_PRESENTER": "n/a",
+    "PUBLIC_COMPONENT": "n/a",
+    "LIVE_ROUTE": "/groups",
+    "STATUS": "NOT_SUPPORTED"
+  }
+]

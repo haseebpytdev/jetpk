@@ -26,10 +26,13 @@ type SharedGroupSearchProps = {
   errors: string[];
   disabled?: boolean;
   className?: string;
+  /** Homepage/landing: never show category cards inside the search box. */
+  showCategoryCards?: boolean;
 };
 
 /**
- * Shared Groups search surface for homepage Groups tab and /groups/search.
+ * Shared Groups search surface — compact filters only by default.
+ * Category discovery belongs on /groups landing, not inside homepage hero search.
  */
 export function SharedGroupSearch({
   values,
@@ -46,6 +49,7 @@ export function SharedGroupSearch({
   errors,
   disabled = false,
   className,
+  showCategoryCards = false,
 }: SharedGroupSearchProps) {
   return (
     <div className={className} data-testid="shared-group-search">
@@ -71,14 +75,16 @@ export function SharedGroupSearch({
         disabled={disabled}
         showInlineCategory={false}
       />
-      <GroupCategoryCards
-        categories={categories}
-        selected={values.category === "all" ? "" : values.category}
-        disabled={disabled || facetsState !== "loaded"}
-        onSelect={(category) => {
-          onChange({ ...values, category: category === "" ? "all" : category });
-        }}
-      />
+      {showCategoryCards ? (
+        <GroupCategoryCards
+          categories={categories}
+          selected={values.category === "all" ? "" : values.category}
+          disabled={disabled || facetsState !== "loaded"}
+          onSelect={(category) => {
+            onChange({ ...values, category: category === "" ? "all" : category });
+          }}
+        />
+      ) : null}
     </div>
   );
 }

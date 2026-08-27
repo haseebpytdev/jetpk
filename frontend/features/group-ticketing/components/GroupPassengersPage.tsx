@@ -7,6 +7,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { mapFieldErrors } from "@/features/auth/utils/laravel-auth-api";
 import { fetchGroupPassengersContext, submitGroupPassengers } from "../services/group-ticketing-api";
 import type { GroupContactDetails, GroupPassenger, GroupPassengersContext } from "../types";
+import { GroupCheckoutAuthModal } from "./GroupCheckoutAuthModal";
 import { GroupLockedState, GroupUnavailableState } from "./GroupStateCards";
 import { GroupPriceBlock } from "./GroupPackageBlocks";
 
@@ -34,6 +35,7 @@ type GroupPassengersPageProps = {
 
 export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
   const router = useRouter();
+  const passengersPath = `/groups/${encodeURIComponent(packageId)}/passengers`;
   const [context, setContext] = useState<GroupPassengersContext | null>(null);
   const [seatCount, setSeatCount] = useState(1);
   const [passengers, setPassengers] = useState<GroupPassenger[]>([emptyPassenger()]);
@@ -46,13 +48,21 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [priceChange, setPriceChange] = useState<{
+    currency: string;
+    old_unit_price: number;
+    new_unit_price: number;
+    available_seats: number;
+  } | null>(null);
+  const [acceptPriceChange, setAcceptPriceChange] = useState(false);
 
-    useEffect(() => {
+  useEffect(() => {
     void fetchGroupPassengersContext(packageId).then((response) => {
       setLoading(false);
       if (!response.ok) {
         if (response.status === 401) {
-          router.push(`/login?redirect=${encodeURIComponent(`/groups/${packageId}/passengers`)}`);
+          setAuthOpen(true);
           return;
         }
         setError(response.message);
@@ -62,7 +72,7 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
       setSeatCount(response.data.seat_count);
       setPassengers(Array.from({ length: response.data.seat_count }, () => emptyPassenger()));
     });
-  }, [packageId, router]);
+  }, [packageId]);
 
   useEffect(() => {
     setPassengers((current) => {
@@ -84,12 +94,20 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
     event.preventDefault();
     setSubmitting(true);
     setFieldErrors({});
+    setError(null);
 
+    const quotedUnit = Number(String(context?.inventory.price_formatted ?? "").replace(/,/g, ""));
     const formData = new FormData();
     formData.set("seat_count", String(seatCount));
     formData.set("contact_name", contact.contact_name);
     formData.set("contact_email", contact.contact_email);
     formData.set("contact_phone", contact.contact_phone);
+    if (Number.isFinite(quotedUnit)) {
+      formData.set("quoted_unit_price", String(quotedUnit));
+    }
+    if (acceptPriceChange) {
+      formData.set("accept_price_change", "1");
+    }
     passengers.forEach((passenger, index) => {
       Object.entries(passenger).forEach(([key, value]) => {
         if (value) formData.set(`passengers[${index}][${key}]`, value);
@@ -100,6 +118,18 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
     setSubmitting(false);
 
     if (!response.ok) {
+      if (response.status === 401) {
+        setAuthOpen(true);
+        return;
+      }
+      if (response.status === 409) {
+        const change = (response.data as { price_change?: typeof priceChange } | undefined)?.price_change;
+        if (change) {
+          setPriceChange(change);
+          setError(response.message);
+          return;
+        }
+      }
       setFieldErrors(mapFieldErrors(response.errors));
       setError(response.message);
       return;
@@ -108,13 +138,30 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
     router.push(response.data.redirect_path);
   };
 
+  if (authOpen && !context) {
+    return (
+      <div className="mx-auto max-w-jp-container px-jp-xl py-8">
+        <p className="mb-4 text-jp-sm text-jp-muted">Sign in to continue group checkout.</p>
+        <GroupCheckoutAuthModal
+          open={authOpen}
+          onClose={() => router.push(`/groups/${encodeURIComponent(packageId)}`)}
+          returnPath={passengersPath}
+          onAuthenticated={(path) => {
+            setAuthOpen(false);
+            window.location.assign(path);
+          }}
+        />
+      </div>
+    );
+  }
+
   if (loading) return <p className="p-8 text-jp-sm text-jp-muted">Loading passenger form…</p>;
   if (context?.lock_state?.locked) return <div className="p-8"><GroupLockedState message={context.lock_state.message ?? undefined} /></div>;
   if (error && !context) return <div className="p-8"><GroupUnavailableState /></div>;
   if (!context) return null;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-jp-container px-jp-xl py-8 font-[Inter,system-ui,sans-serif]">
       <BookingProgress steps={context.progress} className="mb-6" />
       <h1 className="text-2xl font-semibold text-jp-text">Passenger details</h1>
       <form onSubmit={(event) => void handleSubmit(event)} className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]" data-testid="group-passengers-form">
@@ -126,6 +173,7 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
               value={seatCount}
               onChange={(event) => setSeatCount(Number(event.target.value))}
               className="w-full rounded-jp-md border border-jp-border px-3 py-2"
+              data-testid="group-seat-count"
             >
               {Array.from({ length: context.max_seats }, (_, index) => index + 1).map((value) => (
                 <option key={value} value={value}>{value}</option>
@@ -193,8 +241,40 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
             </div>
           </fieldset>
 
+          {priceChange ? (
+            <div
+              role="alertdialog"
+              aria-labelledby="group-price-change-title"
+              className="rounded-jp-md border border-amber-300 bg-amber-50 px-3 py-3 text-jp-sm text-amber-950"
+              data-testid="group-price-change"
+            >
+              <p id="group-price-change-title" className="font-semibold">
+                Fare updated
+              </p>
+              <p className="mt-1">
+                Old per-seat fare: {priceChange.currency} {priceChange.old_unit_price.toLocaleString()}
+              </p>
+              <p>
+                Updated per-seat fare: {priceChange.currency} {priceChange.new_unit_price.toLocaleString()}
+              </p>
+              <p className="mt-1 text-jp-xs">Available seats now: {priceChange.available_seats}</p>
+              <label className="mt-3 flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={acceptPriceChange}
+                  onChange={(event) => setAcceptPriceChange(event.target.checked)}
+                  className="mt-1"
+                  data-testid="group-accept-price-change"
+                />
+                <span>I accept the updated per-seat group fare and want to continue.</span>
+              </label>
+            </div>
+          ) : null}
+
           {error ? <p className="text-jp-sm text-red-700" role="alert">{error}</p> : null}
-          <PrimaryButton type="submit" disabled={submitting}>{submitting ? "Saving…" : "Continue to review"}</PrimaryButton>
+          <PrimaryButton type="submit" disabled={submitting || (Boolean(priceChange) && !acceptPriceChange)}>
+            {submitting ? "Saving…" : "Continue to review"}
+          </PrimaryButton>
         </div>
 
         <aside>
@@ -203,9 +283,21 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
             priceFormatted={context.inventory.price_formatted}
             seatCount={seatCount}
             totalFormatted={totalFormatted}
+            explanation="Per-seat group fare"
+            breakdownSource="TOTAL_ONLY"
           />
         </aside>
       </form>
+
+      <GroupCheckoutAuthModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        returnPath={passengersPath}
+        onAuthenticated={(path) => {
+          setAuthOpen(false);
+          window.location.assign(path);
+        }}
+      />
     </div>
   );
 }

@@ -25,8 +25,8 @@ export const publicNavigationAuthority: PublicNavigationModule[] = [
   {
     label: "Groups",
     status: "ENABLED_REAL_ROUTE",
-    href: "/groups/search",
-    notes: "Operational group ticketing search",
+    href: "/groups",
+    notes: "Groups landing — discovery + search handoff to /groups/search",
   },
   {
     label: "Support",
@@ -76,7 +76,7 @@ export const primaryNavigation: NavItem[] = [
       { label: "Manage Booking", href: "/lookup-booking", description: "Retrieve an existing booking" },
     ],
   },
-  { type: "link", label: "Groups", href: "/groups/search", badge: "New" },
+  { type: "link", label: "Groups", href: "/groups", badge: "New" },
   {
     type: "dropdown",
     label: "Support",
@@ -142,7 +142,7 @@ export const footerColumns: FooterColumn[] = [
     title: "Explore",
     links: [
       { label: "Flights", href: "/" },
-      { label: "Groups", href: "/groups/search" },
+      { label: "Groups", href: "/groups" },
       { label: "Manage Booking", href: "/lookup-booking" },
     ],
   },

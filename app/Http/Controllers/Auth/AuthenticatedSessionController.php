@@ -51,6 +51,7 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse|JsonResponse
     {
         $this->primeClientSlugFromRequest($request);
+        $this->primeCheckoutReturnFromRequest($request);
 
         $user = $request->validateCredentials();
 
@@ -83,15 +84,38 @@ class AuthenticatedSessionController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
 
-        $redirect = $this->completeAuthenticatedLogin($request, $user, $request->boolean('remember'));
-
         if ($request->expectsJson()) {
-            return $this->jsonLoginSuccess(
-                app(AuthPostLoginRedirectResolver::class)->resolvePath($user, $request),
-            );
+            // Resolve checkout resume before completeAuthenticatedLogin consumes url.intended.
+            $resumePath = app(AuthPostLoginRedirectResolver::class)->resolvePath($user, $request);
+            $this->completeAuthenticatedLogin($request, $user, $request->boolean('remember'));
+
+            return $this->jsonLoginSuccess($resumePath);
         }
 
-        return $redirect;
+        return $this->completeAuthenticatedLogin($request, $user, $request->boolean('remember'));
+    }
+
+    /**
+     * Accept a validated internal checkout return path from query or JSON/form body.
+     * Does not accept absolute URLs — open-redirect safe via CheckoutReturnIntent.
+     */
+    private function primeCheckoutReturnFromRequest(Request $request): void
+    {
+        CheckoutReturnIntent::primeSessionFromQuery($request);
+
+        $target = $request->input('redirect');
+        if (! is_string($target) || $target === '') {
+            $target = $request->input('checkout_return');
+        }
+        if (! is_string($target) || $target === '') {
+            return;
+        }
+
+        if (! CheckoutReturnIntent::isAllowedCheckoutReturn($target)) {
+            return;
+        }
+
+        $request->session()->put('url.intended', url($target));
     }
 
     public function completeAuthenticatedLogin(Request $request, User $user, bool $remember): RedirectResponse

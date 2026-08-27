@@ -63,7 +63,12 @@ class CheckoutReturnIntent
 
     public static function isGroupBookingReturn(string $path): bool
     {
-        return preg_match('#^/groups/[^/]+/passengers$#', $path) === 1;
+        if (preg_match('#^/groups/[^/]+/passengers$#', $path) === 1) {
+            return true;
+        }
+
+        // Preserve post-auth resume into an in-progress group booking step.
+        return preg_match('#^/groups/booking/[^/]+/(review|payment|confirmation|status)$#', $path) === 1;
     }
 
     public static function hasGroupBookingIntent(Request $request): bool

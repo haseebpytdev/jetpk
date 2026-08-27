@@ -137,4 +137,39 @@ class PassengerCheckoutTest extends TestCase
             ->assertSee('Booking summary', false)
             ->assertSee('PKR', false);
     }
+
+    public function test_stale_quoted_price_requires_reconfirmation(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $inventory = $this->inventory();
+        $user = User::factory()->create(['account_type' => AccountType::Customer]);
+        $this->actingAs($user);
+
+        $stale = $this->postJson(route('group-ticketing.booking.passengers.store', $inventory), [
+            'seat_count' => 1,
+            'quoted_unit_price' => 88000,
+            'contact_name' => 'Ali Khan',
+            'contact_email' => 'ali@example.com',
+            'contact_phone' => '+923001234567',
+            'passengers' => [$this->passengerPayload()],
+        ]);
+
+        $stale->assertStatus(409)->assertJsonPath('status', 'price_changed');
+        $this->assertEquals(99000.0, (float) $stale->json('price_change.new_unit_price'));
+        $this->assertSame(0, GroupBooking::query()->count());
+
+        $this->postJson(route('group-ticketing.booking.passengers.store', $inventory), [
+            'seat_count' => 1,
+            'quoted_unit_price' => 88000,
+            'accept_price_change' => true,
+            'contact_name' => 'Ali Khan',
+            'contact_email' => 'ali@example.com',
+            'contact_phone' => '+923001234567',
+            'passengers' => [$this->passengerPayload()],
+        ])
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertSame(1, GroupBooking::query()->count());
+    }
 }

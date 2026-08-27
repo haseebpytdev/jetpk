@@ -53,15 +53,33 @@ type GroupPriceBlockProps = {
   priceFormatted: string;
   totalFormatted?: string;
   seatCount?: number;
+  explanation?: string;
+  breakdownSource?: "TOTAL_ONLY" | "ITEMIZED";
 };
 
-export function GroupPriceBlock({ currency, priceFormatted, totalFormatted, seatCount }: GroupPriceBlockProps) {
+export function GroupPriceBlock({
+  currency,
+  priceFormatted,
+  totalFormatted,
+  seatCount,
+  explanation = "Per-seat group fare",
+  breakdownSource = "TOTAL_ONLY",
+}: GroupPriceBlockProps) {
   return (
-    <div className="rounded-jp-md border border-jp-border bg-jp-surface p-4">
-      <p className="text-jp-xs uppercase tracking-wide text-jp-muted">Price per seat</p>
-      <p className="text-xl font-semibold text-jp-text">{currency} {priceFormatted}</p>
+    <div className="rounded-jp-md border border-jp-border bg-jp-surface p-4" data-testid="group-price-block">
+      <p className="text-jp-xs uppercase tracking-wide text-jp-muted">{explanation}</p>
+      <p className="text-xl font-semibold text-jp-text">
+        {currency} {priceFormatted}
+      </p>
+      {breakdownSource === "TOTAL_ONLY" ? (
+        <p className="mt-1 text-jp-xs text-jp-muted">
+          Authoritative total per seat from inventory. No fabricated base/tax split.
+        </p>
+      ) : null}
       {totalFormatted && seatCount ? (
-        <p className="mt-1 text-jp-sm text-jp-muted">Total for {seatCount} seat{seatCount === 1 ? "" : "s"}: {currency} {totalFormatted}</p>
+        <p className="mt-1 text-jp-sm text-jp-muted">
+          Total for {seatCount} seat{seatCount === 1 ? "" : "s"}: {currency} {totalFormatted}
+        </p>
       ) : null}
     </div>
   );
