@@ -6,4 +6,5 @@ frontend/features/flight-results/components/PairReturnCard.tsx
 frontend/features/flight-results/components/ReturnOptionsPage.tsx
 frontend/features/flight-results/hooks/use-flight-results.ts
 frontend/features/flight-results/types/index.ts
+frontend/features/flight-results/utils/criteria-from-params.ts
 frontend/features/flight-results/utils/normalize-journey-display.ts

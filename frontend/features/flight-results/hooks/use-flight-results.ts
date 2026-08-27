@@ -54,16 +54,22 @@ function mapPipelineToPageStatus(
   pipeline: string,
   payload: FlightResultsDataResponse,
 ): ResultsPageStatus {
-  if (pipeline === "failed") return "failed";
+  const visible = countVisibleResults(payload);
+  if (pipeline === "failed") {
+    // Owner blocker: valid inventory must not be suppressed by a fatal banner.
+    // Secondary/supplier-partial failures with usable rows render as ready + soft warning.
+    if (visible > 0) return "ready";
+    return "failed";
+  }
   if (pipeline === "searching" || pipeline === "queued" || pipeline === "in_progress") {
-    return countVisibleResults(payload) > 0 ? "partial" : "searching";
+    return visible > 0 ? "partial" : "searching";
   }
   if (pipeline === "partial") return "partial";
   if (pipeline === "empty") return "empty";
   if (pipeline === "ready") {
-    return countVisibleResults(payload) === 0 && (payload.total ?? 0) === 0 ? "empty" : "ready";
+    return visible === 0 && (payload.total ?? 0) === 0 ? "empty" : "ready";
   }
-  if (countVisibleResults(payload) > 0 || (payload.total ?? 0) > 0) return "ready";
+  if (visible > 0 || (payload.total ?? 0) > 0) return "ready";
   return "empty";
 }
 
@@ -127,8 +133,17 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         setStatus("failed");
         setMessage(payload.message ?? "We could not complete your flight search. Please try again.");
       } else {
-        setStatus("ready");
-        setMessage("");
+        setStatus(nextStatus === "partial" ? "partial" : "ready");
+        // Soft warning when supplier pipeline failed but usable inventory exists.
+        if (pipeline === "failed" && countVisibleResults(merged) > 0) {
+          setMessage(
+            payload.message?.trim()
+              ? `${payload.message} Showing available flights.`
+              : "Some airlines did not finish responding. Showing available flights.",
+          );
+        } else {
+          setMessage("");
+        }
       }
       readyRef.current = true;
       return { shouldPoll: false, nextStatus };

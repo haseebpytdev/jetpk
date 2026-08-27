@@ -36,7 +36,7 @@ export function criteriaFromSearchParams(params: URLSearchParams): FlightSearchP
     origin: from,
     destination: to,
     departureDate: depart,
-    returnDate: params.get("return_date") ?? undefined,
+    returnDate: params.get("return_date") ?? params.get("return") ?? undefined,
     segments,
     passengers: {
       adults: Number(params.get("adults") ?? "1"),

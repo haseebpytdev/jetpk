@@ -282,6 +282,16 @@ export function FlightResultsPage() {
           </div>
         ) : null}
 
+        {(results.status === "ready" || results.status === "partial") && results.message ? (
+          <div
+            className="rounded-jp-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+            data-testid="results-soft-warning"
+            role="status"
+          >
+            {results.message}
+          </div>
+        ) : null}
+
         {results.isReturnSplit ? (
           <ol className="flex gap-3 text-xs font-medium text-jp-text-muted" data-testid="segmented-progress">
             <li className="text-jp-primary">1. Outbound</li>
