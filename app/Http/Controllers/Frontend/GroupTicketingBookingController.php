@@ -17,6 +17,9 @@ use App\Support\GroupTicketing\GroupInventoryCardPresenter;
 use App\Support\GroupTicketing\GroupTicketingJsonPresenter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,7 +38,7 @@ class GroupTicketingBookingController extends Controller
         protected GroupTicketingJsonPresenter $jsonPresenter,
     ) {}
 
-    public function passengers(GroupInventory $inventory, Request $request): View|RedirectResponse|JsonResponse
+    public function passengers(GroupInventory $inventory, Request $request): View|RedirectResponse|JsonResponse|Response
     {
         if ($this->restrictionService->isBlocked($request->user())) {
             if ($request->wantsJson() || $request->query('format') === 'json') {
@@ -77,6 +80,14 @@ class GroupTicketingBookingController extends Controller
                 ...$this->jsonPresenter->presentPassengersContext($inventory, $card, $seatCount),
                 'lock_state' => $this->jsonPresenter->presentLockState($request->user()),
             ]);
+        }
+
+        // Public UI is Next GroupPassengersPage. When OLS hits Laravel for this path,
+        // proxy Next HTML so checkout polish (selects/OCR/summary) is what owners see.
+        $packageKey = trim((string) ($inventory->public_id ?: $inventory->id));
+        $proxied = $this->proxyNextGroupHtml('/groups/'.rawurlencode($packageKey).'/passengers', $request);
+        if ($proxied !== null) {
+            return $proxied;
         }
 
         return view('frontend.group-ticketing.passengers', [
@@ -470,6 +481,41 @@ class GroupTicketingBookingController extends Controller
             }
 
             abort(403);
+        }
+
+        return null;
+    }
+
+    /**
+     * Proxy HTML from the public Next process when OLS still lands on Laravel.
+     */
+    private function proxyNextGroupHtml(string $path, Request $request): ?Response
+    {
+        try {
+            $cookieHeader = collect($request->cookies->all())
+                ->map(static fn ($value, $name): string => $name.'='.$value)
+                ->implode('; ');
+
+            $response = Http::timeout(8)
+                ->withHeaders(array_filter([
+                    'Accept' => 'text/html,application/xhtml+xml',
+                    'Cookie' => $cookieHeader !== '' ? $cookieHeader : null,
+                    'X-Forwarded-Host' => $request->getHost(),
+                    'X-Forwarded-Proto' => $request->isSecure() ? 'https' : 'http',
+                    'User-Agent' => (string) $request->userAgent(),
+                ]))
+                ->get('http://127.0.0.1:3010'.$path);
+
+            if ($response->successful() && is_string($response->body()) && $response->body() !== '') {
+                return response($response->body(), 200)
+                    ->header('Content-Type', 'text/html; charset=utf-8')
+                    ->header('X-JP-Groups-Checkout', 'next-proxy');
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('groups_passengers_next_proxy_failed', [
+                'path' => $path,
+                'message' => $exception->getMessage(),
+            ]);
         }
 
         return null;
