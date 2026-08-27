@@ -120,11 +120,39 @@ Route::middleware('platform.module:public_flight_search')->group(function (): vo
 });
 Route::get('/airports/search', AirportSearchController::class)->middleware('throttle:60,1')->name('airports.search');
 
-// Named hub for generators / legacy OLS. Production public UI: Next `/groups` landing
-// (frontend/app/(public)/groups/page.tsx). When this Laravel route is hit directly,
-// fall back to search rather than self-redirect looping on `/groups`.
+// Named hub. Public UI is Next GroupsLandingPage at /groups.
+// When OLS still routes bare /groups to Laravel, proxy Next HTML from :3010
+// instead of forcing /groups/search (IA requirement: header Groups → landing).
 Route::get('/groups', function () {
-    return redirect()->away(rtrim((string) config('app.url'), '/').'/groups/search');
+    try {
+        $response = \Illuminate\Support\Facades\Http::timeout(8)
+            ->withHeaders([
+                'Accept' => 'text/html,application/xhtml+xml',
+                'X-Forwarded-Host' => request()->getHost(),
+                'X-Forwarded-Proto' => request()->isSecure() ? 'https' : 'http',
+                'User-Agent' => (string) request()->userAgent(),
+            ])
+            ->get('http://127.0.0.1:3010/groups');
+
+        if ($response->successful() && is_string($response->body()) && $response->body() !== '') {
+            return response($response->body(), 200)
+                ->header('Content-Type', 'text/html; charset=utf-8')
+                ->header('X-JP-Groups-Hub', 'next-proxy');
+        }
+    } catch (\Throwable $exception) {
+        \Illuminate\Support\Facades\Log::warning('groups_hub_next_proxy_failed', [
+            'message' => $exception->getMessage(),
+        ]);
+    }
+
+    return response(
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>JetPakistan Groups</title></head><body style="font-family:Inter,system-ui,sans-serif;padding:2rem">'
+        .'<p>JetPakistan Groups</p>'
+        .'<p><a href="/groups/search">Open group search</a></p>'
+        .'</body></html>',
+        200,
+        ['Content-Type' => 'text/html; charset=utf-8', 'X-JP-Groups-Hub' => 'fallback']
+    );
 })->name('group-ticketing.hub');
 
 Route::middleware('platform.module:public_umrah_groups')->group(function (): void {
