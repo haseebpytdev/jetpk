@@ -43,10 +43,20 @@ Live detail JSON for `ALH-*` 404ed under `route:cache` because `Route::bind` in 
 
 Anonymous 401 → JSON login resume → 2 pax → price/seat guards → local hold → manual payment → admin verify → confirmation + IDOR. `ALHAIDER_BOOKING_ENABLED=false` throughout (`supplier_reservation_id` remains null).
 
+## Live disposable Customer UAT (2026-08-27T153500Z)
+
+TEMP_CUSTOMER_CREATED=YES  
+TEMP_CUSTOMER_CLEANUP_REQUIRED=YES  
+USER_ID=13  
+EMAIL=`qa.jp.grp.ui01.20260827203255@example.com`  
+ACCOUNT_TYPE=customer  
+
+Evidence: `docs/evidence/jp-grp-ui-01/20260827T153500Z/`
+
+Live: anonymous Book Now → modal → login → resume passengers → summary + read-only price/seat. **No booking/payment submit.** Gates OFF.
+
 ## Hard stop
 
 STOP before real Al-Haider booking/payment and before enabling booking/reservation gates.
 
-**Blocked for full live matrix:** successful live login + post-login checkout screenshots.
-
-Next owner step: provide a **safe disposable test customer** login (email/password) for production UAT only — still no commercial mutation, gates remain OFF.
+Cleanup required: delete disposable user id 13 after owner/ChatGPT review.
