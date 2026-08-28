@@ -1,0 +1,4518 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "captured_at": "2026-08-28T11:35:31.706Z",
+  "host": "https://jetpakistan.pk",
+  "deployed_runtime_sha": "9979330c35141bc85cd5db7941f4a9c274e89a52",
+  "public_build_id": "e4VIZqNpoHKKio-vCpzSp",
+  "methodology": "Playwright page.goto waitUntil=domcontentloaded; Navigation Timing TTFB=responseStart; cold=first sample warm=rest; FCP/LCP via PerformanceObserver; fonts woff/woff2 aborted to avoid harness hang; samples=10",
+  "methodology_same_as_before": true,
+  "before_reference": "docs/evidence/jp-flight-perf-01/live-before/performance-live-before.json",
+  "fonts_aborted": true,
+  "flight_search": {
+    "depart": "2026-09-17",
+    "search_id": "cab2c33c-7aca-4a3d-bc56-5b1b595f8c5f",
+    "offer_count": 28,
+    "review_path_available": false
+  },
+  "routes": [
+    {
+      "route": "/",
+      "samples": 10,
+      "http_status_all_ok": true,
+      "all": {
+        "ttfb": {
+          "samples": 10,
+          "p50": 320,
+          "p95": 905,
+          "min": 278,
+          "max": 905,
+          "values": [
+            278,
+            296,
+            315,
+            317,
+            320,
+            335,
+            444,
+            466,
+            877,
+            905
+          ]
+        },
+        "dcl": {
+          "samples": 10,
+          "p50": 827,
+          "p95": 1612,
+          "min": 613,
+          "max": 1612,
+          "values": [
+            613,
+            645,
+            661,
+            799,
+            827,
+            1195,
+            1237,
+            1371,
+            1525,
+            1612
+          ]
+        },
+        "fcp": {
+          "samples": 8,
+          "p50": 1296,
+          "p95": 2216,
+          "min": 1052,
+          "max": 2216,
+          "values": [
+            1052,
+            1096,
+            1116,
+            1296,
+            1792,
+            2068,
+            2160,
+            2216
+          ]
+        },
+        "lcp": {
+          "samples": 8,
+          "p50": 1296,
+          "p95": 2216,
+          "min": 1052,
+          "max": 2216,
+          "values": [
+            1052,
+            1096,
+            1116,
+            1296,
+            1792,
+            2068,
+            2160,
+            2216
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 10,
+          "p50": 1336,
+          "p95": 1973,
+          "min": 890,
+          "max": 1973,
+          "values": [
+            890,
+            1063,
+            1144,
+            1264,
+            1336,
+            1580,
+            1599,
+            1600,
+            1671,
+            1973
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 10,
+          "p50": 1633,
+          "p95": 2024,
+          "min": 929,
+          "max": 2024,
+          "values": [
+            929,
+            1266,
+            1308,
+            1615,
+            1633,
+            1641,
+            1723,
+            1751,
+            1947,
+            2024
+          ]
+        },
+        "booking_shell": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "traveler_form_usable": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "network_request_count": {
+          "samples": 10,
+          "p50": 10,
+          "p95": 19,
+          "min": 3,
+          "max": 19,
+          "values": [
+            3,
+            4,
+            5,
+            7,
+            10,
+            11,
+            12,
+            12,
+            13,
+            19
+          ]
+        }
+      },
+      "cold": {
+        "ttfb": {
+          "samples": 1,
+          "p50": 296,
+          "p95": 296,
+          "min": 296,
+          "max": 296,
+          "values": [
+            296
+          ]
+        },
+        "dcl": {
+          "samples": 1,
+          "p50": 1371,
+          "p95": 1371,
+          "min": 1371,
+          "max": 1371,
+          "values": [
+            1371
+          ]
+        },
+        "fcp": {
+          "samples": 1,
+          "p50": 2216,
+          "p95": 2216,
+          "min": 2216,
+          "max": 2216,
+          "values": [
+            2216
+          ]
+        },
+        "lcp": {
+          "samples": 1,
+          "p50": 2216,
+          "p95": 2216,
+          "min": 2216,
+          "max": 2216,
+          "values": [
+            2216
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 1,
+          "p50": 1580,
+          "p95": 1580,
+          "min": 1580,
+          "max": 1580,
+          "values": [
+            1580
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 1,
+          "p50": 1947,
+          "p95": 1947,
+          "min": 1947,
+          "max": 1947,
+          "values": [
+            1947
+          ]
+        }
+      },
+      "warm": {
+        "ttfb": {
+          "samples": 9,
+          "p50": 335,
+          "p95": 905,
+          "min": 278,
+          "max": 905,
+          "values": [
+            278,
+            315,
+            317,
+            320,
+            335,
+            444,
+            466,
+            877,
+            905
+          ]
+        },
+        "dcl": {
+          "samples": 9,
+          "p50": 827,
+          "p95": 1612,
+          "min": 613,
+          "max": 1612,
+          "values": [
+            613,
+            645,
+            661,
+            799,
+            827,
+            1195,
+            1237,
+            1525,
+            1612
+          ]
+        },
+        "fcp": {
+          "samples": 7,
+          "p50": 1296,
+          "p95": 2160,
+          "min": 1052,
+          "max": 2160,
+          "values": [
+            1052,
+            1096,
+            1116,
+            1296,
+            1792,
+            2068,
+            2160
+          ]
+        },
+        "lcp": {
+          "samples": 7,
+          "p50": 1296,
+          "p95": 2160,
+          "min": 1052,
+          "max": 2160,
+          "values": [
+            1052,
+            1096,
+            1116,
+            1296,
+            1792,
+            2068,
+            2160
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 9,
+          "p50": 1336,
+          "p95": 1973,
+          "min": 890,
+          "max": 1973,
+          "values": [
+            890,
+            1063,
+            1144,
+            1264,
+            1336,
+            1599,
+            1600,
+            1671,
+            1973
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 9,
+          "p50": 1633,
+          "p95": 2024,
+          "min": 929,
+          "max": 2024,
+          "values": [
+            929,
+            1266,
+            1308,
+            1615,
+            1633,
+            1641,
+            1723,
+            1751,
+            2024
+          ]
+        }
+      },
+      "ttfb_p50": 320,
+      "ttfb_p95": 905,
+      "dcl_p50": 827,
+      "dcl_p95": 1612,
+      "nav_to_shell_p50": 1336,
+      "nav_to_shell_p95": 1973,
+      "fcp_p50": 1296,
+      "lcp_p50": 1296,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1942,
+          "ttfb_ms": 1129
+        },
+        {
+          "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/hero_background-20260720061656.png?v=1787775737",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 1746,
+          "ttfb_ms": 176
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1709,
+          "ttfb_ms": 1248
+        }
+      ]
+    },
+    {
+      "route": "/groups",
+      "samples": 10,
+      "http_status_all_ok": true,
+      "all": {
+        "ttfb": {
+          "samples": 10,
+          "p50": 316,
+          "p95": 941,
+          "min": 285,
+          "max": 941,
+          "values": [
+            285,
+            286,
+            290,
+            305,
+            316,
+            318,
+            427,
+            660,
+            723,
+            941
+          ]
+        },
+        "dcl": {
+          "samples": 10,
+          "p50": 790,
+          "p95": 1939,
+          "min": 570,
+          "max": 1939,
+          "values": [
+            570,
+            601,
+            668,
+            744,
+            790,
+            797,
+            1022,
+            1251,
+            1347,
+            1939
+          ]
+        },
+        "fcp": {
+          "samples": 10,
+          "p50": 888,
+          "p95": 1992,
+          "min": 788,
+          "max": 1992,
+          "values": [
+            788,
+            824,
+            828,
+            844,
+            888,
+            1012,
+            1276,
+            1500,
+            1620,
+            1992
+          ]
+        },
+        "lcp": {
+          "samples": 10,
+          "p50": 888,
+          "p95": 2084,
+          "min": 788,
+          "max": 2084,
+          "values": [
+            788,
+            824,
+            828,
+            844,
+            888,
+            1012,
+            1276,
+            1500,
+            1620,
+            2084
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 10,
+          "p50": 954,
+          "p95": 2070,
+          "min": 815,
+          "max": 2070,
+          "values": [
+            815,
+            825,
+            834,
+            920,
+            954,
+            1035,
+            1260,
+            1515,
+            1589,
+            2070
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 10,
+          "p50": 1066,
+          "p95": 2106,
+          "min": 852,
+          "max": 2106,
+          "values": [
+            852,
+            866,
+            930,
+            971,
+            1066,
+            1320,
+            1541,
+            1639,
+            1775,
+            2106
+          ]
+        },
+        "booking_shell": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "traveler_form_usable": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "network_request_count": {
+          "samples": 10,
+          "p50": 13,
+          "p95": 27,
+          "min": 6,
+          "max": 27,
+          "values": [
+            6,
+            12,
+            13,
+            13,
+            13,
+            15,
+            22,
+            22,
+            22,
+            27
+          ]
+        }
+      },
+      "cold": {
+        "ttfb": {
+          "samples": 1,
+          "p50": 941,
+          "p95": 941,
+          "min": 941,
+          "max": 941,
+          "values": [
+            941
+          ]
+        },
+        "dcl": {
+          "samples": 1,
+          "p50": 1939,
+          "p95": 1939,
+          "min": 1939,
+          "max": 1939,
+          "values": [
+            1939
+          ]
+        },
+        "fcp": {
+          "samples": 1,
+          "p50": 1992,
+          "p95": 1992,
+          "min": 1992,
+          "max": 1992,
+          "values": [
+            1992
+          ]
+        },
+        "lcp": {
+          "samples": 1,
+          "p50": 2084,
+          "p95": 2084,
+          "min": 2084,
+          "max": 2084,
+          "values": [
+            2084
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 1,
+          "p50": 2070,
+          "p95": 2070,
+          "min": 2070,
+          "max": 2070,
+          "values": [
+            2070
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 1,
+          "p50": 2106,
+          "p95": 2106,
+          "min": 2106,
+          "max": 2106,
+          "values": [
+            2106
+          ]
+        }
+      },
+      "warm": {
+        "ttfb": {
+          "samples": 9,
+          "p50": 316,
+          "p95": 723,
+          "min": 285,
+          "max": 723,
+          "values": [
+            285,
+            286,
+            290,
+            305,
+            316,
+            318,
+            427,
+            660,
+            723
+          ]
+        },
+        "dcl": {
+          "samples": 9,
+          "p50": 790,
+          "p95": 1347,
+          "min": 570,
+          "max": 1347,
+          "values": [
+            570,
+            601,
+            668,
+            744,
+            790,
+            797,
+            1022,
+            1251,
+            1347
+          ]
+        },
+        "fcp": {
+          "samples": 9,
+          "p50": 888,
+          "p95": 1620,
+          "min": 788,
+          "max": 1620,
+          "values": [
+            788,
+            824,
+            828,
+            844,
+            888,
+            1012,
+            1276,
+            1500,
+            1620
+          ]
+        },
+        "lcp": {
+          "samples": 9,
+          "p50": 888,
+          "p95": 1620,
+          "min": 788,
+          "max": 1620,
+          "values": [
+            788,
+            824,
+            828,
+            844,
+            888,
+            1012,
+            1276,
+            1500,
+            1620
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 9,
+          "p50": 954,
+          "p95": 1589,
+          "min": 815,
+          "max": 1589,
+          "values": [
+            815,
+            825,
+            834,
+            920,
+            954,
+            1035,
+            1260,
+            1515,
+            1589
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 9,
+          "p50": 1066,
+          "p95": 1775,
+          "min": 852,
+          "max": 1775,
+          "values": [
+            852,
+            866,
+            930,
+            971,
+            1066,
+            1320,
+            1541,
+            1639,
+            1775
+          ]
+        }
+      },
+      "ttfb_p50": 316,
+      "ttfb_p95": 941,
+      "dcl_p50": 790,
+      "dcl_p95": 1939,
+      "nav_to_shell_p50": 954,
+      "nav_to_shell_p95": 2070,
+      "fcp_p50": 888,
+      "lcp_p50": 888,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1258,
+          "ttfb_ms": 438
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-fe4ee47e48b7da28.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1113,
+          "ttfb_ms": 639
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 1022,
+          "ttfb_ms": 255
+        }
+      ]
+    },
+    {
+      "route": "/groups/search",
+      "samples": 10,
+      "http_status_all_ok": true,
+      "all": {
+        "ttfb": {
+          "samples": 10,
+          "p50": 378,
+          "p95": 1268,
+          "min": 266,
+          "max": 1268,
+          "values": [
+            266,
+            271,
+            281,
+            311,
+            378,
+            401,
+            459,
+            841,
+            951,
+            1268
+          ]
+        },
+        "dcl": {
+          "samples": 10,
+          "p50": 859,
+          "p95": 1923,
+          "min": 546,
+          "max": 1923,
+          "values": [
+            546,
+            563,
+            668,
+            693,
+            859,
+            1071,
+            1118,
+            1368,
+            1911,
+            1923
+          ]
+        },
+        "fcp": {
+          "samples": 10,
+          "p50": 920,
+          "p95": 2272,
+          "min": 712,
+          "max": 2272,
+          "values": [
+            712,
+            732,
+            736,
+            760,
+            920,
+            1152,
+            1160,
+            1408,
+            1980,
+            2272
+          ]
+        },
+        "lcp": {
+          "samples": 10,
+          "p50": 920,
+          "p95": 2272,
+          "min": 712,
+          "max": 2272,
+          "values": [
+            712,
+            732,
+            736,
+            760,
+            920,
+            1152,
+            1160,
+            1408,
+            1980,
+            2272
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 10,
+          "p50": 928,
+          "p95": 2406,
+          "min": 819,
+          "max": 2406,
+          "values": [
+            819,
+            824,
+            840,
+            900,
+            928,
+            1125,
+            1245,
+            1490,
+            1973,
+            2406
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 10,
+          "p50": 1157,
+          "p95": 2467,
+          "min": 852,
+          "max": 2467,
+          "values": [
+            852,
+            863,
+            951,
+            960,
+            1157,
+            1537,
+            1543,
+            1566,
+            2010,
+            2467
+          ]
+        },
+        "booking_shell": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "traveler_form_usable": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "network_request_count": {
+          "samples": 10,
+          "p50": 17,
+          "p95": 29,
+          "min": 7,
+          "max": 29,
+          "values": [
+            7,
+            9,
+            11,
+            11,
+            17,
+            21,
+            21,
+            23,
+            26,
+            29
+          ]
+        }
+      },
+      "cold": {
+        "ttfb": {
+          "samples": 1,
+          "p50": 281,
+          "p95": 281,
+          "min": 281,
+          "max": 281,
+          "values": [
+            281
+          ]
+        },
+        "dcl": {
+          "samples": 1,
+          "p50": 546,
+          "p95": 546,
+          "min": 546,
+          "max": 546,
+          "values": [
+            546
+          ]
+        },
+        "fcp": {
+          "samples": 1,
+          "p50": 736,
+          "p95": 736,
+          "min": 736,
+          "max": 736,
+          "values": [
+            736
+          ]
+        },
+        "lcp": {
+          "samples": 1,
+          "p50": 736,
+          "p95": 736,
+          "min": 736,
+          "max": 736,
+          "values": [
+            736
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 1,
+          "p50": 819,
+          "p95": 819,
+          "min": 819,
+          "max": 819,
+          "values": [
+            819
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 1,
+          "p50": 863,
+          "p95": 863,
+          "min": 863,
+          "max": 863,
+          "values": [
+            863
+          ]
+        }
+      },
+      "warm": {
+        "ttfb": {
+          "samples": 9,
+          "p50": 401,
+          "p95": 1268,
+          "min": 266,
+          "max": 1268,
+          "values": [
+            266,
+            271,
+            311,
+            378,
+            401,
+            459,
+            841,
+            951,
+            1268
+          ]
+        },
+        "dcl": {
+          "samples": 9,
+          "p50": 1071,
+          "p95": 1923,
+          "min": 563,
+          "max": 1923,
+          "values": [
+            563,
+            668,
+            693,
+            859,
+            1071,
+            1118,
+            1368,
+            1911,
+            1923
+          ]
+        },
+        "fcp": {
+          "samples": 9,
+          "p50": 1152,
+          "p95": 2272,
+          "min": 712,
+          "max": 2272,
+          "values": [
+            712,
+            732,
+            760,
+            920,
+            1152,
+            1160,
+            1408,
+            1980,
+            2272
+          ]
+        },
+        "lcp": {
+          "samples": 9,
+          "p50": 1152,
+          "p95": 2272,
+          "min": 712,
+          "max": 2272,
+          "values": [
+            712,
+            732,
+            760,
+            920,
+            1152,
+            1160,
+            1408,
+            1980,
+            2272
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 9,
+          "p50": 1125,
+          "p95": 2406,
+          "min": 824,
+          "max": 2406,
+          "values": [
+            824,
+            840,
+            900,
+            928,
+            1125,
+            1245,
+            1490,
+            1973,
+            2406
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 9,
+          "p50": 1537,
+          "p95": 2467,
+          "min": 852,
+          "max": 2467,
+          "values": [
+            852,
+            951,
+            960,
+            1157,
+            1537,
+            1543,
+            1566,
+            2010,
+            2467
+          ]
+        }
+      },
+      "ttfb_p50": 378,
+      "ttfb_p95": 1268,
+      "dcl_p50": 859,
+      "dcl_p95": 1923,
+      "nav_to_shell_p50": 928,
+      "nav_to_shell_p95": 2406,
+      "fcp_p50": 920,
+      "lcp_p50": 920,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1562,
+          "ttfb_ms": 598
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-fe4ee47e48b7da28.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1384,
+          "ttfb_ms": 396
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1345,
+          "ttfb_ms": 208
+        }
+      ]
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "samples": 10,
+      "http_status_all_ok": true,
+      "all": {
+        "ttfb": {
+          "samples": 10,
+          "p50": 649,
+          "p95": 1408,
+          "min": 449,
+          "max": 1408,
+          "values": [
+            449,
+            505,
+            510,
+            599,
+            649,
+            747,
+            836,
+            930,
+            1081,
+            1408
+          ]
+        },
+        "dcl": {
+          "samples": 10,
+          "p50": 1634,
+          "p95": 3664,
+          "min": 1094,
+          "max": 3664,
+          "values": [
+            1094,
+            1207,
+            1442,
+            1566,
+            1634,
+            1759,
+            1977,
+            2799,
+            3335,
+            3664
+          ]
+        },
+        "fcp": {
+          "samples": 10,
+          "p50": 1436,
+          "p95": 3172,
+          "min": 1060,
+          "max": 3172,
+          "values": [
+            1060,
+            1232,
+            1260,
+            1360,
+            1436,
+            1532,
+            1588,
+            2220,
+            2796,
+            3172
+          ]
+        },
+        "lcp": {
+          "samples": 10,
+          "p50": 1436,
+          "p95": 3172,
+          "min": 1060,
+          "max": 3172,
+          "values": [
+            1060,
+            1232,
+            1260,
+            1360,
+            1436,
+            1532,
+            1588,
+            2220,
+            2796,
+            3172
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 10,
+          "p50": 1813,
+          "p95": 3720,
+          "min": 1193,
+          "max": 3720,
+          "values": [
+            1193,
+            1356,
+            1625,
+            1684,
+            1813,
+            2062,
+            2744,
+            2862,
+            3394,
+            3720
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 10,
+          "p50": 1842,
+          "p95": 3754,
+          "min": 1398,
+          "max": 3754,
+          "values": [
+            1398,
+            1476,
+            1656,
+            1716,
+            1842,
+            2152,
+            2892,
+            3427,
+            3516,
+            3754
+          ]
+        },
+        "booking_shell": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "traveler_form_usable": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "network_request_count": {
+          "samples": 10,
+          "p50": 9,
+          "p95": 9,
+          "min": 9,
+          "max": 9,
+          "values": [
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9
+          ]
+        }
+      },
+      "cold": {
+        "ttfb": {
+          "samples": 1,
+          "p50": 747,
+          "p95": 747,
+          "min": 747,
+          "max": 747,
+          "values": [
+            747
+          ]
+        },
+        "dcl": {
+          "samples": 1,
+          "p50": 1634,
+          "p95": 1634,
+          "min": 1634,
+          "max": 1634,
+          "values": [
+            1634
+          ]
+        },
+        "fcp": {
+          "samples": 1,
+          "p50": 1532,
+          "p95": 1532,
+          "min": 1532,
+          "max": 1532,
+          "values": [
+            1532
+          ]
+        },
+        "lcp": {
+          "samples": 1,
+          "p50": 1532,
+          "p95": 1532,
+          "min": 1532,
+          "max": 1532,
+          "values": [
+            1532
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 1,
+          "p50": 1684,
+          "p95": 1684,
+          "min": 1684,
+          "max": 1684,
+          "values": [
+            1684
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 1,
+          "p50": 1716,
+          "p95": 1716,
+          "min": 1716,
+          "max": 1716,
+          "values": [
+            1716
+          ]
+        }
+      },
+      "warm": {
+        "ttfb": {
+          "samples": 9,
+          "p50": 649,
+          "p95": 1408,
+          "min": 449,
+          "max": 1408,
+          "values": [
+            449,
+            505,
+            510,
+            599,
+            649,
+            836,
+            930,
+            1081,
+            1408
+          ]
+        },
+        "dcl": {
+          "samples": 9,
+          "p50": 1759,
+          "p95": 3664,
+          "min": 1094,
+          "max": 3664,
+          "values": [
+            1094,
+            1207,
+            1442,
+            1566,
+            1759,
+            1977,
+            2799,
+            3335,
+            3664
+          ]
+        },
+        "fcp": {
+          "samples": 9,
+          "p50": 1436,
+          "p95": 3172,
+          "min": 1060,
+          "max": 3172,
+          "values": [
+            1060,
+            1232,
+            1260,
+            1360,
+            1436,
+            1588,
+            2220,
+            2796,
+            3172
+          ]
+        },
+        "lcp": {
+          "samples": 9,
+          "p50": 1436,
+          "p95": 3172,
+          "min": 1060,
+          "max": 3172,
+          "values": [
+            1060,
+            1232,
+            1260,
+            1360,
+            1436,
+            1588,
+            2220,
+            2796,
+            3172
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 9,
+          "p50": 2062,
+          "p95": 3720,
+          "min": 1193,
+          "max": 3720,
+          "values": [
+            1193,
+            1356,
+            1625,
+            1813,
+            2062,
+            2744,
+            2862,
+            3394,
+            3720
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 9,
+          "p50": 2152,
+          "p95": 3754,
+          "min": 1398,
+          "max": 3754,
+          "values": [
+            1398,
+            1476,
+            1656,
+            1842,
+            2152,
+            2892,
+            3427,
+            3516,
+            3754
+          ]
+        }
+      },
+      "ttfb_p50": 649,
+      "ttfb_p95": 1408,
+      "dcl_p50": 1634,
+      "dcl_p95": 3664,
+      "nav_to_shell_p50": 1813,
+      "nav_to_shell_p95": 3720,
+      "fcp_p50": 1436,
+      "lcp_p50": 1436,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 2747,
+          "ttfb_ms": 1071
+        },
+        {
+          "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1833,
+          "ttfb_ms": 749
+        },
+        {
+          "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1667,
+          "ttfb_ms": 655
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "samples": 10,
+      "http_status_all_ok": true,
+      "all": {
+        "ttfb": {
+          "samples": 10,
+          "p50": 346,
+          "p95": 499,
+          "min": 281,
+          "max": 499,
+          "values": [
+            281,
+            298,
+            315,
+            333,
+            346,
+            347,
+            359,
+            409,
+            424,
+            499
+          ]
+        },
+        "dcl": {
+          "samples": 10,
+          "p50": 752,
+          "p95": 927,
+          "min": 572,
+          "max": 927,
+          "values": [
+            572,
+            590,
+            729,
+            744,
+            752,
+            753,
+            791,
+            803,
+            867,
+            927
+          ]
+        },
+        "fcp": {
+          "samples": 10,
+          "p50": 884,
+          "p95": 1156,
+          "min": 784,
+          "max": 1156,
+          "values": [
+            784,
+            800,
+            804,
+            820,
+            884,
+            948,
+            984,
+            1008,
+            1060,
+            1156
+          ]
+        },
+        "lcp": {
+          "samples": 10,
+          "p50": 1216,
+          "p95": 1656,
+          "min": 804,
+          "max": 1656,
+          "values": [
+            804,
+            948,
+            1124,
+            1164,
+            1216,
+            1420,
+            1436,
+            1448,
+            1600,
+            1656
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 10,
+          "p50": 895,
+          "p95": 1105,
+          "min": 764,
+          "max": 1105,
+          "values": [
+            764,
+            827,
+            841,
+            842,
+            895,
+            916,
+            945,
+            1030,
+            1043,
+            1105
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 10,
+          "p50": 926,
+          "p95": 1135,
+          "min": 797,
+          "max": 1135,
+          "values": [
+            797,
+            863,
+            879,
+            880,
+            926,
+            1003,
+            1003,
+            1070,
+            1086,
+            1135
+          ]
+        },
+        "booking_shell": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "traveler_form_usable": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "network_request_count": {
+          "samples": 10,
+          "p50": 12,
+          "p95": 20,
+          "min": 9,
+          "max": 20,
+          "values": [
+            9,
+            10,
+            11,
+            11,
+            12,
+            14,
+            14,
+            14,
+            15,
+            20
+          ]
+        }
+      },
+      "cold": {
+        "ttfb": {
+          "samples": 1,
+          "p50": 409,
+          "p95": 409,
+          "min": 409,
+          "max": 409,
+          "values": [
+            409
+          ]
+        },
+        "dcl": {
+          "samples": 1,
+          "p50": 927,
+          "p95": 927,
+          "min": 927,
+          "max": 927,
+          "values": [
+            927
+          ]
+        },
+        "fcp": {
+          "samples": 1,
+          "p50": 1008,
+          "p95": 1008,
+          "min": 1008,
+          "max": 1008,
+          "values": [
+            1008
+          ]
+        },
+        "lcp": {
+          "samples": 1,
+          "p50": 1436,
+          "p95": 1436,
+          "min": 1436,
+          "max": 1436,
+          "values": [
+            1436
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 1,
+          "p50": 1043,
+          "p95": 1043,
+          "min": 1043,
+          "max": 1043,
+          "values": [
+            1043
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 1,
+          "p50": 1086,
+          "p95": 1086,
+          "min": 1086,
+          "max": 1086,
+          "values": [
+            1086
+          ]
+        }
+      },
+      "warm": {
+        "ttfb": {
+          "samples": 9,
+          "p50": 346,
+          "p95": 499,
+          "min": 281,
+          "max": 499,
+          "values": [
+            281,
+            298,
+            315,
+            333,
+            346,
+            347,
+            359,
+            424,
+            499
+          ]
+        },
+        "dcl": {
+          "samples": 9,
+          "p50": 752,
+          "p95": 867,
+          "min": 572,
+          "max": 867,
+          "values": [
+            572,
+            590,
+            729,
+            744,
+            752,
+            753,
+            791,
+            803,
+            867
+          ]
+        },
+        "fcp": {
+          "samples": 9,
+          "p50": 884,
+          "p95": 1156,
+          "min": 784,
+          "max": 1156,
+          "values": [
+            784,
+            800,
+            804,
+            820,
+            884,
+            948,
+            984,
+            1060,
+            1156
+          ]
+        },
+        "lcp": {
+          "samples": 9,
+          "p50": 1216,
+          "p95": 1656,
+          "min": 804,
+          "max": 1656,
+          "values": [
+            804,
+            948,
+            1124,
+            1164,
+            1216,
+            1420,
+            1448,
+            1600,
+            1656
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 9,
+          "p50": 895,
+          "p95": 1105,
+          "min": 764,
+          "max": 1105,
+          "values": [
+            764,
+            827,
+            841,
+            842,
+            895,
+            916,
+            945,
+            1030,
+            1105
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 9,
+          "p50": 926,
+          "p95": 1135,
+          "min": 797,
+          "max": 1135,
+          "values": [
+            797,
+            863,
+            879,
+            880,
+            926,
+            1003,
+            1003,
+            1070,
+            1135
+          ]
+        }
+      },
+      "ttfb_p50": 346,
+      "ttfb_p95": 499,
+      "dcl_p50": 752,
+      "dcl_p95": 927,
+      "nav_to_shell_p50": 895,
+      "nav_to_shell_p95": 1105,
+      "fcp_p50": 884,
+      "lcp_p50": 1216,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1207,
+          "ttfb_ms": 918
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1175,
+          "ttfb_ms": 263
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1075,
+          "ttfb_ms": 367
+        }
+      ]
+    },
+    {
+      "route": "/flights/results",
+      "samples": 10,
+      "http_status_all_ok": true,
+      "all": {
+        "ttfb": {
+          "samples": 10,
+          "p50": 314,
+          "p95": 444,
+          "min": 282,
+          "max": 444,
+          "values": [
+            282,
+            293,
+            297,
+            313,
+            314,
+            339,
+            341,
+            343,
+            349,
+            444
+          ]
+        },
+        "dcl": {
+          "samples": 10,
+          "p50": 755,
+          "p95": 956,
+          "min": 559,
+          "max": 956,
+          "values": [
+            559,
+            600,
+            623,
+            720,
+            755,
+            756,
+            802,
+            896,
+            955,
+            956
+          ]
+        },
+        "fcp": {
+          "samples": 10,
+          "p50": 948,
+          "p95": 1188,
+          "min": 832,
+          "max": 1188,
+          "values": [
+            832,
+            864,
+            892,
+            912,
+            948,
+            976,
+            1040,
+            1068,
+            1116,
+            1188
+          ]
+        },
+        "lcp": {
+          "samples": 10,
+          "p50": 948,
+          "p95": 1188,
+          "min": 832,
+          "max": 1188,
+          "values": [
+            832,
+            864,
+            892,
+            912,
+            948,
+            976,
+            1040,
+            1068,
+            1116,
+            1188
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 10,
+          "p50": 1022,
+          "p95": 1160,
+          "min": 864,
+          "max": 1160,
+          "values": [
+            864,
+            880,
+            962,
+            1021,
+            1022,
+            1029,
+            1032,
+            1051,
+            1078,
+            1160
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 10,
+          "p50": 3210,
+          "p95": 6754,
+          "min": 2586,
+          "max": 6754,
+          "values": [
+            2586,
+            2724,
+            2943,
+            3082,
+            3210,
+            3413,
+            3585,
+            4011,
+            4305,
+            6754
+          ]
+        },
+        "booking_shell": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "traveler_form_usable": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "network_request_count": {
+          "samples": 10,
+          "p50": 33,
+          "p95": 34,
+          "min": 31,
+          "max": 34,
+          "values": [
+            31,
+            32,
+            32,
+            33,
+            33,
+            33,
+            33,
+            33,
+            33,
+            34
+          ]
+        }
+      },
+      "cold": {
+        "ttfb": {
+          "samples": 1,
+          "p50": 339,
+          "p95": 339,
+          "min": 339,
+          "max": 339,
+          "values": [
+            339
+          ]
+        },
+        "dcl": {
+          "samples": 1,
+          "p50": 956,
+          "p95": 956,
+          "min": 956,
+          "max": 956,
+          "values": [
+            956
+          ]
+        },
+        "fcp": {
+          "samples": 1,
+          "p50": 1116,
+          "p95": 1116,
+          "min": 1116,
+          "max": 1116,
+          "values": [
+            1116
+          ]
+        },
+        "lcp": {
+          "samples": 1,
+          "p50": 1116,
+          "p95": 1116,
+          "min": 1116,
+          "max": 1116,
+          "values": [
+            1116
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 1,
+          "p50": 1051,
+          "p95": 1051,
+          "min": 1051,
+          "max": 1051,
+          "values": [
+            1051
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 1,
+          "p50": 3082,
+          "p95": 3082,
+          "min": 3082,
+          "max": 3082,
+          "values": [
+            3082
+          ]
+        }
+      },
+      "warm": {
+        "ttfb": {
+          "samples": 9,
+          "p50": 314,
+          "p95": 444,
+          "min": 282,
+          "max": 444,
+          "values": [
+            282,
+            293,
+            297,
+            313,
+            314,
+            341,
+            343,
+            349,
+            444
+          ]
+        },
+        "dcl": {
+          "samples": 9,
+          "p50": 755,
+          "p95": 955,
+          "min": 559,
+          "max": 955,
+          "values": [
+            559,
+            600,
+            623,
+            720,
+            755,
+            756,
+            802,
+            896,
+            955
+          ]
+        },
+        "fcp": {
+          "samples": 9,
+          "p50": 948,
+          "p95": 1188,
+          "min": 832,
+          "max": 1188,
+          "values": [
+            832,
+            864,
+            892,
+            912,
+            948,
+            976,
+            1040,
+            1068,
+            1188
+          ]
+        },
+        "lcp": {
+          "samples": 9,
+          "p50": 948,
+          "p95": 1188,
+          "min": 832,
+          "max": 1188,
+          "values": [
+            832,
+            864,
+            892,
+            912,
+            948,
+            976,
+            1040,
+            1068,
+            1188
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 9,
+          "p50": 1022,
+          "p95": 1160,
+          "min": 864,
+          "max": 1160,
+          "values": [
+            864,
+            880,
+            962,
+            1021,
+            1022,
+            1029,
+            1032,
+            1078,
+            1160
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 9,
+          "p50": 3413,
+          "p95": 6754,
+          "min": 2586,
+          "max": 6754,
+          "values": [
+            2586,
+            2724,
+            2943,
+            3210,
+            3413,
+            3585,
+            4011,
+            4305,
+            6754
+          ]
+        }
+      },
+      "ttfb_p50": 314,
+      "ttfb_p95": 444,
+      "dcl_p50": 755,
+      "dcl_p95": 956,
+      "nav_to_shell_p50": 1022,
+      "nav_to_shell_p95": 1160,
+      "fcp_p50": 948,
+      "lcp_p50": 948,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 4110,
+          "ttfb_ms": 371
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 2470,
+          "ttfb_ms": 2391
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2265,
+          "ttfb_ms": 1792
+        }
+      ]
+    },
+    {
+      "route": "/booking/passengers",
+      "samples": 10,
+      "http_status_all_ok": true,
+      "all": {
+        "ttfb": {
+          "samples": 10,
+          "p50": 334,
+          "p95": 2622,
+          "min": 268,
+          "max": 2622,
+          "values": [
+            268,
+            299,
+            308,
+            309,
+            334,
+            366,
+            582,
+            600,
+            1127,
+            2622
+          ]
+        },
+        "dcl": {
+          "samples": 10,
+          "p50": 780,
+          "p95": 4891,
+          "min": 571,
+          "max": 4891,
+          "values": [
+            571,
+            611,
+            650,
+            711,
+            780,
+            955,
+            1090,
+            1670,
+            2314,
+            4891
+          ]
+        },
+        "fcp": {
+          "samples": 10,
+          "p50": 892,
+          "p95": 5088,
+          "min": 748,
+          "max": 5088,
+          "values": [
+            748,
+            776,
+            828,
+            864,
+            892,
+            1164,
+            1228,
+            1712,
+            2348,
+            5088
+          ]
+        },
+        "lcp": {
+          "samples": 10,
+          "p50": 892,
+          "p95": 5088,
+          "min": 748,
+          "max": 5088,
+          "values": [
+            748,
+            776,
+            828,
+            864,
+            892,
+            1164,
+            1228,
+            1712,
+            2348,
+            5088
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 10,
+          "p50": 919,
+          "p95": 5148,
+          "min": 831,
+          "max": 5148,
+          "values": [
+            831,
+            846,
+            873,
+            912,
+            919,
+            1142,
+            1179,
+            1831,
+            2477,
+            5148
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 10,
+          "p50": 1204,
+          "p95": 5182,
+          "min": 881,
+          "max": 5182,
+          "values": [
+            881,
+            882,
+            956,
+            1001,
+            1204,
+            1224,
+            1321,
+            1873,
+            2510,
+            5182
+          ]
+        },
+        "booking_shell": {
+          "samples": 10,
+          "p50": 1217,
+          "p95": 5197,
+          "min": 897,
+          "max": 5197,
+          "values": [
+            897,
+            898,
+            973,
+            1015,
+            1217,
+            1235,
+            1885,
+            1890,
+            2520,
+            5197
+          ]
+        },
+        "traveler_form_usable": {
+          "samples": 0,
+          "p50": null,
+          "p95": null,
+          "min": null,
+          "max": null,
+          "values": []
+        },
+        "network_request_count": {
+          "samples": 10,
+          "p50": 17,
+          "p95": 25,
+          "min": 5,
+          "max": 25,
+          "values": [
+            5,
+            6,
+            13,
+            15,
+            17,
+            17,
+            19,
+            22,
+            24,
+            25
+          ]
+        }
+      },
+      "cold": {
+        "ttfb": {
+          "samples": 1,
+          "p50": 582,
+          "p95": 582,
+          "min": 582,
+          "max": 582,
+          "values": [
+            582
+          ]
+        },
+        "dcl": {
+          "samples": 1,
+          "p50": 955,
+          "p95": 955,
+          "min": 955,
+          "max": 955,
+          "values": [
+            955
+          ]
+        },
+        "fcp": {
+          "samples": 1,
+          "p50": 1228,
+          "p95": 1228,
+          "min": 1228,
+          "max": 1228,
+          "values": [
+            1228
+          ]
+        },
+        "lcp": {
+          "samples": 1,
+          "p50": 1228,
+          "p95": 1228,
+          "min": 1228,
+          "max": 1228,
+          "values": [
+            1228
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 1,
+          "p50": 1179,
+          "p95": 1179,
+          "min": 1179,
+          "max": 1179,
+          "values": [
+            1179
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 1,
+          "p50": 1224,
+          "p95": 1224,
+          "min": 1224,
+          "max": 1224,
+          "values": [
+            1224
+          ]
+        }
+      },
+      "warm": {
+        "ttfb": {
+          "samples": 9,
+          "p50": 334,
+          "p95": 2622,
+          "min": 268,
+          "max": 2622,
+          "values": [
+            268,
+            299,
+            308,
+            309,
+            334,
+            366,
+            600,
+            1127,
+            2622
+          ]
+        },
+        "dcl": {
+          "samples": 9,
+          "p50": 780,
+          "p95": 4891,
+          "min": 571,
+          "max": 4891,
+          "values": [
+            571,
+            611,
+            650,
+            711,
+            780,
+            1090,
+            1670,
+            2314,
+            4891
+          ]
+        },
+        "fcp": {
+          "samples": 9,
+          "p50": 892,
+          "p95": 5088,
+          "min": 748,
+          "max": 5088,
+          "values": [
+            748,
+            776,
+            828,
+            864,
+            892,
+            1164,
+            1712,
+            2348,
+            5088
+          ]
+        },
+        "lcp": {
+          "samples": 9,
+          "p50": 892,
+          "p95": 5088,
+          "min": 748,
+          "max": 5088,
+          "values": [
+            748,
+            776,
+            828,
+            864,
+            892,
+            1164,
+            1712,
+            2348,
+            5088
+          ]
+        },
+        "nav_to_shell": {
+          "samples": 9,
+          "p50": 919,
+          "p95": 5148,
+          "min": 831,
+          "max": 5148,
+          "values": [
+            831,
+            846,
+            873,
+            912,
+            919,
+            1142,
+            1831,
+            2477,
+            5148
+          ]
+        },
+        "nav_to_primary_control": {
+          "samples": 9,
+          "p50": 1204,
+          "p95": 5182,
+          "min": 881,
+          "max": 5182,
+          "values": [
+            881,
+            882,
+            956,
+            1001,
+            1204,
+            1321,
+            1873,
+            2510,
+            5182
+          ]
+        }
+      },
+      "ttfb_p50": 334,
+      "ttfb_p95": 2622,
+      "dcl_p50": 780,
+      "dcl_p95": 4891,
+      "nav_to_shell_p50": 919,
+      "nav_to_shell_p95": 5148,
+      "fcp_p50": 892,
+      "lcp_p50": 892,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=633840ee16737bfd50a56a53ec1b32e714c31c3721f7f5a86021f86fe866e221&search_id=cab2c33c-7aca-4a3d-bc56-5b1b595f8c5f&offer_id=633840e",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "document",
+          "total_ms": 2697,
+          "ttfb_ms": 2613
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2032,
+          "ttfb_ms": 787
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1848,
+          "ttfb_ms": 502
+        }
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "route": "/",
+      "warm": false,
+      "http_status": 200,
+      "ttfb_ms": 296,
+      "dom_content_loaded_ms": 1371,
+      "load_ms": 0,
+      "fcp_ms": 2216,
+      "lcp_ms": 2216,
+      "nav_to_shell_ms": 1580,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1947,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 3,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/css/0f4a1af677576841.css",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "stylesheet",
+        "total_ms": 583,
+        "ttfb_ms": 251
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 1
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 466,
+      "dom_content_loaded_ms": 1237,
+      "load_ms": 0,
+      "fcp_ms": 2160,
+      "lcp_ms": 2160,
+      "nav_to_shell_ms": 1973,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2024,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 5,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1942,
+        "ttfb_ms": 1129
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 2
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 905,
+      "dom_content_loaded_ms": 1612,
+      "load_ms": 0,
+      "fcp_ms": 2068,
+      "lcp_ms": 2068,
+      "nav_to_shell_ms": 1671,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1723,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 10,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/2619-b8db57ac19da49ac.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1076,
+        "ttfb_ms": 595
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 3
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 877,
+      "dom_content_loaded_ms": 1525,
+      "load_ms": 0,
+      "fcp_ms": 1792,
+      "lcp_ms": 1792,
+      "nav_to_shell_ms": 1600,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1633,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 13,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/2455-7175b4eb93cf4cc8.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1453,
+        "ttfb_ms": 808
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 4
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 335,
+      "dom_content_loaded_ms": 661,
+      "load_ms": 0,
+      "fcp_ms": 1052,
+      "lcp_ms": 1052,
+      "nav_to_shell_ms": 1336,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1615,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 12,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1709,
+        "ttfb_ms": 1248
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 5
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 444,
+      "dom_content_loaded_ms": 1195,
+      "load_ms": 0,
+      "fcp_ms": null,
+      "lcp_ms": null,
+      "nav_to_shell_ms": 1599,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1641,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 4,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/main-app-33eddcc3a53c50c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1705,
+        "ttfb_ms": 942
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 6
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 320,
+      "dom_content_loaded_ms": 827,
+      "load_ms": 0,
+      "fcp_ms": 1096,
+      "lcp_ms": 1096,
+      "nav_to_shell_ms": 890,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 929,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 12,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/2619-b8db57ac19da49ac.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1109,
+        "ttfb_ms": 715
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 7
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 315,
+      "dom_content_loaded_ms": 645,
+      "load_ms": 0,
+      "fcp_ms": 1116,
+      "lcp_ms": 1116,
+      "nav_to_shell_ms": 1063,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1266,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 11,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1163,
+        "ttfb_ms": 491
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 8
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 278,
+      "dom_content_loaded_ms": 613,
+      "load_ms": 0,
+      "fcp_ms": 1296,
+      "lcp_ms": 1296,
+      "nav_to_shell_ms": 1144,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1751,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 19,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/storage/client-assets/jetpk-assets/pages/home/hero_background-20260720061656.png?v=1787775737",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 1746,
+        "ttfb_ms": 176
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 9
+    },
+    {
+      "route": "/",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 317,
+      "dom_content_loaded_ms": 799,
+      "load_ms": 0,
+      "fcp_ms": null,
+      "lcp_ms": null,
+      "nav_to_shell_ms": 1264,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1308,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 7,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 786,
+        "ttfb_ms": 264
+      },
+      "transfer_size": 23072,
+      "encoded_body_size": 22772,
+      "sample": 10
+    },
+    {
+      "route": "/groups",
+      "warm": false,
+      "http_status": 200,
+      "ttfb_ms": 941,
+      "dom_content_loaded_ms": 1939,
+      "load_ms": 0,
+      "fcp_ms": 1992,
+      "lcp_ms": 2084,
+      "nav_to_shell_ms": 2070,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2106,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 6,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/groups",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "document",
+        "total_ms": 953,
+        "ttfb_ms": 938
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 1
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 723,
+      "dom_content_loaded_ms": 1251,
+      "load_ms": 0,
+      "fcp_ms": 1500,
+      "lcp_ms": 1500,
+      "nav_to_shell_ms": 1515,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1541,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 13,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-fe4ee47e48b7da28.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1113,
+        "ttfb_ms": 639
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 2
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 427,
+      "dom_content_loaded_ms": 790,
+      "load_ms": 0,
+      "fcp_ms": 1012,
+      "lcp_ms": 1012,
+      "nav_to_shell_ms": 1035,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1066,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 13,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/webpack-01699d9973177576.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 889,
+        "ttfb_ms": 571
+      },
+      "transfer_size": 8935,
+      "encoded_body_size": 8635,
+      "sample": 3
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 305,
+      "dom_content_loaded_ms": 601,
+      "load_ms": 0,
+      "fcp_ms": 824,
+      "lcp_ms": 824,
+      "nav_to_shell_ms": 815,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 852,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 13,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1356-5c8c2e2fb753b8c7.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 754,
+        "ttfb_ms": 385
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 4
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 316,
+      "dom_content_loaded_ms": 570,
+      "load_ms": 0,
+      "fcp_ms": 828,
+      "lcp_ms": 828,
+      "nav_to_shell_ms": 834,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 866,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 15,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/webpack-01699d9973177576.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 678,
+        "ttfb_ms": 424
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 5
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 286,
+      "dom_content_loaded_ms": 1022,
+      "load_ms": 0,
+      "fcp_ms": 1276,
+      "lcp_ms": 1276,
+      "nav_to_shell_ms": 1260,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1320,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 12,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1258,
+        "ttfb_ms": 438
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 6
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 660,
+      "dom_content_loaded_ms": 1347,
+      "load_ms": 1870,
+      "fcp_ms": 1620,
+      "lcp_ms": 1620,
+      "nav_to_shell_ms": 1589,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1639,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 22,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 946,
+        "ttfb_ms": 257
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 7
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 285,
+      "dom_content_loaded_ms": 668,
+      "load_ms": 0,
+      "fcp_ms": 888,
+      "lcp_ms": 888,
+      "nav_to_shell_ms": 920,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 971,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 22,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 770,
+        "ttfb_ms": 296
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 8
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 290,
+      "dom_content_loaded_ms": 797,
+      "load_ms": 1830,
+      "fcp_ms": 844,
+      "lcp_ms": 844,
+      "nav_to_shell_ms": 954,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1775,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 27,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 1022,
+        "ttfb_ms": 255
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 9
+    },
+    {
+      "route": "/groups",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 318,
+      "dom_content_loaded_ms": 744,
+      "load_ms": 0,
+      "fcp_ms": 788,
+      "lcp_ms": 788,
+      "nav_to_shell_ms": 825,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 930,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 22,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 622,
+        "ttfb_ms": 244
+      },
+      "transfer_size": 8929,
+      "encoded_body_size": 8629,
+      "sample": 10
+    },
+    {
+      "route": "/groups/search",
+      "warm": false,
+      "http_status": 200,
+      "ttfb_ms": 281,
+      "dom_content_loaded_ms": 546,
+      "load_ms": 0,
+      "fcp_ms": 736,
+      "lcp_ms": 736,
+      "nav_to_shell_ms": 819,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 863,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 23,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/3048-38ab6963c5708e36.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 787,
+        "ttfb_ms": 251
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 1
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 266,
+      "dom_content_loaded_ms": 668,
+      "load_ms": 1451,
+      "fcp_ms": 712,
+      "lcp_ms": 712,
+      "nav_to_shell_ms": 840,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1566,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 29,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1156,
+        "ttfb_ms": 775
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 2
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 271,
+      "dom_content_loaded_ms": 563,
+      "load_ms": 0,
+      "fcp_ms": 760,
+      "lcp_ms": 760,
+      "nav_to_shell_ms": 900,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 951,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 26,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1345,
+        "ttfb_ms": 208
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 3
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 311,
+      "dom_content_loaded_ms": 693,
+      "load_ms": 0,
+      "fcp_ms": 732,
+      "lcp_ms": 732,
+      "nav_to_shell_ms": 824,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 852,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 11,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/3048-38ab6963c5708e36.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 635,
+        "ttfb_ms": 312
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 4
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 951,
+      "dom_content_loaded_ms": 1368,
+      "load_ms": 0,
+      "fcp_ms": 1408,
+      "lcp_ms": 1408,
+      "nav_to_shell_ms": 1490,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1537,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 21,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/groups/search",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "document",
+        "total_ms": 968,
+        "ttfb_ms": 948
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 5
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 378,
+      "dom_content_loaded_ms": 1118,
+      "load_ms": 0,
+      "fcp_ms": 1160,
+      "lcp_ms": 1160,
+      "nav_to_shell_ms": 1245,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1543,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 21,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/881-efc2141d183e4b27.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1142,
+        "ttfb_ms": 501
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 6
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 1268,
+      "dom_content_loaded_ms": 1923,
+      "load_ms": 0,
+      "fcp_ms": 2272,
+      "lcp_ms": 2272,
+      "nav_to_shell_ms": 2406,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2467,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 11,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-fe4ee47e48b7da28.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1384,
+        "ttfb_ms": 396
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 7
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 459,
+      "dom_content_loaded_ms": 1071,
+      "load_ms": 0,
+      "fcp_ms": 1152,
+      "lcp_ms": 1152,
+      "nav_to_shell_ms": 1125,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1157,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 964,
+        "ttfb_ms": 413
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 8
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 401,
+      "dom_content_loaded_ms": 859,
+      "load_ms": 0,
+      "fcp_ms": 920,
+      "lcp_ms": 920,
+      "nav_to_shell_ms": 928,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 960,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 7,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 930,
+        "ttfb_ms": 485
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 9
+    },
+    {
+      "route": "/groups/search",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 841,
+      "dom_content_loaded_ms": 1911,
+      "load_ms": 0,
+      "fcp_ms": 1980,
+      "lcp_ms": 1980,
+      "nav_to_shell_ms": 1973,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2010,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 17,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1562,
+        "ttfb_ms": 598
+      },
+      "transfer_size": 17297,
+      "encoded_body_size": 16997,
+      "sample": 10
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": false,
+      "http_status": 200,
+      "ttfb_ms": 747,
+      "dom_content_loaded_ms": 1634,
+      "load_ms": 1634,
+      "fcp_ms": 1532,
+      "lcp_ms": 1532,
+      "nav_to_shell_ms": 1684,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1716,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 859,
+        "ttfb_ms": 271
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 1
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 599,
+      "dom_content_loaded_ms": 1977,
+      "load_ms": 1977,
+      "fcp_ms": 1588,
+      "lcp_ms": 1588,
+      "nav_to_shell_ms": 2744,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 3516,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 1362,
+        "ttfb_ms": 1061
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 2
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 836,
+      "dom_content_loaded_ms": 1442,
+      "load_ms": 1949,
+      "fcp_ms": 1436,
+      "lcp_ms": 1436,
+      "nav_to_shell_ms": 2062,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2152,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 1157,
+        "ttfb_ms": 614
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 3
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 449,
+      "dom_content_loaded_ms": 1566,
+      "load_ms": 2064,
+      "fcp_ms": 1360,
+      "lcp_ms": 1360,
+      "nav_to_shell_ms": 1625,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1656,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 1579,
+        "ttfb_ms": 739
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 4
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 1408,
+      "dom_content_loaded_ms": 3335,
+      "load_ms": 3335,
+      "fcp_ms": 3172,
+      "lcp_ms": 3172,
+      "nav_to_shell_ms": 3394,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 3427,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1667,
+        "ttfb_ms": 655
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 5
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 1081,
+      "dom_content_loaded_ms": 3664,
+      "load_ms": 3869,
+      "fcp_ms": 2796,
+      "lcp_ms": 2796,
+      "nav_to_shell_ms": 3720,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 3754,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 2747,
+        "ttfb_ms": 1071
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 6
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 930,
+      "dom_content_loaded_ms": 2799,
+      "load_ms": 2800,
+      "fcp_ms": 2220,
+      "lcp_ms": 2220,
+      "nav_to_shell_ms": 2862,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2892,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1833,
+        "ttfb_ms": 749
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 7
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 649,
+      "dom_content_loaded_ms": 1759,
+      "load_ms": 1759,
+      "fcp_ms": 1260,
+      "lcp_ms": 1260,
+      "nav_to_shell_ms": 1813,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1842,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1086,
+        "ttfb_ms": 703
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 8
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 505,
+      "dom_content_loaded_ms": 1094,
+      "load_ms": 1266,
+      "fcp_ms": 1060,
+      "lcp_ms": 1060,
+      "nav_to_shell_ms": 1193,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1476,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 739,
+        "ttfb_ms": 264
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 9
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 510,
+      "dom_content_loaded_ms": 1207,
+      "load_ms": 1306,
+      "fcp_ms": 1232,
+      "lcp_ms": 1232,
+      "nav_to_shell_ms": 1356,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1398,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 777,
+        "ttfb_ms": 388
+      },
+      "transfer_size": 4640,
+      "encoded_body_size": 4340,
+      "sample": 10
+    },
+    {
+      "route": "/login",
+      "warm": false,
+      "http_status": 200,
+      "ttfb_ms": 409,
+      "dom_content_loaded_ms": 927,
+      "load_ms": 0,
+      "fcp_ms": 1008,
+      "lcp_ms": 1436,
+      "nav_to_shell_ms": 1043,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1086,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 10,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1175,
+        "ttfb_ms": 263
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 1
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 359,
+      "dom_content_loaded_ms": 803,
+      "load_ms": 0,
+      "fcp_ms": 884,
+      "lcp_ms": 1216,
+      "nav_to_shell_ms": 916,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1003,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 12,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1356-5c8c2e2fb753b8c7.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 794,
+        "ttfb_ms": 342
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 2
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 499,
+      "dom_content_loaded_ms": 867,
+      "load_ms": 0,
+      "fcp_ms": 1156,
+      "lcp_ms": 1448,
+      "nav_to_shell_ms": 1105,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1135,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 11,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1049,
+        "ttfb_ms": 339
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 3
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 424,
+      "dom_content_loaded_ms": 791,
+      "load_ms": 0,
+      "fcp_ms": 1060,
+      "lcp_ms": 1656,
+      "nav_to_shell_ms": 1030,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1070,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 11,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1053,
+        "ttfb_ms": 449
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 4
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 346,
+      "dom_content_loaded_ms": 752,
+      "load_ms": 0,
+      "fcp_ms": 984,
+      "lcp_ms": 1600,
+      "nav_to_shell_ms": 945,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1003,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 15,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/3048-38ab6963c5708e36.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1008,
+        "ttfb_ms": 473
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 5
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 333,
+      "dom_content_loaded_ms": 744,
+      "load_ms": 0,
+      "fcp_ms": 800,
+      "lcp_ms": 1420,
+      "nav_to_shell_ms": 827,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 863,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 14,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 945,
+        "ttfb_ms": 378
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 6
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 298,
+      "dom_content_loaded_ms": 729,
+      "load_ms": 0,
+      "fcp_ms": 784,
+      "lcp_ms": 1124,
+      "nav_to_shell_ms": 842,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 880,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 14,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 864,
+        "ttfb_ms": 346
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 7
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 347,
+      "dom_content_loaded_ms": 753,
+      "load_ms": 0,
+      "fcp_ms": 820,
+      "lcp_ms": 1164,
+      "nav_to_shell_ms": 841,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 879,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 14,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1356-5c8c2e2fb753b8c7.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 828,
+        "ttfb_ms": 538
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 8
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 315,
+      "dom_content_loaded_ms": 590,
+      "load_ms": 0,
+      "fcp_ms": 804,
+      "lcp_ms": 804,
+      "nav_to_shell_ms": 764,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 797,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 9,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1207,
+        "ttfb_ms": 918
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 9
+    },
+    {
+      "route": "/login",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 281,
+      "dom_content_loaded_ms": 572,
+      "load_ms": 0,
+      "fcp_ms": 948,
+      "lcp_ms": 948,
+      "nav_to_shell_ms": 895,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 926,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 20,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1075,
+        "ttfb_ms": 367
+      },
+      "transfer_size": 18607,
+      "encoded_body_size": 18307,
+      "sample": 10
+    },
+    {
+      "route": "/flights/results",
+      "warm": false,
+      "http_status": 200,
+      "ttfb_ms": 339,
+      "dom_content_loaded_ms": 956,
+      "load_ms": 1682,
+      "fcp_ms": 1116,
+      "lcp_ms": 1116,
+      "nav_to_shell_ms": 1051,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 3082,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 33,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 2470,
+        "ttfb_ms": 2391
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 1
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 341,
+      "dom_content_loaded_ms": 623,
+      "load_ms": 2656,
+      "fcp_ms": 892,
+      "lcp_ms": 892,
+      "nav_to_shell_ms": 1022,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 4011,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 33,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 2265,
+        "ttfb_ms": 1792
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 2
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 349,
+      "dom_content_loaded_ms": 896,
+      "load_ms": 2344,
+      "fcp_ms": 1188,
+      "lcp_ms": 1188,
+      "nav_to_shell_ms": 1160,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2943,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 33,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 1189,
+        "ttfb_ms": 325
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 3
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 297,
+      "dom_content_loaded_ms": 756,
+      "load_ms": 2033,
+      "fcp_ms": 832,
+      "lcp_ms": 832,
+      "nav_to_shell_ms": 962,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2724,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 33,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 1186,
+        "ttfb_ms": 305
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 4
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 313,
+      "dom_content_loaded_ms": 802,
+      "load_ms": 2145,
+      "fcp_ms": 948,
+      "lcp_ms": 948,
+      "nav_to_shell_ms": 864,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 3413,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 33,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1783,
+        "ttfb_ms": 752
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 5
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 314,
+      "dom_content_loaded_ms": 559,
+      "load_ms": 1996,
+      "fcp_ms": 864,
+      "lcp_ms": 864,
+      "nav_to_shell_ms": 1021,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 3210,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 34,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1356-5c8c2e2fb753b8c7.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1500,
+        "ttfb_ms": 1111
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 6
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 343,
+      "dom_content_loaded_ms": 600,
+      "load_ms": 1818,
+      "fcp_ms": 912,
+      "lcp_ms": 912,
+      "nav_to_shell_ms": 880,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2586,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 33,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 948,
+        "ttfb_ms": 347
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 7
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 293,
+      "dom_content_loaded_ms": 720,
+      "load_ms": 5719,
+      "fcp_ms": 976,
+      "lcp_ms": 976,
+      "nav_to_shell_ms": 1078,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 6754,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 32,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 4110,
+        "ttfb_ms": 371
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 8
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 444,
+      "dom_content_loaded_ms": 755,
+      "load_ms": 2478,
+      "fcp_ms": 1068,
+      "lcp_ms": 1068,
+      "nav_to_shell_ms": 1029,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 3585,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 32,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-59beb68c0d1d459b.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1438,
+        "ttfb_ms": 1046
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 9
+    },
+    {
+      "route": "/flights/results",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 282,
+      "dom_content_loaded_ms": 955,
+      "load_ms": 3293,
+      "fcp_ms": 1040,
+      "lcp_ms": 1040,
+      "nav_to_shell_ms": 1032,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 4305,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": null,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 31,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "image",
+        "total_ms": 2112,
+        "ttfb_ms": 972
+      },
+      "transfer_size": 17856,
+      "encoded_body_size": 17556,
+      "sample": 10
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": false,
+      "http_status": 200,
+      "ttfb_ms": 582,
+      "dom_content_loaded_ms": 955,
+      "load_ms": 0,
+      "fcp_ms": 1228,
+      "lcp_ms": 1228,
+      "nav_to_shell_ms": 1179,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1224,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 1235,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 17,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/app/error-0c1973fe61d9ade6.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1247,
+        "ttfb_ms": 811
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 1
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 600,
+      "dom_content_loaded_ms": 1090,
+      "load_ms": 0,
+      "fcp_ms": 1164,
+      "lcp_ms": 1164,
+      "nav_to_shell_ms": 1142,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1204,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 1217,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 15,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1134,
+        "ttfb_ms": 800
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 2
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 309,
+      "dom_content_loaded_ms": 571,
+      "load_ms": 0,
+      "fcp_ms": 776,
+      "lcp_ms": 776,
+      "nav_to_shell_ms": 919,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 956,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 973,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 6,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/main-app-33eddcc3a53c50c1.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 796,
+        "ttfb_ms": 466
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 3
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 334,
+      "dom_content_loaded_ms": 780,
+      "load_ms": 1810,
+      "fcp_ms": 828,
+      "lcp_ms": 828,
+      "nav_to_shell_ms": 912,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1321,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 1885,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 25,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1407,
+        "ttfb_ms": 462
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 4
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 299,
+      "dom_content_loaded_ms": 1670,
+      "load_ms": 0,
+      "fcp_ms": 1712,
+      "lcp_ms": 1712,
+      "nav_to_shell_ms": 1831,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1873,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 1890,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 22,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 1848,
+        "ttfb_ms": 502
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 5
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 2622,
+      "dom_content_loaded_ms": 4891,
+      "load_ms": 0,
+      "fcp_ms": 5088,
+      "lcp_ms": 5088,
+      "nav_to_shell_ms": 5148,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 5182,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 5197,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 5,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/booking/passengers?flight_id=633840ee16737bfd50a56a53ec1b32e714c31c3721f7f5a86021f86fe866e221&search_id=cab2c33c-7aca-4a3d-bc56-5b1b595f8c5f&offer_id=633840e",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "document",
+        "total_ms": 2697,
+        "ttfb_ms": 2613
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 6
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 1127,
+      "dom_content_loaded_ms": 2314,
+      "load_ms": 0,
+      "fcp_ms": 2348,
+      "lcp_ms": 2348,
+      "nav_to_shell_ms": 2477,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 2510,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 2520,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 13,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 2032,
+        "ttfb_ms": 787
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 7
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 308,
+      "dom_content_loaded_ms": 611,
+      "load_ms": 0,
+      "fcp_ms": 864,
+      "lcp_ms": 864,
+      "nav_to_shell_ms": 831,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 881,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 898,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 19,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 907,
+        "ttfb_ms": 499
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 8
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 366,
+      "dom_content_loaded_ms": 650,
+      "load_ms": 1194,
+      "fcp_ms": 892,
+      "lcp_ms": 892,
+      "nav_to_shell_ms": 873,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 1001,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 1015,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 24,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 628,
+        "ttfb_ms": 233
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 9
+    },
+    {
+      "route": "/booking/passengers",
+      "warm": true,
+      "http_status": 200,
+      "ttfb_ms": 268,
+      "dom_content_loaded_ms": 711,
+      "load_ms": 0,
+      "fcp_ms": 748,
+      "lcp_ms": 748,
+      "nav_to_shell_ms": 846,
+      "shell_visible": true,
+      "nav_to_primary_control_ms": 882,
+      "primary_control_visible": true,
+      "NAVIGATION_START_TO_BOOKING_SHELL_MS": 897,
+      "NAVIGATION_START_TO_TRAVELER_FORM_USABLE_MS": null,
+      "network_request_count": 17,
+      "slowest_request": {
+        "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+        "method": "GET",
+        "status": 200,
+        "resource_type": "script",
+        "total_ms": 953,
+        "ttfb_ms": 531
+      },
+      "transfer_size": 18103,
+      "encoded_body_size": 17803,
+      "sample": 10
+    }
+  ]
+}

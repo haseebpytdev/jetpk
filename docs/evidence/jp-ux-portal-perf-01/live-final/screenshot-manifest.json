@@ -1,0 +1,92 @@
+{
+  "phase": "JP-UX-PORTAL-PERF-01",
+  "captured_at": "2026-08-28T11:46:25.080Z",
+  "host": "https://jetpakistan.pk",
+  "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+  "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+  "screenshots": [
+    {
+      "filename": "01-footer-desktop-compact.png",
+      "timestamp": "2026-08-28T11:46:32.504Z",
+      "route": "/",
+      "viewport": "1440x900",
+      "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+      "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+      "notes": "footer brand block"
+    },
+    {
+      "filename": "02-footer-mobile.png",
+      "timestamp": "2026-08-28T11:46:37.394Z",
+      "route": "/",
+      "viewport": "390x844",
+      "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+      "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+      "notes": "footer mobile"
+    },
+    {
+      "filename": "03-oneway-card-clean.png",
+      "timestamp": "2026-08-28T11:46:49.111Z",
+      "route": "/flights/results",
+      "viewport": "1440x900",
+      "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+      "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+      "notes": "one-way card"
+    },
+    {
+      "filename": "04-return-view-choice-desktop.png",
+      "timestamp": "2026-08-28T11:46:52.947Z",
+      "route": "/flights/results",
+      "viewport": "1440x900",
+      "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+      "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+      "notes": "view choice modal"
+    },
+    {
+      "filename": "05-return-view-choice-mobile.png",
+      "timestamp": "2026-08-28T11:46:56.323Z",
+      "route": "/flights/results",
+      "viewport": "390x844",
+      "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+      "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+      "notes": "view choice mobile"
+    },
+    {
+      "filename": "06-return-pair-horizontal.png",
+      "timestamp": "2026-08-28T11:47:07.940Z",
+      "route": "https://jetpakistan.pk/flights/results?trip_type=round_trip&from=LHE&to=DXB&depart=2026-09-18&return_date=2026-09-25&adults=1&cabin=economy&sort=cheapest&search_id=535cc285-50bc-4875-8842-072602c69d23&view=pair",
+      "viewport": "1440x900",
+      "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+      "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+      "notes": "pair card"
+    },
+    {
+      "filename": "08-return-segmented-outbound.png",
+      "timestamp": "2026-08-28T11:47:19.569Z",
+      "route": "https://jetpakistan.pk/flights/results?trip_type=round_trip&from=LHE&to=DXB&depart=2026-09-18&return_date=2026-09-25&adults=1&cabin=economy&sort=cheapest&search_id=5409ff16-7f60-43ae-ab95-3da78f216a63&view=segmented",
+      "viewport": "1440x900",
+      "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+      "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+      "notes": "segmented outbound"
+    },
+    {
+      "filename": "24-mobile-pair.png",
+      "timestamp": "2026-08-28T11:47:26.574Z",
+      "route": "https://jetpakistan.pk/flights/results?trip_type=round_trip&from=LHE&to=DXB&depart=2026-09-18&return_date=2026-09-25&adults=1&cabin=economy&sort=cheapest&view=pair&search_id=d2b2392a-28b2-4698-97c6-e03687060b0f",
+      "viewport": "390x844",
+      "runtime_sha": "9f5b70f45228ae333495afd0d941467676fd488f",
+      "public_build_id": "Nr53B3pSZ0L2kKgascNwz",
+      "notes": "mobile pair"
+    }
+  ],
+  "gates": {
+    "FOOTER_TAGLINE_HORIZONTAL": "PASS",
+    "FOOTER_TAGLINE_TEXT": "FLY SMART, FLY EASY",
+    "ONEWAY_FLIGHT_NUMBER_VISIBLE": 0,
+    "RETURN_VIEW_CHOICE_MODAL": "PASS",
+    "RETURN_VIEW_PAIR_AUTHORITATIVE": "PASS",
+    "PAIR_CARD_HORIZONTAL": "PASS",
+    "PAIR_FLIGHT_NUMBER_VISIBLE": 0,
+    "RETURN_VIEW_SEGMENTED_AUTHORITATIVE": "PASS",
+    "SEGMENTED_FLIGHT_NUMBER_VISIBLE": 0
+  }
+}
