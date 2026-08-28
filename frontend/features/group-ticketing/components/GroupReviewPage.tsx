@@ -8,6 +8,10 @@ import { confirmGroupReview, fetchGroupReview } from "../services/group-ticketin
 import type { GroupBookingReview } from "../types";
 import { GroupHoldExpiredState } from "./GroupStateCards";
 import { GroupBookingSummaryCard } from "./GroupPackageBlocks";
+import {
+  GroupCheckoutDecisionDialog,
+  type GroupCheckoutDecisionModal,
+} from "./GroupCheckoutDecisionDialog";
 
 type GroupReviewPageProps = {
   bookingRef: string;
@@ -19,13 +23,14 @@ export function GroupReviewPage({ bookingRef }: GroupReviewPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [decisionModal, setDecisionModal] = useState<GroupCheckoutDecisionModal | null>(null);
+  const [acceptFareChange, setAcceptFareChange] = useState(false);
 
   useEffect(() => {
     void fetchGroupReview(bookingRef).then((response) => {
       setLoading(false);
       if (!response.ok) {
         if (response.status === 401) {
-          // Preserve return intent via allowlisted path; modal/full login both accept redirect.
           router.push(`/login?redirect=${encodeURIComponent(`/groups/booking/${bookingRef}/review`)}`);
           return;
         }
@@ -36,11 +41,17 @@ export function GroupReviewPage({ bookingRef }: GroupReviewPageProps) {
     });
   }, [bookingRef, router]);
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (acceptedFare = acceptFareChange) => {
     setSubmitting(true);
-    const response = await confirmGroupReview(bookingRef);
+    setError(null);
+    const response = await confirmGroupReview(bookingRef, { acceptFareChange: acceptedFare });
     setSubmitting(false);
     if (!response.ok) {
+      const decision = (response.data as { checkout_decision?: { modal?: GroupCheckoutDecisionModal } } | undefined)
+        ?.checkout_decision;
+      if (decision?.modal) {
+        setDecisionModal(decision.modal);
+      }
       setError(response.message);
       return;
     }
@@ -83,7 +94,7 @@ export function GroupReviewPage({ bookingRef }: GroupReviewPageProps) {
           <p className="text-jp-sm text-jp-muted">{booking.manual_payment_notice}</p>
           {error ? <p className="text-jp-sm text-red-700" role="alert">{error}</p> : null}
           <PrimaryButton onClick={() => void handleConfirm()} disabled={submitting}>
-            {submitting ? "Confirming…" : "Confirm reservation"}
+            {submitting ? "Confirming…" : "Confirm checkout intent"}
           </PrimaryButton>
         </section>
 
@@ -95,6 +106,29 @@ export function GroupReviewPage({ bookingRef }: GroupReviewPageProps) {
           />
         </aside>
       </div>
+
+      <GroupCheckoutDecisionDialog
+        open={Boolean(decisionModal)}
+        modal={decisionModal}
+        onPrimary={
+          decisionModal?.primary_action?.toLowerCase().includes("accept")
+            ? () => {
+                setAcceptFareChange(true);
+                setDecisionModal(null);
+                void handleConfirm(true);
+              }
+            : decisionModal?.primary_action
+              ? () => {
+                  setDecisionModal(null);
+                  router.push(`/groups/${encodeURIComponent(booking.inventory.public_id)}/passengers`);
+                }
+              : undefined
+        }
+        onSecondary={() => {
+          setDecisionModal(null);
+          router.push("/groups/search");
+        }}
+      />
     </div>
   );
 }

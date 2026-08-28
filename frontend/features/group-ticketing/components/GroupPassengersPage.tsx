@@ -11,6 +11,10 @@ import type { PassengerFormValues } from "@/features/standard-booking/types";
 import { fetchGroupPassengersContext, submitGroupPassengers } from "../services/group-ticketing-api";
 import type { GroupContactDetails, GroupPassenger, GroupPassengersContext } from "../types";
 import { GroupCheckoutAuthModal } from "./GroupCheckoutAuthModal";
+import {
+  GroupCheckoutDecisionDialog,
+  type GroupCheckoutDecisionModal,
+} from "./GroupCheckoutDecisionDialog";
 import { GroupLockedState, GroupUnavailableState } from "./GroupStateCards";
 import { GroupBookingSummaryCard } from "./GroupPackageBlocks";
 
@@ -94,6 +98,10 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
   } | null>(null);
   const [acceptPriceChange, setAcceptPriceChange] = useState(false);
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
+  const [pendingReduction, setPendingReduction] = useState<GroupCheckoutDecisionModal | null>(null);
+  const [keepIndexes, setKeepIndexes] = useState<number[]>([]);
+  const [availabilityDecision, setAvailabilityDecision] = useState<GroupCheckoutDecisionModal | null>(null);
+  const [availabilityAvailableSeats, setAvailabilityAvailableSeats] = useState<number | null>(null);
 
   useEffect(() => {
     void fetchGroupPassengersContext(packageId).then((response) => {
@@ -123,9 +131,25 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
         const defaultNat = context?.countries.find((c) => c.code === "PK")?.code ?? "PK";
         return [...current, ...Array.from({ length: seatCount - current.length }, () => emptyPassenger(defaultNat))];
       }
-      return current.slice(0, seatCount);
+      // Explicit reduction: keep rows until the customer confirms which travelers to keep.
+      return current;
     });
   }, [seatCount, context?.countries]);
+
+  useEffect(() => {
+    if (passengers.length <= seatCount) {
+      setPendingReduction(null);
+      setKeepIndexes([]);
+      return;
+    }
+    setPendingReduction({
+      title: "Select travelers to keep",
+      body: `You reduced seats to ${seatCount}. Choose exactly ${seatCount} traveler(s) to keep. We will not drop passengers automatically.`,
+      primary_action: `Keep ${seatCount} selected`,
+      secondary_action: "Restore previous seat count",
+    });
+    setKeepIndexes((current) => current.filter((index) => index < passengers.length).slice(0, seatCount));
+  }, [passengers.length, seatCount]);
 
   const totalFormatted = useMemo(() => {
     if (!context) return undefined;
@@ -133,12 +157,26 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
     return Number.isFinite(perSeat) ? String(perSeat * seatCount) : undefined;
   }, [context, seatCount]);
 
+  const applyPassengerReduction = () => {
+    if (keepIndexes.length !== seatCount) {
+      setError(`Select exactly ${seatCount} traveler(s) to keep.`);
+      return;
+    }
+    setPassengers((rows) => keepIndexes.map((index) => rows[index]).filter(Boolean));
+    setPendingReduction(null);
+    setError(null);
+  };
+
   const updatePassenger = (index: number, patch: Partial<GroupPassenger>) => {
     setPassengers((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (passengers.length !== seatCount) {
+      setError(`Select exactly ${seatCount} traveler(s) before continuing.`);
+      return;
+    }
     setSubmitting(true);
     setFieldErrors({});
     setError(null);
@@ -176,6 +214,14 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
           setError(response.message);
           return;
         }
+      }
+      const decision = (response.data as { checkout_decision?: { modal?: GroupCheckoutDecisionModal; available_seats?: number } } | undefined)
+        ?.checkout_decision;
+      if (decision?.modal) {
+        setAvailabilityDecision(decision.modal);
+        setAvailabilityAvailableSeats(decision.available_seats ?? null);
+        setError(response.message);
+        return;
       }
       setFieldErrors(mapFieldErrors(response.errors));
       setError(response.message);
@@ -265,16 +311,39 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
               >
                 <legend className="flex w-full items-center justify-between gap-2 px-1">
                   <span className="text-jp-sm font-semibold text-jp-text">{heading}</span>
-                  {seatCount > 1 ? (
-                    <button
-                      type="button"
-                      className="text-jp-xs font-semibold text-jp-primary"
-                      onClick={() => setCollapsed((prev) => ({ ...prev, [index]: !isCollapsed }))}
-                      data-testid={`group-passenger-toggle-${index}`}
-                    >
-                      {isCollapsed ? "Expand" : "Collapse"}
-                    </button>
-                  ) : null}
+                  <div className="flex items-center gap-3">
+                    {pendingReduction ? (
+                      <label className="flex items-center gap-1 text-jp-xs text-jp-text">
+                        <input
+                          type="checkbox"
+                          checked={keepIndexes.includes(index)}
+                          onChange={(event) => {
+                            setKeepIndexes((current) => {
+                              if (event.target.checked) {
+                                if (current.includes(index) || current.length >= seatCount) {
+                                  return current;
+                                }
+                                return [...current, index];
+                              }
+                              return current.filter((value) => value !== index);
+                            });
+                          }}
+                          data-testid={`group-keep-passenger-${index}`}
+                        />
+                        Keep
+                      </label>
+                    ) : null}
+                    {seatCount > 1 ? (
+                      <button
+                        type="button"
+                        className="text-jp-xs font-semibold text-jp-primary"
+                        onClick={() => setCollapsed((prev) => ({ ...prev, [index]: !isCollapsed }))}
+                        data-testid={`group-passenger-toggle-${index}`}
+                      >
+                        {isCollapsed ? "Expand" : "Collapse"}
+                      </button>
+                    ) : null}
+                  </div>
                 </legend>
 
                 {!isCollapsed ? (
@@ -524,7 +593,15 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
               {error}
             </p>
           ) : null}
-          <PrimaryButton type="submit" disabled={submitting || (Boolean(priceChange) && !acceptPriceChange)} className="w-full sm:w-auto">
+          <PrimaryButton
+            type="submit"
+            disabled={
+              submitting ||
+              (Boolean(priceChange) && !acceptPriceChange) ||
+              passengers.length !== seatCount
+            }
+            className="w-full sm:w-auto"
+          >
             {submitting ? "Saving…" : "Continue to review"}
           </PrimaryButton>
         </div>
@@ -545,6 +622,35 @@ export function GroupPassengersPage({ packageId }: GroupPassengersPageProps) {
         onAuthenticated={(path) => {
           setAuthOpen(false);
           window.location.assign(path);
+        }}
+      />
+
+      <GroupCheckoutDecisionDialog
+        open={Boolean(pendingReduction)}
+        modal={pendingReduction}
+        onPrimary={applyPassengerReduction}
+        onSecondary={() => {
+          setSeatCount(passengers.length);
+          setPendingReduction(null);
+          setKeepIndexes([]);
+        }}
+        primaryDisabled={keepIndexes.length !== seatCount}
+      />
+
+      <GroupCheckoutDecisionDialog
+        open={Boolean(availabilityDecision)}
+        modal={availabilityDecision}
+        onPrimary={
+          availabilityAvailableSeats && availabilityAvailableSeats > 0
+            ? () => {
+                setSeatCount(availabilityAvailableSeats);
+                setAvailabilityDecision(null);
+              }
+            : undefined
+        }
+        onSecondary={() => {
+          setAvailabilityDecision(null);
+          router.push("/groups/search");
         }}
       />
     </div>

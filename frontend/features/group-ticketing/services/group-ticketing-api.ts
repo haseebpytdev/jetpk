@@ -115,10 +115,16 @@ export async function fetchGroupReview(bookingRef: string) {
   );
 }
 
-export async function confirmGroupReview(bookingRef: string) {
+export async function confirmGroupReview(
+  bookingRef: string,
+  options: { acceptFareChange?: boolean } = {},
+) {
   const csrf = await ensureLaravelCsrfToken();
   const formData = new FormData();
   if (csrf) formData.set("_token", csrf);
+  if (options.acceptFareChange) {
+    formData.set("accept_fare_change", "1");
+  }
 
   return groupFetch<{ success: boolean; redirect_path: string; booking: GroupPaymentInstructions }>(
     `/groups/booking/${encodeURIComponent(bookingRef)}/review`,

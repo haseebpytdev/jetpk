@@ -220,15 +220,22 @@ class IatiPayloadBuilder
         }
 
         $phone = preg_replace('/\D+/', '', (string) ($contact?->phone ?? ''));
-        $countryCode = trim((string) ($contact?->phone_country_code ?? '92'));
-        $countryCode = preg_replace('/\D+/', '', $countryCode) ?: '92';
+        $countryCode = preg_replace('/\D+/', '', trim((string) ($contact?->phone_country_code ?? '')));
 
         if ($phone === '') {
             throw new IatiValidationException('contact_data_incomplete', 422, 'Contact phone is required for IATI booking.');
         }
 
-        $areaCode = strlen($phone) > 7 ? substr($phone, 0, 3) : '000';
-        $phoneNumber = strlen($phone) > 7 ? substr($phone, 3) : $phone;
+        if ($countryCode === '') {
+            throw new IatiValidationException('contact_data_incomplete', 422, 'Contact phone country code is required for IATI booking.');
+        }
+
+        if (strlen($phone) <= 7) {
+            throw new IatiValidationException('contact_data_incomplete', 422, 'Contact phone must include area and subscriber digits.');
+        }
+
+        $areaCode = substr($phone, 0, 3);
+        $phoneNumber = substr($phone, 3);
 
         $payload = [
             'email' => $email,
@@ -253,11 +260,27 @@ class IatiPayloadBuilder
     protected function identityInfo(BookingPassenger $passenger, array $normalized): array
     {
         $passport = trim((string) ($passenger->passport_number ?? ''));
-        $nationality = strtoupper(trim((string) ($normalized['nationality'] ?? 'PK'))) ?: 'PK';
+        $nationality = strtoupper(trim((string) ($normalized['nationality'] ?? '')));
         $expiry = trim((string) ($normalized['passport_expiry_date'] ?? ''));
 
+        if ($nationality === '') {
+            throw new IatiValidationException(
+                'passenger_data_incomplete',
+                422,
+                'Passenger nationality is required before booking with the supplier.',
+            );
+        }
+
+        if ($passport === '') {
+            throw new IatiValidationException(
+                'passenger_data_incomplete',
+                422,
+                'Passenger passport number is required before booking with the supplier.',
+            );
+        }
+
         return [
-            'not_turkish_citizen' => true,
+            'not_turkish_citizen' => $nationality !== 'TR',
             'not_pakistan_citizen' => $nationality !== 'PK',
             'passport' => [
                 'no' => $passport,

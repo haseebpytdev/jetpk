@@ -770,13 +770,21 @@ class PiaNdcXmlBuilder
                 $ptc = 'ADT';
             }
             $idx = $counter[$ptc]++;
+            $genderRaw = strtoupper(trim((string) ($passenger->gender ?? '')));
+            $gender = match (true) {
+                in_array($genderRaw, ['M', 'MALE'], true) => 'M',
+                in_array($genderRaw, ['F', 'FEMALE'], true) => 'F',
+                default => throw new \InvalidArgumentException(
+                    'Passenger gender is required before creating a PIA NDC order.',
+                ),
+            };
             $passengers[] = [
                 'pax_id' => 'PAX-'.$ptc.$idx,
                 'ptc' => $ptc,
                 'title' => (string) ($passenger->title ?? ''),
                 'given_name' => (string) ($passenger->first_name ?? ''),
                 'surname' => (string) ($passenger->last_name ?? ''),
-                'gender' => strtoupper(substr((string) ($passenger->gender ?? 'M'), 0, 1)),
+                'gender' => $gender,
                 'birthdate' => (string) ($passenger->date_of_birth ?? ''),
                 'contact_info_ref_id' => 'Contact-1',
             ];
@@ -841,13 +849,24 @@ class PiaNdcXmlBuilder
      */
     public function buildDiagnosticPassengers(array $input, string $paxId = 'ADTPax-1'): array
     {
+        $genderRaw = strtoupper(trim((string) ($input['gender'] ?? '')));
+        $gender = match (true) {
+            in_array($genderRaw, ['M', 'MALE'], true) => 'M',
+            in_array($genderRaw, ['F', 'FEMALE'], true) => 'F',
+            default => throw new \InvalidArgumentException('Diagnostic passenger gender is required.'),
+        };
+        $title = strtoupper(trim((string) ($input['title'] ?? '')));
+        if ($title === '') {
+            throw new \InvalidArgumentException('Diagnostic passenger title is required.');
+        }
+
         return [[
             'pax_id' => $paxId,
             'ptc' => 'ADT',
-            'title' => strtoupper(trim((string) ($input['title'] ?? 'MR'))),
+            'title' => $title,
             'given_name' => trim((string) ($input['given_name'] ?? '')),
             'surname' => trim((string) ($input['surname'] ?? '')),
-            'gender' => strtoupper(substr(trim((string) ($input['gender'] ?? 'M')), 0, 1)),
+            'gender' => $gender,
             'birthdate' => trim((string) ($input['dob'] ?? '')),
             'nationality' => strtoupper(trim((string) ($input['nationality'] ?? ''))),
             'passport_number' => trim((string) ($input['passport_number'] ?? '')),
@@ -1137,8 +1156,12 @@ class PiaNdcXmlBuilder
             if (($passenger['passport_number'] ?? '') !== '') {
                 $pax->appendChild($this->identityDocElement($doc, $passenger));
             }
+            $gender = strtoupper(trim((string) ($passenger['gender'] ?? '')));
+            if (! in_array($gender, ['M', 'F'], true)) {
+                throw new \InvalidArgumentException('Passenger gender is required before creating a PIA NDC order.');
+            }
             $individual = $doc->createElement('Individual');
-            $individual->appendChild($doc->createElement('GenderCode', (string) ($passenger['gender'] ?? 'M')));
+            $individual->appendChild($doc->createElement('GenderCode', $gender));
             $individual->appendChild($doc->createElement('GivenName', strtoupper((string) ($passenger['given_name'] ?? ''))));
             $individual->appendChild($doc->createElement('IndividualID', 'IND-'.($passenger['pax_id'] ?? '1')));
             $individual->appendChild($doc->createElement('Surname', strtoupper((string) ($passenger['surname'] ?? ''))));
@@ -1169,7 +1192,11 @@ class PiaNdcXmlBuilder
         if (($passenger['passport_expiry'] ?? '') !== '') {
             $identityDoc->appendChild($doc->createElement('ExpiryDate', (string) $passenger['passport_expiry']));
         }
-        $identityDoc->appendChild($doc->createElement('GenderCode', (string) ($passenger['gender'] ?? 'M')));
+        $gender = strtoupper(trim((string) ($passenger['gender'] ?? '')));
+        if (! in_array($gender, ['M', 'F'], true)) {
+            throw new \InvalidArgumentException('Passenger gender is required before creating a PIA NDC order.');
+        }
+        $identityDoc->appendChild($doc->createElement('GenderCode', $gender));
         $identityDoc->appendChild($doc->createElement('GivenName', strtoupper((string) ($passenger['given_name'] ?? ''))));
         $identityDoc->appendChild($doc->createElement('IdentityDocID', (string) $passenger['passport_number']));
         $identityDoc->appendChild($doc->createElement('IdentityDocTypeCode', 'PASSPORT'));

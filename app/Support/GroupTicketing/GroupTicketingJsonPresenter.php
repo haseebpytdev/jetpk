@@ -142,7 +142,9 @@ class GroupTicketingJsonPresenter
     public function presentReview(GroupBooking $booking, array $card): array
     {
         return array_merge($this->presentBooking($booking, $card), [
-            'hold_notice' => 'Your seats will be reserved for '.$this->reservationService->holdMinutes().' minutes after confirmation.',
+            'hold_notice' => (($booking->meta['availability_notice'] ?? null)
+                ?: 'Availability and fare will be confirmed before payment.')
+                .' Local checkout intent holds seats on JetPakistan for '.$this->reservationService->holdMinutes().' minutes after confirmation.',
             'manual_payment_notice' => 'No payment is taken on this step.',
             'progress' => $this->progressState('review', $booking),
         ]);

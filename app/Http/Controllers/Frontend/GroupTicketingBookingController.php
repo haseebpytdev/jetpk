@@ -9,6 +9,8 @@ use App\Http\Requests\Frontend\GroupTicketingPaymentRequest;
 use App\Models\GroupBooking;
 use App\Models\GroupInventory;
 use App\Services\GroupTicketing\GroupBookingRestrictionService;
+use App\Services\GroupTicketing\GroupFinalCheckoutBlockedException;
+use App\Services\GroupTicketing\GroupFinalCheckoutDecisionService;
 use App\Services\GroupTicketing\GroupInventoryAvailabilityService;
 use App\Services\GroupTicketing\GroupInventorySearchService;
 use App\Services\GroupTicketing\GroupReservationService;
@@ -36,6 +38,7 @@ class GroupTicketingBookingController extends Controller
         protected GroupBookingRestrictionService $restrictionService,
         protected GroupInventoryAvailabilityService $availabilityService,
         protected GroupTicketingJsonPresenter $jsonPresenter,
+        protected GroupFinalCheckoutDecisionService $finalCheckoutDecisionService,
     ) {}
 
     public function passengers(GroupInventory $inventory, Request $request): View|RedirectResponse|JsonResponse|Response
@@ -136,14 +139,25 @@ class GroupTicketingBookingController extends Controller
             }
 
             if ($request->wantsJson()) {
+                $decision = $this->finalCheckoutDecisionService->decide(
+                    (int) $request->input('seat_count', 1),
+                    (int) $availability['available_seats'],
+                    is_numeric($request->input('quoted_unit_price'))
+                        ? round((float) $request->input('quoted_unit_price'), 2)
+                        : round((float) $inventory->price, 2),
+                    round((float) $inventory->price, 2),
+                    (string) ($inventory->currency ?: 'PKR'),
+                );
+
                 return response()->json([
                     'success' => false,
-                    'status' => 'validation_error',
-                    'message' => GroupInventoryAvailabilityService::insufficientSeatsMessage($availability['available_seats']),
+                    'status' => $decision['decision'],
+                    'message' => $decision['modal']['body'] ?? GroupInventoryAvailabilityService::insufficientSeatsMessage($availability['available_seats']),
                     'errors' => [
                         'seat_count' => [GroupInventoryAvailabilityService::insufficientSeatsMessage($availability['available_seats'])],
                     ],
                     'available_seats' => $availability['available_seats'],
+                    'checkout_decision' => $decision,
                 ], 422);
             }
 
@@ -264,7 +278,22 @@ class GroupTicketingBookingController extends Controller
         }
 
         try {
-            $booking = $this->reservationService->createReservation($groupBooking);
+            $booking = $this->reservationService->createReservation(
+                $groupBooking,
+                $request->boolean('accept_price_change') || $request->boolean('accept_fare_change'),
+            );
+        } catch (GroupFinalCheckoutBlockedException $exception) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'status' => $exception->decision['decision'],
+                    'message' => $exception->getMessage(),
+                    'checkout_decision' => $exception->decision,
+                    'errors' => ['reservation' => [$exception->getMessage()]],
+                ], 422);
+            }
+
+            return back()->withErrors(['reservation' => $exception->getMessage()]);
         } catch (\Throwable $exception) {
             if ($request->wantsJson()) {
                 return response()->json([

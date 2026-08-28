@@ -210,7 +210,10 @@ class AlHaiderGroupBookingPayloadBuilder
         return match ($title) {
             'MR', 'MRS', 'MS' => $title,
             'MISS' => 'MS',
-            default => 'MR',
+            default => throw new AlHaiderGroupBookingPayloadException(
+                'passenger_title_required',
+                'Each adult passenger must have a valid title (Mr, Mrs, or Ms).',
+            ),
         };
     }
 }

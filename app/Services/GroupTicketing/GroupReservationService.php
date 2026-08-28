@@ -28,6 +28,7 @@ class GroupReservationService
         private readonly GroupTicketingCommunicationService $communicationService,
         private readonly GroupInventoryAvailabilityService $availabilityService,
         private readonly AlHaiderGroupBookingPayloadBuilder $alHaiderBookingPayloadBuilder,
+        private readonly GroupFinalCheckoutDecisionService $finalCheckoutDecisionService,
     ) {}
 
     public function holdMinutes(): int
@@ -63,7 +64,13 @@ class GroupReservationService
                 'contact_name' => $contact['contact_name'] ?? null,
                 'contact_email' => $contact['contact_email'] ?? null,
                 'contact_phone' => $contact['contact_phone'] ?? null,
-                'meta' => ['inventory_snapshot' => $inventory->snapshot],
+                'meta' => [
+                    'inventory_snapshot' => $inventory->snapshot,
+                    'checkout_mode' => 'local_checkout_intent',
+                    'quoted_unit_price' => round((float) $inventory->price, 2),
+                    'supplier_reservation_id' => null,
+                    'availability_notice' => 'Availability and fare will be confirmed before payment.',
+                ],
             ]);
 
             foreach ($passengers as $index => $passenger) {
@@ -87,9 +94,9 @@ class GroupReservationService
         });
     }
 
-    public function createReservation(GroupBooking $booking): GroupBooking
+    public function createReservation(GroupBooking $booking, bool $acceptFareChange = false): GroupBooking
     {
-        $result = DB::transaction(function () use ($booking): GroupBooking {
+        $result = DB::transaction(function () use ($booking, $acceptFareChange): GroupBooking {
             $booking = GroupBooking::query()->lockForUpdate()->findOrFail($booking->id);
             $inventory = GroupInventory::query()->lockForUpdate()->findOrFail($booking->group_inventory_id);
 
@@ -104,20 +111,42 @@ class GroupReservationService
             $availability = $this->availabilityService->revalidate($inventory, (int) $booking->seat_count);
             $inventory = $availability['inventory'];
 
-            if (! $availability['ok']) {
+            $quotedUnitPrice = round((float) (($booking->meta['quoted_unit_price'] ?? null) ?: $inventory->price), 2);
+            $freshUnitPrice = round((float) $inventory->price, 2);
+
+            if ($availability['unavailable']) {
                 $booking->update(['status' => GroupBookingStatus::Failed]);
 
-                if ($availability['unavailable']) {
-                    throw new \RuntimeException(GroupInventoryAvailabilityService::UNAVAILABLE_MESSAGE);
+                if ((int) $availability['available_seats'] <= 0) {
+                    throw new GroupFinalCheckoutBlockedException(
+                        $this->finalCheckoutDecisionService->decide(
+                            (int) $booking->seat_count,
+                            0,
+                            $quotedUnitPrice,
+                            $freshUnitPrice,
+                            (string) ($inventory->currency ?: 'PKR'),
+                        ),
+                    );
                 }
 
-                throw new \RuntimeException(
-                    GroupInventoryAvailabilityService::insufficientSeatsMessage($availability['available_seats']),
-                );
+                throw new \RuntimeException(GroupInventoryAvailabilityService::UNAVAILABLE_MESSAGE);
+            }
+
+            $decision = $this->finalCheckoutDecisionService->decide(
+                (int) $booking->seat_count,
+                (int) $availability['available_seats'],
+                $quotedUnitPrice,
+                $freshUnitPrice,
+                (string) ($inventory->currency ?: 'PKR'),
+                acceptFareChange: $acceptFareChange || (bool) ($booking->meta['accept_fare_change'] ?? false),
+            );
+
+            if ($decision['decision'] !== GroupFinalCheckoutDecisionService::DECISION_OK) {
+                throw new GroupFinalCheckoutBlockedException($decision);
             }
 
             $supplierReservationId = null;
-            $providerHoldStatus = 'unheld_manual_review';
+            $providerHoldStatus = 'local_checkout_intent';
 
             if ($this->client->isConfigured() && (bool) config('suppliers.al_haider.booking_enabled')) {
                 try {
@@ -162,6 +191,11 @@ class GroupReservationService
                 'supplier_reservation_id' => $supplierReservationId !== '' ? $supplierReservationId : null,
                 'meta' => array_merge($booking->meta ?? [], [
                     'provider_hold_status' => $providerHoldStatus,
+                    'checkout_mode' => $supplierReservationId !== '' ? 'supplier_held' : 'local_checkout_intent',
+                    'quoted_unit_price' => $freshUnitPrice,
+                    'availability_notice' => $supplierReservationId !== ''
+                        ? 'Seats are held with the supplier pending payment.'
+                        : 'Availability and fare will be confirmed before payment.',
                 ]),
             ]);
 

@@ -106,6 +106,12 @@ class IatiPassengerNormalizer
         if (($normalized['passport_expiry_date'] ?? '') === '') {
             $missing[] = $prefix.'passport_expiry_date';
         }
+        if (($normalized['nationality'] ?? '') === '') {
+            $missing[] = $prefix.'nationality';
+        }
+        if (! $this->hasResolvableGender($normalized)) {
+            $missing[] = $prefix.'gender';
+        }
 
         return $missing;
     }
@@ -178,8 +184,30 @@ class IatiPassengerNormalizer
         if (in_array($title, ['mrs', 'ms', 'miss', 'female'], true)) {
             return 'FEMALE';
         }
+        if (in_array($title, ['mr', 'male'], true)) {
+            return 'MALE';
+        }
 
-        return 'MALE';
+        throw new IatiValidationException(
+            'passenger_data_incomplete',
+            422,
+            'Passenger gender is required before booking with the supplier.',
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $normalized
+     */
+    protected function hasResolvableGender(array $normalized): bool
+    {
+        $gender = strtoupper(trim((string) ($normalized['gender'] ?? '')));
+        if (in_array($gender, ['F', 'FEMALE', 'M', 'MALE'], true)) {
+            return true;
+        }
+
+        $title = strtolower(trim((string) ($normalized['title'] ?? '')));
+
+        return in_array($title, ['mr', 'mrs', 'ms', 'miss', 'male', 'female'], true);
     }
 
     protected function resolveGivenName(BookingPassenger $passenger): string
