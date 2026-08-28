@@ -1,4 +1,4 @@
-# Git report — JP-UX-PORTAL-PERF-01
+﻿# Git report â€” JP-UX-PORTAL-PERF-01
 
 ## Heads
 
@@ -10,18 +10,18 @@
 | FINAL_BRANCH | `phase/jp-flight-perf-01` |
 | FINAL_ENGINEERING_SHA | `9f5b70f45228ae333495afd0d941467676fd488f` |
 | FINAL_DEPLOYED_SHA | `9f5b70f45228ae333495afd0d941467676fd488f` |
-| FINAL_DOCS_SHA | *(set after docs commit)* |
+| FINAL_DOCS_SHA | 4609f93eef272fd2b405fae1ce15088fa86f2bac |
 
 ## Ancestry
 
 ```
-9979330c fix(flights): skip non-flight SupplierConnection rows…
+9979330c fix(flights): skip non-flight SupplierConnection rowsâ€¦
 b147f548 docs(flights): commit JP-FLIGHT-PERF-01-R2 live-final evidence
 562ebe0e docs(flights): reopen perf proof and classify PIA NDC AUTH failure
 9f5b70f4 fix(public): close owner flight UX and customer portal defects
 ```
 
-Proven: `9979330c → b147f548 → 562ebe0e → 9f5b70f4`
+Proven: `9979330c â†’ b147f548 â†’ 562ebe0e â†’ 9f5b70f4`
 
 ## Commits in wave
 
@@ -36,3 +36,4 @@ Proven: `9979330c → b147f548 → 562ebe0e → 9f5b70f4`
 ## Force push / destructive ops
 
 None.
+
