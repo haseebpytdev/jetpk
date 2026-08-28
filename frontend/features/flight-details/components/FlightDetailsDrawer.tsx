@@ -126,6 +126,42 @@ export function FlightDetailsDrawer({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset is stable; avoid revalidation object identity churn
   }, [onClose, open, triggerRef]);
 
+  // Warm passengers chunk + fare revalidation while traveler reviews the drawer.
+  useEffect(() => {
+    if (!open || !context || context.intent !== "booking") return;
+    try {
+      void import("@/features/standard-booking/components/PassengerDetailsPage");
+    } catch {
+      /* non-blocking */
+    }
+  }, [open, context]);
+
+  useEffect(() => {
+    if (!open || !context || context.intent !== "booking") return;
+    if (details.loadState !== "ready" || !details.data?.offer) return;
+    const offer = details.data.offer;
+    const fareKey = toSupplierFareKey(details.selectedFareKey, details.fareOptions);
+    revalidation.warmStartRevalidation({
+      searchId: context.searchId,
+      offerId: offer.offer_id,
+      fareOptionKey: fareKey,
+      selectUrl: offer.select_url,
+      supplierProvider: offer.supplier_provider ?? offer.provider,
+      isReturnCombo: Boolean(context.comboId),
+      comboId: context.comboId,
+      outboundKey: context.outboundKey,
+      outboundFareOptionKey: context.outboundFareOptionKey,
+      returnFareOptionKey: fareKey,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- warm once per ready offer/fare
+  }, [
+    open,
+    context,
+    details.loadState,
+    details.data?.offer?.offer_id,
+    details.selectedFareKey,
+  ]);
+
   if (!open || !context) return null;
 
   const offer = details.data?.offer;

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { fetchSessionBootstrap } from "@/features/auth/services/session-service";
-import { fetchGroupPackage } from "../services/group-ticketing-api";
+import { fetchGroupPackage, type GroupPackagePayload } from "../services/group-ticketing-api";
 import type { GroupPackage } from "../types";
 import {
   GroupAvailabilityBadge,
@@ -18,22 +18,65 @@ import { GroupLockedState, GroupUnavailableState } from "./GroupStateCards";
 
 type GroupPackageDetailsPageProps = {
   packageId: string;
+  /** SSR payload — when present, skip blocking client waterfall on first paint. */
+  initialPayload?: GroupPackagePayload | null;
 };
 
-export function GroupPackageDetailsPage({ packageId }: GroupPackageDetailsPageProps) {
+function applyPayload(
+  payload: GroupPackagePayload,
+  setters: {
+    setPkg: (pkg: GroupPackage) => void;
+    setAvailable: (v: boolean) => void;
+    setLocked: (v: boolean) => void;
+    setLockedMessage: (v: string | undefined) => void;
+    setProgress: (
+      v: Array<{ key: string; label: string; state: "completed" | "current" | "upcoming"; href?: string | null }>,
+    ) => void;
+    setRefreshedAt: (v: string | null) => void;
+    setError: (v: string | null) => void;
+  },
+) {
+  setters.setError(null);
+  setters.setPkg(payload.package);
+  setters.setAvailable(payload.available);
+  setters.setLocked(payload.lock_state.locked);
+  setters.setLockedMessage(payload.lock_state.message ?? undefined);
+  setters.setProgress(
+    payload.progress as Array<{
+      key: string;
+      label: string;
+      state: "completed" | "current" | "upcoming";
+      href?: string | null;
+    }>,
+  );
+  setters.setRefreshedAt(new Date().toISOString());
+}
+
+export function GroupPackageDetailsPage({ packageId, initialPayload = null }: GroupPackageDetailsPageProps) {
   const router = useRouter();
-  const [pkg, setPkg] = useState<GroupPackage | null>(null);
-  const [available, setAvailable] = useState(true);
-  const [locked, setLocked] = useState(false);
-  const [lockedMessage, setLockedMessage] = useState<string | undefined>();
+  const [pkg, setPkg] = useState<GroupPackage | null>(initialPayload?.package ?? null);
+  const [available, setAvailable] = useState(initialPayload?.available ?? true);
+  const [locked, setLocked] = useState(initialPayload?.lock_state.locked ?? false);
+  const [lockedMessage, setLockedMessage] = useState<string | undefined>(
+    initialPayload?.lock_state.message ?? undefined,
+  );
   const [progress, setProgress] = useState<
     Array<{ key: string; label: string; state: "completed" | "current" | "upcoming"; href?: string | null }>
-  >([]);
-  const [loading, setLoading] = useState(true);
+  >(
+    (initialPayload?.progress as Array<{
+      key: string;
+      label: string;
+      state: "completed" | "current" | "upcoming";
+      href?: string | null;
+    }>) ?? [],
+  );
+  const [loading, setLoading] = useState(!initialPayload?.package);
   const [error, setError] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [bookingBusy, setBookingBusy] = useState(false);
-  const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
+  const [refreshedAt, setRefreshedAt] = useState<string | null>(
+    initialPayload?.package ? new Date().toISOString() : null,
+  );
 
   const passengersPath = `/groups/${encodeURIComponent(packageId)}/passengers`;
 
@@ -44,16 +87,23 @@ export function GroupPackageDetailsPage({ packageId }: GroupPackageDetailsPagePr
       setPkg(null);
       return;
     }
-    setError(null);
-    setPkg(response.data.package);
-    setAvailable(response.data.available);
-    setLocked(response.data.lock_state.locked);
-    setLockedMessage(response.data.lock_state.message ?? undefined);
-    setProgress(response.data.progress as typeof progress);
-    setRefreshedAt(new Date().toISOString());
+    applyPayload(response.data, {
+      setPkg,
+      setAvailable,
+      setLocked,
+      setLockedMessage,
+      setProgress,
+      setRefreshedAt,
+      setError,
+    });
   };
 
   useEffect(() => {
+    // SSR already hydrated package — refresh in background without blanking the shell.
+    if (initialPayload?.package) {
+      void loadPackage();
+      return;
+    }
     setLoading(true);
     void loadPackage().finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per packageId

@@ -1,4 +1,5 @@
 import { GroupPackageDetailsPage } from "@/features/group-ticketing";
+import { fetchGroupPackageServer } from "@/features/group-ticketing/services/group-ticketing-api";
 
 type PageProps = {
   params: Promise<{ packageId: string }>;
@@ -6,5 +7,6 @@ type PageProps = {
 
 export default async function Page({ params }: PageProps) {
   const { packageId } = await params;
-  return <GroupPackageDetailsPage packageId={packageId} />;
+  const initialPayload = await fetchGroupPackageServer(packageId);
+  return <GroupPackageDetailsPage packageId={packageId} initialPayload={initialPayload} />;
 }

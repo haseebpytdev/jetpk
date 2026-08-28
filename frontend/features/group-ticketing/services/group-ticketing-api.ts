@@ -86,14 +86,48 @@ export async function fetchGroupFacets() {
   return groupFetch<{ sectors: string[]; categories: Array<{ slug: string; name: string }> }>("/groups/facets");
 }
 
+export type GroupPackagePayload = {
+  success: boolean;
+  package: GroupPackage;
+  available: boolean;
+  lock_state: GroupLockState;
+  progress: Array<{ key: string; label: string; state: string; href?: string | null }>;
+};
+
 export async function fetchGroupPackage(packageId: string) {
-  return groupFetch<{
-    success: boolean;
-    package: GroupPackage;
-    available: boolean;
-    lock_state: GroupLockState;
-    progress: Array<{ key: string; label: string; state: string; href?: string | null }>;
-  }>(`/groups/package/${encodeURIComponent(packageId)}?format=json`);
+  return groupFetch<GroupPackagePayload>(
+    `/groups/package/${encodeURIComponent(packageId)}?format=json`,
+  );
+}
+
+/**
+ * Server-side package fetch for SSR first paint (read-only, no-store).
+ * Avoids the client-only waterfall that leaves "Loading package details…".
+ */
+export async function fetchGroupPackageServer(packageId: string): Promise<GroupPackagePayload | null> {
+  const env = process.env as Record<string, string | undefined>;
+  const laravelBase = (env.LARAVEL_URL ?? env.NEXT_PUBLIC_LARAVEL_URL ?? "")
+    .trim()
+    .replace(/\/$/, "");
+  const path = `/groups/package/${encodeURIComponent(packageId)}?format=json`;
+  const url = laravelBase !== "" ? `${laravelBase}${path}` : laravelApiPath(path);
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const payload = (await response.json()) as GroupPackagePayload;
+    if (!payload?.package) return null;
+    return payload;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchGroupPassengersContext(packageId: string) {

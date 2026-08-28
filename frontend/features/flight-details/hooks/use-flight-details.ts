@@ -24,12 +24,48 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
   const fareOptionsRef = useRef(fareOptions);
   fareOptionsRef.current = fareOptions;
 
+  const seedFromInitialOffer = useCallback(
+    (fareOptionKey?: string) => {
+      if (!context?.initialOffer) return false;
+      const knownFareOptions =
+        context.initialFareOptions ??
+        context.initialOffer.branded_fares_display_options ??
+        context.initialOffer.fare_family_options_display ??
+        [];
+      const seededOpts = ensureSelectableFareCatalog(knownFareOptions, context.initialOffer);
+      // Never fall back to a non-authoritative/synthetic option_key for API/selection identity.
+      const authoritativeFareKey =
+        resolveAuthoritativeFareOptionKey(fareOptionKey ?? context.fareOptionKey, seededOpts) ?? "";
+      const uiSelectedKey =
+        authoritativeFareKey ||
+        seededOpts.find((o) => isBaseOfferFareOption(o))?.option_key ||
+        seededOpts[0]?.option_key ||
+        "";
+      const seeded: FlightOfferDetailsResponse = {
+        success: true,
+        search_id: context.searchId,
+        offer_id: context.offerId,
+        offer: context.initialOffer,
+        fare_option_key: authoritativeFareKey || null,
+      };
+      setData(seeded);
+      setLoadState("ready");
+      setSelectedFareKey(uiSelectedKey);
+      setMessage(null);
+      return true;
+    },
+    [context],
+  );
+
   const loadDetails = useCallback(
-    async (fareOptionKey?: string) => {
+    async (fareOptionKey?: string, options?: { background?: boolean }) => {
       if (!context) return;
       const requestId = ++requestIdRef.current;
-      setLoadState("loading");
-      setMessage(null);
+      const background = Boolean(options?.background);
+      if (!background) {
+        setLoadState("loading");
+        setMessage(null);
+      }
 
       const knownFareOptions =
         fareOptionsRef.current.length > 0
@@ -52,28 +88,12 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
       if (requestId !== requestIdRef.current) return;
 
       if (!response.ok) {
-        if (context.initialOffer && (context.legMode === "outbound_confirm" || context.legMode === "pair" || context.legMode === "return_confirm")) {
-          const seeded: FlightOfferDetailsResponse = {
-            success: true,
-            search_id: context.searchId,
-            offer_id: context.offerId,
-            offer: context.initialOffer,
-            fare_option_key: authoritativeFareKey ?? null,
-          };
-          setData(seeded);
-          setLoadState("ready");
-          const seededOpts = ensureSelectableFareCatalog(
-            context.initialFareOptions
-              ?? context.initialOffer.branded_fares_display_options
-              ?? context.initialOffer.fare_family_options_display
-              ?? [],
-            context.initialOffer,
-          );
-          setSelectedFareKey(
-            resolveAuthoritativeFareOptionKey(fareOptionKey ?? context.fareOptionKey, seededOpts)
-              ?? seededOpts[0]?.option_key
-              ?? "",
-          );
+        if (background) {
+          // Keep seeded card offer; do not blank the Continue CTA.
+          return;
+        }
+        if (context.initialOffer && (context.legMode === "outbound_confirm" || context.legMode === "pair" || context.legMode === "return_confirm" || context.intent === "booking")) {
+          seedFromInitialOffer(fareOptionKey);
           return;
         }
         setLoadState(response.status === 410 ? "expired" : "error");
@@ -102,7 +122,7 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
         setSelectedFareKey("");
       }
     },
-    [context],
+    [context, seedFromInitialOffer],
   );
 
   useEffect(() => {
@@ -112,11 +132,18 @@ export function useFlightDetails(context: FlightDetailsContext | null) {
       setMessage(null);
       return;
     }
-    void loadDetails(context.fareOptionKey);
+    // Card already has the offer — paint Continue immediately; enrich in background.
+    // Dominant Book Now delay was waiting on fetchOfferDetails before the CTA appeared.
+    if (context.initialOffer && (context.intent === "booking" || context.legMode === "pair" || context.legMode === "outbound_confirm" || context.legMode === "return_confirm")) {
+      seedFromInitialOffer(context.fareOptionKey);
+      void loadDetails(context.fareOptionKey, { background: true });
+    } else {
+      void loadDetails(context.fareOptionKey);
+    }
     return () => {
       requestIdRef.current += 1;
     };
-  }, [context, loadDetails]);
+  }, [context, loadDetails, seedFromInitialOffer]);
 
   const handleFareOptionChange = useCallback(
     async (key: string) => {

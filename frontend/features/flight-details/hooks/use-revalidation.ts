@@ -30,6 +30,18 @@ function readTotal(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+function paramsCacheKey(params: RevalidationParams): string {
+  return [
+    params.searchId,
+    params.offerId,
+    params.fareOptionKey ?? "",
+    params.comboId ?? "",
+    params.outboundKey ?? "",
+    params.returnFareOptionKey ?? "",
+    params.outboundFareOptionKey ?? "",
+  ].join("|");
+}
+
 export function useRevalidation() {
   const [state, setState] = useState<RevalidationState>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -43,6 +55,10 @@ export function useRevalidation() {
   const pendingHandoffRef = useRef<string | null>(null);
   const lastParamsRef = useRef<RevalidationParams | null>(null);
   const acceptCountRef = useRef(0);
+  const warmPromiseRef = useRef<{
+    key: string;
+    promise: Promise<Awaited<ReturnType<typeof revalidateOffer>>>;
+  } | null>(null);
   const MAX_FARE_CHANGE_ACCEPTS = 2;
 
   const reset = useCallback(() => {
@@ -53,6 +69,7 @@ export function useRevalidation() {
     lastParamsRef.current = null;
     inFlightRef.current = false;
     acceptCountRef.current = 0;
+    warmPromiseRef.current = null;
   }, []);
 
   const classifyFailure = useCallback((status: number, body?: RevalidateOfferResponse): RevalidationState => {
@@ -145,14 +162,52 @@ export function useRevalidation() {
 
   const runRevalidation = useCallback(
     async (params: RevalidationParams, acceptFareChange = false) => {
-      return revalidateOffer({
+      const key = `${paramsCacheKey(params)}|accept=${acceptFareChange ? 1 : 0}`;
+      if (!acceptFareChange && warmPromiseRef.current?.key === key) {
+        return warmPromiseRef.current.promise;
+      }
+      const promise = revalidateOffer({
         searchId: params.searchId,
         offerId: params.offerId,
         selectedFareOptionId: params.fareOptionKey,
         acceptFareChange,
       });
+      if (!acceptFareChange) {
+        warmPromiseRef.current = { key, promise };
+      }
+      return promise;
     },
     [],
+  );
+
+  /**
+   * Start read-only fare revalidation while the traveler reviews the drawer.
+   * Continue reuses the same in-flight/cached promise when fare keys match.
+   */
+  const warmStartRevalidation = useCallback(
+    (params: RevalidationParams) => {
+      if (!providerRequiresRevalidation(params.supplierProvider)) return;
+      if (params.isReturnCombo) return;
+      const key = `${paramsCacheKey(params)}|accept=0`;
+      if (warmPromiseRef.current?.key === key) return;
+      lastParamsRef.current = params;
+      const promise = revalidateOffer({
+        searchId: params.searchId,
+        offerId: params.offerId,
+        selectedFareOptionId: params.fareOptionKey,
+        acceptFareChange: false,
+      });
+      warmPromiseRef.current = { key, promise };
+      void promise.then((result) => {
+        if (warmPromiseRef.current?.key !== key) return;
+        if (!result.ok) return;
+        const change = extractFareChange(result.data);
+        if (change) {
+          pendingHandoffRef.current = result.data.passengers_url ?? null;
+        }
+      });
+    },
+    [extractFareChange],
   );
 
   const continueToPassengers = useCallback(
@@ -350,6 +405,7 @@ export function useRevalidation() {
     fareChange,
     continueToPassengers,
     acceptFareChange,
+    warmStartRevalidation,
     reset,
   };
 }
