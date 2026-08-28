@@ -68,7 +68,7 @@ class JetpkEmailBrandingResolver
         if (empty($brand['home_url'])) {
             $appUrl = trim((string) config('app.url', ''));
             $brand['home_url'] = static::absoluteUrl($appUrl !== '' ? $appUrl : null)
-                ?? trim((string) env('JETPK_HOME_URL', 'https://www.jetpakistan.com'));
+                ?? trim((string) env('JETPK_HOME_URL', 'https://jetpakistan.pk'));
         }
 
         // Normalise logo to an absolute URL (or null for text fallback).
@@ -173,10 +173,10 @@ class JetpkEmailBrandingResolver
             'brand_name'    => 'JetPakistan',
             'legal_name'    => 'JetPakistan',
             'logo_url'      => static::resolveLogoUrlFromPaths('jetpk-assets', 'logo/logo.svg'),
-            'home_url'      => static::previewHomeUrl($previewPath) ?? 'https://www.jetpakistan.com',
+            'home_url'      => static::previewHomeUrl($previewPath) ?? 'https://jetpakistan.pk',
             'manage_url'    => static::previewManageUrl($previewPath),
             'support_email' => 'ota@jetpakistan.pk',
-            'support_phone' => '+92 21 111 000 000',
+            'support_phone' => null,
             'primary_color' => '#00843D',
             'accent_color'  => '#F58220',
             'address'       => null,

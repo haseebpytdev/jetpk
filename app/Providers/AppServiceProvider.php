@@ -62,9 +62,11 @@ use App\Support\Branding\PublicAgencyContactResolver;
 use App\Support\Branding\SafeBrandingResolver;
 use App\Support\Ui\UiVersionResolver;
 use App\Listeners\Auth\SendEmailVerificationNotificationBestEffort;
+use App\Listeners\Mail\CaptureJetpkQaMailboxMessage;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Mail\Events\MessageSending;
 use App\Support\Url\PublicActionUrl;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -131,6 +133,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->booted(function (): void {
             Event::forget(Registered::class);
             Event::listen(Registered::class, SendEmailVerificationNotificationBestEffort::class);
+            Event::listen(MessageSending::class, CaptureJetpkQaMailboxMessage::class);
         });
 
         ResetPassword::createUrlUsing(static function (object $notifiable, string $token): string {
