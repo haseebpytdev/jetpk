@@ -1,0 +1,21 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "captured_at": "2026-08-28T09:50:00Z",
+  "deployed_runtime_sha": "9979330c35141bc85cd5db7941f4a9c274e89a52",
+  "public_build_id": "e4VIZqNpoHKKio-vCpzSp",
+  "provider": "pia_ndc",
+  "elapsed_ms": 364,
+  "failure_stage": "AUTH",
+  "safe_error_class": "SUPPLIER_AUTH_REJECT",
+  "safe_error_code": "provider_error",
+  "safe_provider_message": "Login Incorrect",
+  "http_status": 200,
+  "operation": "air_shopping",
+  "final_state": "ERROR",
+  "accepted_offer_count": 0,
+  "warning_count": 1,
+  "jetpakistan_defect": false,
+  "supplier_side": true,
+  "mutation": "none",
+  "secrets_included": false
+}

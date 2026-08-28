@@ -1,6 +1,7 @@
 ﻿{
   "phase": "JP-FLIGHT-PERF-01-R2",
   "captured_at": "2026-08-28T08:57:20Z",
+  "updated_at": "2026-08-28T09:50:00Z",
   "deployed_runtime_sha": "9979330c35141bc85cd5db7941f4a9c274e89a52",
   "public_build_id": "e4VIZqNpoHKKio-vCpzSp",
   "search_id": "1732f369-7ccb-4d47-9a8b-db17c1786cbb",
@@ -27,7 +28,17 @@
       "accepted_offer_count": 0,
       "warning_count": 1,
       "final_state": "ERROR",
-      "skip_reason": null
+      "skip_reason": null,
+      "failure_stage": "AUTH",
+      "safe_error_class": "SUPPLIER_AUTH_REJECT",
+      "safe_error_code": "provider_error",
+      "safe_provider_message": "Login Incorrect",
+      "http_status": 200,
+      "operation": "air_shopping",
+      "classification_source": "storage/logs/pia-ndc-2026-08-28.log pia_ndc.provider_call (sanitized; no tokens/credentials/raw private payload)",
+      "jetpakistan_defect": false,
+      "supplier_side": true,
+      "notes": "SOAP HTTP 200 but AirShoppingRS business failure DescText=Login Incorrect; JetPakistan adapter returns empty offers + generic unavailable warning. Credential rotation out of scope for this phase."
     },
     {
       "provider": "smtp",
@@ -36,7 +47,10 @@
       "accepted_offer_count": 0,
       "warning_count": 0,
       "final_state": "DISABLED",
-      "skip_reason": "non_flight_provider"
+      "skip_reason": "non_flight_provider",
+      "failure_stage": "OTHER",
+      "safe_error_class": "NON_FLIGHT_CONNECTION_SKIPPED",
+      "notes": "Fixed in 9979330c; previously aborted progressive search"
     },
     {
       "provider": "al_haider",
@@ -45,9 +59,12 @@
       "accepted_offer_count": 0,
       "warning_count": 0,
       "final_state": "DISABLED",
-      "skip_reason": "non_flight_provider"
+      "skip_reason": "non_flight_provider",
+      "failure_stage": "OTHER",
+      "safe_error_class": "NON_FLIGHT_CONNECTION_SKIPPED"
     }
   ],
   "incomplete_supplier_root_cause": "PROVEN",
-  "smtp_abort_absent": true
+  "smtp_abort_absent": true,
+  "pia_ndc_status": "CLASSIFIED_SUPPLIER_AUTH"
 }

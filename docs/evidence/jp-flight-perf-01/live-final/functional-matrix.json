@@ -1,82 +1,70 @@
 {
   "phase": "JP-FLIGHT-PERF-01-R2",
-  "captured_at": "2026-08-28T09:05:00Z",
+  "captured_at": "2026-08-28T09:55:00Z",
   "deployed_runtime_sha": "9979330c35141bc85cd5db7941f4a9c274e89a52",
   "public_build_id": "e4VIZqNpoHKKio-vCpzSp",
+  "docs_sha_at_update": "90cca5feede5aa5243941cb4f8379cc5316a7081",
   "gates": {
     "CHEAPEST_DEFAULT": {
-      "status": "PASS",
-      "evidence": ["01-oneway-cheapest.png", "live UI Sort=Cheapest; first fare PKR 81,636 min of list"]
+      "status": "PASS"
     },
     "PROGRESSIVE_UPDATING_FARES_UX": {
-      "status": "PASS",
-      "evidence": ["03-progressive-ready.png", "sawUpdating=true on live search f050e170; prior soft incomplete copy replaced"]
+      "status": "PASS"
     },
     "INCOMPLETE_SUPPLIER_ROOT_CAUSE": {
       "status": "PASS",
-      "evidence": ["supplier-search-timing-live.json"],
-      "root_causes_proven": [
-        "smtp active SupplierConnection aborted progressive search (Unsupported supplier provider: smtp) after inventory arrived — fixed in 9979330c",
-        "pia_ndc ERROR elapsed_ms=364 warning_count=1 (empty offers)",
-        "sabre SUCCESS elapsed_ms=2472 accepted=32",
-        "LOG_LEVEL=warning hid prior Log::info timing; summaries now on results/data + Log::notice"
-      ]
+      "evidence": [
+        "supplier-search-timing-live.json"
+      ],
+      "pia_ndc": {
+        "failure_stage": "AUTH",
+        "safe_error_class": "SUPPLIER_AUTH_REJECT",
+        "safe_provider_message": "Login Incorrect",
+        "http_status": 200,
+        "jetpakistan_defect": false
+      },
+      "smtp": "non_flight_provider skip (9979330c)",
+      "sabre": "SUCCESS"
     },
     "NEARBY_DATES_FRESH_SEARCHES": {
-      "status": "PASS",
-      "evidence": ["06-nearby-date-minus-one.png", "07-nearby-date-plus-one.png"]
+      "status": "PASS"
     },
     "PAIR_FIRST_RENDER": {
-      "status": "PASS",
-      "evidence": ["08-return-pair-first-render.png", "09-return-pair-hard-refresh.png"]
+      "status": "PASS"
     },
     "SEGMENTED_FIRST_RENDER_HISTORY": {
-      "status": "PASS",
-      "evidence": ["10-return-segmented.png", "11-return-segmented-hard-refresh.png"]
+      "status": "PASS"
     },
     "AUTOMATIC_PRICE_REVALIDATION": {
-      "status": "PASS",
-      "evidence": [
-        "POST /laravel/flights/results/revalidate-offer HTTP 200",
-        "revalidation_status=valid price_changed=false requires_fare_change_acceptance=false",
-        "12-passenger-auto-reprice-clean.png"
-      ]
+      "status": "PASS"
     },
     "CHANGED_PRICE_CONFIRMATION_FIXTURE": {
       "status": "PASS",
-      "scope": "isolated_frontend_fixture_not_live_supplier",
-      "evidence": [
-        "frontend/tests/flight-details.spec.ts requires_fare_change_acceptance + price_changed true paths",
-        "frontend/tests/visual-audit/jp-ui-04a-fixtures.ts"
-      ],
-      "live_observation": "live handoff returned price_changed=false; confirmation modal not triggered on live (correct)"
+      "scope": "isolated_frontend_fixture_not_live_supplier"
     },
     "CHANGE_FLIGHT": {
-      "status": "PASS",
-      "evidence": ["14-change-flight.png", "Change flight control returned to /flights/results"]
+      "status": "PASS"
     },
     "BFCACHE_HISTORY": {
-      "status": "PASS",
-      "evidence": ["17-bfcache-back.png", "17b-bfcache-forward.png", "forward restored /booking/passengers"]
+      "status": "PASS"
     },
     "PASSENGER_SHELL_PERFORMANCE": {
-      "status": "PASS",
-      "shell_ms_to_traveler_heading": 3678,
-      "nav_dcl_ms": 725,
-      "evidence": ["13-passenger-shell-immediate.png"]
+      "status": "NOT_PASS",
+      "PASSENGER_SHELL_P50": 1782,
+      "PASSENGER_USABLE_FORM_P50": 5164,
+      "deep_link_booking_shell_p50": 934,
+      "notes": "Handoff form usable ~5.2s p50; prior 3678ms claim retracted as 'immediate'"
     },
     "PRODUCTION_BEFORE_AFTER_METRICS": {
-      "status": "PASS",
-      "evidence": ["../live-before/performance-live-before.json", "performance-live-after.json", "performance-live-comparison.md"]
+      "status": "NOT_PASS",
+      "reason": "Comparable Playwright after on 9979330c shows shell/DCL/FCP/LCP regressions on home and slower shells on shared routes; prior IWR after on bc83e503 invalidated",
+      "evidence": [
+        "performance-live-after.json",
+        "performance-live-comparison.md"
+      ]
     },
     "GROUP_UI_NON_MUTATING_REGRESSION": {
-      "status": "PASS",
-      "evidence": ["15-groups-landing.png", "15b-groups-search.png", "16-group-detail.png", "group-seat-cleanup.json"],
-      "notes": "ALH-3348 shows 5 seats; Book CTA Unavailable (policy); no supplier-reserved copy; no Al-Haider create/cancel"
-    },
-    "GROUP_AUTH_MODAL_BOOK_PATH": {
-      "status": "PASS_WITH_POLICY_LIMIT",
-      "notes": "Book Now unavailable on ALH-3348; auth modal cannot be exercised without bookable package. Non-mutating Group UI still verified."
+      "status": "PASS"
     },
     "FLIGHT_OWNER_UAT_READY": {
       "status": "PASS"
@@ -85,8 +73,7 @@
       "status": "PASS"
     },
     "GROUP_COMMERCIAL_SUPPLIER_READY": {
-      "status": "NO",
-      "blocker": "60175 external cleanup residue + ALHAIDER_BOOKING_ENABLED=false; not a Flight/Perf deploy blocker per owner override"
+      "status": "NO"
     }
   },
   "commercial_safety": {
@@ -99,6 +86,8 @@
     "ALHAIDER_BOOKING_ENABLED": false,
     "ALHAIDER_CANCEL_ENABLED": false
   },
-  "FINAL_STATUS": "PASS_FLIGHT_PERF_GROUP_UI",
-  "FINAL_STATUS_NOTE": "Flight/Performance + non-mutating Group UI acceptance complete on SHA 9979330c. Group commercial supplier activation remains NO until owner-approved lifecycle/cleanup beyond 60175 residue."
+  "PERFORMANCE_CLOSEOUT": "NOT_PASS",
+  "INCOMPLETE_SUPPLIER_ROOT_CAUSE": "PASS",
+  "FINAL_STATUS": "OPEN_PERFORMANCE_PIA_CLASSIFIED",
+  "FINAL_STATUS_NOTE": "Flight functional UAT and PIA AUTH classification complete. Performance closeout remains open due to measured regressions vs before under identical Playwright methodology; no manufactured optimization."
 }
