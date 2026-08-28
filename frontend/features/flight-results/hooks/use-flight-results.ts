@@ -26,19 +26,20 @@ const POLL_INTERVAL_MS = 750;
 const TERMINAL_STATUSES = new Set(["ready", "empty", "failed", "expired", "error"]);
 
 function stagedSearchMessage(elapsedMs: number, tripType: string, hasResults: boolean): string {
+  // Pending suppliers must never read as a failure warning.
   if (hasResults) {
-    return "Still checking for more flights…";
+    return "Updating fares…";
   }
   if (tripType === "round_trip") {
     if (elapsedMs < 2000) return "Finding outbound and return options…";
     if (elapsedMs < 6000) return "Checking live airline fares…";
     if (elapsedMs < 12000) return "Still searching — live airline responses can take a few moments.";
-    return "Some airlines are taking longer to respond. We'll show each flight as soon as it becomes available.";
+    return "Updating fares… some airlines are still responding.";
   }
   if (elapsedMs < 2000) return "Searching live flights…";
   if (elapsedMs < 6000) return "Checking available fares…";
   if (elapsedMs < 12000) return "Still searching — live airline responses can take a few moments.";
-  return "Some airlines are taking longer to respond. We'll show each flight as soon as it becomes available.";
+  return "Updating fares… some airlines are still responding.";
 }
 
 function countVisibleResults(payload: FlightResultsDataResponse | null): number {
@@ -86,7 +87,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   const requestSeq = useRef(0);
   const readyRef = useRef(false);
   const lastBootstrappedId = useRef<string | null>(null);
-  const skipNextRefresh = useRef(true);
+  const skipNextFilterRefresh = useRef(true);
+  const lastViewKeyRef = useRef<string | null>(null);
   const searchStartedAt = useRef<number>(Date.now());
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filtersKey = JSON.stringify(filters);
@@ -134,12 +136,12 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         setMessage(payload.message ?? "We could not complete your flight search. Please try again.");
       } else {
         setStatus(nextStatus === "partial" ? "partial" : "ready");
-        // Soft warning when supplier pipeline failed but usable inventory exists.
+        // Settled incomplete suppliers — compact notice, not an alarming yellow failure.
         if (pipeline === "failed" && countVisibleResults(merged) > 0) {
           setMessage(
             payload.message?.trim()
               ? `${payload.message} Showing available flights.`
-              : "Some airlines did not finish responding. Showing available flights.",
+              : "Some additional airline fares are temporarily unavailable.",
           );
         } else {
           setMessage("");
@@ -251,7 +253,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       setMessage("Searching flights…");
       setData(null);
       readyRef.current = false;
-      skipNextRefresh.current = true;
+      skipNextFilterRefresh.current = true;
+      lastViewKeyRef.current = viewKey;
 
       let id = searchId;
       if (!id) {
@@ -298,11 +301,20 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
 
   useEffect(() => {
     if (!resolvedSearchId) return;
-    if (skipNextRefresh.current) {
-      skipNextRefresh.current = false;
+
+    const previousView = lastViewKeyRef.current;
+    const viewChanged = previousView !== null && previousView !== viewKey;
+    lastViewKeyRef.current = viewKey;
+
+    // Never skip a view change — missing this refetch caused Pair to stay on Segmented
+    // cards until a later navigation (e.g. browser Back).
+    if (skipNextFilterRefresh.current && !viewChanged) {
+      skipNextFilterRefresh.current = false;
       return;
     }
-    if (!readyRef.current && status !== "partial" && status !== "ready") return;
+    skipNextFilterRefresh.current = false;
+
+    if (!readyRef.current && status !== "partial" && status !== "ready" && !viewChanged) return;
     // View / filter / sort changes must not leave the prior flow's cards on screen.
     setData(null);
     setStatus("loading");

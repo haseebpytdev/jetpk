@@ -961,11 +961,28 @@ class FlightSearchService
                     'supplier_health_healthy' => $connection->supplierHealthHealthy(),
                 ]);
 
+                $supplierCallSummaries[] = [
+                    'connection_id' => $connection->id,
+                    'provider' => $connection->provider->value,
+                    'search_origin' => $request->origin,
+                    'raw_offer_count' => 0,
+                    'accepted_offer_count' => 0,
+                    'normalized_accepted_count' => 0,
+                    'warning_count' => 0,
+                    'elapsed_ms' => 0,
+                    'final_state' => str_contains(strtolower($skipReason), 'circuit')
+                        ? 'CIRCUIT_OPEN'
+                        : 'DISABLED',
+                    'skip_reason' => $skipReason,
+                ];
+
                 continue;
             }
 
             $adapter = $this->resolver->resolve($connection->provider);
+            $supplierStartedAt = microtime(true);
             $result = $adapter->search($request, $connection);
+            $supplierElapsedMs = (int) round((microtime(true) - $supplierStartedAt) * 1000);
             $warnings = [...$warnings, ...$result->warnings];
             $acceptedForMerge = 0;
             $batchOffers = [];
@@ -976,6 +993,7 @@ class FlightSearchService
                 'connection_id' => $connection->id,
                 'search_origin' => $request->origin,
                 'adapter_offer_count' => count($result->offers),
+                'elapsed_ms' => $supplierElapsedMs,
             ]);
 
             $normalizeRejectHistogram = [];
@@ -1070,6 +1088,10 @@ class FlightSearchService
                 'accepted_offer_count' => $acceptedForMerge,
                 'normalized_accepted_count' => $acceptedForMerge,
                 'warning_count' => count($result->warnings),
+                'elapsed_ms' => $supplierElapsedMs,
+                'final_state' => count($result->offers) > 0
+                    ? ($acceptedForMerge > 0 ? 'SUCCESS' : 'EMPTY')
+                    : (count($result->warnings) > 0 ? 'ERROR' : 'EMPTY'),
             ];
 
             Log::info('flight_search.public_diagnostics', [
@@ -1081,6 +1103,7 @@ class FlightSearchService
                 'raw_offer_count' => count($result->offers),
                 'accepted_offer_count' => $acceptedForMerge,
                 'warning_count' => count($result->warnings),
+                'elapsed_ms' => $supplierElapsedMs,
                 'connection_active' => $connection->isEligibleForSupplierSearch(),
                 'supplier_health_healthy' => $connection->supplierHealthHealthy(),
             ]);

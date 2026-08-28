@@ -42,6 +42,8 @@ export function useRevalidation() {
   const inFlightRef = useRef(false);
   const pendingHandoffRef = useRef<string | null>(null);
   const lastParamsRef = useRef<RevalidationParams | null>(null);
+  const acceptCountRef = useRef(0);
+  const MAX_FARE_CHANGE_ACCEPTS = 2;
 
   const reset = useCallback(() => {
     setState("idle");
@@ -50,6 +52,7 @@ export function useRevalidation() {
     pendingHandoffRef.current = null;
     lastParamsRef.current = null;
     inFlightRef.current = false;
+    acceptCountRef.current = 0;
   }, []);
 
   const classifyFailure = useCallback((status: number, body?: RevalidateOfferResponse): RevalidationState => {
@@ -145,7 +148,25 @@ export function useRevalidation() {
       lastParamsRef.current = params;
 
       try {
+        // Return combos still need a bounded read-only reprice of the selected outbound
+        // offer before checkout handoff when the provider requires it.
         if (params.isReturnCombo && params.comboId && params.outboundKey) {
+          if (providerRequiresRevalidation(params.supplierProvider)) {
+            const result = await runRevalidation(params, false);
+            if (!result.ok) {
+              const failureState = classifyFailure(result.status, result.data);
+              setState(failureState);
+              setMessage(result.message);
+              return;
+            }
+            const change = extractFareChange(result.data);
+            if (change) {
+              pendingHandoffRef.current = result.data.passengers_url ?? null;
+              setFareChange(change);
+              setState("fare_change");
+              return;
+            }
+          }
           markResultsLeftForCheckout(params.searchId);
           await submitReturnComboSelection({
             searchId: params.searchId,
@@ -235,6 +256,13 @@ export function useRevalidation() {
       return;
     }
 
+    if (acceptCountRef.current >= MAX_FARE_CHANGE_ACCEPTS) {
+      setState("error");
+      setMessage("The fare kept changing. Please search again and select a new offer.");
+      return;
+    }
+    acceptCountRef.current += 1;
+
     inFlightRef.current = true;
     setState("loading");
 
@@ -251,10 +279,29 @@ export function useRevalidation() {
 
         const secondChange = extractFareChange(result.data);
         if (secondChange) {
+          if (acceptCountRef.current >= MAX_FARE_CHANGE_ACCEPTS) {
+            setState("error");
+            setMessage("The fare kept changing. Please search again and select a new offer.");
+            return;
+          }
           pendingHandoffRef.current = result.data.passengers_url ?? pendingHandoffRef.current;
           setFareChange(secondChange);
           setState("fare_change");
           setMessage("The fare changed again. Please review the updated price.");
+          return;
+        }
+
+        if (params.isReturnCombo && params.comboId && params.outboundKey) {
+          markResultsLeftForCheckout(params.searchId);
+          await submitReturnComboSelection({
+            searchId: params.searchId,
+            comboId: params.comboId,
+            outboundKey: params.outboundKey,
+            fareOptionKey: params.fareOptionKey,
+            returnFareOptionKey: params.returnFareOptionKey ?? params.fareOptionKey,
+            outboundFareOptionKey: params.outboundFareOptionKey,
+          });
+          setState("success");
           return;
         }
 

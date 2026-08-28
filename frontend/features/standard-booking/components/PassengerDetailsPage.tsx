@@ -39,6 +39,8 @@ import {
 } from "./BookingStateCards";
 import { PassengerCard } from "./PassengerCard";
 import { ContactDetailsSection } from "./ContactDetailsSection";
+import { FareChangeDialog } from "@/features/flight-details/components/FareChangeDialog";
+import { revalidateOffer } from "@/features/flight-results/services/flight-results-api";
 
 type PassengerDetailsPageProps = {
   searchParams: Record<string, string | undefined>;
@@ -59,8 +61,15 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   const [changeFlightBusy, setChangeFlightBusy] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
   const [errorRedirect, setErrorRedirect] = useState<string | null>(null);
+  const [fareChange, setFareChange] = useState<{
+    originalTotal?: number;
+    confirmedTotal?: number;
+    currency?: string;
+  } | null>(null);
+  const [fareChangeBusy, setFareChangeBusy] = useState(false);
   const submitLock = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
+  const autoRevalidateAttempted = useRef(false);
 
   const queryKey = useMemo(() => JSON.stringify(searchParams), [searchParams]);
 
@@ -123,6 +132,97 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       cancelled = true;
     };
   }, [queryKey, loadContext]);
+
+  // Silent automatic reprice when checkout still carries an approximate estimate.
+  useEffect(() => {
+    if (!context || loading || fareChange) return;
+    if (autoRevalidateAttempted.current) return;
+    if (!context.itinerary.price_needs_refresh && !context.itinerary.price_is_approximate) return;
+
+    const searchId = context.selection.search_id?.trim();
+    const offerId = context.selection.offer_id?.trim();
+    if (!searchId || !offerId) return;
+
+    autoRevalidateAttempted.current = true;
+    let cancelled = false;
+
+    void (async () => {
+      const result = await revalidateOffer({
+        searchId,
+        offerId,
+        selectedFareOptionId: context.selection.fare_option_key || undefined,
+        acceptFareChange: false,
+      });
+      if (cancelled) return;
+
+      if (!result.ok) {
+        const apiStatus = (result.data?.status ?? "").toLowerCase();
+        if (result.status === 410 || apiStatus.includes("unavailable") || apiStatus.includes("expired")) {
+          setErrorStatus("offer_expired");
+          setFormError("The selected fare is no longer available. Please choose another fare.");
+        }
+        return;
+      }
+
+      const revalidation = result.data.revalidation ?? {};
+      const priceChanged =
+        result.data.status === "fare_changed" ||
+        result.data.requires_fare_change_acceptance === true ||
+        Boolean(revalidation.price_changed);
+
+      if (priceChanged) {
+        setFareChange({
+          originalTotal:
+            typeof revalidation.original_total === "number" ? revalidation.original_total : undefined,
+          confirmedTotal:
+            typeof revalidation.confirmed_total === "number" ? revalidation.confirmed_total : undefined,
+          currency: typeof revalidation.currency === "string" ? revalidation.currency : "PKR",
+        });
+        return;
+      }
+
+      // Unchanged price — reload context so authoritative totals clear the refresh banner.
+      const refreshed = await loadContext();
+      if (cancelled || !refreshed.ok || !refreshed.data.ok) return;
+      setContext(refreshed.data);
+      setLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [context, fareChange, loadContext, loading]);
+
+  const acceptPassengerFareChange = useCallback(async () => {
+    if (!context || fareChangeBusy) return;
+    const searchId = context.selection.search_id?.trim();
+    const offerId = context.selection.offer_id?.trim();
+    if (!searchId || !offerId) return;
+
+    setFareChangeBusy(true);
+    try {
+      const result = await revalidateOffer({
+        searchId,
+        offerId,
+        selectedFareOptionId: context.selection.fare_option_key || undefined,
+        acceptFareChange: true,
+      });
+      if (!result.ok) {
+        setFormError(result.message || "Unable to accept the updated fare. Please search again.");
+        setFareChange(null);
+        return;
+      }
+      setFareChange(null);
+      const refreshed = await loadContext();
+      if (refreshed.ok && refreshed.data.ok) {
+        setContext(refreshed.data);
+        setPassengers(buildPassengersFromContext(refreshed.data));
+        setContact(buildContactFromContext(refreshed.data));
+      }
+    } finally {
+      setFareChangeBusy(false);
+    }
+  }, [context, fareChangeBusy, loadContext]);
 
   const updatePassenger = useCallback((index: number, field: keyof PassengerFormValues, value: string) => {
     setPassengers((rows) => rows.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
@@ -344,6 +444,18 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
   return (
     <BookingPageShell testId="passenger-details-page">
+      <FareChangeDialog
+        open={fareChange !== null}
+        originalTotal={fareChange?.originalTotal}
+        confirmedTotal={fareChange?.confirmedTotal}
+        currency={fareChange?.currency}
+        loading={fareChangeBusy}
+        onAccept={() => void acceptPassengerFareChange()}
+        onCancel={() => {
+          setFareChange(null);
+          setFormError("The selected fare is no longer available at the previous price. Please choose another fare.");
+        }}
+      />
       <Dialog
         open={changeFlightOpen}
         onClose={() => {

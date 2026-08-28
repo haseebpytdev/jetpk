@@ -18,7 +18,8 @@ export function ReturnViewSelector({ open, onSelect }: ReturnViewSelectorProps) 
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onSelect("segmented");
+        // Do not force Segmented — keep current Pair default / close only via selection.
+        return;
       }
     };
     document.addEventListener("keydown", onKey);

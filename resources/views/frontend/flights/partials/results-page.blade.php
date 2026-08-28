@@ -75,8 +75,8 @@
                         <div class="form-group jp-filter-field">
                             <label class="control-label jp-filter-label">Sort</label>
                             <select class="form-control jp-filter-control jp-filter-select" data-filter-sort data-filter-key="sort" id="ota-filter-sort">
+                                <option value="cheapest" selected>Cheapest</option>
                                 <option value="recommended">Recommended</option>
-                                <option value="cheapest">Cheapest</option>
                                 <option value="fastest">Fastest</option>
                                 <option value="earliest_departure">Earliest departure</option>
                                 <option value="latest_departure">Latest departure</option>
@@ -388,7 +388,7 @@
         fare_family: '',
         bookable_only: '',
         operating_airline: '',
-        sort: 'recommended'
+        sort: 'cheapest'
     };
     var filterAirline = document.querySelector('[data-filter-airline]');
     var filterStops = document.querySelector('[data-filter-stops]');
@@ -3153,7 +3153,7 @@
             'search_id=' + encodeURIComponent(searchId),
             'page=' + pageNo,
             'per_page=12',
-            'sort=' + encodeURIComponent(currentFilters.sort || 'recommended')
+            'sort=' + encodeURIComponent(currentFilters.sort || 'cheapest')
         ];
         if (currentFilters.airline) params.push('airline=' + encodeURIComponent(currentFilters.airline));
         if (currentFilters.stops) params.push('stops=' + encodeURIComponent(currentFilters.stops));
@@ -3191,10 +3191,10 @@
     }
 
     function resetFiltersForNewSearch() {
-        currentFilters = {airline: '', stops: '', refundable: '', cabin: '', baggage: '', departure_window: '', arrival_window: '', duration_bucket: '', layover_airport: '', fare_family: '', bookable_only: '', operating_airline: '', sort: 'recommended'};
+        currentFilters = {airline: '', stops: '', refundable: '', cabin: '', baggage: '', departure_window: '', arrival_window: '', duration_bucket: '', layover_airport: '', fare_family: '', bookable_only: '', operating_airline: '', sort: 'cheapest'};
         Array.prototype.forEach.call(document.querySelectorAll('[data-filter-key]'), function (node) {
             if (node.type === 'checkbox') node.checked = false;
-            else node.value = (node.getAttribute('data-filter-key') === 'sort' ? 'recommended' : '');
+            else node.value = (node.getAttribute('data-filter-key') === 'sort' ? 'cheapest' : '');
         });
     }
 
@@ -3849,10 +3849,10 @@
     });
     filterResetButtons.forEach(function (filterReset) {
         filterReset.addEventListener('click', function () {
-            currentFilters = {airline: '', stops: '', refundable: '', cabin: '', baggage: '', departure_window: '', arrival_window: '', duration_bucket: '', layover_airport: '', fare_family: '', bookable_only: '', operating_airline: '', sort: 'recommended'};
+            currentFilters = {airline: '', stops: '', refundable: '', cabin: '', baggage: '', departure_window: '', arrival_window: '', duration_bucket: '', layover_airport: '', fare_family: '', bookable_only: '', operating_airline: '', sort: 'cheapest'};
             Array.prototype.forEach.call(document.querySelectorAll('[data-filter-key]'), function (node) {
                 if (node.type === 'checkbox') node.checked = false;
-                else node.value = (node.getAttribute('data-filter-key') === 'sort' ? 'recommended' : '');
+                else node.value = (node.getAttribute('data-filter-key') === 'sort' ? 'cheapest' : '');
             });
             applyFilters();
         });

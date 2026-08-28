@@ -38,7 +38,12 @@ export function FlightResultsPage() {
   const tripType = params.get("trip_type");
   const viewParam = params.get("view");
   const isReturn = tripType === "round_trip";
-  const needsViewChoice = isReturn && viewParam !== "pair" && viewParam !== "segmented";
+  // Resolve return mode BEFORE results fetch — missing view defaults to Pair (not Segmented).
+  const resolvedView: "pair" | "segmented" | null = !isReturn
+    ? null
+    : viewParam === "segmented"
+      ? "segmented"
+      : "pair";
   const [sort, setSort] = useState<UiSortKey>(() => parseUiSort(params.get("sort")));
   const [filters, setFilters] = useState(() => parseFiltersFromSearchParams(params));
   const [editOpen, setEditOpen] = useState(false);
@@ -48,15 +53,32 @@ export function FlightResultsPage() {
   const detailsTriggerRef = useRef<HTMLElement | null>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const freshSearchInFlight = useRef(false);
+  const defaultViewSynced = useRef(false);
 
   const summary = useMemo(() => buildSearchSummaryFromParams(params), [params]);
+
+  // Persist authoritative defaults into the URL so hard refresh / Back keep the same mode.
+  useEffect(() => {
+    if (defaultViewSynced.current) return;
+    const needsSort = !params.get("sort");
+    const needsView = isReturn && viewParam !== "pair" && viewParam !== "segmented";
+    if (!needsSort && !needsView) {
+      defaultViewSynced.current = true;
+      return;
+    }
+    defaultViewSynced.current = true;
+    const next = new URLSearchParams(params);
+    if (needsSort) next.set("sort", "cheapest");
+    if (needsView) next.set("view", "pair");
+    router.replace(`/flights/results?${next.toString()}`, { scroll: false });
+  }, [isReturn, params, router, viewParam]);
 
   const results = useFlightResults({
     searchId,
     searchParams: params,
     sort,
     filters,
-    view: viewParam,
+    view: resolvedView,
   });
 
   const startFreshSearchFromCheckoutReturn = useCallback(() => {
@@ -90,7 +112,8 @@ export function FlightResultsPage() {
   const syncUrl = useCallback(
     (nextFilters: typeof filters, nextSort: UiSortKey, extra?: Record<string, string | null>) => {
       const next = new URLSearchParams(params);
-      next.set("sort", nextSort);
+      // Persist Laravel-authoritative sort keys in the URL.
+      next.set("sort", nextSort === "lowest_price" ? "cheapest" : nextSort);
       [
         "airline",
         "stops",
@@ -267,14 +290,14 @@ export function FlightResultsPage() {
             <span className="text-jp-text-muted">View:</span>
             <button
               type="button"
-              className={`rounded-jp-md px-2 py-1 ${viewParam === "pair" ? "bg-jp-primary text-white" : "border border-jp-border"}`}
+              className={`rounded-jp-md px-2 py-1 ${resolvedView === "pair" ? "bg-jp-primary text-white" : "border border-jp-border"}`}
               onClick={() => setReturnView("pair")}
             >
               Pair
             </button>
             <button
               type="button"
-              className={`rounded-jp-md px-2 py-1 ${viewParam === "segmented" ? "bg-jp-primary text-white" : "border border-jp-border"}`}
+              className={`rounded-jp-md px-2 py-1 ${resolvedView === "segmented" ? "bg-jp-primary text-white" : "border border-jp-border"}`}
               onClick={() => setReturnView("segmented")}
             >
               Segmented
@@ -282,9 +305,11 @@ export function FlightResultsPage() {
           </div>
         ) : null}
 
-        {(results.status === "ready" || results.status === "partial") && results.message ? (
+        {(results.status === "ready" || results.status === "partial") &&
+        results.message &&
+        !results.searchStillActive ? (
           <div
-            className="rounded-jp-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+            className="rounded-jp-md border border-jp-border bg-jp-surface-muted px-3 py-2 text-sm text-jp-text-muted"
             data-testid="results-soft-warning"
             role="status"
           >
@@ -456,7 +481,7 @@ export function FlightResultsPage() {
           triggerRef={filterButtonRef}
         />
 
-        <ReturnViewSelector open={needsViewChoice} onSelect={setReturnView} />
+        <ReturnViewSelector open={false} onSelect={setReturnView} />
 
         <FlightDetailsDrawer
           open={detailsContext !== null}

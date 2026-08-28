@@ -59,9 +59,12 @@ export function buildFlightSearchQueryParams(input: FlightSearchPayloadInput): U
   params.set("from", input.origin);
   params.set("to", input.destination);
   params.set("depart", input.departureDate);
+  // Authoritative product defaults — resolve before first results paint.
+  params.set("sort", "cheapest");
 
   if (tripType === "round_trip" && input.returnDate) {
     params.set("return_date", input.returnDate);
+    params.set("view", "pair");
   }
 
   return params;

@@ -614,7 +614,7 @@ class FlightController extends Controller
             $perPage = 12;
         }
         $perPage = min($perPage, 25);
-        $sort = (string) $request->query('sort', 'recommended');
+        $sort = (string) $request->query('sort', 'cheapest');
         // Prefer cabin_filter — search criteria also uses query key `cabin`.
         // Treating search cabin as a facet empties return-split results when
         // offer cabin codes do not exactly match the criteria string.
@@ -657,29 +657,30 @@ class FlightController extends Controller
         $offers = $this->sortOffers($offers, $sort, $critForFilters);
 
         if ($this->searchStore->returnSplitFlowActive($searchId)) {
-            $view = trim((string) $request->query('view', ''));
-            if ($view === 'pair') {
-                return $this->resultsDataReturnPair(
+            // Default missing/unknown view to Pair so first paint is not Segmented flash.
+            $view = strtolower(trim((string) $request->query('view', '')));
+            if ($view === 'segmented' || $view === 'split') {
+                return $this->resultsDataReturnSplitOutbound(
                     $request,
                     $payload,
                     $searchId,
                     $offers,
+                    $filters,
                     $sort,
                     $page,
                     $perPage,
+                    $debugAllowed,
                 );
             }
 
-            return $this->resultsDataReturnSplitOutbound(
+            return $this->resultsDataReturnPair(
                 $request,
                 $payload,
                 $searchId,
                 $offers,
-                $filters,
                 $sort,
                 $page,
                 $perPage,
-                $debugAllowed,
             );
         }
 
@@ -1105,6 +1106,23 @@ class FlightController extends Controller
             $cityMap,
             $airlineNameMap,
         );
+
+        $sortKey = strtolower(trim($sort));
+        if (in_array($sortKey, ['cheapest', 'recommended', 'price_asc', ''], true)) {
+            usort($paired, static function (array $a, array $b): int {
+                $priceA = (float) ($a['from_total_amount'] ?? $a['total_amount'] ?? $a['final_customer_price'] ?? PHP_FLOAT_MAX);
+                $priceB = (float) ($b['from_total_amount'] ?? $b['total_amount'] ?? $b['final_customer_price'] ?? PHP_FLOAT_MAX);
+
+                return $priceA <=> $priceB;
+            });
+        } elseif ($sortKey === 'price_desc') {
+            usort($paired, static function (array $a, array $b): int {
+                $priceA = (float) ($a['from_total_amount'] ?? $a['total_amount'] ?? $a['final_customer_price'] ?? 0);
+                $priceB = (float) ($b['from_total_amount'] ?? $b['total_amount'] ?? $b['final_customer_price'] ?? 0);
+
+                return $priceB <=> $priceA;
+            });
+        }
 
         $total = count($paired);
         $offset = ($page - 1) * $perPage;
