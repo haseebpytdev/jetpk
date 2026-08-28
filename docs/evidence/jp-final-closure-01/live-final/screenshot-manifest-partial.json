@@ -1,0 +1,58 @@
+[
+  {
+    "filename": "01-home-desktop.png",
+    "timestamp": "2026-08-28T21:46:58.914Z",
+    "route": "https://jetpakistan.pk/",
+    "role": "anonymous",
+    "viewport": "1440x900",
+    "engineering_sha": "fa6dfdc403388232956a1a2062089a65d296b2b0",
+    "runtime_sha": "fa6dfdc403388232956a1a2062089a65d296b2b0",
+    "build_id": "Q95djxDUc9lkeFU49cbLB",
+    "gate": "LIVE_PUBLIC_SMOKE",
+    "result": "PASS",
+    "http_status": 200,
+    "notes": "Sanitized public capture; no PII"
+  },
+  {
+    "filename": "02-home-mobile.png",
+    "timestamp": "2026-08-28T21:48:28.320Z",
+    "route": "https://jetpakistan.pk/",
+    "role": "anonymous",
+    "viewport": "390x844",
+    "engineering_sha": "fa6dfdc403388232956a1a2062089a65d296b2b0",
+    "runtime_sha": "fa6dfdc403388232956a1a2062089a65d296b2b0",
+    "build_id": "Q95djxDUc9lkeFU49cbLB",
+    "gate": "LIVE_PUBLIC_SMOKE",
+    "result": "PASS",
+    "http_status": 200,
+    "notes": "Sanitized public capture; no PII"
+  },
+  {
+    "filename": "03-groups-hero-desktop.png",
+    "timestamp": "2026-08-28T21:49:58.564Z",
+    "route": "https://jetpakistan.pk/groups",
+    "role": "anonymous",
+    "viewport": "1440x900",
+    "engineering_sha": "fa6dfdc403388232956a1a2062089a65d296b2b0",
+    "runtime_sha": "fa6dfdc403388232956a1a2062089a65d296b2b0",
+    "build_id": "Q95djxDUc9lkeFU49cbLB",
+    "gate": "LIVE_PUBLIC_SMOKE",
+    "result": "PASS",
+    "http_status": 200,
+    "notes": "Sanitized public capture; no PII"
+  },
+  {
+    "filename": "04-groups-hero-mobile.png",
+    "timestamp": "2026-08-28T21:51:28.169Z",
+    "route": "https://jetpakistan.pk/groups",
+    "role": "anonymous",
+    "viewport": "390x844",
+    "engineering_sha": "fa6dfdc403388232956a1a2062089a65d296b2b0",
+    "runtime_sha": "fa6dfdc403388232956a1a2062089a65d296b2b0",
+    "build_id": "Q95djxDUc9lkeFU49cbLB",
+    "gate": "LIVE_PUBLIC_SMOKE",
+    "result": "PASS",
+    "http_status": 200,
+    "notes": "Sanitized public capture; no PII"
+  }
+]
