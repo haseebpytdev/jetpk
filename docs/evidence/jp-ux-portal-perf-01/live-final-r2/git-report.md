@@ -10,7 +10,7 @@
 | FINAL_ENGINEERING_SHA | `7c923e3294910fc122a4776bb13d9146c5e36559` |
 | DEPLOYED_RUNTIME_SHA | `7c923e3294910fc122a4776bb13d9146c5e36559` |
 | EVIDENCE_COMMIT_SHA | *(this docs commit — set after push)* |
-| FINAL_BRANCH_HEAD_SHA | *(branch tip after evidence commit)* |
+| FINAL_BRANCH_HEAD_SHA | 571a8a25de6e91e7c9ef49935dc5e0749002164e |
 | PUBLIC_BUILD_ID | `aq1S4pcjSXLbIEboahxkQ` |
 
 ## Ancestry
