@@ -1,0 +1,27 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "captured_at": "2026-08-28T09:00:56Z",
+  "deployed_runtime_sha": "9979330c35141bc85cd5db7941f4a9c274e89a52",
+  "search_id": "1aaf2db1-7149-4c36-8bd1-0c0791d39770",
+  "offer_id_hash_prefix": "633840ee",
+  "shell_ms_to_traveler_heading": 3678,
+  "revalidate_offer": {
+    "url": "https://jetpakistan.pk/laravel/flights/results/revalidate-offer",
+    "http_status": 200,
+    "success": true,
+    "revalidation_status": "valid",
+    "provider": "sabre",
+    "price_changed": false,
+    "requires_fare_change_acceptance": false
+  },
+  "change_flight": "PASS",
+  "bfcache_history": "PASS",
+  "synthetic_passenger_posted_to_supplier": false,
+  "screenshots": [
+    "12-passenger-auto-reprice-clean.png",
+    "13-passenger-shell-immediate.png",
+    "14-change-flight.png",
+    "17-bfcache-back.png",
+    "17b-bfcache-forward.png"
+  ]
+}

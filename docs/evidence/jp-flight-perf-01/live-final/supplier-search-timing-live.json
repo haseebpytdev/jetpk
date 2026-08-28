@@ -1,0 +1,53 @@
+﻿{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "captured_at": "2026-08-28T08:57:20Z",
+  "deployed_runtime_sha": "9979330c35141bc85cd5db7941f4a9c274e89a52",
+  "public_build_id": "e4VIZqNpoHKKio-vCpzSp",
+  "search_id": "1732f369-7ccb-4d47-9a8b-db17c1786cbb",
+  "depart": "2026-09-17",
+  "route": "LHE-DXB",
+  "trip_type": "one_way",
+  "status": "ready",
+  "total_offers": 28,
+  "warnings": [],
+  "supplier_call_summaries": [
+    {
+      "provider": "sabre",
+      "elapsed_ms": 2472,
+      "raw_offer_count": 32,
+      "accepted_offer_count": 32,
+      "warning_count": 0,
+      "final_state": "SUCCESS",
+      "skip_reason": null
+    },
+    {
+      "provider": "pia_ndc",
+      "elapsed_ms": 364,
+      "raw_offer_count": 0,
+      "accepted_offer_count": 0,
+      "warning_count": 1,
+      "final_state": "ERROR",
+      "skip_reason": null
+    },
+    {
+      "provider": "smtp",
+      "elapsed_ms": 0,
+      "raw_offer_count": 0,
+      "accepted_offer_count": 0,
+      "warning_count": 0,
+      "final_state": "DISABLED",
+      "skip_reason": "non_flight_provider"
+    },
+    {
+      "provider": "al_haider",
+      "elapsed_ms": 0,
+      "raw_offer_count": 0,
+      "accepted_offer_count": 0,
+      "warning_count": 0,
+      "final_state": "DISABLED",
+      "skip_reason": "non_flight_provider"
+    }
+  ],
+  "incomplete_supplier_root_cause": "PROVEN",
+  "smtp_abort_absent": true
+}

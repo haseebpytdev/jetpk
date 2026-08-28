@@ -1,0 +1,90 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "captured_at": "2026-08-28T06:20:00Z",
+  "rule": "LIVE_SUPPLIER_SYNTHETIC_PASSENGER_DATA=0",
+  "live_synthetic_allowed": false,
+  "test_synthetic_data_isolated_from_live": true,
+  "global_supplier_synthetic_guard": "PASS",
+  "suppliers": [
+    {
+      "supplier": "alhaider",
+      "mutation": "POST /api/create/booking",
+      "required_fields": ["contact_email", "contact_phone", "first_name", "last_name", "title", "passport_no", "dob", "doe", "seat_parity"],
+      "fallback_identity_present": false,
+      "fixed": ["adult_title_no_longer_defaults_to_MR"],
+      "tests": ["AlHaiderGroupBookingPayloadBuilderTest", "GlobalSupplierSyntheticPassengerGuardTest"],
+      "live_synthetic_allowed": false
+    },
+    {
+      "supplier": "iati",
+      "mutation": "book / option / ticket passenger payload",
+      "required_fields": ["given_name", "surname", "type", "dob", "passport_number", "passport_expiry", "nationality", "gender", "contact_email", "phone_country_code"],
+      "fallback_identity_present": false,
+      "fixed": ["no_PK_nationality_default", "no_MALE_gender_default", "no_92_or_000_phone_defaults"],
+      "tests": ["IatiPassengerNormalizerTest", "GlobalSupplierSyntheticPassengerGuardTest"],
+      "live_synthetic_allowed": false
+    },
+    {
+      "supplier": "sabre",
+      "mutation": "Passenger Records / createBooking",
+      "required_fields": ["given", "surname", "gender", "dob", "passport_when_required"],
+      "fallback_identity_present": false,
+      "fixed": [],
+      "tests": ["GlobalSupplierSyntheticPassengerGuardTest"],
+      "live_synthetic_allowed": false,
+      "notes": "No Guest/dummy identity; nationality/issuing-country copy remains non-invented"
+    },
+    {
+      "supplier": "pia_ndc",
+      "mutation": "order_create",
+      "required_fields": ["gender_required"],
+      "fallback_identity_present": false,
+      "fixed": ["gender_no_longer_defaults_to_M"],
+      "tests": ["GlobalSupplierSyntheticPassengerGuardTest"],
+      "live_synthetic_allowed": false
+    },
+    {
+      "supplier": "airblue",
+      "mutation": "order_create / OTA air book",
+      "required_fields": ["gender_required"],
+      "fallback_identity_present": false,
+      "fixed": ["gender_no_longer_defaults_to_M"],
+      "tests": ["GlobalSupplierSyntheticPassengerGuardTest"],
+      "live_synthetic_allowed": false
+    },
+    {
+      "supplier": "one_api",
+      "mutation": "SOAP book",
+      "required_fields": [],
+      "fallback_identity_present": false,
+      "fixed": [],
+      "tests": ["GlobalSupplierSyntheticPassengerGuardTest"],
+      "live_synthetic_allowed": false,
+      "notes": "No passenger identity builder; live book must not invent pax"
+    },
+    {
+      "supplier": "duffel",
+      "mutation": "orders create",
+      "required_fields": [],
+      "fallback_identity_present": false,
+      "fixed": [],
+      "tests": ["GlobalSupplierSyntheticPassengerGuardTest"],
+      "live_synthetic_allowed": false
+    }
+  ],
+  "group_payment_race_model": {
+    "abhipay_auth_capture_supported": false,
+    "abhipay_operation": "PURCHASE",
+    "group_checkout_uses_abhipay": false,
+    "group_payment_path": "manual_bank_transfer_office_cash",
+    "inventory_guarantee_during_manual_payment": false,
+    "group_commercial_supplier_ready": false,
+    "rationale": "AbhiPay v3 createPayment sends operation=PURCHASE only; groups do not use online capture. Pre-payment GET cannot lock Al-Haider inventory against other agencies."
+  },
+  "supplier_60175": {
+    "status": "ACTIVE_QA_RESIDUE",
+    "cancel_method": "owner_manual_portal_or_support_only",
+    "blocks_flight_deploy": false,
+    "blocks_group_commercial_activation": true
+  }
+}

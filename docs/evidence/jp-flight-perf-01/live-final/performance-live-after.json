@@ -1,0 +1,46 @@
+﻿{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "captured_at": "2026-08-28T07:49:24Z",
+  "host": "https://jetpakistan.pk",
+  "deployed_runtime_sha": "bc83e503eb3b0fc1c7d0c4a5cfa4fac10c1fb975",
+  "public_build_id": "5GNhekE7oXu9XlFB88Mmh",
+  "methodology": "cold Invoke-WebRequest TTFB proxy; 5 samples/route; not browser LCP",
+  "note": "Captured after bc83e503 activate; current live engineering authority is 9979330c (public build e4VIZqNpoHKKio-vCpzSp). Shell TTFB order-of-magnitude unchanged across rebuild.",
+  "routes": [
+    {
+      "route": "/",
+      "samples": 5,
+      "p50_ms": 1132,
+      "p95_ms": 1218,
+      "values_ms": [1066, 1127, 1132, 1218, 1739]
+    },
+    {
+      "route": "/groups",
+      "samples": 5,
+      "p50_ms": 495,
+      "p95_ms": 512,
+      "values_ms": [459, 491, 495, 512, 534]
+    },
+    {
+      "route": "/groups/search",
+      "samples": 5,
+      "p50_ms": 762,
+      "p95_ms": 766,
+      "values_ms": [724, 747, 762, 766, 795]
+    },
+    {
+      "route": "/login",
+      "samples": 5,
+      "p50_ms": 666,
+      "p95_ms": 723,
+      "values_ms": [604, 649, 666, 723, 830]
+    },
+    {
+      "route": "/groups/package/ALH-3348",
+      "samples": 5,
+      "p50_ms": 1996,
+      "p95_ms": 2076,
+      "values_ms": [1347, 1934, 1996, 2076, 7183]
+    }
+  ]
+}

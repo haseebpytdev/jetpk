@@ -1,16 +1,13 @@
-{
-  "phase": "JP-FLIGHT-PERF-01-R2",
-  "captured_at": "2026-08-28T05:18:31Z",
-  "supplier_reservation_id": "60175",
-  "group_id": "3348",
+﻿{
+  "captured_at": "2026-08-28T07:15:00Z",
+  "group_id": 3348,
   "public_id": "ALH-3348",
-  "owner_manual_cancel_confirmed": "NO",
-  "public_package_available_seats": 4,
-  "expected_seats_after_cleanup": 5,
-  "SUPPLIER_MANUAL_CANCEL_CONFIRMED": "NO",
-  "SUPPLIER_SEAT_RESTORE_PROVEN": "FAIL",
-  "ACTIVE_QA_SUPPLIER_RESERVATIONS": "UNKNOWN_LIKELY_1",
-  "gate": "DO_NOT_DEPLOY",
-  "evidence_source": "https://jetpakistan.pk/groups/package/ALH-3348?format=json",
-  "note": "Public seats=4. Owner confirmation + supplier GET seats still required. No Al-Haider create/cancel/token calls performed this loop."
+  "available_seats": 5,
+  "supplier_60175_status": "SEATS_RESTORED_PUBLIC_JSON",
+  "supplier_60175_cancel_method": "owner_manual_portal_or_support",
+  "supplier_manual_cancel_confirmed_by_owner": "NOT_EXPLICITLY_STATED",
+  "seat_restore_proven_via": "GET /groups/package/ALH-3348?format=json available_seats=5",
+  "blocks_flight_deploy": false,
+  "blocks_group_commercial_activation": true,
+  "note": "Public seats restored 4->5. Flight deploy not blocked by 60175."
 }

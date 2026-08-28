@@ -1,0 +1,21 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "deployed_at": "2026-08-28T08:50:00Z",
+  "authorized_sha": "9979330c35141bc85cd5db7941f4a9c274e89a52",
+  "prior_deployed_sha": "432eb9ca881b336a9f885038b78e4606bb14ab7d",
+  "previous_runtime_baseline": "460cdae0441d0e07c563e636280c0e552481ac92",
+  "fix_in_this_sha": "skip non-flight SupplierConnection (smtp/al_haider) in search fan-out; expose supplier_call_summaries",
+  "old_public_build_id": "z7WJUUT5aoPWYxFC3nLXY",
+  "new_public_build_id": "e4VIZqNpoHKKio-vCpzSp",
+  "live_source_drift": 0,
+  "ols_hash": "PASS",
+  "migrations": 0,
+  "manifest_count": 36,
+  "backup_id": "jp-flight-perf-01-20260828T084139Z",
+  "alhaider_booking_enabled": false,
+  "alhaider_cancel_enabled": "UNSET_defaults_false",
+  "commercial_side_effects": 0,
+  "sabre_pnr_created": false,
+  "payment_executed": false,
+  "activate": "PASS"
+}
