@@ -63,6 +63,45 @@ class CustomerPortalJsonContractTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_customer_draft_booking_detail_resolves_by_id_without_reference(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::factory()->create([
+            'account_type' => AccountType::Customer,
+            'current_agency_id' => $agency->id,
+            'email_verified_at' => now(),
+        ]);
+        $agency->users()->attach($customer->id, ['role' => 'customer']);
+
+        $draft = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'customer_id' => $customer->id,
+            'status' => BookingStatus::Draft,
+            'payment_status' => 'unpaid',
+            'booking_reference' => null,
+            'pnr' => null,
+            'route' => 'LHE-DXB',
+            'travel_date' => now()->addDays(12)->toDateString(),
+        ]);
+
+        $list = $this->actingAs($customer)
+            ->getJson(route('customer.bookings.index', ['format' => 'json']))
+            ->assertOk()
+            ->json();
+
+        $item = collect($list['bookings'] ?? [])->firstWhere('route', 'LHE-DXB');
+        $this->assertNotNull($item);
+        $this->assertSame('draft', $item['booking_status']['code'] ?? null);
+        $this->assertSame('/customer/bookings/'.$draft->id, $item['detail_url'] ?? null);
+
+        $this->actingAs($customer)
+            ->getJson(route('customer.bookings.show', ['booking' => $draft->id]))
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('booking.id', $draft->id);
+    }
+
     public function test_customer_support_json_create_and_detail(): void
     {
         [$customer, $booking] = $this->customerWithBooking();

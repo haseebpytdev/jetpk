@@ -101,7 +101,7 @@ class CustomerPortalDashboardPresenter
             'ticketing_status' => CustomerPortalStatusPresenter::ticketingStatus($booking),
             'total' => CustomerPortalStatusPresenter::customerPayable($booking),
             'currency' => (string) ($booking->currency ?? 'PKR'),
-            'detail_url' => '/customer/bookings/'.$booking->booking_reference,
+            'detail_url' => CustomerPortalBookingUrl::detailPath($booking),
         ];
     }
 
@@ -131,7 +131,7 @@ class CustomerPortalDashboardPresenter
                 'code' => 'complete_pending_payment',
                 'label' => 'Complete pending payment',
                 'available' => true,
-                'url' => '/customer/bookings/'.$firstPending->booking_reference,
+                'url' => CustomerPortalBookingUrl::detailPath($firstPending),
             ];
         }
 
@@ -140,7 +140,7 @@ class CustomerPortalDashboardPresenter
                 'code' => 'view_upcoming_trip',
                 'label' => 'View upcoming trip',
                 'available' => true,
-                'url' => '/customer/bookings/'.$upcoming->booking_reference,
+                'url' => CustomerPortalBookingUrl::detailPath($upcoming),
             ];
         }
 

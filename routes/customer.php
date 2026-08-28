@@ -15,7 +15,7 @@ Route::prefix('customer')->name('customer.')->group(function (): void {
     Route::middleware('platform.module:customer_portal')->group(function (): void {
         Route::get('/', [CustomerBookingController::class, 'dashboard'])->name('dashboard');
         Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
-        Route::get('/bookings/{booking:booking_reference}', [CustomerBookingController::class, 'show'])->name('bookings.show');
+        Route::get('/bookings/{booking}', [CustomerBookingController::class, 'show'])->name('bookings.show');
         Route::get('/payments', [CustomerPaymentController::class, 'index'])->name('payments.index');
         Route::get('/invoices', [CustomerInvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{booking:booking_reference}', [CustomerInvoiceController::class, 'show'])->name('invoices.show');

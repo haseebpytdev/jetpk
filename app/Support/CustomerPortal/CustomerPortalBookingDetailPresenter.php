@@ -91,7 +91,8 @@ class CustomerPortalBookingDetailPresenter
         $payload['source'] = 'customer_portal';
         $payload['booking'] = [
             'id' => $booking->id,
-            'booking_reference' => $booking->booking_reference,
+            'booking_reference' => $booking->display_reference,
+            'status' => (string) ($booking->status?->value ?? $booking->status ?? ''),
         ];
         $payload['actions'] = $this->presentCustomerActions($booking);
         $payload['capabilities'] = $this->presentCapabilities($booking);
@@ -107,26 +108,42 @@ class CustomerPortalBookingDetailPresenter
      */
     private function presentCustomerActions(Booking $booking): array
     {
-        $reference = $booking->booking_reference;
-        $actions = [
-            [
-                'code' => 'view_invoice',
-                'label' => 'View invoice',
+        $detail = CustomerPortalBookingUrl::detailPath($booking);
+        $reference = trim((string) ($booking->booking_reference ?? ''));
+        $actions = [];
+
+        if ($booking->status === BookingStatus::Draft) {
+            $actions[] = [
+                'code' => 'resume_checkout',
+                'label' => 'Resume checkout',
                 'available' => true,
-                'url' => '/customer/invoices/'.$reference,
-            ],
-            [
-                'code' => 'contact_support',
-                'label' => 'Contact support',
+                'url' => '/booking/passengers',
+            ];
+            $actions[] = [
+                'code' => 'view_draft',
+                'label' => 'View draft',
                 'available' => true,
-                'url' => '/customer/support',
-            ],
-            [
-                'code' => 'back_to_bookings',
-                'label' => 'Back to bookings',
-                'available' => true,
-                'url' => '/customer/bookings',
-            ],
+                'url' => $detail,
+            ];
+        }
+
+        $actions[] = [
+            'code' => 'view_invoice',
+            'label' => 'View invoice',
+            'available' => $reference !== '',
+            'url' => $reference !== '' ? '/customer/invoices/'.$reference : null,
+        ];
+        $actions[] = [
+            'code' => 'contact_support',
+            'label' => 'Contact support',
+            'available' => true,
+            'url' => '/customer/support',
+        ];
+        $actions[] = [
+            'code' => 'back_to_bookings',
+            'label' => 'Back to bookings',
+            'available' => true,
+            'url' => '/customer/bookings',
         ];
 
         $invoiceDoc = $booking->documents

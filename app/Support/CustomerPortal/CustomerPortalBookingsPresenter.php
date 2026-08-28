@@ -56,7 +56,7 @@ class CustomerPortalBookingsPresenter
             'ticketing_status' => CustomerPortalStatusPresenter::ticketingStatus($booking),
             'pnr' => $hasPnr ? strtoupper((string) $booking->pnr) : null,
             'booking_type' => 'standard',
-            'detail_url' => '/customer/bookings/'.$booking->booking_reference,
+            'detail_url' => CustomerPortalBookingUrl::detailPath($booking),
             'next_action' => $this->presentNextAction($booking),
         ];
     }
@@ -67,18 +67,19 @@ class CustomerPortalBookingsPresenter
     private function presentNextAction(Booking $booking): ?array
     {
         $paymentStatus = (string) ($booking->payment_status ?? 'unpaid');
+        $detail = CustomerPortalBookingUrl::detailPath($booking);
         if (in_array($paymentStatus, ['unpaid', 'partial'], true) || $booking->status === BookingStatus::PaymentPending) {
             return [
                 'code' => 'complete_payment',
                 'label' => 'Complete payment',
-                'url' => '/customer/bookings/'.$booking->booking_reference,
+                'url' => $detail,
             ];
         }
 
         return [
             'code' => 'view_details',
             'label' => 'View details',
-            'url' => '/customer/bookings/'.$booking->booking_reference,
+            'url' => $detail,
         ];
     }
 
