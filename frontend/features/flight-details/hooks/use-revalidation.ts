@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   absoluteLaravelHandoffUrl,
   buildCheckoutHandoffUrl,
@@ -43,6 +44,7 @@ function paramsCacheKey(params: RevalidationParams): string {
 }
 
 export function useRevalidation() {
+  const router = useRouter();
   const [state, setState] = useState<RevalidationState>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [fareChange, setFareChange] = useState<{
