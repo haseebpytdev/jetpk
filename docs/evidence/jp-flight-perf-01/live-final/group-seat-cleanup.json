@@ -1,0 +1,16 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "captured_at": "2026-08-28T05:18:31Z",
+  "supplier_reservation_id": "60175",
+  "group_id": "3348",
+  "public_id": "ALH-3348",
+  "owner_manual_cancel_confirmed": "NO",
+  "public_package_available_seats": 4,
+  "expected_seats_after_cleanup": 5,
+  "SUPPLIER_MANUAL_CANCEL_CONFIRMED": "NO",
+  "SUPPLIER_SEAT_RESTORE_PROVEN": "FAIL",
+  "ACTIVE_QA_SUPPLIER_RESERVATIONS": "UNKNOWN_LIKELY_1",
+  "gate": "DO_NOT_DEPLOY",
+  "evidence_source": "https://jetpakistan.pk/groups/package/ALH-3348?format=json",
+  "note": "Public seats=4. Owner confirmation + supplier GET seats still required. No Al-Haider create/cancel/token calls performed this loop."
+}

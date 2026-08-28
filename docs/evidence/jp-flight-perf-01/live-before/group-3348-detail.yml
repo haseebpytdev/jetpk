@@ -1,0 +1,86 @@
+- generic [active] [ref=f58e1]:
+  - banner [ref=f58e2]:
+    - generic [ref=f58e3]:
+      - link "JetPakistan" [ref=f58e4] [cursor=pointer]:
+        - /url: /
+        - img "JetPakistan" [ref=f58e5]
+      - generic [ref=f58e6]:
+        - link "24/7 Support" [ref=f58e7] [cursor=pointer]:
+          - /url: tel:+923111222427
+        - button "Register" [ref=f58e12] [cursor=pointer]
+        - button "Switch day or night theme" [ref=f58e15] [cursor=pointer]
+        - button "Open menu" [ref=f58e20] [cursor=pointer]
+  - main [ref=f58e23]:
+    - generic [ref=f58e25]:
+      - generic [ref=f58e26]:
+        - paragraph [ref=f58e27]: Group package
+        - heading "UAE — LYP-SHJ" [level=1] [ref=f58e28]
+      - article [ref=f58e29]:
+        - generic [ref=f58e30]:
+          - generic [ref=f58e31]:
+            - img "AIR ARABIA logo" [ref=f58e33]
+            - generic [ref=f58e34]:
+              - paragraph [ref=f58e35]: AIR ARABIA
+              - paragraph [ref=f58e36]: UAE — LYP-SHJ
+          - text: 4 seats left
+        - generic [ref=f58e37]:
+          - paragraph [ref=f58e38]: Faisalabad (LYP) → Sharjah (SHJ)
+          - paragraph [ref=f58e39]: "Sector: LYP-SHJ"
+        - generic [ref=f58e40]:
+          - generic [ref=f58e41]:
+            - term [ref=f58e42]: Departure
+            - definition [ref=f58e43]: Sat, 5 Sep 2026 5 Sep 2026
+          - generic [ref=f58e44]:
+            - term [ref=f58e45]: Baggage
+            - definition [ref=f58e46]: Checked 20kg · Cabin 10kg
+        - generic [ref=f58e47]:
+          - generic [ref=f58e48]:
+            - strong [ref=f58e49]: PKR 80,000
+            - text: per adult
+          - link "Unavailable" [ref=f58e50] [cursor=pointer]:
+            - /url: "#"
+      - link "Back to search" [ref=f58e52] [cursor=pointer]:
+        - /url: /groups/search
+  - contentinfo [ref=f58e53]:
+    - generic [ref=f58e54]:
+      - generic [ref=f58e55]:
+        - generic [ref=f58e56]:
+          - link "JetPakistan" [ref=f58e57] [cursor=pointer]:
+            - /url: /
+            - img "JetPakistan" [ref=f58e58]
+          - paragraph [ref=f58e59]: Pakistan's premium flight booking platform. Honest fares, instant tickets, human support.
+          - generic [ref=f58e60]:
+            - generic [ref=f58e61]: IATA
+            - generic [ref=f58e64]: PCAA
+            - generic [ref=f58e67]: PCI-DSS
+        - generic [ref=f58e71]:
+          - heading "Company" [level=4] [ref=f58e72]
+          - link "About us" [ref=f58e73] [cursor=pointer]:
+            - /url: /about-us
+          - link "Contact" [ref=f58e74] [cursor=pointer]:
+            - /url: /support
+        - generic [ref=f58e75]:
+          - heading "Policies" [level=4] [ref=f58e76]
+          - link "Terms" [ref=f58e77] [cursor=pointer]:
+            - /url: /terms
+          - link "Privacy" [ref=f58e78] [cursor=pointer]:
+            - /url: /privacy
+        - generic [ref=f58e79]:
+          - heading "Support" [level=4] [ref=f58e80]
+          - link "Help centre" [ref=f58e81] [cursor=pointer]:
+            - /url: /faq
+          - link "Manage booking" [ref=f58e82] [cursor=pointer]:
+            - /url: /lookup-booking
+        - generic [ref=f58e83]:
+          - heading "B2B & agents" [level=4] [ref=f58e84]
+          - link "Become an agent" [ref=f58e85] [cursor=pointer]:
+            - /url: /agent/register
+      - generic [ref=f58e86]:
+        - paragraph [ref=f58e87]: ┬⌐ 2026 JetPakistan. All rights reserved.
+        - generic [ref=f58e88]:
+          - link "Contact support" [ref=f58e89] [cursor=pointer]:
+            - /url: /support
+          - link "Facebook" [ref=f58e92] [cursor=pointer]:
+            - /url: https://www.facebook.com/jetpakistancom/
+          - link "Instagram" [ref=f58e95] [cursor=pointer]:
+            - /url: https://www.instagram.com/jetpakistanofficial

@@ -1,0 +1,329 @@
+﻿{
+    "methodology":  "Playwright page.goto waitUntil=domcontentloaded; 5 samples/route; Navigation Timing API ttfb=responseStart; cold=first sample warm=rest",
+    "public_build_id":  "cFI8u0BMqusPSE84bxubP",
+    "note":  "FCP/LCP often unavailable under Playwright automation without paint observers; shell_visible used as time_to_visible_shell proxy via DCL.",
+    "deploy_gate":  "BLOCKED_SUPPLIER_60175_SEATS_NOT_5",
+    "production_runtime_sha":  "460cdae0441d0e07c563e636280c0e552481ac92",
+    "captured_at":  "2026-08-28T05:20:37.6912944Z",
+    "missing_reason":  "Requires live search/session handoff; measured after search UAT when deploy gate opens. Deploy currently blocked on seats!=5.",
+    "host":  "https://jetpakistan.pk",
+    "group_3348_available_seats_public":  4,
+    "missing_routes":  [
+                           "/flights/results",
+                           "/booking/passengers",
+                           "/booking/review",
+                           "group passengers"
+                       ],
+    "routes":  [
+                   {
+                       "route":  "/",
+                       "samples":  5,
+                       "ttfb_p50":  656,
+                       "ttfb_p95":  821,
+                       "dcl_p50":  1098,
+                       "dcl_p95":  1287,
+                       "nav_to_shell_p50":  1133,
+                       "nav_to_shell_p95":  1440,
+                       "http_status_all_200":  true
+                   },
+                   {
+                       "route":  "/groups",
+                       "samples":  5,
+                       "ttfb_p50":  303,
+                       "ttfb_p95":  572,
+                       "dcl_p50":  564,
+                       "dcl_p95":  735,
+                       "nav_to_shell_p50":  580,
+                       "nav_to_shell_p95":  751,
+                       "http_status_all_200":  true
+                   },
+                   {
+                       "route":  "/groups/search",
+                       "samples":  5,
+                       "ttfb_p50":  311,
+                       "ttfb_p95":  334,
+                       "dcl_p50":  436,
+                       "dcl_p95":  569,
+                       "nav_to_shell_p50":  478,
+                       "nav_to_shell_p95":  583,
+                       "http_status_all_200":  true
+                   },
+                   {
+                       "route":  "/login",
+                       "samples":  5,
+                       "ttfb_p50":  295,
+                       "ttfb_p95":  321,
+                       "dcl_p50":  497,
+                       "dcl_p95":  732,
+                       "nav_to_shell_p50":  540,
+                       "nav_to_shell_p95":  752,
+                       "http_status_all_200":  true
+                   },
+                   {
+                       "route":  "/groups/package/ALH-3348",
+                       "samples":  5,
+                       "ttfb_p50":  386,
+                       "ttfb_p95":  1016,
+                       "dcl_p50":  535,
+                       "dcl_p95":  1098,
+                       "nav_to_shell_p50":  652,
+                       "nav_to_shell_p95":  1130,
+                       "http_status_all_200":  true
+                   }
+               ],
+    "samples":  {
+                    "value":  [
+                                  {
+                                      "route":  "/",
+                                      "sample":  1,
+                                      "warm":  false,
+                                      "nav_click_to_dcl_ms":  1133,
+                                      "http_status":  200,
+                                      "ttfb_ms":  610,
+                                      "dom_content_loaded_ms":  1098,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/",
+                                      "sample":  2,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  1440,
+                                      "http_status":  200,
+                                      "ttfb_ms":  821,
+                                      "dom_content_loaded_ms":  1287,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/",
+                                      "sample":  3,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  993,
+                                      "http_status":  200,
+                                      "ttfb_ms":  656,
+                                      "dom_content_loaded_ms":  939,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/",
+                                      "sample":  4,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  1170,
+                                      "http_status":  200,
+                                      "ttfb_ms":  752,
+                                      "dom_content_loaded_ms":  1153,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/",
+                                      "sample":  5,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  1078,
+                                      "http_status":  200,
+                                      "ttfb_ms":  610,
+                                      "dom_content_loaded_ms":  1013,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups",
+                                      "sample":  1,
+                                      "warm":  false,
+                                      "nav_click_to_dcl_ms":  579,
+                                      "http_status":  200,
+                                      "ttfb_ms":  325,
+                                      "dom_content_loaded_ms":  564,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups",
+                                      "sample":  2,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  751,
+                                      "http_status":  200,
+                                      "ttfb_ms":  572,
+                                      "dom_content_loaded_ms":  735,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups",
+                                      "sample":  3,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  735,
+                                      "http_status":  200,
+                                      "ttfb_ms":  303,
+                                      "dom_content_loaded_ms":  635,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups",
+                                      "sample":  4,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  481,
+                                      "http_status":  200,
+                                      "ttfb_ms":  295,
+                                      "dom_content_loaded_ms":  465,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups",
+                                      "sample":  5,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  580,
+                                      "http_status":  200,
+                                      "ttfb_ms":  299,
+                                      "dom_content_loaded_ms":  554,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/search",
+                                      "sample":  1,
+                                      "warm":  false,
+                                      "nav_click_to_dcl_ms":  441,
+                                      "http_status":  200,
+                                      "ttfb_ms":  311,
+                                      "dom_content_loaded_ms":  429,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/search",
+                                      "sample":  2,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  534,
+                                      "http_status":  200,
+                                      "ttfb_ms":  293,
+                                      "dom_content_loaded_ms":  436,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/search",
+                                      "sample":  3,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  473,
+                                      "http_status":  200,
+                                      "ttfb_ms":  334,
+                                      "dom_content_loaded_ms":  440,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/search",
+                                      "sample":  4,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  478,
+                                      "http_status":  200,
+                                      "ttfb_ms":  327,
+                                      "dom_content_loaded_ms":  421,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/search",
+                                      "sample":  5,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  583,
+                                      "http_status":  200,
+                                      "ttfb_ms":  294,
+                                      "dom_content_loaded_ms":  569,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/login",
+                                      "sample":  1,
+                                      "warm":  false,
+                                      "nav_click_to_dcl_ms":  752,
+                                      "http_status":  200,
+                                      "ttfb_ms":  321,
+                                      "dom_content_loaded_ms":  732,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/login",
+                                      "sample":  2,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  540,
+                                      "http_status":  200,
+                                      "ttfb_ms":  269,
+                                      "dom_content_loaded_ms":  497,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/login",
+                                      "sample":  3,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  556,
+                                      "http_status":  200,
+                                      "ttfb_ms":  312,
+                                      "dom_content_loaded_ms":  532,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/login",
+                                      "sample":  4,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  486,
+                                      "http_status":  200,
+                                      "ttfb_ms":  275,
+                                      "dom_content_loaded_ms":  458,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/login",
+                                      "sample":  5,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  434,
+                                      "http_status":  200,
+                                      "ttfb_ms":  295,
+                                      "dom_content_loaded_ms":  422,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/package/ALH-3348",
+                                      "sample":  1,
+                                      "warm":  false,
+                                      "nav_click_to_dcl_ms":  554,
+                                      "http_status":  200,
+                                      "ttfb_ms":  365,
+                                      "dom_content_loaded_ms":  531,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/package/ALH-3348",
+                                      "sample":  2,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  734,
+                                      "http_status":  200,
+                                      "ttfb_ms":  362,
+                                      "dom_content_loaded_ms":  535,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/package/ALH-3348",
+                                      "sample":  3,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  540,
+                                      "http_status":  200,
+                                      "ttfb_ms":  386,
+                                      "dom_content_loaded_ms":  514,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/package/ALH-3348",
+                                      "sample":  4,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  652,
+                                      "http_status":  200,
+                                      "ttfb_ms":  523,
+                                      "dom_content_loaded_ms":  616,
+                                      "shell_visible":  true
+                                  },
+                                  {
+                                      "route":  "/groups/package/ALH-3348",
+                                      "sample":  5,
+                                      "warm":  true,
+                                      "nav_click_to_dcl_ms":  1130,
+                                      "http_status":  200,
+                                      "ttfb_ms":  1016,
+                                      "dom_content_loaded_ms":  1098,
+                                      "shell_visible":  true
+                                  }
+                              ],
+                    "Count":  25
+                }
+}

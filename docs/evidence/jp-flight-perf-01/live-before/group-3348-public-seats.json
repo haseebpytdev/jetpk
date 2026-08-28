@@ -1,0 +1,14 @@
+﻿{
+    "source":  "https://jetpakistan.pk/groups/package/ALH-3348?format=json",
+    "supplier_package_hint":  "3348",
+    "public_id":  "ALH-3348",
+    "cta_message":  "Live group availability is temporarily unavailable. Please try again.",
+    "seat_label":  "4 seats left",
+    "available_seats_reported":  4,
+    "captured_at":  "2026-08-28T05:18:31.8509975Z",
+    "expected_after_cleanup":  5,
+    "gate":  "FAIL_SEATS_NOT_RESTORED",
+    "owner_manual_cancel_confirmed":  "NO",
+    "bookable":  false,
+    "note":  "Public package JSON may reflect local held_seats; supplier GET seats still required after owner confirms cancel. Deploy blocked while seats!=5 or owner unconfirmed."
+}

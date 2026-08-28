@@ -1,0 +1,24 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R2",
+  "captured_at": "2026-08-28T05:22:00Z",
+  "host": "https://jetpakistan.pk",
+  "production_runtime_sha": "460cdae0441d0e07c563e636280c0e552481ac92",
+  "public_build_id": "cFI8u0BMqusPSE84bxubP",
+  "search": {
+    "criteria": {"from": "LHE", "to": "DXB", "depart": "2026-09-15", "trip_type": "one_way", "adults": 1},
+    "search_id": "4f468f37-2138-46ac-b7d8-8356deacd706",
+    "SEARCH_START_TO_FIRST_RESULT_MS": 23978,
+    "SEARCH_START_TO_SETTLED_RESULTS_MS": 23978,
+    "visible_cards": 12,
+    "sort_control_observed": "recommended",
+    "first_visible_price_snippet": "PKR 98,069",
+    "soft_warning_observed": "Some airlines did not finish responding. Showing available flights.",
+    "pending_updating_fares_observed": false,
+    "commercial": {"pnr": false, "payment": false, "ticket": false}
+  },
+  "notes": [
+    "Current production still on pre-5333ebc0 runtime — Recommended default and old soft-warning copy are expected until deploy.",
+    "Per-supplier elapsed_ms rows require either deployed instrumentation (5333ebc0+) or production log read-only access; not available via browser alone.",
+    "Deploy blocked: ALH-3348 public available_seats=4 and owner has not confirmed manual cancel of reservation 60175."
+  ]
+}
