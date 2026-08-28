@@ -1,0 +1,16 @@
+{
+  "phase": "JP-UX-PORTAL-PERF-01-R3-NEW-QA",
+  "runtime_sha": "61362c21907b4e69ac7f399d38943dca2aa2aef4",
+  "public_build_id": "lhTb3ywP3iwYsjR3lQqZn",
+  "QA_CUSTOMER_EMAIL_HASH": "4075131f5e82a89d",
+  "captured_at": "2026-08-28T19:13:47.508Z",
+  "passengers_post_status": 500,
+  "passengers_ok": false,
+  "next_url": null,
+  "NEW_QA_CUSTOMER_CREATED_DURING_CHECKOUT": "FAIL",
+  "landing_after_passengers": "https://jetpakistan.pk/booking/passengers?flight_id=46c4be76d05bebe1d0dbe2db9a6d0841df21ed7a09710ebdce88ce37fccb07b9&search_id=9fe2c489-57b1-4d86-8ae5-3fe632197267&offer_id=46c4be7",
+  "SUPPLIER_MUTATION_CALLS": 0,
+  "LIVE_SUPPLIER_SYNTHETIC_PASSENGER_DATA": 0,
+  "NEW_QA_CUSTOMER_VERIFICATION_SENT": "BLOCKED_NO_VERIFY_URL_IN_LOGS",
+  "NEW_QA_CUSTOMER_VERIFIED": "BLOCKED_NO_VERIFY_URL"
+}
