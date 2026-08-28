@@ -126,14 +126,27 @@ class StandardBookingJsonPresenter
     /**
      * @return array<string, mixed>
      */
-    public function presentPassengersSuccess(string $nextUrl): array
+    public function presentPassengersSuccess(string $nextUrl, ?bool $verificationDeliveryOk = null): array
     {
-        return [
+        $payload = [
             'ok' => true,
             'status' => 'accepted',
             'next_url' => $nextUrl,
             'progress' => $this->progressState('review'),
         ];
+
+        if ($verificationDeliveryOk === null) {
+            return $payload;
+        }
+
+        $payload['verification_delivery'] = $verificationDeliveryOk ? 'success' : 'failure';
+        $payload['requires_email_verification'] = true;
+        if (! $verificationDeliveryOk) {
+            $payload['message'] = \App\Support\Auth\BestEffortEmailVerification::FAILURE_MESSAGE;
+            $payload['resend_verification_url'] = '/email/verification-notification';
+        }
+
+        return $payload;
     }
 
     /**

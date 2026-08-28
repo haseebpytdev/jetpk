@@ -27,7 +27,7 @@ class EmailVerificationNotificationController extends Controller
             report($e);
 
             return back()
-                ->withErrors(['email' => 'We could not send the verification email right now. Please try again in a few minutes.']);
+                ->withErrors(['email' => \App\Support\Auth\BestEffortEmailVerification::FAILURE_MESSAGE]);
         }
 
         return back()

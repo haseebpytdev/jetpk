@@ -12,9 +12,10 @@ use App\Models\Agency;
 use App\Models\User;
 use App\Services\Client\ClientPageRenderer;
 use App\Services\Client\ClientRedirectResolver;
+use App\Support\Auth\BestEffortEmailVerification;
+use App\Support\Auth\CheckoutReturnIntent;
 use App\Support\Auth\PublicAuthRedirectAllowlist;
 use App\Support\Client\ClientPageKeys;
-use App\Support\Auth\CheckoutReturnIntent;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -75,8 +76,6 @@ class RegisteredUserController extends Controller
             ],
         ]);
 
-        event(new Registered($user));
-
         $this->sendCustomerWelcomeEmail($user);
         $this->sendAdminNewCustomerEmail($user, $phone);
 
@@ -84,23 +83,41 @@ class RegisteredUserController extends Controller
         $request->session()->regenerate();
         $this->storeSecurityChallenge($request);
 
+        // After session regenerate so delivery flash/status survives.
+        event(new Registered($user));
+        $verificationDelivered = BestEffortEmailVerification::lastDeliverySucceeded() ?? true;
+
         $redirectPath = PublicAuthRedirectAllowlist::sanitize(
             $this->clientRedirectResolver->pathForRoute('verification.notice'),
             '/verify-email',
         );
 
         if ($request->expectsJson()) {
-            return response()->json([
+            $payload = [
                 'ok' => true,
                 'redirect' => $redirectPath,
                 'requires_email_verification' => true,
-                'message' => 'Registration complete. Please verify your email address to continue.',
-            ]);
+                'verification_delivery' => $verificationDelivered ? 'success' : 'failure',
+                'message' => $verificationDelivered
+                    ? 'Registration complete. Please verify your email address to continue.'
+                    : BestEffortEmailVerification::FAILURE_MESSAGE,
+            ];
+            if (! $verificationDelivered) {
+                $payload['resend_verification_url'] = '/email/verification-notification';
+            }
+
+            return response()->json($payload);
         }
 
-        return $this->clientRedirectResolver
+        $redirect = $this->clientRedirectResolver
             ->route('verification.notice')
-            ->with('status', 'registration-complete');
+            ->with('status', $verificationDelivered ? 'registration-complete' : 'verification-delivery-failed');
+
+        if (! $verificationDelivered) {
+            $redirect->with('verification_delivery_failed', BestEffortEmailVerification::FAILURE_MESSAGE);
+        }
+
+        return $redirect;
     }
 
     public function validateField(Request $request): JsonResponse

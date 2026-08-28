@@ -61,8 +61,8 @@ use App\Support\Branding\PlatformBrandingResolver;
 use App\Support\Branding\PublicAgencyContactResolver;
 use App\Support\Branding\SafeBrandingResolver;
 use App\Support\Ui\UiVersionResolver;
+use App\Listeners\Auth\SendEmailVerificationNotificationBestEffort;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use App\Support\Url\PublicActionUrl;
@@ -114,8 +114,6 @@ class AppServiceProvider extends ServiceProvider
             ]);
         }
 
-        Event::listen(Registered::class, SendEmailVerificationNotification::class);
-
         RateLimiter::for('lookup-booking', fn (Request $request): Limit => Limit::perMinute(20)->by($request->ip()));
         RateLimiter::for('guest-token', fn (Request $request): Limit => Limit::perMinute(15)->by($request->ip()));
         RateLimiter::for('public-booking-submit', fn (Request $request): Limit => Limit::perMinute(12)->by($request->ip()));
@@ -128,6 +126,12 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('register-validate-field', fn (Request $request): Limit => Limit::perMinute(120)->by($request->ip()));
         RateLimiter::for('public-flight-results-data', fn (Request $request): Limit => Limit::perMinute(60)->by($request->ip()));
         RateLimiter::for('public-flight-results-search', fn (Request $request): Limit => Limit::perMinute(30)->by($request->ip()));
+
+        // Framework EventServiceProvider also attaches the stock throwing listener; replace after boot.
+        $this->app->booted(function (): void {
+            Event::forget(Registered::class);
+            Event::listen(Registered::class, SendEmailVerificationNotificationBestEffort::class);
+        });
 
         ResetPassword::createUrlUsing(static function (object $notifiable, string $token): string {
             return PublicActionUrl::passwordReset($token, $notifiable->getEmailForPasswordReset());

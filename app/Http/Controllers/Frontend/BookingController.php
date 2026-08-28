@@ -495,7 +495,10 @@ class BookingController extends Controller
                 }
             }
 
-            $booking = DB::transaction(function () use ($agency, $validated, $offer, $pricing, $criteria, $routeStr, $airlineStr, $travelDate, $validation, $normalizedValidated, $request, $holdSessionId, $protection, $selectedOfferId, $passengerPricing, $passengerPricingAvailable, $checkoutSupplier, $complexItinerary, $deferComplexSabrePnr, $sabreBookingContext, $distributionChannel, $searchId, $channelContext): Booking {
+            // Inline account creation must commit before verification mail is attempted.
+            // Registered/SMTP failures must never roll back the Draft booking transaction.
+            $inlineRegisteredUser = null;
+            $booking = DB::transaction(function () use ($agency, $validated, $offer, $pricing, $criteria, $routeStr, $airlineStr, $travelDate, $validation, $normalizedValidated, $request, $holdSessionId, $protection, $selectedOfferId, $passengerPricing, $passengerPricingAvailable, $checkoutSupplier, $complexItinerary, $deferComplexSabrePnr, $sabreBookingContext, $distributionChannel, $searchId, $channelContext, &$inlineRegisteredUser): Booking {
                 $leadIdx = (int) ($validated['lead_passenger_index'] ?? 0);
                 $passengersInput = (array) ($validated['passengers'] ?? []);
                 $leadPassenger = $passengersInput[$leadIdx] ?? ($passengersInput[0] ?? []);
@@ -519,7 +522,7 @@ class BookingController extends Controller
                             'registered_via' => 'checkout_inline',
                         ],
                     ]);
-                    event(new Registered($user));
+                    $inlineRegisteredUser = $user;
                     Auth::login($user);
                     $request->session()->regenerate();
                 }
@@ -745,6 +748,11 @@ class BookingController extends Controller
                 return $booking;
             });
 
+            if ($inlineRegisteredUser instanceof User) {
+                // After commit: best-effort verification (listener never throws / never 500s).
+                event(new Registered($inlineRegisteredUser));
+            }
+
             $softBlockRedirect = $this->maybeRedirectSabrePreCheckoutSoftBlock($request, $booking->fresh());
             if ($softBlockRedirect !== null) {
                 return $softBlockRedirect;
@@ -849,8 +857,15 @@ class BookingController extends Controller
             }
 
             if ($this->wantsBookingJson($request)) {
+                $verificationDeliveryOk = $inlineRegisteredUser instanceof User
+                    ? \App\Support\Auth\BestEffortEmailVerification::lastDeliverySucceeded()
+                    : null;
+
                 return response()->json(
-                    $this->standardBookingJsonPresenter->presentPassengersSuccess('/booking/review'),
+                    $this->standardBookingJsonPresenter->presentPassengersSuccess(
+                        '/booking/review',
+                        $verificationDeliveryOk,
+                    ),
                 );
             }
 
