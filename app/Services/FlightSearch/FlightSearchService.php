@@ -160,6 +160,9 @@ class FlightSearchService
                 'multicity_diagnostics' => is_array($cachedResult['meta']['multicity_diagnostics'] ?? null)
                     ? $cachedResult['meta']['multicity_diagnostics']
                     : [],
+                'supplier_call_summaries' => is_array($cachedResult['meta']['supplier_call_summaries'] ?? null)
+                    ? $cachedResult['meta']['supplier_call_summaries']
+                    : [],
                 'criteria_cache' => [
                     'hit' => true,
                     'fingerprint' => $this->supplierResultCache->describe($criteria, $cacheContext)['fingerprint'],
@@ -272,6 +275,28 @@ class FlightSearchService
                 : null,
         ]);
 
+        // Survive production LOG_LEVEL=warning so incomplete-supplier root cause
+        // retains real elapsed_ms / final_state rows without requiring debug fares.
+        Log::notice('flight_search.supplier_timing', [
+            'stage' => 'flight_search_service_complete',
+            'search_id' => (string) ($criteria['search_id'] ?? ''),
+            'supplier_calls' => array_map(
+                static fn (array $row): array => [
+                    'provider' => (string) ($row['provider'] ?? ''),
+                    'connection_id' => (int) ($row['connection_id'] ?? 0),
+                    'elapsed_ms' => (int) ($row['elapsed_ms'] ?? 0),
+                    'raw_offer_count' => (int) ($row['raw_offer_count'] ?? 0),
+                    'accepted_offer_count' => (int) ($row['accepted_offer_count'] ?? 0),
+                    'warning_count' => (int) ($row['warning_count'] ?? 0),
+                    'final_state' => (string) ($row['final_state'] ?? ''),
+                    'skip_reason' => isset($row['skip_reason']) ? (string) $row['skip_reason'] : null,
+                ],
+                $supplierCallSummaries,
+            ),
+            'final_offer_count' => count($offers),
+            'final_offer_count_by_provider' => $finalByProvider,
+        ]);
+
         Log::info('flight_search.pipeline', [
             'stage' => 'flight_search_service_complete',
             'final_offer_count' => count($offers),
@@ -286,6 +311,7 @@ class FlightSearchService
             [
                 'mixed_carrier_filter' => $mixedCarrierFilterDiagnostics,
                 'multicity_diagnostics' => $multicityDiagnostics,
+                'supplier_call_summaries' => $supplierCallSummaries,
             ],
         );
 
@@ -294,6 +320,7 @@ class FlightSearchService
             'warnings' => array_values(array_unique($warnings)),
             'mixed_carrier_filter' => $mixedCarrierFilterDiagnostics,
             'multicity_diagnostics' => $multicityDiagnostics,
+            'supplier_call_summaries' => $supplierCallSummaries,
             'criteria_cache' => [
                 'hit' => false,
                 'fingerprint' => $criteriaCacheDescribe['fingerprint'],

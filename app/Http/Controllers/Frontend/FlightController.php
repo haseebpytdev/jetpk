@@ -747,6 +747,9 @@ class FlightController extends Controller
             'warnings' => is_array($payload['warnings'] ?? null) ? array_values($payload['warnings']) : [],
             'empty_message' => $this->resolveResultsEmptyMessage($payload, $total),
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
+            'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi(
+                is_array($payload['supplier_call_summaries'] ?? null) ? $payload['supplier_call_summaries'] : [],
+            ),
         ];
 
         if ($debugAllowed) {
@@ -2796,9 +2799,14 @@ class FlightController extends Controller
             ? $result['multicity_diagnostics']
             : [];
 
+        $supplierCallSummaries = is_array($result['supplier_call_summaries'] ?? null)
+            ? $result['supplier_call_summaries']
+            : [];
+
         $meta = [
             'mixed_carrier_filter' => $mixedCarrierFilter,
             'multicity_diagnostics' => $multicityDiagnostics,
+            'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi($supplierCallSummaries),
             'criteria_cache' => is_array($result['criteria_cache'] ?? null) ? $result['criteria_cache'] : null,
             'criteria_cache_context' => [
                 'client_slug' => current_client_slug(),
@@ -2812,6 +2820,35 @@ class FlightController extends Controller
         ];
 
         return [$storedOffers, array_values(array_unique($safeWarnings)), $meta];
+    }
+
+    /**
+     * Customer-safe supplier timing rows (no tokens/credentials/PII).
+     *
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    protected function sanitizeSupplierCallSummariesForCustomerApi(array $rows): array
+    {
+        $out = [];
+        foreach ($rows as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $out[] = [
+                'provider' => strtolower(trim((string) ($row['provider'] ?? ''))),
+                'elapsed_ms' => (int) ($row['elapsed_ms'] ?? 0),
+                'raw_offer_count' => (int) ($row['raw_offer_count'] ?? 0),
+                'accepted_offer_count' => (int) ($row['accepted_offer_count'] ?? 0),
+                'warning_count' => (int) ($row['warning_count'] ?? 0),
+                'final_state' => strtoupper(trim((string) ($row['final_state'] ?? ''))),
+                'skip_reason' => isset($row['skip_reason']) && is_string($row['skip_reason'])
+                    ? $row['skip_reason']
+                    : null,
+            ];
+        }
+
+        return $out;
     }
 
     /**

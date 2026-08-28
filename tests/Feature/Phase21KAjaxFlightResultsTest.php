@@ -428,6 +428,63 @@ class Phase21KAjaxFlightResultsTest extends TestCase
         return $offers;
     }
 
+    public function test_results_data_includes_sanitized_supplier_call_summaries(): void
+    {
+        $offers = $this->fakeOffers(1, 'sabre');
+        $mock = Mockery::mock(FlightSearchService::class);
+        $mock->shouldReceive('searchWithMeta')
+            ->andReturn([
+                'offers' => $offers,
+                'warnings' => ['Some additional airline fares are temporarily unavailable.'],
+                'supplier_call_summaries' => [
+                    [
+                        'connection_id' => 42,
+                        'provider' => 'sabre',
+                        'search_origin' => 'LHE',
+                        'raw_offer_count' => 12,
+                        'accepted_offer_count' => 10,
+                        'normalized_accepted_count' => 10,
+                        'warning_count' => 0,
+                        'elapsed_ms' => 4123,
+                        'final_state' => 'SUCCESS',
+                    ],
+                    [
+                        'connection_id' => 7,
+                        'provider' => 'iati',
+                        'search_origin' => 'LHE',
+                        'raw_offer_count' => 0,
+                        'accepted_offer_count' => 0,
+                        'normalized_accepted_count' => 0,
+                        'warning_count' => 1,
+                        'elapsed_ms' => 20012,
+                        'final_state' => 'ERROR',
+                    ],
+                ],
+            ]);
+        $mock->shouldReceive('search')->andReturn($offers);
+        $this->instance(FlightSearchService::class, $mock);
+
+        $page = $this->get('/flights/results?'.$this->validOneWayQuery())->assertOk();
+        preg_match('/data-search-id="([^"]+)"/', $page->getContent(), $matches);
+        $searchId = $matches[1] ?? '';
+        $this->assertNotSame('', $searchId);
+
+        $response = $this->getJson('/flights/results/data?search_id='.$searchId.'&page=1&per_page=12')
+            ->assertOk()
+            ->assertJsonPath('supplier_call_summaries.0.provider', 'sabre')
+            ->assertJsonPath('supplier_call_summaries.0.elapsed_ms', 4123)
+            ->assertJsonPath('supplier_call_summaries.0.final_state', 'SUCCESS')
+            ->assertJsonPath('supplier_call_summaries.0.accepted_offer_count', 10)
+            ->assertJsonPath('supplier_call_summaries.1.provider', 'iati')
+            ->assertJsonPath('supplier_call_summaries.1.elapsed_ms', 20012)
+            ->assertJsonPath('supplier_call_summaries.1.final_state', 'ERROR');
+
+        $row = $response->json('supplier_call_summaries.0');
+        $this->assertArrayNotHasKey('connection_id', $row);
+        $this->assertArrayNotHasKey('search_origin', $row);
+        $this->assertArrayNotHasKey('token', $row);
+    }
+
     private function mockFlightSearch(int $count, array $warnings = [], string $provider = 'duffel', string $pricingCurrency = 'PKR', string $conversionStatus = 'same_currency'): void
     {
         $offers = $this->fakeOffers($count, $provider, $pricingCurrency, $conversionStatus);
@@ -436,6 +493,16 @@ class Phase21KAjaxFlightResultsTest extends TestCase
             ->andReturn([
                 'offers' => $offers,
                 'warnings' => $warnings,
+                'supplier_call_summaries' => [
+                    [
+                        'provider' => $provider,
+                        'elapsed_ms' => 100,
+                        'raw_offer_count' => $count,
+                        'accepted_offer_count' => $count,
+                        'warning_count' => count($warnings),
+                        'final_state' => 'SUCCESS',
+                    ],
+                ],
             ]);
         $mock->shouldReceive('search')->andReturn($offers);
         $this->instance(FlightSearchService::class, $mock);
