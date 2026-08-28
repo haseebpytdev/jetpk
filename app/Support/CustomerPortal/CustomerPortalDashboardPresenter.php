@@ -95,7 +95,8 @@ class CustomerPortalDashboardPresenter
             'route' => (string) ($booking->route ?? ''),
             'travel_date' => $booking->travel_date?->toDateString(),
             'airline' => (string) ($booking->airline ?? ''),
-            'status' => CustomerPortalStatusPresenter::bookingStatus($booking),
+            // Match bookings list + Next CustomerBookingListItem (`booking_status`).
+            'booking_status' => CustomerPortalStatusPresenter::bookingStatus($booking),
             'payment_status' => CustomerPortalStatusPresenter::paymentStatus($booking),
             'ticketing_status' => CustomerPortalStatusPresenter::ticketingStatus($booking),
             'total' => CustomerPortalStatusPresenter::customerPayable($booking),

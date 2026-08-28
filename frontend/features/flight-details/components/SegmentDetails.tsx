@@ -230,8 +230,7 @@ export function SegmentDetails({
                   originCode={origin}
                   destinationCode={destination}
                   duration={segment.duration_display}
-                  stops={0}
-                  stopsLabel="Direct"
+                  hideStops
                   className="rounded-jp-md bg-jp-page/60 px-2 py-2 sm:px-3"
                 />
 

@@ -96,9 +96,10 @@ export function CustomerEmptyState({
   return <EmptyState title={title} description={description} action={action} testId="customer-empty-state" />;
 }
 
-export function StatusBadge({ status }: { status: { label: string; code: string } }) {
+export function StatusBadge({ status }: { status?: { label: string; code: string } | null }) {
+  if (!status?.label) return null;
   return (
-    <UiStatusBadge data-testid={`status-${status.code}`}>
+    <UiStatusBadge data-testid={`status-${status.code || "unknown"}`}>
       {status.label}
     </UiStatusBadge>
   );

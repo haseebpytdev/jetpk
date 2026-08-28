@@ -257,9 +257,6 @@ export function ReturnOptionsPage() {
                       logoUrl={journey?.airline_logo_url}
                       size="md"
                     />
-                    {journey?.flight_number ? (
-                      <p className="mt-1 truncate text-xs text-jp-text-muted">{journey.flight_number}</p>
-                    ) : null}
                   </div>
                   <div className="min-w-0 space-y-2">
                     <TimeRouteBlock

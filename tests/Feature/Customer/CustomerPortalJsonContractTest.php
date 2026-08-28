@@ -33,7 +33,18 @@ class CustomerPortalJsonContractTest extends TestCase
             ->getJson(route('customer.dashboard'))
             ->assertOk()
             ->assertJsonPath('ok', true)
-            ->assertJsonStructure(['metrics' => ['upcoming_trips', 'pending_payment', 'total_bookings']]);
+            ->assertJsonStructure([
+                'metrics' => ['upcoming_trips', 'pending_payment', 'total_bookings'],
+                'recent_bookings' => [
+                    ['booking_status' => ['code', 'label'], 'payment_status' => ['code', 'label']],
+                ],
+            ]);
+
+        $dashboardPayload = $this->actingAs($customer)
+            ->getJson(route('customer.dashboard'))
+            ->json();
+        $this->assertArrayHasKey('booking_status', $dashboardPayload['recent_bookings'][0]);
+        $this->assertArrayNotHasKey('status', $dashboardPayload['recent_bookings'][0]);
     }
 
     public function test_customer_bookings_json_pagination_and_ownership(): void

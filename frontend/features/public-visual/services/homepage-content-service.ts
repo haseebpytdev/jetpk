@@ -364,8 +364,10 @@ export const HomepageContentService = {
           Accept: "application/json",
           ...(options?.headers ?? {}),
         },
-        cache: "no-store",
-        next: { tags: ["homepage-cms"] },
+        // Preview must stay fresh; published homepage CMS can short-revalidate.
+        ...(options?.preview
+          ? { cache: "no-store" as const, next: { tags: ["homepage-cms"] } }
+          : { next: { revalidate: 120, tags: ["homepage-cms"] } }),
       });
 
       if (!response.ok) {

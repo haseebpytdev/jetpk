@@ -1,12 +1,26 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { AnimatedFlightPath } from "@/components/motion/AnimatedFlightPath";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ImageSlot } from "@/components/ui/ImageSlot";
-import { SearchModule } from "@/features/search";
 import { cn } from "@/lib/cn";
 import type { HomepageHeroContent, HomepageTrustChip } from "../types/homepage";
 import { BenefitStrip } from "../components/BenefitStrip";
+
+const SearchModule = dynamic(
+  () => import("@/features/search").then((mod) => mod.SearchModule),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="min-h-[12rem] rounded-jp-card border border-white/20 bg-white/90 p-4 shadow-jp-card"
+        data-testid="homepage-search-placeholder"
+        aria-busy="true"
+      />
+    ),
+  },
+);
 
 type PublicHeroProps = {
   hero: HomepageHeroContent;

@@ -6,8 +6,10 @@ import { getPublicSession } from "@/services/session";
 export const dynamic = "force-dynamic";
 
 export default async function PublicGroupLayout({ children }: { children: ReactNode }) {
-  const session = await getPublicSession();
-  const config = await PublicConfigService.getConfig();
+  const [session, config] = await Promise.all([
+    getPublicSession(),
+    PublicConfigService.getConfig(),
+  ]);
 
   return (
     <PublicShell

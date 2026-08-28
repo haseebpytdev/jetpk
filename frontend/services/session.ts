@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { appConfig } from "@/lib/config";
 import { fetchSessionBootstrap, fetchSessionBootstrapFromCookies, mapBootstrapToPublicSession } from "@/features/auth/services/session-service";
 import type { PublicSession, SessionAdapter, SessionPreviewMode } from "@/types/session";
@@ -63,6 +64,14 @@ export const laravelSessionAdapter: SessionAdapter = {
   },
 };
 
+/** Per-request dedupe of cookie session bootstrap (no cross-request / cross-user cache). */
+const getServerPublicSession = cache(async (): Promise<PublicSession> => {
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const bootstrap = await fetchSessionBootstrapFromCookies(cookieStore.getAll());
+  return mapBootstrapToPublicSession(bootstrap);
+});
+
 export async function getPublicSession(
   preview?: SessionPreviewMode,
   adapter?: SessionAdapter,
@@ -76,10 +85,7 @@ export async function getPublicSession(
   }
 
   if (typeof window === "undefined") {
-    const { cookies } = await import("next/headers");
-    const cookieStore = await cookies();
-    const bootstrap = await fetchSessionBootstrapFromCookies(cookieStore.getAll());
-    return mapBootstrapToPublicSession(bootstrap);
+    return getServerPublicSession();
   }
 
   const resolvedAdapter = adapter ?? laravelSessionAdapter;

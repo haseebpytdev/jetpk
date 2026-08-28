@@ -1,8 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FlightDetailsDrawer, type FlightDetailsContext } from "@/features/flight-details";
+import type { FlightDetailsContext } from "@/features/flight-details";
 import { SearchModule } from "@/features/search";
 import { buildSearchSummaryFromParams, useFlightResults } from "../hooks/use-flight-results";
 import { parseFiltersFromSearchParams } from "../utils/filters";
@@ -30,6 +31,11 @@ import { SearchProgress } from "./SearchProgress";
 import { ResultsHeroBand } from "./ResultsHeroBand";
 import { SearchSummaryBar } from "./SearchSummaryBar";
 
+const FlightDetailsDrawer = dynamic(
+  () => import("@/features/flight-details").then((mod) => mod.FlightDetailsDrawer),
+  { ssr: false },
+);
+
 export function FlightResultsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,12 +44,15 @@ export function FlightResultsPage() {
   const tripType = params.get("trip_type");
   const viewParam = params.get("view");
   const isReturn = tripType === "round_trip";
-  // Resolve return mode BEFORE results fetch — missing view defaults to Pair (not Segmented).
+  // Authoritative only after user choice (or explicit URL). Do not invent Pair before modal.
   const resolvedView: "pair" | "segmented" | null = !isReturn
     ? null
     : viewParam === "segmented"
       ? "segmented"
-      : "pair";
+      : viewParam === "pair"
+        ? "pair"
+        : null;
+  const awaitingReturnViewChoice = isReturn && resolvedView === null;
   const [sort, setSort] = useState<UiSortKey>(() => parseUiSort(params.get("sort")));
   const [filters, setFilters] = useState(() => parseFiltersFromSearchParams(params));
   const [editOpen, setEditOpen] = useState(false);
@@ -53,25 +62,22 @@ export function FlightResultsPage() {
   const detailsTriggerRef = useRef<HTMLElement | null>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const freshSearchInFlight = useRef(false);
-  const defaultViewSynced = useRef(false);
+  const defaultSortSynced = useRef(false);
 
   const summary = useMemo(() => buildSearchSummaryFromParams(params), [params]);
 
-  // Persist authoritative defaults into the URL so hard refresh / Back keep the same mode.
+  // Persist sort default only — return view waits for ReturnViewSelector (no wrong-view flash).
   useEffect(() => {
-    if (defaultViewSynced.current) return;
-    const needsSort = !params.get("sort");
-    const needsView = isReturn && viewParam !== "pair" && viewParam !== "segmented";
-    if (!needsSort && !needsView) {
-      defaultViewSynced.current = true;
+    if (defaultSortSynced.current) return;
+    if (params.get("sort")) {
+      defaultSortSynced.current = true;
       return;
     }
-    defaultViewSynced.current = true;
+    defaultSortSynced.current = true;
     const next = new URLSearchParams(params);
-    if (needsSort) next.set("sort", "cheapest");
-    if (needsView) next.set("view", "pair");
+    next.set("sort", "cheapest");
     router.replace(`/flights/results?${next.toString()}`, { scroll: false });
-  }, [isReturn, params, router, viewParam]);
+  }, [params, router]);
 
   const results = useFlightResults({
     searchId,
@@ -285,7 +291,7 @@ export function FlightResultsPage() {
           </div>
         ) : null}
 
-        {isReturn ? (
+        {isReturn && !awaitingReturnViewChoice ? (
           <div className="flex flex-wrap items-center gap-2 text-sm" data-testid="return-view-switch">
             <span className="text-jp-text-muted">View:</span>
             <button
@@ -374,7 +380,14 @@ export function FlightResultsPage() {
           </div>
 
           <div className="min-w-0 space-y-3">
-            {isSearchingMask || resultsStaleLocked ? (
+            {awaitingReturnViewChoice ? (
+              <SearchProgress
+                message={results.message || "Searching airlines… choose how you want to view return flights."}
+                summary={summary}
+              />
+            ) : null}
+
+            {!awaitingReturnViewChoice && (isSearchingMask || resultsStaleLocked) ? (
               <>
                 <SearchProgress
                   message={
@@ -424,7 +437,7 @@ export function FlightResultsPage() {
               <EmptyResultsState message={results.message} onNewSearch={() => setEditOpen(true)} />
             ) : null}
 
-            {showResultsList ? (
+            {!awaitingReturnViewChoice && showResultsList ? (
               <div role="list" className="space-y-3" aria-label="Flight results">
                 {results.isReturnPair
                   ? results.pairedOptions.map((option) => (
@@ -481,7 +494,7 @@ export function FlightResultsPage() {
           triggerRef={filterButtonRef}
         />
 
-        <ReturnViewSelector open={false} onSelect={setReturnView} />
+        <ReturnViewSelector open={awaitingReturnViewChoice} onSelect={setReturnView} />
 
         <FlightDetailsDrawer
           open={detailsContext !== null}

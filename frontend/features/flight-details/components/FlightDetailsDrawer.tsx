@@ -275,7 +275,9 @@ export function FlightDetailsDrawer({
                 <FareSummaryTabs key={details.selectedFareKey || offer.offer_id} offer={offer} fallback={fallback} />
 
                 {revalidation.state === "loading" ? (
-                  <RevalidationPanel message="Confirming fare with the airline…" />
+                  <RevalidationPanel
+                    message={revalidation.message ?? "Confirming fare with the airline…"}
+                  />
                 ) : null}
 
                 {revalidation.state === "unavailable" ? (

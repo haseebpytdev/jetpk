@@ -14,8 +14,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const params = searchParams ? await searchParams : {};
   const preview = isCmsPreviewFlag(params.jp_preview);
   const previewToken = readCmsPreviewToken(params.jp_preview_token);
-  const session = await getPublicSession();
-  const config = await PublicConfigService.getConfig();
+  const [session, config] = await Promise.all([
+    getPublicSession(),
+    PublicConfigService.getConfig(),
+  ]);
 
   return (
     <PublicShell

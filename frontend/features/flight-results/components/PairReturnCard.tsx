@@ -123,22 +123,17 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
       data-selected-fare-key={effectiveFareKey || undefined}
       aria-label={`Paired flight ${outbound.origin_airport_code} to ${outbound.destination_airport_code} return ${inbound.origin_airport_code} to ${inbound.destination_airport_code}`}
     >
-      <div className="grid items-start gap-3 md:grid-cols-[minmax(8rem,0.85fr)_minmax(16rem,2fr)_minmax(10.5rem,0.95fr)] lg:gap-4 xl:grid-cols-[minmax(10.5rem,1fr)_minmax(20rem,2.35fr)_minmax(12.5rem,0.95fr)]">
-        <div className="min-w-0 space-y-3 md:pr-1">
-          <div>
-            <AirlineIdentity
-              code={outbound.airline_code || option.airline_code}
-              name={outbound.airline_name || option.airline_name}
-              logoUrl={outbound.airline_logo_url}
-              size="md"
-            />
-            {outbound.flight_number ? (
-              <p className="mt-1 truncate text-xs text-jp-text-muted">{outbound.flight_number}</p>
-            ) : null}
-          </div>
+      <div className="grid items-center gap-3 md:grid-cols-[minmax(7.5rem,0.75fr)_minmax(18rem,2.2fr)_minmax(10.5rem,0.95fr)] lg:gap-4 xl:grid-cols-[minmax(9rem,0.85fr)_minmax(22rem,2.5fr)_minmax(12.5rem,0.95fr)]">
+        <div className="min-w-0 space-y-2 md:pr-1">
+          <AirlineIdentity
+            code={outbound.airline_code || option.airline_code}
+            name={outbound.airline_name || option.airline_name}
+            logoUrl={outbound.airline_logo_url}
+            size="md"
+          />
           {showReturnAirline ? (
-            <div>
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-jp-text-muted">Return airline</p>
+            <div className="border-t border-jp-border-soft pt-2">
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-jp-text-muted">Return</p>
               <AirlineIdentity
                 code={inbound.airline_code}
                 name={inbound.airline_name}
@@ -149,36 +144,45 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
           ) : null}
         </div>
 
-        <div className="min-w-0 space-y-4">
-          <div>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-jp-primary">Outbound</p>
-            <TimeRouteBlock
-              departureTime={outbound.departure_time_display}
-              arrivalTime={outbound.arrival_time_display}
-              originCode={outbound.origin_airport_code}
-              destinationCode={outbound.destination_airport_code}
-              duration={outbound.duration_display}
-              arrivalDayOffset={outbound.arrival_day_offset_display}
-              stops={outbound.stops}
-              stopsLabel={outbound.stops_label_display || undefined}
-              layoverSummary={outbound.layover_summary_display}
+        <div className="min-w-0">
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-2">
+            <div className="min-w-0">
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-jp-primary">Outbound</p>
+              <TimeRouteBlock
+                departureTime={outbound.departure_time_display}
+                arrivalTime={outbound.arrival_time_display}
+                originCode={outbound.origin_airport_code}
+                destinationCode={outbound.destination_airport_code}
+                duration={outbound.duration_display}
+                arrivalDayOffset={outbound.arrival_day_offset_display}
+                stops={outbound.stops}
+                stopsLabel={outbound.stops_label_display || undefined}
+                layoverSummary={outbound.layover_summary_display}
+                compact
+              />
+            </div>
+            <div
+              className="hidden h-10 w-px bg-jp-border-soft sm:block"
+              aria-hidden="true"
+              data-testid="pair-leg-separator"
             />
+            <div className="min-w-0 border-t border-jp-border-soft pt-2 sm:border-t-0 sm:pt-0">
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-jp-primary">Return</p>
+              <TimeRouteBlock
+                departureTime={inbound.departure_time_display}
+                arrivalTime={inbound.arrival_time_display}
+                originCode={inbound.origin_airport_code}
+                destinationCode={inbound.destination_airport_code}
+                duration={inbound.duration_display}
+                arrivalDayOffset={inbound.arrival_day_offset_display}
+                stops={inbound.stops}
+                stopsLabel={inbound.stops_label_display || undefined}
+                layoverSummary={inbound.layover_summary_display}
+                compact
+              />
+            </div>
           </div>
-          <div>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-jp-primary">Return</p>
-            <TimeRouteBlock
-              departureTime={inbound.departure_time_display}
-              arrivalTime={inbound.arrival_time_display}
-              originCode={inbound.origin_airport_code}
-              destinationCode={inbound.destination_airport_code}
-              duration={inbound.duration_display}
-              arrivalDayOffset={inbound.arrival_day_offset_display}
-              stops={inbound.stops}
-              stopsLabel={inbound.stops_label_display || undefined}
-              layoverSummary={inbound.layover_summary_display}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <FareBadge refundable={option.refundable} />
             <SupplierSourceBadge label={option.supplier_source_label} />
           </div>
@@ -186,7 +190,7 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
 
         <div className="flex min-w-0 items-end justify-between gap-3 border-t border-jp-border-soft pt-3 md:h-full md:min-w-[10.5rem] md:flex-col md:items-end md:justify-center md:border-l md:border-t-0 md:pl-3 md:pt-0 xl:min-w-[12.5rem] xl:pl-4">
           <div className="text-right">
-            <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">Total return fare</p>
+            <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">Total fare</p>
             <p className="whitespace-nowrap text-lg font-bold text-jp-text" data-testid="result-price-display">
               {displayPrice}
             </p>
@@ -194,7 +198,7 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
           <div className="flex flex-col items-end gap-2">
             <button
               type="button"
-              className="text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+              className="rounded-jp-md border border-jp-border bg-jp-surface px-3 py-1.5 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
               data-testid="pair-details"
               onClick={() => openFareConfirmation()}
             >

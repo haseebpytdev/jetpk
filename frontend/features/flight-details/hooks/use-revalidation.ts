@@ -122,6 +122,23 @@ export function useRevalidation() {
       return false;
     }
     markResultsLeftForCheckout(searchId ?? lastParamsRef.current?.searchId);
+    setState("loading");
+    setMessage("Preparing your trip…");
+    // Soft-prefetch passengers chunk when possible; keep hard assign for session cookie handoff.
+    try {
+      const prefetchPath = new URL(resolved, window.location.origin).pathname;
+      void import("@/features/standard-booking/components/PassengerDetailsPage");
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        window.requestIdleCallback(() => {
+          const link = document.createElement("link");
+          link.rel = "prefetch";
+          link.href = prefetchPath;
+          document.head.appendChild(link);
+        });
+      }
+    } catch {
+      /* non-blocking */
+    }
     window.location.assign(resolved);
     return true;
   }, []);

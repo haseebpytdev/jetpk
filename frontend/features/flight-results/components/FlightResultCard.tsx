@@ -122,9 +122,6 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
       <div className="grid items-center gap-3 md:grid-cols-[minmax(8rem,0.85fr)_minmax(16rem,2fr)_minmax(10.5rem,0.95fr)] lg:gap-4 xl:grid-cols-[minmax(10.5rem,1fr)_minmax(20rem,2.35fr)_minmax(12.5rem,0.95fr)]">
         <div className="min-w-0 md:pr-1">
           <AirlineIdentity code={offer.airline_code} name={offer.airline_name} logoUrl={offer.airline_logo_url} size="md" />
-          <p className="mt-1 truncate text-xs text-jp-text-muted">
-            {offer.flight_number ?? "Flight number not supplied"}
-          </p>
           {offer.operating_airline_name && offer.operating_airline_name !== offer.airline_name ? (
             <p className="mt-0.5 truncate text-[11px] text-jp-text-muted">Operated by {offer.operating_airline_name}</p>
           ) : null}

@@ -13,16 +13,18 @@ type SiteFooterProps = {
 export function SiteFooter({ className, branding = null }: SiteFooterProps) {
   return (
     <footer className={cn("bg-jp-footer text-white", className)} role="contentinfo">
-      <PageContainer className="py-7 sm:py-8">
-        <div className="grid gap-7 lg:grid-cols-[1.25fr_repeat(4,minmax(0,1fr))] lg:gap-8">
-          <div className="space-y-3">
+      <PageContainer className="py-5 sm:py-6">
+        <div className="grid gap-5 lg:grid-cols-[1.25fr_repeat(4,minmax(0,1fr))] lg:gap-6">
+          <div className="space-y-2.5">
             <JetPakistanLogo
               variant="inverse"
+              showTagline
+              taglinePlacement="below"
               logoUrl={branding?.logo_url}
               brandName={branding?.brand_name}
               logoHeight={branding?.header_logo_height}
             />
-            <p className="max-w-sm text-jp-sm leading-relaxed text-white/80">
+            <p className="max-w-sm text-jp-sm leading-snug text-white/80">
               Connecting you to the world with trusted fares, secure booking, and dedicated support for
               travelers across Pakistan and beyond.
             </p>
@@ -31,7 +33,7 @@ export function SiteFooter({ className, branding = null }: SiteFooterProps) {
           {footerColumns.map((column) => (
             <div key={column.title}>
               <h2 className="text-jp-xs font-semibold uppercase tracking-wide text-white">{column.title}</h2>
-              <ul className="mt-3 space-y-1.5">
+              <ul className="mt-2 space-y-1">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <a
@@ -49,7 +51,7 @@ export function SiteFooter({ className, branding = null }: SiteFooterProps) {
       </PageContainer>
 
       <div className="border-t border-white/15">
-        <PageContainer className="flex flex-col gap-3 py-3.5 text-jp-sm text-white/75 sm:flex-row sm:items-center sm:justify-between">
+        <PageContainer className="flex flex-col gap-2 py-2.5 text-jp-sm text-white/75 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} JetPakistan. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-3 sm:justify-end">
             <CurrencySelector appearance="footer" />

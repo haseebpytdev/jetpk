@@ -64,7 +64,7 @@ export function buildFlightSearchQueryParams(input: FlightSearchPayloadInput): U
 
   if (tripType === "round_trip" && input.returnDate) {
     params.set("return_date", input.returnDate);
-    params.set("view", "pair");
+    // View choice is authoritative on results — do not pre-set Pair before the modal.
   }
 
   return params;
