@@ -659,6 +659,10 @@ class FlightSearchService
         SupplierConnection $connection,
         string $sourceChannel = 'public_guest',
     ): bool {
+        if (! $this->isFlightSearchProvider($connection->provider)) {
+            return true;
+        }
+
         if (SupplierPublicRoutingGuard::shouldSkipForChannel($connection, $sourceChannel)) {
             return true;
         }
@@ -678,6 +682,10 @@ class FlightSearchService
         SupplierConnection $connection,
         string $sourceChannel = 'public_guest',
     ): string {
+        if (! $this->isFlightSearchProvider($connection->provider)) {
+            return 'non_flight_provider';
+        }
+
         if (SupplierPublicRoutingGuard::shouldSkipForChannel($connection, $sourceChannel)) {
             return 'sandbox_excluded_from_production_fanout';
         }
@@ -701,6 +709,24 @@ class FlightSearchService
         return $moduleKey === null
             ? 'provider_module_unknown'
             : 'provider_module_disabled:'.$moduleKey;
+    }
+
+    /**
+     * Providers that have a FlightSupplierInterface adapter.
+     * Non-flight modules (e.g. smtp) share SupplierConnection rows and must never enter search fan-out.
+     */
+    protected function isFlightSearchProvider(SupplierProvider $provider): bool
+    {
+        return match ($provider) {
+            SupplierProvider::Sabre,
+            SupplierProvider::PiaNdc,
+            SupplierProvider::Airblue,
+            SupplierProvider::AirlineDirect,
+            SupplierProvider::Duffel,
+            SupplierProvider::Iati,
+            SupplierProvider::OneApi => true,
+            default => false,
+        };
     }
 
     /**
