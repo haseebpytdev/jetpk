@@ -1,0 +1,16 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R1",
+  "captured_at": "2026-08-28T05:00:00Z",
+  "note": "Engineering-local expectations after code changes. Live production after-metrics require deploy (blocked on Al-Haider 60175 manual cancel).",
+  "code_changes_affecting_perf": [
+    "passengers loading.tsx now renders BookingPageShell immediately",
+    "DocumentReader/OCR deferred until Autofill click",
+    "passengers page imports PassengerDetailsPage directly (not feature barrel)",
+    "supplier elapsed_ms instrumentation (observability only)"
+  ],
+  "routes": [
+    {"route": "/booking/passengers", "expected_shell": "immediate BookingPageShell", "ocr_on_page_load": false},
+    {"route": "/flights/results", "default_sort": "cheapest", "pending_ux": "Updating fares… (non-warning)"}
+  ],
+  "live_p50_p95": null
+}

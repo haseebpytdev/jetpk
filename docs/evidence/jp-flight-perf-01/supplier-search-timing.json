@@ -1,0 +1,37 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R1",
+  "investigation": "Code-path root-cause analysis (no live secrets). Timing fields added to supplier_call_summaries in FlightSearchService.",
+  "progressive_architecture": {
+    "backend": "FlightController::completeSearchInto publishes PARTIAL then READY; no separate global aggregation deadline beyond sequential supplier loop",
+    "per_supplier_timeout_seconds": "config ota.supplier_timeout_seconds default 20",
+    "frontend_poll_ms": 750,
+    "late_merge": "mergeProgressiveResults while searching/partial; terminal ready replaces with canonical list"
+  },
+  "likely_incomplete_causes": [
+    {
+      "cause": "supplier_latency_or_timeout",
+      "evidence": "per-connection adapter search wrapped with elapsed_ms; HTTP timeouts surface as warnings/empty batches"
+    },
+    {
+      "cause": "connection_skipped_circuit_or_disabled",
+      "evidence": "shouldSkipSupplierConnection emits DISABLED/CIRCUIT_OPEN summaries before HTTP"
+    },
+    {
+      "cause": "parser_or_pricing_reject",
+      "evidence": "normalize/post-pricing reject histograms in pipeline logs; accepted_offer_count can be 0 with raw_offer_count > 0"
+    },
+    {
+      "cause": "frontend_settlement_stop",
+      "evidence": "polling stops on ready/empty/failed — suppliers finishing after READY are not merged (documented limitation)"
+    },
+    {
+      "cause": "ux_false_alarm",
+      "evidence": "previous copy treated settled pipeline failed+inventory as yellow 'did not finish responding' even when remaining inventory was valid"
+    }
+  ],
+  "supplier_table_template": [
+    {"SUPPLIER": "sabre", "RESULT": "SUCCESS|EMPTY|TIMEOUT|ERROR|DISABLED|CIRCUIT_OPEN", "TIME_MS": null, "OFFER_COUNT": null, "FINAL_STATE": null},
+    {"SUPPLIER": "iati", "RESULT": null, "TIME_MS": null, "OFFER_COUNT": null, "FINAL_STATE": null}
+  ],
+  "live_fill": "Populate TIME_MS/OFFER_COUNT from sanitized flight_search.public_diagnostics logs after non-commercial UAT search; never include tokens/credentials."
+}

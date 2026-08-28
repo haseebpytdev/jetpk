@@ -1,0 +1,21 @@
+{
+  "phase": "JP-FLIGHT-PERF-01-R1",
+  "captured_at": "2026-08-28T04:40:00Z",
+  "note": "Local engineering baseline from code paths + harness stubs. Live production timing requires post-deploy measurement. No commercial mutations.",
+  "routes": [
+    {"route": "/", "samples": 0, "p50_ms": null, "p95_ms": null, "note": "deferred_until_local_harness"},
+    {"route": "/flights/results", "samples": 0, "p50_ms": null, "p95_ms": null, "note": "SEARCH_START_TO_FIRST_RESULT measured separately"},
+    {"route": "/booking/passengers", "samples": 1, "p50_ms": 1916, "p95_ms": 1916, "source": "frontend/tmp/flight-flow-closure-20260819/metrics.json BASE_PASSENGER_ROUTE_TO_SHELL_MS", "shell_after_fix_ms": 334},
+    {"route": "/groups/search", "samples": 0, "p50_ms": null, "p95_ms": null}
+  ],
+  "search_metrics": {
+    "SEARCH_START_TO_FIRST_RESULT_MS": {"p50": null, "note": "progressive first paint; poll 750ms"},
+    "SEARCH_START_TO_SETTLED_RESULTS_MS": {"p50": null, "note": "settles when last supplier completes; per-supplier timeout default 20s"}
+  },
+  "known_delay_sources": [
+    "booking/(public) layout force-dynamic getPublicSession + PublicConfigService",
+    "passengers RouteLoadingSkeleton previously blanked booking chrome (fixed)",
+    "DocumentReader static import previously pulled OCR wrapper into passengers chunk (fixed on-demand)",
+    "supplier sequential collectOffersFromConnections latency"
+  ]
+}
