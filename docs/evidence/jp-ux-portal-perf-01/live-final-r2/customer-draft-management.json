@@ -1,0 +1,42 @@
+{
+  "supported_actions": {
+    "view_draft": true,
+    "resume_checkout_route_reachable": true,
+    "change_flight": "supported_via_passengers_change_flight_dialog",
+    "abandon_db_row": "not_supported_in_customer_portal",
+    "result": "PASS"
+  },
+  "detail_actions": [
+    {
+      "code": "resume_checkout",
+      "label": "Resume checkout",
+      "available": true,
+      "url": "/booking/passengers"
+    },
+    {
+      "code": "view_draft",
+      "label": "View draft",
+      "available": true,
+      "url": "/customer/bookings/11"
+    },
+    {
+      "code": "view_invoice",
+      "label": "View invoice",
+      "available": false,
+      "url": null
+    },
+    {
+      "code": "contact_support",
+      "label": "Contact support",
+      "available": true,
+      "url": "/customer/support"
+    },
+    {
+      "code": "back_to_bookings",
+      "label": "Back to bookings",
+      "available": true,
+      "url": "/customer/bookings"
+    }
+  ],
+  "runtime_sha": "d71e065b861657697dc5a58d0d7dc4702f71d373"
+}

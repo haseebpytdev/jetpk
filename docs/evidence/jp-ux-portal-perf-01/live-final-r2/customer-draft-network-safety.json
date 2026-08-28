@@ -1,0 +1,15 @@
+{
+  "SUPPLIER_MUTATION_PATH_REACHABLE_FROM_DRAFT": "NO_ON_PASSENGERS_POST",
+  "ALHAIDER_CREATE_CALLS": 0,
+  "SABRE_PNR_CALLS": 0,
+  "PIA_ORDER_CREATE_CALLS": 0,
+  "IATI_BOOK_CALLS": 0,
+  "ONEAPI_BOOK_CALLS": 0,
+  "PAYMENT_CALLS": 0,
+  "TICKET_CALLS": 0,
+  "blocked": [],
+  "sample_post_urls": [
+    "https://jetpakistan.pk/laravel/flights/results/revalidate-offer",
+    "https://jetpakistan.pk/laravel/booking/passengers?format=json"
+  ]
+}

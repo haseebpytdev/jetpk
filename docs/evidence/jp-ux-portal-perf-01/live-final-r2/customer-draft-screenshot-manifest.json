@@ -1,0 +1,16 @@
+{
+  "phase": "JP-UX-PORTAL-PERF-01-R2-CUSTOMER-DRAFT",
+  "captured_at": "2026-08-28T17:43:59.529Z",
+  "runtime_sha": "d71e065b861657697dc5a58d0d7dc4702f71d373",
+  "public_build_id": "paZNexLrycq-lEygr8Uz3",
+  "screenshots": [
+    "17-review-traveler-compact.png",
+    "18-customer-dashboard-with-draft.png",
+    "19-customer-bookings-with-draft.png",
+    "20-customer-draft-booking-detail.png",
+    "customer-dashboard-with-draft.png",
+    "customer-bookings-with-draft.png",
+    "customer-draft-booking-detail.png",
+    "review-traveler-compact.png"
+  ]
+}
