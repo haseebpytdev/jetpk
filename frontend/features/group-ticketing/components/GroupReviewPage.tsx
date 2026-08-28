@@ -120,7 +120,12 @@ export function GroupReviewPage({ bookingRef }: GroupReviewPageProps) {
             : decisionModal?.primary_action
               ? () => {
                   setDecisionModal(null);
-                  router.push(`/groups/${encodeURIComponent(booking.inventory.public_id)}/passengers`);
+                  const packageId = booking.inventory.public_id ?? booking.inventory.id;
+                  if (packageId == null || packageId === "") {
+                    router.push("/groups/search");
+                    return;
+                  }
+                  router.push(`/groups/${encodeURIComponent(String(packageId))}/passengers`);
                 }
               : undefined
         }
