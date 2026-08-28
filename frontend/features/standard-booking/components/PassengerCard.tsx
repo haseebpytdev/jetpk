@@ -1,6 +1,14 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { useState } from "react";
 import type { PassengerFormValues, TravelDocumentRequirement } from "../types";
 import { TITLES } from "../utils/passenger-form";
-import { DocumentReader } from "../document-reader";
+
+const DocumentReader = dynamic(
+  () => import("../document-reader/components/DocumentReader").then((mod) => mod.DocumentReader),
+  { ssr: false, loading: () => null },
+);
 
 type PassengerCardProps = {
   index: number;
@@ -27,6 +35,7 @@ export function PassengerCard({
   onChange,
   onReplacePassenger,
 }: PassengerCardProps) {
+  const [passportAutofillOpen, setPassportAutofillOpen] = useState(false);
   const showPassport =
     documentRequirements.passport_required || passenger.document_type === "passport";
   const showNationalId =
@@ -141,11 +150,24 @@ export function PassengerCard({
         </div>
 
         {showPassport && onReplacePassenger ? (
-          <DocumentReader
-            passengerIndex={index}
-            passenger={passenger}
-            onApply={(next) => onReplacePassenger(index, next)}
-          />
+          passportAutofillOpen ? (
+            <DocumentReader
+              passengerIndex={index}
+              passenger={passenger}
+              onApply={(next) => onReplacePassenger(index, next)}
+            />
+          ) : (
+            <div className="sm:col-span-2">
+              <button
+                type="button"
+                className="text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+                data-testid={`passport-autofill-open-${index}`}
+                onClick={() => setPassportAutofillOpen(true)}
+              >
+                Autofill from passport
+              </button>
+            </div>
+          )
         ) : null}
 
         {nationalIdAllowed ? (

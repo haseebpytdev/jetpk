@@ -1,4 +1,4 @@
-import { PassengerDetailsPage } from "@/features/standard-booking";
+import { PassengerDetailsPage } from "@/features/standard-booking/components/PassengerDetailsPage";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
