@@ -138,9 +138,16 @@ export function FlightDetailsDrawer({
 
   useEffect(() => {
     if (!open || !context || context.intent !== "booking") return;
-    if (details.loadState !== "ready" || !details.data?.offer) return;
-    const offer = details.data.offer;
-    const fareKey = toSupplierFareKey(details.selectedFareKey, details.fareOptions);
+    const offer = details.data?.offer ?? context.initialOffer;
+    if (!offer) return;
+    const fareOptions =
+      details.fareOptions.length > 0
+        ? details.fareOptions
+        : (context.initialFareOptions ??
+          context.initialOffer?.branded_fares_display_options ??
+          context.initialOffer?.fare_family_options_display ??
+          []);
+    const fareKey = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, fareOptions);
     revalidation.warmStartRevalidation({
       searchId: context.searchId,
       offerId: offer.offer_id,
@@ -153,13 +160,14 @@ export function FlightDetailsDrawer({
       outboundFareOptionKey: context.outboundFareOptionKey,
       returnFareOptionKey: fareKey,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- warm once per ready offer/fare
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- warm on open + fare identity
   }, [
     open,
     context,
-    details.loadState,
     details.data?.offer?.offer_id,
     details.selectedFareKey,
+    context?.initialOffer?.offer_id,
+    context?.fareOptionKey,
   ]);
 
   if (!open || !context) return null;
