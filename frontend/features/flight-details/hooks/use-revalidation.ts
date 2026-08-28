@@ -143,24 +143,25 @@ export function useRevalidation() {
     markResultsLeftForCheckout(searchId ?? lastParamsRef.current?.searchId);
     setState("loading");
     setMessage("Preparing your trip…");
-    // Soft-prefetch passengers chunk when possible; keep hard assign for session cookie handoff.
+    // Soft-nav for Next passenger checkout: revalidate XHR already set session cookies
+    // (credentials:include). Full location.assign reloads shared layout/chunks (~10s+ cold).
     try {
-      const prefetchPath = new URL(resolved, window.location.origin).pathname;
       void import("@/features/standard-booking/components/PassengerDetailsPage");
-      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-        window.requestIdleCallback(() => {
-          const link = document.createElement("link");
-          link.rel = "prefetch";
-          link.href = prefetchPath;
-          document.head.appendChild(link);
-        });
+      if (resolved.startsWith("/booking/passengers")) {
+        try {
+          router.prefetch(resolved);
+        } catch {
+          /* non-blocking */
+        }
+        router.push(resolved);
+        return true;
       }
     } catch {
-      /* non-blocking */
+      /* fall through to hard assign */
     }
     window.location.assign(resolved);
     return true;
-  }, []);
+  }, [router]);
 
   const runRevalidation = useCallback(
     async (params: RevalidationParams, acceptFareChange = false) => {
