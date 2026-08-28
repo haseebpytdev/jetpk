@@ -1,0 +1,1490 @@
+{
+  "phase": "JP-UX-PORTAL-PERF-01-R2",
+  "captured_at": "2026-08-28T13:52:44.887Z",
+  "host": "https://jetpakistan.pk",
+  "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+  "public_build_id": "aq1S4pcjSXLbIEboahxkQ",
+  "methodology": "Playwright: Book Now click=t0; Continue visible then 2500ms review dwell (allows warm revalidate); soft router.push to /booking/passengers; form usable=First name input. Fonts aborted. No passenger submit. samples=10",
+  "book_now_interaction": true,
+  "deep_link_substituted": false,
+  "depart": "2026-09-19",
+  "BOOK_NOW_TO_PREPARING_STATE_P50": 2650,
+  "BOOK_NOW_TO_NAVIGATION_START_P50": 3928,
+  "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_P50": 4013,
+  "BOOK_NOW_TO_TRAVELER_FORM_USABLE_P50": 6687,
+  "BOOK_NOW_TO_TRAVELER_FORM_USABLE_P95": 12081,
+  "summaries": {
+    "preparing": {
+      "samples": 10,
+      "p50": 2650,
+      "p95": 2749,
+      "min": 2601,
+      "max": 2749,
+      "values": [
+        2601,
+        2614,
+        2616,
+        2648,
+        2650,
+        2666,
+        2686,
+        2688,
+        2703,
+        2749
+      ]
+    },
+    "navigation": {
+      "samples": 10,
+      "p50": 3928,
+      "p95": 5883,
+      "min": 3754,
+      "max": 5883,
+      "values": [
+        3754,
+        3781,
+        3807,
+        3819,
+        3928,
+        3935,
+        3985,
+        4110,
+        4349,
+        5883
+      ]
+    },
+    "route_visible": {
+      "samples": 10,
+      "p50": 4013,
+      "p95": 5961,
+      "min": 3825,
+      "max": 5961,
+      "values": [
+        3825,
+        3854,
+        3866,
+        3883,
+        4013,
+        4068,
+        4080,
+        4167,
+        4412,
+        5961
+      ]
+    },
+    "form_usable": {
+      "samples": 10,
+      "p50": 6687,
+      "p95": 12081,
+      "min": 5780,
+      "max": 12081,
+      "values": [
+        5780,
+        6367,
+        6520,
+        6611,
+        6687,
+        7069,
+        7073,
+        8385,
+        12052,
+        12081
+      ]
+    }
+  },
+  "blank_frame_count_total": 0,
+  "duplicate_loading_text_count_total": 0,
+  "samples": [
+    {
+      "sample": 1,
+      "search_id": "b0f6495a-6bf7-422b-852b-4b6af4a0811f",
+      "book_now_click_ts": 1787925010198,
+      "preparation_start_ts": 1787925012901,
+      "navigation_start_ts": 1787925014126,
+      "route_visible_ts": 1787925014211,
+      "form_usable_ts": 1787925016885,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 92,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2674,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2703,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 3928,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 4013,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 6687,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 13,
+      "network_request_count": 46,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/laravel/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=b0f6495a-6bf7-422b-852b-4b6af4a0811f&offer_id=17d90ad250ec77b23c7",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 2169,
+          "ttfb_ms": 2118
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1750,
+          "ttfb_ms": 1263
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1749,
+          "ttfb_ms": 1259
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2455-7175b4eb93cf4cc8.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1743,
+          "ttfb_ms": 1263
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1739,
+          "ttfb_ms": 226
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1730,
+          "ttfb_ms": 212
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1720,
+          "ttfb_ms": 1172
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1705,
+          "ttfb_ms": 251
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/login?_rsc=Ubs0uuLknkWYTCJu",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 7817
+    },
+    {
+      "sample": 2,
+      "search_id": "99f374f4-052f-4547-b753-db73901a3bb1",
+      "book_now_click_ts": 1787925025408,
+      "preparation_start_ts": 1787925028074,
+      "navigation_start_ts": 1787925029518,
+      "route_visible_ts": 1787925029575,
+      "form_usable_ts": 1787925032019,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 26,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2643,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2666,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 4110,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 4167,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 6611,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 11,
+      "network_request_count": 47,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 2432,
+          "ttfb_ms": 709
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=99f374f4-052f-4547-b753-db73901a3bb1&offer_id=17d90ad250ec77b23c7",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1973,
+          "ttfb_ms": 1961
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/revalidate-offer",
+          "method": "POST",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1840,
+          "ttfb_ms": 1818
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1447,
+          "ttfb_ms": 429
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1435,
+          "ttfb_ms": 419
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-59beb68c0d1d459b.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1435,
+          "ttfb_ms": 419
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/data?search_id=99f374f4-052f-4547-b753-db73901a3bb1&page=1&per_page=12&sort=cheapest",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1298,
+          "ttfb_ms": 1117
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 1219,
+          "ttfb_ms": 273
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/?_rsc=Ubs0uuLknkWYTCJu",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 6876
+    },
+    {
+      "sample": 3,
+      "search_id": "ab913214-fb98-4fbc-8f8a-47efa13b81bc",
+      "book_now_click_ts": 1787925037666,
+      "preparation_start_ts": 1787925040316,
+      "navigation_start_ts": 1787925041473,
+      "route_visible_ts": 1787925041549,
+      "form_usable_ts": 1787925044033,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 51,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2633,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2650,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 3807,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 3883,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 6367,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 10,
+      "network_request_count": 48,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/laravel/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=ab913214-fb98-4fbc-8f8a-47efa13b81bc&offer_id=17d90ad250ec77b23c7",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 2351,
+          "ttfb_ms": 2300
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 2338,
+          "ttfb_ms": 268
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 1905,
+          "ttfb_ms": 568
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/revalidate-offer",
+          "method": "POST",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1756,
+          "ttfb_ms": 1659
+        },
+        {
+          "url": "https://jetpakistan.pk/?_rsc=Ubs0uuLknkWYTCJu",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1311,
+          "ttfb_ms": 1233
+        },
+        {
+          "url": "https://jetpakistan.pk/login?_rsc=Ubs0uuLknkWYTCJu",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1310,
+          "ttfb_ms": 1233
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/data?search_id=ab913214-fb98-4fbc-8f8a-47efa13b81bc&page=1&per_page=12&sort=cheapest",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1280,
+          "ttfb_ms": 1233
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/7888-085939793461c002.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1273,
+          "ttfb_ms": 1232
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=ab913214-fb98-4fbc-8f8a-47efa13b8",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 6630
+    },
+    {
+      "sample": 4,
+      "search_id": "1a17766b-a34d-4f11-9434-75482c51db59",
+      "book_now_click_ts": 1787925049796,
+      "preparation_start_ts": 1787925052444,
+      "navigation_start_ts": 1787925053615,
+      "route_visible_ts": 1787925053662,
+      "form_usable_ts": 1787925056865,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 73,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2634,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2648,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 3819,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 3866,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 7069,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 12,
+      "network_request_count": 46,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/laravel/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=1a17766b-a34d-4f11-9434-75482c51db59&offer_id=17d90ad250ec77b23c7",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 3124,
+          "ttfb_ms": 3085
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 3121,
+          "ttfb_ms": 316
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1859,
+          "ttfb_ms": 1486
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-59beb68c0d1d459b.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1858,
+          "ttfb_ms": 1484
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1857,
+          "ttfb_ms": 1480
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1856,
+          "ttfb_ms": 1497
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/8861-9b7fe741788fb937.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1844,
+          "ttfb_ms": 625
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/864-2d76cca718e5cb74.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 1843,
+          "ttfb_ms": 621
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/login?_rsc=Ubs0uuLknkWYTCJu",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 7248
+    },
+    {
+      "sample": 5,
+      "search_id": "466006d7-d68d-42f1-b26b-e697013bd958",
+      "book_now_click_ts": 1787925067894,
+      "preparation_start_ts": 1787925070582,
+      "navigation_start_ts": 1787925071879,
+      "route_visible_ts": 1787925071962,
+      "form_usable_ts": 1787925074414,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 117,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2671,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2688,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 3985,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 4068,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 6520,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 11,
+      "network_request_count": 46,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-59beb68c0d1d459b.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6263,
+          "ttfb_ms": 471
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/8861-9b7fe741788fb937.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6260,
+          "ttfb_ms": 467
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/864-2d76cca718e5cb74.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6251,
+          "ttfb_ms": 468
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6249,
+          "ttfb_ms": 552
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/error-0c1973fe61d9ade6.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6163,
+          "ttfb_ms": 5339
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6163,
+          "ttfb_ms": 464
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6147,
+          "ttfb_ms": 5030
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 5846,
+          "ttfb_ms": 4946
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/?_rsc=Ubs0uuLknkWYTCJu",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 6664
+    },
+    {
+      "sample": 6,
+      "search_id": "ff1223aa-b2f1-4abe-9e7a-ba123d074ee6",
+      "book_now_click_ts": 1787925082947,
+      "preparation_start_ts": 1787925085563,
+      "navigation_start_ts": 1787925086728,
+      "route_visible_ts": 1787925086801,
+      "form_usable_ts": 1787925088727,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 33,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2598,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2616,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 3781,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 3854,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 5780,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 12,
+      "network_request_count": 45,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2757,
+          "ttfb_ms": 588
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-59beb68c0d1d459b.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2757,
+          "ttfb_ms": 583
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2741,
+          "ttfb_ms": 553
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/864-2d76cca718e5cb74.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2705,
+          "ttfb_ms": 536
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/8861-9b7fe741788fb937.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2703,
+          "ttfb_ms": 536
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2671,
+          "ttfb_ms": 521
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2171,
+          "ttfb_ms": 1407
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2455-7175b4eb93cf4cc8.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2169,
+          "ttfb_ms": 1393
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/?_rsc=Ubs0uuLknkWYTCJu",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 6236
+    },
+    {
+      "sample": 7,
+      "search_id": "e9e550df-eda1-4174-85c5-467fb8628593",
+      "book_now_click_ts": 1787925097092,
+      "preparation_start_ts": 1787925099693,
+      "navigation_start_ts": 1787925102975,
+      "route_visible_ts": 1787925103053,
+      "form_usable_ts": 1787925109144,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 15,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2581,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2601,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 5883,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 5961,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 12052,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 11,
+      "network_request_count": 47,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/laravel/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=e9e550df-eda1-4174-85c5-467fb8628593&offer_id=17d90ad250ec77b23c7",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 5772,
+          "ttfb_ms": 5746
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 4891,
+          "ttfb_ms": 403
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/data?search_id=e9e550df-eda1-4174-85c5-467fb8628593&page=1&per_page=12&sort=cheapest",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 4345,
+          "ttfb_ms": 4224
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4790-a449c73ffb4add70.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 4331,
+          "ttfb_ms": 4219
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/7888-085939793461c002.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 4327,
+          "ttfb_ms": 4219
+        },
+        {
+          "url": "https://jetpakistan.pk/login?_rsc=Ubs0uuLknkWYTCJu",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 4319,
+          "ttfb_ms": 4227
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/revalidate-offer",
+          "method": "POST",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 4042,
+          "ttfb_ms": 3993
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/booking/commerce-gates",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1084,
+          "ttfb_ms": 1079
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/?_rsc=Ubs0uuLknkWYTCJu",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 12245
+    },
+    {
+      "sample": 8,
+      "search_id": "11806f8c-45c0-41e4-b78b-76e789750122",
+      "book_now_click_ts": 1787925119905,
+      "preparation_start_ts": 1787925122519,
+      "navigation_start_ts": 1787925124254,
+      "route_visible_ts": 1787925124317,
+      "form_usable_ts": 1787925131986,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 14,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2598,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2614,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 4349,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 4412,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 12081,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 12,
+      "network_request_count": 44,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/laravel/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=11806f8c-45c0-41e4-b78b-76e789750122&offer_id=17d90ad250ec77b23c7",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 7562,
+          "ttfb_ms": 7378
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 6936,
+          "ttfb_ms": 202
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/data?search_id=11806f8c-45c0-41e4-b78b-76e789750122&page=1&per_page=12&sort=cheapest",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 6455,
+          "ttfb_ms": 6351
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4790-a449c73ffb4add70.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6418,
+          "ttfb_ms": 6300
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/7888-085939793461c002.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6408,
+          "ttfb_ms": 6305
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/revalidate-offer",
+          "method": "POST",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1833,
+          "ttfb_ms": 1727
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 679,
+          "ttfb_ms": 317
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 679,
+          "ttfb_ms": 317
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/?_rsc=Ubs0uuLknkWYTCJu",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 12324
+    },
+    {
+      "sample": 9,
+      "search_id": "f7ca0fb9-a80d-441d-b34a-a86df41e7458",
+      "book_now_click_ts": 1787925142938,
+      "preparation_start_ts": 1787925145687,
+      "navigation_start_ts": 1787925146873,
+      "route_visible_ts": 1787925147018,
+      "form_usable_ts": 1787925150011,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 146,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2726,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2749,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 3935,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 4080,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 7073,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 11,
+      "network_request_count": 46,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/layout-59beb68c0d1d459b.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 7083,
+          "ttfb_ms": 580
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 7057,
+          "ttfb_ms": 590
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6736,
+          "ttfb_ms": 217
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/864-2d76cca718e5cb74.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6612,
+          "ttfb_ms": 214
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/8861-9b7fe741788fb937.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6575,
+          "ttfb_ms": 180
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6528,
+          "ttfb_ms": 199
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6521,
+          "ttfb_ms": 200
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 6499,
+          "ttfb_ms": 264
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/?_rsc=Ubs0uuLknkWYTCJu",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 7251
+    },
+    {
+      "sample": 10,
+      "search_id": "37b77ac1-cd59-48a1-b279-7fb6193da4ef",
+      "book_now_click_ts": 1787925156485,
+      "preparation_start_ts": 1787925159171,
+      "navigation_start_ts": 1787925160239,
+      "route_visible_ts": 1787925160310,
+      "form_usable_ts": 1787925164870,
+      "BOOK_NOW_TO_CONTINUE_VISIBLE_MS": 82,
+      "BOOK_NOW_TO_CONTINUE_CLICK_MS": 2666,
+      "BOOK_NOW_TO_PREPARING_STATE_MS": 2686,
+      "BOOK_NOW_TO_NAVIGATION_START_MS": 3754,
+      "BOOK_NOW_TO_TRAVELER_ROUTE_VISIBLE_MS": 3825,
+      "BOOK_NOW_TO_TRAVELER_FORM_USABLE_MS": 8385,
+      "blank_frame_count": 0,
+      "duplicate_loading_text_count": 0,
+      "cls": 0,
+      "failed_request_count": 10,
+      "network_request_count": 48,
+      "slowest_requests": [
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 4397,
+          "ttfb_ms": 188
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=37b77ac1-cd59-48a1-b279-7fb6193da4ef&offer_id=17d90ad250ec77b23c7",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 4395,
+          "ttfb_ms": 4349
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/app/flights/results/page-28b923037d88aa8f.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2525,
+          "ttfb_ms": 2137
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2517,
+          "ttfb_ms": 412
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/864-2d76cca718e5cb74.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 2508,
+          "ttfb_ms": 596
+        },
+        {
+          "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "image",
+          "total_ms": 1999,
+          "ttfb_ms": 436
+        },
+        {
+          "url": "https://jetpakistan.pk/laravel/flights/results/revalidate-offer",
+          "method": "POST",
+          "status": 200,
+          "resource_type": "fetch",
+          "total_ms": 1832,
+          "ttfb_ms": 1819
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/chunks/8861-9b7fe741788fb937.js",
+          "method": "GET",
+          "status": 200,
+          "resource_type": "script",
+          "total_ms": 941,
+          "ttfb_ms": 581
+        }
+      ],
+      "failed_requests": [
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/_next/static/media/db96af6b531dc71f-s.p.woff2",
+          "status": "failed",
+          "error": "net::ERR_FAILED"
+        },
+        {
+          "url": "https://jetpakistan.pk/booking/passengers?flight_id=17d90ad250ec77b23c7eee4361f70ca95bb723c3f2ae0a559901031c33e0a4a2&search_id=37b77ac1-cd59-48a1-b279-7fb6193da",
+          "status": "failed",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "elapsed_wall_ms": 8498
+    }
+  ],
+  "CONTINUE_DWELL_MS": 2500,
+  "BOOK_NOW_HANDOFF_MEASURED": true
+}

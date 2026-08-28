@@ -1,0 +1,11 @@
+{
+  "phase": "JP-UX-PORTAL-PERF-01-R2",
+  "captured_at": "2026-08-28T14:21:33.075Z",
+  "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+  "public_build_id": "aq1S4pcjSXLbIEboahxkQ",
+  "search_id_hash": "59efcb2bbe074d08",
+  "RETURN_DETAILS_COMPLETE": "PASS",
+  "CARD_DETAILS_PARITY": "PASS",
+  "STOP_COUNT_MISMATCH": 0,
+  "required_field_hits": 5
+}

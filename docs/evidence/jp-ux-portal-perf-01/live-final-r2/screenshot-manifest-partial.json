@@ -1,0 +1,82 @@
+[
+  {
+    "filename": "07-return-pair-mixed-carrier-if-available.png",
+    "timestamp": "2026-08-28T14:03:51.706Z",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-22&return=2026-09-29&trip_type=return&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&search_id=undefined&view=pair",
+    "viewport": "1440x900",
+    "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+    "build_id": "aq1S4pcjSXLbIEboahxkQ",
+    "acceptance_gate": "PAIR_CARD",
+    "result": "CAPTURED"
+  },
+  {
+    "filename": "09-return-segmented-return.png",
+    "timestamp": "2026-08-28T14:04:45.442Z",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-22&return=2026-09-29&trip_type=return&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&search_id=undefined&view=segmented",
+    "viewport": "1440x900",
+    "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+    "build_id": "aq1S4pcjSXLbIEboahxkQ",
+    "acceptance_gate": "SEGMENTED_CARD",
+    "result": "CAPTURED"
+  },
+  {
+    "filename": "12-segmented-no-duplicate-summary.png",
+    "timestamp": "2026-08-28T14:04:45.592Z",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-22&return=2026-09-29&trip_type=return&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&search_id=undefined&view=segmented",
+    "viewport": "1440x900",
+    "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+    "build_id": "aq1S4pcjSXLbIEboahxkQ",
+    "acceptance_gate": "SEGMENTED_SUMMARY",
+    "result": "CAPTURED"
+  },
+  {
+    "filename": "13-progressive-first-results.png",
+    "timestamp": "2026-08-28T14:05:08.920Z",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&search_id=b26d9a56-aff9-42b2-854c-04a4cc63ca99",
+    "viewport": "1440x900",
+    "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+    "build_id": "aq1S4pcjSXLbIEboahxkQ",
+    "acceptance_gate": "PROGRESSIVE_SEARCH",
+    "result": "CAPTURED"
+  },
+  {
+    "filename": "14-progressive-settled.png",
+    "timestamp": "2026-08-28T14:05:12.529Z",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&search_id=b26d9a56-aff9-42b2-854c-04a4cc63ca99",
+    "viewport": "1440x900",
+    "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+    "build_id": "aq1S4pcjSXLbIEboahxkQ",
+    "acceptance_gate": "PROGRESSIVE_SEARCH",
+    "result": "CAPTURED"
+  },
+  {
+    "filename": "21-change-flight.png",
+    "timestamp": "2026-08-28T14:05:23.762Z",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&search_id=c41276bc-5c71-4cca-992e-c174350af303",
+    "viewport": "1440x900",
+    "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+    "build_id": "aq1S4pcjSXLbIEboahxkQ",
+    "acceptance_gate": "CHANGE_FLIGHT",
+    "result": "CAPTURED"
+  },
+  {
+    "filename": "22-bfcache-back.png",
+    "timestamp": "2026-08-28T14:05:31.058Z",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&search_id=b26d9a56-aff9-42b2-854c-04a4cc63ca99",
+    "viewport": "1440x900",
+    "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+    "build_id": "aq1S4pcjSXLbIEboahxkQ",
+    "acceptance_gate": "BFCACHE",
+    "result": "CAPTURED"
+  },
+  {
+    "filename": "23-bfcache-forward.png",
+    "timestamp": "2026-08-28T14:05:32.767Z",
+    "route": "https://jetpakistan.pk/booking/passengers?flight_id=633840ee16737bfd50a56a53ec1b32e714c31c3721f7f5a86021f86fe866e221&search_id=b26d9a56-aff9-42b2-854c-04a4cc63ca99&offer_id=633840ee16737bfd50a56a53ec1b32e714c31c3721f7f5a86021f86fe866e221&from=LHE&to=DXB&depart=2026-09-17&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=lt-pi0",
+    "viewport": "1440x900",
+    "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+    "build_id": "aq1S4pcjSXLbIEboahxkQ",
+    "acceptance_gate": "BFCACHE",
+    "result": "CAPTURED"
+  }
+]

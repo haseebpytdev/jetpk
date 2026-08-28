@@ -1,0 +1,2346 @@
+{
+  "phase": "JP-UX-PORTAL-PERF-01-R2",
+  "captured_at": "2026-08-28T13:42:23.926Z",
+  "host": "https://jetpakistan.pk",
+  "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+  "public_build_id": "aq1S4pcjSXLbIEboahxkQ",
+  "methodology": "Playwright goto domcontentloaded; shell=main/body visible; fonts aborted; samples=10; laravel route matches prior baseline URL; next route is portal detail page",
+  "before_reference": {
+    "shell_p50": 1276,
+    "fcp_p50": 1112,
+    "route": "/groups/package/ALH-3348",
+    "source": "live-before on 9979330c"
+  },
+  "prior_after_reference": {
+    "shell_p50": 1813,
+    "fcp_p50": 1436,
+    "route": "/groups/package/ALH-3348",
+    "source": "live-after on 9f5b70f4"
+  },
+  "laravel_package": {
+    "path": "/groups/package/ALH-3348",
+    "summaries": {
+      "ttfb": {
+        "samples": 10,
+        "p50": 409,
+        "p95": 1059,
+        "min": 336,
+        "max": 1059,
+        "values": [
+          336,
+          369,
+          378,
+          407,
+          409,
+          410,
+          415,
+          467,
+          509,
+          1059
+        ]
+      },
+      "dcl": {
+        "samples": 10,
+        "p50": 928,
+        "p95": 1866,
+        "min": 867,
+        "max": 1866,
+        "values": [
+          867,
+          900,
+          924,
+          926,
+          928,
+          966,
+          1042,
+          1050,
+          1175,
+          1866
+        ]
+      },
+      "fcp": {
+        "samples": 10,
+        "p50": 972,
+        "p95": 1860,
+        "min": 840,
+        "max": 1860,
+        "values": [
+          840,
+          880,
+          912,
+          952,
+          972,
+          976,
+          1016,
+          1072,
+          1104,
+          1860
+        ]
+      },
+      "shell": {
+        "samples": 10,
+        "p50": 1056,
+        "p95": 1999,
+        "min": 976,
+        "max": 1999,
+        "values": [
+          976,
+          1006,
+          1049,
+          1053,
+          1056,
+          1096,
+          1162,
+          1216,
+          1236,
+          1999
+        ]
+      },
+      "content": {
+        "samples": 10,
+        "p50": 1094,
+        "p95": 2035,
+        "min": 1009,
+        "max": 2035,
+        "values": [
+          1009,
+          1040,
+          1082,
+          1092,
+          1094,
+          1155,
+          1204,
+          1257,
+          1263,
+          2035
+        ]
+      }
+    },
+    "samples": [
+      {
+        "sample": 1,
+        "warm": false,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 1059,
+        "dcl_ms": 1866,
+        "fcp_ms": 1860,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1999,
+        "nav_to_content_ms": 2035,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1062,
+            "ttfb_ms": 930
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1062,
+            "ttfb_ms": 930
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 730,
+            "ttfb_ms": 199
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 643,
+            "ttfb_ms": 196
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 525,
+            "ttfb_ms": 505
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 410,
+            "ttfb_ms": 379
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 409,
+            "ttfb_ms": 379
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 403,
+            "ttfb_ms": 373
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 399,
+            "ttfb_ms": 373
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 272,
+            "ttfb_ms": 248
+          }
+        ]
+      },
+      {
+        "sample": 2,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 378,
+        "dcl_ms": 924,
+        "fcp_ms": 952,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1056,
+        "nav_to_content_ms": 1092,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 379,
+            "ttfb_ms": 373
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 573,
+            "ttfb_ms": 185
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 518,
+            "ttfb_ms": 179
+          },
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 379,
+            "ttfb_ms": 373
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 368,
+            "ttfb_ms": 325
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 368,
+            "ttfb_ms": 340
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 337,
+            "ttfb_ms": 197
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 266,
+            "ttfb_ms": 189
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 237,
+            "ttfb_ms": 218
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 214,
+            "ttfb_ms": 197
+          }
+        ]
+      },
+      {
+        "sample": 3,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 369,
+        "dcl_ms": 926,
+        "fcp_ms": 972,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1049,
+        "nav_to_content_ms": 1082,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 371,
+            "ttfb_ms": 364
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 471,
+            "ttfb_ms": 176
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 424,
+            "ttfb_ms": 172
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 407,
+            "ttfb_ms": 378
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 404,
+            "ttfb_ms": 374
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 390,
+            "ttfb_ms": 179
+          },
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 371,
+            "ttfb_ms": 364
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 284,
+            "ttfb_ms": 187
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 228,
+            "ttfb_ms": 211
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 193,
+            "ttfb_ms": 179
+          }
+        ]
+      },
+      {
+        "sample": 4,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 336,
+        "dcl_ms": 867,
+        "fcp_ms": 912,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1006,
+        "nav_to_content_ms": 1040,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 338,
+            "ttfb_ms": 334
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 495,
+            "ttfb_ms": 176
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 443,
+            "ttfb_ms": 173
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 372,
+            "ttfb_ms": 347
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 371,
+            "ttfb_ms": 179
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 364,
+            "ttfb_ms": 340
+          },
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 338,
+            "ttfb_ms": 334
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 299,
+            "ttfb_ms": 170
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 259,
+            "ttfb_ms": 242
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 197,
+            "ttfb_ms": 179
+          }
+        ]
+      },
+      {
+        "sample": 5,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 407,
+        "dcl_ms": 1175,
+        "fcp_ms": 840,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1236,
+        "nav_to_content_ms": 1263,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 409,
+            "ttfb_ms": 400
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 744,
+            "ttfb_ms": 426
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 632,
+            "ttfb_ms": 313
+          },
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 409,
+            "ttfb_ms": 400
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 261,
+            "ttfb_ms": 206
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 230,
+            "ttfb_ms": 212
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 218,
+            "ttfb_ms": 196
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 215,
+            "ttfb_ms": 196
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 212,
+            "ttfb_ms": 182
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 210,
+            "ttfb_ms": 182
+          }
+        ]
+      },
+      {
+        "sample": 6,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 409,
+        "dcl_ms": 900,
+        "fcp_ms": 880,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 976,
+        "nav_to_content_ms": 1009,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 412,
+            "ttfb_ms": 398
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 455,
+            "ttfb_ms": 182
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 452,
+            "ttfb_ms": 178
+          },
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 412,
+            "ttfb_ms": 398
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 299,
+            "ttfb_ms": 266
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 258,
+            "ttfb_ms": 246
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 224,
+            "ttfb_ms": 194
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 211,
+            "ttfb_ms": 197
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 207,
+            "ttfb_ms": 189
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 203,
+            "ttfb_ms": 186
+          }
+        ]
+      },
+      {
+        "sample": 7,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 410,
+        "dcl_ms": 928,
+        "fcp_ms": 976,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1053,
+        "nav_to_content_ms": 1094,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 412,
+            "ttfb_ms": 407
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 458,
+            "ttfb_ms": 205
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 456,
+            "ttfb_ms": 168
+          },
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 412,
+            "ttfb_ms": 407
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 368,
+            "ttfb_ms": 334
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 357,
+            "ttfb_ms": 336
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 348,
+            "ttfb_ms": 172
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 280,
+            "ttfb_ms": 181
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 239,
+            "ttfb_ms": 223
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 190,
+            "ttfb_ms": 167
+          }
+        ]
+      },
+      {
+        "sample": 8,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 415,
+        "dcl_ms": 966,
+        "fcp_ms": 1016,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1096,
+        "nav_to_content_ms": 1155,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 416,
+            "ttfb_ms": 412
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 464,
+            "ttfb_ms": 179
+          },
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 416,
+            "ttfb_ms": 412
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 412,
+            "ttfb_ms": 172
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 389,
+            "ttfb_ms": 366
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 385,
+            "ttfb_ms": 353
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 373,
+            "ttfb_ms": 352
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 369,
+            "ttfb_ms": 178
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 284,
+            "ttfb_ms": 184
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 229,
+            "ttfb_ms": 206
+          }
+        ]
+      },
+      {
+        "sample": 9,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 509,
+        "dcl_ms": 1042,
+        "fcp_ms": 1072,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1162,
+        "nav_to_content_ms": 1204,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 515,
+            "ttfb_ms": 504
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 515,
+            "ttfb_ms": 504
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 495,
+            "ttfb_ms": 170
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 443,
+            "ttfb_ms": 167
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 377,
+            "ttfb_ms": 347
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 367,
+            "ttfb_ms": 346
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 362,
+            "ttfb_ms": 198
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 283,
+            "ttfb_ms": 224
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 255,
+            "ttfb_ms": 235
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 214,
+            "ttfb_ms": 193
+          }
+        ]
+      },
+      {
+        "sample": 10,
+        "warm": true,
+        "route": "/groups/package/ALH-3348",
+        "route_key": "laravel_package",
+        "http_status": 200,
+        "ttfb_ms": 467,
+        "dcl_ms": 1050,
+        "fcp_ms": 1104,
+        "title": "UAE — LYP-SHJ — Group Ticketing",
+        "has_loading": false,
+        "has_group_details": false,
+        "body_len": 563,
+        "nav_to_shell_ms": 1216,
+        "nav_to_content_ms": 1257,
+        "network_request_count": 9,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 468,
+            "ttfb_ms": 464
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/storage/agencies/1/branding/YLGZvxGT5QaYBufweG49re3PLae0TsyIqSdKlph8.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 503,
+            "ttfb_ms": 188
+          },
+          {
+            "url": "https://jetpakistan.pk/groups/package/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 468,
+            "ttfb_ms": 464
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/js/theme.js?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 436,
+            "ttfb_ms": 187
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/booking.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 422,
+            "ttfb_ms": 405
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/forms.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 421,
+            "ttfb_ms": 405
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/theme.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 418,
+            "ttfb_ms": 189
+          },
+          {
+            "url": "https://jetpakistan.pk/storage/airline-logos/G9.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 344,
+            "ttfb_ms": 298
+          },
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 235,
+            "ttfb_ms": 221
+          },
+          {
+            "url": "https://jetpakistan.pk/themes/frontend/jetpakistan/css/tokens.css?v=58",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 197,
+            "ttfb_ms": 180
+          }
+        ]
+      }
+    ]
+  },
+  "next_package": {
+    "path": "/groups/ALH-3348",
+    "summaries": {
+      "ttfb": {
+        "samples": 10,
+        "p50": 1718,
+        "p95": 2346,
+        "min": 1424,
+        "max": 2346,
+        "values": [
+          1424,
+          1440,
+          1596,
+          1716,
+          1718,
+          1981,
+          2096,
+          2145,
+          2184,
+          2346
+        ]
+      },
+      "dcl": {
+        "samples": 10,
+        "p50": 2255,
+        "p95": 2798,
+        "min": 1702,
+        "max": 2798,
+        "values": [
+          1702,
+          1864,
+          1913,
+          2236,
+          2255,
+          2307,
+          2365,
+          2444,
+          2477,
+          2798
+        ]
+      },
+      "fcp": {
+        "samples": 10,
+        "p50": 2444,
+        "p95": 2856,
+        "min": 1952,
+        "max": 2856,
+        "values": [
+          1952,
+          1960,
+          2112,
+          2352,
+          2444,
+          2488,
+          2612,
+          2712,
+          2744,
+          2856
+        ]
+      },
+      "shell": {
+        "samples": 10,
+        "p50": 2556,
+        "p95": 2905,
+        "min": 1981,
+        "max": 2905,
+        "values": [
+          1981,
+          2050,
+          2151,
+          2437,
+          2556,
+          2639,
+          2651,
+          2695,
+          2781,
+          2905
+        ]
+      },
+      "content": {
+        "samples": 10,
+        "p50": 2596,
+        "p95": 3238,
+        "min": 2039,
+        "max": 3238,
+        "values": [
+          2039,
+          2101,
+          2220,
+          2487,
+          2596,
+          2674,
+          2699,
+          2766,
+          2983,
+          3238
+        ]
+      }
+    },
+    "samples": [
+      {
+        "sample": 1,
+        "warm": false,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 2346,
+        "dcl_ms": 2798,
+        "fcp_ms": 2856,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2905,
+        "nav_to_content_ms": 2983,
+        "network_request_count": 14,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2374,
+            "ttfb_ms": 2342
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2374,
+            "ttfb_ms": 2342
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/3048-38ab6963c5708e36.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 688,
+            "ttfb_ms": 361
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/1356-5c8c2e2fb753b8c7.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 663,
+            "ttfb_ms": 353
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2619-b8db57ac19da49ac.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 652,
+            "ttfb_ms": 331
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-fe4ee47e48b7da28.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 629,
+            "ttfb_ms": 258
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 559,
+            "ttfb_ms": 251
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/webpack-b62bfddf09ef2634.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 546,
+            "ttfb_ms": 268
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/main-app-33eddcc3a53c50c1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 535,
+            "ttfb_ms": 249
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/image?url=%2Fstorage%2Fairline-logos%2FG9.png&w=64&q=75",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 468,
+            "ttfb_ms": 395
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/image?url=%2Fstorage%2Fairline-logos%2FG9.png&w=48&q=75",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 463,
+            "ttfb_ms": 376
+          }
+        ]
+      },
+      {
+        "sample": 2,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 2096,
+        "dcl_ms": 2365,
+        "fcp_ms": 2612,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2651,
+        "nav_to_content_ms": 2699,
+        "network_request_count": 26,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2111,
+            "ttfb_ms": 2093
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2111,
+            "ttfb_ms": 2093
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/9838-192df38bd51e65c5.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 745,
+            "ttfb_ms": 370
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 737,
+            "ttfb_ms": 357
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/groups/%5BpackageId%5D/page-7deaf3eed4995b1a.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 737,
+            "ttfb_ms": 366
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4082-2d63bd4776603e27.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 721,
+            "ttfb_ms": 357
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/image?url=%2Fstorage%2Fairline-logos%2FG9.png&w=64&q=75",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 721,
+            "ttfb_ms": 656
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/image?url=%2Fstorage%2Fairline-logos%2FG9.png&w=48&q=75",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 721,
+            "ttfb_ms": 649
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 714,
+            "ttfb_ms": 360
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/7980-2a7f7fe7f3debef6.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 713,
+            "ttfb_ms": 361
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 711,
+            "ttfb_ms": 352
+          }
+        ]
+      },
+      {
+        "sample": 3,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 1440,
+        "dcl_ms": 1913,
+        "fcp_ms": 1960,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2050,
+        "nav_to_content_ms": 2101,
+        "network_request_count": 19,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1466,
+            "ttfb_ms": 1437
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1466,
+            "ttfb_ms": 1437
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/7980-2a7f7fe7f3debef6.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1061,
+            "ttfb_ms": 666
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1060,
+            "ttfb_ms": 670
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/error-0c1973fe61d9ade6.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1047,
+            "ttfb_ms": 663
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2455-7175b4eb93cf4cc8.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1046,
+            "ttfb_ms": 664
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/3048-38ab6963c5708e36.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1037,
+            "ttfb_ms": 663
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1037,
+            "ttfb_ms": 663
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/1356-5c8c2e2fb753b8c7.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1036,
+            "ttfb_ms": 671
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2619-b8db57ac19da49ac.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1024,
+            "ttfb_ms": 660
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-fe4ee47e48b7da28.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1013,
+            "ttfb_ms": 661
+          }
+        ]
+      },
+      {
+        "sample": 4,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 2145,
+        "dcl_ms": 2444,
+        "fcp_ms": 2744,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2695,
+        "nav_to_content_ms": 2766,
+        "network_request_count": 27,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2314,
+            "ttfb_ms": 2140
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2314,
+            "ttfb_ms": 2140
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1078,
+            "ttfb_ms": 698
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/groups/%5BpackageId%5D/page-7deaf3eed4995b1a.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1074,
+            "ttfb_ms": 536
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/9838-192df38bd51e65c5.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1073,
+            "ttfb_ms": 543
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 907,
+            "ttfb_ms": 393
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4082-2d63bd4776603e27.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 904,
+            "ttfb_ms": 418
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 896,
+            "ttfb_ms": 407
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/7980-2a7f7fe7f3debef6.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 773,
+            "ttfb_ms": 413
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 771,
+            "ttfb_ms": 415
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/error-0c1973fe61d9ade6.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 762,
+            "ttfb_ms": 410
+          }
+        ]
+      },
+      {
+        "sample": 5,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 2184,
+        "dcl_ms": 2477,
+        "fcp_ms": 2712,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2781,
+        "nav_to_content_ms": 3238,
+        "network_request_count": 28,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2218,
+            "ttfb_ms": 2181
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2218,
+            "ttfb_ms": 2181
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1281,
+            "ttfb_ms": 898
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/9838-192df38bd51e65c5.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1280,
+            "ttfb_ms": 577
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1278,
+            "ttfb_ms": 574
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4082-2d63bd4776603e27.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1266,
+            "ttfb_ms": 581
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/groups/%5BpackageId%5D/page-7deaf3eed4995b1a.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 960,
+            "ttfb_ms": 576
+          },
+          {
+            "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 801,
+            "ttfb_ms": 171
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 676,
+            "ttfb_ms": 301
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/7980-2a7f7fe7f3debef6.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 673,
+            "ttfb_ms": 301
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/error-0c1973fe61d9ade6.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 667,
+            "ttfb_ms": 299
+          }
+        ]
+      },
+      {
+        "sample": 6,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 1718,
+        "dcl_ms": 2307,
+        "fcp_ms": 2352,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2437,
+        "nav_to_content_ms": 2487,
+        "network_request_count": 10,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1747,
+            "ttfb_ms": 1716
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1747,
+            "ttfb_ms": 1716
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 915,
+            "ttfb_ms": 440
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/webpack-b62bfddf09ef2634.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 769,
+            "ttfb_ms": 389
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/main-app-33eddcc3a53c50c1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 731,
+            "ttfb_ms": 295
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/css/0f4a1af677576841.css",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 384,
+            "ttfb_ms": 335
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/css/a696d48e49aab05a.css",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 377,
+            "ttfb_ms": 187
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/image?url=%2Fstorage%2Fairline-logos%2FG9.png&w=64&q=75",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 364,
+            "ttfb_ms": 280
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/image?url=%2Fstorage%2Fairline-logos%2FG9.png&w=48&q=75",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 364,
+            "ttfb_ms": 280
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/css/efa246bd6145874a.css",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 230,
+            "ttfb_ms": 185
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/css/a0e8f16c1ada1dcc.css",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 219,
+            "ttfb_ms": 174
+          }
+        ]
+      },
+      {
+        "sample": 7,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 1981,
+        "dcl_ms": 2255,
+        "fcp_ms": 2488,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2556,
+        "nav_to_content_ms": 2596,
+        "network_request_count": 17,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2013,
+            "ttfb_ms": 1973
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 2013,
+            "ttfb_ms": 1973
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 777,
+            "ttfb_ms": 401
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/1356-5c8c2e2fb753b8c7.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 776,
+            "ttfb_ms": 404
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/3048-38ab6963c5708e36.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 776,
+            "ttfb_ms": 403
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2619-b8db57ac19da49ac.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 763,
+            "ttfb_ms": 411
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 760,
+            "ttfb_ms": 382
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/layout-fe4ee47e48b7da28.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 758,
+            "ttfb_ms": 402
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 745,
+            "ttfb_ms": 356
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 718,
+            "ttfb_ms": 353
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/webpack-b62bfddf09ef2634.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 712,
+            "ttfb_ms": 384
+          }
+        ]
+      },
+      {
+        "sample": 8,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 1596,
+        "dcl_ms": 1864,
+        "fcp_ms": 2112,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2151,
+        "nav_to_content_ms": 2220,
+        "network_request_count": 28,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1612,
+            "ttfb_ms": 1593
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1612,
+            "ttfb_ms": 1593
+          },
+          {
+            "url": "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "image",
+            "total_ms": 733,
+            "ttfb_ms": 243
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/629-ba3adc5d4e8a3474.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 683,
+            "ttfb_ms": 290
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 682,
+            "ttfb_ms": 285
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/groups/%5BpackageId%5D/page-7deaf3eed4995b1a.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 681,
+            "ttfb_ms": 294
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/9838-192df38bd51e65c5.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 678,
+            "ttfb_ms": 290
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4082-2d63bd4776603e27.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 666,
+            "ttfb_ms": 285
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 656,
+            "ttfb_ms": 281
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/7980-2a7f7fe7f3debef6.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 655,
+            "ttfb_ms": 282
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 654,
+            "ttfb_ms": 283
+          }
+        ]
+      },
+      {
+        "sample": 9,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 1716,
+        "dcl_ms": 2236,
+        "fcp_ms": 2444,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 2639,
+        "nav_to_content_ms": 2674,
+        "network_request_count": 15,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1733,
+            "ttfb_ms": 1710
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1733,
+            "ttfb_ms": 1710
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1535,
+            "ttfb_ms": 638
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1435,
+            "ttfb_ms": 523
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/webpack-b62bfddf09ef2634.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1322,
+            "ttfb_ms": 525
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1266,
+            "ttfb_ms": 429
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/main-app-33eddcc3a53c50c1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1257,
+            "ttfb_ms": 421
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/css/a696d48e49aab05a.css",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 479,
+            "ttfb_ms": 445
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/css/0f4a1af677576841.css",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 479,
+            "ttfb_ms": 445
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/css/efa246bd6145874a.css",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 477,
+            "ttfb_ms": 444
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/css/a0e8f16c1ada1dcc.css",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "stylesheet",
+            "total_ms": 370,
+            "ttfb_ms": 305
+          }
+        ]
+      },
+      {
+        "sample": 10,
+        "warm": true,
+        "route": "/groups/ALH-3348",
+        "route_key": "next_package",
+        "http_status": 200,
+        "ttfb_ms": 1424,
+        "dcl_ms": 1702,
+        "fcp_ms": 1952,
+        "title": "JetPakistan",
+        "has_loading": false,
+        "has_group_details": true,
+        "body_len": 1364,
+        "nav_to_shell_ms": 1981,
+        "nav_to_content_ms": 2039,
+        "network_request_count": 25,
+        "package_api_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1462,
+            "ttfb_ms": 1418
+          }
+        ],
+        "session_config_requests": [],
+        "slowest_requests": [
+          {
+            "url": "https://jetpakistan.pk/groups/ALH-3348",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "document",
+            "total_ms": 1462,
+            "ttfb_ms": 1418
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1133,
+            "ttfb_ms": 694
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/1255-cf02c4775860a5ab.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1083,
+            "ttfb_ms": 269
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/9838-192df38bd51e65c5.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1029,
+            "ttfb_ms": 644
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/161-3bbd3fe498efadcf.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1016,
+            "ttfb_ms": 629
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/954-0a82e50d8d66d71b.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1003,
+            "ttfb_ms": 634
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/2458-8489eb6ca4d779dd.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 1003,
+            "ttfb_ms": 633
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/3048-38ab6963c5708e36.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 999,
+            "ttfb_ms": 621
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/4909-60c88923efbb24ad.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 998,
+            "ttfb_ms": 634
+          },
+          {
+            "url": "https://jetpakistan.pk/_next/static/chunks/app/(public)/layout-aa6c18435a2fe8a1.js",
+            "method": "GET",
+            "status": 200,
+            "resource_type": "script",
+            "total_ms": 987,
+            "ttfb_ms": 637
+          }
+        ]
+      }
+    ]
+  },
+  "comparable_shell_p50": 1056,
+  "comparable_fcp_p50": 972
+}

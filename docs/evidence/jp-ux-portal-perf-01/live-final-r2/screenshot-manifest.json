@@ -1,0 +1,148 @@
+{
+  "phase": "JP-UX-PORTAL-PERF-01-R2",
+  "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+  "public_build_id": "aq1S4pcjSXLbIEboahxkQ",
+  "count": 14,
+  "screenshots": [
+    {
+      "filename": "07-return-pair-mixed-carrier-if-available.png",
+      "timestamp": "2026-08-28T14:21:01.182Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "PAIR_CARD",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "09-return-segmented-return.png",
+      "timestamp": "2026-08-28T14:21:27.394Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "SEGMENTED_CARD",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "10-return-pair-details.png",
+      "timestamp": "2026-08-28T14:20:52.480Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "RETURN_DETAILS",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "11-return-segmented-details.png",
+      "timestamp": "2026-08-28T14:21:33.074Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "RETURN_DETAILS",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "12-segmented-no-duplicate-summary.png",
+      "timestamp": "2026-08-28T14:21:27.662Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "SEGMENTED_SUMMARY",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "13-progressive-first-results.png",
+      "timestamp": "2026-08-28T14:05:08.919Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "PROGRESSIVE_SEARCH",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "14-progressive-settled.png",
+      "timestamp": "2026-08-28T14:05:12.529Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "PROGRESSIVE_SEARCH",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "15-traveler-transition-before-click.png",
+      "timestamp": "2026-08-28T13:50:10.002Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "TRAVELER_TRANSITION",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "15-traveler-transition-first-frame.png",
+      "timestamp": "2026-08-28T13:50:14.334Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "TRAVELER_TRANSITION",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "16-traveler-stable-form.png",
+      "timestamp": "2026-08-28T13:50:16.998Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "TRAVELER_STABLE",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "21-change-flight.png",
+      "timestamp": "2026-08-28T14:05:23.761Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "CHANGE_FLIGHT",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "22-bfcache-back.png",
+      "timestamp": "2026-08-28T14:05:31.057Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "BFCACHE",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "23-bfcache-forward.png",
+      "timestamp": "2026-08-28T14:05:32.767Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "1440x900",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "BFCACHE",
+      "result": "CAPTURED"
+    },
+    {
+      "filename": "25-mobile-traveler.png",
+      "timestamp": "2026-08-28T13:50:17.569Z",
+      "route": "https://jetpakistan.pk",
+      "viewport": "390x844",
+      "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+      "build_id": "aq1S4pcjSXLbIEboahxkQ",
+      "acceptance_gate": "MOBILE_TRAVELER",
+      "result": "CAPTURED"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "phase": "JP-UX-PORTAL-PERF-01-R2",
+  "captured_at": "2026-08-28T14:02:03.362Z",
+  "runtime_sha": "7c923e3294910fc122a4776bb13d9146c5e36559",
+  "public_build_id": "aq1S4pcjSXLbIEboahxkQ",
+  "host": "https://jetpakistan.pk",
+  "RETURN_SEARCH": {},
+  "RETURN_PAIR_DETAILS_ERROR": "locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for getByTestId('pair-details').or(getByRole('button', { name: /^Details$/i })).first()\n",
+  "RETURN_SEGMENTED_DETAILS_ERROR": "locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: /^Details$/i }).first()\n",
+  "RETURN_VIEW_FLIP": "PASS",
+  "RETURN_DETAILS_COMPLETE": "FAIL",
+  "CARD_DETAILS_PARITY": "FAIL",
+  "STOP_COUNT_MISMATCH": 0,
+  "CHANGE_FLIGHT": "PASS",
+  "NEARBY_DATES": "NOT_FOUND_UI",
+  "BFCACHE_HISTORY": "PASS"
+}
