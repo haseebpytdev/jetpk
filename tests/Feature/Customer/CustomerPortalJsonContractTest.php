@@ -102,6 +102,110 @@ class CustomerPortalJsonContractTest extends TestCase
             ->assertJsonPath('booking.id', $draft->id);
     }
 
+    public function test_customer_draft_resume_binds_same_booking_id_and_rejects_foreign_customer(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $customer = User::factory()->create([
+            'account_type' => AccountType::Customer,
+            'current_agency_id' => $agency->id,
+            'email_verified_at' => now(),
+        ]);
+        $other = User::factory()->create([
+            'account_type' => AccountType::Customer,
+            'current_agency_id' => $agency->id,
+            'email_verified_at' => now(),
+        ]);
+        $agency->users()->attach($customer->id, ['role' => 'customer']);
+        $agency->users()->attach($other->id, ['role' => 'customer']);
+
+        $draft = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'customer_id' => $customer->id,
+            'status' => BookingStatus::Draft,
+            'payment_status' => 'unpaid',
+            'booking_reference' => null,
+            'pnr' => null,
+            'route' => 'LHE-DXB',
+            'travel_date' => now()->addDays(12)->toDateString(),
+            'meta' => [
+                'checkout_offer_id' => 'offer-resume-1',
+                'checkout_search_id' => '11111111-1111-1111-1111-111111111111',
+                'search_criteria' => [
+                    'origin' => 'LHE',
+                    'destination' => 'DXB',
+                    'depart_date' => now()->addDays(12)->toDateString(),
+                    'trip_type' => 'one_way',
+                    'cabin' => 'economy',
+                    'adults' => 1,
+                    'children' => 0,
+                    'infants' => 0,
+                ],
+                'flight_offer_snapshot' => ['id' => 'offer-resume-1'],
+            ],
+        ]);
+
+        $detail = $this->actingAs($customer)
+            ->getJson(route('customer.bookings.show', ['booking' => $draft->id]))
+            ->assertOk()
+            ->json();
+
+        $resumeAction = collect($detail['actions'] ?? [])->firstWhere('code', 'resume_checkout');
+        $this->assertNotNull($resumeAction);
+        $this->assertSame('/customer/bookings/'.$draft->id.'/resume', $resumeAction['url'] ?? null);
+
+        $this->actingAs($other)
+            ->getJson(route('customer.bookings.resume', ['booking' => $draft->id]))
+            ->assertForbidden();
+
+        $this->actingAs($customer)
+            ->getJson(route('customer.bookings.resume', ['booking' => $draft->id]))
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('booking_id', $draft->id)
+            ->assertJsonPath('next_url', '/booking/passengers');
+
+        $this->assertSame($draft->id, session('ota_public_booking_id'));
+    }
+
+    public function test_numeric_draft_idor_is_forbidden_for_other_customer_and_guest(): void
+    {
+        $this->seed(OtaFoundationSeeder::class);
+        $agency = Agency::query()->where('slug', 'asif-travels')->firstOrFail();
+        $owner = User::factory()->create([
+            'account_type' => AccountType::Customer,
+            'current_agency_id' => $agency->id,
+            'email_verified_at' => now(),
+        ]);
+        $other = User::factory()->create([
+            'account_type' => AccountType::Customer,
+            'current_agency_id' => $agency->id,
+            'email_verified_at' => now(),
+        ]);
+        $agency->users()->attach($owner->id, ['role' => 'customer']);
+        $agency->users()->attach($other->id, ['role' => 'customer']);
+
+        $draft = Booking::factory()->create([
+            'agency_id' => $agency->id,
+            'customer_id' => $owner->id,
+            'status' => BookingStatus::Draft,
+            'payment_status' => 'unpaid',
+            'booking_reference' => null,
+            'pnr' => null,
+        ]);
+
+        $this->getJson(route('customer.bookings.show', ['booking' => $draft->id]))
+            ->assertUnauthorized();
+
+        $this->actingAs($other)
+            ->getJson(route('customer.bookings.show', ['booking' => $draft->id]))
+            ->assertForbidden();
+
+        $this->actingAs($other)
+            ->getJson(route('customer.bookings.resume', ['booking' => $draft->id]))
+            ->assertForbidden();
+    }
+
     public function test_customer_support_json_create_and_detail(): void
     {
         [$customer, $booking] = $this->customerWithBooking();

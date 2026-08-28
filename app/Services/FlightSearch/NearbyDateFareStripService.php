@@ -6,16 +6,18 @@ use App\Models\Agency;
 use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Builds nearby-date cheapest PKR fares for the results date-price strip.
+ * Builds nearby-date strip rows for results.
+ *
+ * Dates/search URLs are always produced when criteria are valid.
+ * Cheapest PKR is best-effort from cache/search and never invents fares;
+ * missing prices still keep the date actionable.
  */
 class NearbyDateFareStripService
 {
     public function __construct(
-        private readonly FlightSearchService $flightSearch,
         private readonly FlightSearchCriteriaCacheKey $criteriaCacheKey,
     ) {}
 
@@ -65,11 +67,12 @@ class NearbyDateFareStripService
             [
                 'client_slug' => current_client_slug(),
                 'source_channel' => (string) ($criteria['source_channel'] ?? 'public_guest'),
+                'v' => 2,
             ],
         );
 
         $cached = Cache::get($cacheKey);
-        if (is_array($cached)) {
+        if (is_array($cached) && ($cached['available'] ?? false) === true && is_array($cached['dates'] ?? null)) {
             return $cached;
         }
 
@@ -80,7 +83,8 @@ class NearbyDateFareStripService
                 continue;
             }
             $dateStr = $candidate->toDateString();
-            $cheapest = $this->cheapestPkrForDate($criteria, $dateStr, $agency);
+            // Never invent fares; never block the strip on live supplier searches.
+            $cheapest = $this->cheapestPkrForDateCachedOnly($criteria, $dateStr, $agency);
             $dates[] = [
                 'date' => $dateStr,
                 'label' => $candidate->format('D, j M'),
@@ -106,40 +110,54 @@ class NearbyDateFareStripService
     }
 
     /**
+     * Prefer cache hit; never trigger a live supplier search from the strip endpoint.
+     *
      * @param  array<string, mixed>  $criteria
      */
-    private function cheapestPkrForDate(array $criteria, string $departDate, Agency $agency): ?int
+    private function cheapestPkrForDateCachedOnly(array $criteria, string $departDate, Agency $agency): ?int
     {
         try {
             $searchCriteria = $this->criteriaWithDepartDate($criteria, $departDate);
-            $result = $this->flightSearch->searchWithMeta($searchCriteria, $agency, 'public_guest');
-            $offers = is_array($result['offers'] ?? null) ? $result['offers'] : [];
-            $cheapest = null;
-            foreach ($offers as $offer) {
-                if (! is_array($offer)) {
-                    continue;
-                }
-                $final = (float) ($offer['final_customer_price'] ?? $offer['total'] ?? 0);
-                $pricingCurrency = strtoupper(trim((string) ($offer['pricing_currency'] ?? $offer['currency'] ?? 'PKR')));
-                $conversionStatus = (string) ($offer['conversion_status'] ?? 'same_currency');
-                if ($final <= 0 || $pricingCurrency !== 'PKR' || ! in_array($conversionStatus, ['same_currency', 'converted'], true)) {
-                    continue;
-                }
-                $amount = (int) round($final);
-                if ($cheapest === null || $amount < $cheapest) {
-                    $cheapest = $amount;
-                }
-            }
-
-            return $cheapest;
-        } catch (Throwable $e) {
-            Log::warning('nearby_date_strip.search_failed', [
-                'depart_date' => $departDate,
-                'exception' => $e::class,
+            $built = $this->criteriaCacheKey->build($searchCriteria, [
+                'client_slug' => current_client_slug(),
+                'source_channel' => 'public_guest',
+                'agency_id' => $agency->id,
             ]);
+            $cached = Cache::get($built['cache_key']);
+            if (! is_array($cached)) {
+                return null;
+            }
+            $offers = is_array($cached['offers'] ?? null) ? $cached['offers'] : [];
 
+            return $this->minPkrFromOffers($offers);
+        } catch (Throwable) {
             return null;
         }
+    }
+
+    /**
+     * @param  list<mixed>  $offers
+     */
+    private function minPkrFromOffers(array $offers): ?int
+    {
+        $cheapest = null;
+        foreach ($offers as $offer) {
+            if (! is_array($offer)) {
+                continue;
+            }
+            $final = (float) ($offer['final_customer_price'] ?? $offer['total'] ?? 0);
+            $pricingCurrency = strtoupper(trim((string) ($offer['pricing_currency'] ?? $offer['currency'] ?? 'PKR')));
+            $conversionStatus = (string) ($offer['conversion_status'] ?? 'same_currency');
+            if ($final <= 0 || $pricingCurrency !== 'PKR' || ! in_array($conversionStatus, ['same_currency', 'converted'], true)) {
+                continue;
+            }
+            $amount = (int) round($final);
+            if ($cheapest === null || $amount < $cheapest) {
+                $cheapest = $amount;
+            }
+        }
+
+        return $cheapest;
     }
 
     /**

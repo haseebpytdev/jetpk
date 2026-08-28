@@ -117,7 +117,7 @@ class CustomerPortalBookingDetailPresenter
                 'code' => 'resume_checkout',
                 'label' => 'Resume checkout',
                 'available' => true,
-                'url' => '/booking/passengers',
+                'url' => CustomerPortalBookingUrl::resumePath($booking),
             ];
             $actions[] = [
                 'code' => 'view_draft',

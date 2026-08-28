@@ -51,7 +51,14 @@ class NearbyDateFareStripTest extends TestCase
 
         $this->getJson(route('flights.results.nearby-dates', ['search_id' => $searchId]))
             ->assertOk()
-            ->assertJsonStructure(['available', 'selected_date', 'dates']);
+            ->assertJsonPath('available', true)
+            ->assertJsonStructure(['available', 'selected_date', 'dates'])
+            ->assertJsonFragment(['is_selected' => true]);
+
+        $dates = $this->getJson(route('flights.results.nearby-dates', ['search_id' => $searchId]))->json('dates');
+        $this->assertIsArray($dates);
+        $this->assertNotEmpty($dates);
+        $this->assertArrayHasKey('search_url', $dates[0]);
     }
 
     public function test_nearby_date_strip_service_respects_disabled_config(): void

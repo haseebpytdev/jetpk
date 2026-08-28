@@ -1,6 +1,7 @@
 import { isAllowedInternalHandoffUrl } from "@/features/flight-details/utils/handoff";
 
 const NEXT_BOOKING_PREFIXES = [
+  "/booking/passengers",
   "/booking/review",
   "/booking/payment",
   "/booking/payment/manual",

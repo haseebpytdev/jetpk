@@ -18,4 +18,12 @@ final class CustomerPortalBookingUrl
 
         return '/customer/bookings/'.$booking->getKey();
     }
+
+    public static function resumePath(Booking $booking): string
+    {
+        $ref = trim((string) ($booking->booking_reference ?? ''));
+        $key = $ref !== '' ? $ref : (string) $booking->getKey();
+
+        return '/customer/bookings/'.$key.'/resume';
+    }
 }

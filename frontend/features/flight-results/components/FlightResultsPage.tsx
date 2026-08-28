@@ -352,7 +352,7 @@ export function FlightResultsPage() {
           }
         />
 
-        {results.status === "ready" && !results.isReturnSplit && !results.isReturnPair ? (
+        {results.status === "ready" && !results.isReturnSplit ? (
           <NearbyDateStrip searchId={results.resolvedSearchId ?? ""} hidden={results.isReturnSplit} />
         ) : null}
 

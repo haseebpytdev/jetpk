@@ -17,6 +17,8 @@ use App\Support\Bookings\BookingPaymentSummaryPresenter;
 use App\Support\Bookings\PaymentOperationalStatus;
 use App\Support\Bookings\SupplierOperationalStatus;
 use App\Support\Bookings\TicketingOperationalStatus;
+use App\Support\CustomerPortal\CustomerDraftCheckoutResume;
+use App\Support\CustomerPortal\CustomerPortalBookingUrl;
 use App\Support\CustomerPortal\CustomerPortalBookingDetailPresenter;
 use App\Support\CustomerPortal\CustomerPortalBookingsPresenter;
 use App\Support\CustomerPortal\CustomerPortalDashboardPresenter;
@@ -27,6 +29,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CustomerBookingController extends Controller
@@ -38,6 +41,7 @@ class CustomerBookingController extends Controller
         protected CustomerPortalDashboardPresenter $dashboardPresenter,
         protected CustomerPortalBookingsPresenter $bookingsPresenter,
         protected CustomerPortalBookingDetailPresenter $bookingDetailPresenter,
+        protected CustomerDraftCheckoutResume $draftCheckoutResume,
     ) {}
 
     public function dashboard(Request $request): View|JsonResponse
@@ -203,6 +207,40 @@ class CustomerBookingController extends Controller
         ];
 
         return view(client_view('bookings.show', 'customer'), $viewData);
+    }
+
+    /**
+     * Resume an owned Draft into a fresh checkout session bound to THIS booking id.
+     */
+    public function resume(Request $request, Booking $booking): JsonResponse|RedirectResponse
+    {
+        Gate::authorize('view', $booking);
+        $this->ensureCustomerOwnsBooking($request, $booking);
+
+        try {
+            $result = $this->draftCheckoutResume->resumeOwnedDraft($request, $booking);
+        } catch (InvalidArgumentException $e) {
+            if ($this->wantsCustomerPortalJson($request)) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return redirect()
+                ->to(client_url(CustomerPortalBookingUrl::detailPath($booking)))
+                ->withErrors(['resume' => $e->getMessage()]);
+        }
+
+        if ($this->wantsCustomerPortalJson($request)) {
+            return response()->json([
+                'ok' => true,
+                'booking_id' => $result['booking_id'],
+                'next_url' => '/booking/passengers',
+            ]);
+        }
+
+        return redirect()->to($result['next_url']);
     }
 
     public function downloadDocument(Request $request, BookingDocument $bookingDocument): BinaryFileResponse
