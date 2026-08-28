@@ -1,0 +1,92 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01",
+  "generated_at": "2026-08-28T21:45:00Z",
+  "run_completed": true,
+  "platform_certification": "FAIL",
+  "residuals": [
+    {
+      "area": "mail_qa",
+      "gate": "NEW_QA_CUSTOMER_E2E",
+      "status": "NOT_TESTED",
+      "severity": "high",
+      "symptom": "Full new checkout customer verify→resume E2E not executed on live after mail fix",
+      "root_cause": "QA mailbox sink committed but not deployed/enabled; no live signed-URL proof this run",
+      "fixes_attempted": ["Built gated JetpkQaMailbox + CLI reader + unit tests"],
+      "why_unresolved": "Deploy cadence prioritized mail-failure fix; sink kept off production pending controlled enable",
+      "external_requirement": "Enable JETPK_QA_MAIL_SINK_* briefly on server OR owner provides mailbox access",
+      "recommended_next_action": "Deploy 9200165a (or sink-only subset), enable sink for one QA recipient, run checkout E2E, then remove sink",
+      "blocks_go_live": true,
+      "evidence": "tests/Feature/Auth/JetpkQaMailboxSinkTest.php"
+    },
+    {
+      "area": "email",
+      "gate": "EMAIL_SYSTEM",
+      "status": "FAIL",
+      "severity": "medium",
+      "symptom": "Email design families / preview screenshot pack incomplete",
+      "root_cause": "Inventory + hardcode audit done; full template standardization and 15-email screenshot pack not finished",
+      "fixes_attempted": ["email-inventory.json (163)", "email-hardcode-audit.json (32)", "removed seed placeholder phone"],
+      "why_unresolved": "Time boxed after mail deploy; remaining hardcodes and preview matrix remain",
+      "external_requirement": null,
+      "recommended_next_action": "Wire CompanyEmailProfileResolver into JetpkEmailBrandingResolver; generate preview screenshots via jetpk:email:preview",
+      "blocks_go_live": true,
+      "evidence": "docs/evidence/jp-final-closure-01/email/"
+    },
+    {
+      "area": "groups",
+      "gate": "GROUPS_HERO",
+      "status": "NOT_TESTED",
+      "severity": "high",
+      "symptom": "7d4302c7 groups hero engineering not deployed as dedicated runtime; live /groups smoke 200 only",
+      "root_cause": "Mail-only 9-file deploy did not include frontend GroupsLandingPage",
+      "fixes_attempted": ["Ancestry verified; commit audited"],
+      "why_unresolved": "Needs frontend-inclusive protected deploy + visual acceptance",
+      "external_requirement": null,
+      "recommended_next_action": "Stage/deploy groups runtime files from 7d4302c7..9200165a and capture hero screenshots",
+      "blocks_go_live": true,
+      "evidence": "git show 7d4302c7"
+    },
+    {
+      "area": "customer_agent_admin",
+      "gate": "PORTAL_FULL_CERT",
+      "status": "NOT_TESTED",
+      "severity": "high",
+      "symptom": "Customer/Agent/Admin full certification matrices incomplete this run",
+      "root_cause": "Run focused on mail failure root cause + deploy",
+      "fixes_attempted": [],
+      "why_unresolved": "Deferred after mail checkpoint",
+      "external_requirement": "QA credentials / existing QA actors",
+      "recommended_next_action": "Resume portal cert using R3 actors + manual_local groups",
+      "blocks_go_live": true,
+      "evidence": null
+    },
+    {
+      "area": "flights",
+      "gate": "FLIGHT_REGRESSION",
+      "status": "NOT_TESTED",
+      "severity": "high",
+      "symptom": "Fresh OW/return pair/segmented regression not re-run this closure loop",
+      "root_cause": "Deferred",
+      "fixes_attempted": [],
+      "why_unresolved": "Deferred",
+      "external_requirement": null,
+      "recommended_next_action": "Live flight regression without supplier PNR",
+      "blocks_go_live": true,
+      "evidence": null
+    },
+    {
+      "area": "commercial",
+      "gate": "SABRE_CANCEL_FLAGS_OBSERVED",
+      "status": "BLOCKED",
+      "severity": "medium",
+      "symptom": "Production .env shows SABRE_CANCEL_ENABLED=true (and related allow flags) during mail deploy snapshot",
+      "root_cause": "Pre-existing production config; not mutated in this release",
+      "fixes_attempted": ["Recorded only"],
+      "why_unresolved": "Changing Sabre cancel flags requires explicit owner authorization",
+      "external_requirement": "Owner decision on intended Sabre cancel posture",
+      "recommended_next_action": "Owner confirms intended values; separate config change if needed",
+      "blocks_go_live": false,
+      "evidence": "docs/evidence/jp-final-closure-01/deployment-report.md"
+    }
+  ]
+}

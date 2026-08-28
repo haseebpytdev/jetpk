@@ -1,0 +1,240 @@
+{
+  "audit_meta": {
+    "generated_at": "2026-08-29",
+    "scope": "Hardcoded contact/branding/legacy values in email-related code paths",
+    "search_roots": [
+      "app/Mail",
+      "app/Support/Emails",
+      "app/Support/Branding",
+      "resources/views/emails",
+      "app/Services/Communication"
+    ],
+    "hit_count": 32
+  },
+  "hits": [
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 40,
+      "snippet": "'support_email' => 'ota@jetpakistan.pk'",
+      "action": "replace_with_resolver",
+      "notes": "Safe default inside canonical resolver; should remain last-resort fallback only, fed from ClientProfile/Agency settings first."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 71,
+      "snippet": "env('JETPK_HOME_URL', 'https://www.jetpakistan.com')",
+      "action": "replace_with_resolver",
+      "notes": "Home URL fallback; prefer agency/client profile website or config('client.canonical_client.domain')."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 95,
+      "snippet": "config('client.canonical_support_email', 'ota@jetpakistan.pk')",
+      "action": "justify",
+      "notes": "Canonical mailbox remap for deprecated addresses; intentional."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 175,
+      "snippet": "resolveLogoUrlFromPaths('jetpk-assets', 'logo/logo.svg')",
+      "action": "replace_with_resolver",
+      "notes": "Seed fallback logo path; production should use ClientProfileBranding.logo_path."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 176,
+      "snippet": "'home_url' => ... ?? 'https://www.jetpakistan.com'",
+      "action": "replace_with_resolver",
+      "notes": "Seed default home URL."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 179,
+      "snippet": "'support_phone' => '+92 21 111 000 000'",
+      "action": "replace_with_resolver",
+      "notes": "Placeholder phone in seed defaults; replace with agency settings phone."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 327,
+      "snippet": "config('client.canonical_client.domain', 'jetpakistan.pk')",
+      "action": "justify",
+      "notes": "Domain fallback for relative URL building."
+    },
+    {
+      "file": "app/Support/Emails/EmailBaseVariables.php",
+      "line": 87,
+      "snippet": "'brand_support_email' => ... ?? 'ota@jetpakistan.pk'",
+      "action": "replace_with_resolver",
+      "notes": "jetpkSampleVariables() only; live sends use CompanyEmailProfileResolver."
+    },
+    {
+      "file": "app/Support/Emails/EmailBaseVariables.php",
+      "line": 88,
+      "snippet": "'brand_phone' => ... ?? '+92 21 111 000 000'",
+      "action": "replace_with_resolver",
+      "notes": "Sample/audit fallback phone in jetpkSampleVariables()."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailSampleData.php",
+      "line": 24,
+      "snippet": "$brand['support_email'] = $brand['support_email'] ?? 'ota@jetpakistan.pk'",
+      "action": "justify",
+      "notes": "Preview/audit-only sample data; not used in live sends."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailSampleData.php",
+      "line": 25,
+      "snippet": "$brand['support_phone'] = $brand['support_phone'] ?? '+92 21 111 000 000'",
+      "action": "justify",
+      "notes": "Preview/audit-only sample data."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailSampleData.php",
+      "line": 26,
+      "snippet": "config('app.url', 'https://jetpakistan.pk')",
+      "action": "justify",
+      "notes": "Preview fallback URL only."
+    },
+    {
+      "file": "app/Support/Emails/EmailTemplateSampleData.php",
+      "line": 19,
+      "snippet": "'https://www.example-travel.test'",
+      "action": "justify",
+      "notes": "Admin template preview fixture domain; not customer-facing."
+    },
+    {
+      "file": "app/Support/Emails/EmailTemplateSampleData.php",
+      "line": 41,
+      "snippet": "'support_email' => ... ?? 'support@example-travel.test'",
+      "action": "justify",
+      "notes": "Preview fixture email."
+    },
+    {
+      "file": "app/Support/Emails/EmailTemplateSampleData.php",
+      "line": 42,
+      "snippet": "'support_phone' => ... ?? '+92 300 1234567'",
+      "action": "justify",
+      "notes": "Preview fixture phone."
+    },
+    {
+      "file": "app/Support/Branding/ClientMailBrandingResolver.php",
+      "line": 15,
+      "snippet": "private const JETPK_REPLY_TO = 'ota@jetpakistan.pk'",
+      "action": "replace_with_resolver",
+      "notes": "Hardcoded reply-to for LoginOtpMail; should read CompanyEmailProfileResolver or JetpkEmailBrandingResolver."
+    },
+    {
+      "file": "app/Support/Branding/ClientMailBrandingResolver.php",
+      "line": 34,
+      "snippet": "$companyName = 'JetPakistan'",
+      "action": "replace_with_resolver",
+      "notes": "Default company name before preview-context override."
+    },
+    {
+      "file": "app/Support/Branding/CompanyEmailProfileResolver.php",
+      "line": 77,
+      "snippet": ") ?? 'hello@example.com'",
+      "action": "replace_with_resolver",
+      "notes": "Generic placeholder mail-from fallback; should use config('mail.from.address') or canonical support email."
+    },
+    {
+      "file": "app/Support/Branding/SafeBrandingResolver.php",
+      "line": 64,
+      "snippet": "'support_email' => 'ota@jetpakistan.pk'",
+      "action": "replace_with_resolver",
+      "notes": "JetPK safe branding block; overlaps JetpkEmailBrandingResolver."
+    },
+    {
+      "file": "app/Support/Branding/SafeBrandingResolver.php",
+      "line": 80,
+      "snippet": "'support_phone' => '+92 300 0000000'",
+      "action": "replace_with_resolver",
+      "notes": "Another placeholder phone constant."
+    },
+    {
+      "file": "app/Mail/GoogleCustomerWelcomeMail.php",
+      "line": 51,
+      "snippet": "config('ota-brand.support_email', 'support@example.com')",
+      "action": "replace_with_resolver",
+      "notes": "Remove example.com fallback; use CompanyEmailProfileResolver canonical email only."
+    },
+    {
+      "file": "app/Services/Communication/NotificationRecipientResolver.php",
+      "line": 314,
+      "snippet": "config('client.canonical_support_email', 'ota@jetpakistan.pk')",
+      "action": "justify",
+      "notes": "Admin/ops recipient resolution fallback."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/partials/header.blade.php",
+      "line": 4,
+      "snippet": "$brandName = $brand['brand_name'] ?? 'JetPakistan'",
+      "action": "justify",
+      "notes": "Blade null-safe display fallback when emailBrand missing."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/partials/header.blade.php",
+      "line": 24,
+      "snippet": "Jet<span ...>Pakistan</span>",
+      "action": "justify",
+      "notes": "Text logo fallback when logo_url absent; brand_name should drive text."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/partials/footer.blade.php",
+      "line": 4,
+      "snippet": "$brandName = $brand['brand_name'] ?? 'JetPakistan'",
+      "action": "justify",
+      "notes": "Blade null-safe fallback."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/partials/support-card.blade.php",
+      "line": 5,
+      "snippet": "$brandName = $brand['brand_name'] ?? 'JetPakistan'",
+      "action": "justify",
+      "notes": "Blade null-safe fallback."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/layouts/base.blade.php",
+      "line": 18,
+      "snippet": "$brandName = $brand['brand_name'] ?? 'JetPakistan'",
+      "action": "justify",
+      "notes": "Shell-level fallback; resolver should always pass emailBrand in production."
+    },
+    {
+      "file": "config/client.php",
+      "line": 55,
+      "snippet": "deprecated_operational_emails: support@jetpakistan.com, ticketingjp@jetpakistan.com",
+      "action": "justify",
+      "notes": "Legacy mailbox remap list; not rendered in templates."
+    },
+    {
+      "file": "config/jetpk_email.php",
+      "line": 56,
+      "snippet": "forbidden_brand_fragments: Parwaaz, YD Travel, YoursDomain, haseeb-master",
+      "action": "justify",
+      "notes": "Denylist for leakage audits; not customer-visible branding."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 19,
+      "snippet": "never Master branding",
+      "action": "justify",
+      "notes": "Documentation comment referencing Master; no Master values in output."
+    },
+    {
+      "file": "resources/views/emails/bookings/request-received.blade.php",
+      "line": 1,
+      "snippet": "<x-mail::message>",
+      "action": "remove",
+      "notes": "Orphaned Laravel markdown mailable view; live path uses BookingUniversalNotification + emails.layouts.universal."
+    },
+    {
+      "file": "resources/views/emails/auth/google-customer-welcome.blade.php",
+      "line": 1,
+      "snippet": "Legacy markdown welcome view",
+      "action": "remove",
+      "notes": "Superseded by GoogleCustomerWelcomeMail via CustomerFacingEmailRenderer + emails.layouts.modern."
+    }
+  ]
+}
