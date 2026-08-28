@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Synced group ticketing inventory (Al-Haider or future suppliers).
+ * Synced group ticketing inventory (Al-Haider) or local manual QA inventory.
  */
 #[Fillable([
     'supplier',
@@ -37,6 +37,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class GroupInventory extends Model
 {
+    public const SUPPLIER_ALHAIDER = 'alhaider';
+
+    /** Local-only QA / ops inventory — never synced to or reserved with Al-Haider. */
+    public const SUPPLIER_MANUAL_LOCAL = 'manual_local';
+
+    public function isManualLocal(): bool
+    {
+        return strtolower(trim((string) $this->supplier)) === self::SUPPLIER_MANUAL_LOCAL;
+    }
+
     protected function casts(): array
     {
         return [

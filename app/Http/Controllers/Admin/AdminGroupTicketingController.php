@@ -9,11 +9,14 @@ use App\Http\Requests\Admin\StoreGroupCategoryRequest;
 use App\Http\Requests\Admin\StoreGroupHomepageTileRequest;
 use App\Http\Requests\Admin\UpdateGroupHomepageTileRequest;
 use App\Http\Requests\Admin\UpsertGroupHomepageTileRequest;
+use App\Http\Requests\Admin\StoreManualLocalGroupInventoryRequest;
+use App\Http\Requests\Admin\UpdateManualLocalGroupInventoryRequest;
 use App\Models\GroupCategory;
 use App\Models\GroupHomepageTile;
 use App\Models\GroupInventory;
 use App\Services\GroupTicketing\GroupInventoryFacetService;
 use App\Services\GroupTicketing\GroupInventorySyncService;
+use App\Services\GroupTicketing\GroupManualLocalInventoryService;
 use App\Support\GroupTicketing\GroupHomepageTilePresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +26,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
- * Admin setup for group ticketing: derived homepage tiles, inventory sync, read-only API categories.
+ * Admin setup for group ticketing: homepage tiles, inventory sync, manual/local QA inventory.
  */
 class AdminGroupTicketingController extends Controller
 {
@@ -192,18 +195,62 @@ class AdminGroupTicketingController extends Controller
             $query->where(function ($q) use ($term): void {
                 $q->where('title', 'like', $term)
                     ->orWhere('sector', 'like', $term)
-                    ->orWhere('public_id', 'like', $term);
+                    ->orWhere('public_id', 'like', $term)
+                    ->orWhere('supplier', 'like', $term);
             });
+        }
+
+        if ($request->string('source')->toString() === 'manual_local') {
+            $query->where('supplier', GroupInventory::SUPPLIER_MANUAL_LOCAL);
         }
 
         $inventories = $query->paginate(25)->withQueryString();
 
         return view(client_view('group-ticketing.inventory.index', 'admin'), [
             'inventories' => $inventories,
-            'filters' => $request->only(['q']),
+            'filters' => $request->only(['q', 'source']),
             'activeInventoryCount' => $facetService->totalActiveInventoryCount(),
             'lastSyncAt' => $facetService->lastInventorySyncAt(),
         ]);
+    }
+
+    public function inventoryStoreManual(
+        StoreManualLocalGroupInventoryRequest $request,
+        GroupManualLocalInventoryService $manualLocal,
+    ): RedirectResponse {
+        Gate::authorize('platform.admin');
+
+        $inventory = $manualLocal->create([
+            ...$request->validated(),
+            'is_active' => $request->boolean('is_active', false),
+        ]);
+
+        return redirect()
+            ->route('admin.group-ticketing.inventory.index', ['source' => 'manual_local'])
+            ->with('status', 'Created manual/local QA group '.$inventory->public_id.' (inactive until published).');
+    }
+
+    public function inventoryUpdateManual(
+        UpdateManualLocalGroupInventoryRequest $request,
+        GroupInventory $inventory,
+        GroupManualLocalInventoryService $manualLocal,
+    ): RedirectResponse {
+        Gate::authorize('platform.admin');
+
+        if (! $inventory->isManualLocal()) {
+            return redirect()
+                ->route('admin.group-ticketing.inventory.index')
+                ->with('warning', 'Only manual_local inventory can be edited here.');
+        }
+
+        $manualLocal->update($inventory, [
+            ...$request->validated(),
+            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : $inventory->is_active,
+        ]);
+
+        return redirect()
+            ->route('admin.group-ticketing.inventory.index', ['source' => 'manual_local'])
+            ->with('status', 'Updated manual/local QA group '.$inventory->public_id.'.');
     }
 
     public function inventorySync(GroupInventorySyncService $syncService): RedirectResponse

@@ -54,6 +54,7 @@ class GroupInventorySearchService
             ->whereRaw('(total_seats - held_seats - sold_seats) > 0')
             ->with('category');
 
+        $this->applyManualLocalAudienceScope($query, $filters);
         $this->applyFilters($query, $filters);
         $this->applySort($query, (string) ($filters['sort'] ?? 'departure'));
 
@@ -62,11 +63,21 @@ class GroupInventorySearchService
 
     public function findActive(int $id): ?GroupInventory
     {
-        return GroupInventory::query()
+        $inventory = GroupInventory::query()
             ->whereKey($id)
             ->where('is_active', true)
             ->whereRaw('(total_seats - held_seats - sold_seats) > 0')
             ->first();
+
+        if ($inventory === null) {
+            return null;
+        }
+
+        if (! \App\Support\GroupTicketing\GroupManualLocalVisibility::inventoryVisibleTo(auth()->user(), $inventory)) {
+            return null;
+        }
+
+        return $inventory;
     }
 
     public function findByPublicId(string $publicId): ?GroupInventory
@@ -76,7 +87,7 @@ class GroupInventorySearchService
             return null;
         }
 
-        return GroupInventory::query()
+        $inventory = GroupInventory::query()
             ->where(function (Builder $q) use ($publicId): void {
                 $q->where('public_id', $publicId)
                     ->orWhere('supplier_package_id', $publicId);
@@ -87,6 +98,36 @@ class GroupInventorySearchService
             })
             ->where('is_active', true)
             ->first();
+
+        if ($inventory === null) {
+            return null;
+        }
+
+        if (! \App\Support\GroupTicketing\GroupManualLocalVisibility::inventoryVisibleTo(auth()->user(), $inventory)) {
+            return null;
+        }
+
+        return $inventory;
+    }
+
+    /**
+     * Hide manual_local rows from guests and non-allowlisted users.
+     *
+     * @param  Builder<GroupInventory>  $query
+     * @param  array<string, mixed>  $filters
+     */
+    private function applyManualLocalAudienceScope(Builder $query, array $filters): void
+    {
+        $user = $filters['viewer'] ?? auth()->user();
+        if ($user instanceof \App\Models\User
+            && \App\Support\GroupTicketing\GroupManualLocalVisibility::userCanViewManualLocal($user)) {
+            return;
+        }
+
+        $query->where(function (Builder $inner): void {
+            $inner->whereNull('supplier')
+                ->orWhere('supplier', '!=', GroupInventory::SUPPLIER_MANUAL_LOCAL);
+        });
     }
 
     /**

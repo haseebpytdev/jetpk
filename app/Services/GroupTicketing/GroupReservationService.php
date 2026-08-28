@@ -148,7 +148,11 @@ class GroupReservationService
             $supplierReservationId = null;
             $providerHoldStatus = 'local_checkout_intent';
 
-            if ($this->client->isConfigured() && (bool) config('suppliers.al_haider.booking_enabled')) {
+            $mayCallSupplier = ! $inventory->isManualLocal()
+                && $this->client->isConfigured()
+                && (bool) config('suppliers.al_haider.booking_enabled');
+
+            if ($mayCallSupplier) {
                 try {
                     $payload = $this->alHaiderBookingPayloadBuilder->build($booking, $inventory);
                     $response = $this->client->reserveGroup(
@@ -175,6 +179,8 @@ class GroupReservationService
                     $booking->update(['status' => GroupBookingStatus::Failed]);
                     throw $exception;
                 }
+            } elseif ($inventory->isManualLocal()) {
+                $providerHoldStatus = 'manual_local_held';
             } elseif ($availability['provider_confirmed'] ?? false) {
                 $providerHoldStatus = 'provider_unheld_live_confirmed';
             }
@@ -191,7 +197,10 @@ class GroupReservationService
                 'supplier_reservation_id' => $supplierReservationId !== '' ? $supplierReservationId : null,
                 'meta' => array_merge($booking->meta ?? [], [
                     'provider_hold_status' => $providerHoldStatus,
-                    'checkout_mode' => $supplierReservationId !== '' ? 'supplier_held' : 'local_checkout_intent',
+                    'checkout_mode' => $supplierReservationId !== ''
+                        ? 'supplier_held'
+                        : ($inventory->isManualLocal() ? 'manual_local_checkout' : 'local_checkout_intent'),
+                    'qa_group_source' => $inventory->isManualLocal() ? 'MANUAL_LOCAL' : ($booking->meta['qa_group_source'] ?? null),
                     'quoted_unit_price' => $freshUnitPrice,
                     'availability_notice' => $supplierReservationId !== ''
                         ? 'Seats are held with the supplier pending payment.'

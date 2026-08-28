@@ -38,6 +38,15 @@ return [
         'block_booking_when_provider_unavailable' => filter_var(env('OTA_GROUP_BLOCK_BOOKING_WHEN_PROVIDER_UNAVAILABLE', true), FILTER_VALIDATE_BOOL),
         'inventory_search_sync_enabled' => filter_var(env('OTA_GROUP_INVENTORY_SEARCH_SYNC_ENABLED', true), FILTER_VALIDATE_BOOL),
         'inventory_search_sync_stale_minutes' => max(1, min(60, (int) env('OTA_GROUP_INVENTORY_SEARCH_SYNC_STALE_MINUTES', 3))),
+        /**
+         * Manual/local QA inventory (supplier=manual_local) is hidden from public search
+         * unless the authenticated user email is listed here (comma-separated env).
+         * Platform admins always see/manage these rows in Admin inventory.
+         */
+        'manual_local_qa_viewer_emails' => array_values(array_filter(array_map(
+            static fn (string $email): string => strtolower(trim($email)),
+            explode(',', (string) env('OTA_GROUP_QA_VIEWER_EMAILS', '')),
+        ))),
     ],
 
     /**

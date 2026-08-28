@@ -337,7 +337,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/categories', [AdminGroupTicketingController::class, 'categoriesStore'])->name('categories.store');
         Route::patch('/categories/{groupCategory}', [AdminGroupTicketingController::class, 'categoriesUpdate'])->name('categories.update');
         Route::delete('/categories/{groupCategory}', [AdminGroupTicketingController::class, 'categoriesDestroy'])->name('categories.destroy');
-        Route::get('/inventory', [BackOfficeLegacyViewRedirectController::class, 'adminGroupTicketingIndex'])->name('inventory.index');
+        Route::get('/inventory', [AdminGroupTicketingController::class, 'inventoryIndex'])->name('inventory.index');
+        Route::post('/inventory/manual-local', [AdminGroupTicketingController::class, 'inventoryStoreManual'])->name('inventory.manual-local.store');
+        Route::patch('/inventory/{inventory}/manual-local', [AdminGroupTicketingController::class, 'inventoryUpdateManual'])->name('inventory.manual-local.update');
         Route::post('/inventory/sync', [AdminGroupTicketingController::class, 'inventorySync'])->name('inventory.sync');
     });
 

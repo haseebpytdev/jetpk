@@ -48,6 +48,21 @@ class GroupInventoryAvailabilityService
     public function revalidate(GroupInventory $inventory, int $requestedSeats): array
     {
         $requestedSeats = max(1, $requestedSeats);
+
+        if ($inventory->isManualLocal()) {
+            $inventory->refresh();
+
+            if (! $inventory->is_active || $inventory->availableSeats() <= 0) {
+                return $this->result(false, true, false, $inventory, true);
+            }
+
+            if (! $inventory->hasAvailability($requestedSeats)) {
+                return $this->result(false, false, true, $inventory, true);
+            }
+
+            return $this->result(true, false, false, $inventory, true);
+        }
+
         $requireLive = GroupTicketingLivePolicy::requireLiveProviderForReservation();
         $blockWhenUnavailable = GroupTicketingLivePolicy::blockBookingWhenProviderUnavailable();
         $providerConfirmed = false;
@@ -152,6 +167,10 @@ class GroupInventoryAvailabilityService
 
     private function canSyncFromSupplier(GroupInventory $inventory): bool
     {
+        if ($inventory->isManualLocal()) {
+            return false;
+        }
+
         $packageId = trim((string) $inventory->supplier_package_id);
 
         return $packageId !== '';
