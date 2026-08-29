@@ -324,9 +324,27 @@ class JetpkEmailBrandingResolver
         $host = strtolower((string) ($parsed['host'] ?? ''));
         $path = (string) ($parsed['path'] ?? '');
 
-        // Local / preview hosts must never appear in production-like renders when APP_URL is set.
-        if ($appUrl !== '' && ($host === 'jetpk.test' || $host === 'localhost' || str_ends_with($host, '.test'))) {
-            $home = $appUrl;
+        // Local / preview hosts must never appear in customer-facing email action URLs.
+        // Prefer the canonical JetPakistan public domain over APP_URL when APP_URL itself is .test/local.
+        if ($host === 'jetpk.test' || $host === 'localhost' || str_ends_with($host, '.test')) {
+            // Public JetPakistan emails must never ship local/preview hosts, even when
+            // APP_URL and client.canonical_client.domain are both *.test in local QA.
+            $canonicalDomain = trim((string) config('client.canonical_client.domain', 'jetpakistan.pk'));
+            if (
+                $canonicalDomain === ''
+                || $canonicalDomain === 'jetpk.test'
+                || $canonicalDomain === 'localhost'
+                || str_ends_with($canonicalDomain, '.test')
+            ) {
+                $canonicalDomain = 'jetpakistan.pk';
+            }
+            $appHost = strtolower((string) (parse_url($appUrl, PHP_URL_HOST) ?? ''));
+            $appIsLocal = $appHost === '' || $appHost === 'jetpk.test' || $appHost === 'localhost' || str_ends_with($appHost, '.test');
+            if (! $appIsLocal && $appUrl !== '') {
+                $home = $appUrl;
+            } else {
+                $home = 'https://'.$canonicalDomain;
+            }
             $parsed = parse_url($home) ?: [];
             $path = (string) ($parsed['path'] ?? '');
         }

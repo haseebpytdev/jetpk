@@ -84,4 +84,21 @@ class JetpkEmailContentAssertionTest extends TestCase
         $this->assertStringNotContainsString('PNR', $html);
         $this->assertStringNotContainsString('jetpk.test', $html);
     }
+
+    public function test_preview_urls_use_canonical_domain_when_app_url_is_local(): void
+    {
+        Config::set('app.url', 'http://jetpk.test');
+        Config::set('app.asset_url', 'http://jetpk.test');
+        URL::forceRootUrl('http://jetpk.test');
+
+        $this->assertSame(0, Artisan::call('jetpk:email-preview', [
+            '--event' => 'booking_confirmed',
+            '--role' => 'user',
+        ]));
+
+        $html = file_get_contents(storage_path('app/email-previews/jetpk/booking_confirmed_user.html'));
+        $this->assertIsString($html);
+        $this->assertStringNotContainsString('jetpk.test', $html);
+        $this->assertStringContainsString('jetpakistan.pk', $html);
+    }
 }
