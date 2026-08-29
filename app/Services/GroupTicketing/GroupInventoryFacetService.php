@@ -323,8 +323,18 @@ class GroupInventoryFacetService
     /** @return Builder<GroupInventory> */
     private function baseQuery(): Builder
     {
-        return GroupInventory::query()
+        $query = GroupInventory::query()
             ->where('is_active', true)
             ->whereRaw('(total_seats - held_seats - sold_seats) > 0');
+
+        // Match search visibility: guests / non-allowlisted users must not see manual_local in facets.
+        if (! \App\Support\GroupTicketing\GroupManualLocalVisibility::userCanViewManualLocal(auth()->user())) {
+            $query->where(function (Builder $inner): void {
+                $inner->whereNull('supplier')
+                    ->orWhere('supplier', '!=', GroupInventory::SUPPLIER_MANUAL_LOCAL);
+            });
+        }
+
+        return $query;
     }
 }

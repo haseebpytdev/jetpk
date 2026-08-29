@@ -44,10 +44,13 @@ export function GroupResultCard({ card, className }: GroupResultCardProps) {
             )}
           </div>
           <div className="min-w-0">
-            <h2 className="truncate text-jp-sm font-semibold tracking-[-0.01em] text-jp-text">
-              {card.airline_name}
+            <h2 className="truncate text-jp-sm font-semibold tracking-[-0.01em] text-jp-text" data-testid="group-result-title">
+              {card.title?.trim() ? card.title : card.airline_name}
             </h2>
-            {card.airline_code ? <p className="text-jp-xs text-jp-muted">{card.airline_code}</p> : null}
+            <p className="truncate text-jp-xs text-jp-muted">
+              {card.title?.trim() ? card.airline_name : null}
+              {card.airline_code ? (card.title?.trim() ? ` · ${card.airline_code}` : card.airline_code) : null}
+            </p>
           </div>
         </div>
 
