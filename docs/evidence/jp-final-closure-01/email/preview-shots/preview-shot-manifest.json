@@ -1,0 +1,101 @@
+{
+  "count": 16,
+  "items": [
+    {
+      "file": "booking_confirmed_user.html",
+      "shot": "booking_confirmed_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Booking confirmed Dear Team, Your booking is confirmed Everything is set. Your itinerary and passenger details are below. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Nee"
+    },
+    {
+      "file": "booking_cancelled_user.html",
+      "shot": "booking_cancelled_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Booking cancelled Dear Team, Cancelled Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 J"
+    },
+    {
+      "file": "booking_request_received_admin.html",
+      "shot": "booking_request_received_admin.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Booking request received Dear Team, Your booking request has been received We are processing your request. You will get another email once it is confirmed. Need help? Contact JetPakistan support and we'll be glad to assist. ota@"
+    },
+    {
+      "file": "payment_verified_user.html",
+      "shot": "payment_verified_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Payment successful Dear Team, Payment successful Your payment has been received. A summary is below. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakist"
+    },
+    {
+      "file": "payment_rejected_user.html",
+      "shot": "payment_rejected_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Payment failed Dear Team, Failed Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPaki"
+    },
+    {
+      "file": "ticket_issued_user.html",
+      "shot": "ticket_issued_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Ticket Issued Dear Team, Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. Al"
+    },
+    {
+      "file": "agent_application_submitted_applicant.html",
+      "shot": "agent_application_submitted_applicant.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Application received Thank you for applying to partner with JetPakistan. We have received your application for JetPakistan and our team will review it shortly. Pending review Need help? Contact JetPakistan support and we'll be g"
+    },
+    {
+      "file": "agent_application_approved_applicant.html",
+      "shot": "agent_application_approved_applicant.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Welcome, partner We are pleased to inform you that your agent application for JetPakistan has been approved. Approved Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need he"
+    },
+    {
+      "file": "password_reset_requested_user.html",
+      "shot": "password_reset_requested_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Password reset requested Dear User, SIGN-IN DETAILS Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Kar"
+    },
+    {
+      "file": "customer_registered_user.html",
+      "shot": "customer_registered_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Customer Registered This is an update regarding your Customer Registered notification. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 30"
+    },
+    {
+      "file": "support_ticket_created_user.html",
+      "shot": "support_ticket_created_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Support request received Dear Team, Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetP"
+    },
+    {
+      "file": "invoice_generated_user.html",
+      "shot": "invoice_generated_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Invoice This is an update regarding your Invoice Generated notification. Invoice This invoice does not contain any card details. Keep it for your records. Need help? Contact JetPakistan support and we'll be glad to assist. ota@j"
+    },
+    {
+      "file": "refund_approved_user.html",
+      "shot": "refund_approved_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Refund Approved Dear Team, Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. "
+    },
+    {
+      "file": "group_booking_reservation_created_user.html",
+      "shot": "group_booking_reservation_created_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Group reservation held This is an update regarding your Group Booking Reservation Created notification. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpak"
+    },
+    {
+      "file": "commission_earned_agent.html",
+      "shot": "commission_earned_agent.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Commission Earned This is an update regarding your Commission Earned notification. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 44"
+    },
+    {
+      "file": "staff_created_staff.html",
+      "shot": "staff_created_staff.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Account created Your Reservation Staff account for JetPakistan has been created. Active Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 3"
+    }
+  ]
+}

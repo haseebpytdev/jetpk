@@ -1,0 +1,104 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01-R2-RESPONSIVE",
+  "started_at": "2026-08-29T06:41:04.295Z",
+  "items": [
+    {
+      "route": "/",
+      "viewport": "1440x900",
+      "file": "resp-home-desktop.png",
+      "http": 200,
+      "nav_ms": 6016,
+      "result": "PASS"
+    },
+    {
+      "route": "/",
+      "viewport": "1024x768",
+      "file": "resp-home-laptop.png",
+      "http": 200,
+      "nav_ms": 6562,
+      "result": "PASS"
+    },
+    {
+      "route": "/",
+      "viewport": "768x1024",
+      "file": "resp-home-tablet.png",
+      "http": 200,
+      "nav_ms": 3851,
+      "result": "PASS"
+    },
+    {
+      "route": "/",
+      "viewport": "390x844",
+      "file": "resp-home-mobile.png",
+      "http": 200,
+      "nav_ms": 3688,
+      "result": "PASS"
+    },
+    {
+      "route": "/groups",
+      "viewport": "1440x900",
+      "file": "resp-groups-desktop.png",
+      "http": 200,
+      "nav_ms": 4241,
+      "result": "PASS"
+    },
+    {
+      "route": "/groups",
+      "viewport": "1024x768",
+      "file": "resp-groups-laptop.png",
+      "http": 200,
+      "nav_ms": 4080,
+      "result": "PASS"
+    },
+    {
+      "route": "/groups",
+      "viewport": "768x1024",
+      "file": "resp-groups-tablet.png",
+      "http": 200,
+      "nav_ms": 4011,
+      "result": "PASS"
+    },
+    {
+      "route": "/groups",
+      "viewport": "390x844",
+      "file": "resp-groups-mobile.png",
+      "http": 200,
+      "nav_ms": 3559,
+      "result": "PASS"
+    },
+    {
+      "route": "/login",
+      "viewport": "1440x900",
+      "file": "resp-login-desktop.png",
+      "http": 200,
+      "nav_ms": 3629,
+      "result": "PASS"
+    },
+    {
+      "route": "/login",
+      "viewport": "1024x768",
+      "file": "resp-login-laptop.png",
+      "http": 200,
+      "nav_ms": 3732,
+      "result": "PASS"
+    },
+    {
+      "route": "/login",
+      "viewport": "768x1024",
+      "file": "resp-login-tablet.png",
+      "http": 200,
+      "nav_ms": 4200,
+      "result": "PASS"
+    },
+    {
+      "route": "/login",
+      "viewport": "390x844",
+      "file": "resp-login-mobile.png",
+      "http": 200,
+      "nav_ms": 3234,
+      "result": "PASS"
+    }
+  ],
+  "finished_at": "2026-08-29T06:42:07.571Z",
+  "public_build_id": "itomiK6_faLRMh81yE9mu"
+}

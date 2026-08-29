@@ -1,0 +1,37 @@
+[
+  {
+    "file": "01-home-desktop.png",
+    "http": 200,
+    "sha": "0500486e102d498d55e32ad4871f1495695b7a0d",
+    "build": "itomiK6_faLRMh81yE9mu",
+    "result": "PASS"
+  },
+  {
+    "file": "02-home-mobile.png",
+    "http": 200,
+    "sha": "0500486e102d498d55e32ad4871f1495695b7a0d",
+    "build": "itomiK6_faLRMh81yE9mu",
+    "result": "PASS"
+  },
+  {
+    "file": "03-groups-hero-desktop.png",
+    "http": 200,
+    "sha": "0500486e102d498d55e32ad4871f1495695b7a0d",
+    "build": "itomiK6_faLRMh81yE9mu",
+    "result": "PASS"
+  },
+  {
+    "file": "04-groups-hero-mobile.png",
+    "http": 200,
+    "sha": "0500486e102d498d55e32ad4871f1495695b7a0d",
+    "build": "itomiK6_faLRMh81yE9mu",
+    "result": "PASS"
+  },
+  {
+    "file": "21-login-desktop.png",
+    "http": 200,
+    "sha": "0500486e102d498d55e32ad4871f1495695b7a0d",
+    "build": "itomiK6_faLRMh81yE9mu",
+    "result": "PASS"
+  }
+]

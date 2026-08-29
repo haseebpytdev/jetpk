@@ -1,0 +1,67 @@
+[
+  {
+    "filename": "01-home-desktop.png",
+    "timestamp": "2026-08-29T05:59:12.378Z",
+    "route": "https://jetpakistan.pk/",
+    "viewport": "1440x900",
+    "engineering_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "runtime_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "build_id": "itomiK6_faLRMh81yE9mu",
+    "gate": "LIVE_PUBLIC_HOME",
+    "result": "PASS",
+    "http_status": 200,
+    "hero_text_snip": "Skip to main content Flights Groups NEW Support Day theme Login NOW BOARDING · PAKISTAN Every flight from Pakistan, one honest fare. Compare 400+ airlines, pay "
+  },
+  {
+    "filename": "02-home-mobile.png",
+    "timestamp": "2026-08-29T05:59:20.079Z",
+    "route": "https://jetpakistan.pk/",
+    "viewport": "390x844",
+    "engineering_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "runtime_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "build_id": "itomiK6_faLRMh81yE9mu",
+    "gate": "LIVE_PUBLIC_HOME",
+    "result": "PASS",
+    "http_status": 200,
+    "hero_text_snip": "Skip to main content Login NOW BOARDING · PAKISTAN Every flight from Pakistan, one honest fare. Compare 400+ airlines, pay in rupees, and get your e-ticket in s"
+  },
+  {
+    "filename": "03-groups-hero-desktop.png",
+    "timestamp": "2026-08-29T05:59:27.785Z",
+    "route": "https://jetpakistan.pk/groups",
+    "viewport": "1440x900",
+    "engineering_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "runtime_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "build_id": "itomiK6_faLRMh81yE9mu",
+    "gate": "GROUPS_PUBLIC_HERO",
+    "result": "PASS",
+    "http_status": 200,
+    "hero_text_snip": "Skip to main content Flights Groups NEW Support Day theme Login GROUP TRAVEL MADE SIMPLE Find better group fares for your journey Search live block-seat invento"
+  },
+  {
+    "filename": "04-groups-hero-mobile.png",
+    "timestamp": "2026-08-29T05:59:34.421Z",
+    "route": "https://jetpakistan.pk/groups",
+    "viewport": "390x844",
+    "engineering_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "runtime_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "build_id": "itomiK6_faLRMh81yE9mu",
+    "gate": "GROUPS_PUBLIC_HERO",
+    "result": "PASS",
+    "http_status": 200,
+    "hero_text_snip": "Skip to main content Login GROUP TRAVEL Search group departures Find block-seat group inventory with transparent per-seat pricing. Search group fares AIRLINE An"
+  },
+  {
+    "filename": "08-groups-hero-search-desktop.png",
+    "timestamp": "2026-08-29T05:59:40.608Z",
+    "route": "https://jetpakistan.pk/groups",
+    "viewport": "1440x900",
+    "engineering_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "runtime_sha": "57d23dedf3082416d53d9d36650b763913bfb156",
+    "build_id": "itomiK6_faLRMh81yE9mu",
+    "gate": "GROUPS_PUBLIC_HERO",
+    "result": "PASS",
+    "http_status": 200,
+    "hero_text_snip": "Skip to main content Flights Groups NEW Support Day theme Login GROUP TRAVEL Search group departures Find block-seat group inventory with transparent per-seat p"
+  }
+]

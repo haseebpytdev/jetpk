@@ -1,0 +1,14 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01-R2-GROUPS-PACKAGE-UI",
+  "started_at": "2026-08-29T06:37:53.824Z",
+  "CUSTOMER_PACKAGE_UI": "PASS",
+  "customer_snip": "Skip to main content Flights Groups NEW Support Day theme JC JP-DASH-03 QA Customer 1 , current step Package Selected 2 , upcoming Passenger Details 3 , upcoming Review 4 , upcoming Payment 5 , upcoming Success QA SELECTED GROUP QA GROUP A ",
+  "GUEST_PACKAGE_HIDDEN": "PASS",
+  "guest_snip": "Skip to main content Flights Groups NEW Support Day theme Login 1 , current step Package Selected 2 , upcoming Passenger Details 3 , upcoming Review 4 , upcoming Payment 5 , upcoming Success QA SELECT",
+  "AGENT_PACKAGE_UI": "PASS",
+  "agent_snip": "Skip to main content Flights Groups NEW Support Day theme JA JP-DASH-03 QA Agent 1 , current step Package Selected 2 , upcoming Passenger Details 3 , upcoming Review 4 , upcoming Payment 5 , upcoming Success QA SELECTED GROUP QA GROUP B — B",
+  "package_json_status": 200,
+  "INVENTORY_PRICE_SEATS": "PASS",
+  "package_json_snip": "{\"success\":true,\"package\":{\"id\":44,\"public_id\":\"QA-ML-MQVJO8NJ5I\",\"title\":\"QA GROUP A — B2C R2\",\"sector_code\":\"LHE-DXB\",\"route_line\":\"Lahore (LHE) → Dubai (DXB)\",\"origin_label\":\"Lahore (LHE)\",\"dest_label\":\"Dubai (DXB)\",\"departure_date\":\"Thu, 29 Oct 2026\",\"departure_date_short\":\"29 Oct 2026\",\"departure_datetime_display\":\"29 Oct 2026\",\"arrival_time_display\":null,\"airline_name\":\"QA LOCAL\",\"airline_co",
+  "finished_at": "2026-08-29T06:38:12.048Z"
+}

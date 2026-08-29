@@ -1,0 +1,48 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01-R2-PERF",
+  "captured_at": "2026-08-29T06:44:56.917Z",
+  "home": {
+    "samples": 5,
+    "p50": 1924,
+    "p95": 3565,
+    "min": 1216,
+    "max": 3565,
+    "values": [
+      1216,
+      1847,
+      1924,
+      1931,
+      3565
+    ]
+  },
+  "groups": {
+    "samples": 5,
+    "p50": 2334,
+    "p95": 2388,
+    "min": 1250,
+    "max": 2388,
+    "values": [
+      1250,
+      2168,
+      2334,
+      2384,
+      2388
+    ]
+  },
+  "flight_results_nav": {
+    "samples": 1,
+    "p50": 10262,
+    "p95": 10262,
+    "min": 10262,
+    "max": 10262,
+    "values": [
+      10262
+    ]
+  },
+  "progressive_search_to_ready_ms": 6810,
+  "flight_status": "ready",
+  "flight_offers": 8,
+  "PERFORMANCE_HOME": "PASS",
+  "PERFORMANCE_GROUPS": "PASS",
+  "PERFORMANCE_FLIGHT_RESULTS": "PASS"
+}

@@ -1,0 +1,28 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01-R2-GROUPS-VISIBILITY",
+  "started_at": "2026-08-29T06:26:37.118Z",
+  "guest": {
+    "url": "https://jetpakistan.pk/laravel/groups/search/data?sector=LHE-DXB&per_page=50",
+    "status": 200,
+    "has_qa": false,
+    "snip": "{\"filters\":{\"sector\":\"LHE-DXB\"},\"facets\":{\"sectors\":[\"ISB-JED\",\"ISB-RUH\",\"ISB-SHJ\",\"LHE-DMM\",\"LHE-DXB\",\"LYP-SHJ\",\"PEW-SHJ\"],\"airlines\":[{\"name\":\"AIR ARABIA\"},{\"name\":\"AIR SIAL\"},{\"name\":\"FLY JINNAH\"},{\"name\":\"flyadeal\"},{\"name\":\"FLYNAS\"},{\"name\":\"QA LOCAL\"}],\"departure_dates\":[\"2026-08-31\",\"2026-09-"
+  },
+  "GROUPS_GUEST_MANUAL_LOCAL_HIDDEN": "PASS",
+  "customer": {
+    "url": "https://jetpakistan.pk/laravel/groups/search/data?sector=LHE-DXB&per_page=50",
+    "status": 200,
+    "has_qa": true,
+    "snip": "{\"filters\":{\"sector\":\"LHE-DXB\"},\"facets\":{\"sectors\":[\"ISB-JED\",\"ISB-RUH\",\"ISB-SHJ\",\"LHE-DMM\",\"LHE-DXB\",\"LYP-SHJ\",\"PEW-SHJ\"],\"airlines\":[{\"name\":\"AIR ARABIA\"},{\"name\":\"AIR SIAL\"},{\"name\":\"FLY JINNAH\"},{\"name\":\"flyadeal\"},{\"name\":\"FLYNAS\"},{\"name\":\"QA LOCAL\"}],\"departure_dates\":[\"2026-08-31\",\"2026-09-02\",\"2026-09-03\",\"2026-09-04\",\"2026-09-05\",\"2026-09-06\",\"2026-09-07\",\"2026-09-09\",\"2026-09-10\",\"2026"
+  },
+  "GROUPS_CUSTOMER_SEES_MANUAL_LOCAL": "PASS",
+  "GROUPS_CUSTOMER_UI_SHOWS_QA": "FAIL",
+  "agent": {
+    "url": "https://jetpakistan.pk/laravel/groups/search/data?sector=ISB-JED&per_page=50",
+    "status": 200,
+    "has_qa": true,
+    "snip": "{\"filters\":{\"sector\":\"ISB-JED\"},\"facets\":{\"sectors\":[\"ISB-JED\",\"ISB-RUH\",\"ISB-SHJ\",\"LHE-DMM\",\"LHE-DXB\",\"LYP-SHJ\",\"PEW-SHJ\"],\"airlines\":[{\"name\":\"AIR ARABIA\"},{\"name\":\"AIR SIAL\"},{\"name\":\"FLY JINNAH\"},{\"name\":\"flyadeal\"},{\"name\":\"FLYNAS\"},{\"name\":\"QA LOCAL\"}],\"departure_dates\":[\"2026-08-31\",\"2026-09-02\",\"2026-09-03\",\"2026-09-04\",\"2026-09-05\",\"2026-09-06\",\"2026-09-07\",\"2026-09-09\",\"2026-09-10\",\"2026"
+  },
+  "GROUPS_AGENT_SEES_MANUAL_LOCAL": "PASS",
+  "GROUPS_AGENT_UI_SHOWS_QA": "FAIL",
+  "finished_at": "2026-08-29T06:27:40.982Z"
+}
