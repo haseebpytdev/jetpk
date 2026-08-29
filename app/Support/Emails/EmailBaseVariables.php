@@ -84,10 +84,10 @@ class EmailBaseVariables
             'agency_name' => $brandName,
             'company_name' => $companyName,
             'brand_logo_url' => (string) ($brand['logo_url'] ?? ''),
-            'brand_support_email' => (string) ($brand['support_email'] ?? 'ota@jetpakistan.pk'),
-            'brand_phone' => (string) ($brand['support_phone'] ?? '+92 21 111 000 000'),
+            'brand_support_email' => (string) ($brand['support_email'] ?? ''),
+            'brand_phone' => (string) ($brand['support_phone'] ?? ''),
             'support_email' => self::resolveSupportEmail($brand['support_email'] ?? null),
-            'support_phone' => self::resolveSupportPhone($brand['support_phone'] ?? '+92 21 111 000 000'),
+            'support_phone' => self::resolveSupportPhone($brand['support_phone'] ?? null),
             'website_url' => (string) ($brand['home_url'] ?? ''),
         ]);
     }

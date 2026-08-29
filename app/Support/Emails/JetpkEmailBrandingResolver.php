@@ -6,6 +6,7 @@ use App\Models\ClientProfile;
 use App\Models\ClientProfileBranding;
 use App\Services\Client\ClientProfileResolver;
 use App\Services\Client\JetPakistanClientProfileProvisioner;
+use App\Support\Branding\CompanyEmailProfileResolver;
 
 /**
  * JetpkEmailBrandingResolver
@@ -60,10 +61,17 @@ class JetpkEmailBrandingResolver
     {
         // Only JetPK is supported here. Any other slug still returns safe JetPK
         // constants rather than leaking Master branding.
+        $company = ($clientSlug === self::CLIENT_SLUG) ? static::profileFromCompanyEmailProfile() : [];
         $profile = ($clientSlug === self::CLIENT_SLUG) ? static::fetchClientProfile() : [];
-        $config  = static::configBrand();
+        $config = static::configBrand();
 
-        $brand = array_merge(static::$defaults, $config, static::onlyFilled($profile));
+        // Defaults → config → company profile (authoritative contacts) → client profile DB.
+        $brand = array_merge(
+            static::$defaults,
+            $config,
+            static::onlyFilled($company),
+            static::onlyFilled($profile),
+        );
 
         if (empty($brand['home_url'])) {
             $appUrl = trim((string) config('app.url', ''));
@@ -79,7 +87,42 @@ class JetpkEmailBrandingResolver
         $brand['client_slug'] = self::CLIENT_SLUG;
         $brand['support_email'] = static::canonicalBusinessEmail($brand['support_email'] ?? null);
 
+        // Never invent optional contact facts.
+        if (! is_string($brand['support_phone'] ?? null) || trim((string) $brand['support_phone']) === '') {
+            $brand['support_phone'] = null;
+        }
+        if (! is_string($brand['address'] ?? null) || trim((string) $brand['address']) === '') {
+            $brand['address'] = null;
+        }
+
         return $brand;
+    }
+
+    /**
+     * Authoritative organization contacts from Company Profile / agency settings.
+     *
+     * @return array<string, mixed>
+     */
+    protected static function profileFromCompanyEmailProfile(): array
+    {
+        try {
+            $profile = CompanyEmailProfileResolver::resolveForPlatform();
+        } catch (\Throwable) {
+            return [];
+        }
+
+        return static::onlyFilled([
+            'brand_name' => $profile->name,
+            'legal_name' => $profile->legal_name ?? $profile->name,
+            'logo_url' => $profile->logo_url,
+            'home_url' => $profile->website_url,
+            'support_email' => $profile->support_email,
+            'support_phone' => $profile->support_phone,
+            'address' => $profile->address,
+            'primary_color' => $profile->primary_color,
+            'accent_color' => $profile->secondary_color,
+            'footer_text' => $profile->footer_text,
+        ]);
     }
 
     /**
@@ -173,9 +216,9 @@ class JetpkEmailBrandingResolver
             'brand_name'    => 'JetPakistan',
             'legal_name'    => 'JetPakistan',
             'logo_url'      => static::resolveLogoUrlFromPaths('jetpk-assets', 'logo/logo.svg'),
-            'home_url'      => static::previewHomeUrl($previewPath) ?? 'https://jetpakistan.pk',
+            'home_url'      => static::previewHomeUrl($previewPath),
             'manage_url'    => static::previewManageUrl($previewPath),
-            'support_email' => 'ota@jetpakistan.pk',
+            'support_email' => null,
             'support_phone' => null,
             'primary_color' => '#00843D',
             'accent_color'  => '#F58220',

@@ -75,6 +75,7 @@ class JetpkEmailEventRenderer
         $this->collectPlaceholderMetrics($introResult, $unresolvedPlaceholders, $fallbackKeysApplied);
 
         $emailBrand = JetpkEmailBrandingResolver::resolve('jetpk');
+        $payload = $this->sanitizePayloadForEvent($eventKey, $payload);
         $ctaUrl = $content['cta_url'] ?? null;
         if (is_string($ctaUrl) && $ctaUrl !== '') {
             $ctaResult = $this->stringRenderer->render($ctaUrl, $baseVariables, $renderContext);
@@ -134,6 +135,48 @@ class JetpkEmailEventRenderer
         }
 
         return $this->render($eventKey, $agency, null, $runtimeVariables, $payload, $auditMode);
+    }
+
+    /**
+     * Security/identity events must never inherit booking/payment payload blocks.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    protected function sanitizePayloadForEvent(string $eventKey, array $payload): array
+    {
+        $definition = JetpkEmailEventContentRegistry::find($eventKey);
+        $isAuth = $definition !== null
+            && $definition->category === EmailTemplateRegistry::CATEGORY_AUTH_USER;
+
+        $authKeys = [
+            'password_reset',
+            'email_verification',
+            'login_otp',
+            'auth_new_device_login',
+            'password_reset_requested',
+            'customer_welcome',
+        ];
+
+        if (! $isAuth && ! in_array($eventKey, $authKeys, true)) {
+            return $payload;
+        }
+
+        foreach ([
+            'booking',
+            'itinerary',
+            'passengers',
+            'payment',
+            'payment_summary',
+            'refund',
+            'group_reservation',
+            'pnr',
+            'fare',
+        ] as $forbidden) {
+            unset($payload[$forbidden]);
+        }
+
+        return $payload;
     }
 
     /**
