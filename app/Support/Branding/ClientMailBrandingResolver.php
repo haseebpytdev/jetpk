@@ -12,8 +12,6 @@ use App\Support\Auth\ClientLoginOtpGate;
  */
 final class ClientMailBrandingResolver
 {
-    private const JETPK_REPLY_TO = 'ota@jetpakistan.pk';
-
     public static function resolve(?string $clientSlug = null): ClientMailBrandingProfile
     {
         $slug = self::normalizeSlug($clientSlug ?? ClientLoginOtpGate::resolvedClientSlug());
@@ -31,31 +29,34 @@ final class ClientMailBrandingResolver
 
     private static function resolveJetPk(): ClientMailBrandingProfile
     {
-        $companyName = 'JetPakistan';
-        $replyTo = self::JETPK_REPLY_TO;
-        $supportEmail = self::JETPK_REPLY_TO;
-        $logoUrl = null;
+        $company = CompanyEmailProfileResolver::resolveForPlatform();
+        $companyName = trim((string) ($company->name ?? '')) ?: 'JetPakistan';
+        $replyTo = trim((string) ($company->reply_to_email ?? $company->support_email ?? ''));
+        $supportEmail = trim((string) ($company->support_email ?? $replyTo));
+        $logoUrl = $company->logo_url;
+        $mailFromName = trim((string) ($company->mail_from_name ?? $companyName)) ?: $companyName;
 
         if (is_client_preview()) {
             $branding = client_branding();
             $name = trim($branding->companyName());
             if ($name !== '') {
                 $companyName = $name;
+                $mailFromName = $name;
             }
             $email = trim($branding->email());
             if ($email !== '') {
                 $replyTo = $email;
                 $supportEmail = $email;
             }
-            $logoUrl = $branding->logoUrl();
+            $logoUrl = $branding->logoUrl() ?: $logoUrl;
         }
 
         return new ClientMailBrandingProfile(
             clientSlug: 'jetpk',
             companyName: $companyName,
-            mailFromName: $companyName,
-            replyToEmail: $replyTo,
-            supportEmail: $supportEmail,
+            mailFromName: $mailFromName,
+            replyToEmail: $replyTo !== '' ? $replyTo : null,
+            supportEmail: $supportEmail !== '' ? $supportEmail : null,
             logoUrl: $logoUrl,
         );
     }

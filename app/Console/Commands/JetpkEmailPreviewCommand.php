@@ -57,16 +57,49 @@ class JetpkEmailPreviewCommand extends Command
             ? JetpkOperationalEmailEventRegistry::variantContentOverrides($eventKey, $variant)
             : [];
 
+        // Structured blocks (booking/itinerary/passengers/…) must be passed as renderer
+        // payload — EmailBaseVariables scalar merge drops arrays.
+        $payload = [];
+        foreach ([
+            'booking',
+            'itinerary',
+            'passengers',
+            'payment',
+            'payment_summary',
+            'refund',
+            'group_reservation',
+            'security',
+            'agent_application',
+            'invoice',
+            'message',
+            'change_summary',
+        ] as $blockKey) {
+            if (isset($sample[$blockKey]) && is_array($sample[$blockKey])) {
+                $payload[$blockKey] = $sample[$blockKey];
+            }
+        }
+
+        $customerFacingRoles = ['user', 'customer', 'applicant', 'agent'];
+        $introOverride = [];
+        if (in_array(strtolower($role), $customerFacingRoles, true)) {
+            $displayName = trim((string) ($sample['customer_name'] ?? $sample['recipientName'] ?? ''));
+            $introOverride['intro'] = $displayName !== ''
+                ? 'Hello '.$displayName.','
+                : 'Hello,';
+        }
+
         $rendered = $emailService->render(
             agency: $agency,
             eventKey: $eventKey,
-            templateVariables: array_merge($sample, $variantOverrides, [
+            templateVariables: array_merge($sample, $variantOverrides, $introOverride, [
                 'recipient_role' => $role,
                 'recipient_designation' => $sample['recipient_designation'] ?? 'Reservation Staff',
+                'customer_name' => $sample['customer_name'] ?? $sample['recipientName'] ?? 'Ayesha Khan',
             ]),
             deliveryVariant: $variant,
             recipientRole: $role,
             recipientDesignation: $sample['recipient_designation'] ?? 'Reservation Staff',
+            payload: $payload,
         );
 
         $dir = storage_path('app/email-previews/jetpk');

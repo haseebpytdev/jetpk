@@ -74,7 +74,12 @@ class CompanyEmailProfileResolver
             $communication?->mail_from_email,
             $mailFrom['address'] ?? null,
             $supportEmail,
-        ) ?? 'hello@example.com';
+        ) ?? '';
+
+        if ($mailFromEmail === '') {
+            // Never invent a customer-visible mailbox; leave blank for callers to omit.
+            $mailFromEmail = '';
+        }
 
         $replyToEmail = self::firstNonEmptyString(
             $communication?->reply_to_email,

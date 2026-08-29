@@ -199,8 +199,15 @@ class JetpkEmailEventContentRegistry
         $profile = self::profileForEvent($key);
 
         $subject = $defaults['subject'] ?? '{{ agency_name }} — '.$name;
-        $intro = $defaults['body'] ?? 'This is an update regarding your '.$name.' notification.';
-        $firstLine = Str::before($intro, "\n");
+        $body = $defaults['body'] ?? 'This is an update regarding your '.$name.' notification.';
+        $firstLine = Str::before($body, "\n");
+        $intro = self::firstNonEmpty(
+            $profile['intro'] ?? null,
+            ($audience === 'customer' || $audience === 'mixed') && str_starts_with(trim($firstLine), 'Dear Team')
+                ? 'Hello {{ customer_name }},'
+                : null,
+            $firstLine !== '' ? $firstLine : $body,
+        ) ?? 'Hello,';
 
         return new JetpkEmailEventContentDefinition(
             eventKey: $key,
@@ -210,7 +217,7 @@ class JetpkEmailEventContentRegistry
             subject: $subject,
             preheader: $profile['preheader'],
             heading: $profile['heading'] ?? $name,
-            intro: $firstLine !== '' ? $firstLine : $intro,
+            intro: $intro,
             statusLabel: $profile['status_label'] ?? null,
             statusType: $profile['status_type'],
             detailFields: $profile['detail_fields'],
@@ -379,12 +386,13 @@ class JetpkEmailEventContentRegistry
             'booking_confirmed' => [
                 'preheader' => 'Your booking is confirmed.',
                 'heading' => 'Booking confirmed',
+                'intro' => 'Hello {{ customer_name }},',
                 'status_label' => 'Confirmed',
                 'status_type' => 'success',
                 'detail_fields' => ['booking_reference', 'pnr', 'route', 'departure_date'],
                 'cta_label' => 'Manage booking',
                 'cta_url_key' => 'booking_url',
-                'content_blocks' => ['status-alert', 'booking-summary', 'itinerary', 'passengers', 'support-card'],
+                'content_blocks' => ['status-alert', 'booking-summary', 'itinerary', 'passengers'],
                 'alert_title' => 'Your booking is confirmed',
                 'alert_message' => 'Everything is set. Your itinerary and passenger details are below.',
             ],

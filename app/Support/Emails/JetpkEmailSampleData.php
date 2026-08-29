@@ -20,15 +20,27 @@ trait JetpkEmailSampleData
     {
         $brand = JetpkEmailBrandingResolver::resolve('jetpk');
 
-        // Ensure previews show support details even before branding is wired.
-        $brand['support_email'] = $brand['support_email'] ?? 'ota@jetpakistan.pk';
-        $brand['support_phone'] = $brand['support_phone'] ?? '+92 21 111 000 000';
-        $brand['manage_url']    = $brand['manage_url'] ?? ($brand['home_url'] ?? config('app.url', 'https://jetpakistan.pk'));
+        // Fixture-only: never invent fake phone numbers. Prefer company profile; omit when blank.
+        if (! is_string($brand['support_email'] ?? null) || trim((string) $brand['support_email']) === '') {
+            unset($brand['support_email']);
+        }
+        if (! is_string($brand['support_phone'] ?? null) || trim((string) $brand['support_phone']) === '') {
+            unset($brand['support_phone']);
+        }
+        // Security/identity previews must not inherit Manage booking.
+        if (in_array($type, ['password_reset', 'email_verification', 'otp', 'account_created'], true)) {
+            unset($brand['manage_url']);
+        } else {
+            $brand['manage_url'] = $brand['manage_url'] ?? null;
+        }
 
         $brandName = trim((string) ($brand['brand_name'] ?? 'JetPakistan')) ?: 'JetPakistan';
         $companyName = trim((string) ($brand['legal_name'] ?? $brandName)) ?: $brandName;
 
-        $home = $brand['home_url'] ?? config('app.url', 'https://jetpakistan.pk');
+        $home = $brand['home_url'] ?? config('app.url');
+        if (! is_string($home) || trim($home) === '') {
+            $home = null;
+        }
 
         $base = [
             'emailBrand'    => $brand,

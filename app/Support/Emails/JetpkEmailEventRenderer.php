@@ -76,6 +76,17 @@ class JetpkEmailEventRenderer
 
         $emailBrand = JetpkEmailBrandingResolver::resolve('jetpk');
         $payload = $this->sanitizePayloadForEvent($eventKey, $payload);
+        if ($this->isSecurityIdentityEvent($eventKey, $definition)) {
+            // Security/identity emails must not expose booking CTAs.
+            unset($emailBrand['manage_url']);
+        }
+        // Prefer compact footer support; drop Need-help card to avoid duplicate presentation.
+        if (in_array('support-card', $content['content_blocks'] ?? [], true)) {
+            $content['content_blocks'] = array_values(array_filter(
+                $content['content_blocks'],
+                static fn (string $block): bool => $block !== 'support-card',
+            ));
+        }
         $ctaUrl = $content['cta_url'] ?? null;
         if (is_string($ctaUrl) && $ctaUrl !== '') {
             $ctaResult = $this->stringRenderer->render($ctaUrl, $baseVariables, $renderContext);
@@ -83,6 +94,12 @@ class JetpkEmailEventRenderer
             $this->collectPlaceholderMetrics($ctaResult, $unresolvedPlaceholders, $fallbackKeysApplied);
         } else {
             $ctaUrl = null;
+        }
+
+        // Avoid duplicate salutations when intro already greets (Hello/Hi/Dear …).
+        $recipientName = $baseVariables['customer_name'] ?? $baseVariables['user_name'] ?? null;
+        if (is_string($introText) && preg_match('/^(Hello|Hi|Dear)\b/i', trim($introText)) === 1) {
+            $recipientName = null;
         }
 
         $viewData = array_merge($payload, [
@@ -95,7 +112,7 @@ class JetpkEmailEventRenderer
             'ctaUrl' => $ctaUrl,
             'eventContent' => $content,
             'detailFieldValues' => $this->detailFieldValues($content['detail_fields'], $baseVariables),
-            'recipientName' => $baseVariables['customer_name'] ?? $baseVariables['user_name'] ?? null,
+            'recipientName' => $recipientName,
         ]);
 
         if (is_string($content['full_html_override'] ?? null) && trim($content['full_html_override']) !== '') {
@@ -146,19 +163,7 @@ class JetpkEmailEventRenderer
     protected function sanitizePayloadForEvent(string $eventKey, array $payload): array
     {
         $definition = JetpkEmailEventContentRegistry::find($eventKey);
-        $isAuth = $definition !== null
-            && $definition->category === EmailTemplateRegistry::CATEGORY_AUTH_USER;
-
-        $authKeys = [
-            'password_reset',
-            'email_verification',
-            'login_otp',
-            'auth_new_device_login',
-            'password_reset_requested',
-            'customer_welcome',
-        ];
-
-        if (! $isAuth && ! in_array($eventKey, $authKeys, true)) {
+        if (! $this->isSecurityIdentityEvent($eventKey, $definition)) {
             return $payload;
         }
 
@@ -177,6 +182,29 @@ class JetpkEmailEventRenderer
         }
 
         return $payload;
+    }
+
+    protected function isSecurityIdentityEvent(string $eventKey, ?JetpkEmailEventContentDefinition $definition = null): bool
+    {
+        $definition ??= JetpkEmailEventContentRegistry::find($eventKey);
+        if ($definition !== null && $definition->category === EmailTemplateRegistry::CATEGORY_AUTH_USER) {
+            return true;
+        }
+
+        return in_array($eventKey, [
+            'password_reset',
+            'email_verification',
+            'login_otp',
+            'auth_new_device_login',
+            'password_reset_requested',
+            'customer_welcome',
+            'customer_login_success',
+            'admin_login_success',
+            'staff_login_success',
+            'agent_login_success',
+            'login_failed_sensitive',
+            'login_failed_alert',
+        ], true);
     }
 
     /**

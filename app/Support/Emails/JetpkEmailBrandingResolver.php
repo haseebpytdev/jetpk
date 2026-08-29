@@ -38,7 +38,7 @@ class JetpkEmailBrandingResolver
         'logo_url'         => null,
         'home_url'         => null,
         'manage_url'       => null,
-        'support_email'    => 'ota@jetpakistan.pk',
+        'support_email'    => null,
         'support_phone'    => null,
         'primary_color'    => '#00843D',
         'accent_color'     => '#F58220',
@@ -65,27 +65,31 @@ class JetpkEmailBrandingResolver
         $profile = ($clientSlug === self::CLIENT_SLUG) ? static::fetchClientProfile() : [];
         $config = static::configBrand();
 
-        // Defaults → config → company profile (authoritative contacts) → client profile DB.
+        // Defaults → config → client profile DB → company profile (contacts + public URLs win).
         $brand = array_merge(
             static::$defaults,
             $config,
-            static::onlyFilled($company),
             static::onlyFilled($profile),
+            static::onlyFilled($company),
         );
 
+        $appUrl = rtrim(trim((string) config('app.url', '')), '/');
         if (empty($brand['home_url'])) {
-            $appUrl = trim((string) config('app.url', ''));
-            $brand['home_url'] = static::absoluteUrl($appUrl !== '' ? $appUrl : null)
-                ?? trim((string) env('JETPK_HOME_URL', 'https://jetpakistan.pk'));
+            $brand['home_url'] = static::absoluteUrl($appUrl !== '' ? $appUrl : null);
         }
 
         // Normalise logo to an absolute URL (or null for text fallback).
         $brand['logo_url'] = static::absoluteUrl($brand['logo_url'] ?? null);
         $brand['home_url'] = static::absoluteUrl($brand['home_url'] ?? null) ?? ($brand['home_url'] ?? null);
 
+        // Never leave customer-visible action URLs on client-preview /jetpk paths.
+        $brand['home_url'] = static::canonicalizePublicHomeUrl($brand['home_url'] ?? null, $appUrl);
+        $brand['manage_url'] = static::canonicalizeManageUrl($brand['home_url'] ?? null, $brand['manage_url'] ?? null);
+
         // Guarantee the client slug is always JetPK for these views.
         $brand['client_slug'] = self::CLIENT_SLUG;
-        $brand['support_email'] = static::canonicalBusinessEmail($brand['support_email'] ?? null);
+        $resolvedSupport = static::canonicalBusinessEmail($brand['support_email'] ?? null);
+        $brand['support_email'] = $resolvedSupport !== '' ? $resolvedSupport : null;
 
         // Never invent optional contact facts.
         if (! is_string($brand['support_phone'] ?? null) || trim((string) $brand['support_phone']) === '') {
@@ -135,10 +139,14 @@ class JetpkEmailBrandingResolver
             static fn (string $value): string => strtolower(trim($value)),
             (array) config('client.deprecated_operational_emails', []),
         );
-        $canonical = strtolower(trim((string) config('client.canonical_support_email', 'ota@jetpakistan.pk')));
+        $canonical = strtolower(trim((string) config('client.canonical_support_email', '')));
 
-        if ($email === '' || in_array($email, $legacy, true)) {
-            return $canonical !== '' ? $canonical : 'ota@jetpakistan.pk';
+        if ($email === '') {
+            return $canonical;
+        }
+
+        if (in_array($email, $legacy, true)) {
+            return $canonical !== '' ? $canonical : $email;
         }
 
         return trim((string) $email);
@@ -299,6 +307,53 @@ class JetpkEmailBrandingResolver
         return static::absoluteUrl($path);
     }
 
+    /**
+     * Prefer company website / APP_URL; strip legacy /jetpk preview prefix for standalone JetPK.
+     */
+    protected static function canonicalizePublicHomeUrl(?string $homeUrl, string $appUrl): ?string
+    {
+        $home = trim((string) $homeUrl);
+        if ($home === '' && $appUrl !== '') {
+            $home = $appUrl;
+        }
+        if ($home === '') {
+            return null;
+        }
+
+        $parsed = parse_url($home);
+        $host = strtolower((string) ($parsed['host'] ?? ''));
+        $path = (string) ($parsed['path'] ?? '');
+
+        // Local / preview hosts must never appear in production-like renders when APP_URL is set.
+        if ($appUrl !== '' && ($host === 'jetpk.test' || $host === 'localhost' || str_ends_with($host, '.test'))) {
+            $home = $appUrl;
+            $parsed = parse_url($home) ?: [];
+            $path = (string) ($parsed['path'] ?? '');
+        }
+
+        if ($path === '/jetpk' || str_starts_with($path, '/jetpk/')) {
+            $scheme = $parsed['scheme'] ?? 'https';
+            $host = $parsed['host'] ?? '';
+            if ($host !== '') {
+                $home = $scheme.'://'.$host;
+            } elseif ($appUrl !== '') {
+                $home = $appUrl;
+            }
+        }
+
+        return rtrim($home, '/');
+    }
+
+    protected static function canonicalizeManageUrl(?string $homeUrl, mixed $manageUrl): ?string
+    {
+        $home = rtrim(trim((string) $homeUrl), '/');
+        if ($home === '') {
+            return is_string($manageUrl) && trim($manageUrl) !== '' ? trim($manageUrl) : null;
+        }
+
+        return $home.'/lookup-booking';
+    }
+
     protected static function firstNonEmpty(?string ...$values): ?string
     {
         foreach ($values as $value) {
@@ -355,6 +410,12 @@ class JetpkEmailBrandingResolver
 
         $path = '/' . ltrim($value, '/');
 
+        try {
+            return \App\Support\Url\PublicActionUrl::absolute($path);
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
         if (function_exists('url')) {
             try {
                 return url($path);
@@ -369,6 +430,6 @@ class JetpkEmailBrandingResolver
         }
         $base = $base ?: ('https://'.trim((string) config('client.canonical_client.domain', 'jetpakistan.pk')));
 
-        return rtrim($base, '/') . $path;
+        return rtrim((string) $base, '/').$path;
     }
 }
