@@ -100,5 +100,6 @@ class JetpkEmailContentAssertionTest extends TestCase
         $this->assertIsString($html);
         $this->assertStringNotContainsString('jetpk.test', $html);
         $this->assertStringContainsString('jetpakistan.pk', $html);
+        $this->assertDoesNotMatchRegularExpression('#https?://jetpk\\.test/#', $html);
     }
 }

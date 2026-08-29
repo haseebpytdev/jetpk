@@ -84,6 +84,7 @@ class JetpkEmailBrandingResolver
 
         // Never leave customer-visible action URLs on client-preview /jetpk paths.
         $brand['home_url'] = static::canonicalizePublicHomeUrl($brand['home_url'] ?? null, $appUrl);
+        $brand['logo_url'] = static::rewriteLocalAssetHostToPublic($brand['logo_url'] ?? null);
         $brand['manage_url'] = static::canonicalizeManageUrl($brand['home_url'] ?? null, $brand['manage_url'] ?? null);
 
         // Guarantee the client slug is always JetPK for these views.
@@ -360,6 +361,28 @@ class JetpkEmailBrandingResolver
         }
 
         return rtrim($home, '/');
+    }
+
+    /**
+     * Rewrite logo/asset hosts that resolve through local APP_URL (*.test) onto the public site.
+     */
+    protected static function rewriteLocalAssetHostToPublic(?string $url): ?string
+    {
+        $value = trim((string) $url);
+        if ($value === '') {
+            return null;
+        }
+
+        $parsed = parse_url($value);
+        $host = strtolower((string) ($parsed['host'] ?? ''));
+        if ($host === '' || ! ($host === 'jetpk.test' || $host === 'localhost' || str_ends_with($host, '.test'))) {
+            return $value;
+        }
+
+        $path = (string) ($parsed['path'] ?? '');
+        $query = isset($parsed['query']) ? '?'.$parsed['query'] : '';
+
+        return 'https://jetpakistan.pk'.$path.$query;
     }
 
     protected static function canonicalizeManageUrl(?string $homeUrl, mixed $manageUrl): ?string
