@@ -127,12 +127,25 @@ export function GroupSearchPage() {
   ]);
 
   const filtersValid = useMemo(() => {
-    if (facets.state !== "loaded") return false;
-    if (filters.airline && !airlineValues.includes(filters.airline)) return false;
-    if (filters.sector && !sectorValues.includes(filters.sector)) return false;
-    if (filters.category && !categoryValues.includes(filters.category)) return false;
+    if (!hasSearch) {
+      return false;
+    }
+    // URL-driven searches must load results without waiting on facet hydration.
+    // Facet stale-value checks apply only after facets are loaded.
+    if (facets.state !== "loaded") {
+      return true;
+    }
+    if (filters.airline && airlineValues.length > 0 && !airlineValues.includes(filters.airline)) {
+      return false;
+    }
+    if (filters.sector && sectorValues.length > 0 && !sectorValues.includes(filters.sector)) {
+      return false;
+    }
+    if (filters.category && categoryValues.length > 0 && !categoryValues.includes(filters.category)) {
+      return false;
+    }
     return true;
-  }, [facets.state, filters.airline, filters.sector, filters.category, airlineValues, sectorValues, categoryValues]);
+  }, [hasSearch, facets.state, filters.airline, filters.sector, filters.category, airlineValues, sectorValues, categoryValues]);
 
   const loadResults = useCallback(async (nextFilters: GroupSearchFilters, append = false) => {
     setLoading(true);
