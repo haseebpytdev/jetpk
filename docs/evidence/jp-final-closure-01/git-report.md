@@ -19,8 +19,8 @@
 - FINAL_R4_ENGINEERING_SHA=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9` (deployed runtime object)
 - DEPLOYED_RUNTIME_SHA=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9`
 - PUBLIC_BUILD_ID=`OUwL6VdIoWW07Xli8W_KB`
-- EVIDENCE_COMMIT_SHA=(filled after docs commit)
-- FINAL_BRANCH_HEAD_SHA=(filled after docs commit)
+- EVIDENCE_COMMIT_SHA=`39e140e775aa6c84e84463894ed8dee787df04da`
+- FINAL_BRANCH_HEAD_SHA=`39e140e775aa6c84e84463894ed8dee787df04da` (docs tip; ≠ engineering SHA)
 
 ## Notes
 
