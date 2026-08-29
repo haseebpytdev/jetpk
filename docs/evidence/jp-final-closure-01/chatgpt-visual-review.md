@@ -1,32 +1,22 @@
-# ChatGPT visual review pack — JP-FINAL-CLOSURE-01
+# ChatGPT visual review notes — JP-FINAL-CLOSURE-01 R3
 
-## Status
+## Email pack (16 + mobile 6)
 
-Partial. Mail robustness is a **runtime** change (no visual email pack complete).
-Public screenshot capture may be partial if Playwright font timeouts persist.
+- Source: `storage/app/email-previews/jetpk/*_{role}.html` via `jetpk:email-preview`
+- Shots: `docs/evidence/jp-final-closure-01/email/preview-shots/`
+- Manifest: `preview-shot-manifest.json` → `EMAIL_VISUAL_PACK=PASS`
+- Checks: no `hello@example.com`, no `jetpk.test`, no Manage booking on security/verification, no Dear Team on non-ops user templates
+- Support phone `+92 300 4455667` present from company/`ota-client` config (classified accepted, not invent)
 
-Do **not** mark OWNER_VISUAL_PASS.
+## Live surfaces
 
-## Email
+- Responsive 5×5 (home/groups/groups_search/flights/support × 1440/1366/1024/768/390): PASS
+- Flights: oneway/details/traveler×10/review/return pair/segmented/nearby preserved/change/bfcache: PASS
+- Groups discovery + local bookings JFZZT2DJ / WZBJCK6Z: PASS (prior)
+- Admin CMS path corrected to `/admin/dashboard/cms/pages`: PASS
+- QA ML inventory deactivated after shots: PASS
 
-- Inventory: `email/email-inventory.json` (163 entries)
-- Hardcode audit: `email/email-hardcode-audit.json` (32 hits)
-- Infrastructure notes: `email/existing-infrastructure.md`
-- Preview screenshots: **not generated this run** — ChatGPT should treat EMAIL_PREVIEW as incomplete
+## Known visual caveats
 
-## Public / Groups
-
-- Live smoke HTTP 200 on `/` and `/groups` after mail deploy
-- Groups hero engineering (`7d4302c7`) **not** included in mail-only file deploy — inspect live `/groups` cautiously; may still be pre-hero baseline
-
-## Flights / Customer / Agent / Admin
-
-- Not freshly screenshot-certified in this loop
-- R3 historical evidence remains under `docs/evidence/jp-ux-portal-perf-01/live-final-r3/`
-
-## What ChatGPT should verify first
-
-1. Git: live authority = `fa6dfdc4` (not branch tip `9200165a`)
-2. Deployment report ACTIVATE=PASS + OLS + drift 0
-3. Mail failure architecture (BestEffort + after-commit Registered)
-4. Residual matrix honesty (NEW_QA_E2E, EMAIL_SYSTEM, GROUPS, portals)
+- Do not use unsuffixed `booking_confirmed.html` / `payment_rejected_user.html` leftovers from older preview commands for certification
+- First Book Now sample includes progressive warm (~28s); steady p50 ~19.6s

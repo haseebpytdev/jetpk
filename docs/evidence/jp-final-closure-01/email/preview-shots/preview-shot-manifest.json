@@ -1,101 +1,126 @@
 {
   "count": 16,
+  "hardcodes": {
+    "hello_example": 0,
+    "dear_team_non_ops": 0,
+    "manage_booking_security": 0,
+    "company_support_phone": 16,
+    "jetpk_path": 0
+  },
+  "EMAIL_VISUAL_PACK": "PASS",
+  "COMPANY_PHONE_NOTE": "support phone from company/ota-client config; not invent hardcode",
   "items": [
     {
       "file": "booking_confirmed_user.html",
+      "source": "storage",
       "shot": "booking_confirmed_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Booking confirmed Dear Team, Your booking is confirmed Everything is set. Your itinerary and passenger details are below. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Nee"
+      "text_snip": " Visit site Booking confirmed Hello Ayesha Khan, Your booking is confirmed Everything is set. Your itinerary and passenger details are below. BOOKING SUMMARY Booking reference JPK-2026-004821 PNR X7K9QP Route Karachi (KHI) → Dubai (DXB) Trip type One way Passengers 2 Booking stat"
     },
     {
       "file": "booking_cancelled_user.html",
+      "source": "storage",
       "shot": "booking_cancelled_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Booking cancelled Dear Team, Cancelled Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 J"
+      "text_snip": " Visit site Booking cancelled Hello Ayesha Khan, Cancelled BOOKING SUMMARY Booking reference JPK-2026-004821 PNR X7K9QP Route Karachi (KHI) → Dubai (DXB) Trip type One way Passengers 2 Booking status Cancelled Payment status Paid Total amount PKR 96,500 Need help? ota@jetpakistan"
     },
     {
       "file": "booking_request_received_admin.html",
+      "source": "storage",
       "shot": "booking_request_received_admin.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Booking request received Dear Team, Your booking request has been received We are processing your request. You will get another email once it is confirmed. Need help? Contact JetPakistan support and we'll be glad to assist. ota@"
+      "text_snip": " Visit site Booking request received Dear Team, Your booking request has been received We are processing your request. You will get another email once it is confirmed. BOOKING SUMMARY Booking reference JPK-2026-004821 PNR Will appear once confirmed Route Karachi (KHI) → Dubai (DX"
     },
     {
       "file": "payment_verified_user.html",
+      "source": "storage",
       "shot": "payment_verified_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Payment successful Dear Team, Payment successful Your payment has been received. A summary is below. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakist"
-    },
-    {
-      "file": "payment_rejected_user.html",
-      "shot": "payment_rejected_user.png",
-      "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Payment failed Dear Team, Failed Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPaki"
+      "text_snip": " Visit site Payment successful Hello Ayesha Khan, Payment successful Your payment has been received. A summary is below. PAYMENT SUMMARY Amount PKR 96,500 Method Card Status Paid Invoice number INV-2026-004821 Reference TXN-4F9A21C7 Paid at 09 Jul 2026, 3:42 PM BOOKING SUMMARY Bo"
     },
     {
       "file": "ticket_issued_user.html",
+      "source": "storage",
       "shot": "ticket_issued_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Ticket Issued Dear Team, Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. Al"
+      "text_snip": " Visit site Ticket Issued Hello Ayesha Khan, Customer Ayesha Khan Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with dedicated support."
     },
     {
       "file": "agent_application_submitted_applicant.html",
+      "source": "storage",
       "shot": "agent_application_submitted_applicant.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Application received Thank you for applying to partner with JetPakistan. We have received your application for JetPakistan and our team will review it shortly. Pending review Need help? Contact JetPakistan support and we'll be g"
+      "text_snip": " Visit site Application received Hi Ayesha Khan, Thank you for applying to partner with JetPakistan. We have received your application for JetPakistan and our team will review it shortly. Pending review Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi"
     },
     {
       "file": "agent_application_approved_applicant.html",
+      "source": "storage",
       "shot": "agent_application_approved_applicant.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Welcome, partner We are pleased to inform you that your agent application for JetPakistan has been approved. Approved Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need he"
+      "text_snip": " Visit site Welcome, partner Hi Ayesha Khan, We are pleased to inform you that your agent application for JetPakistan has been approved. Approved Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. All rights reserved. We help you pla"
     },
     {
       "file": "password_reset_requested_user.html",
+      "source": "storage",
       "shot": "password_reset_requested_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Password reset requested Dear User, SIGN-IN DETAILS Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Kar"
+      "text_snip": " Visit site Password reset requested Hello Ayesha Khan, SIGN-IN DETAILS Need help? ota@jetpakistan.pk · +92 300 4455667 Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with dedicated support."
+    },
+    {
+      "file": "email_verification_user.html",
+      "source": "storage",
+      "shot": "email_verification_user.png",
+      "leak_legacy_brand": "PASS",
+      "text_snip": " Visit site Verify your email Hello Ayesha Khan, Need help? ota@jetpakistan.pk · +92 300 4455667 Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with dedicated support."
     },
     {
       "file": "customer_registered_user.html",
+      "source": "storage",
       "shot": "customer_registered_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Customer Registered This is an update regarding your Customer Registered notification. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 30"
+      "text_snip": " Visit site Customer Registered Hello Ayesha Khan, Customer Ayesha Khan Need help? ota@jetpakistan.pk · +92 300 4455667 Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with dedicated support."
     },
     {
       "file": "support_ticket_created_user.html",
+      "source": "storage",
       "shot": "support_ticket_created_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Support request received Dear Team, Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetP"
+      "text_snip": " Visit site Support request received Hello Ayesha Khan, Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with dedicated support."
     },
     {
       "file": "invoice_generated_user.html",
+      "source": "storage",
       "shot": "invoice_generated_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Invoice This is an update regarding your Invoice Generated notification. Invoice This invoice does not contain any card details. Keep it for your records. Need help? Contact JetPakistan support and we'll be glad to assist. ota@j"
+      "text_snip": " Visit site Invoice Hello Ayesha Khan, Invoice No. INV-2026-004821 Paid Booking reference JPK-2026-004821 Transaction reference TXN-4F9A21C7 Paid at 09 Jul 2026, 3:42 PM Total PKR 96,500 This invoice does not contain any card details. Keep it for your records. Need help? ota@jetp"
     },
     {
       "file": "refund_approved_user.html",
+      "source": "storage",
       "shot": "refund_approved_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Refund Approved Dear Team, Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. "
+      "text_snip": " Visit site Refund Approved Hello Ayesha Khan, Customer Ayesha Khan Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with dedicated support."
     },
     {
       "file": "group_booking_reservation_created_user.html",
+      "source": "storage",
       "shot": "group_booking_reservation_created_user.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Group reservation held This is an update regarding your Group Booking Reservation Created notification. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpak"
+      "text_snip": " Visit site Group reservation held Hello Ayesha Khan, Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with dedicated support."
     },
     {
       "file": "commission_earned_agent.html",
+      "source": "storage",
       "shot": "commission_earned_agent.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Commission Earned This is an update regarding your Commission Earned notification. Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 300 44"
+      "text_snip": " Visit site Commission Earned Hello Ayesha Khan, Need help? ota@jetpakistan.pk · +92 300 4455667 Manage booking · Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with dedicated support."
     },
     {
       "file": "staff_created_staff.html",
+      "source": "storage",
       "shot": "staff_created_staff.png",
       "leak_legacy_brand": "PASS",
-      "text_snip": " Visit site Account created Your Reservation Staff account for JetPakistan has been created. Active Need help? Contact JetPakistan support and we'll be glad to assist. ota@jetpakistan.pk +92 300 4455667 Need help? ota@jetpakistan.pk · +92 3"
+      "text_snip": " Visit site Account created Hi Ayesha Khan, Your Reservation Staff account for JetPakistan has been created. Active Customer Ayesha Khan Need help? ota@jetpakistan.pk · +92 300 4455667 Home Karachi © 2026 JetPakistan. All rights reserved. We help you plan and book flights with de"
     }
   ]
 }

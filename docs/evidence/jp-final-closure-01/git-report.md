@@ -1,32 +1,23 @@
-# JP-FINAL-CLOSURE-01 — Git report
+# JP-FINAL-CLOSURE-01 — Git report (R3 rebuild)
 
-## START
+## Authority
 
-- START_BRANCH_HEAD=`ca2b5821a3cfe0474a369c15d5b30026e8b8dccb`
-- START_LIVE_RUNTIME=`61362c21907b4e69ac7f399d38943dca2aa2aef4`
 - BRANCH=`phase/jp-flight-perf-01`
+- REMOTE=`jetpk` → `https://github.com/haseebpytdev/jetpk.git`
+- START_R3_LIVE_RUNTIME=`37d489cec3ff34f2679f80201d4581e178863b38`
+- START_PUBLIC_BUILD=`4KN41ZZvPsqgb3xu8D7Ju`
 
-## Commits created this run
+## Engineering commits this R3 continuation
 
-| SHA | TYPE | SUBJECT | DEPLOYED | STATUS |
-|---|---|---|---|---|
-| `fa6dfdc403388232956a1a2062089a65d296b2b0` | ENGINEERING_RUNTIME | fix(mail): keep checkout/registration when verification SMTP fails | YES | CURRENT_LIVE_MAIL |
-| `9200165a9e096ec744fa1475c8d8e5cb0549db6c` | ENGINEERING_RUNTIME | feat(mail): add gated QA mailbox sink and drop placeholder email phone | NO | SUPERSEDES tip; sink disabled by default; not deployed |
+| SHA | TYPE | SUBJECT | DEPLOYED |
+|---|---|---|---|
+| `86fa57fbe5b4c28d64ecc06d16d82710ad29fda1` | EMAIL_FINAL | email content/branding (prior) | YES (via 37d489ce lineage) |
+| `37d489cec3ff34f2679f80201d4581e178863b38` | GROUP_DISCOVERY | facet unblock + groups UI | YES |
+| `52460b310757e550f133e7c33a1d47440f56daa4` | EMAIL_URL | force jetpakistan.pk when canonical domain is local | superseded |
+| `63e66e65bf8d83acaa5feaeb0efcedd66ad1f75e` | EMAIL_URL+LOGO | rewrite local *.test logo hosts to jetpakistan.pk | YES (file hash match live) |
 
-## Pre-existing ancestry (classified)
+## Tip
 
-| SHA | TYPE | SUBJECT |
-|---|---|---|
-| `61362c21` | ENGINEERING_RUNTIME | fix(customer): resume owned drafts and restore nearby dates (was live) |
-| `7d4302c7` | ENGINEERING_RUNTIME | feat(groups): strengthen /groups hero and add manual_local QA inventory (undeployed) |
-| `ca2b5821` | DOCS_EVIDENCE | docs(customer): close Draft resume and nearby-date production evidence |
-
-## Final pins
-
-- FINAL_ENGINEERING_SHA (branch tip)=`9200165a9e096ec744fa1475c8d8e5cb0549db6c`
-- DEPLOYED_RUNTIME_SHA=`fa6dfdc403388232956a1a2062089a65d296b2b0`
-- MAIL_ROBUSTNESS_ENGINEERING_SHA=`fa6dfdc403388232956a1a2062089a65d296b2b0`
-- EVIDENCE_COMMIT_SHA=(pending docs commit)
-- FINAL_BRANCH_HEAD_SHA=`9200165a9e096ec744fa1475c8d8e5cb0549db6c`
-
-**Authority:** live runtime is `fa6dfdc4`, not docs tip, not undeployed QA-sink tip.
+- LOCAL/REMOTE HEAD=`63e66e65bf8d83acaa5feaeb0efcedd66ad1f75e`
+- DEPLOYED_RUNTIME_SHA (PHP branding file)=`63e66e65bf8d83acaa5feaeb0efcedd66ad1f75e`
+- PUBLIC_BUILD_ID=`4KN41ZZvPsqgb3xu8D7Ju` (unchanged; no frontend rebuild)

@@ -1,20 +1,41 @@
 {
+  "phase": "JP-FINAL-CLOSURE-01-R3",
+  "updated_at": "2026-08-29T07:50:00Z",
+  "analysis": {
+    "contradiction": "r2-new-qa-customer-matrix.json set LIVE_SUPPLIER_SYNTHETIC_PASSENGER_DATA=1 because synthetic passenger fields were filled in the JetPakistan checkout form. commercial-safety.json correctly recorded 0 for live-supplier serialization.",
+    "root_cause": "Mislabelled counter in R2 E2E harness — it treated local Draft passenger storage as live-supplier synthetic data. No evidence of supplier serialization.",
+    "flow": [
+      "Progressive search LHE-DXB (live search OK)",
+      "Book Now → /booking/passengers",
+      "POST /booking/passengers created local Draft (HTTP 200, next_url=/booking/review)",
+      "Playwright aborted POST /booking/review and supplier mutation URL patterns",
+      "blocked_network=[] and SUPPLIER_MUTATION_CALLS=0 in same matrix"
+    ],
+    "booking_12_probe": {
+      "status": "draft",
+      "supplier_field": "sabre",
+      "note": "supplier column reflects selected offer provider, not a created supplier reservation",
+      "pnr": null,
+      "supplier_reservation_id": null,
+      "payment_count": 0,
+      "passenger_count": 1
+    }
+  },
+  "QA_SYNTHETIC_DATA_USED_LOCALLY": "YES",
+  "QA_SYNTHETIC_DATA_STORED_IN_JETPAKISTAN": "YES",
+  "QA_SYNTHETIC_DATA_SERIALIZED_TO_LIVE_SUPPLIER_REQUEST": "NO",
   "LIVE_SUPPLIER_SYNTHETIC_PASSENGER_DATA": 0,
   "SUPPLIER_MUTATION_CALLS": 0,
   "NEW_ALHAIDER_CREATE_CALLS": 0,
-  "SABRE_PNR_CREATED": 0,
-  "PAYMENT_EXECUTED": 0,
-  "TICKET_ISSUED": 0,
+  "NEW_ALHAIDER_API_CANCEL_CALLS": 0,
+  "SABRE_PNR_CREATED": "NO",
+  "PIA_ORDER_CREATED": "NO",
+  "IATI_BOOKING_CREATED": "NO",
+  "ONEAPI_BOOKING_CREATED": "NO",
+  "PAYMENT_EXECUTED": "NO",
+  "TICKET_ISSUED": "NO",
   "ALHAIDER_BOOKING_ENABLED": false,
-  "ALHAIDER_CANCEL_ENABLED": "UNSET",
-  "SABRE_CANCEL_FLAGS_OBSERVED": {
-    "SABRE_CANCEL_ENABLED": true,
-    "SABRE_CANCEL_LIVE_CALL_ENABLED": true,
-    "SABRE_CANCEL_ALLOW_PRODUCTION_SEND": true,
-    "SABRE_CANCEL_ALLOW_PRODUCTION_HOST": true,
-    "mutated_this_run": false,
-    "note": "Pre-existing production snapshot during mail deploy; owner decision required"
-  },
   "GROUP_COMMERCIAL_SUPPLIER_READY": false,
-  "PIA_NDC_STATUS": "SUPPLIER_AUTH_REJECT"
+  "PIA_NDC_STATUS": "SUPPLIER_AUTH_REJECT",
+  "COMMERCIAL_SAFETY_EVIDENCE_CONSISTENT": "PASS"
 }

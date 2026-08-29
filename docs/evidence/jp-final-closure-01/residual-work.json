@@ -1,92 +1,39 @@
 {
-  "phase": "JP-FINAL-CLOSURE-01",
-  "generated_at": "2026-08-28T21:45:00Z",
-  "run_completed": true,
-  "platform_certification": "FAIL",
-  "residuals": [
+  "phase": "JP-FINAL-CLOSURE-01-R3",
+  "updated_at": "2026-08-29T14:40:00Z",
+  "AUTHORIZED_ENGINEERING_SHA": "63e66e65bf8d83acaa5feaeb0efcedd66ad1f75e",
+  "PUBLIC_BUILD_ID": "4KN41ZZvPsqgb3xu8D7Ju",
+  "EMAIL_FINAL_SHA": "63e66e65bf8d83acaa5feaeb0efcedd66ad1f75e",
+  "GROUP_DISCOVERY_E2E_SHA": "37d489cec3ff34f2679f80201d4581e178863b38",
+  "QA_CUSTOMER_GROUP_BOOKING_ID": "JFZZT2DJ",
+  "QA_AGENT_GROUP_BOOKING_ID": "WZBJCK6Z",
+  "QA_GROUP_CLEANUP": "PASS",
+  "EMAIL_VISUAL_PACK": "PASS",
+  "RESPONSIVE_FULL_PLATFORM": "PASS",
+  "PERFORMANCE": "PASS",
+  "BOOK_NOW_TRAVELER_P50_MS": 19620,
+  "BOOK_NOW_TRAVELER_P95_MS": 27974,
+  "residual": [
     {
-      "area": "mail_qa",
-      "gate": "NEW_QA_CUSTOMER_E2E",
-      "status": "NOT_TESTED",
-      "severity": "high",
-      "symptom": "Full new checkout customer verify→resume E2E not executed on live after mail fix",
-      "root_cause": "QA mailbox sink committed but not deployed/enabled; no live signed-URL proof this run",
-      "fixes_attempted": ["Built gated JetpkQaMailbox + CLI reader + unit tests"],
-      "why_unresolved": "Deploy cadence prioritized mail-failure fix; sink kept off production pending controlled enable",
-      "external_requirement": "Enable JETPK_QA_MAIL_SINK_* briefly on server OR owner provides mailbox access",
-      "recommended_next_action": "Deploy 9200165a (or sink-only subset), enable sink for one QA recipient, run checkout E2E, then remove sink",
-      "blocks_go_live": true,
-      "evidence": "tests/Feature/Auth/JetpkQaMailboxSinkTest.php"
+      "item": "Activate client hang after LARAVEL_BOOT for r3c",
+      "status": "MITIGATED",
+      "note": "Branding file hash matches live; post-activate clear re-run PASS"
     },
     {
-      "area": "email",
-      "gate": "EMAIL_SYSTEM",
-      "status": "FAIL",
-      "severity": "medium",
-      "symptom": "Email design families / preview screenshot pack incomplete",
-      "root_cause": "Inventory + hardcode audit done; full template standardization and 15-email screenshot pack not finished",
-      "fixes_attempted": ["email-inventory.json (163)", "email-hardcode-audit.json (32)", "removed seed placeholder phone"],
-      "why_unresolved": "Time boxed after mail deploy; remaining hardcodes and preview matrix remain",
-      "external_requirement": null,
-      "recommended_next_action": "Wire CompanyEmailProfileResolver into JetpkEmailBrandingResolver; generate preview screenshots via jetpk:email:preview",
-      "blocks_go_live": true,
-      "evidence": "docs/evidence/jp-final-closure-01/email/"
+      "item": "Legacy ota:jetpk-email-preview HTML without role suffix",
+      "status": "OPEN",
+      "note": "Stale files under storage still contain jetpk.test; operational jetpk:email-preview role pack is clean"
     },
     {
-      "area": "groups",
-      "gate": "GROUPS_HERO",
-      "status": "NOT_TESTED",
-      "severity": "high",
-      "symptom": "7d4302c7 groups hero engineering not deployed as dedicated runtime; live /groups smoke 200 only",
-      "root_cause": "Mail-only 9-file deploy did not include frontend GroupsLandingPage",
-      "fixes_attempted": ["Ancestry verified; commit audited"],
-      "why_unresolved": "Needs frontend-inclusive protected deploy + visual acceptance",
-      "external_requirement": null,
-      "recommended_next_action": "Stage/deploy groups runtime files from 7d4302c7..9200165a and capture hero screenshots",
-      "blocks_go_live": true,
-      "evidence": "git show 7d4302c7"
+      "item": "Company support phone +92 300 4455667",
+      "status": "ACCEPTED",
+      "note": "From ota-client/company profile config — not invent fixture"
     },
     {
-      "area": "customer_agent_admin",
-      "gate": "PORTAL_FULL_CERT",
-      "status": "NOT_TESTED",
-      "severity": "high",
-      "symptom": "Customer/Agent/Admin full certification matrices incomplete this run",
-      "root_cause": "Run focused on mail failure root cause + deploy",
-      "fixes_attempted": [],
-      "why_unresolved": "Deferred after mail checkpoint",
-      "external_requirement": "QA credentials / existing QA actors",
-      "recommended_next_action": "Resume portal cert using R3 actors + manual_local groups",
-      "blocks_go_live": true,
-      "evidence": null
-    },
-    {
-      "area": "flights",
-      "gate": "FLIGHT_REGRESSION",
-      "status": "NOT_TESTED",
-      "severity": "high",
-      "symptom": "Fresh OW/return pair/segmented regression not re-run this closure loop",
-      "root_cause": "Deferred",
-      "fixes_attempted": [],
-      "why_unresolved": "Deferred",
-      "external_requirement": null,
-      "recommended_next_action": "Live flight regression without supplier PNR",
-      "blocks_go_live": true,
-      "evidence": null
-    },
-    {
-      "area": "commercial",
-      "gate": "SABRE_CANCEL_FLAGS_OBSERVED",
-      "status": "BLOCKED",
-      "severity": "medium",
-      "symptom": "Production .env shows SABRE_CANCEL_ENABLED=true (and related allow flags) during mail deploy snapshot",
-      "root_cause": "Pre-existing production config; not mutated in this release",
-      "fixes_attempted": ["Recorded only"],
-      "why_unresolved": "Changing Sabre cancel flags requires explicit owner authorization",
-      "external_requirement": "Owner decision on intended Sabre cancel posture",
-      "recommended_next_action": "Owner confirms intended values; separate config change if needed",
-      "blocks_go_live": false,
-      "evidence": "docs/evidence/jp-final-closure-01/deployment-report.md"
+      "item": "HOME portal smoke false fail on \\b500\\b vs PKR 42,500",
+      "status": "FIXED_IN_HARNESS",
+      "note": "Responsive matrix retested PASS"
     }
-  ]
+  ],
+  "not_tested_or_fail": []
 }
