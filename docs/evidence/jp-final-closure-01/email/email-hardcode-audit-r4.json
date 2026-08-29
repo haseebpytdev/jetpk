@@ -1,0 +1,244 @@
+{
+  "audit_meta": {
+    "phase": "JP-FINAL-CLOSURE-01-R4",
+    "generated_at": "2026-08-30",
+    "source": "fresh scan of current JetPakistan email-related PHP/Blade/config",
+    "scope": "Hardcoded contact/branding/legacy values in email-related code paths",
+    "search_roots": [
+      "app/Mail",
+      "app/Support/Emails",
+      "app/Support/Branding",
+      "app/Services/Communication",
+      "resources/views/emails",
+      "config/jetpk_email.php",
+      "config/client.php",
+      "config/ota-brand.php"
+    ],
+    "classifications": [
+      "RESOLVER_DRIVEN",
+      "FIXTURE_ONLY",
+      "JUSTIFIED",
+      "REMOVED"
+    ],
+    "hit_count": 28,
+    "counts_by_classification": {
+      "RESOLVER_DRIVEN": 10,
+      "FIXTURE_ONLY": 8,
+      "JUSTIFIED": 8,
+      "REMOVED": 2
+    },
+    "unresolved_live_render_replace_with_resolver": 0,
+    "EMAIL_HARDCODE_REAUDIT": "PASS"
+  },
+  "hits": [
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 36,
+      "snippet": "'brand_name' => 'JetPakistan'",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "Safe last-resort brand name inside canonical JetPK email branding resolver; contacts (support_email/phone) are null and filled from CompanyEmailProfile/ClientProfile first."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 41,
+      "snippet": "'support_email' => null",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "Prior hardcoded ota@ mailbox removed; resolver no longer invents contact email."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 143,
+      "snippet": "config('client.canonical_support_email', '')",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "Legacy mailbox remap uses config canonical support email; empty when unset."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 333,
+      "snippet": "config('client.canonical_client.domain', 'jetpakistan.pk')",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "Public-domain canonicalize for relative URL building when APP_URL is local; last-resort inside resolver."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailBrandingResolver.php",
+      "line": 340,
+      "snippet": "$canonicalDomain = 'jetpakistan.pk'",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "Forces public JetPK domain when configured domain is .test/local so live emails never ship preview hosts."
+    },
+    {
+      "file": "app/Support/Emails/EmailBaseVariables.php",
+      "line": 87,
+      "snippet": "'brand_support_email' => (string) ($brand['support_email'] ?? '')",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "jetpkSampleVariables() pulls from JetpkEmailBrandingResolver; no invented mailbox/phone fallbacks."
+    },
+    {
+      "file": "app/Support/Branding/ClientMailBrandingResolver.php",
+      "line": 33,
+      "snippet": "$companyName = ... ?: 'JetPakistan'",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "Name fallback only after CompanyEmailProfileResolver; reply-to/support come from company profile (no hardcoded mailbox)."
+    },
+    {
+      "file": "app/Support/Branding/CompanyEmailProfileResolver.php",
+      "line": 79,
+      "snippet": "$mailFromEmail = ''",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "Prior hello@example.com fallback removed; blank when unresolved so callers omit From rather than invent."
+    },
+    {
+      "file": "app/Mail/GoogleCustomerWelcomeMail.php",
+      "line": 51,
+      "snippet": "config('ota-brand.support_email', config('client.canonical_support_email', ''))",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "R4: removed support@example.com dead fallback; CompanyEmailProfileResolver then ota-brand/canonical config only."
+    },
+    {
+      "file": "app/Services/Communication/NotificationRecipientResolver.php",
+      "line": 314,
+      "snippet": "config('client.canonical_support_email', 'ota@jetpakistan.pk')",
+      "classification": "RESOLVER_DRIVEN",
+      "notes": "Ops/admin recipient resolution via config canonical mailbox; not customer template branding invent."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailSampleData.php",
+      "line": 37,
+      "snippet": "$brandName = ... ?: 'JetPakistan'",
+      "classification": "FIXTURE_ONLY",
+      "notes": "Preview/audit sample trait only; live sends use CompanyEmailProfileResolver."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailSampleData.php",
+      "line": 61,
+      "snippet": "'reference' => 'JPK-2026-004821'",
+      "classification": "FIXTURE_ONLY",
+      "notes": "Deterministic fake booking reference for previews."
+    },
+    {
+      "file": "app/Support/Emails/JetpkEmailSampleDataProvider.php",
+      "line": 39,
+      "snippet": "eventAuthoritativeScalars(ticket_issued|refund_approved|...)",
+      "classification": "FIXTURE_ONLY",
+      "notes": "R4: preview-only detail_field scalars (booking_reference, ticket_numbers, amount, refund_status, group_reference, seats, route, ticket_reference, customer_name/email); not used on live send paths."
+    },
+    {
+      "file": "app/Support/Emails/EmailTemplateSampleData.php",
+      "line": 19,
+      "snippet": "'https://www.example-travel.test'",
+      "classification": "FIXTURE_ONLY",
+      "notes": "Admin template preview fixture domain; not customer-facing live render."
+    },
+    {
+      "file": "app/Support/Emails/EmailTemplateSampleData.php",
+      "line": 41,
+      "snippet": "'support_email' => ... ?? 'support@example-travel.test'",
+      "classification": "FIXTURE_ONLY",
+      "notes": "Preview fixture email for admin CMS template samples."
+    },
+    {
+      "file": "app/Support/Emails/EmailTemplateSampleData.php",
+      "line": 42,
+      "snippet": "'support_phone' => ... ?? '+92 300 1234567'",
+      "classification": "FIXTURE_ONLY",
+      "notes": "Preview fixture phone for admin CMS template samples."
+    },
+    {
+      "file": "app/Support/Emails/EmailTemplateSampleData.php",
+      "line": 78,
+      "snippet": "'login_email' => 'agent@example-travel.test'",
+      "classification": "FIXTURE_ONLY",
+      "notes": "Preview fixture agent login email."
+    },
+    {
+      "file": "app/Support/Emails/EmailPlaceholderFallbacks.php",
+      "line": 161,
+      "snippet": "'JetPakistan'",
+      "classification": "FIXTURE_ONLY",
+      "notes": "Placeholder sanitizer last-resort brand when forbidden/empty; preview/render safety net after resolver."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/partials/header.blade.php",
+      "line": 4,
+      "snippet": "$brandName = $brand['brand_name'] ?? 'JetPakistan'",
+      "classification": "JUSTIFIED",
+      "notes": "Blade null-safe display fallback when emailBrand missing; resolver always supplies brand in production."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/partials/footer.blade.php",
+      "line": 4,
+      "snippet": "$brandName = $brand['brand_name'] ?? 'JetPakistan'",
+      "classification": "JUSTIFIED",
+      "notes": "Blade null-safe fallback."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/partials/support-card.blade.php",
+      "line": 5,
+      "snippet": "$brandName = $brand['brand_name'] ?? 'JetPakistan'",
+      "classification": "JUSTIFIED",
+      "notes": "Blade null-safe fallback."
+    },
+    {
+      "file": "resources/views/emails/themes/jetpakistan/layouts/base.blade.php",
+      "line": 18,
+      "snippet": "$brandName = $brand['brand_name'] ?? 'JetPakistan'",
+      "classification": "JUSTIFIED",
+      "notes": "Shell-level null-safe fallback."
+    },
+    {
+      "file": "config/client.php",
+      "line": 48,
+      "snippet": "env('OTA_SUPPORT_EMAIL', 'ota@jetpakistan.pk')",
+      "classification": "JUSTIFIED",
+      "notes": "Canonical support mailbox config default; consumed by resolvers, not hardcoded in templates."
+    },
+    {
+      "file": "config/client.php",
+      "line": 56,
+      "snippet": "deprecated_operational_emails: support@jetpakistan.com, ticketingjp@jetpakistan.com",
+      "classification": "JUSTIFIED",
+      "notes": "Legacy mailbox remap denylist; not rendered as customer branding."
+    },
+    {
+      "file": "config/jetpk_email.php",
+      "line": 44,
+      "snippet": "prohibited_brand_markers: Parwaaz, YD Travel, YoursDomain, haseeb-master",
+      "classification": "JUSTIFIED",
+      "notes": "Leakage denylist for audits; not customer-visible branding."
+    },
+    {
+      "file": "app/Support/Branding/SafeBrandingResolver.php",
+      "line": 64,
+      "snippet": "'support_email' => 'ota@jetpakistan.pk'",
+      "classification": "JUSTIFIED",
+      "notes": "Public site SafeBranding jetpk fallback block (not JetPK email theme render path); phone left blank for jetpk branch."
+    },
+    {
+      "file": "resources/views/emails/bookings/request-received.blade.php",
+      "line": 1,
+      "snippet": "<x-mail::message> orphaned markdown view",
+      "classification": "REMOVED",
+      "notes": "Orphaned Laravel markdown mailable view; live path uses BookingUniversalNotification + emails.layouts.universal / JetPK theme. File retained but not on live JetPK render path."
+    },
+    {
+      "file": "resources/views/emails/auth/google-customer-welcome.blade.php",
+      "line": 1,
+      "snippet": "Legacy markdown welcome view",
+      "classification": "REMOVED",
+      "notes": "Superseded by GoogleCustomerWelcomeMail via CustomerFacingEmailRenderer + emails.layouts.modern. Not on live JetPK theme path."
+    }
+  ],
+  "preview_regeneration": {
+    "command": "php artisan jetpk:email-preview",
+    "exists": true,
+    "examples": [
+      "php artisan jetpk:email-preview --event=ticket_issued --role=user",
+      "php artisan jetpk:email-preview --event=refund_approved --role=user",
+      "php artisan jetpk:email-preview --event=group_booking_reservation_created --role=user",
+      "php artisan jetpk:email-preview --event=commission_earned --role=agent",
+      "php artisan jetpk:email-preview --event=support_ticket_created --role=user",
+      "php artisan jetpk:email-preview --event=customer_registered --role=user"
+    ],
+    "output_dir": "storage/app/email-previews/jetpk/"
+  }
+}

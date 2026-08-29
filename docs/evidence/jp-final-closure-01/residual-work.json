@@ -1,39 +1,53 @@
 {
-  "phase": "JP-FINAL-CLOSURE-01-R3",
-  "updated_at": "2026-08-29T14:40:00Z",
-  "AUTHORIZED_ENGINEERING_SHA": "63e66e65bf8d83acaa5feaeb0efcedd66ad1f75e",
-  "PUBLIC_BUILD_ID": "4KN41ZZvPsqgb3xu8D7Ju",
-  "EMAIL_FINAL_SHA": "63e66e65bf8d83acaa5feaeb0efcedd66ad1f75e",
-  "GROUP_DISCOVERY_E2E_SHA": "37d489cec3ff34f2679f80201d4581e178863b38",
+  "phase": "JP-FINAL-CLOSURE-01-R4",
+  "updated_at": "2026-08-29T21:40:00Z",
+  "FINAL_R4_ENGINEERING_SHA": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+  "DEPLOYED_RUNTIME_SHA": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+  "PUBLIC_BUILD_ID": "OUwL6VdIoWW07Xli8W_KB",
+  "ACTIVATE": "PASS",
+  "FULL_RUNTIME_SOURCE_DRIFT": 0,
+  "OLS": "PASS",
+  "FLIGHT_CARD_ONEWAY_PARITY": "PASS",
+  "FLIGHT_CARD_PAIR_PARITY": "PASS",
+  "FLIGHT_CARD_SEGMENTED_OUTBOUND_PARITY": "PASS",
+  "FLIGHT_CARD_SEGMENTED_RETURN_PARITY": "PASS",
+  "PAIR_ACTIONS_SIDE_BY_SIDE": "PASS",
+  "SEGMENTED_ACTIONS_SIDE_BY_SIDE": "PASS",
+  "EMAIL_SEMANTIC_COMPLETENESS": "PASS",
+  "EMAIL_HARDCODE_REAUDIT": "PASS",
+  "GROUP_LOCAL_E2E_EVIDENCE": "PASS",
+  "RESPONSIVE_FULL_PLATFORM": "PASS",
+  "BOOK_NOW_TRAVELER_SHELL_P50": 5267,
+  "BOOK_NOW_TRAVELER_SHELL_P95": 38921,
+  "BOOK_NOW_TRAVELER_USABLE_P50": 8206,
+  "BOOK_NOW_TRAVELER_USABLE_P95": 40879,
+  "REVALIDATION_P50": 1640,
+  "REVALIDATION_P95": 1996,
+  "PERFORMANCE": "FAIL",
   "QA_CUSTOMER_GROUP_BOOKING_ID": "JFZZT2DJ",
   "QA_AGENT_GROUP_BOOKING_ID": "WZBJCK6Z",
-  "QA_GROUP_CLEANUP": "PASS",
-  "EMAIL_VISUAL_PACK": "PASS",
-  "RESPONSIVE_FULL_PLATFORM": "PASS",
-  "PERFORMANCE": "PASS",
-  "BOOK_NOW_TRAVELER_P50_MS": 19620,
-  "BOOK_NOW_TRAVELER_P95_MS": 27974,
+  "SUPPLIER_MUTATION_CALLS": 0,
+  "PAYMENT_EXECUTED": "NO",
+  "TICKET_ISSUED": "NO",
+  "LIVE_SUPPLIER_SYNTHETIC_PASSENGER_DATA": 0,
   "residual": [
     {
-      "item": "Activate client hang after LARAVEL_BOOT for r3c",
-      "status": "MITIGATED",
-      "note": "Branding file hash matches live; post-activate clear re-run PASS"
-    },
-    {
-      "item": "Legacy ota:jetpk-email-preview HTML without role suffix",
+      "item": "Book Now → Traveler usable p95 ~40s with high variance",
       "status": "OPEN",
-      "note": "Stale files under storage still contain jetpk.test; operational jetpk:email-preview role pack is clean"
+      "note": "Revalidation p50~1.6s not dominant; post-nav passengers GET/hydration spikes. Instrumented p50 usable ~8.2s improved vs R3 ~19.6s wall baseline but PERFORMANCE remains FAIL."
     },
     {
-      "item": "Company support phone +92 300 4455667",
-      "status": "ACCEPTED",
-      "note": "From ota-client/company profile config — not invent fixture"
+      "item": "Traveler/Review authenticated portal depth at all 5 viewports",
+      "status": "PARTIAL",
+      "note": "Guest overflow matrix PASS; traveler screenshots captured on live handoff; full auth Review matrix not re-run in R4."
     },
     {
-      "item": "HOME portal smoke false fail on \\b500\\b vs PKR 42,500",
-      "status": "FIXED_IN_HARNESS",
-      "note": "Responsive matrix retested PASS"
+      "item": "JetpkEmailSampleDataProvider preview scalars",
+      "status": "LOCAL_UNCOMMITTED_OR_PENDING",
+      "note": "Preview/fixture enrichment present locally; live semantic profiles already deployed in 6e3ea4e6."
     }
   ],
-  "not_tested_or_fail": []
+  "not_tested_or_fail": [
+    "PERFORMANCE"
+  ]
 }

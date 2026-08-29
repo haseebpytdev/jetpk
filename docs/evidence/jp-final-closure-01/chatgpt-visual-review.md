@@ -1,22 +1,53 @@
-# ChatGPT visual review notes — JP-FINAL-CLOSURE-01 R3
+# JP-FINAL-CLOSURE-01-R4 — ChatGPT visual review pack
 
-## Email pack (16 + mobile 6)
+## Runtime authority
 
-- Source: `storage/app/email-previews/jetpk/*_{role}.html` via `jetpk:email-preview`
-- Shots: `docs/evidence/jp-final-closure-01/email/preview-shots/`
-- Manifest: `preview-shot-manifest.json` → `EMAIL_VISUAL_PACK=PASS`
-- Checks: no `hello@example.com`, no `jetpk.test`, no Manage booking on security/verification, no Dear Team on non-ops user templates
-- Support phone `+92 300 4455667` present from company/`ota-client` config (classified accepted, not invent)
+- ENGINEERING=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9`
+- BUILD=`OUwL6VdIoWW07Xli8W_KB`
+- HOST=`https://jetpakistan.pk`
 
-## Live surfaces
+## Flight card comparison (canonical One-Way)
 
-- Responsive 5×5 (home/groups/groups_search/flights/support × 1440/1366/1024/768/390): PASS
-- Flights: oneway/details/traveler×10/review/return pair/segmented/nearby preserved/change/bfcache: PASS
-- Groups discovery + local bookings JFZZT2DJ / WZBJCK6Z: PASS (prior)
-- Admin CMS path corrected to `/admin/dashboard/cms/pages`: PASS
-- QA ML inventory deactivated after shots: PASS
+Compare side-by-side CTAs `[ Details ] [ Book Now ]`:
 
-## Known visual caveats
+| Surface | Desktop | Mobile |
+|---|---|---|
+| One-Way | `live-final/r4/oneway-card-desktop.png` | `oneway-card-mobile.png` |
+| Return Pair | `return-pair-card-desktop.png` | `return-pair-card-mobile.png` |
+| Segmented Outbound | `segmented-outbound-card-desktop.png` | `segmented-outbound-card-mobile.png` |
+| Segmented Return | `segmented-return-card-desktop.png` | `segmented-return-card-mobile.png` |
 
-- Do not use unsuffixed `booking_confirmed.html` / `payment_rejected_user.html` leftovers from older preview commands for certification
-- First Book Now sample includes progressive warm (~28s); steady p50 ~19.6s
+Code parity JSON: `live-final/flight-card-parity.json`
+
+## Portals / Groups
+
+- `groups-results-desktop.png` / `groups-results-mobile.png`
+- `customer-dashboard-desktop.png` (may be login redirect as guest)
+- `agent-dashboard-desktop.png`
+- `admin-dashboard-desktop.png`
+
+## Email
+
+- Fresh hardcode reaudit: `email/email-hardcode-audit-r4.json` → EMAIL_HARDCODE_REAUDIT=PASS
+- Semantic previews/shots: `email/previews-r4/` + `email/preview-shots-r4/` (generated in R4 closeout)
+
+## Group local E2E
+
+- `live-final/r4-group-local-e2e.json` — JFZZT2DJ / WZBJCK6Z still `manual_local`, supplier_reservation_id NULL, payment unexecuted
+
+## Performance
+
+- Primary metrics from instrumented `jp-book-now-timing` marks (not inflated Playwright `waitForURL(load)` wall clock)
+- `live-final/r4/book-now-timing-breakdown.json`
+- SHELL p50=`5267`ms p95=`38921`ms
+- USABLE p50=`8206`ms p95=`40879`ms
+- REVALIDATION p50=`1640`ms p95=`1996`ms
+- **PERFORMANCE=FAIL** (usable p95 still ~40s / high variance; revalidate not dominant)
+
+## Reviewer checklist
+
+1. Actions never vertically stack as link-over-button on standard cards
+2. Pair keeps OUTBOUND|RETURN middle layout with One-Way outer shell
+3. Email ticket/refund/group detail rows show useful context when fixture/live scalars exist
+4. Confirm engineering SHA ≠ docs tip after evidence commit
+5. Do not convert PERFORMANCE=FAIL into PASS

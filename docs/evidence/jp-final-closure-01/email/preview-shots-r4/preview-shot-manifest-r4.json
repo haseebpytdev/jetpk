@@ -1,0 +1,162 @@
+[
+  {
+    "filename": "ticket_issued_user-desktop.png",
+    "source_html": "ticket_issued_user.html",
+    "timestamp": "2026-08-29T21:27:03.479Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "800x1100",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "ticket_issued_user-mobile.png",
+    "source_html": "ticket_issued_user.html",
+    "timestamp": "2026-08-29T21:27:03.947Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "390x844",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "refund_approved_user-desktop.png",
+    "source_html": "refund_approved_user.html",
+    "timestamp": "2026-08-29T21:27:06.049Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "800x1100",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "refund_approved_user-mobile.png",
+    "source_html": "refund_approved_user.html",
+    "timestamp": "2026-08-29T21:27:06.462Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "390x844",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "group_booking_reservation_created_user-desktop.png",
+    "source_html": "group_booking_reservation_created_user.html",
+    "timestamp": "2026-08-29T21:27:07.568Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "800x1100",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "group_booking_reservation_created_user-mobile.png",
+    "source_html": "group_booking_reservation_created_user.html",
+    "timestamp": "2026-08-29T21:27:07.912Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "390x844",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "commission_earned_agent-desktop.png",
+    "source_html": "commission_earned_agent.html",
+    "timestamp": "2026-08-29T21:27:09.095Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "800x1100",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "commission_earned_agent-mobile.png",
+    "source_html": "commission_earned_agent.html",
+    "timestamp": "2026-08-29T21:27:09.436Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "390x844",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "support_ticket_created_user-desktop.png",
+    "source_html": "support_ticket_created_user.html",
+    "timestamp": "2026-08-29T21:27:10.649Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "800x1100",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "support_ticket_created_user-mobile.png",
+    "source_html": "support_ticket_created_user.html",
+    "timestamp": "2026-08-29T21:27:10.945Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "390x844",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "customer_registered_user-desktop.png",
+    "source_html": "customer_registered_user.html",
+    "timestamp": "2026-08-29T21:27:12.145Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "800x1100",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "customer_registered_user-mobile.png",
+    "source_html": "customer_registered_user.html",
+    "timestamp": "2026-08-29T21:27:12.435Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "390x844",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "booking_confirmed_user-desktop.png",
+    "source_html": "booking_confirmed_user.html",
+    "timestamp": "2026-08-29T21:27:13.694Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "800x1100",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "booking_confirmed_user-mobile.png",
+    "source_html": "booking_confirmed_user.html",
+    "timestamp": "2026-08-29T21:27:14.016Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "390x844",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "payment_verified_user-desktop.png",
+    "source_html": "payment_verified_user.html",
+    "timestamp": "2026-08-29T21:27:15.280Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "800x1100",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  },
+  {
+    "filename": "payment_verified_user-mobile.png",
+    "source_html": "payment_verified_user.html",
+    "timestamp": "2026-08-29T21:27:15.580Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "viewport": "390x844",
+    "role": "preview",
+    "gate": "EMAIL_SEMANTIC_PREVIEW"
+  }
+]

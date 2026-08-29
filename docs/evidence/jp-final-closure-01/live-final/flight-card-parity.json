@@ -1,0 +1,62 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01-R4",
+  "generated_at": "2026-08-29T20:30:00Z",
+  "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+  "public_build_id": "OUwL6VdIoWW07Xli8W_KB",
+  "canonical": "frontend/features/flight-results/components/FlightResultCard.tsx",
+  "shared_actions": "frontend/features/flight-results/components/FlightResultActions.tsx",
+  "shared_actions_structure": "flex flex-wrap justify-end gap-2 → Details (outline) + Book Now (primary)",
+  "surfaces": {
+    "oneway": {
+      "file": "FlightResultCard.tsx",
+      "uses_FlightResultActions": true,
+      "actions_side_by_side": true,
+      "airline_identity_size": "md",
+      "route_block": "TimeRouteBlock",
+      "fare_badge": true,
+      "supplier_badge": true,
+      "price_column": "md:flex-col md:items-end",
+      "card_shell": "rounded-jp-card border border-jp-border bg-jp-surface p-3 shadow-jp-card",
+      "FLIGHT_CARD_ONEWAY_PARITY": "PASS",
+      "screenshots": "PASS",
+      "screenshot_files": ["oneway-card-desktop.png", "oneway-card-mobile.png"]
+    },
+    "pair": {
+      "file": "PairReturnCard.tsx",
+      "uses_FlightResultActions": true,
+      "actions_side_by_side": true,
+      "middle_layout": "OUTBOUND | RETURN TimeRouteBlock compact",
+      "secondary_return_airline": "size=sm when airline differs",
+      "FLIGHT_CARD_PAIR_PARITY": "PASS",
+      "PAIR_ACTIONS_SIDE_BY_SIDE": "PASS",
+      "screenshots": "PASS",
+      "screenshot_files": ["return-pair-card-desktop.png", "return-pair-card-mobile.png"]
+    },
+    "segmented_outbound": {
+      "file": "OutboundOptionCard.tsx",
+      "uses_FlightResultActions": true,
+      "actions_side_by_side": true,
+      "airline_identity_size": "md",
+      "FLIGHT_CARD_SEGMENTED_OUTBOUND_PARITY": "PASS",
+      "SEGMENTED_OUTBOUND_ACTIONS_SIDE_BY_SIDE": "PASS",
+      "screenshots": "PASS",
+      "screenshot_files": ["segmented-outbound-card-desktop.png", "segmented-outbound-card-mobile.png"]
+    },
+    "segmented_return": {
+      "file": "ReturnOptionsPage.tsx",
+      "uses_FlightResultActions": true,
+      "actions_side_by_side": true,
+      "airline_identity_size": "md",
+      "FLIGHT_CARD_SEGMENTED_RETURN_PARITY": "PASS",
+      "SEGMENTED_RETURN_ACTIONS_SIDE_BY_SIDE": "PASS",
+      "screenshots": "PASS",
+      "screenshot_files": ["segmented-return-card-desktop.png", "segmented-return-card-mobile.png"]
+    }
+  },
+  "ONEWAY_ACTIONS": "SIDE_BY_SIDE",
+  "PAIR_ACTIONS": "SIDE_BY_SIDE",
+  "SEGMENTED_OUTBOUND_ACTIONS": "SIDE_BY_SIDE",
+  "SEGMENTED_RETURN_ACTIONS": "SIDE_BY_SIDE",
+  "code_parity_gate": "PASS",
+  "visual_screenshot_gate": "PASS"
+}

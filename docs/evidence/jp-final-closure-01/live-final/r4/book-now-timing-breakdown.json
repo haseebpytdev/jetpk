@@ -1,0 +1,339 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01-R4",
+  "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+  "build_id": "OUwL6VdIoWW07Xli8W_KB",
+  "generated_at": "2026-08-29T21:39:11.356Z",
+  "n_attempted": 10,
+  "n_success": 8,
+  "n_timeout_fail": 2,
+  "primary_metric": "instrumented_jp_book_now_timing_marks",
+  "BOOK_NOW_TRAVELER_SHELL_P50": 5267,
+  "BOOK_NOW_TRAVELER_SHELL_P95": 38921,
+  "BOOK_NOW_TRAVELER_USABLE_P50": 8206,
+  "BOOK_NOW_TRAVELER_USABLE_P95": 40879,
+  "REVALIDATION_P50": 1640,
+  "REVALIDATION_P95": 1996,
+  "wall_clock_note": "Playwright waitForURL(load) inflated wall clock (~58-83s). Instrumented T0-T9 marks are authoritative.",
+  "wall_clock_shell": {
+    "samples": 8,
+    "p50": 68392,
+    "p95": 83340,
+    "min": 57887,
+    "max": 83340,
+    "values": [
+      57887,
+      58686,
+      67857,
+      68392,
+      74286,
+      78530,
+      82936,
+      83340
+    ]
+  },
+  "wall_clock_usable": {
+    "samples": 8,
+    "p50": 68443,
+    "p95": 83405,
+    "min": 57941,
+    "max": 83405,
+    "values": [
+      57941,
+      58736,
+      67956,
+      68443,
+      74337,
+      78583,
+      82995,
+      83405
+    ]
+  },
+  "instrumented_shell": {
+    "samples": 8,
+    "p50": 5267,
+    "p95": 38921,
+    "min": 2501,
+    "max": 38921,
+    "values": [
+      2501,
+      2860,
+      4299,
+      5267,
+      18828,
+      33368,
+      37391,
+      38921
+    ]
+  },
+  "instrumented_usable": {
+    "samples": 8,
+    "p50": 8206,
+    "p95": 40879,
+    "min": 4420,
+    "max": 40879,
+    "values": [
+      4420,
+      5093,
+      6998,
+      8206,
+      22285,
+      35862,
+      40014,
+      40879
+    ]
+  },
+  "revalidation": {
+    "samples": 8,
+    "p50": 1640,
+    "p95": 1996,
+    "min": 1247,
+    "max": 1996,
+    "values": [
+      1247,
+      1533,
+      1560,
+      1640,
+      1781,
+      1912,
+      1947,
+      1996
+    ]
+  },
+  "dominant_delay": {
+    "supplier_revalidate_ms_p50": 1640,
+    "supplier_revalidate_ms_p95": 1996,
+    "classification": "Supplier revalidate ~1.2-2.0s is NOT dominant. Dominant variance is post soft-nav traveler shell/context (Laravel GET /booking/passengers + hydration). T8/T9 spikes to ~30-40s on some samples."
+  },
+  "samples": [
+    {
+      "i": 0,
+      "searchId": "c862073e-5492-4858-aec4-91919c0f6f0d",
+      "shell_ms": 57887,
+      "usable_ms": 57941,
+      "nav_ms": 57813,
+      "revalidate_ms": 1640,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 450,
+        "T2_revalidate_start_from_T0": 10,
+        "T3_revalidate_response_from_T0": 1650,
+        "T6_nav_start_from_T0": 4491,
+        "T7_passenger_route_from_T0": 4493,
+        "T8_shell_visible_from_T0": 5267,
+        "T9_field_enabled_from_T0": 8206
+      },
+      "marks": {
+        "T0_click": 22163.099999999977,
+        "T1_handler": 22613.400000000023,
+        "T2_revalidate_start": 22172.5,
+        "T3_revalidate_response": 23812.70000000007,
+        "T6_nav_start": 26654.300000000047,
+        "T7_passenger_route": 26655.599999999977,
+        "T8_shell_visible": 27429.5,
+        "T9_field_enabled": 30369
+      }
+    },
+    {
+      "i": 1,
+      "searchId": "4aab7904-36f2-4ef1-b11f-d254926a45a3",
+      "shell_ms": 74286,
+      "usable_ms": 74337,
+      "nav_ms": 74242,
+      "revalidate_ms": 1947,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 561,
+        "T2_revalidate_start_from_T0": 18,
+        "T3_revalidate_response_from_T0": 1964,
+        "T6_nav_start_from_T0": 2762,
+        "T7_passenger_route_from_T0": 2764,
+        "T8_shell_visible_from_T0": 37391,
+        "T9_field_enabled_from_T0": 40014
+      },
+      "marks": {
+        "T0_click": 25598.699999999953,
+        "T1_handler": 26159.800000000047,
+        "T2_revalidate_start": 25616.300000000047,
+        "T3_revalidate_response": 27562.800000000047,
+        "T6_nav_start": 28361,
+        "T7_passenger_route": 28362.099999999977,
+        "T8_shell_visible": 62989.80000000005,
+        "T9_field_enabled": 65612.59999999998
+      }
+    },
+    {
+      "i": 2,
+      "searchId": "48dc0e74-8118-4823-872b-0720f798650c",
+      "shell_ms": 78530,
+      "usable_ms": 78583,
+      "nav_ms": 78506,
+      "revalidate_ms": 1560,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 234,
+        "T2_revalidate_start_from_T0": 10,
+        "T3_revalidate_response_from_T0": 1570,
+        "T6_nav_start_from_T0": 2799,
+        "T7_passenger_route_from_T0": 2800,
+        "T8_shell_visible_from_T0": 4299,
+        "T9_field_enabled_from_T0": 6998
+      },
+      "marks": {
+        "T0_click": 5880.600000000093,
+        "T1_handler": 6114,
+        "T2_revalidate_start": 5889.900000000023,
+        "T3_revalidate_response": 7449.900000000023,
+        "T6_nav_start": 8679.300000000047,
+        "T7_passenger_route": 8680.5,
+        "T8_shell_visible": 10179.199999999953,
+        "T9_field_enabled": 12878.800000000047
+      }
+    },
+    {
+      "i": 5,
+      "searchId": "f49c426e-ca32-40df-b2af-3b51c3d98952",
+      "shell_ms": 58686,
+      "usable_ms": 58736,
+      "nav_ms": 58654,
+      "revalidate_ms": 1996,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 430,
+        "T2_revalidate_start_from_T0": 4,
+        "T3_revalidate_response_from_T0": 2000,
+        "T6_nav_start_from_T0": 2888,
+        "T7_passenger_route_from_T0": 2894,
+        "T8_shell_visible_from_T0": 18828,
+        "T9_field_enabled_from_T0": 22285
+      },
+      "marks": {
+        "T0_click": 18948.199999999953,
+        "T1_handler": 19377.699999999953,
+        "T2_revalidate_start": 18952.5,
+        "T3_revalidate_response": 20948.399999999907,
+        "T6_nav_start": 21835.899999999907,
+        "T7_passenger_route": 21842.300000000047,
+        "T8_shell_visible": 37775.80000000005,
+        "T9_field_enabled": 41232.80000000005
+      }
+    },
+    {
+      "i": 6,
+      "searchId": "15c1765f-712b-44c7-8d84-566bb0b491a9",
+      "shell_ms": 68392,
+      "usable_ms": 68443,
+      "nav_ms": 68369,
+      "revalidate_ms": 1247,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 320,
+        "T2_revalidate_start_from_T0": 6,
+        "T3_revalidate_response_from_T0": 1253,
+        "T6_nav_start_from_T0": 1836,
+        "T7_passenger_route_from_T0": 1837,
+        "T8_shell_visible_from_T0": 2501,
+        "T9_field_enabled_from_T0": 4420
+      },
+      "marks": {
+        "T0_click": 20199.299999999814,
+        "T1_handler": 20519.09999999986,
+        "T2_revalidate_start": 20204.799999999814,
+        "T3_revalidate_response": 21452,
+        "T6_nav_start": 22034.799999999814,
+        "T7_passenger_route": 22036.199999999953,
+        "T8_shell_visible": 22700.399999999907,
+        "T9_field_enabled": 24618.899999999907
+      }
+    },
+    {
+      "i": 7,
+      "searchId": "a4a2eb5e-46ab-4411-abd7-1ad7a66ccb09",
+      "shell_ms": 83340,
+      "usable_ms": 83405,
+      "nav_ms": 83319,
+      "revalidate_ms": 1912,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 204,
+        "T2_revalidate_start_from_T0": 5,
+        "T3_revalidate_response_from_T0": 1917,
+        "T6_nav_start_from_T0": 2499,
+        "T7_passenger_route_from_T0": 2500,
+        "T8_shell_visible_from_T0": 33368,
+        "T9_field_enabled_from_T0": 35862
+      },
+      "marks": {
+        "T0_click": 3152.9000000001397,
+        "T1_handler": 3356.6999999999534,
+        "T2_revalidate_start": 3157.9000000001397,
+        "T3_revalidate_response": 5069.800000000047,
+        "T6_nav_start": 5651.90000000014,
+        "T7_passenger_route": 5653.199999999953,
+        "T8_shell_visible": 36520.60000000009,
+        "T9_field_enabled": 39014.69999999995
+      }
+    },
+    {
+      "i": 8,
+      "searchId": "3ce3ac98-4722-450c-84e6-150ddb625213",
+      "shell_ms": 82936,
+      "usable_ms": 82995,
+      "nav_ms": 82910,
+      "revalidate_ms": 1781,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 251,
+        "T2_revalidate_start_from_T0": 5,
+        "T3_revalidate_response_from_T0": 1785,
+        "T6_nav_start_from_T0": 2622,
+        "T7_passenger_route_from_T0": 2628,
+        "T8_shell_visible_from_T0": 38921,
+        "T9_field_enabled_from_T0": 40879
+      },
+      "marks": {
+        "T0_click": 4702.59999999986,
+        "T1_handler": 4953.799999999814,
+        "T2_revalidate_start": 4707.299999999814,
+        "T3_revalidate_response": 6487.799999999814,
+        "T6_nav_start": 7324.09999999986,
+        "T7_passenger_route": 7330.59999999986,
+        "T8_shell_visible": 43623.19999999995,
+        "T9_field_enabled": 45581.39999999991
+      }
+    },
+    {
+      "i": 9,
+      "searchId": "7d898a8d-b223-4cbe-980a-0e4fcea2cb4b",
+      "shell_ms": 67857,
+      "usable_ms": 67956,
+      "nav_ms": 67831,
+      "revalidate_ms": 1533,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 257,
+        "T2_revalidate_start_from_T0": 14,
+        "T3_revalidate_response_from_T0": 1547,
+        "T6_nav_start_from_T0": 2217,
+        "T7_passenger_route_from_T0": 2222,
+        "T8_shell_visible_from_T0": 2860,
+        "T9_field_enabled_from_T0": 5093
+      },
+      "marks": {
+        "T0_click": 20004.699999999953,
+        "T1_handler": 20261.800000000047,
+        "T2_revalidate_start": 20018.600000000093,
+        "T3_revalidate_response": 21551.699999999953,
+        "T6_nav_start": 22221.40000000014,
+        "T7_passenger_route": 22226.600000000093,
+        "T8_shell_visible": 22864.90000000014,
+        "T9_field_enabled": 25097.90000000014
+      }
+    }
+  ],
+  "PERFORMANCE": "FAIL",
+  "PERFORMANCE_REASON": "Instrumented usable p95 remains ~40s with high variance; not consistently prompt for certification PASS.",
+  "compared_to_r3_wall_baseline": {
+    "p50": 19620,
+    "p95": 27974
+  }
+}

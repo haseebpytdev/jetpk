@@ -1,0 +1,256 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01-R4",
+  "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+  "build_id": "OUwL6VdIoWW07Xli8W_KB",
+  "generated_at": "2026-08-29T21:14:21.939Z",
+  "fail_count": 0,
+  "RESPONSIVE_FULL_PLATFORM": "PASS",
+  "note": "Guest/auth-redirect surfaces included; Traveler/Review require live handoff — covered by book-now perf path screenshots when available.",
+  "rows": [
+    {
+      "surface": "Groups",
+      "viewport": 1440,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "Groups",
+      "viewport": 1366,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "Groups",
+      "viewport": 1024,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "Groups",
+      "viewport": 768,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "Groups",
+      "viewport": 390,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "GroupResults",
+      "viewport": 1440,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "GroupResults",
+      "viewport": 1366,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "GroupResults",
+      "viewport": 1024,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "GroupResults",
+      "viewport": 768,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "GroupResults",
+      "viewport": 390,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "CustomerDashboard",
+      "viewport": 1440,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "CustomerDashboard",
+      "viewport": 1366,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "CustomerDashboard",
+      "viewport": 1024,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "CustomerDashboard",
+      "viewport": 768,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "CustomerDashboard",
+      "viewport": 390,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AgentDashboard",
+      "viewport": 1440,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AgentDashboard",
+      "viewport": 1366,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AgentDashboard",
+      "viewport": 1024,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AgentDashboard",
+      "viewport": 768,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AgentDashboard",
+      "viewport": 390,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AdminDashboard",
+      "viewport": 1440,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AdminDashboard",
+      "viewport": 1366,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AdminDashboard",
+      "viewport": 1024,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AdminDashboard",
+      "viewport": 768,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "AdminDashboard",
+      "viewport": 390,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "FlightsOneWay",
+      "viewport": 1440,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "FlightsOneWay",
+      "viewport": 1366,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "FlightsOneWay",
+      "viewport": 1024,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "FlightsOneWay",
+      "viewport": 768,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "FlightsOneWay",
+      "viewport": 390,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "ReturnPair",
+      "viewport": 1440,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "ReturnPair",
+      "viewport": 1366,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "ReturnPair",
+      "viewport": 1024,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "ReturnPair",
+      "viewport": 768,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    },
+    {
+      "surface": "ReturnPair",
+      "viewport": 390,
+      "http": 200,
+      "overflowX": false,
+      "result": "PASS"
+    }
+  ]
+}

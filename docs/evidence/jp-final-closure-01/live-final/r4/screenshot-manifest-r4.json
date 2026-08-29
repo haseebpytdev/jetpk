@@ -1,0 +1,157 @@
+[
+  {
+    "filename": "oneway-card-desktop.png",
+    "timestamp": "2026-08-29T20:32:59.804Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "gate": "FLIGHT_CARD_ONEWAY",
+    "reused": true
+  },
+  {
+    "filename": "oneway-card-mobile.png",
+    "timestamp": "2026-08-29T20:33:00.561Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "gate": "FLIGHT_CARD_ONEWAY",
+    "reused": true
+  },
+  {
+    "filename": "return-pair-card-desktop.png",
+    "timestamp": "2026-08-29T20:37:17.135Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "/flights/results?from=LHE&to=DXB&depart=2026-09-19&return_date=2026-09-26&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&return_view=pair&search_id=06fceed4-2701-41ee-b750-16ac025c8b7a",
+    "viewport": "1440x900",
+    "role": "guest",
+    "gate": "FLIGHT_CARD_PAIR",
+    "note": "pair_missing status=ready"
+  },
+  {
+    "filename": "return-pair-card-mobile.png",
+    "timestamp": "2026-08-29T20:37:17.767Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "/flights/results?from=LHE&to=DXB&depart=2026-09-19&return_date=2026-09-26&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&return_view=pair&search_id=06fceed4-2701-41ee-b750-16ac025c8b7a",
+    "viewport": "390x844",
+    "role": "guest",
+    "gate": "FLIGHT_CARD_PAIR",
+    "note": "pair_missing status=ready"
+  },
+  {
+    "filename": "segmented-outbound-card-desktop.png",
+    "timestamp": "2026-08-29T20:37:28.662Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "/flights/results?from=LHE&to=DXB&depart=2026-09-19&return_date=2026-09-26&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&return_view=segmented&search_id=25e6e4f7-9bfb-470a-80b5-925268da2269",
+    "viewport": "1440x900",
+    "role": "guest",
+    "gate": "FLIGHT_CARD_SEGMENTED_OUTBOUND"
+  },
+  {
+    "filename": "segmented-outbound-card-mobile.png",
+    "timestamp": "2026-08-29T20:37:29.336Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "/flights/results?from=LHE&to=DXB&depart=2026-09-19&return_date=2026-09-26&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&return_view=segmented&search_id=25e6e4f7-9bfb-470a-80b5-925268da2269",
+    "viewport": "390x844",
+    "role": "guest",
+    "gate": "FLIGHT_CARD_SEGMENTED_OUTBOUND"
+  },
+  {
+    "filename": "segmented-return-card-desktop.png",
+    "timestamp": "2026-08-29T20:37:32.697Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-19&return_date=2026-09-26&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&return_view=segmented&search_id=25e6e4f7-9bfb-470a-80b5-925268da2269",
+    "viewport": "1440x900",
+    "role": "guest",
+    "gate": "FLIGHT_CARD_SEGMENTED_RETURN",
+    "note": "return_leg_not_reached"
+  },
+  {
+    "filename": "segmented-return-card-mobile.png",
+    "timestamp": "2026-08-29T20:37:33.267Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/flights/results?from=LHE&to=DXB&depart=2026-09-19&return_date=2026-09-26&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&return_view=segmented&search_id=25e6e4f7-9bfb-470a-80b5-925268da2269",
+    "viewport": "390x844",
+    "role": "guest",
+    "gate": "FLIGHT_CARD_SEGMENTED_RETURN",
+    "note": "return_leg_not_reached"
+  },
+  {
+    "filename": "groups-results-desktop.png",
+    "timestamp": "2026-08-29T20:37:37.944Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/groups",
+    "viewport": "1440x900",
+    "role": "guest",
+    "gate": "GROUPS",
+    "http_status": 200
+  },
+  {
+    "filename": "groups-results-mobile.png",
+    "timestamp": "2026-08-29T20:37:41.948Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/groups",
+    "viewport": "390x844",
+    "role": "guest",
+    "gate": "GROUPS",
+    "http_status": 200
+  },
+  {
+    "filename": "customer-dashboard-desktop.png",
+    "timestamp": "2026-08-29T20:37:46.179Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/customer/dashboard",
+    "viewport": "1440x900",
+    "role": "guest_or_redirect",
+    "gate": "CUSTOMER_DASH",
+    "http_status": 200
+  },
+  {
+    "filename": "agent-dashboard-desktop.png",
+    "timestamp": "2026-08-29T20:37:50.934Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/agent/dashboard",
+    "viewport": "1440x900",
+    "role": "guest_or_redirect",
+    "gate": "AGENT_DASH",
+    "http_status": 200
+  },
+  {
+    "filename": "admin-dashboard-desktop.png",
+    "timestamp": "2026-08-29T20:37:56.151Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/admin",
+    "viewport": "1440x900",
+    "role": "guest_or_redirect",
+    "gate": "ADMIN_DASH",
+    "http_status": 200
+  },
+  {
+    "filename": "traveler-desktop.png",
+    "timestamp": "2026-08-29T21:45:13.406Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/booking/passengers?flight_id=1654091dd0b5960617bbfdf41b4483fdbc9baecfa36787bc53ff4eec363313c4&search_id=72968843-8653-43d5-8653-d841073e37e8&offer_id=1654091dd0b5960617bbfdf41b4483fdbc9baecfa36787bc53ff4eec363313c4&from=LHE&to=DXB&depart=2026-09-26&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=lt-pi0",
+    "viewport": "1440x900",
+    "role": "guest",
+    "gate": "TRAVELER"
+  },
+  {
+    "filename": "traveler-mobile.png",
+    "timestamp": "2026-08-29T21:45:13.406Z",
+    "runtime_sha": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
+    "build_id": "OUwL6VdIoWW07Xli8W_KB",
+    "route": "https://jetpakistan.pk/booking/passengers?flight_id=1654091dd0b5960617bbfdf41b4483fdbc9baecfa36787bc53ff4eec363313c4&search_id=72968843-8653-43d5-8653-d841073e37e8&offer_id=1654091dd0b5960617bbfdf41b4483fdbc9baecfa36787bc53ff4eec363313c4&from=LHE&to=DXB&depart=2026-09-26&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=lt-pi0",
+    "viewport": "390x844",
+    "role": "guest",
+    "gate": "TRAVELER"
+  }
+]
