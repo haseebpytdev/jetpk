@@ -7,13 +7,14 @@ import { normalizeJourneyDisplay } from "../utils/normalize-journey-display";
 import { formatWholePkr } from "../utils/price";
 import { AirlineIdentity } from "./AirlineIdentity";
 import { FareBadge } from "./FareBadge";
+import { FlightResultActions } from "./FlightResultActions";
 import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 
 type PairReturnCardProps = {
   option: PairedReturnOption;
-  onSelect: (option: PairedReturnOption, fareOptionKey?: string) => void;
-  onDetails?: (option: PairedReturnOption, fareOptionKey?: string) => void;
+  onSelect: (option: PairedReturnOption, fareOptionKey?: string, intent?: "details" | "booking") => void;
+  onDetails?: (option: PairedReturnOption, fareOptionKey?: string, intent?: "details" | "booking") => void;
   selecting?: boolean;
 };
 
@@ -105,15 +106,15 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
     inbound.airline_code !== outbound.airline_code &&
     inbound.airline_code !== (option.airline_code ?? "");
 
-  const openFareConfirmation = () => {
+  const openFareConfirmation = (intent: "details" | "booking") => {
     const key =
       resolveAuthoritativeFareOptionKey(effectiveFareKey, fareOptions)
       ?? (effectiveFareKey.trim() !== "" ? effectiveFareKey : undefined);
     if (onDetails) {
-      onDetails(option, key);
+      onDetails(option, key, intent);
       return;
     }
-    onSelect(option, key);
+    onSelect(option, key, intent);
   };
 
   return (
@@ -195,25 +196,14 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
               {displayPrice}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <button
-              type="button"
-              className="rounded-jp-md border border-jp-border bg-jp-surface px-3 py-1.5 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-              data-testid="pair-details"
-              onClick={() => openFareConfirmation()}
-            >
-              Details
-            </button>
-            <button
-              type="button"
-              className="rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-              disabled={!option.can_book || selecting}
-              onClick={() => openFareConfirmation()}
-              data-testid="pair-select"
-            >
-              {selecting ? "…" : "Book Now"}
-            </button>
-          </div>
+          <FlightResultActions
+            onDetails={() => openFareConfirmation("details")}
+            onBook={() => openFareConfirmation("booking")}
+            canBook={option.can_book !== false}
+            booking={Boolean(selecting)}
+            detailsTestId="pair-details"
+            bookTestId="pair-select"
+          />
         </div>
       </div>
     </article>

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import type { FareFamilyOption, FlightOffer } from "../types";
 import { AirlineIdentity } from "./AirlineIdentity";
 import { FareBadge } from "./FareBadge";
+import { FlightResultActions } from "./FlightResultActions";
 import { MulticityInquiryActions } from "./MulticityInquiryActions";
 import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
@@ -196,26 +197,15 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
                 </span>
               ) : null}
             </div>
-            <div className="flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-                data-testid="flight-details-trigger"
-                aria-label={`View details for ${offer.airline_name ?? "flight"}`}
-                onClick={() => openWithSelectedFare("details")}
-              >
-                Details
-              </button>
-              <button
-                type="button"
-                className="rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                data-testid="book-now-trigger"
-                disabled={!offer.can_book || offer.multicity_inquiry_only}
-                onClick={() => openWithSelectedFare("booking")}
-              >
-                Book Now
-              </button>
-            </div>
+            <FlightResultActions
+              onDetails={() => openWithSelectedFare("details")}
+              onBook={() => openWithSelectedFare("booking")}
+              canBook={Boolean(offer.can_book) && !offer.multicity_inquiry_only}
+              booking={bookingOptionKey !== null}
+              detailsTestId="flight-details-trigger"
+              bookTestId="book-now-trigger"
+              detailsAriaLabel={`View details for ${offer.airline_name ?? "flight"}`}
+            />
           </div>
         </div>
       </div>

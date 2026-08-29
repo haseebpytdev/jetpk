@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { markBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
 import {
   absoluteLaravelHandoffUrl,
   buildCheckoutHandoffUrl,
@@ -143,6 +144,7 @@ export function useRevalidation() {
     markResultsLeftForCheckout(searchId ?? lastParamsRef.current?.searchId);
     setState("loading");
     setMessage("Preparing your trip…");
+    markBookNowTiming("T6_nav_start", { handoff: resolved.slice(0, 120) });
     // Soft-nav for Next passenger checkout: revalidate XHR already set session cookies
     // (credentials:include). Full location.assign reloads shared layout/chunks (~10s+ cold).
     try {
@@ -154,6 +156,7 @@ export function useRevalidation() {
           /* non-blocking */
         }
         router.push(resolved);
+        markBookNowTiming("T7_passenger_route");
         return true;
       }
     } catch {
@@ -175,6 +178,14 @@ export function useRevalidation() {
         selectedFareOptionId: params.fareOptionKey,
         acceptFareChange,
       });
+      markBookNowTiming("T2_revalidate_start", {
+        offerId: params.offerId,
+        provider: params.supplierProvider,
+        acceptFareChange,
+      });
+      void promise.then(() => {
+        markBookNowTiming("T3_revalidate_response");
+      });
       if (!acceptFareChange) {
         warmPromiseRef.current = { key, promise };
       }
@@ -194,6 +205,11 @@ export function useRevalidation() {
       const key = `${paramsCacheKey(params)}|accept=0`;
       if (warmPromiseRef.current?.key === key) return;
       lastParamsRef.current = params;
+      markBookNowTiming("T2_revalidate_start", {
+        offerId: params.offerId,
+        provider: params.supplierProvider,
+        phase: "warm",
+      });
       const promise = revalidateOffer({
         searchId: params.searchId,
         offerId: params.offerId,
@@ -202,6 +218,7 @@ export function useRevalidation() {
       });
       warmPromiseRef.current = { key, promise };
       void promise.then((result) => {
+        markBookNowTiming("T3_revalidate_response", { phase: "warm", ok: result.ok });
         if (warmPromiseRef.current?.key !== key) return;
         if (!result.ok) return;
         const change = extractFareChange(result.data);
@@ -209,6 +226,7 @@ export function useRevalidation() {
           pendingHandoffRef.current = result.data.passengers_url ?? null;
         }
       });
+      return;
     },
     [extractFareChange],
   );
@@ -218,7 +236,8 @@ export function useRevalidation() {
       if (inFlightRef.current) return;
       inFlightRef.current = true;
       setState("loading");
-      setMessage(null);
+      setMessage("Preparing your trip…");
+      markBookNowTiming("T1_handler", { phase: "continueToPassengers" });
       setFareChange(null);
       lastParamsRef.current = params;
 
@@ -243,6 +262,7 @@ export function useRevalidation() {
             }
           }
           markResultsLeftForCheckout(params.searchId);
+          markBookNowTiming("T4_draft_prep_start", { phase: "return_combo" });
           await submitReturnComboSelection({
             searchId: params.searchId,
             comboId: params.comboId,
@@ -251,6 +271,7 @@ export function useRevalidation() {
             returnFareOptionKey: params.returnFareOptionKey ?? params.fareOptionKey,
             outboundFareOptionKey: params.outboundFareOptionKey,
           });
+          markBookNowTiming("T5_draft_prep_done", { phase: "return_combo" });
           return;
         }
 

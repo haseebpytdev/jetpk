@@ -231,8 +231,12 @@ class JetpkEmailEventRenderer
             'ticket_reference' => 'Ticket reference',
             'ticket_subject' => 'Subject',
             'ticket_status' => 'Status',
+            'ticket_numbers' => 'Ticket number(s)',
+            'tickets_count' => 'Tickets',
+            'passenger_name' => 'Passenger',
             'group_reference' => 'Group reference',
             'seats' => 'Seats',
+            'payment_status' => 'Payment status',
             'agency_name' => 'Agency',
             'application_reference' => 'Application reference',
             'invoice_number' => 'Invoice number',
@@ -244,6 +248,14 @@ class JetpkEmailEventRenderer
             'report_period' => 'Period',
             'agent_name' => 'Agent',
         ];
+
+        // Alias group payload keys onto canonical detail fields when present.
+        if (! array_key_exists('group_reference', $variables) && array_key_exists('group_booking_reference', $variables)) {
+            $variables['group_reference'] = $variables['group_booking_reference'];
+        }
+        if (! array_key_exists('ticket_numbers', $variables) && isset($variables['tickets']) && is_scalar($variables['tickets'])) {
+            $variables['ticket_numbers'] = $variables['tickets'];
+        }
 
         $rows = [];
         foreach ($detailFields as $field) {

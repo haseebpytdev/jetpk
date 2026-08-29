@@ -41,6 +41,7 @@ import { PassengerCard } from "./PassengerCard";
 import { ContactDetailsSection } from "./ContactDetailsSection";
 import { FareChangeDialog } from "@/features/flight-details/components/FareChangeDialog";
 import { revalidateOffer } from "@/features/flight-results/services/flight-results-api";
+import { markBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
 
 type PassengerDetailsPageProps = {
   searchParams: Record<string, string | undefined>;
@@ -70,6 +71,8 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   const submitLock = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const autoRevalidateAttempted = useRef(false);
+  const shellMarkedRef = useRef(false);
+  const fieldMarkedRef = useRef(false);
 
   const queryKey = useMemo(() => JSON.stringify(searchParams), [searchParams]);
 
@@ -132,6 +135,19 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       cancelled = true;
     };
   }, [queryKey, loadContext]);
+
+  // Book Now timing: traveler shell first paint (T8) and first editable field ready (T9).
+  useEffect(() => {
+    if (!loading || shellMarkedRef.current) return;
+    shellMarkedRef.current = true;
+    markBookNowTiming("T8_shell_visible", { phase: "passengers_loading" });
+  }, [loading]);
+
+  useEffect(() => {
+    if (loading || !context || fareChange || errorStatus || expired || fieldMarkedRef.current) return;
+    fieldMarkedRef.current = true;
+    markBookNowTiming("T9_field_enabled", { phase: "passengers_form_ready" });
+  }, [loading, context, fareChange, errorStatus, expired]);
 
   // Silent automatic reprice when checkout still carries an approximate estimate.
   useEffect(() => {
@@ -376,7 +392,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     return (
       <BookingPageShell testId="passengers-loading">
         <BookingProgress steps={fallbackProgress} className="mb-6" />
-        <BookingPageHeader title="Traveler information" description="Confirm each traveler and contact details." />
+        <BookingPageHeader title="Traveler information" description="Preparing your trip…" />
         <BookingLayout
           main={
             <BookingMainColumn>

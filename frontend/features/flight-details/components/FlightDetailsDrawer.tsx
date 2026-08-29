@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { ResultSkeleton } from "@/features/flight-results/components/ResultSkeleton";
 import { SearchErrorState } from "@/features/flight-results/components/SearchErrorState";
+import { markBookNowTiming, startBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
 import { useFlightDetails } from "../hooks/use-flight-details";
 import { useRevalidation } from "../hooks/use-revalidation";
 import type { FlightDetailsContext } from "../types";
@@ -45,9 +46,22 @@ export function FlightDetailsDrawer({
 }: FlightDetailsDrawerProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollSurfaceRef = useRef<HTMLDivElement>(null);
+  const autoContinueRef = useRef(false);
   const details = useFlightDetails(open ? context : null);
   const revalidation = useRevalidation();
 
+  useEffect(() => {
+    if (!open || !context || context.intent !== "booking") {
+      autoContinueRef.current = false;
+      return;
+    }
+    startBookNowTiming({
+      offerId: context.offerId,
+      legMode: context.legMode,
+      searchId: context.searchId,
+    });
+    markBookNowTiming("T1_handler", { phase: "drawer_open_booking" });
+  }, [open, context]);
   useEffect(() => {
     if (!open) return;
 
@@ -170,6 +184,66 @@ export function FlightDetailsDrawer({
     context?.fareOptionKey,
   ]);
 
+  // Book Now should not leave the traveler staring at results/drawer when fare is already chosen.
+  // Auto-continue only when a single fare (or preselected key) exists — never skip multi-fare choice.
+  useEffect(() => {
+    if (!open || !context || context.intent !== "booking") return;
+    if (autoContinueRef.current) return;
+    const offer = details.data?.offer ?? context.initialOffer;
+    if (!offer) return;
+    const isInquiry = details.data?.multicity_inquiry_only ?? offer.multicity_inquiry_only;
+    if (isInquiry) return;
+    const canContinue = Boolean(offer.can_book) && !isInquiry;
+    if (!canContinue && context.legMode !== "outbound_confirm") return;
+    const fareOptions =
+      details.fareOptions.length > 0
+        ? details.fareOptions
+        : (context.initialFareOptions ??
+          context.initialOffer?.branded_fares_display_options ??
+          context.initialOffer?.fare_family_options_display ??
+          []);
+    const hasExplicitFare = Boolean((context.fareOptionKey ?? "").trim());
+    if (fareOptions.length > 1 && !hasExplicitFare) return;
+    autoContinueRef.current = true;
+    const timer = window.setTimeout(() => {
+      if (context.legMode === "outbound_confirm" && context.outboundKey) {
+        const qs = new URLSearchParams({
+          search_id: context.searchId,
+          outbound_key: context.outboundKey,
+        });
+        const outboundFare = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
+        if (outboundFare) qs.set("outbound_fare_option_key", outboundFare);
+        markBookNowTiming("T6_nav_start", { phase: "outbound_confirm_auto" });
+        window.location.assign(`/flights/return-options?${qs.toString()}`);
+        return;
+      }
+      const fareKey = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
+      const isPair = context.legMode === "pair" || (Boolean(context.comboId) && context.legMode !== "return_confirm");
+      markBookNowTiming("T1_handler", { phase: "auto_continue" });
+      void revalidation.continueToPassengers({
+        searchId: context.searchId,
+        offerId: offer.offer_id,
+        fareOptionKey: fareKey,
+        selectUrl: offer.select_url,
+        supplierProvider: offer.supplier_provider ?? offer.provider,
+        isReturnCombo: Boolean(context.comboId),
+        comboId: context.comboId,
+        outboundKey: context.outboundKey,
+        outboundFareOptionKey: context.outboundFareOptionKey,
+        returnFareOptionKey: context.legMode === "return_confirm" ? fareKey : fareKey,
+      });
+    }, 80);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot after offer identity ready
+  }, [
+    open,
+    context,
+    details.data?.offer?.offer_id,
+    details.fareOptions.length,
+    details.selectedFareKey,
+    context?.initialOffer?.offer_id,
+  ]);
+
   if (!open || !context) return null;
 
   const offer = details.data?.offer;
@@ -189,12 +263,14 @@ export function FlightDetailsDrawer({
       });
       const outboundFare = toSupplierFareKey(details.selectedFareKey, details.fareOptions);
       if (outboundFare) qs.set("outbound_fare_option_key", outboundFare);
+      markBookNowTiming("T6_nav_start", { phase: "outbound_confirm" });
       window.location.assign(`/flights/return-options?${qs.toString()}`);
       return;
     }
 
     const fareKey = toSupplierFareKey(details.selectedFareKey, details.fareOptions);
     const isPair = context.legMode === "pair" || (Boolean(context.comboId) && context.legMode !== "return_confirm");
+    markBookNowTiming("T1_handler", { phase: "continue_click" });
     void revalidation.continueToPassengers({
       searchId: context.searchId,
       offerId: offer.offer_id,

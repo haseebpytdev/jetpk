@@ -26,14 +26,24 @@ class GroupTicketingCommunicationService
             $agency = $this->platformAgency();
             $expires = $booking->expires_at?->format('d M Y H:i') ?? '';
 
+            $inventory = $booking->inventory;
+            $route = trim((string) ($inventory?->sector ?? $inventory?->title ?? ''));
+            $route = $route !== '' ? $route : null;
+
             $this->notificationService->send(
                 agency: $agency,
                 eventKey: OtaNotificationEvent::GroupBookingReservationCreated->value,
                 payload: [
                     'group_booking_reference' => $booking->reference,
+                    'group_reference' => $booking->reference,
+                    'booking_reference' => $booking->reference,
                     'expires_at' => $expires,
                     'total_amount' => number_format((float) $booking->total_amount, 0),
                     'currency' => $booking->currency,
+                    'route' => $route,
+                    'seats' => (string) $booking->seat_count,
+                    'booking_status' => $booking->status?->value ?? (string) $booking->status,
+                    'payment_status' => $booking->manual_payment_status ?: 'payment_pending',
                 ],
                 booking: null,
                 actor: $booking->user,

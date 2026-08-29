@@ -82,7 +82,21 @@ class OtaNotificationService
             $scope = $recipientBundle['scope'];
             $safePayload = $this->payloadSanitizer->sanitizeForScope($payload, $scope);
 
-            $mergedVariables = EmailBaseVariables::merge($agency, $booking, $templateVariables);
+            $scalarFromPayload = [];
+            foreach ($safePayload as $key => $value) {
+                if (! is_string($key) || $key === 'universal_email' || $key === 'routing_note') {
+                    continue;
+                }
+                if (is_scalar($value) || $value === null) {
+                    $scalarFromPayload[$key] = $value;
+                }
+            }
+
+            $mergedVariables = EmailBaseVariables::merge(
+                $agency,
+                $booking,
+                array_merge($scalarFromPayload, $templateVariables),
+            );
             if (isset($recipientContext['delivery_variant']) && is_string($recipientContext['delivery_variant'])) {
                 $variantOverrides = JetpkOperationalEmailEventRegistry::variantContentOverrides(
                     $eventKey,

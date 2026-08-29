@@ -12,6 +12,7 @@ import { SearchProgress } from "@/features/flight-results/components/SearchProgr
 import { AirlineIdentity } from "@/features/flight-results/components/AirlineIdentity";
 import { normalizeJourneyDisplay } from "@/features/flight-results/utils/normalize-journey-display";
 import { FareBadge } from "@/features/flight-results/components/FareBadge";
+import { FlightResultActions } from "@/features/flight-results/components/FlightResultActions";
 import { SupplierSourceBadge } from "@/features/flight-results/components/SupplierSourceBadge";
 import { TimeRouteBlock } from "@/features/flight-results/components/TimeRouteBlock";
 import type { FareFamilyOption, FlightOffer } from "@/features/flight-results/types";
@@ -289,30 +290,18 @@ export function ReturnOptionsPage() {
                           ?? "Price unavailable"}
                       </p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <button
-                        type="button"
-                        className="text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-                        data-testid="return-details-trigger"
-                        onClick={(event) => {
-                          detailsTriggerRef.current = event.currentTarget;
-                          openFareConfirmation(option, "details");
-                        }}
-                      >
-                        Details
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-                        data-testid="result-price-button"
-                        onClick={(event) => {
-                          detailsTriggerRef.current = event.currentTarget;
-                          openFareConfirmation(option, "booking");
-                        }}
-                      >
-                        Book Now
-                      </button>
-                    </div>
+                    <FlightResultActions
+                      onDetails={() => {
+                        detailsTriggerRef.current = document.activeElement as HTMLButtonElement | null;
+                        openFareConfirmation(option, "details");
+                      }}
+                      onBook={() => {
+                        detailsTriggerRef.current = document.activeElement as HTMLButtonElement | null;
+                        openFareConfirmation(option, "booking");
+                      }}
+                      detailsTestId="return-details-trigger"
+                      bookTestId="result-price-button"
+                    />
                   </div>
                 </div>
               </article>

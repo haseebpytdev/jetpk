@@ -321,6 +321,85 @@ class JetpkEmailEventContentRegistry
     {
         $typeKey ??= JetpkEmailEventTypeMap::typeForEvent($eventKey);
 
+        // Event-key overrides for semantic completeness (type map may be absent).
+        $eventProfile = match ($eventKey) {
+            'ticket_issued' => [
+                'preheader' => 'Your tickets have been issued.',
+                'heading' => 'Ticket issued',
+                'status_label' => 'Ticketed',
+                'status_type' => 'success',
+                'detail_fields' => ['booking_reference', 'ticket_numbers', 'tickets_count', 'route', 'passenger_name', 'booking_status'],
+                'cta_label' => 'Manage booking',
+                'cta_url_key' => 'booking_url',
+                'content_blocks' => ['status-alert', 'detail-fields', 'booking-summary'],
+                'alert_title' => 'Tickets issued',
+                'alert_message' => 'Your e-ticket details are below. Keep this email for your records.',
+            ],
+            'refund_approved', 'refund_rejected', 'refund_paid', 'refund_requested' => [
+                'preheader' => 'Update on your refund request.',
+                'heading' => match ($eventKey) {
+                    'refund_approved' => 'Refund approved',
+                    'refund_rejected' => 'Refund rejected',
+                    'refund_paid' => 'Refund paid',
+                    default => 'Refund requested',
+                },
+                'status_label' => match ($eventKey) {
+                    'refund_approved' => 'Approved',
+                    'refund_rejected' => 'Rejected',
+                    'refund_paid' => 'Paid',
+                    default => 'Requested',
+                },
+                'status_type' => $eventKey === 'refund_rejected' ? 'error' : ($eventKey === 'refund_approved' || $eventKey === 'refund_paid' ? 'success' : 'info'),
+                'detail_fields' => ['booking_reference', 'amount', 'refund_status', 'payment_reference'],
+                'cta_label' => 'View booking',
+                'cta_url_key' => 'booking_url',
+                'content_blocks' => ['status-alert', 'detail-fields', 'booking-summary', 'payment-summary', 'refund-info'],
+            ],
+            'group_booking_reservation_created' => [
+                'preheader' => 'Your group reservation has been held locally.',
+                'heading' => 'Group reservation held',
+                'status_label' => 'Local hold',
+                'status_type' => 'warning',
+                'detail_fields' => ['group_reference', 'booking_reference', 'route', 'seats', 'booking_status', 'payment_status'],
+                'cta_label' => 'View booking',
+                'cta_url_key' => 'booking_url',
+                'content_blocks' => ['status-alert', 'detail-fields', 'group-reservation'],
+                'alert_title' => 'Local group hold',
+                'alert_message' => 'This is a local inventory hold. It is not a supplier-confirmed reservation until ticketing completes.',
+            ],
+            'commission_earned' => [
+                'preheader' => 'Commission has been recorded for your agency.',
+                'heading' => 'Commission earned',
+                'status_label' => 'Earned',
+                'status_type' => 'success',
+                'detail_fields' => ['booking_reference', 'amount', 'currency', 'agent_name', 'payment_reference'],
+                'content_blocks' => ['status-alert', 'detail-fields'],
+            ],
+            'support_ticket_created' => [
+                'preheader' => 'We received your support request.',
+                'heading' => 'Support request received',
+                'status_type' => 'info',
+                'detail_fields' => ['ticket_reference', 'ticket_subject', 'ticket_status'],
+                'cta_label' => 'Open support',
+                'cta_url_key' => 'support_url',
+                'content_blocks' => ['status-alert', 'detail-fields', 'message'],
+            ],
+            'customer_registered' => [
+                'preheader' => 'Your JetPakistan account is ready.',
+                'heading' => 'Welcome to JetPakistan',
+                'status_type' => 'success',
+                'detail_fields' => ['customer_name', 'customer_email'],
+                'cta_label' => 'Go to dashboard',
+                'cta_url_key' => 'login_url',
+                'content_blocks' => ['status-alert', 'detail-fields'],
+            ],
+            default => null,
+        };
+
+        if ($eventProfile !== null) {
+            return $eventProfile;
+        }
+
         return match ($typeKey) {
             'otp' => [
                 'preheader' => 'Use this code to verify your sign-in.',

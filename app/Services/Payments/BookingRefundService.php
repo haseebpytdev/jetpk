@@ -218,7 +218,17 @@ class BookingRefundService
             ]),
             fallbackSubject: 'Refund update: '.$booking->reference_code,
             fallbackBody: 'There is a refund update for booking '.$booking->reference_code.'.',
-            templateVariables: ['booking_reference' => (string) $booking->reference_code],
+            templateVariables: [
+                'booking_reference' => (string) $booking->reference_code,
+                'amount' => $refundAmount !== null ? (string) $refundAmount : null,
+                'currency' => $currency,
+                'refund_status' => $refundEventKey,
+                'payment_reference' => isset($payload['reference']) && is_scalar($payload['reference'])
+                    ? (string) $payload['reference']
+                    : (isset($payload['payment_reference']) && is_scalar($payload['payment_reference'])
+                        ? (string) $payload['payment_reference']
+                        : null),
+            ],
             recipientContext: [
                 'notify_buckets' => ['booking_customer'],
             ],

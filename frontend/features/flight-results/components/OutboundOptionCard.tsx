@@ -7,6 +7,7 @@ import { normalizeJourneyDisplay } from "../utils/normalize-journey-display";
 import { formatWholePkr } from "../utils/price";
 import { AirlineIdentity } from "./AirlineIdentity";
 import { FareBadge } from "./FareBadge";
+import { FlightResultActions } from "./FlightResultActions";
 import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 
@@ -146,24 +147,12 @@ export function OutboundOptionCard({ option, searchId, onOpenDetails }: Outbound
               {displayPrice ?? option.from_total_display ?? "Price unavailable"}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <button
-              type="button"
-              className="text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-              data-testid="outbound-details-trigger"
-              onClick={() => openWithSelectedFare("details")}
-            >
-              Details
-            </button>
-            <button
-              type="button"
-              className="rounded-jp-md bg-jp-primary px-4 py-2 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
-              data-testid="outbound-book-now"
-              onClick={() => openWithSelectedFare("booking")}
-            >
-              Book Now
-            </button>
-          </div>
+          <FlightResultActions
+            onDetails={() => openWithSelectedFare("details")}
+            onBook={() => openWithSelectedFare("booking")}
+            detailsTestId="outbound-details-trigger"
+            bookTestId="outbound-book-now"
+          />
         </div>
       </div>
       <span className="sr-only">{searchId}</span>

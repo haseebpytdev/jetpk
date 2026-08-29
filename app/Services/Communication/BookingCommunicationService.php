@@ -362,9 +362,19 @@ class BookingCommunicationService
     public function notifyTicketIssuedOperationalOnly(Booking $booking): void
     {
         $booking = $booking->fresh(['agency.agencySetting', 'contact', 'customer', 'tickets', 'agent.user']);
+        $ticketNumbers = $booking->tickets
+            ->pluck('ticket_number')
+            ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+            ->values()
+            ->all();
+        $ticketNumbersCsv = $ticketNumbers !== [] ? implode(', ', $ticketNumbers) : null;
+        $passengerName = trim((string) ($booking->contact?->name ?? $booking->customer?->name ?? ''));
+
         $this->notifyOperational($booking, OtaNotificationEvent::TicketIssued, [
             'booking_reference' => $booking->reference_code,
             'tickets_count' => $booking->tickets()->count(),
+            'ticket_numbers' => $ticketNumbersCsv,
+            'passenger_name' => $passengerName !== '' ? $passengerName : null,
             'routing_note' => 'Internal ticket issued notification.',
         ], null, null, null, [
             'notify_buckets' => ['platform_admin', 'assigned_staff'],
@@ -373,6 +383,8 @@ class BookingCommunicationService
         $this->notifyOperational($booking, OtaNotificationEvent::TicketIssued, [
             'booking_reference' => $booking->reference_code,
             'tickets_count' => $booking->tickets()->count(),
+            'ticket_numbers' => $ticketNumbersCsv,
+            'passenger_name' => $passengerName !== '' ? $passengerName : null,
             'universal_email' => $this->bookingEmailPayloadFactory->b2bTicketIssued($booking),
             'routing_note' => 'B2B ticket issued notification for agency/agent recipients.',
         ], null, 'Ticket issued for booking '.$booking->reference_code, 'Ticketing has been completed for booking '.$booking->reference_code.'.', [

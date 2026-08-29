@@ -223,7 +223,11 @@ export function FlightResultsPage() {
   );
 
   const openPairFareConfirmation = useCallback(
-    (pair: import("../types").PairedReturnOption, fareOptionKey?: string) => {
+    (
+      pair: import("../types").PairedReturnOption,
+      fareOptionKey?: string,
+      intent: "details" | "booking" = "booking",
+    ) => {
       if (resultsStaleLocked) return;
       const resolvedSearchId = results.resolvedSearchId ?? searchId ?? "";
       if (!resolvedSearchId) return;
@@ -236,7 +240,7 @@ export function FlightResultsPage() {
         fareOptionKey,
         initialOffer: seededOffer,
         initialFareOptions: seededOffer.branded_fares_display_options ?? seededOffer.fare_family_options_display,
-        intent: "booking",
+        intent,
         legMode: "pair",
       });
     },
