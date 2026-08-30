@@ -391,6 +391,18 @@ class FlightController extends Controller
                 $selectedFareOptionId !== '' ? $selectedFareOptionId : null,
             );
 
+            // Persist freshness into checkout draft so Traveler GET can skip a second live shop.
+            try {
+                app(\App\Services\Booking\BookingDraftService::class)->merge([
+                    'offer_freshness' => $freshnessMeta,
+                    'search_id' => $searchId,
+                    'offer_id' => $offerId,
+                    'flight_id' => $offerId,
+                ]);
+            } catch (\Throwable) {
+                // Draft merge is best-effort for Traveler performance; revalidation already succeeded.
+            }
+
             Log::info('flight_search.selected_offer_refresh.success', [
                 'search_id' => $searchId,
                 'offer_id' => $offerId,
