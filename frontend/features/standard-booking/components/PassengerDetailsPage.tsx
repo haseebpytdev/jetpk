@@ -41,7 +41,7 @@ import { PassengerCard } from "./PassengerCard";
 import { ContactDetailsSection } from "./ContactDetailsSection";
 import { FareChangeDialog } from "@/features/flight-details/components/FareChangeDialog";
 import { revalidateOffer } from "@/features/flight-results/services/flight-results-api";
-import { markBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
+import { markBookNowTiming, markClientHydration } from "@/features/flight-results/utils/book-now-timing";
 
 type PassengerDetailsPageProps = {
   searchParams: Record<string, string | undefined>;
@@ -138,6 +138,10 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
   // Book Now timing: T8 may already be marked by route loading.tsx; keep idempotent shell mark.
   useEffect(() => {
+    markClientHydration("N0_page_start_ms");
+  }, []);
+
+  useEffect(() => {
     if (!loading || shellMarkedRef.current) return;
     shellMarkedRef.current = true;
     markBookNowTiming("T8_shell_visible", { phase: "passengers_loading" });
@@ -146,7 +150,9 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   useEffect(() => {
     if (loading || !context || errorStatus || expired || fieldMarkedRef.current) return;
     fieldMarkedRef.current = true;
+    markClientHydration("N3_form_render_ms");
     markBookNowTiming("T9_field_enabled", { phase: "passengers_form_ready" });
+    markClientHydration("N4_hydration_settled_ms");
   }, [loading, context, errorStatus, expired]);
 
   // Silent automatic reprice when checkout still carries an approximate estimate.

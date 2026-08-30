@@ -142,9 +142,7 @@ class BookingController extends Controller
         $timing = PassengersRequestTiming::start($request);
 
         if ($gate = $this->guestCheckoutGateResponse($request)) {
-            $timing->finish('guest_gate');
-
-            return $gate;
+            return $timing->finalize($gate, 'guest_gate');
         }
 
         $checkoutContext = app(ClientCheckoutContextResolver::class);
@@ -928,18 +926,14 @@ class BookingController extends Controller
         $effectiveFlightId = $flightId !== '' ? $flightId : (($draft['offer_id'] ?? '') !== '' ? $draft['offer_id'] : ($draft['flight_id'] ?? ''));
 
         if ($request->isMethod('get') && trim((string) $effectiveFlightId) === '') {
-            $timing->finish('missing_session');
-
-            return $this->passengersMissingSessionResponse($request);
+            return $timing->finalize($this->passengersMissingSessionResponse($request), 'missing_session');
         }
 
         $criteria = $this->resolveCheckoutSearchCriteria($draft, (string) ($draft['search_id'] ?? ''));
         $resultsQuery = $this->buildFlightsResultsQuery($criteria);
 
         if ($redirect = $this->redirectMulticityInquiryOnlyCheckout($criteria, $resultsQuery)) {
-            $timing->finish('multicity_redirect');
-
-            return $redirect;
+            return $timing->finalize($redirect, 'multicity_redirect');
         }
 
         // Persist draft identity and release the session lock before cache/supplier I/O.
@@ -972,9 +966,11 @@ class BookingController extends Controller
 
         if ($effectiveFlightId !== '' && $offer === null) {
             $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
-            $timing->finish('offer_missing');
 
-            return $this->redirectSelectedOfferWarning($criteria, request: $request);
+            return $timing->finalize(
+                $this->redirectSelectedOfferWarning($criteria, request: $request),
+                'offer_missing',
+            );
         }
 
         $fareOptionKey = trim((string) ($draft['fare_option_key'] ?? ''));
@@ -1286,19 +1282,23 @@ class BookingController extends Controller
 
         if ($this->wantsBookingJson($request)) {
             $timing->mark('S7_payload_complete');
-            $timing->finish('json_ok');
 
-            return response()->json(
-                $this->standardBookingJsonPresenter->presentPassengersContext($viewData, $request),
+            return $timing->finalize(
+                response()->json(
+                    $this->standardBookingJsonPresenter->presentPassengersContext($viewData, $request),
+                ),
+                'json_ok',
             );
         }
 
         $resolvedView = client_view('frontend.booking.passenger-details', 'frontend');
         $this->logJetpkCheckoutPassengersRender($request, $resolvedView);
         $timing->mark('S7_payload_complete');
-        $timing->finish('blade_ok');
 
-        return view($resolvedView, $viewData);
+        return $timing->finalize(
+            response()->view($resolvedView, $viewData),
+            'blade_ok',
+        );
     }
 
     /**

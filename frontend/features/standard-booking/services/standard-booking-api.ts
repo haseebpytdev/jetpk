@@ -1,6 +1,11 @@
 import { laravelApiPath } from "@/services/flight-search";
 import { ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
 import type { LaravelValidationErrors } from "@/features/auth/utils/laravel-auth-api";
+import {
+  attachPassengersServerTiming,
+  markClientHydration,
+  type PassengersServerTiming,
+} from "@/features/flight-results/utils/book-now-timing";
 import type {
   StandardPassengersContext,
   StandardPassengersSubmitResponse,
@@ -22,6 +27,17 @@ function buildQuery(params: Record<string, string | undefined>): string {
   return search.toString();
 }
 
+function capturePassengersTimingHeaders(response: Response): void {
+  const raw = response.headers.get("X-JP-Passengers-Timing");
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw) as PassengersServerTiming;
+    attachPassengersServerTiming(parsed);
+  } catch {
+    /* ignore malformed timing */
+  }
+}
+
 async function standardFetch<T>(
   path: string,
   init?: RequestInit,
@@ -32,8 +48,13 @@ async function standardFetch<T>(
   const csrf = init?.method && init.method !== "GET" ? await ensureLaravelCsrfToken() : null;
   const bookNowId =
     typeof window !== "undefined" ? window.__jpBookNowTiming?.id ?? null : null;
+  const isPassengersGet =
+    (!init?.method || init.method === "GET") && path.includes("/booking/passengers");
 
   try {
+    if (isPassengersGet) {
+      markClientHydration("N1_fetch_start_ms");
+    }
     const response = await fetch(laravelApiPath(path), {
       ...init,
       credentials: "include",
@@ -44,6 +65,11 @@ async function standardFetch<T>(
         ...init?.headers,
       },
     });
+
+    if (isPassengersGet) {
+      markClientHydration("N2_fetch_end_ms");
+      capturePassengersTimingHeaders(response);
+    }
 
     const contentType = response.headers.get("content-type") ?? "";
     const payload = contentType.includes("application/json") ? await response.json() : null;

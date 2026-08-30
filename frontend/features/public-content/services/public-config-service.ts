@@ -37,6 +37,20 @@ function publicConfigEndpoint(): string {
     return laravelApiPath("/api/public/content/config");
   }
 
+  // SSR: call Laravel private origin directly (same pattern as session bootstrap).
+  // Avoid fetching https://public-host/laravel/... from Next, which can stall soft-nav
+  // under OLS/PHP contention (~30s TCP waits) even when AbortController fires late.
+  const laravelBase = (
+    process.env.LARAVEL_URL ??
+    process.env.NEXT_PUBLIC_LARAVEL_URL ??
+    ""
+  )
+    .trim()
+    .replace(/\/$/, "");
+  if (laravelBase !== "") {
+    return `${laravelBase}/api/public/content/config`;
+  }
+
   const appBase = appConfig.appUrl.replace(/\/$/, "");
   return `${appBase}/laravel/api/public/content/config`;
 }

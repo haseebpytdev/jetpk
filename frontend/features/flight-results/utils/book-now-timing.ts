@@ -14,12 +14,33 @@ export type BookNowTimingMark =
   | "T8_shell_visible"
   | "T9_field_enabled";
 
+export type PassengersServerTiming = {
+  correlation_id?: string;
+  total_ms?: number | null;
+  session_hydrate_ms?: number | null;
+  offer_resolve_ms?: number | null;
+  passenger_contact_load_ms?: number | null;
+  S0_ms?: number | null;
+  S7_ms?: number | null;
+  S8_ms?: number | null;
+};
+
+export type ClientHydrationTiming = {
+  N0_page_start_ms?: number | null;
+  N1_fetch_start_ms?: number | null;
+  N2_fetch_end_ms?: number | null;
+  N3_form_render_ms?: number | null;
+  N4_hydration_settled_ms?: number | null;
+};
+
 type TimingSession = {
   id: string;
   t0: number;
   marks: Partial<Record<BookNowTimingMark, number>>;
   deltasMs: Record<string, number | null>;
   meta?: Record<string, unknown>;
+  serverTiming?: PassengersServerTiming;
+  clientHydration?: ClientHydrationTiming;
 };
 
 declare global {
@@ -80,5 +101,42 @@ export function markBookNowTiming(mark: BookNowTimingMark, meta?: Record<string,
 
 export function bookNowTimingSnapshot(): TimingSession | null {
   if (typeof window === "undefined") return null;
-  return window.__jpBookNowTiming ? { ...window.__jpBookNowTiming, marks: { ...window.__jpBookNowTiming.marks } } : null;
+  return window.__jpBookNowTiming
+    ? {
+        ...window.__jpBookNowTiming,
+        marks: { ...window.__jpBookNowTiming.marks },
+        serverTiming: window.__jpBookNowTiming.serverTiming
+          ? { ...window.__jpBookNowTiming.serverTiming }
+          : undefined,
+        clientHydration: window.__jpBookNowTiming.clientHydration
+          ? { ...window.__jpBookNowTiming.clientHydration }
+          : undefined,
+      }
+    : null;
+}
+
+/** Attach non-PII Laravel passengers Server-Timing / X-JP-Passengers-Timing. */
+export function attachPassengersServerTiming(timing: PassengersServerTiming): void {
+  if (typeof window === "undefined") return;
+  const session = ensureSession(false);
+  if (!session) return;
+  session.serverTiming = { ...(session.serverTiming ?? {}), ...timing };
+  session.meta = {
+    ...(session.meta ?? {}),
+    server_passengers_total_ms: timing.total_ms ?? null,
+    session_hydrate_ms: timing.session_hydrate_ms ?? null,
+    offer_resolve_ms: timing.offer_resolve_ms ?? null,
+  };
+}
+
+export function markClientHydration(
+  key: keyof ClientHydrationTiming,
+  fromT0?: number,
+): void {
+  if (typeof window === "undefined") return;
+  const session = ensureSession(false);
+  if (!session) return;
+  const value =
+    typeof fromT0 === "number" ? fromT0 : Math.round(performance.now() - session.t0);
+  session.clientHydration = { ...(session.clientHydration ?? {}), [key]: value };
 }
