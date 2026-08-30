@@ -1,24 +1,24 @@
 import type { ReactNode } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
-import { getPublicSession } from "@/services/session";
+import type { PublicSession } from "@/types/session";
 
 /**
  * Checkout soft-nav layout (Book Now → Traveler).
  *
- * Intentionally NOT under `(public)` force-dynamic layout that also awaits
- * PublicConfig via the public origin. That cross-layout hop was the dominant
- * T7→T8 stall surface (session/config contention up to ~30s).
+ * Do NOT SSR-fetch Laravel session/config here. R6 telemetry proved passengers
+ * API is ~150–1100ms while T7→T8 soft-nav still spikes ~25–30s when layout
+ * awaits getPublicSession (AbortSignal.timeout did not eliminate outliers).
  *
- * Mirrors `app/flights/layout.tsx`: session-only SSR with AbortSignal-bounded
- * fetch inside getPublicSession. No Promise.race orphan fallback.
+ * Anonymous SSR shell paints immediately; guest checkout is the primary path.
+ * Authenticated header state is not required to enter Traveler.
  */
 export const dynamic = "force-dynamic";
 
-export default async function CheckoutLayout({ children }: { children: ReactNode }) {
-  const session = await getPublicSession();
+const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
+export default function CheckoutLayout({ children }: { children: ReactNode }) {
   return (
-    <PublicShell session={session} hideFooter>
+    <PublicShell session={ANONYMOUS_SESSION} hideFooter>
       {children}
     </PublicShell>
   );
