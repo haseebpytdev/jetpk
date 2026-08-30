@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { markBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
+import { bookNowTimingSnapshot, markBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
 import {
   absoluteLaravelHandoffUrl,
   buildCheckoutHandoffUrl,
@@ -145,22 +145,21 @@ export function useRevalidation() {
     setState("loading");
     setMessage("Preparing your trip…");
     markBookNowTiming("T6_nav_start", { handoff: resolved.slice(0, 120) });
-    // Soft-nav for Next passenger checkout: revalidate XHR already set session cookies
-    // (credentials:include). Full location.assign reloads shared layout/chunks (~10s+ cold).
-    try {
-      void import("@/features/standard-booking/components/PassengerDetailsPage");
-      if (resolved.startsWith("/booking/passengers")) {
-        try {
-          router.prefetch(resolved);
-        } catch {
-          /* non-blocking */
+    // R6: soft-nav to /booking/passengers still spikes T7→T8 ~25–36s even with
+    // anonymous checkout layout and ~200ms passengers API. Prefer hard navigation
+    // so Traveler mounts on a fresh document instead of a stalled RSC flight.
+    if (resolved.startsWith("/booking/passengers")) {
+      try {
+        const snap = bookNowTimingSnapshot();
+        if (snap && typeof sessionStorage !== "undefined") {
+          sessionStorage.setItem("jp-book-now-timing", JSON.stringify(snap));
         }
-        router.push(resolved);
-        markBookNowTiming("T7_passenger_route");
-        return true;
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* fall through to hard assign */
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign" });
+      window.location.assign(resolved);
+      return true;
     }
     window.location.assign(resolved);
     return true;

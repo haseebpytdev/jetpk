@@ -71,6 +71,35 @@ export function startBookNowTiming(meta?: Record<string, unknown>): string | nul
   return session.id;
 }
 
+/** Restore timing session after hard navigation to Traveler. */
+export function restoreBookNowTimingFromStorage(): TimingSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem("jp-book-now-timing");
+    if (!raw) return null;
+    sessionStorage.removeItem("jp-book-now-timing");
+    const parsed = JSON.parse(raw) as TimingSession;
+    if (!parsed?.id || typeof parsed.t0 !== "number") return null;
+    // Re-base marks onto a fresh performance.now() timeline while preserving
+    // from_T0 deltas recorded before the hard navigation.
+    const now = performance.now();
+    const session: TimingSession = {
+      ...parsed,
+      t0: now - (typeof parsed.deltasMs?.T7_passenger_route_from_T0 === "number"
+        ? parsed.deltasMs.T7_passenger_route_from_T0
+        : typeof parsed.deltasMs?.T6_nav_start_from_T0 === "number"
+          ? parsed.deltasMs.T6_nav_start_from_T0
+          : 0),
+      marks: { ...(parsed.marks ?? {}) },
+      deltasMs: { ...(parsed.deltasMs ?? {}) },
+    };
+    window.__jpBookNowTiming = session;
+    return session;
+  } catch {
+    return null;
+  }
+}
+
 export function markBookNowTiming(mark: BookNowTimingMark, meta?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
   const session = ensureSession(false);
