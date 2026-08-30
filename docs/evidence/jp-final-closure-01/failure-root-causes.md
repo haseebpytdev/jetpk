@@ -1,4 +1,4 @@
-# Failure / root causes — JP-FINAL-CLOSURE-01 (CURRENT = R5)
+# Failure / root causes — JP-FINAL-CLOSURE-01 (CURRENT = R6)
 
 Historical R1 checkpoint preserved as `failure-root-causes-r1-checkpoint.md`.
 
@@ -6,49 +6,61 @@ Historical R1 checkpoint preserved as `failure-root-causes-r1-checkpoint.md`.
 
 | Area | Status | Notes |
 |---|---|---|
-| Checkout SMTP → HTTP 500 | RESOLVED | Best-effort verification mail; R1/R2 |
-| Email hardcode / semantic live render | RESOLVED (R4) | `unresolved_live_render_replace_with_resolver=0` |
+| Checkout SMTP → HTTP 500 | RESOLVED | Best-effort verification mail |
+| Email hardcode / semantic live render | RESOLVED (R4) | |
 | Groups Hero / manual_local E2E | RESOLVED | JFZZT2DJ / WZBJCK6Z preserved |
-| Flight card CTA code parity | RESOLVED (R4) | Shared `FlightResultActions` |
-| Pair visual proof gap | RESOLVED (R5 harness) | Requires `view=pair` (not `return_view`); ISB–DXB inventory |
-| Auth dashboard redirect-as-proof | PARTIAL (R5) | Customer + Agent authenticated PASS; Staff uses `/staff/dashboard` |
+| Flight card CTA code parity | RESOLVED | Shared `FlightResultActions` |
+| Pair + segmented outbound visuals | RESOLVED (R5/R6) | |
+| Segmented return card + Details | RESOLVED (R6 harness) | `return-option-card` count≥1; Details PASS |
+| Auth Customer/Agent/Admin screenshots | RESOLVED (R6) | Staff uses `/staff/dashboard` |
+| Group detail 5-viewport | RESOLVED (R6) | `QA-ML-MQVJO8NJ5I` |
+| Passengers INFO log discarded | EXPLAINED | `LOG_LEVEL=warning`; fixed via Server-Timing / `X-JP-Passengers-Timing` |
+| R5 “disk 100% full” | HISTORICAL | Current ~20% used / ~77G free |
 
-## Current R5 engineering issues
+## Current R6 engineering issues
 
-### 1. Book Now → Traveler performance — OPEN (FAIL)
+### 1. Book Now → Traveler continuous T0→T9 performance — OPEN (FAIL)
 
-- **Deployed measured (SHA `3c0def3a`, build `PGOVQaS2ow-r7q2OHoNdo`):**
-  - n=14 attempted, **13 successes**
-  - SHELL p50=**2740ms**, p95=**33888ms**
-  - USABLE p50=**3693ms**, p95=**34480ms**
-  - REVALIDATION p50≈1.4s (not dominant)
-- **Standard median** used (even-n average of middle two); do not use R4’s incorrect 4th-of-8 “p50”.
-- **Dominant remaining defect:** rare soft-nav stalls (T7→T8 ~30s) while most samples are ~2.5–4s.
-- **Fixes shipped / staged:**
-  - Preserve draft `search_id`; skip duplicate Sabre validate after recent revalidation; release session before offer I/O; passengers S0–S8 timing (`3c0def3a`)
-  - Public layout session/config hard timeout + draft `offer_freshness` merge on revalidate (`cf03d5cc` **ACTIVATE=PASS**, build `3JiCRsBEwJwCFd3-b-GvE`)
-- **Acceptance:** p50 meets targets on R5A sample; **p95 spike >15s ⇒ PERFORMANCE=FAIL** until post-R5B resample clears outliers.
+**Measured on deployed `a603211f` / build `38WrCuLnbbv8LChWWw4_M` (n=15/15 successes):**
 
-### 2. Segmented return visual / Book action proof — OPEN
+| Metric | p50 | p95 |
+|---|---:|---:|
+| SHELL (T0→T8) | 20450ms | 24571ms |
+| USABLE (T0→T9) | 20965ms | 25131ms |
+| REVALIDATION | 1351ms | 2156ms |
+| SERVER_PASSENGERS | 166ms | 541ms |
+| SESSION_HYDRATE | 0ms | 0ms |
+| OFFER_RESOLVE | 8ms | 50ms |
+| OUTLIER_COUNT_OVER_15S | 11 | |
 
-- Outbound card DOM proven.
-- Return-leg harness often stayed on segmented results URL (`return-option-card` not reached) when Continue→`/flights/return-options` did not complete in time.
-- Product code path exists (`legMode=outbound_confirm` → `/flights/return-options`); treat as **harness/flow evidence gap** unless a product regression is freshly proven.
+**Expanding interval:** T7→T8 (hard `location.assign` → Traveler shell mark), bimodal ~1.1s vs ~15–22s.
 
-### 3. Review / full traveler matrix depth — INCOMPLETE
+**Not dominant:** revalidation (~1.2–2.1s), passengers API (~150–540ms), session hydrate (~0).
 
-- Customer/Agent dashboards authenticated screenshots PASS.
-- Staff/Admin: use `/staff/dashboard` (not `/admin` for QA staff account).
-- Full Review matrix + all 5 viewports for Traveler/Group Detail may still be thin in R5 pack.
+**Empty-page HTTPS TTFB** for `/booking/passengers` probed ~70–120ms — HTML is fast; stall is post-navigation JS/hydration readiness under results→checkout transition.
+
+**Shipped R6 mitigations:** checkout `(checkout)` group; anonymous layout; hard-nav; Server-Timing headers; wall-clock timing restore. R5B Promise.race **not** restored.
+
+**Acceptance:** repeated >15s T7→T8 ⇒ `PERFORMANCE=FAIL`.
+
+### 2. Segmented Return Book Now handoff — HARNESS residual
+
+- Visual + Details PASS with `SEGMENTED_RETURN_CARD_FOUND_COUNT≥1`.
+- Book → `/booking/passengers` automation intermittent (fare-change “Accept new fare” / search JSON HTML). Product path not freshly proven broken after card+Details success.
+
+### 3. Review responsive matrix — NOT_REACHED safely
+
+- Traveler form screenshots PASS.
+- Review not forced: continue would POST passenger data; avoided supplier-adjacent mutation. Classify `REVIEW_RESPONSIVE=NOT_REACHED` (evidence gap), not a proven product layout defect.
 
 ## External / non-blocking
 
-- Production disk was **100% full** (73G backups) blocking R5b backup; pruned old packs to restore ~17G free. Monitor disk.
-- Sabre cancel production posture: unchanged (owner decision).
-- PIA NDC: SUPPLIER_AUTH_REJECT unless new contrary evidence.
-- Preview-only `JetpkEmailSampleDataProvider`: **HARNESS_FIXTURE**, not required runtime.
+- PIA NDC: SUPPLIER_AUTH_REJECT unless new contrary evidence
+- Sabre cancel production posture: unchanged
+- OS updates / reboot: frozen during R6 (separate maintenance)
+- Preview-only email fixtures: HARNESS_FIXTURE
 
-## Commercial safety (unchanged requirement)
+## Commercial safety
 
 - SUPPLIER_MUTATION_CALLS=0, PAYMENT_EXECUTED=NO, TICKET_ISSUED=NO
 - LIVE_SUPPLIER_SYNTHETIC_PASSENGER_DATA=0

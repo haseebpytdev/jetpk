@@ -1,25 +1,39 @@
-# ChatGPT visual review — JP-FINAL-CLOSURE-01-R5
+# ChatGPT visual review — JP-FINAL-CLOSURE-01-R6
 
-## Runtime
+## Pack location
 
-- DEPLOYED_RUNTIME_SHA=`0221a3f9ff26621289eb3ad61b43e3af00b3ebb3`
-- PUBLIC_BUILD_ID=`zxhTMPV_izXxL129p_rnD`
-- Card screenshots captured under R5A build `PGOVQaS2ow-r7q2OHoNdo` (same card UI)
+`docs/evidence/jp-final-closure-01/live-final/r6/`
 
-## Visual gates
+Runtime SHA: `a603211f0b5cebf73c1770532cfed649030b7a1f`  
+Build: `38WrCuLnbbv8LChWWw4_M`
 
-| Shot | Expected | Result |
+## Card / flight visuals
+
+| Gate | Result | Evidence |
 |---|---|---|
-| 01/02 return pair | `pair-return-card` | **PASS** (count=12) |
-| 03/04 segmented outbound | `outbound-option-card` | **PASS** |
-| 05/06 segmented return | `return-option-card` | **FAIL** (still on results URL) |
-| 15–18 customer/agent auth | dashboard not login | **PASS** |
-| Staff/admin | `/staff/dashboard` | PARTIAL |
+| Pair visual | PASS | `01-return-pair-desktop.png`, `02-return-pair-mobile.png` (12 cards) |
+| Segmented outbound | PASS | `03`/`04` |
+| Segmented return | PASS | `05`/`06`, `SEGMENTED_RETURN_CARD_FOUND_COUNT=1` |
+| Pair Details | PASS | |
+| Segmented outbound Details | PASS | |
+| Segmented return Details | PASS | |
+| Segmented return Book action | FAIL | Harness intermittent after card proven |
 
-## Performance for reviewers
+## Responsive / auth
 
-Best certified instrumented sample (R5A): usable p50≈3.7s vs corrected R4≈15.25s; **p95≈34s ⇒ PERFORMANCE=FAIL**.
+| Gate | Result |
+|---|---|
+| Traveler desktop/tablet/mobile | PASS (`07`–`09`) |
+| Group detail 5 viewports | PASS (`13`/`13b`/`13c`/`14` tablet+mobile) on `QA-ML-MQVJO8NJ5I` |
+| Customer auth | PASS (`15`/`16`) — not login redirect |
+| Agent auth | PASS (`17`/`18`) |
+| Admin/staff auth | PASS (`19`/`20`) via `/staff/dashboard` |
+| Review | NOT_REACHED (no forced passenger POST) |
 
-## Do not reopen
+## Performance visual note
+
+Instrumented continuous Book Now timing shows Traveler eventually usable on all 15 samples, but T7→T8 often ~15–22s — do not treat median post-document shell as green while continuous T0→T8 p95 remains pathological.
+
+## Preserved green (do not reopen)
 
 One-way/pair/segmented **code** parity, Groups JFZZT2DJ/WZBJCK6Z, email hardcode R4=0 unresolved live resolver.

@@ -1,26 +1,33 @@
-# JP-FINAL-CLOSURE-01-R5 — Git report
-
-Stable object roles only (no self-referential branch HEAD).
-
-## START (R5 authority)
-
-- START_REMOTE_HEAD=`6bec49455f548a5f49d72bc42f9c6348f2d70512`
-- START_RUNTIME_SHA=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9`
-- START_PUBLIC_BUILD=`OUwL6VdIoWW07Xli8W_KB`
-- BRANCH=`phase/jp-flight-perf-01`
-- REMOTE=`jetpk`
-
-## Engineering objects
-
-| SHA | ROLE |
-|---|---|
-| `3c0def3a7442b8a54c0b049bab862a326d2ae180` | R5A travelers GET dual-shop / search_id / session release |
-| `cf03d5ccebffb3edac865fe269640a42f55960a7` | R5B freshness draft + layout race (layout portion reverted) |
-| `0221a3f9ff26621289eb3ad61b43e3af00b3ebb3` | R5C FINAL — revert orphaning layout race timeout |
+# JP-FINAL-CLOSURE-01 — Git report (R6)
 
 ## Authority
 
-- FINAL_ENGINEERING_SHA=`0221a3f9ff26621289eb3ad61b43e3af00b3ebb3`
-- DEPLOYED_RUNTIME_SHA=`0221a3f9ff26621289eb3ad61b43e3af00b3ebb3`
-- PUBLIC_BUILD_ID=`zxhTMPV_izXxL129p_rnD`
-- EVIDENCE_COMMIT_SHA=`(set in console after evidence commit; not required inside this file)`
+| Role | SHA |
+|---|---|
+| Start remote head (R5 evidence) | `1f12edef052da278f02b7ffeaf4e7a881c663ef9` |
+| Start runtime (R5C) | `0221a3f9ff26621289eb3ad61b43e3af00b3ebb3` |
+| Final R6 engineering | `a603211f0b5cebf73c1770532cfed649030b7a1f` |
+| Deployed runtime | `a603211f0b5cebf73c1770532cfed649030b7a1f` |
+| Public build | `38WrCuLnbbv8LChWWw4_M` |
+
+Branch: `phase/jp-flight-perf-01`
+
+## Engineering commits (R6)
+
+| SHA | Summary |
+|---|---|
+| `9d76e579` | Checkout route group; passengers Server-Timing headers; freshness tests |
+| `94db66f3` | Checkout layout SSR-anonymous (no getPublicSession await) |
+| `691d9c61` | Hard-navigate Book Now → Traveler |
+| `6b567d44` | Wall-clock timing rebase across hard-nav; snapshot after T7 |
+| `a603211f` | Restore timing on Traveler page mount |
+
+## Intentionally not restored
+
+- R5B `Promise.race` public-layout timeout (`cf03d5cc` regressor)
+
+## Staging safety (engineering commits)
+
+- Exact-path `git add` only
+- `SERVER_GOVERNANCE_RULES_STAGED=0`
+- No server-governance / private lock docs committed

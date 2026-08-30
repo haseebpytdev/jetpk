@@ -1,0 +1,80 @@
+[
+  {
+    "filename": "01-return-pair-desktop.png",
+    "timestamp": "2026-08-30T17:34:31.355Z",
+    "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+    "build_id": "38WrCuLnbbv8LChWWw4_M",
+    "final_url": "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-10-04&return_date=2026-10-11&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=pair&search_id=b6d3c8f5-00f2-4d4d-84b9-6e447a2052b6",
+    "route": "/flights/results?from=ISB&to=DXB&depart=2026-10-04&return_date=2026-10-11&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=pair&search_id=b6d3c8f5-00f2-4d4d-84b9-6e447a2052b6",
+    "viewport": "1440",
+    "role": "guest",
+    "expected_component": "pair-return-card",
+    "component_found": true,
+    "gate": "PASS"
+  },
+  {
+    "filename": "02-return-pair-mobile.png",
+    "timestamp": "2026-08-30T17:34:32.070Z",
+    "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+    "build_id": "38WrCuLnbbv8LChWWw4_M",
+    "final_url": "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-10-04&return_date=2026-10-11&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=pair&search_id=b6d3c8f5-00f2-4d4d-84b9-6e447a2052b6",
+    "route": "/flights/results?from=ISB&to=DXB&depart=2026-10-04&return_date=2026-10-11&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=pair&search_id=b6d3c8f5-00f2-4d4d-84b9-6e447a2052b6",
+    "viewport": "390",
+    "role": "guest",
+    "expected_component": "pair-return-card",
+    "component_found": true,
+    "gate": "PASS"
+  },
+  {
+    "filename": "03-segmented-outbound-desktop.png",
+    "timestamp": "2026-08-30T17:37:31.413Z",
+    "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+    "build_id": "38WrCuLnbbv8LChWWw4_M",
+    "final_url": "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-10-04&return_date=2026-10-11&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=segmented&search_id=ec2933b4-a63d-49b4-b73f-2ca90e3abe61",
+    "route": "/flights/results?from=ISB&to=DXB&depart=2026-10-04&return_date=2026-10-11&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=segmented&search_id=ec2933b4-a63d-49b4-b73f-2ca90e3abe61",
+    "viewport": "1440",
+    "role": "guest",
+    "expected_component": "outbound-option-card",
+    "component_found": true,
+    "gate": "PASS"
+  },
+  {
+    "filename": "04-segmented-outbound-mobile.png",
+    "timestamp": "2026-08-30T17:37:32.017Z",
+    "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+    "build_id": "38WrCuLnbbv8LChWWw4_M",
+    "final_url": "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-10-04&return_date=2026-10-11&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=segmented&search_id=ec2933b4-a63d-49b4-b73f-2ca90e3abe61",
+    "route": "/flights/results?from=ISB&to=DXB&depart=2026-10-04&return_date=2026-10-11&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=segmented&search_id=ec2933b4-a63d-49b4-b73f-2ca90e3abe61",
+    "viewport": "390",
+    "role": "guest",
+    "expected_component": "outbound-option-card",
+    "component_found": true,
+    "gate": "PASS"
+  },
+  {
+    "filename": "05-segmented-return-desktop.png",
+    "timestamp": "2026-08-30T17:40:01.797Z",
+    "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+    "build_id": "38WrCuLnbbv8LChWWw4_M",
+    "final_url": "https://jetpakistan.pk/flights/return-options?search_id=ec2933b4-a63d-49b4-b73f-2ca90e3abe61&outbound_key=39ef9ea53a5f2cca34d81bf6ee656d8fd624874803d61ea7ef882beb0e980e68&outbound_fare_option_key=lt-pi0",
+    "route": "https://jetpakistan.pk/flights/return-options?search_id=ec2933b4-a63d-49b4-b73f-2ca90e3abe61&outbound_key=39ef9ea53a5f2cca34d81bf6ee656d8fd624874803d61ea7ef882beb0e980e68&outbound_fare_option_key=lt-pi0",
+    "viewport": "1440",
+    "role": "guest",
+    "expected_component": "return-option-card",
+    "component_found": true,
+    "gate": "PASS"
+  },
+  {
+    "filename": "06-segmented-return-mobile.png",
+    "timestamp": "2026-08-30T17:40:02.381Z",
+    "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+    "build_id": "38WrCuLnbbv8LChWWw4_M",
+    "final_url": "https://jetpakistan.pk/flights/return-options?search_id=ec2933b4-a63d-49b4-b73f-2ca90e3abe61&outbound_key=39ef9ea53a5f2cca34d81bf6ee656d8fd624874803d61ea7ef882beb0e980e68&outbound_fare_option_key=lt-pi0",
+    "route": "https://jetpakistan.pk/flights/return-options?search_id=ec2933b4-a63d-49b4-b73f-2ca90e3abe61&outbound_key=39ef9ea53a5f2cca34d81bf6ee656d8fd624874803d61ea7ef882beb0e980e68&outbound_fare_option_key=lt-pi0",
+    "viewport": "390",
+    "role": "guest",
+    "expected_component": "return-option-card",
+    "component_found": true,
+    "gate": "PASS"
+  }
+]

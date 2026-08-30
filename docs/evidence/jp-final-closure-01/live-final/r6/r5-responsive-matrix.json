@@ -1,0 +1,117 @@
+[
+  {
+    "surface": "customer_dashboard",
+    "viewport": 1440,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/customer/dashboard",
+    "AUTH_ROLE": "customer",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "customer_dashboard",
+    "viewport": 390,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/customer/dashboard",
+    "AUTH_ROLE": "customer",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "agent_dashboard",
+    "viewport": 1440,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/agent/dashboard",
+    "AUTH_ROLE": "agent",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "agent_dashboard",
+    "viewport": 390,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/agent/dashboard",
+    "AUTH_ROLE": "agent",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "admin_dashboard",
+    "viewport": 1440,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/staff/dashboard",
+    "AUTH_ROLE": "staff",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "admin_dashboard",
+    "viewport": 390,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/staff/dashboard",
+    "AUTH_ROLE": "staff",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "group_detail",
+    "viewport": 1440,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/groups",
+    "AUTH_ROLE": "guest",
+    "TARGET_COMPONENT_PRESENT": false,
+    "overflowX": false,
+    "result": "FAIL"
+  },
+  {
+    "surface": "group_detail",
+    "viewport": 390,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/groups",
+    "AUTH_ROLE": "guest",
+    "TARGET_COMPONENT_PRESENT": false,
+    "overflowX": false,
+    "result": "FAIL"
+  },
+  {
+    "surface": "traveler",
+    "viewport": 1440,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/booking/passengers?flight_id=1b5a129271a9e33a3ebeaef25ba7168f19bfb819991a2d0012fb6c7db986b80f&search_id=af409e87-6275-4caf-87b2-ff0bfc129387&offer_id=1b5a129271a9e33a3ebeaef25ba7168f19bfb819991a2d0012fb6c7db986b80f&from=LHE&to=DXB&depart=2026-09-24&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=lt-pi0",
+    "AUTH_ROLE": "guest",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "traveler",
+    "viewport": 768,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/booking/passengers?flight_id=1b5a129271a9e33a3ebeaef25ba7168f19bfb819991a2d0012fb6c7db986b80f&search_id=af409e87-6275-4caf-87b2-ff0bfc129387&offer_id=1b5a129271a9e33a3ebeaef25ba7168f19bfb819991a2d0012fb6c7db986b80f&from=LHE&to=DXB&depart=2026-09-24&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=lt-pi0",
+    "AUTH_ROLE": "guest",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "traveler",
+    "viewport": 390,
+    "HTTP": 200,
+    "FINAL_URL": "https://jetpakistan.pk/booking/passengers?flight_id=1b5a129271a9e33a3ebeaef25ba7168f19bfb819991a2d0012fb6c7db986b80f&search_id=af409e87-6275-4caf-87b2-ff0bfc129387&offer_id=1b5a129271a9e33a3ebeaef25ba7168f19bfb819991a2d0012fb6c7db986b80f&from=LHE&to=DXB&depart=2026-09-24&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=lt-pi0",
+    "AUTH_ROLE": "guest",
+    "TARGET_COMPONENT_PRESENT": true,
+    "overflowX": false,
+    "result": "PASS"
+  },
+  {
+    "surface": "review",
+    "result": "NOT_REACHED_NO_SUBMIT",
+    "note": "avoided forcing POST that may mutate"
+  }
+]

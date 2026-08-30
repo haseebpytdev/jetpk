@@ -1,0 +1,55 @@
+{
+  "GROUP_DETAIL_RESPONSIVE": "PASS",
+  "results": [
+    {
+      "file": "13-group-detail-desktop.png",
+      "viewport": 1440,
+      "final_url": "https://jetpakistan.pk/groups/QA-ML-MQVJO8NJ5I",
+      "component_found": true,
+      "overflowX": false,
+      "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+      "build_id": "38WrCuLnbbv8LChWWw4_M",
+      "gate": "PASS"
+    },
+    {
+      "file": "13b-group-detail-1366.png",
+      "viewport": 1366,
+      "final_url": "https://jetpakistan.pk/groups/QA-ML-MQVJO8NJ5I",
+      "component_found": true,
+      "overflowX": false,
+      "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+      "build_id": "38WrCuLnbbv8LChWWw4_M",
+      "gate": "PASS"
+    },
+    {
+      "file": "13c-group-detail-1024.png",
+      "viewport": 1024,
+      "final_url": "https://jetpakistan.pk/groups/QA-ML-MQVJO8NJ5I",
+      "component_found": true,
+      "overflowX": false,
+      "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+      "build_id": "38WrCuLnbbv8LChWWw4_M",
+      "gate": "PASS"
+    },
+    {
+      "file": "14-group-detail-tablet.png",
+      "viewport": 768,
+      "final_url": "https://jetpakistan.pk/groups/QA-ML-MQVJO8NJ5I",
+      "component_found": true,
+      "overflowX": false,
+      "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+      "build_id": "38WrCuLnbbv8LChWWw4_M",
+      "gate": "PASS"
+    },
+    {
+      "file": "14-group-detail-mobile.png",
+      "viewport": 390,
+      "final_url": "https://jetpakistan.pk/groups/QA-ML-MQVJO8NJ5I",
+      "component_found": true,
+      "overflowX": false,
+      "runtime_sha": "a603211f0b5cebf73c1770532cfed649030b7a1f",
+      "build_id": "38WrCuLnbbv8LChWWw4_M",
+      "gate": "PASS"
+    }
+  ]
+}
