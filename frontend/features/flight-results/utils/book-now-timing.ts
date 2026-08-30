@@ -75,7 +75,7 @@ export function startBookNowTiming(meta?: Record<string, unknown>): string | nul
   return session.id;
 }
 
-/** Restore timing session after hard navigation to Traveler. */
+/** Restore timing session after Traveler mount (hard-nav or soft-nav remount). */
 export function restoreBookNowTimingFromStorage(): TimingSession | null {
   if (typeof window === "undefined") return null;
   try {
