@@ -1,15 +1,22 @@
-# JP-FINAL-CLOSURE-01-R4 — Deployment report
+# JP-FINAL-CLOSURE-01-R5 — Deployment report
 
-## Deployed object
+## Final deployed object (R5C)
 
-- AUTHORIZED_SHA=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9`
-- MANIFEST_COUNT=`16` (`tmp/jp-final-closure-01-r4/runtime-manifest-r4.txt`)
-- BACKUP_ID=`jp-final-closure-01-r2-20260829T191040Z`
-- EXPECTED_OLD_BUILD=`4KN41ZZvPsqgb3xu8D7Ju`
-- NEW_PUBLIC_BUILD_ID=`OUwL6VdIoWW07Xli8W_KB`
-- RELEASE=`/home/pkjetp/releases/jetpk-jp-final-closure-01-r4-20260829T190500Z`
+- AUTHORIZED_SHA / DEPLOYED_RUNTIME_SHA=`0221a3f9ff26621289eb3ad61b43e3af00b3ebb3`
+- PUBLIC_BUILD_ID=`zxhTMPV_izXxL129p_rnD`
+- BACKUP_ID=`jp-final-closure-01-r2-20260830T114948Z`
+- MANIFEST_COUNT=`13`
+- RELEASE=`jetpk-jp-final-closure-01-r5-20260830T114927Z`
 
-## Gates (from `tmp/jp-final-closure-01-r4/deploy.out`)
+## Intermediate objects
+
+| SHA | Build | Note |
+|---|---|---|
+| `3c0def3a…` | `PGOVQaS2ow-r7q2OHoNdo` | R5A — best measured Book Now sample (13/14, usable p50≈3.7s) |
+| `cf03d5cc…` | `3JiCRsBEwJwCFd3-b-GvE` | R5B — layout Promise.race timeout **regressed**; superseded |
+| `0221a3f9…` | `zxhTMPV_izXxL129p_rnD` | R5C — revert race timeout; keep AbortSignal + travelers GET fixes |
+
+## Gates (deploy3.out)
 
 | Gate | Result |
 |---|---|
@@ -17,26 +24,14 @@
 | PHP_SYNTAX | PASS |
 | LARAVEL_BOOT | PASS |
 | MIGRATIONS | 0 |
-| PUBLIC_BUILD (pkjetp, PUBLIC_ONLY=1) | PASS |
-| PRE_PROXY_GATE | PASS |
-| OLS_HASH (`612aa83891aaf42b135f5fb05a69d06c83f5191b9b42e846ffb95d4353672c4c`) | PASS |
+| PUBLIC_BUILD | PASS |
+| OLS_HASH | PASS |
 | FULL_RUNTIME_SOURCE_DRIFT | 0 |
 | FULL_GIT_OBJECT_PARITY | PASS |
 | PUBLIC_PM2 | online |
 | DASHBOARD_PM2 | online |
-| SMOKE `/` `/groups` `/login` `/verify-email` | 200 |
 | **ACTIVATE** | **PASS** |
-
-## Scope copied
-
-Laravel email/communication + frontend flight-results / flight-details / standard-booking traveler timing. Dashboard rebuild skipped (unchanged).
-
-## Safety
-
-- No supplier booking/PNR/payment/ticket mutation in deploy path
-- ALHAIDER_BOOKING_ENABLED remains false (preserved)
-- LIVE_SUPPLIER_SYNTHETIC_PASSENGER_DATA=0 (commercial-safety evidence)
 
 ## Rollback
 
-Restore staged paths from backup `jp-final-closure-01-r2-20260829T191040Z` via protected rollback helper; rebuild public Next if frontend rolled back.
+Restore from backup `jp-final-closure-01-r2-20260830T114948Z` / prior SHA `cf03d5cc` or `3c0def3a`.

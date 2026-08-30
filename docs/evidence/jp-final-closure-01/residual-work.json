@@ -1,53 +1,65 @@
 {
-  "phase": "JP-FINAL-CLOSURE-01-R4",
-  "updated_at": "2026-08-29T21:40:00Z",
-  "FINAL_R4_ENGINEERING_SHA": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
-  "DEPLOYED_RUNTIME_SHA": "6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9",
-  "PUBLIC_BUILD_ID": "OUwL6VdIoWW07Xli8W_KB",
+  "phase": "JP-FINAL-CLOSURE-01-R5",
+  "updated_at": "2026-08-30T12:05:00Z",
+  "FINAL_ENGINEERING_SHA": "0221a3f9ff26621289eb3ad61b43e3af00b3ebb3",
+  "DEPLOYED_RUNTIME_SHA": "0221a3f9ff26621289eb3ad61b43e3af00b3ebb3",
+  "PUBLIC_BUILD_ID": "zxhTMPV_izXxL129p_rnD",
   "ACTIVATE": "PASS",
   "FULL_RUNTIME_SOURCE_DRIFT": 0,
   "OLS": "PASS",
-  "FLIGHT_CARD_ONEWAY_PARITY": "PASS",
-  "FLIGHT_CARD_PAIR_PARITY": "PASS",
-  "FLIGHT_CARD_SEGMENTED_OUTBOUND_PARITY": "PASS",
-  "FLIGHT_CARD_SEGMENTED_RETURN_PARITY": "PASS",
-  "PAIR_ACTIONS_SIDE_BY_SIDE": "PASS",
-  "SEGMENTED_ACTIONS_SIDE_BY_SIDE": "PASS",
-  "EMAIL_SEMANTIC_COMPLETENESS": "PASS",
-  "EMAIL_HARDCODE_REAUDIT": "PASS",
-  "GROUP_LOCAL_E2E_EVIDENCE": "PASS",
-  "RESPONSIVE_FULL_PLATFORM": "PASS",
-  "BOOK_NOW_TRAVELER_SHELL_P50": 5267,
-  "BOOK_NOW_TRAVELER_SHELL_P95": 38921,
-  "BOOK_NOW_TRAVELER_USABLE_P50": 8206,
-  "BOOK_NOW_TRAVELER_USABLE_P95": 40879,
-  "REVALIDATION_P50": 1640,
-  "REVALIDATION_P95": 1996,
+  "PAIR_VISUAL_PROOF": "PASS",
+  "PAIR_CARD_FOUND_COUNT": 12,
+  "SEGMENTED_OUTBOUND_VISUAL_PROOF": "PASS",
+  "SEGMENTED_RETURN_VISUAL_PROOF": "FAIL",
+  "PAIR_DETAILS": "PASS",
+  "SEGMENTED_OUTBOUND_DETAILS": "PASS",
+  "SEGMENTED_RETURN_DETAILS": "FAIL",
+  "CUSTOMER_AUTH_RESPONSIVE": "PASS",
+  "AGENT_AUTH_RESPONSIVE": "PASS",
+  "ADMIN_AUTH_RESPONSIVE": "PARTIAL",
   "PERFORMANCE": "FAIL",
-  "QA_CUSTOMER_GROUP_BOOKING_ID": "JFZZT2DJ",
-  "QA_AGENT_GROUP_BOOKING_ID": "WZBJCK6Z",
+  "PERFORMANCE_CERT_SAMPLE": {
+    "runtime_sha": "3c0def3a7442b8a54c0b049bab862a326d2ae180",
+    "build_id": "PGOVQaS2ow-r7q2OHoNdo",
+    "percentile_algorithm": "p50=standard_median(even_n_avg_middle_two); p95=nearest_rank",
+    "n_attempted": 14,
+    "n_success": 13,
+    "SHELL_P50": 2740,
+    "SHELL_P95": 33888,
+    "USABLE_P50": 3693,
+    "USABLE_P95": 34480,
+    "REVALIDATION_P50": 1385,
+    "REVALIDATION_P95": 2079
+  },
+  "PERFORMANCE_ROOT_CAUSE": "Rare soft-nav stalls (T7→T8 ~30s) remain after dual-shop/search_id/session fixes; supplier revalidation ~1.4s not dominant. R5B layout Promise.race orphaned session fetches and worsened p50—reverted in R5C. p95>15s ⇒ FAIL.",
+  "GROUP_LOCAL_E2E": "PASS",
+  "EMAIL_HARDCODE_REAUDIT": "PASS",
   "SUPPLIER_MUTATION_CALLS": 0,
   "PAYMENT_EXECUTED": "NO",
   "TICKET_ISSUED": "NO",
-  "LIVE_SUPPLIER_SYNTHETIC_PASSENGER_DATA": 0,
   "residual": [
     {
-      "item": "Book Now → Traveler usable p95 ~40s with high variance",
+      "item": "Traveler shell/usable p95 spike >15s",
       "status": "OPEN",
-      "note": "Revalidation p50~1.6s not dominant; post-nav passengers GET/hydration spikes. Instrumented p50 usable ~8.2s improved vs R3 ~19.6s wall baseline but PERFORMANCE remains FAIL."
+      "exact_p50_p95": "shell 2740/33888; usable 3693/34480 (R5A sample)",
+      "dominant_subsystem": "post-Book-Now soft-nav / public layout session bootstrap contention",
+      "attempted_fixes": [
+        "preserve draft search_id",
+        "skip Sabre validateOffer after recent revalidation",
+        "session save before offer I/O",
+        "AbortSignal.timeout(2500) on SSR session fetch",
+        "draft offer_freshness merge on revalidate",
+        "R5B layout Promise.race (reverted — orphaned lock)"
+      ]
     },
     {
-      "item": "Traveler/Review authenticated portal depth at all 5 viewports",
-      "status": "PARTIAL",
-      "note": "Guest overflow matrix PASS; traveler screenshots captured on live handoff; full auth Review matrix not re-run in R4."
+      "item": "Segmented return-option-card visual + Details/Book",
+      "status": "OPEN",
+      "note": "outbound proven; return-options handoff not completed in harness"
     },
     {
-      "item": "JetpkEmailSampleDataProvider preview scalars",
-      "status": "LOCAL_UNCOMMITTED_OR_PENDING",
-      "note": "Preview/fixture enrichment present locally; live semantic profiles already deployed in 6e3ea4e6."
+      "item": "Review + full 5-viewport matrices",
+      "status": "OPEN"
     }
-  ],
-  "not_tested_or_fail": [
-    "PERFORMANCE"
   ]
 }

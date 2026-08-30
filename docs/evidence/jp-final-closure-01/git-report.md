@@ -1,28 +1,26 @@
-# JP-FINAL-CLOSURE-01-R4 — Git report
+# JP-FINAL-CLOSURE-01-R5 — Git report
 
-## START (pre-R4 ChatGPT-verified)
+Stable object roles only (no self-referential branch HEAD).
 
-- PRE_R4_VERIFIED_HEAD=`9f4fb03ca8a5d387ec535c60c57bd411b022a12a` (docs/evidence tip)
-- PRE_R4_ENGINEERING=`63e66e65bf8d83acaa5feaeb0efcedd66ad1f75e`
-- PRE_R4_PUBLIC_BUILD=`4KN41ZZvPsqgb3xu8D7Ju`
+## START (R5 authority)
+
+- START_REMOTE_HEAD=`6bec49455f548a5f49d72bc42f9c6348f2d70512`
+- START_RUNTIME_SHA=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9`
+- START_PUBLIC_BUILD=`OUwL6VdIoWW07Xli8W_KB`
 - BRANCH=`phase/jp-flight-perf-01`
-- REMOTE=`jetpk` (not `origin`)
+- REMOTE=`jetpk`
 
-## Commits after 9f4fb03c
+## Engineering objects
 
-| SHA | TYPE | SUBJECT | DEPLOYED |
-|---|---|---|---|
-| `6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9` | ENGINEERING_RUNTIME | fix(jp-r4): flight card CTA parity, Book Now timing, email semantic fields | YES |
+| SHA | ROLE |
+|---|---|
+| `3c0def3a7442b8a54c0b049bab862a326d2ae180` | R5A travelers GET dual-shop / search_id / session release |
+| `cf03d5ccebffb3edac865fe269640a42f55960a7` | R5B freshness draft + layout race (layout portion reverted) |
+| `0221a3f9ff26621289eb3ad61b43e3af00b3ebb3` | R5C FINAL — revert orphaning layout race timeout |
 
-## Authority (post-R4)
+## Authority
 
-- FINAL_R4_ENGINEERING_SHA=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9` (deployed runtime object)
-- DEPLOYED_RUNTIME_SHA=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9`
-- PUBLIC_BUILD_ID=`OUwL6VdIoWW07Xli8W_KB`
-- EVIDENCE_COMMIT_SHA=`39e140e775aa6c84e84463894ed8dee787df04da`
-- FINAL_BRANCH_HEAD_SHA=`39e140e775aa6c84e84463894ed8dee787df04da` (docs tip; ≠ engineering SHA)
-
-## Notes
-
-- `JetpkEmailSampleDataProvider` preview scalars may land in a follow-up commit; live semantic profiles already shipped in `6e3ea4e6`.
-- Evidence commit follows separately so engineering SHA ≠ branch tip after docs land.
+- FINAL_ENGINEERING_SHA=`0221a3f9ff26621289eb3ad61b43e3af00b3ebb3`
+- DEPLOYED_RUNTIME_SHA=`0221a3f9ff26621289eb3ad61b43e3af00b3ebb3`
+- PUBLIC_BUILD_ID=`zxhTMPV_izXxL129p_rnD`
+- EVIDENCE_COMMIT_SHA=`(set in console after evidence commit; not required inside this file)`

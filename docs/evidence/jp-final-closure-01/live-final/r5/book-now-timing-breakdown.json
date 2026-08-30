@@ -1,0 +1,277 @@
+{
+  "phase": "JP-FINAL-CLOSURE-01-R5",
+  "runtime_sha": "cf03d5ccebffb3edac865fe269640a42f55960a7",
+  "build_id": "3JiCRsBEwJwCFd3-b-GvE",
+  "generated_at": "2026-08-30T11:47:35.467Z",
+  "percentile_algorithm": "p50=standard_median(even_n_avg_middle_two); p95=nearest_rank",
+  "n_attempted": 12,
+  "n_success": 6,
+  "n_timeout_fail": 6,
+  "BOOK_NOW_TRAVELER_SHELL_P50": 33667,
+  "BOOK_NOW_TRAVELER_SHELL_P95": 39318,
+  "BOOK_NOW_TRAVELER_USABLE_P50": 34558,
+  "BOOK_NOW_TRAVELER_USABLE_P95": 40058,
+  "REVALIDATION_P50": 1775,
+  "REVALIDATION_P95": 2339,
+  "instrumented_shell": {
+    "samples": 6,
+    "p50": 33667,
+    "p50_nearest_rank": 33405,
+    "p95": 39318,
+    "min": 4010,
+    "max": 39318,
+    "values": [
+      4010,
+      4387,
+      33405,
+      33929,
+      35608,
+      39318
+    ]
+  },
+  "instrumented_usable": {
+    "samples": 6,
+    "p50": 34558,
+    "p50_nearest_rank": 34339,
+    "p95": 40058,
+    "min": 5255,
+    "max": 40058,
+    "values": [
+      5255,
+      5435,
+      34339,
+      34777,
+      36235,
+      40058
+    ]
+  },
+  "revalidation": {
+    "samples": 6,
+    "p50": 1775,
+    "p50_nearest_rank": 1720,
+    "p95": 2339,
+    "min": 1309,
+    "max": 2339,
+    "values": [
+      1309,
+      1408,
+      1720,
+      1829,
+      1832,
+      2339
+    ]
+  },
+  "samples": [
+    {
+      "i": 0,
+      "error": "Error: sample_incomplete_0",
+      "ok": false
+    },
+    {
+      "i": 1,
+      "error": "Error: sample_incomplete_1",
+      "ok": false
+    },
+    {
+      "i": 2,
+      "searchId": "69296c90-b799-4300-a907-d7f3f7c64dce",
+      "ok": true,
+      "timeout": false,
+      "shell_ms": 33929,
+      "usable_ms": 34777,
+      "revalidate_ms": 1829,
+      "wall_ms": 35632,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 7562,
+        "T2_revalidate_start_from_T0": 31,
+        "T3_revalidate_response_from_T0": 1860,
+        "T6_nav_start_from_T0": 7965,
+        "T7_passenger_route_from_T0": 7965,
+        "T8_shell_visible_from_T0": 33929,
+        "T9_field_enabled_from_T0": 34777
+      },
+      "marks": {
+        "T0_click": 21188.10000000149,
+        "T1_handler": 28750,
+        "T2_revalidate_start": 21219,
+        "T3_revalidate_response": 23048.19999999553,
+        "T6_nav_start": 29152.79999999702,
+        "T7_passenger_route": 29153.10000000149,
+        "T8_shell_visible": 55117,
+        "T9_field_enabled": 55965.39999999851
+      }
+    },
+    {
+      "i": 3,
+      "error": "Error: sample_incomplete_3",
+      "ok": false
+    },
+    {
+      "i": 4,
+      "searchId": "9c08b710-2d89-4948-b43e-29d2dfe35f14",
+      "ok": true,
+      "timeout": false,
+      "shell_ms": 4387,
+      "usable_ms": 5255,
+      "revalidate_ms": 1832,
+      "wall_ms": 12002,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 1007,
+        "T2_revalidate_start_from_T0": 20,
+        "T3_revalidate_response_from_T0": 1852,
+        "T6_nav_start_from_T0": 2859,
+        "T7_passenger_route_from_T0": 2867,
+        "T8_shell_visible_from_T0": 4387,
+        "T9_field_enabled_from_T0": 5255
+      },
+      "marks": {
+        "T0_click": 64934.10000000149,
+        "T1_handler": 65940.60000000149,
+        "T2_revalidate_start": 64954.10000000149,
+        "T3_revalidate_response": 66785.79999999702,
+        "T6_nav_start": 67792.5,
+        "T7_passenger_route": 67800.60000000149,
+        "T8_shell_visible": 69320.89999999851,
+        "T9_field_enabled": 70189
+      }
+    },
+    {
+      "i": 5,
+      "searchId": "5d4bead3-93bd-4924-8a4b-c0437504a673",
+      "ok": true,
+      "timeout": false,
+      "shell_ms": 33405,
+      "usable_ms": 34339,
+      "revalidate_ms": 1720,
+      "wall_ms": 34535,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 7004,
+        "T2_revalidate_start_from_T0": 7,
+        "T3_revalidate_response_from_T0": 1727,
+        "T6_nav_start_from_T0": 7295,
+        "T7_passenger_route_from_T0": 7295,
+        "T8_shell_visible_from_T0": 33405,
+        "T9_field_enabled_from_T0": 34339
+      },
+      "marks": {
+        "T0_click": 19904.39999999851,
+        "T1_handler": 26908.29999999702,
+        "T2_revalidate_start": 19911.10000000149,
+        "T3_revalidate_response": 21631.10000000149,
+        "T6_nav_start": 27199.10000000149,
+        "T7_passenger_route": 27199.39999999851,
+        "T8_shell_visible": 53309.60000000149,
+        "T9_field_enabled": 54243.5
+      }
+    },
+    {
+      "i": 6,
+      "error": "Error: sample_incomplete_6",
+      "ok": false
+    },
+    {
+      "i": 7,
+      "searchId": "6b5192e2-f628-4c4d-bfe6-5f5c5c0dc7e3",
+      "ok": true,
+      "timeout": false,
+      "shell_ms": 39318,
+      "usable_ms": 40058,
+      "revalidate_ms": 2339,
+      "wall_ms": 40303,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 8017,
+        "T2_revalidate_start_from_T0": 9,
+        "T3_revalidate_response_from_T0": 2348,
+        "T6_nav_start_from_T0": 8366,
+        "T7_passenger_route_from_T0": 8366,
+        "T8_shell_visible_from_T0": 39318,
+        "T9_field_enabled_from_T0": 40058
+      },
+      "marks": {
+        "T0_click": 5633.0999999940395,
+        "T1_handler": 13649.69999999553,
+        "T2_revalidate_start": 5642.19999999553,
+        "T3_revalidate_response": 7981.0999999940395,
+        "T6_nav_start": 13999.09999999404,
+        "T7_passenger_route": 13999.39999999851,
+        "T8_shell_visible": 44951.39999999851,
+        "T9_field_enabled": 45690.59999999404
+      }
+    },
+    {
+      "i": 8,
+      "searchId": "08232272-7c23-4a99-900d-62ffd4fd78df",
+      "ok": true,
+      "timeout": false,
+      "shell_ms": 35608,
+      "usable_ms": 36235,
+      "revalidate_ms": 1408,
+      "wall_ms": 36894,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 6724,
+        "T2_revalidate_start_from_T0": 15,
+        "T3_revalidate_response_from_T0": 1423,
+        "T6_nav_start_from_T0": 7424,
+        "T7_passenger_route_from_T0": 7424,
+        "T8_shell_visible_from_T0": 35608,
+        "T9_field_enabled_from_T0": 36235
+      },
+      "marks": {
+        "T0_click": 4264.30000000447,
+        "T1_handler": 10987.89999999851,
+        "T2_revalidate_start": 4279.30000000447,
+        "T3_revalidate_response": 5686.89999999851,
+        "T6_nav_start": 11687.70000000298,
+        "T7_passenger_route": 11687.89999999851,
+        "T8_shell_visible": 39871.70000000298,
+        "T9_field_enabled": 40499
+      }
+    },
+    {
+      "i": 9,
+      "error": "Error: sample_incomplete_9",
+      "ok": false
+    },
+    {
+      "i": 10,
+      "error": "Error: sample_incomplete_10",
+      "ok": false
+    },
+    {
+      "i": 11,
+      "searchId": "a5a5fb05-7747-4f3c-a90c-1b5b1887606d",
+      "ok": true,
+      "timeout": false,
+      "shell_ms": 4010,
+      "usable_ms": 5435,
+      "revalidate_ms": 1309,
+      "wall_ms": 6185,
+      "timing_deltas": {
+        "T0_click_from_T0": 0,
+        "T1_handler_from_T0": 3822,
+        "T2_revalidate_start_from_T0": 12,
+        "T3_revalidate_response_from_T0": 1321,
+        "T6_nav_start_from_T0": 4187,
+        "T7_passenger_route_from_T0": 4188,
+        "T8_shell_visible_from_T0": 4010,
+        "T9_field_enabled_from_T0": 5435
+      },
+      "marks": {
+        "T0_click": 19295.89999999851,
+        "T1_handler": 23117.79999999702,
+        "T2_revalidate_start": 19308,
+        "T3_revalidate_response": 20616.69999999553,
+        "T6_nav_start": 23482.89999999851,
+        "T7_passenger_route": 23483.19999999553,
+        "T8_shell_visible": 23305.39999999851,
+        "T9_field_enabled": 24730.19999999553
+      }
+    }
+  ],
+  "PERFORMANCE": "FAIL"
+}

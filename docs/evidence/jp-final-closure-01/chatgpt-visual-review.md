@@ -1,53 +1,25 @@
-# JP-FINAL-CLOSURE-01-R4 — ChatGPT visual review pack
+# ChatGPT visual review — JP-FINAL-CLOSURE-01-R5
 
-## Runtime authority
+## Runtime
 
-- ENGINEERING=`6e3ea4e69bbd2d463aaabfe2f53d93388e29b3f9`
-- BUILD=`OUwL6VdIoWW07Xli8W_KB`
-- HOST=`https://jetpakistan.pk`
+- DEPLOYED_RUNTIME_SHA=`0221a3f9ff26621289eb3ad61b43e3af00b3ebb3`
+- PUBLIC_BUILD_ID=`zxhTMPV_izXxL129p_rnD`
+- Card screenshots captured under R5A build `PGOVQaS2ow-r7q2OHoNdo` (same card UI)
 
-## Flight card comparison (canonical One-Way)
+## Visual gates
 
-Compare side-by-side CTAs `[ Details ] [ Book Now ]`:
-
-| Surface | Desktop | Mobile |
+| Shot | Expected | Result |
 |---|---|---|
-| One-Way | `live-final/r4/oneway-card-desktop.png` | `oneway-card-mobile.png` |
-| Return Pair | `return-pair-card-desktop.png` | `return-pair-card-mobile.png` |
-| Segmented Outbound | `segmented-outbound-card-desktop.png` | `segmented-outbound-card-mobile.png` |
-| Segmented Return | `segmented-return-card-desktop.png` | `segmented-return-card-mobile.png` |
+| 01/02 return pair | `pair-return-card` | **PASS** (count=12) |
+| 03/04 segmented outbound | `outbound-option-card` | **PASS** |
+| 05/06 segmented return | `return-option-card` | **FAIL** (still on results URL) |
+| 15–18 customer/agent auth | dashboard not login | **PASS** |
+| Staff/admin | `/staff/dashboard` | PARTIAL |
 
-Code parity JSON: `live-final/flight-card-parity.json`
+## Performance for reviewers
 
-## Portals / Groups
+Best certified instrumented sample (R5A): usable p50≈3.7s vs corrected R4≈15.25s; **p95≈34s ⇒ PERFORMANCE=FAIL**.
 
-- `groups-results-desktop.png` / `groups-results-mobile.png`
-- `customer-dashboard-desktop.png` (may be login redirect as guest)
-- `agent-dashboard-desktop.png`
-- `admin-dashboard-desktop.png`
+## Do not reopen
 
-## Email
-
-- Fresh hardcode reaudit: `email/email-hardcode-audit-r4.json` → EMAIL_HARDCODE_REAUDIT=PASS
-- Semantic previews/shots: `email/previews-r4/` + `email/preview-shots-r4/` (generated in R4 closeout)
-
-## Group local E2E
-
-- `live-final/r4-group-local-e2e.json` — JFZZT2DJ / WZBJCK6Z still `manual_local`, supplier_reservation_id NULL, payment unexecuted
-
-## Performance
-
-- Primary metrics from instrumented `jp-book-now-timing` marks (not inflated Playwright `waitForURL(load)` wall clock)
-- `live-final/r4/book-now-timing-breakdown.json`
-- SHELL p50=`5267`ms p95=`38921`ms
-- USABLE p50=`8206`ms p95=`40879`ms
-- REVALIDATION p50=`1640`ms p95=`1996`ms
-- **PERFORMANCE=FAIL** (usable p95 still ~40s / high variance; revalidate not dominant)
-
-## Reviewer checklist
-
-1. Actions never vertically stack as link-over-button on standard cards
-2. Pair keeps OUTBOUND|RETURN middle layout with One-Way outer shell
-3. Email ticket/refund/group detail rows show useful context when fixture/live scalars exist
-4. Confirm engineering SHA ≠ docs tip after evidence commit
-5. Do not convert PERFORMANCE=FAIL into PASS
+One-way/pair/segmented **code** parity, Groups JFZZT2DJ/WZBJCK6Z, email hardcode R4=0 unresolved live resolver.
