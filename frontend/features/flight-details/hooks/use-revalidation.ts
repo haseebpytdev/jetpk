@@ -148,7 +148,11 @@ export function useRevalidation() {
     // R6: soft-nav to /booking/passengers still spikes T7→T8 ~25–36s even with
     // anonymous checkout layout and ~200ms passengers API. Prefer hard navigation
     // so Traveler mounts on a fresh document instead of a stalled RSC flight.
-    if (resolved.startsWith("/booking/passengers")) {
+    const isPassengersHandoff =
+      resolved.startsWith("/booking/passengers") ||
+      /(?:^|\/)booking\/passengers(?:\?|$)/.test(resolved);
+    if (isPassengersHandoff) {
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign" });
       try {
         const snap = bookNowTimingSnapshot();
         if (snap && typeof sessionStorage !== "undefined") {
@@ -157,8 +161,12 @@ export function useRevalidation() {
       } catch {
         /* ignore */
       }
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign" });
-      window.location.assign(resolved);
+      const target = resolved.startsWith("http")
+        ? resolved
+        : resolved.startsWith("/")
+          ? resolved
+          : `/${resolved}`;
+      window.location.assign(target);
       return true;
     }
     window.location.assign(resolved);

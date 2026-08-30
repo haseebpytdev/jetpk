@@ -36,6 +36,8 @@ export type ClientHydrationTiming = {
 type TimingSession = {
   id: string;
   t0: number;
+  /** Wall-clock ms at T0 — survives hard navigation when performance.now() resets. */
+  t0Wall?: number;
   marks: Partial<Record<BookNowTimingMark, number>>;
   deltasMs: Record<string, number | null>;
   meta?: Record<string, unknown>;
@@ -56,6 +58,7 @@ function ensureSession(reset = false): TimingSession | null {
   const session: TimingSession = {
     id: `bn-${Date.now().toString(36)}`,
     t0: performance.now(),
+    t0Wall: Date.now(),
     marks: {},
     deltasMs: {},
   };
@@ -67,6 +70,7 @@ export function startBookNowTiming(meta?: Record<string, unknown>): string | nul
   const session = ensureSession(true);
   if (!session) return null;
   session.meta = meta;
+  session.t0Wall = Date.now();
   markBookNowTiming("T0_click");
   return session.id;
 }
@@ -80,16 +84,21 @@ export function restoreBookNowTimingFromStorage(): TimingSession | null {
     sessionStorage.removeItem("jp-book-now-timing");
     const parsed = JSON.parse(raw) as TimingSession;
     if (!parsed?.id || typeof parsed.t0 !== "number") return null;
-    // Re-base marks onto a fresh performance.now() timeline while preserving
-    // from_T0 deltas recorded before the hard navigation.
-    const now = performance.now();
+    // Prefer wall-clock rebase so T8/T9 from_T0 remain continuous across hard nav
+    // (performance.now() resets on full document load).
+    const nowPerf = performance.now();
+    const elapsedWall =
+      typeof parsed.t0Wall === "number" && Number.isFinite(parsed.t0Wall)
+        ? Math.max(0, Date.now() - parsed.t0Wall)
+        : typeof parsed.deltasMs?.T7_passenger_route_from_T0 === "number"
+          ? parsed.deltasMs.T7_passenger_route_from_T0
+          : typeof parsed.deltasMs?.T6_nav_start_from_T0 === "number"
+            ? parsed.deltasMs.T6_nav_start_from_T0
+            : 0;
     const session: TimingSession = {
       ...parsed,
-      t0: now - (typeof parsed.deltasMs?.T7_passenger_route_from_T0 === "number"
-        ? parsed.deltasMs.T7_passenger_route_from_T0
-        : typeof parsed.deltasMs?.T6_nav_start_from_T0 === "number"
-          ? parsed.deltasMs.T6_nav_start_from_T0
-          : 0),
+      t0: nowPerf - elapsedWall,
+      t0Wall: parsed.t0Wall ?? Date.now() - elapsedWall,
       marks: { ...(parsed.marks ?? {}) },
       deltasMs: { ...(parsed.deltasMs ?? {}) },
     };
