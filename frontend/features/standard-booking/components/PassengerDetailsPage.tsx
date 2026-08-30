@@ -41,7 +41,7 @@ import { PassengerCard } from "./PassengerCard";
 import { ContactDetailsSection } from "./ContactDetailsSection";
 import { FareChangeDialog } from "@/features/flight-details/components/FareChangeDialog";
 import { revalidateOffer } from "@/features/flight-results/services/flight-results-api";
-import { markBookNowTiming, markClientHydration } from "@/features/flight-results/utils/book-now-timing";
+import { markBookNowTiming, markClientHydration, restoreBookNowTimingFromStorage } from "@/features/flight-results/utils/book-now-timing";
 
 type PassengerDetailsPageProps = {
   searchParams: Record<string, string | undefined>;
@@ -136,8 +136,9 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     };
   }, [queryKey, loadContext]);
 
-  // Book Now timing: T8 may already be marked by route loading.tsx; keep idempotent shell mark.
+  // Book Now timing: restore hard-nav session before shell marks (loading.tsx may be skipped).
   useEffect(() => {
+    restoreBookNowTimingFromStorage();
     markClientHydration("N0_page_start_ms");
   }, []);
 
