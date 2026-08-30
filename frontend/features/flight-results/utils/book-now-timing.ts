@@ -54,6 +54,15 @@ export function markBookNowTiming(mark: BookNowTimingMark, meta?: Record<string,
   if (typeof window === "undefined") return;
   const session = ensureSession(false);
   if (!session) return;
+  // Keep the earliest shell mark (loading.tsx may fire before page mount).
+  if (mark === "T8_shell_visible" && session.marks.T8_shell_visible != null) {
+    if (meta) session.meta = { ...(session.meta ?? {}), ...meta };
+    return;
+  }
+  if (mark === "T9_field_enabled" && session.marks.T9_field_enabled != null) {
+    if (meta) session.meta = { ...(session.meta ?? {}), ...meta };
+    return;
+  }
   const now = performance.now();
   session.marks[mark] = now;
   if (meta) session.meta = { ...(session.meta ?? {}), ...meta };

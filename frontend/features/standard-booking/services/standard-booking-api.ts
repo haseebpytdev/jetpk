@@ -30,6 +30,8 @@ async function standardFetch<T>(
   | { ok: false; status: number; message: string; errors?: LaravelValidationErrors; data?: Partial<T> }
 > {
   const csrf = init?.method && init.method !== "GET" ? await ensureLaravelCsrfToken() : null;
+  const bookNowId =
+    typeof window !== "undefined" ? window.__jpBookNowTiming?.id ?? null : null;
 
   try {
     const response = await fetch(laravelApiPath(path), {
@@ -38,6 +40,7 @@ async function standardFetch<T>(
       headers: {
         ...JSON_HEADERS,
         ...(csrf ? { "X-XSRF-TOKEN": csrf } : {}),
+        ...(bookNowId ? { "X-JP-Book-Now-Id": bookNowId } : {}),
         ...init?.headers,
       },
     });

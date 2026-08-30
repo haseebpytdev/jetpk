@@ -11,10 +11,11 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-28 (JP-FLIGHT-PERF-01 progressive search / Pair-first / passengers shell)
+**Last updated:** 2026-08-30 (JP-FINAL-CLOSURE-01-R5 Traveler Book Now performance)
 
 | Date | Phase | Notes |
 | --- | --- | --- |
+| 2026-08-30 | JP-FINAL-CLOSURE-01-R5 | Traveler GET: preserve draft `search_id`; skip duplicate Sabre validate when recent revalidation exists; release session before offer/supplier I/O; `PassengersRequestTiming` S0–S8; soft-nav shell via client passengers page + loading T8; session bootstrap 2.5s timeout. |
 | 2026-08-28 | JP-FLIGHT-PERF-01-R1 | Default results sort **Cheapest**; Pair-first return `view`; pending UX “Updating fares…”; bounded fare-change accepts; passengers silent auto-revalidate; passengers shell-first loading + OCR on Autofill only. Evidence `docs/evidence/jp-flight-perf-01/`. Deploy blocked on Al-Haider `60175` manual cancel. |
 | 2026-08-28 | JP-GRP-COMM-01-R2 | **`GroupReservationService`**: supplier cancel must succeed before local `held_seats` decrement; `SupplierReleaseFailed` keeps seats held. **`ALHAIDER_CANCEL_ENABLED`** separated from **`ALHAIDER_BOOKING_ENABLED`**. **`AlHaiderGroupBookingPayloadBuilder`**: fail-closed (no synthetic passenger/contact data); seat_count = adults+children. Admin manual reconcile + retry-supplier-release. Tests: `GroupReservationSupplierReleaseAtomicityTest`. |
 | 2026-08-26 | JP-API-CMS-FINAL-CLOSEOUT | **Al-Haider `managed_token`:** DB `SupplierConnection` is sole token authority; `AlHaiderManagedTokenRenewalService` renews only on genuine expiry with lock + persistent 1/365d issuance budget + ambiguous fail-closed; `AlHaiderClient::isConfigured()` recognizes DB tokens without ENV secrets; Test Connection uses read-only groups probe (zero login); official reserve/cancel paths corrected. **SMTP:** active-invalid DB → ENV fallback. **Nav:** single **API & Modules** sidebar entry. **CMS:** connected-field production-truth matrix tests. |

@@ -6,6 +6,7 @@ import {
   BookingPageShell,
   BookingSidebar,
 } from "@/features/booking-layout";
+import { BookNowShellTimingMark } from "@/features/standard-booking/components/BookNowShellTimingMark";
 
 const FALLBACK_PROGRESS = [
   { key: "search", label: "Search", state: "completed" as const },
@@ -19,6 +20,7 @@ const FALLBACK_PROGRESS = [
 export default function Loading() {
   return (
     <BookingPageShell testId="passengers-route-loading">
+      <BookNowShellTimingMark />
       <BookingProgress steps={FALLBACK_PROGRESS} className="mb-6" />
       <BookingPageHeader title="Traveler information" description="Confirm each traveler and contact details." />
       <BookingLayout

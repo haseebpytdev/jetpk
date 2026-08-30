@@ -55,6 +55,18 @@ class OfferValidationService
             return $this->validateSabreOfferCheckoutUsingCachedOffer($agency, $selectedOfferSnapshot, $searchContext, $connection);
         }
 
+        // Book Now already performed live selected-offer revalidation within the freshness
+        // window — do not run a second Bargain Finder shop on Traveler GET.
+        if (strtolower($provider) === SupplierProvider::Sabre->value
+            && $this->sabreHasValidRecentRevalidation($selectedOfferSnapshot, $searchContext)) {
+            Log::info('sabre.checkout.validate_using_recent_revalidation', [
+                'search_id' => (string) ($searchContext['search_id'] ?? ''),
+                'offer_id' => (string) ($selectedOfferSnapshot['offer_id'] ?? $selectedOfferSnapshot['id'] ?? ''),
+            ]);
+
+            return $this->validateSabreOfferCheckoutUsingCachedOffer($agency, $selectedOfferSnapshot, $searchContext, $connection);
+        }
+
         $request = FlightSearchRequestData::fromArray($searchContext, $agency->id, (string) ($searchContext['source_channel'] ?? 'public_guest'));
         $adapter = $this->resolver->resolve($connection->provider);
         $brandedContext = $this->resolveSabreBrandedCheckoutContext($selectedOfferSnapshot, $searchContext);
@@ -370,6 +382,35 @@ class OfferValidationService
     {
         return (bool) config('suppliers.sabre.booking_enabled', false)
             && (bool) config('suppliers.sabre.booking_live_call_enabled', false);
+    }
+
+    /**
+     * @param  array<string, mixed>  $selectedOfferSnapshot
+     * @param  array<string, mixed>  $searchContext
+     */
+    protected function sabreHasValidRecentRevalidation(array $selectedOfferSnapshot, array $searchContext): bool
+    {
+        $freshness = is_array($searchContext['offer_freshness'] ?? null)
+            ? $searchContext['offer_freshness']
+            : (is_array($selectedOfferSnapshot['offer_freshness'] ?? null)
+                ? $selectedOfferSnapshot['offer_freshness']
+                : []);
+
+        if ($freshness === []) {
+            $freshness = [
+                'last_revalidated_at' => $selectedOfferSnapshot['last_revalidated_at']
+                    ?? $selectedOfferSnapshot['selected_offer_last_revalidated_at']
+                    ?? $searchContext['last_revalidated_at']
+                    ?? null,
+                'revalidation_status' => $selectedOfferSnapshot['revalidation_status']
+                    ?? $selectedOfferSnapshot['selected_offer_revalidation_status']
+                    ?? $searchContext['revalidation_status']
+                    ?? null,
+            ];
+        }
+
+        return app(\App\Support\FlightSearch\SabreOfferFreshness::class)
+            ->hasValidRecentRevalidation($freshness);
     }
 
     /**

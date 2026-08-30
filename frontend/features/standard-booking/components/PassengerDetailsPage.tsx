@@ -136,7 +136,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     };
   }, [queryKey, loadContext]);
 
-  // Book Now timing: traveler shell first paint (T8) and first editable field ready (T9).
+  // Book Now timing: T8 may already be marked by route loading.tsx; keep idempotent shell mark.
   useEffect(() => {
     if (!loading || shellMarkedRef.current) return;
     shellMarkedRef.current = true;
@@ -144,10 +144,10 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   }, [loading]);
 
   useEffect(() => {
-    if (loading || !context || fareChange || errorStatus || expired || fieldMarkedRef.current) return;
+    if (loading || !context || errorStatus || expired || fieldMarkedRef.current) return;
     fieldMarkedRef.current = true;
     markBookNowTiming("T9_field_enabled", { phase: "passengers_form_ready" });
-  }, [loading, context, fareChange, errorStatus, expired]);
+  }, [loading, context, errorStatus, expired]);
 
   // Silent automatic reprice when checkout still carries an approximate estimate.
   useEffect(() => {

@@ -72,6 +72,8 @@ export async function fetchSessionBootstrap(cookieHeader?: string): Promise<Sess
         method: "GET",
         headers,
         cache: "no-store",
+        // Soft-nav to Traveler re-runs public layout; never block 30–40s on session lock.
+        signal: AbortSignal.timeout(2500),
       });
 
       if (!response.ok) {

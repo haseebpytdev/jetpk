@@ -38,6 +38,7 @@ use App\Services\Suppliers\Sabre\SabreBookingService;
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
 use App\Services\TravelData\AirlineBrandingService;
 use App\Support\Booking\AgentBookingContext;
+use App\Support\Booking\PassengersRequestTiming;
 use App\Support\Booking\StandardBookingCheckoutJsonResponder;
 use App\Support\Booking\StandardBookingJsonPresenter;
 use App\Support\Bookings\BookingHoldSessionSupplierOfferIdResolver;
@@ -138,7 +139,11 @@ class BookingController extends Controller
 
     public function passengers(StoreBookingPassengersRequest $request): View|RedirectResponse|JsonResponse
     {
+        $timing = PassengersRequestTiming::start($request);
+
         if ($gate = $this->guestCheckoutGateResponse($request)) {
+            $timing->finish('guest_gate');
+
             return $gate;
         }
 
@@ -875,7 +880,9 @@ class BookingController extends Controller
         $this->mergeReturnSplitCheckoutDraft($request);
 
         // Review → Edit travelers: restore draft + passenger prefill from durable session booking.
+        $timing->mark('S1_session_hydrate_start');
         $this->hydrateCheckoutDraftFromSessionBooking($request);
+        $timing->mark('S2_session_hydrate_end');
 
         $flightId = $request->string('flight_id')->toString();
         $offerId = $request->string('offer_id')->toString();
@@ -884,7 +891,6 @@ class BookingController extends Controller
             $draftMerge = [
                 'flight_id' => $flightId !== '' ? $flightId : $offerId,
                 'offer_id' => $offerId !== '' ? $offerId : $flightId,
-                'search_id' => $searchId,
                 'search_from' => $request->string('from')->toString(),
                 'search_to' => $request->string('to')->toString(),
                 'search_depart' => $request->string('depart')->toString(),
@@ -895,6 +901,11 @@ class BookingController extends Controller
                 'children' => max(0, (int) $request->input('children', 0)),
                 'infants' => max(0, (int) $request->input('infants', 0)),
             ];
+            // Never blank an existing draft search_id with an empty query param — that
+            // forces findOffer miss → full supplier re-shop on Traveler GET.
+            if ($searchId !== '') {
+                $draftMerge['search_id'] = $searchId;
+            }
             if ($request->filled('fare_option_key')) {
                 $draftMerge['fare_option_key'] = $request->string('fare_option_key')->toString();
             }
@@ -917,6 +928,8 @@ class BookingController extends Controller
         $effectiveFlightId = $flightId !== '' ? $flightId : (($draft['offer_id'] ?? '') !== '' ? $draft['offer_id'] : ($draft['flight_id'] ?? ''));
 
         if ($request->isMethod('get') && trim((string) $effectiveFlightId) === '') {
+            $timing->finish('missing_session');
+
             return $this->passengersMissingSessionResponse($request);
         }
 
@@ -924,7 +937,14 @@ class BookingController extends Controller
         $resultsQuery = $this->buildFlightsResultsQuery($criteria);
 
         if ($redirect = $this->redirectMulticityInquiryOnlyCheckout($criteria, $resultsQuery)) {
+            $timing->finish('multicity_redirect');
+
             return $redirect;
+        }
+
+        // Persist draft identity and release the session lock before cache/supplier I/O.
+        if ($request->isMethod('get') && $request->hasSession()) {
+            $request->session()->save();
         }
 
         $offer = null;
@@ -932,6 +952,7 @@ class BookingController extends Controller
         $agency = $channelContext['agency'];
         if ($effectiveFlightId !== '') {
             $offer = null;
+            $timing->mark('S3_offer_resolve_start');
             if (is_string($draft['search_id'] ?? null) && ($draft['search_id'] ?? '') !== '') {
                 $offer = $this->searchStore->findOfferForCheckoutTransition((string) $draft['search_id'], $effectiveFlightId);
             }
@@ -946,10 +967,12 @@ class BookingController extends Controller
                     : [];
                 $offer = collect($offers)->firstWhere('id', $effectiveFlightId);
             }
+            $timing->mark('S4_offer_resolve_end');
         }
 
         if ($effectiveFlightId !== '' && $offer === null) {
             $request->session()->forget(self::SESSION_BOOKING_AFTER_STALE_RECOVERY);
+            $timing->finish('offer_missing');
 
             return $this->redirectSelectedOfferWarning($criteria, request: $request);
         }
@@ -1262,6 +1285,9 @@ class BookingController extends Controller
         ];
 
         if ($this->wantsBookingJson($request)) {
+            $timing->mark('S7_payload_complete');
+            $timing->finish('json_ok');
+
             return response()->json(
                 $this->standardBookingJsonPresenter->presentPassengersContext($viewData, $request),
             );
@@ -1269,6 +1295,8 @@ class BookingController extends Controller
 
         $resolvedView = client_view('frontend.booking.passenger-details', 'frontend');
         $this->logJetpkCheckoutPassengersRender($request, $resolvedView);
+        $timing->mark('S7_payload_complete');
+        $timing->finish('blade_ok');
 
         return view($resolvedView, $viewData);
     }
@@ -4410,6 +4438,9 @@ class BookingController extends Controller
         }
         if (is_array($draft[SabreSelectedBrandedFareCheckoutContext::META_KEY] ?? null)) {
             $withChannel[SabreSelectedBrandedFareCheckoutContext::META_KEY] = $draft[SabreSelectedBrandedFareCheckoutContext::META_KEY];
+        }
+        if (is_array($draft['offer_freshness'] ?? null)) {
+            $withChannel['offer_freshness'] = $draft['offer_freshness'];
         }
 
         return $withChannel;
