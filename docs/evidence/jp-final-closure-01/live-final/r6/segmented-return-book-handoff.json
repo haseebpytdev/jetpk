@@ -1,0 +1,16 @@
+{
+  "RETURN_CARD_PRESENT": "YES",
+  "SEGMENTED_RETURN_CARD_FOUND_COUNT": 2,
+  "BOOK_BUTTON_PRESENT": "YES",
+  "BOOK_CLICK_OCCURRED": "YES",
+  "BOOK_HANDLER_ENTERED": "YES",
+  "EXPECTED_TARGET": "/booking/passengers",
+  "ACTUAL_FINAL_URL": "https://jetpakistan.pk/booking/passengers?flight_id=8bad85d4944469c82e4c9ca0b74975684a97bbeca8beaa200457715475dfd96c&search_id=954e2380-6308-4700-bfa7-26a85ae195f2&offer_id=8bad85d4944469c82e4c9ca0b74975684a97bbeca8beaa200457715475dfd96c&from=ISB&to=DXB&depart=2026-10-04&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&return_date=2026-10-11&fare_option_key=standard-fare-894788d2&return_fare_option_key=standard-fare-894788d2&outbound_fare_option_key=standard-fare-b3f87410&outbound_key=028e29a947339e70bb7bdb39a5d781c3ee4b8d52bd981368ac491ac9b6625e50&combo_id=8bad85d4944469c82e4c9ca0b74975684a97bbeca8beaa200457715475dfd96c",
+  "LOCAL_DRAFT_ID": "954e2380-6308-4700-bfa7-26a85ae195f2",
+  "LOCAL_DRAFT_CREATED": "YES",
+  "SEGMENTED_RETURN_BOOK_ACTION": "PASS",
+  "SEGMENTED_RETURN_FAILURE_CLASS": "NONE",
+  "SUPPLIER_MUTATION": "NO",
+  "runtime_sha": "6a6c3b35227d9aa29e88a2c9d83e81d7812e9cb2",
+  "build_id": "abYe4XmYEs6wOjNqRDNGX"
+}

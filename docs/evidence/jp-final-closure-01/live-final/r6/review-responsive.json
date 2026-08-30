@@ -1,0 +1,21 @@
+{
+  "REVIEW_ACTUALLY_REACHED": "YES",
+  "REVIEW_COMPONENT_PRESENT": "YES",
+  "REVIEW_RESPONSIVE": "PASS",
+  "REVIEW_SCREENSHOT_COUNT": 8,
+  "SUPPLIER_MUTATION_CALLS": 0,
+  "final_url": "https://jetpakistan.pk/booking/review",
+  "runtime_sha": "6a6c3b35227d9aa29e88a2c9d83e81d7812e9cb2",
+  "build_id": "abYe4XmYEs6wOjNqRDNGX",
+  "method": "inert local Laravel passengers save → /booking/review; no live supplier booking POST",
+  "shots": [
+    { "file": "review-desktop.png", "viewport": 1440, "component_found": true, "overflowX": false, "gate": "PASS" },
+    { "file": "10-review-desktop.png", "viewport": 1440, "component_found": true, "overflowX": false, "gate": "PASS" },
+    { "file": "review-1366.png", "viewport": 1366, "component_found": true, "overflowX": false, "gate": "PASS" },
+    { "file": "review-1024.png", "viewport": 1024, "component_found": true, "overflowX": false, "gate": "PASS" },
+    { "file": "review-tablet.png", "viewport": 768, "component_found": true, "overflowX": false, "gate": "PASS" },
+    { "file": "11-review-tablet.png", "viewport": 768, "component_found": true, "overflowX": false, "gate": "PASS" },
+    { "file": "review-mobile.png", "viewport": 390, "component_found": true, "overflowX": false, "gate": "PASS" },
+    { "file": "12-review-mobile.png", "viewport": 390, "component_found": true, "overflowX": false, "gate": "PASS" }
+  ]
+}
