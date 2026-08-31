@@ -29,7 +29,7 @@ export function FlightResultActions({
   bookAriaLabel,
 }: FlightResultActionsProps) {
   return (
-    <div className="flex flex-wrap justify-end gap-2" data-testid="flight-result-actions">
+    <div className="flex flex-wrap justify-end gap-2 max-lg:pr-16" data-testid="flight-result-actions">
       <button
         type="button"
         className="rounded-jp-md border border-jp-border px-3 py-2 text-sm font-medium text-jp-text hover:border-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"

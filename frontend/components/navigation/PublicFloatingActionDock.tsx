@@ -27,11 +27,12 @@ export function PublicFloatingActionDock({
   const pathname = usePathname() ?? "";
   const liftForCheckoutSticky =
     pathname.startsWith("/booking/") || pathname.startsWith("/groups/booking/");
-  // Keep FAB clear of result-card Book Now / share controls (bottom-right CTAs).
-  const clearPrimaryCtaCorner =
+  // Elevate FAB above sticky fare Continue / result CTAs (keep bottom-right).
+  const liftForFlightCta =
     pathname.startsWith("/flights/results") ||
     pathname.startsWith("/flights/return") ||
     pathname.startsWith("/flights/details");
+  const liftFab = liftForCheckoutSticky || liftForFlightCta;
 
   useEffect(() => {
     const details = detailsRef.current;
@@ -85,17 +86,14 @@ export function PublicFloatingActionDock({
       ref={detailsRef}
       tabIndex={-1}
       className={cn(
-        "pointer-events-none fixed z-50 xl:hidden",
-        clearPrimaryCtaCorner
-          ? "left-[max(1rem,env(safe-area-inset-left))] right-auto"
-          : "right-[max(1rem,env(safe-area-inset-right))]",
-        liftForCheckoutSticky
+        "pointer-events-none fixed right-[max(1rem,env(safe-area-inset-right))] z-50 xl:hidden",
+        liftFab
           ? "bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+4.25rem))]"
           : "bottom-[max(1rem,env(safe-area-inset-bottom))]",
       )}
       data-testid="public-fab-dock"
       data-lift-checkout={liftForCheckoutSticky ? "1" : "0"}
-      data-clear-cta-corner={clearPrimaryCtaCorner ? "1" : "0"}
+      data-lift-flight-cta={liftForFlightCta ? "1" : "0"}
       onToggle={(event) => {
         if (event.currentTarget.open) {
           event.currentTarget.focus();
@@ -124,10 +122,7 @@ export function PublicFloatingActionDock({
         id={panelId}
         role="group"
         aria-label="JetPakistan quick actions"
-        className={cn(
-          "pointer-events-auto absolute bottom-16 mb-1 w-[min(18rem,calc(100vw-2rem))] rounded-jp-lg border border-jp-border bg-jp-surface p-2 shadow-jp-md",
-          clearPrimaryCtaCorner ? "left-0 right-auto" : "right-0",
-        )}
+        className="pointer-events-auto absolute bottom-16 right-0 mb-1 w-[min(18rem,calc(100vw-2rem))] rounded-jp-lg border border-jp-border bg-jp-surface p-2 shadow-jp-md"
       >
         <p className="px-2 pb-1 text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Explore</p>
         <ul className="max-h-[min(60vh,22rem)] space-y-1 overflow-y-auto">
