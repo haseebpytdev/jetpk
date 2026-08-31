@@ -250,7 +250,7 @@ export function ReturnOptionsPage() {
                 role="listitem"
                 data-testid="return-option-card"
               >
-                <div className="grid items-center gap-3 md:grid-cols-[minmax(8rem,0.85fr)_minmax(16rem,2fr)_minmax(10.5rem,0.95fr)] lg:gap-4">
+                <div className="grid items-stretch gap-3 lg:grid-cols-[minmax(8rem,0.85fr)_minmax(0,2fr)_minmax(10.5rem,0.95fr)] lg:items-center lg:gap-4">
                   <div className="min-w-0">
                     <AirlineIdentity
                       code={journey?.airline_code}
@@ -279,10 +279,10 @@ export function ReturnOptionsPage() {
                       {journey?.departure_time_display ?? ""} → {journey?.arrival_time_display ?? ""}
                     </p>
                   </div>
-                  <div className="flex min-w-0 items-end justify-between gap-3 border-t border-jp-border-soft pt-3 md:flex-col md:items-end md:border-l md:border-t-0 md:pl-3 md:pt-0">
-                    <div className="text-right">
+                  <div className="flex min-w-0 flex-wrap items-end justify-between gap-3 border-t border-jp-border-soft pt-3 lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0">
+                    <div className="min-w-0 text-left sm:text-right">
                       <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">Total fare</p>
-                      <p className="whitespace-nowrap text-lg font-bold text-jp-text" data-testid="result-price-display">
+                      <p className="text-lg font-bold leading-tight text-jp-text break-words" data-testid="result-price-display">
                         {formatWholePkr(price)
                           ?? (selectedFare?.price_display as string | undefined)
                           ?? (option.price_display as string | undefined)

@@ -182,8 +182,8 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
       data-selected-fare-key={effectiveFareKey || undefined}
       aria-label={`${offer.airline_name ?? offer.airline_code ?? "Flight"} ${offer.departure_time ?? ""} to ${offer.arrival_time ?? ""}`}
     >
-      <div className="grid items-center gap-3 md:grid-cols-[minmax(8rem,0.85fr)_minmax(16rem,2fr)_minmax(10.5rem,0.95fr)] lg:gap-4 xl:grid-cols-[minmax(10.5rem,1fr)_minmax(20rem,2.35fr)_minmax(12.5rem,0.95fr)]">
-        <div className="min-w-0 md:pr-1">
+      <div className="grid items-stretch gap-3 lg:grid-cols-[minmax(8rem,0.85fr)_minmax(0,2fr)_minmax(10.5rem,0.95fr)] lg:items-center lg:gap-4 xl:grid-cols-[minmax(10.5rem,1fr)_minmax(20rem,2.35fr)_minmax(12.5rem,0.95fr)]">
+        <div className="min-w-0 lg:pr-1">
           <AirlineIdentity code={offer.airline_code} name={offer.airline_name} logoUrl={offer.airline_logo_url} size="md" />
           {offer.operating_airline_name && offer.operating_airline_name !== offer.airline_name ? (
             <p className="mt-0.5 truncate text-[11px] text-jp-text-muted">Operated by {offer.operating_airline_name}</p>
@@ -221,12 +221,12 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
           ) : null}
         </div>
 
-        <div className="flex min-w-0 items-end justify-between gap-3 border-t border-jp-border-soft pt-3 md:h-full md:min-w-[10.5rem] md:flex-col md:items-end md:justify-center md:border-l md:border-t-0 md:pl-3 md:pt-0 xl:min-w-[12.5rem] xl:pl-4">
-          <div className="text-right">
+        <div className="flex min-w-0 flex-wrap items-end justify-between gap-3 border-t border-jp-border-soft pt-3 lg:h-full lg:min-w-[10.5rem] lg:flex-col lg:items-end lg:justify-center lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0 xl:min-w-[12.5rem] xl:pl-4">
+          <div className="min-w-0 text-left sm:text-right">
             <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">
               {fareOptions.length > 1 && !selectedOption ? "From" : "Total fare"}
             </p>
-            <p className="whitespace-nowrap text-lg font-bold text-jp-text" data-testid="result-price-display">
+            <p className="text-lg font-bold leading-tight text-jp-text break-words" data-testid="result-price-display">
               {displayPrice ?? "Price unavailable"}
             </p>
           </div>
@@ -234,7 +234,7 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
             <div className="flex items-center gap-1" data-testid="result-share-actions">
               <button
                 type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-jp-md border border-jp-border text-jp-text-muted hover:border-jp-primary hover:text-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-jp-md border border-jp-border text-jp-text-muted hover:border-jp-primary hover:text-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary sm:h-8 sm:w-8"
                 aria-label={copied ? "Copied flight details" : "Copy flight details"}
                 title={copied ? "Copied" : "Copy"}
                 data-testid="result-copy-share"
@@ -246,7 +246,7 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-jp-md border border-jp-border text-jp-text-muted hover:border-jp-primary hover:text-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-jp-md border border-jp-border text-jp-text-muted hover:border-jp-primary hover:text-jp-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary sm:h-8 sm:w-8"
                 aria-label="Share on WhatsApp"
                 title="WhatsApp"
                 data-testid="result-whatsapp-share"

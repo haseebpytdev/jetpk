@@ -37,19 +37,19 @@ export function TimeRouteBlock({
   className,
 }: TimeRouteBlockProps) {
   return (
-    <div className={cn("grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4", className)}>
-      <div className="text-left">
-        <p className={cn("font-semibold text-jp-text", compact ? "text-base sm:text-lg" : "text-lg sm:text-xl")}>
+    <div className={cn("grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 sm:gap-4", className)}>
+      <div className="min-w-0 text-left">
+        <p className={cn("font-semibold text-jp-text", compact ? "text-sm sm:text-base md:text-lg" : "text-base sm:text-lg md:text-xl")}>
           {departureTime ?? "—"}
         </p>
-        <p className={cn("text-jp-text-muted", compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-sm")}>
+        <p className={cn("truncate text-jp-text-muted", compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-sm")}>
           {originCode ?? "—"}
         </p>
       </div>
       <div
         className={cn(
-          "flex max-w-full flex-col items-center overflow-visible px-1 text-center",
-          compact ? "min-w-[5.5rem]" : "min-w-[7rem]",
+          "flex max-w-full flex-col items-center overflow-visible px-0.5 text-center sm:px-1",
+          compact ? "min-w-[4.5rem] sm:min-w-[5.5rem]" : "min-w-[5rem] sm:min-w-[7rem]",
         )}
         data-testid="center-route-block"
       >
@@ -66,14 +66,14 @@ export function TimeRouteBlock({
           />
         ) : null}
       </div>
-      <div className="text-right">
-        <p className={cn("font-semibold text-jp-text", compact ? "text-base sm:text-lg" : "text-lg sm:text-xl")}>
+      <div className="text-right min-w-0">
+        <p className={cn("font-semibold text-jp-text", compact ? "text-sm sm:text-base md:text-lg" : "text-base sm:text-lg md:text-xl")}>
           {arrivalTime ?? "—"}
           {arrivalDayOffset ? (
             <span className="ml-1 align-super text-[10px] font-normal text-jp-text-muted">{arrivalDayOffset}</span>
           ) : null}
         </p>
-        <p className={cn("text-jp-text-muted", compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-sm")}>
+        <p className={cn("truncate text-jp-text-muted", compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-sm")}>
           {destinationCode ?? "—"}
         </p>
       </div>

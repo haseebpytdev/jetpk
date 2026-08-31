@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import type { PublicSession } from "@/types/session";
 import Link from "next/link";
 import { useEffect, useId, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 type PublicFloatingActionDockProps = {
   session: PublicSession;
@@ -23,6 +24,9 @@ export function PublicFloatingActionDock({
   const panelId = useId();
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const signedIn = session.status === "authenticated";
+  const pathname = usePathname() ?? "";
+  const liftForCheckoutSticky =
+    pathname.startsWith("/booking/") || pathname.startsWith("/groups/booking/");
 
   useEffect(() => {
     const details = detailsRef.current;
@@ -75,8 +79,14 @@ export function PublicFloatingActionDock({
     <details
       ref={detailsRef}
       tabIndex={-1}
-      className="pointer-events-none fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-50 xl:hidden"
+      className={cn(
+        "pointer-events-none fixed right-[max(1rem,env(safe-area-inset-right))] z-50 xl:hidden",
+        liftForCheckoutSticky
+          ? "bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+4.25rem))]"
+          : "bottom-[max(1rem,env(safe-area-inset-bottom))]",
+      )}
       data-testid="public-fab-dock"
+      data-lift-checkout={liftForCheckoutSticky ? "1" : "0"}
       onToggle={(event) => {
         if (event.currentTarget.open) {
           event.currentTarget.focus();

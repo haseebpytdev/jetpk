@@ -167,6 +167,23 @@ frontend/tsconfig.tsbuildinfo
 *.gguf
 *.bin
 
+# Local agent / CLI / package caches (never commit)
+.claude/
+.playwright-cli/
+.pnpm-store/
+/dashboard/tmp/
+/frontend/tmp/
+/tmp/
+frontend/tests/_wave9_tmp_ref.ts
+
+# Generated Tesseract self-host copies under public (source of truth is install script)
+/frontend/public/tesseract/*.js
+/frontend/public/tesseract/*.wasm
+/frontend/public/tesseract/*.wasm.js
+
+# Local wallet/debug dumps (never commit)
+/agent-wallet-full.yml
+
 # JP-DASH-03 local-only Playwright session (never commit)
 tmp/jp-dash-03-admin-storage-state.json
 tmp/jp-dash-03-staff-storage-state.json

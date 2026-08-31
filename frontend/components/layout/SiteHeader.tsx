@@ -27,7 +27,7 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
   return (
     <>
       <header className="sticky top-0 z-40 overflow-visible border-b border-jp-border bg-jp-surface" data-testid="site-header">
-        <div className="mx-auto grid h-jp-nav w-full max-w-jp-container grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-jp-md overflow-visible px-jp-xl">
+      <div className="mx-auto flex h-jp-nav w-full max-w-jp-container items-center justify-between gap-jp-md overflow-visible px-jp-xl xl:grid xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
           <div className="flex min-w-0 items-center justify-start">
             <Link
               href="/"
@@ -46,7 +46,7 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
 
           <DesktopNavigation session={session} className="justify-center" />
 
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex shrink-0 items-center justify-end gap-2">
             <div className="hidden shrink-0 items-center gap-2 xl:flex">
               <ThemeSwitch />
               {signedIn ? (

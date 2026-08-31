@@ -124,8 +124,8 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
       data-selected-fare-key={effectiveFareKey || undefined}
       aria-label={`Paired flight ${outbound.origin_airport_code} to ${outbound.destination_airport_code} return ${inbound.origin_airport_code} to ${inbound.destination_airport_code}`}
     >
-      <div className="grid items-center gap-3 md:grid-cols-[minmax(7.5rem,0.75fr)_minmax(18rem,2.2fr)_minmax(10.5rem,0.95fr)] lg:gap-4 xl:grid-cols-[minmax(9rem,0.85fr)_minmax(22rem,2.5fr)_minmax(12.5rem,0.95fr)]">
-        <div className="min-w-0 space-y-2 md:pr-1">
+      <div className="grid items-stretch gap-3 lg:grid-cols-[minmax(7.5rem,0.75fr)_minmax(0,2.2fr)_minmax(10.5rem,0.95fr)] lg:items-center lg:gap-4 xl:grid-cols-[minmax(9rem,0.85fr)_minmax(22rem,2.5fr)_minmax(12.5rem,0.95fr)]">
+        <div className="min-w-0 space-y-2 lg:pr-1">
           <AirlineIdentity
             code={outbound.airline_code || option.airline_code}
             name={outbound.airline_name || option.airline_name}
@@ -146,7 +146,7 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
         </div>
 
         <div className="min-w-0">
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-2">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-2">
             <div className="min-w-0">
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-jp-primary">Outbound</p>
               <TimeRouteBlock
@@ -163,11 +163,11 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
               />
             </div>
             <div
-              className="hidden h-10 w-px bg-jp-border-soft sm:block"
+              className="hidden h-10 w-px bg-jp-border-soft md:block"
               aria-hidden="true"
               data-testid="pair-leg-separator"
             />
-            <div className="min-w-0 border-t border-jp-border-soft pt-2 sm:border-t-0 sm:pt-0">
+            <div className="min-w-0 border-t border-jp-border-soft pt-2 md:border-t-0 md:pt-0">
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-jp-primary">Return</p>
               <TimeRouteBlock
                 departureTime={inbound.departure_time_display}
@@ -189,10 +189,10 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
           </div>
         </div>
 
-        <div className="flex min-w-0 items-end justify-between gap-3 border-t border-jp-border-soft pt-3 md:h-full md:min-w-[10.5rem] md:flex-col md:items-end md:justify-center md:border-l md:border-t-0 md:pl-3 md:pt-0 xl:min-w-[12.5rem] xl:pl-4">
-          <div className="text-right">
+        <div className="flex min-w-0 flex-wrap items-end justify-between gap-3 border-t border-jp-border-soft pt-3 lg:h-full lg:min-w-[10.5rem] lg:flex-col lg:items-end lg:justify-center lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0 xl:min-w-[12.5rem] xl:pl-4">
+          <div className="min-w-0 text-left sm:text-right">
             <p className="text-[11px] uppercase tracking-wide text-jp-text-muted">Total fare</p>
-            <p className="whitespace-nowrap text-lg font-bold text-jp-text" data-testid="result-price-display">
+            <p className="text-lg font-bold leading-tight text-jp-text break-words" data-testid="result-price-display">
               {displayPrice}
             </p>
           </div>
