@@ -22,6 +22,7 @@ export default async function AuthGroupLayout({ children }: { children: ReactNod
             }
           : null
       }
+      aiEnabled={Boolean(config?.ai_assistant_enabled)}
     >
       <AuthCsrfBootstrap />
       {children}

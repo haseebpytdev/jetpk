@@ -68,6 +68,15 @@ Route::get('/api/public/ai/health', [PublicAiAssistantController::class, 'health
 Route::post('/api/public/ai/chat', [PublicAiAssistantController::class, 'chat'])
     ->middleware('throttle:8,1')
     ->name('api.public.ai.chat');
+Route::get('/api/public/ai/messages', [PublicAiAssistantController::class, 'messages'])
+    ->middleware('throttle:60,1')
+    ->name('api.public.ai.messages');
+Route::post('/api/public/ai/clear', [PublicAiAssistantController::class, 'clear'])
+    ->middleware('throttle:10,1')
+    ->name('api.public.ai.clear');
+Route::post('/api/public/ai/handoff', [PublicAiAssistantController::class, 'requestHandoff'])
+    ->middleware('throttle:10,1')
+    ->name('api.public.ai.handoff');
 
 Route::prefix('api/public/content')->group(function (): void {
     Route::get('/csrf-token', [PublicContentApiController::class, 'csrfToken'])->name('api.public.content.csrf');

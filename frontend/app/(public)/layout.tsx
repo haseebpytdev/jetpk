@@ -23,6 +23,7 @@ export default async function PublicGroupLayout({ children }: { children: ReactN
             }
           : null
       }
+      aiEnabled={Boolean(config?.ai_assistant_enabled)}
     >
       <SeoJsonLd config={config} />
       {children}

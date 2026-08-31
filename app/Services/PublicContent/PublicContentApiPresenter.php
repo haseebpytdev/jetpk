@@ -166,6 +166,7 @@ final class PublicContentApiPresenter
             'commerce_gates' => app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->gates(
                 Agency::query()->where('slug', (string) config('ota.default_agency_slug', 'asif-travels'))->value('id')
             ),
+            'ai_assistant_enabled' => (bool) config('ota.ai_assistant.enabled', false),
             'default_seo' => [
                 'title' => 'JetPakistan',
                 'description' => 'Book flights, hotels, and travel services with JetPakistan.',

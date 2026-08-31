@@ -31,6 +31,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             }
           : null
       }
+      aiEnabled={Boolean(config?.ai_assistant_enabled)}
     >
       <HomepageContent preview={preview} previewToken={previewToken} />
     </PublicShell>

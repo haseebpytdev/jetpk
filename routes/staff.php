@@ -14,6 +14,7 @@ use App\Http\Controllers\BackOffice\BackOfficeLegacyViewRedirectController;
 use App\Http\Controllers\Staff\FinanceStatementController;
 use App\Http\Controllers\Staff\LedgerController;
 use App\Http\Controllers\Staff\ReportsController;
+use App\Http\Controllers\Staff\AiSupportQueueController;
 use App\Http\Controllers\Staff\SupportTicketController;
 use App\Support\Staff\StaffPermission;
 use App\Support\Ui\UiVersionResolver;
@@ -110,6 +111,22 @@ Route::prefix('staff')->name('staff.')->group(function (): void {
         Route::get('/support/tickets/{ticket}', [BackOfficeLegacyViewRedirectController::class, 'staffSupportTicketShow'])->name('support.tickets.show');
         Route::post('/support/tickets/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('support.tickets.reply');
         Route::patch('/support/tickets/{ticket}/status', [SupportTicketController::class, 'updateStatus'])->name('support.tickets.status');
+
+        Route::get('/support/ai-queue', [AiSupportQueueController::class, 'index'])
+            ->middleware('staff.permission:'.StaffPermission::SupportView)
+            ->name('support.ai-queue.index');
+        Route::get('/support/ai-queue/{publicId}', [AiSupportQueueController::class, 'show'])
+            ->middleware('staff.permission:'.StaffPermission::SupportView)
+            ->name('support.ai-queue.show');
+        Route::post('/support/ai-queue/{publicId}/takeover', [AiSupportQueueController::class, 'takeover'])
+            ->middleware('staff.permission:'.StaffPermission::SupportReply)
+            ->name('support.ai-queue.takeover');
+        Route::post('/support/ai-queue/{publicId}/reply', [AiSupportQueueController::class, 'reply'])
+            ->middleware('staff.permission:'.StaffPermission::SupportReply)
+            ->name('support.ai-queue.reply');
+        Route::post('/support/ai-queue/{publicId}/return-to-ai', [AiSupportQueueController::class, 'returnToAi'])
+            ->middleware('staff.permission:'.StaffPermission::SupportReply)
+            ->name('support.ai-queue.return-to-ai');
     });
 
     if (app()->environment('testing')) {

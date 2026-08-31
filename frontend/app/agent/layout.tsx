@@ -30,6 +30,7 @@ export default async function AgentLayout({ children }: { children: ReactNode })
             }
           : null
       }
+      aiEnabled={Boolean(config?.ai_assistant_enabled)}
     >
       {children}
       <PortalAppFooter />

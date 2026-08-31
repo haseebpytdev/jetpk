@@ -30,6 +30,7 @@ export default async function CustomerLayout({ children }: { children: ReactNode
             }
           : null
       }
+      aiEnabled={Boolean(config?.ai_assistant_enabled)}
     >
       {children}
       <PortalAppFooter />

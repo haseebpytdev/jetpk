@@ -30,6 +30,7 @@ export type PublicConfig = {
     guest_booking_enabled: boolean;
     card_payment_enabled: boolean;
   };
+  ai_assistant_enabled?: boolean;
 };
 
 function publicConfigEndpoint(): string {
