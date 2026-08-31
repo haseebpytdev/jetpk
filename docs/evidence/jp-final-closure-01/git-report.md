@@ -1,14 +1,15 @@
-# JP-FINAL-CLOSURE-01 — Git report (R6F)
+# JP-FINAL-CLOSURE-01 — Git report (R6G)
 
 ## Authority
 
 | Role | SHA |
 |---|---|
 | Start remote head (unchanged; no push) | `1f12edef052da278f02b7ffeaf4e7a881c663ef9` |
-| Start local HEAD (R6 evidence) | `1cc533475119a72c5724b1bbd2314373a112ebd5` |
-| R6F engineering (soft-nav restore) | `6a6c3b35227d9aa29e88a2c9d83e81d7812e9cb2` |
-| Deployed runtime | `6a6c3b35227d9aa29e88a2c9d83e81d7812e9cb2` |
-| Public build | `abYe4XmYEs6wOjNqRDNGX` |
+| R6F start local HEAD | `6117f4dd1984ada8e451e83804f08e98fd0efcd5` |
+| R6F engineering | `6a6c3b35227d9aa29e88a2c9d83e81d7812e9cb2` |
+| R6G engineering (T3–T6 marks only) | `754b9f4f3c27cb3590bd6ff50cf74d090f4ef51b` |
+| Deployed runtime | `754b9f4f3c27cb3590bd6ff50cf74d090f4ef51b` |
+| Public build | `O5uddPMWQuSwqsd1-_c3_` |
 
 Branch: `phase/jp-flight-perf-01`
 
@@ -16,20 +17,18 @@ Branch: `phase/jp-flight-perf-01`
 
 | SHA | Summary |
 |---|---|
-| `9d76e579` | Checkout route group; Server-Timing; freshness tests |
-| `94db66f3` | Checkout layout SSR-anonymous |
-| `691d9c61` | Hard-navigate Book Now (controlled experiment; retained) |
-| `6b567d44` | Wall-clock timing continuity |
-| `a603211f` | Traveler timing restore |
-| `1cc53347` | R6 evidence (corrected by R6F evidence commit) |
-| `6a6c3b35` | **R6F** restore soft `router.push` primary + continuous timing |
-| *(this commit)* | R6F evidence correction |
+| `9d76e579` … `1cc53347` | R6 eng + evidence |
+| `6a6c3b35` | R6F soft `router.push` primary |
+| `6117f4dd` | R6F evidence |
+| `754b9f4f` | **R6G** T3–T6 fare/continue sub-marks |
+| *(this commit)* | R6G evidence + SYSTEM_ONLY metric correction docs |
 
 ## Staging safety
 
 - Exact-path `git add` only
 - Pre-existing email dirty files left unstaged
-- R5 historical evidence restored then left untouched
+- R5 historical evidence untouched
 - `SERVER_GOVERNANCE_RULES_STAGED=0`
 - `CURSOR_RULE_FILE_STAGED=0`
+- `PRIVATE_SERVER_NOTES_STAGED=0`
 - No push pending ChatGPT verification

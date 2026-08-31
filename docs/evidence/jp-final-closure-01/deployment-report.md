@@ -1,13 +1,13 @@
-# JP-FINAL-CLOSURE-01 — Deployment report (R6F)
+# JP-FINAL-CLOSURE-01 — Deployment report (R6G)
 
-## Deployed object (R6F soft-nav)
+## Deployed object (R6G instrumentation)
 
-- AUTHORIZED_SHA / DEPLOYED_RUNTIME_SHA=`6a6c3b35227d9aa29e88a2c9d83e81d7812e9cb2`
-- PUBLIC_BUILD_ID=`abYe4XmYEs6wOjNqRDNGX`
-- PRIOR_RUNTIME (R6 hard-nav)=`a603211f0b5cebf73c1770532cfed649030b7a1f` / build `38WrCuLnbbv8LChWWw4_M`
-- BACKUP_ID=`jp-final-closure-01-r2-20260830T190750Z`
+- AUTHORIZED_SHA / DEPLOYED_RUNTIME_SHA=`754b9f4f3c27cb3590bd6ff50cf74d090f4ef51b`
+- PUBLIC_BUILD_ID=`O5uddPMWQuSwqsd1-_c3_`
+- PRIOR_RUNTIME (R6F)=`6a6c3b35227d9aa29e88a2c9d83e81d7812e9cb2` / build `abYe4XmYEs6wOjNqRDNGX`
+- BACKUP_ID=`jp-final-closure-01-r2-20260831T034739Z`
 - Orchestrator: `/usr/local/sbin/jetpk-production-run` (single outer lock)
-- Transcript: `tmp/jp-final-closure-01-r6/deploy-r6f.out`
+- Transcript: `tmp/jp-final-closure-01-r6/deploy-r6g.out`
 
 ## Gates
 
@@ -19,11 +19,11 @@
 | BACKUP / ROLLBACK_PACKAGE | PASS |
 | ACTIVATE | PASS |
 | FULL_RUNTIME_SOURCE_DRIFT | 0 |
-| AUTHORIZED_RUNTIME_PARITY / FULL_GIT_OBJECT_PARITY | PASS |
-| PUBLIC_BUILD | PASS |
+| AUTHORIZED_RUNTIME_PARITY | PASS |
+| PUBLIC_BUILD | PASS (`O5uddPMWQuSwqsd1-_c3_`) |
 | FINAL_VERIFIED_ROLLBACK_COUNT | 2 |
-| PRODUCTION_LOCK_RELEASED | YES (orchestrator complete RC=0) |
+| PRODUCTION_LOCK_RELEASED | YES (orchestrator RC=0) |
 
-## Retention
+## Post-classification note
 
-Post-activate temporarily had 3 rollback candidates; retention converged to latest **2** verified checkpoints (`FINAL_VERIFIED_ROLLBACK_COUNT=2`).
+Root cause class = harness measurement defect. **No additional runtime deploy** after instrumentation. Harness-only metric correction does not require redeploy.
