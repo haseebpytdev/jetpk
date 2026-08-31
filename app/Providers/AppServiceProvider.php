@@ -65,6 +65,9 @@ use App\Listeners\Auth\SendEmailVerificationNotificationBestEffort;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Contracts\Ai\InferenceProvider;
+use App\Services\Ai\LocalLlamaProvider;
+use App\Services\Ai\NullInferenceProvider;
 use App\Support\Url\PublicActionUrl;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -96,6 +99,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(CurrentClientContext::class);
         $this->app->scoped(ClientRedirectResolver::class);
         $this->app->singleton(\App\Support\Sabre\Scenario\SabreGdsScenarioCorrelationRegistry::class);
+
+        $this->app->singleton(InferenceProvider::class, function (): InferenceProvider {
+            if (! (bool) config('ota.ai_assistant.enabled', false)) {
+                return new NullInferenceProvider;
+            }
+
+            return new LocalLlamaProvider;
+        });
     }
 
     /**

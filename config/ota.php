@@ -297,5 +297,12 @@ return [
         'timeout_seconds' => max(3, (int) env('OTA_AI_TIMEOUT_SECONDS', 45)),
         'anonymous_per_minute' => max(1, (int) env('OTA_AI_ANON_PER_MINUTE', 8)),
         'max_message_chars' => max(100, (int) env('OTA_AI_MAX_MESSAGE_CHARS', 2000)),
+        'model_id' => (string) env('OTA_AI_MODEL_ID', 'local'),
+        'flight_search_enabled' => filter_var(env('OTA_AI_FLIGHT_SEARCH_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'groups_enabled' => filter_var(env('OTA_AI_GROUPS_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'knowledge_enabled' => filter_var(env('OTA_AI_KNOWLEDGE_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'human_handoff_enabled' => filter_var(env('OTA_AI_HUMAN_HANDOFF_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'max_conversation_messages' => max(10, (int) env('OTA_AI_MAX_CONVERSATION_MESSAGES', 80)),
+        'load_shed_available_mb_min' => max(256, (int) env('OTA_AI_LOAD_SHED_AVAILABLE_MB_MIN', 2000)),
     ],
 ];
