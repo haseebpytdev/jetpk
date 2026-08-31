@@ -1,0 +1,1174 @@
+{
+  "RUNTIME": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+  "PUBLIC_BUILD": "qqh-GEl1jVdeJPSOUwDQ7",
+  "DASH_BUILD": "vusuf0T5POTkwsLY8oUyO",
+  "identity": {
+    "customer": "YES",
+    "agent": "YES",
+    "staff": "YES",
+    "admin": "YES"
+  },
+  "MATRIX_TOTAL": 71,
+  "MATRIX_PASS": 66,
+  "MATRIX_FAIL": 0,
+  "MATRIX_BLOCKED": 0,
+  "SCREENSHOTS": 51,
+  "matrix": [
+    {
+      "role": "customer",
+      "route": "/customer/dashboard",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Travel overview"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/dashboard",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Travel overview"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/dashboard",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Travel overview"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/bookings",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "My bookings"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/bookings",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "My bookings"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/bookings",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "My bookings"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/travelers",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Saved travelers"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/travelers",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Saved travelers"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/travelers",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Saved travelers"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/profile",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Profile"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/profile",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Profile"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/profile",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Profile"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/support",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Support"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/support",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Support"
+    },
+    {
+      "role": "customer",
+      "route": "/customer/support",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Support"
+    },
+    {
+      "role": "customer",
+      "surface": "nav_open",
+      "viewport": "390x844",
+      "result": "PASS"
+    },
+    {
+      "role": "customer",
+      "surface": "onboarding",
+      "result": "PARTIAL_NO_DIALOG"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/dashboard",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Agency overview"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/dashboard",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Agency overview"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/dashboard",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Agency overview"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/bookings",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Bookings"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/bookings",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Bookings"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/bookings",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Bookings"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/groups",
+      "viewport": "360x800",
+      "result": "SKIP_404"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/groups",
+      "viewport": "390x844",
+      "result": "SKIP_404"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/groups",
+      "viewport": "768x1024",
+      "result": "SKIP_404"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/wallet",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Wallet"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/wallet",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Wallet"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/wallet",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Wallet"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/ledger",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "My Ledger"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/ledger",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "My Ledger"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/ledger",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "My Ledger"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/support",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Support"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/support",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Support"
+    },
+    {
+      "role": "agent",
+      "route": "/agent/support",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Support"
+    },
+    {
+      "role": "agent",
+      "surface": "nav_open",
+      "viewport": "390x844",
+      "result": "PASS"
+    },
+    {
+      "role": "agent",
+      "surface": "onboarding",
+      "result": "PARTIAL_NO_DIALOG"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Operations dashboard"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Operations dashboard"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Operations dashboard"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/bookings",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": ""
+    },
+    {
+      "role": "staff",
+      "route": "/staff/bookings",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Bookings"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/bookings",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": ""
+    },
+    {
+      "role": "staff",
+      "surface": "nav_open",
+      "viewport": "390x844",
+      "result": "PASS"
+    },
+    {
+      "role": "staff",
+      "surface": "onboarding",
+      "result": "PASS"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/dashboard",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Operations dashboard"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/dashboard",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Operations dashboard"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/dashboard",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Operations dashboard"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/bookings",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Bookings"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/bookings",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Bookings"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/bookings",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Bookings"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/agents",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Agents"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/agents",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Agents"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/agents",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Agents"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/markups",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Markups"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/markups",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Markups"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/markups",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Markups"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/api-settings",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "API & Modules"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/api-settings",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "API & Modules"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/api-settings",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "API & Modules"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/settings",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Settings"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/settings",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Settings"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/settings",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Settings"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/settings/payments",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "API & Modules"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/settings/payments",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "API & Modules"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/settings/payments",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "API & Modules"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/reports",
+      "viewport": "360x800",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Reports"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/reports",
+      "viewport": "390x844",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Reports"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/reports",
+      "viewport": "768x1024",
+      "http": 200,
+      "overflow": "NO",
+      "result": "PASS",
+      "h1": "Reports"
+    },
+    {
+      "role": "admin",
+      "surface": "nav_open",
+      "viewport": "390x844",
+      "result": "PASS"
+    },
+    {
+      "role": "admin",
+      "surface": "onboarding",
+      "result": "PASS"
+    }
+  ],
+  "manifest": [
+    {
+      "file": "customer/customer-dashboard__360x800__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/dashboard",
+      "ts": "2026-08-31T19:42:49.630Z",
+      "role": "customer",
+      "route": "/customer/dashboard",
+      "viewport": "360x800"
+    },
+    {
+      "file": "customer/customer-dashboard__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/dashboard",
+      "ts": "2026-08-31T19:42:55.215Z",
+      "role": "customer",
+      "route": "/customer/dashboard",
+      "viewport": "390x844"
+    },
+    {
+      "file": "customer/customer-dashboard__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/dashboard",
+      "ts": "2026-08-31T19:42:57.330Z",
+      "role": "customer",
+      "route": "/customer/dashboard",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "customer/customer-bookings__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/bookings",
+      "ts": "2026-08-31T19:43:04.786Z",
+      "role": "customer",
+      "route": "/customer/bookings",
+      "viewport": "390x844"
+    },
+    {
+      "file": "customer/customer-bookings__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/bookings",
+      "ts": "2026-08-31T19:43:08.424Z",
+      "role": "customer",
+      "route": "/customer/bookings",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "customer/customer-travelers__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/travelers",
+      "ts": "2026-08-31T19:43:18.668Z",
+      "role": "customer",
+      "route": "/customer/travelers",
+      "viewport": "390x844"
+    },
+    {
+      "file": "customer/customer-travelers__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/travelers",
+      "ts": "2026-08-31T19:43:21.313Z",
+      "role": "customer",
+      "route": "/customer/travelers",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "customer/customer-profile__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/profile",
+      "ts": "2026-08-31T19:43:27.759Z",
+      "role": "customer",
+      "route": "/customer/profile",
+      "viewport": "390x844"
+    },
+    {
+      "file": "customer/customer-profile__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/profile",
+      "ts": "2026-08-31T19:43:34.772Z",
+      "role": "customer",
+      "route": "/customer/profile",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "customer/customer-support__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/support",
+      "ts": "2026-08-31T19:43:43.761Z",
+      "role": "customer",
+      "route": "/customer/support",
+      "viewport": "390x844"
+    },
+    {
+      "file": "customer/customer-support__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/support",
+      "ts": "2026-08-31T19:43:47.509Z",
+      "role": "customer",
+      "route": "/customer/support",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "customer/customer-nav__390x844__open.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/dashboard",
+      "ts": "2026-08-31T19:43:53.793Z",
+      "role": "customer",
+      "note": "nav_open"
+    },
+    {
+      "file": "customer/customer-dashboard__844x390__landscape.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/customer/dashboard",
+      "ts": "2026-08-31T19:43:59.487Z",
+      "role": "customer",
+      "orientation": "landscape"
+    },
+    {
+      "file": "agent/agent-dashboard__360x800__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/dashboard",
+      "ts": "2026-08-31T19:44:12.791Z",
+      "role": "agent",
+      "route": "/agent/dashboard",
+      "viewport": "360x800"
+    },
+    {
+      "file": "agent/agent-dashboard__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/dashboard",
+      "ts": "2026-08-31T19:44:16.236Z",
+      "role": "agent",
+      "route": "/agent/dashboard",
+      "viewport": "390x844"
+    },
+    {
+      "file": "agent/agent-dashboard__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/dashboard",
+      "ts": "2026-08-31T19:44:21.200Z",
+      "role": "agent",
+      "route": "/agent/dashboard",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "agent/agent-bookings__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/bookings",
+      "ts": "2026-08-31T19:44:25.470Z",
+      "role": "agent",
+      "route": "/agent/bookings",
+      "viewport": "390x844"
+    },
+    {
+      "file": "agent/agent-bookings__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/bookings",
+      "ts": "2026-08-31T19:44:29.011Z",
+      "role": "agent",
+      "route": "/agent/bookings",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "agent/agent-wallet__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/wallet",
+      "ts": "2026-08-31T19:44:41.672Z",
+      "role": "agent",
+      "route": "/agent/wallet",
+      "viewport": "390x844"
+    },
+    {
+      "file": "agent/agent-wallet__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/wallet",
+      "ts": "2026-08-31T19:44:44.337Z",
+      "role": "agent",
+      "route": "/agent/wallet",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "agent/agent-ledger__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/ledger",
+      "ts": "2026-08-31T19:44:49.097Z",
+      "role": "agent",
+      "route": "/agent/ledger",
+      "viewport": "390x844"
+    },
+    {
+      "file": "agent/agent-ledger__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/ledger",
+      "ts": "2026-08-31T19:44:51.450Z",
+      "role": "agent",
+      "route": "/agent/ledger",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "agent/agent-support__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/support",
+      "ts": "2026-08-31T19:44:56.667Z",
+      "role": "agent",
+      "route": "/agent/support",
+      "viewport": "390x844"
+    },
+    {
+      "file": "agent/agent-support__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/support",
+      "ts": "2026-08-31T19:45:01.022Z",
+      "role": "agent",
+      "route": "/agent/support",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "agent/agent-nav__390x844__open.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/agent/dashboard",
+      "ts": "2026-08-31T19:45:05.886Z",
+      "role": "agent",
+      "note": "nav_open"
+    },
+    {
+      "file": "staff/staff-dashboard__360x800__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/staff/dashboard",
+      "ts": "2026-08-31T19:45:16.632Z",
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "360x800"
+    },
+    {
+      "file": "staff/staff-dashboard__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/staff/dashboard",
+      "ts": "2026-08-31T19:45:19.798Z",
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "390x844"
+    },
+    {
+      "file": "staff/staff-dashboard__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/staff/dashboard",
+      "ts": "2026-08-31T19:45:23.181Z",
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "staff/staff-bookings__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/staff/dashboard/bookings",
+      "ts": "2026-08-31T19:45:31.346Z",
+      "role": "staff",
+      "route": "/staff/bookings",
+      "viewport": "390x844"
+    },
+    {
+      "file": "staff/staff-bookings__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/staff/dashboard/bookings",
+      "ts": "2026-08-31T19:45:37.411Z",
+      "role": "staff",
+      "route": "/staff/bookings",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "staff/staff-nav__390x844__open.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/staff/dashboard",
+      "ts": "2026-08-31T19:45:40.600Z",
+      "role": "staff",
+      "note": "nav_open"
+    },
+    {
+      "file": "onboarding/staff-onboarding__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/staff/dashboard",
+      "ts": "2026-08-31T19:45:41.882Z",
+      "role": "staff"
+    },
+    {
+      "file": "admin/admin-dashboard__360x800__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard",
+      "ts": "2026-08-31T19:45:52.515Z",
+      "role": "admin",
+      "route": "/admin/dashboard",
+      "viewport": "360x800"
+    },
+    {
+      "file": "admin/admin-dashboard__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard",
+      "ts": "2026-08-31T19:45:54.892Z",
+      "role": "admin",
+      "route": "/admin/dashboard",
+      "viewport": "390x844"
+    },
+    {
+      "file": "admin/admin-dashboard__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard",
+      "ts": "2026-08-31T19:45:58.864Z",
+      "role": "admin",
+      "route": "/admin/dashboard",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "admin/admin-bookings__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/bookings",
+      "ts": "2026-08-31T19:46:13.976Z",
+      "role": "admin",
+      "route": "/admin/bookings",
+      "viewport": "390x844"
+    },
+    {
+      "file": "admin/admin-bookings__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/bookings",
+      "ts": "2026-08-31T19:46:19.345Z",
+      "role": "admin",
+      "route": "/admin/bookings",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "admin/admin-agents__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/agents",
+      "ts": "2026-08-31T19:46:33.507Z",
+      "role": "admin",
+      "route": "/admin/agents",
+      "viewport": "390x844"
+    },
+    {
+      "file": "admin/admin-agents__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/agents",
+      "ts": "2026-08-31T19:46:39.767Z",
+      "role": "admin",
+      "route": "/admin/agents",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "admin/admin-markups__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/markups",
+      "ts": "2026-08-31T19:46:51.040Z",
+      "role": "admin",
+      "route": "/admin/markups",
+      "viewport": "390x844"
+    },
+    {
+      "file": "admin/admin-markups__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/markups",
+      "ts": "2026-08-31T19:46:54.408Z",
+      "role": "admin",
+      "route": "/admin/markups",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "admin/admin-api-settings__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/integrations",
+      "ts": "2026-08-31T19:47:10.002Z",
+      "role": "admin",
+      "route": "/admin/api-settings",
+      "viewport": "390x844"
+    },
+    {
+      "file": "admin/admin-api-settings__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/integrations",
+      "ts": "2026-08-31T19:47:17.938Z",
+      "role": "admin",
+      "route": "/admin/api-settings",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "admin/admin-settings__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/settings",
+      "ts": "2026-08-31T19:47:37.635Z",
+      "role": "admin",
+      "route": "/admin/settings",
+      "viewport": "390x844"
+    },
+    {
+      "file": "admin/admin-settings__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/settings",
+      "ts": "2026-08-31T19:47:44.468Z",
+      "role": "admin",
+      "route": "/admin/settings",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "admin/admin-payments__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/integrations?provider=abhipay",
+      "ts": "2026-08-31T19:47:52.365Z",
+      "role": "admin",
+      "route": "/admin/settings/payments",
+      "viewport": "390x844"
+    },
+    {
+      "file": "admin/admin-payments__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/integrations?provider=abhipay",
+      "ts": "2026-08-31T19:47:56.176Z",
+      "role": "admin",
+      "route": "/admin/settings/payments",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "admin/admin-reports__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/reports",
+      "ts": "2026-08-31T19:48:03.223Z",
+      "role": "admin",
+      "route": "/admin/reports",
+      "viewport": "390x844"
+    },
+    {
+      "file": "admin/admin-reports__768x1024__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard/reports",
+      "ts": "2026-08-31T19:48:10.276Z",
+      "role": "admin",
+      "route": "/admin/reports",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "admin/admin-nav__390x844__open.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard",
+      "ts": "2026-08-31T19:48:13.812Z",
+      "role": "admin",
+      "note": "nav_open"
+    },
+    {
+      "file": "onboarding/admin-onboarding__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/admin/dashboard",
+      "ts": "2026-08-31T19:48:15.671Z",
+      "role": "admin"
+    }
+  ]
+}

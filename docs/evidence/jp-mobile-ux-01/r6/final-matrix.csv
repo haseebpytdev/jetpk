@@ -1,0 +1,25 @@
+surface,auth,automated,visual,portrait,landscape,overflow,overlap,data,actions,final
+Public Home,guest,PASS,PASS,PASS,PASS,0,0,N/A,PASS,PASS
+Flight Search,guest,PASS,PASS,PASS,PASS,0,0,N/A,PASS,PASS
+Flight Results,guest,PASS,PASS,PASS,PASS,0,0,PASS,PASS,PASS
+Flight Short Link,guest,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Group Short Link,guest,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Groups,guest,PASS,PASS,PASS,PASS,0,0,PASS,PASS,PASS
+Login/Register,guest,PASS,PASS,PASS,N/A,0,0,N/A,PASS,PASS
+Traveler,guest,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Review,guest,PASS,PASS,PASS,PASS,0,0,PASS,PASS,PASS
+Booking/Payment State,customer,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Customer Dashboard,customer,PASS,PASS,PASS,PASS,0,0,PASS,PASS,PASS
+Agent Dashboard,agent,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Staff Dashboard,staff,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Admin Dashboard,admin,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Customer Lists/Tables,customer,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Agent Lists/Tables,agent,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Staff Lists/Tables,staff,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Admin Lists/Tables,admin,PASS,PASS,PASS,N/A,0,0,PASS,PASS,PASS
+Customer Onboarding,customer,PASS,PASS,PASS,N/A,0,0,N/A,PASS,PASS
+Agent Onboarding,agent,PASS,PASS,PASS,N/A,0,0,N/A,PASS,PASS
+Staff Onboarding,staff,PASS,PASS,PASS,N/A,0,0,N/A,PASS,PASS
+Admin Onboarding,admin,PASS,PASS,PASS,N/A,0,0,N/A,PASS,PASS
+Modals/Drawers,mixed,PASS,PASS,PASS,N/A,0,0,N/A,PASS,PASS
+FAB,guest,PASS,PASS,PASS,N/A,0,0,N/A,PASS,PASS

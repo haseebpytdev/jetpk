@@ -1,0 +1,18 @@
+[
+  {
+    "role": "customer",
+    "tour_key_present": true,
+    "restarted": true,
+    "dialog_visible": false,
+    "file": "onboarding/customer-onboarding__390x844__final.png",
+    "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3"
+  },
+  {
+    "role": "agent",
+    "tour_key_present": true,
+    "restarted": true,
+    "dialog_visible": false,
+    "file": "onboarding/agent-onboarding__390x844__final.png",
+    "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3"
+  }
+]

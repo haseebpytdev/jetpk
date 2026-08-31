@@ -1,0 +1,194 @@
+{
+  "RUNTIME": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+  "PUBLIC_BUILD": "qqh-GEl1jVdeJPSOUwDQ7",
+  "DASH_BUILD": "vusuf0T5POTkwsLY8oUyO",
+  "matrix": [
+    {
+      "route": "/",
+      "overflow": "YES",
+      "result": "FAIL",
+      "url": "https://jetpakistan.pk/"
+    },
+    {
+      "route": "/groups",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/groups"
+    },
+    {
+      "route": "/login",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/login"
+    },
+    {
+      "route": "/f/KTX4DSXK",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/flights/results?trip_type=one_way&from=ISB&to=DXB&depart=2026-10-20&adults=1&cabin=economy"
+    },
+    {
+      "route": "/f/FEXPIRER6",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/f/FEXPIRER6"
+    },
+    {
+      "route": "/f/NOTREAL99",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/f/NOTREAL99"
+    },
+    {
+      "route": "/g/F6VRDUQI",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/g/F6VRDUQI"
+    },
+    {
+      "route": "/g/GEXPIRER6",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/g/GEXPIRER6"
+    },
+    {
+      "route": "/g/NOTREAL99",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/g/NOTREAL99"
+    },
+    {
+      "route": "/booking/payment/status",
+      "overflow": "NO",
+      "result": "PASS",
+      "url": "https://jetpakistan.pk/booking/payment/status"
+    },
+    {
+      "route": "/api/public/ai/health",
+      "note": "fail_closed_probe",
+      "status": "CAPTURED"
+    },
+    {
+      "route": "/customer/bookings",
+      "overflow": "NO",
+      "result": "PASS"
+    }
+  ],
+  "manifest": [
+    {
+      "file": "public/home__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/",
+      "ts": "2026-08-31T19:50:58.454Z",
+      "route": "/"
+    },
+    {
+      "file": "public/groups__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/groups",
+      "ts": "2026-08-31T19:51:01.972Z",
+      "route": "/groups"
+    },
+    {
+      "file": "public/login__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/login",
+      "ts": "2026-08-31T19:51:04.534Z",
+      "route": "/login"
+    },
+    {
+      "file": "short-links/flight-short-valid__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/flights/results?trip_type=one_way&from=ISB&to=DXB&depart=2026-10-20&adults=1&cabin=economy",
+      "ts": "2026-08-31T19:51:10.240Z",
+      "route": "/f/KTX4DSXK"
+    },
+    {
+      "file": "short-links/flight-short-expired__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/f/FEXPIRER6",
+      "ts": "2026-08-31T19:51:14.555Z",
+      "route": "/f/FEXPIRER6"
+    },
+    {
+      "file": "short-links/flight-short-invalid__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/f/NOTREAL99",
+      "ts": "2026-08-31T19:51:18.573Z",
+      "route": "/f/NOTREAL99"
+    },
+    {
+      "file": "short-links/group-short-valid__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/g/F6VRDUQI",
+      "ts": "2026-08-31T19:51:22.454Z",
+      "route": "/g/F6VRDUQI"
+    },
+    {
+      "file": "short-links/group-short-expired__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/g/GEXPIRER6",
+      "ts": "2026-08-31T19:51:25.402Z",
+      "route": "/g/GEXPIRER6"
+    },
+    {
+      "file": "short-links/group-short-invalid__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/g/NOTREAL99",
+      "ts": "2026-08-31T19:51:28.066Z",
+      "route": "/g/NOTREAL99"
+    },
+    {
+      "file": "payment/payment-status__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/payment/status",
+      "ts": "2026-08-31T19:51:30.546Z",
+      "route": "/booking/payment/status"
+    },
+    {
+      "file": "fab/fab__390x844__expanded.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/",
+      "ts": "2026-08-31T19:51:36.911Z"
+    },
+    {
+      "file": "fab/fab__390x844__collapsed.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/",
+      "ts": "2026-08-31T19:51:37.605Z"
+    },
+    {
+      "file": "payment/customer-bookings-payment-states__390x844__final.png",
+      "runtime": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+      "public_build": "qqh-GEl1jVdeJPSOUwDQ7",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/login",
+      "ts": "2026-08-31T19:51:47.821Z",
+      "role": "customer"
+    }
+  ]
+}

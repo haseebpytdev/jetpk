@@ -1,0 +1,197 @@
+{
+  "RUNTIME": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+  "FINAL_SUPPLIER_MUTATION_CTA": "Confirm booking | Continue to payment",
+  "FINAL_SUPPLIER_MUTATION_ROUTE": "POST /booking/review?format=json",
+  "FINAL_SUPPLIER_MUTATION_METHOD": "POST",
+  "SUPPLIER_MUTATION_INVOKED": "NO",
+  "steps": [
+    {
+      "step": "results_ready",
+      "url": "https://jetpakistan.pk/flights/results?trip_type=one_way&from=ISB&to=DXB&depart=2026-10-20&adults=1&cabin=economy&search_id=94cc923c-5a55-4d3a-bead-45967ba46b03"
+    },
+    {
+      "step": "book_now_clicked"
+    },
+    {
+      "step": "continue_with_fare"
+    },
+    {
+      "step": "passengers_url",
+      "url": "https://jetpakistan.pk/booking/passengers?flight_id=5eb259ef0d82f8fa27c4c176257428b61559b7f5efa00e995994421446d29a21&search_id=94cc923c-5a55-4d3a-bead-45967ba46b03&offer_id=5eb259ef0d82f8fa27c4c176257428b61559b7f5efa00e995994421446d29a21&from=ISB&to=DXB&depart=2026-10-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=ecosaver-pi0"
+    },
+    {
+      "step": "form_ready"
+    },
+    {
+      "step": "filled"
+    },
+    {
+      "step": "continue_clicked"
+    },
+    {
+      "step": "on_review",
+      "url": "https://jetpakistan.pk/booking/review"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "public/flight-results__390x844__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/flights/results?trip_type=one_way&from=ISB&to=DXB&depart=2026-10-20&adults=1&cabin=economy&search_id=94cc923c-5a55-4d3a-bead-45967ba46b03",
+      "ts": "2026-08-31T19:25:39.903Z"
+    },
+    {
+      "file": "traveler/traveler__390x844__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/passengers?flight_id=5eb259ef0d82f8fa27c4c176257428b61559b7f5efa00e995994421446d29a21&search_id=94cc923c-5a55-4d3a-bead-45967ba46b03&offer_id=5eb259ef0d82f8fa27c4c176257428b61559b7f5efa00e995994421446d29a21&from=ISB&to=DXB&depart=2026-10-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=ecosaver-pi0",
+      "ts": "2026-08-31T19:25:46.487Z"
+    },
+    {
+      "file": "traveler/traveler-filled__390x844__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/passengers?flight_id=5eb259ef0d82f8fa27c4c176257428b61559b7f5efa00e995994421446d29a21&search_id=94cc923c-5a55-4d3a-bead-45967ba46b03&offer_id=5eb259ef0d82f8fa27c4c176257428b61559b7f5efa00e995994421446d29a21&from=ISB&to=DXB&depart=2026-10-20&trip_type=one_way&cabin=economy&adults=1&children=0&infants=0&fare_option_key=ecosaver-pi0",
+      "ts": "2026-08-31T19:25:47.487Z"
+    },
+    {
+      "file": "review/review__360x800__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/review",
+      "ts": "2026-08-31T19:25:52.155Z",
+      "viewport": "360x800"
+    },
+    {
+      "file": "review/review__390x844__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/review",
+      "ts": "2026-08-31T19:25:52.921Z",
+      "viewport": "390x844"
+    },
+    {
+      "file": "review/review__430x932__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/review",
+      "ts": "2026-08-31T19:25:53.649Z",
+      "viewport": "430x932"
+    },
+    {
+      "file": "review/review__768x1024__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/review",
+      "ts": "2026-08-31T19:25:54.424Z",
+      "viewport": "768x1024"
+    },
+    {
+      "file": "review/review__820x1180__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/review",
+      "ts": "2026-08-31T19:25:56.748Z",
+      "viewport": "820x1180"
+    },
+    {
+      "file": "review/review__1024x768__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/review",
+      "ts": "2026-08-31T19:25:57.451Z",
+      "viewport": "1024x768"
+    },
+    {
+      "file": "review/review__844x390__landscape.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/review",
+      "ts": "2026-08-31T19:25:57.617Z"
+    },
+    {
+      "file": "review/fare-breakdown__390x844__final.png",
+      "runtime": "0ec10a02b6951dd50aa1725c199af3ce82e1ccf3",
+      "public_build": "oixrSu2qqHS9Fqs9w44LF",
+      "dashboard_build": "vusuf0T5POTkwsLY8oUyO",
+      "url": "https://jetpakistan.pk/booking/review",
+      "ts": "2026-08-31T19:25:58.263Z"
+    }
+  ],
+  "fare": {
+    "BASE_VISIBLE": "YES",
+    "TAXES_VISIBLE": "YES",
+    "FEES_VISIBLE": "YES",
+    "PASSENGER_BREAKDOWN_VISIBLE": "YES",
+    "CURRENCY_VISIBLE": "YES",
+    "GRAND_TOTAL_VISIBLE": "YES",
+    "text_snip": "skip to main content login jp , completed 3 , current step 4 , upcoming 5 , upcoming review your booking confirm itinerary, travelers, contact details, and payment option before continuing. complete within 6:51 review summary ▲ your booking flight summary ek 613 09:25 isb 2026-10-20 ● direct 11:35 dxb 2h 10m direct economy selected fare eco saver checked baggage 25 kg passengers 1 total pkr 100,515 fare pkr 82,790 taxes & fees pkr 17,725 total pkr 100,515 payment method manual payment confirm booking no payment is taken on this step for manual payment. full itinerary itinerary isb → dxb 2h 10m direct economy flight ek emirates · 613 segment 1 09:25 isb islamabad tue, 20 oct 2h 10m 11:35 dxb dubai tue, 20 oct selected fare details selected fare eco saver checked baggage 25 kg cancellation /"
+  },
+  "matrix": [
+    {
+      "viewport": "360x800",
+      "overflow": "NO",
+      "result": "PASS"
+    },
+    {
+      "viewport": "390x844",
+      "overflow": "NO",
+      "result": "PASS"
+    },
+    {
+      "viewport": "430x932",
+      "overflow": "NO",
+      "result": "PASS"
+    },
+    {
+      "viewport": "768x1024",
+      "overflow": "NO",
+      "result": "PASS"
+    },
+    {
+      "viewport": "820x1180",
+      "overflow": "NO",
+      "result": "PASS"
+    },
+    {
+      "viewport": "1024x768",
+      "overflow": "NO",
+      "result": "PASS"
+    }
+  ],
+  "MOBILE_REVIEW": "PASS",
+  "REVIEW_ADVANCE_ROOT_CAUSE": "NONE_R5_AUTOMATION_INCOMPLETE",
+  "REVIEW_PRIMARY_ACTION_REACHABLE": "YES",
+  "REVIEW_PRIMARY_ACTION_NOT_OBSCURED": "YES",
+  "REVIEW_TOTAL_ALWAYS_VISIBLE": "YES",
+  "REVIEW_INFORMATION_HIERARCHY": "PASS",
+  "MOBILE_FARE_BREAKDOWN": "PASS",
+  "fare_expand": {
+    "RUNTIME": "e6f022e7f37f0994aeee7027c58dfc513f2aa783",
+    "steps": [
+      "on_review"
+    ],
+    "fare": {
+      "BASE_VISIBLE": "YES",
+      "TAXES_VISIBLE": "YES",
+      "FEES_VISIBLE": "YES",
+      "PASSENGER_BREAKDOWN_VISIBLE": "YES",
+      "CURRENCY_VISIBLE": "YES",
+      "GRAND_TOTAL_VISIBLE": "YES",
+      "text_snip": "skip to main content login jp , completed 3 , current step 4 , upcoming 5 , upcoming review your booking confirm itinerary, travelers, contact details, and payment option before continuing. complete within 6:51 review summary ▲ your booking flight summary ek 613 09:25 isb 2026-10-20 ● direct 11:35 dxb 2h 10m direct economy selected fare eco saver checked baggage 25 kg passengers 1 total pkr 100,515 fare pkr 82,790 taxes & fees pkr 17,725 total pkr 100,515 payment method manual payment confirm booking no payment is taken on this step for manual payment. full itinerary itinerary isb → dxb 2h 10m direct economy flight ek emirates · 613 segment 1 09:25 isb islamabad tue, 20 oct 2h 10m 11:35 dxb dubai tue, 20 oct selected fare details selected fare eco saver checked baggage 25 kg cancellation /"
+    },
+    "SUPPLIER_MUTATION_INVOKED": "NO",
+    "REVIEW_PRIMARY_ACTION_REACHABLE": "YES"
+  }
+}

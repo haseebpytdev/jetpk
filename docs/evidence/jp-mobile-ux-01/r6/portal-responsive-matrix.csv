@@ -1,0 +1,17 @@
+surface,role,route,viewport,overflow,result,notes
+customer_dashboard,customer,/customer/dashboard,390x844,NO,PASS,
+customer_dashboard,customer,/customer/dashboard,768x1024,NO,PASS,
+customer_bookings,customer,/customer/bookings,390x844,NO,PASS,list
+customer_travelers,customer,/customer/travelers,390x844,NO,PASS,list
+agent_dashboard,agent,/agent/dashboard,390x844,NO,PASS,
+agent_bookings,agent,/agent/bookings,390x844,NO,PASS,list
+agent_wallet,agent,/agent/wallet,390x844,NO,PASS,finance display-only
+agent_ledger,agent,/agent/ledger,390x844,NO,PASS,finance display-only
+agent_groups,agent,/agent/groups,390x844,N/A,SKIP_404,route not present
+staff_dashboard,staff,/staff/dashboard,390x844,NO,PASS,
+staff_bookings,staff,/staff/bookings,390x844,NO,PASS,authorized list
+admin_dashboard,admin,/admin/dashboard,390x844,NO,PASS,
+admin_bookings,admin,/admin/bookings,390x844,NO,PASS,dense table
+admin_agents,admin,/admin/agents,390x844,NO,PASS,dense table
+admin_api_settings,admin,/admin/api-settings,390x844,NO,PASS,secrets redacted in shots
+admin_markups,admin,/admin/markups,390x844,NO,PASS,
