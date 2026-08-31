@@ -1,66 +1,33 @@
-# JP-OPS-CLOSURE-01 — Summary
+# JP-OPS-CLOSURE-01 — Summary (R2)
 
-## Freeze (Section 1) — updated end of run
+## Freeze
 
 ```
-START_LOCAL_HEAD=85d1a10c0e7e9558637c3134ed910218ceed6201
-FINAL_LOCAL_HEAD=02703b3b1c5c8ebde908b8766c4b59f8e8716b3b
-REMOTE_HEAD=1f12edef052da278f02b7ffeaf4e7a881c663ef9
-AHEAD_BY=20
-BEHIND_BY=0
-STAGED_FILES=(none)
 BRANCH=phase/jp-flight-perf-01
-DEPLOYED_RUNTIME_SHA=9eddd7a227273a7516e98b858eed29b4101b21db (unchanged; no deploy this run)
+OPS_LAYER_A_ENGINEERING_SHA=1d24b5ecf0fdd2cf63eddbe7de3a83b929a1f4ff
+DEFECT_FIX_SHA=15e9ab6e574bda386acf22c4269662a733327ef2
+DEPLOYED_RUNTIME_SHA=15e9ab6e574bda386acf22c4269662a733327ef2
+PUBLIC_BUILD_ID=6_O29_iFhESJgn0Dey3MT
+START_EVIDENCE_SHA=dc26df2eaf5528e7a915ef7916b9e7c85ac31a79
+REMOTE_HEAD=1f12edef052da278f02b7ffeaf4e7a881c663ef9
+AHEAD_BY=23 (after this evidence commit)
+NO_PUSH=YES
 ```
 
-Remote matches expected authority. **DO NOT PUSH.**
+## R2 outcome
 
-### Engineering commits this run
+Layer A engineering deployed under `jetpk-production-run`. Safe local operational scenarios executed with `SUPPLIER_MUTATION_CALLS=0`. Guest cancel double-`/laravel` defect found, fixed (`15e9ab6e`), redeployed, retested PASS.
 
-1. `bbe76bd2` — payment deadline / unpaid expiry / reminders
-2. `1d24b5ec` — guest-email checkout + saved-traveler picker
-3. `02703b3b` — evidence matrices
+Checkout UI scenarios OPS-02..05 and OPS-20 remain `BLOCKED_SAFETY` because production confirm can create live Sabre PNR. Google OPS-12/13 `BLOCKED_EXTERNAL` (credentials absent).
 
-### Run status
+See `docs/evidence/jp-ops-closure-01/live-r2/`.
 
-`FINAL_STATUS=INCOMPLETE_OPERATIONAL_RUN` — Layer A code+tests landed; production deploy, live transport, Google handoff, and OPS-01..20 live evidence remain.
+## Owner dirty files (never staged)
 
-## Worktree classification (Section 2)
+- `app/Console/Commands/JetpkEmailPreviewCommand.php`
+- `app/Mail/GoogleCustomerWelcomeMail.php`
+- `resources/views/emails/themes/jetpakistan/partials/blocks/group-reservation.blade.php`
 
-`UNKNOWN_WORKTREE_CHANGES=NO` after classification.
+## Final status
 
-### Tracked dirty
-
-| PATH | PREEXISTING_OWNER_WORK | R6_GENERATED | OPS_CLOSURE_RELATED | UNKNOWN | STAGED |
-|---|---|---|---|---|---|
-| app/Console/Commands/JetpkEmailPreviewCommand.php | YES | NO | NO | NO | NO |
-| app/Mail/GoogleCustomerWelcomeMail.php | YES | NO | NO | NO | NO |
-| resources/views/emails/themes/jetpakistan/partials/blocks/group-reservation.blade.php | YES | NO | NO | NO | NO |
-
-Owner email files are **preserved** (not restored/edited/staged/committed unless owner authorizes).
-
-### Untracked categories
-
-| Category | Count / note |
-|---|---|
-| tmp/ | ~1446 local probes/logs |
-| frontend/tmp/ | 1 |
-| dashboard/tmp/ | 1 |
-| frontend/public/tesseract/ | 10 wasm/js assets |
-| .claude/ | 1 |
-| docs/evidence/ | 3 leftover evidence files |
-| other (classified) | `.playwright-cli/`, `.pnpm-store/`, `agent-wallet-full.yml` (Playwright a11y dump), `docs/phases/JP-BO-04-STAGE-B-FINAL.md`, `frontend/tests/_wave9_tmp_ref.ts` |
-
-None of the “other” paths are unknown engineering residue requiring deletion. Do not stage `tmp/` or secrets.
-
-## Investigation headlines (pre-fix)
-
-1. **No standard-booking expiry/reminder/auto-cancel scheduler** — `BookingStatus::Expired` is never assigned in `app/`.
-2. **`bookings.payment_due_at` is not written** by services; countdown authority incomplete.
-3. **Guest existing-email prompt** (Sign in & continue / Continue as guest) is **not implemented**; checkout only has static guest/sign-in UI.
-4. **Saved traveler checkout picker/autofill is not implemented** — portal CRUD + IDOR tests exist; checkout does not load `SavedTraveler`.
-5. Payment verify does **not** auto-issue tickets (good). Ticketing is explicit via `TicketingService`.
-6. Google OAuth code path is complete with privileged-email block and checkout return intent.
-7. Mail failures are booking-state-safe; `CommunicationLog` records failures.
-
-See sibling matrices for detail.
+`READY_FOR_CHATGPT_REVIEW_WITH_EXTERNAL_BLOCKERS`
