@@ -44,6 +44,11 @@ final class ProviderEndpointDefaults
                 'overridable' => false,
                 'source' => 'n/a',
             ],
+            SupplierProvider::GoogleOauth->value => [
+                'base_url' => null,
+                'overridable' => false,
+                'source' => 'n/a',
+            ],
             default => [
                 'base_url' => null,
                 'overridable' => in_array($provider, [

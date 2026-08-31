@@ -9,9 +9,11 @@ use App\Models\Agency;
 use App\Models\AuditLog;
 use App\Models\SupplierConnection;
 use App\Models\User;
+use App\Services\Integrations\GoogleOauthConfigResolver;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Laravel\Socialite\Facades\Socialite;
 
 class SupplierConnectionService
 {
@@ -98,6 +100,10 @@ class SupplierConnectionService
 
             if ($connection->provider === SupplierProvider::AlHaider) {
                 return $this->testAlHaiderConnection($connection, $actor, $old);
+            }
+
+            if ($connection->provider === SupplierProvider::GoogleOauth) {
+                return $this->testGoogleOauthConnection($connection, $actor, $old);
             }
 
             if ($hasCreds && $this->hasRequiredCredentialKeys($connection->provider, $credentials)) {
@@ -251,6 +257,83 @@ class SupplierConnectionService
     }
 
     /**
+     * Google OAuth Test Configuration: completeness + redirect shape + Socialite driver resolve only.
+     * Never performs a token exchange or live Google call.
+     *
+     * @param  array<string, mixed>  $old
+     * @return array<string, mixed>
+     */
+    protected function testGoogleOauthConnection(SupplierConnection $connection, User $actor, array $old): array
+    {
+        $resolver = app(GoogleOauthConfigResolver::class);
+        $reason = $resolver->usabilityFailureReason($connection);
+        $lastError = null;
+        $lastTestStatus = 'ready_for_review';
+
+        if ($reason !== null) {
+            $lastTestStatus = 'config_incomplete';
+            $lastError = match ($reason) {
+                'missing_client_id' => 'Client ID is required.',
+                'missing_client_secret' => 'Client secret is required.',
+                'missing_redirect_uri' => 'Redirect URI could not be resolved.',
+                'invalid_redirect_uri' => 'Redirect URI must be a valid http(s) URL with host and path.',
+                'redirect_must_be_https' => 'Production redirect URI must use HTTPS.',
+                default => 'Google OAuth configuration is incomplete.',
+            };
+        } else {
+            $credentials = is_array($connection->credentials) ? $connection->credentials : [];
+            $previous = [
+                'client_id' => config('services.google.client_id'),
+                'client_secret' => config('services.google.client_secret'),
+                'redirect' => config('services.google.redirect'),
+            ];
+
+            try {
+                \Illuminate\Support\Facades\Config::set('services.google.client_id', trim((string) ($credentials['client_id'] ?? '')));
+                \Illuminate\Support\Facades\Config::set('services.google.client_secret', trim((string) ($credentials['client_secret'] ?? '')));
+                \Illuminate\Support\Facades\Config::set(
+                    'services.google.redirect',
+                    \App\Support\Suppliers\GoogleOauthSupplierConnectionNormalizer::resolvedRedirectUri($connection)
+                );
+                // Resolve driver only — no redirect/user/token exchange.
+                Socialite::driver('google');
+            } catch (\Throwable $e) {
+                $lastTestStatus = 'driver_unavailable';
+                $lastError = 'Socialite Google driver could not be resolved.';
+            } finally {
+                \Illuminate\Support\Facades\Config::set('services.google.client_id', $previous['client_id']);
+                \Illuminate\Support\Facades\Config::set('services.google.client_secret', $previous['client_secret']);
+                \Illuminate\Support\Facades\Config::set('services.google.redirect', $previous['redirect']);
+            }
+        }
+
+        $connection->last_tested_at = now();
+        $connection->last_test_status = $lastTestStatus;
+        $connection->last_error = $lastError;
+        $connection->save();
+
+        $this->diagnosticLogger->log(
+            connection: $connection,
+            action: 'google_oauth_config_check',
+            status: $lastError === null ? 'success' : 'failed',
+            safeMessage: $lastError,
+            meta: [
+                'last_test_status' => $lastTestStatus,
+                'token_exchange' => false,
+            ],
+        );
+
+        $this->writeAudit($connection, $actor, 'supplier.connection_tested', $old, $this->auditPayload($connection));
+
+        return [
+            'status' => $connection->status->value,
+            'last_test_status' => $connection->last_test_status,
+            'last_error' => $connection->last_error,
+            'token_exchange' => false,
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $credentials
      * @return array<string, string>
      */
@@ -339,6 +422,8 @@ class SupplierConnectionService
             SupplierProvider::AlHaider => self::alHaiderCredentialKeysComplete($credentials),
             SupplierProvider::Smtp => trim((string) ($credentials['host'] ?? '')) !== ''
                 && trim((string) ($credentials['from_address'] ?? '')) !== '',
+            SupplierProvider::GoogleOauth => trim((string) ($credentials['client_id'] ?? '')) !== ''
+                && trim((string) ($credentials['client_secret'] ?? '')) !== '',
             default => true,
         };
     }

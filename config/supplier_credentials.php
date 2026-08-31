@@ -519,5 +519,30 @@ return [
                 ],
             ],
         ],
+        'google_oauth' => [
+            'fields' => [
+                'client_id' => [
+                    'label' => 'Client ID',
+                    'type' => 'text',
+                    'required' => true,
+                    'placeholder' => 'xxxx.apps.googleusercontent.com',
+                    'help' => 'From Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID.',
+                ],
+                'client_secret' => [
+                    'label' => 'Client secret',
+                    'type' => 'password',
+                    'required' => false,
+                    'placeholder' => 'Leave blank to keep existing value.',
+                    'help' => 'Required when the connection is active. Leave blank on edit to keep the stored secret.',
+                ],
+                'redirect_uri' => [
+                    'label' => 'Redirect URI override',
+                    'type' => 'text',
+                    'required' => false,
+                    'placeholder' => 'Defaults to APP_URL/auth/google/callback',
+                    'help' => 'Optional. Must match an Authorized redirect URI in Google Cloud Console. Canonical default is /auth/google/callback on APP_URL.',
+                ],
+            ],
+        ],
     ],
 ];

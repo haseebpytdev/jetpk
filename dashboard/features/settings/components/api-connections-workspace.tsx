@@ -86,6 +86,14 @@ type WorkspaceConnectionRow = ApiConnectionRow & {
     username_present?: boolean;
     password_present?: boolean;
   } | null;
+  google_oauth?: {
+    client_id_present?: boolean;
+    client_id_hint?: string;
+    client_secret_present?: boolean;
+    redirect_uri?: string;
+    default_redirect_uri?: string;
+    runtime_source?: string;
+  } | null;
   audit?: {
     lastTestedAt?: string | null;
     lastTestStatus?: string | null;
@@ -119,6 +127,7 @@ const MODULE_FILTERS = [
   { key: "payments", label: "Payments" },
   { key: "hotels", label: "Hotels" },
   { key: "messaging", label: "Messaging" },
+  { key: "auth", label: "Authentication" },
 ] as const;
 
 function currentChannel(credentials: Record<string, string>, row?: WorkspaceConnectionRow): string {
@@ -530,6 +539,25 @@ export function ApiConnectionsWorkspace({
                           {row.smtp?.runtime_source ? (
                             <div><dt className="text-jp-muted">Mail source</dt><dd>{row.smtp.runtime_source.replaceAll("_", " ")}</dd></div>
                           ) : null}
+                          {row.google_oauth?.runtime_source ? (
+                            <div><dt className="text-jp-muted">OAuth source</dt><dd>{row.google_oauth.runtime_source.replaceAll("_", " ")}</dd></div>
+                          ) : null}
+                          {row.provider === "google_oauth" ? (
+                            <details className="sm:col-span-2 rounded-lg border border-jp-border bg-slate-50 p-3" data-testid="google-oauth-setup-guide">
+                              <summary className="cursor-pointer text-sm font-medium text-jp-ink">SETUP GUIDE</summary>
+                              <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-jp-muted">
+                                <li>In Google Cloud Console create an OAuth 2.0 Client ID (Web application).</li>
+                                <li>Paste Client ID and Client secret into Credentials (leave secret blank on edit to keep stored).</li>
+                                <li>
+                                  Authorized redirect URI:{" "}
+                                  <code className="break-all text-jp-ink">
+                                    {row.google_oauth?.default_redirect_uri || row.google_oauth?.redirect_uri || "APP_URL/auth/google/callback"}
+                                  </code>
+                                </li>
+                                <li>Enable the connection, then run Test Configuration (checks completeness only — no live token exchange).</li>
+                              </ol>
+                            </details>
+                          ) : null}
                         </dl>
                       </>
                     ) : null}
@@ -752,6 +780,20 @@ export function ApiConnectionsWorkspace({
                   </button>
                 )}
                 <p className="text-sm font-medium text-jp-ink">Provider: {providerLabelByKey.get(provider) ?? provider}</p>
+                {provider === "google_oauth" ? (
+                  <details className="rounded-lg border border-jp-border bg-slate-50 p-3" data-testid="google-oauth-create-setup-guide">
+                    <summary className="cursor-pointer text-sm font-medium text-jp-ink">SETUP GUIDE</summary>
+                    <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-jp-muted">
+                      <li>Create an OAuth 2.0 Client ID (Web) in Google Cloud Console.</li>
+                      <li>Enter Client ID and Client secret below.</li>
+                      <li>
+                        Authorized redirect URI must be{" "}
+                        <code className="break-all text-jp-ink">APP_URL/auth/google/callback</code> (or your optional override).
+                      </li>
+                      <li>Save as active to overlay ENV; Test Configuration checks completeness only.</li>
+                    </ol>
+                  </details>
+                ) : null}
                 {!installed ? (
                   <p className="text-sm text-amber-700">Provider adapter not installed / coming soon. Credential entry is disabled.</p>
                 ) : (

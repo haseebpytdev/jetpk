@@ -16,4 +16,6 @@ enum SupplierProvider: string
     case Travelport = 'travelport';
     /** Transactional email / SMTP module (not a flight adapter). */
     case Smtp = 'smtp';
+    /** Google Sign-In / OAuth (not a flight adapter). */
+    case GoogleOauth = 'google_oauth';
 }

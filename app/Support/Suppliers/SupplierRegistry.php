@@ -36,6 +36,11 @@ final class SupplierRegistry
             return true;
         }
 
+        // Google OAuth is an auth module managed via SupplierConnection — not a flight adapter.
+        if ($provider === SupplierProvider::GoogleOauth) {
+            return true;
+        }
+
         try {
             app(SupplierAdapterResolver::class)->resolve($provider);
 

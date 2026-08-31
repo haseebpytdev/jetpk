@@ -11,10 +11,11 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-30 (JP-FINAL-CLOSURE-01-R5 Traveler Book Now performance)
+**Last updated:** 2026-08-31 (Google OAuth Admin API Settings)
 
 | Date | Phase | Notes |
 | --- | --- | --- |
+| 2026-08-31 | Google OAuth Admin API | **`SupplierProvider::GoogleOauth`** managed like SMTP via Admin API settings. **`GoogleOauthConfigResolver`**: active complete DB → `services.google.*`, else ENV fallback. Blank secret preserves stored. Test Configuration = completeness + Socialite driver resolve only (no token exchange). |
 | 2026-08-30 | JP-FINAL-CLOSURE-01-R5 | Traveler GET: preserve draft `search_id`; skip duplicate Sabre validate when recent revalidation exists; release session before offer/supplier I/O; `PassengersRequestTiming` S0–S8; soft-nav shell via client passengers page + loading T8; session bootstrap 2.5s timeout. |
 | 2026-08-28 | JP-FLIGHT-PERF-01-R1 | Default results sort **Cheapest**; Pair-first return `view`; pending UX “Updating fares…”; bounded fare-change accepts; passengers silent auto-revalidate; passengers shell-first loading + OCR on Autofill only. Evidence `docs/evidence/jp-flight-perf-01/`. Deploy blocked on Al-Haider `60175` manual cancel. |
 | 2026-08-28 | JP-GRP-COMM-01-R2 | **`GroupReservationService`**: supplier cancel must succeed before local `held_seats` decrement; `SupplierReleaseFailed` keeps seats held. **`ALHAIDER_CANCEL_ENABLED`** separated from **`ALHAIDER_BOOKING_ENABLED`**. **`AlHaiderGroupBookingPayloadBuilder`**: fail-closed (no synthetic passenger/contact data); seat_count = adults+children. Admin manual reconcile + retry-supplier-release. Tests: `GroupReservationSupplierReleaseAtomicityTest`. |
@@ -1283,7 +1284,7 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 **Phase complete after:** SFTP upload + **`php artisan view:clear`** + **`php artisan cache:clear`** + spot-send welcome/manual/abandoned on staging + registry admin check.
 | `Support/` | **`SupportTicketService`** — ticket create/reply/status/assign; E6 events for created/replied/status-changed. |
 | `Payments/` | `BookingPaymentService`, `BookingRefundService`, `PaymentTransactionService`, `PaymentGatewaySettingsService`, `Gateways/AbhiPayGateway`, `PaymentGatewayResolver`. **`Support/Payments/PublicAbhiPayCheckoutPresenter`** — confirmation/review AbhiPay CTA state (PIA NDC active-PNR gating, payment status labels, guest token). **`Services/Suppliers/PiaNdc/PiaNdcBookingStatusRefreshService`** — controlled DoOrderRetrieve refresh + local reconciliation (R12L). |
-| `Integrations/` | **JP-INT-01** Admin hub facade: `IntegrationRegistry`, `IntegrationHubService`, `IntegrationManagerResolver`, `IntegrationHealthRecorder`, `AbhiPayDiagnosticPaymentService`, managers (`AbhiPay`, `Supplier`, `Draft`). Controller `Admin\IntegrationsController`. Dashboard `/integrations`. |
+| `Integrations/` | **JP-INT-01** Admin hub facade: `IntegrationRegistry`, `IntegrationHubService`, `IntegrationManagerResolver`, `IntegrationHealthRecorder`, `AbhiPayDiagnosticPaymentService`, managers (`AbhiPay`, `Supplier`, `Draft`). **`SmtpMailConfigResolver`** / **`GoogleOauthConfigResolver`** DB-first runtime overlays. Controller `Admin\IntegrationsController`. Dashboard `/integrations`. |
 | `Promos/` | **`PromoCodeService`** — validate/apply/remove/redeem promo on flight booking checkout payables; **`PromoCodeCalculator`** — percent/fixed discount math (supplier fares unchanged). **`Promo/PromoCodeValidationService`** — admin preview validation. |
 | `Documents/` | `BookingDocumentService` — PDFs / document lifecycle. |
 | `Dashboard/` | `AgencyDashboardService` — `build()`, `operationalCountsForAgency()`, `buildAdminCommandCenter()` (PNR/payment/staff/agent/failures panels). |

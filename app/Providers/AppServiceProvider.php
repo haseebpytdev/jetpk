@@ -114,6 +114,14 @@ class AppServiceProvider extends ServiceProvider
             ]);
         }
 
+        try {
+            app(\App\Services\Integrations\GoogleOauthConfigResolver::class)->applyRuntimeConfig();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('google_oauth.bootstrap_skipped', [
+                'message' => $e->getMessage(),
+            ]);
+        }
+
         RateLimiter::for('lookup-booking', fn (Request $request): Limit => Limit::perMinute(20)->by($request->ip()));
         RateLimiter::for('guest-token', fn (Request $request): Limit => Limit::perMinute(15)->by($request->ip()));
         RateLimiter::for('public-booking-submit', fn (Request $request): Limit => Limit::perMinute(12)->by($request->ip()));

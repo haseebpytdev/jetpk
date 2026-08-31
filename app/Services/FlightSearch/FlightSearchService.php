@@ -713,7 +713,7 @@ class FlightSearchService
 
     /**
      * Providers that have a FlightSupplierInterface adapter.
-     * Non-flight modules (e.g. smtp) share SupplierConnection rows and must never enter search fan-out.
+     * Non-flight modules (e.g. smtp, google_oauth) share SupplierConnection rows and must never enter search fan-out.
      */
     protected function isFlightSearchProvider(SupplierProvider $provider): bool
     {

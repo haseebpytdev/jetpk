@@ -20,6 +20,7 @@ class FlightSearchNonFlightProviderSkipTest extends TestCase
 
         foreach ([
             SupplierProvider::Smtp,
+            SupplierProvider::GoogleOauth,
             SupplierProvider::AlHaider,
             SupplierProvider::Amadeus,
             SupplierProvider::Travelport,

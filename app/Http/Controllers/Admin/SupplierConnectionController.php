@@ -21,6 +21,7 @@ use App\Support\Suppliers\SabreCapabilityTruth;
 use App\Support\Suppliers\SabreSupplierChannelConfig;
 use App\Support\Suppliers\SabreSupplierConnectionNormalizer;
 use App\Support\Suppliers\SmtpSupplierConnectionNormalizer;
+use App\Support\Suppliers\GoogleOauthSupplierConnectionNormalizer;
 use App\Support\Suppliers\SupplierCredentialFormPresenter;
 use App\Support\Suppliers\SupplierProviderFieldCatalog;
 use App\Models\AuditLog;
@@ -110,6 +111,7 @@ class SupplierConnectionController extends Controller
             ['key' => 'airline_direct', 'label' => 'Airline Direct', 'channel' => 'Direct', 'module' => 'flights', 'description' => 'Direct airline API or portal integration.', 'icon' => 'AD', 'capabilities' => ['Direct'], 'readiness' => 'Custom'],
             ['key' => 'al_haider', 'label' => 'Al-Haider', 'channel' => 'Group', 'module' => 'groups', 'description' => 'Al-Haider Umrah group ticketing and package inventory.', 'icon' => 'AH', 'capabilities' => ['Group', 'Umrah'], 'readiness' => 'Group'],
             ['key' => 'smtp', 'label' => 'Transactional Email (SMTP)', 'channel' => 'Messaging', 'module' => 'messaging', 'description' => 'SMTP delivery for transactional JetPakistan email.', 'icon' => 'EM', 'capabilities' => ['Email'], 'readiness' => 'Live ready'],
+            ['key' => 'google_oauth', 'label' => 'Google Sign-In / Google OAuth', 'channel' => 'Authentication', 'module' => 'auth', 'description' => 'Google OAuth client for customer Sign-In with Google.', 'icon' => 'GO', 'capabilities' => ['OAuth', 'Sign-In'], 'readiness' => 'Live ready'],
             ['key' => 'generic', 'label' => 'Generic', 'channel' => 'Other', 'module' => 'other', 'description' => 'Generic supplier connection for custom integrations.', 'icon' => 'GX', 'capabilities' => ['Custom'], 'readiness' => 'Advanced'],
         ];
 
@@ -286,6 +288,11 @@ class SupplierConnectionController extends Controller
                     'runtime_source' => app(\App\Services\Integrations\SmtpMailConfigResolver::class)->currentSource(),
                 ])
                 : null,
+            'google_oauth' => $provider === SupplierProvider::GoogleOauth->value
+                ? array_merge(GoogleOauthSupplierConnectionNormalizer::safeSummary($connection), [
+                    'runtime_source' => app(\App\Services\Integrations\GoogleOauthConfigResolver::class)->currentSource(),
+                ])
+                : null,
         ];
     }
 
@@ -323,6 +330,7 @@ class SupplierConnectionController extends Controller
         return match ($provider) {
             SupplierProvider::AlHaider->value => 'groups',
             SupplierProvider::Smtp->value => 'messaging',
+            SupplierProvider::GoogleOauth->value => 'auth',
             default => 'flights',
         };
     }
@@ -332,6 +340,7 @@ class SupplierConnectionController extends Controller
         return match ($this->moduleForProvider($provider)) {
             'groups' => 'Groups',
             'messaging' => 'Messaging',
+            'auth' => 'Authentication',
             'payments' => 'Payments',
             'hotels' => 'Hotels',
             default => 'Flights',
@@ -350,7 +359,11 @@ class SupplierConnectionController extends Controller
             $liveDefaults = ProviderEndpointDefaults::for($provider->value, 'live');
             $catalog[] = [
                 'key' => $provider->value,
-                'label' => $provider === SupplierProvider::Smtp ? 'Transactional Email (SMTP)' : $provider->name,
+                'label' => match ($provider) {
+                    SupplierProvider::Smtp => 'Transactional Email (SMTP)',
+                    SupplierProvider::GoogleOauth => 'Google Sign-In / Google OAuth',
+                    default => $provider->name,
+                },
                 'installed' => \App\Support\Suppliers\SupplierRegistry::adapterInstalled($provider),
                 'module' => $this->moduleForProvider($provider->value),
                 'baseUrlOverridable' => (bool) $defaults['overridable'],
@@ -494,10 +507,18 @@ class SupplierConnectionController extends Controller
     {
         unset($result['credentials'], $result['password'], $result['token'], $result['secret']);
 
-        return [
-            'ok' => (bool) ($result['ok'] ?? $result['success'] ?? true),
-            'message' => (string) ($result['message'] ?? $result['status'] ?? 'Test completed'),
+        $out = [
+            'ok' => (bool) ($result['ok'] ?? $result['success'] ?? ($result['last_error'] ?? null) === null),
+            'message' => (string) ($result['message'] ?? $result['last_test_status'] ?? $result['status'] ?? 'Test completed'),
         ];
+
+        foreach (['last_test_status', 'last_error', 'token_exchange', 'status'] as $key) {
+            if (array_key_exists($key, $result)) {
+                $out[$key] = $result[$key];
+            }
+        }
+
+        return $out;
     }
 
     protected function sanitizeFailure(string $error): ?string
@@ -618,13 +639,16 @@ class SupplierConnectionController extends Controller
             }
         }
 
-        return SmtpSupplierConnectionNormalizer::normalizePayload(
-            AlHaiderSupplierConnectionNormalizer::normalizePayload(
-                OneApiSupplierConnectionNormalizer::normalizePayload(
-                    AirBlueSupplierConnectionNormalizer::normalizePayload(
-                        PiaNdcSupplierConnectionNormalizer::normalizePayload(
-                            IatiSupplierConnectionNormalizer::normalizePayload(
-                                SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+        return GoogleOauthSupplierConnectionNormalizer::normalizePayload(
+            SmtpSupplierConnectionNormalizer::normalizePayload(
+                AlHaiderSupplierConnectionNormalizer::normalizePayload(
+                    OneApiSupplierConnectionNormalizer::normalizePayload(
+                        AirBlueSupplierConnectionNormalizer::normalizePayload(
+                            PiaNdcSupplierConnectionNormalizer::normalizePayload(
+                                IatiSupplierConnectionNormalizer::normalizePayload(
+                                    SabreSupplierConnectionNormalizer::normalizePayload($payload, $existing),
+                                    $existing
+                                ),
                                 $existing
                             ),
                             $existing

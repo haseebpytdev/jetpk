@@ -13,6 +13,7 @@ type ExtendedRow = ApiConnectionRow & {
   moduleLabel?: string;
   lastSuccessfulUseAt?: string | null;
   smtp?: { runtime_source?: string } | null;
+  google_oauth?: { runtime_source?: string } | null;
 };
 
 type Props = {
@@ -95,6 +96,11 @@ export function ApiConnectionCard({
         {row.smtp?.runtime_source ? (
           <span className="rounded-full border border-jp-border bg-white px-2 py-0.5">
             Mail: {row.smtp.runtime_source.replaceAll("_", " ")}
+          </span>
+        ) : null}
+        {row.google_oauth?.runtime_source ? (
+          <span className="rounded-full border border-jp-border bg-white px-2 py-0.5">
+            OAuth: {row.google_oauth.runtime_source.replaceAll("_", " ")}
           </span>
         ) : null}
       </div>
