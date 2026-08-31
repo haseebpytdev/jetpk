@@ -54,12 +54,29 @@ class PublicShareLinkController extends Controller
             ]);
         }
 
-        $packageId = data_get($link->payload, 'package_id');
-        if (is_string($packageId) && $packageId !== '') {
-            return redirect()->to(url('/groups/'.$packageId));
-        }
+        $payload = is_array($link->payload) ? $link->payload : [];
+        $packageId = data_get($payload, 'package_id');
+        $packageId = is_string($packageId) ? $packageId : '';
+        $continueUrl = $packageId !== '' ? url('/groups/'.$packageId) : url('/groups');
+        $origin = (string) ($link->origin ?: data_get($payload, 'origin', ''));
+        $destination = (string) ($link->destination ?: data_get($payload, 'destination', ''));
+        $routeLabel = ($origin !== '' && $destination !== '')
+            ? strtoupper($origin).' → '.strtoupper($destination)
+            : (string) data_get($payload, 'route_label', '');
+        $seats = data_get($payload, 'seats_available');
+        $seatsLabel = is_numeric($seats) ? ((int) $seats).' seats indicated' : (string) data_get($payload, 'availability_label', '');
 
-        return redirect()->to(url('/groups'));
+        return response()->view('frontend.share.group-landing', [
+            'title' => (string) (data_get($payload, 'title') ?: 'Group offer'),
+            'routeLabel' => $routeLabel,
+            'departLabel' => $link->depart_date?->format('D, j M Y') ?: (string) data_get($payload, 'depart_label', ''),
+            'seatsLabel' => $seatsLabel,
+            'displayFare' => $link->display_fare,
+            'currency' => $link->display_currency ?: 'PKR',
+            'expiresLabel' => $link->expires_at?->timezone(config('app.timezone'))->format('j M Y H:i'),
+            'continueUrl' => $continueUrl,
+            'groupsUrl' => url('/groups'),
+        ]);
     }
 
     public function createFlight(Request $request): Response
@@ -92,6 +109,53 @@ class PublicShareLinkController extends Controller
             'url' => url($link->publicPath()),
             'expires_at' => $link->expires_at?->toIso8601String(),
             'revalidation_notice' => 'Fare will be revalidated before booking.',
+        ]);
+    }
+
+    public function createGroup(Request $request): Response
+    {
+        $this->shareLinks->assertCreateRateLimit($request->ip() ?? 'unknown');
+
+        $data = $request->validate([
+            'package_id' => ['required', 'string', 'max:64'],
+            'origin' => ['nullable', 'string', 'max:8'],
+            'destination' => ['nullable', 'string', 'max:8'],
+            'depart_date' => ['nullable', 'date'],
+            'return_date' => ['nullable', 'date'],
+            'display_currency' => ['nullable', 'string', 'max:8'],
+            'display_fare' => ['nullable', 'numeric', 'min:0'],
+            'title' => ['nullable', 'string', 'max:160'],
+            'route_label' => ['nullable', 'string', 'max:120'],
+            'seats_available' => ['nullable', 'integer', 'min:0', 'max:999'],
+            'availability_label' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        $payload = [
+            'package_id' => $data['package_id'],
+            'title' => $data['title'] ?? null,
+            'route_label' => $data['route_label'] ?? null,
+            'seats_available' => $data['seats_available'] ?? null,
+            'availability_label' => $data['availability_label'] ?? null,
+            'origin' => $data['origin'] ?? null,
+            'destination' => $data['destination'] ?? null,
+        ];
+
+        $link = $this->shareLinks->createGroupLink([
+            'origin' => $data['origin'] ?? null,
+            'destination' => $data['destination'] ?? null,
+            'depart_date' => $data['depart_date'] ?? null,
+            'return_date' => $data['return_date'] ?? null,
+            'display_currency' => $data['display_currency'] ?? 'PKR',
+            'display_fare' => $data['display_fare'] ?? null,
+            'payload' => $payload,
+        ], 'public_api');
+
+        return response()->json([
+            'ok' => true,
+            'code' => $link->code,
+            'url' => url($link->publicPath()),
+            'expires_at' => $link->expires_at?->toIso8601String(),
+            'revalidation_notice' => 'Group availability will be revalidated before booking.',
         ]);
     }
 }

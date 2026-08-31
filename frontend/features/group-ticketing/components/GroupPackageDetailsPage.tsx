@@ -78,7 +78,46 @@ export function GroupPackageDetailsPage({ packageId, initialPayload = null }: Gr
     initialPayload?.package ? new Date().toISOString() : null,
   );
 
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
+
   const passengersPath = `/groups/${encodeURIComponent(packageId)}/passengers`;
+
+  const handleCopyShare = async () => {
+    if (!pkg || shareBusy) return;
+    setShareBusy(true);
+    setShareFeedback(null);
+    try {
+      const response = await fetch("/api/public/share/group", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          package_id: packageId,
+          depart_date: pkg.departure_date ?? undefined,
+          display_currency: pkg.currency ?? "PKR",
+          title: pkg.title || pkg.route_line || "Group offer",
+          route_label: pkg.route_line,
+          seats_available: pkg.available_seats,
+        }),
+      });
+      const data = (await response.json().catch(() => null)) as { ok?: boolean; url?: string; message?: string } | null;
+      if (!response.ok || !data?.ok || !data.url) {
+        setShareFeedback(data?.message ?? "Unable to create share link.");
+        return;
+      }
+      await navigator.clipboard.writeText(data.url);
+      setShareFeedback("Link copied");
+    } catch {
+      setShareFeedback("Unable to copy link.");
+    } finally {
+      setShareBusy(false);
+    }
+  };
 
   const loadPackage = async () => {
     const response = await fetchGroupPackage(packageId);
@@ -214,6 +253,20 @@ export function GroupPackageDetailsPage({ packageId, initialPayload = null }: Gr
           >
             {bookingBusy ? "Checking…" : "Book Now"}
           </PrimaryButton>
+          <button
+            type="button"
+            onClick={() => void handleCopyShare()}
+            disabled={shareBusy}
+            className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-button border border-jp-border px-4 text-jp-sm font-semibold text-jp-text disabled:opacity-60"
+            data-testid="group-copy-share"
+          >
+            {shareBusy ? "Creating link…" : "Copy share link"}
+          </button>
+          {shareFeedback ? (
+            <p className="text-center text-jp-xs text-jp-muted" data-testid="group-share-feedback">
+              {shareFeedback}
+            </p>
+          ) : null}
           <Link
             href="/groups/search"
             className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-button border border-jp-border px-4 text-jp-sm font-semibold"

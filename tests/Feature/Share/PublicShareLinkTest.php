@@ -77,4 +77,50 @@ class PublicShareLinkTest extends TestCase
         $response->assertOk()->assertJsonPath('ok', true);
         $this->assertStringContainsString('/f/', (string) $response->json('url'));
     }
+
+    public function test_create_and_resolve_group_short_link_landing(): void
+    {
+        $response = $this->postJson('/api/public/share/group', [
+            'package_id' => 'grp-demo-1',
+            'origin' => 'LHE',
+            'destination' => 'JED',
+            'depart_date' => '2026-11-01',
+            'display_fare' => 185000,
+            'title' => 'LHE–JED group seats',
+            'seats_available' => 12,
+        ]);
+
+        $response->assertOk()->assertJsonPath('ok', true);
+        $code = (string) $response->json('code');
+        $this->assertStringContainsString('/g/', (string) $response->json('url'));
+
+        $this->get('/g/'.$code)
+            ->assertOk()
+            ->assertSee('LHE–JED group seats')
+            ->assertSee('View & continue')
+            ->assertDontSee('supplier')
+            ->assertDontSee('cost');
+    }
+
+    public function test_expired_group_link_shows_recovery_page(): void
+    {
+        PublicShareLink::query()->create([
+            'code' => 'GEXPIRED1',
+            'link_type' => 'group_offer',
+            'origin' => 'ISB',
+            'destination' => 'DXB',
+            'depart_date' => '2026-09-20',
+            'adults' => 1,
+            'children' => 0,
+            'infants' => 0,
+            'display_currency' => 'PKR',
+            'display_fare' => 90000,
+            'expires_at' => now()->subMinute(),
+            'payload' => ['package_id' => 'grp-x'],
+        ]);
+
+        $this->get('/g/GEXPIRED1')
+            ->assertOk()
+            ->assertSee('This group reference has expired');
+    }
 }

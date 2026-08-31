@@ -59,6 +59,9 @@ Route::get('/g/{code}', [PublicShareLinkController::class, 'showGroup'])
 Route::post('/api/public/share/flight', [PublicShareLinkController::class, 'createFlight'])
     ->middleware('throttle:30,1')
     ->name('api.public.share.flight');
+Route::post('/api/public/share/group', [PublicShareLinkController::class, 'createGroup'])
+    ->middleware('throttle:30,1')
+    ->name('api.public.share.group');
 Route::get('/api/public/ai/health', [PublicAiAssistantController::class, 'health'])
     ->middleware('throttle:60,1')
     ->name('api.public.ai.health');
