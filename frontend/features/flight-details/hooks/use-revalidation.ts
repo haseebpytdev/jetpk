@@ -174,11 +174,8 @@ export function useRevalidation() {
       try {
         void import("@/features/standard-booking/components/PassengerDetailsPage");
         try {
-          // Bound prefetch so soft-nav often has the RSC payload before push.
-          await Promise.race([
-            Promise.resolve(router.prefetch(resolved)).then(() => undefined),
-            new Promise<void>((r) => setTimeout(r, 1000)),
-          ]);
+          // Fire-and-forget prefetch — do not block soft push (R6I: await correlated with stalled push).
+          router.prefetch(resolved);
         } catch {
           /* non-blocking */
         }
@@ -186,22 +183,64 @@ export function useRevalidation() {
         markBookNowTiming("T4B_checkout_prep_done");
         markBookNowTiming("T5_router_push", { nav: "soft_push" });
         markBookNowTiming("T7_passenger_route", { nav: "soft_push" });
-        // Re-persist after T7 so restore sees T7_from_T0 if the route remounts.
         persistTimingForContinuity();
         router.push(resolved);
-        // R6H: soft-nav can stall 15–34s without painting loading.tsx. Watchdog hard-assigns.
-        window.setTimeout(() => {
+
+        // R6I: soft-nav hang is genuine (no history/RSC progress for 3.2s). Keep hard
+        // fallback, but cancel on destination progress and retry soft once before hard.
+        let settled = false;
+        let softRetryTimer: number | undefined;
+        let hardTimer: number | undefined;
+        let pollTimer: number | undefined;
+
+        const passengersReached = () => /\/booking\/passengers/.test(window.location.pathname);
+
+        const cleanup = () => {
+          settled = true;
+          if (softRetryTimer != null) window.clearTimeout(softRetryTimer);
+          if (hardTimer != null) window.clearTimeout(hardTimer);
+          if (pollTimer != null) window.clearInterval(pollTimer);
+          window.removeEventListener("popstate", onMaybeProgress);
+        };
+
+        const onMaybeProgress = () => {
+          if (settled) return;
+          if (passengersReached()) cleanup();
+        };
+
+        pollTimer = window.setInterval(onMaybeProgress, 50);
+        window.addEventListener("popstate", onMaybeProgress);
+
+        softRetryTimer = window.setTimeout(() => {
+          if (settled || passengersReached()) {
+            cleanup();
+            return;
+          }
+          // One soft re-push — R6I diag showed first push often never starts history update.
           try {
-            if (!/\/booking\/passengers/.test(window.location.pathname)) {
-              markBookNowTiming("T5_router_push", { nav: "hard_assign_watchdog" });
-              markBookNowTiming("T7_passenger_route", { nav: "hard_assign_watchdog" });
-              persistTimingForContinuity();
-              window.location.assign(target);
-            }
+            markBookNowTiming("T5_router_push", { nav: "soft_push_retry" });
+            router.push(resolved);
           } catch {
             /* ignore */
           }
+        }, 900);
+
+        hardTimer = window.setTimeout(() => {
+          if (settled || passengersReached()) {
+            cleanup();
+            return;
+          }
+          try {
+            markBookNowTiming("T5_router_push", { nav: "hard_assign_watchdog" });
+            markBookNowTiming("T7_passenger_route", { nav: "hard_assign_watchdog" });
+            persistTimingForContinuity();
+            cleanup();
+            window.location.assign(target);
+          } catch {
+            cleanup();
+          }
         }, 3200);
+
         return true;
       } catch {
         /* fall through to hard assign */
