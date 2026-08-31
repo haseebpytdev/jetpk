@@ -10,7 +10,8 @@ Close mobile/tablet UX for JetPakistan public + checkout surfaces with dense mat
 - Remote freeze: `1f12edef052da278f02b7ffeaf4e7a881c663ef9`
 - R4 evidence: `871b12e40edb2c8c7aaad030000378b776df12de` (docs-only)
 - R4 engineering / prior deploy: `769b76b9699a4175ea241c37eb945a87bad51d10`
-- Final R5 engineering/runtime: `c89536afe762a567f1df0dc6e193ee0ba2a8af9f`
+- Final R5 engineering/runtime: `629a0da8fcc44537257a3c78204b30742f7467b4`
+  (prior visual pack mostly captured at `c89536af`; booking-shell FAB inset follow-up deployed as final runtime)
 
 ## What passed
 

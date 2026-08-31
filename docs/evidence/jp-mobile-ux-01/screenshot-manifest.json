@@ -1,9 +1,9 @@
 {
-  "RUNTIME": "c89536afe762a567f1df0dc6e193ee0ba2a8af9f",
-  "PUBLIC_BUILD": "ZZfidOFs_ir31JteO5OU0",
+  "RUNTIME": "629a0da8fcc44537257a3c78204b30742f7467b4",
+  "PUBLIC_BUILD": "-itZKTxeTb04Bs7IRtpUe",
   "DASHBOARD_BUILD": "vusuf0T5POTkwsLY8oUyO",
-  "captured_at": "2026-08-31T17:40:00Z",
-  "note": "Final screenshots after last engineering deploy c89536af; portal dashboards not captured due to secure sign-in prep block.",
+  "captured_at": "2026-08-31T17:50:00Z",
+  "note": "Most visual screenshots captured against c89536af/ZZfidOFs; final runtime is 629a0da8/-itZKTxe (booking shell inset). Portal dashboards not authenticated (login validation / prep).",
   "manifest": [
     {"file": "public/home__390x844__final.png", "route": "/", "viewport": "390x844"},
     {"file": "fab/fab__390x844__expanded.png", "route": "/", "viewport": "390x844"},
