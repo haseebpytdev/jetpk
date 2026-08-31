@@ -49,7 +49,8 @@ export async function fetchCommerceGates(): Promise<CommerceGates> {
 }
 
 export function buildGuestCheckoutAuthRedirect(targetPath: string): string {
-  return `/booking/account?redirect=${encodeURIComponent(targetPath)}`;
+  // OLS does not yet proxy /booking/account — use login Account gate instead.
+  return `/login?redirect=${encodeURIComponent(targetPath)}&booking_gate=account`;
 }
 
 export async function ensureGuestBookingAllowed(

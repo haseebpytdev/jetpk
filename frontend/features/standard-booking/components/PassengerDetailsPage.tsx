@@ -103,7 +103,9 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         const data = response.data as { status?: string; redirect_url?: string; register_url?: string } | undefined;
         const apiStatus = (data?.status ?? "").toLowerCase();
         if (response.status === 401 || apiStatus === "guest_booking_disabled") {
-          const authRedirect = data?.redirect_url ?? `/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+          const authRedirect =
+            data?.redirect_url ??
+            `/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}&booking_gate=account`;
           window.location.assign(authRedirect);
           return;
         }

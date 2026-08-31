@@ -176,11 +176,13 @@ final class CommerceCheckoutSettingsService
             $returnPath = '/booking/passengers';
         }
 
-        $accountUrl = '/booking/account?redirect='.rawurlencode($returnPath);
-        $loginUrl = '/login?redirect='.rawurlencode($returnPath);
+        // OLS only proxies specific /booking/* Next routes (passengers/review/...).
+        // Account gate therefore uses /login with booking_gate=account (OLS-allowed).
+        $loginUrl = '/login?redirect='.rawurlencode($returnPath).'&booking_gate=account';
         $registerUrl = $this->isCustomerRegistrationEnabled()
-            ? '/register?redirect='.rawurlencode($returnPath)
+            ? '/register?redirect='.rawurlencode($returnPath).'&booking_gate=account'
             : null;
+        $accountUrl = $loginUrl;
 
         if ($request->wantsJson() || $request->query('format') === 'json') {
             return response()->json([
