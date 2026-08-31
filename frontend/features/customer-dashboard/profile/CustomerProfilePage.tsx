@@ -86,6 +86,14 @@ export function CustomerProfilePage({ session }: { session: PublicSession }) {
           <PrimaryButton type="submit" disabled={submitting}>
             {submitting ? "Saving…" : "Save profile"}
           </PrimaryButton>
+          <button
+            type="button"
+            className="mt-4 text-jp-sm font-medium text-jp-brand focus-visible:shadow-jp-focus"
+            onClick={() => window.dispatchEvent(new Event("jp-dashboard-tour-restart"))}
+            data-testid="customer-take-dashboard-tour"
+          >
+            Take Dashboard Tour
+          </button>
         </form>
       ) : null}
     </CustomerDashboardShell>

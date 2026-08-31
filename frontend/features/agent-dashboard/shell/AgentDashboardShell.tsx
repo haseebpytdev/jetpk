@@ -15,6 +15,7 @@ import {
   buildPortalNav,
   type PortalNavItem,
 } from "@/features/portal";
+import { DashboardTourHostLazy } from "@/features/dashboard-tours";
 import type { AgentCapabilities, AgentNavigationItem } from "../types";
 import type { PublicSession } from "@/types/session";
 import { fetchAgentCapabilities } from "../services/agent-dashboard-api";
@@ -125,6 +126,7 @@ export function AgentDashboardShell({
             </p>
           ) : null}
           {children}
+          <DashboardTourHostLazy portal="agent" />
         </PortalContent>
       }
     />

@@ -4,6 +4,8 @@ import { Suspense, useState, type ReactNode } from "react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DataSourcePreviewGate } from "@/components/dashboard/data-source-preview-gate";
+import { DashboardTourHostLazy } from "@/features/dashboard-tours/DashboardTourHostLazy";
+import { useDashboardPortal } from "@/lib/portal-context";
 import type { DashboardBranding } from "@/services/branding-service";
 import type { DashboardSessionSummary } from "@/services/session-service";
 
@@ -17,6 +19,7 @@ export function DashboardShell({
   branding?: DashboardBranding | null;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const portal = useDashboardPortal();
 
   return (
     <div className="flex min-h-screen min-w-0 overflow-x-hidden bg-jp-page text-jp-text" data-testid="dashboard-shell">
@@ -33,6 +36,7 @@ export function DashboardShell({
             <DataSourcePreviewGate />
           </Suspense>
           {children}
+          <DashboardTourHostLazy portal={portal === "staff" ? "staff" : "admin"} />
         </main>
         <footer className="flex flex-col gap-2 border-t border-jp-border bg-jp-surface px-4 py-4 text-jp-xs text-jp-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <span>© 2026 JetPakistan.pk — back-office dashboard</span>

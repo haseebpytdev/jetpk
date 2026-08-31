@@ -16,6 +16,7 @@ import {
   buildPortalNav,
   type PortalNavItem,
 } from "@/features/portal";
+import { DashboardTourHostLazy } from "@/features/dashboard-tours";
 import type { PublicSession } from "@/types/session";
 
 const NAV_ITEMS: PortalNavItem[] = [
@@ -68,6 +69,7 @@ export function CustomerDashboardShell({
         <PortalContent titleId="customer-page-title">
           <PortalPageHeader title={title} id="customer-page-title" />
           {children}
+          <DashboardTourHostLazy portal="customer" />
         </PortalContent>
       }
     />

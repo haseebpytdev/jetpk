@@ -6,6 +6,7 @@ use App\Http\Controllers\Customer\CustomerInvoiceController;
 use App\Http\Controllers\Customer\CustomerNotificationController;
 use App\Http\Controllers\Customer\CustomerPaymentController;
 use App\Http\Controllers\Customer\CustomerProfileController;
+use App\Http\Controllers\Customer\DashboardTourController;
 use App\Http\Controllers\Customer\SavedTravelerController;
 use App\Http\Controllers\Customer\SupportTicketController;
 use App\Http\Controllers\Frontend\BookingCheckoutPromoController;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('customer')->name('customer.')->group(function (): void {
     Route::middleware('platform.module:customer_portal')->group(function (): void {
         Route::get('/', [CustomerBookingController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard-tours', [DashboardTourController::class, 'show'])->name('dashboard-tours.show');
+        Route::patch('/dashboard-tours', [DashboardTourController::class, 'update'])->name('dashboard-tours.update');
         Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{booking}/resume', [CustomerBookingController::class, 'resume'])->name('bookings.resume');
         Route::get('/bookings/{booking}', [CustomerBookingController::class, 'show'])->name('bookings.show');

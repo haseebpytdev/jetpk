@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Dashboard\DashboardSuppliersController;
 use App\Http\Controllers\Api\Dashboard\DashboardSupportTicketsController;
 use App\Http\Controllers\Api\Dashboard\DashboardSystemHealthController;
 use App\Http\Controllers\Api\Dashboard\DashboardTicketsController;
+use App\Http\Controllers\Api\Dashboard\DashboardTourController;
 use App\Http\Controllers\Api\Dashboard\DashboardUsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['throttle:120,1'])->group(function (): void {
     Route::get('/session', [DashboardSessionController::class, 'show'])
         ->name('session');
+
+    Route::get('/tours', [DashboardTourController::class, 'show'])
+        ->name('tours.show');
+    Route::patch('/tours', [DashboardTourController::class, 'update'])
+        ->name('tours.update');
 
     Route::middleware('dashboard.permission:dashboard.view')->group(function (): void {
         Route::get('/overview', [DashboardOverviewController::class, 'show'])

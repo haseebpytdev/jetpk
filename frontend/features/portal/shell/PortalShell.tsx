@@ -237,6 +237,7 @@ function PortalGroupedNav({
                   <Link
                     key={item.href}
                     href={item.href}
+                    data-tour-target={item.code}
                     aria-current={active ? "page" : undefined}
                     className={`flex min-h-9 items-center rounded-jp-md px-3 py-1.5 text-jp-sm font-medium focus-visible:shadow-jp-focus ${
                       active ? "bg-jp-brand-soft text-jp-brand" : "text-jp-text hover:bg-jp-surface-muted"
@@ -279,6 +280,7 @@ function PortalGroupedNav({
                     <Link
                       key={item.href}
                       href={item.href}
+                      data-tour-target={item.code}
                       aria-current={active ? "page" : undefined}
                       className={`flex min-h-9 items-center rounded-jp-md px-3 py-1.5 text-jp-sm font-medium focus-visible:shadow-jp-focus ${
                         active ? "bg-jp-brand-soft text-jp-brand" : "text-jp-text hover:bg-jp-surface-muted"
@@ -323,7 +325,15 @@ export function PortalSidebarFooter() {
 
   return (
     <>
-      <Link href="/" className="text-jp-brand focus-visible:shadow-jp-focus">
+      <button
+        type="button"
+        onClick={() => window.dispatchEvent(new Event("jp-dashboard-tour-restart"))}
+        className="block text-left text-jp-brand focus-visible:shadow-jp-focus"
+        data-testid="take-dashboard-tour"
+      >
+        Take Dashboard Tour
+      </button>
+      <Link href="/" className="mt-2 block text-jp-brand focus-visible:shadow-jp-focus">
         Return to site
       </Link>
       <button

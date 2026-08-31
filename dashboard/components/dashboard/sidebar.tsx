@@ -264,7 +264,12 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
                       return (
                         <li key={item.key}>
                           {item.target === "laravel" ? (
-                            <a href={href} onClick={onClose} className={linkClass}>
+                            <a
+                              href={href}
+                              onClick={onClose}
+                              className={linkClass}
+                              data-tour-target={item.key}
+                            >
                               <span className="flex-1 truncate">{item.label}</span>
                             </a>
                           ) : (
@@ -273,6 +278,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
                               onClick={onClose}
                               className={linkClass}
                               aria-current={active ? "page" : undefined}
+                              data-tour-target={item.key}
                             >
                               <span className="flex-1 truncate">{item.label}</span>
                             </Link>
@@ -290,6 +296,14 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
           <div className="rounded-xl bg-white/5 p-4">
             <p className="text-sm font-semibold">Need help?</p>
             <p className="mt-1 text-xs text-gray-400">Contact platform support for operational assistance.</p>
+            <button
+              type="button"
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-white/20 bg-transparent px-3 py-2 text-sm font-medium text-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              onClick={() => window.dispatchEvent(new Event("jp-backoffice-tour-restart"))}
+              data-testid="take-dashboard-tour"
+            >
+              Take Dashboard Tour
+            </button>
             {useSessionNavigation ? (
               <a
                 href={sanitizePublicHref(

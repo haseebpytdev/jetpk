@@ -240,6 +240,14 @@ export function ProfilePageContent() {
         <p className="mt-3 text-xs text-jp-muted">
           Role, permissions, and protected account state are not editable here.
         </p>
+        <button
+          type="button"
+          className="mt-4 text-sm font-medium text-jp-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jp-accent"
+          onClick={() => window.dispatchEvent(new Event("jp-backoffice-tour-restart"))}
+          data-testid="profile-take-dashboard-tour"
+        >
+          Take Dashboard Tour
+        </button>
       </section>
 
       <section className="rounded-2xl border border-jp-border bg-white p-5 shadow-sm">

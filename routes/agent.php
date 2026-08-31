@@ -18,6 +18,7 @@ use App\Http\Controllers\Agent\AgentWalletController;
 use App\Http\Controllers\Agent\BookingCancellationController;
 use App\Http\Controllers\Agent\BookingPaymentProofController;
 use App\Http\Controllers\Agent\DashboardController;
+use App\Http\Controllers\Agent\DashboardTourController;
 use App\Http\Controllers\Agent\FinanceStatementController;
 use App\Http\Controllers\Agent\SavedTravelerController;
 use App\Http\Controllers\Agent\SupportTicketController;
@@ -26,6 +27,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('agent')->name('agent.')->group(function (): void {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard-tours', [DashboardTourController::class, 'show'])->name('dashboard-tours.show');
+    Route::patch('/dashboard-tours', [DashboardTourController::class, 'update'])->name('dashboard-tours.update');
     Route::get('/profile', [AgentProfileController::class, 'show'])->name('profile.show');
     Route::get('/notifications', [AgentNotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/unread-summary', [AgentNotificationController::class, 'unreadSummary'])->name('notifications.unread-summary');
