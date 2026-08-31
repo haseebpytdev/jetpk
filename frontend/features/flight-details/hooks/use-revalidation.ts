@@ -167,7 +167,8 @@ export function useRevalidation() {
       /(?:^|\/)booking\/passengers(?:\?|$)/.test(resolved);
     if (isPassengersHandoff) {
       try {
-        void import("@/features/standard-booking/components/PassengerDetailsPage");
+        // Await chunk so soft-nav does not suspend on first paint of Traveler.
+        await import("@/features/standard-booking/components/PassengerDetailsPage");
         try {
           router.prefetch(resolved);
         } catch {
