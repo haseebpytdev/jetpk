@@ -283,7 +283,7 @@ export function FlightResultsPage() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-7xl space-y-2.5 px-4 pb-6 pt-2.5 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl space-y-2.5 px-4 pb-24 pt-2.5 sm:px-6 sm:pb-10 lg:px-8 xl:pb-6">
         {editOpen ? (
           <div data-testid="inline-edit-search">
             <SearchModule
