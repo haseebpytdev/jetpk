@@ -92,6 +92,12 @@ export type GroupPackagePayload = {
   available: boolean;
   lock_state: GroupLockState;
   progress: Array<{ key: string; label: string; state: string; href?: string | null }>;
+  eligibility?: {
+    eligible: boolean;
+    reason: string;
+    message: string;
+    customer_group_booking_enabled: boolean;
+  };
 };
 
 export async function fetchGroupPackage(packageId: string) {

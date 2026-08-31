@@ -173,6 +173,8 @@ class GroupTicketingSearchController extends Controller
                 'available' => $availability['ok'],
                 'lock_state' => $this->jsonPresenter->presentLockState($request->user()),
                 'progress' => $this->jsonPresenter->progressState('package'),
+                'eligibility' => app(\App\Services\GroupTicketing\GroupBookingEligibilityService::class)
+                    ->evaluate($request->user()),
             ]);
         }
 

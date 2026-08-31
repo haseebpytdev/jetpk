@@ -80,6 +80,8 @@ export function GroupPackageDetailsPage({ packageId, initialPayload = null }: Gr
 
   const [shareBusy, setShareBusy] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
+  const [eligibility, setEligibility] = useState(initialPayload?.eligibility ?? null);
+  const [sessionRole, setSessionRole] = useState<"anonymous" | "customer" | "agent" | "other">("anonymous");
 
   const passengersPath = `/groups/${encodeURIComponent(packageId)}/passengers`;
 
@@ -135,6 +137,7 @@ export function GroupPackageDetailsPage({ packageId, initialPayload = null }: Gr
       setRefreshedAt,
       setError,
     });
+    setEligibility(response.data.eligibility ?? null);
   };
 
   useEffect(() => {
@@ -148,8 +151,29 @@ export function GroupPackageDetailsPage({ packageId, initialPayload = null }: Gr
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per packageId
   }, [packageId]);
 
+  useEffect(() => {
+    void (async () => {
+      const bootstrap = await fetchSessionBootstrap();
+      if (!bootstrap.authenticated) {
+        setSessionRole("anonymous");
+        return;
+      }
+      const role = String(bootstrap.user?.account_type ?? bootstrap.role ?? "").toLowerCase();
+      if (role.includes("agent")) {
+        setSessionRole("agent");
+      } else if (role.includes("customer")) {
+        setSessionRole("customer");
+      } else {
+        setSessionRole("other");
+      }
+    })();
+  }, []);
+
+  const customerGroupBlocked =
+    sessionRole === "customer" && eligibility?.customer_group_booking_enabled === false;
+
   const handleBookNow = async () => {
-    if (bookingBusy) return;
+    if (bookingBusy || customerGroupBlocked) return;
     setBookingBusy(true);
     try {
       await loadPackage();
@@ -247,12 +271,38 @@ export function GroupPackageDetailsPage({ packageId, initialPayload = null }: Gr
           <GroupBookingSummaryCard package={pkg} />
           <PrimaryButton
             onClick={() => void handleBookNow()}
-            disabled={bookingBusy}
+            disabled={bookingBusy || customerGroupBlocked}
             className="w-full"
             data-testid="group-book-now"
           >
-            {bookingBusy ? "Checking…" : "Book Now"}
+            {bookingBusy ? "Checking…" : customerGroupBlocked ? "Agents only" : "Book Now"}
           </PrimaryButton>
+          {customerGroupBlocked ? (
+            <div
+              className="rounded-jp-md border border-jp-border bg-jp-page px-3 py-3 text-center"
+              data-testid="group-customer-booking-disabled"
+            >
+              <p className="text-sm font-medium text-jp-text">
+                This Group offer is currently available for registered JetPakistan Agents.
+              </p>
+              <div className="mt-3 flex flex-col gap-2">
+                <Link
+                  href="/login?redirect=/agent/dashboard"
+                  className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-button border border-jp-border px-4 text-jp-sm font-semibold"
+                  data-testid="group-agent-login"
+                >
+                  Agent login
+                </Link>
+                <Link
+                  href="/agent/register"
+                  className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-button border border-jp-border px-4 text-jp-sm font-semibold"
+                  data-testid="group-agent-register"
+                >
+                  Agent registration
+                </Link>
+              </div>
+            </div>
+          ) : null}
           <button
             type="button"
             onClick={() => void handleCopyShare()}

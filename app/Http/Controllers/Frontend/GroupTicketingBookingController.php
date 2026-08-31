@@ -8,6 +8,7 @@ use App\Http\Requests\Frontend\GroupTicketingPassengersRequest;
 use App\Http\Requests\Frontend\GroupTicketingPaymentRequest;
 use App\Models\GroupBooking;
 use App\Models\GroupInventory;
+use App\Services\GroupTicketing\GroupBookingEligibilityService;
 use App\Services\GroupTicketing\GroupBookingRestrictionService;
 use App\Services\GroupTicketing\GroupFinalCheckoutBlockedException;
 use App\Services\GroupTicketing\GroupFinalCheckoutDecisionService;
@@ -39,10 +40,15 @@ class GroupTicketingBookingController extends Controller
         protected GroupInventoryAvailabilityService $availabilityService,
         protected GroupTicketingJsonPresenter $jsonPresenter,
         protected GroupFinalCheckoutDecisionService $finalCheckoutDecisionService,
+        protected GroupBookingEligibilityService $eligibilityService,
     ) {}
 
     public function passengers(GroupInventory $inventory, Request $request): View|RedirectResponse|JsonResponse|Response
     {
+        if ($gate = $this->eligibilityService->gateResponse($request, $request->user())) {
+            return $gate;
+        }
+
         if ($this->restrictionService->isBlocked($request->user())) {
             if ($request->wantsJson() || $request->query('format') === 'json') {
                 return response()->json([
@@ -105,6 +111,10 @@ class GroupTicketingBookingController extends Controller
 
     public function storePassengers(GroupInventory $inventory, GroupTicketingPassengersRequest $request): RedirectResponse|JsonResponse
     {
+        if ($gate = $this->eligibilityService->gateResponse($request, $request->user())) {
+            return $gate;
+        }
+
         if ($this->restrictionService->isBlocked($request->user())) {
             if ($request->wantsJson()) {
                 return response()->json([
