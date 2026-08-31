@@ -264,4 +264,38 @@ return [
         'allow_zero_payable' => filter_var(env('OTA_PROMO_ALLOW_ZERO_PAYABLE', false), FILTER_VALIDATE_BOOL),
         'allow_internal_testing_codes' => filter_var(env('OTA_PROMO_ALLOW_INTERNAL_TESTING', true), FILTER_VALIDATE_BOOL),
     ],
+
+    /**
+     * QA operational communication isolation.
+     * When a booking is synthetic/local_qa, internal ops recipients are redirected to
+     * controlled sink addresses. Production routing for normal bookings is unchanged.
+     * Not activatable via public request parameters.
+     */
+    'qa_communication' => [
+        'isolation_enabled' => filter_var(env('OTA_QA_COMMUNICATION_ISOLATION_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'controlled_domains' => array_values(array_filter(array_map(
+            static fn (string $d): string => strtolower(trim($d)),
+            explode(',', (string) env('OTA_QA_CONTROLLED_EMAIL_DOMAINS', 'example.invalid')),
+        ))),
+        'ops_sink_emails' => array_values(array_filter(array_map(
+            static fn (string $e): string => strtolower(trim($e)),
+            explode(',', (string) env('OTA_QA_OPS_SINK_EMAILS', 'qa-ops-sink@example.invalid')),
+        ))),
+    ],
+
+    /** Public short fare/group share links (JP-SHARE-LINK-01). */
+    'share_links' => [
+        'flight_ttl_minutes' => max(5, (int) env('OTA_SHARE_FLIGHT_TTL_MINUTES', 180)),
+        'group_ttl_minutes' => max(30, (int) env('OTA_SHARE_GROUP_TTL_MINUTES', 1440)),
+        'code_length' => max(6, min(12, (int) env('OTA_SHARE_LINK_CODE_LENGTH', 8))),
+    ],
+
+    /** Local AI travel assistant (JP-AI-ASSIST). Disabled until capacity-approved runtime is healthy. */
+    'ai_assistant' => [
+        'enabled' => filter_var(env('OTA_AI_ASSISTANT_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'gateway_url' => env('OTA_AI_GATEWAY_URL', 'http://127.0.0.1:3921'),
+        'timeout_seconds' => max(3, (int) env('OTA_AI_TIMEOUT_SECONDS', 45)),
+        'anonymous_per_minute' => max(1, (int) env('OTA_AI_ANON_PER_MINUTE', 8)),
+        'max_message_chars' => max(100, (int) env('OTA_AI_MAX_MESSAGE_CHARS', 2000)),
+    ],
 ];

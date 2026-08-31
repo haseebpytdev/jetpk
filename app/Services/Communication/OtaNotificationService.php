@@ -31,6 +31,7 @@ class OtaNotificationService
         protected NotificationTemplateRenderer $templateRenderer,
         protected OtaOperationalEmailRenderer $operationalEmailRenderer,
         protected JetpkEmailEventRenderer $jetpkEmailEventRenderer,
+        protected QaOperationalCommunicationGuard $qaOperationalCommunicationGuard,
     ) {}
 
     /**
@@ -78,6 +79,7 @@ class OtaNotificationService
             $settings = $this->communicationSettingsService->getOrCreateSettings($agency);
             $eventSetting = $this->getOrCreateEventSetting($agency, $eventKey);
             $recipientBundle = $this->recipientResolver->resolve($agency, $eventKey, $booking, $actor, $recipientContext);
+            $recipientBundle = $this->qaOperationalCommunicationGuard->filterRecipientBundle($recipientBundle, $booking);
             $this->logSkippedRecipientBuckets($agency, $eventKey, $booking, $recipientBundle['skipped_buckets']);
             $scope = $recipientBundle['scope'];
             $safePayload = $this->payloadSanitizer->sanitizeForScope($payload, $scope);
@@ -600,6 +602,11 @@ class OtaNotificationService
                     'reason' => $resolved['reason'],
                 ]);
 
+                continue;
+            }
+
+            $resolved['emails'] = $this->qaOperationalCommunicationGuard->filterEmailList($resolved['emails'], $booking);
+            if ($resolved['emails'] === []) {
                 continue;
             }
 
