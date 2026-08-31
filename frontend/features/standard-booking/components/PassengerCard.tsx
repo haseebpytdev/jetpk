@@ -58,15 +58,19 @@ export function PassengerCard({
       className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-card sm:p-5"
       data-testid={`passenger-card-${index}`}
     >
-      <legend className="flex flex-wrap items-center gap-2 px-1 text-sm font-semibold text-jp-text">
-        <span>{label}</span>
+      <legend className="sr-only">
+        {label}
+        {isLead ? " (Lead passenger)" : ""}
+      </legend>
+      <div className="mb-2 flex flex-wrap items-center gap-2" data-testid={`passenger-card-header-${index}`}>
+        <h2 className="text-sm font-semibold text-jp-text">{label}</h2>
         {isLead ? (
           <span className="rounded-jp-md bg-jp-primary/10 px-2 py-0.5 text-[11px] font-semibold text-jp-primary">
             Lead passenger
           </span>
         ) : null}
-      </legend>
-      <p className="mt-1 text-xs text-jp-muted">Enter details exactly as shown on the passport.</p>
+      </div>
+      <p className="text-xs text-jp-muted">Enter details exactly as shown on the passport.</p>
 
       {savedTravelers.length > 0 && onSelectSavedTraveler ? (
         <label className="mt-3 block text-jp-sm" data-testid={`saved-traveler-picker-${index}`}>
