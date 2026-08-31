@@ -59,7 +59,7 @@ export function MobileStickyAction({ children, className }: MobileStickyActionPr
   return (
     <div
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-jp-border bg-jp-surface/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-jp-card backdrop-blur sm:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-jp-border bg-jp-surface/95 p-3 pr-[max(4.5rem,calc(env(safe-area-inset-right)+3.75rem))] pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-jp-card backdrop-blur sm:hidden",
         footerVisible && "pointer-events-none opacity-0",
         className,
       )}

@@ -88,7 +88,7 @@ export function PublicFloatingActionDock({
       className={cn(
         "pointer-events-none fixed right-[max(1rem,env(safe-area-inset-right))] z-50 xl:hidden",
         liftFab
-          ? "bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+4.25rem))]"
+          ? "bottom-[max(6.75rem,calc(env(safe-area-inset-bottom)+5.5rem))]"
           : "bottom-[max(1rem,env(safe-area-inset-bottom))]",
       )}
       data-testid="public-fab-dock"

@@ -766,7 +766,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
           sidebar={<BookingSidebar>{summarySidebar}</BookingSidebar>}
         />
 
-        <div className="mt-4 lg:hidden">
+        <div className="mt-4 max-xl:pr-16 lg:hidden">
           <PrimaryButton
             type="submit"
             className="w-full"
