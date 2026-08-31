@@ -38,8 +38,9 @@ export function PublicFloatingActionDock({
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", onPointer);
-    return () => document.removeEventListener("mousedown", onPointer);
+    // Use click (not mousedown) so the opening click cannot race-close the panel.
+    document.addEventListener("click", onPointer);
+    return () => document.removeEventListener("click", onPointer);
   }, [open]);
 
   const navItems = primaryNavigationForSession(session);
@@ -111,7 +112,10 @@ export function PublicFloatingActionDock({
         aria-controls={panelId}
         aria-label={open ? "Close JetPakistan quick actions" : "Open JetPakistan quick actions"}
         data-testid="public-fab-trigger"
-        onClick={() => setOpen((value) => !value)}
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen((value) => !value);
+        }}
       >
         {open ? "×" : "JP"}
       </button>

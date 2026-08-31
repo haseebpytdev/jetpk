@@ -1,3 +1,5 @@
+"use client";
+
 import { AccountMenu } from "@/components/navigation/AccountMenu";
 import { DesktopNavigation } from "@/components/navigation/DesktopNavigation";
 import { PublicFloatingActionDock } from "@/components/navigation/PublicFloatingActionDock";
