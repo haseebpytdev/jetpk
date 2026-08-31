@@ -160,6 +160,13 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/tsconfig.tsbuildinfo
 
+# JP-AI-ASSIST local models / runtime (never commit)
+/ai-assistant/models/
+/ai-assistant/data/
+/ai-assistant/runtime/*.sock
+*.gguf
+*.bin
+
 # JP-DASH-03 local-only Playwright session (never commit)
 tmp/jp-dash-03-admin-storage-state.json
 tmp/jp-dash-03-staff-storage-state.json

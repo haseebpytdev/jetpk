@@ -1,0 +1,54 @@
+{
+  "tools": [
+    {
+      "name": "search_flights",
+      "mutation": false,
+      "description": "Read-only JetPakistan flight search"
+    },
+    {
+      "name": "search_groups",
+      "mutation": false,
+      "description": "Read-only published group inventory search"
+    },
+    {
+      "name": "get_offer_details",
+      "mutation": false
+    },
+    {
+      "name": "compare_offers",
+      "mutation": false
+    },
+    {
+      "name": "create_fare_link",
+      "mutation": false,
+      "description": "Creates /f/{code} via PublicShareLinkService"
+    },
+    {
+      "name": "create_group_link",
+      "mutation": false,
+      "description": "Creates /g/{code} via PublicShareLinkService"
+    },
+    {
+      "name": "search_jetpakistan_knowledge",
+      "mutation": false
+    },
+    {
+      "name": "create_support_handoff",
+      "mutation": false
+    }
+  ],
+  "forbidden_tools": [
+    "create_pnr",
+    "confirm_booking",
+    "issue_ticket",
+    "verify_payment",
+    "reject_payment",
+    "cancel_supplier",
+    "refund",
+    "void",
+    "wallet_mutate",
+    "shell_exec",
+    "sql_exec",
+    "read_env"
+  ]
+}
