@@ -10,7 +10,11 @@ type BookingPageShellProps = {
 export function BookingPageShell({ children, className, testId }: BookingPageShellProps) {
   return (
     <div
-      className={cn("mx-auto w-full max-w-jp-booking px-4 py-6 sm:px-6 lg:px-8", className)}
+      className={cn(
+        "mx-auto w-full max-w-jp-booking px-4 py-6 pb-24 sm:px-6 lg:px-8 xl:pb-6",
+        "max-xl:pr-16",
+        className,
+      )}
       data-testid={testId}
     >
       {children}
