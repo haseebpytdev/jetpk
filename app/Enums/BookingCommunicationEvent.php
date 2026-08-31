@@ -17,4 +17,6 @@ enum BookingCommunicationEvent: string
     case StaffAssigned = 'staff_assigned';
     case UserInvited = 'user_invited';
     case PasswordResetRequested = 'password_reset_requested';
+    case BookingExpired = 'booking_expired';
+    case PaymentReminder = 'payment_reminder';
 }

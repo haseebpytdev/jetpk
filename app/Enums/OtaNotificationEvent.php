@@ -12,6 +12,7 @@ enum OtaNotificationEvent: string
     case BookingStatusChanged = 'booking_status_changed';
     case BookingAssigned = 'booking_assigned';
     case BookingCancelled = 'booking_cancelled';
+    case BookingExpired = 'booking_expired';
     case BookingFailedValidation = 'booking_failed_validation';
     case BookingManualReviewRequired = 'booking_manual_review_required';
     case StaleSegmentRequiresNewSearch = 'stale_segment_requires_new_search';
@@ -26,6 +27,7 @@ enum OtaNotificationEvent: string
     case PaymentVerified = 'payment_verified';
     case PaymentRejected = 'payment_rejected';
     case PaymentCompleted = 'payment_completed';
+    case PaymentReminder = 'payment_reminder';
     case RefundRequested = 'refund_requested';
     case RefundApproved = 'refund_approved';
     case RefundPaid = 'refund_paid';
@@ -110,6 +112,7 @@ enum OtaNotificationEvent: string
             self::BookingStatusChanged,
             self::BookingAssigned,
             self::BookingCancelled,
+            self::BookingExpired,
             self::BookingFailedValidation,
             self::BookingManualReviewRequired,
             self::StaleSegmentRequiresNewSearch,
@@ -122,6 +125,7 @@ enum OtaNotificationEvent: string
             self::PaymentVerified,
             self::PaymentRejected,
             self::PaymentCompleted,
+            self::PaymentReminder,
             self::RefundRequested,
             self::RefundApproved,
             self::RefundPaid,

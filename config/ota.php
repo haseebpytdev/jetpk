@@ -19,6 +19,34 @@ return [
     /** Public checkout fare-hold countdown (passengers + review). */
     'checkout_lock_minutes' => max(1, (int) env('OTA_CHECKOUT_LOCK_MINUTES', 7)),
 
+    /**
+     * JetPakistan business payment window after booking submit (minutes).
+     * Effective deadline = min(business window, supplier deadline − safety buffer) when a supplier deadline exists.
+     */
+    'payment_window_minutes' => max(1, (int) env('OTA_PAYMENT_WINDOW_MINUTES', 120)),
+
+    /** Minutes subtracted from supplier payment/PNR deadline when computing effective payment_due_at. */
+    'payment_deadline_safety_buffer_minutes' => max(0, (int) env('OTA_PAYMENT_DEADLINE_SAFETY_BUFFER_MINUTES', 15)),
+
+    /**
+     * Unpaid booking expiry + payment reminders (standard flight bookings).
+     * Supplier auto-cancel on expiry remains OFF unless explicitly enabled.
+     */
+    'unpaid_booking_expiry' => [
+        'enabled' => filter_var(env('OTA_UNPAID_BOOKING_EXPIRY_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'supplier_cancel_enabled' => filter_var(env('OTA_UNPAID_EXPIRY_SUPPLIER_CANCEL_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'batch_size' => max(1, (int) env('OTA_UNPAID_BOOKING_EXPIRY_BATCH_SIZE', 50)),
+    ],
+
+    'payment_reminders' => [
+        'enabled' => filter_var(env('OTA_PAYMENT_REMINDERS_ENABLED', true), FILTER_VALIDATE_BOOL),
+        /** First reminder when this fraction of the payment window remains (0.5 = halfway). */
+        'first_remaining_fraction' => max(0.05, min(0.95, (float) env('OTA_PAYMENT_REMINDER_FIRST_REMAINING_FRACTION', 0.5))),
+        /** Final reminder when this many minutes remain before payment_due_at. */
+        'final_minutes_before' => max(1, (int) env('OTA_PAYMENT_REMINDER_FINAL_MINUTES_BEFORE', 30)),
+        'batch_size' => max(1, (int) env('OTA_PAYMENT_REMINDER_BATCH_SIZE', 50)),
+    ],
+
     /** IATI instant-payment local checkout window (minutes) before local payment request expires. */
     'iati_local_checkout_minutes' => max(1, (int) env('OTA_IATI_LOCAL_CHECKOUT_MINUTES', 15)),
 

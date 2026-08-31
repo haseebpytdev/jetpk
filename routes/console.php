@@ -22,4 +22,6 @@ Schedule::command('ota:process-abandoned-flight-searches')->everyFifteenMinutes(
 Schedule::command('ota:send-abandoned-flight-searches')->everyFifteenMinutes();
 Schedule::command('group-ticketing:sync-inventory')->dailyAt('02:00');
 Schedule::command('group-ticketing:release-expired')->everyMinute();
+Schedule::command('ota:expire-unpaid-bookings')->everyMinute();
+Schedule::command('ota:send-payment-reminders')->everyFiveMinutes();
 Schedule::command('jetpk:branding-background-cleanup')->dailyAt('03:15');

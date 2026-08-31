@@ -141,6 +141,8 @@ class BookingService
             if ($actor !== null && ! $actor->isCustomer()) {
                 $booking->meta = $this->mergeCreatorContext($booking, $actor);
             }
+            $booking->payment_due_at = app(\App\Services\Bookings\PaymentDeadlineService::class)
+                ->computeEffectiveDeadline($booking);
             $booking->save();
 
             $this->changeStatus($booking, BookingStatus::Pending, $actor, 'Booking request submitted');
@@ -178,10 +180,10 @@ class BookingService
 
         return match ($booking->status) {
             BookingStatus::Draft => [BookingStatus::Pending],
-            BookingStatus::Pending => [BookingStatus::FareReview, BookingStatus::Confirmed, BookingStatus::Cancelled],
-            BookingStatus::FareReview => [BookingStatus::Confirmed, BookingStatus::Cancelled],
-            BookingStatus::Confirmed => [BookingStatus::PaymentPending, BookingStatus::Cancelled],
-            BookingStatus::PaymentPending => [BookingStatus::Paid, BookingStatus::Cancelled],
+            BookingStatus::Pending => [BookingStatus::FareReview, BookingStatus::Confirmed, BookingStatus::Cancelled, BookingStatus::Expired],
+            BookingStatus::FareReview => [BookingStatus::Confirmed, BookingStatus::Cancelled, BookingStatus::Expired],
+            BookingStatus::Confirmed => [BookingStatus::PaymentPending, BookingStatus::Cancelled, BookingStatus::Expired],
+            BookingStatus::PaymentPending => [BookingStatus::Paid, BookingStatus::Cancelled, BookingStatus::Expired],
             BookingStatus::Paid => [BookingStatus::TicketingPending, BookingStatus::Refunded],
             BookingStatus::TicketingPending => [BookingStatus::Ticketed, BookingStatus::Failed],
             BookingStatus::Failed => [BookingStatus::TicketingPending, BookingStatus::Cancelled],
@@ -232,9 +234,13 @@ class BookingService
             app(LedgerEventRecorder::class)->recordMarkupRevenueForBooking($booking, $actor);
         }
 
-        $this->communicationService->sendBookingStatusChanged($booking, str_replace('_', ' ', $to->value));
-        if ($to === BookingStatus::Confirmed) {
-            $this->communicationService->sendBookingConfirmed($booking);
+        if ($to === BookingStatus::Expired) {
+            $this->communicationService->sendBookingExpired($booking);
+        } else {
+            $this->communicationService->sendBookingStatusChanged($booking, str_replace('_', ' ', $to->value));
+            if ($to === BookingStatus::Confirmed) {
+                $this->communicationService->sendBookingConfirmed($booking);
+            }
         }
 
         return $booking;

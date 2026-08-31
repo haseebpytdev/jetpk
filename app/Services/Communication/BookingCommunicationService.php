@@ -449,6 +449,78 @@ class BookingCommunicationService
         }
     }
 
+    /**
+     * Customer + ops notification when an unpaid booking expires. Deduped per booking.
+     */
+    public function sendBookingExpired(Booking $booking): void
+    {
+        $booking = $booking->fresh(['agency.agencySetting', 'contact', 'customer', 'assignedStaff']);
+
+        if (! $this->customerEmailAlreadySent($booking, BookingCommunicationEvent::BookingExpired->value)) {
+            $this->sendEmailForBooking(
+                $booking,
+                BookingCommunicationEvent::BookingExpired,
+                fn (Booking $b): Mailable => new BookingUniversalNotification($this->bookingEmailPayloadFactory->bookingExpired($b)),
+                [
+                    'recipient_bucket' => 'booking_customer',
+                    'payment_due_at' => $booking->payment_due_at?->toIso8601String(),
+                ]
+            );
+        }
+
+        if (! $this->operationalNotificationAlreadyLogged($booking, OtaNotificationEvent::BookingExpired->value)) {
+            $this->notifyOperational($booking, OtaNotificationEvent::BookingExpired, [
+                'booking_reference' => $booking->reference_code,
+                'status' => $booking->status->value,
+                'payment_due_at' => $booking->payment_due_at?->toIso8601String(),
+                'payment_status' => (string) ($booking->payment_status ?? ''),
+            ], null, 'Booking expired — '.$booking->reference_code, null, [
+                'notify_buckets' => ['assigned_staff', 'operations_queue', 'platform_admin'],
+            ]);
+        }
+    }
+
+    /**
+     * Deduped payment reminder (stage = first|final). Returns true when a customer email was queued/sent.
+     */
+    public function sendPaymentReminder(Booking $booking, string $stage = 'first'): bool
+    {
+        $booking = $booking->fresh(['agency.agencySetting', 'contact', 'customer']);
+        $stage = $stage === 'final' ? 'final' : 'first';
+
+        if ($this->paymentReminderAlreadyLogged($booking, $stage)) {
+            return false;
+        }
+
+        $recipient = $this->resolveRecipient($booking);
+        if (blank($recipient['email'] ?? null)) {
+            return false;
+        }
+
+        $this->sendEmailForBooking(
+            $booking,
+            BookingCommunicationEvent::PaymentReminder,
+            fn (Booking $b): Mailable => new BookingUniversalNotification($this->bookingEmailPayloadFactory->paymentReminder($b, $stage)),
+            [
+                'recipient_bucket' => 'booking_customer',
+                'reminder_stage' => $stage,
+                'payment_due_at' => $booking->payment_due_at?->toIso8601String(),
+            ]
+        );
+
+        return true;
+    }
+
+    protected function paymentReminderAlreadyLogged(Booking $booking, string $stage): bool
+    {
+        return CommunicationLog::query()
+            ->where('booking_id', $booking->id)
+            ->where('event', BookingCommunicationEvent::PaymentReminder->value)
+            ->whereIn('status', ['queued', 'sent', 'sending'])
+            ->where('meta->reminder_stage', $stage)
+            ->exists();
+    }
+
     public function notifyFareUpdateRequiresAcceptance(Booking $booking): void
     {
         $booking = $booking->fresh(['agency.agencySetting', 'contact', 'customer', 'agent.user']);

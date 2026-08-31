@@ -1014,6 +1014,50 @@ class BookingEmailPayloadFactory
         );
     }
 
+    public function bookingExpired(Booking $booking): array
+    {
+        $booking = $this->preparedBooking($booking);
+        $due = $booking->payment_due_at?->format('d M Y, g:i A');
+
+        return $this->basePayload(
+            $booking,
+            'booking_expired',
+            'Booking expired — '.$booking->reference_code,
+            'Payment deadline expired',
+            'Expired',
+            'danger',
+            'Your booking was released because payment was not completed before the deadline.',
+            array_values(array_filter([
+                $due !== null ? 'Payment was due by '.$due.'.' : null,
+                'If you still wish to travel, please search again and create a new booking.',
+                'Contact support with your booking reference if you believe payment was already completed.',
+            ]))
+        );
+    }
+
+    public function paymentReminder(Booking $booking, string $stage = 'first'): array
+    {
+        $booking = $this->preparedBooking($booking);
+        $due = $booking->payment_due_at?->format('d M Y, g:i A');
+        $isFinal = $stage === 'final';
+
+        return $this->basePayload(
+            $booking,
+            'payment_reminder',
+            ($isFinal ? 'Final payment reminder — ' : 'Payment reminder — ').$booking->reference_code,
+            $isFinal ? 'Final payment reminder' : 'Payment reminder',
+            $isFinal ? 'Final reminder' : 'Reminder',
+            'warning',
+            $isFinal
+                ? 'Your payment deadline is almost here. Please complete payment to keep this booking.'
+                : 'This is a reminder that payment is still required for your booking.',
+            array_values(array_filter([
+                $due !== null ? 'Please complete payment by '.$due.'.' : null,
+                'If you have already paid, please submit payment proof or contact support with your booking reference.',
+            ]))
+        );
+    }
+
     public function itineraryReady(Booking $booking, ?string $staffNote = null, bool $hasPdfAttachment = false): array
     {
         $booking = $this->preparedBooking($booking);

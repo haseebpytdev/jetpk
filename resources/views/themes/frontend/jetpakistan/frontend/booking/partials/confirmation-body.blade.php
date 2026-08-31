@@ -167,6 +167,22 @@
                 </div>
                 <span class="jp-status-pill {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span>
             </div>
+            @php
+                $showPaymentCountdown = ! $isTicketed
+                    && in_array($booking->status, [BookingStatus::Pending, BookingStatus::PaymentPending, BookingStatus::Confirmed, BookingStatus::FareReview], true)
+                    && in_array((string) ($booking->payment_status ?? 'unpaid'), ['unpaid', 'partial', ''], true)
+                    && $booking->payment_due_at !== null;
+            @endphp
+            @if ($showPaymentCountdown)
+                <div class="jp-confirm-payment-deadline" data-jp-payment-deadline>
+                    <p class="jp-confirm-hero__note">Complete payment before the deadline to keep this booking.</p>
+                    <x-bookings.fare-session-countdown
+                        session-key="payment-deadline-{{ $booking->id }}"
+                        :expires-at-iso="$booking->payment_due_at->toIso8601String()"
+                        variant="desktop"
+                    />
+                </div>
+            @endif
             <dl class="jp-kv-grid jp-kv-grid--hero">
                 <div class="jp-kv-grid__row">
                     <dt>{{ $pnrFieldLabel }}</dt>
