@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\PublicAiAssistantController;
+use App\Http\Controllers\PublicSite\PublicShareLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BackOffice\BackOfficeDashboardController;
 use App\Http\Controllers\ClientUiPreviewController;
@@ -45,6 +47,24 @@ Route::get('/devcp/{path}', static function (string $path) {
 })->where('path', '.*')->name('devcp.alias');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/f/{code}', [PublicShareLinkController::class, 'showFlight'])
+    ->where('code', '[A-Za-z0-9]{6,16}')
+    ->middleware('throttle:60,1')
+    ->name('share.flight');
+Route::get('/g/{code}', [PublicShareLinkController::class, 'showGroup'])
+    ->where('code', '[A-Za-z0-9]{6,16}')
+    ->middleware('throttle:60,1')
+    ->name('share.group');
+Route::post('/api/public/share/flight', [PublicShareLinkController::class, 'createFlight'])
+    ->middleware('throttle:30,1')
+    ->name('api.public.share.flight');
+Route::get('/api/public/ai/health', [PublicAiAssistantController::class, 'health'])
+    ->middleware('throttle:60,1')
+    ->name('api.public.ai.health');
+Route::post('/api/public/ai/chat', [PublicAiAssistantController::class, 'chat'])
+    ->middleware('throttle:8,1')
+    ->name('api.public.ai.chat');
 
 Route::prefix('api/public/content')->group(function (): void {
     Route::get('/csrf-token', [PublicContentApiController::class, 'csrfToken'])->name('api.public.content.csrf');

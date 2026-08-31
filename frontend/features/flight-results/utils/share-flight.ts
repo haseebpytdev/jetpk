@@ -79,10 +79,45 @@ function resolveCityCode(
   return { city: cleanCity || cleanCode, code: cleanCode };
 }
 
+export async function createFlightShortShareUrl(input: {
+  origin: string;
+  destination: string;
+  depart_date: string;
+  return_date?: string | null;
+  trip_type?: string;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  cabin?: string;
+  display_fare?: number | null;
+  airline_code?: string | null;
+  airline_name?: string | null;
+}): Promise<{ url: string; expires_at?: string | null } | null> {
+  try {
+    const response = await fetch("/api/public/share/flight", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      credentials: "same-origin",
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { ok?: boolean; url?: string; expires_at?: string | null };
+    if (!data.ok || !data.url) return null;
+    return { url: data.url, expires_at: data.expires_at ?? null };
+  } catch {
+    return null;
+  }
+}
+
 export function buildFlightShareText(
   offer: FlightOffer,
   priceAmount: number | null | undefined,
   shareUrl: string,
+  expiresLabel?: string | null,
 ): string {
   const first = offer.segments?.[0];
   const last = offer.segments?.[offer.segments.length - 1];
@@ -100,16 +135,27 @@ export function buildFlightShareText(
   const airlineLabel = iata ? `${airline} (${iata})` : airline;
   const routeLabel = `${origin.city}${origin.code ? ` (${origin.code})` : ""} to ${destination.city}${destination.code ? ` (${destination.code})` : ""}`;
 
-  return [
+  const lines = [
     "✈️ *Your Flight Details*",
     "",
-    `- ${airlineLabel}: ${routeLabel} - ${price}`,
+    `${airlineLabel}: ${routeLabel} - ${price}`,
     "",
     `💰 *Total:* ${price}`,
     "",
-    "🔗 View & Book:",
+    "🔗 *View & Book:*",
     shareUrl,
-  ].join("\n");
+    "",
+  ];
+
+  if (expiresLabel) {
+    lines.push(`⏳ Fare reference valid until ${expiresLabel}. Fare will be revalidated before booking.`, "");
+  } else {
+    lines.push("⏳ Fare will be revalidated before booking.", "");
+  }
+
+  lines.push("Thanks for visiting!", "", "✈️ *JetPakistan*");
+
+  return lines.join("\n");
 }
 
 export function buildWhatsAppShareUrl(text: string): string {

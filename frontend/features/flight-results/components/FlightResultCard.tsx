@@ -1,7 +1,7 @@
 "use client";
 
 import { resolveAuthoritativeFareOptionKey } from "@/features/flight-details/utils/fare-option-key";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FareFamilyOption, FlightOffer } from "../types";
 import { AirlineIdentity } from "./AirlineIdentity";
 import { FareBadge } from "./FareBadge";
@@ -15,6 +15,7 @@ import {
   buildSafePublicResultsShareUrl,
   buildWhatsAppShareUrl,
   copyTextToClipboard,
+  createFlightShortShareUrl,
 } from "../utils/share-flight";
 
 type FlightResultCardProps = {
@@ -94,14 +95,75 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
     [searchParams],
   );
   const shareUrl = useMemo(() => buildSafePublicResultsShareUrl(shareParams), [shareParams]);
+  const [resolvedShareUrl, setResolvedShareUrl] = useState(shareUrl);
+  const [shareExpiryLabel, setShareExpiryLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    setResolvedShareUrl(shareUrl);
+    setShareExpiryLabel(null);
+  }, [shareUrl]);
+
   const shareText = useMemo(
-    () => buildFlightShareText(offer, displayAmount ?? offer.final_customer_price, shareUrl),
-    [offer, displayAmount, shareUrl],
+    () => buildFlightShareText(offer, displayAmount ?? offer.final_customer_price, resolvedShareUrl, shareExpiryLabel),
+    [offer, displayAmount, resolvedShareUrl, shareExpiryLabel],
   );
   const whatsappUrl = useMemo(() => buildWhatsAppShareUrl(shareText), [shareText]);
 
+  const ensureShortShare = async (): Promise<string> => {
+    const origin = (offer.segments?.[0]?.origin_airport_code ?? offer.departure_airport_code ?? shareParams.get("from") ?? "").toString();
+    const destination = (
+      offer.segments?.[offer.segments.length - 1]?.destination_airport_code ??
+      offer.arrival_airport_code ??
+      shareParams.get("to") ??
+      ""
+    ).toString();
+    const depart = shareParams.get("depart") ?? "";
+    if (!origin || !destination || !depart) {
+      return shareUrl;
+    }
+
+    const short = await createFlightShortShareUrl({
+      origin,
+      destination,
+      depart_date: depart,
+      return_date: shareParams.get("return_date"),
+      trip_type: shareParams.get("trip_type") ?? "one_way",
+      adults: Number(shareParams.get("adults") ?? 1),
+      children: Number(shareParams.get("children") ?? 0),
+      infants: Number(shareParams.get("infants") ?? 0),
+      cabin: shareParams.get("cabin") ?? "economy",
+      display_fare: displayAmount ?? offer.final_customer_price ?? null,
+      airline_code: offer.airline_code,
+      airline_name: offer.airline_name,
+    });
+
+    if (!short?.url) {
+      return shareUrl;
+    }
+
+    setResolvedShareUrl(short.url);
+    if (short.expires_at) {
+      try {
+        const when = new Date(short.expires_at);
+        setShareExpiryLabel(
+          when.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+        );
+      } catch {
+        setShareExpiryLabel(null);
+      }
+    }
+    return short.url;
+  };
+
   const handleCopy = async () => {
-    const ok = await copyTextToClipboard(shareText);
+    const url = await ensureShortShare();
+    const text = buildFlightShareText(
+      offer,
+      displayAmount ?? offer.final_customer_price,
+      url,
+      shareExpiryLabel,
+    );
+    const ok = await copyTextToClipboard(text);
     if (!ok) return;
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
@@ -188,6 +250,19 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
                 aria-label="Share on WhatsApp"
                 title="WhatsApp"
                 data-testid="result-whatsapp-share"
+                onClick={(event) => {
+                  event.preventDefault();
+                  void (async () => {
+                    const url = await ensureShortShare();
+                    const text = buildFlightShareText(
+                      offer,
+                      displayAmount ?? offer.final_customer_price,
+                      url,
+                      shareExpiryLabel,
+                    );
+                    window.open(buildWhatsAppShareUrl(text), "_blank", "noopener,noreferrer");
+                  })();
+                }}
               >
                 <WhatsAppIcon className="h-3.5 w-3.5" />
               </a>
