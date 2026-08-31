@@ -19,7 +19,6 @@ import {
   SupplierTimeoutState,
 } from "@/features/flight-details/components/OfferStatePanels";
 import { PriceBreakdown } from "@/features/flight-details/components/PriceBreakdown";
-import { ReturnJourneyDetails } from "@/features/flight-details/components/ReturnJourneyDetails";
 import { SegmentDetails } from "@/features/flight-details/components/SegmentDetails";
 import { useFlightDetails } from "@/features/flight-details/hooks/use-flight-details";
 import { useRevalidation } from "@/features/flight-details/hooks/use-revalidation";
@@ -136,11 +135,22 @@ export function FareSelectionPage() {
                 <h2 id="fare-selection-journey-heading" className="mb-3 text-sm font-semibold text-jp-text">
                   Journey details
                 </h2>
-                <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
                 <SegmentDetails
                   segments={segments}
                   layovers={offer.layovers_display}
                   airlineLogoUrl={offer.airline_logo_url}
+                  journeyBoundaryIndexes={
+                    details.data?.return_combo
+                      ? [
+                          Math.max(
+                            0,
+                            (Array.isArray((details.data.return_combo.outbound_journey as { segments?: unknown[] } | null)?.segments)
+                              ? ((details.data.return_combo.outbound_journey as { segments?: unknown[] }).segments?.length ?? 1)
+                              : Math.max(1, Math.floor(segments.length / 2))) - 1,
+                          ),
+                        ]
+                      : []
+                  }
                 />
               </section>
 

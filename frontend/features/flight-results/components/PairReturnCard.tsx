@@ -124,6 +124,35 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
       data-selected-fare-key={effectiveFareKey || undefined}
       aria-label={`Paired flight ${outbound.origin_airport_code} to ${outbound.destination_airport_code} return ${inbound.origin_airport_code} to ${inbound.destination_airport_code}`}
     >
+      <div
+        className="mb-3 grid gap-2 rounded-jp-md border border-jp-border-soft bg-jp-page/50 px-2.5 py-2 sm:grid-cols-2 sm:gap-3 sm:px-3"
+        data-testid="paired-journey-orientation-strip"
+      >
+        <div className="min-w-0" data-testid="paired-strip-departure">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-jp-text-muted">Departure</p>
+          <p className="mt-0.5 text-xs font-semibold text-jp-text">
+            {outbound.origin_airport_code} → {outbound.destination_airport_code}
+          </p>
+          <p className="text-[11px] text-jp-text-muted">{outbound.departure_date_display || "—"}</p>
+          <p className="text-[11px] text-jp-text-muted">
+            {[outbound.stops_label_display || (outbound.stops === 0 ? "Direct" : `${outbound.stops} stop${outbound.stops === 1 ? "" : "s"}`), outbound.duration_display]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        </div>
+        <div className="min-w-0 border-t border-jp-border-soft pt-2 sm:border-t-0 sm:pt-0" data-testid="paired-strip-arrival">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-jp-text-muted">Arrival</p>
+          <p className="mt-0.5 text-xs font-semibold text-jp-text">
+            {inbound.origin_airport_code} → {inbound.destination_airport_code}
+          </p>
+          <p className="text-[11px] text-jp-text-muted">{inbound.departure_date_display || "—"}</p>
+          <p className="text-[11px] text-jp-text-muted">
+            {[inbound.stops_label_display || (inbound.stops === 0 ? "Direct" : `${inbound.stops} stop${inbound.stops === 1 ? "" : "s"}`), inbound.duration_display]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        </div>
+      </div>
       <div className="grid items-stretch gap-3 lg:grid-cols-[minmax(7.5rem,0.75fr)_minmax(0,2.2fr)_minmax(10.5rem,0.95fr)] lg:items-center lg:gap-4 xl:grid-cols-[minmax(9rem,0.85fr)_minmax(22rem,2.5fr)_minmax(12.5rem,0.95fr)]">
         <div className="min-w-0 space-y-2 lg:pr-1">
           <AirlineIdentity
@@ -152,6 +181,8 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
               <TimeRouteBlock
                 departureTime={outbound.departure_time_display}
                 arrivalTime={outbound.arrival_time_display}
+                departureDate={outbound.departure_date_display}
+                arrivalDate={outbound.arrival_date_display}
                 originCode={outbound.origin_airport_code}
                 destinationCode={outbound.destination_airport_code}
                 duration={outbound.duration_display}
@@ -172,6 +203,8 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
               <TimeRouteBlock
                 departureTime={inbound.departure_time_display}
                 arrivalTime={inbound.arrival_time_display}
+                departureDate={inbound.departure_date_display}
+                arrivalDate={inbound.arrival_date_display}
                 originCode={inbound.origin_airport_code}
                 destinationCode={inbound.destination_airport_code}
                 duration={inbound.duration_display}

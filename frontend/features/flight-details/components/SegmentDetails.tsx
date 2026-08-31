@@ -1,3 +1,4 @@
+import { JetPakistanLogo } from "@/components/layout/JetPakistanLogo";
 import { AirlineIdentity } from "@/features/flight-results/components/AirlineIdentity";
 import { TimeRouteBlock } from "@/features/flight-results/components/TimeRouteBlock";
 import type { FlightSegmentDisplay } from "@/features/flight-results/types";
@@ -100,11 +101,7 @@ function LayoverBlock({ layover }: { layover?: LayoverDisplay }) {
   if (!layover) return null;
   const isStay = layover.kind === "destination_stay";
   const place = isStay
-    ? (layover.airport_code
-      ? `Time in ${layover.airport_code}`
-      : layover.city
-        ? `Stay at destination · ${layover.city}`
-        : "Stay at destination")
+    ? "Thanks for Choosing JetPakistan"
     : layover.airport_code
       ? `Layover in ${layover.airport_code}`
       : layover.city
@@ -116,19 +113,30 @@ function LayoverBlock({ layover }: { layover?: LayoverDisplay }) {
     <div
       className={
         isStay
-          ? "my-3 rounded-jp-md border border-jp-border bg-jp-page px-4 py-3 text-center"
-          : "my-3 rounded-jp-md border border-dashed border-jp-border bg-jp-surface-muted/70 px-4 py-3 text-center"
+          ? "my-3 flex flex-col items-center gap-2 rounded-jp-md border border-jp-success/25 bg-jp-success-soft px-4 py-3 text-center"
+          : "my-3 rounded-jp-md border border-jp-success/30 bg-jp-success-soft/80 px-4 py-3 text-center"
       }
       data-testid={isStay ? "destination-stay-block" : "layover-block"}
       data-layover-kind={layover.kind ?? "connection"}
       tabIndex={0}
       role="note"
-      aria-label={[place, duration].filter(Boolean).join(" · ")}
+      aria-label={[place, !isStay ? duration : null].filter(Boolean).join(" · ")}
     >
-      <p className="text-sm font-medium text-jp-text">{place}</p>
-      {duration ? <p className="mt-0.5 text-sm text-jp-text-muted">{duration}</p> : null}
-      {!isStay && layover.terminal_change ? <p className="mt-1 text-xs text-jp-text-muted">Terminal change</p> : null}
-      {!isStay && layover.overnight ? <p className="mt-1 text-xs text-jp-text-muted">Overnight layover</p> : null}
+      {isStay ? (
+        <>
+          <JetPakistanLogo showTagline={false} logoHeight={28} className="min-w-0 justify-center" />
+          <p className="text-sm font-medium text-jp-text" data-testid="return-interleg-brand-message">
+            Thanks for Choosing JetPakistan
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="text-sm font-medium text-jp-text">{place}</p>
+          {duration ? <p className="mt-0.5 text-sm text-jp-text-muted">{duration}</p> : null}
+          {layover.terminal_change ? <p className="mt-1 text-xs text-jp-text-muted">Terminal change</p> : null}
+          {layover.overnight ? <p className="mt-1 text-xs text-jp-text-muted">Overnight layover</p> : null}
+        </>
+      )}
     </div>
   );
 }
@@ -175,13 +183,8 @@ export function SegmentDetails({
                 duration_minutes: derived?.duration_minutes,
               });
             } else {
-              const stops = Number((segment as FlightSegmentDisplay & { stops?: number }).stops ?? 0);
-              // Direct single-leg journeys never show connection blocks between phantom gaps.
               const raw = layovers[index] ?? parseLayoverFromSegment(segment) ?? deriveLayoverFromSegments(segment, next);
               gap = raw ? enrichLayover({ ...raw, kind: raw.kind ?? "connection" }) : undefined;
-              if (segments.length === 1 || (stops === 0 && segments.length === 2 && !raw && !gap)) {
-                // keep gap as computed
-              }
             }
           }
 
@@ -197,9 +200,6 @@ export function SegmentDetails({
                       {originLabel} <span className="text-jp-text-muted">→</span> {destLabel}
                     </p>
                   </div>
-                  {segment.departure_date_display ? (
-                    <p className="text-xs font-medium text-jp-text-muted">{segment.departure_date_display}</p>
-                  ) : null}
                 </header>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -227,6 +227,8 @@ export function SegmentDetails({
                   departureTime={segment.departure_time_display}
                   arrivalTime={segment.arrival_time_display}
                   arrivalDayOffset={segment.arrival_day_offset_display ?? segment.arrival_day_offset}
+                  departureDate={segment.departure_date_display}
+                  arrivalDate={segment.arrival_date_display}
                   originCode={origin}
                   destinationCode={destination}
                   duration={segment.duration_display}
@@ -234,17 +236,15 @@ export function SegmentDetails({
                   className="rounded-jp-md bg-jp-page/60 px-2 py-2 sm:px-3"
                 />
 
-                {(originCity || destCity || segment.terminal_departure || segment.terminal_arrival || segment.arrival_date_display) ? (
+                {(originCity || destCity || segment.terminal_departure || segment.terminal_arrival) ? (
                   <div className="grid gap-2 text-xs text-jp-text-muted sm:grid-cols-2">
                     <div>
                       {originCity ? <p>{originCity}</p> : null}
                       {segment.terminal_departure ? <p>Terminal {segment.terminal_departure}</p> : null}
-                      {segment.departure_date_display ? <p>{segment.departure_date_display}</p> : null}
                     </div>
                     <div className="sm:text-right">
                       {destCity ? <p>{destCity}</p> : null}
                       {segment.terminal_arrival ? <p>Terminal {segment.terminal_arrival}</p> : null}
-                      {segment.arrival_date_display ? <p>{segment.arrival_date_display}</p> : null}
                     </div>
                   </div>
                 ) : null}

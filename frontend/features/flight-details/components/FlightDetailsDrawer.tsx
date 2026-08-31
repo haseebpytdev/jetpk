@@ -18,7 +18,6 @@ import {
   RevalidationPanel,
   SupplierTimeoutState,
 } from "./OfferStatePanels";
-import { ReturnJourneyDetails } from "./ReturnJourneyDetails";
 import { SegmentDetails } from "./SegmentDetails";
 
 function toSupplierFareKey(key: string | undefined, options: { option_key: string; is_base_offer_fare?: boolean; is_synthetic_default?: boolean }[]): string | undefined {
@@ -360,7 +359,6 @@ export function FlightDetailsDrawer({
 
                 <section className="rounded-jp-card border border-jp-border bg-jp-surface p-3.5" aria-labelledby="journey-details-heading">
                   <h3 id="journey-details-heading" className="mb-3 text-sm font-semibold text-jp-text">Journey details</h3>
-                  <ReturnJourneyDetails returnCombo={details.data?.return_combo} />
                   <SegmentDetails
                     segments={segments}
                     layovers={offer.layovers_display}

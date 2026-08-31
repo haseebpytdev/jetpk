@@ -1,10 +1,15 @@
 import { cn } from "@/lib/cn";
+import { compactEndpointDate } from "../utils/endpoint-date";
 import { StopsAndLayover, type LayoverDetail } from "./StopsAndLayover";
 
 type TimeRouteBlockProps = {
   departureTime?: string;
   arrivalTime?: string;
   arrivalDayOffset?: string;
+  /** Authoritative segment/journey departure date display (not search date). */
+  departureDate?: string;
+  /** Authoritative segment/journey arrival date display (not search date). */
+  arrivalDate?: string;
   originCode?: string;
   destinationCode?: string;
   duration?: string;
@@ -20,10 +25,54 @@ type TimeRouteBlockProps = {
   className?: string;
 };
 
+function EndpointColumn({
+  date,
+  time,
+  airport,
+  dayOffset,
+  align,
+  compact,
+}: {
+  date?: string;
+  time?: string;
+  airport?: string;
+  dayOffset?: string;
+  align: "left" | "right";
+  compact: boolean;
+}) {
+  const compactDate = compactEndpointDate(date);
+  return (
+    <div className={cn("min-w-0", align === "left" ? "text-left" : "text-right")}>
+      {compactDate ? (
+        <p
+          className={cn(
+            "font-medium uppercase tracking-wide text-jp-text-muted",
+            compact ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-xs",
+          )}
+          data-testid="endpoint-date"
+        >
+          {compactDate}
+        </p>
+      ) : null}
+      <p className={cn("font-semibold tabular-nums text-jp-text", compact ? "text-sm sm:text-base md:text-lg" : "text-base sm:text-lg md:text-xl")}>
+        {time ?? "—"}
+        {dayOffset ? (
+          <span className="ml-1 align-super text-[10px] font-normal text-jp-text-muted">{dayOffset}</span>
+        ) : null}
+      </p>
+      <p className={cn("truncate text-jp-text-muted", compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-sm")}>
+        {airport ?? "—"}
+      </p>
+    </div>
+  );
+}
+
 export function TimeRouteBlock({
   departureTime,
   arrivalTime,
   arrivalDayOffset,
+  departureDate,
+  arrivalDate,
   originCode,
   destinationCode,
   duration,
@@ -38,14 +87,13 @@ export function TimeRouteBlock({
 }: TimeRouteBlockProps) {
   return (
     <div className={cn("grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 sm:gap-4", className)}>
-      <div className="min-w-0 text-left">
-        <p className={cn("font-semibold text-jp-text", compact ? "text-sm sm:text-base md:text-lg" : "text-base sm:text-lg md:text-xl")}>
-          {departureTime ?? "—"}
-        </p>
-        <p className={cn("truncate text-jp-text-muted", compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-sm")}>
-          {originCode ?? "—"}
-        </p>
-      </div>
+      <EndpointColumn
+        date={departureDate}
+        time={departureTime}
+        airport={originCode}
+        align="left"
+        compact={compact}
+      />
       <div
         className={cn(
           "flex max-w-full flex-col items-center overflow-visible px-0.5 text-center sm:px-1",
@@ -66,17 +114,14 @@ export function TimeRouteBlock({
           />
         ) : null}
       </div>
-      <div className="text-right min-w-0">
-        <p className={cn("font-semibold text-jp-text", compact ? "text-sm sm:text-base md:text-lg" : "text-base sm:text-lg md:text-xl")}>
-          {arrivalTime ?? "—"}
-          {arrivalDayOffset ? (
-            <span className="ml-1 align-super text-[10px] font-normal text-jp-text-muted">{arrivalDayOffset}</span>
-          ) : null}
-        </p>
-        <p className={cn("truncate text-jp-text-muted", compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-sm")}>
-          {destinationCode ?? "—"}
-        </p>
-      </div>
+      <EndpointColumn
+        date={arrivalDate}
+        time={arrivalTime}
+        airport={destinationCode}
+        dayOffset={arrivalDayOffset}
+        align="right"
+        compact={compact}
+      />
     </div>
   );
 }

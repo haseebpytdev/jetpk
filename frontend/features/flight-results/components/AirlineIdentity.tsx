@@ -24,10 +24,12 @@ export function AirlineIdentity({ code, name, logoUrl, size = "md", className }:
     <div className={cn("flex items-center gap-2.5", className)}>
       <div
         className={cn(
-          "relative flex shrink-0 items-center justify-center overflow-hidden rounded-jp-sm border border-jp-border bg-jp-surface-muted",
+          "relative aspect-square flex shrink-0 items-center justify-center overflow-hidden rounded-jp-sm bg-white",
+          logoUrl ? "border border-jp-border/60" : "border border-jp-border bg-jp-surface",
           sizing.box,
         )}
         aria-hidden={Boolean(logoUrl)}
+        data-testid="airline-logo-container"
       >
         {logoUrl ? (
           <Image
@@ -35,7 +37,7 @@ export function AirlineIdentity({ code, name, logoUrl, size = "md", className }:
             alt={alt}
             width={sizing.img}
             height={sizing.img}
-            className="h-full w-full object-contain p-0.5"
+            className="h-full w-full object-contain p-1"
             unoptimized
           />
         ) : (

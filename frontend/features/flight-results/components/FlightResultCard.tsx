@@ -195,6 +195,8 @@ export function FlightResultCard({ offer, searchId, searchParams, onOpenDetails 
             departureTime={firstSegment?.departure_time_display ?? offer.departure_time}
             arrivalTime={lastSegment?.arrival_time_display ?? offer.arrival_time}
             arrivalDayOffset={offer.arrival_day_offset_display ?? offer.arrival_day_offset}
+            departureDate={firstSegment?.departure_date_display}
+            arrivalDate={lastSegment?.arrival_date_display}
             originCode={firstSegment?.origin_airport_code ?? firstSegment?.origin ?? offer.departure_airport_code}
             destinationCode={lastSegment?.destination_airport_code ?? lastSegment?.destination ?? offer.arrival_airport_code}
             duration={offer.duration ?? offer.segments?.map((segment) => segment.duration_display).filter(Boolean).join(" + ")}

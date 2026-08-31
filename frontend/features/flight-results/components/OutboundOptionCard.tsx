@@ -127,6 +127,8 @@ export function OutboundOptionCard({ option, searchId, onOpenDetails }: Outbound
             departureTime={journey.departure_time_display}
             arrivalTime={journey.arrival_time_display}
             arrivalDayOffset={journey.arrival_day_offset_display}
+            departureDate={journey.departure_date_display}
+            arrivalDate={journey.arrival_date_display}
             originCode={journey.origin_airport_code}
             destinationCode={journey.destination_airport_code}
             duration={journey.duration_display}

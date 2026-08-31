@@ -5,6 +5,8 @@
 export type NormalizedJourneyDisplay = {
   departure_time_display: string;
   arrival_time_display: string;
+  departure_date_display: string;
+  arrival_date_display: string;
   duration_display: string;
   origin_airport_code: string;
   destination_airport_code: string;
@@ -80,6 +82,8 @@ export function normalizeJourneyDisplay(
   return {
     departure_time_display: asString(journey?.departure_time_display ?? journey?.departure_time, "—"),
     arrival_time_display: asString(journey?.arrival_time_display ?? journey?.arrival_time, "—"),
+    departure_date_display: asString(journey?.departure_date_display ?? journey?.departure_date),
+    arrival_date_display: asString(journey?.arrival_date_display ?? journey?.arrival_date),
     duration_display: asString(journey?.duration_display ?? journey?.duration),
     origin_airport_code: origin,
     destination_airport_code: destination,
