@@ -69,7 +69,7 @@ export function ContactDetailsSection({
         </div>
       ) : null}
 
-      <div className="mt-4 grid gap-x-5 gap-y-4 sm:grid-cols-2">
+      <div className="mt-4 grid gap-x-5 gap-y-4 md:grid-cols-2">
         <label className="text-jp-sm sm:col-span-2">
           Contact name <span className="text-jp-muted">(optional)</span>
           <input

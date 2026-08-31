@@ -519,7 +519,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
               <div className="space-y-4" aria-busy="true" data-testid="passenger-skeleton">
                 <div className="min-h-[10rem] rounded-jp-card border border-jp-border bg-jp-surface p-4">
                   <div className="h-4 w-28 animate-pulse rounded bg-jp-surface-muted" />
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
                     <div className="h-10 animate-pulse rounded-jp-md bg-jp-surface-muted" />
                     <div className="h-10 animate-pulse rounded-jp-md bg-jp-surface-muted" />
                     <div className="h-10 animate-pulse rounded-jp-md bg-jp-surface-muted" />

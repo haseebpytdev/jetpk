@@ -93,8 +93,8 @@ export function PassengerCard({
 
       <input type="hidden" name={`passengers[${index}][passenger_type]`} value={passenger.passenger_type} />
 
-      <div className="mt-4 grid gap-x-5 gap-y-3.5 sm:grid-cols-2">
-        <div className="border-b border-jp-border-soft pb-2 sm:col-span-2">
+      <div className="mt-4 grid gap-x-5 gap-y-3.5 md:grid-cols-2">
+        <div className="border-b border-jp-border-soft pb-2 md:col-span-2">
           <h3 className="text-sm font-semibold text-jp-text">Personal information</h3>
         </div>
         <label className="text-jp-sm">
@@ -127,7 +127,7 @@ export function PassengerCard({
           </select>
         </label>
 
-        <label className="text-jp-sm sm:col-span-1">
+        <label className="text-jp-sm md:col-span-1">
           First name <span className="text-red-700">*</span>
           <input
             type="text"
@@ -142,7 +142,7 @@ export function PassengerCard({
           ) : null}
         </label>
 
-        <label className="text-jp-sm sm:col-span-1">
+        <label className="text-jp-sm md:col-span-1">
           Last name <span className="text-red-700">*</span>
           <input
             type="text"
@@ -180,7 +180,7 @@ export function PassengerCard({
           />
         </label>
 
-        <div className="mt-1 border-b border-jp-border-soft pb-2 sm:col-span-2">
+        <div className="mt-1 border-b border-jp-border-soft pb-2 md:col-span-2">
           <h3 className="text-sm font-semibold text-jp-text">Travel document</h3>
         </div>
 
@@ -192,7 +192,7 @@ export function PassengerCard({
               onApply={(next) => onReplacePassenger(index, next)}
             />
           ) : (
-            <div className="sm:col-span-2">
+            <div className="md:col-span-2">
               <button
                 type="button"
                 className="text-sm font-medium text-jp-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jp-primary"
@@ -206,7 +206,7 @@ export function PassengerCard({
         ) : null}
 
         {nationalIdAllowed ? (
-          <label className="text-jp-sm sm:col-span-2">
+          <label className="text-jp-sm md:col-span-2">
             Document type <span className="text-red-700">*</span>
             <select
               value={passenger.document_type}
@@ -268,7 +268,7 @@ export function PassengerCard({
         ) : null}
 
         {showNationalId ? (
-          <label className="text-jp-sm sm:col-span-2">
+          <label className="text-jp-sm md:col-span-2">
             CNIC / NICOP <span className="text-red-700">*</span>
             <input
               type="text"
