@@ -90,7 +90,7 @@ export async function fetchSessionBootstrap(cookieHeader?: string): Promise<Sess
   const result = await laravelJsonFetch<SessionBootstrap>("/api/public/auth/session", {
     method: "GET",
     headers,
-    timeoutMs: 2500,
+    signal: AbortSignal.timeout(2500),
   });
 
   if (!result.ok) {
