@@ -60,7 +60,7 @@ export function PublicFloatingActionDock({
     tiles.push({ href: "/#ask-jetpakistan", label: "Ask JetPakistan", testId: "fab-ask-ai" });
   }
   tiles.push({
-    href: signedIn ? (session.dashboard_url || "/customer/dashboard") : "/login",
+    href: signedIn ? (session.dashboardUrl || "/customer/dashboard") : "/login",
     label: signedIn ? "Account" : "Login",
     testId: "fab-account",
   });
