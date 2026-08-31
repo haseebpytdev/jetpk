@@ -1,0 +1,17 @@
+{
+  "RUNTIME": "c89536afe762a567f1df0dc6e193ee0ba2a8af9f",
+  "PUBLIC_BUILD": "ZZfidOFs_ir31JteO5OU0",
+  "DASHBOARD_BUILD": "vusuf0T5POTkwsLY8oUyO",
+  "captured_at": "2026-08-31T17:40:00Z",
+  "note": "Final screenshots after last engineering deploy c89536af; portal dashboards not captured due to secure sign-in prep block.",
+  "manifest": [
+    {"file": "public/home__390x844__final.png", "route": "/", "viewport": "390x844"},
+    {"file": "fab/fab__390x844__expanded.png", "route": "/", "viewport": "390x844"},
+    {"file": "flight-results/flight-results__390x844__final.png", "route": "/flights/results", "viewport": "390x844"},
+    {"file": "flight-results/flight-details__390x844__final.png", "route": "/flights/results#fare", "viewport": "390x844"},
+    {"file": "traveler/traveler__390x844__final.png", "route": "/booking/passengers", "viewport": "390x844"},
+    {"file": "groups/groups__390x844__final.png", "route": "/groups", "viewport": "390x844"},
+    {"file": "public/login__390x844__final.png", "route": "/login", "viewport": "390x844"},
+    {"file": "landscape/home__844x390__landscape.png", "route": "/", "viewport": "844x390"}
+  ]
+}
