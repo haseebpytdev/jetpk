@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { Dialog } from "@/components/ui/Dialog";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
+import { markBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
 
 type FareChangeDialogProps = {
   open: boolean;
@@ -31,6 +33,11 @@ export function FareChangeDialog({
   const difference =
     originalTotal != null && confirmedTotal != null ? confirmedTotal - originalTotal : null;
 
+  useEffect(() => {
+    if (!open) return;
+    markBookNowTiming("T3D_fare_modal_visible", { fare_changed: true });
+  }, [open]);
+
   return (
     <Dialog
       open={open}
@@ -42,7 +49,14 @@ export function FareChangeDialog({
           <SecondaryButton type="button" disabled={loading} onClick={onCancel}>
             Choose another flight
           </SecondaryButton>
-          <PrimaryButton type="button" disabled={loading} onClick={onAccept}>
+          <PrimaryButton
+            type="button"
+            disabled={loading}
+            onClick={() => {
+              markBookNowTiming("T3E_fare_accept_clicked", { fare_changed: true });
+              onAccept();
+            }}
+          >
             {loading ? "Continuing…" : "Accept new fare"}
           </PrimaryButton>
         </>

@@ -144,6 +144,8 @@ export function useRevalidation() {
     markResultsLeftForCheckout(searchId ?? lastParamsRef.current?.searchId);
     setState("loading");
     setMessage("Preparing your trip…");
+    markBookNowTiming("T4A_checkout_prep_start");
+    markBookNowTiming("T4C_passengers_url_ready", { handoff: resolved.slice(0, 120) });
     markBookNowTiming("T6_nav_start", { handoff: resolved.slice(0, 120) });
 
     const persistTimingForContinuity = () => {
@@ -172,6 +174,8 @@ export function useRevalidation() {
           /* non-blocking */
         }
         persistTimingForContinuity();
+        markBookNowTiming("T4B_checkout_prep_done");
+        markBookNowTiming("T5_router_push", { nav: "soft_push" });
         markBookNowTiming("T7_passenger_route", { nav: "soft_push" });
         // Re-persist after T7 so restore sees T7_from_T0 if the route remounts.
         persistTimingForContinuity();
@@ -181,6 +185,7 @@ export function useRevalidation() {
         /* fall through to hard assign */
       }
       persistTimingForContinuity();
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
       markBookNowTiming("T7_passenger_route", { nav: "hard_assign_fallback" });
       persistTimingForContinuity();
       const target = resolved.startsWith("http")
@@ -283,8 +288,15 @@ export function useRevalidation() {
               return;
             }
             const change = extractFareChange(result.data);
+            markBookNowTiming("T3A_payload_classified", {
+              fare_changed: Boolean(change),
+              price_changed: Boolean(change),
+              decision_required: Boolean(change),
+            });
             if (change) {
               pendingHandoffRef.current = result.data.passengers_url ?? null;
+              markBookNowTiming("T3B_fare_change_decision", { fare_changed: true });
+              markBookNowTiming("T3C_fare_modal_requested", { fare_changed: true });
               setFareChange(change);
               setState("fare_change");
               return;
@@ -317,6 +329,11 @@ export function useRevalidation() {
           }
 
           const change = extractFareChange(result.data);
+          markBookNowTiming("T3A_payload_classified", {
+            fare_changed: Boolean(change),
+            price_changed: Boolean(change),
+            decision_required: Boolean(change),
+          });
           if (change) {
             pendingHandoffRef.current =
               result.data.passengers_url ??
@@ -328,6 +345,8 @@ export function useRevalidation() {
                     params.searchId,
                   )
                 : null);
+            markBookNowTiming("T3B_fare_change_decision", { fare_changed: true });
+            markBookNowTiming("T3C_fare_modal_requested", { fare_changed: true });
             setFareChange(change);
             setState("fare_change");
             return;
@@ -381,6 +400,8 @@ export function useRevalidation() {
       return;
     }
 
+    markBookNowTiming("T3F_fare_accept_handler", { fare_changed: true });
+
     if (acceptCountRef.current >= MAX_FARE_CHANGE_ACCEPTS) {
       setState("error");
       setMessage("The fare kept changing. Please search again and select a new offer.");
@@ -410,11 +431,15 @@ export function useRevalidation() {
             return;
           }
           pendingHandoffRef.current = result.data.passengers_url ?? pendingHandoffRef.current;
+          markBookNowTiming("T3B_fare_change_decision", { fare_changed: true, second: true });
+          markBookNowTiming("T3C_fare_modal_requested", { fare_changed: true, second: true });
           setFareChange(secondChange);
           setState("fare_change");
           setMessage("The fare changed again. Please review the updated price.");
           return;
         }
+
+        markBookNowTiming("T3G_fare_accept_complete", { fare_changed: true });
 
         if (params.isReturnCombo && params.comboId && params.outboundKey) {
           markResultsLeftForCheckout(params.searchId);
@@ -440,6 +465,7 @@ export function useRevalidation() {
         return;
       }
 
+      markBookNowTiming("T3G_fare_accept_complete", { fare_changed: true, no_revalidate: true });
       const handoff = pendingHandoffRef.current ?? fareChange?.passengersUrl ?? null;
       if (!handoff || !(await navigateHandoff(handoff, params.fareOptionKey, params.searchId))) {
         setState("error");

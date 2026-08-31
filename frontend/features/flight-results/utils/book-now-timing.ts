@@ -7,8 +7,26 @@ export type BookNowTimingMark =
   | "T1_handler"
   | "T2_revalidate_start"
   | "T3_revalidate_response"
+  /** First revalidation payload classified (fare change vs auto). */
+  | "T3A_payload_classified"
+  /** Fare-change decision known (requires user Accept). */
+  | "T3B_fare_change_decision"
+  /** Fare-change modal requested (state → fare_change). */
+  | "T3C_fare_modal_requested"
+  /** Fare-change modal visible in UI. */
+  | "T3D_fare_modal_visible"
+  /** Accept new fare clicked (user/harness). */
+  | "T3E_fare_accept_clicked"
+  /** Accept handler entered. */
+  | "T3F_fare_accept_handler"
+  /** Accept processing complete (ready to navigate). */
+  | "T3G_fare_accept_complete"
   | "T4_draft_prep_start"
+  | "T4A_checkout_prep_start"
+  | "T4B_checkout_prep_done"
+  | "T4C_passengers_url_ready"
   | "T5_draft_prep_done"
+  | "T5_router_push"
   | "T6_nav_start"
   | "T7_passenger_route"
   | "T8_shell_visible"
@@ -113,12 +131,18 @@ export function markBookNowTiming(mark: BookNowTimingMark, meta?: Record<string,
   if (typeof window === "undefined") return;
   const session = ensureSession(false);
   if (!session) return;
-  // Keep the earliest shell mark (loading.tsx may fire before page mount).
-  if (mark === "T8_shell_visible" && session.marks.T8_shell_visible != null) {
-    if (meta) session.meta = { ...(session.meta ?? {}), ...meta };
-    return;
-  }
-  if (mark === "T9_field_enabled" && session.marks.T9_field_enabled != null) {
+  // Keep earliest critical marks (loading.tsx / second accept revalidate must not erase T3).
+  const firstWins: BookNowTimingMark[] = [
+    "T3_revalidate_response",
+    "T3A_payload_classified",
+    "T3B_fare_change_decision",
+    "T3C_fare_modal_requested",
+    "T3D_fare_modal_visible",
+    "T3E_fare_accept_clicked",
+    "T8_shell_visible",
+    "T9_field_enabled",
+  ];
+  if (firstWins.includes(mark) && session.marks[mark] != null) {
     if (meta) session.meta = { ...(session.meta ?? {}), ...meta };
     return;
   }
