@@ -38,35 +38,37 @@ export function DestinationsSection() {
           </div>
         </div>
 
-        <div
-          ref={scrollerRef}
-          className="mt-jp-lg flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          role="region"
-          aria-label="Destination cards"
-        >
-          {DESTINATION_FIXTURES.map((destination) => (
-            <article
-              key={destination.id}
-              className="w-[min(85vw,17rem)] shrink-0 snap-start overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card"
-            >
-              <div className="relative aspect-[4/3] bg-jp-surface-muted">
-                <Image
-                  src={destination.image}
-                  alt={destination.imageAlt}
-                  fill
-                  sizes="(max-width: 768px) 85vw, 272px"
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-jp-md">
-                <Badge variant="new">{destination.label}</Badge>
-                <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">
-                  {destination.city}
-                </h3>
-                <p className="text-jp-sm text-jp-muted">{destination.country}</p>
-              </div>
-            </article>
-          ))}
+        <div className="mt-jp-lg min-w-0 max-w-full overflow-x-clip">
+          <div
+            ref={scrollerRef}
+            className="flex min-w-0 snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="region"
+            aria-label="Destination cards"
+          >
+            {DESTINATION_FIXTURES.map((destination) => (
+              <article
+                key={destination.id}
+                className="w-[min(85vw,17rem)] shrink-0 snap-start overflow-hidden rounded-jp-card border border-jp-border bg-jp-surface shadow-jp-card"
+              >
+                <div className="relative aspect-[4/3] bg-jp-surface-muted">
+                  <Image
+                    src={destination.image}
+                    alt={destination.imageAlt}
+                    fill
+                    sizes="(max-width: 768px) 85vw, 272px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-jp-md">
+                  <Badge variant="new">{destination.label}</Badge>
+                  <h3 className="mt-2 font-sans text-jp-md font-semibold text-jp-text">
+                    {destination.city}
+                  </h3>
+                  <p className="text-jp-sm text-jp-muted">{destination.country}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </PageContainer>
     </SectionContainer>

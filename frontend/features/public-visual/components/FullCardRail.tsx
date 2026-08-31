@@ -75,7 +75,7 @@ export function FullCardRail({
   const cardBasis = `calc((100% - ${(count - 1) * 1}rem) / ${count})`;
 
   return (
-    <div className={cn("mt-jp-md flex w-full max-w-full items-center gap-2 overflow-hidden", className)} data-full-card-count={count}>
+    <div className={cn("mt-jp-md flex w-full min-w-0 max-w-full items-center gap-2 overflow-x-clip", className)} data-full-card-count={count}>
       {needsNav ? (
         <SecondaryButton
           type="button"
