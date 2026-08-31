@@ -1,17 +1,29 @@
 # JP-OPS-CLOSURE-01 — Summary
 
-## Freeze (Section 1)
+## Freeze (Section 1) — updated end of run
 
 ```
-LOCAL_HEAD=85d1a10c0e7e9558637c3134ed910218ceed6201
+START_LOCAL_HEAD=85d1a10c0e7e9558637c3134ed910218ceed6201
+FINAL_LOCAL_HEAD=02703b3b1c5c8ebde908b8766c4b59f8e8716b3b
 REMOTE_HEAD=1f12edef052da278f02b7ffeaf4e7a881c663ef9
-AHEAD_BY=17
+AHEAD_BY=20
 BEHIND_BY=0
 STAGED_FILES=(none)
 BRANCH=phase/jp-flight-perf-01
+DEPLOYED_RUNTIME_SHA=9eddd7a227273a7516e98b858eed29b4101b21db (unchanged; no deploy this run)
 ```
 
 Remote matches expected authority. **DO NOT PUSH.**
+
+### Engineering commits this run
+
+1. `bbe76bd2` — payment deadline / unpaid expiry / reminders
+2. `1d24b5ec` — guest-email checkout + saved-traveler picker
+3. `02703b3b` — evidence matrices
+
+### Run status
+
+`FINAL_STATUS=INCOMPLETE_OPERATIONAL_RUN` — Layer A code+tests landed; production deploy, live transport, Google handoff, and OPS-01..20 live evidence remain.
 
 ## Worktree classification (Section 2)
 
