@@ -86,9 +86,11 @@ export async function fetchSessionBootstrap(cookieHeader?: string): Promise<Sess
     }
   }
 
+  // Browser soft-nav handoff must not wait unboundedly on session lock (R6H: ~14s POST_CLICK tails).
   const result = await laravelJsonFetch<SessionBootstrap>("/api/public/auth/session", {
     method: "GET",
     headers,
+    timeoutMs: 2500,
   });
 
   if (!result.ok) {

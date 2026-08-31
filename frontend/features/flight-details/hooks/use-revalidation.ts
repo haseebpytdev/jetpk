@@ -166,9 +166,13 @@ export function useRevalidation() {
       resolved.startsWith("/booking/passengers") ||
       /(?:^|\/)booking\/passengers(?:\?|$)/.test(resolved);
     if (isPassengersHandoff) {
+      const target = resolved.startsWith("http")
+        ? resolved
+        : resolved.startsWith("/")
+          ? resolved
+          : `/${resolved}`;
       try {
-        // Await chunk so soft-nav does not suspend on first paint of Traveler.
-        await import("@/features/standard-booking/components/PassengerDetailsPage");
+        void import("@/features/standard-booking/components/PassengerDetailsPage");
         try {
           router.prefetch(resolved);
         } catch {
@@ -181,6 +185,19 @@ export function useRevalidation() {
         // Re-persist after T7 so restore sees T7_from_T0 if the route remounts.
         persistTimingForContinuity();
         router.push(resolved);
+        // R6H: soft-nav can stall 15–34s without painting loading.tsx. Watchdog hard-assigns.
+        window.setTimeout(() => {
+          try {
+            if (!/\/booking\/passengers/.test(window.location.pathname)) {
+              markBookNowTiming("T5_router_push", { nav: "hard_assign_watchdog" });
+              markBookNowTiming("T7_passenger_route", { nav: "hard_assign_watchdog" });
+              persistTimingForContinuity();
+              window.location.assign(target);
+            }
+          } catch {
+            /* ignore */
+          }
+        }, 2800);
         return true;
       } catch {
         /* fall through to hard assign */
@@ -189,11 +206,6 @@ export function useRevalidation() {
       markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
       markBookNowTiming("T7_passenger_route", { nav: "hard_assign_fallback" });
       persistTimingForContinuity();
-      const target = resolved.startsWith("http")
-        ? resolved
-        : resolved.startsWith("/")
-          ? resolved
-          : `/${resolved}`;
       window.location.assign(target);
       return true;
     }

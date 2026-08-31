@@ -59,12 +59,16 @@ export async function ensureGuestBookingAllowed(
 }
 
 export async function redirectIfGuestBookingBlocked(targetPath: string): Promise<boolean> {
-  const bootstrap = await fetchSessionBootstrap();
-  const redirect = await ensureGuestBookingAllowed(targetPath, Boolean(bootstrap.authenticated));
-  if (!redirect) {
+  try {
+    const bootstrap = await fetchSessionBootstrap();
+    const redirect = await ensureGuestBookingAllowed(targetPath, Boolean(bootstrap.authenticated));
+    if (!redirect) {
+      return false;
+    }
+    window.location.assign(redirect);
+    return true;
+  } catch {
+    // Fail open: guest checkout is the primary path; never block Book Now on gate I/O.
     return false;
   }
-
-  window.location.assign(redirect);
-  return true;
 }
