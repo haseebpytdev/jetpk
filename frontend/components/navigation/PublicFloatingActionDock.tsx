@@ -74,8 +74,19 @@ export function PublicFloatingActionDock({
   return (
     <details
       ref={detailsRef}
+      tabIndex={-1}
       className="pointer-events-none fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-50 xl:hidden"
       data-testid="public-fab-dock"
+      onToggle={(event) => {
+        if (event.currentTarget.open) {
+          event.currentTarget.focus();
+        }
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.currentTarget.open = false;
+        }
+      }}
     >
       <summary
         className={cn(

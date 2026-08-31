@@ -1,3 +1,5 @@
+"use client";
+
 import type { PublicConfig } from "@/features/public-content/services/public-config-service";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
