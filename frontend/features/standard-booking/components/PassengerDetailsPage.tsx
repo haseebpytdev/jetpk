@@ -16,7 +16,7 @@ import { Dialog } from "@/components/ui/Dialog";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
 import { mapFieldErrors, ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
-import { fetchStandardPassengersContext, submitStandardPassengers } from "../services/standard-booking-api";
+import { fetchStandardPassengersContext, submitStandardPassengers, probeCheckoutGuestEmail, fetchCheckoutSavedTravelers, fetchCheckoutSavedTraveler, type CheckoutSavedTravelerListItem } from "../services/standard-booking-api";
 import type { ContactFormValues, PassengerFormValues, StandardPassengersContext } from "../types";
 import {
   buildContactFromContext,
@@ -24,6 +24,7 @@ import {
   buildPassengersFromContext,
   passengerLabel,
 } from "../utils/passenger-form";
+import { passengerSlotLooksEmpty, savedTravelerToPassenger } from "../utils/saved-traveler-to-passenger";
 import { isAllowedBookingNextUrl, resolveBookingNextUrl } from "../utils/allowlist";
 import { laravelApiPath } from "@/services/flight-search";
 import { BookingSessionCountdown } from "./BookingSessionCountdown";
@@ -68,11 +69,17 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     currency?: string;
   } | null>(null);
   const [fareChangeBusy, setFareChangeBusy] = useState(false);
+  const [accountMatch, setAccountMatch] = useState(false);
+  const [continueAsGuest, setContinueAsGuest] = useState(false);
+  const [savedTravelers, setSavedTravelers] = useState<CheckoutSavedTravelerListItem[]>([]);
+  const [savedTravelerIdByIndex, setSavedTravelerIdByIndex] = useState<Record<number, number | null>>({});
+  const [savedTravelerWarning, setSavedTravelerWarning] = useState<string | null>(null);
   const submitLock = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const autoRevalidateAttempted = useRef(false);
   const shellMarkedRef = useRef(false);
   const fieldMarkedRef = useRef(false);
+  const savedTravelerAutofillDone = useRef(false);
 
   const queryKey = useMemo(() => JSON.stringify(searchParams), [searchParams]);
 
@@ -257,7 +264,113 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
   const updateContact = useCallback((field: keyof ContactFormValues, value: string | boolean) => {
     setContact((current) => ({ ...current, [field]: value }));
+    if (field === "email") {
+      setAccountMatch(false);
+      setContinueAsGuest(false);
+    }
   }, []);
+
+  const handleEmailBlur = useCallback(async (email: string) => {
+    if (!context || context.auth.authenticated || continueAsGuest) return;
+    const trimmed = email.trim();
+    if (!trimmed || !trimmed.includes("@")) {
+      setAccountMatch(false);
+      return;
+    }
+    const result = await probeCheckoutGuestEmail(trimmed);
+    if (result.ok && result.data.match) {
+      setAccountMatch(true);
+      setContact((current) => ({ ...current, create_account: false }));
+    } else {
+      setAccountMatch(false);
+    }
+  }, [context, continueAsGuest]);
+
+  const handleSignInContinue = useCallback(() => {
+    const returnPath = window.location.pathname + window.location.search;
+    window.location.assign(`/login?redirect=${encodeURIComponent(returnPath)}&checkout_return=${encodeURIComponent(returnPath)}`);
+  }, []);
+
+  const handleContinueAsGuest = useCallback(() => {
+    setContinueAsGuest(true);
+    setAccountMatch(false);
+    setContact((current) => ({ ...current, create_account: false }));
+  }, []);
+
+  const applySavedTraveler = useCallback(async (index: number, travelerId: number | null) => {
+    if (!travelerId) {
+      setSavedTravelerIdByIndex((current) => ({ ...current, [index]: null }));
+      setSavedTravelerWarning(null);
+      return;
+    }
+
+    const alreadyUsed = Object.entries(savedTravelerIdByIndex).some(
+      ([slot, id]) => Number(slot) !== index && id === travelerId,
+    );
+    if (alreadyUsed) {
+      setSavedTravelerWarning("That saved traveler is already selected for another passenger.");
+      return;
+    }
+
+    const result = await fetchCheckoutSavedTraveler(travelerId);
+    if (!result.ok || !result.data.traveler) {
+      setSavedTravelerWarning("Unable to load saved traveler.");
+      return;
+    }
+
+    const passengerType = passengers[index]?.passenger_type ?? "adult";
+    replacePassenger(index, savedTravelerToPassenger(result.data.traveler, passengerType));
+    setSavedTravelerIdByIndex((current) => ({ ...current, [index]: travelerId }));
+    const expiry = result.data.traveler.document_expiry_status;
+    if (expiry === "expired") {
+      setSavedTravelerWarning("Selected traveler document is expired. Update the document before travel.");
+    } else if (expiry === "expiring_soon") {
+      setSavedTravelerWarning("Selected traveler document expires soon.");
+    } else {
+      setSavedTravelerWarning(null);
+    }
+  }, [passengers, replacePassenger, savedTravelerIdByIndex]);
+
+  useEffect(() => {
+    if (!context?.auth.authenticated || context.auth.agent_booking_mode) {
+      setSavedTravelers([]);
+      return;
+    }
+    let cancelled = false;
+    void fetchCheckoutSavedTravelers().then(async (response) => {
+      if (cancelled || !response.ok) return;
+      const list = response.data.travelers ?? [];
+      setSavedTravelers(list);
+      if (savedTravelerAutofillDone.current) return;
+      const autofillId =
+        response.data.default_traveler_id ??
+        (list.length === 1 ? list[0]?.id ?? null : null);
+      if (!autofillId) return;
+
+      setPassengers((rows) => {
+        if (!rows[0] || rows[0].passenger_type !== "adult" || !passengerSlotLooksEmpty(rows[0])) {
+          return rows;
+        }
+        return rows;
+      });
+
+      // Read latest passengers via functional check above; load fill once.
+      savedTravelerAutofillDone.current = true;
+      const fill = await fetchCheckoutSavedTraveler(autofillId);
+      if (cancelled || !fill.ok || !fill.data.traveler) return;
+      setPassengers((rows) => {
+        if (!rows[0] || !passengerSlotLooksEmpty(rows[0])) {
+          return rows;
+        }
+        const next = savedTravelerToPassenger(fill.data.traveler, rows[0].passenger_type);
+        setSavedTravelerIdByIndex((current) => ({ ...current, 0: autofillId }));
+        return rows.map((row, i) => (i === 0 ? next : row));
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [context]);
 
   const focusFirstError = useCallback((errors: Record<string, string>) => {
     const firstKey = Object.keys(errors)[0];
@@ -566,6 +679,12 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
                 </div>
               ) : null}
 
+              {savedTravelerWarning ? (
+                <div className="rounded-jp-md border border-amber-200 bg-amber-50 p-3 text-jp-sm text-amber-900" role="status" data-testid="saved-traveler-warning">
+                  {savedTravelerWarning}
+                </div>
+              ) : null}
+
               {passengers.map((passenger, index) => {
                 const slot = context.travellers.expected[index];
                 const ordinal = (typeOrdinals[slot.type] ?? 0) + 1;
@@ -582,6 +701,11 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
                     fieldErrors={fieldErrors}
                     onChange={updatePassenger}
                     onReplacePassenger={replacePassenger}
+                    savedTravelers={context.auth.authenticated && !context.auth.agent_booking_mode ? savedTravelers : []}
+                    selectedSavedTravelerId={savedTravelerIdByIndex[index] ?? null}
+                    onSelectSavedTraveler={(travelerId) => {
+                      void applySavedTraveler(index, travelerId);
+                    }}
                   />
                 );
               })}
@@ -592,6 +716,13 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
                 canCreateAccount={context.auth.can_create_account}
                 fieldErrors={fieldErrors}
                 onChange={updateContact}
+                accountMatch={accountMatch}
+                continueAsGuest={continueAsGuest}
+                onEmailBlur={(email) => {
+                  void handleEmailBlur(email);
+                }}
+                onSignInContinue={handleSignInContinue}
+                onContinueAsGuest={handleContinueAsGuest}
               />
 
               <SeatExtrasReadinessPanel message={context.seat_extras_capability.message} />

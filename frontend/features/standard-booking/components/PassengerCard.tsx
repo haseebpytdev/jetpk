@@ -20,6 +20,15 @@ type PassengerCardProps = {
   fieldErrors: Record<string, string>;
   onChange: (index: number, field: keyof PassengerFormValues, value: string) => void;
   onReplacePassenger?: (index: number, next: PassengerFormValues) => void;
+  savedTravelers?: Array<{
+    id: number;
+    first_name: string;
+    last_name: string;
+    document_number_masked?: string | null;
+    is_default?: boolean;
+  }>;
+  selectedSavedTravelerId?: number | null;
+  onSelectSavedTraveler?: (travelerId: number | null) => void;
 };
 
 const fieldClass = "mt-1 h-10 w-full rounded-jp-md border border-jp-border bg-white px-3 text-sm text-jp-text shadow-sm outline-none transition-colors focus:border-jp-primary focus:ring-2 focus:ring-jp-primary/20 aria-[invalid=true]:border-red-600 aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-red-200";
@@ -34,6 +43,9 @@ export function PassengerCard({
   fieldErrors,
   onChange,
   onReplacePassenger,
+  savedTravelers = [],
+  selectedSavedTravelerId = null,
+  onSelectSavedTraveler,
 }: PassengerCardProps) {
   const [passportAutofillOpen, setPassportAutofillOpen] = useState(false);
   const showPassport =
@@ -55,6 +67,29 @@ export function PassengerCard({
         ) : null}
       </legend>
       <p className="mt-1 text-xs text-jp-muted">Enter details exactly as shown on the passport.</p>
+
+      {savedTravelers.length > 0 && onSelectSavedTraveler ? (
+        <label className="mt-3 block text-jp-sm" data-testid={`saved-traveler-picker-${index}`}>
+          Use saved traveler
+          <select
+            className={fieldClass}
+            value={selectedSavedTravelerId ?? ""}
+            onChange={(e) => {
+              const raw = e.target.value;
+              onSelectSavedTraveler(raw === "" ? null : Number(raw));
+            }}
+          >
+            <option value="">Enter manually</option>
+            {savedTravelers.map((traveler) => (
+              <option key={traveler.id} value={traveler.id}>
+                {traveler.last_name}, {traveler.first_name}
+                {traveler.document_number_masked ? ` · ${traveler.document_number_masked}` : ""}
+                {traveler.is_default ? " (default)" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
 
       <input type="hidden" name={`passengers[${index}][passenger_type]`} value={passenger.passenger_type} />
 

@@ -63,7 +63,7 @@ class CustomerPortalTravelersPresenter
      *
      * @return array<string, mixed>
      */
-    private function presentTravelerForList(SavedTraveler $traveler): array
+    public function presentTravelerForList(SavedTraveler $traveler): array
     {
         return [
             'id' => $traveler->id,
@@ -76,6 +76,8 @@ class CustomerPortalTravelersPresenter
             'document_type' => $traveler->document_type,
             'document_number_masked' => TravelDocumentFormatter::maskDocumentForList($traveler->document_number),
             'document_expiry' => $traveler->document_expiry?->toDateString(),
+            'document_expiry_status' => $traveler->documentExpiryStatus(),
+            'completeness_status' => $traveler->completenessStatus(),
             'issuing_country' => $traveler->issuing_country,
             'phone' => $traveler->phone,
             'email' => $traveler->email,
@@ -86,11 +88,47 @@ class CustomerPortalTravelersPresenter
     }
 
     /**
+     * Checkout list payload for authenticated Customer (masked documents).
+     *
+     * @param  \Illuminate\Support\Collection<int, SavedTraveler>|iterable<SavedTraveler>  $travelers
+     * @return array<string, mixed>
+     */
+    public function presentCheckoutIndex(iterable $travelers, int|string|null $defaultTravelerId = null): array
+    {
+        $items = collect($travelers)
+            ->map(fn (SavedTraveler $traveler) => $this->presentTravelerForList($traveler))
+            ->values()
+            ->all();
+
+        return [
+            'ok' => true,
+            'travelers' => $items,
+            'default_traveler_id' => $defaultTravelerId !== null ? (int) $defaultTravelerId : null,
+        ];
+    }
+
+    /**
+     * Checkout fill payload — full document_number for owner only.
+     *
+     * @return array<string, mixed>
+     */
+    public function presentCheckoutShow(SavedTraveler $traveler): array
+    {
+        return [
+            'ok' => true,
+            'traveler' => array_merge($this->presentTravelerForForm($traveler), [
+                'document_expiry_status' => $traveler->documentExpiryStatus(),
+                'completeness_status' => $traveler->completenessStatus(),
+            ]),
+        ];
+    }
+
+    /**
      * Authorized create/edit form JSON — full document_number only for replace-with-new-value editing.
      *
      * @return array<string, mixed>
      */
-    private function presentTravelerForForm(SavedTraveler $traveler): array
+    public function presentTravelerForForm(SavedTraveler $traveler): array
     {
         return [
             'id' => $traveler->id,

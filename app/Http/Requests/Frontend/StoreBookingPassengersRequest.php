@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Frontend;
 
+use App\Enums\AccountType;
 use App\Models\User;
 use App\Services\Booking\InternationalRouteDetector;
 use App\Services\FlightSearch\FlightSearchResultStore;
@@ -35,7 +36,10 @@ class StoreBookingPassengersRequest extends FormRequest
 
         $emailRules = ['required', 'email', 'max:255'];
         if (! $loggedIn && $this->boolean('create_account')) {
-            $emailRules[] = Rule::unique(User::class, 'email');
+            // Customer emails only — privileged accounts must not be enumerable via unique errors.
+            $emailRules[] = Rule::unique(User::class, 'email')->where(
+                fn ($query) => $query->where('account_type', AccountType::Customer->value)
+            );
         }
 
         $passwordRules = ['nullable', 'confirmed'];

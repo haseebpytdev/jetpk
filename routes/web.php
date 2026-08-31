@@ -8,6 +8,8 @@ use App\Http\Controllers\Frontend\AgentRegistrationController;
 use App\Http\Controllers\Frontend\AirportSearchController;
 use App\Http\Controllers\Frontend\BookingCheckoutPromoController;
 use App\Http\Controllers\Frontend\BookingController;
+use App\Http\Controllers\Frontend\CheckoutGuestEmailController;
+use App\Http\Controllers\Frontend\CheckoutSavedTravelerController;
 use App\Http\Controllers\Frontend\ClientManagedPageController;
 use App\Http\Controllers\Frontend\OneApiCheckoutController;
 use App\Http\Controllers\Frontend\CmsPageController;
@@ -216,6 +218,15 @@ Route::middleware('platform.module:public_umrah_groups')->group(function (): voi
 Route::middleware('platform.module:customer_checkout')->group(function (): void {
     Route::get('/booking/commerce-gates', [BookingController::class, 'commerceGates'])->name('booking.commerce-gates');
     Route::match(['get', 'post'], '/booking/passengers', [BookingController::class, 'passengers'])->middleware('throttle:public-booking-submit')->name('booking.passengers');
+    Route::post('/booking/checkout/guest-email', [CheckoutGuestEmailController::class, 'show'])
+        ->middleware('throttle:checkout-guest-email')
+        ->name('booking.checkout.guest-email');
+    Route::get('/booking/saved-travelers', [CheckoutSavedTravelerController::class, 'index'])
+        ->middleware('auth')
+        ->name('booking.saved-travelers.index');
+    Route::get('/booking/saved-travelers/{traveler}', [CheckoutSavedTravelerController::class, 'show'])
+        ->middleware('auth')
+        ->name('booking.saved-travelers.show');
     Route::post('/booking/abandon-selected-offer', [BookingController::class, 'abandonSelectedOffer'])->middleware('throttle:public-booking-submit')->name('booking.abandon-selected-offer');
     Route::match(['get', 'post'], '/booking/review', [BookingController::class, 'review'])->middleware('throttle:public-booking-submit')->name('booking.review');
     Route::get('/booking/checkout-state', [BookingController::class, 'checkoutState'])->name('booking.checkout-state');

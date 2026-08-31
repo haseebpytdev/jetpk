@@ -117,6 +117,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('lookup-booking', fn (Request $request): Limit => Limit::perMinute(20)->by($request->ip()));
         RateLimiter::for('guest-token', fn (Request $request): Limit => Limit::perMinute(15)->by($request->ip()));
         RateLimiter::for('public-booking-submit', fn (Request $request): Limit => Limit::perMinute(12)->by($request->ip()));
+        RateLimiter::for('checkout-guest-email', fn (Request $request): Limit => Limit::perMinute(8)->by($request->session()->getId().'|'.$request->ip()));
         RateLimiter::for('payment-proof-submit', fn (Request $request): Limit => Limit::perMinute(20)->by((string) ($request->user()?->id ?? $request->ip())));
         RateLimiter::for('abhipay-payment-start', fn (Request $request): Limit => Limit::perMinute(10)->by((string) ($request->user()?->id ?? $request->ip())));
         RateLimiter::for('promo-apply', fn (Request $request): Limit => Limit::perMinute(20)->by((string) ($request->user()?->id ?? $request->ip())));
