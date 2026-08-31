@@ -174,7 +174,11 @@ export function useRevalidation() {
       try {
         void import("@/features/standard-booking/components/PassengerDetailsPage");
         try {
-          router.prefetch(resolved);
+          // Bound prefetch so soft-nav often has the RSC payload before push.
+          await Promise.race([
+            Promise.resolve(router.prefetch(resolved)).then(() => undefined),
+            new Promise<void>((r) => setTimeout(r, 1000)),
+          ]);
         } catch {
           /* non-blocking */
         }
@@ -197,7 +201,7 @@ export function useRevalidation() {
           } catch {
             /* ignore */
           }
-        }, 2800);
+        }, 3200);
         return true;
       } catch {
         /* fall through to hard assign */
