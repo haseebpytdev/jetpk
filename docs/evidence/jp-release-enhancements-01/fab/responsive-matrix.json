@@ -1,0 +1,18 @@
+{
+  "measured_at": "2026-08-31T14:33:00Z",
+  "host": "https://jetpakistan.pk",
+  "breakpoint_rule": "FAB visible below Tailwind xl (1280px); desktop nav xl+",
+  "rows": [
+    {"w": 1920, "fabVisible": false, "logoOverlap": false, "expected": "desktop_nav"},
+    {"w": 1440, "fabVisible": false, "logoOverlap": false, "expected": "desktop_nav"},
+    {"w": 1280, "fabVisible": false, "logoOverlap": false, "expected": "desktop_nav_xl_edge"},
+    {"w": 1024, "fabVisible": true, "logoOverlap": false, "fabFullyOnscreen": true},
+    {"w": 912, "fabVisible": true, "logoOverlap": false, "fabFullyOnscreen": true},
+    {"w": 820, "fabVisible": true, "logoOverlap": false, "fabFullyOnscreen": true},
+    {"w": 768, "fabVisible": true, "logoOverlap": false, "fabFullyOnscreen": true},
+    {"w": 430, "fabVisible": true, "logoOverlap": false, "fabFullyOnscreen": true},
+    {"w": 390, "fabVisible": true, "logoOverlap": false, "fabFullyOnscreen": true},
+    {"w": 360, "fabVisible": true, "logoOverlap": false, "fabFullyOnscreen": true}
+  ],
+  "notes": "Interaction open/expand retested after SiteHeader client-boundary fix deploy."
+}
