@@ -32,6 +32,11 @@ export type SearchSubmitState =
  */
 export function laravelApiPath(path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
+  // Presenters may already emit /laravel/... mutation URLs; never double-prefix.
+  if (normalized === "/laravel" || normalized.startsWith("/laravel/")) {
+    return normalized;
+  }
+
   return `/laravel${normalized}`;
 }
 
