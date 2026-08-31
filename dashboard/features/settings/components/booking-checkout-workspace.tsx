@@ -7,11 +7,13 @@ import { loadBookingCheckoutSettings, updateBookingCheckoutSettings } from "@/se
 type CheckoutFormState = {
   guest_booking_enabled: boolean;
   card_payment_enabled: boolean;
+  customer_group_booking_enabled: boolean;
 };
 
 const emptyForm: CheckoutFormState = {
   guest_booking_enabled: true,
   card_payment_enabled: true,
+  customer_group_booking_enabled: true,
 };
 
 function settingsToForm(settings: Record<string, unknown> | undefined): CheckoutFormState {
@@ -19,6 +21,7 @@ function settingsToForm(settings: Record<string, unknown> | undefined): Checkout
   return {
     guest_booking_enabled: settings.guest_booking_enabled !== false,
     card_payment_enabled: settings.card_payment_enabled !== false,
+    customer_group_booking_enabled: settings.customer_group_booking_enabled !== false,
   };
 }
 
@@ -51,6 +54,7 @@ export function BookingCheckoutWorkspace() {
     const result = await updateBookingCheckoutSettings({
       guest_booking_enabled: form.guest_booking_enabled,
       card_payment_enabled: form.card_payment_enabled,
+      customer_group_booking_enabled: form.customer_group_booking_enabled,
     });
 
     setBusy(false);
@@ -73,9 +77,11 @@ export function BookingCheckoutWorkspace() {
 
       <form onSubmit={onSave} className="rounded-xl border border-jp-border bg-white p-4 space-y-4">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">Guest booking</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Guest Booking</h3>
           <p className="mt-1 text-xs text-jp-muted">
-            When disabled, unauthenticated visitors can still search flights but must sign in before passenger checkout.
+            Allow visitors without a JetPakistan account to complete normal public Flight checkout.
+            When disabled, anonymous visitors may search and view fares but must sign in or register
+            before entering Traveler Details.
           </p>
           <label className="mt-3 flex items-center gap-2 text-sm">
             <input
@@ -84,7 +90,26 @@ export function BookingCheckoutWorkspace() {
               onChange={(event) => setForm((current) => ({ ...current, guest_booking_enabled: event.target.checked }))}
               data-testid="guest-booking-enabled-toggle"
             />
-            Allow guest booking
+            Enabled
+          </label>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">Customer Group Booking</h3>
+          <p className="mt-1 text-xs text-jp-muted">
+            When disabled, authenticated Customers cannot book Group offers. Approved Agents remain eligible.
+            Group booking always requires authentication — this never enables anonymous Group checkout.
+          </p>
+          <label className="mt-3 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.customer_group_booking_enabled}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, customer_group_booking_enabled: event.target.checked }))
+              }
+              data-testid="customer-group-booking-enabled-toggle"
+            />
+            Enabled
           </label>
         </div>
 

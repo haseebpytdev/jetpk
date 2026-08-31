@@ -54,6 +54,14 @@ class CheckoutReturnIntent
             return true;
         }
 
+        if (str_starts_with($path, '/booking/account')) {
+            return true;
+        }
+
+        if (str_starts_with($path, '/booking/review')) {
+            return true;
+        }
+
         if (self::isGroupBookingReturn($path)) {
             return true;
         }

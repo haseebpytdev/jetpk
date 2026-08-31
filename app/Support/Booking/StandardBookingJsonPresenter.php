@@ -360,7 +360,16 @@ class StandardBookingJsonPresenter
      */
     public function progressState(string $activeStep): array
     {
+        $guestEnabled = app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->isGuestBookingEnabled();
+        $includeAccount = ! $guestEnabled;
+        $accountComplete = auth()->check();
+
+        $steps = [];
+        if ($includeAccount) {
+            $steps[] = ['key' => 'account', 'label' => 'Account'];
+        }
         $steps = [
+            ...$steps,
             ['key' => 'flight_selected', 'label' => 'Flight Selected'],
             ['key' => 'passenger_details', 'label' => 'Passenger Details'],
             ['key' => 'seat_extras', 'label' => 'Seat & Extras'],
@@ -373,14 +382,19 @@ class StandardBookingJsonPresenter
         $activeIndex = array_search($activeStep, $order, true);
         $completedThrough = $activeIndex !== false && $activeIndex > 0
             ? $order[$activeIndex - 1]
-            : ($activeStep === 'passenger_details' ? 'flight_selected' : null);
+            : ($activeStep === 'passenger_details' ? ($includeAccount && $accountComplete ? 'account' : 'flight_selected') : null);
+        if ($includeAccount && $accountComplete && $activeStep === 'passenger_details') {
+            $completedThrough = 'flight_selected';
+        }
         $completedIndex = $completedThrough !== null ? array_search($completedThrough, $order, true) : -1;
 
-        return array_map(function (array $step) use ($activeStep, $activeIndex, $completedIndex, $order): array {
+        return array_map(function (array $step) use ($activeStep, $activeIndex, $completedIndex, $order, $includeAccount, $accountComplete): array {
             $index = array_search($step['key'], $order, true);
             $state = 'upcoming';
             if ($step['key'] === $activeStep) {
                 $state = 'current';
+            } elseif ($step['key'] === 'account' && $includeAccount && $accountComplete) {
+                $state = 'completed';
             } elseif ($completedIndex !== false && $index !== false && $index <= $completedIndex) {
                 $state = 'completed';
             }

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'agency_id',
     'guest_booking_enabled',
     'card_payment_enabled',
+    'customer_group_booking_enabled',
 ])]
 class CommerceCheckoutSetting extends Model
 {
@@ -18,6 +19,7 @@ class CommerceCheckoutSetting extends Model
         return [
             'guest_booking_enabled' => 'boolean',
             'card_payment_enabled' => 'boolean',
+            'customer_group_booking_enabled' => 'boolean',
         ];
     }
 

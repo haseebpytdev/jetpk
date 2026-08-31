@@ -718,6 +718,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
                 onChange={updateContact}
                 accountMatch={accountMatch}
                 continueAsGuest={continueAsGuest}
+                allowContinueAsGuest={context.commerce_gates?.guest_booking_enabled !== false}
                 onEmailBlur={(email) => {
                   void handleEmailBlur(email);
                 }}

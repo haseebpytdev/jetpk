@@ -10,6 +10,8 @@ type ContactDetailsSectionProps = {
   onChange: (field: keyof ContactFormValues, value: string | boolean) => void;
   accountMatch?: boolean;
   continueAsGuest?: boolean;
+  /** When false (guest booking disabled), never offer Continue as Guest. */
+  allowContinueAsGuest?: boolean;
   onEmailBlur?: (email: string) => void;
   onSignInContinue?: () => void;
   onContinueAsGuest?: () => void;
@@ -25,6 +27,7 @@ export function ContactDetailsSection({
   onChange,
   accountMatch = false,
   continueAsGuest = false,
+  allowContinueAsGuest = true,
   onEmailBlur,
   onSignInContinue,
   onContinueAsGuest,
@@ -46,7 +49,9 @@ export function ContactDetailsSection({
         >
           <p className="text-sm font-semibold text-jp-text">You already have a JetPakistan account.</p>
           <p className="mt-1 text-jp-sm text-jp-muted">
-            Sign in to continue with this booking, or continue as a guest. Continuing as guest will not link this booking to your account.
+            {allowContinueAsGuest
+              ? "Sign in to continue with this booking, or continue as a guest. Continuing as guest will not link this booking to your account."
+              : "Sign in to continue with this booking. Guest checkout is not available."}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -57,14 +62,16 @@ export function ContactDetailsSection({
             >
               Sign in &amp; continue
             </button>
-            <button
-              type="button"
-              className="rounded-jp-md border border-jp-border bg-white px-3 py-2 text-sm font-semibold text-jp-text"
-              data-testid="existing-account-continue-guest"
-              onClick={onContinueAsGuest}
-            >
-              Continue as guest
-            </button>
+            {allowContinueAsGuest ? (
+              <button
+                type="button"
+                className="rounded-jp-md border border-jp-border bg-white px-3 py-2 text-sm font-semibold text-jp-text"
+                data-testid="existing-account-continue-guest"
+                onClick={onContinueAsGuest}
+              >
+                Continue as guest
+              </button>
+            ) : null}
           </div>
         </div>
       ) : null}

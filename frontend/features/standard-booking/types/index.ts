@@ -155,6 +155,12 @@ export type StandardPassengersContext = {
     agent_booking_mode: boolean;
     agent_contact_locked: boolean;
   };
+  commerce_gates?: {
+    guest_booking_enabled?: boolean;
+    card_payment_enabled?: boolean;
+    customer_group_booking_enabled?: boolean;
+    customer_registration_enabled?: boolean;
+  };
   validation_result?: Record<string, unknown> | null;
   validation_alert?: string | null;
   fare_estimate_drift?: boolean;

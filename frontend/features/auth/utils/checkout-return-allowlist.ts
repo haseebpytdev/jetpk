@@ -12,6 +12,8 @@ export function isAllowedCheckoutReturn(target: string | null | undefined): bool
 
   const pathOnly = trimmed.split("?")[0] ?? "";
   if (pathOnly.startsWith("/booking/passengers")) return true;
+  if (pathOnly.startsWith("/booking/account")) return true;
+  if (pathOnly.startsWith("/booking/review")) return true;
   if (/^\/groups\/[^/]+\/passengers$/.test(pathOnly)) return true;
   if (/^\/groups\/booking\/[^/]+\/(review|payment|confirmation|status)$/.test(pathOnly)) return true;
   if (/^\/customer\/bookings\/\d+$/.test(pathOnly)) return true;

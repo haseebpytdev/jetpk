@@ -29,6 +29,8 @@ export type PublicConfig = {
   commerce_gates?: {
     guest_booking_enabled: boolean;
     card_payment_enabled: boolean;
+    customer_group_booking_enabled?: boolean;
+    customer_registration_enabled?: boolean;
   };
   ai_assistant_enabled?: boolean;
 };

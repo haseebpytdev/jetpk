@@ -5,14 +5,22 @@ import { fetchWithTimeout } from "@/features/public-content/utils/laravel-api";
 export type CommerceGates = {
   guest_booking_enabled: boolean;
   card_payment_enabled: boolean;
+  customer_group_booking_enabled: boolean;
+  customer_registration_enabled: boolean;
 };
 
 const DEFAULT_GATES: CommerceGates = {
   guest_booking_enabled: true,
   card_payment_enabled: true,
+  customer_group_booking_enabled: true,
+  customer_registration_enabled: true,
 };
 
 let cachedGates: CommerceGates | null = null;
+
+export function clearCommerceGatesCache(): void {
+  cachedGates = null;
+}
 
 export async function fetchCommerceGates(): Promise<CommerceGates> {
   if (cachedGates) {
@@ -31,6 +39,8 @@ export async function fetchCommerceGates(): Promise<CommerceGates> {
     cachedGates = {
       guest_booking_enabled: payload.guest_booking_enabled !== false,
       card_payment_enabled: payload.card_payment_enabled !== false,
+      customer_group_booking_enabled: payload.customer_group_booking_enabled !== false,
+      customer_registration_enabled: payload.customer_registration_enabled !== false,
     };
     return cachedGates;
   } catch {
@@ -39,7 +49,7 @@ export async function fetchCommerceGates(): Promise<CommerceGates> {
 }
 
 export function buildGuestCheckoutAuthRedirect(targetPath: string): string {
-  return `/login?redirect=${encodeURIComponent(targetPath)}`;
+  return `/booking/account?redirect=${encodeURIComponent(targetPath)}`;
 }
 
 export async function ensureGuestBookingAllowed(

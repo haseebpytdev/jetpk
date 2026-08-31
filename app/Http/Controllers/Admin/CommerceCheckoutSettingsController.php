@@ -49,6 +49,7 @@ class CommerceCheckoutSettingsController extends Controller
         $validated = $request->validate([
             'guest_booking_enabled' => ['nullable', 'boolean'],
             'card_payment_enabled' => ['nullable', 'boolean'],
+            'customer_group_booking_enabled' => ['nullable', 'boolean'],
         ]);
 
         $payload = [];
@@ -57,6 +58,9 @@ class CommerceCheckoutSettingsController extends Controller
         }
         if ($request->has('card_payment_enabled')) {
             $payload['card_payment_enabled'] = $request->boolean('card_payment_enabled');
+        }
+        if ($request->has('customer_group_booking_enabled')) {
+            $payload['customer_group_booking_enabled'] = $request->boolean('customer_group_booking_enabled');
         }
 
         $settings = $this->settingsService->update($request->user(), $payload, $agency);
@@ -80,6 +84,7 @@ class CommerceCheckoutSettingsController extends Controller
         return [
             'guest_booking_enabled' => (bool) $settings->guest_booking_enabled,
             'card_payment_enabled' => (bool) $settings->card_payment_enabled,
+            'customer_group_booking_enabled' => (bool) ($settings->customer_group_booking_enabled ?? true),
             'updated_at' => $settings->updated_at?->toIso8601String(),
         ];
     }
