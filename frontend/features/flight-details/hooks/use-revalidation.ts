@@ -44,6 +44,28 @@ function paramsCacheKey(params: RevalidationParams): string {
   ].join("|");
 }
 
+/** Ensure return-combo checkout query mirrors select-return-combo handoff fields. */
+function enrichReturnComboPassengersUrl(url: string, params: RevalidationParams): string {
+  if (!params.isReturnCombo) return url;
+  try {
+    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "https://jetpakistan.pk");
+    const setIfMissing = (key: string, value?: string) => {
+      const v = (value ?? "").trim();
+      if (!v) return;
+      if (!parsed.searchParams.get(key)) parsed.searchParams.set(key, v);
+    };
+    setIfMissing("combo_id", params.comboId);
+    setIfMissing("outbound_key", params.outboundKey);
+    const returnFare = (params.returnFareOptionKey ?? params.fareOptionKey ?? "").trim();
+    setIfMissing("fare_option_key", returnFare);
+    setIfMissing("return_fare_option_key", returnFare);
+    setIfMissing("outbound_fare_option_key", params.outboundFareOptionKey);
+    return `${parsed.pathname}${parsed.search}`;
+  } catch {
+    return url;
+  }
+}
+
 export function useRevalidation() {
   const router = useRouter();
   const [state, setState] = useState<RevalidationState>("idle");
@@ -311,7 +333,7 @@ export function useRevalidation() {
   const warmStartRevalidation = useCallback(
     (params: RevalidationParams) => {
       if (!providerRequiresRevalidation(params.supplierProvider)) return;
-      if (params.isReturnCombo) return;
+      // R7D: warm Return combos too — drawer open overlaps live revalidate / rematch.
       const key = `${paramsCacheKey(params)}|accept=0`;
       if (warmPromiseRef.current?.key === key) return;
       lastParamsRef.current = params;
@@ -319,6 +341,7 @@ export function useRevalidation() {
         offerId: params.offerId,
         provider: params.supplierProvider,
         phase: "warm",
+        return_combo: Boolean(params.isReturnCombo),
       });
       const promise = revalidateOffer({
         searchId: params.searchId,
@@ -333,7 +356,9 @@ export function useRevalidation() {
         if (!result.ok) return;
         const change = extractFareChange(result.data);
         if (change) {
-          pendingHandoffRef.current = result.data.passengers_url ?? null;
+          pendingHandoffRef.current = result.data.passengers_url
+            ? enrichReturnComboPassengersUrl(result.data.passengers_url, params)
+            : null;
         }
       });
       return;
@@ -346,7 +371,7 @@ export function useRevalidation() {
       if (inFlightRef.current) return;
       inFlightRef.current = true;
       setState("loading");
-      setMessage("Preparing your trip…");
+      setMessage("Checking the latest fare…");
       markBookNowTiming("T1_handler", { phase: "continueToPassengers" });
       setFareChange(null);
       lastParamsRef.current = params;
@@ -356,7 +381,16 @@ export function useRevalidation() {
         // offer before checkout handoff when the provider requires it.
         if (params.isReturnCombo && params.comboId && params.outboundKey) {
           if (providerRequiresRevalidation(params.supplierProvider)) {
-            const result = await runRevalidation(params, false);
+            setMessage("Checking the latest fare…");
+            const progressTimer = window.setTimeout(() => {
+              setMessage("Refreshing availability…");
+            }, 8000);
+            let result: Awaited<ReturnType<typeof runRevalidation>>;
+            try {
+              result = await runRevalidation(params, false);
+            } finally {
+              window.clearTimeout(progressTimer);
+            }
             if (!result.ok) {
               const failureState = classifyFailure(result.status, result.data);
               setState(failureState);
@@ -368,18 +402,44 @@ export function useRevalidation() {
               fare_changed: Boolean(change),
               price_changed: Boolean(change),
               decision_required: Boolean(change),
+              return_combo: true,
             });
             if (change) {
-              pendingHandoffRef.current = result.data.passengers_url ?? null;
+              const enriched = result.data.passengers_url
+                ? enrichReturnComboPassengersUrl(result.data.passengers_url, params)
+                : null;
+              pendingHandoffRef.current = enriched;
               markBookNowTiming("T3B_fare_change_decision", { fare_changed: true });
               markBookNowTiming("T3C_fare_modal_requested", { fare_changed: true });
-              setFareChange(change);
+              setFareChange({ ...change, passengersUrl: enriched ?? change.passengersUrl });
               setState("fare_change");
               return;
             }
+            // R7D: after successful revalidation the API already returns passengers_url
+            // with draft authority. Prefer soft handoff — do NOT full-document POST
+            // select-return-combo (that path caused the ~55–80s customer tail).
+            const passengersUrl = result.data.passengers_url
+              ? enrichReturnComboPassengersUrl(result.data.passengers_url, params)
+              : null;
+            if (passengersUrl) {
+              setMessage("Preparing your trip…");
+              markBookNowTiming("T4_draft_prep_start", { phase: "return_combo_passengers_url" });
+              const ok = await navigateHandoff(
+                passengersUrl,
+                params.fareOptionKey || result.data.selected_fare_option_id || undefined,
+                params.searchId,
+              );
+              if (!ok) {
+                return;
+              }
+              markBookNowTiming("T5_draft_prep_done", { phase: "return_combo_passengers_url" });
+              setState("success");
+              return;
+            }
+            setMessage("Refreshing availability…");
           }
           markResultsLeftForCheckout(params.searchId);
-          markBookNowTiming("T4_draft_prep_start", { phase: "return_combo" });
+          markBookNowTiming("T4_draft_prep_start", { phase: "return_combo_form_fallback" });
           await submitReturnComboSelection({
             searchId: params.searchId,
             comboId: params.comboId,
@@ -388,14 +448,23 @@ export function useRevalidation() {
             returnFareOptionKey: params.returnFareOptionKey ?? params.fareOptionKey,
             outboundFareOptionKey: params.outboundFareOptionKey,
           });
-          markBookNowTiming("T5_draft_prep_done", { phase: "return_combo" });
+          markBookNowTiming("T5_draft_prep_done", { phase: "return_combo_form_fallback" });
           return;
         }
 
         const needsRevalidation = providerRequiresRevalidation(params.supplierProvider);
 
         if (needsRevalidation) {
-          const result = await runRevalidation(params, false);
+          setMessage("Checking the latest fare…");
+          const progressTimer = window.setTimeout(() => {
+            setMessage("Refreshing availability…");
+          }, 8000);
+          let result: Awaited<ReturnType<typeof runRevalidation>>;
+          try {
+            result = await runRevalidation(params, false);
+          } finally {
+            window.clearTimeout(progressTimer);
+          }
 
           if (!result.ok) {
             const failureState = classifyFailure(result.status, result.data);
@@ -517,6 +586,22 @@ export function useRevalidation() {
 
         markBookNowTiming("T3G_fare_accept_complete", { fare_changed: true });
 
+        const rawPassengers =
+          result.data.passengers_url ?? pendingHandoffRef.current;
+        const passengersUrl = rawPassengers
+          ? enrichReturnComboPassengersUrl(rawPassengers, params)
+          : null;
+
+        if (passengersUrl) {
+          if (!(await navigateHandoff(passengersUrl, params.fareOptionKey, params.searchId))) {
+            setState("error");
+            setMessage("Unable to accept the updated fare. Please try again.");
+            return;
+          }
+          setState("success");
+          return;
+        }
+
         if (params.isReturnCombo && params.comboId && params.outboundKey) {
           markResultsLeftForCheckout(params.searchId);
           await submitReturnComboSelection({
@@ -531,13 +616,8 @@ export function useRevalidation() {
           return;
         }
 
-        const passengersUrl = result.data.passengers_url ?? pendingHandoffRef.current;
-        if (!passengersUrl || !(await navigateHandoff(passengersUrl, params.fareOptionKey, params.searchId))) {
-          setState("error");
-          setMessage("Unable to accept the updated fare. Please try again.");
-          return;
-        }
-        setState("success");
+        setState("error");
+        setMessage("Unable to accept the updated fare. Please try again.");
         return;
       }
 

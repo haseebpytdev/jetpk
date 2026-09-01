@@ -123,6 +123,42 @@ class BrandedFareCheckoutContextPersistenceTest extends TestCase
         $this->assertContains($match['match_strategy'], ['itinerary_signature', 'branded_fare_context', 'offer_id_exact']);
     }
 
+    public function test_deterministic_matcher_rejects_silent_brand_substitution(): void
+    {
+        $selected = NormalizedFlightOfferData::fromArray($this->brandedOffer('2026-08-01'));
+        $wrongBrand = $this->brandedOffer('2026-08-01', 'sabre-offer-other-brand');
+        // Same itinerary, but only Freedom brand remaining (customer selected Smart).
+        $wrongBrand['branded_fares'] = [
+            ['name' => 'Freedom', 'brand_code' => 'FL', 'price_total' => 550, 'currency' => 'USD', 'pricing_information_index' => 1, 'booking_classes_by_segment' => ['F'], 'fare_basis_codes' => ['FLWOPPK1']],
+        ];
+        $candidate = NormalizedFlightOfferData::fromArray($wrongBrand);
+
+        $match = app(SabreSelectedOfferDeterministicMatcher::class)->match(
+            [$candidate],
+            $selected,
+            ['brand_code' => 'SM', 'fare_basis' => 'KLWOPPK1', 'booking_class' => 'K', 'selected_price_total' => 400],
+        );
+
+        $this->assertNull($match);
+    }
+
+    public function test_deterministic_matcher_rejects_wrong_flight_number(): void
+    {
+        $selected = NormalizedFlightOfferData::fromArray($this->brandedOffer('2026-08-01'));
+        $wrongFlight = $this->brandedOffer('2026-08-01', 'sabre-offer-wrong-flight');
+        $wrongFlight['flight_number'] = 'EK-999';
+        $wrongFlight['segments'][0]['flight_number'] = 'EK-999';
+        $candidate = NormalizedFlightOfferData::fromArray($wrongFlight);
+
+        $match = app(SabreSelectedOfferDeterministicMatcher::class)->match(
+            [$candidate],
+            $selected,
+            ['brand_code' => 'SM', 'fare_basis' => 'KLWOPPK1', 'booking_class' => 'K'],
+        );
+
+        $this->assertNull($match);
+    }
+
     public function test_zero_refresh_offers_preserves_complete_context(): void
     {
         $context = [

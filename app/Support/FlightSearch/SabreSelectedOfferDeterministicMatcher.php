@@ -31,16 +31,31 @@ final class SabreSelectedOfferDeterministicMatcher
             return null;
         }
 
-        foreach ($offers as $candidate) {
-            if ($this->matchesBasicItinerary($candidate, $sourceOffer)) {
-                return ['offer' => $candidate, 'match_strategy' => 'itinerary_signature'];
-            }
-        }
-
         $brandCode = strtoupper(trim((string) ($selectedContext['brand_code'] ?? '')));
         $fareBasis = strtoupper(trim((string) ($selectedContext['fare_basis'] ?? '')));
         $bookingClass = strtoupper(trim((string) ($selectedContext['booking_class'] ?? '')));
-        $selectedTotal = (float) ($selectedContext['selected_price_total'] ?? $sourceOffer->fare_breakdown->supplier_total ?? 0);
+        // Price deltas are handled by fare-change acceptance after rematch — do not
+        // reject the correct brand solely because the refreshed total moved.
+        $requiresBrand = $brandCode !== '' || $fareBasis !== '' || $bookingClass !== '';
+
+        foreach ($offers as $candidate) {
+            if (! $this->matchesBasicItinerary($candidate, $sourceOffer)) {
+                continue;
+            }
+            // R7D: never silently accept a different branded fare on itinerary-only match.
+            if ($requiresBrand
+                && ! $this->matchesBrandedFareContext(
+                    $candidate->toArray(),
+                    $brandCode,
+                    $fareBasis,
+                    $bookingClass,
+                    0.0,
+                )) {
+                continue;
+            }
+
+            return ['offer' => $candidate, 'match_strategy' => 'itinerary_signature'];
+        }
 
         foreach ($offers as $candidate) {
             if (! $this->matchesSegmentChain($candidate, $sourceOffer)) {
@@ -48,7 +63,7 @@ final class SabreSelectedOfferDeterministicMatcher
             }
 
             $candidateArray = $candidate->toArray();
-            $brandedMatch = $this->matchesBrandedFareContext($candidateArray, $brandCode, $fareBasis, $bookingClass, $selectedTotal);
+            $brandedMatch = $this->matchesBrandedFareContext($candidateArray, $brandCode, $fareBasis, $bookingClass, 0.0);
             if ($brandedMatch) {
                 return ['offer' => $candidate, 'match_strategy' => 'branded_fare_context'];
             }

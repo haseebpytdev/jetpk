@@ -180,7 +180,7 @@ export function FareSelectionPage() {
               <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />
 
               {revalidation.state === "loading" ? (
-                <RevalidationPanel message="Confirming fare with the airline…" />
+                <RevalidationPanel message={revalidation.message ?? "Checking the latest fare…"} />
               ) : null}
               {revalidation.state === "unavailable" ? (
                 <OfferUnavailableState

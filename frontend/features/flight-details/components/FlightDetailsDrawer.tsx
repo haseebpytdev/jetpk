@@ -394,7 +394,7 @@ export function FlightDetailsDrawer({
 
                 {revalidation.state === "loading" ? (
                   <RevalidationPanel
-                    message={revalidation.message ?? "Confirming fare with the airline…"}
+                    message={revalidation.message ?? "Checking the latest fare…"}
                   />
                 ) : null}
 
