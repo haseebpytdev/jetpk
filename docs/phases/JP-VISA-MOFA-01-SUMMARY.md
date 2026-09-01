@@ -76,7 +76,7 @@ Delete evidence docs / revert commit; no runtime impact.
 
 ## Commit SHA
 
-(filled after commit)
+`990d1f54ec671604bcd38f778317c925a80a01c8`
 
 ## Final status
 
