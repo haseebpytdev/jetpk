@@ -144,6 +144,38 @@ class SabreSelectedOfferRevalidationGate
                 return $this->refreshSuccessResult($freshnessMeta, $metaPatch, 'revalidated');
             }
 
+            // Recoverable live failures (empty/unusable supplier response, draft/validation
+            // gaps) must not hard-stop checkout: FlightController can refresh via a bounded
+            // re-shop match. Permanent mismatch still surfaces after that recovery attempt.
+            $liveReason = strtolower(trim((string) ($metaPatch['selected_offer_revalidation_reason'] ?? '')));
+            $recoverable = $liveReason === ''
+                || str_contains($liveReason, 'empty')
+                || str_contains($liveReason, 'unusable')
+                || str_contains($liveReason, 'timeout')
+                || str_contains($liveReason, 'temporary')
+                || str_contains($liveReason, 'draft_invalid')
+                || str_contains($liveReason, 'missing_connection')
+                || str_contains($liveReason, 'sabre_revalidation_failed');
+
+            if ($recoverable) {
+                Log::info('sabre.checkout.selected_offer_revalidation_search_refresh_required', [
+                    'reason' => $liveReason !== '' ? $liveReason : 'live_revalidation_failed',
+                ]);
+
+                return [
+                    'success' => false,
+                    'status' => 'search_refresh_required',
+                    'message' => $this->freshness->customerSafeMessage('selected_offer_revalidation_required'),
+                    'block_code' => 'selected_offer_revalidation_required',
+                    'diagnostic' => SabreOfferFreshness::DIAG_SELECTED_OFFER_REVALIDATION_REQUIRED,
+                    'freshness_meta' => $freshnessMeta,
+                    'meta_patch' => array_merge($metaPatch, [
+                        'selected_offer_revalidation_status' => 'search_refresh_required',
+                        'selected_offer_live_revalidation_reason' => $liveReason !== '' ? $liveReason : 'live_revalidation_failed',
+                    ]),
+                ];
+            }
+
             return [
                 'success' => false,
                 'status' => 'failed',

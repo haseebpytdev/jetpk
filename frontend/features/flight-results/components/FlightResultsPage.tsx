@@ -257,7 +257,7 @@ export function FlightResultsPage() {
       const seededOffer = pairedOptionToOffer(pair);
       setDetailsContext({
         searchId: resolvedSearchId,
-        offerId: pair.combo_id,
+        offerId: pair.offer_id ?? pair.combo_id,
         comboId: pair.combo_id,
         outboundKey: pair.outbound_key,
         fareOptionKey,

@@ -325,7 +325,9 @@ class FlightController extends Controller
         );
 
         if (! ($refresh['success'] ?? false)
-            && ($refresh['status'] ?? '') === 'search_refresh_required') {
+            && in_array((string) ($refresh['status'] ?? ''), ['search_refresh_required', 'failed'], true)) {
+            // Bounded recovery: re-shop and rematch the selected itinerary when live
+            // revalidation is unavailable or returns an empty/unusable supplier payload.
             $refresh = $this->refreshSelectedOfferViaSearch($agency, $searchId, $offerId, $offer, $criteria, $payload);
         }
 

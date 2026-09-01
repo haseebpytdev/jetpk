@@ -77,19 +77,31 @@ export function useRevalidation() {
 
   const classifyFailure = useCallback((status: number, body?: RevalidateOfferResponse): RevalidationState => {
     const apiStatus = (body?.status ?? "").toLowerCase();
+    const message = (body?.message ?? "").toLowerCase();
     if (status === 410 || apiStatus.includes("expired") || apiStatus === "search_expired") return "expired";
-    if (apiStatus.includes("timeout") || apiStatus.includes("timed_out") || status === 408 || status === 504) {
+    if (
+      apiStatus.includes("timeout") ||
+      apiStatus.includes("timed_out") ||
+      status === 408 ||
+      status === 504 ||
+      message.includes("temporarily")
+    ) {
       return "timeout";
     }
     if (
       apiStatus.includes("unavailable") ||
       apiStatus === "offer_not_found" ||
       apiStatus === "offer_stale" ||
+      apiStatus === "selected_fare_resolution_failed" ||
       status === 404
     ) {
       return "unavailable";
     }
     if (status >= 500 || status === 429) return "timeout";
+    // Fresh offer + generic failed often means supplier temporary revalidation gap.
+    if (apiStatus === "failed" && body?.offer_freshness?.offer_freshness_status === "fresh") {
+      return "timeout";
+    }
     return "error";
   }, []);
 
