@@ -23,6 +23,10 @@ export type UseFlightResultsOptions = {
 };
 
 const POLL_INTERVAL_MS = 750;
+/** Bound infinite skeleton: no usable rows after this → truthful timeout UI. */
+const CLIENT_SEARCH_DEADLINE_MS = 60_000;
+/** With partial rows, stop waiting on straggler suppliers after this. */
+const CLIENT_SEARCH_SETTLE_MS = 90_000;
 const TERMINAL_STATUSES = new Set(["ready", "empty", "failed", "expired", "error"]);
 
 function stagedSearchMessage(elapsedMs: number, tripType: string, hasResults: boolean): string {
@@ -124,7 +128,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         setMessage(stagedSearchMessage(elapsed, tripType, visible > 0));
         setSearchStillActive(true);
         readyRef.current = visible > 0;
-        return { shouldPoll: true, nextStatus: visible > 0 ? "partial" : "searching" };
+        return { shouldPoll: true, nextStatus: visible > 0 ? "partial" : "searching", visible };
       }
 
       setSearchStillActive(false);
@@ -148,7 +152,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         }
       }
       readyRef.current = true;
-      return { shouldPoll: false, nextStatus };
+      return { shouldPoll: false, nextStatus, visible };
     },
     [tripType],
   );
@@ -185,15 +189,15 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       });
 
       if (seq !== requestSeq.current || controller.signal.aborted) {
-        return { shouldPoll: false };
+        return { shouldPoll: false, visible: 0 };
       }
 
       if (!response.ok) {
         if (response.status === 0 && response.message === "Request cancelled.") {
-          return { shouldPoll: false };
+          return { shouldPoll: false, visible: 0 };
         }
         if (phase === "poll") {
-          return { shouldPoll: true };
+          return { shouldPoll: true, visible: 0 };
         }
         // Primary search/refresh failure: do not keep prior inventory visible as current.
         setData(null);
@@ -201,7 +205,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         setMessage(response.message);
         setIsLoadingMore(false);
         setSearchStillActive(false);
-        return { shouldPoll: false };
+        return { shouldPoll: false, visible: 0 };
       }
 
       const payload = response.data;
@@ -223,9 +227,29 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       stopPolling();
       setSearchStillActive(true);
       const tick = async () => {
+        const elapsed = Date.now() - searchStartedAt.current;
         const result = await loadPage(id, 1, false, "poll");
         if (!result?.shouldPoll) {
           stopPolling();
+          return;
+        }
+        const visible = typeof result.visible === "number" ? result.visible : 0;
+        if (elapsed >= CLIENT_SEARCH_DEADLINE_MS && visible === 0) {
+          stopPolling();
+          setStatus("failed");
+          setMessage(
+            tripType === "round_trip"
+              ? "We couldn't load these return options. Retry this search or adjust your dates."
+              : "We couldn't load flight options in time. Retry this search or adjust your dates.",
+          );
+          setSearchStillActive(false);
+          return;
+        }
+        if (elapsed >= CLIENT_SEARCH_SETTLE_MS) {
+          stopPolling();
+          setStatus("ready");
+          setMessage("Showing available flights. Some airline responses are still delayed.");
+          setSearchStillActive(false);
           return;
         }
         pollTimerRef.current = setTimeout(() => {
@@ -236,7 +260,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         void tick();
       }, POLL_INTERVAL_MS);
     },
-    [loadPage, stopPolling],
+    [loadPage, stopPolling, tripType],
   );
 
   useEffect(() => {
@@ -319,7 +343,13 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     setData(null);
     setStatus("loading");
     setMessage("Finding the best available flights…");
-    void loadPage(resolvedSearchId, 1, false, "refresh");
+    // Refresh bumps requestSeq and aborts in-flight polls. If the search is still
+    // active, we MUST restart polling — otherwise Pair stays on infinite skeleton.
+    void loadPage(resolvedSearchId, 1, false, "refresh").then((result) => {
+      if (result?.shouldPoll) {
+        schedulePoll(resolvedSearchId);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey, laravelSort, resolvedSearchId, viewKey]);
 

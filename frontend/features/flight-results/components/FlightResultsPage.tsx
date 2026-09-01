@@ -76,6 +76,13 @@ export function FlightResultsPage() {
     defaultSortSynced.current = true;
     const next = new URLSearchParams(params);
     next.set("sort", "cheapest");
+    const liveId =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("search_id")
+        : null;
+    if (liveId && !next.get("search_id")) {
+      next.set("search_id", liveId);
+    }
     router.replace(`/flights/results?${next.toString()}`, { scroll: false });
   }, [params, router]);
 
@@ -116,8 +123,24 @@ export function FlightResultsPage() {
   }, [results.resolvedSearchId, results.status]);
 
   const syncUrl = useCallback(
-    (nextFilters: typeof filters, nextSort: UiSortKey, extra?: Record<string, string | null>) => {
+    (
+      nextFilters: typeof filters,
+      nextSort: UiSortKey,
+      extra?: Record<string, string | null>,
+      liveSearchId?: string | null,
+    ) => {
       const next = new URLSearchParams(params);
+      // history.replaceState may have added search_id outside Next navigation —
+      // never drop it when switching Pair/Segmented or sorting.
+      const authoritativeSearchId =
+        liveSearchId ||
+        next.get("search_id") ||
+        (typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("search_id")
+          : null);
+      if (authoritativeSearchId) {
+        next.set("search_id", authoritativeSearchId);
+      }
       // Persist Laravel-authoritative sort keys in the URL.
       next.set("sort", nextSort === "lowest_price" ? "cheapest" : nextSort);
       [
@@ -160,24 +183,24 @@ export function FlightResultsPage() {
 
   const handleFiltersChange = (next: typeof filters) => {
     setFilters(next);
-    syncUrl(next, sort);
+    syncUrl(next, sort, undefined, results.resolvedSearchId);
   };
 
   const handleSortChange = (next: UiSortKey) => {
     setSort(next);
-    syncUrl(filters, next);
+    syncUrl(filters, next, undefined, results.resolvedSearchId);
   };
 
   const handleClearFilters = () => {
     setFilters({});
-    syncUrl({}, sort);
+    syncUrl({}, sort, undefined, results.resolvedSearchId);
   };
 
   const setReturnView = useCallback(
     (view: "pair" | "segmented") => {
-      syncUrl(filters, sort, { view, outbound_key: null, combo_id: null, fare_option_key: null });
+      syncUrl(filters, sort, { view, outbound_key: null, combo_id: null, fare_option_key: null }, results.resolvedSearchId);
     },
-    [filters, sort, syncUrl],
+    [filters, sort, syncUrl, results.resolvedSearchId],
   );
 
   const openDetails = useCallback(
@@ -448,6 +471,8 @@ export function FlightResultsPage() {
                       <div key={option.combo_id} role="listitem">
                         <PairReturnCard
                           option={option}
+                          searchId={results.resolvedSearchId ?? searchId ?? ""}
+                          searchParams={params}
                           onDetails={openPairFareConfirmation}
                           onSelect={openPairFareConfirmation}
                         />
@@ -459,6 +484,7 @@ export function FlightResultsPage() {
                           <OutboundOptionCard
                             option={option}
                             searchId={results.resolvedSearchId ?? ""}
+                            searchParams={params}
                             onOpenDetails={openOutboundFareConfirmation}
                           />
                         </div>
