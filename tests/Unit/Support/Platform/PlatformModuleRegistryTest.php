@@ -16,6 +16,7 @@ class PlatformModuleRegistryTest extends TestCase
             'public_site',
             'public_flight_search',
             'public_umrah_groups',
+            'public_visa',
             'customer_portal',
             'customer_registration',
             'customer_booking_lookup',
@@ -58,7 +59,7 @@ class PlatformModuleRegistryTest extends TestCase
         $keys = array_map(fn ($m) => $m->key, PlatformModuleRegistry::all());
 
         $this->assertEqualsCanonicalizing($this->expectedKeys(), $keys);
-        $this->assertCount(37, $keys);
+        $this->assertCount(38, $keys);
 
         foreach ($this->expectedKeys() as $expected) {
             $this->assertNotNull(PlatformModuleRegistry::find($expected), "Missing module: {$expected}");

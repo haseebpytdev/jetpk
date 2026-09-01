@@ -267,6 +267,7 @@ final class PlatformModuleRegistry
                     'public_site' => true,
                     'public_flight_search' => false,
                     'public_umrah_groups' => false,
+                    'public_visa' => false,
                     'customer_portal' => false,
                     'customer_registration' => false,
                     'customer_booking_lookup' => false,
@@ -302,6 +303,7 @@ final class PlatformModuleRegistry
                     'public_site' => true,
                     'public_flight_search' => true,
                     'public_umrah_groups' => true,
+                    'public_visa' => false,
                     'customer_registration' => true,
                     'customer_booking_lookup' => true,
                     'customer_checkout' => true,
@@ -326,7 +328,9 @@ final class PlatformModuleRegistry
             'b2b_b2c' => [
                 'label' => 'Full OTA',
                 'description' => 'Full agent and customer portals with shared supplier stack (B2B + B2C).',
-                'modules' => $allEnabled,
+                'modules' => self::mergeMode($allEnabled, [
+                    'public_visa' => false,
+                ]),
             ],
             'public_search_only' => [
                 'label' => 'Search only',
@@ -335,6 +339,7 @@ final class PlatformModuleRegistry
                     'public_site' => true,
                     'public_flight_search' => true,
                     'public_umrah_groups' => true,
+                    'public_visa' => false,
                     'supplier_search' => true,
                     'customer_portal' => false,
                     'customer_registration' => false,
@@ -361,6 +366,7 @@ final class PlatformModuleRegistry
                 'label' => 'No supplier booking',
                 'description' => 'Shopping and checkout may continue; supplier PNR creation and ticketing disabled.',
                 'modules' => self::mergeMode($allEnabled, [
+                    'public_visa' => false,
                     'supplier_booking' => false,
                     'ticketing' => false,
                 ]),
@@ -369,6 +375,7 @@ final class PlatformModuleRegistry
                 'label' => 'No ticketing',
                 'description' => 'Supplier booking may continue; automated/staff ticket issuance disabled.',
                 'modules' => self::mergeMode($allEnabled, [
+                    'public_visa' => false,
                     'ticketing' => false,
                 ]),
             ],
@@ -376,6 +383,7 @@ final class PlatformModuleRegistry
                 'label' => 'No wallet / deposits',
                 'description' => 'Agent portal without wallet balance, deposits, or ledger views.',
                 'modules' => self::mergeMode($allEnabled, [
+                    'public_visa' => false,
                     'agent_wallet' => false,
                     'agent_deposits' => false,
                     'agent_ledger' => false,
@@ -387,6 +395,7 @@ final class PlatformModuleRegistry
                 'modules' => self::mergeMode($allEnabled, [
                     'public_site' => true,
                     'public_flight_search' => false,
+                    'public_visa' => false,
                     'customer_portal' => false,
                     'customer_registration' => false,
                     'customer_booking_lookup' => false,
@@ -592,6 +601,26 @@ final class PlatformModuleRegistry
                 'medium',
                 requiresAll: ['public_site'],
                 relatedRoutes: ['umrah-groups.index', 'umrah-groups.show'],
+            ),
+            self::mod(
+                'public_visa',
+                'Public Visa module',
+                'Optional multi-country Visa services (Saudi MOFA provider). Default off; live MOFA blocked until policy approval.',
+                'public_website',
+                'high',
+                defaultEnabled: false,
+                requiresAll: ['public_site'],
+                relatedRoutes: ['api.public.visa.health'],
+                notes: [
+                    'Independent optional module — not required for OTA core or Ask JetPakistan.',
+                    'Live Saudi MOFA transport requires OTA_VISA_SAUDI_MOFA_POLICY_APPROVED=true.',
+                ],
+                configHints: [
+                    'OTA_VISA_MODULE_ENABLED',
+                    'OTA_VISA_SAUDI_MOFA_ENABLED',
+                    'OTA_VISA_SAUDI_MOFA_POLICY_APPROVED',
+                    'OTA_VISA_DEFAULT_PROVIDER',
+                ],
             ),
             self::mod(
                 'customer_portal',

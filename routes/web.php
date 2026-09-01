@@ -78,6 +78,25 @@ Route::post('/api/public/ai/handoff', [PublicAiAssistantController::class, 'requ
     ->middleware('throttle:10,1')
     ->name('api.public.ai.handoff');
 
+Route::prefix('api/public/visa')->middleware('throttle:30,1')->group(function (): void {
+    Route::get('/health', [\App\Http\Controllers\Api\Public\PublicVisaController::class, 'health'])
+        ->name('api.public.visa.health');
+    Route::get('/capabilities', [\App\Http\Controllers\Api\Public\PublicVisaController::class, 'capabilities'])
+        ->name('api.public.visa.capabilities');
+    Route::post('/start', [\App\Http\Controllers\Api\Public\PublicVisaController::class, 'start'])
+        ->name('api.public.visa.start');
+    Route::post('/captcha/refresh', [\App\Http\Controllers\Api\Public\PublicVisaController::class, 'refreshCaptcha'])
+        ->name('api.public.visa.captcha.refresh');
+    Route::post('/lookup', [\App\Http\Controllers\Api\Public\PublicVisaController::class, 'lookup'])
+        ->name('api.public.visa.lookup');
+    Route::post('/document', [\App\Http\Controllers\Api\Public\PublicVisaController::class, 'document'])
+        ->name('api.public.visa.document');
+    Route::post('/export/pdf', [\App\Http\Controllers\Api\Public\PublicVisaController::class, 'exportPdf'])
+        ->name('api.public.visa.export.pdf');
+    Route::post('/export/png', [\App\Http\Controllers\Api\Public\PublicVisaController::class, 'exportPng'])
+        ->name('api.public.visa.export.png');
+});
+
 Route::prefix('api/public/content')->group(function (): void {
     Route::get('/csrf-token', [PublicContentApiController::class, 'csrfToken'])->name('api.public.content.csrf');
     Route::get('/turnstile-config', [PublicContentApiController::class, 'turnstileConfig'])->name('api.public.content.turnstile-config');

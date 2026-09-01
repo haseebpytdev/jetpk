@@ -5,6 +5,9 @@ use App\Http\Controllers\BackOffice\BackOfficeLegacyViewRedirectController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
+    Route::get('/visa-module', [\App\Http\Controllers\Admin\VisaModuleSettingsController::class, 'show'])
+        ->name('visa-module.show');
+
     Route::prefix('page-settings')->name('page-settings.')->group(function (): void {
         Route::get('/', [BackOfficeLegacyViewRedirectController::class, 'adminPageSettingsIndex'])->name('index');
         Route::get('/catalog', [ClientPageSettingsController::class, 'catalog'])->name('catalog');

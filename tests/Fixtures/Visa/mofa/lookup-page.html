@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Visa platform</title></head>
+<body>
+<form id="myform" action="/visaservices/searchvisa" method="post">
+  <input type="hidden" name="__RequestVerificationToken" value="fixture-csrf-token-not-secret" />
+  <select name="ddlFirstValue" id="ddlFirstValue" class="required"></select>
+  <input type="text" name="tbFirstValue" id="tbFirstValue" class="required" />
+  <select name="ddlSecondValue" id="ddlSecondValue" class="required"></select>
+  <input type="text" name="tbSecondValue" id="tbSecondValue" class="required" />
+  <select name="NationalityId" id="NationalityId" class="required"></select>
+  <input type="text" name="Captcha" id="Captcha" />
+  <img id="imgCaptcha" src="/Base/GetRandomCaptchaImage/1001" alt="captcha" />
+  <button type="submit" name="submit" id="btnSubmit">inquire</button>
+</form>
+</body>
+</html>
