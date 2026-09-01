@@ -4,17 +4,19 @@ namespace App\Services\Ai;
 
 use App\Contracts\Ai\InferenceProvider;
 use App\Data\Ai\TravelIntent;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 
 /**
- * Extract TravelIntent: structured parser is authoritative for routes;
- * healthy local model may fill gaps only. Application owns tools.
+ * Extract TravelIntent: structured parser first; local model fills gaps only.
+ * Application canonicalizes locations/airlines/dates/budgets and owns tools.
  */
 final class TravelIntentExtractor
 {
     public function __construct(
         private readonly InferenceProvider $provider,
         private readonly StructuredTravelIntentParser $structured,
+        private readonly TravelIntentCanonicalizer $canonicalizer,
     ) {}
 
     /**
@@ -25,49 +27,83 @@ final class TravelIntentExtractor
         $structured = $this->structured->parse($message, $prior);
 
         if ($preferStructured || ! $this->provider->isHealthy()) {
-            return $structured;
+            return $this->applyCanonical($structured->toArray(), $prior, 'STRUCTURED_FALLBACK');
         }
 
         $fromModel = $this->tryModelJson($message, $prior);
         if ($fromModel === null) {
-            return $structured;
+            return $this->applyCanonical($structured->toArray(), $prior, 'STRUCTURED_FALLBACK');
         }
 
         $merged = $structured->toArray();
-        $modelArr = $fromModel->toArray();
-        foreach (['origin', 'destination', 'depart_date', 'return_date', 'airline', 'max_stops', 'budget', 'time_preference', 'cabin'] as $key) {
-            if (($merged[$key] ?? null) === null && ($modelArr[$key] ?? null) !== null) {
+        $modelArr = $fromModel;
+        foreach ([
+            'origin', 'destination', 'origin_text', 'destination_text',
+            'depart_date', 'return_date', 'depart_date_text', 'return_date_text',
+            'airline', 'airline_name', 'max_stops', 'budget', 'budget_text',
+            'time_preference', 'cabin', 'depart_date_delta_days', 'clarification_required',
+            'adults', 'children', 'infants',
+        ] as $key) {
+            if (! array_key_exists($key, $modelArr) || $modelArr[$key] === null || $modelArr[$key] === '') {
+                continue;
+            }
+            // Structured owns resolved route when searchable.
+            if (in_array($key, ['origin', 'destination'], true) && $structured->isSearchable()) {
+                continue;
+            }
+            if (($merged[$key] ?? null) === null || in_array($key, [
+                'origin_text', 'destination_text', 'depart_date_text', 'return_date_text',
+                'airline_name', 'budget_text', 'depart_date_delta_days', 'clarification_required',
+            ], true)) {
                 $merged[$key] = $modelArr[$key];
             }
         }
         if (($merged['intent'] ?? 'unknown') === 'unknown' && ($modelArr['intent'] ?? 'unknown') !== 'unknown') {
             $merged['intent'] = $modelArr['intent'];
         }
-        if ($structured->adults === 1 && (int) ($modelArr['adults'] ?? 1) > 1 && preg_match('/\d+\s*adult/i', $message) === 1) {
+        if ($structured->adults === 1 && (int) ($modelArr['adults'] ?? 1) > 1) {
             $merged['adults'] = (int) $modelArr['adults'];
         }
 
-        // Structured owns the mode when it already understood the route.
         $mode = $structured->isSearchable() ? 'STRUCTURED_FALLBACK' : 'AI_FULL';
 
-        return TravelIntent::fromArray($merged, $mode);
+        return $this->applyCanonical($merged, $prior, $mode);
+    }
+
+    /**
+     * @param  array<string, mixed>  $raw
+     * @param  array<string, mixed>|null  $prior
+     */
+    private function applyCanonical(array $raw, ?array $prior, string $mode): TravelIntent
+    {
+        $canon = $this->canonicalizer->canonicalize($raw, $prior, Carbon::now());
+        $payload = $canon['intent'];
+        if ($canon['clarification_required'] && in_array($payload['intent'] ?? '', ['flight_search', 'group_search'], true)
+            && (empty($payload['origin']) || empty($payload['destination']))) {
+            $payload['intent'] = 'unknown';
+        }
+
+        return TravelIntent::fromArray($payload, $mode);
     }
 
     /**
      * @param  array<string, mixed>|null  $prior
+     * @return array<string, mixed>|null
      */
-    private function tryModelJson(string $message, ?array $prior): ?TravelIntent
+    private function tryModelJson(string $message, ?array $prior): ?array
     {
         $system = $this->systemPrompt();
         $userPayload = json_encode([
             'message' => $message,
             'prior' => $prior,
+            'today' => Carbon::now()->toDateString(),
+            'instruction' => 'Emit JSON only. Prefer names/phrases over codes. Use depart_date_delta_days for relative follow-ups.',
         ], JSON_UNESCAPED_UNICODE);
 
         $result = $this->provider->complete([
             ['role' => 'system', 'content' => $system],
             ['role' => 'user', 'content' => (string) $userPayload],
-        ], 220);
+        ], 180);
 
         if (! ($result['ok'] ?? false)) {
             return null;
@@ -80,11 +116,7 @@ final class TravelIntentExtractor
 
         unset($raw['tool'], $raw['tools'], $raw['function'], $raw['functions'], $raw['action']);
 
-        try {
-            return TravelIntent::fromArray($raw, 'AI_FULL');
-        } catch (\Throwable) {
-            return null;
-        }
+        return $raw;
     }
 
     private function systemPrompt(): string
@@ -97,7 +129,7 @@ final class TravelIntentExtractor
             }
         }
 
-        return 'Return only a JSON object with travel intent fields. Never name tools or functions.';
+        return 'Return only a JSON object with travel intent fields. Prefer city names over IATA. Never name tools.';
     }
 
     /**
@@ -108,6 +140,12 @@ final class TravelIntentExtractor
         $content = trim($content);
         if ($content === '') {
             return null;
+        }
+
+        // Drop Qwen thinking blocks if present.
+        if (preg_match('/<\/think>/i', $content) === 1) {
+            $parts = preg_split('/<\/think>/i', $content);
+            $content = trim((string) end($parts));
         }
 
         if (preg_match('/\{[\s\S]*\}/', $content, $m) === 1) {

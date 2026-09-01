@@ -77,19 +77,19 @@ final class TravelIntent
 
         return new self(
             intent: $intent,
-            origin: self::normalizeAirport($raw['origin'] ?? null),
-            destination: self::normalizeAirport($raw['destination'] ?? null),
-            departDate: self::normalizeDate($raw['depart_date'] ?? $raw['departDate'] ?? null),
-            returnDate: self::normalizeDate($raw['return_date'] ?? $raw['returnDate'] ?? null),
+            origin: self::normalizeAirport($raw['origin'] ?? $raw['origin_text'] ?? null),
+            destination: self::normalizeAirport($raw['destination'] ?? $raw['destination_text'] ?? null),
+            departDate: self::normalizeDate($raw['depart_date'] ?? $raw['departDate'] ?? $raw['depart_date_text'] ?? null),
+            returnDate: self::normalizeDate($raw['return_date'] ?? $raw['returnDate'] ?? $raw['return_date_text'] ?? null),
             adults: $adults,
             children: $children,
             infants: $infants,
             cabin: self::normalizeCabin($raw['cabin'] ?? null),
-            airline: self::normalizeAirline($raw['airline'] ?? null),
+            airline: self::normalizeAirline($raw['airline'] ?? $raw['airline_name'] ?? null),
             maxStops: isset($raw['max_stops']) || isset($raw['maxStops'])
                 ? max(0, min(3, (int) ($raw['max_stops'] ?? $raw['maxStops'])))
                 : null,
-            budget: isset($raw['budget']) && is_numeric($raw['budget']) ? (float) $raw['budget'] : null,
+            budget: self::normalizeBudget($raw['budget'] ?? $raw['budget_text'] ?? null),
             timePreference: self::normalizeTimePref($raw['time_preference'] ?? $raw['timePreference'] ?? null),
             currency: strtoupper((string) ($raw['currency'] ?? 'PKR')) ?: 'PKR',
             mode: $mode,
@@ -138,19 +138,37 @@ final class TravelIntent
         'bangkok' => 'BKK', 'kuala lumpur' => 'KUL',
     ];
 
+    /** @var list<string> */
+    private const KNOWN_IATA = [
+        'LHE', 'ISB', 'KHI', 'PEW', 'MUX', 'LYP', 'DXB', 'JED', 'RUH', 'MED', 'DOH', 'IST',
+        'LHR', 'MAN', 'YYZ', 'SHJ', 'AUH', 'MCT', 'BKK', 'KUL', 'JFK',
+    ];
+
     private static function normalizeAirport(mixed $value): ?string
     {
         if (! is_string($value) && ! is_numeric($value)) {
             return null;
         }
         $raw = trim((string) $value);
+        if (preg_match('/^IATA[:\s-]*([A-Za-z]{3})$/i', $raw, $m) === 1) {
+            $raw = $m[1];
+        }
         $v = strtoupper($raw);
+        // Accept only known IATA — reject invented codes (e.g. LHR for "Lahore").
         if (preg_match('/^[A-Z]{3}$/', $v) === 1) {
-            return $v;
+            return in_array($v, self::KNOWN_IATA, true) ? $v : null;
         }
         $key = strtolower($raw);
+        if (isset(self::CITY_TO_IATA[$key])) {
+            return self::CITY_TO_IATA[$key];
+        }
+        foreach (self::CITY_TO_IATA as $alias => $code) {
+            if ($alias !== '' && str_contains($key, $alias)) {
+                return $code;
+            }
+        }
 
-        return self::CITY_TO_IATA[$key] ?? null;
+        return null;
     }
 
     private static function normalizeDate(mixed $value): ?string
@@ -183,14 +201,72 @@ final class TravelIntent
         return $map[$v] ?? null;
     }
 
+    /** @var array<string, string> */
+    private const AIRLINE_ALIASES = [
+        'emirates' => 'EK', 'ek' => 'EK',
+        'pia' => 'PK', 'pakistan international' => 'PK', 'pk' => 'PK',
+        'qatar' => 'QR', 'qatar airways' => 'QR', 'qr' => 'QR',
+        'etihad' => 'EY', 'ey' => 'EY',
+        'flydubai' => 'FZ', 'fz' => 'FZ',
+        'saudia' => 'SV', 'sv' => 'SV', 'saudi' => 'SV',
+        'flynas' => 'XY', 'xy' => 'XY',
+        'gulf air' => 'GF', 'gf' => 'GF',
+        'air arabia' => 'G9', 'g9' => 'G9',
+        'flyjinnah' => '9P', 'fly jinnah' => '9P',
+        'airblue' => 'PA', 'turkish' => 'TK', 'tk' => 'TK',
+    ];
+
     private static function normalizeAirline(mixed $value): ?string
     {
         if (! is_string($value)) {
             return null;
         }
-        $v = strtoupper(trim($value));
+        $raw = trim($value);
+        if ($raw === '' || preg_match('/jet\s*pakistan/i', $raw) === 1) {
+            return null;
+        }
+        $v = strtoupper($raw);
         if (preg_match('/^[A-Z0-9]{2}$/', $v) === 1) {
             return $v;
+        }
+        $key = strtolower($raw);
+        if (isset(self::AIRLINE_ALIASES[$key])) {
+            return self::AIRLINE_ALIASES[$key];
+        }
+        foreach (self::AIRLINE_ALIASES as $alias => $code) {
+            if (str_contains($key, $alias)) {
+                return $code;
+            }
+        }
+
+        return null;
+    }
+
+    private static function normalizeBudget(mixed $value): ?float
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        if (is_numeric($value)) {
+            $n = (float) $value;
+
+            return $n < 1000 ? $n * 1000.0 : $n;
+        }
+        if (! is_string($value)) {
+            return null;
+        }
+        $s = strtolower(trim(str_replace([',', 'pkr', 'rs'], ['', '', ''], $value)));
+        if (preg_match('/^(\d+(?:\.\d+)?)\s*(k|hazar|lac|lakh)?$/u', $s, $m) === 1) {
+            $n = (float) $m[1];
+            $unit = $m[2] ?? '';
+            if ($unit === 'k' || $unit === 'hazar') {
+                return $n * 1000.0;
+            }
+            if ($unit === 'lac' || $unit === 'lakh') {
+                return $n * 100000.0;
+            }
+
+            return $n < 1000 ? $n * 1000.0 : $n;
         }
 
         return null;
