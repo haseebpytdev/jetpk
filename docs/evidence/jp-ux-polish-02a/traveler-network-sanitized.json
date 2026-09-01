@@ -1,0 +1,128 @@
+[
+  {
+    "t": 1788290913747,
+    "type": "req",
+    "method": "GET",
+    "path": "/laravel/flights/results/offer"
+  },
+  {
+    "t": 1788290913748,
+    "type": "req",
+    "method": "POST",
+    "path": "/laravel/flights/results/revalidate-offer"
+  },
+  {
+    "t": 1788290914967,
+    "type": "res",
+    "status": 200,
+    "path": "/laravel/flights/results/offer"
+  },
+  {
+    "t": 1788290915753,
+    "type": "res",
+    "status": 200,
+    "path": "/laravel/flights/results/revalidate-offer"
+  },
+  {
+    "t": 1788290916230,
+    "type": "req",
+    "method": "GET",
+    "path": "/booking/commerce-gates"
+  },
+  {
+    "t": 1788290916748,
+    "type": "res",
+    "status": 200,
+    "path": "/booking/commerce-gates"
+  },
+  {
+    "t": 1788290916762,
+    "type": "req",
+    "method": "GET",
+    "path": "/booking/passengers"
+  },
+  {
+    "t": 1788290919972,
+    "type": "req",
+    "method": "GET",
+    "path": "/booking/passengers"
+  },
+  {
+    "t": 1788290920832,
+    "type": "res",
+    "status": 200,
+    "path": "/booking/passengers"
+  },
+  {
+    "t": 1788290920898,
+    "type": "req",
+    "method": "GET",
+    "path": "/_next/static/chunks/app/(checkout)/booking/passengers/page-8a312039ecf8782d.js"
+  },
+  {
+    "t": 1788290938664,
+    "type": "res",
+    "status": 200,
+    "path": "/_next/static/chunks/app/(checkout)/booking/passengers/page-8a312039ecf8782d.js"
+  },
+  {
+    "t": 1788290939020,
+    "type": "req",
+    "method": "GET",
+    "path": "/laravel/booking/passengers"
+  },
+  {
+    "t": 1788290939766,
+    "type": "res",
+    "status": 200,
+    "path": "/laravel/booking/passengers"
+  },
+  {
+    "t": 1788291007749,
+    "type": "req",
+    "method": "GET",
+    "path": "/booking/review"
+  },
+  {
+    "t": 1788291008347,
+    "type": "res",
+    "status": 200,
+    "path": "/booking/review"
+  },
+  {
+    "t": 1788291008416,
+    "type": "req",
+    "method": "GET",
+    "path": "/_next/static/chunks/app/(checkout)/booking/review/page-a01d9db42b07f3bf.js"
+  },
+  {
+    "t": 1788291009885,
+    "type": "req",
+    "method": "GET",
+    "path": "/booking/payment"
+  },
+  {
+    "t": 1788291010774,
+    "type": "res",
+    "status": 307,
+    "path": "/booking/payment"
+  },
+  {
+    "t": 1788291010778,
+    "type": "req",
+    "method": "GET",
+    "path": "/booking/payment/manual"
+  },
+  {
+    "t": 1788291011319,
+    "type": "res",
+    "status": 200,
+    "path": "/booking/payment/manual"
+  },
+  {
+    "t": 1788291011405,
+    "type": "req",
+    "method": "GET",
+    "path": "/_next/static/chunks/app/(checkout)/booking/payment/manual/page-d272f2547b90548f.js"
+  }
+]

@@ -1,0 +1,74 @@
+{
+  "observations": [
+    {
+      "ms": 500,
+      "sk": false,
+      "ready": true,
+      "footer": true,
+      "headerText": "Traveler information",
+      "bodyHasPreparing": false
+    },
+    {
+      "ms": 2000,
+      "sk": false,
+      "ready": true,
+      "footer": true,
+      "headerText": "Traveler information",
+      "bodyHasPreparing": false
+    },
+    {
+      "ms": 5000,
+      "sk": false,
+      "ready": true,
+      "footer": true,
+      "headerText": "Traveler information",
+      "bodyHasPreparing": false
+    },
+    {
+      "ms": 10000,
+      "sk": false,
+      "ready": true,
+      "footer": true,
+      "headerText": "Traveler information",
+      "bodyHasPreparing": false
+    }
+  ],
+  "transitions": [
+    {
+      "t": 1788290905733,
+      "from": "RESULTS",
+      "to": "BOOK_CLICK",
+      "note": "pair-select"
+    },
+    {
+      "t": 1788290914576,
+      "from": "FARE",
+      "to": "CONTINUE",
+      "note": "continue-to-passengers"
+    },
+    {
+      "t": 1788290996806,
+      "from": "INITIAL_LOADING",
+      "to": "NAVIGATED",
+      "note": "https://jetpakistan.pk/booking/passengers"
+    },
+    {
+      "t": 1788290996845,
+      "from": "INITIAL_LOADING",
+      "to": "READY",
+      "note": "passenger-details-page"
+    }
+  ],
+  "injected": [
+    {
+      "t": 1788291011481,
+      "s": "OTHER",
+      "detail": {
+        "sk": false,
+        "ready": false,
+        "loadingShell": false
+      }
+    }
+  ],
+  "readyAt": 1788290996845
+}

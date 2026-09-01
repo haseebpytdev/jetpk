@@ -1,0 +1,64 @@
+{
+  "searchId": "d324b2bc-b9e0-4c0e-94d1-8411ac3db9b2",
+  "depart": "2026-09-22",
+  "return_date": "2026-10-13",
+  "returnDom": {
+    "found": true,
+    "hasDep": true,
+    "hasArr": true,
+    "outboundVisible": 0,
+    "returnVisible": 0,
+    "stripText": "Departure ISB → DXB · Tue, 22 Sep · 4h 45m · 1 stop Arrival DXB → ISB · Tue, 13 Oct · 6h 35m · 1 stop"
+  },
+  "travelerOk": true,
+  "transitions": [
+    {
+      "t": 1788290905733,
+      "from": "RESULTS",
+      "to": "BOOK_CLICK",
+      "note": "pair-select"
+    },
+    {
+      "t": 1788290914576,
+      "from": "FARE",
+      "to": "CONTINUE",
+      "note": "continue-to-passengers"
+    },
+    {
+      "t": 1788290996806,
+      "from": "INITIAL_LOADING",
+      "to": "NAVIGATED",
+      "note": "https://jetpakistan.pk/booking/passengers"
+    },
+    {
+      "t": 1788290996845,
+      "from": "INITIAL_LOADING",
+      "to": "READY",
+      "note": "passenger-details-page"
+    }
+  ],
+  "url": "https://jetpakistan.pk/booking/payment/manual",
+  "screenshots": [
+    "01-return-paired-desktop.png",
+    "02-return-strip-closeup.png",
+    "03-return-paired-mobile-390.png",
+    "04-traveler-ready-0.5s.png",
+    "05-traveler-ready-2s.png",
+    "06-traveler-ready-5s.png",
+    "07-traveler-ready-10s.png",
+    "08-traveler-footer.png",
+    "09-review-footer.png",
+    "10-payment-shell-footer.png",
+    "11-logo-pf-airsial.png",
+    "12-logo-9p-flyjinnah.png",
+    "13-logo-gulf-air.png",
+    "14-logo-air-arabia.png",
+    "15-groups-hero.png",
+    "16-groups-results.png",
+    "17-groups-mobile.png",
+    "18-faq-hero.png",
+    "19-support-hero.png",
+    "19b-contact-hero.png",
+    "20-home-hero-trending-transition.png"
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "t": 1788290905733,
+    "from": "RESULTS",
+    "to": "BOOK_CLICK",
+    "note": "pair-select"
+  },
+  {
+    "t": 1788290914576,
+    "from": "FARE",
+    "to": "CONTINUE",
+    "note": "continue-to-passengers"
+  },
+  {
+    "t": 1788290996806,
+    "from": "INITIAL_LOADING",
+    "to": "NAVIGATED",
+    "note": "https://jetpakistan.pk/booking/passengers"
+  },
+  {
+    "t": 1788290996845,
+    "from": "INITIAL_LOADING",
+    "to": "READY",
+    "note": "passenger-details-page"
+  }
+]

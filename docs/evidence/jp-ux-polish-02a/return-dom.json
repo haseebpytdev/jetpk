@@ -1,0 +1,8 @@
+{
+  "found": true,
+  "hasDep": true,
+  "hasArr": true,
+  "outboundVisible": 0,
+  "returnVisible": 0,
+  "stripText": "Departure ISB → DXB · Tue, 22 Sep · 4h 45m · 1 stop Arrival DXB → ISB · Tue, 13 Oct · 6h 35m · 1 stop"
+}

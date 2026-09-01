@@ -1,0 +1,29 @@
+{
+  "runtimeSha": "f593ddeb45890fdd7d985f4a5ef9705ac7d4ea03",
+  "buildId": "m-n0qXZkLHvCqrRPZ2lcx",
+  "homeGeo": {
+    "heroEnd": 642,
+    "trendingStart": 691,
+    "gap": 49,
+    "orphanPath": false
+  },
+  "returnDom": {
+    "found": false
+  },
+  "travelerOk": false,
+  "searchOk": true,
+  "transitions": [],
+  "screenshots": [
+    "11-logo-pf-airsial.png",
+    "12-logo-9p-flyjinnah.png",
+    "13-logo-gulf-air.png",
+    "14-logo-air-arabia.png",
+    "15-groups-hero.png",
+    "16-groups-results.png",
+    "17-groups-mobile.png",
+    "18-faq-hero.png",
+    "19-support-hero.png",
+    "19b-contact-hero.png",
+    "20-home-hero-trending-transition.png"
+  ]
+}
