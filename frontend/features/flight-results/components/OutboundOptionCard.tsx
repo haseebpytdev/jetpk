@@ -8,12 +8,14 @@ import { formatWholePkr } from "../utils/price";
 import { AirlineIdentity } from "./AirlineIdentity";
 import { FareBadge } from "./FareBadge";
 import { FlightResultActions } from "./FlightResultActions";
+import { ResultShareActions } from "./ResultShareActions";
 import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 
 type OutboundOptionCardProps = {
   option: OutboundOption;
   searchId: string;
+  searchParams?: URLSearchParams;
   onOpenDetails?: (
     option: OutboundOption,
     offer: FlightOffer,
@@ -83,7 +85,7 @@ export function outboundOptionToOffer(option: OutboundOption): FlightOffer {
   };
 }
 
-export function OutboundOptionCard({ option, searchId, onOpenDetails }: OutboundOptionCardProps) {
+export function OutboundOptionCard({ option, searchId, searchParams, onOpenDetails }: OutboundOptionCardProps) {
   const journey = normalizeJourneyDisplay(
     option.journey_display as Record<string, unknown> | undefined,
     optionAirlineFallback(option),
@@ -93,6 +95,7 @@ export function OutboundOptionCard({ option, searchId, onOpenDetails }: Outbound
   const selectedOption = fareOptions.find((item) => item.option_key === selectedFareKey) ?? fareOptions[0];
   const effectiveFareKey = selectedOption?.option_key ?? selectedFareKey;
   const displayPrice = formatWholePkr(selectedOption?.displayed_price ?? option.from_total_amount);
+  const shareOffer = useMemo(() => outboundOptionToOffer(option), [option]);
 
   const openWithSelectedFare = (intent: "details" | "booking") => {
     const offer = outboundOptionToOffer(option);
@@ -149,12 +152,19 @@ export function OutboundOptionCard({ option, searchId, onOpenDetails }: Outbound
               {displayPrice ?? option.from_total_display ?? "Price unavailable"}
             </p>
           </div>
-          <FlightResultActions
-            onDetails={() => openWithSelectedFare("details")}
-            onBook={() => openWithSelectedFare("booking")}
-            detailsTestId="outbound-details-trigger"
-            bookTestId="outbound-book-now"
-          />
+          <div className="flex flex-col items-end gap-2">
+            <ResultShareActions
+              offer={shareOffer}
+              searchParams={searchParams}
+              displayAmount={selectedOption?.displayed_price ?? option.from_total_amount}
+            />
+            <FlightResultActions
+              onDetails={() => openWithSelectedFare("details")}
+              onBook={() => openWithSelectedFare("booking")}
+              detailsTestId="outbound-details-trigger"
+              bookTestId="outbound-book-now"
+            />
+          </div>
         </div>
       </div>
       <span className="sr-only">{searchId}</span>

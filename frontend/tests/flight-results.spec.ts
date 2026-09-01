@@ -625,3 +625,96 @@ test("one-way never shows return view selector", async ({ page }) => {
   await gotoResults(page);
   await expect(page.getByTestId("return-view-selector")).toHaveCount(0);
 });
+
+test("r7c airline logo container has no visible tile frame", async ({ page }) => {
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        mockResultsBody({
+          offers: [
+            mockOffer({
+              airline_logo_url: "https://jetpakistan.pk/client-assets/jetpk/logo/logo.png",
+            }),
+          ],
+        }),
+      ),
+    });
+  });
+  await page.goto(`/flights/results?${baseResultsQuery()}`);
+  const logo = page.getByTestId("airline-logo-container").first();
+  await expect(logo).toBeVisible();
+  await expect(logo).toHaveAttribute("data-logo-frame", "none");
+  const className = (await logo.getAttribute("class")) ?? "";
+  expect(className.includes("border")).toBeFalsy();
+  expect(className.includes("bg-white")).toBeFalsy();
+});
+
+test("r7c paired return cards expose copy and whatsapp share", async ({ page }) => {
+  const query = new URLSearchParams({
+    search_id: MOCK_SEARCH_ID,
+    trip_type: "round_trip",
+    from: "LHE",
+    to: "JED",
+    depart: "2026-09-01",
+    return_date: "2026-09-10",
+    adults: "1",
+    cabin: "economy",
+    view: "pair",
+  }).toString();
+
+  await page.route("**/laravel/flights/results/data**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        mockResultsBody({
+          flow: "return_pair",
+          pairing_authority: "SUPPLIER_RETURNED",
+          status: "ready",
+          offers: [],
+          paired_options: [
+            {
+              combo_id: "combo-1",
+              outbound_key: "out-1",
+              return_key: "ret-1",
+              provider: "iati",
+              supplier_provider: "iati",
+              airline_code: "PK",
+              airline_name: "PIA",
+              total_amount: 180000,
+              total_display: "PKR 180,000",
+              can_book: true,
+              outbound_journey: {
+                departure_time_display: "08:00",
+                arrival_time_display: "11:00",
+                origin_airport_code: "LHE",
+                destination_airport_code: "JED",
+                duration_display: "5h",
+                stops: 0,
+                airline_code: "PK",
+                airline_name: "PIA",
+              },
+              return_journey: {
+                departure_time_display: "14:00",
+                arrival_time_display: "21:00",
+                origin_airport_code: "JED",
+                destination_airport_code: "LHE",
+                duration_display: "5h",
+                stops: 0,
+                airline_code: "PK",
+                airline_name: "PIA",
+              },
+            },
+          ],
+        }),
+      ),
+    });
+  });
+
+  await page.goto(`/flights/results?${query}`);
+  await expect(page.getByTestId("pair-return-card").first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("result-copy-share").first()).toBeVisible();
+  await expect(page.getByTestId("result-whatsapp-share").first()).toBeVisible();
+});

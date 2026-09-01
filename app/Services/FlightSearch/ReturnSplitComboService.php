@@ -635,6 +635,7 @@ class ReturnSplitComboService
             'combo_id' => $comboId,
             'sample_combo_id' => $comboId,
             'provider' => (string) ($offer['supplier_provider'] ?? ''),
+            'supplier_provider' => (string) ($offer['supplier_provider'] ?? ''),
             'supplier_source_label' => SupplierSourcePresenter::labelForOffer(
                 (string) ($offer['supplier_provider'] ?? ''),
                 isset($offer['source_type']) ? (string) $offer['source_type'] : null,

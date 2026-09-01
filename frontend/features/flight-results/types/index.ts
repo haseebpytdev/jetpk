@@ -147,6 +147,7 @@ export type FlightOffer = {
 
 export type PairedReturnOption = {
   combo_id: string;
+  offer_id?: string;
   outbound_key?: string;
   return_key?: string;
   outbound_journey?: Record<string, unknown>;
@@ -163,6 +164,9 @@ export type PairedReturnOption = {
   airline_logo_url?: string | null;
   pairing_authority?: string;
   supplier_source_label?: string;
+  supplier_provider?: string;
+  provider?: string;
+  select_url?: string;
   branded_fares_display_options?: FareFamilyOption[];
   fare_family_options_display?: FareFamilyOption[];
   has_branded_fares?: boolean;

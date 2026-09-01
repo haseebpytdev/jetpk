@@ -13,6 +13,7 @@ import { AirlineIdentity } from "@/features/flight-results/components/AirlineIde
 import { normalizeJourneyDisplay } from "@/features/flight-results/utils/normalize-journey-display";
 import { FareBadge } from "@/features/flight-results/components/FareBadge";
 import { FlightResultActions } from "@/features/flight-results/components/FlightResultActions";
+import { ResultShareActions } from "@/features/flight-results/components/ResultShareActions";
 import { SupplierSourceBadge } from "@/features/flight-results/components/SupplierSourceBadge";
 import { TimeRouteBlock } from "@/features/flight-results/components/TimeRouteBlock";
 import type { FareFamilyOption, FlightOffer } from "@/features/flight-results/types";
@@ -39,6 +40,7 @@ function returnOptionToOffer(option: Record<string, unknown>, comboId: string): 
   const price =
     (option.displayed_price as number | undefined)
     ?? (option.total_amount as number | undefined);
+  const provider = String(option.supplier_provider ?? option.provider ?? "").trim();
   return {
     offer_id: comboId,
     airline_code: journey?.airline_code,
@@ -58,6 +60,9 @@ function returnOptionToOffer(option: Record<string, unknown>, comboId: string): 
     price_display: (option.price_display as string | undefined) ?? (option.total_display as string | undefined),
     final_customer_price: price,
     supplier_source_label: typeof option.supplier_source_label === "string" ? option.supplier_source_label : undefined,
+    supplier_provider: provider || undefined,
+    provider: provider || undefined,
+    select_url: typeof option.select_url === "string" ? option.select_url : undefined,
     can_book: option.can_book !== false,
     refundable: typeof option.refundable === "boolean" ? option.refundable : undefined,
     branded_fares_display_options: resolveFareOptions(option),
@@ -292,18 +297,25 @@ export function ReturnOptionsPage() {
                           ?? "Price unavailable"}
                       </p>
                     </div>
-                    <FlightResultActions
-                      onDetails={() => {
-                        detailsTriggerRef.current = document.activeElement as HTMLButtonElement | null;
-                        openFareConfirmation(option, "details");
-                      }}
-                      onBook={() => {
-                        detailsTriggerRef.current = document.activeElement as HTMLButtonElement | null;
-                        openFareConfirmation(option, "booking");
-                      }}
-                      detailsTestId="return-details-trigger"
-                      bookTestId="result-price-button"
-                    />
+                    <div className="flex flex-col items-end gap-2">
+                      <ResultShareActions
+                        offer={returnOptionToOffer(option, comboId)}
+                        searchParams={searchParams}
+                        displayAmount={typeof price === "number" ? price : null}
+                      />
+                      <FlightResultActions
+                        onDetails={() => {
+                          detailsTriggerRef.current = document.activeElement as HTMLButtonElement | null;
+                          openFareConfirmation(option, "details");
+                        }}
+                        onBook={() => {
+                          detailsTriggerRef.current = document.activeElement as HTMLButtonElement | null;
+                          openFareConfirmation(option, "booking");
+                        }}
+                        detailsTestId="return-details-trigger"
+                        bookTestId="result-price-button"
+                      />
+                    </div>
                   </div>
                 </div>
               </article>

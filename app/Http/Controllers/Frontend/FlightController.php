@@ -288,7 +288,7 @@ class FlightController extends Controller
             return response()->json([
                 'success' => false,
                 'status' => 'offer_not_found',
-                'message' => (string) __('We could not confirm this fare with the airline. Please refresh your search or choose another option.'),
+                'message' => (string) __('This fare is no longer available. Refresh your search or choose another option.'),
             ], 404);
         }
 

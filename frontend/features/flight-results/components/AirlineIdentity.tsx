@@ -15,6 +15,9 @@ const SIZE_MAP = {
   lg: { box: "h-12 w-12", text: "text-base", img: 48 },
 } as const;
 
+/**
+ * Airline row identity. Wrapper is sizing-only (no visible tile/border/card).
+ */
 export function AirlineIdentity({ code, name, logoUrl, size = "md", className }: AirlineIdentityProps) {
   const sizing = SIZE_MAP[size];
   const initials = (code ?? name ?? "?").slice(0, 2).toUpperCase();
@@ -24,12 +27,12 @@ export function AirlineIdentity({ code, name, logoUrl, size = "md", className }:
     <div className={cn("flex items-center gap-2.5", className)}>
       <div
         className={cn(
-          "relative aspect-square flex shrink-0 items-center justify-center overflow-hidden rounded-jp-sm bg-white",
-          logoUrl ? "border border-jp-border/60" : "border border-jp-border bg-jp-surface",
+          "relative flex shrink-0 items-center justify-center overflow-hidden bg-transparent",
           sizing.box,
         )}
         aria-hidden={Boolean(logoUrl)}
         data-testid="airline-logo-container"
+        data-logo-frame="none"
       >
         {logoUrl ? (
           <Image
@@ -37,16 +40,29 @@ export function AirlineIdentity({ code, name, logoUrl, size = "md", className }:
             alt={alt}
             width={sizing.img}
             height={sizing.img}
-            className="h-full w-full object-contain p-1"
+            className="h-full w-full object-contain"
             unoptimized
           />
         ) : (
-          <span className={cn("font-semibold text-jp-text-muted", sizing.text)}>{initials}</span>
+          <span
+            className={cn(
+              "inline-flex h-full w-full items-center justify-center rounded-jp-sm border border-jp-border bg-jp-surface font-semibold text-jp-text-muted",
+              sizing.text,
+            )}
+          >
+            {initials}
+          </span>
         )}
       </div>
       <div className="min-w-0">
-        {name ? <p className="truncate text-sm font-semibold leading-tight text-jp-text" title={name}>{name}</p> : null}
-        {code ? <p className="mt-0.5 text-[11px] font-medium tracking-wide text-jp-text-muted">{code}</p> : null}
+        {name ? (
+          <p className="truncate text-sm font-semibold leading-tight text-jp-text" title={name}>
+            {name}
+          </p>
+        ) : null}
+        {code ? (
+          <p className="mt-0.5 text-[11px] font-medium tracking-wide text-jp-text-muted">{code}</p>
+        ) : null}
       </div>
     </div>
   );

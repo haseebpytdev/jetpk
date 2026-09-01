@@ -8,11 +8,14 @@ import { formatWholePkr } from "../utils/price";
 import { AirlineIdentity } from "./AirlineIdentity";
 import { FareBadge } from "./FareBadge";
 import { FlightResultActions } from "./FlightResultActions";
+import { ResultShareActions } from "./ResultShareActions";
 import { SupplierSourceBadge } from "./SupplierSourceBadge";
 import { TimeRouteBlock } from "./TimeRouteBlock";
 
 type PairReturnCardProps = {
   option: PairedReturnOption;
+  searchId?: string;
+  searchParams?: URLSearchParams;
   onSelect: (option: PairedReturnOption, fareOptionKey?: string, intent?: "details" | "booking") => void;
   onDetails?: (option: PairedReturnOption, fareOptionKey?: string, intent?: "details" | "booking") => void;
   selecting?: boolean;
@@ -35,8 +38,9 @@ export function pairedOptionToOffer(option: PairedReturnOption): FlightOffer {
   const outbound = normalizeJourneyDisplay(option.outbound_journey, journeyFallback(option));
   const inbound = normalizeJourneyDisplay(option.return_journey, journeyFallback(option));
   const fareOptions = resolveFareOptions(option);
+  const provider = (option.supplier_provider ?? option.provider ?? "").trim();
   return {
-    offer_id: option.combo_id,
+    offer_id: option.offer_id ?? option.combo_id,
     airline_code: outbound.airline_code || option.airline_code,
     airline_name: outbound.airline_name || option.airline_name,
     airline_logo_url: outbound.airline_logo_url,
@@ -57,6 +61,9 @@ export function pairedOptionToOffer(option: PairedReturnOption): FlightOffer {
     price_display: option.total_display,
     final_customer_price: option.total_amount ?? undefined,
     supplier_source_label: option.supplier_source_label,
+    supplier_provider: provider || undefined,
+    provider: provider || undefined,
+    select_url: option.select_url,
     can_book: option.can_book !== false,
     refundable: option.refundable,
     branded_fares_display_options: fareOptions,
@@ -92,7 +99,14 @@ export function pairedOptionToOffer(option: PairedReturnOption): FlightOffer {
   };
 }
 
-export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairReturnCardProps) {
+export function PairReturnCard({
+  option,
+  searchId,
+  searchParams,
+  onSelect,
+  onDetails,
+  selecting,
+}: PairReturnCardProps) {
   const fallback = journeyFallback(option);
   const outbound = normalizeJourneyDisplay(option.outbound_journey, fallback);
   const inbound = normalizeJourneyDisplay(option.return_journey, fallback);
@@ -105,6 +119,7 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
     Boolean(inbound.airline_code) &&
     inbound.airline_code !== outbound.airline_code &&
     inbound.airline_code !== (option.airline_code ?? "");
+  const shareOffer = useMemo(() => pairedOptionToOffer(option), [option]);
 
   const openFareConfirmation = (intent: "details" | "booking") => {
     const key =
@@ -229,14 +244,21 @@ export function PairReturnCard({ option, onSelect, onDetails, selecting }: PairR
               {displayPrice}
             </p>
           </div>
-          <FlightResultActions
-            onDetails={() => openFareConfirmation("details")}
-            onBook={() => openFareConfirmation("booking")}
-            canBook={option.can_book !== false}
-            booking={Boolean(selecting)}
-            detailsTestId="pair-details"
-            bookTestId="pair-select"
-          />
+          <div className="flex flex-col items-end gap-2">
+            <ResultShareActions
+              offer={shareOffer}
+              searchParams={searchParams}
+              displayAmount={selectedOption?.displayed_price ?? option.total_amount}
+            />
+            <FlightResultActions
+              onDetails={() => openFareConfirmation("details")}
+              onBook={() => openFareConfirmation("booking")}
+              canBook={option.can_book !== false}
+              booking={Boolean(selecting)}
+              detailsTestId="pair-details"
+              bookTestId="pair-select"
+            />
+          </div>
         </div>
       </div>
     </article>

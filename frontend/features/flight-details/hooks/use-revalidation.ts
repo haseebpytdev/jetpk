@@ -77,11 +77,19 @@ export function useRevalidation() {
 
   const classifyFailure = useCallback((status: number, body?: RevalidateOfferResponse): RevalidationState => {
     const apiStatus = (body?.status ?? "").toLowerCase();
-    if (status === 410 || apiStatus.includes("expired")) return "expired";
-    if (apiStatus.includes("timeout") || apiStatus.includes("timed_out")) return "timeout";
-    if (apiStatus.includes("unavailable") || apiStatus === "offer_not_found" || apiStatus === "offer_stale") {
+    if (status === 410 || apiStatus.includes("expired") || apiStatus === "search_expired") return "expired";
+    if (apiStatus.includes("timeout") || apiStatus.includes("timed_out") || status === 408 || status === 504) {
+      return "timeout";
+    }
+    if (
+      apiStatus.includes("unavailable") ||
+      apiStatus === "offer_not_found" ||
+      apiStatus === "offer_stale" ||
+      status === 404
+    ) {
       return "unavailable";
     }
+    if (status >= 500 || status === 429) return "timeout";
     return "error";
   }, []);
 
