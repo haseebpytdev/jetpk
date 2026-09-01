@@ -1,74 +1,55 @@
 # JetPakistan — Saudi MOFA Visa Lookup  
-## Written authorization / policy approval request
+## Written authorization / policy approval request (updated after R2 technical proof)
 
 **Status:** Draft for client / MOFA / authorized Saudi partner contact.  
-**Permission received:** **NO** (this document does not grant or claim approval).
+**Permission received:** **NO** (this document does not claim approval).
 
 ---
 
-## 1. Purpose
+## Proven technical design (no sensitive details)
 
-JetPakistan (https://jetpakistan.pk) is evaluating an **optional** customer feature that would help travelers look up **their own** Saudi visa information using the official Ministry of Foreign Affairs Visa Platform:
+Live authorized testing confirmed JetPakistan can, in principle, mediate a **user-initiated** Visa Platform inquire as follows:
 
-`https://visa.mofa.gov.sa/visaservices/searchvisa`
-
-We seek **written confirmation** whether this proposed user-initiated, human-CAPTCHA, server-mediated relay is permitted — or whether an official partner/API channel must be used instead.
+1. User starts a lookup and supplies **their own** identifiers
+2. JetPakistan backend opens a temporary MOFA session
+3. MOFA CAPTCHA image is shown to the **same** user and solved **manually by that human**
+4. Same session submits the inquire (CSRF + cookies)
+5. MOFA returns a redirect to an official printable **HTML** visa page with structured fields
+6. JetPakistan may display a summary from those fields and/or stream the official HTML document bytes unchanged for that user
+7. No MOFA `application/pdf` download API was observed; any PDF/PNG would be a **local copy** of the official document/print view and must be labeled accordingly
 
 ---
 
-## 2. What JetPakistan proposes
+## Commitments
 
 | Practice | Commitment |
 |---|---|
-| Initiation | User manually starts each lookup inside JetPakistan |
-| Identity data | User supplies **their own** lookup values only |
-| CAPTCHA | Official MOFA CAPTCHA image is shown to the same user and **solved by that human** |
-| CAPTCHA automation | **None** — no OCR, AI, third-party solvers, or bypass |
-| Bulk / polling | **No** background polling, scheduled jobs, or bulk harvesting |
-| Enumeration | **No** passport/visa enumeration or guessing |
-| Resale / database | **No** resale or permanent harvesting of visa records |
-| Authority | MOFA remains the sole authoritative source |
-| PDF | If MOFA returns an official PDF, JetPakistan would **stream the original bytes unchanged** to the same user |
-| Storage | **No permanent** passport/visa/PDF archive by default; only short-lived encrypted session handling |
-| Attribution | UI would state that visa information is supplied by the Saudi Ministry of Foreign Affairs |
-| Rate limits | JetPakistan would honor MOFA throttling / fail closed |
-| Kill switch | Feature can be disabled instantly without core OTA impact |
+| Initiation | User-initiated only |
+| Identifiers | User-owned / authorized only |
+| CAPTCHA | Human-solved only; no OCR/AI/solver/bypass |
+| Bulk / polling | None |
+| Enumeration | None |
+| Harvesting / resale | None |
+| Authority | MOFA remains authoritative |
+| Storage | No permanent passport/visa/document archive by default |
+| Attribution | MOFA attribution shown |
+| Controls | Rate limits + instant kill switch |
 
 ---
 
-## 3. Explicit questions requiring written answers
+## Questions requiring written answers
 
-Please confirm in writing whether MOFA / an authorized Saudi partner **permits**:
-
-1. User-initiated **server-mediated** Visa Platform search (JetPakistan backend ↔ MOFA, on behalf of the same end user);
-2. Relaying the MOFA CAPTCHA image to that same end user for **manual** solving;
-3. Submitting the user-entered CAPTCHA through the **same temporary MOFA session**;
-4. Displaying returned visa information inside the JetPakistan UI (with MOFA attribution);
-5. Proxying/streaming the **original MOFA-issued PDF** to the same user;
-6. Temporary encrypted handling of MOFA session cookies strictly for that lookup;
-7. Displaying MOFA attribution on JetPakistan result screens;
-8. Whether an **official partner / API interface** exists that should be used **instead** of Visa Platform form mediation.
+1. User-initiated server-mediated Visa Platform search permitted?
+2. Relaying MOFA CAPTCHA to the same user for manual solving permitted?
+3. Submitting that CAPTCHA on the same temporary MOFA session permitted?
+4. Displaying returned visa fields inside JetPakistan permitted?
+5. Streaming the official MOFA HTML visa document to the same user permitted?
+6. Temporary encrypted MOFA session-cookie handling permitted?
+7. MOFA attribution on JetPakistan UI required/acceptable?
+8. Does an official partner/API channel exist that **must** be used instead?
 
 ---
 
-## 4. What JetPakistan will not do without approval
+## Fallback
 
-- Production public Visa lookup activation
-- CAPTCHA circumvention
-- Automated mass queries
-- Framing/embedding the Visa Platform against MOFA framing/linking rules without permission
-- Claiming JetPakistan independently issues or verifies visas
-
----
-
-## 5. Fallback if permission is denied or unavailable
-
-JetPakistan will ship (or keep) a simple informational landing that directs customers to the **official** MOFA Visa Platform URL — without server-mediated lookup.
-
----
-
-## 6. Contact / response
-
-Please reply with written approval, denial, or redirection to an official integration channel, including any required commercial/government registration steps.
-
-**Document control:** JetPakistan internal evidence `jp-visa-mofa-01a` — policy package only.
+If permission is denied or unavailable: JetPakistan will only deep-link users to the official MOFA Search Visa URL — no server-mediated lookup.

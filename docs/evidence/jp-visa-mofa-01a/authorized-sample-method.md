@@ -1,47 +1,28 @@
-# Authorized sample method
-
-## Result
+# Authorized sample method (R2)
 
 | Flag | Value |
 |---|---|
-| AUTHORIZED_SAMPLE_AVAILABLE | **NO** |
-| LIVE_SAMPLE_AUTHORIZED | **NO** |
-| AUTHORIZED_LOOKUP_ATTEMPTS | `0` |
-| AUTHORIZED_LOOKUP_SUCCESS | **NO** |
-| PDF_PROTOCOL_CLOSURE | **BLOCKED_AUTHORIZED_SAMPLE_REQUIRED** |
+| AUTHORIZED_SAMPLE_AVAILABLE | **YES** |
+| LIVE_SAMPLE_AUTHORIZED | **YES** (owner/company confirmation for technical integration test) |
+| AUTHORIZED_SAMPLE_COUNT_AVAILABLE | **2** |
+| AUTHORIZED_SAMPLE_COUNT_USED | **1** |
+| OWNER_LOOKUP_VALUES_ENTERED_MANUALLY | **YES** |
 | SENSITIVE_LOOKUP_VALUES_PERSISTED | **NO** |
+| CAPTCHA_HUMAN_ENTRY | **YES** |
 | CAPTCHA_SOLVER_USED | **NO** |
-| CAPTCHA_HUMAN_ENTRY | **N/A** (no lookup attempted) |
+| CAPTCHA_AUTOMATION | **0** |
+| AUTHORIZED_LOOKUP_ATTEMPTS | **1** |
+| AUTHORIZED_LOOKUP_SUCCESS | **YES** |
 
-## Checks performed (presence only; no values printed)
+## Method
 
-Environment variables checked (all unset):
+1. Open live MOFA Search Visa page in controlled browser
+2. Inspect dropdown **option names only**
+3. Preselect criterion pair (names only): Passport number + Visa number
+4. **Pause** for owner manual entry of values, nationality, and CAPTCHA
+5. Owner submitted inquire; automation resumed only after `LOOKUP_DONE`
+6. Second sample **not** used (first succeeded)
 
-- `JP_MOFA_SAMPLE`
-- `MOFA_SAMPLE`
-- `JP_VISA_SAMPLE`
-- `AUTHORIZED_VISA_SAMPLE`
+## Persistence boundary
 
-Local file paths checked (all missing):
-
-- `%USERPROFILE%\.jp-mofa-sample.env`
-- `%TEMP%\jp-mofa-authorized-sample.env`
-- `C:\Users\khadi\ota-jetpk\.local\mofa-authorized-sample.env`
-- `C:\Users\khadi\ota-jetpk\tmp\mofa-authorized-sample.env`
-
-Repo search: no MOFA/visa sample artifacts under writable tree.
-
-## Rules obeyed
-
-- Did **not** invent, guess, enumerate, or reuse third-party identities
-- Did **not** submit fake passport/visa values to MOFA
-- Did **not** open a live lookup session for identity search
-
-## How to unlock PDF protocol closure (future re-run)
-
-Owner supplies legitimate self-authorized lookup values via a **transient local** channel only (never Cursor prompt, Git, evidence, or screenshots), then:
-
-1. Human solves CAPTCHA manually in the same MOFA session
-2. One successful lookup (+ at most one CAPTCHA mistype retry)
-3. Capture sanitized protocol metadata only
-4. Transient PDF SHA256 compare; delete bytes immediately
+No passport/visa/application/name/DOB/photo/CAPTCHA/cookie/token values written to Git, evidence, prompts, or scripts.

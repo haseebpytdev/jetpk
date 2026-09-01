@@ -1,25 +1,27 @@
-# Result data shape
-
-## Status
-
-**Not observed.** No authorized successful lookup in 01A.
+# Result data shape (field names only)
 
 | Flag | Value |
 |---|---|
-| RESULT_STRUCTURED_DATA_AVAILABLE | **PENDING_AUTHORIZED_SAMPLE** |
-| MOFA_RESULT_FIELD_NAMES | `PENDING_AUTHORIZED_SAMPLE` |
+| RESULT_STRUCTURED_DATA_AVAILABLE | **YES** |
 
-## Method for later closure
+## MOFA_RESULT_FIELD_NAMES
 
-On authorized success, record **field names only** (never values) from HTML/result UI categories such as:
+Observed bilingual labels on successful `/Home/PrintedUmrahVisa` HTML (names only):
 
-- status
-- visa number
-- application number
-- name
-- nationality
-- visa type
-- validity / duration / entries
-- issue / expiry date
+- Visa No. / رقم التأشيرة
+- Date of Issue / صالحة اعتبارا من
+- Valid Until / صالحة لغاية
+- Duration of Stay / مدة الإقامة
+- Passport No. / رقم جواز السفر
+- Place of issue / مصدر التأشيرة
+- Name / الاسم
+- Birth Date / تاريخ الميلاد
+- Nationality / الجنسية
+- Type Of Visa / نوع التأشيرة
+- Umrah Operator / مكتب العمرة
+- External Agent / الوكيل الخارجي
+- Application No. / رقم الطلب
 
-If only PDF exists with no structured HTML fields: set `RESULT_STRUCTURED_DATA_AVAILABLE=NO` accurately.
+Plus printable advisory/restriction paragraphs and MRZ/QR visual regions (not parsed; OCR not used).
+
+**No field values are stored in evidence.**

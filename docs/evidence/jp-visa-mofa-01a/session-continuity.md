@@ -1,25 +1,17 @@
-# Session continuity
-
-## Preserved from JP-VISA-MOFA-01 (not disproven)
+# Session continuity (R2 live)
 
 | Flag | Value |
 |---|---|
-| MOFA_SESSION_REQUIRED | YES |
-| MOFA_CSRF_REQUIRED | YES |
-| MOFA_HIDDEN_STATE_REQUIRED | YES |
-| MOFA_CAPTCHA_SESSION_BOUND | YES |
-| CAPTCHA_AND_SEARCH_SAME_SESSION_REQUIRED | YES |
-| CAPTCHA_HUMAN_SOLVED_ONLY | YES |
-| CAPTCHA_BYPASS_IMPLEMENTED | NO |
+| CAPTCHA_AND_SEARCH_SAME_SESSION_REQUIRED | **YES** (preserved + used) |
+| RESULT_AND_DOCUMENT_SAME_SESSION_REQUIRED | **YES** |
+| MOFA_RESULT_REQUIRES_SESSION | **YES** |
 
-## Still open (needs authorized success)
+## Proof
 
-| Flag | Value |
+| Probe | Outcome |
 |---|---|
-| RESULT_AND_PDF_SAME_SESSION_REQUIRED | `PENDING_AUTHORIZED_SAMPLE` |
-| MOFA_RESULT_REQUIRES_SESSION | `PENDING_AUTHORIZED_SAMPLE` |
-| MOFA_PDF_SESSION_REQUIRED | `PENDING_AUTHORIZED_SAMPLE` |
+| Authenticated success path | POST search → 302 → `GET /Home/PrintedUmrahVisa` 200 HTML |
+| `GET /Home/PrintedUmrahVisa` with no cookies | **302** to site root |
+| `GET /Home/PrintedUmrahVisa` with fresh session but **no** prior successful search | **302** (`Object moved`) — no visa HTML |
 
-## Future adapter expectation
-
-Single ephemeral MOFA cookie jar across: page → captcha → POST search → result → PDF. Do not attempt session bypass.
+Therefore document retrieval is **not** a stable public URL; it requires the MOFA search session established by the successful inquire.

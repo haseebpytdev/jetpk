@@ -1,24 +1,26 @@
-# Success flow
+# Success flow (live authorized lookup)
 
-## Status
+## Proven chain
 
-**Not executed.** Blocked: authorized sample unavailable.
+```
+GET  /visaservices/searchvisa          → 200 text/html  (session + CSRF + captcha)
+GET  /Base/GetRandomCaptchaImage/{id}  → 200 image/jpeg
+POST /visaservices/searchvisa          → 302 Location: /Home/PrintedUmrahVisa
+GET  /Home/PrintedUmrahVisa            → 200 text/html  (official printable visa page)
+```
 
-| Stage | Proven in 01A? | Notes |
-|---|---|---|
-| A. Lookup page | Preserved from 01 | `GET /visaservices/searchvisa` |
-| B. CAPTCHA | Preserved from 01 | `GET /Base/GetRandomCaptchaImage` |
-| C. POST search | Preserved protocol only | No authorized POST with identity values |
-| D. Result | **UNPROVEN** | Requires authorized success |
-| E. PDF/view action | **UNPROVEN** | Requires authorized success |
-| F. PDF bytes | **UNPROVEN** | Requires authorized success |
+## Success facts
 
-## Fields that remain open until authorized success
-
-| Key | Status |
+| Key | Value |
 |---|---|
-| MOFA_SUCCESS_RESPONSE_TYPE | `PENDING_AUTHORIZED_SAMPLE` |
-| MOFA_SUCCESS_HTTP_STATUS | `PENDING_AUTHORIZED_SAMPLE` |
-| MOFA_SUCCESS_REDIRECT_REQUIRED | `PENDING_AUTHORIZED_SAMPLE` |
-| MOFA_RESULT_ROUTE | Preserved candidate `/visaservices/searchvisa` (01); success shape unproven |
-| MOFA_RESULT_REQUIRES_SESSION | `PENDING_AUTHORIZED_SAMPLE` |
+| MOFA_SUCCESS_RESPONSE_TYPE | `HTTP_302_THEN_HTML_PRINTED_VISA_PAGE` |
+| MOFA_SUCCESS_HTTP_STATUS | `302` (POST) then `200` (result page) |
+| MOFA_SUCCESS_REDIRECT_REQUIRED | **YES** |
+| MOFA_RESULT_ROUTE | `/Home/PrintedUmrahVisa` |
+| MOFA_RESULT_REQUIRES_SESSION | **YES** |
+
+## Notes
+
+- Result page `Cache-Control: no-cache, no-store, must-revalidate`
+- `X-Frame-Options: DENY` (iframe not viable)
+- No `application/pdf` response observed on this success path
