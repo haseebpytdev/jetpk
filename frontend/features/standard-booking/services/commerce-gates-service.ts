@@ -1,4 +1,3 @@
-import { laravelApiPath } from "@/services/flight-search";
 import { fetchSessionBootstrap } from "@/features/auth/services/session-service";
 import { fetchWithTimeout } from "@/features/public-content/utils/laravel-api";
 
@@ -28,7 +27,8 @@ export async function fetchCommerceGates(): Promise<CommerceGates> {
   }
 
   try {
-    const response = await fetchWithTimeout(laravelApiPath("/booking/commerce-gates"), {
+    // Browser same-origin public route (OLS proxies /booking/commerce-gates).
+    const response = await fetchWithTimeout("/booking/commerce-gates", {
       headers: { Accept: "application/json" },
       cache: "no-store",
     });

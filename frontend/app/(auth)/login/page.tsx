@@ -7,7 +7,7 @@ import { fetchSessionBootstrapFromCookies } from "@/features/auth/services/sessi
 import { cookies } from "next/headers";
 import { sanitizeCheckoutReturnUrl } from "@/features/auth/utils/checkout-return-allowlist";
 import { sanitizeDashboardUrl } from "@/features/auth/utils/dashboard-allowlist";
-import { laravelApiPath } from "@/services/flight-search";
+import { absoluteLaravelUrl } from "@/services/flight-search";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -20,9 +20,12 @@ type LoginPageProps = {
 
 async function registrationEnabled(): Promise<boolean> {
   try {
-    const response = await fetch(laravelApiPath("/booking/commerce-gates"), {
+    // Public commerce gates are served at /booking/commerce-gates (not /laravel/...).
+    // Using laravelApiPath here made SSR fail-open to registration ON.
+    const response = await fetch(absoluteLaravelUrl("/booking/commerce-gates"), {
       headers: { Accept: "application/json" },
       cache: "no-store",
+      next: { revalidate: 0 },
     });
     if (!response.ok) return true;
     const payload = (await response.json()) as { customer_registration_enabled?: boolean };
