@@ -1,0 +1,6 @@
+﻿KILL SWITCH CONTROL
+Authoritative control: OTA_AI_ASSISTANT_MODE in production .env + config:cache + lsphp recycle.
+Proven transitions (activate2 + post-killswitch under jetpk-production-run):
+INTERNAL_CANARY -> OFF -> INTERNAL_CANARY
+PUBLIC -> INTERNAL_CANARY -> OFF -> PUBLIC (restored)
+PUBLIC_ENABLE_SOURCE_CHANGE_REQUIRED=NO

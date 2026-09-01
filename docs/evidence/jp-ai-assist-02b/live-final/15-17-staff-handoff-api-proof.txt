@@ -1,0 +1,3 @@
+﻿STAFF_QUEUE / HUMAN_TAKEOVER / HUMAN_REPLY
+Verified by production suite jp-ai-assist-02b-public-suite.php (PUBLIC_HUMAN_HANDOFF=PASS, STAFF_QUEUE=PASS, HUMAN_REPLY_TO_CHAT=PASS, AI_HUMAN_DOUBLE_REPLY=0).
+No staff dashboard browser session credentials used in this evidence pack (sanitized).
