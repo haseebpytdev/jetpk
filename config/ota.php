@@ -304,5 +304,7 @@ return [
         'human_handoff_enabled' => filter_var(env('OTA_AI_HUMAN_HANDOFF_ENABLED', true), FILTER_VALIDATE_BOOL),
         'max_conversation_messages' => max(10, (int) env('OTA_AI_MAX_CONVERSATION_MESSAGES', 80)),
         'load_shed_available_mb_min' => max(256, (int) env('OTA_AI_LOAD_SHED_AVAILABLE_MB_MIN', 2000)),
+        /** Optional local LLM phrasing assist — never required for core Flight/Group authority. */
+        'optional_llm_assist' => filter_var(env('OTA_AI_OPTIONAL_LLM_ASSIST', false), FILTER_VALIDATE_BOOL),
     ],
 ];

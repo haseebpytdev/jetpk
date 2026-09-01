@@ -1,0 +1,3994 @@
+{
+    "generated_at": "2026-09-01",
+    "anchor_date": "2026-09-01",
+    "turns": [
+        {
+            "lang": "en",
+            "message": "Lahore to Dubai on 18 Sep 2 adults",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 1
+        },
+        {
+            "lang": "en",
+            "message": "Lahore to Dubai on 18 Sep 2 adults",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 2
+        },
+        {
+            "lang": "en",
+            "message": "Lahore to Dubai on 18 Sep 2 adults",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 3
+        },
+        {
+            "lang": "en",
+            "message": "Lahore to Dubai on 18 Sep 2 adults",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 4
+        },
+        {
+            "lang": "en",
+            "message": "Lahore to Dubai on 18 Sep 2 adults",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 5
+        },
+        {
+            "lang": "en",
+            "message": "Lahore to Dubai on 18 Sep 2 adults",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 6
+        },
+        {
+            "lang": "en",
+            "message": "Lahore to Dubai on 18 Sep 2 adults",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 7
+        },
+        {
+            "lang": "en",
+            "message": "Lahore to Dubai on 18 Sep 2 adults",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 8
+        },
+        {
+            "lang": "en",
+            "message": "LHE to DXB tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 9
+        },
+        {
+            "lang": "en",
+            "message": "LHE to DXB tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 10
+        },
+        {
+            "lang": "en",
+            "message": "LHE to DXB tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 11
+        },
+        {
+            "lang": "en",
+            "message": "LHE to DXB tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 12
+        },
+        {
+            "lang": "en",
+            "message": "LHE to DXB tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 13
+        },
+        {
+            "lang": "en",
+            "message": "LHE to DXB tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 14
+        },
+        {
+            "lang": "en",
+            "message": "LHE to DXB tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 15
+        },
+        {
+            "lang": "en",
+            "message": "LHE to DXB tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 16
+        },
+        {
+            "lang": "en",
+            "message": "Islamabad to Jeddah next Friday direct",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 17
+        },
+        {
+            "lang": "en",
+            "message": "Islamabad to Jeddah next Friday direct",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 18
+        },
+        {
+            "lang": "en",
+            "message": "Islamabad to Jeddah next Friday direct",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 19
+        },
+        {
+            "lang": "en",
+            "message": "Islamabad to Jeddah next Friday direct",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 20
+        },
+        {
+            "lang": "en",
+            "message": "Islamabad to Jeddah next Friday direct",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 21
+        },
+        {
+            "lang": "en",
+            "message": "Islamabad to Jeddah next Friday direct",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 22
+        },
+        {
+            "lang": "en",
+            "message": "Islamabad to Jeddah next Friday direct",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 23
+        },
+        {
+            "lang": "en",
+            "message": "Islamabad to Jeddah next Friday direct",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 24
+        },
+        {
+            "lang": "en",
+            "message": "Karachi to Doha cheapest under 150k",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 25
+        },
+        {
+            "lang": "en",
+            "message": "Karachi to Doha cheapest under 150k",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 26
+        },
+        {
+            "lang": "en",
+            "message": "Karachi to Doha cheapest under 150k",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 27
+        },
+        {
+            "lang": "en",
+            "message": "Karachi to Doha cheapest under 150k",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 28
+        },
+        {
+            "lang": "en",
+            "message": "Karachi to Doha cheapest under 150k",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 29
+        },
+        {
+            "lang": "en",
+            "message": "Karachi to Doha cheapest under 150k",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 30
+        },
+        {
+            "lang": "en",
+            "message": "Karachi to Doha cheapest under 150k",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 31
+        },
+        {
+            "lang": "en",
+            "message": "Karachi to Doha cheapest under 150k",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 32
+        },
+        {
+            "lang": "en",
+            "message": "how does guest booking work",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 33
+        },
+        {
+            "lang": "en",
+            "message": "how does guest booking work",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 34
+        },
+        {
+            "lang": "en",
+            "message": "how does guest booking work",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 35
+        },
+        {
+            "lang": "en",
+            "message": "how does guest booking work",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 36
+        },
+        {
+            "lang": "en",
+            "message": "how does guest booking work",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 37
+        },
+        {
+            "lang": "en",
+            "message": "how does guest booking work",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 38
+        },
+        {
+            "lang": "en",
+            "message": "how does guest booking work",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 39
+        },
+        {
+            "lang": "en",
+            "message": "how does guest booking work",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 40
+        },
+        {
+            "lang": "en",
+            "message": "talk to a human agent",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 41
+        },
+        {
+            "lang": "en",
+            "message": "talk to a human agent",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 42
+        },
+        {
+            "lang": "en",
+            "message": "talk to a human agent",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 43
+        },
+        {
+            "lang": "en",
+            "message": "talk to a human agent",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 44
+        },
+        {
+            "lang": "en",
+            "message": "talk to a human agent",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 45
+        },
+        {
+            "lang": "en",
+            "message": "talk to a human agent",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 46
+        },
+        {
+            "lang": "en",
+            "message": "talk to a human agent",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 47
+        },
+        {
+            "lang": "en",
+            "message": "talk to a human agent",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 48
+        },
+        {
+            "lang": "en",
+            "message": "London to Dubai 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 49
+        },
+        {
+            "lang": "en",
+            "message": "London to Dubai 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 50
+        },
+        {
+            "lang": "en",
+            "message": "London to Dubai 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 51
+        },
+        {
+            "lang": "en",
+            "message": "London to Dubai 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 52
+        },
+        {
+            "lang": "en",
+            "message": "London to Dubai 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 53
+        },
+        {
+            "lang": "en",
+            "message": "London to Dubai 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 54
+        },
+        {
+            "lang": "en",
+            "message": "London to Dubai 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 55
+        },
+        {
+            "lang": "en",
+            "message": "London to Dubai 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 56
+        },
+        {
+            "lang": "en",
+            "message": "New York to Lahore",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 57
+        },
+        {
+            "lang": "en",
+            "message": "New York to Lahore",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 58
+        },
+        {
+            "lang": "en",
+            "message": "New York to Lahore",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 59
+        },
+        {
+            "lang": "en",
+            "message": "New York to Lahore",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 60
+        },
+        {
+            "lang": "en",
+            "message": "New York to Lahore",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 61
+        },
+        {
+            "lang": "en",
+            "message": "New York to Lahore",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 62
+        },
+        {
+            "lang": "en",
+            "message": "New York to Lahore",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 63
+        },
+        {
+            "lang": "en",
+            "message": "New York to Lahore",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 64
+        },
+        {
+            "lang": "en",
+            "message": "flights from Multan to Sharjah 18 September",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "MUX",
+                "destination": "SHJ",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 65
+        },
+        {
+            "lang": "en",
+            "message": "flights from Multan to Sharjah 18 September",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "MUX",
+                "destination": "SHJ",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 66
+        },
+        {
+            "lang": "en",
+            "message": "flights from Multan to Sharjah 18 September",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "MUX",
+                "destination": "SHJ",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 67
+        },
+        {
+            "lang": "en",
+            "message": "flights from Multan to Sharjah 18 September",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "MUX",
+                "destination": "SHJ",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 68
+        },
+        {
+            "lang": "en",
+            "message": "flights from Multan to Sharjah 18 September",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "MUX",
+                "destination": "SHJ",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 69
+        },
+        {
+            "lang": "en",
+            "message": "flights from Multan to Sharjah 18 September",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "MUX",
+                "destination": "SHJ",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 70
+        },
+        {
+            "lang": "en",
+            "message": "flights from Multan to Sharjah 18 September",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "MUX",
+                "destination": "SHJ",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 71
+        },
+        {
+            "lang": "en",
+            "message": "flights from Multan to Sharjah 18 September",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "MUX",
+                "destination": "SHJ",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 72
+        },
+        {
+            "lang": "en",
+            "message": "cancellation refund policy",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 73
+        },
+        {
+            "lang": "en",
+            "message": "cancellation refund policy",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 74
+        },
+        {
+            "lang": "en",
+            "message": "cancellation refund policy",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 75
+        },
+        {
+            "lang": "en",
+            "message": "cancellation refund policy",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 76
+        },
+        {
+            "lang": "en",
+            "message": "cancellation refund policy",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 77
+        },
+        {
+            "lang": "en",
+            "message": "cancellation refund policy",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 78
+        },
+        {
+            "lang": "en",
+            "message": "cancellation refund policy",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 79
+        },
+        {
+            "lang": "en",
+            "message": "cancellation refund policy",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 80
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 81
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 82
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 83
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 84
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 85
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 86
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 87
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 88
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 89
+        },
+        {
+            "lang": "ru",
+            "message": "Lahore se Dubai jana hai 18 Sep do bara",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 90
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 91
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 92
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 93
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 94
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 95
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 96
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 97
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 98
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 99
+        },
+        {
+            "lang": "ru",
+            "message": "ISB sy JED aglay jumay seedhi chahiye",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-04",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 100
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 101
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 102
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 103
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 104
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 105
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 106
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 107
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 108
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 109
+        },
+        {
+            "lang": "ru",
+            "message": "Karachi se Doha sasti under 150 hazar",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "budget": 150000,
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 110
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 111
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 112
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 113
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 114
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 115
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 116
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 117
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 118
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 119
+        },
+        {
+            "lang": "ru",
+            "message": "Dubai groups dikhao",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 120
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 121
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 122
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 123
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 124
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 125
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 126
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 127
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 128
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 129
+        },
+        {
+            "lang": "ru",
+            "message": "Jeddah group chahiye",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 130
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 131
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 132
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 133
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 134
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 135
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 136
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 137
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 138
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 139
+        },
+        {
+            "lang": "ru",
+            "message": "payment deadline kya hai",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 140
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 141
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 142
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 143
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 144
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 145
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 146
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 147
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 148
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 149
+        },
+        {
+            "lang": "ru",
+            "message": "human support chahiye",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 150
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 151
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 152
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 153
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 154
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 155
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 156
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 157
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 158
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 159
+        },
+        {
+            "lang": "ru",
+            "message": "kal LHE DXB",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 160
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 161
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 162
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 163
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 164
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 165
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 166
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 167
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 168
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 169
+        },
+        {
+            "lang": "ru",
+            "message": "parso Islamabad Dubai",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 170
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 171
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 172
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 173
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 174
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 175
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 176
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 177
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 178
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 179
+        },
+        {
+            "lang": "ru",
+            "message": "Emirates airline Lahore Dubai 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 180
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 181
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 182
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 183
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 184
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 185
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 186
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 187
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 188
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 189
+        },
+        {
+            "lang": "ur",
+            "message": "لاہور سے دبئی 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 190
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 191
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 192
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 193
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 194
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 195
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 196
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 197
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 198
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 199
+        },
+        {
+            "lang": "ur",
+            "message": "اسلام آباد سے جدہ براہ راست",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "JED",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 200
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 201
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 202
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 203
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 204
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 205
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 206
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 207
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 208
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 209
+        },
+        {
+            "lang": "ur",
+            "message": "کراچی سے دوحہ سستی",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "KHI",
+                "destination": "DOH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 210
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 211
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 212
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 213
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 214
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 215
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 216
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 217
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 218
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 219
+        },
+        {
+            "lang": "ur",
+            "message": "دبئی کے گروپ دکھائیں",
+            "expect": {
+                "intent": "group_search"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 220
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 221
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 222
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 223
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 224
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 225
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 226
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 227
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 228
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 229
+        },
+        {
+            "lang": "ur",
+            "message": "ادائیگی کی مدد",
+            "expect": {
+                "intent": "knowledge"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 230
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 231
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 232
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 233
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 234
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 235
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 236
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 237
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 238
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 239
+        },
+        {
+            "lang": "ur",
+            "message": "انسان سے بات",
+            "expect": {
+                "intent": "handoff"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 240
+        },
+        {
+            "lang": "mixed",
+            "message": "Lahore sy Dubai direcrt 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 241
+        },
+        {
+            "lang": "mixed",
+            "message": "Lahore sy Dubai direcrt 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 242
+        },
+        {
+            "lang": "mixed",
+            "message": "Lahore sy Dubai direcrt 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 243
+        },
+        {
+            "lang": "mixed",
+            "message": "Lahore sy Dubai direcrt 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 244
+        },
+        {
+            "lang": "mixed",
+            "message": "Lahore sy Dubai direcrt 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 245
+        },
+        {
+            "lang": "mixed",
+            "message": "Lahore sy Dubai direcrt 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 246
+        },
+        {
+            "lang": "mixed",
+            "message": "ISB to دبئی tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 247
+        },
+        {
+            "lang": "mixed",
+            "message": "ISB to دبئی tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 248
+        },
+        {
+            "lang": "mixed",
+            "message": "ISB to دبئی tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 249
+        },
+        {
+            "lang": "mixed",
+            "message": "ISB to دبئی tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 250
+        },
+        {
+            "lang": "mixed",
+            "message": "ISB to دبئی tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 251
+        },
+        {
+            "lang": "mixed",
+            "message": "ISB to دبئی tomorrow",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "DXB",
+                "depart_date": "2026-09-02"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 252
+        },
+        {
+            "lang": "mixed",
+            "message": "Jedah flights from LHE 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "JED",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 253
+        },
+        {
+            "lang": "mixed",
+            "message": "Jedah flights from LHE 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "JED",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 254
+        },
+        {
+            "lang": "mixed",
+            "message": "Jedah flights from LHE 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "JED",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 255
+        },
+        {
+            "lang": "mixed",
+            "message": "Jedah flights from LHE 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "JED",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 256
+        },
+        {
+            "lang": "mixed",
+            "message": "Jedah flights from LHE 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "JED",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 257
+        },
+        {
+            "lang": "mixed",
+            "message": "Jedah flights from LHE 18 Sep",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "JED",
+                "depart_date": "2026-09-18"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 258
+        },
+        {
+            "lang": "mixed",
+            "message": "islmabad se RUH sasti",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "RUH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 259
+        },
+        {
+            "lang": "mixed",
+            "message": "islmabad se RUH sasti",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "RUH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 260
+        },
+        {
+            "lang": "mixed",
+            "message": "islmabad se RUH sasti",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "RUH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 261
+        },
+        {
+            "lang": "mixed",
+            "message": "islmabad se RUH sasti",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "RUH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 262
+        },
+        {
+            "lang": "mixed",
+            "message": "islmabad se RUH sasti",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "RUH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 263
+        },
+        {
+            "lang": "mixed",
+            "message": "islmabad se RUH sasti",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "ISB",
+                "destination": "RUH",
+                "ranking": "CHEAPEST"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 264
+        },
+        {
+            "lang": "mixed",
+            "message": "LHE DXB under 160k Emirates",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "budget": 160000,
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 265
+        },
+        {
+            "lang": "mixed",
+            "message": "LHE DXB under 160k Emirates",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "budget": 160000,
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 266
+        },
+        {
+            "lang": "mixed",
+            "message": "LHE DXB under 160k Emirates",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "budget": 160000,
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 267
+        },
+        {
+            "lang": "mixed",
+            "message": "LHE DXB under 160k Emirates",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "budget": 160000,
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 268
+        },
+        {
+            "lang": "mixed",
+            "message": "LHE DXB under 160k Emirates",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "budget": 160000,
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 269
+        },
+        {
+            "lang": "mixed",
+            "message": "LHE DXB under 160k Emirates",
+            "expect": {
+                "intent": "flight_search",
+                "origin": "LHE",
+                "destination": "DXB",
+                "budget": 160000,
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "base",
+            "prior": null,
+            "id": 270
+        },
+        {
+            "lang": "en",
+            "message": "one day later",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2,
+                "intent": "flight_search"
+            },
+            "id": 271
+        },
+        {
+            "lang": "en",
+            "message": "one day later",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2,
+                "intent": "flight_search"
+            },
+            "id": 272
+        },
+        {
+            "lang": "en",
+            "message": "one day later",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2,
+                "intent": "flight_search"
+            },
+            "id": 273
+        },
+        {
+            "lang": "en",
+            "message": "one day later",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2,
+                "intent": "flight_search"
+            },
+            "id": 274
+        },
+        {
+            "lang": "en",
+            "message": "one day later",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2,
+                "intent": "flight_search"
+            },
+            "id": 275
+        },
+        {
+            "lang": "en",
+            "message": "one day later",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "adults": 2,
+                "intent": "flight_search"
+            },
+            "id": 276
+        },
+        {
+            "lang": "en",
+            "message": "only direct",
+            "expect": {
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 277
+        },
+        {
+            "lang": "en",
+            "message": "only direct",
+            "expect": {
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 278
+        },
+        {
+            "lang": "en",
+            "message": "only direct",
+            "expect": {
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 279
+        },
+        {
+            "lang": "en",
+            "message": "only direct",
+            "expect": {
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 280
+        },
+        {
+            "lang": "en",
+            "message": "only direct",
+            "expect": {
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 281
+        },
+        {
+            "lang": "en",
+            "message": "only direct",
+            "expect": {
+                "max_stops": 0
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 282
+        },
+        {
+            "lang": "en",
+            "message": "under 160k",
+            "expect": {
+                "budget": 160000
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 283
+        },
+        {
+            "lang": "en",
+            "message": "under 160k",
+            "expect": {
+                "budget": 160000
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 284
+        },
+        {
+            "lang": "en",
+            "message": "under 160k",
+            "expect": {
+                "budget": 160000
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 285
+        },
+        {
+            "lang": "en",
+            "message": "under 160k",
+            "expect": {
+                "budget": 160000
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 286
+        },
+        {
+            "lang": "en",
+            "message": "under 160k",
+            "expect": {
+                "budget": 160000
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 287
+        },
+        {
+            "lang": "en",
+            "message": "under 160k",
+            "expect": {
+                "budget": 160000
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 288
+        },
+        {
+            "lang": "en",
+            "message": "Emirates please",
+            "expect": {
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 289
+        },
+        {
+            "lang": "en",
+            "message": "Emirates please",
+            "expect": {
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 290
+        },
+        {
+            "lang": "en",
+            "message": "Emirates please",
+            "expect": {
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 291
+        },
+        {
+            "lang": "en",
+            "message": "Emirates please",
+            "expect": {
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 292
+        },
+        {
+            "lang": "en",
+            "message": "Emirates please",
+            "expect": {
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 293
+        },
+        {
+            "lang": "en",
+            "message": "Emirates please",
+            "expect": {
+                "airline": "EK"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "LHE",
+                "destination": "DXB",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 294
+        },
+        {
+            "lang": "en",
+            "message": "aik din baad",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 295
+        },
+        {
+            "lang": "en",
+            "message": "aik din baad",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 296
+        },
+        {
+            "lang": "en",
+            "message": "aik din baad",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 297
+        },
+        {
+            "lang": "en",
+            "message": "aik din baad",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 298
+        },
+        {
+            "lang": "en",
+            "message": "aik din baad",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 299
+        },
+        {
+            "lang": "en",
+            "message": "aik din baad",
+            "expect": {
+                "depart_date": "2026-09-19"
+            },
+            "clarify": false,
+            "kind": "followup",
+            "prior": {
+                "origin": "ISB",
+                "destination": "JED",
+                "depart_date": "2026-09-18",
+                "intent": "flight_search"
+            },
+            "id": 300
+        },
+        {
+            "lang": "en",
+            "message": "18 ko LHE DXB",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 301
+        },
+        {
+            "lang": "en",
+            "message": "2 adults plus baby LHE DXB 18 Sep",
+            "expect": null,
+            "clarify": true,
+            "kind": "clarify",
+            "prior": null,
+            "id": 302
+        }
+    ]
+}

@@ -133,15 +133,16 @@ final class TravelIntent
         'karachi' => 'KHI', 'khi' => 'KHI', 'peshawar' => 'PEW', 'multan' => 'MUX',
         'faisalabad' => 'LYP', 'dubai' => 'DXB', 'dxb' => 'DXB', 'jeddah' => 'JED',
         'jed' => 'JED', 'riyadh' => 'RUH', 'madinah' => 'MED', 'medina' => 'MED',
-        'doha' => 'DOH', 'istanbul' => 'IST', 'london' => 'LHR', 'manchester' => 'MAN',
-        'toronto' => 'YYZ', 'sharjah' => 'SHJ', 'abu dhabi' => 'AUH', 'muscat' => 'MCT',
-        'bangkok' => 'BKK', 'kuala lumpur' => 'KUL',
+        // Ambiguous multi-airport cities (London, New York) are NOT auto-mapped here.
+        'doha' => 'DOH', 'istanbul' => 'IST', 'manchester' => 'MAN', 'heathrow' => 'LHR',
+        'gatwick' => 'LGW', 'toronto' => 'YYZ', 'sharjah' => 'SHJ', 'abu dhabi' => 'AUH',
+        'muscat' => 'MCT', 'bangkok' => 'BKK', 'kuala lumpur' => 'KUL',
     ];
 
     /** @var list<string> */
     private const KNOWN_IATA = [
         'LHE', 'ISB', 'KHI', 'PEW', 'MUX', 'LYP', 'DXB', 'JED', 'RUH', 'MED', 'DOH', 'IST',
-        'LHR', 'MAN', 'YYZ', 'SHJ', 'AUH', 'MCT', 'BKK', 'KUL', 'JFK',
+        'LHR', 'LGW', 'MAN', 'YYZ', 'SHJ', 'AUH', 'MCT', 'BKK', 'KUL', 'JFK', 'EWR', 'LGA',
     ];
 
     private static function normalizeAirport(mixed $value): ?string

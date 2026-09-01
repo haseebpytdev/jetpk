@@ -192,22 +192,27 @@ final class AiChatOrchestrator
             $conversation->save();
         }
 
-        $mode = $this->resolveMode();
+        // Hybrid model-free core: mode label stays STRUCTURED_FALLBACK for routine chat.
+        $mode = 'STRUCTURED_FALLBACK';
         $prior = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
-        $intent = $this->extractor->extract(
-            $cleanMessage,
-            $prior,
-            preferStructured: $mode !== 'AI_FULL'
-        );
+        $hybrid = $this->extractor->extractHybrid($cleanMessage, $prior);
+        $intent = $hybrid->intent;
 
-        $conversation->shopping_state = array_merge($prior, $intent->toArray());
+        $conversation->shopping_state = $this->extractor->patchState($prior, $intent);
+        if ($hybrid->rankingPreference) {
+            $state = is_array($conversation->shopping_state) ? $conversation->shopping_state : [];
+            $state['ranking_preference'] = $hybrid->rankingPreference;
+            $conversation->shopping_state = $state;
+        }
         $conversation->save();
 
-        $meta = [
+        $meta = array_merge([
             'AI_FLIGHT_SEARCH_READ_CALLS' => 0,
             'AI_GROUP_SEARCH_READ_CALLS' => 0,
-            'intent' => $intent->toArray(),
-        ];
+            'LOCAL_LLM_REQUIRED_FOR_CORE' => false,
+            'llm_bypassed' => $hybrid->llmBypassed,
+            'provenance' => $hybrid->provenance,
+        ], $hybrid->toMeta());
 
         if ($intent->intent === 'handoff') {
             return $this->beginHandoff($conversation, 'user_requested', $mode, $meta);
@@ -215,6 +220,28 @@ final class AiChatOrchestrator
 
         if ($intent->intent === 'knowledge') {
             return $this->replyKnowledge($conversation, $cleanMessage, $mode, $meta);
+        }
+
+        if ($hybrid->clarificationRequired) {
+            $body = $hybrid->clarificationMessage ?: $this->clarifyMessage($intent, $mode);
+            $this->storeMessage($conversation, 'assistant', $body, [
+                'mode' => $mode,
+                'intent' => $intent->toArray(),
+                'clarification_options' => $hybrid->clarificationOptions,
+            ]);
+
+            return [
+                'ok' => true,
+                'status' => 'clarify',
+                'mode' => $mode,
+                'conversation_id' => $conversation->public_id,
+                'state' => $conversation->state,
+                'message' => $body,
+                'clarification_options' => $hybrid->clarificationOptions,
+                'recommendations' => [],
+                'actions' => $this->defaultActions(),
+                'meta' => $meta,
+            ];
         }
 
         if ($intent->intent === 'flight_search' || ($intent->isSearchable() && $intent->intent !== 'group_search')) {
@@ -227,7 +254,7 @@ final class AiChatOrchestrator
             return $this->replyGroupSearch($conversation, $intent, $mode, $meta);
         }
 
-        $body = $this->clarifyMessage($intent, $mode);
+        $body = $hybrid->clarificationMessage ?: $this->clarifyMessage($intent, $mode);
         $this->storeMessage($conversation, 'assistant', $body, [
             'mode' => $mode,
             'intent' => $intent->toArray(),
