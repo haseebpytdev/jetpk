@@ -9,3 +9,8 @@ Production canary deploy **not executed** in this run:
 - Public AI must remain OFF on first activate; then set `OTA_AI_ASSISTANT_MODE=internal_canary`
 
 PUBLIC_AI_DURING_INITIAL_DEPLOY=N/A (no deploy)
+
+
+## R2 closure
+
+See `deployment-r2.md` — production canary completed under NO PUSH.

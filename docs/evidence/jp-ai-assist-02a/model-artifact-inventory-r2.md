@@ -1,0 +1,14 @@
+# Model artifact inventory R2 (pre-delete)
+
+SERVER_MODEL_FILES_FOUND=4  
+SERVER_MODEL_TOTAL_BYTES=5186151072  
+
+- Qwen3.5-0.8B-M-TS-Q4_K_M.gguf
+- Qwen3-1.7B-Q8_0.gguf
+- Qwen3-4B-Q4_K_M.gguf
+- Qwen3.5-0.8B-S-TS-Q4_K_S.gguf
+
+SERVER_LLAMA_RUNTIME_BYTES=134109635  
+SERVER_AI_BENCHMARK_ARTIFACT_BYTES≈129635  
+
+GENERAL_LLM_SERVICE_RUNNING=NO · no listeners · no open GGUF FDs · no systemd/PM2/cron AI jobs.
