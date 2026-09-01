@@ -83,8 +83,11 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
   const queryKey = useMemo(() => JSON.stringify(searchParams), [searchParams]);
 
-  const loadContext = useCallback(() => {
-    setLoading(true);
+  const loadContext = useCallback((options?: { soft?: boolean }) => {
+    const soft = options?.soft === true;
+    if (!soft) {
+      setLoading(true);
+    }
     setFormError(null);
     setErrorStatus(null);
     return fetchStandardPassengersContext(searchParams);
@@ -213,8 +216,9 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         return;
       }
 
-      // Unchanged price — reload context so authoritative totals clear the refresh banner.
-      const refreshed = await loadContext();
+      // Unchanged price — soft-reload context so authoritative totals clear the refresh banner
+      // without flipping READY back to the full-page INITIAL_LOADING skeleton.
+      const refreshed = await loadContext({ soft: true });
       if (cancelled || !refreshed.ok || !refreshed.data.ok) return;
       setContext(refreshed.data);
       setLoading(false);
@@ -245,12 +249,13 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         return;
       }
       setFareChange(null);
-      const refreshed = await loadContext();
+      const refreshed = await loadContext({ soft: true });
       if (refreshed.ok && refreshed.data.ok) {
         setContext(refreshed.data);
         setPassengers(buildPassengersFromContext(refreshed.data));
         setContact(buildContactFromContext(refreshed.data));
       }
+      setLoading(false);
     } finally {
       setFareChangeBusy(false);
     }
@@ -510,7 +515,11 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     { key: "payment", label: "Payment", state: "upcoming" as const },
   ];
 
-  if (loading) {
+  // Full-page skeleton only for INITIAL_LOADING. Once itinerary authority is READY
+  // (context present), secondary refreshes must not regress to passenger-skeleton.
+  const showInitialSkeleton = loading && !context;
+
+  if (showInitialSkeleton) {
     return (
       <BookingPageShell testId="passengers-loading">
         <BookingProgress steps={fallbackProgress} className="mb-6" />
@@ -641,7 +650,21 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
       <BookingPageHeader
         title="Traveler information"
-        description="Enter details exactly as shown on the passport."
+        description={
+          [
+            context.itinerary.route_label ||
+              `${context.itinerary.origin} → ${context.itinerary.destination}${
+                context.itinerary.return_date ? ` → ${context.itinerary.origin}` : ""
+              }`,
+            [context.itinerary.depart_date, context.itinerary.return_date].filter(Boolean).join(" · "),
+            context.travellers.total
+              ? `${context.travellers.total} traveler${context.travellers.total === 1 ? "" : "s"}`
+              : null,
+            context.itinerary.fare_family || context.itinerary.cabin,
+          ]
+            .filter(Boolean)
+            .join(" · ") || "Enter details exactly as shown on the passport."
+        }
         actions={
           <BookingSessionCountdown
             expiresAt={context.booking_session.expires_at}

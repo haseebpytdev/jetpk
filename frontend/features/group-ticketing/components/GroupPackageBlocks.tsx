@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AirlineLogoMark } from "@/components/ui/AirlineLogoMark";
 import type { GroupPackage } from "../types";
 import { GroupResultCard } from "./GroupResultCard";
 
@@ -18,15 +18,13 @@ export function GroupPackageHero({ package: pkg }: GroupPackageHeroProps) {
   return (
     <header className="space-y-3" data-testid="group-package-hero">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-jp-lg border border-jp-border bg-white">
-          {pkg.airline_logo_url ? (
-            <Image src={pkg.airline_logo_url} alt="" width={56} height={56} className="h-12 w-12 object-contain" />
-          ) : (
-            <span className="text-jp-sm font-bold text-jp-muted">
-              {pkg.airline_code ?? pkg.airline_name.slice(0, 2).toUpperCase()}
-            </span>
-          )}
-        </div>
+        <AirlineLogoMark
+          code={pkg.airline_code}
+          name={pkg.airline_name}
+          logoUrl={pkg.airline_logo_url}
+          size={56}
+          decorative
+        />
         <div className="min-w-0">
           <p className="text-jp-xs font-semibold uppercase tracking-[0.14em] text-jp-muted">Selected group</p>
           <h1 className="text-2xl font-semibold tracking-[-0.02em] text-jp-text">{pkg.title}</h1>
@@ -144,15 +142,13 @@ export function GroupBookingSummaryCard({
       <div className="rounded-jp-lg border border-jp-border bg-jp-surface p-4 shadow-jp-sm">
         <p className="text-jp-xs font-semibold uppercase tracking-[0.14em] text-jp-muted">Booking summary</p>
         <div className="mt-3 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-jp-md border border-jp-border bg-white">
-            {pkg.airline_logo_url ? (
-              <Image src={pkg.airline_logo_url} alt="" width={48} height={48} className="h-10 w-10 object-contain" />
-            ) : (
-              <span className="text-jp-xs font-bold text-jp-muted">
-                {pkg.airline_code ?? pkg.airline_name.slice(0, 2).toUpperCase()}
-              </span>
-            )}
-          </div>
+          <AirlineLogoMark
+            code={pkg.airline_code}
+            name={pkg.airline_name}
+            logoUrl={pkg.airline_logo_url}
+            size={48}
+            decorative
+          />
           <div className="min-w-0">
             <p className="truncate text-jp-sm font-semibold text-jp-text">{pkg.airline_name}</p>
             <p className="text-jp-xs text-jp-muted">Group Ticketing</p>

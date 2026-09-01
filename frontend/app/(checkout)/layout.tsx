@@ -15,12 +15,14 @@ import type { PublicSession } from "@/types/session";
  * that never varies.
  *
  * Guest checkout is the primary path; authenticated header is not required.
+ * Shared SiteFooter stays enabled for public footer consistency across Traveler /
+ * Review / Payment shells (sticky CTAs keep their own bottom padding).
  */
 const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
 export default function CheckoutLayout({ children }: { children: ReactNode }) {
   return (
-    <PublicShell session={ANONYMOUS_SESSION} hideFooter>
+    <PublicShell session={ANONYMOUS_SESSION}>
       {children}
     </PublicShell>
   );

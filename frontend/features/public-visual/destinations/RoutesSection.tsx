@@ -19,7 +19,7 @@ export function RoutesSection({ enabled, eyebrow, title, subtitle, ctaText, ctaU
 
   return (
     <ScrollReveal as="section">
-      <SectionContainer className="!py-8 sm:!py-10">
+      <SectionContainer className="!py-6 sm:!py-8" data-testid="trending-routes-section">
         <PageContainer>
           <PublicSectionHeader
             eyebrow={eyebrow}

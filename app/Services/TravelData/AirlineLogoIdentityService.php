@@ -79,10 +79,11 @@ final class AirlineLogoIdentityService
     private function resolveSourceAsset(string $logoCode, ?string $publicRoot = null): ?array
     {
         $candidates = [
-            'airline-logos/'.$logoCode.'.png',
-            'airline-logos/'.$logoCode.'.webp',
+            // Prefer travel-assets (often transparent masters) over legacy airline-logos tiles.
             'travel-assets/airlines/logos/'.$logoCode.'.png',
             'travel-assets/airlines/logos/'.$logoCode.'.webp',
+            'airline-logos/'.$logoCode.'.png',
+            'airline-logos/'.$logoCode.'.webp',
         ];
 
         foreach ($candidates as $relative) {

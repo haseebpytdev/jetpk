@@ -1,12 +1,20 @@
-import Image from "next/image";
-import Link from "next/link";
+import { AirlineLogoMark } from "@/components/ui/AirlineLogoMark";
 import { cn } from "@/lib/cn";
+import Link from "next/link";
 import type { GroupPackage } from "../types";
 
 type GroupResultCardProps = {
   card: GroupPackage;
   className?: string;
 };
+
+function seatTone(card: GroupPackage): string {
+  const seats = card.available_seats;
+  if (seats <= 0) return "bg-red-50 text-red-800";
+  if (seats === 1) return "bg-amber-50 text-amber-950";
+  if (seats <= 3) return "bg-amber-50 text-amber-900";
+  return "bg-jp-primary-soft text-jp-primary";
+}
 
 /**
  * Compact premium group result card — flight-inspired zones.
@@ -21,28 +29,20 @@ export function GroupResultCard({ card, className }: GroupResultCardProps) {
   return (
     <article
       className={cn(
-        "rounded-jp-lg border border-jp-border bg-jp-surface px-4 py-3 shadow-jp-sm",
+        "rounded-jp-lg border border-jp-border bg-jp-surface px-4 py-3.5 shadow-jp-sm transition hover:border-jp-primary/35 hover:shadow-md",
         className,
       )}
       data-testid="group-result-card"
     >
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)_minmax(8.5rem,auto)] lg:items-center">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,11rem)_minmax(0,1fr)_minmax(8.5rem,auto)] lg:items-center">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-jp-md border border-jp-border bg-white">
-            {card.airline_logo_url ? (
-              <Image
-                src={card.airline_logo_url}
-                alt=""
-                width={44}
-                height={44}
-                className="h-9 w-9 object-contain"
-              />
-            ) : (
-              <span className="text-jp-xs font-bold text-jp-muted">
-                {card.airline_code ?? card.airline_name.slice(0, 2).toUpperCase()}
-              </span>
-            )}
-          </div>
+          <AirlineLogoMark
+            code={card.airline_code}
+            name={card.airline_name}
+            logoUrl={card.airline_logo_url}
+            size={44}
+            decorative
+          />
           <div className="min-w-0">
             <h2 className="truncate text-jp-sm font-semibold tracking-[-0.01em] text-jp-text" data-testid="group-result-title">
               {card.title?.trim() ? card.title : card.airline_name}
@@ -55,7 +55,7 @@ export function GroupResultCard({ card, className }: GroupResultCardProps) {
         </div>
 
         <div className="min-w-0 space-y-1.5">
-          <p className="text-jp-sm font-semibold text-jp-text">{card.route_line}</p>
+          <p className="text-jp-base font-semibold tracking-[-0.015em] text-jp-text">{card.route_line}</p>
           <p className="text-jp-xs text-jp-muted">
             {card.departure_datetime_display ?? card.departure_date_short ?? "Departure TBA"}
             {card.arrival_time_display ? ` · Arr ${card.arrival_time_display}` : ""}
@@ -76,12 +76,7 @@ export function GroupResultCard({ card, className }: GroupResultCardProps) {
             ) : null}
             {card.baggage_line ? <span className="text-jp-xs text-jp-muted">{card.baggage_line}</span> : null}
             <span
-              className={cn(
-                "inline-flex rounded-jp-pill px-2 py-0.5 text-jp-xs font-medium",
-                card.seats_badge_variant === "warn"
-                  ? "bg-amber-50 text-amber-900"
-                  : "bg-jp-primary-soft text-jp-primary",
-              )}
+              className={cn("inline-flex rounded-jp-pill px-2 py-0.5 text-jp-xs font-medium", seatTone(card))}
               data-testid="group-available-seats"
             >
               {card.seat_label}
@@ -90,7 +85,7 @@ export function GroupResultCard({ card, className }: GroupResultCardProps) {
         </div>
 
         <div className="flex shrink-0 flex-col items-stretch gap-1.5 sm:items-end">
-          <p className="text-right text-jp-base font-semibold tracking-[-0.02em] text-jp-text" data-testid="group-result-price">
+          <p className="text-right text-jp-lg font-bold tracking-[-0.02em] text-jp-text" data-testid="group-result-price">
             {priceLabel}
           </p>
           <p className="text-right text-jp-xs text-jp-muted">Per-seat fare</p>

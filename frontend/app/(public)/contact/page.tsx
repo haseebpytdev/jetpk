@@ -34,6 +34,7 @@ export default async function ContactPage() {
             description: "Reach our team for booking help, partnership questions, or general inquiries.",
           }}
           id="contact-page-heading"
+          variant="support"
         />
 
         <div className="grid gap-jp-xl lg:grid-cols-2">

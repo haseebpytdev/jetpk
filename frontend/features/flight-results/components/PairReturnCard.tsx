@@ -140,31 +140,60 @@ export function PairReturnCard({
       aria-label={`Paired flight ${outbound.origin_airport_code} to ${outbound.destination_airport_code} return ${inbound.origin_airport_code} to ${inbound.destination_airport_code}`}
     >
       <div
-        className="mb-3 grid gap-2 rounded-jp-md border border-jp-border-soft bg-jp-page/50 px-2.5 py-2 sm:grid-cols-2 sm:gap-3 sm:px-3"
+        className="mb-3 flex flex-col gap-2 rounded-jp-md border border-jp-border-soft bg-jp-page/40 px-2.5 py-2 sm:flex-row sm:items-center sm:gap-3 sm:px-3"
         data-testid="paired-journey-orientation-strip"
       >
-        <div className="min-w-0" data-testid="paired-strip-departure">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-jp-text-muted">Departure</p>
-          <p className="mt-0.5 text-xs font-semibold text-jp-text">
-            {outbound.origin_airport_code} → {outbound.destination_airport_code}
-          </p>
-          <p className="text-[11px] text-jp-text-muted">{outbound.departure_date_display || "—"}</p>
-          <p className="text-[11px] text-jp-text-muted">
-            {[outbound.stops_label_display || (outbound.stops === 0 ? "Direct" : `${outbound.stops} stop${outbound.stops === 1 ? "" : "s"}`), outbound.duration_display]
-              .filter(Boolean)
-              .join(" · ")}
+        <div
+          className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1"
+          data-testid="paired-strip-departure"
+        >
+          <span
+            className="inline-flex h-5 shrink-0 items-center rounded-jp-pill bg-jp-primary px-2 text-[10px] font-semibold tracking-wide text-white"
+            data-testid="paired-strip-departure-badge"
+          >
+            Departure
+          </span>
+          <p className="min-w-0 text-xs leading-snug text-jp-text">
+            <span className="font-semibold">
+              {outbound.origin_airport_code} → {outbound.destination_airport_code}
+            </span>
+            <span className="text-jp-text-muted">
+              {" · "}
+              {outbound.departure_date_display || "—"}
+              {outbound.duration_display ? ` · ${outbound.duration_display}` : ""}
+              {" · "}
+              {outbound.stops_label_display ||
+                (outbound.stops === 0 ? "Direct" : `${outbound.stops} stop${outbound.stops === 1 ? "" : "s"}`)}
+            </span>
           </p>
         </div>
-        <div className="min-w-0 border-t border-jp-border-soft pt-2 sm:border-t-0 sm:pt-0" data-testid="paired-strip-arrival">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-jp-text-muted">Arrival</p>
-          <p className="mt-0.5 text-xs font-semibold text-jp-text">
-            {inbound.origin_airport_code} → {inbound.destination_airport_code}
-          </p>
-          <p className="text-[11px] text-jp-text-muted">{inbound.departure_date_display || "—"}</p>
-          <p className="text-[11px] text-jp-text-muted">
-            {[inbound.stops_label_display || (inbound.stops === 0 ? "Direct" : `${inbound.stops} stop${inbound.stops === 1 ? "" : "s"}`), inbound.duration_display]
-              .filter(Boolean)
-              .join(" · ")}
+        <div
+          className="hidden h-6 w-px shrink-0 bg-jp-border-soft sm:block"
+          aria-hidden="true"
+          data-testid="paired-strip-divider"
+        />
+        <div
+          className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 border-t border-jp-border-soft pt-2 sm:border-t-0 sm:pt-0"
+          data-testid="paired-strip-arrival"
+        >
+          <span
+            className="inline-flex h-5 shrink-0 items-center rounded-jp-pill bg-jp-primary-soft px-2 text-[10px] font-semibold tracking-wide text-jp-primary"
+            data-testid="paired-strip-arrival-badge"
+          >
+            Arrival
+          </span>
+          <p className="min-w-0 text-xs leading-snug text-jp-text">
+            <span className="font-semibold">
+              {inbound.origin_airport_code} → {inbound.destination_airport_code}
+            </span>
+            <span className="text-jp-text-muted">
+              {" · "}
+              {inbound.departure_date_display || "—"}
+              {inbound.duration_display ? ` · ${inbound.duration_display}` : ""}
+              {" · "}
+              {inbound.stops_label_display ||
+                (inbound.stops === 0 ? "Direct" : `${inbound.stops} stop${inbound.stops === 1 ? "" : "s"}`)}
+            </span>
           </p>
         </div>
       </div>
@@ -178,7 +207,7 @@ export function PairReturnCard({
           />
           {showReturnAirline ? (
             <div className="border-t border-jp-border-soft pt-2">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-jp-text-muted">Return</p>
+              <span className="sr-only">Return airline</span>
               <AirlineIdentity
                 code={inbound.airline_code}
                 name={inbound.airline_name}
@@ -191,8 +220,8 @@ export function PairReturnCard({
 
         <div className="min-w-0">
           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-2">
-            <div className="min-w-0">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-jp-primary">Outbound</p>
+            <div className="min-w-0" data-leg="outbound">
+              <span className="sr-only">Outbound flight</span>
               <TimeRouteBlock
                 departureTime={outbound.departure_time_display}
                 arrivalTime={outbound.arrival_time_display}
@@ -213,8 +242,8 @@ export function PairReturnCard({
               aria-hidden="true"
               data-testid="pair-leg-separator"
             />
-            <div className="min-w-0 border-t border-jp-border-soft pt-2 md:border-t-0 md:pt-0">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-jp-primary">Return</p>
+            <div className="min-w-0 border-t border-jp-border-soft pt-2 md:border-t-0 md:pt-0" data-leg="return">
+              <span className="sr-only">Return flight</span>
               <TimeRouteBlock
                 departureTime={inbound.departure_time_display}
                 arrivalTime={inbound.arrival_time_display}

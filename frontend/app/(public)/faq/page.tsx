@@ -34,7 +34,7 @@ export default async function FaqPage({ searchParams }: FaqPageProps) {
     <PageContainer className="py-jp-4xl">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "FAQ" }]} />
       <div className="mt-jp-xl space-y-jp-2xl">
-        <PublicPageHero hero={page.hero} id="faq-page-heading" />
+        <PublicPageHero hero={page.hero} id="faq-page-heading" variant="support" />
         <FaqPageClient categories={page.categories} />
         {page.cta ? (
           <div>

@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { AnimatedFlightPath } from "@/components/motion/AnimatedFlightPath";
 import { PublicSectionHeader } from "@/features/public-visual";
 import type { SupportPageContent } from "../types";
 import { ContactDetailsCard } from "./ContactDetailsCard";
 import { ContactForm } from "./ContactForm";
 import { ContentCardGrid } from "./ContentCardGrid";
 import { EmptyContentState } from "./EmptyContentState";
+import { PublicPageHero } from "./PublicPageHero";
 
 type SupportPageClientProps = {
   content: SupportPageContent;
@@ -56,33 +56,30 @@ export function SupportPageClient({
           </p>
         </div>
       ) : null}
-      <div className="grid gap-jp-xl lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-        <div>
-          {content.hero.kicker ? (
-            <p className="text-jp-xs font-semibold uppercase tracking-[0.16em] text-jp-primary">{content.hero.kicker}</p>
-          ) : null}
-          <h1 className="mt-3 font-sans text-jp-h1 font-bold text-jp-text">
-            {content.hero.title || "We're Here to Help"}
-          </h1>
-          {content.hero.description ? (
-            <p className="mt-4 max-w-2xl text-jp-body text-jp-muted">{content.hero.description}</p>
-          ) : null}
-          <div className="mt-6 flex max-w-2xl gap-2">
-            <label htmlFor="support-topic-search" className="sr-only">
-              Search support topics
-            </label>
-            <input
-              id="support-topic-search"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search for help topics, e.g. refund, baggage, visa..."
-              className="min-h-jp-button flex-1 rounded-jp-pill border border-jp-border bg-jp-surface px-4 text-jp-sm focus-visible:outline-none focus-visible:shadow-jp-focus"
-            />
-          </div>
+
+      <PublicPageHero
+        hero={{
+          kicker: content.hero.kicker,
+          title: content.hero.title || "We're Here to Help",
+          description: content.hero.description,
+        }}
+        id="support-page-heading"
+        variant="support"
+      >
+        <div className="mt-6 flex max-w-2xl gap-2">
+          <label htmlFor="support-topic-search" className="sr-only">
+            Search support topics
+          </label>
+          <input
+            id="support-topic-search"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search for help topics, e.g. refund, baggage, visa..."
+            className="min-h-jp-button flex-1 rounded-jp-pill border border-jp-border bg-jp-surface px-4 text-jp-sm text-jp-text focus-visible:outline-none focus-visible:shadow-jp-focus"
+          />
         </div>
-        <AnimatedFlightPath variant="hero" className="hidden lg:block" />
-      </div>
+      </PublicPageHero>
 
       {filteredTopics.length ? (
         <section>

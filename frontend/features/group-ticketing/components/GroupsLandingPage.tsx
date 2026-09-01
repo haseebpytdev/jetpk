@@ -134,45 +134,50 @@ export function GroupsLandingPage() {
   return (
     <div data-testid="groups-landing-page">
       <section
-        className="relative overflow-hidden border-b border-jp-border bg-gradient-to-br from-jp-primary-soft via-jp-page to-jp-bg-subtle"
+        className="relative overflow-hidden border-b border-jp-border"
         data-testid="groups-landing-hero"
         aria-labelledby="groups-hero-heading"
       >
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          className="absolute inset-0 bg-gradient-to-br from-[#0f3d2e] via-[#1a5c46] to-jp-page"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40"
           aria-hidden="true"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 85% 20%, rgba(15, 118, 110, 0.18), transparent 42%), radial-gradient(circle at 10% 80%, rgba(15, 118, 110, 0.12), transparent 36%)",
+              "radial-gradient(circle at 78% 18%, rgba(255,255,255,0.18), transparent 40%), radial-gradient(circle at 12% 78%, rgba(15,118,110,0.35), transparent 36%)",
           }}
         />
-        <div
-          className="pointer-events-none absolute -right-16 top-8 hidden h-64 w-64 rounded-full border border-jp-primary/15 sm:block"
+        <svg
+          className="pointer-events-none absolute right-6 top-10 hidden h-28 w-48 text-white/25 lg:block"
+          viewBox="0 0 192 112"
+          fill="none"
           aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute -right-4 top-24 hidden h-40 w-40 rounded-full border border-dashed border-jp-primary/20 sm:block"
-          aria-hidden="true"
-        />
+        >
+          <path d="M12 78c36-8 58-40 96-48 24-5 48-2 72 16" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 6" strokeLinecap="round" />
+          <circle cx="176" cy="48" r="3.5" fill="currentColor" />
+        </svg>
 
-        <div className="relative mx-auto w-full max-w-jp-container px-jp-xl pb-16 pt-10 sm:pb-20 sm:pt-14">
-          <div className="max-w-2xl" data-testid="groups-landing-cms-hero">
+        <div className="relative mx-auto w-full max-w-jp-container px-jp-xl pb-14 pt-10 sm:pb-16 sm:pt-12">
+          <div className="max-w-2xl text-white" data-testid="groups-landing-cms-hero">
             {cms.hero.kicker ? (
-              <p className="text-jp-xs font-semibold uppercase tracking-[0.16em] text-jp-primary">{cms.hero.kicker}</p>
+              <p className="text-jp-xs font-semibold uppercase tracking-[0.16em] text-white/80">{cms.hero.kicker}</p>
             ) : null}
             <h1
               id="groups-hero-heading"
-              className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-jp-text sm:text-4xl lg:text-5xl"
+              className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl lg:text-5xl"
             >
               {cms.hero.title}
             </h1>
             {cms.hero.description ? (
-              <p className="mt-3 max-w-xl text-jp-sm leading-relaxed text-jp-muted sm:text-base">{cms.hero.description}</p>
+              <p className="mt-3 max-w-xl text-jp-sm leading-relaxed text-white/90 sm:text-base">{cms.hero.description}</p>
             ) : null}
           </div>
 
           <div
-            className="relative z-10 mt-8 rounded-jp-xl border border-jp-border bg-jp-surface p-4 shadow-jp-md sm:-mb-10 sm:mt-10 sm:p-6"
+            className="relative z-10 mt-8 rounded-jp-xl border border-white/20 bg-jp-surface p-4 shadow-jp-md sm:-mb-10 sm:mt-10 sm:p-6"
             data-testid="groups-landing-search"
           >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -223,7 +228,7 @@ export function GroupsLandingPage() {
               Popular group routes
             </h2>
             <p className="mt-1 max-w-2xl text-jp-sm text-jp-muted">Live sectors from current inventory — tap to fill search.</p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {popularSectors.map((item) => (
                 <button
                   key={item.value}
@@ -233,9 +238,16 @@ export function GroupsLandingPage() {
                     setSector(item.value);
                     setErrors([]);
                   }}
-                  className="inline-flex min-h-jp-tap items-center rounded-full border border-jp-border bg-jp-surface px-3.5 py-1.5 text-jp-sm font-semibold text-jp-text shadow-jp-sm transition hover:border-jp-primary hover:text-jp-primary focus-visible:outline-none focus-visible:shadow-jp-focus"
+                  className="flex min-h-jp-tap flex-col items-start rounded-jp-lg border border-jp-border bg-jp-surface px-3.5 py-3 text-left shadow-jp-sm transition hover:border-jp-primary hover:shadow-md focus-visible:outline-none focus-visible:shadow-jp-focus"
                 >
-                  {formatSectorLabel(item.label || item.value)}
+                  <span className="text-jp-sm font-semibold text-jp-text">{formatSectorLabel(item.label || item.value)}</span>
+                  {typeof item.inventory_count === "number" ? (
+                    <span className="mt-1 text-jp-xs text-jp-muted">
+                      {item.inventory_count} departure{item.inventory_count === 1 ? "" : "s"}
+                    </span>
+                  ) : (
+                    <span className="mt-1 text-jp-xs text-jp-muted">Live group corridor</span>
+                  )}
                 </button>
               ))}
             </div>

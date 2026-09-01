@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { AnimatedFlightPath } from "@/components/motion/AnimatedFlightPath";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { cn } from "@/lib/cn";
@@ -40,7 +39,7 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
     hero.focalPoint === "left" ? "left center" : hero.focalPoint === "right" ? "right center" : "center";
 
   return (
-    <section className="relative overflow-hidden border-b border-jp-border bg-jp-page">
+    <section className="relative overflow-hidden border-b border-jp-border bg-jp-page" data-testid="homepage-public-hero">
       <div className="relative min-h-[clamp(20rem,42vh,30rem)]">
         <div className="absolute inset-0" data-testid="homepage-hero-image">
           <picture>
@@ -78,15 +77,19 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
           </div>
 
           {hero.searchVisible ? (
-            <div className="relative z-20 -mb-8 sm:-mb-10 lg:-mb-12">
+            <div className="relative z-20 -mb-6 sm:-mb-8" data-testid="homepage-hero-search-overlap">
               <SearchModule layout="compact" />
               <BenefitStrip items={trustChips} variant="hero" className="mt-jp-md" />
-              <AnimatedFlightPath className="mt-jp-md max-w-lg" />
             </div>
           ) : null}
         </PageContainer>
       </div>
-      <div className={cn(hero.searchVisible ? "h-10 sm:h-12 lg:h-14" : "h-0")} aria-hidden="true" />
+      {/* Compact overlap reserve only — matches -mb-* above; no orphan decorative path. */}
+      <div
+        className={cn(hero.searchVisible ? "h-6 sm:h-8" : "h-0")}
+        aria-hidden="true"
+        data-testid="homepage-hero-overlap-spacer"
+      />
     </section>
   );
 }
