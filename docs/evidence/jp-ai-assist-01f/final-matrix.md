@@ -1,0 +1,13 @@
+# Final matrix — JP-AI-ASSIST-01F
+
+HYBRID_PIPELINE_CANDIDATE_APPROVED=YES  
+AI_MODEL_DECISION=USE_HYBRID_MODEL_FREE_CORE  
+AI_01F_CERTIFICATION=PASS  
+SAFE_TO_PUSH=NO  
+
+R7D_REGRESSION=NO (parser-only; shopping code path unchanged)  
+MOBILE_R6_REGRESSION=NO  
+
+LOCAL_TRANSLATION_MODEL_BENCHMARK_NEEDED=NO (Urdu domain coverage met on corpus)
+
+Next: JP-AI-ASSIST-02 controlled Ask JetPakistan V1 activation.
