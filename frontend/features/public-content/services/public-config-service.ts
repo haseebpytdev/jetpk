@@ -33,6 +33,7 @@ export type PublicConfig = {
     customer_registration_enabled?: boolean;
   };
   ai_assistant_enabled?: boolean;
+  ai_assistant_mode?: string;
 };
 
 function publicConfigEndpoint(): string {
@@ -40,9 +41,6 @@ function publicConfigEndpoint(): string {
     return laravelApiPath("/api/public/content/config");
   }
 
-  // SSR: call Laravel private origin directly (same pattern as session bootstrap).
-  // Avoid fetching https://public-host/laravel/... from Next, which can stall soft-nav
-  // under OLS/PHP contention (~30s TCP waits) even when AbortController fires late.
   const laravelBase = (
     process.env.LARAVEL_URL ??
     process.env.NEXT_PUBLIC_LARAVEL_URL ??
@@ -61,9 +59,29 @@ function publicConfigEndpoint(): string {
 export const PublicConfigService = {
   async getConfig(): Promise<PublicConfig | null> {
     try {
+      const headers: Record<string, string> = { Accept: "application/json" };
+      let cookieHeader: string | undefined;
+
+      if (typeof window === "undefined") {
+        try {
+          const { cookies } = await import("next/headers");
+          const store = await cookies();
+          cookieHeader = store
+            .getAll()
+            .map((c) => `${c.name}=${c.value}`)
+            .join("; ");
+          if (cookieHeader) {
+            headers.Cookie = cookieHeader;
+          }
+        } catch {
+          /* ignore */
+        }
+      }
+
       const response = await fetchWithTimeout(publicConfigEndpoint(), {
-        headers: { Accept: "application/json" },
-        next: { revalidate: 300 },
+        headers,
+        credentials: "include",
+        cache: "no-store",
       });
       if (!response.ok) return null;
       return (await response.json()) as PublicConfig;

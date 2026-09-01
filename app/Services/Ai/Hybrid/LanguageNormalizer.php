@@ -32,7 +32,8 @@ final class LanguageNormalizer
         '/\bchld\b/u' => 'child',
         '/\binfnt\b/u' => 'infant',
         '/\bgrp\b/u' => 'group',
-        '/\bbaghair\s+stop\b/u' => 'direct',
+            '/\bpeshawr\b/u' => 'peshawar',
+            '/\bbaghair\s+stop\b/u' => 'direct',
         '/\bstop\s+nahi\b/u' => 'direct',
         '/\bnon[\s-]?stop\b/u' => 'direct',
     ];

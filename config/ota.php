@@ -292,6 +292,12 @@ return [
 
     /** Local AI travel assistant (JP-AI-ASSIST). Disabled until capacity-approved runtime is healthy. */
     'ai_assistant' => [
+        /**
+         * Audience mode (server authoritative):
+         * off | internal_canary | public
+         * Prefer mode over legacy enabled when set.
+         */
+        'mode' => strtolower((string) env('OTA_AI_ASSISTANT_MODE', 'off')),
         'enabled' => filter_var(env('OTA_AI_ASSISTANT_ENABLED', false), FILTER_VALIDATE_BOOL),
         'gateway_url' => env('OTA_AI_GATEWAY_URL', 'http://127.0.0.1:3921'),
         'timeout_seconds' => max(3, (int) env('OTA_AI_TIMEOUT_SECONDS', 45)),

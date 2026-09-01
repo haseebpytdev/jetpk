@@ -105,7 +105,7 @@ final class HybridTravelPipeline
 
         // Destination-led group phrases: "Dubai groups", "Jeddah group chahiye", "دبئی کے گروپ"
         if ($intentName === 'group_search' && $destination === null && $origin === null && ! $oAmb && ! $dAmb) {
-            foreach (['dubai' => 'DXB', 'jeddah' => 'JED', 'lahore' => 'LHE', 'islamabad' => 'ISB', 'karachi' => 'KHI', 'دبی' => 'DXB', 'دبئی' => 'DXB', 'جدہ' => 'JED'] as $token => $code) {
+            foreach (['dubai' => 'DXB', 'jeddah' => 'JED', 'lahore' => 'LHE', 'islamabad' => 'ISB', 'karachi' => 'KHI', 'abu dhabi' => 'AUH', 'sharjah' => 'SHJ', 'دبی' => 'DXB', 'دبئی' => 'DXB', 'جدہ' => 'JED', 'ابوظہبی' => 'AUH'] as $token => $code) {
                 if (str_contains($normalized, $token) || str_contains($original, $token)) {
                     $destination = $code;
                     $provenance['destination'] = 'RESOLVED_MASTER_DATA';
@@ -239,6 +239,18 @@ final class HybridTravelPipeline
             }
         }
 
+        if (
+            is_string($depart)
+            && is_string($returnDate)
+            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $depart) === 1
+            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $returnDate) === 1
+            && $returnDate < $depart
+        ) {
+            $clarifyRequired = true;
+            $clarifyMessage = 'Your return date is before departure. Please confirm both dates.';
+            $intentName = 'unknown';
+        }
+
         $payload = [
             'intent' => $clarifyRequired ? 'unknown' : $intentName,
             'origin' => $origin,
@@ -289,7 +301,7 @@ final class HybridTravelPipeline
     private function wantsHandoff(string $normalized, string $original): bool
     {
         return (bool) preg_match(
-            '/talk to (a )?(person|human)|human (support|agent)|agent please|live agent|speak to (support|agent)|real person|human please|staff please|talk to support|connect (me )?to (a )?(human|agent|support)|handoff|انسانی\s*سپورٹ|انسان سے بات/u',
+            '/talk to (a )?(person|human)|human (support|agent)|agent please|live agent|speak to (support|agent)|real person|human please|staff please|talk to support|connect (me )?to (a )?(human|agent|support)|handoff|insaan se baat|انسانی\s*سپورٹ|انسان سے بات/u',
             $normalized.' '.$original
         );
     }

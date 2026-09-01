@@ -27,27 +27,27 @@ final class LocationResolver
 
     /** @var array<string, string> */
     private const CITY_TO_IATA = [
+        'abu dhabi' => 'AUH', 'auh' => 'AUH', 'ابوظہبی' => 'AUH',
+        'muscat' => 'MCT', 'mct' => 'MCT', 'مسقط' => 'MCT',
+        'bangkok' => 'BKK', 'bkk' => 'BKK', 'بینکاک' => 'BKK',
+        'kuala lumpur' => 'KUL', 'kul' => 'KUL',
+        'jfk' => 'JFK', 'ewr' => 'EWR', 'lga' => 'LGA',
+        'peshawar' => 'PEW', 'pew' => 'PEW', 'پشاور' => 'PEW', 'peshawr' => 'PEW',
+        'sharjah' => 'SHJ', 'shj' => 'SHJ', 'شارجہ' => 'SHJ',
+        'istanbul' => 'IST', 'ist' => 'IST', 'استنبول' => 'IST',
+        'toronto' => 'YYZ', 'yyz' => 'YYZ',
+        'manchester' => 'MAN', 'man' => 'MAN',
+        'heathrow' => 'LHR', 'lhr' => 'LHR', 'gatwick' => 'LGW', 'lgw' => 'LGW',
+        'doha' => 'DOH', 'doh' => 'DOH', 'دوحہ' => 'DOH', 'دوحه' => 'DOH',
+        'madinah' => 'MED', 'medina' => 'MED', 'med' => 'MED', 'مدینہ' => 'MED',
+        'riyadh' => 'RUH', 'ruh' => 'RUH', 'ریاض' => 'RUH',
+        'jeddah' => 'JED', 'jed' => 'JED', 'جدہ' => 'JED', 'جده' => 'JED',
+        'dubai' => 'DXB', 'dxb' => 'DXB', 'dwc' => 'DXB', 'دبئی' => 'DXB', 'دبي' => 'DXB',
         'lahore' => 'LHE', 'lhe' => 'LHE', 'لاہور' => 'LHE',
         'islamabad' => 'ISB', 'isb' => 'ISB', 'isl' => 'ISB', 'اسلام آباد' => 'ISB', 'اسلاماباد' => 'ISB',
         'karachi' => 'KHI', 'khi' => 'KHI', 'کراچی' => 'KHI',
-        'peshawar' => 'PEW', 'pew' => 'PEW', 'پشاور' => 'PEW',
         'multan' => 'MUX', 'mux' => 'MUX', 'ملتان' => 'MUX',
         'faisalabad' => 'LYP', 'lyp' => 'LYP', 'فیصل آباد' => 'LYP',
-        'dubai' => 'DXB', 'dxb' => 'DXB', 'dwc' => 'DXB', 'دبئی' => 'DXB', 'دبي' => 'DXB',
-        'jeddah' => 'JED', 'jed' => 'JED', 'جدہ' => 'JED', 'جده' => 'JED',
-        'riyadh' => 'RUH', 'ruh' => 'RUH', 'ریاض' => 'RUH',
-        'madinah' => 'MED', 'medina' => 'MED', 'med' => 'MED', 'مدینہ' => 'MED',
-        'doha' => 'DOH', 'doh' => 'DOH', 'دوحہ' => 'DOH', 'دوحه' => 'DOH',
-        'istanbul' => 'IST', 'ist' => 'IST', 'استنبول' => 'IST',
-        'heathrow' => 'LHR', 'lhr' => 'LHR', 'gatwick' => 'LGW', 'lgw' => 'LGW',
-        'manchester' => 'MAN', 'man' => 'MAN',
-        'toronto' => 'YYZ', 'yyz' => 'YYZ',
-        'sharjah' => 'SHJ', 'shj' => 'SHJ', 'شارجہ' => 'SHJ',
-        'abu dhabi' => 'AUH', 'auh' => 'AUH',
-        'muscat' => 'MCT', 'mct' => 'MCT',
-        'bangkok' => 'BKK', 'bkk' => 'BKK',
-        'kuala lumpur' => 'KUL', 'kul' => 'KUL',
-        'jfk' => 'JFK', 'ewr' => 'EWR', 'lga' => 'LGA',
     ];
 
     private const KNOWN_IATA = [
@@ -105,7 +105,11 @@ final class LocationResolver
             return ['code' => self::CITY_TO_IATA[$raw], 'ambiguous' => false, 'options' => [], 'provenance' => 'RESOLVED_MASTER_DATA'];
         }
         foreach (self::CITY_TO_IATA as $alias => $code) {
-            if ($alias !== '' && str_contains($key, $alias)) {
+            if ($alias === '' || mb_strlen((string) $alias) < 4) {
+                continue;
+            }
+            if (preg_match('/(?:^|[\s,])'.preg_quote((string) $alias, '/').'(?:[\s,]|$)/ui', $key) === 1
+                || preg_match('/(?:^|[\s,])'.preg_quote((string) $alias, '/').'(?:[\s,]|$)/ui', $raw) === 1) {
                 return ['code' => $code, 'ambiguous' => false, 'options' => [], 'provenance' => 'RESOLVED_MASTER_DATA'];
             }
         }
@@ -126,10 +130,32 @@ final class LocationResolver
         if (preg_match('/([a-z\p{Arabic}][a-z\p{Arabic} ]{1,24}?)\s+flights?\s+from\s+([a-z]{3}|[a-z\p{Arabic} ]{3,24})/u', $hay, $m) === 1) {
             $destText = trim($m[1]);
             $originText = trim($m[2]);
-            $o = $this->resolve($originText);
-            $d = $this->resolve($destText);
-            if ($o['code'] || $d['code'] || $o['ambiguous'] || $d['ambiguous']) {
-                return [$o['code'], $d['code'], $o['ambiguous'], $d['ambiguous'], $o['options'], $d['options']];
+            // Ignore polite prefixes like "please find flights from …"
+            if (! preg_match('/\b(please|find|show|need|want|get)\b/u', $destText)) {
+                $o = $this->resolve($originText);
+                $d = $this->resolve($destText);
+                if ($o['code'] && $d['code']) {
+                    return [$o['code'], $d['code'], false, false, [], []];
+                }
+                if ($o['code'] || $d['code'] || $o['ambiguous'] || $d['ambiguous']) {
+                    return [$o['code'], $d['code'], $o['ambiguous'], $d['ambiguous'], $o['options'], $d['options']];
+                }
+            }
+        }
+
+        // "Bangkok from Islamabad" / "Dubai from Lahore"
+        if (preg_match('/([a-z\p{Arabic} ]{3,24}?)\s+from\s+([a-z]{3}|[a-z\p{Arabic} ]{3,24})(?:\s|$|,|\.|on|for|tomorrow|today)/u', $hay, $m) === 1) {
+            $destText = trim($m[1]);
+            $originText = trim($m[2]);
+            if (! preg_match('/\b(please|find|show|need|want|get|flights?)\b/u', $destText)) {
+                $o = $this->resolve($originText);
+                $d = $this->resolve($destText);
+                if ($o['code'] && $d['code']) {
+                    return [$o['code'], $d['code'], false, false, [], []];
+                }
+                if ($o['ambiguous'] || $d['ambiguous']) {
+                    return [$o['code'], $d['code'], $o['ambiguous'], $d['ambiguous'], $o['options'], $d['options']];
+                }
             }
         }
 
@@ -145,16 +171,20 @@ final class LocationResolver
             }
         }
 
-        $clean = preg_replace('/\b(flights?|please)\b/u', ' ', $normalized) ?? $normalized;
+        $clean = preg_replace('/\b(flights?|please|find|show|need)\b/u', ' ', $normalized) ?? $normalized;
         $clean = preg_replace('/\s+/u', ' ', trim($clean)) ?? $clean;
 
         if (preg_match('/\b([a-z]{3})\s*(?:to|→|->|se)\s*([a-z]{3})\b/u', $clean, $m) === 1) {
-            $originText = $m[1];
-            $destText = $m[2];
-        } elseif (preg_match('/\bfrom\s+([a-z]{3}|[a-z ]{3,20}?)\s+to\s+([a-z]{3}|[a-z ]{3,20}?)(?:\s|$|,|\.)/u', $clean, $m) === 1) {
+            $o = $this->resolve($m[1]);
+            $d = $this->resolve($m[2]);
+            if ($o['code'] && $d['code']) {
+                return [$o['code'], $d['code'], false, false, [], []];
+            }
+            // Fall through — avoid treating word tails like "war se shj" as IATA pairs.
+        } elseif (preg_match('/\bfrom\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)\s+to\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|tomorrow|today|\d)|$|,|\.)/u', $clean, $m) === 1) {
             $originText = trim($m[1]);
             $destText = trim($m[2]);
-        } elseif (preg_match('/([a-z ]{2,24}?)\s+(?:to|→|->|se)\s+([a-z ]{2,24}?)(?:\s|$|,|\.|for|on|under|direct|cheapest|tomorrow|today)/u', $clean, $m) === 1) {
+        } elseif (preg_match('/([a-z]+(?:\s+[a-z]+){0,3}?)\s+(?:to|→|->|se)\s+([a-z]{3}|[a-z]+(?:\s+[a-z]+){0,3}?)(?=\s+(?:on|for|under|direct|cheapest|sasti|jaldi|emirates|saudia|tomorrow|today|\d)|$|,|\.)/u', $clean, $m) === 1) {
             $originText = trim($m[1]);
             $destText = trim($m[2]);
         } elseif (preg_match('/([\p{Arabic}][\p{Arabic}\s]{1,30}?)\s*سے\s*([\p{Arabic}][\p{Arabic}\s]{1,30}?)(?:\s|$|براہ)/u', $original, $m) === 1) {

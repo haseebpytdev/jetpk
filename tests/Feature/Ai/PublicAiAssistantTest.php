@@ -22,7 +22,7 @@ class PublicAiAssistantTest extends TestCase
 
     public function test_disabled_returns_soft_unavailable(): void
     {
-        config(['ota.ai_assistant.enabled' => false]);
+        config(['ota.ai_assistant.mode' => 'off', 'ota.ai_assistant.enabled' => false]);
 
         $this->postJson('/api/public/ai/chat', ['message' => 'LHE to DXB'])
             ->assertStatus(503)
@@ -33,6 +33,8 @@ class PublicAiAssistantTest extends TestCase
     public function test_structured_fallback_parses_route_without_live_model(): void
     {
         config([
+            'ota.ai_assistant.mode' => 'public',
+            'ota.ai_assistant.mode' => 'public',
             'ota.ai_assistant.enabled' => true,
             'ota.ai_assistant.flight_search_enabled' => true,
             'ota.ai_assistant.human_handoff_enabled' => true,
@@ -61,7 +63,7 @@ class PublicAiAssistantTest extends TestCase
 
     public function test_idor_blocked_on_messages_poll(): void
     {
-        config(['ota.ai_assistant.enabled' => true]);
+        config(['ota.ai_assistant.mode' => 'public', 'ota.ai_assistant.enabled' => true]);
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
 
         $owner = str_repeat('b', 40);
@@ -86,7 +88,7 @@ class PublicAiAssistantTest extends TestCase
 
     public function test_xss_stripped_from_user_message(): void
     {
-        config(['ota.ai_assistant.enabled' => true]);
+        config(['ota.ai_assistant.mode' => 'public', 'ota.ai_assistant.enabled' => true]);
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
 
         $response = $this->withCookie('jp_ai_vid', str_repeat('d', 40))
@@ -112,6 +114,7 @@ class PublicAiAssistantTest extends TestCase
     public function test_handoff_pauses_ai_replies(): void
     {
         config([
+            'ota.ai_assistant.mode' => 'public',
             'ota.ai_assistant.enabled' => true,
             'ota.ai_assistant.human_handoff_enabled' => true,
         ]);
@@ -166,7 +169,7 @@ class PublicAiAssistantTest extends TestCase
 
     public function test_prompt_injection_refused_safely(): void
     {
-        config(['ota.ai_assistant.enabled' => true]);
+        config(['ota.ai_assistant.mode' => 'public', 'ota.ai_assistant.enabled' => true]);
         $this->app->instance(InferenceProvider::class, new NullInferenceProvider);
 
         $this->withCookie('jp_ai_vid', str_repeat('f', 40))
@@ -177,3 +180,4 @@ class PublicAiAssistantTest extends TestCase
             ->assertJsonPath('status', 'refused');
     }
 }
+

@@ -346,14 +346,15 @@ final class AiChatOrchestrator
 
     public function resolveMode(): string
     {
-        if (! (bool) config('ota.ai_assistant.enabled', false)) {
+        $eligibility = app(\App\Services\Ai\AiAssistantEligibility::class);
+        if (! $eligibility->isRuntimeOn()) {
             return 'AI_UNAVAILABLE';
         }
         if ($this->memoryPressure() || ! $this->provider->isHealthy()) {
             return 'STRUCTURED_FALLBACK';
         }
 
-        return 'AI_FULL';
+        return 'STRUCTURED_FALLBACK';
     }
 
     private function memoryPressure(): bool

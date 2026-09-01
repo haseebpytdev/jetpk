@@ -376,16 +376,37 @@ export function AskJetPakistanChat({ enabled }: AskJetPakistanChatProps) {
               <button
                 type="button"
                 className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
-                onClick={() => void send("LHE to DXB tomorrow")}
+                onClick={() => void send("Find flights Lahore to Dubai")}
               >
-                Flights
+                Find Flights
               </button>
               <button
                 type="button"
                 className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
-                onClick={() => void send("Show group packages LHE to DXB")}
+                onClick={() => void send("Find Groups for Dubai")}
               >
-                Groups
+                Find Groups
+              </button>
+              <button
+                type="button"
+                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
+                onClick={() => void send("How does booking work")}
+              >
+                Booking Help
+              </button>
+              <button
+                type="button"
+                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
+                onClick={() => void send("payment deadline help")}
+              >
+                Payment Help
+              </button>
+              <button
+                type="button"
+                className="rounded-jp-md border border-jp-border px-2 py-1 text-jp-xs font-semibold"
+                onClick={() => void send("Saved Travelers help")}
+              >
+                Saved Travelers
               </button>
               <button
                 type="button"

@@ -98,9 +98,12 @@ class PublicContentApiController extends Controller
         return response()->json($this->presenter->customClientPage($page, $pageKey));
     }
 
-    public function publicConfig(): JsonResponse
+    public function publicConfig(Request $request): JsonResponse
     {
-        return response()->json($this->presenter->publicConfig());
+        return response()
+            ->json($this->presenter->publicConfig($request))
+            ->header('Cache-Control', 'private, no-store')
+            ->header('Vary', 'Cookie');
     }
 
     public function homepage(): JsonResponse

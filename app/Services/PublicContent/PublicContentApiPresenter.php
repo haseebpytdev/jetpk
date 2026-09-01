@@ -18,6 +18,8 @@ use App\Support\Client\ClientSafeHtmlSanitizer;
 use App\Support\Client\ReservedPublicPath;
 use App\Support\Branding\JetpkCompanyBrandingResolver;
 use App\Support\Media\PublicMediaUrl;
+use App\Services\Ai\AiAssistantEligibility;
+use Illuminate\Http\Request;
 
 /**
  * Shapes Laravel-managed public content for the Next.js public frontend.
@@ -31,6 +33,7 @@ final class PublicContentApiPresenter
         private readonly AboutUsContentPresenter $cmsContentPresenter,
         private readonly CmsPageContentSanitizer $cmsPageSanitizer,
         private readonly ClientPageContentResolver $contentResolver,
+        private readonly AiAssistantEligibility $aiEligibility,
     ) {}
 
     /**
@@ -139,12 +142,15 @@ final class PublicContentApiPresenter
     /**
      * @return array<string, mixed>
      */
-    public function publicConfig(): array
+    public function publicConfig(?Request $request = null): array
     {
         $contact = $this->contactResolver->contact();
         $global = $this->contentFor(ClientPageKeys::GLOBAL);
         $social = is_array($global['social'] ?? null) ? $global['social'] : [];
         $branding = app(JetpkCompanyBrandingResolver::class);
+        $aiEnabled = $request instanceof Request
+            ? $this->aiEligibility->isEligibleRequest($request)
+            : false;
 
         return [
             'brand_name' => (string) config('ota-brand.name', 'JetPakistan'),
@@ -166,7 +172,8 @@ final class PublicContentApiPresenter
             'commerce_gates' => app(\App\Services\Commerce\CommerceCheckoutSettingsService::class)->gates(
                 Agency::query()->where('slug', (string) config('ota.default_agency_slug', 'asif-travels'))->value('id')
             ),
-            'ai_assistant_enabled' => (bool) config('ota.ai_assistant.enabled', false),
+            'ai_assistant_enabled' => $aiEnabled,
+            'ai_assistant_mode' => $this->aiEligibility->mode(),
             'default_seo' => [
                 'title' => 'JetPakistan',
                 'description' => 'Book flights, hotels, and travel services with JetPakistan.',

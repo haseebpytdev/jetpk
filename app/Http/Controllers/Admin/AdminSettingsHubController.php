@@ -49,6 +49,7 @@ class AdminSettingsHubController extends Controller
                 $this->card('Group ticketing', 'Homepage tiles, categories, and inventory sync.', 'admin.group-ticketing.index'),
                 $this->card('Support tickets', 'Customer and agent support queue.', 'admin.support.tickets.index'),
                 $this->card('Homepage featured fares', 'Dynamic cheapest-fare route rules.', 'admin.settings.homepage-featured-fares.index'),
+                $this->card('Ask JetPakistan', 'Assistant mode, tools, knowledge, and handoff status.', 'admin.settings.ai-assistant.show'),
             ])),
         ];
 

@@ -4,22 +4,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AiConversation;
+use App\Services\Ai\AiAssistantEligibility;
 use App\Services\Ai\AiChatOrchestrator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Public AI chat API. Soft-fails when disabled or degraded — never 500 for model down.
+ * Public AI chat API. Soft-fails when disabled or ineligible — never 500 for model down.
  */
 class PublicAiAssistantController extends Controller
 {
     public function __construct(
         private readonly AiChatOrchestrator $orchestrator,
+        private readonly AiAssistantEligibility $eligibility,
     ) {}
 
     public function chat(Request $request): JsonResponse
     {
-        if (! (bool) config('ota.ai_assistant.enabled', false)) {
+        if (! $this->eligibility->isEligibleRequest($request)) {
             return $this->unavailable();
         }
 
@@ -64,20 +66,28 @@ class PublicAiAssistantController extends Controller
     public function health(): JsonResponse
     {
         try {
-            return response()->json($this->orchestrator->healthPayload());
+            $base = $this->orchestrator->healthPayload();
+            $status = $this->eligibility->statusPayload();
+
+            return response()->json(array_merge($base, [
+                'enabled' => $this->eligibility->isRuntimeOn(),
+                'assistant_mode' => $status['mode'],
+                'status' => $status,
+            ]));
         } catch (\Throwable) {
             return response()->json([
                 'ok' => true,
-                'enabled' => (bool) config('ota.ai_assistant.enabled', false),
+                'enabled' => false,
                 'gateway' => 'degraded',
                 'mode' => 'STRUCTURED_FALLBACK',
+                'assistant_mode' => $this->eligibility->mode(),
             ]);
         }
     }
 
     public function messages(Request $request): JsonResponse
     {
-        if (! (bool) config('ota.ai_assistant.enabled', false)) {
+        if (! $this->eligibility->isEligibleRequest($request)) {
             return $this->unavailable();
         }
 
@@ -116,7 +126,7 @@ class PublicAiAssistantController extends Controller
 
     public function clear(Request $request): JsonResponse
     {
-        if (! (bool) config('ota.ai_assistant.enabled', false)) {
+        if (! $this->eligibility->isEligibleRequest($request)) {
             return $this->unavailable();
         }
 
@@ -153,7 +163,7 @@ class PublicAiAssistantController extends Controller
 
     public function requestHandoff(Request $request): JsonResponse
     {
-        if (! (bool) config('ota.ai_assistant.enabled', false)) {
+        if (! $this->eligibility->isEligibleRequest($request)) {
             return $this->unavailable();
         }
 
@@ -203,10 +213,6 @@ class PublicAiAssistantController extends Controller
      */
     private function withVisitorCookie(JsonResponse $response, array $resolved): JsonResponse
     {
-        if (! ($resolved['set_cookie'] ?? false)) {
-            // Always refresh cookie so browser keeps the opaque visitor token.
-        }
-
         return $response->cookie(
             AiChatOrchestrator::COOKIE,
             $resolved['visitor_raw'],
