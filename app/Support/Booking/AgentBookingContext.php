@@ -165,7 +165,7 @@ final class AgentBookingContext
             }
         }
 
-        $agency = Agency::query()->where('slug', config('ota.default_agency_slug'))->first();
+        $agency = \App\Support\FlightSearch\DefaultAgencyLookup::byConfiguredSlug();
 
         return [
             'agency' => $agency,

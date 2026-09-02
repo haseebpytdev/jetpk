@@ -32,7 +32,9 @@ use App\Support\FlightSearch\PublicOfferRevalidationPresenter;
 use App\Support\FlightSearch\PublicProgressiveSearchSnapshotPreparer;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
+use App\Support\FlightSearch\AirportReferenceLookup;
 use App\Support\FlightSearch\SabreOfferFreshness;
+use App\Support\FlightSearch\SearchPerfTrace;
 use App\Support\Suppliers\SupplierSourcePresenter;
 use App\Support\Suppliers\SupplierSourceVisibility;
 use Carbon\Carbon;
@@ -177,12 +179,21 @@ class FlightController extends Controller
 
     public function resultsSearchData(PublicFlightSearchRequest $request): JsonResponse
     {
+        $perf = new SearchPerfTrace();
+        $perf->startDbListener();
+        app()->instance(SearchPerfTrace::class, $perf);
+
         $criteria = $request->criteria();
+        $perf->mark('T1_REQUEST_VALIDATION_COMPLETE');
+        $perf->mark('T2_SEARCH_CONTEXT_READY');
+
         $freshness = app(SabreOfferFreshness::class);
         $progressive = (bool) config('ota.progressive_flight_search', true);
 
         if (! $progressive) {
             [, $searchId, $warnings] = $this->runSearch($criteria, $request);
+            $perf->mark('T_INIT_RESPONSE_READY');
+            $perf->noticeLog('init_sync');
 
             return response()->json([
                 'search_id' => $searchId,
@@ -199,11 +210,16 @@ class FlightController extends Controller
                     'search_created_at' => now()->toIso8601String(),
                     'created_at' => now()->toIso8601String(),
                 ])),
+                'search_perf' => $perf->publicMeta(),
             ]);
         }
 
         $channel = AgentBookingContext::resolveCheckoutChannel($request);
+        $perf->mark('T3_AUTH_CONTEXT_READY');
         $agency = $channel['agency'];
+        // Feature flags for progressive init are route-module gated already; mark ready.
+        $perf->mark('T4_FEATURE_FLAGS_READY');
+
         $searchId = $this->searchStore->beginSearch($criteria, [
             'criteria_cache_context' => [
                 'client_slug' => current_client_slug(),
@@ -211,36 +227,54 @@ class FlightController extends Controller
                 'source_channel' => $channel['source_channel'],
                 'agent_id' => $channel['agent_id'],
             ],
+            'search_perf_id' => $perf->id(),
         ]);
 
         $sourceChannel = $channel['source_channel'];
         $agentId = $channel['agent_id'];
         $agencyId = $agency?->id;
+        $searchPerfId = $perf->id();
+        SearchPerfTrace::remember($perf);
 
-        dispatch(function () use ($searchId, $criteria, $agencyId, $sourceChannel, $agentId): void {
+        dispatch(function () use ($searchId, $criteria, $agencyId, $sourceChannel, $agentId, $searchPerfId): void {
             try {
+                $perf = SearchPerfTrace::resume($searchPerfId) ?? new SearchPerfTrace($searchPerfId);
+                $perf->mark('T_AFTER_RESPONSE_START');
+                app()->instance(SearchPerfTrace::class, $perf);
                 $agency = $agencyId !== null ? Agency::query()->find($agencyId) : null;
-                $this->completeSearchInto($searchId, $criteria, $agency, $sourceChannel, $agentId);
+                app(self::class)->completeSearchInto($searchId, $criteria, $agency, $sourceChannel, $agentId, $perf);
             } catch (\Throwable $e) {
                 Log::error('flight_search.progressive.failed', [
                     'search_id' => $searchId,
+                    'search_perf_id' => $searchPerfId,
                     'exception_class' => $e::class,
                     'message' => $e->getMessage(),
                 ]);
-                $this->searchStore->markFailed(
+                app(FlightSearchResultStore::class)->markFailed(
                     $searchId,
                     'We could not complete your flight search. Please try again.',
                 );
+            } finally {
+                SearchPerfTrace::forget($searchPerfId);
             }
         })->afterResponse();
+
+        $summaryText = $this->formatSearchSummary($criteria);
+        $inlineDisplay = $this->buildInlineSearchDisplay($criteria);
+        $perf->mark('T5_AIRPORT_ROUTE_NORMALIZATION_READY');
+        // Provider registry / eligibility / commercial prep happen afterResponse.
+        $perf->mark('T_INIT_RESPONSE_READY');
+        $logStarted = microtime(true);
+        $perf->noticeLog('init_progressive');
+        $perf->recordLogging((microtime(true) - $logStarted) * 1000);
 
         return response()->json([
             'search_id' => $searchId,
             'status' => FlightSearchResultStore::SEARCH_STATUS_SEARCHING,
             'summary' => [
-                'text' => $this->formatSearchSummary($criteria),
+                'text' => $summaryText,
             ],
-            'inline_display' => $this->buildInlineSearchDisplay($criteria),
+            'inline_display' => $inlineDisplay,
             'criteria' => $criteria,
             'warnings' => [],
             'initial_results_url' => client_route('flights.results.data', ['search_id' => $searchId]),
@@ -250,6 +284,7 @@ class FlightController extends Controller
                 'created_at' => now()->toIso8601String(),
                 'search_status' => FlightSearchResultStore::SEARCH_STATUS_SEARCHING,
             ])),
+            'search_perf' => $perf->publicMeta(),
         ]);
     }
 
@@ -764,6 +799,7 @@ class FlightController extends Controller
             'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi(
                 is_array($payload['supplier_call_summaries'] ?? null) ? $payload['supplier_call_summaries'] : [],
             ),
+            'search_perf' => is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : null,
         ];
 
         if ($debugAllowed) {
@@ -2532,22 +2568,7 @@ class FlightController extends Controller
 
     protected function airportCityCountryLine(string $iata): string
     {
-        if ($iata === '') {
-            return '';
-        }
-
-        $row = Airport::query()->where('iata_code', $iata)->first();
-        if ($row === null) {
-            return '';
-        }
-
-        $city = trim((string) $row->city);
-        $country = trim((string) $row->country);
-        if ($city !== '' && $country !== '') {
-            return $city.', '.$country;
-        }
-
-        return $city !== '' ? $city : $country;
+        return AirportReferenceLookup::cityCountryLine($iata);
     }
 
     protected function cabinMetaLabel(string $value): string
@@ -2677,13 +2698,16 @@ class FlightController extends Controller
      *
      * @param  array<string, mixed>  $criteria
      */
-    protected function completeSearchInto(
+    public function completeSearchInto(
         string $searchId,
         array $criteria,
         ?Agency $agency,
         string $sourceChannel,
         ?int $agentId,
+        ?SearchPerfTrace $perf = null,
     ): void {
+        $perf ??= app()->bound(SearchPerfTrace::class) ? app(SearchPerfTrace::class) : null;
+
         $onProgress = function (array $offersSoFar, array $warningsSoFar) use ($searchId, $criteria, $agency, $sourceChannel, $agentId): void {
             [$gatedOffers, $safeWarnings] = $this->applyPublicResultsProviderGate(
                 $offersSoFar,
@@ -2736,6 +2760,12 @@ class FlightController extends Controller
             $agentId,
             $onProgress,
         );
+
+        if ($perf !== null) {
+            $meta['search_perf'] = $perf->publicMeta();
+            $meta['search_perf_id'] = $perf->id();
+            $perf->noticeLog('pre_supplier_complete');
+        }
 
         $finalStatus = $storedOffers === []
             ? FlightSearchResultStore::SEARCH_STATUS_EMPTY

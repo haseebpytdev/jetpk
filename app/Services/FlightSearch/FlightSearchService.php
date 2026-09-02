@@ -15,6 +15,8 @@ use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use App\Support\FlightSearch\PublicSabreMulticitySearchPostProcessor;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
+use App\Support\FlightSearch\DefaultAgencyLookup;
+use App\Support\FlightSearch\SearchPerfTrace;
 use App\Support\Platform\PlatformModuleEnforcer;
 use App\Support\Pricing\IatiFarePricingResolver;
 use App\Support\Pricing\PublicCustomerPricing;
@@ -66,11 +68,13 @@ class FlightSearchService
         ?callable $onProgress = null,
     ): array
     {
-        $agency ??= Agency::query()->where('slug', config('ota.default_agency_slug'))->first();
+        $agency ??= DefaultAgencyLookup::byConfiguredSlug();
         $criteria = $this->ensureSearchCriteriaId($criteria);
+        $perf = app()->bound(SearchPerfTrace::class) ? app(SearchPerfTrace::class) : null;
         if ($agency === null) {
             $connections = collect();
         } else {
+            $registryStarted = microtime(true);
             $connections = SupplierConnection::query()
                 ->where('agency_id', $agency->id)
                 ->where(function ($query): void {
@@ -79,6 +83,13 @@ class FlightSearchService
                 })
                 ->orderBy('id')
                 ->get();
+            if ($perf !== null) {
+                $perf->recordPhpCpu((microtime(true) - $registryStarted) * 1000);
+                $perf->mark('T6_PROVIDER_REGISTRY_READY');
+            }
+        }
+        if ($perf !== null && $agency === null) {
+            $perf->mark('T6_PROVIDER_REGISTRY_READY');
         }
 
         if ($connections->isEmpty()) {
@@ -125,10 +136,17 @@ class FlightSearchService
         }
 
         $supplierSearchEnabled = $this->platformModuleEnforcer->effectiveModuleEnabled('supplier_search');
+        $settingsStarted = microtime(true);
+        $iatiEnabled = $this->platformModuleEnforcer->effectiveModuleEnabled('iati_supplier');
+        $piaEnabled = $this->platformModuleEnforcer->effectiveModuleEnabled('pia_ndc_supplier');
+        if ($perf !== null) {
+            $perf->recordSettingsLookup((microtime(true) - $settingsStarted) * 1000);
+            $perf->mark('T4_FEATURE_FLAGS_READY');
+        }
         $this->logPublicSearchDiagnostics($criteria, $agency, $sourceChannel, $connections, [
             'supplier_search_enabled' => $supplierSearchEnabled,
-            'iati_supplier_enabled' => $this->platformModuleEnforcer->effectiveModuleEnabled('iati_supplier'),
-            'pia_ndc_supplier_enabled' => $this->platformModuleEnforcer->effectiveModuleEnabled('pia_ndc_supplier'),
+            'iati_supplier_enabled' => $iatiEnabled,
+            'pia_ndc_supplier_enabled' => $piaEnabled,
         ]);
 
         if (! $supplierSearchEnabled) {
@@ -140,6 +158,22 @@ class FlightSearchService
                 'offers' => [],
                 'warnings' => [],
             ];
+        }
+
+        $eligStarted = microtime(true);
+        $skipByConnectionId = [];
+        foreach ($connections as $connection) {
+            $skipByConnectionId[(int) $connection->id] = $this->shouldSkipSupplierConnection($connection, $sourceChannel)
+                ? $this->resolveConnectionSkipReason($connection, $sourceChannel)
+                : null;
+        }
+        if ($perf !== null) {
+            $perf->recordPhpCpu((microtime(true) - $eligStarted) * 1000);
+            $perf->mark('T7_PROVIDER_ELIGIBILITY_COMPLETE');
+            // Static commercial/markup/currency rule retrieval is deferred until offers exist.
+            $perf->mark('T8_COMMERCIAL_RULES_READY');
+            $perf->mark('T9_MARKUPS_READY');
+            $perf->mark('T10_CURRENCY_CONTEXT_READY');
         }
 
         $cacheContext = $this->buildCriteriaCacheContext($agency, $sourceChannel, $agentId, $connections);
@@ -189,6 +223,7 @@ class FlightSearchService
                         $mergedWarnings = [...$warnings, ...$batchWarnings];
                         $onProgress($merged, $mergedWarnings);
                     },
+                    $skipByConnectionId,
                 );
                 $offers = [...$offers, ...$variantResult['offers']];
                 $warnings = [...$warnings, ...$variantResult['warnings']];
@@ -984,6 +1019,7 @@ class FlightSearchService
      * @param  Collection<int, SupplierConnection>  $connections
      * @param  array<string, mixed>  $variantCriteria
      * @param  (callable(list<array<string, mixed>> $offersSoFar, list<string> $warnings): void)|null  $onProgress
+     * @param  array<int, string|null>|null  $skipByConnectionId  precomputed skip reasons (null = eligible)
      * @return array{offers: list<array<string, mixed>>, warnings: list<string>, supplier_call_summaries: list<array<string, mixed>>}
      */
     protected function collectOffersFromConnections(
@@ -993,15 +1029,37 @@ class FlightSearchService
         string $sourceChannel,
         ?int $agentId,
         ?callable $onProgress = null,
+        ?array $skipByConnectionId = null,
     ): array {
+        $buildStarted = microtime(true);
         $request = FlightSearchRequestData::fromArray($variantCriteria, $agency?->id, $sourceChannel);
+        $perf = app()->bound(SearchPerfTrace::class) ? app(SearchPerfTrace::class) : null;
+        if ($perf !== null) {
+            $perf->recordPhpCpu((microtime(true) - $buildStarted) * 1000);
+            $perf->mark('T11_PROVIDER_REQUEST_BUILD_COMPLETE');
+            $perf->mark('T12_ORCHESTRATOR_DISPATCH_START');
+            $perf->setDispatchMode('SEQUENTIAL');
+        }
         $offers = [];
         $warnings = [];
         $supplierCallSummaries = [];
+        $markedFirstNetwork = false;
 
         foreach ($connections as $connection) {
-            if ($this->shouldSkipSupplierConnection($connection, $sourceChannel)) {
-                $skipReason = $this->resolveConnectionSkipReason($connection, $sourceChannel);
+            $connectionId = (int) $connection->id;
+            $eligStarted = microtime(true);
+            if ($skipByConnectionId !== null && array_key_exists($connectionId, $skipByConnectionId)) {
+                $skipReason = $skipByConnectionId[$connectionId];
+                $shouldSkip = $skipReason !== null;
+            } else {
+                $shouldSkip = $this->shouldSkipSupplierConnection($connection, $sourceChannel);
+                $skipReason = $shouldSkip
+                    ? $this->resolveConnectionSkipReason($connection, $sourceChannel)
+                    : null;
+            }
+            $eligMs = (microtime(true) - $eligStarted) * 1000;
+
+            if ($shouldSkip) {
                 Log::info('flight_search.public_diagnostics', [
                     'stage' => 'connection_skipped',
                     'search_id' => (string) ($variantCriteria['search_id'] ?? ''),
@@ -1023,16 +1081,47 @@ class FlightSearchService
                     'normalized_accepted_count' => 0,
                     'warning_count' => 0,
                     'elapsed_ms' => 0,
-                    'final_state' => str_contains(strtolower($skipReason), 'circuit')
+                    'final_state' => str_contains(strtolower((string) $skipReason), 'circuit')
                         ? 'CIRCUIT_OPEN'
                         : 'DISABLED',
                     'skip_reason' => $skipReason,
                 ];
 
+                if ($perf !== null) {
+                    $perf->recordProvider([
+                        'provider' => $connection->provider->value,
+                        'eligible' => false,
+                        'eligibility_decision_ms' => round($eligMs, 3),
+                        'request_build_ms' => 0,
+                        'queue_wait_ms' => 0,
+                        'network_start_offset_ms' => null,
+                        'dispatch_start_offset_ms' => $perf->elapsedMsSinceT0(),
+                        'skip_reason' => $skipReason,
+                    ]);
+                }
+
                 continue;
             }
 
             $adapter = $this->resolver->resolve($connection->provider);
+            $dispatchOffset = $perf?->elapsedMsSinceT0();
+            if ($perf !== null && ! $markedFirstNetwork) {
+                $perf->mark('T13_FIRST_SUPPLIER_NETWORK_CALL_START');
+                $markedFirstNetwork = true;
+            }
+            $networkOffset = $perf?->elapsedMsSinceT0();
+            if ($perf !== null) {
+                $perf->recordProvider([
+                    'provider' => $connection->provider->value,
+                    'eligible' => true,
+                    'eligibility_decision_ms' => round($eligMs, 3),
+                    'request_build_ms' => 0,
+                    'queue_wait_ms' => 0,
+                    'network_start_offset_ms' => $networkOffset,
+                    'dispatch_start_offset_ms' => $dispatchOffset,
+                    'skip_reason' => null,
+                ]);
+            }
             $supplierStartedAt = microtime(true);
             $result = $adapter->search($request, $connection);
             $supplierElapsedMs = (int) round((microtime(true) - $supplierStartedAt) * 1000);

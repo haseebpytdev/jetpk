@@ -27,7 +27,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
-| 2026-08-25 | JP-BO-04G progressive + fare authority | **`FlightSearchResultStore`**: `beginSearch` / `publishProgress` / `search_status`. **`FlightController::resultsSearchData`** returns `search_id` immediately (`afterResponse` + partial publish). Next **`useFlightResults`** polls ~750ms and merges by offer identity. **`markSelectedFareAuthoritative`** clears FX `price_needs_refresh` after successful revalidate. |
+| 2026-09-02 | JP-LARAVEL-PERF-01 pre-supplier | **`SearchPerfTrace`** T0–T13 + provider start spread on progressive search init/poll. **`PricingRuleService`** per-request active markup memo. **`AirportReferenceLookup`** + **`DefaultAgencyLookup`** request memo / stable airport TTL. Slim **`beginSearch`** payload write; eligibility skip map once per search. Tests: **`SearchPerfTraceTest`**, **`PricingRuleServiceRequestMemoTest`**, **`AirportReferenceLookupTest`**. |
 | 2026-08-24 | JP-BO-04D / JP-BO-04E (partial) | Next **Accounting** workspace: audited wallet credit/debit/reversal via `FinanceAdjustmentController` JSON + `operational-api`. Settings **SMTP** Save/Test via `AgencyCommunicationSettingsController` (masked secrets, confirmed recipient only). Legacy redirect JSON dispatch fixed for adjustments + communications. Evidence `tmp/jp-bo-04/14-16-*.txt`. |
 | 2026-08-22 | JP-INT-01 Integrations Hub | Admin **Integrations** control plane: `IntegrationRegistry` + manager facade over suppliers/AbhiPay; health history; encrypted AbhiPay settings; non-commercial Test Connection; test-mode diagnostic Test Payment (`purpose=integration_test`, PKR 1.00); legacy payments settings redirect; RBAC `integrations.*`. Docs: `docs/phases/JP-INT-01-*`. |
 | 2026-08-21 | JETPK WAVE-6 CLUSTER D UX CLEANUP | **Branded cards / booking shell / passport autofill:** removed per-card View Details (Select fare updates Fare Summary). Synthetic-only offers show Current fare instead of broken branded Unavailable. Booking max width expanded (~1080–1240px) with ~300–360px Flight Preview column. Document Reader simplified to Autofill from passport icon CTA; customer MRZ/OCR jargon hidden; client-side architecture preserved. |
@@ -859,7 +859,7 @@ Routes: `admin.finance.statements.*`, `staff.finance.statements.*` (`staff.repor
 
 | File | Responsibility | Public API |
 |------|----------------|------------|
-| `FlightSearchService.php` | Agency-scoped search + metadata wrapper; nearby departure origin expansion + direct-only post-filter; Sabre rows get `fare_verification_digest` / `expected_ui_price`. | `search`, `searchWithMeta` |
+| `FlightSearchService.php` | Agency-scoped search + metadata wrapper; nearby departure origin expansion + direct-only post-filter; Sabre rows get `fare_verification_digest` / `expected_ui_price`. JP-LARAVEL-PERF-01: eligibility skip map once + `SearchPerfTrace` T6–T13 / provider start offsets. | `search`, `searchWithMeta` |
 
 **Adapters (supplier search):** `app/Services/Suppliers/Adapters/SabreFlightSupplierAdapter.php`,
 `DuffelFlightSupplierAdapter.php` — implement search against provider APIs;

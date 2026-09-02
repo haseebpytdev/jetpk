@@ -63,7 +63,7 @@ class FlightSearchResultStore
         $searchId = (string) Str::uuid();
         $this->writePayload($searchId, $criteria, [], [], array_merge($meta, [
             'search_status' => self::SEARCH_STATUS_SEARCHING,
-        ]));
+        ]), null, true);
 
         return $searchId;
     }
@@ -222,15 +222,18 @@ class FlightSearchResultStore
         array $warnings,
         array $meta = [],
         ?array $existingPayload = null,
+        bool $lightweightInit = false,
     ): void {
         $trimmedOffers = array_slice($offers, 0, self::MAX_STORED_OFFERS);
-        $normalizer = app(SabreFlightSearchNormalizer::class);
-        foreach ($trimmedOffers as $idx => $row) {
-            if (! is_array($row)) {
-                continue;
-            }
-            if (strcasecmp((string) ($row['supplier_provider'] ?? ''), 'sabre') === 0) {
-                $trimmedOffers[$idx] = $normalizer->ensureSabreBookingContextOnCachedOffer($row);
+        if (! $lightweightInit && $trimmedOffers !== []) {
+            $normalizer = app(SabreFlightSearchNormalizer::class);
+            foreach ($trimmedOffers as $idx => $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                if (strcasecmp((string) ($row['supplier_provider'] ?? ''), 'sabre') === 0) {
+                    $trimmedOffers[$idx] = $normalizer->ensureSabreBookingContextOnCachedOffer($row);
+                }
             }
         }
 
@@ -253,19 +256,29 @@ class FlightSearchResultStore
             $payload['search_status'] = (string) ($meta['search_status'] ?? $payload['search_status']);
         }
 
-        $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
-            $criteria,
-            is_array($meta['criteria_cache_context'] ?? null) ? $meta['criteria_cache_context'] : [],
-        );
-        $payload['criteria_cache_fingerprint'] = $cacheDescribe['fingerprint'];
-        $payload['criteria_cache_summary'] = $cacheDescribe['summary'];
-        if (is_array($meta['criteria_cache'] ?? null)) {
-            $payload['criteria_cache'] = $meta['criteria_cache'];
-        }
+        if (! $lightweightInit) {
+            $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
+                $criteria,
+                is_array($meta['criteria_cache_context'] ?? null) ? $meta['criteria_cache_context'] : [],
+            );
+            $payload['criteria_cache_fingerprint'] = $cacheDescribe['fingerprint'];
+            $payload['criteria_cache_summary'] = $cacheDescribe['summary'];
+            if (is_array($meta['criteria_cache'] ?? null)) {
+                $payload['criteria_cache'] = $meta['criteria_cache'];
+            }
 
-        $splitService = app(ReturnSplitComboService::class);
-        if ($splitService->isEnabled() && (string) ($criteria['trip_type'] ?? '') === 'round_trip') {
-            $payload['return_split'] = $splitService->safeBuildIndexForStore($criteria, $trimmedOffers, $searchId);
+            $splitService = app(ReturnSplitComboService::class);
+            if ($splitService->isEnabled() && (string) ($criteria['trip_type'] ?? '') === 'round_trip') {
+                $payload['return_split'] = $splitService->safeBuildIndexForStore($criteria, $trimmedOffers, $searchId);
+            }
+        } elseif (is_array($meta['criteria_cache_context'] ?? null)) {
+            // Fingerprint still required for progressive cache-key continuity; avoid split index on empty init.
+            $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
+                $criteria,
+                $meta['criteria_cache_context'],
+            );
+            $payload['criteria_cache_fingerprint'] = $cacheDescribe['fingerprint'];
+            $payload['criteria_cache_summary'] = $cacheDescribe['summary'];
         }
 
         Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);

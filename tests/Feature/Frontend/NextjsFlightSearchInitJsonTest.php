@@ -56,6 +56,10 @@ class NextjsFlightSearchInitJsonTest extends TestCase
                 'results_page_url',
                 'initial_results_url',
                 'criteria',
+                'search_perf' => [
+                    'search_perf_id',
+                    'INIT_RESPONSE_MS',
+                ],
             ])
             ->assertJsonPath('criteria.direct_only', true)
             ->assertJsonPath('criteria.nearby_airports', true)

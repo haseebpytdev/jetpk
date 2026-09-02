@@ -81,13 +81,21 @@ class PlatformModuleSettingsService
      */
     public function overrides(): array
     {
-        return Cache::remember(
+        $started = microtime(true);
+        $overrides = Cache::remember(
             self::CACHE_KEY,
             self::CACHE_TTL_SECONDS,
             fn (): array => PlatformModuleSetting::query()
                 ->pluck('enabled', 'module_key')
                 ->all()
         );
+        if (app()->bound(\App\Support\FlightSearch\SearchPerfTrace::class)) {
+            app(\App\Support\FlightSearch\SearchPerfTrace::class)->recordSettingsLookup(
+                (microtime(true) - $started) * 1000
+            );
+        }
+
+        return $overrides;
     }
 
     /**

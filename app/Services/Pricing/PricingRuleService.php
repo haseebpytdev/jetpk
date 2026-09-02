@@ -19,19 +19,28 @@ use Illuminate\Support\Facades\Log;
  */
 class PricingRuleService
 {
+    /** @var array<int, Collection<int, MarkupRule>> per-request active rule memo (JP-LARAVEL-PERF-01) */
+    private array $activeRulesByAgency = [];
+
     public function __construct(
         protected FlightPricingService $defaultPricing,
         protected LiveFxRateService $fxRateService,
     ) {}
 
     /**
-     * @param  array<string, mixed>  $context
+     * Load active agency markup rows once per request; filter in PHP per offer context.
+     *
      * @return Collection<int, MarkupRule>
      */
-    public function getApplicableRules(Agency $agency, array $context): Collection
+    protected function activeRulesForAgency(Agency $agency): Collection
     {
-        $now = now();
+        $agencyId = (int) $agency->id;
+        if (isset($this->activeRulesByAgency[$agencyId])) {
+            return $this->activeRulesByAgency[$agencyId];
+        }
 
+        $now = now();
+        $dbStarted = microtime(true);
         $rules = MarkupRule::query()
             ->where('agency_id', $agency->id)
             ->where('status', MarkupRuleStatus::Active->value)
@@ -46,8 +55,29 @@ class PricingRuleService
             ->orderBy('priority')
             ->orderBy('id')
             ->get();
+        $dbMs = (microtime(true) - $dbStarted) * 1000;
 
-        return $rules->filter(function (MarkupRule $rule) use ($context): bool {
+        if (app()->bound(\App\Support\FlightSearch\SearchPerfTrace::class)) {
+            app(\App\Support\FlightSearch\SearchPerfTrace::class)->recordMarkup(
+                $rules->count(),
+                $dbMs,
+                0.0,
+            );
+        }
+
+        return $this->activeRulesByAgency[$agencyId] = $rules;
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     * @return Collection<int, MarkupRule>
+     */
+    public function getApplicableRules(Agency $agency, array $context): Collection
+    {
+        $resolveStarted = microtime(true);
+        $rules = $this->activeRulesForAgency($agency);
+
+        $filtered = $rules->filter(function (MarkupRule $rule) use ($context): bool {
             try {
                 return $this->matchesRule($rule, $context);
             } catch (\Throwable $e) {
@@ -60,6 +90,16 @@ class PricingRuleService
                 return false;
             }
         })->values();
+
+        if (app()->bound(\App\Support\FlightSearch\SearchPerfTrace::class)) {
+            app(\App\Support\FlightSearch\SearchPerfTrace::class)->recordMarkup(
+                $rules->count(),
+                0.0,
+                (microtime(true) - $resolveStarted) * 1000,
+            );
+        }
+
+        return $filtered;
     }
 
     /**
