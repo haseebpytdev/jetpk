@@ -201,9 +201,10 @@ export function useRevalidation() {
       }
     };
 
-    // R6F: hard location.assign made usable p50 ~21s (worse than R5A soft-nav ~3.7s).
-    // Soft-nav is primary for /booking/passengers; keep continuous timing via
-    // sessionStorage so T0→T9 survives remount. Hard assign only as fallback.
+    // JP-NEXT-PERF-02B: soft router.push to /booking/passengers hangs (RSC never
+    // completes) while results still has in-flight fonts/logos/csrf. That saturates
+    // the browser connection pool so passengers JS sits ~18s even from cache.
+    // Hard assign AFTER releasing in-flight subresources recovers FE overhead ~1.4s.
     const isPassengersHandoff =
       resolved.startsWith("/booking/passengers") ||
       /(?:^|\/)booking\/passengers(?:\?|$)/.test(resolved);
@@ -213,83 +214,46 @@ export function useRevalidation() {
         : resolved.startsWith("/")
           ? resolved
           : `/${resolved}`;
+      const absolute = target.startsWith("http") ? target : `${window.location.origin}${target}`;
+
+      const releaseConnectionPool = () => {
+        try {
+          document
+            .querySelectorAll('img[src*="airline-logos"], img[src*="/storage/airline"]')
+            .forEach((node) => {
+              const img = node as HTMLImageElement;
+              img.removeAttribute("srcset");
+              img.removeAttribute("src");
+            });
+        } catch {
+          /* ignore */
+        }
+        try {
+          document
+            .querySelectorAll('link[rel="preload"][as="font"], link[rel="preload"][as="image"]')
+            .forEach((node) => node.parentNode?.removeChild(node));
+        } catch {
+          /* ignore */
+        }
+        try {
+          window.stop();
+        } catch {
+          /* ignore */
+        }
+      };
+
       try {
         void import("@/features/standard-booking/components/PassengerDetailsPage");
-        try {
-          router.prefetch(resolved);
-        } catch {
-          /* non-blocking */
-        }
-        persistTimingForContinuity();
-        markBookNowTiming("T4B_checkout_prep_done");
-        markBookNowTiming("T5_router_push", { nav: "soft_push" });
-        markBookNowTiming("T7_passenger_route", { nav: "soft_push" });
-        persistTimingForContinuity();
-        router.push(resolved);
-
-        // Soft RSC is ~0.5–1.5s when healthy. Hard assign full reload was measured ~18s.
-        // Retry soft once; hard-assign only as last resort after a long stall.
-        let settled = false;
-        let softRetryTimer: number | undefined;
-        let hardTimer: number | undefined;
-        let pollTimer: number | undefined;
-
-        const passengersReached = () => /\/booking\/passengers/.test(window.location.pathname);
-
-        const cleanup = () => {
-          settled = true;
-          if (softRetryTimer != null) window.clearTimeout(softRetryTimer);
-          if (hardTimer != null) window.clearTimeout(hardTimer);
-          if (pollTimer != null) window.clearInterval(pollTimer);
-          window.removeEventListener("popstate", onMaybeProgress);
-        };
-
-        const onMaybeProgress = () => {
-          if (settled) return;
-          if (passengersReached()) cleanup();
-        };
-
-        pollTimer = window.setInterval(onMaybeProgress, 50);
-        window.addEventListener("popstate", onMaybeProgress);
-
-        softRetryTimer = window.setTimeout(() => {
-          if (settled || passengersReached()) {
-            cleanup();
-            return;
-          }
-          try {
-            markBookNowTiming("T5_router_push", { nav: "soft_push_retry" });
-            router.push(resolved);
-          } catch {
-            /* ignore */
-          }
-        }, 250);
-
-        hardTimer = window.setTimeout(() => {
-          if (settled || passengersReached()) {
-            cleanup();
-            return;
-          }
-          try {
-            markBookNowTiming("T5_router_push", { nav: "hard_assign_watchdog" });
-            markBookNowTiming("T7_passenger_route", { nav: "hard_assign_watchdog" });
-            persistTimingForContinuity();
-            window.location.assign(target.startsWith("http") ? target : `${window.location.origin}${target}`);
-          } catch {
-            /* ignore */
-          }
-          cleanup();
-        }, 8000);
-
-        return true;
       } catch {
-        /* fall through to hard assign */
+        /* non-blocking */
       }
       persistTimingForContinuity();
-      markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_fallback" });
+      markBookNowTiming("T4B_checkout_prep_done");
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_pool_release" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_pool_release" });
       persistTimingForContinuity();
-      window.location.assign(target);
+      releaseConnectionPool();
+      window.location.assign(absolute);
       return true;
     }
     window.location.assign(resolved);

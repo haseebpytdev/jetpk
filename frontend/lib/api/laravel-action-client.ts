@@ -29,11 +29,24 @@ export async function ensureLaravelCsrfToken(forceRefresh = false): Promise<stri
   }
 
   try {
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer =
+      controller && typeof window !== "undefined"
+        ? window.setTimeout(() => {
+            try {
+              controller.abort();
+            } catch {
+              /* ignore */
+            }
+          }, 2500)
+        : null;
     const response = await fetch(laravelApiPath("/api/public/content/csrf-token"), {
       credentials: "include",
       headers: JSON_HEADERS,
       cache: "no-store",
+      signal: controller?.signal,
     });
+    if (timer != null) window.clearTimeout(timer);
     if (!response.ok) return null;
 
     const fromCookie = readCookie("XSRF-TOKEN");

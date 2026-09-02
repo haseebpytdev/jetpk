@@ -52,6 +52,8 @@ export function AirlineLogoMark({
           height={size}
           className="h-full w-full object-contain"
           unoptimized
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         <span
