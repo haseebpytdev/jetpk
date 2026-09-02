@@ -107,6 +107,17 @@ class FlightSearchResultStore
 
         $this->writePayload($searchId, $criteria, $offers, $warnings, $mergedMeta, is_array($existing) ? $existing : null);
 
+        // Refresh search_perf after writePayload so FIRST_VALID_PAIR / PAIRING marks
+        // recorded during return_split build are visible on progressive polls.
+        if (app()->bound(SearchPerfTrace::class)) {
+            $cached = Cache::get($this->key($searchId));
+            if (is_array($cached)) {
+                $cached['search_perf'] = app(SearchPerfTrace::class)->publicMeta();
+                $cached['search_perf_id'] = app(SearchPerfTrace::class)->id();
+                Cache::put($this->key($searchId), $cached, self::TTL_SECONDS);
+            }
+        }
+
         return true;
     }
 
