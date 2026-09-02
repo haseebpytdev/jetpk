@@ -111,13 +111,10 @@ export function GroupsLandingPage() {
         return;
       }
       setErrors([]);
+      // Immediate navigation ack — do not pad with artificial setTimeout delays.
       setSearching(true);
       setSearchPhase("searching");
-      window.setTimeout(() => setSearchPhase("seats"), 280);
-      window.setTimeout(() => setSearchPhase("departures"), 560);
-      window.setTimeout(() => {
-        router.push(buildGroupSearchPagePath(buildGroupHandoffQuery(next)));
-      }, 720);
+      router.push(buildGroupSearchPagePath(buildGroupHandoffQuery(next)));
     },
     [airlineValues, sectorValues, categoryValues, router],
   );

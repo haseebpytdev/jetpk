@@ -43,9 +43,13 @@ export function BookingReviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
   const submitLock = useRef(false);
+  const hasReadyContext = useRef(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (options?: { soft?: boolean }) => {
+    // Soft reloads keep the READY shell — never regress to a full-page spinner.
+    if (!options?.soft || !hasReadyContext.current) {
+      setLoading(true);
+    }
     setError(null);
     const response = await fetchBookingReview();
     setLoading(false);
@@ -66,6 +70,7 @@ export function BookingReviewPage() {
     }
 
     setContext(response.data);
+    hasReadyContext.current = true;
     const defaultMethod = response.data.payment_methods.find((m) => m.available)?.code ?? "manual";
     setSelectedMethod(defaultMethod);
   }, []);
@@ -115,7 +120,7 @@ export function BookingReviewPage() {
       setError(response.message);
       return;
     }
-    await load();
+    await load({ soft: true });
   };
 
   const handleDeclineFare = async () => {
@@ -131,7 +136,14 @@ export function BookingReviewPage() {
     router.push(url);
   };
 
-  if (loading) return <BookingLoadingState message="Loading review…" testId="review-loading" />;
+  if (loading && !context) {
+    return (
+      <BookingPageShell testId="review-loading-shell">
+        <BookingPageHeader title="Review booking" description="Preparing your itinerary and travelers…" />
+        <BookingLoadingState message="Loading review…" testId="review-loading" />
+      </BookingPageShell>
+    );
+  }
   if (error === "missing_session") return <div className="mx-auto max-w-jp-booking p-8"><MissingBookingSessionState /></div>;
   if (expired) return <div className="mx-auto max-w-jp-booking p-8"><BookingSessionExpiredState /></div>;
   if (!context) return <div className="mx-auto max-w-jp-booking p-8"><OfferExpiredState /></div>;

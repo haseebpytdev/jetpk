@@ -110,6 +110,13 @@ export function useGroupSearchFacets(enabled = true): UseGroupSearchFacetsResult
   return { state, airlines, sectors, categories, dateBounds, travelDateMatch, errorMessage, retry };
 }
 
+/** Seed module cache from SSR so client hooks skip a duplicate facets round-trip. */
+export function seedGroupSearchFacetsCache(data: GroupSearchFacetsResponse | null | undefined): void {
+  if (!data) return;
+  cachedFacets = data;
+  inflightRequest = null;
+}
+
 /** Test helper to reset module cache between Playwright runs. */
 export function resetGroupSearchFacetsCacheForTests(): void {
   cachedFacets = null;

@@ -38,7 +38,14 @@ export function ManualPaymentPage() {
     });
   }, []);
 
-  if (loading) return <BookingLoadingState message="Loading payment status…" />;
+  if (loading && !state) {
+    return (
+      <BookingPageShell testId="payment-loading-shell">
+        <BookingPageHeader title="Payment" description="Loading payment instructions…" />
+        <BookingLoadingState message="Loading payment status…" />
+      </BookingPageShell>
+    );
+  }
   if (!state?.ok) return <div className="mx-auto max-w-jp-booking p-8"><MissingBookingSessionState /></div>;
 
   const manual = state.manual_payment;

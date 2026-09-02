@@ -1,11 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useGroupSearchFacets } from "../hooks/use-group-search-facets";
+import { seedGroupSearchFacetsCache, useGroupSearchFacets } from "../hooks/use-group-search-facets";
 import { validateGroupSearch } from "@/features/search/utils/validation";
 import { fetchGroupResultsPage, fetchGroupSearchData } from "../services/group-ticketing-api";
-import type { GroupPackage, GroupSearchFilters } from "../types";
+import type {
+  GroupPackage,
+  GroupSearchDataResponse,
+  GroupSearchFacetsResponse,
+  GroupSearchFilters,
+} from "../types";
 import { GroupEmptyResultsState } from "./GroupStateCards";
 import { GroupLockedState } from "./GroupStateCards";
 import { GroupResultCard } from "./GroupResultCard";
@@ -24,18 +29,47 @@ function parseFilters(params: URLSearchParams): GroupSearchFilters {
   };
 }
 
+function filtersKey(filters: GroupSearchFilters): string {
+  return [
+    filters.airline ?? "",
+    filters.sector ?? "",
+    filters.date_from ?? "",
+    filters.category ?? "",
+    String(filters.page ?? 1),
+    filters.sort ?? "",
+  ].join("|");
+}
+
 type GroupSearchCmsHero = {
   kicker?: string;
   title?: string;
   description?: string;
 };
 
-export function GroupSearchPage() {
+type GroupSearchPageProps = {
+  initialFilters?: GroupSearchFilters;
+  initialResults?: GroupSearchDataResponse | null;
+  initialFacets?: GroupSearchFacetsResponse | null;
+};
+
+export function GroupSearchPage({
+  initialFilters,
+  initialResults = null,
+  initialFacets = null,
+}: GroupSearchPageProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useMemo(() => new URLSearchParams(searchParams.toString()), [searchParams]);
   const filters = useMemo(() => parseFilters(params), [params]);
   const hasSearch = Boolean(filters.airline || filters.sector || filters.date_from || filters.category);
+  const currentKey = filtersKey(filters);
+  const initialKey = initialFilters ? filtersKey(initialFilters) : null;
+  const ssrMatches = Boolean(initialResults && initialKey && initialKey === currentKey);
+
+  // Seed facets cache once before the hook reads it (module-level, safe across remounts).
+  if (initialFacets) {
+    seedGroupSearchFacetsCache(initialFacets);
+  }
 
   const facets = useGroupSearchFacets();
   const airlineValues = useMemo(() => facets.airlines.map((item) => item.value), [facets.airlines]);
@@ -47,20 +81,29 @@ export function GroupSearchPage() {
   const [category, setCategory] = useState(filters.category ?? "all");
   const [travelDate, setTravelDate] = useState(filters.date_from ?? "");
   const [errors, setErrors] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [cards, setCards] = useState<GroupPackage[]>([]);
-  const [countLabel, setCountLabel] = useState("");
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [userNotice, setUserNotice] = useState<string | null>(null);
-  const [locked, setLocked] = useState(false);
-  const [lockedMessage, setLockedMessage] = useState<string | undefined>();
-  const [page, setPage] = useState(filters.page ?? 1);
-  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(hasSearch && !ssrMatches);
+  const [cards, setCards] = useState<GroupPackage[]>(ssrMatches ? initialResults!.cards : []);
+  const [countLabel, setCountLabel] = useState(ssrMatches ? initialResults!.count_label : "");
+  const [statusMessage, setStatusMessage] = useState<string | null>(
+    ssrMatches ? (initialResults!.status_message ?? null) : null,
+  );
+  const [userNotice, setUserNotice] = useState<string | null>(
+    ssrMatches ? (initialResults!.user_notice ?? null) : null,
+  );
+  const [locked, setLocked] = useState(ssrMatches ? initialResults!.lock_state.locked : false);
+  const [lockedMessage, setLockedMessage] = useState<string | undefined>(
+    ssrMatches ? (initialResults!.lock_state.message ?? undefined) : undefined,
+  );
+  const [page, setPage] = useState(ssrMatches ? initialResults!.page : (filters.page ?? 1));
+  const [hasMore, setHasMore] = useState(ssrMatches ? initialResults!.has_more : false);
   const [cmsHero, setCmsHero] = useState<GroupSearchCmsHero>({
     kicker: "Group travel",
     title: "Search group departures",
     description: "Find block-seat group inventory with transparent per-seat pricing.",
   });
+  const abortRef = useRef<AbortController | null>(null);
+  const requestSeq = useRef(0);
+  const hydratedSsrKey = useRef<string | null>(ssrMatches ? currentKey : null);
 
   useEffect(() => {
     let cancelled = false;
@@ -147,9 +190,31 @@ export function GroupSearchPage() {
     return true;
   }, [hasSearch, facets.state, filters.airline, filters.sector, filters.category, airlineValues, sectorValues, categoryValues]);
 
+  const applyResults = useCallback((response: GroupSearchDataResponse, append = false) => {
+    setCards((current) => (append ? [...current, ...response.cards] : response.cards));
+    setCountLabel(response.count_label);
+    setStatusMessage(response.status_message ?? null);
+    setUserNotice(response.user_notice ?? null);
+    setLocked(response.lock_state.locked);
+    setLockedMessage(response.lock_state.message ?? undefined);
+    setPage(response.page);
+    setHasMore(response.has_more);
+  }, []);
+
   const loadResults = useCallback(async (nextFilters: GroupSearchFilters, append = false) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const seq = ++requestSeq.current;
+
+    // Secondary loading indicator only — never wipe cards before replacement arrives.
     setLoading(true);
+
     const response = await fetchGroupSearchData(nextFilters);
+
+    if (seq !== requestSeq.current || controller.signal.aborted) {
+      return;
+    }
 
     if (!response.ok) {
       setErrors([response.message]);
@@ -157,21 +222,25 @@ export function GroupSearchPage() {
       return;
     }
 
-    setCards((current) => (append ? [...current, ...response.data.cards] : response.data.cards));
-    setCountLabel(response.data.count_label);
-    setStatusMessage(response.data.status_message ?? null);
-    setUserNotice(response.data.user_notice ?? null);
-    setLocked(response.data.lock_state.locked);
-    setLockedMessage(response.data.lock_state.message ?? undefined);
-    setPage(response.data.page);
-    setHasMore(response.data.has_more);
+    applyResults(response.data, append);
     setLoading(false);
-  }, []);
+  }, [applyResults]);
 
   useEffect(() => {
     if (!hasSearch || !filtersValid) return;
+
+    // Authoritative SSR payload already rendered for this exact filter key.
+    if (hydratedSsrKey.current === currentKey) {
+      hydratedSsrKey.current = null;
+      setLoading(false);
+      return;
+    }
+
     void loadResults(filters, false);
-  }, [filters, hasSearch, filtersValid, loadResults]);
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, [filters, hasSearch, filtersValid, loadResults, currentKey]);
 
   const pushFilters = (nextValues: {
     airline: string;
@@ -269,7 +338,7 @@ export function GroupSearchPage() {
           onSubmit={handleSubmit}
           onClear={handleClear}
           errors={formErrors}
-          disabled={loading}
+          disabled={false}
           showCategoryCards={false}
         />
       </div>
@@ -279,14 +348,14 @@ export function GroupSearchPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-jp-text">Results</h2>
             <p className="text-jp-sm text-jp-muted" data-testid="group-result-count">
-              {countLabel}
+              {loading && cards.length === 0 ? "Loading results…" : countLabel}
               {hasMore ? " · more available" : ""}
             </p>
           </div>
           {userNotice ? (
             <p className="rounded-jp-md border border-amber-200 bg-amber-50 px-3 py-2 text-jp-sm text-amber-900">{userNotice}</p>
           ) : null}
-          {statusMessage && cards.length === 0 ? <GroupEmptyResultsState /> : null}
+          {statusMessage && cards.length === 0 && !loading ? <GroupEmptyResultsState /> : null}
           {cards.map((card) => (
             <GroupResultCard key={`${card.public_id ?? card.id}`} card={card} />
           ))}

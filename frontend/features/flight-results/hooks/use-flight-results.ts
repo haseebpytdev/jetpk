@@ -172,11 +172,17 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       const seq = ++requestSeq.current;
 
       if (!append && phase !== "poll") {
-        setStatus(phase === "init" ? "initializing" : "loading");
-        setMessage(phase === "init" ? "Searching flights…" : "Finding the best available flights…");
-      } else if (append) {
-        setIsLoadingMore(true);
-      }
+      // Preserve READY/partial during soft filter/sort refresh so cards stay mounted.
+      setStatus((current) => {
+        if (phase === "refresh" && (current === "ready" || current === "partial")) {
+          return current;
+        }
+        return phase === "init" ? "initializing" : "loading";
+      });
+      setMessage(phase === "init" ? "Searching flights…" : phase === "refresh" ? "Updating results…" : "Finding the best available flights…");
+    } else if (append) {
+      setIsLoadingMore(true);
+    }
 
       const response = await fetchFlightResultsData({
         searchId: id,
@@ -339,10 +345,16 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     skipNextFilterRefresh.current = false;
 
     if (!readyRef.current && status !== "partial" && status !== "ready" && !viewChanged) return;
-    // View / filter / sort changes must not leave the prior flow's cards on screen.
-    setData(null);
-    setStatus("loading");
-    setMessage("Finding the best available flights…");
+    // Paired ↔ Segmented must clear prior cards (different representation).
+    // Sort/filter refreshes keep prior cards visible — no READY→full-skeleton regression.
+    if (viewChanged) {
+      setData(null);
+      setStatus("loading");
+      setMessage("Finding the best available flights…");
+    } else {
+      setStatus((current) => (current === "ready" || current === "partial" ? current : "loading"));
+      setMessage("Updating results…");
+    }
     // Refresh bumps requestSeq and aborts in-flight polls. If the search is still
     // active, we MUST restart polling — otherwise Pair stays on infinite skeleton.
     void loadPage(resolvedSearchId, 1, false, "refresh").then((result) => {

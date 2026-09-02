@@ -106,16 +106,13 @@ export async function fetchGroupPackage(packageId: string) {
   );
 }
 
-/**
- * Server-side package fetch for SSR first paint (read-only, no-store).
- * Avoids the client-only waterfall that leaves "Loading package details…".
- */
-export async function fetchGroupPackageServer(packageId: string): Promise<GroupPackagePayload | null> {
+function laravelServerBaseUrl(): string {
   const env = process.env as Record<string, string | undefined>;
-  const laravelBase = (env.LARAVEL_URL ?? env.NEXT_PUBLIC_LARAVEL_URL ?? "")
-    .trim()
-    .replace(/\/$/, "");
-  const path = `/groups/package/${encodeURIComponent(packageId)}?format=json`;
+  return (env.LARAVEL_URL ?? env.NEXT_PUBLIC_LARAVEL_URL ?? "").trim().replace(/\/$/, "");
+}
+
+async function fetchLaravelJsonServer<T>(path: string): Promise<T | null> {
+  const laravelBase = laravelServerBaseUrl();
   const url = laravelBase !== "" ? `${laravelBase}${path}` : laravelApiPath(path);
 
   try {
@@ -128,12 +125,45 @@ export async function fetchGroupPackageServer(packageId: string): Promise<GroupP
       cache: "no-store",
     });
     if (!response.ok) return null;
-    const payload = (await response.json()) as GroupPackagePayload;
-    if (!payload?.package) return null;
-    return payload;
+    return (await response.json()) as T;
   } catch {
     return null;
   }
+}
+
+/**
+ * Server-side package fetch for SSR first paint (read-only, no-store).
+ * Avoids the client-only waterfall that leaves "Loading package details…".
+ */
+export async function fetchGroupPackageServer(packageId: string): Promise<GroupPackagePayload | null> {
+  const payload = await fetchLaravelJsonServer<GroupPackagePayload>(
+    `/groups/package/${encodeURIComponent(packageId)}?format=json`,
+  );
+  if (!payload?.package) return null;
+  return payload;
+}
+
+/**
+ * Server-side groups search payload — starts inventory fetch before client hydration.
+ * Uses the private Laravel listener when LARAVEL_URL is set (avoids browser→proxy hop).
+ */
+export async function fetchGroupSearchDataServer(
+  filters: GroupSearchFilters,
+): Promise<GroupSearchDataResponse | null> {
+  const query = buildQuery(filters);
+  if (!query) return null;
+  const payload = await fetchLaravelJsonServer<GroupSearchDataResponse>(
+    `/groups/search/data?${query}`,
+  );
+  if (!payload || !Array.isArray(payload.cards)) return null;
+  return payload;
+}
+
+/** Server-side facets for parallel hydration with search results. */
+export async function fetchGroupSearchFacetsServer(): Promise<GroupSearchFacetsResponse | null> {
+  const payload = await fetchLaravelJsonServer<GroupSearchFacetsResponse>("/groups/search/facets");
+  if (!payload) return null;
+  return payload;
 }
 
 export async function fetchGroupPassengersContext(packageId: string) {

@@ -141,12 +141,18 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       setContext(response.data);
       setPassengers(buildPassengersFromContext(response.data));
       setContact(buildContactFromContext(response.data));
+      // Warm the next checkout segment so Traveler → Review is not chunk-bound.
+      try {
+        router.prefetch("/booking/review");
+      } catch {
+        // Prefetch is best-effort.
+      }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [queryKey, loadContext]);
+  }, [queryKey, loadContext, router]);
 
   // Book Now timing: restore hard-nav session before shell marks (loading.tsx may be skipped).
   useEffect(() => {
