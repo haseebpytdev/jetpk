@@ -55,6 +55,21 @@ class OfferValidationService
             return $this->validateSabreOfferCheckoutUsingCachedOffer($agency, $selectedOfferSnapshot, $searchContext, $connection);
         }
 
+        // REG-05: Book Now already stamped authoritative_bootstrap after live revalidation.
+        // Traveler GET must not re-shop Sabre Bargain Finder for the same selected offer.
+        if (strtolower($provider) === SupplierProvider::Sabre->value
+            && (
+                ! empty($searchContext['authoritative_bootstrap'])
+                || ! empty($selectedOfferSnapshot['authoritative_bootstrap'])
+            )) {
+            Log::info('sabre.checkout.validate_using_authoritative_bootstrap', [
+                'search_id' => (string) ($searchContext['search_id'] ?? ''),
+                'offer_id' => (string) ($selectedOfferSnapshot['offer_id'] ?? $selectedOfferSnapshot['id'] ?? ''),
+            ]);
+
+            return $this->validateSabreOfferCheckoutUsingCachedOffer($agency, $selectedOfferSnapshot, $searchContext, $connection);
+        }
+
         // Book Now already performed live selected-offer revalidation within the freshness
         // window — do not run a second Bargain Finder shop on Traveler GET.
         if (strtolower($provider) === SupplierProvider::Sabre->value

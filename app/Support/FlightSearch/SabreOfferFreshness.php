@@ -394,15 +394,28 @@ final class SabreOfferFreshness
     public function hasValidRecentRevalidation(array $freshnessMeta): bool
     {
         $last = $this->parseTimestamp(
-            is_string($freshnessMeta['last_revalidated_at'] ?? null) ? (string) $freshnessMeta['last_revalidated_at'] : null
+            is_string($freshnessMeta['last_revalidated_at'] ?? null)
+                ? (string) $freshnessMeta['last_revalidated_at']
+                : (is_string($freshnessMeta['selected_offer_last_revalidated_at'] ?? null)
+                    ? (string) $freshnessMeta['selected_offer_last_revalidated_at']
+                    : (is_string($freshnessMeta['authoritative_revalidation_at'] ?? null)
+                        ? (string) $freshnessMeta['authoritative_revalidation_at']
+                        : null))
         );
         if ($last === null) {
             return false;
         }
 
-        $status = trim((string) ($freshnessMeta['revalidation_status'] ?? ''));
+        $status = strtolower(trim((string) (
+            $freshnessMeta['revalidation_status']
+                ?? $freshnessMeta['selected_offer_revalidation_status']
+                ?? ''
+        )));
+        $offerStatus = strtolower(trim((string) ($freshnessMeta['offer_freshness_status'] ?? '')));
+        $ok = in_array($status, ['success', 'revalidated', 'valid'], true)
+            || in_array($offerStatus, ['fresh', 'revalidated'], true);
 
-        return $status === 'success' && $this->revalidationStillValid($last);
+        return $ok && $this->revalidationStillValid($last);
     }
 
     /**

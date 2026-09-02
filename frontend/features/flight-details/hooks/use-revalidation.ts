@@ -15,6 +15,16 @@ import { isAllowedInternalHandoffUrl, providerRequiresRevalidation, resolvePasse
 import { redirectIfGuestBookingBlocked } from "@/features/standard-booking/services/commerce-gates-service";
 import { markResultsLeftForCheckout } from "@/features/flight-results/utils/checkout-nav";
 
+
+/** Clean Book Now → Traveler UI state boundaries (REG-05). Animation deferred. */
+export const BOOK_NOW_UI_PHASE = {
+  VALIDATING_FARE: "VALIDATING_FARE",
+  PREPARING_TRAVELER: "PREPARING_TRAVELER",
+  NAVIGATING_TO_TRAVELER: "NAVIGATING_TO_TRAVELER",
+} as const;
+export type BookNowUiPhase = (typeof BOOK_NOW_UI_PHASE)[keyof typeof BOOK_NOW_UI_PHASE];
+
+
 export type RevalidationParams = {
   searchId: string;
   offerId: string;
@@ -186,9 +196,12 @@ export function useRevalidation() {
     markResultsLeftForCheckout(searchId ?? lastParamsRef.current?.searchId);
     setState("loading");
     setMessage("Preparing your trip…");
-    markBookNowTiming("T4A_checkout_prep_start");
+    markBookNowTiming("T4A_checkout_prep_start", { ui_phase: BOOK_NOW_UI_PHASE.PREPARING_TRAVELER });
     markBookNowTiming("T4C_passengers_url_ready", { handoff: resolved.slice(0, 120) });
-    markBookNowTiming("T6_nav_start", { handoff: resolved.slice(0, 120) });
+    markBookNowTiming("T6_nav_start", {
+      ui_phase: BOOK_NOW_UI_PHASE.NAVIGATING_TO_TRAVELER,
+      handoff: resolved.slice(0, 120),
+    });
 
     const persistTimingForContinuity = () => {
       try {
@@ -278,6 +291,7 @@ export function useRevalidation() {
         acceptFareChange,
       });
       markBookNowTiming("T2_revalidate_start", {
+        ui_phase: BOOK_NOW_UI_PHASE.VALIDATING_FARE,
         offerId: params.offerId,
         provider: params.supplierProvider,
         acceptFareChange,
@@ -312,6 +326,7 @@ export function useRevalidation() {
       if (warmPromiseRef.current?.key === key) return;
       lastParamsRef.current = params;
       markBookNowTiming("T2_revalidate_start", {
+        ui_phase: BOOK_NOW_UI_PHASE.VALIDATING_FARE,
         offerId: params.offerId,
         provider: params.supplierProvider,
         phase: "warm",

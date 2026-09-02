@@ -431,6 +431,13 @@ class FlightController extends Controller
 
             // Persist freshness into checkout draft so Traveler GET can skip a second live shop.
             try {
+                if (! $requiresAcceptance) {
+                    $freshnessMeta['revalidation_status'] = 'success';
+                    $freshnessMeta['selected_offer_revalidation_status'] = 'success';
+                    $freshnessMeta['last_revalidated_at'] = $freshnessMeta['last_revalidated_at']
+                        ?? now()->toIso8601String();
+                    $freshnessMeta['selected_offer_last_revalidated_at'] = $freshnessMeta['last_revalidated_at'];
+                }
                 app(\App\Services\Booking\BookingDraftService::class)->merge([
                     'offer_freshness' => $freshnessMeta,
                     'search_id' => $searchId,
@@ -1284,19 +1291,38 @@ class FlightController extends Controller
             $nowMs = (int) round(microtime(true) * 1000);
             if ($t0Unix > 0 && \Illuminate\Support\Facades\Cache::add($r4Key, $nowMs, 1800)) {
                 $searchPerf['FIRST_PAIR_POLL_READABLE_MS'] = $nowMs - $t0Unix;
-                $persisted = isset($searchPerf['FIRST_VALID_PAIR_PERSISTED_MS'])
-                    ? (float) $searchPerf['FIRST_VALID_PAIR_PERSISTED_MS']
-                    : null;
-                if ($persisted !== null) {
-                    $searchPerf['PAIR_PERSIST_TO_POLL_READABLE_MS'] = round(
-                        max(0.0, ($nowMs - $t0Unix) - $persisted),
-                        3
-                    );
+                $searchPerf['FIRST_PAIR_POLL_READABLE_UNIX_MS'] = $nowMs;
+                // Prefer absolute unix stamps (same clock) over mixing search_t0 offset
+                // with SearchPerfTrace worker-relative FIRST_VALID_PAIR_PERSISTED_MS.
+                $persistUnix = isset($searchPerf['FIRST_VALID_PAIR_PERSISTED_UNIX_MS'])
+                    ? (int) $searchPerf['FIRST_VALID_PAIR_PERSISTED_UNIX_MS']
+                    : 0;
+                if ($persistUnix > 0) {
+                    $searchPerf['PAIR_PERSIST_TO_POLL_READABLE_MS'] = round(max(0.0, $nowMs - $persistUnix), 3);
+                } else {
+                    $persisted = isset($searchPerf['FIRST_VALID_PAIR_PERSISTED_MS'])
+                        ? (float) $searchPerf['FIRST_VALID_PAIR_PERSISTED_MS']
+                        : null;
+                    if ($persisted !== null) {
+                        $searchPerf['PAIR_PERSIST_TO_POLL_READABLE_MS'] = round(
+                            max(0.0, ($nowMs - $t0Unix) - $persisted),
+                            3
+                        );
+                    }
                 }
             } elseif ($t0Unix > 0) {
                 $r4At = \Illuminate\Support\Facades\Cache::get($r4Key);
                 if (is_numeric($r4At)) {
                     $searchPerf['FIRST_PAIR_POLL_READABLE_MS'] = (int) $r4At - $t0Unix;
+                    $persistUnix = isset($searchPerf['FIRST_VALID_PAIR_PERSISTED_UNIX_MS'])
+                        ? (int) $searchPerf['FIRST_VALID_PAIR_PERSISTED_UNIX_MS']
+                        : 0;
+                    if ($persistUnix > 0) {
+                        $searchPerf['PAIR_PERSIST_TO_POLL_READABLE_MS'] = round(
+                            max(0.0, ((int) $r4At) - $persistUnix),
+                            3
+                        );
+                    }
                 }
             }
         }

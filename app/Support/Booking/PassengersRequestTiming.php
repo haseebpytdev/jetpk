@@ -3,6 +3,7 @@
 namespace App\Support\Booking;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -27,11 +28,39 @@ final class PassengersRequestTiming
 
     private readonly string $correlationId;
 
+    private int $dbQueryCount = 0;
+
+    private float $dbTotalMs = 0.0;
+
+    private float $dbSlowestMs = 0.0;
+
+    /** @var array<string, int> */
+    private array $dbFingerprints = [];
+
+
     private function __construct(string $correlationId)
     {
         $this->correlationId = $correlationId;
         $this->t0 = microtime(true);
         $this->mark('S0_request_received');
+        $this->startDbListener();
+    }
+
+    private function startDbListener(): void
+    {
+        DB::listen(function ($query): void {
+            $ms = (float) ($query->time ?? 0);
+            $this->dbQueryCount++;
+            $this->dbTotalMs += $ms;
+            if ($ms > $this->dbSlowestMs) {
+                $this->dbSlowestMs = $ms;
+            }
+            $sql = strtolower(trim(preg_replace('/\s+/', ' ', (string) ($query->sql ?? '')) ?? ''));
+            $fp = strlen($sql) > 160 ? substr($sql, 0, 160) : $sql;
+            if ($fp !== '') {
+                $this->dbFingerprints[$fp] = ($this->dbFingerprints[$fp] ?? 0) + 1;
+            }
+        });
     }
 
     public static function start(Request $request): self
@@ -85,6 +114,10 @@ final class PassengersRequestTiming
             'serialize_ms' => $this->intervalMs('S7a_serialize_start', 'S7_payload_complete'),
             'passenger_contact_load_ms' => $this->intervalMs('S5_passenger_contact_load_start', 'S6_passenger_contact_load_end'),
             'app_internal_ms' => $totalMs,
+            'db_query_count' => $this->dbQueryCount,
+            'db_total_ms' => (int) round($this->dbTotalMs),
+            'db_slowest_query_ms' => round($this->dbSlowestMs, 3),
+            'db_duplicate_query_count' => count(array_filter($this->dbFingerprints, static fn (int $n): bool => $n > 1)),
         ], $deltas);
     }
 
@@ -160,6 +193,10 @@ final class PassengersRequestTiming
             'serialize_ms' => $ctx['serialize_ms'] ?? null,
             'passenger_contact_load_ms' => $ctx['passenger_contact_load_ms'] ?? null,
             'app_internal_ms' => $ctx['app_internal_ms'] ?? null,
+            'db_query_count' => $ctx['db_query_count'] ?? null,
+            'db_total_ms' => $ctx['db_total_ms'] ?? null,
+            'db_slowest_query_ms' => $ctx['db_slowest_query_ms'] ?? null,
+            'db_duplicate_query_count' => $ctx['db_duplicate_query_count'] ?? null,
             'S0_ms' => $ctx['S0_request_received_ms'] ?? null,
             'S7_ms' => $ctx['S7_payload_complete_ms'] ?? null,
             'S8_ms' => $ctx['S8_response_dispatched_ms'] ?? null,

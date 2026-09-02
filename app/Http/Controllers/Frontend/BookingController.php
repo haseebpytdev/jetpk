@@ -4464,6 +4464,12 @@ class BookingController extends Controller
         if (is_array($draft['offer_freshness'] ?? null)) {
             $withChannel['offer_freshness'] = $draft['offer_freshness'];
         }
+        if (! empty($draft['authoritative_bootstrap'])) {
+            $withChannel['authoritative_bootstrap'] = true;
+            if (is_string($draft['authoritative_revalidation_at'] ?? null)) {
+                $withChannel['authoritative_revalidation_at'] = $draft['authoritative_revalidation_at'];
+            }
+        }
 
         return $withChannel;
     }

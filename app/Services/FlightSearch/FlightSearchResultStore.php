@@ -396,11 +396,29 @@ class FlightSearchResultStore
         // rename visibility (mark-before-put inflated PAIR_AVAILABLE_TO_BROWSER by write time).
         $this->storePut($this->key($searchId), $payload);
 
-        if ($comboCountForMark > 0 && app()->bound(SearchPerfTrace::class)) {
-            app(SearchPerfTrace::class)->recordFirstValidPairPersisted();
-            $payload['search_perf'] = app(SearchPerfTrace::class)->publicMeta();
-            $payload['search_perf_id'] = app(SearchPerfTrace::class)->id();
+        // REG-05: FIRST_VALID_PAIR_PERSISTED means pollable pairs exist — not merely
+        // return_split.combo_count > 0 (precompute can fail / journeys unresolved).
+        $pollablePairCount = is_array($payload['return_pair_options'] ?? null)
+            ? count($payload['return_pair_options'])
+            : 0;
+        if ($pollablePairCount > 0 && app()->bound(SearchPerfTrace::class)) {
+            $perf = app(SearchPerfTrace::class);
+            $perf->recordFirstValidPairPersisted();
+            $searchPerf = $perf->publicMeta();
+            $searchPerf['POLLABLE_PAIR_COUNT_AT_PERSIST'] = $pollablePairCount;
+            $searchPerf['PERSISTED_VALID_PAIR_COUNT'] = $pollablePairCount;
+            $searchPerf['PERSISTED_PAIRED_OPTIONS_COUNT'] = $pollablePairCount;
+            $searchPerf['PARTIAL_SNAPSHOT_CONTAINS_RENDERABLE_PAIR'] = 'YES';
+            $searchPerf['FIRST_VALID_PAIR_PERSISTED_UNIX_MS'] = (int) round(microtime(true) * 1000);
+            $payload['search_perf'] = $searchPerf;
+            $payload['search_perf_id'] = $perf->id();
             $this->storePut($this->key($searchId), $payload);
+        } elseif ($comboCountForMark > 0 && $pollablePairCount === 0) {
+            Log::notice('flight_search.pair_index_without_pollable_pairs', [
+                'search_id' => $searchId,
+                'combo_count' => $comboCountForMark,
+                'pollable_pair_count' => 0,
+            ]);
         }
     }
 
