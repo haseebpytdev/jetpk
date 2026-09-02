@@ -213,20 +213,83 @@ export function useRevalidation() {
         : resolved.startsWith("/")
           ? resolved
           : `/${resolved}`;
-      // JP-NEXT-PERF-02B: soft router.push is intermittently stalling (URL commit without
-      // RSC progress) until watchdog — P95 ~4.5–5s. Prefer immediate hard assign for
-      // authoritative passengers_url handoff; soft path remains for non-passengers URLs.
       try {
         void import("@/features/standard-booking/components/PassengerDetailsPage");
+        try {
+          router.prefetch(resolved);
+        } catch {
+          /* non-blocking */
+        }
+        persistTimingForContinuity();
+        markBookNowTiming("T4B_checkout_prep_done");
+        markBookNowTiming("T5_router_push", { nav: "soft_push" });
+        markBookNowTiming("T7_passenger_route", { nav: "soft_push" });
+        persistTimingForContinuity();
+        router.push(resolved);
+
+        // Soft RSC is ~0.5–1.5s when healthy. Hard assign full reload was measured ~18s.
+        // Retry soft once; hard-assign only as last resort after a long stall.
+        let settled = false;
+        let softRetryTimer: number | undefined;
+        let hardTimer: number | undefined;
+        let pollTimer: number | undefined;
+
+        const passengersReached = () => /\/booking\/passengers/.test(window.location.pathname);
+
+        const cleanup = () => {
+          settled = true;
+          if (softRetryTimer != null) window.clearTimeout(softRetryTimer);
+          if (hardTimer != null) window.clearTimeout(hardTimer);
+          if (pollTimer != null) window.clearInterval(pollTimer);
+          window.removeEventListener("popstate", onMaybeProgress);
+        };
+
+        const onMaybeProgress = () => {
+          if (settled) return;
+          if (passengersReached()) cleanup();
+        };
+
+        pollTimer = window.setInterval(onMaybeProgress, 50);
+        window.addEventListener("popstate", onMaybeProgress);
+
+        softRetryTimer = window.setTimeout(() => {
+          if (settled || passengersReached()) {
+            cleanup();
+            return;
+          }
+          try {
+            markBookNowTiming("T5_router_push", { nav: "soft_push_retry" });
+            router.push(resolved);
+          } catch {
+            /* ignore */
+          }
+        }, 250);
+
+        hardTimer = window.setTimeout(() => {
+          if (settled || passengersReached()) {
+            cleanup();
+            return;
+          }
+          try {
+            markBookNowTiming("T5_router_push", { nav: "hard_assign_watchdog" });
+            markBookNowTiming("T7_passenger_route", { nav: "hard_assign_watchdog" });
+            persistTimingForContinuity();
+            window.location.assign(target.startsWith("http") ? target : `${window.location.origin}${target}`);
+          } catch {
+            /* ignore */
+          }
+          cleanup();
+        }, 8000);
+
+        return true;
       } catch {
-        /* non-blocking */
+        /* fall through to hard assign */
       }
       persistTimingForContinuity();
-      markBookNowTiming("T4B_checkout_prep_done");
-      markBookNowTiming("T5_router_push", { nav: "hard_assign_primary" });
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_primary" });
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_fallback" });
       persistTimingForContinuity();
-      window.location.assign(target.startsWith("http") ? target : `${window.location.origin}${target}`);
+      window.location.assign(target);
       return true;
     }
     window.location.assign(resolved);
