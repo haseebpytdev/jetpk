@@ -702,6 +702,13 @@ class FlightSearchService
             return true;
         }
 
+        // Public customer results gate suppliers at display time; skip their network fan-out
+        // so progressive first-paint is not delayed by suppliers that can never appear.
+        if (PublicCustomerPricing::isPublicChannel($sourceChannel)
+            && $this->shouldSkipPublicResultsSupplier($connection->provider)) {
+            return true;
+        }
+
         if (! $connection->isEligibleForSupplierSearch()) {
             return true;
         }
@@ -725,6 +732,11 @@ class FlightSearchService
             return 'sandbox_excluded_from_production_fanout';
         }
 
+        if (PublicCustomerPricing::isPublicChannel($sourceChannel)
+            && $this->shouldSkipPublicResultsSupplier($connection->provider)) {
+            return 'public_results_supplier_gated';
+        }
+
         if (! $connection->isEligibleForSupplierSearch()) {
             return 'connection_inactive';
         }
@@ -744,6 +756,25 @@ class FlightSearchService
         return $moduleKey === null
             ? 'provider_module_unknown'
             : 'provider_module_disabled:'.$moduleKey;
+    }
+
+    /**
+     * Providers that public results will never display (see ota.public_flight_results_suppliers).
+     */
+    protected function shouldSkipPublicResultsSupplier(SupplierProvider $provider): bool
+    {
+        /** @var list<string> $allowedList */
+        $allowedList = config('ota.public_flight_results_suppliers', ['duffel', 'sabre']);
+        $allowed = array_values(array_filter(array_map(
+            static fn (mixed $v): string => strtolower(trim((string) $v)),
+            is_array($allowedList) ? $allowedList : ['duffel', 'sabre'],
+        )));
+
+        if ($allowed === []) {
+            return false;
+        }
+
+        return ! in_array(strtolower($provider->value), $allowed, true);
     }
 
     /**
@@ -1235,6 +1266,14 @@ class FlightSearchService
                     ? ($acceptedForMerge > 0 ? 'SUCCESS' : 'EMPTY')
                     : (count($result->warnings) > 0 ? 'ERROR' : 'EMPTY'),
             ];
+
+            if ($perf !== null) {
+                $perf->recordProviderResponse(
+                    $connection->provider->value,
+                    (float) $supplierElapsedMs,
+                    $acceptedForMerge,
+                );
+            }
 
             Log::info('flight_search.public_diagnostics', [
                 'stage' => 'supplier_adapter_returned',

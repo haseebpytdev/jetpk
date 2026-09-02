@@ -1198,8 +1198,12 @@ class FlightController extends Controller
             'offers' => [],
             'outbound_options' => [],
             'warnings' => is_array($payload['warnings'] ?? null) ? array_values($payload['warnings']) : [],
-            'empty_message' => $total === 0 ? 'No paired return options are currently available.' : '',
+            'empty_message' => $this->resolveResultsEmptyMessage($payload, $total),
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
+            'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi(
+                is_array($payload['supplier_call_summaries'] ?? null) ? $payload['supplier_call_summaries'] : [],
+            ),
+            'search_perf' => is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : null,
         ]);
     }
 
@@ -1283,6 +1287,10 @@ class FlightController extends Controller
             'outbound_options' => $slice,
             'warnings' => is_array($payload['warnings'] ?? null) ? array_values($payload['warnings']) : [],
             'search_freshness' => $freshness->sanitizeForCustomerApi($freshness->buildSearchFreshnessMeta($payload)),
+            'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi(
+                is_array($payload['supplier_call_summaries'] ?? null) ? $payload['supplier_call_summaries'] : [],
+            ),
+            'search_perf' => is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : null,
         ]);
     }
 
@@ -2708,7 +2716,7 @@ class FlightController extends Controller
     ): void {
         $perf ??= app()->bound(SearchPerfTrace::class) ? app(SearchPerfTrace::class) : null;
 
-        $onProgress = function (array $offersSoFar, array $warningsSoFar) use ($searchId, $criteria, $agency, $sourceChannel, $agentId): void {
+        $onProgress = function (array $offersSoFar, array $warningsSoFar) use ($searchId, $criteria, $agency, $sourceChannel, $agentId, $perf): void {
             [$gatedOffers, $safeWarnings] = $this->applyPublicResultsProviderGate(
                 $offersSoFar,
                 $warningsSoFar,
@@ -2732,24 +2740,30 @@ class FlightController extends Controller
                 return;
             }
 
+            $progressMeta = [
+                'criteria_cache_context' => [
+                    'client_slug' => current_client_slug(),
+                    'agency_id' => $agency?->id,
+                    'source_channel' => $sourceChannel,
+                    'agent_id' => $agentId,
+                ],
+                'mixed_carrier_filter' => is_array($prepared['diagnostics']['mixed_carrier'] ?? null)
+                    ? $prepared['diagnostics']['mixed_carrier']
+                    : [],
+                'progressive_snapshot' => $prepared['diagnostics'],
+            ];
+            if ($perf !== null) {
+                $progressMeta['search_perf'] = $perf->publicMeta();
+                $progressMeta['search_perf_id'] = $perf->id();
+            }
+
             $this->searchStore->publishProgress(
                 $searchId,
                 $criteria,
                 $gatedOffers,
                 $safeWarnings,
                 FlightSearchResultStore::SEARCH_STATUS_PARTIAL,
-                [
-                    'criteria_cache_context' => [
-                        'client_slug' => current_client_slug(),
-                        'agency_id' => $agency?->id,
-                        'source_channel' => $sourceChannel,
-                        'agent_id' => $agentId,
-                    ],
-                    'mixed_carrier_filter' => is_array($prepared['diagnostics']['mixed_carrier'] ?? null)
-                        ? $prepared['diagnostics']['mixed_carrier']
-                        : [],
-                    'progressive_snapshot' => $prepared['diagnostics'],
-                ],
+                $progressMeta,
             );
         };
 

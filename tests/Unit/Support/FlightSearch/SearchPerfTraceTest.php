@@ -40,6 +40,16 @@ class SearchPerfTraceTest extends TestCase
 
         $public = $perf->publicMeta();
         $this->assertArrayHasKey('search_perf_id', $public);
+        $this->assertArrayHasKey('FIRST_PROVIDER_RESPONSE_MS', $public);
+        $this->assertArrayHasKey('FIRST_VALID_PAIR_MS', $public);
+        $this->assertArrayHasKey('PAIRING_MS', $public);
         $this->assertArrayNotHasKey('queries', $public);
+
+        $perf->recordProviderResponse('sabre', 42.0, 3);
+        $perf->recordFirstValidPair(1.5);
+        $after = $perf->publicMeta();
+        $this->assertNotNull($after['FIRST_PROVIDER_RESPONSE_MS']);
+        $this->assertNotNull($after['FIRST_VALID_PAIR_MS']);
+        $this->assertSame(1.5, $after['PAIRING_MS']);
     }
 }

@@ -343,7 +343,8 @@ export function FlightResultsPage() {
   const isBootstrapping =
     results.status === "idle" || results.status === "loading" || results.status === "initializing";
   const isSearchingMask =
-    results.status === "searching" || results.status === "loading" || (isBootstrapping && shownCount === 0);
+    (results.status === "searching" || results.status === "loading" || isBootstrapping) &&
+    shownCount === 0;
   // Never show prior cards beside a fatal error/failed banner (stale mix blocker).
   const showResultsList =
     !resultsStaleLocked &&

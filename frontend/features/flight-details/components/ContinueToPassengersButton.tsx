@@ -22,7 +22,7 @@ export function ContinueToPassengersButton({
       aria-busy={loading}
       onClick={onClick}
     >
-      {loading ? "Checking the latest fare…" : label}
+      {loading ? "Validating fare…" : label}
     </PrimaryButton>
   );
 }

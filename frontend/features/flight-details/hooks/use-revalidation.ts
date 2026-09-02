@@ -353,7 +353,7 @@ export function useRevalidation() {
       if (inFlightRef.current) return;
       inFlightRef.current = true;
       setState("loading");
-      setMessage("Checking the latest fare…");
+      setMessage("Validating fare…");
       markBookNowTiming("T1_handler", { phase: "continueToPassengers" });
       setFareChange(null);
       lastParamsRef.current = params;
@@ -363,7 +363,7 @@ export function useRevalidation() {
         // offer before checkout handoff when the provider requires it.
         if (params.isReturnCombo && params.comboId && params.outboundKey) {
           if (providerRequiresRevalidation(params.supplierProvider)) {
-            setMessage("Checking the latest fare…");
+            setMessage("Validating fare…");
             const progressTimer = window.setTimeout(() => {
               setMessage("Refreshing availability…");
             }, 8000);
@@ -437,7 +437,7 @@ export function useRevalidation() {
         const needsRevalidation = providerRequiresRevalidation(params.supplierProvider);
 
         if (needsRevalidation) {
-          setMessage("Checking the latest fare…");
+          setMessage("Validating fare…");
           const progressTimer = window.setTimeout(() => {
             setMessage("Refreshing availability…");
           }, 8000);

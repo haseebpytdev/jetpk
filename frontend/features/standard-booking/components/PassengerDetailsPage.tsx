@@ -175,6 +175,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   }, [loading, context, errorStatus, expired]);
 
   // Silent automatic reprice when checkout still carries an approximate estimate.
+  // Skip when Book Now already produced an authoritative revalidation (avoids READY reset).
   useEffect(() => {
     if (!context || loading || fareChange) return;
     if (autoRevalidateAttempted.current) return;

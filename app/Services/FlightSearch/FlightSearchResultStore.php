@@ -7,6 +7,7 @@ use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use App\Support\FlightSearch\ItineraryFareConsolidator;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use App\Support\FlightSearch\SabreOfferFreshness;
+use App\Support\FlightSearch\SearchPerfTrace;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -269,7 +270,23 @@ class FlightSearchResultStore
 
             $splitService = app(ReturnSplitComboService::class);
             if ($splitService->isEnabled() && (string) ($criteria['trip_type'] ?? '') === 'round_trip') {
-                $payload['return_split'] = $splitService->safeBuildIndexForStore($criteria, $trimmedOffers, $searchId);
+                $pairStarted = microtime(true);
+                $returnSplit = $splitService->safeBuildIndexForStore($criteria, $trimmedOffers, $searchId);
+                $pairingMs = (microtime(true) - $pairStarted) * 1000;
+                $payload['return_split'] = $returnSplit;
+
+                if (app()->bound(SearchPerfTrace::class)) {
+                    $perf = app(SearchPerfTrace::class);
+                    $comboCount = (int) ($returnSplit['combo_count'] ?? 0);
+                    if ($comboCount > 0) {
+                        $perf->recordFirstValidPair($pairingMs);
+                    }
+                    if ($trimmedOffers !== []) {
+                        $perf->recordFirstValidOutbound();
+                    }
+                }
+            } elseif ($trimmedOffers !== [] && app()->bound(SearchPerfTrace::class)) {
+                app(SearchPerfTrace::class)->recordFirstValidOutbound();
             }
         } elseif (is_array($meta['criteria_cache_context'] ?? null)) {
             // Fingerprint still required for progressive cache-key continuity; avoid split index on empty init.

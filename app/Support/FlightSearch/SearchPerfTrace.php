@@ -43,6 +43,18 @@ final class SearchPerfTrace
 
     private ?float $lastEligibleProviderNetworkStartMs = null;
 
+    private ?float $firstProviderResponseMs = null;
+
+    private ?float $firstValidOutboundMs = null;
+
+    private ?float $firstValidPairMs = null;
+
+    private ?float $firstResultExposedMs = null;
+
+    private float $pairingTotalMs = 0.0;
+
+    private ?float $lastPairingMs = null;
+
     private int $decryptCount = 0;
 
     private float $decryptTotalMs = 0.0;
@@ -232,6 +244,15 @@ final class SearchPerfTrace
             'dispatch_start_offset_ms' => isset($row['dispatch_start_offset_ms'])
                 ? (float) $row['dispatch_start_offset_ms']
                 : null,
+            'network_duration_ms' => isset($row['network_duration_ms'])
+                ? (float) $row['network_duration_ms']
+                : null,
+            'response_offset_ms' => isset($row['response_offset_ms'])
+                ? (float) $row['response_offset_ms']
+                : null,
+            'accepted_offer_count' => isset($row['accepted_offer_count'])
+                ? (int) $row['accepted_offer_count']
+                : null,
             'token_cache_lookup_ms' => isset($row['token_cache_lookup_ms'])
                 ? (float) $row['token_cache_lookup_ms']
                 : null,
@@ -241,6 +262,62 @@ final class SearchPerfTrace
             'token_network_calls' => (int) ($row['token_network_calls'] ?? 0),
             'skip_reason' => isset($row['skip_reason']) ? (string) $row['skip_reason'] : null,
         ];
+    }
+
+    /**
+     * Patch the most recent eligible provider row after its network call returns.
+     */
+    public function recordProviderResponse(string $provider, float $networkDurationMs, int $acceptedOfferCount = 0): void
+    {
+        $responseOffset = $this->elapsedMsSinceT0();
+        if ($this->firstProviderResponseMs === null) {
+            $this->firstProviderResponseMs = $responseOffset;
+            $this->mark('T_FIRST_PROVIDER_RESPONSE');
+        }
+
+        for ($i = count($this->providers) - 1; $i >= 0; $i--) {
+            $row = $this->providers[$i];
+            if ((string) ($row['provider'] ?? '') !== $provider) {
+                continue;
+            }
+            if (! (bool) ($row['eligible'] ?? false)) {
+                continue;
+            }
+            $this->providers[$i]['network_duration_ms'] = round(max(0.0, $networkDurationMs), 3);
+            $this->providers[$i]['response_offset_ms'] = $responseOffset;
+            $this->providers[$i]['accepted_offer_count'] = max(0, $acceptedOfferCount);
+            break;
+        }
+    }
+
+    public function recordFirstValidOutbound(): void
+    {
+        if ($this->firstValidOutboundMs !== null) {
+            return;
+        }
+        $this->firstValidOutboundMs = $this->elapsedMsSinceT0();
+        $this->mark('T_FIRST_VALID_OUTBOUND');
+        if ($this->firstResultExposedMs === null) {
+            $this->firstResultExposedMs = $this->firstValidOutboundMs;
+            $this->mark('T_FIRST_RESULT_EXPOSED');
+        }
+    }
+
+    public function recordFirstValidPair(float $pairingMs): void
+    {
+        $pairing = max(0.0, $pairingMs);
+        $this->lastPairingMs = round($pairing, 3);
+        $this->pairingTotalMs += $pairing;
+
+        if ($this->firstValidPairMs !== null) {
+            return;
+        }
+        $this->firstValidPairMs = $this->elapsedMsSinceT0();
+        $this->mark('T_FIRST_VALID_PAIR');
+        if ($this->firstResultExposedMs === null) {
+            $this->firstResultExposedMs = $this->firstValidPairMs;
+            $this->mark('T_FIRST_RESULT_EXPOSED');
+        }
     }
 
     /**
@@ -344,6 +421,12 @@ final class SearchPerfTrace
             'FIRST_PROVIDER_NETWORK_START_MS' => $this->firstProviderNetworkStartMs,
             'LAST_ELIGIBLE_PROVIDER_NETWORK_START_MS' => $this->lastEligibleProviderNetworkStartMs,
             'PROVIDER_START_SPREAD_MS' => $spread,
+            'FIRST_PROVIDER_RESPONSE_MS' => $this->firstProviderResponseMs,
+            'FIRST_VALID_OUTBOUND_MS' => $this->firstValidOutboundMs,
+            'FIRST_VALID_PAIR_MS' => $this->firstValidPairMs,
+            'FIRST_RESULT_EXPOSED_MS' => $this->firstResultExposedMs,
+            'PAIRING_MS' => $this->lastPairingMs,
+            'PAIRING_TOTAL_MS' => round($this->pairingTotalMs, 3),
             'providers' => $this->providers,
             'counters' => $this->counters,
         ];
@@ -372,8 +455,14 @@ final class SearchPerfTrace
                 'eligible' => $p['eligible'],
                 'network_start_offset_ms' => $p['network_start_offset_ms'],
                 'dispatch_start_offset_ms' => $p['dispatch_start_offset_ms'],
+                'network_duration_ms' => $p['network_duration_ms'] ?? null,
+                'response_offset_ms' => $p['response_offset_ms'] ?? null,
+                'accepted_offer_count' => $p['accepted_offer_count'] ?? null,
                 'skip_reason' => $p['skip_reason'],
             ], $summary['providers']),
+            'FIRST_PROVIDER_RESPONSE_MS' => $summary['FIRST_PROVIDER_RESPONSE_MS'],
+            'FIRST_VALID_PAIR_MS' => $summary['FIRST_VALID_PAIR_MS'],
+            'PAIRING_MS' => $summary['PAIRING_MS'],
         ]);
     }
 
@@ -413,6 +502,11 @@ final class SearchPerfTrace
             'FIRST_PROVIDER_NETWORK_START_MS' => $s['FIRST_PROVIDER_NETWORK_START_MS'],
             'LAST_ELIGIBLE_PROVIDER_NETWORK_START_MS' => $s['LAST_ELIGIBLE_PROVIDER_NETWORK_START_MS'],
             'PROVIDER_START_SPREAD_MS' => $s['PROVIDER_START_SPREAD_MS'],
+            'FIRST_PROVIDER_RESPONSE_MS' => $s['FIRST_PROVIDER_RESPONSE_MS'],
+            'FIRST_VALID_OUTBOUND_MS' => $s['FIRST_VALID_OUTBOUND_MS'],
+            'FIRST_VALID_PAIR_MS' => $s['FIRST_VALID_PAIR_MS'],
+            'FIRST_RESULT_EXPOSED_MS' => $s['FIRST_RESULT_EXPOSED_MS'],
+            'PAIRING_MS' => $s['PAIRING_MS'],
             'providers' => $s['providers'],
         ];
     }
