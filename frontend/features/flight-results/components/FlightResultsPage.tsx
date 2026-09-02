@@ -32,7 +32,7 @@ import { ResultsHeroBand } from "./ResultsHeroBand";
 import { SearchSummaryBar } from "./SearchSummaryBar";
 
 /** First useful paint: mount a short visible window before remaining cards. */
-const INITIAL_VISIBLE_CARDS = 6;
+const INITIAL_VISIBLE_CARDS = 4;
 
 const FlightDetailsDrawer = dynamic(
   () => import("@/features/flight-details").then((mod) => mod.FlightDetailsDrawer),

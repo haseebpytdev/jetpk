@@ -265,7 +265,7 @@ export function useRevalidation() {
           } catch {
             /* ignore */
           }
-        }, 350);
+        }, 200);
 
         hardTimer = window.setTimeout(() => {
           if (settled || passengersReached()) {
@@ -276,12 +276,12 @@ export function useRevalidation() {
             markBookNowTiming("T5_router_push", { nav: "hard_assign_watchdog" });
             markBookNowTiming("T7_passenger_route", { nav: "hard_assign_watchdog" });
             persistTimingForContinuity();
-            cleanup();
-            window.location.assign(target);
+            window.location.assign(target.startsWith("http") ? target : `${window.location.origin}${target.startsWith("/") ? target : `/${target}`}`);
           } catch {
-            cleanup();
+            /* ignore */
           }
-        }, 3200);
+          cleanup();
+        }, 700);
 
         return true;
       } catch {
