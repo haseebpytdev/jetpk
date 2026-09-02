@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { FlightDetailsContext } from "@/features/flight-details";
 import { SearchModule } from "@/features/search";
@@ -31,6 +31,9 @@ import { SearchProgress } from "./SearchProgress";
 import { ResultsHeroBand } from "./ResultsHeroBand";
 import { SearchSummaryBar } from "./SearchSummaryBar";
 
+/** First useful paint: mount a short visible window before remaining cards. */
+const INITIAL_VISIBLE_CARDS = 6;
+
 const FlightDetailsDrawer = dynamic(
   () => import("@/features/flight-details").then((mod) => mod.FlightDetailsDrawer),
   { ssr: false },
@@ -44,12 +47,15 @@ export function FlightResultsPage() {
   const tripType = params.get("trip_type");
   const viewParam = params.get("view");
   const isReturn = tripType === "round_trip";
+  // JP-NEXT-PERF-02B: local override avoids App Router remount on Pair↔Segmented.
+  const [viewOverride, setViewOverride] = useState<"pair" | "segmented" | null>(null);
+  const effectiveViewParam = viewOverride ?? viewParam;
   // Authoritative only after user choice (or explicit URL). Do not invent Pair before modal.
   const resolvedView: "pair" | "segmented" | null = !isReturn
     ? null
-    : viewParam === "segmented"
+    : effectiveViewParam === "segmented"
       ? "segmented"
-      : viewParam === "pair"
+      : effectiveViewParam === "pair"
         ? "pair"
         : null;
   const awaitingReturnViewChoice = isReturn && resolvedView === null;
@@ -59,12 +65,20 @@ export function FlightResultsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailsContext, setDetailsContext] = useState<FlightDetailsContext | null>(null);
   const [resultsStaleLocked, setResultsStaleLocked] = useState(false);
+  const [visiblePaintBudget, setVisiblePaintBudget] = useState(INITIAL_VISIBLE_CARDS);
   const detailsTriggerRef = useRef<HTMLElement | null>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const freshSearchInFlight = useRef(false);
   const defaultSortSynced = useRef(false);
 
   const summary = useMemo(() => buildSearchSummaryFromParams(params), [params]);
+
+  // Warm CSRF off the Book Now critical path (fare validate no longer waits cold CSRF).
+  useEffect(() => {
+    void import("@/features/auth/utils/laravel-auth-api").then((m) => {
+      void m.ensureLaravelCsrfToken();
+    });
+  }, []);
 
   // Persist sort default only — return view waits for ReturnViewSelector (no wrong-view flash).
   useEffect(() => {
@@ -99,6 +113,7 @@ export function FlightResultsPage() {
     freshSearchInFlight.current = true;
     setResultsStaleLocked(true);
     setDetailsContext(null);
+    setViewOverride(null);
     clearResultsLeftForCheckout();
     const next = buildFreshResultsSearchParams(params);
     router.replace(`/flights/results?${next.toString()}`, { scroll: false });
@@ -198,10 +213,55 @@ export function FlightResultsPage() {
 
   const setReturnView = useCallback(
     (view: "pair" | "segmented") => {
-      syncUrl(filters, sort, { view, outbound_key: null, combo_id: null, fare_option_key: null }, results.resolvedSearchId);
+      // Local presentation switch: update URL without App Router remount/loading.tsx.
+      setViewOverride(view);
+      setVisiblePaintBudget(INITIAL_VISIBLE_CARDS);
+      try {
+        const next = new URLSearchParams(
+          typeof window !== "undefined" ? window.location.search : params.toString(),
+        );
+        const authoritativeSearchId =
+          results.resolvedSearchId ||
+          next.get("search_id") ||
+          searchId ||
+          null;
+        if (authoritativeSearchId) next.set("search_id", authoritativeSearchId);
+        next.set("view", view);
+        next.delete("outbound_key");
+        next.delete("combo_id");
+        next.delete("fare_option_key");
+        window.history.replaceState(null, "", `/flights/results?${next.toString()}`);
+      } catch {
+        syncUrl(filters, sort, { view, outbound_key: null, combo_id: null, fare_option_key: null }, results.resolvedSearchId);
+      }
     },
-    [filters, sort, syncUrl, results.resolvedSearchId],
+    [filters, params, results.resolvedSearchId, searchId, sort, syncUrl],
   );
+
+  // First useful cards first; expand remaining after paint (no fare accuracy compromise).
+  useEffect(() => {
+    const total = results.isReturnPair
+      ? results.pairedOptions.length
+      : results.isReturnSplit
+        ? results.outboundOptions.length
+        : results.offers.length;
+    if (total <= INITIAL_VISIBLE_CARDS) {
+      setVisiblePaintBudget(total || INITIAL_VISIBLE_CARDS);
+      return;
+    }
+    setVisiblePaintBudget(INITIAL_VISIBLE_CARDS);
+    const raf = window.requestAnimationFrame(() => {
+      startTransition(() => setVisiblePaintBudget(total));
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [
+    results.isReturnPair,
+    results.isReturnSplit,
+    results.offers.length,
+    results.outboundOptions.length,
+    results.pairedOptions.length,
+    resolvedView,
+  ]);
 
   const openDetails = useCallback(
     (offer: import("../types").FlightOffer, fareOptionKey: string, intent: "details" | "booking") => {
@@ -467,7 +527,7 @@ export function FlightResultsPage() {
             {!awaitingReturnViewChoice && showResultsList ? (
               <div role="list" className="space-y-3" aria-label="Flight results">
                 {results.isReturnPair
-                  ? results.pairedOptions.map((option) => (
+                  ? results.pairedOptions.slice(0, visiblePaintBudget).map((option) => (
                       <div key={option.combo_id} role="listitem">
                         <PairReturnCard
                           option={option}
@@ -479,7 +539,7 @@ export function FlightResultsPage() {
                       </div>
                     ))
                   : results.isReturnSplit
-                    ? results.outboundOptions.map((option) => (
+                    ? results.outboundOptions.slice(0, visiblePaintBudget).map((option) => (
                         <div key={option.outbound_key} role="listitem">
                           <OutboundOptionCard
                             option={option}
@@ -489,7 +549,7 @@ export function FlightResultsPage() {
                           />
                         </div>
                       ))
-                    : results.offers.map((offer) => (
+                    : results.offers.slice(0, visiblePaintBudget).map((offer) => (
                         <div key={offer.offer_id} role="listitem">
                           <FlightResultCard
                             offer={offer}

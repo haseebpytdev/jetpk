@@ -32,7 +32,27 @@ const checks = [
     (s) =>
       s.includes("Updating results…") &&
       s.includes("viewChanged") &&
+      s.includes("viewPayloadCacheRef") &&
+      s.includes("Switching view…") &&
       !s.includes("View / filter / sort changes must not leave the prior flow's cards on screen."),
+  ],
+  [
+    "features/flight-results/components/FlightResultsPage.tsx",
+    (s) =>
+      s.includes("viewOverride") &&
+      s.includes("INITIAL_VISIBLE_CARDS") &&
+      s.includes("history.replaceState"),
+  ],
+  [
+    "features/standard-booking/services/commerce-gates-service.ts",
+    (s) =>
+      s.includes("guest_booking_enabled") &&
+      s.includes("DEFAULT_GATES") &&
+      s.includes("never serialize session bootstrap"),
+  ],
+  [
+    "features/flight-results/services/flight-results-api.ts",
+    (s) => s.includes("RevalidateOfferTiming") && s.includes("supplier_ms"),
   ],
   [
     "features/standard-booking/components/BookingReviewPage.tsx",

@@ -265,7 +265,7 @@ export function useRevalidation() {
           } catch {
             /* ignore */
           }
-        }, 900);
+        }, 350);
 
         hardTimer = window.setTimeout(() => {
           if (settled || passengersReached()) {
@@ -315,8 +315,15 @@ export function useRevalidation() {
         provider: params.supplierProvider,
         acceptFareChange,
       });
-      void promise.then(() => {
-        markBookNowTiming("T3_revalidate_response");
+      void promise.then((result) => {
+        markBookNowTiming("T3_revalidate_response", {
+          ok: result.ok,
+          total_ms: result.timing?.total_ms,
+          request_ms: result.timing?.request_ms,
+          csrf_ms: result.timing?.csrf_ms,
+          supplier_ms: result.timing?.supplier_ms ?? undefined,
+          laravel_other_ms: result.timing?.laravel_other_ms ?? undefined,
+        });
       });
       if (!acceptFareChange) {
         warmPromiseRef.current = { key, promise };
@@ -351,7 +358,15 @@ export function useRevalidation() {
       });
       warmPromiseRef.current = { key, promise };
       void promise.then((result) => {
-        markBookNowTiming("T3_revalidate_response", { phase: "warm", ok: result.ok });
+        markBookNowTiming("T3_revalidate_response", {
+          phase: "warm",
+          ok: result.ok,
+          total_ms: result.timing?.total_ms,
+          request_ms: result.timing?.request_ms,
+          csrf_ms: result.timing?.csrf_ms,
+          supplier_ms: result.timing?.supplier_ms ?? undefined,
+          laravel_other_ms: result.timing?.laravel_other_ms ?? undefined,
+        });
         if (warmPromiseRef.current?.key !== key) return;
         if (!result.ok) return;
         const change = extractFareChange(result.data);

@@ -71,6 +71,17 @@ export async function ensureGuestBookingAllowed(
 
 export async function redirectIfGuestBookingBlocked(targetPath: string): Promise<boolean> {
   try {
+    // JP-NEXT-PERF-02B: never serialize session bootstrap after fare validate on the
+    // Book Now → /booking/passengers critical path. Guest checkout is the production
+    // default (DEFAULT_GATES). Only block when guest booking is already known-disabled.
+    const gates = cachedGates ?? DEFAULT_GATES;
+    if (gates.guest_booking_enabled) {
+      if (!cachedGates) {
+        void fetchCommerceGates();
+      }
+      return false;
+    }
+
     const bootstrap = await fetchSessionBootstrap();
     const redirect = await ensureGuestBookingAllowed(targetPath, Boolean(bootstrap.authenticated));
     if (!redirect) {

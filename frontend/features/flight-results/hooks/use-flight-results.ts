@@ -93,6 +93,9 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   const lastBootstrappedId = useRef<string | null>(null);
   const skipNextFilterRefresh = useRef(true);
   const lastViewKeyRef = useRef<string | null>(null);
+  /** JP-NEXT-PERF-02B: cache Pair/Segmented representations keyed to same search_id. */
+  const viewPayloadCacheRef = useRef<Map<string, FlightResultsDataResponse>>(new Map());
+  const dataRef = useRef<FlightResultsDataResponse | null>(null);
   const searchStartedAt = useRef<number>(Date.now());
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filtersKey = JSON.stringify(filters);
@@ -100,6 +103,11 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   const identity = searchIdentityKey(searchParams);
   const viewKey = view ?? "";
   const tripType = searchParams.get("trip_type") ?? "one_way";
+
+  const representationCacheKey = useCallback(
+    (id: string, forView: string) => `${id}|${forView}|${laravelSort}|${filtersKey}`,
+    [filtersKey, laravelSort],
+  );
 
   const stopPolling = useCallback(() => {
     if (pollTimerRef.current) {
@@ -117,6 +125,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       let merged: FlightResultsDataResponse = payload;
       setData((current) => {
         merged = mode === "merge" ? mergeProgressiveResults(current, payload) : payload;
+        dataRef.current = merged;
         return merged;
       });
       const visible = countVisibleResults(merged);
@@ -206,6 +215,12 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
           return { shouldPoll: true, visible: 0 };
         }
         // Primary search/refresh failure: do not keep prior inventory visible as current.
+        // View-switch soft refresh keeps prior representation if the other view fails.
+        if (phase === "refresh" && readyRef.current && countVisibleResults(dataRef.current) > 0) {
+          setIsLoadingMore(false);
+          setMessage(response.message || "Could not switch view. Showing previous results.");
+          return { shouldPoll: false, visible: countVisibleResults(dataRef.current) };
+        }
         setData(null);
         setStatus(response.status === 410 ? "expired" : "error");
         setMessage(response.message);
@@ -221,11 +236,14 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       const shouldMerge =
         append || (phase === "poll" && isActiveSearchStatus(pipeline) && !isTerminalSearchStatus(pipeline));
       const result = applyPayload(payload, shouldMerge ? "merge" : "replace");
+      if (countVisibleResults(payload) > 0 || pipeline === "ready" || pipeline === "partial") {
+        viewPayloadCacheRef.current.set(representationCacheKey(id, viewKey), payload);
+      }
       setPage(targetPage);
       setIsLoadingMore(false);
       return result;
     },
-    [applyPayload, filters, laravelSort, viewKey],
+    [applyPayload, filters, laravelSort, representationCacheKey, viewKey],
   );
 
   const schedulePoll = useCallback(
@@ -282,6 +300,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       setStatus("initializing");
       setMessage("Searching flights…");
       setData(null);
+      dataRef.current = null;
+      viewPayloadCacheRef.current.clear();
       readyRef.current = false;
       skipNextFilterRefresh.current = true;
       lastViewKeyRef.current = viewKey;
@@ -345,12 +365,34 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     skipNextFilterRefresh.current = false;
 
     if (!readyRef.current && status !== "partial" && status !== "ready" && !viewChanged) return;
-    // Paired ↔ Segmented must clear prior cards (different representation).
-    // Sort/filter refreshes keep prior cards visible — no READY→full-skeleton regression.
+
+    // JP-NEXT-PERF-02B: Pair ↔ Segmented is a representation of the SAME search_id.
+    // Prefer cached Laravel payload for the other view; never clear READY → full skeleton
+    // and never re-init supplier search.
     if (viewChanged) {
-      setData(null);
-      setStatus("loading");
-      setMessage("Finding the best available flights…");
+      const cached = viewPayloadCacheRef.current.get(representationCacheKey(resolvedSearchId, viewKey));
+      if (cached && countVisibleResults(cached) > 0) {
+        dataRef.current = cached;
+        setData(cached);
+        const pipeline = resolvePipelineStatus(cached);
+        const nextStatus = mapPipelineToPageStatus(pipeline, cached);
+        setStatus(nextStatus === "partial" ? "partial" : "ready");
+        setMessage("");
+        setPage(1);
+        readyRef.current = true;
+        // Soft revalidate in background only if search still active — no supplier search.
+        if (isActiveSearchStatus(pipeline)) {
+          void loadPage(resolvedSearchId, 1, false, "refresh").then((result) => {
+            if (result?.shouldPoll) {
+              schedulePoll(resolvedSearchId);
+            }
+          });
+        }
+        return;
+      }
+      // Cache miss: keep prior cards mounted while fetching the other representation.
+      setStatus((current) => (current === "ready" || current === "partial" ? current : "loading"));
+      setMessage("Switching view…");
     } else {
       setStatus((current) => (current === "ready" || current === "partial" ? current : "loading"));
       setMessage("Updating results…");
@@ -364,6 +406,38 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersKey, laravelSort, resolvedSearchId, viewKey]);
+
+  // Prefetch the alternate Return representation after first READY (same search_id).
+  useEffect(() => {
+    if (!resolvedSearchId) return;
+    if (status !== "ready" && status !== "partial") return;
+    if (tripType !== "round_trip") return;
+    const current = (viewKey || "pair").toLowerCase();
+    const alt = current === "segmented" || current === "split" ? "pair" : "segmented";
+    const altKey = representationCacheKey(resolvedSearchId, alt);
+    if (viewPayloadCacheRef.current.has(altKey)) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    void (async () => {
+      const response = await fetchFlightResultsData({
+        searchId: resolvedSearchId,
+        page: 1,
+        perPage: 12,
+        sort: laravelSort,
+        filters,
+        view: alt,
+        signal: controller.signal,
+      });
+      if (cancelled || !response.ok) return;
+      if (countVisibleResults(response.data) > 0) {
+        viewPayloadCacheRef.current.set(altKey, response.data);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [filters, laravelSort, representationCacheKey, resolvedSearchId, status, tripType, viewKey]);
 
   useEffect(() => () => stopPolling(), [stopPolling]);
 

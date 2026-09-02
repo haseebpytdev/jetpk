@@ -124,16 +124,26 @@ export async function fetchReturnOptionsData(params: {
   }
 }
 
+export type RevalidateOfferTiming = {
+  csrf_ms: number;
+  request_ms: number;
+  total_ms: number;
+  supplier_ms: number | null;
+  laravel_other_ms: number | null;
+};
+
 export async function revalidateOffer(params: {
   searchId: string;
   offerId: string;
   selectedFareOptionId?: string;
   acceptFareChange?: boolean;
 }): Promise<
-  | { ok: true; data: RevalidateOfferResponse }
-  | { ok: false; status: number; message: string; data?: RevalidateOfferResponse }
+  | { ok: true; data: RevalidateOfferResponse; timing: RevalidateOfferTiming }
+  | { ok: false; status: number; message: string; data?: RevalidateOfferResponse; timing?: RevalidateOfferTiming }
 > {
+  const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
   const csrf = await ensureLaravelCsrfToken();
+  const tCsrf = typeof performance !== "undefined" ? performance.now() : Date.now();
   const form = new FormData();
   form.append("search_id", params.searchId);
   form.append("offer_id", params.offerId);
@@ -157,6 +167,40 @@ export async function revalidateOffer(params: {
     });
 
     const body = (await response.json()) as RevalidateOfferResponse;
+    const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
+    const requestMs = Math.round(t1 - tCsrf);
+    const csrfMs = Math.round(tCsrf - t0);
+    const totalMs = Math.round(t1 - t0);
+
+    // Prefer explicit server fields / Server-Timing when present; else null (not guessed).
+    const serverTiming = response.headers.get("server-timing") ?? "";
+    const supplierMatch = /supplier(?:;dur=|;)(\d+(?:\.\d+)?)/i.exec(serverTiming);
+    const laravelMatch = /laravel(?:;dur=|;)(\d+(?:\.\d+)?)/i.exec(serverTiming);
+    const meta = body as RevalidateOfferResponse & {
+      timing?: { supplier_ms?: number; laravel_ms?: number };
+      revalidation?: { supplier_ms?: number; laravel_ms?: number };
+    };
+    const supplierMs =
+      (typeof meta.timing?.supplier_ms === "number" ? meta.timing.supplier_ms : null) ??
+      (typeof meta.revalidation?.supplier_ms === "number" ? meta.revalidation.supplier_ms : null) ??
+      (supplierMatch ? Number(supplierMatch[1]) : null);
+    const laravelOtherMs =
+      (typeof meta.timing?.laravel_ms === "number" ? meta.timing.laravel_ms : null) ??
+      (typeof meta.revalidation?.laravel_ms === "number" ? meta.revalidation.laravel_ms : null) ??
+      (laravelMatch ? Number(laravelMatch[1]) : null);
+
+    const timing: RevalidateOfferTiming = {
+      csrf_ms: csrfMs,
+      request_ms: requestMs,
+      total_ms: totalMs,
+      supplier_ms: supplierMs != null && Number.isFinite(supplierMs) ? Math.round(supplierMs) : null,
+      laravel_other_ms:
+        laravelOtherMs != null && Number.isFinite(laravelOtherMs)
+          ? Math.round(laravelOtherMs)
+          : supplierMs != null && Number.isFinite(supplierMs)
+            ? Math.max(0, Math.round(requestMs - Number(supplierMs)))
+            : null,
+    };
 
     if (!response.ok || !body.success) {
       return {
@@ -164,10 +208,11 @@ export async function revalidateOffer(params: {
         status: response.status,
         message: body.message ?? "We could not confirm this fare with the airline.",
         data: body,
+        timing,
       };
     }
 
-    return { ok: true, data: body };
+    return { ok: true, data: body, timing };
   } catch {
     return { ok: false, status: 0, message: "Network error. Check your connection and try again." };
   }
