@@ -1,0 +1,101 @@
+{
+  "TRAVELER_TO_REVIEW_VALID_SAMPLES": 10,
+  "TRAVELER_TO_REVIEW_P50_MS": 518,
+  "TRAVELER_TO_REVIEW_P95_MS": 1172,
+  "REVIEW_LOADING_TO_READY_P50_MS": 33,
+  "REVIEW_LOADING_TO_READY_P95_MS": 78,
+  "REVIEW_BLANK_FULL_PAGE_LOADING": "NO",
+  "REVIEW_READY_TO_SKELETON_REGRESSION": 0,
+  "samples": [
+    {
+      "i": 0,
+      "valid": true,
+      "shell_ms": 526,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 78,
+      "traveler_to_review_ms": 624,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 1,
+      "valid": true,
+      "shell_ms": 1135,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 28,
+      "traveler_to_review_ms": 1172,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 2,
+      "valid": true,
+      "shell_ms": 662,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 32,
+      "traveler_to_review_ms": 710,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 3,
+      "valid": true,
+      "shell_ms": 346,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 41,
+      "traveler_to_review_ms": 420,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 4,
+      "valid": true,
+      "shell_ms": 496,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 59,
+      "traveler_to_review_ms": 559,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 5,
+      "valid": true,
+      "shell_ms": 401,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 38,
+      "traveler_to_review_ms": 470,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 6,
+      "valid": true,
+      "shell_ms": 461,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 32,
+      "traveler_to_review_ms": 504,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 7,
+      "valid": true,
+      "shell_ms": 402,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 33,
+      "traveler_to_review_ms": 518,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 8,
+      "valid": true,
+      "shell_ms": 516,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 33,
+      "traveler_to_review_ms": 606,
+      "ready_to_skeleton": 0
+    },
+    {
+      "i": 9,
+      "valid": true,
+      "shell_ms": 467,
+      "blank_full_page": 0,
+      "loading_to_ready_ms": 34,
+      "traveler_to_review_ms": 518,
+      "ready_to_skeleton": 0
+    }
+  ]
+}

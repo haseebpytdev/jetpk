@@ -1,0 +1,38 @@
+{
+  "LOCAL_SORT_P95_MS": 197,
+  "LOCAL_FILTER_P95_MS": 332,
+  "FILTER_OR_SORT_READY_TO_SKELETON_REGRESSIONS": 0,
+  "NEARBY_DATE_TOTAL_P50_MS": 67,
+  "NEARBY_DATE_TOTAL_P95_MS": 5129,
+  "sortTimes": [
+    189,
+    181,
+    159,
+    169,
+    178,
+    171,
+    197,
+    169,
+    175,
+    170
+  ],
+  "filterTimes": [
+    256,
+    166,
+    332,
+    164,
+    158,
+    187,
+    176,
+    163,
+    161,
+    168
+  ],
+  "nearby": [
+    86,
+    5129,
+    53,
+    67,
+    57
+  ]
+}

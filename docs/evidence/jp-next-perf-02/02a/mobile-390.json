@@ -1,0 +1,56 @@
+{
+  "routes": [
+    {
+      "route": "home",
+      "ms": 10574,
+      "overflow": 0
+    },
+    {
+      "route": "oneway",
+      "ms": 30786,
+      "cards": 12,
+      "overflow": 0
+    },
+    {
+      "route": "return_paired",
+      "ms": 6980,
+      "cards": 12,
+      "overflow": 0
+    },
+    {
+      "route": "return_segmented",
+      "ms": 2564,
+      "cards": 12,
+      "overflow": 0
+    },
+    {
+      "route": "groups",
+      "ms": 2071,
+      "overflow": 0
+    },
+    {
+      "route": "traveler",
+      "ms": 24575,
+      "overflow": 0,
+      "skeleton": false
+    },
+    {
+      "route": "review",
+      "ms": 2332,
+      "blank": false,
+      "overflow": 0
+    },
+    {
+      "route": "payment_shell",
+      "ms": 2456,
+      "blank": false,
+      "overflow": 0
+    }
+  ],
+  "overflow": 0,
+  "skeleton_reg": 0,
+  "MOBILE_390_FULL_PACK": "PASS",
+  "MOBILE_HORIZONTAL_OVERFLOW": 0,
+  "MOBILE_READY_TO_SKELETON_REGRESSION": 0,
+  "MOBILE_PERFORMANCE_REGRESSION": "NO"
+}

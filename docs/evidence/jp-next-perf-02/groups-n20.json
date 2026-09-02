@@ -1,0 +1,15 @@
+﻿{
+  "summary": {
+    "cold_n": 10,
+    "warm_n": 10,
+    "GROUP_FILTER_READY_COLD_P50_MS": 1413,
+    "GROUP_FILTER_READY_COLD_P95_MS": 6755,
+    "GROUP_FILTER_READY_WARM_P50_MS": 1210,
+    "GROUP_FILTER_READY_WARM_P95_MS": 1738,
+    "GROUP_FIRST_CARD_COLD_P50_MS": 1417,
+    "GROUP_FIRST_CARD_COLD_P95_MS": 6825,
+    "GROUP_FIRST_CARD_WARM_P50_MS": 1257,
+    "GROUP_FIRST_CARD_WARM_P95_MS": 1931,
+    "note": "Cold P95 driven by single jpAuditReset outlier 6825ms; remaining 9 cold first-card samples 1013-1725ms (max 1725)."
+  }
+}

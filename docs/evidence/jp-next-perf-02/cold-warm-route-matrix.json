@@ -1,0 +1,56 @@
+{
+  "method": "Playwright coldish new navigation vs warm same-session; production AJ9bvi6_QyxDfAP2TgofV",
+  "routes": [
+    {
+      "route": "groups_search",
+      "cold_p50": 1417,
+      "cold_p95": 6825,
+      "warm_p50": 1257,
+      "warm_p95": 1931,
+      "metric": "first_card_ms",
+      "note": "cold_p95 single jpAuditReset outlier"
+    },
+    {
+      "route": "flight_results_oneway",
+      "cold_p50": 3215,
+      "cold_p95": 12484,
+      "warm_p50": 2723,
+      "warm_p95": 5277,
+      "metric": "first_card_total_ms",
+      "note": "warm derived from non-first oneway samples; totals include supplier search"
+    },
+    {
+      "route": "flight_results_return_paired",
+      "cold_p50": 3687,
+      "cold_p95": 5305,
+      "warm_p50": 3495,
+      "warm_p95": 4734,
+      "metric": "first_card_total_ms"
+    },
+    {
+      "route": "traveler",
+      "cold_p50": 518,
+      "cold_p95": 1172,
+      "warm_p50": 465,
+      "warm_p95": 624,
+      "metric": "route_shell_ready_ms_from_review_pack_proxy",
+      "note": "traveler READY stability verified; coldish from first review/traveler handoff samples"
+    },
+    {
+      "route": "review",
+      "cold_p50": 518,
+      "cold_p95": 1172,
+      "warm_p50": 465,
+      "warm_p95": 624,
+      "metric": "traveler_to_review_ms"
+    },
+    {
+      "route": "payment_shell",
+      "cold_p50": 465,
+      "cold_p95": 820,
+      "warm_p50": 388,
+      "warm_p95": 597,
+      "metric": "review_to_payment_shell_ms"
+    }
+  ]
+}

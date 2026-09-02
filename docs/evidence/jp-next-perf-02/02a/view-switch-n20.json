@@ -1,0 +1,53 @@
+{
+  "PAIR_TO_SEGMENTED_P50_MS": 2178,
+  "PAIR_TO_SEGMENTED_P95_MS": 8889,
+  "SEGMENTED_TO_PAIR_P50_MS": 3160,
+  "SEGMENTED_TO_PAIR_P95_MS": 14414,
+  "note": "view= URL changes refetch server representation; not local-only.",
+  "samples": {
+    "pairToSeg": [
+      1673,
+      2549,
+      2215,
+      2381,
+      2275,
+      3124,
+      2756,
+      8889,
+      2840,
+      2041,
+      1992,
+      2640,
+      2178,
+      2062,
+      2149,
+      1870,
+      15334,
+      2025,
+      1972,
+      1931
+    ],
+    "segToPair": [
+      3066,
+      3072,
+      3217,
+      18042,
+      4967,
+      3536,
+      3686,
+      4411,
+      3502,
+      3160,
+      2728,
+      2945,
+      2451,
+      2729,
+      2563,
+      2405,
+      3928,
+      3223,
+      2811,
+      14414
+    ]
+  }
+}
