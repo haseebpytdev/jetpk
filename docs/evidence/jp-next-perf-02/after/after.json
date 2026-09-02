@@ -1,0 +1,8 @@
+﻿[
+  {"scenario":"groups_search_ISB-SHJ","cold_warm":"coldish_postdeploy","supplier_ms":null,"laravel_ms":822,"network_ms":null,"next_route_ms":979,"render_ms":1446,"total_ms":2425,"client_data_fetch":false,"build":"AJ9bvi6_QyxDfAP2TgofV"},
+  {"scenario":"groups_search_ISB-SHJ","cold_warm":"warm","supplier_ms":null,"laravel_ms":null,"network_ms":null,"next_route_ms":406,"render_ms":null,"total_ms":1851,"client_data_fetch":false},
+  {"scenario":"groups_search_ISB-SHJ","cold_warm":"warm","supplier_ms":null,"laravel_ms":null,"network_ms":null,"next_route_ms":305,"render_ms":null,"total_ms":1100,"client_data_fetch":false},
+  {"scenario":"groups_search_ISB-SHJ","cold_warm":"warm","supplier_ms":null,"laravel_ms":null,"network_ms":null,"next_route_ms":352,"render_ms":null,"total_ms":1233,"client_data_fetch":false},
+  {"scenario":"groups_search_ISB-SHJ","cold_warm":"warm","supplier_ms":null,"laravel_ms":null,"network_ms":null,"next_route_ms":330,"render_ms":null,"total_ms":1290,"client_data_fetch":false},
+  {"scenario":"groups_ssr_local","cold_warm":"server","supplier_ms":null,"laravel_ms":822,"network_ms":0,"next_route_ms":656,"render_ms":0,"total_ms":656,"ssr_has_cards":true}
+]

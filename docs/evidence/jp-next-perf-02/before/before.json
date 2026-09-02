@@ -1,0 +1,19 @@
+﻿{
+    "data_duration_ms":  3345,
+    "measured_at":  "2026-09-02T07:05:23.5227919Z",
+    "cms_duration_ms":  1332,
+    "facets_duration_ms":  1384,
+    "load_ms":  2620,
+    "dcl_ms":  1577,
+    "document_ttfb_ms":  1100,
+    "laravel_local_facets_ms":  110,
+    "scenario":  "groups_search_sector_ISB-SHJ",
+    "data_complete_ms":  6032,
+    "cold_warm":  "browser_navigate_coldish",
+    "notes":  "APIs start only after client hydration; inventory via browser proxy ~3.3s vs local Laravel 0.83s",
+    "first_card_approx_ms":  6076,
+    "next_hydration_before_api_ms":  2687,
+    "logo_start_ms":  6076,
+    "api_start_ms":  2687,
+    "laravel_local_data_ms":  826
+}
