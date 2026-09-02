@@ -1,0 +1,115 @@
+{
+  "summary": {
+    "lane": "localhost_https_host_jetpakistan",
+    "n_ok": 20,
+    "n_err": 0,
+    "CLIENT_WALL_P50_MS": 118.99,
+    "CLIENT_WALL_P95_MS": 138.655,
+    "INIT_RESPONSE_P50_MS": 4.801,
+    "INIT_RESPONSE_P95_MS": 8.098,
+    "LOCAL_QUEUE_PROXY_P50_MS": 113.498,
+    "LOCAL_QUEUE_PROXY_P95_MS": 132.156
+  },
+  "samples": [
+    {
+      "client_wall_ms": 186.628,
+      "INIT_RESPONSE_MS": 8.629,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 123.34,
+      "INIT_RESPONSE_MS": 4.923,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 102.612,
+      "INIT_RESPONSE_MS": 4.801,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 116.26,
+      "INIT_RESPONSE_MS": 5.173,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 134.434,
+      "INIT_RESPONSE_MS": 5.621,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 118.796,
+      "INIT_RESPONSE_MS": 5.298,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 135.617,
+      "INIT_RESPONSE_MS": 4.957,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 98.28,
+      "INIT_RESPONSE_MS": 3.353,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 123.569,
+      "INIT_RESPONSE_MS": 4.706,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 128.852,
+      "INIT_RESPONSE_MS": 6.188,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 120.437,
+      "INIT_RESPONSE_MS": 4.471,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 122.503,
+      "INIT_RESPONSE_MS": 4.597,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 115.661,
+      "INIT_RESPONSE_MS": 4.015,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 118.99,
+      "INIT_RESPONSE_MS": 5.949,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 138.655,
+      "INIT_RESPONSE_MS": 6.499,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 114.75,
+      "INIT_RESPONSE_MS": 4.104,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 127.598,
+      "INIT_RESPONSE_MS": 8.098,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 108.979,
+      "INIT_RESPONSE_MS": 4.185,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 111.496,
+      "INIT_RESPONSE_MS": 4.69,
+      "ok": true
+    },
+    {
+      "client_wall_ms": 106.938,
+      "INIT_RESPONSE_MS": 4.498,
+      "ok": true
+    }
+  ]
+}

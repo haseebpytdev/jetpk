@@ -1,15 +1,15 @@
 # Pre-supplier breakdown — BEFORE
 
-## 02D aligned authority (full page browser wall)
+## Historical browser/OLS wall (02D authority — do not treat as server T0→supplier)
 
 | Metric | ms |
 |---|---|
-| ONEWAY_LARAVEL_PRE_SUPPLIER_P50_MS | 860 |
-| ONEWAY_LARAVEL_PRE_SUPPLIER_P95_MS | 4421 |
+| HISTORICAL_BROWSER_OLS_PRE_SUPPLIER_WALL_P50_MS | 860 |
+| HISTORICAL_BROWSER_OLS_PRE_SUPPLIER_WALL_P95_MS | 4421 |
 
 Source: `docs/evidence/jp-next-perf-02/oneway-aligned-n20-02d.json`
 
-## Fresh direct API N20 (pre-deploy)
+## Fresh direct API N20 (pre-deploy; still client wall, not server spans)
 
 | Metric | ms |
 |---|---|
@@ -18,6 +18,8 @@ Source: `docs/evidence/jp-next-perf-02/oneway-aligned-n20-02d.json`
 
 Source: `before-n20.json` — no server `search_perf` yet.
 
-## Interpretation
+## Like-for-like server BEFORE
 
-02D P95 ≫ direct API P95 because 02D included page-load connection contention and OLS queue tails, not Laravel prep CPU.
+**Not available.** `SearchPerfTrace` did not exist on production before JP-LARAVEL-PERF-01 deploy.
+
+`LIKE_FOR_LIKE_PRE_SUPPLIER_IMPROVEMENT_PCT=NOT_PROVABLE`

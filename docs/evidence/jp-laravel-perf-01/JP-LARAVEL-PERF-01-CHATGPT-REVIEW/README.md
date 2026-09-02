@@ -1,15 +1,8 @@
-# JP-LARAVEL-PERF-01 ChatGPT Review
+# JP-LARAVEL-PERF-01 / 01R ChatGPT Review
 
-## Before vs after
-- 02D browser pre-supplier P95: 4421 ms (misattributed wall)
-- Direct API before P95: 340 ms
-- Server TOTAL_PRE_SUPPLIER after P95: 58.8 ms (PASS << 1000)
-
-## Root causes
-See root-causes.md
-
-## Dispatch
-SEQUENTIAL; first network ~59 ms; spread P95 ~2322 ms (Sabre then PIA)
-
-## Safety
-No mutations; MOFA undeployed; Next build unchanged; remote tip unchanged; SAFE_TO_PUSH=NO
+CURRENT_SERVER_T0_TO_FIRST_SUPPLIER_P95_MS=58.831
+LIKE_FOR_LIKE_PRE_SUPPLIER_IMPROVEMENT_PCT=NOT_PROVABLE
+USER_VISIBLE_QUEUE_LATENCY_BLOCKER=NO
+FINAL_VERIFIED_ROLLBACK_COUNT=2
+SWAP_PRESSURE_CORRELATED=NO
+SAFE_TO_PUSH=NO

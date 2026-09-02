@@ -1,10 +1,20 @@
 # Pre-supplier breakdown — AFTER (N30 server search_perf)
 
+## Correct clocks (01R)
+
 | Metric | P50 | P95 |
 |---|---|---|
-| Client init wall | 309 | 3199 |
-| Server INIT_RESPONSE_MS | 4.7 | 8.4 |
-| Server TOTAL_PRE_SUPPLIER_MS (T0→first network) | 45.5 | 58.8 |
+| HISTORICAL_BROWSER_OLS_PRE_SUPPLIER_WALL (02D) | 860 | 4421 |
+| CURRENT_SERVER_T0_TO_FIRST_SUPPLIER | 45.5 | 58.8 |
+| CURRENT_SERVER_INIT_RESPONSE | 4.7 | 8.4 |
+| Client init wall (external, after deploy N30) | 309 | 3199 |
+
+`LIKE_FOR_LIKE_PRE_SUPPLIER_IMPROVEMENT_PCT=NOT_PROVABLE` — historical wall ≠ server T0→first-supplier.
+
+## Component (server search_perf)
+
+| Metric | P50 | P95 |
+|---|---|---|
 | FIRST_PROVIDER_NETWORK_START_MS | 46.0 | 58.8 |
 | LAST_ELIGIBLE_PROVIDER_NETWORK_START_MS | 1722 | 2381 |
 | PROVIDER_START_SPREAD_MS | 1678 | 2322 |
@@ -18,4 +28,4 @@
 
 `SUPPLIER_DISPATCH_MODE=SEQUENTIAL`
 
-Client init wall P95 remains OLS/network heavy-tailed; **application-controlled** pre-supplier P95 is **58.8 ms**.
+Application-controlled pre-supplier P95 is **58.8 ms**. External client init-wall tails are edge/network (see `ols-php-queue-01r.md`); not Laravel prep CPU.

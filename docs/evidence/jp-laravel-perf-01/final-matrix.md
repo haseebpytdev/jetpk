@@ -1,36 +1,30 @@
-# Final matrix — JP-LARAVEL-PERF-01
+# Final matrix — JP-LARAVEL-PERF-01 (corrected 01R)
 
-## One Way pre-supplier
+## Clocks (not interchangeable)
 
-| Metric | Before | After | Notes |
-|---|---|---|---|
-| 02D browser init wall P50/P95 | 860 / 4421 | — | Historical authority |
-| Direct API init wall P50/P95 | 301 / 340 | 309 / 3199 | Client/OLS variance remains |
-| Server INIT_RESPONSE_MS P50/P95 | n/a | 4.7 / 8.4 | Progressive JSON |
-| Server TOTAL_PRE_SUPPLIER_MS P50/P95 | n/a | 45.5 / 58.8 | T0→first supplier network |
-| Target ≤1000 ms (app-controlled) | — | **PASS** | |
+| Metric | P50 | P95 |
+|---|---|---|
+| HISTORICAL_BROWSER_OLS_PRE_SUPPLIER_WALL | 860 | 4421 |
+| CURRENT_SERVER_T0_TO_FIRST_SUPPLIER | 45.49 | 58.831 |
+| LIKE_FOR_LIKE_PRE_SUPPLIER_IMPROVEMENT_PCT | — | **NOT_PROVABLE** |
 
-## Provider dispatch
+## Closure gates (01R)
 
-| Metric | After |
+| Gate | Value |
 |---|---|
-| SUPPLIER_DISPATCH_MODE | SEQUENTIAL |
-| FIRST_PROVIDER_NETWORK_START P95 | 58.8 ms |
-| PROVIDER_START_SPREAD P95 | 2322 ms |
-
-## Health
-
-| Check | Value |
-|---|---|
-| PUBLIC_BUILD_ID | U9-V-YGZgQ3qKayMCp4BX (unchanged) |
-| OLS | PASS |
-| PM2 public/dashboard | online |
-| MOFA staged | NO |
-| Remote phase tip | 1f12edef… (unchanged) |
+| CURRENT_SERVER_T0_TO_FIRST_SUPPLIER_P95_MS | 58.831 ≤ 1000 |
+| USER_VISIBLE_QUEUE_LATENCY_BLOCKER | NO |
+| FINAL_VERIFIED_ROLLBACK_COUNT | 2 |
+| SWAP_PRESSURE_CORRELATED | NO |
+| FINAL_RUNTIME_SHA | 9e3dc316517b40c953dd47d12271e84d3276bd75 |
+| REMOTE_HEAD | 1f12edef052da278f02b7ffeaf4e7a881c663ef9 |
+| AUTHORIZED_RUNTIME_PARITY | PASS |
+| FULL_RUNTIME_SOURCE_DRIFT | 0 |
+| SUPPLIER_MUTATION_CALLS | 0 |
 | SAFE_TO_PUSH | NO |
 
 ## Certification
 
-`PASS_PRE_SUPPLIER_BACKEND_LATENCY_CLOSED`
+`PASS_PRE_SUPPLIER_BACKEND_LATENCY_CLOSED_WITH_MEASUREMENT_INTEGRITY`
 
-Application-controlled Laravel pre-supplier P95 = **58.8 ms**. Client init wall tails are OLS/network, not Laravel prep CPU.
+Removed overclaimed 94.7%/98.7% improvement. Current Laravel internal pre-supplier P95 remains ≤1000 ms; OLS/PHP queue is not a current user-visible blocker.

@@ -1,0 +1,306 @@
+{
+  "private_8088": {
+    "n_ok": 0,
+    "n_err": 20,
+    "CLIENT_WALL_P50_MS": null,
+    "CLIENT_WALL_P95_MS": null,
+    "INIT_RESPONSE_P50_MS": null,
+    "INIT_RESPONSE_P95_MS": null,
+    "QUEUE_PROXY_P50_MS": null,
+    "QUEUE_PROXY_P95_MS": null
+  },
+  "public_https": {
+    "n_ok": 20,
+    "n_err": 0,
+    "CLIENT_WALL_P50_MS": 174.957,
+    "CLIENT_WALL_P95_MS": 307.635,
+    "INIT_RESPONSE_P50_MS": 5.229,
+    "INIT_RESPONSE_P95_MS": 21.908,
+    "QUEUE_PROXY_P50_MS": 167.91,
+    "QUEUE_PROXY_P95_MS": 285.727
+  },
+  "samples_private": [
+    {
+      "i": 0,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 37.47
+    },
+    {
+      "i": 1,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 3.366
+    },
+    {
+      "i": 2,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 2.083
+    },
+    {
+      "i": 3,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 2.125
+    },
+    {
+      "i": 4,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.804
+    },
+    {
+      "i": 5,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.668
+    },
+    {
+      "i": 6,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.611
+    },
+    {
+      "i": 7,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 2.35
+    },
+    {
+      "i": 8,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 2.047
+    },
+    {
+      "i": 9,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.833
+    },
+    {
+      "i": 10,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 2.269
+    },
+    {
+      "i": 11,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.619
+    },
+    {
+      "i": 12,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 3.131
+    },
+    {
+      "i": 13,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 2.194
+    },
+    {
+      "i": 14,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.607
+    },
+    {
+      "i": 15,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.697
+    },
+    {
+      "i": 16,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.488
+    },
+    {
+      "i": 17,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 3.262
+    },
+    {
+      "i": 18,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 1.338
+    },
+    {
+      "i": 19,
+      "lane": "private_8088",
+      "error": "<urlopen error [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)>",
+      "client_wall_ms": 2.05
+    }
+  ],
+  "samples_public": [
+    {
+      "i": 0,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 1623.744,
+      "INIT_RESPONSE_MS": 42.021,
+      "search_status": "searching"
+    },
+    {
+      "i": 1,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 207.139,
+      "INIT_RESPONSE_MS": 5.642,
+      "search_status": "searching"
+    },
+    {
+      "i": 2,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 182.21,
+      "INIT_RESPONSE_MS": 5.007,
+      "search_status": "searching"
+    },
+    {
+      "i": 3,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 231.422,
+      "INIT_RESPONSE_MS": 5.229,
+      "search_status": "searching"
+    },
+    {
+      "i": 4,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 185.24,
+      "INIT_RESPONSE_MS": 5.01,
+      "search_status": "searching"
+    },
+    {
+      "i": 5,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 174.957,
+      "INIT_RESPONSE_MS": 7.047,
+      "search_status": "searching"
+    },
+    {
+      "i": 6,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 184.817,
+      "INIT_RESPONSE_MS": 5.173,
+      "search_status": "searching"
+    },
+    {
+      "i": 7,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 137.569,
+      "INIT_RESPONSE_MS": 4.071,
+      "search_status": "searching"
+    },
+    {
+      "i": 8,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 153.287,
+      "INIT_RESPONSE_MS": 4.365,
+      "search_status": "searching"
+    },
+    {
+      "i": 9,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 113.236,
+      "INIT_RESPONSE_MS": 4.14,
+      "search_status": "searching"
+    },
+    {
+      "i": 10,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 183.974,
+      "INIT_RESPONSE_MS": 7.502,
+      "search_status": "searching"
+    },
+    {
+      "i": 11,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 154.598,
+      "INIT_RESPONSE_MS": 5.078,
+      "search_status": "searching"
+    },
+    {
+      "i": 12,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 166.526,
+      "INIT_RESPONSE_MS": 5.516,
+      "search_status": "searching"
+    },
+    {
+      "i": 13,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 307.635,
+      "INIT_RESPONSE_MS": 21.908,
+      "search_status": "searching"
+    },
+    {
+      "i": 14,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 198.029,
+      "INIT_RESPONSE_MS": 7.668,
+      "search_status": "searching"
+    },
+    {
+      "i": 15,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 227.265,
+      "INIT_RESPONSE_MS": 19.751,
+      "search_status": "searching"
+    },
+    {
+      "i": 16,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 155.575,
+      "INIT_RESPONSE_MS": 6.137,
+      "search_status": "searching"
+    },
+    {
+      "i": 17,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 151.684,
+      "INIT_RESPONSE_MS": 4.533,
+      "search_status": "searching"
+    },
+    {
+      "i": 18,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 130.524,
+      "INIT_RESPONSE_MS": 5.045,
+      "search_status": "searching"
+    },
+    {
+      "i": 19,
+      "lane": "public_https",
+      "http_status": 200,
+      "client_wall_ms": 131.351,
+      "INIT_RESPONSE_MS": 5.89,
+      "search_status": "searching"
+    }
+  ]
+}
