@@ -213,87 +213,20 @@ export function useRevalidation() {
         : resolved.startsWith("/")
           ? resolved
           : `/${resolved}`;
+      // JP-NEXT-PERF-02B: soft router.push is intermittently stalling (URL commit without
+      // RSC progress) until watchdog — P95 ~4.5–5s. Prefer immediate hard assign for
+      // authoritative passengers_url handoff; soft path remains for non-passengers URLs.
       try {
         void import("@/features/standard-booking/components/PassengerDetailsPage");
-        try {
-          // Fire-and-forget prefetch — do not block soft push (R6I: await correlated with stalled push).
-          router.prefetch(resolved);
-        } catch {
-          /* non-blocking */
-        }
-        persistTimingForContinuity();
-        markBookNowTiming("T4B_checkout_prep_done");
-        markBookNowTiming("T5_router_push", { nav: "soft_push" });
-        markBookNowTiming("T7_passenger_route", { nav: "soft_push" });
-        persistTimingForContinuity();
-        router.push(resolved);
-
-        // R6I: soft-nav hang is genuine (no history/RSC progress for 3.2s). Keep hard
-        // fallback, but cancel on destination progress and retry soft once before hard.
-        let settled = false;
-        let softRetryTimer: number | undefined;
-        let hardTimer: number | undefined;
-        let pollTimer: number | undefined;
-
-        const passengersReached = () => /\/booking\/passengers/.test(window.location.pathname);
-
-        const cleanup = () => {
-          settled = true;
-          if (softRetryTimer != null) window.clearTimeout(softRetryTimer);
-          if (hardTimer != null) window.clearTimeout(hardTimer);
-          if (pollTimer != null) window.clearInterval(pollTimer);
-          window.removeEventListener("popstate", onMaybeProgress);
-        };
-
-        const onMaybeProgress = () => {
-          if (settled) return;
-          if (passengersReached()) cleanup();
-        };
-
-        pollTimer = window.setInterval(onMaybeProgress, 50);
-        window.addEventListener("popstate", onMaybeProgress);
-
-        softRetryTimer = window.setTimeout(() => {
-          if (settled || passengersReached()) {
-            cleanup();
-            return;
-          }
-          // One soft re-push — R6I diag showed first push often never starts history update.
-          try {
-            markBookNowTiming("T5_router_push", { nav: "soft_push_retry" });
-            router.push(resolved);
-          } catch {
-            /* ignore */
-          }
-        }, 200);
-
-        hardTimer = window.setTimeout(() => {
-          if (settled || passengersReached()) {
-            cleanup();
-            return;
-          }
-          try {
-            markBookNowTiming("T5_router_push", { nav: "hard_assign_watchdog" });
-            markBookNowTiming("T7_passenger_route", { nav: "hard_assign_watchdog" });
-            persistTimingForContinuity();
-            // Only after soft nav truly stalls — early hard-assign cancels in-flight RSC
-            // and was measured as ~18s blank Traveler shell (JP-NEXT-PERF-02B).
-            window.location.assign(target.startsWith("http") ? target : `${window.location.origin}${target.startsWith("/") ? target : `/${target}`}`);
-          } catch {
-            /* ignore */
-          }
-          cleanup();
-        }, 4500);
-
-        return true;
       } catch {
-        /* fall through to hard assign */
+        /* non-blocking */
       }
       persistTimingForContinuity();
-      markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_fallback" });
+      markBookNowTiming("T4B_checkout_prep_done");
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_primary" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_primary" });
       persistTimingForContinuity();
-      window.location.assign(target);
+      window.location.assign(target.startsWith("http") ? target : `${window.location.origin}${target}`);
       return true;
     }
     window.location.assign(resolved);
