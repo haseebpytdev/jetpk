@@ -3,6 +3,10 @@
 namespace App\Services\FlightSearch;
 
 use App\Services\Suppliers\Sabre\SabreFlightSearchNormalizer;
+use App\Services\TravelData\AirlineBrandingService;
+use App\Support\FlightSearch\AirlineDisplayNameResolver;
+use App\Support\FlightSearch\AtomicFlightSearchFileStore;
+use App\Support\FlightSearch\FlightOfferDisplayPresenter;
 use App\Support\FlightSearch\FlightSearchCriteriaCacheKey;
 use App\Support\FlightSearch\ItineraryFareConsolidator;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
@@ -34,6 +38,39 @@ class FlightSearchResultStore
 
     public const SEARCH_STATUS_FAILED = 'failed';
 
+    protected function atomic(): AtomicFlightSearchFileStore
+    {
+        return app(AtomicFlightSearchFileStore::class);
+    }
+
+    /**
+     * @return array<string, float|int|bool|string|null>
+     */
+    public function lastStoreOperationMetrics(): array
+    {
+        return AtomicFlightSearchFileStore::lastOperationMetrics();
+    }
+
+    protected function storeGet(string $cacheKey): ?array
+    {
+        $hit = $this->atomic()->get($cacheKey);
+        if (is_array($hit)) {
+            return $hit;
+        }
+
+        // Bridge: payloads still under Laravel file cache during cutover remain readable.
+        $legacy = Cache::get($cacheKey);
+
+        return is_array($legacy) ? $legacy : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function storePut(string $cacheKey, array $payload): void
+    {
+        $this->atomic()->put($cacheKey, $payload, self::TTL_SECONDS);
+    }
     /**
      * @param  list<array<string, mixed>>  $offers
      * @param  list<string>  $warnings
@@ -89,7 +126,7 @@ class FlightSearchResultStore
             return false;
         }
 
-        $existing = Cache::get($this->key($searchId));
+        $existing = $this->storeGet($this->key($searchId));
         if (! is_array($existing)) {
             return false;
         }
@@ -105,18 +142,14 @@ class FlightSearchResultStore
             ['search_status' => $status],
         );
 
-        $this->writePayload($searchId, $criteria, $offers, $warnings, $mergedMeta, is_array($existing) ? $existing : null);
-
-        // Refresh search_perf after writePayload so FIRST_VALID_PAIR / PAIRING marks
-        // recorded during return_split build are visible on progressive polls.
+        // Fold live search_perf into the single atomic put (avoid second write that
+        // competed with poll reads under the old exclusive file-cache flock).
         if (app()->bound(SearchPerfTrace::class)) {
-            $cached = Cache::get($this->key($searchId));
-            if (is_array($cached)) {
-                $cached['search_perf'] = app(SearchPerfTrace::class)->publicMeta();
-                $cached['search_perf_id'] = app(SearchPerfTrace::class)->id();
-                Cache::put($this->key($searchId), $cached, self::TTL_SECONDS);
-            }
+            $mergedMeta['search_perf'] = app(SearchPerfTrace::class)->publicMeta();
+            $mergedMeta['search_perf_id'] = app(SearchPerfTrace::class)->id();
         }
+
+        $this->writePayload($searchId, $criteria, $offers, $warnings, $mergedMeta, is_array($existing) ? $existing : null);
 
         return true;
     }
@@ -128,7 +161,7 @@ class FlightSearchResultStore
             return false;
         }
 
-        $existing = Cache::get($this->key($searchId));
+        $existing = $this->storeGet($this->key($searchId));
         if (! is_array($existing)) {
             return false;
         }
@@ -238,9 +271,8 @@ class FlightSearchResultStore
     ): void {
         $trimmedOffers = array_slice($offers, 0, self::MAX_STORED_OFFERS);
         $searchStatus = strtolower(trim((string) ($meta['search_status'] ?? self::SEARCH_STATUS_READY)));
-        // Progressive partials: skip Sabre booking-context enrich so Cache::put (file driver)
-        // releases sooner and peer poll workers are not blocked on flock during first paint.
-        // Final ready/empty still enriches for checkout authority.
+        // Progressive partials: skip Sabre booking-context enrich so first paint
+        // is not delayed by checkout-only booking-context work.
         $deferBookingContext = in_array($searchStatus, [
             self::SEARCH_STATUS_PARTIAL,
             self::SEARCH_STATUS_SEARCHING,
@@ -301,6 +333,38 @@ class FlightSearchResultStore
                 $payload['return_split'] = $returnSplit;
                 $comboCountForMark = (int) ($returnSplit['combo_count'] ?? 0);
 
+                // REG-04: precompute pair presentation once on write so polls do not
+                // rebuild FlightOfferDisplayPresenter work under POLL_PAIR_MERGE_MS (~3s).
+                if ($comboCountForMark > 0) {
+                    try {
+                        $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
+                            AirlineDisplayNameResolver::collectCodesFromOffers($trimmedOffers)
+                        );
+                        $airlineLogos = app(AirlineBrandingService::class)->mapLogosForOffers($trimmedOffers);
+                        $iataCodes = [];
+                        foreach ($trimmedOffers as $offRow) {
+                            if (is_array($offRow)) {
+                                $iataCodes = array_merge($iataCodes, FlightOfferDisplayPresenter::collectIataCodes($offRow));
+                            }
+                        }
+                        $cityMap = FlightOfferDisplayPresenter::airportCityMap($iataCodes);
+                        $payload['return_pair_options'] = $splitService->buildPairedComboOptions(
+                            $returnSplit,
+                            $trimmedOffers,
+                            $criteria,
+                            $airlineLogos,
+                            $cityMap,
+                            $airlineNameMap,
+                        );
+                        $payload['return_pair_options_combo_count'] = $comboCountForMark;
+                    } catch (\Throwable $e) {
+                        Log::warning('flight_search.return_pair_options_precompute_failed', [
+                            'search_id' => $searchId,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
                 if (app()->bound(SearchPerfTrace::class)) {
                     $perf = app(SearchPerfTrace::class);
                     if ($comboCountForMark > 0) {
@@ -323,11 +387,20 @@ class FlightSearchResultStore
             $payload['criteria_cache_summary'] = $cacheDescribe['summary'];
         }
 
-        Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);
+        if (app()->bound(SearchPerfTrace::class)) {
+            $payload['search_perf'] = app(SearchPerfTrace::class)->publicMeta();
+            $payload['search_perf_id'] = app(SearchPerfTrace::class)->id();
+        }
 
-        // R3 after put: pair is now poll-readable (file-cache lock released).
+        // Persist first, then stamp FIRST_VALID_PAIR_PERSISTED so poll clocks match
+        // rename visibility (mark-before-put inflated PAIR_AVAILABLE_TO_BROWSER by write time).
+        $this->storePut($this->key($searchId), $payload);
+
         if ($comboCountForMark > 0 && app()->bound(SearchPerfTrace::class)) {
             app(SearchPerfTrace::class)->recordFirstValidPairPersisted();
+            $payload['search_perf'] = app(SearchPerfTrace::class)->publicMeta();
+            $payload['search_perf_id'] = app(SearchPerfTrace::class)->id();
+            $this->storePut($this->key($searchId), $payload);
         }
     }
 
@@ -341,7 +414,7 @@ class FlightSearchResultStore
             return null;
         }
 
-        $raw = Cache::get($this->key($searchId));
+        $raw = $this->storeGet($this->key($searchId));
         if (! is_array($raw)) {
             return null;
         }
@@ -582,7 +655,7 @@ class FlightSearchResultStore
         }
 
         $payload['offers'] = $offers;
-        Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);
+        $this->storePut($this->key($searchId), $payload);
 
         return true;
     }
@@ -622,7 +695,7 @@ class FlightSearchResultStore
         }
 
         $payload['offers'] = $offers;
-        Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);
+        $this->storePut($this->key($searchId), $payload);
 
         return true;
     }

@@ -33,6 +33,7 @@ use App\Support\FlightSearch\PublicProgressiveSearchSnapshotPreparer;
 use App\Support\FlightSearch\SabreFareVerificationDigest;
 use App\Support\FlightSearch\SabreMixedCarrierSearchResultsFilter;
 use App\Support\FlightSearch\AirportReferenceLookup;
+use App\Support\FlightSearch\ResultsDataPollTiming;
 use App\Support\FlightSearch\SabreOfferFreshness;
 use App\Support\FlightSearch\SearchPerfTrace;
 use App\Support\Suppliers\SupplierSourcePresenter;
@@ -691,6 +692,9 @@ class FlightController extends Controller
 
     public function resultsData(Request $request): JsonResponse
     {
+        $pollTiming = new ResultsDataPollTiming;
+        $pollTiming->mark('P1_AUTH_SESSION_COMPLETE');
+
         $searchId = trim((string) $request->query('search_id', ''));
         if ($searchId === '') {
             return PublicFlightSearchSecurity::missingSearchIdResponse();
@@ -699,8 +703,14 @@ class FlightController extends Controller
         if (! PublicFlightSearchSecurity::isValidSearchId($searchId)) {
             return PublicFlightSearchSecurity::invalidSearchIdResponse();
         }
+        $pollTiming->mark('P2_SEARCH_ID_RESOLVED');
 
+        $pollTiming->mark('P3_RESULT_STORE_READ_START');
         $payload = $this->searchStore->get($searchId);
+        $pollTiming->mark('P4_RESULT_STORE_READ_COMPLETE');
+        $pollTiming->setStoreMetrics($this->searchStore->lastStoreOperationMetrics());
+        // Deserialization completes inside the atomic store get; mark P5 immediately after.
+        $pollTiming->mark('P5_DESERIALIZATION_COMPLETE');
         if ($payload === null) {
             return PublicFlightSearchSecurity::expiredSearchIdResponse();
         }
@@ -769,6 +779,7 @@ class FlightController extends Controller
                     $page,
                     $perPage,
                     $debugAllowed,
+                    $pollTiming,
                 );
             }
 
@@ -780,8 +791,11 @@ class FlightController extends Controller
                 $sort,
                 $page,
                 $perPage,
+                $pollTiming,
             );
         }
+
+        $pollTiming->mark('P6_PARTIAL_PAIR_MERGE_COMPLETE');
 
         $total = count($offers);
         $offset = ($page - 1) * $perPage;
@@ -834,6 +848,7 @@ class FlightController extends Controller
 
         $freshness = app(SabreOfferFreshness::class);
 
+        $searchPerf = is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : [];
         $response = [
             'search_id' => $searchId,
             'status' => $this->searchStore->resolveSearchStatus($payload),
@@ -849,7 +864,7 @@ class FlightController extends Controller
             'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi(
                 is_array($payload['supplier_call_summaries'] ?? null) ? $payload['supplier_call_summaries'] : [],
             ),
-            'search_perf' => is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : null,
+            'search_perf' => $searchPerf !== [] ? $searchPerf : null,
         ];
 
         if ($debugAllowed) {
@@ -881,6 +896,13 @@ class FlightController extends Controller
                 ];
             }
         }
+
+        $pollTiming->mark('P7_RESPONSE_SERIALIZED');
+        $pollTiming->mark('P8_RESPONSE_SENT');
+        $response['search_perf'] = array_merge(
+            is_array($response['search_perf']) ? $response['search_perf'] : [],
+            $pollTiming->publicMeta(),
+        );
 
         return response()->json($response);
     }
@@ -1185,33 +1207,50 @@ class FlightController extends Controller
         string $sort,
         int $page,
         int $perPage,
+        ?ResultsDataPollTiming $pollTiming = null,
     ): JsonResponse {
         $pollStarted = microtime(true);
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
         // Pair against raw cached offers so consolidator parent-id rewrites cannot empty the slice.
         $rawOffers = is_array($payload['offers'] ?? null) ? $payload['offers'] : $offers;
         $index = is_array($payload['return_split'] ?? null) ? $payload['return_split'] : [];
-        $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
-            AirlineDisplayNameResolver::collectCodesFromOffers($rawOffers)
-        );
-        $filterMeta = $this->buildFilterMeta($rawOffers, $criteria, $airlineNameMap);
-        $airlineLogos = $this->airlineBranding->mapLogosForOffers($rawOffers);
-        $iataCodes = [];
-        foreach ($rawOffers as $offRow) {
-            if (is_array($offRow)) {
-                $iataCodes = array_merge($iataCodes, FlightOfferDisplayPresenter::collectIataCodes($offRow));
-            }
-        }
-        $cityMap = FlightOfferDisplayPresenter::airportCityMap($iataCodes);
 
-        $paired = $this->returnSplitComboService->buildPairedComboOptions(
-            $index,
-            $rawOffers,
-            $criteria,
-            $airlineLogos,
-            $cityMap,
-            $airlineNameMap,
-        );
+        $cachedPairs = is_array($payload['return_pair_options'] ?? null) ? $payload['return_pair_options'] : null;
+        $cachedComboCount = (int) ($payload['return_pair_options_combo_count'] ?? 0);
+        $indexComboCount = (int) ($index['combo_count'] ?? 0);
+        $usedCachedPairs = is_array($cachedPairs)
+            && $cachedPairs !== []
+            && $cachedComboCount > 0
+            && $cachedComboCount === $indexComboCount;
+
+        if ($usedCachedPairs) {
+            $paired = $cachedPairs;
+            // Progressive first-paint: skip facet histogram rebuild (was part of ~3s POLL_PAIR_MERGE).
+            $filterMeta = $this->buildFilterMeta([], $criteria, []);
+        } else {
+            $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
+                AirlineDisplayNameResolver::collectCodesFromOffers($rawOffers)
+            );
+            $filterMeta = $this->buildFilterMeta($rawOffers, $criteria, $airlineNameMap);
+            $airlineLogos = $this->airlineBranding->mapLogosForOffers($rawOffers);
+            $iataCodes = [];
+            foreach ($rawOffers as $offRow) {
+                if (is_array($offRow)) {
+                    $iataCodes = array_merge($iataCodes, FlightOfferDisplayPresenter::collectIataCodes($offRow));
+                }
+            }
+            $cityMap = FlightOfferDisplayPresenter::airportCityMap($iataCodes);
+
+            $paired = $this->returnSplitComboService->buildPairedComboOptions(
+                $index,
+                $rawOffers,
+                $criteria,
+                $airlineLogos,
+                $cityMap,
+                $airlineNameMap,
+            );
+        }
+        $pollTiming?->mark('P6_PARTIAL_PAIR_MERGE_COMPLETE');
 
         $sortKey = strtolower(trim($sort));
         if (in_array($sortKey, ['cheapest', 'recommended', 'price_asc', ''], true)) {
@@ -1262,6 +1301,11 @@ class FlightController extends Controller
             }
         }
         $searchPerf['POLL_RESPONSE_SERVER_MS'] = round((microtime(true) - $pollStarted) * 1000, 3);
+        $pollTiming?->mark('P7_RESPONSE_SERIALIZED');
+        $pollTiming?->mark('P8_RESPONSE_SENT');
+        if ($pollTiming !== null) {
+            $searchPerf = array_merge($searchPerf, $pollTiming->publicMeta());
+        }
 
         return response()->json([
             'flow' => 'return_pair',
@@ -1302,6 +1346,7 @@ class FlightController extends Controller
         int $page,
         int $perPage,
         bool $debugAllowed,
+        ?ResultsDataPollTiming $pollTiming = null,
     ): JsonResponse {
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
         $index = $this->searchStore->getReturnSplitIndex($searchId) ?? [];
@@ -1355,6 +1400,14 @@ class FlightController extends Controller
         );
         $freshness = app(SabreOfferFreshness::class);
 
+        $searchPerf = is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : [];
+        $pollTiming?->mark('P6_PARTIAL_PAIR_MERGE_COMPLETE');
+        $pollTiming?->mark('P7_RESPONSE_SERIALIZED');
+        $pollTiming?->mark('P8_RESPONSE_SENT');
+        if ($pollTiming !== null) {
+            $searchPerf = array_merge($searchPerf, $pollTiming->publicMeta());
+        }
+
         return response()->json([
             'flow' => 'return_split_outbound',
             'search_id' => $searchId,
@@ -1370,7 +1423,7 @@ class FlightController extends Controller
             'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi(
                 is_array($payload['supplier_call_summaries'] ?? null) ? $payload['supplier_call_summaries'] : [],
             ),
-            'search_perf' => is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : null,
+            'search_perf' => $searchPerf !== [] ? $searchPerf : null,
         ]);
     }
 

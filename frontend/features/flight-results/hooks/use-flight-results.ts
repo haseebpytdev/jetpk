@@ -22,7 +22,8 @@ export type UseFlightResultsOptions = {
   view?: string | null;
 };
 
-const POLL_INTERVAL_MS = 750;
+/** REG-04: after store delivery fix, cadence bounds pair→browser worst case (~interval + RTT). */
+const POLL_INTERVAL_MS = 400;
 /** Bound infinite skeleton: no usable rows after this → truthful timeout UI. */
 const CLIENT_SEARCH_DEADLINE_MS = 60_000;
 /** With partial rows, stop waiting on straggler suppliers after this. */

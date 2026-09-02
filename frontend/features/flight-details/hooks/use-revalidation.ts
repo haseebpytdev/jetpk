@@ -355,6 +355,12 @@ export function useRevalidation() {
       setState("loading");
       setMessage("Validating fare…");
       markBookNowTiming("T1_handler", { phase: "continueToPassengers" });
+      // Warm Traveler route/chunk while fare revalidation runs (hard nav still authoritative).
+      try {
+        router.prefetch("/booking/passengers");
+      } catch {
+        /* ignore */
+      }
       setFareChange(null);
       lastParamsRef.current = params;
 
@@ -515,7 +521,7 @@ export function useRevalidation() {
         inFlightRef.current = false;
       }
     },
-    [classifyFailure, extractFareChange, navigateHandoff, runRevalidation],
+    [classifyFailure, extractFareChange, navigateHandoff, router, runRevalidation],
   );
 
   const acceptFareChange = useCallback(async () => {
