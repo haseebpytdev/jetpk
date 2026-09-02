@@ -1,0 +1,439 @@
+{
+  "n": 30,
+  "SUPPLIER_DISPATCH_MODE": "SEQUENTIAL",
+  "FIRST_PROVIDER_NETWORK_START_P95_MS": 58.831,
+  "PROVIDER_START_SPREAD_P95_MS": 2321.843,
+  "samples": [
+    {
+      "sample_id": "oneway-lp01-after-00",
+      "providers": [
+        {
+          "provider": "sabre",
+          "eligible": true,
+          "eligibility_decision_ms": 0.002,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 55.11,
+          "dispatch_start_offset_ms": 55.107,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "pia_ndc",
+          "eligible": true,
+          "eligibility_decision_ms": 0.002,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 1776.375,
+          "dispatch_start_offset_ms": 1776.373,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "smtp",
+          "eligible": false,
+          "eligibility_decision_ms": 0.002,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2138.883,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "provider": "al_haider",
+          "eligible": false,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2139.002,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "TOTAL_PRE_SUPPLIER_MS": 55.11,
+      "spread": 1721.265
+    },
+    {
+      "sample_id": "oneway-lp01-after-01",
+      "providers": [
+        {
+          "provider": "sabre",
+          "eligible": true,
+          "eligibility_decision_ms": 0.002,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 45.934,
+          "dispatch_start_offset_ms": 45.932,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "pia_ndc",
+          "eligible": true,
+          "eligibility_decision_ms": 0,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 1380.348,
+          "dispatch_start_offset_ms": 1380.346,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "smtp",
+          "eligible": false,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 1782.007,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "provider": "al_haider",
+          "eligible": false,
+          "eligibility_decision_ms": 0,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 1782.13,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "TOTAL_PRE_SUPPLIER_MS": 45.934,
+      "spread": 1334.414
+    },
+    {
+      "sample_id": "oneway-lp01-after-02",
+      "providers": [
+        {
+          "provider": "sabre",
+          "eligible": true,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 58.831,
+          "dispatch_start_offset_ms": 58.829,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "pia_ndc",
+          "eligible": true,
+          "eligibility_decision_ms": 0.002,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 2380.674,
+          "dispatch_start_offset_ms": 2380.672,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "smtp",
+          "eligible": false,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2741.264,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "provider": "al_haider",
+          "eligible": false,
+          "eligibility_decision_ms": 0,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2741.413,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "TOTAL_PRE_SUPPLIER_MS": 58.831,
+      "spread": 2321.843
+    },
+    {
+      "sample_id": "oneway-lp01-after-03",
+      "providers": [
+        {
+          "provider": "sabre",
+          "eligible": true,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 40.677,
+          "dispatch_start_offset_ms": 40.675,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "pia_ndc",
+          "eligible": true,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 1712.486,
+          "dispatch_start_offset_ms": 1712.485,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "smtp",
+          "eligible": false,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2137.587,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "provider": "al_haider",
+          "eligible": false,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2137.717,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "TOTAL_PRE_SUPPLIER_MS": 40.677,
+      "spread": 1671.809
+    },
+    {
+      "sample_id": "oneway-lp01-after-04",
+      "providers": [
+        {
+          "provider": "sabre",
+          "eligible": true,
+          "eligibility_decision_ms": 0.003,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 50.709,
+          "dispatch_start_offset_ms": 50.706,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "pia_ndc",
+          "eligible": true,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 1596.5,
+          "dispatch_start_offset_ms": 1596.498,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "smtp",
+          "eligible": false,
+          "eligibility_decision_ms": 0.002,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 1956.973,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "provider": "al_haider",
+          "eligible": false,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 1957.074,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "TOTAL_PRE_SUPPLIER_MS": 50.709,
+      "spread": 1545.791
+    },
+    {
+      "sample_id": "oneway-lp01-after-05",
+      "providers": [
+        {
+          "provider": "sabre",
+          "eligible": true,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 43.491,
+          "dispatch_start_offset_ms": 43.489,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "pia_ndc",
+          "eligible": true,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 1721.705,
+          "dispatch_start_offset_ms": 1721.702,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "smtp",
+          "eligible": false,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2082.631,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "provider": "al_haider",
+          "eligible": false,
+          "eligibility_decision_ms": 0,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2082.739,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "TOTAL_PRE_SUPPLIER_MS": 43.491,
+      "spread": 1678.214
+    },
+    {
+      "sample_id": "oneway-lp01-after-06",
+      "providers": [
+        {
+          "provider": "sabre",
+          "eligible": true,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 46.031,
+          "dispatch_start_offset_ms": 46.029,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "pia_ndc",
+          "eligible": true,
+          "eligibility_decision_ms": 0.001,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": 1907.118,
+          "dispatch_start_offset_ms": 1907.116,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": null
+        },
+        {
+          "provider": "smtp",
+          "eligible": false,
+          "eligibility_decision_ms": 0,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2266.535,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        },
+        {
+          "provider": "al_haider",
+          "eligible": false,
+          "eligibility_decision_ms": 0,
+          "request_build_ms": 0,
+          "queue_wait_ms": 0,
+          "network_start_offset_ms": null,
+          "dispatch_start_offset_ms": 2266.674,
+          "token_cache_lookup_ms": null,
+          "token_refresh_ms": null,
+          "token_network_calls": 0,
+          "skip_reason": "non_flight_provider"
+        }
+      ],
+      "TOTAL_PRE_SUPPLIER_MS": 46.031,
+      "spread": 1861.087
+    },
+    {
+      "sample_id": "oneway-lp01-after-07",
+      "providers": [],
+      "TOTAL_PRE_SUPPLIER_MS": 46.499,
+      "spread": null
+    },
+    {
+      "sample_id": "oneway-lp01-after-08",
+      "providers": [],
+      "TOTAL_PRE_SUPPLIER_MS": 113.55,
+      "spread": null
+    },
+    {
+      "sample_id": "oneway-lp01-after-09",
+      "providers": [],
+      "TOTAL_PRE_SUPPLIER_MS": 54.773,
+      "spread": null
+    }
+  ]
+}
