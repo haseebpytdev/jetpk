@@ -237,7 +237,16 @@ class FlightSearchResultStore
         bool $lightweightInit = false,
     ): void {
         $trimmedOffers = array_slice($offers, 0, self::MAX_STORED_OFFERS);
-        if (! $lightweightInit && $trimmedOffers !== []) {
+        $searchStatus = strtolower(trim((string) ($meta['search_status'] ?? self::SEARCH_STATUS_READY)));
+        // Progressive partials: skip Sabre booking-context enrich so Cache::put (file driver)
+        // releases sooner and peer poll workers are not blocked on flock during first paint.
+        // Final ready/empty still enriches for checkout authority.
+        $deferBookingContext = in_array($searchStatus, [
+            self::SEARCH_STATUS_PARTIAL,
+            self::SEARCH_STATUS_SEARCHING,
+            self::SEARCH_STATUS_QUEUED,
+        ], true);
+        if (! $lightweightInit && $trimmedOffers !== [] && ! $deferBookingContext) {
             $normalizer = app(SabreFlightSearchNormalizer::class);
             foreach ($trimmedOffers as $idx => $row) {
                 if (! is_array($row)) {
@@ -262,12 +271,17 @@ class FlightSearchResultStore
             'created_at' => $createdAt,
             'updated_at' => now()->toIso8601String(),
             'search_status' => (string) ($meta['search_status'] ?? self::SEARCH_STATUS_READY),
+            // Wall-clock ms for correlating browser R0 with worker T0 (no PII).
+            'search_t0_unix_ms' => is_array($existingPayload) && isset($existingPayload['search_t0_unix_ms'])
+                ? (int) $existingPayload['search_t0_unix_ms']
+                : (int) round(microtime(true) * 1000),
         ];
         if ($meta !== []) {
             $payload = array_merge($payload, $meta);
             $payload['search_status'] = (string) ($meta['search_status'] ?? $payload['search_status']);
         }
 
+        $comboCountForMark = 0;
         if (! $lightweightInit) {
             $cacheDescribe = app(FlightSearchCriteriaCacheKey::class)->build(
                 $criteria,
@@ -285,11 +299,11 @@ class FlightSearchResultStore
                 $returnSplit = $splitService->safeBuildIndexForStore($criteria, $trimmedOffers, $searchId);
                 $pairingMs = (microtime(true) - $pairStarted) * 1000;
                 $payload['return_split'] = $returnSplit;
+                $comboCountForMark = (int) ($returnSplit['combo_count'] ?? 0);
 
                 if (app()->bound(SearchPerfTrace::class)) {
                     $perf = app(SearchPerfTrace::class);
-                    $comboCount = (int) ($returnSplit['combo_count'] ?? 0);
-                    if ($comboCount > 0) {
+                    if ($comboCountForMark > 0) {
                         $perf->recordFirstValidPair($pairingMs);
                     }
                     if ($trimmedOffers !== []) {
@@ -310,6 +324,11 @@ class FlightSearchResultStore
         }
 
         Cache::put($this->key($searchId), $payload, self::TTL_SECONDS);
+
+        // R3 after put: pair is now poll-readable (file-cache lock released).
+        if ($comboCountForMark > 0 && app()->bound(SearchPerfTrace::class)) {
+            app(SearchPerfTrace::class)->recordFirstValidPairPersisted();
+        }
     }
 
     /**
@@ -654,6 +673,16 @@ class FlightSearchResultStore
             return false;
         }
 
+        return $this->returnSplitPayloadActive($payload);
+    }
+
+    /**
+     * Prefer this when the poll already loaded $payload (avoids a second Cache::get).
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function returnSplitPayloadActive(array $payload): bool
+    {
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
         if ((string) ($criteria['trip_type'] ?? '') !== 'round_trip') {
             return false;
@@ -664,7 +693,9 @@ class FlightSearchResultStore
             return false;
         }
 
-        return $splitService->indexIsUsable($this->getReturnSplitIndex($searchId));
+        $index = is_array($payload['return_split'] ?? null) ? $payload['return_split'] : null;
+
+        return $splitService->indexIsUsable($index);
     }
 
     private function key(string $searchId): string

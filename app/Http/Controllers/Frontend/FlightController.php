@@ -435,6 +435,9 @@ class FlightController extends Controller
                     'search_id' => $searchId,
                     'offer_id' => $offerId,
                     'flight_id' => $offerId,
+                    // Authoritative Traveler bootstrap: passengers GET may skip live re-shop.
+                    'authoritative_bootstrap' => ! $requiresAcceptance,
+                    'authoritative_revalidation_at' => now()->toIso8601String(),
                 ]);
             } catch (\Throwable) {
                 // Draft merge is best-effort for Traveler performance; revalidation already succeeded.
@@ -448,6 +451,53 @@ class FlightController extends Controller
                 'requires_acceptance' => $requiresAcceptance,
                 'fare_option_key' => FlightOfferDisplayPresenter::safeFareOptionKeyForLog($selectedFareOptionId),
             ]);
+
+            // Never emit JSON null passengers_url on success — clients treat null as missing.
+            if ($passengersUrl === null && $offerId !== '' && ! $requiresAcceptance) {
+                $passengersUrl = $this->buildCustomerSelectUrl(
+                    true,
+                    $offer,
+                    $searchId,
+                    $criteria,
+                    $selectedFareOptionId !== '' ? $selectedFareOptionId : null,
+                );
+            }
+            if ($passengersUrl === null) {
+                return response()->json([
+                    'success' => false,
+                    'status' => 'passengers_url_unavailable',
+                    'message' => (string) __('Checkout is temporarily unavailable for this fare. Please choose another option.'),
+                    'offer_freshness' => $freshnessMeta,
+                ], 422);
+            }
+
+            // Attach return-combo identity from the request when present.
+            $comboId = trim((string) $request->input('combo_id', ''));
+            $outboundKey = trim((string) $request->input('outbound_key', ''));
+            if ($comboId !== '' || $outboundKey !== '') {
+                $parts = parse_url($passengersUrl);
+                $q = [];
+                if (is_array($parts) && isset($parts['query'])) {
+                    parse_str((string) $parts['query'], $q);
+                }
+                if ($comboId !== '' && empty($q['combo_id'])) {
+                    $q['combo_id'] = $comboId;
+                }
+                if ($outboundKey !== '' && empty($q['outbound_key'])) {
+                    $q['outbound_key'] = $outboundKey;
+                }
+                $base = (is_array($parts) ? (($parts['path'] ?? '/booking/passengers')) : '/booking/passengers');
+                $passengersUrl = $base.'?'.http_build_query($q);
+                if (! PublicFlightSearchSecurity::isAllowedInternalUrl($passengersUrl)) {
+                    $passengersUrl = $this->buildCustomerSelectUrl(
+                        true,
+                        $offer,
+                        $searchId,
+                        $criteria,
+                        $selectedFareOptionId !== '' ? $selectedFareOptionId : null,
+                    );
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -705,7 +755,7 @@ class FlightController extends Controller
         }
         $offers = $this->sortOffers($offers, $sort, $critForFilters);
 
-        if ($this->searchStore->returnSplitFlowActive($searchId)) {
+        if ($this->searchStore->returnSplitPayloadActive($payload)) {
             // Default missing/unknown view to Pair so first paint is not Segmented flash.
             $view = strtolower(trim((string) $request->query('view', '')));
             if ($view === 'segmented' || $view === 'split') {
@@ -1136,15 +1186,18 @@ class FlightController extends Controller
         int $page,
         int $perPage,
     ): JsonResponse {
+        $pollStarted = microtime(true);
         $criteria = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
-        $index = $this->searchStore->getReturnSplitIndex($searchId) ?? [];
+        // Pair against raw cached offers so consolidator parent-id rewrites cannot empty the slice.
+        $rawOffers = is_array($payload['offers'] ?? null) ? $payload['offers'] : $offers;
+        $index = is_array($payload['return_split'] ?? null) ? $payload['return_split'] : [];
         $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
-            AirlineDisplayNameResolver::collectCodesFromOffers($offers)
+            AirlineDisplayNameResolver::collectCodesFromOffers($rawOffers)
         );
-        $filterMeta = $this->buildFilterMeta($offers, $criteria, $airlineNameMap);
-        $airlineLogos = $this->airlineBranding->mapLogosForOffers($offers);
+        $filterMeta = $this->buildFilterMeta($rawOffers, $criteria, $airlineNameMap);
+        $airlineLogos = $this->airlineBranding->mapLogosForOffers($rawOffers);
         $iataCodes = [];
-        foreach ($offers as $offRow) {
+        foreach ($rawOffers as $offRow) {
             if (is_array($offRow)) {
                 $iataCodes = array_merge($iataCodes, FlightOfferDisplayPresenter::collectIataCodes($offRow));
             }
@@ -1153,7 +1206,7 @@ class FlightController extends Controller
 
         $paired = $this->returnSplitComboService->buildPairedComboOptions(
             $index,
-            $offers,
+            $rawOffers,
             $criteria,
             $airlineLogos,
             $cityMap,
@@ -1184,6 +1237,32 @@ class FlightController extends Controller
         );
         $freshness = app(SabreOfferFreshness::class);
 
+        $searchPerf = is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : [];
+        // R4: first poll that can return usable pairs (Cache::add once — no fat payload rewrite).
+        if ($total > 0) {
+            $r4Key = 'flight_search_r4:'.$searchId;
+            $t0Unix = (int) ($payload['search_t0_unix_ms'] ?? 0);
+            $nowMs = (int) round(microtime(true) * 1000);
+            if ($t0Unix > 0 && \Illuminate\Support\Facades\Cache::add($r4Key, $nowMs, 1800)) {
+                $searchPerf['FIRST_PAIR_POLL_READABLE_MS'] = $nowMs - $t0Unix;
+                $persisted = isset($searchPerf['FIRST_VALID_PAIR_PERSISTED_MS'])
+                    ? (float) $searchPerf['FIRST_VALID_PAIR_PERSISTED_MS']
+                    : null;
+                if ($persisted !== null) {
+                    $searchPerf['PAIR_PERSIST_TO_POLL_READABLE_MS'] = round(
+                        max(0.0, ($nowMs - $t0Unix) - $persisted),
+                        3
+                    );
+                }
+            } elseif ($t0Unix > 0) {
+                $r4At = \Illuminate\Support\Facades\Cache::get($r4Key);
+                if (is_numeric($r4At)) {
+                    $searchPerf['FIRST_PAIR_POLL_READABLE_MS'] = (int) $r4At - $t0Unix;
+                }
+            }
+        }
+        $searchPerf['POLL_RESPONSE_SERVER_MS'] = round((microtime(true) - $pollStarted) * 1000, 3);
+
         return response()->json([
             'flow' => 'return_pair',
             'pairing_authority' => $total > 0 ? 'SUPPLIER_RETURNED' : 'UNAVAILABLE',
@@ -1203,7 +1282,8 @@ class FlightController extends Controller
             'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi(
                 is_array($payload['supplier_call_summaries'] ?? null) ? $payload['supplier_call_summaries'] : [],
             ),
-            'search_perf' => is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : null,
+            'search_perf' => $searchPerf !== [] ? $searchPerf : null,
+            'search_t0_unix_ms' => (int) ($payload['search_t0_unix_ms'] ?? 0) ?: null,
         ]);
     }
 
@@ -2752,10 +2832,7 @@ class FlightController extends Controller
                     : [],
                 'progressive_snapshot' => $prepared['diagnostics'],
             ];
-            if ($perf !== null) {
-                $progressMeta['search_perf'] = $perf->publicMeta();
-                $progressMeta['search_perf_id'] = $perf->id();
-            }
+            // Do not snapshot search_perf before writePayload — publishProgress refreshes after put.
 
             $this->searchStore->publishProgress(
                 $searchId,

@@ -47,7 +47,12 @@ class SearchPerfTraceTest extends TestCase
 
         $perf->recordProviderResponse('sabre', 42.0, 3);
         $perf->recordFirstValidPair(1.5);
+        $perf->recordFirstValidPairPersisted();
         $after = $perf->publicMeta();
+        $this->assertNotNull($after['FIRST_VALID_PAIR_MS']);
+        $this->assertNotNull($after['FIRST_VALID_PAIR_PERSISTED_MS']);
+        $this->assertSame('SEARCH_WORKER_T0', $after['CLOCK_BASE']);
+        $this->assertArrayHasKey('PAIR_CREATE_TO_PERSIST_MS', $after);
         $this->assertNotNull($after['FIRST_PROVIDER_RESPONSE_MS']);
         $this->assertNotNull($after['FIRST_VALID_PAIR_MS']);
         $this->assertSame(1.5, $after['PAIRING_MS']);

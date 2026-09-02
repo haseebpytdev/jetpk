@@ -77,9 +77,14 @@ final class PassengersRequestTiming
         return array_merge([
             'correlation_id' => $this->correlationId,
             'total_ms' => $totalMs,
+            'auth_gate_ms' => $this->intervalMs('S0b_auth_gate_start', 'S0c_auth_gate_end'),
             'session_hydrate_ms' => $this->intervalMs('S1_session_hydrate_start', 'S2_session_hydrate_end'),
             'offer_resolve_ms' => $this->intervalMs('S3_offer_resolve_start', 'S4_offer_resolve_end'),
+            'live_search_ms' => $this->intervalMs('S3b_live_search_start', 'S3c_live_search_end'),
+            'hold_validate_ms' => $this->intervalMs('S5_hold_validate_start', 'S6_hold_validate_end'),
+            'serialize_ms' => $this->intervalMs('S7a_serialize_start', 'S7_payload_complete'),
             'passenger_contact_load_ms' => $this->intervalMs('S5_passenger_contact_load_start', 'S6_passenger_contact_load_end'),
+            'app_internal_ms' => $totalMs,
         ], $deltas);
     }
 
@@ -123,8 +128,12 @@ final class PassengersRequestTiming
         $serverTiming = [];
         $metricMap = [
             'total' => 'total_ms',
+            'auth' => 'auth_gate_ms',
             'sess' => 'session_hydrate_ms',
             'offer' => 'offer_resolve_ms',
+            'livesearch' => 'live_search_ms',
+            'hold' => 'hold_validate_ms',
+            'serialize' => 'serialize_ms',
             'pax' => 'passenger_contact_load_ms',
             's0' => 'S0_request_received_ms',
             's7' => 'S7_payload_complete_ms',
@@ -143,9 +152,14 @@ final class PassengersRequestTiming
         $payload = [
             'correlation_id' => $this->correlationId,
             'total_ms' => $ctx['total_ms'] ?? null,
+            'auth_gate_ms' => $ctx['auth_gate_ms'] ?? null,
             'session_hydrate_ms' => $ctx['session_hydrate_ms'] ?? null,
             'offer_resolve_ms' => $ctx['offer_resolve_ms'] ?? null,
+            'live_search_ms' => $ctx['live_search_ms'] ?? null,
+            'hold_validate_ms' => $ctx['hold_validate_ms'] ?? null,
+            'serialize_ms' => $ctx['serialize_ms'] ?? null,
             'passenger_contact_load_ms' => $ctx['passenger_contact_load_ms'] ?? null,
+            'app_internal_ms' => $ctx['app_internal_ms'] ?? null,
             'S0_ms' => $ctx['S0_request_received_ms'] ?? null,
             'S7_ms' => $ctx['S7_payload_complete_ms'] ?? null,
             'S8_ms' => $ctx['S8_response_dispatched_ms'] ?? null,

@@ -49,6 +49,9 @@ final class SearchPerfTrace
 
     private ?float $firstValidPairMs = null;
 
+    /** Offset from T0 when return_split with combo_count>0 was Cache::put (poll-readable). */
+    private ?float $firstValidPairPersistedMs = null;
+
     private ?float $firstResultExposedMs = null;
 
     private float $pairingTotalMs = 0.0;
@@ -312,12 +315,36 @@ final class SearchPerfTrace
         if ($this->firstValidPairMs !== null) {
             return;
         }
+        // R2: pair index built in-memory (not yet guaranteed poll-readable).
         $this->firstValidPairMs = $this->elapsedMsSinceT0();
         $this->mark('T_FIRST_VALID_PAIR');
         if ($this->firstResultExposedMs === null) {
             $this->firstResultExposedMs = $this->firstValidPairMs;
             $this->mark('T_FIRST_RESULT_EXPOSED');
         }
+    }
+
+    /**
+     * R3: first time a usable return_split was persisted to the result store.
+     * Call only after Cache::put of that payload succeeds.
+     */
+    public function recordFirstValidPairPersisted(): void
+    {
+        if ($this->firstValidPairPersistedMs !== null) {
+            return;
+        }
+        $this->firstValidPairPersistedMs = $this->elapsedMsSinceT0();
+        $this->mark('T_FIRST_VALID_PAIR_PERSISTED');
+    }
+
+    public function firstValidPairMs(): ?float
+    {
+        return $this->firstValidPairMs;
+    }
+
+    public function firstValidPairPersistedMs(): ?float
+    {
+        return $this->firstValidPairPersistedMs;
     }
 
     /**
@@ -424,8 +451,14 @@ final class SearchPerfTrace
             'FIRST_PROVIDER_RESPONSE_MS' => $this->firstProviderResponseMs,
             'FIRST_VALID_OUTBOUND_MS' => $this->firstValidOutboundMs,
             'FIRST_VALID_PAIR_MS' => $this->firstValidPairMs,
+            'FIRST_VALID_PAIR_PERSISTED_MS' => $this->firstValidPairPersistedMs,
+            'PAIR_CREATE_TO_PERSIST_MS' => ($this->firstValidPairMs !== null && $this->firstValidPairPersistedMs !== null)
+                ? round(max(0.0, $this->firstValidPairPersistedMs - $this->firstValidPairMs), 3)
+                : null,
             'FIRST_RESULT_EXPOSED_MS' => $this->firstResultExposedMs,
             'PAIRING_MS' => $this->lastPairingMs,
+            /** All *_MS offsets are ms since search-worker T0 unless named as a duration (PAIR_CREATE_TO_PERSIST_MS). */
+            'CLOCK_BASE' => 'SEARCH_WORKER_T0',
             'PAIRING_TOTAL_MS' => round($this->pairingTotalMs, 3),
             'providers' => $this->providers,
             'counters' => $this->counters,
@@ -505,8 +538,11 @@ final class SearchPerfTrace
             'FIRST_PROVIDER_RESPONSE_MS' => $s['FIRST_PROVIDER_RESPONSE_MS'],
             'FIRST_VALID_OUTBOUND_MS' => $s['FIRST_VALID_OUTBOUND_MS'],
             'FIRST_VALID_PAIR_MS' => $s['FIRST_VALID_PAIR_MS'],
+            'FIRST_VALID_PAIR_PERSISTED_MS' => $s['FIRST_VALID_PAIR_PERSISTED_MS'],
+            'PAIR_CREATE_TO_PERSIST_MS' => $s['PAIR_CREATE_TO_PERSIST_MS'],
             'FIRST_RESULT_EXPOSED_MS' => $s['FIRST_RESULT_EXPOSED_MS'],
             'PAIRING_MS' => $s['PAIRING_MS'],
+            'CLOCK_BASE' => $s['CLOCK_BASE'],
             'providers' => $s['providers'],
         ];
     }

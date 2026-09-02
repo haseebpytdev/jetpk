@@ -282,7 +282,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       };
       pollTimerRef.current = setTimeout(() => {
         void tick();
-      }, POLL_INTERVAL_MS);
+      }, 0);
     },
     [loadPage, stopPolling, tripType],
   );

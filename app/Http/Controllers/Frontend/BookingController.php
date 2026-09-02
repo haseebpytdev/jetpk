@@ -140,10 +140,14 @@ class BookingController extends Controller
     public function passengers(StoreBookingPassengersRequest $request): View|RedirectResponse|JsonResponse
     {
         $timing = PassengersRequestTiming::start($request);
+        $timing->mark('S0b_auth_gate_start');
 
         if ($gate = $this->guestCheckoutGateResponse($request)) {
+            $timing->mark('S0c_auth_gate_end');
+
             return $timing->finalize($gate, 'guest_gate');
         }
+        $timing->mark('S0c_auth_gate_end');
 
         $checkoutContext = app(ClientCheckoutContextResolver::class);
         $checkoutContext->persist($request);
@@ -947,21 +951,37 @@ class BookingController extends Controller
         if ($effectiveFlightId !== '') {
             $offer = null;
             $timing->mark('S3_offer_resolve_start');
+            $liveSearchUsed = false;
             if (is_string($draft['search_id'] ?? null) && ($draft['search_id'] ?? '') !== '') {
                 $offer = $this->searchStore->findOfferForCheckoutTransition((string) $draft['search_id'], $effectiveFlightId);
+                if ($offer === null) {
+                    // Soft read without selection-stale gate when Book Now just revalidated.
+                    $offer = $this->searchStore->findOffer((string) $draft['search_id'], $effectiveFlightId);
+                }
             }
-            if ($offer === null) {
-                $offers = $agency !== null && $criteria['origin'] !== '' && $criteria['destination'] !== '' && $criteria['depart_date'] !== ''
-                    ? $this->flightSearch->search(
-                        $criteria,
-                        $agency,
-                        $channelContext['source_channel'],
-                        $channelContext['agent_id'],
-                    )
-                    : [];
+            if ($offer === null
+                && empty($draft['authoritative_bootstrap'])
+                && $agency !== null
+                && $criteria['origin'] !== ''
+                && $criteria['destination'] !== ''
+                && $criteria['depart_date'] !== '') {
+                $timing->mark('S3b_live_search_start');
+                $liveSearchUsed = true;
+                $offers = $this->flightSearch->search(
+                    $criteria,
+                    $agency,
+                    $channelContext['source_channel'],
+                    $channelContext['agent_id'],
+                );
                 $offer = collect($offers)->firstWhere('id', $effectiveFlightId);
+                $timing->mark('S3c_live_search_end');
             }
             $timing->mark('S4_offer_resolve_end');
+            if ($liveSearchUsed) {
+                $timing->mark('S4_live_search_used');
+            } elseif ($offer !== null && ! empty($draft['authoritative_bootstrap'])) {
+                $timing->mark('S4_bootstrap_cache_hit');
+            }
         }
 
         if ($effectiveFlightId !== '' && $offer === null) {
@@ -1040,6 +1060,7 @@ class BookingController extends Controller
                 return $freshnessRedirect;
             }
 
+            $timing->mark('S5_hold_validate_start');
             $holdPreparation = $this->fareHoldService->prepareCheckoutHold(
                 searchId: (string) ($draft['search_id'] ?? ''),
                 offerId: $effectiveFlightId,
@@ -1049,6 +1070,7 @@ class BookingController extends Controller
                 criteria: $this->checkoutCriteriaWithChannel($criteria, $request),
                 presentOffer: fn (array $normalized, array $pricing): array => $this->presentValidatedOffer($normalized, $pricing),
             );
+            $timing->mark('S6_hold_validate_end');
             $validation = $holdPreparation['validation'];
             $checkoutReady = $validation->is_valid && $validation->validated_offer !== null;
             $mergedHoldFromUnstableTestMode = false;
@@ -1281,12 +1303,12 @@ class BookingController extends Controller
         ];
 
         if ($this->wantsBookingJson($request)) {
+            $timing->mark('S7a_serialize_start');
+            $json = $this->standardBookingJsonPresenter->presentPassengersContext($viewData, $request);
             $timing->mark('S7_payload_complete');
 
             return $timing->finalize(
-                response()->json(
-                    $this->standardBookingJsonPresenter->presentPassengersContext($viewData, $request),
-                ),
+                response()->json($json),
                 'json_ok',
             );
         }

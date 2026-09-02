@@ -97,9 +97,12 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
   useEffect(() => {
     let cancelled = false;
+    let requestGen = 0;
 
-    void loadContext().then((response) => {
-      if (cancelled) return;
+    const run = async () => {
+      const gen = ++requestGen;
+      const response = await loadContext();
+      if (cancelled || gen !== requestGen) return;
       setLoading(false);
 
       if (!response.ok) {
@@ -147,7 +150,9 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       } catch {
         // Prefetch is best-effort.
       }
-    });
+    };
+
+    void run();
 
     return () => {
       cancelled = true;
