@@ -276,12 +276,14 @@ export function useRevalidation() {
             markBookNowTiming("T5_router_push", { nav: "hard_assign_watchdog" });
             markBookNowTiming("T7_passenger_route", { nav: "hard_assign_watchdog" });
             persistTimingForContinuity();
+            // Only after soft nav truly stalls — early hard-assign cancels in-flight RSC
+            // and was measured as ~18s blank Traveler shell (JP-NEXT-PERF-02B).
             window.location.assign(target.startsWith("http") ? target : `${window.location.origin}${target.startsWith("/") ? target : `/${target}`}`);
           } catch {
             /* ignore */
           }
           cleanup();
-        }, 700);
+        }, 4500);
 
         return true;
       } catch {
