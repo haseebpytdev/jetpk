@@ -1,0 +1,97 @@
+{
+  "ONEWAY_LARAVEL_NON_SUPPLIER_P50_MS": null,
+  "ONEWAY_LARAVEL_NON_SUPPLIER_P95_MS": null,
+  "note": "Server-Timing laravel/supplier not exposed on /flights/results/data in this runtime; values null means NOT_SEPARATED. Backend proxy duration remains supplier-dominated (02A).",
+  "samples": [
+    {
+      "i": 0,
+      "total": 3197,
+      "backend_proxy_ms": 732,
+      "post_api_ms": 2465,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 1,
+      "total": 1934,
+      "backend_proxy_ms": 642,
+      "post_api_ms": 1292,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 2,
+      "total": 2791,
+      "backend_proxy_ms": 952,
+      "post_api_ms": 1839,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 3,
+      "total": 1982,
+      "backend_proxy_ms": 696,
+      "post_api_ms": 1286,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 4,
+      "total": 1995,
+      "backend_proxy_ms": 622,
+      "post_api_ms": 1373,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 5,
+      "total": 3066,
+      "backend_proxy_ms": 748,
+      "post_api_ms": 2318,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 6,
+      "total": 2388,
+      "backend_proxy_ms": 951,
+      "post_api_ms": 1437,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 7,
+      "total": 2138,
+      "backend_proxy_ms": 909,
+      "post_api_ms": 1229,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 8,
+      "total": 2211,
+      "backend_proxy_ms": 786,
+      "post_api_ms": 1425,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    },
+    {
+      "i": 9,
+      "total": 2311,
+      "backend_proxy_ms": 763,
+      "post_api_ms": 1548,
+      "supplier_hint": null,
+      "laravel_hint": null,
+      "laravel_non_supplier_ms": null
+    }
+  ]
+}

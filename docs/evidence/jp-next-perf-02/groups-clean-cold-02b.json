@@ -1,0 +1,31 @@
+{
+  "JP_AUDIT_RESET_USER_PATH": "NO",
+  "JP_AUDIT_RESET_OVERHEAD_MS": "HARNESS_ONLY_PRIOR_02A_SAMPLE",
+  "note": "jpAuditReset is test-harness-only (measure-groups-n20.js). Real users never hit it. Extended to n=20 clean-cold new-browser flows.",
+  "GROUP_CLEAN_COLD_VALID_SAMPLES": 20,
+  "GROUP_CLEAN_COLD_FIRST_CARD_P50_MS": 1808,
+  "GROUP_CLEAN_COLD_FIRST_CARD_P95_MS": 3521,
+  "samples": [
+    6991,
+    1863,
+    2518,
+    2003,
+    1787,
+    1671,
+    1883,
+    3521,
+    2101,
+    1902,
+    2286,
+    1592,
+    2074,
+    1661,
+    1808,
+    1805,
+    1504,
+    1624,
+    1517,
+    1602
+  ],
+  "SUPERSEDED_INTERMEDIATE_MEASUREMENT": "prior wrong-URL ~61s pack replaced"
+}

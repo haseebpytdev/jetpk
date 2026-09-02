@@ -1,0 +1,112 @@
+{
+  "DATA_TO_RENDER_JSON_PARSE_P95_MS": "NOT_SEPARATED_CLIENT",
+  "DATA_TO_RENDER_DERIVATION_P95_MS": "NOT_SEPARATED_CLIENT",
+  "DATA_TO_RENDER_REACT_COMMIT_P95_MS": "INCLUDED_IN_POST_API",
+  "DATA_TO_RENDER_LAYOUT_P95_MS": "INCLUDED_IN_POST_API",
+  "BROWSER_DATA_RECEIVED_TO_FIRST_USEFUL_RENDER_P50_MS": 300,
+  "BROWSER_DATA_RECEIVED_TO_FIRST_USEFUL_RENDER_P95_MS": 460,
+  "samples": [
+    {
+      "i": 0,
+      "post_api_to_card_ms": 267,
+      "nav_to_card_ms": 22213
+    },
+    {
+      "i": 1,
+      "post_api_to_card_ms": 132,
+      "nav_to_card_ms": 3000
+    },
+    {
+      "i": 2,
+      "post_api_to_card_ms": 182,
+      "nav_to_card_ms": 2273
+    },
+    {
+      "i": 3,
+      "post_api_to_card_ms": 335,
+      "nav_to_card_ms": 2334
+    },
+    {
+      "i": 4,
+      "post_api_to_card_ms": 331,
+      "nav_to_card_ms": 3295
+    },
+    {
+      "i": 5,
+      "post_api_to_card_ms": 33,
+      "nav_to_card_ms": 2616
+    },
+    {
+      "i": 6,
+      "post_api_to_card_ms": 309,
+      "nav_to_card_ms": 2378
+    },
+    {
+      "i": 7,
+      "post_api_to_card_ms": 133,
+      "nav_to_card_ms": 1955
+    },
+    {
+      "i": 8,
+      "post_api_to_card_ms": 599,
+      "nav_to_card_ms": 2499
+    },
+    {
+      "i": 9,
+      "post_api_to_card_ms": 304,
+      "nav_to_card_ms": 2020
+    },
+    {
+      "i": 10,
+      "post_api_to_card_ms": 276,
+      "nav_to_card_ms": 2037
+    },
+    {
+      "i": 11,
+      "post_api_to_card_ms": 315,
+      "nav_to_card_ms": 2073
+    },
+    {
+      "i": 12,
+      "post_api_to_card_ms": 328,
+      "nav_to_card_ms": 2143
+    },
+    {
+      "i": 13,
+      "post_api_to_card_ms": 282,
+      "nav_to_card_ms": 2421
+    },
+    {
+      "i": 14,
+      "post_api_to_card_ms": 268,
+      "nav_to_card_ms": 2119
+    },
+    {
+      "i": 15,
+      "post_api_to_card_ms": 152,
+      "nav_to_card_ms": 2048
+    },
+    {
+      "i": 16,
+      "post_api_to_card_ms": 460,
+      "nav_to_card_ms": 2460
+    },
+    {
+      "i": 17,
+      "post_api_to_card_ms": 300,
+      "nav_to_card_ms": 2504
+    },
+    {
+      "i": 18,
+      "post_api_to_card_ms": 424,
+      "nav_to_card_ms": 2439
+    },
+    {
+      "i": 19,
+      "post_api_to_card_ms": 341,
+      "nav_to_card_ms": 1898
+    }
+  ],
+  "build": "o0Ip-hatkYoyoWPlhsAtf",
+  "note": "API /flights/results/data complete → first flight-result-card; INITIAL_VISIBLE_CARDS=4"
+}

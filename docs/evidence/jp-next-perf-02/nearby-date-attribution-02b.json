@@ -1,0 +1,53 @@
+{
+  "NEARBY_DATE_SUPPLIER_P95_MS": 757,
+  "NEARBY_DATE_APP_OVERHEAD_P95_MS": 3428,
+  "classification": "MIXED_OR_APP",
+  "samples": [
+    {
+      "i": 0,
+      "total_ms": 435,
+      "supplier_or_backend_ms": 699,
+      "app_overhead_ms": 0,
+      "init_search_posts": 0,
+      "data_fetches": 0,
+      "classification": "REPRESENTATION_OR_CACHED_SEARCH"
+    },
+    {
+      "i": 1,
+      "total_ms": 114,
+      "supplier_or_backend_ms": 699,
+      "app_overhead_ms": 0,
+      "init_search_posts": 0,
+      "data_fetches": 0,
+      "classification": "REPRESENTATION_OR_CACHED_SEARCH"
+    },
+    {
+      "i": 2,
+      "total_ms": 108,
+      "supplier_or_backend_ms": 699,
+      "app_overhead_ms": 0,
+      "init_search_posts": 0,
+      "data_fetches": 0,
+      "classification": "REPRESENTATION_OR_CACHED_SEARCH"
+    },
+    {
+      "i": 3,
+      "total_ms": 4185,
+      "supplier_or_backend_ms": 757,
+      "app_overhead_ms": 3428,
+      "init_search_posts": 0,
+      "data_fetches": 4,
+      "classification": "REPRESENTATION_OR_CACHED_SEARCH"
+    },
+    {
+      "i": 4,
+      "total_ms": 71,
+      "supplier_or_backend_ms": 757,
+      "app_overhead_ms": 0,
+      "init_search_posts": 0,
+      "data_fetches": 0,
+      "classification": "REPRESENTATION_OR_CACHED_SEARCH"
+    }
+  ],
+  "note": "Nearby date navigation uses search_url → new results identity (supplier-backed search)."
+}
