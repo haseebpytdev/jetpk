@@ -43,17 +43,21 @@ class AirlineBrandingServiceTest extends TestCase
     }
 
     #[Test]
-    public function ignores_missing_db_logo_file_and_uses_generic(): void
+    public function prefers_travel_assets_master_before_cdn_for_pf(): void
     {
-        Airline::query()->create([
-            'iata_code' => 'XX',
-            'name' => 'Missing Logo Airline',
-            'is_active' => true,
-            'logo_path' => 'travel-assets/airlines/logos/XX.png',
-        ]);
+        Storage::fake('public');
+        Storage::disk('public')->put('travel-assets/airlines/logos/PF.png', 'airsial-bytes');
+        Config::set('ota.airline_logo_cache.download_on_miss', true);
 
-        Config::set('ota.airline_logo_cache.download_on_miss', false);
-        $url = app(AirlineBrandingService::class)->getLogoForCode('XX');
-        $this->assertSame('/images/airline-generic.svg', $url);
+        $url = app(AirlineBrandingService::class)->getLogoForCode('PF');
+        $this->assertStringContainsString('/storage/travel-assets/airlines/logos/PF.png', (string) $url);
+    }
+
+    #[Test]
+    public function blocks_iata_only_cdn_download_for_pf_and_9p(): void
+    {
+        $cache = app(\App\Services\TravelData\AirlineLogoCacheService::class);
+        $this->assertTrue($cache->isIataOnlyDownloadBlocked('PF'));
+        $this->assertTrue($cache->isIataOnlyDownloadBlocked('9P'));
     }
 }

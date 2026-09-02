@@ -63,7 +63,9 @@ return [
             'country' => 'Pakistan',
             'is_active' => true,
             'logo_code' => 'PF',
-            'logo_path' => null,
+            // Verified AirSial master (not generic IATA PF / Primera Air).
+            'logo_path' => 'travel-assets/airlines/logos/PF.png',
+            'block_iata_cdn_download' => true,
             'supplier_aliases' => ['PF', 'SIF'],
         ],
         '9P' => [
@@ -74,7 +76,9 @@ return [
             'country' => 'Pakistan',
             'is_active' => true,
             'logo_code' => '9P',
-            'logo_path' => null,
+            // Verified Fly Jinnah FJ mark (not Air Arabia wordmark).
+            'logo_path' => 'travel-assets/airlines/logos/9P.png',
+            'block_iata_cdn_download' => true,
             'supplier_aliases' => ['9P', 'FJL'],
         ],
         'SV' => [

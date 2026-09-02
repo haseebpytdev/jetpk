@@ -11,10 +11,11 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-08-31 (Google OAuth Admin API Settings)
+**Last updated:** 2026-09-02 (JP-UX-POLISH-02B airline identity)
 
 | Date | Phase | Notes |
 | --- | --- | --- |
+| 2026-09-02 | JP-UX-POLISH-02B | Fail-closed airline logo identity: prefer local travel-assets masters; block generic IATA CDN for collision codes (PF AirSial, 9P Fly Jinnah). **`AirlineBrandingService::publicUrlForLocalMaster()`**, **`AirlineLogoCacheService::isIataOnlyDownloadBlocked()`**. Evidence `docs/evidence/jp-ux-polish-02b/`. |
 | 2026-08-31 | Google OAuth Admin API | **`SupplierProvider::GoogleOauth`** managed like SMTP via Admin API settings. **`GoogleOauthConfigResolver`**: active complete DB → `services.google.*`, else ENV fallback. Blank secret preserves stored. Test Configuration = completeness + Socialite driver resolve only (no token exchange). |
 | 2026-08-30 | JP-FINAL-CLOSURE-01-R5 | Traveler GET: preserve draft `search_id`; skip duplicate Sabre validate when recent revalidation exists; release session before offer/supplier I/O; `PassengersRequestTiming` S0–S8; soft-nav shell via client passengers page + loading T8; session bootstrap 2.5s timeout. |
 | 2026-08-28 | JP-FLIGHT-PERF-01-R1 | Default results sort **Cheapest**; Pair-first return `view`; pending UX “Updating fares…”; bounded fare-change accepts; passengers silent auto-revalidate; passengers shell-first loading + OCR on Autofill only. Evidence `docs/evidence/jp-flight-perf-01/`. Deploy blocked on Al-Haider `60175` manual cancel. |
@@ -1290,7 +1291,7 @@ Dual-channel AirBlue (PA): **`crane_ndc`** (Hitit Crane NDC 20.1) and **`zapways
 | `Dashboard/` | `AgencyDashboardService` — `build()`, `operationalCountsForAgency()`, `buildAdminCommandCenter()` (PNR/payment/staff/agent/failures panels). |
 | `resources/views/components/dashboard/` | E1 shared dashboard UI: `kpi-stat`, `quick-action`, `empty-state`, `section-header`, `status-badge` (`.ota-kpi-card`, `.ota-bstat` in `layouts/dashboard.blade.php`). |
 | `Reports/` | `BookingReportService` — reporting helpers; **`buildPnrManualReviewDigestSummary()`** (P3 read-only digest metrics); **`buildAgencyBookingActivitySummary()`** (A3 read-only agency activity metrics). |
-| `TravelData/` | **`AirportImportService`** (OurAirports-style IATA CSV upsert + overrides), **`AirportProximityService`** (nearby departure IATA via haversine + `ota-flights.nearby_departure_airports`), **`AirlineLogoCacheService`** (local `/storage/airline-logos/{IATA}.png` + **`ota:cache-airline-logos`**), `AirlineBrandingService`. |
+| `TravelData/` | **`AirportImportService`** (OurAirports-style IATA CSV upsert + overrides), **`AirportProximityService`** (nearby departure IATA via haversine + `ota-flights.nearby_departure_airports`), **`AirlineLogoCacheService`** (local `/storage/airline-logos/{IATA}.png` + **`ota:cache-airline-logos`**; **`isIataOnlyDownloadBlocked()`** blocks generic IATA CDN for collision/override codes), **`AirlineBrandingService`** (`getLogoForCode`, **`publicUrlForLocalMaster`** prefers travel-assets masters before CDN). |
 
 ---
 

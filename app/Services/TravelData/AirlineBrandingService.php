@@ -55,14 +55,45 @@ class AirlineBrandingService
             }
         }
 
+        // Prefer verified local masters (travel-assets then airline-logos) before any IATA CDN miss-download.
+        $localMaster = $this->publicUrlForLocalMaster($logoCode)
+            ?? ($canonicalIata !== null ? $this->publicUrlForLocalMaster($canonicalIata) : null);
+        if ($localMaster !== null) {
+            return $localMaster;
+        }
+
         if (! config('ota.airline_logo_cache.enabled', true)) {
             return $this->logoCache->genericFallbackPublicUrl();
         }
 
-        return $this->logoCache->resolvePublicUrl(
-            $logoCode,
-            (bool) config('ota.airline_logo_cache.download_on_miss', true),
-        );
+        $attemptDownload = (bool) config('ota.airline_logo_cache.download_on_miss', true)
+            && ! $this->logoCache->isIataOnlyDownloadBlocked($logoCode);
+
+        return $this->logoCache->resolvePublicUrl($logoCode, $attemptDownload);
+    }
+
+    /**
+     * Local identity master only — no CDN download.
+     */
+    public function publicUrlForLocalMaster(?string $code): ?string
+    {
+        $logoCode = $this->canonical->logoCode($code) ?? ($code !== null ? Str::upper(trim($code)) : null);
+        if ($logoCode === null || $logoCode === '') {
+            return null;
+        }
+
+        foreach ([
+            'travel-assets/airlines/logos/'.$logoCode.'.png',
+            'travel-assets/airlines/logos/'.$logoCode.'.webp',
+            'airline-logos/'.$logoCode.'.png',
+            'airline-logos/'.$logoCode.'.webp',
+        ] as $relative) {
+            if (Storage::disk('public')->exists($relative)) {
+                return $this->storagePublicUrl($relative);
+            }
+        }
+
+        return null;
     }
 
     public function getDisplayNameForCode(?string $code): ?string

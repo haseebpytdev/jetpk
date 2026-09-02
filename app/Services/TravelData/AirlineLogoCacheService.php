@@ -218,6 +218,12 @@ class AirlineLogoCacheService
             return null;
         }
 
+        if ($this->isIataOnlyDownloadBlocked($safeCode)) {
+            Log::info('airline_logo_cache_iata_only_download_blocked', ['code' => $safeCode]);
+
+            return null;
+        }
+
         $template = (string) config(
             'ota.airline_logo_cache.download_template',
             config('ota.airline_logo_cdn_template', 'https://images.kiwi.com/airlines/64x64/{CODE}.png')
@@ -228,5 +234,35 @@ class AirlineLogoCacheService
         }
 
         return str_replace('{CODE}', $safeCode, $template);
+    }
+
+    /**
+     * Generic IATA CDN templates are not identity authority for collision / override codes.
+     */
+    public function isIataOnlyDownloadBlocked(string $safeCode): bool
+    {
+        $code = Str::upper(trim($safeCode));
+        if ($code === '') {
+            return true;
+        }
+
+        $unsafe = config('ota.airline_logo_cache.iata_cdn_identity_unsafe_codes', []);
+        if (is_array($unsafe) && in_array($code, array_map(static fn ($c) => Str::upper((string) $c), $unsafe), true)) {
+            return true;
+        }
+
+        $override = app(AirlineCanonicalResolver::class)->overrideForIata($code);
+        if (is_array($override) && (bool) ($override['block_iata_cdn_download'] ?? false)) {
+            return true;
+        }
+
+        // When enabled, never treat IATA alone as logo identity for any JetPK override carrier.
+        if ((bool) config('ota.airline_logo_cache.iata_only_download_blocked', true)
+            && app(AirlineCanonicalResolver::class)->isCanonicalOverride($code)
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }

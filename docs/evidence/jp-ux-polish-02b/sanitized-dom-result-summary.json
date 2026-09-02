@@ -1,0 +1,21 @@
+﻿{
+    "sample_fields":  [
+                          "route",
+                          "datetime",
+                          "fare",
+                          "seats",
+                          "meal",
+                          "baggage",
+                          "View details"
+                      ],
+    "card_count_visible":  7,
+    "timings":  {
+                    "GROUP_RESULTS_FIRST_CARD_MS":  9755,
+                    "GROUP_FILTER_READY_MS":  8137
+                },
+    "airlines_on_cards":  [
+                              "FLY JINNAH · 9P"
+                          ],
+    "pf_live_card":  "https://jetpakistan.pk/groups/search?airline=AIR%20SIAL (AIR SIAL · PF LHE-DXB)",
+    "url":  "https://jetpakistan.pk/groups/search?sector=ISB-SHJ"
+}

@@ -168,6 +168,14 @@ return [
             env('OTA_AIRLINE_LOGO_CDN_TEMPLATE', 'https://images.kiwi.com/airlines/64x64/{CODE}.png')
         ),
         'generic_fallback' => env('OTA_AIRLINE_LOGO_GENERIC_FALLBACK', 'images/airline-generic.svg'),
+        /*
+        | IATA-only CDN downloads are NOT identity authority. Codes listed here (and any
+        | airline_canonical_overrides entry) never auto-download from a generic IATA template —
+        | reused/historical IATA codes (e.g. PF→Primera Air) cause wrong-airline logos.
+        | Prefer local travel-assets / airline-logos masters keyed by canonical identity.
+        */
+        'iata_only_download_blocked' => true,
+        'iata_cdn_identity_unsafe_codes' => ['PF', '9P'],
     ],
 
     /**
