@@ -218,20 +218,23 @@ export function useRevalidation() {
 
       const releaseConnectionPool = () => {
         try {
-          document
-            .querySelectorAll('img[src*="airline-logos"], img[src*="/storage/airline"]')
-            .forEach((node) => {
-              const img = node as HTMLImageElement;
-              img.removeAttribute("srcset");
-              img.removeAttribute("src");
-            });
+          document.querySelectorAll("img").forEach((node) => {
+            const img = node as HTMLImageElement;
+            img.removeAttribute("srcset");
+            img.removeAttribute("src");
+            try {
+              img.src = "";
+            } catch {
+              /* ignore */
+            }
+          });
         } catch {
           /* ignore */
         }
         try {
-          document
-            .querySelectorAll('link[rel="preload"][as="font"], link[rel="preload"][as="image"]')
-            .forEach((node) => node.parentNode?.removeChild(node));
+          document.querySelectorAll('link[rel="preload"], link[rel="prefetch"]').forEach((node) => {
+            node.parentNode?.removeChild(node);
+          });
         } catch {
           /* ignore */
         }
@@ -242,18 +245,20 @@ export function useRevalidation() {
         }
       };
 
-      try {
-        void import("@/features/standard-booking/components/PassengerDetailsPage");
-      } catch {
-        /* non-blocking */
-      }
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
       markBookNowTiming("T5_router_push", { nav: "hard_assign_pool_release" });
       markBookNowTiming("T7_passenger_route", { nav: "hard_assign_pool_release" });
       persistTimingForContinuity();
       releaseConnectionPool();
-      window.location.assign(absolute);
+      // Yield so aborted font/logo/csrf streams can free sockets before document nav.
+      window.setTimeout(() => {
+        try {
+          window.location.assign(absolute);
+        } catch {
+          window.location.href = absolute;
+        }
+      }, 100);
       return true;
     }
     window.location.assign(resolved);

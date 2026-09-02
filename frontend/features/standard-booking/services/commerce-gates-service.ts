@@ -76,9 +76,8 @@ export async function redirectIfGuestBookingBlocked(targetPath: string): Promise
     // default (DEFAULT_GATES). Only block when guest booking is already known-disabled.
     const gates = cachedGates ?? DEFAULT_GATES;
     if (gates.guest_booking_enabled) {
-      if (!cachedGates) {
-        void fetchCommerceGates();
-      }
+      // Do NOT kick off commerce-gates I/O on the Book Now critical path — it
+      // competes with Traveler document/JS for scarce browser sockets.
       return false;
     }
 
