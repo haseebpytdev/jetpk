@@ -130,6 +130,7 @@ export function PublicFloatingActionDock({
             <li key={`${tile.label}-${tile.href}`}>
               <Link
                 href={tile.href}
+                prefetch={false}
                 data-testid={tile.testId}
                 onClick={() => {
                   if (detailsRef.current) detailsRef.current.open = false;

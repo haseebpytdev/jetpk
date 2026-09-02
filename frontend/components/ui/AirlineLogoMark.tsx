@@ -1,5 +1,4 @@
 import { cn } from "@/lib/cn";
-import Image from "next/image";
 
 type AirlineLogoMarkProps = {
   code?: string | null;
@@ -14,6 +13,8 @@ type AirlineLogoMarkProps = {
 /**
  * Square transparent airline logo stage — no radius, border, or app tile background.
  * Intrinsic baked frames in PNG assets cannot be removed via CSS; prefer transparent assets.
+ * Native <img loading=lazy> avoids Next/Image eager scheduling that can saturate sockets
+ * on dense results grids (JP-NEXT-PERF-02B).
  */
 export function AirlineLogoMark({
   code,
@@ -45,13 +46,13 @@ export function AirlineLogoMark({
       aria-hidden={decorative || Boolean(logoUrl) || undefined}
     >
       {logoUrl ? (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element -- lazy native img for results density
+        <img
           src={logoUrl}
           alt={decorative ? "" : alt}
           width={size}
           height={size}
           className="h-full w-full object-contain"
-          unoptimized
           loading="lazy"
           decoding="async"
         />

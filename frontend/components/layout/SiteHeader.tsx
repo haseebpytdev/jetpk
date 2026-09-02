@@ -31,6 +31,7 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
           <div className="flex min-w-0 items-center justify-start">
             <Link
               href="/"
+              prefetch={false}
               className="shrink-0 rounded-jp-md focus-visible:outline-none focus-visible:shadow-jp-focus"
               aria-label="JetPakistan home"
               data-testid="site-logo-link"
@@ -52,7 +53,7 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
               {signedIn ? (
                 <AccountMenu session={session} />
               ) : (
-                <LinkButton href="/login" variant="primary" className="jp-header-login-cta gap-1.5" data-testid="header-login-cta">
+                <LinkButton href="/login" prefetch={false} variant="primary" className="jp-header-login-cta gap-1.5" data-testid="header-login-cta">
                   <svg
                     width="14"
                     height="14"

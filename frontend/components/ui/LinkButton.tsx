@@ -13,6 +13,7 @@ export function LinkButton({
   className,
   variant = "primary",
   external,
+  prefetch = false,
   ...props
 }: LinkButtonProps) {
   const classes = cn(
@@ -39,7 +40,7 @@ export function LinkButton({
   }
 
   return (
-    <Link className={classes} {...props}>
+    <Link className={classes} prefetch={prefetch} {...props}>
       {children}
     </Link>
   );
