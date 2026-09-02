@@ -78,7 +78,7 @@ If CDN templates are re-enabled for PF/9P without local masters, wrong-airline l
 Restore from `/home/pkjetp/backups/jp-ux-polish-02b-logos-20260902T011329Z` (airline-logos, travel-assets, PHP copies).
 
 ## Commit SHA
-(filled after commit)
+`9e64316cbdd69f18a86f1950082683fe1b9aaa6a`
 
 ## Final status
-PASS (pending commit SHA stamp)
+PASS
