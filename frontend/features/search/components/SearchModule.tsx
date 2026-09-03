@@ -214,6 +214,13 @@ export function SearchModule({
       if (typeof document !== "undefined") {
         document.body.setAttribute("data-handoff-url", resultsPath);
       }
+      // Warm the results route chunk while hard-nav still owns the handoff
+      // (soft router.push previously stalled 20–40s before shell mount).
+      try {
+        void router.prefetch(resultsPath);
+      } catch {
+        /* prefetch is best-effort */
+      }
       // Hard-nav results handoff: soft router.push can stall 20–40s before the
       // results shell mounts (cert outlier: loading_shell≈33s, poll_count=1).
       // Supplier search already started above; hard assign preserves search_id overlap.

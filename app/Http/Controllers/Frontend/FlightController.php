@@ -764,9 +764,67 @@ class FlightController extends Controller
             'flight_number' => strtoupper(trim((string) $request->query('flight_number', ''))),
         ];
 
+        $critForFilters = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
+        $view = strtolower(trim((string) $request->query('view', '')));
+        $tripType = (string) ($critForFilters['trip_type'] ?? '');
+
+        // JP-APP-PERF-CLOSURE-01: Return Pair polls must not run consolidator/filter/sort
+        // or the one-way mapper. Those paths were stretching empty-poll RTT to 2–3.5s
+        // and delaying first useful pair delivery after persist.
+        if ($tripType === 'round_trip' && $view !== 'segmented' && $view !== 'split') {
+            $cachedPairs = is_array($payload['return_pair_options'] ?? null) ? $payload['return_pair_options'] : [];
+            $splitActive = $this->searchStore->returnSplitPayloadActive($payload);
+            if (! $splitActive && $cachedPairs === []) {
+                $pollTiming->mark('P6_PARTIAL_PAIR_MERGE_COMPLETE');
+                $searchPerf = is_array($payload['search_perf'] ?? null) ? $payload['search_perf'] : [];
+                $pollTiming->mark('P7_RESPONSE_SERIALIZED');
+                $pollTiming->mark('P8_RESPONSE_SENT');
+                $searchPerf = array_merge($searchPerf, $pollTiming->publicMeta());
+                $freshness = app(SabreOfferFreshness::class);
+
+                return response()->json([
+                    'flow' => 'return_pair',
+                    'pairing_authority' => 'UNAVAILABLE',
+                    'search_id' => $searchId,
+                    'status' => $this->searchStore->resolveSearchStatus($payload),
+                    'page' => $page,
+                    'per_page' => $perPage,
+                    'total' => 0,
+                    'has_more' => false,
+                    'filters' => $this->buildFilterMeta([], $critForFilters, []),
+                    'paired_options' => [],
+                    'offers' => [],
+                    'outbound_options' => [],
+                    'warnings' => is_array($payload['warnings'] ?? null) ? array_values($payload['warnings']) : [],
+                    'empty_message' => null,
+                    'search_freshness' => $freshness->sanitizeForCustomerApi(
+                        $freshness->buildSearchFreshnessMeta($payload)
+                    ),
+                    'supplier_call_summaries' => $this->sanitizeSupplierCallSummariesForCustomerApi(
+                        is_array($payload['supplier_call_summaries'] ?? null) ? $payload['supplier_call_summaries'] : [],
+                    ),
+                    'search_perf' => $searchPerf !== [] ? $searchPerf : null,
+                    'search_t0_unix_ms' => (int) ($payload['search_t0_unix_ms'] ?? 0) ?: null,
+                ]);
+            }
+
+            /** @var list<array<string, mixed>> $rawOffers */
+            $rawOffers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
+
+            return $this->resultsDataReturnPair(
+                $request,
+                $payload,
+                $searchId,
+                $rawOffers,
+                $sort,
+                $page,
+                $perPage,
+                $pollTiming,
+            );
+        }
+
         /** @var list<array<string, mixed>> $offers */
         $offers = $this->searchStore->displayOffersFromPayload($payload);
-        $critForFilters = is_array($payload['criteria'] ?? null) ? $payload['criteria'] : [];
         $beforeFilter = count($offers);
         $offers = $this->filterOffers($offers, $filters, $critForFilters);
         $hasActiveFilters = collect($filters)->contains(function (mixed $v): bool {
@@ -783,31 +841,17 @@ class FlightController extends Controller
         $offers = $this->sortOffers($offers, $sort, $critForFilters);
 
         if ($this->searchStore->returnSplitPayloadActive($payload)) {
-            // Default missing/unknown view to Pair so first paint is not Segmented flash.
-            $view = strtolower(trim((string) $request->query('view', '')));
-            if ($view === 'segmented' || $view === 'split') {
-                return $this->resultsDataReturnSplitOutbound(
-                    $request,
-                    $payload,
-                    $searchId,
-                    $offers,
-                    $filters,
-                    $sort,
-                    $page,
-                    $perPage,
-                    $debugAllowed,
-                    $pollTiming,
-                );
-            }
-
-            return $this->resultsDataReturnPair(
+            // Segmented / split view only — Pair short-circuits above.
+            return $this->resultsDataReturnSplitOutbound(
                 $request,
                 $payload,
                 $searchId,
                 $offers,
+                $filters,
                 $sort,
                 $page,
                 $perPage,
+                $debugAllowed,
                 $pollTiming,
             );
         }

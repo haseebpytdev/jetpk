@@ -39,6 +39,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-09-03 | JP-APP-PERF-CLOSURE-01 | Return Pair poll short-circuit skips consolidator/one-way mapper on empty/partial polls; early partial onProgress throttled to 1st/every-3rd until first persisted pair; SearchModule prefetches resultsPath before hard-nav. |
 | 2026-09-03 | JP-HOME-UI-01 | Next homepage hero keeps search + trust tags inside the image-backed flow, removes the pale spacer/divider, modernizes Login, and aligns full-header/FAB visibility at `lg`; existing FAB receives tokenized visual/focus/motion polish. No search logic or runtime dependencies changed. |
 | 2026-09-02 | JP-LARAVEL-PERF-01 pre-supplier | **`SearchPerfTrace`** T0–T13 + provider start spread on progressive search init/poll. **`PricingRuleService`** per-request active markup memo. **`AirportReferenceLookup`** + **`DefaultAgencyLookup`** request memo / stable airport TTL. Slim **`beginSearch`** payload write; eligibility skip map once per search. Tests: **`SearchPerfTraceTest`**, **`PricingRuleServiceRequestMemoTest`**, **`AirportReferenceLookupTest`**. |
 | 2026-08-24 | JP-BO-04D / JP-BO-04E (partial) | Next **Accounting** workspace: audited wallet credit/debit/reversal via `FinanceAdjustmentController` JSON + `operational-api`. Settings **SMTP** Save/Test via `AgencyCommunicationSettingsController` (masked secrets, confirmed recipient only). Legacy redirect JSON dispatch fixed for adjustments + communications. Evidence `tmp/jp-bo-04/14-16-*.txt`. |

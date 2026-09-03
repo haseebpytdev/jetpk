@@ -1258,7 +1258,14 @@ class FlightSearchService
 
                 // Keep attempting early progressive publish until the first pair/result
                 // actually persists — a filtered first offer must not block later ones.
-                if ($onProgress !== null && ! $earlyProgressFired && $batchOffers !== []) {
+                // Throttle writes: every offer until first persist made writePayload dominate
+                // the pricing loop; publish first offer, then every 3rd, then always once
+                // a pair may exist (combo path inside writePayload is the authority).
+                $batchCount = count($batchOffers);
+                $shouldTryEarlyProgress = $batchCount === 1
+                    || ($batchCount % 3 === 0)
+                    || $batchCount === count($result->offers);
+                if ($onProgress !== null && ! $earlyProgressFired && $batchOffers !== [] && $shouldTryEarlyProgress) {
                     $hadPersistedPair = $perf !== null && $perf->firstValidPairPersistedMs() !== null;
                     $onProgress($offers, $warnings);
                     $nowPersistedPair = $perf !== null && $perf->firstValidPairPersistedMs() !== null;
