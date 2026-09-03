@@ -286,9 +286,33 @@ body {
   transition: width var(--jp-motion-standard) var(--jp-ease-standard);
 }
 
+/* Fare processing flight-path motif (Book Now → Traveler) */
+@keyframes jp-fare-flight-path {
+  0% {
+    transform: translateX(-36px);
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(36px);
+    opacity: 0.35;
+  }
+}
+
+.jp-fare-flight-motif {
+  transform-origin: center;
+  animation: jp-fare-flight-path 2.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .jp-progress-fill {
     transition: none;
+  }
+
+  .jp-fare-flight-motif {
+    animation: none;
   }
 }
 

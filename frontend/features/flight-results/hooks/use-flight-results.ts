@@ -33,13 +33,13 @@ const TERMINAL_STATUSES = new Set(["ready", "empty", "failed", "expired", "error
 function stagedSearchMessage(elapsedMs: number, tripType: string, hasResults: boolean): string {
   // Pending suppliers must never read as a failure warning.
   if (hasResults) {
-    return "Updating fares…";
+    return "Checking for more options…";
   }
   if (tripType === "round_trip") {
-    if (elapsedMs < 2000) return "Finding outbound and return options…";
-    if (elapsedMs < 6000) return "Checking live airline fares…";
+    if (elapsedMs < 2500) return "Searching live return fares";
+    if (elapsedMs < 7000) return "Matching outbound and return options";
     if (elapsedMs < 12000) return "Still searching — live airline responses can take a few moments.";
-    return "Updating fares… some airlines are still responding.";
+    return "Checking for more options… some airlines are still responding.";
   }
   if (elapsedMs < 2000) return "Searching live flights…";
   if (elapsedMs < 6000) return "Checking available fares…";

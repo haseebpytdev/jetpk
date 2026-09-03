@@ -15,9 +15,9 @@ import { FareSummaryTabs } from "./FareSummaryTabs";
 import {
   OfferExpiredState,
   OfferUnavailableState,
-  RevalidationPanel,
   SupplierTimeoutState,
 } from "./OfferStatePanels";
+import { FareProcessingTransition } from "./FareProcessingTransition";
 import { SegmentDetails } from "./SegmentDetails";
 
 function toSupplierFareKey(key: string | undefined, options: { option_key: string; is_base_offer_fare?: boolean; is_synthetic_default?: boolean }[]): string | undefined {
@@ -393,15 +393,29 @@ export function FlightDetailsDrawer({
                 <FareSummaryTabs key={details.selectedFareKey || offer.offer_id} offer={offer} fallback={fallback} />
 
                 {revalidation.state === "loading" ? (
-                  <RevalidationPanel
-                    message={revalidation.message ?? "Checking the latest fare…"}
+                  <FareProcessingTransition
+                    phase={revalidation.uiPhase ?? "VALIDATING_FARE"}
+                    origin={
+                      typeof offer.departure_airport_code === "string"
+                        ? offer.departure_airport_code
+                        : typeof offer.origin === "string"
+                          ? offer.origin
+                          : undefined
+                    }
+                    destination={
+                      typeof offer.arrival_airport_code === "string"
+                        ? offer.arrival_airport_code
+                        : typeof offer.destination === "string"
+                          ? offer.destination
+                          : undefined
+                    }
                   />
                 ) : null}
 
                 {revalidation.state === "unavailable" ? (
                   <OfferUnavailableState
-                    title="Fare unavailable"
-                    message={revalidation.message ?? "This fare is no longer available."}
+                    title="This fare is no longer available"
+                    message={revalidation.message ?? "Choose another flight or start a fresh search."}
                     onClose={onClose}
                     onNewSearch={onNewSearch}
                   />

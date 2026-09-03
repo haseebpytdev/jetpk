@@ -492,11 +492,7 @@ export function FlightResultsPage() {
             {results.searchStillActive && shownCount > 0 ? (
               <SearchProgress
                 compact
-                message={
-                  results.total > 0
-                    ? `${results.total} flights found · checking for more`
-                    : results.message || "Searching for more flights…"
-                }
+                message={results.message || "Checking for more options…"}
               />
             ) : null}
 

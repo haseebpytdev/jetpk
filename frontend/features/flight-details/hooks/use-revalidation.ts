@@ -16,7 +16,7 @@ import { redirectIfGuestBookingBlocked } from "@/features/standard-booking/servi
 import { markResultsLeftForCheckout } from "@/features/flight-results/utils/checkout-nav";
 
 
-/** Clean Book Now → Traveler UI state boundaries (REG-05). Animation deferred. */
+/** Clean Book Now → Traveler UI state boundaries (JP-DEEP-CLOSURE-01). */
 export const BOOK_NOW_UI_PHASE = {
   VALIDATING_FARE: "VALIDATING_FARE",
   PREPARING_TRAVELER: "PREPARING_TRAVELER",
@@ -24,6 +24,11 @@ export const BOOK_NOW_UI_PHASE = {
 } as const;
 export type BookNowUiPhase = (typeof BOOK_NOW_UI_PHASE)[keyof typeof BOOK_NOW_UI_PHASE];
 
+const PHASE_USER_MESSAGE: Record<BookNowUiPhase, string> = {
+  VALIDATING_FARE: "Checking the latest fare and availability",
+  PREPARING_TRAVELER: "Preparing traveler details",
+  NAVIGATING_TO_TRAVELER: "Almost there",
+};
 
 export type RevalidationParams = {
   searchId: string;
@@ -79,6 +84,7 @@ function enrichReturnComboPassengersUrl(url: string, params: RevalidationParams)
 export function useRevalidation() {
   const router = useRouter();
   const [state, setState] = useState<RevalidationState>("idle");
+  const [uiPhase, setUiPhase] = useState<BookNowUiPhase | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [fareChange, setFareChange] = useState<{
     originalTotal?: number;
@@ -96,8 +102,14 @@ export function useRevalidation() {
   } | null>(null);
   const MAX_FARE_CHANGE_ACCEPTS = 2;
 
+  const applyUiPhase = useCallback((phase: BookNowUiPhase) => {
+    setUiPhase(phase);
+    setMessage(PHASE_USER_MESSAGE[phase]);
+  }, []);
+
   const reset = useCallback(() => {
     setState("idle");
+    setUiPhase(null);
     setMessage(null);
     setFareChange(null);
     pendingHandoffRef.current = null;
@@ -195,9 +207,10 @@ export function useRevalidation() {
     }
     markResultsLeftForCheckout(searchId ?? lastParamsRef.current?.searchId);
     setState("loading");
-    setMessage("Preparing your trip…");
+    applyUiPhase(BOOK_NOW_UI_PHASE.PREPARING_TRAVELER);
     markBookNowTiming("T4A_checkout_prep_start", { ui_phase: BOOK_NOW_UI_PHASE.PREPARING_TRAVELER });
     markBookNowTiming("T4C_passengers_url_ready", { handoff: resolved.slice(0, 120) });
+    applyUiPhase(BOOK_NOW_UI_PHASE.NAVIGATING_TO_TRAVELER);
     markBookNowTiming("T6_nav_start", {
       ui_phase: BOOK_NOW_UI_PHASE.NAVIGATING_TO_TRAVELER,
       handoff: resolved.slice(0, 120),
@@ -276,7 +289,7 @@ export function useRevalidation() {
     }
     window.location.assign(resolved);
     return true;
-  }, [router]);
+  }, [applyUiPhase, router]);
 
   const runRevalidation = useCallback(
     async (params: RevalidationParams, acceptFareChange = false) => {
@@ -368,7 +381,7 @@ export function useRevalidation() {
       if (inFlightRef.current) return;
       inFlightRef.current = true;
       setState("loading");
-      setMessage("Validating fare…");
+      applyUiPhase(BOOK_NOW_UI_PHASE.VALIDATING_FARE);
       markBookNowTiming("T1_handler", { phase: "continueToPassengers" });
       // Warm Traveler route/chunk while fare revalidation runs (hard nav still authoritative).
       try {
@@ -384,9 +397,9 @@ export function useRevalidation() {
         // offer before checkout handoff when the provider requires it.
         if (params.isReturnCombo && params.comboId && params.outboundKey) {
           if (providerRequiresRevalidation(params.supplierProvider)) {
-            setMessage("Validating fare…");
+            applyUiPhase(BOOK_NOW_UI_PHASE.VALIDATING_FARE);
             const progressTimer = window.setTimeout(() => {
-              setMessage("Refreshing availability…");
+              setMessage("We're still confirming this fare with the airline.");
             }, 8000);
             let result: Awaited<ReturnType<typeof runRevalidation>>;
             try {
@@ -415,6 +428,7 @@ export function useRevalidation() {
               markBookNowTiming("T3B_fare_change_decision", { fare_changed: true });
               markBookNowTiming("T3C_fare_modal_requested", { fare_changed: true });
               setFareChange({ ...change, passengersUrl: enriched ?? change.passengersUrl });
+              setUiPhase(null);
               setState("fare_change");
               return;
             }
@@ -425,7 +439,7 @@ export function useRevalidation() {
               ? enrichReturnComboPassengersUrl(result.data.passengers_url, params)
               : null;
             if (passengersUrl) {
-              setMessage("Preparing your trip…");
+              applyUiPhase(BOOK_NOW_UI_PHASE.PREPARING_TRAVELER);
               markBookNowTiming("T4_draft_prep_start", { phase: "return_combo_passengers_url" });
               const ok = await navigateHandoff(
                 passengersUrl,
@@ -439,7 +453,7 @@ export function useRevalidation() {
               setState("success");
               return;
             }
-            setMessage("Refreshing availability…");
+            applyUiPhase(BOOK_NOW_UI_PHASE.VALIDATING_FARE);
           }
           markResultsLeftForCheckout(params.searchId);
           markBookNowTiming("T4_draft_prep_start", { phase: "return_combo_form_fallback" });
@@ -458,9 +472,9 @@ export function useRevalidation() {
         const needsRevalidation = providerRequiresRevalidation(params.supplierProvider);
 
         if (needsRevalidation) {
-          setMessage("Validating fare…");
+          applyUiPhase(BOOK_NOW_UI_PHASE.VALIDATING_FARE);
           const progressTimer = window.setTimeout(() => {
-            setMessage("Refreshing availability…");
+            setMessage("We're still confirming this fare with the airline.");
           }, 8000);
           let result: Awaited<ReturnType<typeof runRevalidation>>;
           try {
@@ -496,6 +510,7 @@ export function useRevalidation() {
             markBookNowTiming("T3B_fare_change_decision", { fare_changed: true });
             markBookNowTiming("T3C_fare_modal_requested", { fare_changed: true });
             setFareChange(change);
+            setUiPhase(null);
             setState("fare_change");
             return;
           }
@@ -536,7 +551,7 @@ export function useRevalidation() {
         inFlightRef.current = false;
       }
     },
-    [classifyFailure, extractFareChange, navigateHandoff, router, runRevalidation],
+    [applyUiPhase, classifyFailure, extractFareChange, navigateHandoff, router, runRevalidation],
   );
 
   const acceptFareChange = useCallback(async () => {
@@ -582,6 +597,7 @@ export function useRevalidation() {
           markBookNowTiming("T3B_fare_change_decision", { fare_changed: true, second: true });
           markBookNowTiming("T3C_fare_modal_requested", { fare_changed: true, second: true });
           setFareChange(secondChange);
+          setUiPhase(null);
           setState("fare_change");
           setMessage("The fare changed again. Please review the updated price.");
           return;
@@ -639,6 +655,7 @@ export function useRevalidation() {
 
   return {
     state,
+    uiPhase,
     message,
     fareChange,
     continueToPassengers,

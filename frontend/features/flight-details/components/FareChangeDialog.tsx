@@ -57,7 +57,7 @@ export function FareChangeDialog({
               onAccept();
             }}
           >
-            {loading ? "Continuing…" : "Accept new fare"}
+            {loading ? "Continuing…" : "Continue with updated fare"}
           </PrimaryButton>
         </>
       }

@@ -15,9 +15,9 @@ import { FareRulesAccordion } from "@/features/flight-details/components/FareRul
 import {
   OfferExpiredState,
   OfferUnavailableState,
-  RevalidationPanel,
   SupplierTimeoutState,
 } from "@/features/flight-details/components/OfferStatePanels";
+import { FareProcessingTransition } from "@/features/flight-details/components/FareProcessingTransition";
 import { PriceBreakdown } from "@/features/flight-details/components/PriceBreakdown";
 import { SegmentDetails } from "@/features/flight-details/components/SegmentDetails";
 import { useFlightDetails } from "@/features/flight-details/hooks/use-flight-details";
@@ -180,12 +180,14 @@ export function FareSelectionPage() {
               <PriceBreakdown offer={offer} breakdown={fallback?.fare_breakdown} />
 
               {revalidation.state === "loading" ? (
-                <RevalidationPanel message={revalidation.message ?? "Checking the latest fare…"} />
+                <FareProcessingTransition
+                  phase={revalidation.uiPhase ?? "VALIDATING_FARE"}
+                />
               ) : null}
               {revalidation.state === "unavailable" ? (
                 <OfferUnavailableState
-                  title="Fare unavailable"
-                  message={revalidation.message ?? "This fare is no longer available."}
+                  title="This fare is no longer available"
+                  message={revalidation.message ?? "Choose another flight or start a fresh search."}
                   onNewSearch={() => router.push("/")}
                 />
               ) : null}
