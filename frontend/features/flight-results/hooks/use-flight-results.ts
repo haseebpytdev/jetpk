@@ -90,6 +90,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   const abortRef = useRef<AbortController | null>(null);
   const pollAbortRef = useRef<AbortController | null>(null);
   const requestSeq = useRef(0);
+  const pollGenerationRef = useRef(0);
   const readyRef = useRef(false);
   const lastBootstrappedId = useRef<string | null>(null);
   const skipNextFilterRefresh = useRef(true);
@@ -115,6 +116,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       clearTimeout(pollTimerRef.current);
       pollTimerRef.current = null;
     }
+    pollGenerationRef.current += 1;
     pollAbortRef.current?.abort();
     pollAbortRef.current = null;
     setSearchStillActive(false);
@@ -204,8 +206,13 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         signal: controller.signal,
       });
 
-      if (seq !== requestSeq.current || controller.signal.aborted) {
-        return { shouldPoll: false, visible: 0 };
+      // Aborted/stale polls must not halt the cadence loop. A newer poll or refresh
+      // bumps requestSeq / aborts the fetch; the scheduler decides whether to continue.
+      if (controller.signal.aborted) {
+        return { shouldPoll: true, visible: 0, aborted: true as const };
+      }
+      if (seq !== requestSeq.current) {
+        return { shouldPoll: phase === "poll", visible: 0, stale: true as const };
       }
 
       if (!response.ok) {
@@ -232,6 +239,21 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
 
       const payload = response.data;
       const pipeline = resolvePipelineStatus(payload);
+      // Empty progressive polls: skip merge/setData churn while still searching.
+      // Cadence + message updates remain; first non-empty poll applies normally.
+      if (
+        phase === "poll" &&
+        countVisibleResults(payload) === 0 &&
+        countVisibleResults(dataRef.current) === 0 &&
+        isActiveSearchStatus(pipeline) &&
+        !isTerminalSearchStatus(pipeline)
+      ) {
+        const elapsedEmpty = Date.now() - searchStartedAt.current;
+        setStatus("searching");
+        setMessage(stagedSearchMessage(elapsedEmpty, tripType, false));
+        setSearchStillActive(true);
+        return { shouldPoll: true, nextStatus: "searching" as const, visible: 0 };
+      }
       // Progressive polls merge while search is ACTIVE; terminal ready/empty/failed
       // must reconcile to canonical backend truth (never permanently retain rejected partials).
       const shouldMerge =
@@ -244,16 +266,29 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
       setIsLoadingMore(false);
       return result;
     },
-    [applyPayload, filters, laravelSort, representationCacheKey, viewKey],
+    [applyPayload, filters, laravelSort, representationCacheKey, tripType, viewKey],
   );
 
   const schedulePoll = useCallback(
     (id: string) => {
       stopPolling();
       setSearchStillActive(true);
+      const generation = pollGenerationRef.current;
       const tick = async () => {
-        const elapsed = Date.now() - searchStartedAt.current;
+        if (pollGenerationRef.current !== generation) return;
+        const tickStarted = Date.now();
+        const elapsed = tickStarted - searchStartedAt.current;
         const result = await loadPage(id, 1, false, "poll");
+        if (pollGenerationRef.current !== generation) return;
+        // Aborted/stale: another poll/refresh superseded this tick — keep cadence alive.
+        if (result?.aborted || result?.stale) {
+          const spent = Date.now() - tickStarted;
+          const delay = Math.max(0, POLL_INTERVAL_MS - spent);
+          pollTimerRef.current = setTimeout(() => {
+            void tick();
+          }, delay);
+          return;
+        }
         if (!result?.shouldPoll) {
           stopPolling();
           return;
@@ -277,9 +312,13 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
           setSearchStillActive(false);
           return;
         }
+        // Compensate: prior loop did await(loadPage) + 200ms, so actual interval was
+        // ~RTT+parse+200 (~600–900ms). Target wall cadence ≈ POLL_INTERVAL_MS.
+        const spent = Date.now() - tickStarted;
+        const delay = Math.max(0, POLL_INTERVAL_MS - spent);
         pollTimerRef.current = setTimeout(() => {
           void tick();
-        }, POLL_INTERVAL_MS);
+        }, delay);
       };
       pollTimerRef.current = setTimeout(() => {
         void tick();

@@ -17,7 +17,35 @@ RESULT_DEPLOY=PASS (9bbb9c16 / XZ7Lahyn3D9lKHj99gRl6)
 RESULT_RETURN_N30=FAIL first_useful P50=6773 P95=11251 (server FIRST_VALID_PAIR_PERSISTED ~2.7s)
 RESULT_NOTE=init_error UTF-8 BOM on /laravel/flights/results/search — search_id overlap never engaged
 
-## ITERATION_03 (in progress)
+## ITERATION_03
 ROOT_CAUSE=config/ota-flights.php UTF-8 BOM (EF BB BF) prepended to every Laravel JSON response → JSON.parse fails → SearchModule/cert cannot use search_id
 FIX=Strip BOM from config/ota-flights.php; harden initFlightSearch + cert harness to strip \uFEFF
-RESULT=pending deploy + Return/Traveler N>=30 recert
+RESULT_DEPLOY=PASS (84543e9e / BPsy9Vjym-lwJQzYb7qTs)
+RESULT_RETURN_N30_COLD=P50=4068 P95=6449 (init works; still over 4500)
+RESULT_TRAVELER_N30=P50=3530 P95=5018; FARE_P95=3508 supplier floor; RESPONSE_TO_NAV=0; shell_p95=524; skeleton=0
+
+## ITERATION_04
+ROOT_CAUSE=Poll loop started only after first init loadPage; cold Next contexts inflated P95
+FIX=200ms poll; schedulePoll immediately; homepage prefetch of /flights/results (b7e51260)
+RESULT_DEPLOY=PASS (b7e51260 / 5awYV0VBokLCj8sCbfcKS)
+RESULT_RETURN_N30_COLD=P50=4225 P95=7650 (cold-context overstated)
+RESULT_RETURN_N30_WARM=P50=3366 P95=4922 under4500=27/30 — still ~422ms over absolute gate
+
+## ITERATION_03_BOM_GATE (re-verified this loop)
+OTA_FLIGHTS_UTF8_BOM_PRESENT_AFTER_FIX=NO
+JSON_RESPONSE_PREFIX_BYTES_VALID=YES
+JSON_PARSE_FAILURE_COUNT=0
+SEARCH_ID_AVAILABLE=YES
+SEARCHMODULE_SEARCH_ID_USED=YES (30/30 warm)
+Evidence: bom-proof-iter03.md
+
+## ITERATION_05 (in progress)
+ROOT_CAUSE=Poll loop awaited loadPage then always slept +200ms → ACTUAL_POLL_INTERVAL_P95≈933ms; empty polls still ran merge/setData churn; aborted/stale polls could halt cadence
+FIX=Compensate poll delay to target wall cadence; generation-guarded abort/stale continue; skip empty progressive merge/setData
+RESULT_DEPLOY=pending
+RESULT_RETURN_N30=pending
+
+## OPEN
+RETURN_LATENCY_CLOSED=NO (warm P95=4922 vs <=4500)
+TRAVELER_LATENCY_CLOSED=NO (total P95=5018; fare supplier floor ~3508; JP post-fare ~1.6–2.2s)
+PRODUCTION=b7e51260 / 5awYV0VBokLCj8sCbfcKS
