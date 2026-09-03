@@ -1159,6 +1159,10 @@ class FlightSearchService
             $warnings = [...$warnings, ...$result->warnings];
             $acceptedForMerge = 0;
             $batchOffers = [];
+            // JP-DEEP-CLOSURE-01: do not wait to price the full Sabre batch (~40–80
+            // offers, historically ~1.5–2.5s) before the first progressive publish.
+            // First priced offer → onProgress immediately; full batch republishes after.
+            $earlyProgressFired = false;
 
             Log::info('flight_search.pipeline', [
                 'stage' => 'supplier_adapter_returned',
@@ -1251,6 +1255,22 @@ class FlightSearchService
                 $offers[] = $displayRow;
                 $batchOffers[] = $displayRow;
                 $acceptedForMerge++;
+
+                if ($onProgress !== null && ! $earlyProgressFired && $batchOffers !== []) {
+                    $onProgress($offers, $warnings);
+                    $earlyProgressFired = true;
+                    if ($perf !== null) {
+                        $perf->mark('T_FIRST_EARLY_PARTIAL_PUBLISH');
+                    }
+                    Log::info('flight_search.pipeline', [
+                        'stage' => 'early_partial_progress_published',
+                        'provider' => $connection->provider->value,
+                        'connection_id' => $connection->id,
+                        'search_origin' => $request->origin,
+                        'offers_so_far' => count($offers),
+                        'batch_offers_so_far' => count($batchOffers),
+                    ]);
+                }
             }
 
             $supplierCallSummaries[] = [
@@ -1298,9 +1318,11 @@ class FlightSearchService
                 'pricing_accepted_count' => count($result->offers),
                 'normalize_issue_histogram' => $normalizeRejectHistogram,
                 'post_pricing_issue_histogram' => $postPricingRejectHistogram,
+                'early_partial_published' => $earlyProgressFired,
             ]);
 
-            if ($onProgress !== null && $batchOffers !== []) {
+            // Republish full connection batch when more offers were priced after early partial.
+            if ($onProgress !== null && $batchOffers !== [] && (! $earlyProgressFired || count($batchOffers) > 1)) {
                 $onProgress($offers, $warnings);
             }
         }

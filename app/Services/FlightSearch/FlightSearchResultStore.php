@@ -539,19 +539,15 @@ class FlightSearchResultStore
     }
 
     /**
-     * Resolve a cached offer for checkout freshness / revalidation (includes stale search payloads).
+     * Resolve an offer from an already-loaded search payload (avoids a second store read).
      *
+     * @param  array<string, mixed>  $payload
      * @return array<string, mixed>|null
      */
-    public function findOfferForCheckoutTransition(string $searchId, string $offerId): ?array
+    public function findOfferInPayload(array $payload, string $offerId): ?array
     {
         $offerId = trim($offerId);
         if ($offerId === '') {
-            return null;
-        }
-
-        $payload = $this->get($searchId, false);
-        if ($payload === null) {
             return null;
         }
 
@@ -586,48 +582,31 @@ class FlightSearchResultStore
     }
 
     /**
+     * Resolve a cached offer for checkout freshness / revalidation (includes stale search payloads).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findOfferForCheckoutTransition(string $searchId, string $offerId): ?array
+    {
+        $payload = $this->get($searchId, false);
+        if ($payload === null) {
+            return null;
+        }
+
+        return $this->findOfferInPayload($payload, $offerId);
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public function findOffer(string $searchId, string $offerId): ?array
     {
-        $offerId = trim($offerId);
-        if ($offerId === '') {
-            return null;
-        }
-
         $payload = $this->get($searchId, true);
         if ($payload === null) {
             return null;
         }
 
-        foreach ($this->displayOffersFromPayload($payload) as $offer) {
-            if (! is_array($offer)) {
-                continue;
-            }
-            if ((string) ($offer['id'] ?? '') === $offerId || (string) ($offer['offer_id'] ?? '') === $offerId) {
-                if ($this->isOfferBlockedForSelection($offer)) {
-                    return null;
-                }
-
-                return $offer;
-            }
-        }
-
-        $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
-        foreach ($offers as $offer) {
-            if (! is_array($offer)) {
-                continue;
-            }
-            if ((string) ($offer['id'] ?? '') === $offerId || (string) ($offer['offer_id'] ?? '') === $offerId) {
-                if ($this->isOfferBlockedForSelection($offer)) {
-                    return null;
-                }
-
-                return $offer;
-            }
-        }
-
-        return null;
+        return $this->findOfferInPayload($payload, $offerId);
     }
 
     /**
@@ -643,17 +622,20 @@ class FlightSearchResultStore
     }
 
     /**
+     * Patch revalidation meta onto a cached offer.
+     *
      * @param  array<string, mixed>  $metaPatch
+     * @return array{ok: bool, offer: array<string, mixed>|null, payload: array<string, mixed>|null}
      */
-    public function patchOfferRevalidationMeta(string $searchId, string $offerId, array $metaPatch): bool
+    public function patchOfferRevalidationMeta(string $searchId, string $offerId, array $metaPatch): array
     {
         $payload = $this->get($searchId);
         if ($payload === null) {
-            return false;
+            return ['ok' => false, 'offer' => null, 'payload' => null];
         }
 
         $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
-        $updated = false;
+        $updatedOffer = null;
 
         foreach ($offers as $idx => $offer) {
             if (! is_array($offer)) {
@@ -664,18 +646,18 @@ class FlightSearchResultStore
                 continue;
             }
             $offers[$idx] = array_merge($offer, $metaPatch);
-            $updated = true;
+            $updatedOffer = $offers[$idx];
             break;
         }
 
-        if (! $updated) {
-            return false;
+        if ($updatedOffer === null) {
+            return ['ok' => false, 'offer' => null, 'payload' => $payload];
         }
 
         $payload['offers'] = $offers;
         $this->storePut($this->key($searchId), $payload);
 
-        return true;
+        return ['ok' => true, 'offer' => $updatedOffer, 'payload' => $payload];
     }
 
     /**

@@ -319,7 +319,7 @@ class FlightController extends Controller
             ], 410);
         }
 
-        $offer = $this->searchStore->findOfferForCheckoutTransition($searchId, $offerId);
+        $offer = $this->searchStore->findOfferInPayload($payload, $offerId);
         if ($offer === null) {
             return response()->json([
                 'success' => false,
@@ -369,9 +369,13 @@ class FlightController extends Controller
 
         if (($refresh['success'] ?? false) === true) {
             $metaPatch = is_array($refresh['meta_patch'] ?? null) ? $refresh['meta_patch'] : [];
-            $this->searchStore->patchOfferRevalidationMeta($searchId, $offerId, $metaPatch);
-            $payload = $this->searchStore->get($searchId);
-            $offer = $this->searchStore->findOffer($searchId, $offerId) ?? $offer;
+            $patched = $this->searchStore->patchOfferRevalidationMeta($searchId, $offerId, $metaPatch);
+            if (($patched['ok'] ?? false) === true && is_array($patched['payload'] ?? null)) {
+                $payload = $patched['payload'];
+                $offer = is_array($patched['offer'] ?? null)
+                    ? $patched['offer']
+                    : ($this->searchStore->findOfferInPayload($payload, $offerId) ?? $offer);
+            }
             $freshness = app(SabreOfferFreshness::class);
             $freshnessMeta = $freshness->sanitizeForCustomerApi(
                 $freshness->buildOfferFreshnessMeta($offer, $payload, $metaPatch),
@@ -528,11 +532,14 @@ class FlightController extends Controller
 
         $metaPatch = is_array($refresh['meta_patch'] ?? null) ? $refresh['meta_patch'] : [];
         if ($metaPatch !== []) {
-            $this->searchStore->patchOfferRevalidationMeta($searchId, $offerId, $metaPatch);
+            $patched = $this->searchStore->patchOfferRevalidationMeta($searchId, $offerId, $metaPatch);
+            if (($patched['ok'] ?? false) === true && is_array($patched['payload'] ?? null)) {
+                $payload = $patched['payload'];
+                $offer = is_array($patched['offer'] ?? null) ? $patched['offer'] : $offer;
+            }
         }
 
         $freshness = app(SabreOfferFreshness::class);
-        $offer = $this->searchStore->findOffer($searchId, $offerId) ?? $offer;
         $freshnessMeta = $freshness->sanitizeForCustomerApi(
             $freshness->buildOfferFreshnessMeta($offer, $payload, $metaPatch),
         );
@@ -590,7 +597,10 @@ class FlightController extends Controller
         $metaPatch = is_array($refresh['meta_patch'] ?? null) ? $refresh['meta_patch'] : [];
 
         if ($metaPatch !== []) {
-            $this->searchStore->patchOfferRevalidationMeta($searchId, $offerId, $metaPatch);
+            $patched = $this->searchStore->patchOfferRevalidationMeta($searchId, $offerId, $metaPatch);
+            if (($patched['ok'] ?? false) === true && is_array($patched['offer'] ?? null)) {
+                $offer = $patched['offer'];
+            }
             $validatedFare = is_array($metaPatch['fare_breakdown'] ?? null) ? $metaPatch['fare_breakdown'] : null;
             $validatedRaw = is_array($metaPatch['raw_payload'] ?? null) ? $metaPatch['raw_payload'] : null;
             if ($validatedFare !== null || $validatedRaw !== null) {
@@ -602,10 +612,10 @@ class FlightController extends Controller
                     $offerPatch['raw_payload'] = $validatedRaw;
                 }
                 $this->searchStore->refreshOfferFromSearch($searchId, $offerId, $offerPatch);
+                $offer = $this->searchStore->findOffer($searchId, $offerId) ?? $offer;
             }
         }
 
-        $offer = $this->searchStore->findOffer($searchId, $offerId) ?? $offer;
         $publicStatus = (string) ($revalidation['revalidation_status'] ?? 'failed');
         $canContinue = in_array($publicStatus, ['valid', 'changed'], true);
 

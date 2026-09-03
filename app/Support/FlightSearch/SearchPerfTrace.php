@@ -449,6 +449,9 @@ final class SearchPerfTrace
             'LAST_ELIGIBLE_PROVIDER_NETWORK_START_MS' => $this->lastEligibleProviderNetworkStartMs,
             'PROVIDER_START_SPREAD_MS' => $spread,
             'FIRST_PROVIDER_RESPONSE_MS' => $this->firstProviderResponseMs,
+            'FIRST_EARLY_PARTIAL_PUBLISH_MS' => isset($this->marks['T_FIRST_EARLY_PARTIAL_PUBLISH'])
+                ? round($this->elapsedMsSinceT0($this->marks['T_FIRST_EARLY_PARTIAL_PUBLISH']), 3)
+                : null,
             'FIRST_VALID_OUTBOUND_MS' => $this->firstValidOutboundMs,
             'FIRST_VALID_PAIR_MS' => $this->firstValidPairMs,
             'FIRST_VALID_PAIR_PERSISTED_MS' => $this->firstValidPairPersistedMs,
@@ -536,6 +539,7 @@ final class SearchPerfTrace
             'LAST_ELIGIBLE_PROVIDER_NETWORK_START_MS' => $s['LAST_ELIGIBLE_PROVIDER_NETWORK_START_MS'],
             'PROVIDER_START_SPREAD_MS' => $s['PROVIDER_START_SPREAD_MS'],
             'FIRST_PROVIDER_RESPONSE_MS' => $s['FIRST_PROVIDER_RESPONSE_MS'],
+            'FIRST_EARLY_PARTIAL_PUBLISH_MS' => $s['FIRST_EARLY_PARTIAL_PUBLISH_MS'],
             'FIRST_VALID_OUTBOUND_MS' => $s['FIRST_VALID_OUTBOUND_MS'],
             'FIRST_VALID_PAIR_MS' => $s['FIRST_VALID_PAIR_MS'],
             'FIRST_VALID_PAIR_PERSISTED_MS' => $s['FIRST_VALID_PAIR_PERSISTED_MS'],
