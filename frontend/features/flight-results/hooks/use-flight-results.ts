@@ -281,7 +281,8 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         const result = await loadPage(id, 1, false, "poll");
         if (pollGenerationRef.current !== generation) return;
         // Aborted/stale: another poll/refresh superseded this tick — keep cadence alive.
-        if (result?.aborted || result?.stale) {
+        const pollFlags = result as { aborted?: boolean; stale?: boolean; shouldPoll?: boolean; visible?: number } | null | undefined;
+        if (pollFlags?.aborted || pollFlags?.stale) {
           const spent = Date.now() - tickStarted;
           const delay = Math.max(0, POLL_INTERVAL_MS - spent);
           pollTimerRef.current = setTimeout(() => {
@@ -289,11 +290,11 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
           }, delay);
           return;
         }
-        if (!result?.shouldPoll) {
+        if (!pollFlags?.shouldPoll) {
           stopPolling();
           return;
         }
-        const visible = typeof result.visible === "number" ? result.visible : 0;
+        const visible = typeof pollFlags.visible === "number" ? pollFlags.visible : 0;
         if (elapsed >= CLIENT_SEARCH_DEADLINE_MS && visible === 0) {
           stopPolling();
           setStatus("failed");
