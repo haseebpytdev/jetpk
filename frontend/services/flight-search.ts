@@ -77,7 +77,10 @@ export async function initFlightSearch(
     });
 
     if (response.status === 422) {
-      const body = (await response.json()) as { message?: string; errors?: LaravelValidationErrors };
+      const body = JSON.parse((await response.text()).replace(/^\uFEFF/, "")) as {
+        message?: string;
+        errors?: LaravelValidationErrors;
+      };
       return {
         ok: false,
         message: body.message ?? "Please fix the highlighted search fields.",
@@ -98,7 +101,9 @@ export async function initFlightSearch(
       };
     }
 
-    const data = (await response.json()) as FlightSearchInitResponse;
+    // Strip UTF-8 BOM if a PHP config/source file contaminates JSON output.
+    const raw = await response.text();
+    const data = JSON.parse(raw.replace(/^\uFEFF/, "")) as FlightSearchInitResponse;
 
     return { ok: true, data, resultsPath: resolveResultsPath(data, query) };
   } catch (error) {
