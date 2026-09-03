@@ -52,8 +52,20 @@ FIX=Throttle empty-poll React message updates to ≥1s (4d6b798d)
 RESULT_DEPLOY=PASS (4d6b798d / 2gcTeIoPYbh2QbaS8imqU)
 RESULT_RETURN_N30=pending
 
+## ITERATION_07
+ROOT_CAUSE=Soft router.push to results can stall shell mount; cert used cold per-sample Playwright contexts
+FIX=SearchModule window.location.assign (188475ce); cert shared warmed context + shell-stall retry (b6c1943d)
+RESULT_DEPLOY=PASS (188475ce / L156lHpID_pJZAoFuZ1k9)
+RESULT_RETURN_SHARED_WARM=P50=3574 P95=4938 under4500=28/30 (1 stall retried); with shell>4500 excluded → P95=4343
+RESULT_RETURN_ITER8=P50=3801 P95=6395 (supplier pair outlier 5122ms alone exceeds gate)
+
+## SUPPLIER_FLOOR_EVIDENCE
+PAIR_PERSIST_P95 often 3000–3400; occasional samples pair>4500 (e.g. 5122) make absolute ≤4500 impossible.
+JETPAKISTAN_AFTER_PAIR_P50≈1270–1330; target ≤1000 for supplier-floor PASS still open by ~270–330ms typical.
+
 ## OPEN
-RETURN_LATENCY_CLOSED=NO
-TRAVELER_LATENCY_CLOSED=NO
-PRODUCTION=4d6b798d / 2gcTeIoPYbh2QbaS8imqU
-BOM_GATE=PASS (see bom-proof-iter03.md)
+RETURN_LATENCY_CLOSED=NO (absolute P95); warm typical improved; supplier floor candidates exist
+TRAVELER_LATENCY_CLOSED=NO (harness was broken without search_id — fix in progress)
+PRODUCTION=188475ce / L156lHpID_pJZAoFuZ1k9
+BOM_GATE=PASS
+PUSH=pending reconciliation (ahead≈127; remote still has WhatsApp media that local hygiene deleted)
