@@ -34,7 +34,7 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
           <div className="flex min-w-0 items-center justify-start">
             <Link
               href="/"
-              prefetch={false}
+              prefetch
               className="shrink-0 rounded-jp-md focus-visible:outline-none focus-visible:shadow-jp-focus"
               aria-label="JetPakistan home"
               data-testid="site-logo-link"
@@ -58,7 +58,7 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
               ) : (
                 <LinkButton
                   href="/login"
-                  prefetch={false}
+                  prefetch
                   variant="secondary"
                   className={anonymousLoginActionClass}
                   data-testid="header-login-cta"

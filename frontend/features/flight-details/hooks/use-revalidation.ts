@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import { bookNowTimingSnapshot, markBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
 import {
@@ -381,8 +382,13 @@ export function useRevalidation() {
     async (params: RevalidationParams) => {
       if (inFlightRef.current) return;
       inFlightRef.current = true;
-      setState("loading");
-      applyUiPhase(BOOK_NOW_UI_PHASE.VALIDATING_FARE);
+      // Flush processing transition before awaiting supplier work so ACK paint
+      // is not deferred behind the first revalidation network hop (ACK P95 gate).
+      flushSync(() => {
+        setState("loading");
+        applyUiPhase(BOOK_NOW_UI_PHASE.VALIDATING_FARE);
+        setFareChange(null);
+      });
       markBookNowTiming("T1_handler", { phase: "continueToPassengers" });
       // Warm Traveler route/chunk while fare revalidation runs (hard nav still authoritative).
       try {
@@ -390,7 +396,6 @@ export function useRevalidation() {
       } catch {
         /* ignore */
       }
-      setFareChange(null);
       lastParamsRef.current = params;
 
       try {

@@ -217,7 +217,12 @@ export function SearchModule({
       // Warm the results route chunk while hard-nav still owns the handoff
       // (soft router.push previously stalled 20–40s before shell mount).
       try {
-        void router.prefetch(resultsPath);
+        await Promise.race([
+          Promise.resolve(router.prefetch(resultsPath)).then(() => undefined),
+          new Promise<void>((resolve) => {
+            window.setTimeout(resolve, 600);
+          }),
+        ]);
       } catch {
         /* prefetch is best-effort */
       }

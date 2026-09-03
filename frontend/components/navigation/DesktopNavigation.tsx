@@ -6,6 +6,7 @@ import { primaryNavigationForSession } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
 import type { PublicSession } from "@/types/session";
 import type { NavItem } from "@/types/navigation";
+import Link from "next/link";
 
 type DesktopNavigationProps = {
   className?: string;
@@ -26,13 +27,14 @@ export function DesktopNavigation({ className, session }: DesktopNavigationProps
 function DesktopNavItem({ item }: { item: NavItem }) {
   if (item.type === "link") {
     return (
-      <a
+      <Link
         href={item.href}
+        prefetch
         className="inline-flex items-center gap-2 rounded-jp-md px-3 py-2 text-jp-sm font-semibold tracking-[-0.01em] text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
       >
         <span>{item.label}</span>
         {item.badge ? <Badge variant="new">{item.badge}</Badge> : null}
-      </a>
+      </Link>
     );
   }
 

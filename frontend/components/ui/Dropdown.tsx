@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn";
 import { useEscapeKey } from "@/lib/hooks/use-escape-key";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 
 type DropdownProps = {
   trigger: (props: {
@@ -211,14 +212,15 @@ export function DropdownLinkItem({
   onNavigate?: () => void;
 }) {
   return (
-    <a
+    <Link
       href={href}
+      prefetch
       role="menuitem"
       className="block rounded-jp-sm px-3 py-2 text-jp-sm text-jp-text transition-colors hover:bg-jp-primary-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
       onClick={onNavigate}
     >
       <span className="block font-medium">{children}</span>
       {description ? <span className="mt-0.5 block text-jp-xs text-jp-muted">{description}</span> : null}
-    </a>
+    </Link>
   );
 }
