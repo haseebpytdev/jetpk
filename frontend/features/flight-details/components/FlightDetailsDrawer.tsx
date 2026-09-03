@@ -398,16 +398,12 @@ export function FlightDetailsDrawer({
                     origin={
                       typeof offer.departure_airport_code === "string"
                         ? offer.departure_airport_code
-                        : typeof offer.origin === "string"
-                          ? offer.origin
-                          : undefined
+                        : undefined
                     }
                     destination={
                       typeof offer.arrival_airport_code === "string"
                         ? offer.arrival_airport_code
-                        : typeof offer.destination === "string"
-                          ? offer.destination
-                          : undefined
+                        : undefined
                     }
                   />
                 ) : null}
