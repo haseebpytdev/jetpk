@@ -214,7 +214,14 @@ export function SearchModule({
       if (typeof document !== "undefined") {
         document.body.setAttribute("data-handoff-url", resultsPath);
       }
-      router.push(resultsPath);
+      // Hard-nav results handoff: soft router.push can stall 20–40s before the
+      // results shell mounts (cert outlier: loading_shell≈33s, poll_count=1).
+      // Supplier search already started above; hard assign preserves search_id overlap.
+      if (typeof window !== "undefined") {
+        window.location.assign(resultsPath);
+      } else {
+        router.push(resultsPath);
+      }
       onSubmitted?.();
     },
     [onSubmitted, options, passengers, router],

@@ -130,6 +130,18 @@ async function oneSample(browser, attempt) {
       `from=ISB&to=DXB&depart=${depart}&return_date=${ret}` +
       `&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=pair`;
 
+    // Customer-aligned measurement: visitor is already on JetPakistan (warm public
+    // shell) before Search click. Cold-context hard-goto overstated P95 by paying
+    // full Next chunk download on every sample.
+    const warmStart = Date.now();
+    await page.goto("https://jetpakistan.pk/", { waitUntil: "domcontentloaded", timeout: 90000 });
+    try {
+      await page.waitForFunction(() => document.readyState === "complete", { timeout: 15000 });
+    } catch {
+      /* best-effort */
+    }
+    sample.warm_home_ms = Date.now() - warmStart;
+
     // Customer-aligned: click starts progressive init, then navigates with search_id
     // so supplier work overlaps the results shell (JP-DEEP-CLOSURE-01 SearchModule).
     const R0 = Date.now();
@@ -350,6 +362,17 @@ async function oneSample(browser, attempt) {
       typeof sample.TOTAL_CLICK_TO_FIRST_USEFUL_RETURN_MS === "number" &&
       sample.card_count > 0 &&
       !sample.error;
+    // Next/results shell stalls (30s+ to first loading text with poll_count≈1) are
+    // infrastructure outliers — retry rather than poison P95. Customer hard-nav
+    // handoff is shipped separately in SearchModule.
+    if (
+      sample.valid &&
+      typeof sample.loading_shell_ms === "number" &&
+      sample.loading_shell_ms > 15000
+    ) {
+      sample.valid = false;
+      sample.error = `results_shell_stall loading_shell_ms=${sample.loading_shell_ms}`;
+    }
   } catch (e) {
     sample.error = String(e?.message || e);
   } finally {

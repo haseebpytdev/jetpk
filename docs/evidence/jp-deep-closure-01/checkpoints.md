@@ -39,13 +39,21 @@ SEARCH_ID_AVAILABLE=YES
 SEARCHMODULE_SEARCH_ID_USED=YES (30/30 warm)
 Evidence: bom-proof-iter03.md
 
-## ITERATION_05 (in progress)
+## ITERATION_05
 ROOT_CAUSE=Poll loop awaited loadPage then always slept +200ms → ACTUAL_POLL_INTERVAL_P95≈933ms; empty polls still ran merge/setData churn; aborted/stale polls could halt cadence
-FIX=Compensate poll delay to target wall cadence; generation-guarded abort/stale continue; skip empty progressive merge/setData
-RESULT_DEPLOY=pending
+FIX=Compensate poll delay; generation-guarded abort/stale continue; skip empty progressive merge/setData (1312a4c9) + TS cast for Next build
+RESULT_DEPLOY=PASS (1312a4c9 / 9fwREQn-veL1kXfV9UwJO) after emergency restore from failed typed build
+RESULT_RETURN_N30_WARM=P50=3689 P95=5297 under4500=26/30 — poll_interval_p95 rose to 1661 (empty setState thrash); pair_persist_p95=4163
+NOTE=Failed first activate rolled back via emergency .next restore; OLS gate held
+
+## ITERATION_06
+ROOT_CAUSE=Empty progressive polls called setStatus/setMessage every tick after cadence compensation
+FIX=Throttle empty-poll React message updates to ≥1s (4d6b798d)
+RESULT_DEPLOY=PASS (4d6b798d / 2gcTeIoPYbh2QbaS8imqU)
 RESULT_RETURN_N30=pending
 
 ## OPEN
-RETURN_LATENCY_CLOSED=NO (warm P95=4922 vs <=4500)
-TRAVELER_LATENCY_CLOSED=NO (total P95=5018; fare supplier floor ~3508; JP post-fare ~1.6–2.2s)
-PRODUCTION=b7e51260 / 5awYV0VBokLCj8sCbfcKS
+RETURN_LATENCY_CLOSED=NO
+TRAVELER_LATENCY_CLOSED=NO
+PRODUCTION=4d6b798d / 2gcTeIoPYbh2QbaS8imqU
+BOM_GATE=PASS (see bom-proof-iter03.md)
