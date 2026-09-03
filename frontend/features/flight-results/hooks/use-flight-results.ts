@@ -100,6 +100,7 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
   const dataRef = useRef<FlightResultsDataResponse | null>(null);
   const searchStartedAt = useRef<number>(Date.now());
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastEmptyPollMessageAt = useRef(0);
   const filtersKey = JSON.stringify(filters);
   const laravelSort = resolveLaravelSort(sort);
   const identity = searchIdentityKey(searchParams);
@@ -249,8 +250,12 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         !isTerminalSearchStatus(pipeline)
       ) {
         const elapsedEmpty = Date.now() - searchStartedAt.current;
-        setStatus("searching");
-        setMessage(stagedSearchMessage(elapsedEmpty, tripType, false));
+        // Throttle React updates on empty polls — message churn was stretching poll cadence.
+        if (elapsedEmpty - lastEmptyPollMessageAt.current >= 1000) {
+          lastEmptyPollMessageAt.current = elapsedEmpty;
+          setStatus("searching");
+          setMessage(stagedSearchMessage(elapsedEmpty, tripType, false));
+        }
         setSearchStillActive(true);
         return { shouldPoll: true, nextStatus: "searching" as const, visible: 0 };
       }
