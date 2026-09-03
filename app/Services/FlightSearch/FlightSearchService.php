@@ -1256,20 +1256,26 @@ class FlightSearchService
                 $batchOffers[] = $displayRow;
                 $acceptedForMerge++;
 
+                // Keep attempting early progressive publish until the first pair/result
+                // actually persists — a filtered first offer must not block later ones.
                 if ($onProgress !== null && ! $earlyProgressFired && $batchOffers !== []) {
+                    $hadPersistedPair = $perf !== null && $perf->firstValidPairPersistedMs() !== null;
                     $onProgress($offers, $warnings);
-                    $earlyProgressFired = true;
-                    if ($perf !== null) {
-                        $perf->mark('T_FIRST_EARLY_PARTIAL_PUBLISH');
+                    $nowPersistedPair = $perf !== null && $perf->firstValidPairPersistedMs() !== null;
+                    if ($nowPersistedPair && ! $hadPersistedPair) {
+                        $earlyProgressFired = true;
+                        if ($perf !== null) {
+                            $perf->mark('T_FIRST_EARLY_PARTIAL_PUBLISH');
+                        }
+                        Log::info('flight_search.pipeline', [
+                            'stage' => 'early_partial_progress_published',
+                            'provider' => $connection->provider->value,
+                            'connection_id' => $connection->id,
+                            'search_origin' => $request->origin,
+                            'offers_so_far' => count($offers),
+                            'batch_offers_so_far' => count($batchOffers),
+                        ]);
                     }
-                    Log::info('flight_search.pipeline', [
-                        'stage' => 'early_partial_progress_published',
-                        'provider' => $connection->provider->value,
-                        'connection_id' => $connection->id,
-                        'search_origin' => $request->origin,
-                        'offers_so_far' => count($offers),
-                        'batch_offers_so_far' => count($batchOffers),
-                    ]);
                 }
             }
 

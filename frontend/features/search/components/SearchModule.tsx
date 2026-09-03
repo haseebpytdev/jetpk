@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   handoffToGroupSearch,
   buildGroupHandoffQuery,
+  initFlightSearch,
   type SearchSubmitState,
 } from "@/services/flight-search";
 import { buildFlightResultsPagePath, buildFlightSearchQueryParams } from "../utils/laravel-payload";
@@ -175,7 +176,7 @@ export function SearchModule({
       setErrors([]);
       setSubmitState({ status: "submitting" });
 
-      const query = buildFlightSearchQueryParams({
+      const payload = {
         mode: searchMode,
         origin: primary.from.iata,
         destination: primary.to.iata,
@@ -184,8 +185,21 @@ export function SearchModule({
         segments: searchMode === "multi_city" ? draftSegments : undefined,
         passengers,
         options,
-      });
-      const resultsPath = buildFlightResultsPagePath(query);
+      };
+      const query = buildFlightSearchQueryParams(payload);
+
+      // JP-DEEP-CLOSURE-01: start progressive search before results navigation so
+      // supplier network overlaps the results shell instead of waiting for mount.
+      let resultsPath = buildFlightResultsPagePath(query);
+      try {
+        const init = await initFlightSearch(payload);
+        if (init.ok && init.resultsPath) {
+          resultsPath = init.resultsPath;
+        }
+      } catch {
+        /* navigate without search_id — results page will init as before */
+      }
+
       setSubmitState({ status: "redirecting", targetUrl: resultsPath });
       if (typeof document !== "undefined") {
         document.body.setAttribute("data-handoff-url", resultsPath);
