@@ -23,7 +23,7 @@ export type UseFlightResultsOptions = {
 };
 
 /** REG-04: after store delivery fix, cadence bounds pair→browser worst case (~interval + RTT). */
-const POLL_INTERVAL_MS = 400;
+const POLL_INTERVAL_MS = 200;
 /** Bound infinite skeleton: no usable rows after this → truthful timeout UI. */
 const CLIENT_SEARCH_DEADLINE_MS = 60_000;
 /** With partial rows, stop waiting on straggler suppliers after this. */
@@ -333,9 +333,11 @@ export function useFlightResults({ searchId, searchParams, sort, filters, view }
         setResolvedSearchId(id);
       }
 
-      const result = await loadPage(id, 1, false, "init");
       lastBootstrappedId.current = id;
-      if (!cancelled && result?.shouldPoll) {
+      // JP-DEEP-CLOSURE-01: start the poll loop immediately. Waiting for an initial
+      // loadPage round-trip before schedulePoll serialized ~1 poll interval behind
+      // pair persistence once the results shell finally hydrated.
+      if (!cancelled) {
         schedulePoll(id);
       }
     };

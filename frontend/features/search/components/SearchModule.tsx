@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   handoffToGroupSearch,
@@ -63,6 +63,16 @@ export function SearchModule({
   onSubmitted,
 }: SearchModuleProps) {
   const router = useRouter();
+
+  // Warm the results route so soft navigation after search init pays less shell cost.
+  useEffect(() => {
+    try {
+      router.prefetch("/flights/results");
+    } catch {
+      /* prefetch is best-effort */
+    }
+  }, [router]);
+
   const [productTab, setProductTab] = useState<ProductTab>("flights");
   const [tripType, setTripType] = useState<TripType>(() => hydrateTripType(initialParams));
   const mode = resolveSearchMode(productTab, tripType);
