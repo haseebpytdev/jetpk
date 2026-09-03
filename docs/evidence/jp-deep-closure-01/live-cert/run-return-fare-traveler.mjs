@@ -166,7 +166,17 @@ async function oneSample(browser, attempt) {
     const T0 = Date.now();
     sample.T0 = T0;
     await bookBtn.click({ timeout: 15000 });
-    sample.BOOK_NOW_ACK_MS = Date.now() - T0;
+    // ACK = time until processing transition paints (not click() return).
+    try {
+      await page.waitForSelector('[data-testid="fare-processing-transition"]', {
+        state: "visible",
+        timeout: 5000,
+      });
+      sample.BOOK_NOW_ACK_MS = Date.now() - T0;
+    } catch {
+      sample.BOOK_NOW_ACK_MS = Date.now() - T0;
+      sample.ack_missing_transition = true;
+    }
 
     // Fare drawer / continue
     const cont = page.locator('[data-testid="continue-to-passengers"]');

@@ -277,14 +277,14 @@ export function useRevalidation() {
       markBookNowTiming("T7_passenger_route", { nav: "hard_assign_pool_release" });
       persistTimingForContinuity();
       releaseConnectionPool();
-      // Yield so aborted font/logo/csrf streams can free sockets before document nav.
+      // Yield one task so aborted streams can free sockets — no artificial 100ms floor.
       window.setTimeout(() => {
         try {
           window.location.assign(absolute);
         } catch {
           window.location.href = absolute;
         }
-      }, 100);
+      }, 0);
       return true;
     }
     window.location.assign(resolved);
