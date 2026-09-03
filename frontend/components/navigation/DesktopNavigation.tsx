@@ -15,7 +15,7 @@ type DesktopNavigationProps = {
 export function DesktopNavigation({ className, session }: DesktopNavigationProps) {
   const items = primaryNavigationForSession(session);
   return (
-    <nav aria-label="Primary" className={cn("hidden items-center gap-1 xl:flex", className)}>
+    <nav aria-label="Primary" className={cn("hidden items-center gap-1 lg:flex", className)}>
       {items.map((item) => (
         <DesktopNavItem key={item.label} item={item} />
       ))}

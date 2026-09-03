@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ImageSlot } from "@/components/ui/ImageSlot";
-import { cn } from "@/lib/cn";
 import type { HomepageHeroContent, HomepageTrustChip } from "../types/homepage";
 import { BenefitStrip } from "../components/BenefitStrip";
 
@@ -39,7 +38,7 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
     hero.focalPoint === "left" ? "left center" : hero.focalPoint === "right" ? "right center" : "center";
 
   return (
-    <section className="relative overflow-hidden border-b border-jp-border bg-jp-page" data-testid="homepage-public-hero">
+    <section className="relative overflow-hidden bg-jp-page" data-testid="homepage-public-hero">
       <div className="relative min-h-[clamp(20rem,42vh,30rem)]">
         <div className="absolute inset-0" data-testid="homepage-hero-image">
           <picture>
@@ -59,12 +58,12 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
             />
           </picture>
           <div
-            className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-jp-page/95 dark:from-black/55 dark:via-black/35 dark:to-jp-page"
+            className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/50 dark:from-black/55 dark:via-black/35 dark:to-black/65"
             aria-hidden="true"
           />
         </div>
 
-        <PageContainer className="relative z-10 flex min-h-[clamp(20rem,42vh,30rem)] flex-col justify-end pb-0 pt-jp-3xl">
+        <PageContainer className="relative z-10 flex min-h-[clamp(20rem,42vh,30rem)] flex-col justify-end pb-jp-lg pt-jp-3xl">
           <div className="max-w-3xl pb-jp-lg text-white">
             {hero.eyebrow ? (
               <p className="text-jp-sm font-semibold uppercase tracking-[0.18em] text-white/85">{hero.eyebrow}</p>
@@ -77,19 +76,13 @@ export function PublicHero({ hero, trustChips, fallbackImage }: PublicHeroProps)
           </div>
 
           {hero.searchVisible ? (
-            <div className="relative z-20 -mb-6 sm:-mb-8" data-testid="homepage-hero-search-overlap">
+            <div className="relative z-20" data-testid="homepage-hero-search-overlap">
               <SearchModule layout="compact" />
               <BenefitStrip items={trustChips} variant="hero" className="mt-jp-md" />
             </div>
           ) : null}
         </PageContainer>
       </div>
-      {/* Compact overlap reserve only — matches -mb-* above; no orphan decorative path. */}
-      <div
-        className={cn(hero.searchVisible ? "h-6 sm:h-8" : "h-0")}
-        aria-hidden="true"
-        data-testid="homepage-hero-overlap-spacer"
-      />
     </section>
   );
 }

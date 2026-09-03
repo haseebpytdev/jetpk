@@ -14,7 +14,7 @@ type PublicFloatingActionDockProps = {
 };
 
 /**
- * JP-UI-FAB-01: unified bottom-right floating action dock for sub-xl viewports.
+ * JP-UI-FAB-01: unified bottom-right floating action dock for sub-lg viewports.
  * Uses native <details> so open/close works even if client hydration is delayed.
  */
 export function PublicFloatingActionDock({
@@ -23,6 +23,7 @@ export function PublicFloatingActionDock({
 }: PublicFloatingActionDockProps) {
   const panelId = useId();
   const detailsRef = useRef<HTMLDetailsElement>(null);
+  const summaryRef = useRef<HTMLElement>(null);
   const signedIn = session.status === "authenticated";
   const pathname = usePathname() ?? "";
   const liftForCheckoutSticky =
@@ -41,6 +42,7 @@ export function PublicFloatingActionDock({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && details.open) {
         details.open = false;
+        summaryRef.current?.focus();
       }
     };
     const onDocClick = (event: MouseEvent) => {
@@ -86,7 +88,7 @@ export function PublicFloatingActionDock({
       ref={detailsRef}
       tabIndex={-1}
       className={cn(
-        "pointer-events-none fixed right-[max(1rem,env(safe-area-inset-right))] z-50 xl:hidden",
+        "jp-public-fab-dock group pointer-events-none fixed right-[max(1rem,env(safe-area-inset-right))] z-50 lg:hidden",
         liftFab
           ? "bottom-[max(6.75rem,calc(env(safe-area-inset-bottom)+5.5rem))]"
           : "bottom-[max(1rem,env(safe-area-inset-bottom))]",
@@ -102,12 +104,16 @@ export function PublicFloatingActionDock({
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.currentTarget.open = false;
+          summaryRef.current?.focus();
         }
       }}
     >
       <summary
+        ref={summaryRef}
         className={cn(
-          "pointer-events-auto list-none inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-jp-brand text-sm font-bold text-white shadow-jp-md",
+          "pointer-events-auto list-none inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-[1.125rem] border border-white/30 bg-jp-brand text-white shadow-jp-md",
+          "transition-[transform,background-color,box-shadow] duration-jp-fast hover:-translate-y-0.5 hover:bg-jp-brand-hover hover:shadow-jp-raised active:translate-y-0 group-open:bg-jp-brand-active",
+          "motion-reduce:transform-none motion-reduce:transition-none",
           "focus-visible:outline-none focus-visible:shadow-jp-focus",
           "[&::-webkit-details-marker]:hidden",
         )}
@@ -115,16 +121,25 @@ export function PublicFloatingActionDock({
         aria-label="JetPakistan quick actions"
         data-testid="public-fab-trigger"
       >
-        JP
+        <span className="inline-flex group-open:hidden" aria-hidden="true">
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+            <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </span>
+        <span className="hidden group-open:inline-flex" aria-hidden="true">
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+            <path d="m6.5 6.5 11 11m0-11-11 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </span>
       </summary>
 
       <div
         id={panelId}
         role="group"
         aria-label="JetPakistan quick actions"
-        className="pointer-events-auto absolute bottom-16 right-0 mb-1 w-[min(18rem,calc(100vw-2rem))] rounded-jp-lg border border-jp-border bg-jp-surface p-2 shadow-jp-md"
+        className="jp-public-fab-panel pointer-events-auto absolute bottom-16 right-0 mb-2 w-[min(18rem,calc(100vw-2rem))] origin-bottom-right rounded-jp-xl border border-jp-brand-border bg-jp-surface p-3 shadow-jp-raised"
       >
-        <p className="px-2 pb-1 text-jp-xs font-semibold uppercase tracking-wide text-jp-muted">Explore</p>
+        <p className="px-2 pb-2 text-jp-xs font-semibold uppercase tracking-[0.14em] text-jp-muted">Quick actions</p>
         <ul className="max-h-[min(60vh,22rem)] space-y-1 overflow-y-auto">
           {tiles.map((tile) => (
             <li key={`${tile.label}-${tile.href}`}>
@@ -135,7 +150,7 @@ export function PublicFloatingActionDock({
                 onClick={() => {
                   if (detailsRef.current) detailsRef.current.open = false;
                 }}
-                className="flex min-h-11 items-center rounded-jp-md px-3 py-2 text-jp-sm font-semibold text-jp-text hover:bg-jp-brand-soft focus-visible:outline-none focus-visible:shadow-jp-focus"
+                className="flex min-h-12 items-center rounded-jp-md px-3 py-2 text-jp-sm font-semibold text-jp-text transition-colors duration-jp-fast hover:bg-jp-brand-soft hover:text-jp-brand focus-visible:outline-none focus-visible:shadow-jp-focus motion-reduce:transition-none"
               >
                 {tile.label}
               </Link>

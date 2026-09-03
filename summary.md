@@ -11,7 +11,19 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-09-02 (JP-UX-POLISH-02B airline identity)
+**Last updated:** 2026-09-03 (JP-HOME-UI-01 homepage shell polish)
+
+## Concurrent Codex UI Work — JP-HOME-UI-01
+
+**Status:** Integrated into `phase/jp-flight-perf-01` (JP-APP-PERF-CLOSURE-01).
+**Branch / worktree:** `phase/jp-home-ui-01-codex` / `C:\Users\khadi\ota-jetpk-codex-home-ui`
+**Source HEAD:** `b6c1943dc2164faceb3d42f76dc33c05bd769b92`
+**Current Codex HEAD:** branch tip containing this entry (exact SHA in the final return)
+
+**Scope / behavior:** Homepage hero now contains the full search/trust composition with no pale gap or divider; the existing Login action uses compact branded styling; full header/FAB collapse aligns at `lg`; the existing FAB has polished open/close, focus, and touch behavior. No search logic changed.
+**Files changed:** `PublicHero`, `SiteHeader`, `DesktopNavigation`, `PublicFloatingActionDock`, `globals.css`, targeted Playwright coverage, and this entry.
+**Tests:** production build and lint pass; JP-HOME-UI-01 Playwright 7/7 at 1440/1280/1024/768/390; existing search payload contract 7/7.
+**Integration status / Cursor action:** Cherry-picked e33f3ea320b60cd35d7c510c1fd2c7992e59f539 onto performance HEAD 482632e6 with semantic review. CODEX_DIFF_REVIEW=PASS; NO_PERFORMANCE_LOGIC_OVERWRITE=YES; NO_SEARCH_BUSINESS_LOGIC_CHANGE=YES; NO_DUPLICATE_COMPONENT=YES; NO_NEW_RUNTIME_DEPENDENCY=YES.
 
 | Date | Phase | Notes |
 | --- | --- | --- |
@@ -27,6 +39,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-09-03 | JP-HOME-UI-01 | Next homepage hero keeps search + trust tags inside the image-backed flow, removes the pale spacer/divider, modernizes Login, and aligns full-header/FAB visibility at `lg`; existing FAB receives tokenized visual/focus/motion polish. No search logic or runtime dependencies changed. |
 | 2026-09-02 | JP-LARAVEL-PERF-01 pre-supplier | **`SearchPerfTrace`** T0–T13 + provider start spread on progressive search init/poll. **`PricingRuleService`** per-request active markup memo. **`AirportReferenceLookup`** + **`DefaultAgencyLookup`** request memo / stable airport TTL. Slim **`beginSearch`** payload write; eligibility skip map once per search. Tests: **`SearchPerfTraceTest`**, **`PricingRuleServiceRequestMemoTest`**, **`AirportReferenceLookupTest`**. |
 | 2026-08-24 | JP-BO-04D / JP-BO-04E (partial) | Next **Accounting** workspace: audited wallet credit/debit/reversal via `FinanceAdjustmentController` JSON + `operational-api`. Settings **SMTP** Save/Test via `AgencyCommunicationSettingsController` (masked secrets, confirmed recipient only). Legacy redirect JSON dispatch fixed for adjustments + communications. Evidence `tmp/jp-bo-04/14-16-*.txt`. |
 | 2026-08-22 | JP-INT-01 Integrations Hub | Admin **Integrations** control plane: `IntegrationRegistry` + manager facade over suppliers/AbhiPay; health history; encrypted AbhiPay settings; non-commercial Test Connection; test-mode diagnostic Test Payment (`purpose=integration_test`, PKR 1.00); legacy payments settings redirect; RBAC `integrations.*`. Docs: `docs/phases/JP-INT-01-*`. |
