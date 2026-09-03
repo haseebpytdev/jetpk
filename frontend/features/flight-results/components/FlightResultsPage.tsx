@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { FlightDetailsContext } from "@/features/flight-details";
-import { SearchModule } from "@/features/search";
 import { buildSearchSummaryFromParams, useFlightResults } from "../hooks/use-flight-results";
 import { parseFiltersFromSearchParams } from "../utils/filters";
 import { parseUiSort, type UiSortKey } from "../utils/sorting";
@@ -36,6 +35,12 @@ const INITIAL_VISIBLE_CARDS = 4;
 
 const FlightDetailsDrawer = dynamic(
   () => import("@/features/flight-details").then((mod) => mod.FlightDetailsDrawer),
+  { ssr: false },
+);
+
+// Modify-search widget is closed by default — keep it out of the results critical chunk.
+const SearchModule = dynamic(
+  () => import("@/features/search").then((mod) => mod.SearchModule),
   { ssr: false },
 );
 
