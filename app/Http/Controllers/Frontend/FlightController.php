@@ -1279,15 +1279,23 @@ class FlightController extends Controller
         $cachedPairs = is_array($payload['return_pair_options'] ?? null) ? $payload['return_pair_options'] : null;
         $cachedComboCount = (int) ($payload['return_pair_options_combo_count'] ?? 0);
         $indexComboCount = (int) ($index['combo_count'] ?? 0);
-        $usedCachedPairs = is_array($cachedPairs)
-            && $cachedPairs !== []
-            && $cachedComboCount > 0
-            && $cachedComboCount === $indexComboCount;
+        // Prefer any non-empty precomputed pairs for poll paint. Combo-count drift during
+        // progressive writes previously forced a rebuild that could return [] and hide
+        // already-persisted pairs (cert: PAIR_PERSIST_TO_POLL_READABLE ≈11.6s).
+        $usedCachedPairs = is_array($cachedPairs) && $cachedPairs !== [];
 
         if ($usedCachedPairs) {
             $paired = $cachedPairs;
             // Progressive first-paint: skip facet histogram rebuild (was part of ~3s POLL_PAIR_MERGE).
             $filterMeta = $this->buildFilterMeta([], $criteria, []);
+            if ($cachedComboCount > 0 && $indexComboCount > 0 && $cachedComboCount !== $indexComboCount) {
+                Log::notice('flight_search.return_pair_poll_using_stale_combo_cache', [
+                    'search_id' => $searchId,
+                    'cached_combo_count' => $cachedComboCount,
+                    'index_combo_count' => $indexComboCount,
+                    'cached_pair_count' => count($cachedPairs),
+                ]);
+            }
         } else {
             $airlineNameMap = AirlineDisplayNameResolver::mapForCodes(
                 AirlineDisplayNameResolver::collectCodesFromOffers($rawOffers)

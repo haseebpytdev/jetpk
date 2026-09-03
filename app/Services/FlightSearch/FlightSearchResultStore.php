@@ -333,6 +333,16 @@ class FlightSearchResultStore
                 $payload['return_split'] = $returnSplit;
                 $comboCountForMark = (int) ($returnSplit['combo_count'] ?? 0);
 
+                // Never wipe previously pollable pairs on interim progressive writes.
+                // A later snapshot can temporarily fail precompute / change combo_count
+                // and previously hid pairs from polls for multi-second stretches.
+                $priorPairs = is_array($existingPayload['return_pair_options'] ?? null)
+                    ? $existingPayload['return_pair_options']
+                    : [];
+                $priorPairComboCount = (int) ($existingPayload['return_pair_options_combo_count'] ?? 0);
+                $allowPairRetention = $trimmedOffers !== []
+                    && ! in_array($searchStatus, [self::SEARCH_STATUS_EMPTY, self::SEARCH_STATUS_FAILED], true);
+
                 // REG-04: precompute pair presentation once on write so polls do not
                 // rebuild FlightOfferDisplayPresenter work under POLL_PAIR_MERGE_MS (~3s).
                 if ($comboCountForMark > 0) {
@@ -365,9 +375,23 @@ class FlightSearchResultStore
                     }
                 }
 
+                $newPairs = is_array($payload['return_pair_options'] ?? null) ? $payload['return_pair_options'] : [];
+                if ($newPairs === [] && $allowPairRetention && $priorPairs !== []) {
+                    $payload['return_pair_options'] = $priorPairs;
+                    $payload['return_pair_options_combo_count'] = $priorPairComboCount > 0
+                        ? $priorPairComboCount
+                        : count($priorPairs);
+                    Log::notice('flight_search.return_pair_options_retained', [
+                        'search_id' => $searchId,
+                        'prior_count' => count($priorPairs),
+                        'combo_count' => $comboCountForMark,
+                        'search_status' => $searchStatus,
+                    ]);
+                }
+
                 if (app()->bound(SearchPerfTrace::class)) {
                     $perf = app(SearchPerfTrace::class);
-                    if ($comboCountForMark > 0) {
+                    if ($comboCountForMark > 0 || (is_array($payload['return_pair_options'] ?? null) && $payload['return_pair_options'] !== [])) {
                         $perf->recordFirstValidPair($pairingMs);
                     }
                     if ($trimmedOffers !== []) {
