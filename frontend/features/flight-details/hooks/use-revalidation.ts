@@ -227,10 +227,12 @@ export function useRevalidation() {
       }
     };
 
-    // JP-NEXT-PERF-02B: soft router.push to /booking/passengers hangs (RSC never
-    // completes) while results still has in-flight fonts/logos/csrf. That saturates
-    // the browser connection pool so passengers JS sits ~18s even from cache.
-    // Hard assign AFTER releasing in-flight subresources recovers FE overhead ~1.4s.
+    // JP-NEXT-PERF-02B: soft router.push to /booking/passengers can hang while
+    // results still has in-flight logos saturating the connection pool.
+    // Hard assign after releasing *image* slots recovers FE overhead.
+    // JP-APP-PERF-CLOSURE-01: do NOT window.stop() or strip preload/prefetch —
+    // that cancelled the passengers document/chunk warmup and produced
+    // TRAVELER_ROUTE_SHELL_P95≈4.5s on otherwise warm browsers.
     const isPassengersHandoff =
       resolved.startsWith("/booking/passengers") ||
       /(?:^|\/)booking\/passengers(?:\?|$)/.test(resolved);
@@ -242,7 +244,7 @@ export function useRevalidation() {
           : `/${resolved}`;
       const absolute = target.startsWith("http") ? target : `${window.location.origin}${target}`;
 
-      const releaseConnectionPool = () => {
+      const releaseImageSlots = () => {
         try {
           document.querySelectorAll("img").forEach((node) => {
             const img = node as HTMLImageElement;
@@ -257,27 +259,21 @@ export function useRevalidation() {
         } catch {
           /* ignore */
         }
-        try {
-          document.querySelectorAll('link[rel="preload"], link[rel="prefetch"]').forEach((node) => {
-            node.parentNode?.removeChild(node);
-          });
-        } catch {
-          /* ignore */
-        }
-        try {
-          window.stop();
-        } catch {
-          /* ignore */
-        }
       };
+
+      try {
+        void router.prefetch(target.startsWith("http") ? new URL(target).pathname + new URL(target).search : target);
+      } catch {
+        /* prefetch is best-effort */
+      }
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      markBookNowTiming("T5_router_push", { nav: "hard_assign_pool_release" });
-      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_pool_release" });
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_image_release" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_image_release" });
       persistTimingForContinuity();
-      releaseConnectionPool();
-      // Yield one task so aborted streams can free sockets — no artificial 100ms floor.
+      releaseImageSlots();
+      // Yield one task so aborted image streams can free sockets — no artificial floor.
       window.setTimeout(() => {
         try {
           window.location.assign(absolute);
@@ -309,6 +305,11 @@ export function useRevalidation() {
         provider: params.supplierProvider,
         acceptFareChange,
       });
+      try {
+        void router.prefetch("/booking/passengers");
+      } catch {
+        /* best-effort warmup during supplier revalidation */
+      }
       void promise.then((result) => {
         markBookNowTiming("T3_revalidate_response", {
           ok: result.ok,
