@@ -216,13 +216,9 @@ export function SearchModule({
       }
       // Warm the results route chunk while hard-nav still owns the handoff
       // (soft router.push previously stalled 20–40s before shell mount).
+      // Do not await prefetch — a bounded wait delayed assign and inflated FU.
       try {
-        await Promise.race([
-          Promise.resolve(router.prefetch(resultsPath)).then(() => undefined),
-          new Promise<void>((resolve) => {
-            window.setTimeout(resolve, 600);
-          }),
-        ]);
+        void router.prefetch(resultsPath);
       } catch {
         /* prefetch is best-effort */
       }
