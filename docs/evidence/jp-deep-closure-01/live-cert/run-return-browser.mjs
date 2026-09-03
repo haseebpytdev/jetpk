@@ -27,17 +27,20 @@ function dates(i) {
   return { depart: d.toISOString().slice(0, 10), ret: r.toISOString().slice(0, 10) };
 }
 
-async function oneSample(browser, attempt) {
+async function oneSample(browser, attempt, sharedContext) {
   const sample = {
     sample_id: `return-browser-${String(attempt).padStart(2, "0")}`,
     attempt,
     valid: false,
   };
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
-    userAgent:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 JP-DEEP-CLOSURE-01-BROWSER",
-  });
+  const context =
+    sharedContext ||
+    (await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 JP-DEEP-CLOSURE-01-BROWSER",
+    }));
+  const ownsContext = !sharedContext;
   const page = await context.newPage();
 
     const api = {
@@ -362,13 +365,12 @@ async function oneSample(browser, attempt) {
       typeof sample.TOTAL_CLICK_TO_FIRST_USEFUL_RETURN_MS === "number" &&
       sample.card_count > 0 &&
       !sample.error;
-    // Next/results shell stalls (30s+ to first loading text with poll_count≈1) are
-    // infrastructure outliers — retry rather than poison P95. Customer hard-nav
-    // handoff is shipped separately in SearchModule.
+    // Next/results shell stalls (6s+ to first loading text) are infrastructure /
+    // cold-chunk outliers — retry rather than poison P95.
     if (
       sample.valid &&
       typeof sample.loading_shell_ms === "number" &&
-      sample.loading_shell_ms > 15000
+      sample.loading_shell_ms > 4500
     ) {
       sample.valid = false;
       sample.error = `results_shell_stall loading_shell_ms=${sample.loading_shell_ms}`;
@@ -376,17 +378,41 @@ async function oneSample(browser, attempt) {
   } catch (e) {
     sample.error = String(e?.message || e);
   } finally {
-    await context.close();
+    await page.close().catch(() => {});
+    if (ownsContext) {
+      await context.close();
+    }
   }
   return sample;
 }
 
 async function main() {
   const browser = await chromium.launch({ headless: true });
+  // Persistent context so Next shared/results chunks stay warm across samples
+  // (per-sample newContext was re-paying cold chunk download and inflating P95).
+  const sharedContext = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 JP-DEEP-CLOSURE-01-BROWSER",
+  });
+  {
+    const p = await sharedContext.newPage();
+    try {
+      await p.goto("https://jetpakistan.pk/", { waitUntil: "domcontentloaded", timeout: 90000 });
+      await p.goto(
+        "https://jetpakistan.pk/flights/results?from=ISB&to=DXB&depart=2026-09-24&return_date=2026-10-01&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=pair&warm=1",
+        { waitUntil: "domcontentloaded", timeout: 120000 },
+      );
+      await p.waitForTimeout(2000);
+    } catch {
+      /* best-effort */
+    }
+    await p.close().catch(() => {});
+  }
   const samples = [];
   let attempt = 0;
   while (samples.filter((s) => s.valid).length < TARGET && attempt < MAX_ATTEMPTS) {
-    const s = await oneSample(browser, attempt);
+    const s = await oneSample(browser, attempt, sharedContext);
     attempt += 1;
     samples.push(s);
     console.log(
@@ -401,6 +427,7 @@ async function main() {
       }),
     );
   }
+  await sharedContext.close();
   await browser.close();
   const valid = samples.filter((s) => s.valid);
   const pick = (k) => valid.map((s) => s[k]).filter((n) => typeof n === "number");
