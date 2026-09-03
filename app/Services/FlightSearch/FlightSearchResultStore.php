@@ -551,7 +551,10 @@ class FlightSearchResultStore
             return null;
         }
 
-        foreach ($this->displayOffersFromPayload($payload) as $offer) {
+        // JP-APP-PERF-CLOSURE-01: lookup by id must not run consolidator/filter over the
+        // full offer set — that was costing ~2–3s on Traveler GET (S3_offer_resolve).
+        $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
+        foreach ($offers as $offer) {
             if (! is_array($offer)) {
                 continue;
             }
@@ -564,17 +567,28 @@ class FlightSearchResultStore
             }
         }
 
-        $offers = is_array($payload['offers'] ?? null) ? $payload['offers'] : [];
-        foreach ($offers as $offer) {
-            if (! is_array($offer)) {
+        // Return Pair cards use combo_id === Sabre offer id; presentation rows may
+        // remain after raw offers are trimmed — resolve via pair options then raw id.
+        $pairs = is_array($payload['return_pair_options'] ?? null) ? $payload['return_pair_options'] : [];
+        foreach ($pairs as $pair) {
+            if (! is_array($pair)) {
                 continue;
             }
-            if ((string) ($offer['id'] ?? '') === $offerId || (string) ($offer['offer_id'] ?? '') === $offerId) {
-                if ($this->isOfferBlockedForSelection($offer)) {
-                    return null;
+            $pairId = (string) ($pair['combo_id'] ?? $pair['offer_id'] ?? $pair['id'] ?? '');
+            if ($pairId === '' || $pairId !== $offerId) {
+                continue;
+            }
+            foreach ($offers as $offer) {
+                if (! is_array($offer)) {
+                    continue;
                 }
+                if ((string) ($offer['id'] ?? '') === $pairId || (string) ($offer['offer_id'] ?? '') === $pairId) {
+                    if ($this->isOfferBlockedForSelection($offer)) {
+                        return null;
+                    }
 
-                return $offer;
+                    return $offer;
+                }
             }
         }
 
