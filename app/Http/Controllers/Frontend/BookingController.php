@@ -1060,6 +1060,22 @@ class BookingController extends Controller
                 return $freshnessRedirect;
             }
 
+            // Recover authoritative bootstrap when the boolean was lost across hard-nav
+            // but Book Now already stamped valid offer_freshness (avoids a second Sabre shop).
+            if (empty($draft['authoritative_bootstrap'])
+                && is_array($draft['offer_freshness'] ?? null)
+                && $this->sabreOfferFreshness->hasValidRecentRevalidation($draft['offer_freshness'])) {
+                $this->bookingDraft->merge([
+                    'authoritative_bootstrap' => true,
+                    'authoritative_revalidation_at' => (string) (
+                        $draft['offer_freshness']['last_revalidated_at']
+                        ?? $draft['offer_freshness']['selected_offer_last_revalidated_at']
+                        ?? now()->toIso8601String()
+                    ),
+                ]);
+                $draft = $this->bookingDraft->current();
+            }
+
             $timing->mark('S5_hold_validate_start');
             $holdPreparation = $this->fareHoldService->prepareCheckoutHold(
                 searchId: (string) ($draft['search_id'] ?? ''),
