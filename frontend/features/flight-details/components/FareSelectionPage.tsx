@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
 import { OrderSummary } from "@/features/booking-layout";
@@ -51,6 +51,31 @@ export function FareSelectionPage() {
   const segments = offer?.segments ?? [];
   const isInquiry = details.data?.multicity_inquiry_only ?? offer?.multicity_inquiry_only;
   const canContinue = offer?.can_book && !isInquiry;
+
+  // Explicit selected fare (or URL fare key) → background authoritative revalidation while user reviews.
+  useEffect(() => {
+    if (!context || !offer || isInquiry) return;
+    const fareKey = (details.selectedFareKey || context.fareOptionKey || "").trim();
+    if (!fareKey) return;
+    revalidation.warmStartRevalidation({
+      searchId: context.searchId,
+      offerId: offer.offer_id,
+      fareOptionKey: fareKey,
+      selectUrl: offer.select_url,
+      supplierProvider: offer.supplier_provider ?? offer.provider,
+      isReturnCombo: Boolean(context.comboId),
+      comboId: context.comboId,
+      outboundKey: context.outboundKey,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- warm on fare identity only
+  }, [
+    context?.searchId,
+    offer?.offer_id,
+    details.selectedFareKey,
+    context?.fareOptionKey,
+    context?.comboId,
+    isInquiry,
+  ]);
 
   const showRevalidationError =
     revalidation.state === "unavailable" ||

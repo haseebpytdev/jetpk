@@ -22,6 +22,14 @@ import {
   resolvePassengerCheckoutHandoffUrl,
   warmPassengersHardNavDocument,
 } from "../utils/handoff";
+import {
+  AUTHORITATIVE_REVALIDATION_FRESH_MS,
+  BOOK_NOW_VALIDATION_SOURCE,
+  buildValidationSignature,
+  classifyBookNowValidationSource,
+  isAuthoritativeValidationFresh,
+  type BookNowValidationSource,
+} from "../utils/prevalidation-authority";
 import { redirectIfGuestBookingBlocked } from "@/features/standard-booking/services/commerce-gates-service";
 import { markResultsLeftForCheckout } from "@/features/flight-results/utils/checkout-nav";
 
@@ -91,16 +99,53 @@ function readTotal(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function paramsCacheKey(params: RevalidationParams): string {
-  return [
-    params.searchId,
-    params.offerId,
-    params.fareOptionKey ?? "",
-    params.comboId ?? "",
-    params.outboundKey ?? "",
-    params.returnFareOptionKey ?? "",
-    params.outboundFareOptionKey ?? "",
-  ].join("|");
+function paramsCacheKey(params: RevalidationParams, acceptFareChange = false): string {
+  return buildValidationSignature({
+    searchId: params.searchId,
+    offerId: params.offerId,
+    fareOptionKey: params.fareOptionKey,
+    comboId: params.comboId,
+    outboundKey: params.outboundKey,
+    outboundFareOptionKey: params.outboundFareOptionKey,
+    returnFareOptionKey: params.returnFareOptionKey,
+    supplierProvider: params.supplierProvider,
+    acceptFareChange,
+  });
+}
+
+function stampBookNowValidationSource(source: BookNowValidationSource, meta?: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  const w = window as Window & {
+    __jpBookNowValidationSource?: BookNowValidationSource;
+    __jpPrevalidationStats?: Record<string, number>;
+    __jpBookNowTiming?: { meta?: Record<string, unknown> };
+  };
+  w.__jpBookNowValidationSource = source;
+  try {
+    document.documentElement.setAttribute("data-jp-book-now-validation-source", source);
+  } catch {
+    /* ignore */
+  }
+  const stats = (w.__jpPrevalidationStats ??= {
+    prevalidations_started: 0,
+    book_now_clicks: 0,
+    fresh_reuse: 0,
+    inflight_join: 0,
+    normal_fallback: 0,
+    stale_revalidated: 0,
+    supplier_revalidation_calls: 0,
+  });
+  if (source === BOOK_NOW_VALIDATION_SOURCE.FRESH_PREVALIDATION) stats.fresh_reuse += 1;
+  if (source === BOOK_NOW_VALIDATION_SOURCE.JOINED_INFLIGHT_PREVALIDATION) stats.inflight_join += 1;
+  if (source === BOOK_NOW_VALIDATION_SOURCE.NORMAL_FALLBACK_REVALIDATION) stats.normal_fallback += 1;
+  if (source === BOOK_NOW_VALIDATION_SOURCE.STALE_PREVALIDATION_REVALIDATED) stats.stale_revalidated += 1;
+  if (w.__jpBookNowTiming) {
+    w.__jpBookNowTiming.meta = {
+      ...(w.__jpBookNowTiming.meta ?? {}),
+      book_now_validation_source: source,
+      ...(meta ?? {}),
+    };
+  }
 }
 
 /** Ensure return-combo checkout query mirrors select-return-combo handoff fields. */
@@ -143,7 +188,11 @@ export function useRevalidation() {
   const warmPromiseRef = useRef<{
     key: string;
     promise: Promise<Awaited<ReturnType<typeof revalidateOffer>>>;
+    startedAt: number;
+    completedAt: number | null;
+    generation: number;
   } | null>(null);
+  const prevalidationGenerationRef = useRef(0);
   const MAX_FARE_CHANGE_ACCEPTS = 2;
 
   const applyUiPhase = useCallback((phase: BookNowUiPhase) => {
@@ -334,21 +383,59 @@ export function useRevalidation() {
 
   const runRevalidation = useCallback(
     async (params: RevalidationParams, acceptFareChange = false) => {
-      const key = `${paramsCacheKey(params)}|accept=${acceptFareChange ? 1 : 0}`;
+      const key = paramsCacheKey(params, acceptFareChange);
       if (!acceptFareChange && warmPromiseRef.current?.key === key) {
-        return warmPromiseRef.current.promise;
+        const entry = warmPromiseRef.current;
+        const source = classifyBookNowValidationSource(
+          {
+            key: entry.key,
+            startedAt: entry.startedAt,
+            completedAt: entry.completedAt,
+          },
+          key,
+        );
+        if (source === BOOK_NOW_VALIDATION_SOURCE.STALE_PREVALIDATION_REVALIDATED) {
+          stampBookNowValidationSource(source, {
+            age_ms:
+              entry.completedAt != null ? Date.now() - entry.completedAt : null,
+            fresh_window_ms: AUTHORITATIVE_REVALIDATION_FRESH_MS,
+          });
+          warmPromiseRef.current = null;
+        } else if (
+          source === BOOK_NOW_VALIDATION_SOURCE.FRESH_PREVALIDATION ||
+          source === BOOK_NOW_VALIDATION_SOURCE.JOINED_INFLIGHT_PREVALIDATION
+        ) {
+          stampBookNowValidationSource(source, {
+            age_ms:
+              entry.completedAt != null ? Date.now() - entry.completedAt : null,
+            fresh_window_ms: AUTHORITATIVE_REVALIDATION_FRESH_MS,
+          });
+          return entry.promise;
+        }
+      } else if (!acceptFareChange) {
+        stampBookNowValidationSource(BOOK_NOW_VALIDATION_SOURCE.NORMAL_FALLBACK_REVALIDATION);
       }
+
+      const startedAt = Date.now();
+      const generation = ++prevalidationGenerationRef.current;
       const promise = revalidateOffer({
         searchId: params.searchId,
         offerId: params.offerId,
         selectedFareOptionId: params.fareOptionKey,
         acceptFareChange,
       });
+      try {
+        const w = window as Window & { __jpPrevalidationStats?: Record<string, number> };
+        if (w.__jpPrevalidationStats) w.__jpPrevalidationStats.supplier_revalidation_calls += 1;
+      } catch {
+        /* ignore */
+      }
       markBookNowTiming("T2_revalidate_start", {
         ui_phase: BOOK_NOW_UI_PHASE.VALIDATING_FARE,
         offerId: params.offerId,
         provider: params.supplierProvider,
         acceptFareChange,
+        phase: acceptFareChange ? "accept" : "authoritative",
       });
       try {
         void router.prefetch("/booking/passengers");
@@ -364,32 +451,74 @@ export function useRevalidation() {
           supplier_ms: result.timing?.supplier_ms ?? undefined,
           laravel_other_ms: result.timing?.laravel_other_ms ?? undefined,
         });
+        if (
+          !acceptFareChange &&
+          warmPromiseRef.current?.key === key &&
+          warmPromiseRef.current.generation === generation
+        ) {
+          warmPromiseRef.current.completedAt = Date.now();
+        }
       });
       if (!acceptFareChange) {
-        warmPromiseRef.current = { key, promise };
+        warmPromiseRef.current = {
+          key,
+          promise,
+          startedAt,
+          completedAt: null,
+          generation,
+        };
       }
       return promise;
     },
-    [],
+    [router],
   );
 
   /**
-   * Start read-only fare revalidation while the traveler reviews the drawer.
-   * Continue reuses the same in-flight/cached promise when fare keys match.
+   * Start read-only fare revalidation while the traveler reviews the selected fare.
+   * Book Now reuses the same in-flight/fresh promise when the authority signature matches.
    */
   const warmStartRevalidation = useCallback(
     (params: RevalidationParams) => {
       if (!providerRequiresRevalidation(params.supplierProvider)) return;
-      // R7D: warm Return combos too — drawer open overlaps live revalidate / rematch.
-      const key = `${paramsCacheKey(params)}|accept=0`;
-      if (warmPromiseRef.current?.key === key) return;
+      const key = paramsCacheKey(params, false);
+      const existing = warmPromiseRef.current;
+      if (existing?.key === key) {
+        // Same selection: keep single in-flight / fresh owner.
+        if (existing.completedAt == null) return;
+        if (isAuthoritativeValidationFresh(existing.completedAt)) return;
+        // Stale completed result — replace.
+      } else if (existing && existing.key !== key) {
+        // Fare/selection changed — previous owner becomes non-authoritative.
+        prevalidationGenerationRef.current += 1;
+        warmPromiseRef.current = null;
+      }
       lastParamsRef.current = params;
+      const startedAt = Date.now();
+      const generation = ++prevalidationGenerationRef.current;
+      try {
+        const w = window as Window & { __jpPrevalidationStats?: Record<string, number> };
+        const stats = (w.__jpPrevalidationStats ??= {
+          prevalidations_started: 0,
+          book_now_clicks: 0,
+          fresh_reuse: 0,
+          inflight_join: 0,
+          normal_fallback: 0,
+          stale_revalidated: 0,
+          supplier_revalidation_calls: 0,
+        });
+        stats.prevalidations_started += 1;
+        stats.supplier_revalidation_calls += 1;
+      } catch {
+        /* ignore */
+      }
       markBookNowTiming("T2_revalidate_start", {
         ui_phase: BOOK_NOW_UI_PHASE.VALIDATING_FARE,
         offerId: params.offerId,
         provider: params.supplierProvider,
-        phase: "warm",
+        phase: "prevalidation",
+        fare_selected_at: startedAt,
         return_combo: Boolean(params.isReturnCombo),
+        validation_signature: key.slice(0, 120),
       });
       // Warm Traveler route/chunks while drawer revalidation runs (hard nav still authoritative).
       try {
@@ -403,10 +532,16 @@ export function useRevalidation() {
         selectedFareOptionId: params.fareOptionKey,
         acceptFareChange: false,
       });
-      warmPromiseRef.current = { key, promise };
+      warmPromiseRef.current = {
+        key,
+        promise,
+        startedAt,
+        completedAt: null,
+        generation,
+      };
       void promise.then((result) => {
         markBookNowTiming("T3_revalidate_response", {
-          phase: "warm",
+          phase: "prevalidation",
           ok: result.ok,
           total_ms: result.timing?.total_ms,
           request_ms: result.timing?.request_ms,
@@ -414,7 +549,10 @@ export function useRevalidation() {
           supplier_ms: result.timing?.supplier_ms ?? undefined,
           laravel_other_ms: result.timing?.laravel_other_ms ?? undefined,
         });
-        if (warmPromiseRef.current?.key !== key) return;
+        if (warmPromiseRef.current?.key !== key || warmPromiseRef.current.generation !== generation) {
+          return; // stale selection response — ignore
+        }
+        warmPromiseRef.current.completedAt = Date.now();
         if (!result.ok) return;
         const change = extractFareChange(result.data);
         if (change) {
@@ -438,6 +576,21 @@ export function useRevalidation() {
         offerId: params.offerId,
         searchId: params.searchId,
       });
+      try {
+        const w = window as Window & { __jpPrevalidationStats?: Record<string, number> };
+        const stats = (w.__jpPrevalidationStats ??= {
+          prevalidations_started: 0,
+          book_now_clicks: 0,
+          fresh_reuse: 0,
+          inflight_join: 0,
+          normal_fallback: 0,
+          stale_revalidated: 0,
+          supplier_revalidation_calls: 0,
+        });
+        stats.book_now_clicks += 1;
+      } catch {
+        /* ignore */
+      }
       // Flush processing transition before awaiting supplier work so ACK paint
       // is not deferred behind the first revalidation network hop (ACK P95 gate).
       flushSync(() => {
