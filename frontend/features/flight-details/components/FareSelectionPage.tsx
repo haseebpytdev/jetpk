@@ -85,10 +85,13 @@ export function FareSelectionPage() {
 
   const handleContinue = () => {
     if (!offer || !context) return;
+    // Same fare identity as warmStartRevalidation — mismatched keys force a
+    // second revalidate-offer POST (DUP rematch≥2 / fetch P95 pollution).
+    const fareKey = (details.selectedFareKey || context.fareOptionKey || "").trim();
     void revalidation.continueToPassengers({
       searchId: context.searchId,
       offerId: offer.offer_id,
-      fareOptionKey: details.selectedFareKey,
+      fareOptionKey: fareKey || undefined,
       selectUrl: offer.select_url,
       supplierProvider: offer.supplier_provider ?? offer.provider,
       isReturnCombo: Boolean(context.comboId),

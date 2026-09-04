@@ -260,14 +260,15 @@ export function FlightDetailsDrawer({
         search_id: context.searchId,
         outbound_key: context.outboundKey,
       });
-      const outboundFare = toSupplierFareKey(details.selectedFareKey, details.fareOptions);
+      const outboundFare = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
       if (outboundFare) qs.set("outbound_fare_option_key", outboundFare);
       markBookNowTiming("T6_nav_start", { phase: "outbound_confirm" });
       window.location.assign(`/flights/return-options?${qs.toString()}`);
       return;
     }
 
-    const fareKey = toSupplierFareKey(details.selectedFareKey, details.fareOptions);
+    // Match warmStartRevalidation fare identity (avoid rematch≥2 / second POST).
+    const fareKey = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
     const isPair = context.legMode === "pair" || (Boolean(context.comboId) && context.legMode !== "return_confirm");
     markBookNowTiming("T1_handler", { phase: "continue_click" });
     void revalidation.continueToPassengers({
