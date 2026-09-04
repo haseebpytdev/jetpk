@@ -4,6 +4,7 @@ import type { PublicConfig } from "@/features/public-content/services/public-con
 import { AskJetPakistanChat } from "@/features/ai-assistant/components/AskJetPakistanChat";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { PublicRoutePrefetch } from "@/components/navigation/PublicRoutePrefetch";
 import type { PublicSession } from "@/types/session";
 import type { ReactNode } from "react";
 
@@ -25,6 +26,7 @@ export function PublicShell({
 }: PublicShellProps) {
   return (
     <div className="jp-page flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-jp-page text-jp-text">
+      <PublicRoutePrefetch />
       <SiteHeader session={session} branding={branding} aiEnabled={aiEnabled} />
       <main id="main-content" className="jp-main flex-1">
         {children}

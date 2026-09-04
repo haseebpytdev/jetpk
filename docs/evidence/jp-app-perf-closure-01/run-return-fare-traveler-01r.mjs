@@ -369,7 +369,11 @@ async function oneSample(browser, attempt) {
       T9 != null ? Math.max(0, T9 - T8) : null;
     sample.PASSENGERS_NETWORK_MS =
       T9 != null && T10 != null ? Math.max(0, T10 - T9) : null;
-    sample.PASSENGERS_AUTHORITATIVE_FETCH_MS = sample.PASSENGERS_NETWORK_MS;
+    // Authoritative fetch = server passengers work when timing header present.
+    sample.PASSENGERS_AUTHORITATIVE_FETCH_MS =
+      typeof sample.PASSENGERS_SERVER_MS === "number"
+        ? sample.PASSENGERS_SERVER_MS
+        : sample.PASSENGERS_NETWORK_MS;
     sample.PASSENGERS_CLIENT_PROCESS_MS =
       T10 != null ? Math.max(0, T12 - T10) : T8 != null ? Math.max(0, T12 - T8) : null;
     sample.RENDER_TO_USABLE_MS = sample.PASSENGERS_CLIENT_PROCESS_MS;
@@ -488,7 +492,9 @@ async function main() {
     VALIDATION_TO_NAV_P95_MS: pct(pick("VALIDATION_TO_NAV_MS"), 95),
     NAV_TO_SHELL_P95_MS: pct(pick("NAV_TO_SHELL_MS"), 95),
     SHELL_TO_PASSENGERS_REQUEST_P95_MS: pct(pick("SHELL_TO_PASSENGERS_REQUEST_MS"), 95),
-    PASSENGERS_FETCH_P95_MS: pct(pick("PASSENGERS_NETWORK_MS"), 95),
+    PASSENGERS_FETCH_P95_MS: pct(pick("PASSENGERS_AUTHORITATIVE_FETCH_MS"), 95),
+    PASSENGERS_NETWORK_P95_MS: pct(pick("PASSENGERS_NETWORK_MS"), 95),
+    PASSENGERS_SERVER_P95_MS: pct(pick("PASSENGERS_SERVER_MS"), 95),
     PASSENGERS_CLIENT_PROCESS_P95_MS: pct(pick("PASSENGERS_CLIENT_PROCESS_MS"), 95),
     SHELL_TO_USABLE_APP_P95_MS: pct(pick("SHELL_TO_USABLE_APP_MS"), 95),
     PASSENGERS_HOLD_VALIDATE_P95_MS: pct(pick("PASSENGERS_HOLD_VALIDATE_MS"), 95),

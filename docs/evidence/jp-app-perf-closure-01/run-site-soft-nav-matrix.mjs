@@ -100,8 +100,8 @@ function pct(arr, p) {
 
 async function softClickNav(page, href) {
   const beforeUrl = page.url();
-  const clicked = await page.evaluate((targetHref) => {
-    const links = Array.from(document.querySelectorAll("a[href]"));
+  // Prefer header/footer Link nodes; open dropdown panels when needed.
+  const clicked = await page.evaluate(async (targetHref) => {
     const norm = (h) => {
       try {
         const u = new URL(h, window.location.origin);
@@ -111,17 +111,30 @@ async function softClickNav(page, href) {
       }
     };
     const want = norm(targetHref);
-    const el = links.find((a) => norm(a.getAttribute("href") || "") === want);
+    const links = Array.from(document.querySelectorAll("a[href]"));
+    let el = links.find((a) => norm(a.getAttribute("href") || "") === want);
+    if (!el) {
+      // Open any collapsed dropdown that might contain the link.
+      const triggers = Array.from(
+        document.querySelectorAll('button[aria-haspopup="menu"], button[aria-expanded="false"]'),
+      );
+      for (const btn of triggers) {
+        btn.click();
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      el = Array.from(document.querySelectorAll("a[href]")).find(
+        (a) => norm(a.getAttribute("href") || "") === want,
+      );
+    }
     if (!el) return { ok: false, reason: "link_not_found" };
+    el.scrollIntoView({ block: "center" });
     el.click();
     return { ok: true, href: el.getAttribute("href") };
   }, href);
   if (!clicked.ok) return { ...clicked, fullReload: null };
-  await page.waitForFunction(
-    (prev) => window.location.href !== prev,
-    beforeUrl,
-    { timeout: 30000 },
-  ).catch(() => {});
+  await page
+    .waitForFunction((prev) => window.location.href !== prev, beforeUrl, { timeout: 30000 })
+    .catch(() => {});
   return clicked;
 }
 
@@ -157,36 +170,37 @@ for (const t of transitions) {
     await page.waitForTimeout(250);
 
     const navStart = Date.now();
-    let fullReload = false;
-    page.once("framenavigated", (frame) => {
-      if (frame === page.mainFrame()) {
-        // soft SPA still fires; detect document request
-      }
-    });
-
-    const reqPromise = page
-      .waitForRequest(
-        (req) =>
+    let sawDocument = false;
+    const onRequest = (req) => {
+      try {
+        if (
           req.resourceType() === "document" &&
-          new URL(req.url()).pathname.replace(/\/$/, "") === t.href.replace(/\/$/, ""),
-        { timeout: 8000 },
-      )
-      .then(() => true)
-      .catch(() => false);
+          new URL(req.url()).pathname.replace(/\/$/, "") === t.href.replace(/\/$/, "")
+        ) {
+          sawDocument = true;
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    page.on("request", onRequest);
 
     const click = await softClickNav(page, t.href);
+    let fullReload = false;
     if (!click.ok) {
-      // fallback hard
       legacyHard += 1;
       await page.goto(BASE + t.href, { waitUntil: "domcontentloaded", timeout: 120000 });
       navTypes.push("HARD_FALLBACK");
       fullReload = true;
     } else {
-      fullReload = await reqPromise;
+      // Brief settle only — do not await a multi-second document timeout on soft nav.
+      await page.waitForTimeout(80);
+      fullReload = sawDocument;
       navTypes.push(fullReload ? "HARD_DOCUMENT" : "CLIENT_SOFT");
       if (!fullReload) softCandidatesOk += 1;
       else legacyHard += 1;
     }
+    page.off("request", onRequest);
     fullReloads.push(fullReload);
 
     const shellAt = Date.now();
