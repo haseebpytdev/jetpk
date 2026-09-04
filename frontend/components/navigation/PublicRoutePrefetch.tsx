@@ -42,8 +42,8 @@ export function PublicRoutePrefetch() {
       } catch {
         /* best-effort */
       }
-      // Stagger so navigation RSC is not starved by a parallel prefetch storm.
-      timer = setTimeout(prefetchNext, 120);
+      // Wide stagger: soft-nav RSC must not share the pipe with a prefetch burst.
+      timer = setTimeout(prefetchNext, 350);
     };
 
     const start = () => {
@@ -51,12 +51,19 @@ export function PublicRoutePrefetch() {
       prefetchNext();
     };
 
-    const ric = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
-    if (typeof ric === "function") {
-      idleId = ric(start);
-    } else {
-      timer = setTimeout(start, 400);
-    }
+    // Delay past first paint/hydration so an early Link click is not contended
+    // with our own idle prefetch queue (login/about/contact/…).
+    const ric = (window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
+    }).requestIdleCallback;
+    const kickoff = () => {
+      if (typeof ric === "function") {
+        idleId = ric(start, { timeout: 4000 });
+      } else {
+        start();
+      }
+    };
+    timer = setTimeout(kickoff, 2500);
 
     return () => {
       cancelled = true;
