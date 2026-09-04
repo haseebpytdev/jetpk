@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { PassengerDetailsPage } from "@/features/standard-booking/components/PassengerDetailsPage";
+import { BookNowShellTimingMark } from "@/features/standard-booking/components/BookNowShellTimingMark";
 
 /**
  * Client page so soft-nav mounts Traveler UI without awaiting an async server
@@ -18,5 +19,10 @@ export default function PassengersClientPage() {
     return next;
   }, [searchParams]);
 
-  return <PassengerDetailsPage searchParams={normalized} />;
+  return (
+    <>
+      <BookNowShellTimingMark />
+      <PassengerDetailsPage searchParams={normalized} />
+    </>
+  );
 }

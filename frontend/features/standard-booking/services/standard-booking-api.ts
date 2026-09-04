@@ -93,9 +93,28 @@ async function standardFetch<T>(
 export async function fetchStandardPassengersContext(
   params: Record<string, string | undefined>,
 ) {
-  return standardFetch<StandardPassengersContext>(
-    `/booking/passengers?${buildQuery(params)}`,
-  );
+  return primeStandardPassengersContext(params);
+}
+
+/** Dedupe in-flight passengers GET so shell priming and page mount share one request. */
+let passengersContextPrime:
+  | {
+      key: string;
+      promise: ReturnType<typeof standardFetch<StandardPassengersContext>>;
+    }
+  | null = null;
+
+export function primeStandardPassengersContext(params: Record<string, string | undefined>) {
+  const key = buildQuery(params);
+  if (passengersContextPrime?.key === key) {
+    return passengersContextPrime.promise;
+  }
+  const promise = standardFetch<StandardPassengersContext>(`/booking/passengers?${key}`);
+  passengersContextPrime = { key, promise };
+  void promise.finally(() => {
+    // Keep resolved promise for immediate reuse; clear only on mismatch via key check above.
+  });
+  return promise;
 }
 
 export async function submitStandardPassengers(formData: FormData) {

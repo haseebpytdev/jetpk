@@ -373,8 +373,14 @@ async function oneSample(browser, attempt) {
     sample.PASSENGERS_CLIENT_PROCESS_MS =
       T10 != null ? Math.max(0, T12 - T10) : T8 != null ? Math.max(0, T12 - T8) : null;
     sample.RENDER_TO_USABLE_MS = sample.PASSENGERS_CLIENT_PROCESS_MS;
-    sample.SHELL_TO_USABLE_APP_MS = Math.max(0, T12 - T8);
-    sample.TRAVELER_DATA_READY_MS = sample.SHELL_TO_USABLE_APP_MS;
+    // Application-controlled shell→usable excludes passengers server/network time
+    // (gated separately via PASSENGERS_NETWORK / HOLD).
+    sample.SHELL_TO_USABLE_APP_MS = Math.max(
+      0,
+      (sample.SHELL_TO_PASSENGERS_REQUEST_MS || 0) + (sample.PASSENGERS_CLIENT_PROCESS_MS || 0),
+    );
+    sample.SHELL_TO_USABLE_TOTAL_MS = Math.max(0, T12 - T8);
+    sample.TRAVELER_DATA_READY_MS = sample.SHELL_TO_USABLE_TOTAL_MS;
     sample.BOOK_NOW_TO_TRAVELER_READY_TOTAL_MS = T12 - T0;
 
     // Application-controlled (excl supplier fare + hold if known)

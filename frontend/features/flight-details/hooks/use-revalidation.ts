@@ -311,14 +311,12 @@ export function useRevalidation() {
       markBookNowTiming("T7_passenger_route", { nav: "hard_assign_image_release" });
       persistTimingForContinuity();
       releaseImageSlots();
-      // Yield one task so aborted image streams can free sockets — no artificial floor.
-      window.setTimeout(() => {
-        try {
-          window.location.assign(absolute);
-        } catch {
-          window.location.href = absolute;
-        }
-      }, 0);
+      // Assign immediately after releasing image slots — no artificial setTimeout floor.
+      try {
+        window.location.assign(absolute);
+      } catch {
+        window.location.href = absolute;
+      }
       return true;
     }
     window.location.assign(resolved);
