@@ -84,12 +84,14 @@ export async function fetchManagedPage(
     }
     const query = params.toString();
     const path = `/api/public/content/pages/${pageKey}${query ? `?${query}` : ""}`;
+    const isPreview = Boolean(options?.preview || token);
     const response = await fetchWithTimeout(managedPageRequestUrl(path), {
       headers: {
         Accept: "application/json",
         ...(options?.headers ?? {}),
       },
-      cache: "no-store",
+      // Published CMS pages: short ISR. Preview must never reuse cached publish payload.
+      ...(isPreview ? { cache: "no-store" as const } : { next: { revalidate: 60 } }),
     });
     if (!response.ok) return null;
     return (await response.json()) as LaravelManagedPageResponse;

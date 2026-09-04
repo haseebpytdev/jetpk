@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMetadata } from "@/features/public-content";
@@ -9,7 +10,8 @@ import {
   readCmsPreviewToken,
 } from "@/features/public-content/utils/cms-preview";
 
-export const dynamic = "force-dynamic";
+/** Published FAQ uses short ISR; preview requests call noStore() below. */
+export const revalidate = 60;
 
 type FaqPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -24,6 +26,9 @@ export default async function FaqPage({ searchParams }: FaqPageProps) {
   const params = searchParams ? await searchParams : {};
   const preview = isCmsPreviewFlag(params.jp_preview);
   const previewToken = readCmsPreviewToken(params.jp_preview_token);
+  if (preview) {
+    noStore();
+  }
   const page = await FaqService.getFaqPage({
     preview,
     previewToken,
