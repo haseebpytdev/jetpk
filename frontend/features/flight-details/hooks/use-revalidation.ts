@@ -307,35 +307,16 @@ export function useRevalidation() {
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
-      markBookNowTiming("T5_router_push", { nav: "soft_push_after_image_release" });
-      markBookNowTiming("T7_passenger_route", { nav: "soft_push_after_image_release" });
+      markBookNowTiming("T5_router_push", { nav: "hard_assign_image_release" });
+      markBookNowTiming("T7_passenger_route", { nav: "hard_assign_image_release" });
       persistTimingForContinuity();
       releaseImageSlots();
-      // Prefer soft push after releasing image slots (hard assign was NAV_TO_SHELL≈0.8–1.1s).
-      // Fall back to hard assign if the soft transition has not committed shortly.
+      // Hard assign remains authoritative for passengers_url handoff (soft push raced
+      // fallback assign and produced hangs / destroyed contexts in 01R smoke).
       try {
-        const pathOnly = target.startsWith("http")
-          ? new URL(target).pathname + new URL(target).search
-          : target;
-        void router.push(pathOnly);
-        window.setTimeout(() => {
-          try {
-            const here = window.location.pathname + window.location.search;
-            const wantPath = pathOnly.split("?")[0] || pathOnly;
-            if (!here.startsWith(wantPath.split("?")[0] || wantPath)) {
-              markBookNowTiming("T5_router_push", { nav: "hard_assign_fallback" });
-              window.location.assign(absolute);
-            }
-          } catch {
-            window.location.assign(absolute);
-          }
-        }, 1200);
+        window.location.assign(absolute);
       } catch {
-        try {
-          window.location.assign(absolute);
-        } catch {
-          window.location.href = absolute;
-        }
+        window.location.href = absolute;
       }
       return true;
     }
