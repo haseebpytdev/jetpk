@@ -4,11 +4,16 @@ import { CurrencySelector } from "@/components/navigation/CurrencySelector";
 import type { PublicConfig } from "@/features/public-content/services/public-config-service";
 import { footerColumns, socialLinks } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
+import Link from "next/link";
 
 type SiteFooterProps = {
   className?: string;
   branding?: Pick<PublicConfig, "brand_name" | "logo_url" | "header_logo_height"> | null;
 };
+
+function isInternalHref(href: string): boolean {
+  return href.startsWith("/") && !href.startsWith("//");
+}
 
 export function SiteFooter({ className, branding = null }: SiteFooterProps) {
   return (
@@ -36,12 +41,22 @@ export function SiteFooter({ className, branding = null }: SiteFooterProps) {
               <ul className="mt-2 space-y-1">
                 {column.links.map((link) => (
                   <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="text-jp-sm text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    >
-                      {link.label}
-                    </a>
+                    {isInternalHref(link.href) ? (
+                      <Link
+                        href={link.href}
+                        prefetch
+                        className="text-jp-sm text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className="text-jp-sm text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

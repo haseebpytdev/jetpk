@@ -56,29 +56,40 @@ export function SiteHeader({ session, branding = null, aiEnabled = false }: Site
               {signedIn ? (
                 <AccountMenu session={session} />
               ) : (
-                <LinkButton
-                  href="/login"
-                  prefetch
-                  variant="secondary"
-                  className={anonymousLoginActionClass}
-                  data-testid="header-login-cta"
-                >
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
+                <>
+                  <LinkButton
+                    href="/register"
+                    prefetch
+                    variant="secondary"
+                    className="inline-flex min-h-jp-button items-center justify-center rounded-jp-pill border-transparent bg-transparent px-3 text-jp-text hover:bg-jp-primary-soft"
+                    data-testid="header-register-cta"
                   >
-                    <circle cx="12" cy="8" r="3.5" />
-                    <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
-                  </svg>
-                  <span>Login</span>
-                </LinkButton>
+                    Register
+                  </LinkButton>
+                  <LinkButton
+                    href="/login"
+                    prefetch
+                    variant="secondary"
+                    className={anonymousLoginActionClass}
+                    data-testid="header-login-cta"
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="8" r="3.5" />
+                      <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+                    </svg>
+                    <span>Login</span>
+                  </LinkButton>
+                </>
               )}
             </div>
             <div className="lg:hidden">
