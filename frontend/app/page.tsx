@@ -10,6 +10,7 @@ import type { PublicSession } from "@/types/session";
 const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
 export const revalidate = 60;
+export const dynamic = "force-static";
 
 export default function HomePage() {
   return (

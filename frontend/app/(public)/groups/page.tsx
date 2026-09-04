@@ -1,6 +1,9 @@
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 
-const GroupsLandingPage = dynamic(
+export const revalidate = 60;
+export const dynamic = "force-static";
+
+const GroupsLandingPage = nextDynamic(
   () =>
     import("@/features/group-ticketing/components/GroupsLandingPage").then((m) => m.GroupsLandingPage),
   {

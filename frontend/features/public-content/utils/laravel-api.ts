@@ -13,14 +13,41 @@ export type LaravelValidationErrors = Record<string, string[]>;
 
 const LARAVEL_FETCH_TIMEOUT_MS = 3_000;
 
-export async function fetchWithTimeout(input: string, init?: RequestInit): Promise<Response> {
+type FetchInit = RequestInit & {
+  next?: { revalidate?: number | false; tags?: string[] };
+};
+
+function isCacheableFetch(init?: FetchInit): boolean {
+  if (!init) return false;
+  if (init.cache === "force-cache") return true;
+  if (init.cache === "no-store") return false;
+  const revalidate = init.next?.revalidate;
+  return typeof revalidate === "number" && revalidate > 0;
+}
+
+/**
+ * Timed fetch for Laravel public APIs.
+ * Cacheable ISR fetches must NOT receive AbortSignal — Next treats signal as
+ * opting out of fetch memoization/data cache, which kept About/FAQ/home ƒ-dynamic
+ * and made soft-nav re-hit Laravel every click.
+ */
+export async function fetchWithTimeout(input: string, init?: FetchInit): Promise<Response> {
+  if (isCacheableFetch(init)) {
+    return await Promise.race([
+      fetch(input, init),
+      new Promise<Response>((_, reject) => {
+        setTimeout(() => reject(new DOMException("Laravel fetch timeout", "TimeoutError")), LARAVEL_FETCH_TIMEOUT_MS);
+      }),
+    ]);
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), LARAVEL_FETCH_TIMEOUT_MS);
 
   try {
     return await fetch(input, {
       ...init,
-      signal: controller.signal,
+      signal: init?.signal ?? controller.signal,
     });
   } finally {
     clearTimeout(timeout);

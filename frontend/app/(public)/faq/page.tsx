@@ -9,6 +9,7 @@ import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMeta
  * CMS preview lives at /faq/preview (force-dynamic).
  */
 export const revalidate = 60;
+export const dynamic = "force-static";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await FaqService.getFaqPage();

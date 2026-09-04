@@ -6,6 +6,7 @@ import { AboutPageContent, PublicPageService, publicSeoToMetadata } from "@/feat
  * CMS preview lives at /about-us/preview (force-dynamic) so this route stays cacheable.
  */
 export const revalidate = 60;
+export const dynamic = "force-static";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await PublicPageService.getAboutPage();
