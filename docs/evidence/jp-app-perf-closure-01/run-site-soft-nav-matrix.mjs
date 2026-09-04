@@ -52,7 +52,7 @@ const transitions = [
     name: "home_to_groups",
     from: "/",
     href: "/groups",
-    usable: "main, h1",
+    usable: '[data-testid="groups-landing-page"], main, h1',
     soft: true,
   },
   {
@@ -96,6 +96,20 @@ function pct(arr, p) {
   const a = arr.filter((n) => typeof n === "number" && Number.isFinite(n)).sort((x, y) => x - y);
   if (!a.length) return null;
   return a[Math.min(a.length - 1, Math.ceil((p / 100) * a.length) - 1)];
+}
+
+async function gotoRetry(page, url, opts = {}, attempts = 4) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 120000, ...opts });
+      return;
+    } catch (e) {
+      lastErr = e;
+      await page.waitForTimeout(500 * (i + 1));
+    }
+  }
+  throw lastErr;
 }
 
 async function softClickNav(page, href) {
@@ -145,7 +159,7 @@ const context = await browser.newContext({
 });
 const page = await context.newPage();
 
-await page.goto(BASE + "/", { waitUntil: "domcontentloaded", timeout: 120000 });
+await gotoRetry(page, BASE + "/");
 
 const matrix = [];
 let softCandidatesFound = 0;
@@ -155,9 +169,11 @@ let legacyHard = 0;
 for (const t of transitions) {
   softCandidatesFound += 1;
   // Warm from page once
-  await page.goto(BASE + t.from, { waitUntil: "networkidle", timeout: 120000 }).catch(async () => {
-    await page.goto(BASE + t.from, { waitUntil: "domcontentloaded", timeout: 120000 });
-  });
+  try {
+    await page.goto(BASE + t.from, { waitUntil: "networkidle", timeout: 90000 });
+  } catch {
+    await gotoRetry(page, BASE + t.from);
+  }
   await page.waitForTimeout(400);
 
   const shells = [];
@@ -166,8 +182,12 @@ for (const t of transitions) {
   const fullReloads = [];
 
   for (let i = 0; i < N; i++) {
-    await page.goto(BASE + t.from, { waitUntil: "domcontentloaded", timeout: 120000 });
-    await page.waitForTimeout(250);
+    await gotoRetry(page, BASE + t.from);
+    // Wait for client hydration so Next Link intercepts (pre-hydrate clicks = hard document).
+    await page.waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", null, {
+      timeout: 20000,
+    }).catch(() => {});
+    await page.waitForTimeout(150);
 
     const navStart = Date.now();
     let sawDocument = false;
@@ -189,7 +209,7 @@ for (const t of transitions) {
     let fullReload = false;
     if (!click.ok) {
       legacyHard += 1;
-      await page.goto(BASE + t.href, { waitUntil: "domcontentloaded", timeout: 120000 });
+      await gotoRetry(page, BASE + t.href);
       navTypes.push("HARD_FALLBACK");
       fullReload = true;
     } else {

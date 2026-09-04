@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { PublicRoutePrefetch } from "@/components/navigation/PublicRoutePrefetch";
 import type { PublicSession } from "@/types/session";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 type PublicShellProps = {
   children: ReactNode;
@@ -24,6 +24,13 @@ export function PublicShell({
   hideFooter = false,
   aiEnabled = false,
 }: PublicShellProps) {
+  useEffect(() => {
+    document.documentElement.dataset.jpHydrated = "1";
+    return () => {
+      delete document.documentElement.dataset.jpHydrated;
+    };
+  }, []);
+
   return (
     <div className="jp-page flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-jp-page text-jp-text">
       <PublicRoutePrefetch />
