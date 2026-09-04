@@ -1,5 +1,6 @@
 "use client";
 
+import { flushSync } from "react-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookingProgress } from "@/features/booking-progress";
@@ -103,9 +104,9 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
       const gen = ++requestGen;
       const response = await loadContext();
       if (cancelled || gen !== requestGen) return;
-      setLoading(false);
 
       if (!response.ok) {
+        setLoading(false);
         const data = response.data as { status?: string; redirect_url?: string; register_url?: string } | undefined;
         const apiStatus = (data?.status ?? "").toLowerCase();
         if (response.status === 401 || apiStatus === "guest_booking_disabled") {
@@ -141,9 +142,18 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         return;
       }
 
-      setContext(response.data);
-      setPassengers(buildPassengersFromContext(response.data));
-      setContact(buildContactFromContext(response.data));
+      flushSync(() => {
+        setContext(response.data);
+        setPassengers(buildPassengersFromContext(response.data));
+        setContact(buildContactFromContext(response.data));
+        setLoading(false);
+      });
+      if (!fieldMarkedRef.current) {
+        fieldMarkedRef.current = true;
+        markClientHydration("N3_form_render_ms");
+        markBookNowTiming("T9_field_enabled", { phase: "passengers_form_ready_flush" });
+        markClientHydration("N4_hydration_settled_ms");
+      }
       // Warm the next checkout segment so Traveler → Review is not chunk-bound.
       try {
         router.prefetch("/booking/review");
