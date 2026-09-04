@@ -5,7 +5,7 @@ import { AboutPageContent, PublicPageService, publicSeoToMetadata } from "@/feat
  * Published About is ISR-cached for soft-nav.
  * CMS preview lives at /about-us/preview (force-dynamic) so this route stays cacheable.
  */
-export const revalidate = 60;
+export const revalidate = 300;
 export const dynamic = "force-static";
 
 export async function generateMetadata(): Promise<Metadata> {

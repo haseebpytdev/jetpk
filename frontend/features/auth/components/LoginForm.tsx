@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ensureLaravelCsrfToken } from "@/lib/api";
 import { useState } from "react";
@@ -176,18 +177,18 @@ export function LoginForm({
       {showRegisterLink ? (
         <p className="text-center text-jp-sm text-jp-muted">
           No account?{" "}
-          <a href={registerHref} className="font-semibold text-jp-primary hover:underline" data-testid="login-register-link">
+          <Link href={registerHref} className="font-semibold text-jp-primary hover:underline" data-testid="login-register-link" prefetch>
             Create account
-          </a>
+          </Link>
         </p>
       ) : null}
 
       {!compact ? (
         <p className="text-center text-jp-sm text-jp-muted">
           Travel agency?{" "}
-          <a href="/agent/register" className="font-semibold text-jp-primary hover:underline">
+          <Link href="/agent/register" className="font-semibold text-jp-primary hover:underline" prefetch>
             Apply as an Agent
-          </a>
+          </Link>
         </p>
       ) : null}
     </form>

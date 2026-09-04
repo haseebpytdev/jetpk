@@ -16,7 +16,12 @@ import {
 } from "@/features/flight-results/services/flight-results-api";
 import type { RevalidateOfferResponse } from "@/features/flight-results/types";
 import type { RevalidationState } from "../types";
-import { isAllowedInternalHandoffUrl, providerRequiresRevalidation, resolvePassengerCheckoutHandoffUrl } from "../utils/handoff";
+import {
+  isAllowedInternalHandoffUrl,
+  providerRequiresRevalidation,
+  resolvePassengerCheckoutHandoffUrl,
+  warmPassengersHardNavDocument,
+} from "../utils/handoff";
 import { redirectIfGuestBookingBlocked } from "@/features/standard-booking/services/commerce-gates-service";
 import { markResultsLeftForCheckout } from "@/features/flight-results/utils/checkout-nav";
 
@@ -65,6 +70,8 @@ function stampPassengersUrlAuthority(url: string, source: PassengersUrlAuthority
   } catch {
     /* ignore */
   }
+  // Start document warm immediately — hard assign cannot reuse in-memory primes.
+  warmPassengersHardNavDocument(url);
 }
 
 export type RevalidationParams = {
@@ -304,6 +311,7 @@ export function useRevalidation() {
       } catch {
         /* prefetch is best-effort */
       }
+      warmPassengersHardNavDocument(absolute);
 
       persistTimingForContinuity();
       markBookNowTiming("T4B_checkout_prep_done");
@@ -457,6 +465,7 @@ export function useRevalidation() {
       } catch {
         /* ignore */
       }
+      warmPassengersHardNavDocument("/booking/passengers");
       lastParamsRef.current = params;
 
       try {

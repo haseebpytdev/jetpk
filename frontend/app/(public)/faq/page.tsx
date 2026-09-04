@@ -8,7 +8,7 @@ import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMeta
  * Published FAQ is ISR-cached for soft-nav.
  * CMS preview lives at /faq/preview (force-dynamic).
  */
-export const revalidate = 60;
+export const revalidate = 300;
 export const dynamic = "force-static";
 
 export async function generateMetadata(): Promise<Metadata> {

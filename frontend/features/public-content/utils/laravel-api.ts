@@ -30,15 +30,12 @@ function isCacheableFetch(init?: FetchInit): boolean {
  * Cacheable ISR fetches must NOT receive AbortSignal — Next treats signal as
  * opting out of fetch memoization/data cache, which kept About/FAQ/home ƒ-dynamic
  * and made soft-nav re-hit Laravel every click.
+ * Also do NOT Promise.race-reject cacheable fetches at 3s: that produced
+ * Privacy/Terms/Contact soft-nav P95≈2.6–3.4s on ISR miss (regen aborted to null).
  */
 export async function fetchWithTimeout(input: string, init?: FetchInit): Promise<Response> {
   if (isCacheableFetch(init)) {
-    return await Promise.race([
-      fetch(input, init),
-      new Promise<Response>((_, reject) => {
-        setTimeout(() => reject(new DOMException("Laravel fetch timeout", "TimeoutError")), LARAVEL_FETCH_TIMEOUT_MS);
-      }),
-    ]);
+    return await fetch(input, init);
   }
 
   const controller = new AbortController();
@@ -50,7 +47,7 @@ export async function fetchWithTimeout(input: string, init?: FetchInit): Promise
       signal: init?.signal ?? controller.signal,
     });
   } finally {
-    clearTimeout(timeout);
+      clearTimeout(timeout);
   }
 }
 
@@ -117,8 +114,8 @@ export async function fetchManagedPage(
         Accept: "application/json",
         ...(options?.headers ?? {}),
       },
-      // Published CMS pages: short ISR. Preview must never reuse cached publish payload.
-      ...(isPreview ? { cache: "no-store" as const } : { next: { revalidate: 60 } }),
+      // Published CMS pages: ISR window. Preview must never reuse cached publish payload.
+      ...(isPreview ? { cache: "no-store" as const } : { next: { revalidate: 300 } }),
     });
     if (!response.ok) return null;
     return (await response.json()) as LaravelManagedPageResponse;

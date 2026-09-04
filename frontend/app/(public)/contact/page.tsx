@@ -9,7 +9,7 @@ import {
   publicSeoToMetadata,
 } from "@/features/public-content";
 
-export const revalidate = 60;
+export const revalidate = 300;
 export const dynamic = "force-static";
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -1,6 +1,6 @@
 import { GroupsLandingPage } from "@/features/group-ticketing/components/GroupsLandingPage";
 
-export const revalidate = 60;
+export const revalidate = 300;
 export const dynamic = "force-static";
 
 /**
