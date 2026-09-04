@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { PassengerDetailsPage } from "@/features/standard-booking/components/PassengerDetailsPage";
 import { BookNowShellTimingMark } from "@/features/standard-booking/components/BookNowShellTimingMark";
+import { primeStandardPassengersContext } from "@/features/standard-booking/services/standard-booking-api";
 
 /**
  * Client page so soft-nav mounts Traveler UI without awaiting an async server
@@ -18,6 +19,9 @@ export default function PassengersClientPage() {
     });
     return next;
   }, [searchParams]);
+
+  // Sync prime as soon as search params are available (deduped with shell mark).
+  primeStandardPassengersContext(normalized);
 
   return (
     <>
