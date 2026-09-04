@@ -1,22 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Breadcrumbs, FaqPageClient, FaqService, PublicPageHero, publicSeoToMetadata } from "@/features/public-content";
+import {
+  cmsPreviewRequestHeaders,
+  isCmsPreviewFlag,
+  readCmsPreviewToken,
+} from "@/features/public-content/utils/cms-preview";
 
-/**
- * Published FAQ is ISR-cached for soft-nav.
- * CMS preview lives at /faq/preview (force-dynamic).
- */
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+
+type FaqPreviewPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await FaqService.getFaqPage();
+  noStore();
+  const page = await FaqService.getFaqPage({ preview: true });
   return publicSeoToMetadata(page.seo, "/faq");
 }
 
-export default async function FaqPage() {
-  const page = await FaqService.getFaqPage();
+/** CMS draft preview — not on the warm soft-nav path. */
+export default async function FaqPreviewPage({ searchParams }: FaqPreviewPageProps) {
+  noStore();
+  const params = searchParams ? await searchParams : {};
+  const preview = isCmsPreviewFlag(params.jp_preview) || true;
+  const previewToken = readCmsPreviewToken(params.jp_preview_token);
+  const page = await FaqService.getFaqPage({
+    preview,
+    previewToken,
+    headers: await cmsPreviewRequestHeaders(preview, previewToken),
+  });
 
   return (
     <PageContainer className="py-jp-4xl">
