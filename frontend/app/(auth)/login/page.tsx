@@ -1,12 +1,9 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AuthShell, LoginForm } from "@/features/auth";
+import { GuestAuthRedirect } from "@/features/auth/components/GuestAuthRedirect";
 import { LoginSessionNotice } from "@/features/auth/components/LoginSessionNotice";
 import { BookingProgress } from "@/features/booking-progress";
-import { fetchSessionBootstrapFromCookies } from "@/features/auth/services/session-service";
-import { cookies } from "next/headers";
 import { sanitizeCheckoutReturnUrl } from "@/features/auth/utils/checkout-return-allowlist";
-import { sanitizeDashboardUrl } from "@/features/auth/utils/dashboard-allowlist";
 import { absoluteLaravelUrl } from "@/services/flight-search";
 
 type LoginPageProps = {
@@ -24,8 +21,7 @@ async function registrationEnabled(): Promise<boolean> {
     // Using laravelApiPath here made SSR fail-open to registration ON.
     const response = await fetch(absoluteLaravelUrl("/booking/commerce-gates"), {
       headers: { Accept: "application/json" },
-      cache: "no-store",
-      next: { revalidate: 0 },
+      next: { revalidate: 60 },
     });
     if (!response.ok) return true;
     const payload = (await response.json()) as { customer_registration_enabled?: boolean };
@@ -35,6 +31,11 @@ async function registrationEnabled(): Promise<boolean> {
   }
 }
 
+/**
+ * Login — no SSR session bootstrap (soft-nav). Auth layout is static anonymous;
+ * GuestAuthRedirect sends signed-in users to their dashboard / return path.
+ * Commerce-gate fetch only runs for booking_gate=account.
+ */
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const {
     reason,
@@ -43,15 +44,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     booking_gate: bookingGate,
   } = await searchParams;
   const returnPath = sanitizeCheckoutReturnUrl(checkoutReturn || redirectParam, "");
-  const cookieStore = await cookies();
-  const bootstrap = await fetchSessionBootstrapFromCookies(cookieStore.getAll());
-  if (bootstrap.authenticated) {
-    redirect(
-      returnPath ||
-        sanitizeDashboardUrl(bootstrap.landing_route ?? bootstrap.dashboard_url, "/"),
-    );
-  }
-
   const isBookingAccountGate = bookingGate === "account";
   const canRegister = isBookingAccountGate ? await registrationEnabled() : true;
   const registerHref = returnPath
@@ -67,44 +59,47 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   ];
 
   return (
-    <AuthShell
-      title={isBookingAccountGate ? "Account required to continue booking" : "Log in to your account"}
-      description={
-        isBookingAccountGate
-          ? "Guest checkout is currently unavailable. Sign in to resume Traveler Details with your selected flight."
-          : "Welcome back. Enter your details to continue."
-      }
-      secondaryCard={
-        canRegister ? (
-          <div className="space-y-3 text-center" data-testid="login-register-card">
-            <p className="text-jp-sm font-semibold text-jp-text">New to JetPakistan?</p>
-            <p className="text-jp-sm text-jp-muted">Create an account and start your journey with us.</p>
-            <Link
-              href={registerHref}
-              className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-md border border-jp-brand px-4 text-jp-sm font-semibold text-jp-brand hover:bg-jp-brand-soft focus-visible:shadow-jp-focus"
-              data-testid="login-register-link"
-            >
-              Sign up
-            </Link>
+    <>
+      <GuestAuthRedirect returnPath={returnPath || undefined} />
+      <AuthShell
+        title={isBookingAccountGate ? "Account required to continue booking" : "Log in to your account"}
+        description={
+          isBookingAccountGate
+            ? "Guest checkout is currently unavailable. Sign in to resume Traveler Details with your selected flight."
+            : "Welcome back. Enter your details to continue."
+        }
+        secondaryCard={
+          canRegister ? (
+            <div className="space-y-3 text-center" data-testid="login-register-card">
+              <p className="text-jp-sm font-semibold text-jp-text">New to JetPakistan?</p>
+              <p className="text-jp-sm text-jp-muted">Create an account and start your journey with us.</p>
+              <Link
+                href={registerHref}
+                className="inline-flex min-h-jp-button w-full items-center justify-center rounded-jp-md border border-jp-brand px-4 text-jp-sm font-semibold text-jp-brand hover:bg-jp-brand-soft focus-visible:shadow-jp-focus"
+                data-testid="login-register-link"
+              >
+                Sign up
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-2 text-center" data-testid="login-register-disabled">
+              <p className="text-jp-sm font-semibold text-jp-text">Customer registration is closed</p>
+              <p className="text-jp-sm text-jp-muted">Use an existing JetPakistan account to continue.</p>
+            </div>
+          )
+        }
+      >
+        {isBookingAccountGate ? (
+          <div className="mb-4" data-testid="login-booking-account-gate">
+            <BookingProgress steps={accountProgress} ariaLabel="Booking progress" />
+            <p className="mt-2 text-center text-xs text-jp-muted" data-testid="login-no-guest-notice">
+              Continue as Guest is not available for this booking.
+            </p>
           </div>
-        ) : (
-          <div className="space-y-2 text-center" data-testid="login-register-disabled">
-            <p className="text-jp-sm font-semibold text-jp-text">Customer registration is closed</p>
-            <p className="text-jp-sm text-jp-muted">Use an existing JetPakistan account to continue.</p>
-          </div>
-        )
-      }
-    >
-      {isBookingAccountGate ? (
-        <div className="mb-4" data-testid="login-booking-account-gate">
-          <BookingProgress steps={accountProgress} ariaLabel="Booking progress" />
-          <p className="mt-2 text-center text-xs text-jp-muted" data-testid="login-no-guest-notice">
-            Continue as Guest is not available for this booking.
-          </p>
-        </div>
-      ) : null}
-      <LoginSessionNotice reason={reason} />
-      <LoginForm returnPath={returnPath || undefined} showRegisterLink={canRegister} />
-    </AuthShell>
+        ) : null}
+        <LoginSessionNotice reason={reason} />
+        <LoginForm returnPath={returnPath || undefined} showRegisterLink={canRegister} />
+      </AuthShell>
+    </>
   );
 }

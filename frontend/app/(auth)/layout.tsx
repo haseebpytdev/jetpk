@@ -1,29 +1,20 @@
 import type { ReactNode } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { AuthCsrfBootstrap } from "@/features/auth/components/AuthCsrfBootstrap";
-import { PublicConfigService } from "@/features/public-content";
-import { getPublicSession } from "@/services/session";
+import type { PublicSession } from "@/types/session";
 
-export const dynamic = "force-dynamic";
+/**
+ * Auth routes (/login, /register, …).
+ *
+ * Same soft-nav rule as checkout/(public): static anonymous shell, no
+ * force-dynamic, no SSR session/config await. PublicShell upgrades header
+ * after mount; GuestAuthRedirect on login/register sends signed-in users away.
+ */
+const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
-export default async function AuthGroupLayout({ children }: { children: ReactNode }) {
-  const session = await getPublicSession();
-  const config = await PublicConfigService.getConfig();
-
+export default function AuthGroupLayout({ children }: { children: ReactNode }) {
   return (
-    <PublicShell
-      session={session}
-      branding={
-        config
-          ? {
-              brand_name: config.brand_name,
-              logo_url: config.logo_url,
-              header_logo_height: config.header_logo_height,
-            }
-          : null
-      }
-      aiEnabled={Boolean(config?.ai_assistant_enabled)}
-    >
+    <PublicShell session={ANONYMOUS_SESSION}>
       <AuthCsrfBootstrap />
       {children}
     </PublicShell>

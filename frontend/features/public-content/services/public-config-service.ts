@@ -59,29 +59,14 @@ function publicConfigEndpoint(): string {
 export const PublicConfigService = {
   async getConfig(): Promise<PublicConfig | null> {
     try {
-      const headers: Record<string, string> = { Accept: "application/json" };
-      let cookieHeader: string | undefined;
-
-      if (typeof window === "undefined") {
-        try {
-          const { cookies } = await import("next/headers");
-          const store = await cookies();
-          cookieHeader = store
-            .getAll()
-            .map((c) => `${c.name}=${c.value}`)
-            .join("; ");
-          if (cookieHeader) {
-            headers.Cookie = cookieHeader;
-          }
-        } catch {
-          /* ignore */
-        }
-      }
-
+      // Public config is not user-specific — avoid cookies()/no-store so layouts
+      // that still SSR-fetch config remain cacheable for soft-nav.
       const response = await fetchWithTimeout(publicConfigEndpoint(), {
-        headers,
-        credentials: "include",
-        cache: "no-store",
+        headers: { Accept: "application/json" },
+        credentials: typeof window !== "undefined" ? "include" : "omit",
+        ...(typeof window === "undefined"
+          ? { next: { revalidate: 300 } }
+          : { cache: "force-cache" as RequestCache }),
       });
       if (!response.ok) return null;
       return (await response.json()) as PublicConfig;

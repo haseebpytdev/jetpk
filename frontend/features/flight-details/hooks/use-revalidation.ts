@@ -382,6 +382,12 @@ export function useRevalidation() {
         phase: "warm",
         return_combo: Boolean(params.isReturnCombo),
       });
+      // Warm Traveler route/chunks while drawer revalidation runs (hard nav still authoritative).
+      try {
+        void router.prefetch("/booking/passengers");
+      } catch {
+        /* best-effort */
+      }
       const promise = revalidateOffer({
         searchId: params.searchId,
         offerId: params.offerId,
@@ -410,7 +416,7 @@ export function useRevalidation() {
       });
       return;
     },
-    [extractFareChange],
+    [extractFareChange, router],
   );
 
   const continueToPassengers = useCallback(

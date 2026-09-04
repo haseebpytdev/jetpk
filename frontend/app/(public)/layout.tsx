@@ -1,31 +1,22 @@
 import type { ReactNode } from "react";
 import { PublicShell } from "@/components/layout/PublicShell";
-import { PublicConfigService, SeoJsonLd } from "@/features/public-content";
-import { getPublicSession } from "@/services/session";
+import { SeoJsonLd } from "@/features/public-content";
+import type { PublicSession } from "@/types/session";
 
-export const dynamic = "force-dynamic";
+/**
+ * Public informational routes (About, FAQ, Groups, Contact, …).
+ *
+ * Do NOT SSR-await Laravel session/config here and do NOT force-dynamic.
+ * Soft-nav RSC previously waited on session + no-store config on every Link
+ * click (multi-second ordinary-page P95). Checkout layout already proved the
+ * anonymous static shell pattern; PublicShell hydrates session/branding client-side.
+ */
+const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
-export default async function PublicGroupLayout({ children }: { children: ReactNode }) {
-  const [session, config] = await Promise.all([
-    getPublicSession(),
-    PublicConfigService.getConfig(),
-  ]);
-
+export default function PublicGroupLayout({ children }: { children: ReactNode }) {
   return (
-    <PublicShell
-      session={session}
-      branding={
-        config
-          ? {
-              brand_name: config.brand_name,
-              logo_url: config.logo_url,
-              header_logo_height: config.header_logo_height,
-            }
-          : null
-      }
-      aiEnabled={Boolean(config?.ai_assistant_enabled)}
-    >
-      <SeoJsonLd config={config} />
+    <PublicShell session={ANONYMOUS_SESSION}>
+      <SeoJsonLd config={null} />
       {children}
     </PublicShell>
   );
