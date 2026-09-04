@@ -174,22 +174,44 @@ Route::middleware('platform.module:public_flight_search')->group(function (): vo
 Route::get('/airports/search', AirportSearchController::class)->middleware('throttle:60,1')->name('airports.search');
 
 // Named hub. Public UI is Next GroupsLandingPage at /groups.
-// When OLS still routes bare /groups to Laravel, proxy Next HTML from :3010
+// When OLS still routes bare /groups to Laravel, proxy Next from :3010
 // instead of forcing /groups/search (IA requirement: header Groups → landing).
+// Forward RSC / router headers + query so soft-nav Link clicks stay CLIENT_SOFT.
 Route::get('/groups', function () {
     try {
+        $incoming = request();
+        $query = $incoming->getQueryString();
+        $url = 'http://127.0.0.1:3010/groups'.($query ? '?'.$query : '');
+        $headers = [
+            'X-Forwarded-Host' => $incoming->getHost(),
+            'X-Forwarded-Proto' => $incoming->isSecure() ? 'https' : 'http',
+            'User-Agent' => (string) $incoming->userAgent(),
+        ];
+        foreach ([
+            'RSC',
+            'Next-Router-State-Tree',
+            'Next-Router-Prefetch',
+            'Next-Router-Segment-Prefetch',
+            'Accept',
+        ] as $headerName) {
+            $value = $incoming->headers->get($headerName);
+            if (is_string($value) && $value !== '') {
+                $headers[$headerName] = $value;
+            }
+        }
+        if (! isset($headers['Accept'])) {
+            $headers['Accept'] = 'text/html,application/xhtml+xml';
+        }
+
         $response = \Illuminate\Support\Facades\Http::timeout(8)
-            ->withHeaders([
-                'Accept' => 'text/html,application/xhtml+xml',
-                'X-Forwarded-Host' => request()->getHost(),
-                'X-Forwarded-Proto' => request()->isSecure() ? 'https' : 'http',
-                'User-Agent' => (string) request()->userAgent(),
-            ])
-            ->get('http://127.0.0.1:3010/groups');
+            ->withHeaders($headers)
+            ->get($url);
 
         if ($response->successful() && is_string($response->body()) && $response->body() !== '') {
+            $contentType = $response->header('Content-Type') ?: 'text/html; charset=utf-8';
+
             return response($response->body(), 200)
-                ->header('Content-Type', 'text/html; charset=utf-8')
+                ->header('Content-Type', $contentType)
                 ->header('X-JP-Groups-Hub', 'next-proxy');
         }
     } catch (\Throwable $exception) {
