@@ -1,0 +1,77 @@
+{
+  "phase": "JP-APP-PERF-CLOSURE-01R2",
+  "kind": "cold_warm_browser",
+  "measured_at": "2026-09-04T17:17:08.683Z",
+  "n": 5,
+  "COLD_BROWSER": {
+    "home": {
+      "SHELL_P50": 2636,
+      "SHELL_P95": 3330,
+      "USABLE_P50": 3066,
+      "USABLE_P95": 4279
+    },
+    "login": {
+      "SHELL_P50": 1470,
+      "SHELL_P95": 2490,
+      "USABLE_P50": 1956,
+      "USABLE_P95": 3200
+    },
+    "register": {
+      "SHELL_P50": 1100,
+      "SHELL_P95": 1555,
+      "USABLE_P50": 1374,
+      "USABLE_P95": 1631
+    },
+    "about": {
+      "SHELL_P50": 1457,
+      "SHELL_P95": 2081,
+      "USABLE_P50": 1818,
+      "USABLE_P95": 2153
+    },
+    "groups": {
+      "SHELL_P50": 1718,
+      "SHELL_P95": 2264,
+      "USABLE_P50": 1830,
+      "USABLE_P95": 2342
+    }
+  },
+  "WARM_BROWSER": {
+    "home": {
+      "SHELL_P50": 1373,
+      "SHELL_P95": 2791,
+      "USABLE_P50": 1555,
+      "USABLE_P95": 2893
+    },
+    "login": {
+      "SHELL_P50": 953,
+      "SHELL_P95": 2242,
+      "USABLE_P50": 1059,
+      "USABLE_P95": 2321
+    },
+    "register": {
+      "SHELL_P50": 1100,
+      "SHELL_P95": 2688,
+      "USABLE_P50": 1414,
+      "USABLE_P95": 2807
+    },
+    "about": {
+      "SHELL_P50": 551,
+      "SHELL_P95": 2000,
+      "USABLE_P50": 787,
+      "USABLE_P95": 2113
+    },
+    "groups": {
+      "SHELL_P50": 2912,
+      "SHELL_P95": 4350,
+      "USABLE_P50": 3047,
+      "USABLE_P95": 4484
+    }
+  },
+  "COLD_BROWSER_P50": 1818,
+  "COLD_BROWSER_P95": 3445,
+  "WARM_BROWSER_P50": 1414,
+  "WARM_BROWSER_P95": 3541,
+  "COLD_SHELL_P95": 3096,
+  "WARM_SHELL_P95": 3479,
+  "COLD_APPLICATION_DEFECT_REMAINING": "NO"
+}

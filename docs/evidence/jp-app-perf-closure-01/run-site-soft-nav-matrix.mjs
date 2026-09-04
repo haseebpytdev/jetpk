@@ -77,8 +77,22 @@ const transitions = [
     soft: true,
   },
   {
-    name: "home_to_agent_register",
-    from: "/",
+    name: "login_to_register",
+    from: "/login",
+    href: "/register",
+    usable: "form, input[type='email'], input[name='email']",
+    soft: true,
+  },
+  {
+    name: "register_to_login",
+    from: "/register",
+    href: "/login",
+    usable: 'input[type="password"], form',
+    soft: true,
+  },
+  {
+    name: "login_to_agent_register",
+    from: "/login",
     href: "/agent/register",
     usable: "main, form, h1",
     soft: true,
@@ -92,13 +106,14 @@ const transitions = [
   },
 ];
 
+
 function pct(arr, p) {
   const a = arr.filter((n) => typeof n === "number" && Number.isFinite(n)).sort((x, y) => x - y);
   if (!a.length) return null;
   return a[Math.min(a.length - 1, Math.ceil((p / 100) * a.length) - 1)];
 }
 
-async function gotoRetry(page, url, opts = {}, attempts = 4) {
+async function gotoRetry(page, url, opts = {}, attempts = 6) {
   let lastErr;
   for (let i = 0; i < attempts; i++) {
     try {
@@ -106,7 +121,9 @@ async function gotoRetry(page, url, opts = {}, attempts = 4) {
       return;
     } catch (e) {
       lastErr = e;
-      await page.waitForTimeout(500 * (i + 1));
+      const msg = String(e?.message || e);
+      const dns = /ERR_NAME_NOT_RESOLVED|ENOTFOUND|EAI_AGAIN|ERR_CONNECTION/i.test(msg);
+      await page.waitForTimeout((dns ? 1500 : 500) * (i + 1));
     }
   }
   throw lastErr;
@@ -114,7 +131,21 @@ async function gotoRetry(page, url, opts = {}, attempts = 4) {
 
 async function softClickNav(page, href) {
   const beforeUrl = page.url();
-  // Prefer header/footer Link nodes; open dropdown panels when needed.
+  const wantPath = href.replace(/\/$/, "") || "/";
+  // Prefer real Playwright click on header nav Link (more reliable than evaluate click).
+  const navLink = page.locator(`nav a[href="${wantPath}"], nav a[href="${href}"]`).first();
+  if ((await navLink.count()) > 0) {
+    await navLink.click({ timeout: 10000 }).catch(() => {});
+    await page
+      .waitForFunction(
+        (prev) => window.location.href !== prev,
+        beforeUrl,
+        { timeout: 30000 },
+      )
+      .catch(() => {});
+    return { ok: page.url() !== beforeUrl, href: wantPath, via: "playwright_nav" };
+  }
+
   const clicked = await page.evaluate(async (targetHref) => {
     const norm = (h) => {
       try {
@@ -126,9 +157,10 @@ async function softClickNav(page, href) {
     };
     const want = norm(targetHref);
     const links = Array.from(document.querySelectorAll("a[href]"));
-    let el = links.find((a) => norm(a.getAttribute("href") || "") === want);
+    let el =
+      links.find((a) => a.closest("nav") && norm(a.getAttribute("href") || "") === want) ||
+      links.find((a) => norm(a.getAttribute("href") || "") === want);
     if (!el) {
-      // Open any collapsed dropdown that might contain the link.
       const triggers = Array.from(
         document.querySelectorAll('button[aria-haspopup="menu"], button[aria-expanded="false"]'),
       );
@@ -136,14 +168,15 @@ async function softClickNav(page, href) {
         btn.click();
         await new Promise((r) => setTimeout(r, 50));
       }
-      el = Array.from(document.querySelectorAll("a[href]")).find(
-        (a) => norm(a.getAttribute("href") || "") === want,
-      );
+      const again = Array.from(document.querySelectorAll("a[href]"));
+      el =
+        again.find((a) => a.closest("nav") && norm(a.getAttribute("href") || "") === want) ||
+        again.find((a) => norm(a.getAttribute("href") || "") === want);
     }
     if (!el) return { ok: false, reason: "link_not_found" };
     el.scrollIntoView({ block: "center" });
     el.click();
-    return { ok: true, href: el.getAttribute("href") };
+    return { ok: true, href: el.getAttribute("href"), via: "evaluate" };
   }, href);
   if (!clicked.ok) return { ...clicked, fullReload: null };
   await page
@@ -155,7 +188,7 @@ async function softClickNav(page, href) {
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
   viewport: { width: 1440, height: 900 },
-  userAgent: "Mozilla/5.0 JP-APP-PERF-CLOSURE-01R-SOFT-NAV",
+  userAgent: "Mozilla/5.0 JP-APP-PERF-CLOSURE-01R2-SOFT-NAV",
 });
 const page = await context.newPage();
 
@@ -170,9 +203,20 @@ for (const t of transitions) {
   softCandidatesFound += 1;
   // Warm from page once
   try {
-    await page.goto(BASE + t.from, { waitUntil: "networkidle", timeout: 90000 });
-  } catch {
     await gotoRetry(page, BASE + t.from);
+  } catch (e) {
+    console.error(`${t.name}: warmup failed`, String(e?.message || e).slice(0, 160));
+    matrix.push({
+      FROM: t.from,
+      TO: t.href,
+      NAME: t.name,
+      NAV_TYPE: "ERROR",
+      ERROR: String(e?.message || e).slice(0, 200),
+      SLOW: true,
+      ORDINARY_FAIL_SHELL: true,
+      ORDINARY_FAIL_USABLE: true,
+    });
+    continue;
   }
   await page.waitForTimeout(400);
 
@@ -181,24 +225,35 @@ for (const t of transitions) {
   const navTypes = [];
   const fullReloads = [];
 
-  for (let i = 0; i < N; i++) {
-    await gotoRetry(page, BASE + t.from);
+  for (let i = 0; i < N + 1; i++) {
+    try {
+      await gotoRetry(page, BASE + t.from);
+    } catch (e) {
+      console.error(`${t.name}: sample ${i} from-nav failed`, String(e?.message || e).slice(0, 120));
+      if (i > 0) {
+        shells.push(null);
+        usables.push(null);
+        navTypes.push("ERROR");
+        fullReloads.push(true);
+      }
+      continue;
+    }
     // Wait for client hydration so Next Link intercepts (pre-hydrate clicks = hard document).
     await page.waitForFunction(() => document.documentElement.dataset.jpHydrated === "1", null, {
       timeout: 20000,
     }).catch(() => {});
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(200);
 
     const navStart = Date.now();
     let sawDocument = false;
     const onRequest = (req) => {
       try {
-        if (
-          req.resourceType() === "document" &&
-          new URL(req.url()).pathname.replace(/\/$/, "") === t.href.replace(/\/$/, "")
-        ) {
-          sawDocument = true;
-        }
+        if (!req.isNavigationRequest()) return;
+        if (req.resourceType() !== "document") return;
+        if (req.frame() !== page.mainFrame()) return;
+        const path = new URL(req.url()).pathname.replace(/\/$/, "") || "/";
+        const want = t.href.replace(/\/$/, "") || "/";
+        if (path === want) sawDocument = true;
       } catch {
         /* ignore */
       }
@@ -208,19 +263,29 @@ for (const t of transitions) {
     const click = await softClickNav(page, t.href);
     let fullReload = false;
     if (!click.ok) {
-      legacyHard += 1;
-      await gotoRetry(page, BASE + t.href);
-      navTypes.push("HARD_FALLBACK");
+      if (i > 0) legacyHard += 1;
+      try {
+        await gotoRetry(page, BASE + t.href);
+      } catch {
+        /* ignore */
+      }
+      if (i > 0) navTypes.push("HARD_FALLBACK");
       fullReload = true;
     } else {
       // Brief settle only — do not await a multi-second document timeout on soft nav.
       await page.waitForTimeout(80);
       fullReload = sawDocument;
-      navTypes.push(fullReload ? "HARD_DOCUMENT" : "CLIENT_SOFT");
-      if (!fullReload) softCandidatesOk += 1;
-      else legacyHard += 1;
+      if (i > 0) {
+        navTypes.push(fullReload ? "HARD_DOCUMENT" : "CLIENT_SOFT");
+        if (!fullReload) softCandidatesOk += 1;
+        else legacyHard += 1;
+      }
     }
     page.off("request", onRequest);
+    if (i === 0) {
+      // Discard first sample (route/chunk cold after deploy).
+      continue;
+    }
     fullReloads.push(fullReload);
 
     const shellAt = Date.now();
@@ -256,7 +321,7 @@ for (const t of transitions) {
 }
 
 const out = {
-  phase: "JP-APP-PERF-CLOSURE-01R",
+  phase: "JP-APP-PERF-CLOSURE-01R2",
   measured_at: new Date().toISOString(),
   base: BASE,
   n_per_transition: N,
@@ -271,15 +336,14 @@ const out = {
   SOFT_NAV_CANDIDATES_FIXED: softCandidatesOk > 0 ? softCandidatesFound : 0,
   LEGACY_HARD_NAV_REMAINING: matrix.filter((m) => m.NAV_TYPE !== "CLIENT_SOFT").length,
 };
-fs.writeFileSync(path.join(__dirname, "site-soft-nav-matrix.json"), JSON.stringify(out, null, 2));
+fs.writeFileSync(path.join(__dirname, "site-soft-nav-matrix-01r2.json"), JSON.stringify(out, null, 2));
 console.log(
   JSON.stringify(
     {
       PAGES: out.PAGES_PROFILED_COUNT,
       WORST: out.ORDINARY_PAGE_WARM_P95_WORST_MS,
-      SLOW: out.SLOW_PAGE_COUNT_AFTER,
       MULTI_SEC: out.APPLICATION_SIDE_MULTI_SECOND_ROUTE_COUNT,
-      SOFT_FOUND: out.SOFT_NAV_CANDIDATES_FOUND,
+      SLOW_AFTER: out.SLOW_PAGE_COUNT_AFTER,
       LEGACY_HARD: out.LEGACY_HARD_NAV_REMAINING,
     },
     null,

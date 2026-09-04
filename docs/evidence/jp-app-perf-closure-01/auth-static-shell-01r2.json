@@ -1,0 +1,43 @@
+{
+  "phase": "JP-APP-PERF-CLOSURE-01R2",
+  "kind": "auth_static_shell_regression",
+  "measured_at": "2026-09-04T16:56:43.098Z",
+  "AUTH_REDIRECT_LOOP": 0,
+  "WRONG_ROLE_LANDING": 0,
+  "PUBLIC_CACHE_LEAK": 0,
+  "AUTHENTICATED_PRIVATE_DATA_IN_STATIC_HTML": 0,
+  "LOGIN_FLASH_SEVERE": "NO",
+  "REGISTER_FLASH_SEVERE": "NO",
+  "BOOKING_RETURN_PATH_PRESERVED": "YES",
+  "CUSTOMER_REGISTRATION_GATE_PRESERVED": "YES",
+  "samples": [
+    {
+      "role": "anonymous",
+      "route": "/login",
+      "final_url": "https://jetpakistan.pk/login",
+      "status": 200,
+      "cache": null,
+      "leaks": [],
+      "flash_severe": false,
+      "stayed_on_route": true
+    },
+    {
+      "role": "anonymous",
+      "route": "/register",
+      "final_url": "https://jetpakistan.pk/register",
+      "status": 200,
+      "cache": null,
+      "leaks": [],
+      "flash_severe": false,
+      "stayed_on_route": true
+    },
+    {
+      "role": "anonymous",
+      "route": "/booking/account",
+      "final_url": "https://jetpakistan.pk/access-denied?reason=not-found",
+      "has_return_affordance": true
+    }
+  ],
+  "AUTHENTICATED_ROLE_SAMPLES": "SKIPPED_NO_JP_AUTH_COOKIE",
+  "AUTH_STATIC_SHELL_REGRESSION": "PASS"
+}

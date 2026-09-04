@@ -1,0 +1,82 @@
+{
+  "phase": "JP-APP-PERF-CLOSURE-01R2",
+  "kind": "cms_isr_regression",
+  "measured_at": "2026-09-04T14:28:39.653Z",
+  "fail": 0,
+  "preview_ok": "PROTECTED_OR_MISSING",
+  "CMS_ISR_REGRESSION": "PASS",
+  "samples": [
+    {
+      "path": "/",
+      "status": 200,
+      "cache": "HIT",
+      "prerender": "1",
+      "ok": true,
+      "leaks": [],
+      "title_snip": "Skip to main content Flights Groups NEW Support Day theme Register Login NOW BO"
+    },
+    {
+      "path": "/about-us",
+      "status": 200,
+      "cache": "HIT",
+      "prerender": "1",
+      "ok": true,
+      "leaks": [],
+      "title_snip": "Skip to main content Flights Groups NEW Support Day theme Register Login Home / "
+    },
+    {
+      "path": "/faq",
+      "status": 200,
+      "cache": "HIT",
+      "prerender": "1",
+      "ok": true,
+      "leaks": [],
+      "title_snip": "Skip to main content Flights Groups NEW Support Day theme Register Login Home / "
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "cache": "HIT",
+      "prerender": "1",
+      "ok": true,
+      "leaks": [],
+      "title_snip": "Skip to main content Flights Groups NEW Support Day theme Register Login Home / "
+    },
+    {
+      "path": "/support",
+      "status": 200,
+      "cache": "HIT",
+      "prerender": "1",
+      "ok": true,
+      "leaks": [],
+      "title_snip": "Skip to main content Flights Groups NEW Support Day theme Register Login Home / "
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "cache": "HIT",
+      "prerender": "1",
+      "ok": true,
+      "leaks": [],
+      "title_snip": "Skip to main content Flights Groups NEW Support Day theme Register Login Home / "
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "cache": "HIT",
+      "prerender": "1",
+      "ok": true,
+      "leaks": [],
+      "title_snip": "Skip to main content Flights Groups NEW Support Day theme Register Login Home / "
+    },
+    {
+      "path": "/groups",
+      "status": 200,
+      "cache": null,
+      "prerender": null,
+      "ok": true,
+      "leaks": [],
+      "title_snip": "Skip to main content Flights Groups NEW Support Day theme Register Login GROUP "
+    }
+  ]
+}
