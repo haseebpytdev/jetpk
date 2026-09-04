@@ -1,39 +1,20 @@
 import { PublicShell } from "@/components/layout/PublicShell";
 import { HomepageContent } from "@/features/home";
-import { PublicConfigService } from "@/features/public-content/services/public-config-service";
-import { isCmsPreviewFlag, readCmsPreviewToken } from "@/features/public-content/utils/cms-preview";
-import { getPublicSession } from "@/services/session";
+import type { PublicSession } from "@/types/session";
 
-export const dynamic = "force-dynamic";
+/**
+ * Published homepage — static anonymous shell + ISR content.
+ * Do NOT force-dynamic or SSR-await session/config (soft-nav from "/" was blocked).
+ * CMS draft preview: /home/preview
+ */
+const ANONYMOUS_SESSION: PublicSession = { status: "anonymous" };
 
-type HomePageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
+export const revalidate = 60;
 
-export default async function HomePage({ searchParams }: HomePageProps) {
-  const params = searchParams ? await searchParams : {};
-  const preview = isCmsPreviewFlag(params.jp_preview);
-  const previewToken = readCmsPreviewToken(params.jp_preview_token);
-  const [session, config] = await Promise.all([
-    getPublicSession(),
-    PublicConfigService.getConfig(),
-  ]);
-
+export default function HomePage() {
   return (
-    <PublicShell
-      session={session}
-      branding={
-        config
-          ? {
-              brand_name: config.brand_name,
-              logo_url: config.logo_url,
-              header_logo_height: config.header_logo_height,
-            }
-          : null
-      }
-      aiEnabled={Boolean(config?.ai_assistant_enabled)}
-    >
-      <HomepageContent preview={preview} previewToken={previewToken} />
+    <PublicShell session={ANONYMOUS_SESSION}>
+      <HomepageContent />
     </PublicShell>
   );
 }
