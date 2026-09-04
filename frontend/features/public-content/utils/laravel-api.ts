@@ -12,6 +12,8 @@ import { allowContentFixtures } from "./content-policy";
 export type LaravelValidationErrors = Record<string, string[]>;
 
 const LARAVEL_FETCH_TIMEOUT_MS = 3_000;
+/** Cacheable ISR: longer than soft-nav target so a slow Laravel can still populate cache; never hang next build. */
+const LARAVEL_CACHEABLE_FETCH_TIMEOUT_MS = 8_000;
 
 type FetchInit = RequestInit & {
   next?: { revalidate?: number | false; tags?: string[] };
@@ -30,12 +32,20 @@ function isCacheableFetch(init?: FetchInit): boolean {
  * Cacheable ISR fetches must NOT receive AbortSignal — Next treats signal as
  * opting out of fetch memoization/data cache, which kept About/FAQ/home ƒ-dynamic
  * and made soft-nav re-hit Laravel every click.
- * Also do NOT Promise.race-reject cacheable fetches at 3s: that produced
- * Privacy/Terms/Contact soft-nav P95≈2.6–3.4s on ISR miss (regen aborted to null).
+ * Use an 8s Promise.race (not 3s): 3s caused Privacy/Terms soft-nav P95≈2.6–3.4s
+ * on ISR miss; unbounded wait hung `next build` on /support (60s static timeout).
  */
 export async function fetchWithTimeout(input: string, init?: FetchInit): Promise<Response> {
   if (isCacheableFetch(init)) {
-    return await fetch(input, init);
+    return await Promise.race([
+      fetch(input, init),
+      new Promise<Response>((_, reject) => {
+        setTimeout(
+          () => reject(new DOMException("Laravel cacheable fetch timeout", "TimeoutError")),
+          LARAVEL_CACHEABLE_FETCH_TIMEOUT_MS,
+        );
+      }),
+    ]);
   }
 
   const controller = new AbortController();
@@ -47,7 +57,7 @@ export async function fetchWithTimeout(input: string, init?: FetchInit): Promise
       signal: init?.signal ?? controller.signal,
     });
   } finally {
-      clearTimeout(timeout);
+    clearTimeout(timeout);
   }
 }
 
