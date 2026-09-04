@@ -32,6 +32,9 @@ export const metadata: Metadata = {
   robots: "index,follow",
 };
 
+/** Keep HTML sitemap out of SSG — Laravel route list can hang build workers. */
+export const dynamic = "force-dynamic";
+
 export default async function HtmlSitemapPage() {
   const routes = await fetchRoutes();
 
