@@ -392,7 +392,7 @@ export function FlightDetailsDrawer({
 
                 <FareSummaryTabs key={details.selectedFareKey || offer.offer_id} offer={offer} fallback={fallback} />
 
-                {revalidation.state === "loading" ? (
+                {revalidation.state === "loading" || revalidation.uiPhase ? (
                   <FareProcessingTransition
                     phase={revalidation.uiPhase ?? "VALIDATING_FARE"}
                     origin={

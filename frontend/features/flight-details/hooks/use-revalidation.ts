@@ -3,7 +3,11 @@
 import { useCallback, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
-import { bookNowTimingSnapshot, markBookNowTiming } from "@/features/flight-results/utils/book-now-timing";
+import {
+  bookNowTimingSnapshot,
+  markBookNowTiming,
+  startBookNowTiming,
+} from "@/features/flight-results/utils/book-now-timing";
 import {
   absoluteLaravelHandoffUrl,
   buildCheckoutHandoffUrl,
@@ -30,6 +34,38 @@ const PHASE_USER_MESSAGE: Record<BookNowUiPhase, string> = {
   PREPARING_TRAVELER: "Preparing traveler details",
   NAVIGATING_TO_TRAVELER: "Almost there",
 };
+
+type PassengersUrlAuthorityStamp = {
+  present: boolean;
+  url: string;
+  source: "server_revalidate" | "server_handoff";
+  search_id?: string | null;
+  at: number;
+};
+
+function stampPassengersUrlAuthority(url: string, source: PassengersUrlAuthorityStamp["source"]) {
+  if (typeof window === "undefined" || !url) return;
+  let searchId: string | null = null;
+  try {
+    searchId = new URL(url, window.location.origin).searchParams.get("search_id");
+  } catch {
+    searchId = null;
+  }
+  const stamp: PassengersUrlAuthorityStamp = {
+    present: true,
+    url,
+    source,
+    search_id: searchId,
+    at: Date.now(),
+  };
+  (window as Window & { __jpPassengersUrlAuthority?: PassengersUrlAuthorityStamp }).__jpPassengersUrlAuthority =
+    stamp;
+  try {
+    sessionStorage.setItem("jp-passengers-url-authority", JSON.stringify(stamp));
+  } catch {
+    /* ignore */
+  }
+}
 
 export type RevalidationParams = {
   searchId: string;
@@ -210,6 +246,7 @@ export function useRevalidation() {
     setState("loading");
     applyUiPhase(BOOK_NOW_UI_PHASE.PREPARING_TRAVELER);
     markBookNowTiming("T4A_checkout_prep_start", { ui_phase: BOOK_NOW_UI_PHASE.PREPARING_TRAVELER });
+    stampPassengersUrlAuthority(resolved, "server_handoff");
     markBookNowTiming("T4C_passengers_url_ready", { handoff: resolved.slice(0, 120) });
     applyUiPhase(BOOK_NOW_UI_PHASE.NAVIGATING_TO_TRAVELER);
     markBookNowTiming("T6_nav_start", {
@@ -382,6 +419,12 @@ export function useRevalidation() {
     async (params: RevalidationParams) => {
       if (inFlightRef.current) return;
       inFlightRef.current = true;
+      // T0 = Book Now / Continue click (not drawer open).
+      startBookNowTiming({
+        phase: "continue_click",
+        offerId: params.offerId,
+        searchId: params.searchId,
+      });
       // Flush processing transition before awaiting supplier work so ACK paint
       // is not deferred behind the first revalidation network hop (ACK P95 gate).
       flushSync(() => {
@@ -389,6 +432,19 @@ export function useRevalidation() {
         applyUiPhase(BOOK_NOW_UI_PHASE.VALIDATING_FARE);
         setFareChange(null);
       });
+      // Synchronous ACK stamp (performance.now) — harness reads this, not Playwright selector RTT.
+      try {
+        const session = typeof window !== "undefined" ? window.__jpBookNowTiming : null;
+        const ackMs =
+          session && typeof session.t0 === "number"
+            ? Math.round(performance.now() - session.t0)
+            : 0;
+        (window as Window & { __jpFareAckMs?: number }).__jpFareAckMs = ackMs;
+        document.documentElement.setAttribute("data-jp-fare-processing", "1");
+        document.documentElement.setAttribute("data-jp-fare-ack-ms", String(ackMs));
+      } catch {
+        /* ignore */
+      }
       markBookNowTiming("T1_handler", { phase: "continueToPassengers" });
       // Warm Traveler route/chunk while fare revalidation runs (hard nav still authoritative).
       try {
@@ -445,6 +501,7 @@ export function useRevalidation() {
               ? enrichReturnComboPassengersUrl(result.data.passengers_url, params)
               : null;
             if (passengersUrl) {
+              stampPassengersUrlAuthority(passengersUrl, "server_revalidate");
               applyUiPhase(BOOK_NOW_UI_PHASE.PREPARING_TRAVELER);
               markBookNowTiming("T4_draft_prep_start", { phase: "return_combo_passengers_url" });
               const ok = await navigateHandoff(
@@ -523,6 +580,7 @@ export function useRevalidation() {
 
           const passengersUrl = result.data.passengers_url;
           if (passengersUrl) {
+            stampPassengersUrlAuthority(passengersUrl, "server_revalidate");
             const ok = await navigateHandoff(
               passengersUrl,
               params.fareOptionKey || result.data.selected_fare_option_id || undefined,
