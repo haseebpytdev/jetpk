@@ -27,7 +27,8 @@ class JetpkEmailProdQaCommand extends Command
         {--send : Send after render (authorized inbox only)}
         {--family-gate : One representative scenario per major family}
         {--limit=0 : Max scenarios}
-        {--start=0 : Skip first N scenarios}';
+        {--start=0 : Skip first N scenarios}
+        {--skip-ids= : Comma-separated scenario_ids already passed}';
 
     protected $description = 'JetPakistan production email QA: inventory, snapshot, optional locked send.';
 
@@ -91,6 +92,10 @@ class JetpkEmailProdQaCommand extends Command
         File::ensureDirectoryExists($htmlDir, 0700);
         $limit = (int) $this->option('limit');
         $start = (int) $this->option('start');
+        $skipIds = array_filter(array_map('trim', explode(',', (string) $this->option('skip-ids'))));
+        if ($skipIds !== []) {
+            $rows = array_values(array_filter($rows, static fn (array $row): bool => ! in_array($row['scenario_id'], $skipIds, true)));
+        }
         $slice = $this->option('family-gate') ? $this->familyGateRows($rows) : array_slice($rows, $start, $limit > 0 ? $limit : null);
         $brand = JetpkEmailBrandingResolver::resolve('jetpk');
         $company = CompanyEmailProfileResolver::resolveForPlatform();
