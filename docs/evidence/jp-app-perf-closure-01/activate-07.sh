@@ -1,6 +1,6 @@
 echo JETPK_PRODUCTION_LOCK_ACQUIRED
 APP=/home/pkjetp/jetpk_app
-SHA=REPLACE_AFTER_PUSH
+SHA=6275f03fd16e148eea34d5ce02ec015e5c46ac8a
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 RB=/home/pkjetp/releases/jp-final-07-$STAMP
 mkdir -p "$RB"
@@ -21,7 +21,16 @@ copy_one() {
 
 copy_one "app/Support/Emails/JetpkEmailEventRenderer.php"
 copy_one "app/Support/Emails/JetpkEmailPlainTextComposer.php"
+copy_one "app/Support/Emails/JetpkEmailSampleDataProvider.php"
 copy_one "app/Console/Commands/JetpkEmailProdQaCommand.php"
+copy_one "frontend/app/(checkout)/booking/passengers/page.tsx"
+copy_one "frontend/app/(checkout)/booking/passengers/loading.tsx"
+copy_one "frontend/features/standard-booking/utils/passengers-early-fetch-inline.ts"
+copy_one "frontend/features/standard-booking/utils/passengers-fetch-query.ts"
+copy_one "frontend/features/standard-booking/services/standard-booking-api.ts"
+copy_one "frontend/features/standard-booking/components/PassengerDetailsPage.tsx"
+copy_one "frontend/features/standard-booking/components/BookNowShellTimingMark.tsx"
+copy_one "frontend/features/flight-results/utils/book-now-timing.ts"
 
 echo BACKUP=$RB
 TMP=/tmp/jp-final-07-$STAMP
@@ -42,7 +51,16 @@ install_one() {
 
 install_one "app/Support/Emails/JetpkEmailEventRenderer.php"
 install_one "app/Support/Emails/JetpkEmailPlainTextComposer.php"
+install_one "app/Support/Emails/JetpkEmailSampleDataProvider.php"
 install_one "app/Console/Commands/JetpkEmailProdQaCommand.php"
+install_one "frontend/app/(checkout)/booking/passengers/page.tsx"
+install_one "frontend/app/(checkout)/booking/passengers/loading.tsx"
+install_one "frontend/features/standard-booking/utils/passengers-early-fetch-inline.ts"
+install_one "frontend/features/standard-booking/utils/passengers-fetch-query.ts"
+install_one "frontend/features/standard-booking/services/standard-booking-api.ts"
+install_one "frontend/features/standard-booking/components/PassengerDetailsPage.tsx"
+install_one "frontend/features/standard-booking/components/BookNowShellTimingMark.tsx"
+install_one "frontend/features/flight-results/utils/book-now-timing.ts"
 
 printf '%s' "$SHA" > "$APP/.jetpk-runtime-sha"
 printf '%s' "$SHA" > "$APP/.jetpk-authorized-sha"
