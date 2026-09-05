@@ -1,0 +1,63 @@
+{
+  "phase": "JP-FINAL-CLOSURE-06",
+  "production_runtime_sha": "a5e97cdda6a4409878ba77a3f914fffa938e7e1c",
+  "public_build_id": "0NMKi-2XwkblKpudgNB3h",
+  "dashboard_build_id": "knBdbMBLDH3sxWqzoMDYu",
+  "recipient": "myworkhaseeb@gmail.com",
+  "GMAIL_INBOX_VERIFICATION": "PENDING_CHATGPT",
+  "messages": [
+    {
+      "scenario_id": "support_ticket_created__admin",
+      "intended_role": "admin",
+      "purpose": "PROFILE_TRANSPORT_PROOF",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-SUPPORT-TICKET-CREATED-ADMIN-20260905185714-FCNGP8",
+      "subject": "[ADMIN] JetPakistan — Support ticket opened — TKT-88213",
+      "send_timestamp": "2026-09-05T18:57:14Z",
+      "smtp_accepted": "sent",
+      "recipient": "myworkhaseeb@gmail.com",
+      "expected_profile_probe": "+92-51-8894406",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "booking_confirmed__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-BOOKING-CONFIRMED-ADMIN-20260905185800-TXMLZY",
+      "subject": "[ADMIN] JetPakistan — Booking confirmed — JPK-2026-004821",
+      "send_timestamp": "2026-09-05T18:58:00Z",
+      "smtp_accepted": "sent",
+      "recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "ticket_issued__booking_agent",
+      "intended_role": "booking_agent",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-TICKET-ISSUED-BOOKING-AGENT-20260905185803-KU1XAN",
+      "subject": "[AGENT] JetPakistan — Ticket issued — JPK-2026-004821",
+      "send_timestamp": "2026-09-05T18:58:03Z",
+      "smtp_accepted": "sent",
+      "recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "agent_application_submitted__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-AGENT-APPLICATION-SUBMITTED-ADMIN-20260905185806-KQTED5",
+      "subject": "[ADMIN] JetPakistan — New agent application received",
+      "send_timestamp": "2026-09-05T18:58:06Z",
+      "smtp_accepted": "sent",
+      "recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "support_ticket_created__admin",
+      "intended_role": "admin",
+      "purpose": "POST_FIX_CTA",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-SUPPORT-TICKET-CREATED-ADMIN-20260905185809-GNDMCX",
+      "subject": "[ADMIN] JetPakistan — Support ticket opened — TKT-88213",
+      "send_timestamp": "2026-09-05T18:58:09Z",
+      "smtp_accepted": "sent",
+      "recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    }
+  ]
+}

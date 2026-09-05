@@ -1,6 +1,6 @@
 echo JETPK_PRODUCTION_LOCK_ACQUIRED
 APP=/home/pkjetp/jetpk_app
-SHA=PLACEHOLDER_SHA
+SHA=a5e97cdda6a4409878ba77a3f914fffa938e7e1c
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 RB=/home/pkjetp/releases/jp-final-06-$STAMP
 mkdir -p "$RB"
