@@ -69,6 +69,30 @@ final class EmailContextualCtaResolver
             }
         }
 
+        if (str_contains($event, 'support_ticket') || str_contains($event, 'support_reply')) {
+            $ticketRef = trim((string) ($variables['ticket_reference'] ?? ''));
+            if ($staff) {
+                $adminTicket = $ticketRef !== ''
+                    ? (self::named('admin.support.tickets.show', ['ticket' => $ticketRef])
+                        ?? self::named('staff.support.tickets.show', ['ticket' => $ticketRef]))
+                    : null;
+                $adminTicket ??= self::named('admin.support.tickets.index')
+                    ?? self::named('staff.support.tickets.index');
+                if ($adminTicket !== null) {
+                    return ['label' => 'Open support ticket', 'url' => $adminTicket];
+                }
+            }
+            $customerShow = $ticketRef !== ''
+                ? self::named('customer.support.tickets.show', ['ticket' => $ticketRef])
+                : null;
+            $inbox = $customerShow
+                ?? self::named('customer.support.tickets.index')
+                ?? self::named('agent.support.tickets.index');
+            if ($inbox !== null) {
+                return ['label' => 'Open support ticket', 'url' => $inbox];
+            }
+        }
+
         if (str_contains($event, 'admin_created') || str_contains($event, 'staff_created') || str_contains($event, 'account_created')) {
             return $login !== null ? ['label' => 'Sign in', 'url' => $login] : null;
         }
@@ -76,13 +100,16 @@ final class EmailContextualCtaResolver
         return null;
     }
 
-    private static function named(string $name): ?string
+    /**
+     * @param  array<string, mixed>  $parameters
+     */
+    private static function named(string $name, array $parameters = []): ?string
     {
         if (! Route::has($name)) {
             return null;
         }
         try {
-            return route($name, absolute: true);
+            return route($name, $parameters, absolute: true);
         } catch (Throwable) {
             return null;
         }

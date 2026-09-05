@@ -83,7 +83,7 @@ trait JetpkEmailSampleData
                 'to'      => 'DXB', 'to_name' => 'Dubai Intl',
                 'depart'  => '10 Jul 2026, 08:20',
                 'arrive'  => '10 Jul 2026, 10:05',
-                'airline' => 'Sample Air', 'flight_no' => 'SA-311',
+                'airline' => 'Pakistan International', 'flight_no' => 'PK-211',
                 'stops'   => 'Non-stop', 'baggage' => '30kg',
             ],
         ];

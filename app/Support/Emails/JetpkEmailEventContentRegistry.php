@@ -585,7 +585,7 @@ class JetpkEmailEventContentRegistry
                 'detail_fields' => ['group_reference', 'route', 'seats'],
                 'content_blocks' => ['status-alert', 'group-reservation', 'support-card'],
             ],
-            'agent_registration_received', 'agent_registration_approved' => [
+            'agent_application_submitted', 'agent_application_approved', 'agent_registration_received', 'agent_registration_approved' => [
                 'preheader' => 'Update on your agency application.',
                 'heading' => $typeKey === 'agent_registration_approved' ? 'Welcome, partner' : 'Application received',
                 'status_type' => $typeKey === 'agent_registration_approved' ? 'success' : 'info',
@@ -602,7 +602,7 @@ class JetpkEmailEventContentRegistry
                 ],
                 'cta_label' => $typeKey === 'agent_registration_approved' ? 'Open agent portal' : 'Review application',
                 'cta_url_key' => $typeKey === 'agent_registration_approved' ? 'agent_portal_url' : 'login_url',
-                'content_blocks' => ['status-alert', 'detail-fields', 'agent-application'],
+                'content_blocks' => ['status-alert', 'agent-application'],
             ],
             'admin_operational_notification' => [
                 'preheader' => 'Operational alert for your review.',
@@ -667,6 +667,11 @@ class JetpkEmailEventContentRegistry
         } elseif (str_contains($eventKey, 'login') || str_contains($eventKey, 'password') || str_contains($eventKey, 'auth_')) {
             $blocks = ['security-details', 'status-alert', 'support-card'];
             $detailFields = ['login_time', 'device', 'location'];
+        } elseif (str_contains($eventKey, 'agent_application') || str_contains($eventKey, 'agent_registration')) {
+            $blocks = ['status-alert', 'agent-application'];
+            $detailFields = [];
+            $ctaLabel = 'Review application';
+            $ctaUrlKey = 'login_url';
         }
 
         return [

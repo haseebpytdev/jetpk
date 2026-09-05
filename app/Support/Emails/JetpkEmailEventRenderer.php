@@ -86,6 +86,8 @@ class JetpkEmailEventRenderer
             || str_contains($eventKey, 'admin_created')
             || str_contains($eventKey, 'agent_application')
             || str_contains($eventKey, 'agent_registration')
+            || str_contains($eventKey, 'support_ticket')
+            || str_contains($eventKey, 'support_reply')
         ) {
             unset($emailBrand['manage_url']);
         }
@@ -131,6 +133,14 @@ class JetpkEmailEventRenderer
         if (isset($payload['agent_application']) && is_array($payload['agent_application']) && ! isset($payload['application'])) {
             $payload['application'] = $payload['agent_application'];
         }
+        $blocks = $content['content_blocks'] ?? [];
+        if (in_array('agent-application', $blocks, true)) {
+            $content['content_blocks'] = array_values(array_filter(
+                $blocks,
+                static fn (string $block): bool => $block !== 'detail-fields',
+            ));
+            $content['detail_fields'] = [];
+        }
 
         $viewData = array_merge($payload, [
             'emailBrand' => $emailBrand,
@@ -162,11 +172,13 @@ class JetpkEmailEventRenderer
         $fallbackKeysApplied = array_values(array_unique($fallbackKeysApplied));
         $missingRequiredVariables = $this->missingRequiredVariables($baseVariables);
 
+        $plainFacts = is_array($viewData['detailFieldValues'] ?? null) ? $viewData['detailFieldValues'] : [];
+        $plainFacts = JetpkEmailPlainTextComposer::mergeBookingFacts($plainFacts, $payload, $baseVariables);
         $plainBody = JetpkEmailPlainTextComposer::compose([
             'title' => $headline,
             'greeting' => $recipientGreeting,
             'message' => is_string($introText) ? $introText : '',
-            'facts' => is_array($viewData['detailFieldValues'] ?? null) ? $viewData['detailFieldValues'] : [],
+            'facts' => $plainFacts,
             'cta_label' => is_string($ctaText) ? $ctaText : null,
             'cta_url' => is_string($ctaUrl) ? $ctaUrl : null,
             'support_email' => $emailBrand['support_email'] ?? $baseVariables['support_email'] ?? null,

@@ -11,7 +11,7 @@ outside current tables but is a new high-traffic path, add a short entry so the
 next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 `SPEC.md` non-negotiable #13 and *Definition of Done*.
 
-**Last updated:** 2026-09-03 (JP-HOME-UI-01 homepage shell polish)
+**Last updated:** 2026-09-05 (JP-FINAL-CLOSURE-06 email Gmail defects)
 
 ## Concurrent Codex UI Work — JP-HOME-UI-01
 
@@ -39,6 +39,7 @@ next agent does not miss it. Rules: `AGENTS.md` → *Summary documentation*,
 
 ## Changelog (high level)
 
+| 2026-09-05 | JP-FINAL-CLOSURE-06 | Email QA: support CTA uses `admin.support.tickets.show`; canonical PK-211 itinerary for booking/ticket samples; booking plain-text facts; agent application single block. Traveler residual decomposed, no Traveler code change. |
 | 2026-09-03 | JP-APP-PERF-CLOSURE-01 traveler | Book Now handoff no longer window.stop()/strips prefetch; prefetch /booking/passengers during revalidation. |
 | 2026-09-03 | JP-APP-PERF-CLOSURE-01 | Return Pair poll short-circuit skips consolidator/one-way mapper on empty/partial polls; early partial onProgress throttled to 1st/every-3rd until first persisted pair; SearchModule prefetches resultsPath before hard-nav. |
 | 2026-09-03 | JP-HOME-UI-01 | Next homepage hero keeps search + trust tags inside the image-backed flow, removes the pale spacer/divider, modernizes Login, and aligns full-header/FAB visibility at `lg`; existing FAB receives tokenized visual/focus/motion polish. No search logic or runtime dependencies changed. |

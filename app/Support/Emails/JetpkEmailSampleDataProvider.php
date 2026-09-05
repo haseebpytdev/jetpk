@@ -54,17 +54,18 @@ final class JetpkEmailSampleDataProvider
             $sample['group_reservation'] = $block;
         }
 
-        if ($eventKey === 'ticket_issued') {
+        if ($eventKey === 'ticket_issued' || $eventKey === 'booking_confirmed') {
             if (! isset($sample['booking'])) {
                 $sample['booking'] = [
                     'reference' => (string) ($sample['booking_reference'] ?? 'JPK-2026-004821'),
                     'pnr' => (string) ($sample['pnr'] ?? 'X7K9QP'),
-                    'status' => (string) ($sample['booking_status'] ?? 'Ticketed'),
+                    'status' => (string) ($sample['booking_status'] ?? ($eventKey === 'ticket_issued' ? 'Ticketed' : 'Confirmed')),
                     'route' => (string) ($sample['route'] ?? 'Karachi (KHI) → Dubai (DXB)'),
                     'amount' => (string) ($sample['amount'] ?? '96,500'),
                     'currency' => (string) ($sample['currency'] ?? 'PKR'),
                     'trip_type' => 'One way',
                     'passenger_count' => '2',
+                    'payment_status' => (string) ($sample['payment_status'] ?? 'Paid'),
                 ];
             }
             if (! isset($sample['itinerary'])) {
