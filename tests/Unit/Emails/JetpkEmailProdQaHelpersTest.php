@@ -50,6 +50,33 @@ class JetpkEmailProdQaHelpersTest extends TestCase
         JetpkEmailQaRecipientLock::activate('other@example.com');
     }
 
+    public function test_recipient_lock_rejects_malformed_and_role_metadata(): void
+    {
+        $cases = [0, 1, true, false, '0', 'admin', 'staff', 'agent', 'ops', 'customer', '', 'not-an-email'];
+        foreach ($cases as $value) {
+            try {
+                JetpkEmailQaRecipientLock::normalizeOrFail($value);
+                $this->fail('Expected reject for '.var_export($value, true));
+            } catch (\InvalidArgumentException $e) {
+                $this->assertStringContainsString('recipient', strtolower($e->getMessage()));
+            }
+        }
+        JetpkEmailQaRecipientLock::activate(JetpkEmailQaRecipientLock::AUTHORIZED_INBOX);
+        $this->assertSame(
+            JetpkEmailQaRecipientLock::AUTHORIZED_INBOX,
+            JetpkEmailQaRecipientLock::enforceOrFail(JetpkEmailQaRecipientLock::AUTHORIZED_INBOX),
+        );
+        foreach (['admin', 0, '0'] as $value) {
+            try {
+                JetpkEmailQaRecipientLock::enforceOrFail($value);
+                $this->fail('Expected QA lock reject for '.var_export($value, true));
+            } catch (\InvalidArgumentException $e) {
+                $this->assertNotSame('', $e->getMessage());
+            }
+        }
+        JetpkEmailQaRecipientLock::deactivate();
+    }
+
     public function test_recipient_lock_accepts_authorized_inbox_only(): void
     {
         JetpkEmailQaRecipientLock::activate('myworkhaseeb@gmail.com');
@@ -81,7 +108,7 @@ class JetpkEmailProdQaHelpersTest extends TestCase
         File::delete($store->path());
     }
 
-    public function test_content_auditor_flags_css_in_plain_text(): void
+    public function test_content_auditor_flags_css_and_html(): void
     {
         $auditor = new JetpkEmailQaContentAuditor();
         $result = $auditor->audit(

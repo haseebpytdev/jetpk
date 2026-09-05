@@ -153,6 +153,7 @@ class JetpkOperationalEmailService
         string $plainBody,
         array $attachments = [],
     ): string {
+        $to = JetpkEmailQaRecipientLock::normalizeOrFail($to);
         if (JetpkEmailQaRecipientLock::isActive()) {
             $to = JetpkEmailQaRecipientLock::enforceOrFail($to);
         }
