@@ -24,6 +24,7 @@ import { useFlightDetails } from "@/features/flight-details/hooks/use-flight-det
 import { useRevalidation } from "@/features/flight-details/hooks/use-revalidation";
 import type { FlightDetailsContext } from "@/features/flight-details/types";
 import { buildFareRouteLabel } from "@/features/flight-details/utils/route-label";
+import { toAuthoritativeFareOptionKey } from "@/features/flight-details/utils/base-offer-fare";
 
 export function FareSelectionPage() {
   const router = useRouter();
@@ -55,8 +56,10 @@ export function FareSelectionPage() {
   // Explicit selected fare (or URL fare key) → background authoritative revalidation while user reviews.
   useEffect(() => {
     if (!context || !offer || isInquiry) return;
-    const fareKey = (details.selectedFareKey || context.fareOptionKey || "").trim();
-    if (!fareKey) return;
+    const fareKey = toAuthoritativeFareOptionKey(
+      details.selectedFareKey || context.fareOptionKey,
+      details.fareOptions,
+    );
     revalidation.warmStartRevalidation({
       searchId: context.searchId,
       offerId: offer.offer_id,
@@ -66,6 +69,8 @@ export function FareSelectionPage() {
       isReturnCombo: Boolean(context.comboId),
       comboId: context.comboId,
       outboundKey: context.outboundKey,
+      outboundFareOptionKey: context.outboundFareOptionKey,
+      returnFareOptionKey: fareKey,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- warm on fare identity only
   }, [
@@ -87,16 +92,21 @@ export function FareSelectionPage() {
     if (!offer || !context) return;
     // Same fare identity as warmStartRevalidation — mismatched keys force a
     // second revalidate-offer POST (DUP rematch≥2 / fetch P95 pollution).
-    const fareKey = (details.selectedFareKey || context.fareOptionKey || "").trim();
+    const fareKey = toAuthoritativeFareOptionKey(
+      details.selectedFareKey || context.fareOptionKey,
+      details.fareOptions,
+    );
     void revalidation.continueToPassengers({
       searchId: context.searchId,
       offerId: offer.offer_id,
-      fareOptionKey: fareKey || undefined,
+      fareOptionKey: fareKey,
       selectUrl: offer.select_url,
       supplierProvider: offer.supplier_provider ?? offer.provider,
       isReturnCombo: Boolean(context.comboId),
       comboId: context.comboId,
       outboundKey: context.outboundKey,
+      outboundFareOptionKey: context.outboundFareOptionKey,
+      returnFareOptionKey: fareKey,
     });
   };
 

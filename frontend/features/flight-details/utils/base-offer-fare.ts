@@ -44,3 +44,18 @@ export function isBaseOfferFareOption(option: FareFamilyOption | undefined): boo
     || option.option_key === BASE_FARE_OPTION_KEY
   );
 }
+
+/**
+ * Map UI/URL fare identity onto the supplier key used by prevalidation.
+ * Synthetic base-offer cards are not a Sabre brand qualifier.
+ */
+export function toAuthoritativeFareOptionKey(
+  key: string | undefined,
+  options: { option_key: string; is_base_offer_fare?: boolean; is_synthetic_default?: boolean }[] = [],
+): string | undefined {
+  const trimmed = key?.trim() ?? "";
+  if (!trimmed || trimmed === BASE_FARE_OPTION_KEY) return undefined;
+  const match = options.find((o) => o.option_key === trimmed);
+  if (match && isBaseOfferFareOption(match as FareFamilyOption)) return undefined;
+  return trimmed;
+}

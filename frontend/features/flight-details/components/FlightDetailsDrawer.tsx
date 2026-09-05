@@ -7,7 +7,7 @@ import { markBookNowTiming, startBookNowTiming } from "@/features/flight-results
 import { useFlightDetails } from "../hooks/use-flight-details";
 import { useRevalidation } from "../hooks/use-revalidation";
 import type { FlightDetailsContext } from "../types";
-import { BASE_FARE_OPTION_KEY, isBaseOfferFareOption } from "../utils/base-offer-fare";
+import { toAuthoritativeFareOptionKey } from "../utils/base-offer-fare";
 import { ContinueToPassengersButton } from "./ContinueToPassengersButton";
 import { FareChangeDialog } from "./FareChangeDialog";
 import { FareFamilyDetails } from "./FareFamilyDetails";
@@ -19,14 +19,6 @@ import {
 } from "./OfferStatePanels";
 import { FareProcessingTransition } from "./FareProcessingTransition";
 import { SegmentDetails } from "./SegmentDetails";
-
-function toSupplierFareKey(key: string | undefined, options: { option_key: string; is_base_offer_fare?: boolean; is_synthetic_default?: boolean }[]): string | undefined {
-  const trimmed = key?.trim() ?? "";
-  if (!trimmed || trimmed === BASE_FARE_OPTION_KEY) return undefined;
-  const match = options.find((o) => o.option_key === trimmed);
-  if (match && isBaseOfferFareOption(match)) return undefined;
-  return trimmed;
-}
 
 type FlightDetailsDrawerProps = {
   open: boolean;
@@ -160,7 +152,7 @@ export function FlightDetailsDrawer({
           context.initialOffer?.branded_fares_display_options ??
           context.initialOffer?.fare_family_options_display ??
           []);
-    const fareKey = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, fareOptions);
+    const fareKey = toAuthoritativeFareOptionKey(details.selectedFareKey || context.fareOptionKey, fareOptions);
     revalidation.warmStartRevalidation({
       searchId: context.searchId,
       offerId: offer.offer_id,
@@ -173,14 +165,19 @@ export function FlightDetailsDrawer({
       outboundFareOptionKey: context.outboundFareOptionKey,
       returnFareOptionKey: fareKey,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- warm on open + fare identity
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- warm on fare identity primitives only
   }, [
     open,
-    context,
+    context?.intent,
+    context?.searchId,
+    context?.comboId,
+    context?.outboundKey,
+    context?.outboundFareOptionKey,
+    context?.fareOptionKey,
+    details.loadState,
     details.data?.offer?.offer_id,
     details.selectedFareKey,
     context?.initialOffer?.offer_id,
-    context?.fareOptionKey,
   ]);
 
   // Book Now should not leave the traveler staring at results/drawer when fare is already chosen.
@@ -188,6 +185,7 @@ export function FlightDetailsDrawer({
   useEffect(() => {
     if (!open || !context || context.intent !== "booking") return;
     if (autoContinueRef.current) return;
+    if (details.loadState === "loading") return;
     const offer = details.data?.offer ?? context.initialOffer;
     if (!offer) return;
     const isInquiry = details.data?.multicity_inquiry_only ?? offer.multicity_inquiry_only;
@@ -210,13 +208,13 @@ export function FlightDetailsDrawer({
           search_id: context.searchId,
           outbound_key: context.outboundKey,
         });
-        const outboundFare = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
+        const outboundFare = toAuthoritativeFareOptionKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
         if (outboundFare) qs.set("outbound_fare_option_key", outboundFare);
         markBookNowTiming("T6_nav_start", { phase: "outbound_confirm_auto" });
         window.location.assign(`/flights/return-options?${qs.toString()}`);
         return;
       }
-      const fareKey = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
+      const fareKey = toAuthoritativeFareOptionKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
       const isPair = context.legMode === "pair" || (Boolean(context.comboId) && context.legMode !== "return_confirm");
       markBookNowTiming("T1_handler", { phase: "auto_continue" });
       void revalidation.continueToPassengers({
@@ -236,7 +234,10 @@ export function FlightDetailsDrawer({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot after offer identity ready
   }, [
     open,
-    context,
+    context?.intent,
+    context?.searchId,
+    context?.comboId,
+    details.loadState,
     details.data?.offer?.offer_id,
     details.fareOptions.length,
     details.selectedFareKey,
@@ -260,7 +261,7 @@ export function FlightDetailsDrawer({
         search_id: context.searchId,
         outbound_key: context.outboundKey,
       });
-      const outboundFare = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
+      const outboundFare = toAuthoritativeFareOptionKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
       if (outboundFare) qs.set("outbound_fare_option_key", outboundFare);
       markBookNowTiming("T6_nav_start", { phase: "outbound_confirm" });
       window.location.assign(`/flights/return-options?${qs.toString()}`);
@@ -268,7 +269,7 @@ export function FlightDetailsDrawer({
     }
 
     // Match warmStartRevalidation fare identity (avoid rematch≥2 / second POST).
-    const fareKey = toSupplierFareKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
+    const fareKey = toAuthoritativeFareOptionKey(details.selectedFareKey || context.fareOptionKey, details.fareOptions);
     const isPair = context.legMode === "pair" || (Boolean(context.comboId) && context.legMode !== "return_confirm");
     markBookNowTiming("T1_handler", { phase: "continue_click" });
     void revalidation.continueToPassengers({

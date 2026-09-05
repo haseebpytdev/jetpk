@@ -413,10 +413,33 @@ export function useRevalidation() {
           return entry.promise;
         }
       } else if (!acceptFareChange) {
-        stampBookNowValidationSource(BOOK_NOW_VALIDATION_SOURCE.NORMAL_FALLBACK_REVALIDATION);
+        stampBookNowValidationSource(BOOK_NOW_VALIDATION_SOURCE.NORMAL_FALLBACK_REVALIDATION, {
+          requested_key: key.slice(0, 240),
+          existing_key: warmPromiseRef.current?.key?.slice(0, 240) ?? null,
+          fallback_reason:
+            !warmPromiseRef.current
+              ? "NO_PREVALIDATION"
+              : warmPromiseRef.current.key !== key
+                ? "KEY_MISMATCH"
+                : "OTHER",
+        });
       }
 
       const startedAt = Date.now();
+      try {
+        const w = window as Window & { __jpRevalidateTrace?: Array<Record<string, unknown>> };
+        (w.__jpRevalidateTrace ??= []).push({
+          at: startedAt,
+          phase: acceptFareChange ? "accept_fare_change" : "runRevalidation_post",
+          key: key.slice(0, 240),
+          fareOptionKey: params.fareOptionKey ?? "",
+          offerId: params.offerId,
+          searchId: params.searchId,
+          existing_key: warmPromiseRef.current?.key?.slice(0, 240) ?? null,
+        });
+      } catch {
+        /* ignore */
+      }
       const generation = ++prevalidationGenerationRef.current;
       const promise = revalidateOffer({
         searchId: params.searchId,
@@ -482,6 +505,23 @@ export function useRevalidation() {
       if (!providerRequiresRevalidation(params.supplierProvider)) return;
       const key = paramsCacheKey(params, false);
       const existing = warmPromiseRef.current;
+      try {
+        const w = window as Window & {
+          __jpRevalidateTrace?: Array<Record<string, unknown>>;
+        };
+        (w.__jpRevalidateTrace ??= []).push({
+          at: Date.now(),
+          phase: "warmStart",
+          key: key.slice(0, 240),
+          fareOptionKey: params.fareOptionKey ?? "",
+          offerId: params.offerId,
+          searchId: params.searchId,
+          existing_key: existing?.key?.slice(0, 240) ?? null,
+          existing_completed: existing?.completedAt != null,
+        });
+      } catch {
+        /* ignore */
+      }
       if (existing?.key === key) {
         // Same selection: keep single in-flight / fresh owner.
         if (existing.completedAt == null) return;

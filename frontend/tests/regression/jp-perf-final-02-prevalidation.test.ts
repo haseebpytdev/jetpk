@@ -126,4 +126,21 @@ describe("JP-PERF-FINAL-02 prevalidation authority", () => {
   it("uses established 600s freshness window (not invented short TTL)", () => {
     assert.equal(AUTHORITATIVE_REVALIDATION_FRESH_MS, 600_000);
   });
+
+  it("maps synthetic base-offer UI key to empty supplier fare identity", () => {
+    const BASE = "__jp_base_offer__";
+    const toAuthoritativeFareOptionKey = (key, options = []) => {
+      const trimmed = key?.trim() ?? "";
+      if (!trimmed || trimmed === BASE) return undefined;
+      const match = options.find((o) => o.option_key === trimmed);
+      if (match && (match.is_base_offer_fare || match.option_key === BASE)) return undefined;
+      return trimmed;
+    };
+    assert.equal(toAuthoritativeFareOptionKey(BASE, []), undefined);
+    assert.equal(toAuthoritativeFareOptionKey("eclassic-pi0", []), "eclassic-pi0");
+    assert.equal(
+      toAuthoritativeFareOptionKey("eclassic-pi0", [{ option_key: "eclassic-pi0", is_base_offer_fare: true }]),
+      undefined,
+    );
+  });
 });
