@@ -128,6 +128,13 @@ async function oneSample(browser, attempt) {
         }
         sample.revalidate_status = body?.status || body?.success;
         sample.revalidate_keys = body ? Object.keys(body).slice(0, 20) : [];
+        sample.BOOK_NOW_SUCCESS = body?.success === true || body?.status === "success" || body?.ok === true;
+        sample.BOOK_NOW_PRICE_NEEDS_REFRESH = body?.price_needs_refresh ?? body?.itinerary?.price_needs_refresh ?? null;
+        sample.BOOK_NOW_REQUIRES_FARE_CHANGE_ACCEPTANCE =
+          body?.requires_fare_change_acceptance ?? body?.itinerary?.requires_fare_change_acceptance ?? null;
+        sample.search_id = body?.search_id || sample.search_id;
+        sample.offer_id = body?.offer_id || sample.offer_id;
+        sample.fare_option_key = body?.fare_option_key || body?.selected_fare_option_key || sample.fare_option_key;
       }
       if (/\/laravel\/booking\/passengers/i.test(res.url()) && res.request().method() === "GET") {
         passengersResEnd = Date.now();
@@ -151,6 +158,14 @@ async function oneSample(browser, attempt) {
             body?.itinerary?.authoritative_after_revalidation,
           );
           sample.ITINERARY_PRICE_NEEDS_REFRESH = Boolean(body?.itinerary?.price_needs_refresh);
+          sample.ITINERARY_REQUIRES_FARE_CHANGE_ACCEPTANCE =
+            body?.itinerary?.requires_fare_change_acceptance ?? body?.requires_fare_change_acceptance ?? null;
+          sample.bound_search_id = body?.itinerary?.bound_search_id ?? body?.bound_search_id ?? null;
+          sample.bound_offer_id = body?.itinerary?.bound_offer_id ?? body?.bound_offer_id ?? null;
+          sample.selected_fare_option_key =
+            body?.itinerary?.selected_fare_option_key ?? body?.selected_fare_option_key ?? null;
+          sample.fare_change_accepted =
+            body?.itinerary?.fare_change_accepted ?? body?.fare_change_accepted ?? null;
         } catch {
           /* ignore */
         }
@@ -320,6 +335,106 @@ async function oneSample(browser, attempt) {
     sample.NAV_TO_SHELL_MS = Math.max(0, shellAt - T7);
     sample.TRAVELER_ROUTE_SHELL_MS = sample.NAV_TO_SHELL_MS;
 
+    const navTiming = await page.evaluate(() => {
+      const nav = performance.getEntriesByType("navigation")[0];
+      if (!nav || nav.entryType !== "navigation") return null;
+      const n = nav;
+      const dns = Math.max(0, n.domainLookupEnd - n.domainLookupStart);
+      const hasTls = n.secureConnectionStart > 0;
+      const tcp = hasTls
+        ? Math.max(0, n.secureConnectionStart - n.connectStart)
+        : Math.max(0, n.connectEnd - n.connectStart);
+      const tls = hasTls ? Math.max(0, n.connectEnd - n.secureConnectionStart) : 0;
+      const ttfb = Math.max(0, n.responseStart - n.requestStart);
+      const transfer = Math.max(0, n.responseEnd - n.responseStart);
+      const serverTiming = Array.isArray(n.serverTiming)
+        ? n.serverTiming.map((s) => ({ name: s.name, duration: s.duration, description: s.description }))
+        : [];
+      return {
+        domainLookupStart: n.domainLookupStart,
+        domainLookupEnd: n.domainLookupEnd,
+        connectStart: n.connectStart,
+        secureConnectionStart: n.secureConnectionStart,
+        connectEnd: n.connectEnd,
+        requestStart: n.requestStart,
+        responseStart: n.responseStart,
+        responseEnd: n.responseEnd,
+        domInteractive: n.domInteractive,
+        fetchStart: n.fetchStart,
+        startTime: n.startTime,
+        duration: n.duration,
+        transferSize: n.transferSize,
+        encodedBodySize: n.encodedBodySize,
+        serverTiming,
+        DNS_MS: Math.round(dns),
+        TCP_MS: Math.round(tcp),
+        TLS_MS: Math.round(tls),
+        REQUEST_TO_FIRST_BYTE_MS: Math.round(ttfb),
+        DOCUMENT_TRANSFER_MS: Math.round(transfer),
+      };
+    });
+    sample.nav_timing = navTiming;
+    const exclusiveNav = await page.evaluate(() => {
+      const nav = performance.getEntriesByType("navigation")[0];
+      const shellMark = window.__jpTravelerBoot?.marks?.TRAVELER_SHELL_MARK;
+      if (!nav || nav.entryType !== "navigation") return null;
+      const dns = Math.max(0, nav.domainLookupEnd - nav.domainLookupStart);
+      const hasTls = nav.secureConnectionStart > 0;
+      const tcp = hasTls
+        ? Math.max(0, nav.secureConnectionStart - nav.connectStart)
+        : Math.max(0, nav.connectEnd - nav.connectStart);
+      const tls = hasTls ? Math.max(0, nav.connectEnd - nav.secureConnectionStart) : 0;
+      const ttfb = Math.max(0, nav.responseStart - nav.requestStart);
+      const transfer = Math.max(0, nav.responseEnd - nav.responseStart);
+      const navStart = nav.startTime;
+      const shell = typeof shellMark === "number" ? shellMark : nav.responseEnd;
+      const navWall = Math.max(0, shell - navStart);
+      const postDoc = Math.max(0, shell - nav.responseEnd);
+      const exclusive = {
+        DNS_MS: Math.round(dns),
+        TCP_MS: Math.round(tcp),
+        TLS_MS: Math.round(tls),
+        REQUEST_TO_FIRST_BYTE_MS: Math.round(ttfb),
+        DOCUMENT_TRANSFER_MS: Math.round(transfer),
+        POST_DOCUMENT_APP_TO_SHELL_MS: Math.round(postDoc),
+      };
+      const childSum =
+        exclusive.DNS_MS +
+        exclusive.TCP_MS +
+        exclusive.TLS_MS +
+        exclusive.REQUEST_TO_FIRST_BYTE_MS +
+        exclusive.DOCUMENT_TRANSFER_MS +
+        exclusive.POST_DOCUMENT_APP_TO_SHELL_MS;
+      const unattributed = Math.max(0, Math.round(navWall) - childSum);
+      return {
+        ...exclusive,
+        NAV_TO_SHELL_MS: Math.round(navWall),
+        NAV_TO_SHELL_EXTERNAL_MS:
+          exclusive.DNS_MS +
+          exclusive.TCP_MS +
+          exclusive.TLS_MS +
+          exclusive.REQUEST_TO_FIRST_BYTE_MS +
+          exclusive.DOCUMENT_TRANSFER_MS,
+        NAV_TO_SHELL_APP_MS: exclusive.POST_DOCUMENT_APP_TO_SHELL_MS,
+        NAV_TO_SHELL_UNATTRIBUTED_MS: unattributed,
+        NAV_TO_SHELL_TOTAL_RECONCILED: unattributed === 0 && childSum <= Math.round(navWall) + 1 ? "YES" : "NO",
+      };
+    });
+    if (exclusiveNav) {
+      sample.DNS_MS = exclusiveNav.DNS_MS;
+      sample.TCP_MS = exclusiveNav.TCP_MS;
+      sample.TLS_MS = exclusiveNav.TLS_MS;
+      sample.REQUEST_TO_FIRST_BYTE_MS = exclusiveNav.REQUEST_TO_FIRST_BYTE_MS;
+      sample.DOCUMENT_TRANSFER_MS = exclusiveNav.DOCUMENT_TRANSFER_MS;
+      sample.POST_DOCUMENT_APP_TO_SHELL_MS = exclusiveNav.POST_DOCUMENT_APP_TO_SHELL_MS;
+      sample.NAV_TO_SHELL_MS = exclusiveNav.NAV_TO_SHELL_MS;
+      sample.TRAVELER_ROUTE_SHELL_MS = exclusiveNav.NAV_TO_SHELL_MS;
+      sample.NAV_TO_SHELL_EXTERNAL_MS = exclusiveNav.NAV_TO_SHELL_EXTERNAL_MS;
+      sample.NAV_TO_SHELL_APP_MS = exclusiveNav.NAV_TO_SHELL_APP_MS;
+      sample.NAV_TO_SHELL_UNATTRIBUTED_MS = exclusiveNav.NAV_TO_SHELL_UNATTRIBUTED_MS;
+      sample.NAV_TO_SHELL_TOTAL_RECONCILED = exclusiveNav.NAV_TO_SHELL_TOTAL_RECONCILED;
+    }
+
     if (/account-required|login/.test(navAssignUrl)) {
       sample.note = "account_gate";
       await context.close();
@@ -404,16 +519,52 @@ async function oneSample(browser, attempt) {
     // Client hydration marks if present
     const clientMarks = await page.evaluate(() => {
       const s = window.__jpBookNowTiming;
+      const boot = window.__jpTravelerBoot || null;
       return s
         ? {
             deltas: s.deltasMs || {},
             marks: s.marks || {},
             hydration: s.clientHydration || null,
             serverTiming: s.serverTiming || null,
+            boot,
           }
-        : null;
+        : { boot };
     });
     sample.client_marks = clientMarks;
+    sample.traveler_boot = clientMarks?.boot || null;
+    if (sample.traveler_boot?.marks) {
+      const m = sample.traveler_boot.marks;
+      const keys = [
+        "TRAVELER_DOCUMENT_READY",
+        "REACT_ROOT_COMMIT",
+        "TRAVELER_SHELL_MARK",
+        "CLIENT_BOOT_START",
+        "CLIENT_BOOT_END",
+        "PASSENGER_EFFECT_REGISTERED",
+        "PASSENGER_EFFECT_STARTED",
+        "PASSENGER_REQUEST_SCHEDULED",
+        "PASSENGER_FETCH_CALLED",
+        "PASSENGER_FETCH_REQUEST_START",
+      ];
+      const parts = [];
+      for (let i = 0; i < keys.length - 1; i += 1) {
+        const a = m[keys[i]];
+        const b = m[keys[i + 1]];
+        if (typeof a === "number" && typeof b === "number") {
+          parts.push(`${keys[i]}->${keys[i + 1]}=${Math.round(b - a)}`);
+        }
+      }
+      sample.WHERE_THE_TIME_WENT = parts.join("; ") || "marks_incomplete";
+      sample.DOCUMENT_COMMIT_TO_EARLY_FETCH_START_MS =
+        typeof m.TRAVELER_DOCUMENT_READY === "number" && typeof m.EARLY_FETCH_START === "number"
+          ? Math.round(m.EARLY_FETCH_START - m.TRAVELER_DOCUMENT_READY)
+          : null;
+      sample.HYDRATION_START_MS = typeof m.HYDRATION_START === "number" ? Math.round(m.HYDRATION_START) : null;
+      sample.HYDRATION_END_MS = typeof m.HYDRATION_END === "number" ? Math.round(m.HYDRATION_END) : null;
+      sample.REACT_FETCH_CONSUME_MS =
+        typeof m.REACT_FETCH_CONSUME === "number" ? Math.round(m.REACT_FETCH_CONSUME) : null;
+    }
+    sample.DUPLICATE_PASSENGER_GET_COUNT = Math.max(0, secondaryFetches.length - 1);
 
     const T8 = shellAt;
     const T9 = passengersReqStart;
@@ -440,9 +591,12 @@ async function oneSample(browser, attempt) {
     sample.BOOK_NOW_REMAINING_VALIDATION_MS =
       validateEnd != null ? Math.max(0, validateEnd - T5_BOOK_NOW_CLICK) : 0;
     sample.BOOK_NOW_TO_NAV_MS = T7 - T5_BOOK_NOW_CLICK;
-    sample.NAV_TO_SHELL_MS = T8 - T7;
+    sample.VALIDATION_TO_NAV_MS =
+      validateEnd != null ? Math.max(0, T7 - Math.max(validateEnd, T5_BOOK_NOW_CLICK)) : sample.BOOK_NOW_TO_NAV_MS;
+    sample.NAV_TO_SHELL_MS = exclusiveNav?.NAV_TO_SHELL_MS ?? (T8 - T7);
     sample.TRAVELER_ROUTE_SHELL_MS = sample.NAV_TO_SHELL_MS;
     sample.PASSENGERS_FETCH_MS = T9 != null && T10 != null ? T10 - T9 : null;
+    sample.EARLY_FETCH_START_TO_RESPONSE_MS = sample.PASSENGERS_FETCH_MS;
     sample.PASSENGERS_CLIENT_MS = T10 != null ? T12 - T10 : T12 - T8;
     sample.SHELL_TO_USABLE_MS = T12 - T8;
     sample.BOOK_NOW_TO_USABLE_MS = T12 - T5_BOOK_NOW_CLICK;
@@ -450,7 +604,7 @@ async function oneSample(browser, attempt) {
     sample.JP_PRE_SUPPLIER_MS = 0;
     sample.SUPPLIER_FARE_MS = sample.PREVALIDATION_TOTAL_MS;
     sample.JP_POST_SUPPLIER_VALIDATION_MS = sample.LARAVEL_POST_REVALIDATION_MS ?? null;
-    sample.SHELL_TO_PASSENGERS_REQUEST_MS = T9 != null ? T9 - T8 : null;
+    sample.SHELL_TO_PASSENGERS_REQUEST_MS = T9 != null ? Math.max(0, T9 - T8) : null;
     sample.PASSENGERS_NETWORK_MS = sample.PASSENGERS_FETCH_MS;
     sample.PASSENGERS_AUTHORITATIVE_FETCH_MS =
       typeof sample.PASSENGERS_SERVER_MS === "number"
@@ -459,6 +613,39 @@ async function oneSample(browser, attempt) {
     sample.PASSENGERS_CLIENT_PROCESS_MS = sample.PASSENGERS_CLIENT_MS;
     sample.SHELL_TO_USABLE_APP_MS =
       (sample.SHELL_TO_PASSENGERS_REQUEST_MS || 0) + (sample.PASSENGERS_CLIENT_PROCESS_MS || 0);
+    sample.FRESH_WALL_START = T5_BOOK_NOW_CLICK;
+    sample.FRESH_WALL_END = T12;
+    sample.FRESH_WALL_MS = T12 - T5_BOOK_NOW_CLICK;
+    if (validateStart != null && validateEnd != null) {
+      const supplierMs = validateEnd - validateStart;
+      if (validateEnd <= T5_BOOK_NOW_CLICK) {
+        sample.SUPPLIER_WAIT_CLASS = "PRE_WALL";
+        sample.FRESH_SUPPLIER_OVERLAP_MS = 0;
+        sample.FRESH_SUPPLIER_CHILD_MS = 0;
+        sample.FRESH_PRE_WALL_SUPPLIER_MS = supplierMs;
+      } else if (validateStart >= T5_BOOK_NOW_CLICK) {
+        sample.SUPPLIER_WAIT_CLASS = "CHILD";
+        sample.FRESH_SUPPLIER_OVERLAP_MS = 0;
+        sample.FRESH_SUPPLIER_CHILD_MS = Math.min(supplierMs, sample.FRESH_WALL_MS);
+        sample.FRESH_PRE_WALL_SUPPLIER_MS = 0;
+      } else {
+        sample.SUPPLIER_WAIT_CLASS = "OVERLAP";
+        sample.FRESH_SUPPLIER_OVERLAP_MS = Math.min(validateEnd - T5_BOOK_NOW_CLICK, sample.FRESH_WALL_MS);
+        sample.FRESH_SUPPLIER_CHILD_MS = 0;
+        sample.FRESH_PRE_WALL_SUPPLIER_MS = Math.max(0, T5_BOOK_NOW_CLICK - validateStart);
+      }
+    }
+    sample.FRESH_APP_MS = Math.max(
+      0,
+      sample.FRESH_WALL_MS - (sample.FRESH_SUPPLIER_OVERLAP_MS || 0) - (sample.FRESH_SUPPLIER_CHILD_MS || 0),
+    );
+    sample.FRESH_UNATTRIBUTED_MS = Math.max(
+      0,
+      sample.FRESH_WALL_MS -
+        sample.FRESH_APP_MS -
+        (sample.FRESH_SUPPLIER_OVERLAP_MS || 0) -
+        (sample.FRESH_SUPPLIER_CHILD_MS || 0),
+    );
     sample.SHELL_TO_USABLE_TOTAL_MS = sample.SHELL_TO_USABLE_MS;
     sample.TRAVELER_DATA_READY_MS = sample.SHELL_TO_USABLE_TOTAL_MS;
     sample.BOOK_NOW_TO_TRAVELER_READY_TOTAL_MS = sample.BOOK_NOW_TO_USABLE_MS;
@@ -611,6 +798,10 @@ async function main() {
         url: s.SERVER_PASSENGERS_URL_USED,
         source: s.BOOK_NOW_VALIDATION_SOURCE,
         rematch: s.rematch_count,
+        auth: s.ITINERARY_AUTHORITATIVE_AFTER_REVALIDATION,
+        fare_acc: s.BOOK_NOW_REQUIRES_FARE_CHANGE_ACCEPTANCE,
+        traveler_reprice: s.TRAVELER_AUTO_REPRICE_POST_COUNT,
+        shell_app: s.SHELL_TO_USABLE_APP_MS,
         reconciled: s.TOTAL_RECONCILED,
         err: s.error || null,
       }),
@@ -660,6 +851,47 @@ async function main() {
     PASSENGERS_SERVER_P95_MS: pct(pick("PASSENGERS_SERVER_MS"), 95),
     PASSENGERS_CLIENT_PROCESS_P95_MS: pct(pick("PASSENGERS_CLIENT_PROCESS_MS"), 95),
     SHELL_TO_USABLE_APP_P95_MS: pct(pick("SHELL_TO_USABLE_APP_MS"), 95),
+    NAV_TO_SHELL_APP_P95_MS: pct(pick("NAV_TO_SHELL_APP_MS"), 95),
+    NAV_TO_SHELL_EXTERNAL_P95_MS: pct(pick("NAV_TO_SHELL_EXTERNAL_MS"), 95),
+    NAV_TO_SHELL_UNATTRIBUTED_P95_MS: pct(pick("NAV_TO_SHELL_UNATTRIBUTED_MS"), 95),
+    DOCUMENT_COMMIT_TO_EARLY_FETCH_START_P95_MS: pct(pick("DOCUMENT_COMMIT_TO_EARLY_FETCH_START_MS"), 95),
+    EARLY_FETCH_START_TO_RESPONSE_P95_MS: pct(pick("EARLY_FETCH_START_TO_RESPONSE_MS"), 95),
+    DUPLICATE_PASSENGER_GET_COUNT: valid.reduce((a, s) => a + (s.DUPLICATE_PASSENGER_GET_COUNT || 0), 0),
+    FRESH_P95_MS: pct(
+      valid
+        .filter((s) => s.BOOK_NOW_VALIDATION_SOURCE === "FRESH_PREVALIDATION")
+        .map((s) => s.FRESH_WALL_MS)
+        .filter((n) => typeof n === "number"),
+      95,
+    ),
+    FRESH_APP_P95_MS: pct(
+      valid
+        .filter((s) => s.BOOK_NOW_VALIDATION_SOURCE === "FRESH_PREVALIDATION")
+        .map((s) => s.FRESH_APP_MS)
+        .filter((n) => typeof n === "number"),
+      95,
+    ),
+    FRESH_SUPPLIER_OVERLAP_P95_MS: pct(
+      valid
+        .filter((s) => s.BOOK_NOW_VALIDATION_SOURCE === "FRESH_PREVALIDATION")
+        .map((s) => s.FRESH_SUPPLIER_OVERLAP_MS)
+        .filter((n) => typeof n === "number"),
+      95,
+    ),
+    FRESH_PRE_WALL_SUPPLIER_P95_MS: pct(
+      valid
+        .filter((s) => s.BOOK_NOW_VALIDATION_SOURCE === "FRESH_PREVALIDATION")
+        .map((s) => s.FRESH_PRE_WALL_SUPPLIER_MS)
+        .filter((n) => typeof n === "number"),
+      95,
+    ),
+    FRESH_UNATTRIBUTED_P95_MS: pct(
+      valid
+        .filter((s) => s.BOOK_NOW_VALIDATION_SOURCE === "FRESH_PREVALIDATION")
+        .map((s) => s.FRESH_UNATTRIBUTED_MS)
+        .filter((n) => typeof n === "number"),
+      95,
+    ),
     PASSENGERS_HOLD_VALIDATE_P95_MS: pct(pick("PASSENGERS_HOLD_VALIDATE_MS"), 95),
     APP_CONTROLLED_P95_MS: pct(pick("APP_CONTROLLED_MS"), 95),
     TOTAL_RECONCILED_COUNT: valid.filter((s) => s.TOTAL_RECONCILED === "YES").length,

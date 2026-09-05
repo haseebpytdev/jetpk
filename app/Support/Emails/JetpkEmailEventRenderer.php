@@ -174,13 +174,25 @@ class JetpkEmailEventRenderer
 
         $plainFacts = is_array($viewData['detailFieldValues'] ?? null) ? $viewData['detailFieldValues'] : [];
         $plainFacts = JetpkEmailPlainTextComposer::mergeBookingFacts($plainFacts, $payload, $baseVariables);
+        $plainFacts = JetpkEmailPlainTextComposer::mergeAgentApplicationFacts($plainFacts, $payload, $baseVariables);
+        $plainCtaUrl = is_string($ctaUrl) ? trim($ctaUrl) : '';
+        $plainCtaLabel = is_string($ctaText) ? trim($ctaText) : '';
+        if ($plainCtaUrl === '') {
+            $htmlAction = JetpkEmailPlainTextComposer::htmlActionCta($html);
+            if ($htmlAction !== null) {
+                $plainCtaUrl = $htmlAction['url'];
+                if ($plainCtaLabel === '' && is_string($htmlAction['label'])) {
+                    $plainCtaLabel = $htmlAction['label'];
+                }
+            }
+        }
         $plainBody = JetpkEmailPlainTextComposer::compose([
             'title' => $headline,
             'greeting' => $recipientGreeting,
             'message' => is_string($introText) ? $introText : '',
             'facts' => $plainFacts,
-            'cta_label' => is_string($ctaText) ? $ctaText : null,
-            'cta_url' => is_string($ctaUrl) ? $ctaUrl : null,
+            'cta_label' => $plainCtaLabel !== '' ? $plainCtaLabel : null,
+            'cta_url' => $plainCtaUrl !== '' ? $plainCtaUrl : null,
             'support_email' => $emailBrand['support_email'] ?? $baseVariables['support_email'] ?? null,
             'support_phone' => $emailBrand['support_phone'] ?? $baseVariables['support_phone'] ?? null,
             'footer' => $emailBrand['footer_text'] ?? null,

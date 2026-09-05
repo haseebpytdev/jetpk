@@ -10,21 +10,18 @@ import type {
   StandardPassengersContext,
   StandardPassengersSubmitResponse,
 } from "../types";
+import {
+  buildPassengersFetchQuery,
+  hasPassengersHandoffQuery,
+  PASSENGERS_JSON_HEADERS,
+  shouldFallbackAfterEarlyResult,
+  shouldReuseEarlyPrime,
+} from "../utils/passengers-fetch-query";
 
-const JSON_HEADERS = {
-  Accept: "application/json",
-  "X-Requested-With": "XMLHttpRequest",
-} as const;
+const JSON_HEADERS = PASSENGERS_JSON_HEADERS;
 
 function buildQuery(params: Record<string, string | undefined>): string {
-  const search = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== "") {
-      search.set(key, value);
-    }
-  });
-  search.set("format", "json");
-  return search.toString();
+  return buildPassengersFetchQuery(params);
 }
 
 function capturePassengersTimingHeaders(response: Response): void {
@@ -35,6 +32,14 @@ function capturePassengersTimingHeaders(response: Response): void {
     attachPassengersServerTiming(parsed);
   } catch {
     /* ignore malformed timing */
+  }
+}
+
+function markTravelerBoot(key: string): void {
+  if (typeof window === "undefined") return;
+  window.__jpTravelerBoot = window.__jpTravelerBoot ?? { marks: {} };
+  if (window.__jpTravelerBoot.marks[key] == null) {
+    window.__jpTravelerBoot.marks[key] = performance.now();
   }
 }
 
@@ -53,6 +58,8 @@ async function standardFetch<T>(
 
   try {
     if (isPassengersGet) {
+      markTravelerBoot("PASSENGER_FETCH_CALLED");
+      markTravelerBoot("PASSENGER_FETCH_REQUEST_START");
       markClientHydration("N1_fetch_start_ms");
     }
     const response = await fetch(laravelApiPath(path), {
@@ -90,10 +97,28 @@ async function standardFetch<T>(
   }
 }
 
+export function clearStandardPassengersPrime(expectedKey?: string): void {
+  if (expectedKey && passengersContextPrime && passengersContextPrime.key !== expectedKey) {
+    return;
+  }
+  passengersContextPrime = null;
+  if (typeof window === "undefined") return;
+  if (!expectedKey || window.__jpPassengersPrime?.key === expectedKey) {
+    window.__jpPassengersPrime = undefined;
+  }
+}
+
 export async function fetchStandardPassengersContext(
   params: Record<string, string | undefined>,
 ) {
-  return primeStandardPassengersContext(params);
+  const key = buildQuery(params);
+  try {
+    const result = await primeStandardPassengersContext(params);
+    markTravelerBoot("REACT_FETCH_CONSUME");
+    return result;
+  } finally {
+    clearStandardPassengersPrime(key);
+  }
 }
 
 /** Dedupe in-flight passengers GET so shell priming and page mount share one request. */
@@ -104,16 +129,52 @@ let passengersContextPrime:
     }
   | null = null;
 
+type PassengersPrimeResult = ReturnType<typeof standardFetch<StandardPassengersContext>>;
+
+function missingHandoffResult(): Awaited<PassengersPrimeResult> {
+  return {
+    ok: false,
+    status: 404,
+    message: "Booking session is missing.",
+    data: { status: "missing_session" } as Partial<StandardPassengersContext>,
+  };
+}
+
 export function primeStandardPassengersContext(params: Record<string, string | undefined>) {
   const key = buildQuery(params);
+  markTravelerBoot("PASSENGER_REQUEST_SCHEDULED");
+  if (!hasPassengersHandoffQuery(params)) {
+    return Promise.resolve(missingHandoffResult());
+  }
   if (passengersContextPrime?.key === key) {
     return passengersContextPrime.promise;
   }
+  if (typeof window !== "undefined") {
+    const early = window.__jpPassengersPrime;
+    if (shouldReuseEarlyPrime(early?.key, key) && early?.promise) {
+      markTravelerBoot("REACT_FETCH_CONSUME");
+      const reused = early.promise.then((result) => {
+        if (shouldFallbackAfterEarlyResult(result as { ok?: boolean })) {
+          clearStandardPassengersPrime(key);
+          return standardFetch<StandardPassengersContext>(`/booking/passengers?${key}`);
+        }
+        const response = (result as { _response?: Response })._response;
+        if (response) {
+          markClientHydration("N2_fetch_end_ms");
+          capturePassengersTimingHeaders(response);
+        }
+        return result as Awaited<PassengersPrimeResult>;
+      }) as PassengersPrimeResult;
+      passengersContextPrime = { key, promise: reused };
+      return reused;
+    }
+  }
+  markTravelerBoot("PASSENGER_FETCH_CALLED");
   const promise = standardFetch<StandardPassengersContext>(`/booking/passengers?${key}`);
   passengersContextPrime = { key, promise };
-  void promise.finally(() => {
-    // Keep resolved promise for immediate reuse; clear only on mismatch via key check above.
-  });
+  if (typeof window !== "undefined") {
+    window.__jpPassengersPrime = { key, promise, source: "react_prime" };
+  }
   return promise;
 }
 

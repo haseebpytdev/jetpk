@@ -67,6 +67,8 @@ declare global {
   interface Window {
     __jpBookNowTiming?: TimingSession;
     __jpBookNowTimingLog?: TimingSession[];
+    __jpPassengersPrime?: { key: string; promise: Promise<unknown>; source?: string };
+    __jpTravelerBoot?: { marks: Record<string, number>; meta?: Record<string, unknown> };
   }
 }
 

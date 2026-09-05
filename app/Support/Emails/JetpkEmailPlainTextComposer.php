@@ -153,4 +153,84 @@ final class JetpkEmailPlainTextComposer
 
         return $currency !== '' ? $currency.' '.$amount : $amount;
     }
+
+    /**
+     * @param  list<array{label: string, value: string}>  $facts
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $variables
+     * @return list<array{label: string, value: string}>
+     */
+    public static function mergeAgentApplicationFacts(array $facts, array $payload, array $variables): array
+    {
+        $application = [];
+        if (is_array($payload['application'] ?? null)) {
+            $application = $payload['application'];
+        } elseif (is_array($payload['agent_application'] ?? null)) {
+            $application = $payload['agent_application'];
+        }
+
+        $pairs = [
+            ['Application ID', $application['reference'] ?? $application['application_reference'] ?? $variables['application_reference'] ?? null],
+            ['Applicant', $application['applicant_name'] ?? $variables['applicant_name'] ?? null],
+            ['Agency / company', $application['agency_name'] ?? $application['company_name'] ?? $variables['applicant_agency_name'] ?? $variables['agency_company'] ?? null],
+            ['Email', $application['email'] ?? $application['applicant_email'] ?? $variables['applicant_email'] ?? null],
+            ['Phone', $application['phone'] ?? $application['applicant_phone'] ?? $variables['applicant_phone'] ?? null],
+            ['City', $application['city'] ?? $variables['city'] ?? null],
+            ['Country', $application['country'] ?? $variables['country'] ?? null],
+            ['Submitted', $application['submitted_at'] ?? $variables['submitted_at'] ?? null],
+            ['Status', $application['status'] ?? $application['application_status'] ?? $variables['application_status'] ?? null],
+        ];
+
+        $seen = [];
+        foreach ($facts as $index => $row) {
+            $label = strtolower(trim((string) ($row['label'] ?? '')));
+            if ($label !== '') {
+                $seen[$label] = $index;
+            }
+        }
+        foreach ($pairs as [$label, $value]) {
+            $value = trim((string) $value);
+            if ($value === '') {
+                continue;
+            }
+            $key = strtolower($label);
+            if (isset($seen[$key])) {
+                $facts[$seen[$key]]['value'] = $value;
+
+                continue;
+            }
+            $facts[] = ['label' => $label, 'value' => $value];
+            $seen[$key] = array_key_last($facts);
+        }
+
+        return $facts;
+    }
+
+    /**
+     * Reuse the HTML body/footer action URL — do not invent a second CTA.
+     *
+     * @return array{label: string|null, url: string}|null
+     */
+    public static function htmlActionCta(string $html): ?array
+    {
+        $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5);
+
+        if (preg_match('/class="[^"]*jetpk-btn[^"]*"[\s\S]{0,1600}?<a[^>]+href="([^"]+)"[^>]*>([^<]+)</i', $html, $match) === 1) {
+            $url = trim($match[1]);
+            $label = trim(html_entity_decode($match[2], ENT_QUOTES | ENT_HTML5));
+            if ($url !== '' && $url !== '#') {
+                return ['label' => $label !== '' ? $label : null, 'url' => $url];
+            }
+        }
+
+        if (preg_match('/<a[^>]+href="([^"]+)"[^>]*>\s*(Manage booking|Open in admin|View booking|Review application)\s*</i', $html, $match) === 1) {
+            $url = trim($match[1]);
+            $label = trim($match[2]);
+            if ($url !== '' && $url !== '#') {
+                return ['label' => $label !== '' ? $label : null, 'url' => $url];
+            }
+        }
+
+        return null;
+    }
 }

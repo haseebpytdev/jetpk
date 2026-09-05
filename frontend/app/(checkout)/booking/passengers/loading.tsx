@@ -7,6 +7,7 @@ import {
   BookingSidebar,
 } from "@/features/booking-layout";
 import { BookNowShellTimingMark } from "@/features/standard-booking/components/BookNowShellTimingMark";
+import { PASSENGERS_EARLY_FETCH_INLINE } from "@/features/standard-booking/utils/passengers-early-fetch-inline";
 
 const FALLBACK_PROGRESS = [
   { key: "search", label: "Search", state: "completed" as const },
@@ -20,6 +21,10 @@ const FALLBACK_PROGRESS = [
 export default function Loading() {
   return (
     <BookingPageShell testId="passengers-route-loading">
+      <script
+        id="jp-passengers-early-fetch-loading"
+        dangerouslySetInnerHTML={{ __html: PASSENGERS_EARLY_FETCH_INLINE }}
+      />
       <BookNowShellTimingMark />
       <BookingProgress steps={FALLBACK_PROGRESS} className="mb-6" />
       <BookingPageHeader title="Traveler information" description="Confirm each traveler and contact details." />

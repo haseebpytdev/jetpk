@@ -17,7 +17,7 @@ import { Dialog } from "@/components/ui/Dialog";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
 import { mapFieldErrors, ensureLaravelCsrfToken } from "@/features/auth/utils/laravel-auth-api";
-import { fetchStandardPassengersContext, submitStandardPassengers, probeCheckoutGuestEmail, fetchCheckoutSavedTravelers, fetchCheckoutSavedTraveler, type CheckoutSavedTravelerListItem } from "../services/standard-booking-api";
+import { fetchStandardPassengersContext, submitStandardPassengers, probeCheckoutGuestEmail, fetchCheckoutSavedTravelers, fetchCheckoutSavedTraveler, clearStandardPassengersPrime, type CheckoutSavedTravelerListItem } from "../services/standard-booking-api";
 import type { ContactFormValues, PassengerFormValues, StandardPassengersContext } from "../types";
 import {
   buildContactFromContext,
@@ -92,6 +92,12 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     }
     setFormError(null);
     setErrorStatus(null);
+    if (typeof window !== "undefined") {
+      window.__jpTravelerBoot = window.__jpTravelerBoot ?? { marks: {} };
+      if (window.__jpTravelerBoot.marks.PASSENGER_EFFECT_STARTED == null) {
+        window.__jpTravelerBoot.marks.PASSENGER_EFFECT_STARTED = performance.now();
+      }
+    }
     return fetchStandardPassengersContext(searchParams);
     // queryKey is the stable identity for searchParams contents
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,6 +106,12 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   useEffect(() => {
     let cancelled = false;
     let requestGen = 0;
+    if (typeof window !== "undefined") {
+      window.__jpTravelerBoot = window.__jpTravelerBoot ?? { marks: {} };
+      if (window.__jpTravelerBoot.marks.PASSENGER_EFFECT_REGISTERED == null) {
+        window.__jpTravelerBoot.marks.PASSENGER_EFFECT_REGISTERED = performance.now();
+      }
+    }
 
     const run = async () => {
       const gen = ++requestGen;
@@ -154,6 +166,12 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
         markClientHydration("N3_form_render_ms");
         markBookNowTiming("T9_field_enabled", { phase: "passengers_form_ready_flush" });
         markClientHydration("N4_hydration_settled_ms");
+        if (typeof window !== "undefined") {
+          window.__jpTravelerBoot = window.__jpTravelerBoot ?? { marks: {} };
+          if (window.__jpTravelerBoot.marks.HYDRATION_END == null) {
+            window.__jpTravelerBoot.marks.HYDRATION_END = performance.now();
+          }
+        }
       }
       // Warm the next checkout segment so Traveler → Review is not chunk-bound.
       try {
@@ -167,6 +185,7 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
 
     return () => {
       cancelled = true;
+      clearStandardPassengersPrime();
     };
   }, [queryKey, loadContext, router]);
 
@@ -174,6 +193,18 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
   useEffect(() => {
     restoreBookNowTimingFromStorage();
     markClientHydration("N0_page_start_ms");
+    if (typeof window !== "undefined") {
+      window.__jpTravelerBoot = window.__jpTravelerBoot ?? { marks: {} };
+      if (window.__jpTravelerBoot.marks.HYDRATION_START == null) {
+        window.__jpTravelerBoot.marks.HYDRATION_START = performance.now();
+      }
+      if (window.__jpTravelerBoot.marks.REACT_ROOT_COMMIT == null) {
+        window.__jpTravelerBoot.marks.REACT_ROOT_COMMIT = performance.now();
+      }
+      if (window.__jpTravelerBoot.marks.TRAVELER_SHELL_MARK == null) {
+        window.__jpTravelerBoot.marks.TRAVELER_SHELL_MARK = performance.now();
+      }
+    }
   }, []);
 
   useEffect(() => {

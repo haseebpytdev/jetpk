@@ -98,7 +98,7 @@ final class JetpkEmailSampleDataProvider
         if (str_contains($eventKey, 'agent_application') || str_contains($eventKey, 'agent_registration')) {
             $sample['application_reference'] = (string) ($sample['application_reference'] ?? 'APP-2026-4412');
             $sample['applicant_name'] = (string) ($sample['applicant_name'] ?? 'Sara Ahmed');
-            $sample['agency_name'] = (string) ($sample['agency_name'] ?? 'Skyline Partners');
+            $sample['applicant_agency_name'] = (string) ($sample['applicant_agency_name'] ?? 'Skyline Partners');
             $sample['applicant_email'] = (string) ($sample['applicant_email'] ?? 'sara@example.com');
             $sample['applicant_phone'] = (string) ($sample['applicant_phone'] ?? '+92 300 1234567');
             $sample['city'] = (string) ($sample['city'] ?? 'Lahore');
@@ -108,7 +108,7 @@ final class JetpkEmailSampleDataProvider
             $sample['agent_application'] = [
                 'reference' => $sample['application_reference'],
                 'applicant_name' => $sample['applicant_name'],
-                'agency_name' => $sample['agency_name'],
+                'agency_name' => $sample['applicant_agency_name'],
                 'email' => $sample['applicant_email'],
                 'phone' => $sample['applicant_phone'],
                 'city' => $sample['city'],

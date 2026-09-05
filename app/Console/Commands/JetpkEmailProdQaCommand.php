@@ -28,7 +28,8 @@ class JetpkEmailProdQaCommand extends Command
         {--family-gate : One representative scenario per major family}
         {--limit=0 : Max scenarios}
         {--start=0 : Skip first N scenarios}
-        {--skip-ids= : Comma-separated scenario_ids already passed}';
+        {--skip-ids= : Comma-separated scenario_ids already passed}
+        {--only-ids= : Comma-separated scenario_ids to run}';
 
     protected $description = 'JetPakistan production email QA: inventory, snapshot, optional locked send.';
 
@@ -95,6 +96,10 @@ class JetpkEmailProdQaCommand extends Command
         $skipIds = array_filter(array_map('trim', explode(',', (string) $this->option('skip-ids'))));
         if ($skipIds !== []) {
             $rows = array_values(array_filter($rows, static fn (array $row): bool => ! in_array($row['scenario_id'], $skipIds, true)));
+        }
+        $onlyIds = array_filter(array_map('trim', explode(',', (string) $this->option('only-ids'))));
+        if ($onlyIds !== []) {
+            $rows = array_values(array_filter($rows, static fn (array $row): bool => in_array($row['scenario_id'], $onlyIds, true)));
         }
         $slice = $this->option('family-gate') ? $this->familyGateRows($rows) : array_slice($rows, $start, $limit > 0 ? $limit : null);
         $brand = JetpkEmailBrandingResolver::resolve('jetpk');

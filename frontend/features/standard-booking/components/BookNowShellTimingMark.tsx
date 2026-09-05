@@ -27,6 +27,12 @@ export function BookNowShellTimingMark() {
   useLayoutEffect(() => {
     restoreBookNowTimingFromStorage();
     markBookNowTiming("T8_shell_visible", { phase: "passengers_route_loading" });
+    if (typeof window !== "undefined") {
+      window.__jpTravelerBoot = window.__jpTravelerBoot ?? { marks: {} };
+      if (window.__jpTravelerBoot.marks.TRAVELER_SHELL_MARK == null) {
+        window.__jpTravelerBoot.marks.TRAVELER_SHELL_MARK = performance.now();
+      }
+    }
     try {
       primeStandardPassengersContext(paramsFromLocation());
     } catch {
