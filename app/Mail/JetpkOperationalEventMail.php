@@ -7,6 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 /**
@@ -24,12 +25,26 @@ class JetpkOperationalEventMail extends Mailable
         public string $emailSubject,
         public string $plainBody,
         public array $attachmentPayloads = [],
+        public ?string $qaCorrelationId = null,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
             subject: $this->emailSubject,
+        );
+    }
+
+    public function headers(): Headers
+    {
+        if ($this->qaCorrelationId === null || $this->qaCorrelationId === '') {
+            return new Headers();
+        }
+
+        return new Headers(
+            text: [
+                'X-JetPakistan-QA-Correlation' => $this->qaCorrelationId,
+            ],
         );
     }
 

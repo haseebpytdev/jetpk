@@ -7,6 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Symfony\Component\Mime\Email;
 
 /**
  * Manual booking-console customer email with modern layout (I8).
@@ -30,9 +31,15 @@ class ManualBookingCommunicationMail extends Mailable
 
     public function content(): Content
     {
+        $plain = $this->plainBody;
+        if ($plain !== '') {
+            $this->withSymfonyMessage(static function (Email $message) use ($plain): void {
+                $message->text($plain);
+            });
+        }
+
         return new Content(
             htmlString: $this->htmlBody,
-            textString: $this->plainBody,
         );
     }
 }

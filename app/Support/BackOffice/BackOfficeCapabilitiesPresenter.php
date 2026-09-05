@@ -248,8 +248,9 @@ class BackOfficeCapabilitiesPresenter
         }
 
         $system = [];
-        if ($has('settings.view')) {
+        if ($has('settings.view') || $isAdmin) {
             $system[] = $this->dashboardNav('Settings', 'settings', '/settings');
+            $system[] = $this->dashboardNav('Company Profile & Branding', 'company-profile-branding', '/settings/general');
         }
         if ($isAdmin) {
             $system[] = $this->dashboardNav('System health', 'system-health', '/system/health');

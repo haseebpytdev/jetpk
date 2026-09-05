@@ -7,7 +7,7 @@ import { DashboardLink } from "@/components/dashboard/dashboard-link";
 import { OperationalInboxBadge } from "@/components/dashboard/operational-inbox-badge";
 import { postLaravelLogout } from "@/lib/laravel-auth-api";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
-import type { DashboardSessionSummary } from "@/services/session-service";
+import { DashboardUserAvatar } from "@/components/dashboard/user-avatar";
 
 type Props = {
   onMenuClick: () => void;
@@ -68,8 +68,8 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
             aria-haspopup="menu"
             onClick={() => setProfileOpen((value) => !value)}
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-jp-accent/15 text-xs font-semibold text-jp-accent-muted">
-              {profile?.initials ?? "??"}
+            <span className="flex h-9 w-9 overflow-hidden rounded-full bg-jp-accent/15 text-xs font-semibold text-jp-accent-muted">
+              <DashboardUserAvatar photoUrl={profile?.photoUrl} initials={profile?.initials ?? "??"} />
             </span>
             <span className="hidden max-w-[14rem] truncate text-[0.8125rem] font-medium sm:inline" title={profile?.displayName}>
               {profile?.displayName ?? (isLive ? "Session unavailable" : "Preview user")}
@@ -80,10 +80,17 @@ export function DashboardHeader({ onMenuClick, session }: Props) {
               role="menu"
               className="absolute right-0 mt-2 w-56 rounded-xl border border-jp-border bg-white py-2 shadow-lg"
             >
-              <div className="border-b px-4 pb-2">
+              <div className="flex items-center gap-3 border-b px-4 pb-2">
+                <DashboardUserAvatar
+                  photoUrl={profile?.photoUrl}
+                  initials={profile?.initials ?? "??"}
+                  sizeClass="h-10 w-10"
+                />
+                <div className="min-w-0">
                 <p className="text-sm font-semibold">{profile?.displayName ?? "Signed out"}</p>
                 <p className="text-xs text-jp-muted">{profile?.email ?? "—"}</p>
                 {profile?.roles?.[0] ? <p className="mt-1 text-xs text-jp-muted">{profile.roles[0]}</p> : null}
+                </div>
               </div>
               <DashboardLink
                 href="/profile"

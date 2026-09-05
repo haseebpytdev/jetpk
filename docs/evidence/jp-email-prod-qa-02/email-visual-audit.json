@@ -1,0 +1,6 @@
+{
+  "run_id": "jp-email-prod-qa-02-pending-production",
+  "EMAIL_RESPONSIVE_VISUAL_AUDIT": "PENDING",
+  "UNEXPECTED_EMAIL_OVERFLOW": null,
+  "note": "Desktop/mobile Chromium screenshots are generated from snapshot HTML after production render."
+}

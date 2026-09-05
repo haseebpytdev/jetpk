@@ -104,6 +104,18 @@ class EmailPlaceholderFallbacks
             return 'Not provided';
         }
 
+        if ($canonical === 'booking_reference') {
+            $resolved = trim((string) (
+                $context['booking_reference']
+                ?? $context['reference_code']
+                ?? $context['pnr']
+                ?? ''
+            ));
+            if ($resolved !== '') {
+                return $resolved;
+            }
+        }
+
         return self::OPS_FALLBACKS[$canonical] ?? null;
     }
 

@@ -15,7 +15,7 @@ import { laravelRouteUrl } from "@/lib/laravel-route-url";
 import { previewNavGroupsForPortal } from "@/lib/nav-config";
 import { isPrimaryActiveNav } from "@/lib/nav-active";
 import type { DashboardBranding } from "@/services/branding-service";
-import type { DashboardSessionSummary } from "@/services/session-service";
+import { DashboardUserAvatar } from "@/components/dashboard/user-avatar";
 
 type Props = {
   open: boolean;
@@ -166,6 +166,7 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
     displayName: isLive ? "Session unavailable" : "Preview user",
     email: "—",
     initials: "??",
+    photoUrl: null,
     roles: isLive ? [] : ["Preview"],
   };
 
@@ -210,9 +211,12 @@ export function DashboardSidebar({ open, onClose, session: sessionProp, branding
             </span>
           </Link>
           <div className="mt-4 flex items-center gap-3 rounded-xl bg-white/5 p-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-jp-accent text-sm font-semibold">
-              {profile.initials}
-            </span>
+            <DashboardUserAvatar
+              photoUrl={profile.photoUrl}
+              initials={profile.initials}
+              sizeClass="h-11 w-11"
+              textClass="text-sm font-semibold text-white bg-jp-accent"
+            />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{profile.displayName}</p>
               <p className="truncate text-xs text-gray-400">{profile.roles?.[0] ?? "User"}</p>

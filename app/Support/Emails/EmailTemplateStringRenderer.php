@@ -39,6 +39,9 @@ class EmailTemplateStringRenderer
                     'brand_name' => $normalized['brand_name'] ?? $context['brand_name'] ?? null,
                     'agency_name' => $normalized['agency_name'] ?? $context['agency_name'] ?? null,
                     'company_name' => $normalized['company_name'] ?? $context['company_name'] ?? null,
+                    'booking_reference' => $normalized['booking_reference'] ?? $context['booking_reference'] ?? null,
+                    'pnr' => $normalized['pnr'] ?? $context['pnr'] ?? null,
+                    'reference_code' => $normalized['reference_code'] ?? $context['reference_code'] ?? null,
                 ]);
                 $fallback = EmailPlaceholderFallbacks::fallbackFor($key, $fallbackContext);
                 if ($fallback !== null) {

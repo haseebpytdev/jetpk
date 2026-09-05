@@ -15,10 +15,10 @@
                 <td align="left" valign="middle" style="font-family:Arial,Helvetica,sans-serif;">
                     @if(!empty($logoUrl) && !empty($homeUrl))
                         <a href="{{ $homeUrl }}" target="_blank" style="text-decoration:none;">
-                            <img src="{{ $logoUrl }}" alt="{{ $brandName }}" height="38" style="display:block; height:38px; max-height:38px; width:auto; border:0;">
+                            <img src="{{ $logoUrl }}" alt="{{ $brandName }}" class="jetpk-logo" height="38" style="display:block; height:38px; max-height:48px; max-width:180px; width:auto; border:0;">
                         </a>
                     @elseif(!empty($logoUrl))
-                        <img src="{{ $logoUrl }}" alt="{{ $brandName }}" height="38" style="display:block; height:38px; max-height:38px; width:auto; border:0;">
+                        <img src="{{ $logoUrl }}" alt="{{ $brandName }}" class="jetpk-logo" height="38" style="display:block; height:38px; max-height:48px; max-width:180px; width:auto; border:0;">
                     @else
                         {{-- Safe text fallback: never a Master logo --}}
                         <span style="font-family:Arial,Helvetica,sans-serif; font-size:22px; font-weight:bold; color:{{ $primary }}; letter-spacing:0.3px;">Jet<span style="color:{{ $accent }};">Pakistan</span></span>

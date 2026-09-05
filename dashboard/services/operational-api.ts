@@ -1053,6 +1053,15 @@ export async function updateOrganizationProfile(payload: Record<string, unknown>
   });
 }
 
+export async function updateOrganizationBrandingMedia(formData: FormData): Promise<MutationResponse<{ organization?: Record<string, unknown> }>> {
+  formData.append("_method", "PATCH");
+  return laravelRequest(brandingSettingsPath(), {
+    method: "POST",
+    formData,
+    retryCsrfOnce: true,
+  });
+}
+
 export async function createPlatformUser(payload: Record<string, unknown>): Promise<MutationResponse<{ user?: Record<string, unknown> }>> {
   return laravelRequest(usersStorePath(), {
     method: "POST",

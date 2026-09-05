@@ -1,0 +1,1311 @@
+{
+    "run_id": "jp-email-prod-qa-02-local-render",
+    "discovered": 96,
+    "active_role_copies": 163,
+    "scenarios": [
+        {
+            "scenario_id": "booking_request_received__admin",
+            "event_key": "booking_request_received",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_request_received__agent_booking",
+            "event_key": "booking_request_received",
+            "role": "agent_booking",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_fare_updated_requires_acceptance__admin",
+            "event_key": "booking_fare_updated_requires_acceptance",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_fare_updated_requires_acceptance__customer_party",
+            "event_key": "booking_fare_updated_requires_acceptance",
+            "role": "customer_party",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_fare_updated_requires_acceptance__agent_booking",
+            "event_key": "booking_fare_updated_requires_acceptance",
+            "role": "agent_booking",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_updated_fare_accepted__admin",
+            "event_key": "booking_updated_fare_accepted",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_updated_fare_accepted__customer_party",
+            "event_key": "booking_updated_fare_accepted",
+            "role": "customer_party",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_updated_fare_accepted__agent_booking",
+            "event_key": "booking_updated_fare_accepted",
+            "role": "agent_booking",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_confirmed__admin",
+            "event_key": "booking_confirmed",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_confirmed__agent_booking",
+            "event_key": "booking_confirmed",
+            "role": "agent_booking",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_confirmed__agency_admin",
+            "event_key": "booking_confirmed",
+            "role": "agency_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_status_changed__admin",
+            "event_key": "booking_status_changed",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_status_changed__agent_booking",
+            "event_key": "booking_status_changed",
+            "role": "agent_booking",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_status_changed__agency_admin",
+            "event_key": "booking_status_changed",
+            "role": "agency_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_assigned__admin",
+            "event_key": "booking_assigned",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_assigned__staff_assigned",
+            "event_key": "booking_assigned",
+            "role": "staff_assigned",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_cancelled__admin",
+            "event_key": "booking_cancelled",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_cancelled__agent_booking",
+            "event_key": "booking_cancelled",
+            "role": "agent_booking",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_cancelled__agency_admin",
+            "event_key": "booking_cancelled",
+            "role": "agency_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_expired__assigned_staff",
+            "event_key": "booking_expired",
+            "role": "assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_expired__operations_queue",
+            "event_key": "booking_expired",
+            "role": "operations_queue",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_expired__platform_admin",
+            "event_key": "booking_expired",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_failed_validation__admin",
+            "event_key": "booking_failed_validation",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_manual_review_required__assigned_staff",
+            "event_key": "booking_manual_review_required",
+            "role": "assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_manual_review_required__operations_queue",
+            "event_key": "booking_manual_review_required",
+            "role": "operations_queue",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_manual_review_required__platform_admin",
+            "event_key": "booking_manual_review_required",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "stale_segment_requires_new_search__admin",
+            "event_key": "stale_segment_requires_new_search",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "stale_segment_requires_new_search__staff_assigned",
+            "event_key": "stale_segment_requires_new_search",
+            "role": "staff_assigned",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "pnr_itinerary_synced__admin",
+            "event_key": "pnr_itinerary_synced",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "pnr_itinerary_synced__staff_assigned",
+            "event_key": "pnr_itinerary_synced",
+            "role": "staff_assigned",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "pnr_itinerary_sync_failed__admin",
+            "event_key": "pnr_itinerary_sync_failed",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "pnr_itinerary_sync_failed__staff_assigned",
+            "event_key": "pnr_itinerary_sync_failed",
+            "role": "staff_assigned",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "cancellation_requested__assigned_staff",
+            "event_key": "cancellation_requested",
+            "role": "assigned_staff",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "cancellation_requested__operations_queue",
+            "event_key": "cancellation_requested",
+            "role": "operations_queue",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "cancellation_requested__platform_admin",
+            "event_key": "cancellation_requested",
+            "role": "platform_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "cancellation_status_changed__admin",
+            "event_key": "cancellation_status_changed",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "cancellation_status_changed__agent_booking",
+            "event_key": "cancellation_status_changed",
+            "role": "agent_booking",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "cancellation_status_changed__agency_admin",
+            "event_key": "cancellation_status_changed",
+            "role": "agency_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_proof_submitted__finance",
+            "event_key": "payment_proof_submitted",
+            "role": "finance",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_proof_submitted__assigned_staff",
+            "event_key": "payment_proof_submitted",
+            "role": "assigned_staff",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_proof_submitted__operations_queue",
+            "event_key": "payment_proof_submitted",
+            "role": "operations_queue",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_proof_submitted__platform_admin",
+            "event_key": "payment_proof_submitted",
+            "role": "platform_admin",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_recorded__finance",
+            "event_key": "payment_recorded",
+            "role": "finance",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_recorded__admin",
+            "event_key": "payment_recorded",
+            "role": "admin",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_recorded__staff_assigned",
+            "event_key": "payment_recorded",
+            "role": "staff_assigned",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_verified__platform_admin",
+            "event_key": "payment_verified",
+            "role": "platform_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_verified__assigned_staff",
+            "event_key": "payment_verified",
+            "role": "assigned_staff",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_rejected__platform_admin",
+            "event_key": "payment_rejected",
+            "role": "platform_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_rejected__assigned_staff",
+            "event_key": "payment_rejected",
+            "role": "assigned_staff",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_completed__admin",
+            "event_key": "payment_completed",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_reminder__admin",
+            "event_key": "payment_reminder",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_requested__admin",
+            "event_key": "refund_requested",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_requested__staff_assigned",
+            "event_key": "refund_requested",
+            "role": "staff_assigned",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_requested__agent_booking",
+            "event_key": "refund_requested",
+            "role": "agent_booking",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_requested__agency_admin",
+            "event_key": "refund_requested",
+            "role": "agency_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_approved__admin",
+            "event_key": "refund_approved",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_approved__agent_booking",
+            "event_key": "refund_approved",
+            "role": "agent_booking",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_approved__agency_admin",
+            "event_key": "refund_approved",
+            "role": "agency_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_paid__admin",
+            "event_key": "refund_paid",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_paid__agent_booking",
+            "event_key": "refund_paid",
+            "role": "agent_booking",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_paid__agency_admin",
+            "event_key": "refund_paid",
+            "role": "agency_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_rejected__admin",
+            "event_key": "refund_rejected",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_rejected__agent_booking",
+            "event_key": "refund_rejected",
+            "role": "agent_booking",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_rejected__agency_admin",
+            "event_key": "refund_rejected",
+            "role": "agency_admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_booking_created__customer_party",
+            "event_key": "supplier_booking_created",
+            "role": "customer_party",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_booking_created__admin",
+            "event_key": "supplier_booking_created",
+            "role": "admin",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_booking_created__staff_assigned",
+            "event_key": "supplier_booking_created",
+            "role": "staff_assigned",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_booking_failed__assigned_staff",
+            "event_key": "supplier_booking_failed",
+            "role": "assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_booking_failed__operations_queue",
+            "event_key": "supplier_booking_failed",
+            "role": "operations_queue",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_booking_failed__platform_admin",
+            "event_key": "supplier_booking_failed",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_readiness_failed__assigned_staff",
+            "event_key": "supplier_readiness_failed",
+            "role": "assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_readiness_failed__operations_queue",
+            "event_key": "supplier_readiness_failed",
+            "role": "operations_queue",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_readiness_failed__platform_admin",
+            "event_key": "supplier_readiness_failed",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_search_failed__assigned_staff",
+            "event_key": "supplier_search_failed",
+            "role": "assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_search_failed__operations_queue",
+            "event_key": "supplier_search_failed",
+            "role": "operations_queue",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_search_failed__platform_admin",
+            "event_key": "supplier_search_failed",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_order_failed__assigned_staff",
+            "event_key": "supplier_order_failed",
+            "role": "assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_order_failed__operations_queue",
+            "event_key": "supplier_order_failed",
+            "role": "operations_queue",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "supplier_order_failed__platform_admin",
+            "event_key": "supplier_order_failed",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "fx_conversion_failed__admin",
+            "event_key": "fx_conversion_failed",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticket_issued__booking_agent",
+            "event_key": "ticket_issued",
+            "role": "booking_agent",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticket_issued__agency_admin",
+            "event_key": "ticket_issued",
+            "role": "agency_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticket_issued__agent_staff_creator",
+            "event_key": "ticket_issued",
+            "role": "agent_staff_creator",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticketing_failed__assigned_staff",
+            "event_key": "ticketing_failed",
+            "role": "assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticketing_failed__operations_queue",
+            "event_key": "ticketing_failed",
+            "role": "operations_queue",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticketing_failed__platform_admin",
+            "event_key": "ticketing_failed",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticketing_not_supported__assigned_staff",
+            "event_key": "ticketing_not_supported",
+            "role": "assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticketing_not_supported__operations_queue",
+            "event_key": "ticketing_not_supported",
+            "role": "operations_queue",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticketing_not_supported__platform_admin",
+            "event_key": "ticketing_not_supported",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "customer_registered__customer",
+            "event_key": "customer_registered",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_application_submitted__admin",
+            "event_key": "agent_application_submitted",
+            "role": "admin",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "agent_application_submitted__applicant",
+            "event_key": "agent_application_submitted",
+            "role": "applicant",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "agent_application_approved__applicant",
+            "event_key": "agent_application_approved",
+            "role": "applicant",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_application_approved__admin",
+            "event_key": "agent_application_approved",
+            "role": "admin",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_application_needs_more_info__applicant",
+            "event_key": "agent_application_needs_more_info",
+            "role": "applicant",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_application_needs_more_info__admin",
+            "event_key": "agent_application_needs_more_info",
+            "role": "admin",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_application_rejected__applicant",
+            "event_key": "agent_application_rejected",
+            "role": "applicant",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_application_rejected__admin",
+            "event_key": "agent_application_rejected",
+            "role": "admin",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "staff_created__staff",
+            "event_key": "staff_created",
+            "role": "staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "staff_created__admin",
+            "event_key": "staff_created",
+            "role": "admin",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_created__agent",
+            "event_key": "agent_created",
+            "role": "agent",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_created__admin",
+            "event_key": "agent_created",
+            "role": "admin",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "admin_created__staff",
+            "event_key": "admin_created",
+            "role": "staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "user_suspended__user",
+            "event_key": "user_suspended",
+            "role": "user",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "user_suspended__admin",
+            "event_key": "user_suspended",
+            "role": "admin",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "user_activated__user",
+            "event_key": "user_activated",
+            "role": "user",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "user_activated__admin",
+            "event_key": "user_activated",
+            "role": "admin",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "password_reset_requested__staff",
+            "event_key": "password_reset_requested",
+            "role": "staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "customer_login_success__logged_in_user",
+            "event_key": "customer_login_success",
+            "role": "logged_in_user",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "admin_login_success__logged_in_user",
+            "event_key": "admin_login_success",
+            "role": "logged_in_user",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "staff_login_success__logged_in_user",
+            "event_key": "staff_login_success",
+            "role": "logged_in_user",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_login_success__logged_in_user",
+            "event_key": "agent_login_success",
+            "role": "logged_in_user",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "login_failed_sensitive__admin",
+            "event_key": "login_failed_sensitive",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "login_failed_alert__logged_in_user",
+            "event_key": "login_failed_alert",
+            "role": "logged_in_user",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "auth_new_device_login__logged_in_user",
+            "event_key": "auth_new_device_login",
+            "role": "logged_in_user",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "commission_earned__agent",
+            "event_key": "commission_earned",
+            "role": "agent",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "commission_approved__agent",
+            "event_key": "commission_approved",
+            "role": "agent",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "commission_payout_recorded__agent",
+            "event_key": "commission_payout_recorded",
+            "role": "agent",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "commission_statement_issued__agent",
+            "event_key": "commission_statement_issued",
+            "role": "agent",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_deposit_submitted__finance",
+            "event_key": "agent_deposit_submitted",
+            "role": "finance",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_deposit_submitted__admin",
+            "event_key": "agent_deposit_submitted",
+            "role": "admin",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_deposit_approved__applicant",
+            "event_key": "agent_deposit_approved",
+            "role": "applicant",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agent_deposit_rejected__applicant",
+            "event_key": "agent_deposit_rejected",
+            "role": "applicant",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "document_generated__staff",
+            "event_key": "document_generated",
+            "role": "staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "document_downloaded_admin_optional__staff",
+            "event_key": "document_downloaded_admin_optional",
+            "role": "staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticket_itinerary_generated__staff",
+            "event_key": "ticket_itinerary_generated",
+            "role": "staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "invoice_generated__staff",
+            "event_key": "invoice_generated",
+            "role": "staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_receipt_generated__staff",
+            "event_key": "payment_receipt_generated",
+            "role": "staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "support_ticket_created__admin",
+            "event_key": "support_ticket_created",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "support_ticket_created__ticket_assigned_staff",
+            "event_key": "support_ticket_created",
+            "role": "ticket_assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "support_ticket_created__ticket_creator",
+            "event_key": "support_ticket_created",
+            "role": "ticket_creator",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "support_ticket_assigned__ticket_assigned_staff",
+            "event_key": "support_ticket_assigned",
+            "role": "ticket_assigned_staff",
+            "audience": "staff",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "support_ticket_forwarded__ticket_forwarded_agent",
+            "event_key": "support_ticket_forwarded",
+            "role": "ticket_forwarded_agent",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "support_ticket_replied__admin",
+            "event_key": "support_ticket_replied",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "support_ticket_replied__ticket_assigned_staff",
+            "event_key": "support_ticket_replied",
+            "role": "ticket_assigned_staff",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "support_ticket_status_changed__ticket_creator",
+            "event_key": "support_ticket_status_changed",
+            "role": "ticket_creator",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "daily_admin_report__admin",
+            "event_key": "daily_admin_report",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "weekly_admin_report__admin",
+            "event_key": "weekly_admin_report",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "monthly_admin_report__admin",
+            "event_key": "monthly_admin_report",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "monthly_agent_ledger__admin",
+            "event_key": "monthly_agent_ledger",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "monthly_finance_ledger__finance",
+            "event_key": "monthly_finance_ledger",
+            "role": "finance",
+            "audience": "finance",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agency_wallet_deposit_summary__agency_admin",
+            "event_key": "agency_wallet_deposit_summary",
+            "role": "agency_admin",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "agency_booking_activity_summary__agency_admin",
+            "event_key": "agency_booking_activity_summary",
+            "role": "agency_admin",
+            "audience": "agent",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "pnr_manual_review_digest__platform_admin",
+            "event_key": "pnr_manual_review_digest",
+            "role": "platform_admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "group_booking_reservation_created__admin",
+            "event_key": "group_booking_reservation_created",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "group_booking_payment_submitted__admin",
+            "event_key": "group_booking_payment_submitted",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "group_booking_released_unpaid__admin",
+            "event_key": "group_booking_released_unpaid",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "group_booking_supplier_release_failed__admin",
+            "event_key": "group_booking_supplier_release_failed",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "group_booking_access_restricted__admin",
+            "event_key": "group_booking_access_restricted",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "login_otp__customer",
+            "event_key": "login_otp",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "email_verification__customer",
+            "event_key": "email_verification",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "password_reset__mixed",
+            "event_key": "password_reset",
+            "role": "mixed",
+            "audience": "mixed",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "customer_welcome__customer",
+            "event_key": "customer_welcome",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "FULL_LIVE_TRIGGER"
+        },
+        {
+            "scenario_id": "itinerary_ready__customer",
+            "event_key": "itinerary_ready",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "settings_test_email__admin",
+            "event_key": "settings_test_email",
+            "role": "admin",
+            "audience": "admin",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_expiring__customer",
+            "event_key": "booking_expiring",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_reminder_manual__customer",
+            "event_key": "payment_reminder_manual",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "invoice_sent_manual__customer",
+            "event_key": "invoice_sent_manual",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "payment_receipt_sent_manual__customer",
+            "event_key": "payment_receipt_sent_manual",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "ticket_itinerary_sent_manual__customer",
+            "event_key": "ticket_itinerary_sent_manual",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "cancellation_update_manual__customer",
+            "event_key": "cancellation_update_manual",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "refund_update_manual__customer",
+            "event_key": "refund_update_manual",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        },
+        {
+            "scenario_id": "booking_update_manual__customer",
+            "event_key": "booking_update_manual",
+            "role": "customer",
+            "audience": "customer",
+            "status": "ACTIVE_PRODUCTION",
+            "proof_class": "PRODUCTION_EVENT_CHAIN"
+        }
+    ]
+}

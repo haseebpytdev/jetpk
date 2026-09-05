@@ -1,0 +1,27 @@
+{
+    "run_id": "jp-email-prod-qa-02-local-render",
+    "snapshot_db": "C:\\Users\\khadi\\ota-jetpk\\storage\\app/email-qa/live\\jp-email-prod-qa-02-local-render.sqlite",
+    "messages": [
+        {
+            "scenario_id": "booking_request_received__admin",
+            "correlation_id": "JP-EMAIL-PROD-QA-02-BOOKING-REQUEST-RECEIVED-ADMIN-20260905095952-PH5XCK",
+            "subject": "[ADMIN] JetPakistan \u2014 New booking received \u2014 Booking reference pending",
+            "role": "admin",
+            "proof_class": "PRODUCTION_EVENT_CHAIN",
+            "transport": "render_only",
+            "content_audit_pass": true,
+            "recipient": "myworkhaseeb@gmail.com"
+        },
+        {
+            "scenario_id": "booking_request_received__agent_booking",
+            "correlation_id": "JP-EMAIL-PROD-QA-02-BOOKING-REQUEST-RECEIVED-AGENT-BOOKING-20260905095954-NGUYEY",
+            "subject": "JetPakistan \u2014 New booking received \u2014 Booking reference pending",
+            "role": "agent_booking",
+            "proof_class": "PRODUCTION_EVENT_CHAIN",
+            "transport": "render_only",
+            "content_audit_pass": true,
+            "recipient": "myworkhaseeb@gmail.com"
+        }
+    ],
+    "GMAIL_INBOX_VERIFICATION": "PENDING_CHATGPT"
+}

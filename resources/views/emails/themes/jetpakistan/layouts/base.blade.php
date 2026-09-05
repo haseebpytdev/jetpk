@@ -47,9 +47,12 @@
         html, body { margin: 0 !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
         * { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
         table, td { mso-table-lspace: 0pt !important; mso-table-rspace: 0pt !important; border-collapse: collapse !important; }
-        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; max-width: 100%; }
         a { text-decoration: none; }
         body, table, td, a { font-family: Arial, Helvetica, sans-serif; }
+        td, p, a, span, li { overflow-wrap: break-word; word-wrap: break-word; }
+        .jetpk-long { overflow-wrap: anywhere; word-break: break-word; max-width: 100%; }
+        .jetpk-logo { max-width: 180px; max-height: 48px; height: auto; }
 
         /* Mobile */
         @media only screen and (max-width: 640px) {

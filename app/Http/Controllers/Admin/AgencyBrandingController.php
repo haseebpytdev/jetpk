@@ -57,6 +57,7 @@ class AgencyBrandingController extends Controller
                     'country' => (string) ($settings->country ?? ''),
                     'timezone' => (string) ($settings->timezone ?: 'Asia/Karachi'),
                     'logo_url' => is_string($logoPath) && $logoPath !== '' ? asset('storage/'.$logoPath) : null,
+                    'favicon_url' => filled($settings->favicon_path) ? asset('storage/'.$settings->favicon_path) : null,
                     'tagline' => (string) ($settings->tagline ?? ''),
                     'color_scheme' => BrandDisplayResolver::colorSchemeKey($settings),
                     'primary_color' => (string) ($settings->primary_color ?? ''),
@@ -133,6 +134,8 @@ class AgencyBrandingController extends Controller
             'logo' => ['nullable', 'image', 'max:5120'],
             'favicon' => ['nullable', 'file', 'max:1024'],
             'hero_image' => ['nullable', 'image', 'max:5120'],
+            'remove_logo' => ['nullable', 'boolean'],
+            'remove_favicon' => ['nullable', 'boolean'],
             'header_logo_height' => ['nullable', 'integer', 'min:'.PlatformBrandingResolver::MIN_HEADER_LOGO_HEIGHT, 'max:'.PlatformBrandingResolver::MAX_HEADER_LOGO_HEIGHT],
             'slim_topbar_enabled' => ['nullable', 'boolean'],
             'slim_topbar_message' => ['nullable', 'string', 'max:255'],
@@ -178,6 +181,14 @@ class AgencyBrandingController extends Controller
                 $validated[$settingKey] = $media->file_path;
             }
         }
+
+        if ($request->boolean('remove_logo') && ! $request->hasFile('logo')) {
+            $validated['logo_path'] = null;
+        }
+        if ($request->boolean('remove_favicon') && ! $request->hasFile('favicon')) {
+            $validated['favicon_path'] = null;
+        }
+        unset($validated['remove_logo'], $validated['remove_favicon']);
 
         $colorScheme = (string) ($validated['color_scheme'] ?? BrandDisplayResolver::colorSchemeKey($setting));
         unset($validated['color_scheme']);

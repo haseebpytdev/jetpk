@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { laravelRequest } from "@/lib/api/laravel-action-client";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { useDashboardPortal } from "@/lib/portal-context";
@@ -83,6 +84,7 @@ async function fetchSessionLite(portal: string): Promise<SessionLite> {
 export function ProfilePageContent() {
   const portal = useDashboardPortal();
   const isLive = useDashboardLiveMode();
+  const router = useRouter();
   const [session, setSession] = useState<SessionLite | null>(null);
   const [form, setForm] = useState<ProfileFormState>(emptyForm);
   const [loading, setLoading] = useState(true);
@@ -213,6 +215,7 @@ export function ProfilePageContent() {
     }
     setPhotoFile(null);
     setRemovePhoto(false);
+    router.refresh();
   }
 
   return (

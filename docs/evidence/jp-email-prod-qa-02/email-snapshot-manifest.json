@@ -1,0 +1,5 @@
+{
+  "run_id": "jp-email-prod-qa-02-pending-production",
+  "snapshots": [],
+  "db_path_pattern": "storage/app/email-qa/live/<RUN_ID>.sqlite"
+}

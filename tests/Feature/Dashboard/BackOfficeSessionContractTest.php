@@ -32,7 +32,7 @@ class BackOfficeSessionContractTest extends TestCase
             ->assertJsonPath('data.platformRole', 'platform_admin')
             ->assertJsonPath('data.portalType', 'admin')
             ->assertJsonPath('data.sessionUsable', true)
-            ->assertJsonStructure(['data' => ['navigation', 'capabilities', 'permissions']]);
+            ->assertJsonStructure(['data' => ['navigation', 'capabilities', 'permissions', 'photoUrl']]);
     }
 
     public function test_staff_session_returns_staff_platform_role(): void
@@ -94,6 +94,8 @@ class BackOfficeSessionContractTest extends TestCase
         $itemLabels = collect($groups)
             ->flatMap(static fn (array $group): array => collect($group['items'] ?? [])->pluck('label')->all())
             ->all();
+        $this->assertContains('Company Profile & Branding', $itemLabels);
+        $this->assertContains('Settings', $itemLabels);
         $this->assertContains('API & Modules', $itemLabels);
         $this->assertNotContains('API Connections', $itemLabels);
         $this->assertNotContains('CMS', $itemLabels);

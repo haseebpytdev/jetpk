@@ -9,7 +9,10 @@ use App\Models\Booking;
 use App\Models\CommunicationLog;
 use App\Models\User;
 use App\Support\Emails\EmailBaseVariables;
+use App\Support\Emails\EmailRecipientRoleSubjectTagger;
+use App\Support\Emails\HtmlEmailPlainTextConverter;
 use App\Support\Emails\JetpkEmailEventRenderer;
+use App\Support\Emails\JetpkEmailQaRecipientLock;
 use App\Support\Emails\JetpkOperationalEmailEventRegistry;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -72,10 +75,12 @@ class JetpkOperationalEmailService
             payload: $payload,
         );
 
-        $plainBody = $this->plainBodyFromHtml($rendered->html, $rendered->content['intro'] ?? $fallbackBody);
+        $plainBody = HtmlEmailPlainTextConverter::fromHtml($rendered->html, (string) ($rendered->content['intro'] ?? $fallbackBody));
+        $subject = $rendered->subject !== '' ? $rendered->subject : $fallbackSubject;
+        $subject = EmailRecipientRoleSubjectTagger::apply($subject, $recipientRole);
 
         return [
-            'subject' => $rendered->subject !== '' ? $rendered->subject : $fallbackSubject,
+            'subject' => $subject,
             'html' => $rendered->html,
             'plain_body' => $plainBody,
             'used_template' => $rendered->usedDbTemplate,
@@ -148,7 +153,15 @@ class JetpkOperationalEmailService
         string $plainBody,
         array $attachments = [],
     ): string {
+        if (JetpkEmailQaRecipientLock::isActive()) {
+            $to = JetpkEmailQaRecipientLock::enforceOrFail($to);
+        }
+
         $mailable = new JetpkOperationalEventMail($html, $subject, $plainBody, $attachments);
+        $correlation = app()->bound('jetpk.email_qa.correlation') ? (string) app('jetpk.email_qa.correlation') : '';
+        if ($correlation !== '') {
+            $mailable->qaCorrelationId = $correlation;
+        }
 
         if ($this->shouldQueueMail()) {
             Mail::to($to)->queue($mailable);
@@ -224,9 +237,7 @@ class JetpkOperationalEmailService
 
     protected function plainBodyFromHtml(string $html, string $fallback): string
     {
-        $text = trim(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $html))));
-
-        return $text !== '' ? $text : $fallback;
+        return HtmlEmailPlainTextConverter::fromHtml($html, $fallback);
     }
 
     protected function shouldQueueMail(): bool

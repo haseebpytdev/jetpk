@@ -7,6 +7,7 @@ export type LaravelSessionPayload = {
   id: string;
   displayName: string;
   email: string | null;
+  photoUrl?: string | null;
   roles: string[];
   permissions: string[];
   accountType: string;

@@ -18,10 +18,12 @@ final class DashboardSessionResource
         $access = BackOfficePortalAccess::evaluate($user);
         $portal = $portalType ?? ($user->isPlatformAdmin() ? 'admin' : 'staff');
         $capabilities = app(BackOfficeCapabilitiesPresenter::class)->present($user, $portal);
+        $user->loadMissing('profile');
 
         return [
             'id' => (string) $user->id,
             'displayName' => $user->name,
+            'photoUrl' => $user->profilePhotoUrl(),
             'email' => self::maskEmail($user->email),
             'roles' => DashboardPermissionResolver::roleLabels($user),
             'permissions' => DashboardPermissionResolver::effectivePermissionKeys($user),

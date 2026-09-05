@@ -38,6 +38,7 @@ export type DashboardSessionSummary = {
   navigationGroups: DashboardNavGroup[];
   capabilities: Record<string, boolean>;
   initials: string;
+  photoUrl?: string | null;
   unavailable?: boolean;
 };
 
@@ -68,6 +69,7 @@ function unavailableSession(portal: DashboardPortal = "admin"): DashboardSession
     navigationGroups: [],
     capabilities: {},
     initials: "??",
+    photoUrl: null,
     unavailable: true,
   };
 }
@@ -128,6 +130,7 @@ function fromFixture(portal: DashboardPortal = "admin"): DashboardSessionSummary
       can_review_refund: portal === "admin",
     },
     initials: isStaff ? "PS" : mockUser.initials,
+    photoUrl: null,
   };
 }
 
@@ -151,6 +154,7 @@ function fromLaravel(payload: LaravelSessionPayload, portal: DashboardPortal): D
     navigationGroups: (payload.navigationGroups as DashboardNavGroup[]) ?? [],
     capabilities: (payload.capabilities as Record<string, boolean>) ?? {},
     initials: toInitials(payload.displayName),
+    photoUrl: payload.photoUrl ?? null,
   };
 }
 

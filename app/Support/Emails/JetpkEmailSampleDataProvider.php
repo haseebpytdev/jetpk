@@ -24,6 +24,13 @@ final class JetpkEmailSampleDataProvider
 
         $merged = array_merge(self::forType($type), self::eventAuthoritativeScalars($eventKey));
 
+        if (
+            trim((string) ($merged['booking_reference'] ?? '')) === ''
+            && preg_match('/booking|ticket|refund|payment|pnr|itinerary/i', $eventKey) === 1
+        ) {
+            $merged['booking_reference'] = 'JPK-2026-004821';
+        }
+
         return self::attachStructuredPreviewBlocks($eventKey, $merged);
     }
 

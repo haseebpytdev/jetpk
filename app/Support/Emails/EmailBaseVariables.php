@@ -112,7 +112,7 @@ class EmailBaseVariables
     {
         return self::applyAliases(array_merge(
             self::forContext($agency, $booking),
-            self::normalizeScalars($variables),
+            self::preferFilledScalars(self::normalizeScalars($variables)),
         ));
     }
 
@@ -134,8 +134,14 @@ class EmailBaseVariables
         $fareTotal = $booking->fareBreakdown?->total;
         $currency = (string) ($booking->currency ?? $booking->fareBreakdown?->currency ?? 'PKR');
 
+        $reference = self::firstNonEmptyString(
+            $booking->reference_code ?? null,
+            $booking->booking_reference ?? null,
+            $booking->pnr ?? null,
+        );
+
         return [
-            'booking_reference' => (string) $booking->reference_code,
+            'booking_reference' => $reference ?? '',
             'booking_status' => Str::headline(str_replace('_', ' ', (string) $booking->status->value)),
             'status' => (string) $booking->status->value,
             'customer_name' => $contactName,
@@ -203,7 +209,50 @@ class EmailBaseVariables
             }
         }
 
+        if (trim((string) ($variables['booking_reference'] ?? '')) === '') {
+            $reference = self::firstNonEmptyString(
+                $variables['reference_code'] ?? null,
+                $variables['pnr'] ?? null,
+                $variables['ticket_reference'] ?? null,
+            );
+            if ($reference !== null) {
+                $variables['booking_reference'] = $reference;
+            }
+        }
+
         return EmailPlaceholderFallbacks::applyVariableAliases($variables);
+    }
+
+    protected static function firstNonEmptyString(mixed ...$candidates): ?string
+    {
+        foreach ($candidates as $candidate) {
+            if (! is_string($candidate) && ! is_numeric($candidate)) {
+                continue;
+            }
+            $value = trim((string) $candidate);
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Empty runtime scalars must not wipe booking/reference facts already resolved from the model.
+     *
+     * @param  array<string, scalar|null>  $runtime
+     * @return array<string, scalar|null>
+     */
+    protected static function preferFilledScalars(array $runtime): array
+    {
+        foreach (['booking_reference', 'pnr', 'reference_code', 'ticket_reference'] as $key) {
+            if (array_key_exists($key, $runtime) && trim((string) $runtime[$key]) === '') {
+                unset($runtime[$key]);
+            }
+        }
+
+        return $runtime;
     }
 
     protected static function resolveSupportEmail(?string $profileEmail): string
