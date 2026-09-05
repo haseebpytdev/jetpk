@@ -16,6 +16,7 @@ import { previewNavGroupsForPortal } from "@/lib/nav-config";
 import { isPrimaryActiveNav } from "@/lib/nav-active";
 import type { DashboardBranding } from "@/services/branding-service";
 import { DashboardUserAvatar } from "@/components/dashboard/user-avatar";
+import type { DashboardSessionSummary } from "@/services/session-service";
 
 type Props = {
   open: boolean;

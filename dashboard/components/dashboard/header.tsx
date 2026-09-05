@@ -8,6 +8,7 @@ import { OperationalInboxBadge } from "@/components/dashboard/operational-inbox-
 import { postLaravelLogout } from "@/lib/laravel-auth-api";
 import { useDashboardLiveMode } from "@/lib/use-dashboard-live-mode";
 import { DashboardUserAvatar } from "@/components/dashboard/user-avatar";
+import type { DashboardSessionSummary } from "@/services/session-service";
 
 type Props = {
   onMenuClick: () => void;
