@@ -54,13 +54,66 @@ final class JetpkEmailSampleDataProvider
             $sample['group_reservation'] = $block;
         }
 
-        if ($eventKey === 'ticket_issued' && ! isset($sample['booking'])) {
-            $sample['booking'] = [
-                'reference' => (string) ($sample['booking_reference'] ?? 'JPK-2026-004821'),
-                'status' => (string) ($sample['booking_status'] ?? 'Ticketed'),
-                'route' => (string) ($sample['route'] ?? 'Karachi (KHI) → Dubai (DXB)'),
-                'amount' => (string) ($sample['amount'] ?? '96,500'),
-                'currency' => (string) ($sample['currency'] ?? 'PKR'),
+        if ($eventKey === 'ticket_issued') {
+            if (! isset($sample['booking'])) {
+                $sample['booking'] = [
+                    'reference' => (string) ($sample['booking_reference'] ?? 'JPK-2026-004821'),
+                    'pnr' => (string) ($sample['pnr'] ?? 'X7K9QP'),
+                    'status' => (string) ($sample['booking_status'] ?? 'Ticketed'),
+                    'route' => (string) ($sample['route'] ?? 'Karachi (KHI) → Dubai (DXB)'),
+                    'amount' => (string) ($sample['amount'] ?? '96,500'),
+                    'currency' => (string) ($sample['currency'] ?? 'PKR'),
+                    'trip_type' => 'One way',
+                    'passenger_count' => '2',
+                ];
+            }
+            if (! isset($sample['itinerary'])) {
+                $sample['itinerary'] = [
+                    [
+                        'label' => 'Outbound',
+                        'from' => 'KHI',
+                        'from_name' => 'Karachi',
+                        'to' => 'DXB',
+                        'to_name' => 'Dubai',
+                        'depart' => '10 Jul 2026, 08:20',
+                        'arrive' => '10 Jul 2026, 10:05',
+                        'airline' => 'Pakistan International',
+                        'flight_no' => 'PK-211',
+                        'stops' => 'Non-stop',
+                        'baggage' => '30kg',
+                        'cabin' => 'Economy',
+                        'terminal' => 'T1',
+                    ],
+                ];
+            }
+            if (! isset($sample['passengers'])) {
+                $sample['passengers'] = [
+                    ['name' => 'Ayesha Khan', 'type' => 'Adult'],
+                    ['name' => 'Bilal Khan', 'type' => 'Adult'],
+                ];
+            }
+        }
+
+        if (str_contains($eventKey, 'agent_application') || str_contains($eventKey, 'agent_registration')) {
+            $sample['application_reference'] = (string) ($sample['application_reference'] ?? 'APP-2026-4412');
+            $sample['applicant_name'] = (string) ($sample['applicant_name'] ?? 'Sara Ahmed');
+            $sample['agency_name'] = (string) ($sample['agency_name'] ?? 'Skyline Partners');
+            $sample['applicant_email'] = (string) ($sample['applicant_email'] ?? 'sara@example.com');
+            $sample['applicant_phone'] = (string) ($sample['applicant_phone'] ?? '+92 300 1234567');
+            $sample['city'] = (string) ($sample['city'] ?? 'Lahore');
+            $sample['country'] = (string) ($sample['country'] ?? 'Pakistan');
+            $sample['submitted_at'] = (string) ($sample['submitted_at'] ?? '5 Sep 2026, 14:20');
+            $sample['application_status'] = (string) ($sample['application_status'] ?? 'Pending review');
+            $sample['agent_application'] = [
+                'reference' => $sample['application_reference'],
+                'applicant_name' => $sample['applicant_name'],
+                'agency_name' => $sample['agency_name'],
+                'email' => $sample['applicant_email'],
+                'phone' => $sample['applicant_phone'],
+                'city' => $sample['city'],
+                'country' => $sample['country'],
+                'submitted_at' => $sample['submitted_at'],
+                'status' => $sample['application_status'],
             ];
         }
 
@@ -94,6 +147,7 @@ final class JetpkEmailSampleDataProvider
         return match ($eventKey) {
             'ticket_issued' => [
                 'booking_reference' => 'JPK-2026-004821',
+                'pnr' => 'X7K9QP',
                 'ticket_numbers' => '157-1234567890, 157-1234567891',
                 'tickets_count' => '2',
                 'route' => 'Karachi (KHI) → Dubai (DXB)',

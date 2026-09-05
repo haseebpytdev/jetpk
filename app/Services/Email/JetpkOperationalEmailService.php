@@ -75,7 +75,9 @@ class JetpkOperationalEmailService
             payload: $payload,
         );
 
-        $plainBody = HtmlEmailPlainTextConverter::fromHtml($rendered->html, (string) ($rendered->content['intro'] ?? $fallbackBody));
+        $plainBody = $rendered->plainBody !== ''
+            ? $rendered->plainBody
+            : HtmlEmailPlainTextConverter::fromHtml($rendered->html, (string) ($rendered->content['intro'] ?? $fallbackBody));
         $subject = $rendered->subject !== '' ? $rendered->subject : $fallbackSubject;
         $subject = EmailRecipientRoleSubjectTagger::apply($subject, $recipientRole);
 

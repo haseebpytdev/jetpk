@@ -220,6 +220,16 @@ class EmailBaseVariables
             }
         }
 
+        if (trim((string) ($variables['booking_url'] ?? '')) === '' && trim((string) ($variables['manage_booking_url'] ?? '')) !== '') {
+            $variables['booking_url'] = (string) $variables['manage_booking_url'];
+        }
+        if (trim((string) ($variables['login_url'] ?? '')) === '' && \Illuminate\Support\Facades\Route::has('login')) {
+            try {
+                $variables['login_url'] = route('login', absolute: true);
+            } catch (\Throwable) {
+            }
+        }
+
         return EmailPlaceholderFallbacks::applyVariableAliases($variables);
     }
 

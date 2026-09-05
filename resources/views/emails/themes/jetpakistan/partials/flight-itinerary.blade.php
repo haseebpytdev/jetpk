@@ -38,6 +38,8 @@
                         $flightNo = $seg['flight_no'] ?? null;
                         $stops    = $seg['stops']    ?? null;
                         $baggage  = $seg['baggage']  ?? null;
+                        $cabin    = $seg['cabin']    ?? ($seg['fare_brand'] ?? null);
+                        $terminal = $seg['terminal'] ?? null;
                         $carrier  = trim(($airline ?? '').(($airline && $flightNo) ? ' · ' : '').($flightNo ?? ''));
                     @endphp
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid {{ $borderColor }}; border-radius:12px; background-color:#ffffff; margin:0 0 10px 0;">
@@ -60,12 +62,13 @@
                                 @if(!empty($arrive))<div style="font-size:13px; color:{{ $textColor }}; margin-top:3px;">{{ $arrive }}</div>@endif
                             </td>
                         </tr>
-                        @if(!empty($carrier) || !empty($baggage))
+                        @if(!empty($carrier) || !empty($baggage) || !empty($cabin) || !empty($terminal))
                             <tr>
                                 <td colspan="3" style="padding:0 16px 12px 16px; font-family:Arial,Helvetica,sans-serif; font-size:12px; color:{{ $mutedColor }}; border-top:1px solid {{ $borderColor }}; padding-top:10px;">
                                     @if(!empty($carrier)){{ $carrier }}@endif
-                                    @if(!empty($carrier) && !empty($baggage)) &nbsp;·&nbsp; @endif
-                                    @if(!empty($baggage))Baggage: {{ $baggage }}@endif
+                                    @if(!empty($cabin)) &nbsp;·&nbsp; Cabin: {{ $cabin }}@endif
+                                    @if(!empty($terminal)) &nbsp;·&nbsp; Terminal: {{ $terminal }}@endif
+                                    @if(!empty($baggage)) &nbsp;·&nbsp; Baggage: {{ $baggage }}@endif
                                 </td>
                             </tr>
                         @endif

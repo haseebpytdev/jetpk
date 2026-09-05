@@ -17,7 +17,17 @@
     $amount      = $b['amount']         ?? null;
     $currency    = $b['currency']       ?? null;
     $total       = ($amount !== null) ? trim(($currency ? $currency.' ' : '').$amount) : null;
-    $pnrText     = $pnr ?: ($status && strtolower($status) === 'confirmed' ? null : 'Will appear once confirmed');
+    $statusNorm  = strtolower((string) $status);
+    $ticketed    = $statusNorm !== '' && (str_contains($statusNorm, 'ticket') || $statusNorm === 'issued');
+    if (is_string($pnr) && trim($pnr) !== '') {
+        $pnrText = $pnr;
+    } elseif ($ticketed) {
+        $pnrText = 'Not stored on this ticketed booking';
+    } elseif ($statusNorm === 'confirmed') {
+        $pnrText = null;
+    } else {
+        $pnrText = 'Not issued yet';
+    }
 @endphp
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:6px 0 14px 0; border:1px solid {{ $borderColor }}; border-radius:12px; background-color:#ffffff;">
     <tr>

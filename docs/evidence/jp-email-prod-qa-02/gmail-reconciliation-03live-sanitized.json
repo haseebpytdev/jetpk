@@ -1,0 +1,110 @@
+{
+  "run_id": "jp-email-prod-qa-03live",
+  "SANITIZED_GMAIL_RECONCILIATION_MANIFEST": "COMMITTED_AND_RETRIEVABLE",
+  "expected_recipient": "myworkhaseeb@gmail.com",
+  "WRONG_RECIPIENT_COUNT": 0,
+  "smtp_accepted": true,
+  "GMAIL_INBOX_VERIFICATION": "PENDING_CHATGPT",
+  "messages": [
+    {
+      "scenario_id": "login_otp__customer",
+      "intended_role": "customer",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-LOGIN-OTP-CUSTOMER-20260905170222-1TV9NH",
+      "subject": "JetPakistan — Login OTP",
+      "send_timestamp": "2026-09-05T17:02:22Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "ticket_issued__booking_agent",
+      "intended_role": "booking_agent",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-TICKET-ISSUED-BOOKING-AGENT-20260905170225-RD3DIY",
+      "subject": "[AGENT] JetPakistan — Ticket issued — JPK-2026-004821",
+      "send_timestamp": "2026-09-05T17:02:25Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "booking_confirmed__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-BOOKING-CONFIRMED-ADMIN-20260905170228-QSJF7S",
+      "subject": "[ADMIN] JetPakistan — Booking confirmed — JPK-2026-004821",
+      "send_timestamp": "2026-09-05T17:02:28Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "pnr_manual_review_digest__platform_admin",
+      "intended_role": "platform_admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-PNR-MANUAL-REVIEW-DIGEST-PLATFORM-ADMIN-20260905170230-BHNJJ5",
+      "subject": "[ADMIN] JetPakistan — PNR / manual review digest — 4–5 Sep 2026",
+      "send_timestamp": "2026-09-05T17:02:30Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "agency_wallet_deposit_summary__agency_admin",
+      "intended_role": "agency_admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-AGENCY-WALLET-DEPOSIT-SUMMARY-AGENCY-ADMIN-20260905170232-KOLUMY",
+      "subject": "[ADMIN] JetPakistan — Agency wallet/deposit summary — September 2026",
+      "send_timestamp": "2026-09-05T17:02:32Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "group_booking_supplier_release_failed__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-GROUP-BOOKING-SUPPLIER-RELEASE-FAILED-ADMIN-20260905170235-PDO6HB",
+      "subject": "[ADMIN] JetPakistan — Group Booking Supplier Release Failed",
+      "send_timestamp": "2026-09-05T17:02:35Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "group_booking_payment_submitted__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-GROUP-BOOKING-PAYMENT-SUBMITTED-ADMIN-20260905170237-ACGSA2",
+      "subject": "[ADMIN] JetPakistan — Group Booking Payment Submitted",
+      "send_timestamp": "2026-09-05T17:02:37Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "admin_created__staff",
+      "intended_role": "staff",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-ADMIN-CREATED-STAFF-20260905170240-O0EVCL",
+      "subject": "[STAFF] JetPakistan — Your Admin Portal account has been created",
+      "send_timestamp": "2026-09-05T17:02:40Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "agent_application_submitted__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-AGENT-APPLICATION-SUBMITTED-ADMIN-20260905170242-BXQE11",
+      "subject": "[ADMIN] JetPakistan — New agent application received",
+      "send_timestamp": "2026-09-05T17:02:42Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    },
+    {
+      "scenario_id": "daily_admin_report__admin",
+      "intended_role": "admin",
+      "correlation_id": "JP-EMAIL-PROD-QA-02-DAILY-ADMIN-REPORT-ADMIN-20260905170244-HJO3TL",
+      "subject": "[ADMIN] JetPakistan — Daily operations report — 5 Sep 2026",
+      "send_timestamp": "2026-09-05T17:02:44Z",
+      "smtp_accepted": true,
+      "expected_recipient": "myworkhaseeb@gmail.com",
+      "gmail_verification_status": "PENDING_CHATGPT"
+    }
+  ]
+}

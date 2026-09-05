@@ -138,7 +138,10 @@ class JetpkEmailProdQaCommand extends Command
                     return self::FAILURE;
                 }
 
-                $plain = HtmlEmailPlainTextConverter::fromHtml($rendered['html'], $rendered['plain_body']);
+                $plain = trim((string) ($rendered['plain_body'] ?? ''));
+                if ($plain === '') {
+                    $plain = HtmlEmailPlainTextConverter::fromHtml($rendered['html'], '');
+                }
                 $audit = $auditor->audit($rendered['subject'], $rendered['html'], $plain);
                 $store->insert([
                     'run_id' => $runId,

@@ -88,8 +88,10 @@
                                 <h1 class="jetpk-h1" style="margin:0 0 12px 0; font-family:Arial,Helvetica,sans-serif; font-size:26px; line-height:32px; font-weight:bold; color:{{ $textColor }};">{{ $headline }}</h1>
                             @endif
 
-                            @if(!empty($recipientName))
-                                <p style="margin:0 0 12px 0; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:24px; color:{{ $textColor }};">Hi {{ $recipientName }},</p>
+                            @if(!empty($recipientGreeting))
+                                <p style="margin:0 0 12px 0; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:24px; color:{{ $textColor }};">{{ $recipientGreeting }}</p>
+                            @elseif(!empty($recipientName))
+                                <p style="margin:0 0 12px 0; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:24px; color:{{ $textColor }};">Hello {{ $recipientName }},</p>
                             @endif
 
                             @if(!empty($introText))

@@ -26,6 +26,8 @@ readonly class JetpkEmailRenderResult
         public array $unresolvedPlaceholders = [],
         public array $fallbackKeysApplied = [],
         public array $missingRequiredVariables = [],
+        public string $plainBody = '',
+        public string $recipientGreeting = '',
     ) {}
 
     public function hasUnresolvedPlaceholders(): bool

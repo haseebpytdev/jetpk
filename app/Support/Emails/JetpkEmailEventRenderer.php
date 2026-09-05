@@ -105,18 +105,31 @@ class JetpkEmailEventRenderer
             $ctaUrl = null;
         }
 
-        // Avoid duplicate salutations when intro already greets (Hello/Hi/Dear …).
-        $recipientName = $baseVariables['customer_name'] ?? $baseVariables['user_name'] ?? null;
-        if (is_string($recipientName) && preg_match('/^(user|guest)$/i', trim($recipientName)) === 1) {
-            $recipientName = null;
+        $intendedRole = (string) ($baseVariables['recipient_role'] ?? $definition->audience ?? '');
+        $customerName = $baseVariables['customer_name'] ?? $baseVariables['user_name'] ?? null;
+        $customerName = is_string($customerName) ? $customerName : null;
+        $staffFacing = EmailRecipientRoleGreeting::isStaffFacingRole($intendedRole);
+        $introLooksLikeGreeting = is_string($introText) && preg_match('/^(Hello|Hi|Dear)\b/i', trim($introText)) === 1;
+        if ($staffFacing && $introLooksLikeGreeting) {
+            $introText = '';
         }
-        if (! is_string($recipientName) || trim($recipientName) === '') {
-            $recipientName = self::greetingNameForRole(
-                (string) ($baseVariables['recipient_role'] ?? $definition->audience ?? ''),
-            );
+        $recipientGreeting = EmailRecipientRoleGreeting::line(
+            $intendedRole,
+            $staffFacing ? null : $customerName,
+        );
+        if (! $staffFacing && $introLooksLikeGreeting) {
+            $recipientGreeting = '';
         }
-        if (is_string($introText) && preg_match('/^(Hello|Hi|Dear)\b/i', trim($introText)) === 1) {
-            $recipientName = null;
+
+        $ctaText = $content['cta_label'];
+        $contextualCta = EmailContextualCtaResolver::resolve($eventKey, $intendedRole, $baseVariables);
+        if ($contextualCta !== null) {
+            $ctaText = $contextualCta['label'];
+            $ctaUrl = $contextualCta['url'];
+        }
+
+        if (isset($payload['agent_application']) && is_array($payload['agent_application']) && ! isset($payload['application'])) {
+            $payload['application'] = $payload['agent_application'];
         }
 
         $viewData = array_merge($payload, [
@@ -125,11 +138,12 @@ class JetpkEmailEventRenderer
             'preheaderText' => $preheader,
             'headline' => $headline,
             'introText' => $introText,
-            'ctaText' => $content['cta_label'],
+            'ctaText' => $ctaText,
             'ctaUrl' => $ctaUrl,
             'eventContent' => $content,
             'detailFieldValues' => $this->detailFieldValues($content['detail_fields'], $baseVariables),
-            'recipientName' => $recipientName,
+            'recipientName' => null,
+            'recipientGreeting' => $recipientGreeting,
         ]);
 
         if (is_string($content['full_html_override'] ?? null) && trim($content['full_html_override']) !== '') {
@@ -148,6 +162,18 @@ class JetpkEmailEventRenderer
         $fallbackKeysApplied = array_values(array_unique($fallbackKeysApplied));
         $missingRequiredVariables = $this->missingRequiredVariables($baseVariables);
 
+        $plainBody = JetpkEmailPlainTextComposer::compose([
+            'title' => $headline,
+            'greeting' => $recipientGreeting,
+            'message' => is_string($introText) ? $introText : '',
+            'facts' => is_array($viewData['detailFieldValues'] ?? null) ? $viewData['detailFieldValues'] : [],
+            'cta_label' => is_string($ctaText) ? $ctaText : null,
+            'cta_url' => is_string($ctaUrl) ? $ctaUrl : null,
+            'support_email' => $emailBrand['support_email'] ?? $baseVariables['support_email'] ?? null,
+            'support_phone' => $emailBrand['support_phone'] ?? $baseVariables['support_phone'] ?? null,
+            'footer' => $emailBrand['footer_text'] ?? null,
+        ]);
+
         return new JetpkEmailRenderResult(
             eventKey: $eventKey,
             subject: $subject,
@@ -158,6 +184,8 @@ class JetpkEmailEventRenderer
             unresolvedPlaceholders: $unresolvedPlaceholders,
             fallbackKeysApplied: $fallbackKeysApplied,
             missingRequiredVariables: $missingRequiredVariables,
+            plainBody: $plainBody,
+            recipientGreeting: $recipientGreeting,
         );
     }
 
@@ -277,6 +305,13 @@ class JetpkEmailEventRenderer
             'group_status' => 'Group status',
             'review_reason' => 'Reason',
             'empty_digest_note' => 'Review status',
+            'applicant_name' => 'Applicant',
+            'applicant_email' => 'Applicant email',
+            'applicant_phone' => 'Applicant phone',
+            'city' => 'City',
+            'country' => 'Country',
+            'submitted_at' => 'Submitted',
+            'application_status' => 'Application status',
         ];
 
         // Alias group payload keys onto canonical detail fields when present.
@@ -306,6 +341,18 @@ class JetpkEmailEventRenderer
             }
             if ($field === 'amount' && isset($variables['currency'])) {
                 $value = trim($variables['currency'].' '.$value);
+            }
+            if ($field === 'ticket_numbers') {
+                $parts = preg_split('/\s*,\s*/', (string) $value) ?: [(string) $value];
+                $parts = array_values(array_filter(array_map('trim', $parts), static fn (string $part): bool => $part !== ''));
+                foreach ($parts as $index => $ticketNumber) {
+                    $rows[] = [
+                        'label' => count($parts) > 1 ? 'Ticket '.($index + 1) : 'Ticket number',
+                        'value' => $ticketNumber,
+                    ];
+                }
+
+                continue;
             }
             $rows[] = [
                 'label' => $labels[$field] ?? ucfirst(str_replace('_', ' ', $field)),

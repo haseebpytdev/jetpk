@@ -1,0 +1,11 @@
+{
+  "CANONICAL": true,
+  "phase": "JP-FINAL-CLOSURE-04",
+  "EMAIL_RESPONSIVE_VISUAL_AUDIT": "PASS",
+  "AUTHORITATIVE_AUDIT_FILE": "email-visual-audit-03r1.json",
+  "OVERFLOW_X": 0,
+  "WORD_FRAGMENTATION": 0,
+  "historical_pending_file": "email-visual-audit.json",
+  "historical_pending_file_status": "SUPERSEDED_NOT_AUTHORITATIVE",
+  "note": "email-visual-audit.json remains as historical PENDING evidence and must not be treated as the current gate."
+}
