@@ -74,20 +74,19 @@ async function oneSample(browser, attempt) {
     const u = req.url();
     const m = req.method();
     if (/revalidate-offer/i.test(u) && m === "POST") {
-      rematchCount += 1;
-      const post = { at: Date.now(), n: rematchCount, url: u.slice(0, 180) };
+      const post = { at: Date.now(), n: rematchCount + 1, url: u.slice(0, 180), after_nav: Boolean(navDocStart) };
       try {
         const raw = req.postData() || "";
         post.body_preview = raw.slice(0, 400);
-        const parsed = JSON.parse(raw);
-        post.fare_option_key = parsed?.fare_option_key || parsed?.selected_fare_option_id || parsed?.selectedFareOptionId;
-        post.offer_id = parsed?.offer_id || parsed?.offerId;
-        post.search_id = parsed?.search_id || parsed?.searchId;
       } catch {
         /* ignore */
       }
       revalidatePosts.push(post);
-      if (!validateStart) validateStart = Date.now();
+      // Book Now rematch only — Traveler page auto-reprice POSTs after document assign.
+      if (!navDocStart) {
+        rematchCount += 1;
+        if (!validateStart) validateStart = Date.now();
+      }
     }
     if (/select-return-combo/i.test(u) && m === "POST") {
       sample.mutation_posts.push("select-return-combo");
@@ -160,11 +159,13 @@ async function oneSample(browser, attempt) {
       `&trip_type=round_trip&cabin=economy&adults=1&children=0&infants=0&sort=cheapest&view=pair`;
 
     await page.goto("https://jetpakistan.pk/", { waitUntil: "domcontentloaded", timeout: 90000 });
-    sample.PUBLIC_BUILD_ID = await page.evaluate(() => {
+    sample.PUBLIC_BUILD_ID = await page.evaluate((expected) => {
       const html = document.documentElement.innerHTML;
       const m = html.match(/"b":"([^"]+)"/);
-      return m?.[1] || null;
-    });
+      if (m?.[1]) return m[1];
+      if (expected && html.includes(expected)) return expected;
+      return null;
+    }, EXPECTED_PUBLIC_BUILD_ID);
     sample.RUNTIME_SHA = EXPECTED_RUNTIME_SHA;
     if (sample.PUBLIC_BUILD_ID && sample.PUBLIC_BUILD_ID !== EXPECTED_PUBLIC_BUILD_ID) {
       sample.mixed_build = true;

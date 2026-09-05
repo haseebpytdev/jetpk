@@ -201,6 +201,19 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     if (!searchId || !offerId) return;
 
     autoRevalidateAttempted.current = true;
+    try {
+      const raw = sessionStorage.getItem("jp-book-now-timing");
+      const parsed = raw ? JSON.parse(raw) : null;
+      const src = parsed?.meta?.book_now_validation_source;
+      if (
+        src === "FRESH_PREVALIDATION" ||
+        src === "JOINED_INFLIGHT_PREVALIDATION"
+      ) {
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
     let cancelled = false;
 
     void (async () => {
