@@ -144,6 +144,16 @@ async function oneSample(browser, attempt) {
             /* ignore */
           }
         }
+        try {
+          const raw = await res.text();
+          const body = JSON.parse(raw.replace(/^\uFEFF/, "").trim());
+          sample.ITINERARY_AUTHORITATIVE_AFTER_REVALIDATION = Boolean(
+            body?.itinerary?.authoritative_after_revalidation,
+          );
+          sample.ITINERARY_PRICE_NEEDS_REFRESH = Boolean(body?.itinerary?.price_needs_refresh);
+        } catch {
+          /* ignore */
+        }
       }
     } catch {
       /* ignore */
@@ -506,6 +516,13 @@ async function oneSample(browser, attempt) {
     sample.TRAVELER_SECONDARY_FETCH_COUNT = secondaryFetches.length;
     sample.rematch_count = rematchCount;
     sample.revalidate_posts = revalidatePosts;
+    sample.BOOK_NOW_REVALIDATION_POST_COUNT = revalidatePosts.filter((p) => !p.after_nav).length;
+    sample.TRAVELER_AUTO_REPRICE_POST_COUNT = revalidatePosts.filter((p) => p.after_nav).length;
+    sample.TOTAL_REVALIDATION_POST_COUNT = revalidatePosts.length;
+    sample.BOOK_NOW_DUPLICATE_REVALIDATION_CALLS = Math.max(0, sample.BOOK_NOW_REVALIDATION_POST_COUNT - 1);
+    sample.TRAVELER_REDUNDANT_REVALIDATION_CALLS = sample.ITINERARY_AUTHORITATIVE_AFTER_REVALIDATION
+      ? sample.TRAVELER_AUTO_REPRICE_POST_COUNT
+      : 0;
     sample.secondary_fetches = secondaryFetches.slice(0, 10);
     try {
       const traces = await page.evaluate(() => ({
@@ -663,6 +680,15 @@ async function main() {
     ),
     SUPPLIER_MUTATION_CALLS: 0,
     DUPLICATE_REVALIDATION_CALLS: valid.filter((s) => (s.rematch_count || 0) > 1).length,
+    BOOK_NOW_REVALIDATION_POST_COUNT_P95: pct(
+      valid.map((s) => s.BOOK_NOW_REVALIDATION_POST_COUNT).filter((n) => typeof n === "number"),
+      95,
+    ),
+    TRAVELER_AUTO_REPRICE_POST_COUNT: valid.reduce((a, s) => a + (s.TRAVELER_AUTO_REPRICE_POST_COUNT || 0), 0),
+    TOTAL_FLOW_REDUNDANT_REVALIDATION_CALLS: valid.reduce(
+      (a, s) => a + (s.BOOK_NOW_DUPLICATE_REVALIDATION_CALLS || 0) + (s.TRAVELER_REDUNDANT_REVALIDATION_CALLS || 0),
+      0,
+    ),
     AVG_REVALIDATION_CALLS_PER_BOOK_NOW: valid.length
       ? Number((valid.reduce((a, s) => a + (s.rematch_count || 0), 0) / valid.length).toFixed(2))
       : null,

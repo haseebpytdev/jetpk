@@ -115,6 +115,9 @@ export type SelectedFlightSummary = {
   currency: string;
   price_is_approximate?: boolean;
   price_needs_refresh?: boolean;
+  authoritative_after_revalidation?: boolean;
+  bound_search_id?: string | null;
+  bound_offer_id?: string | null;
   return_split?: Record<string, unknown> | null;
   selected_fare_option_key?: string | null;
   selected_fare?: Record<string, unknown> | null;

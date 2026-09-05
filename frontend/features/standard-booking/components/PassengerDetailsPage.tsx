@@ -27,6 +27,7 @@ import {
 } from "../utils/passenger-form";
 import { passengerSlotLooksEmpty, savedTravelerToPassenger } from "../utils/saved-traveler-to-passenger";
 import { isAllowedBookingNextUrl, resolveBookingNextUrl } from "../utils/allowlist";
+import { shouldSkipPassengerAutoReprice } from "../utils/passenger-reprice-authority";
 import { laravelApiPath } from "@/services/flight-search";
 import { BookingSessionCountdown } from "./BookingSessionCountdown";
 import {
@@ -201,18 +202,8 @@ export function PassengerDetailsPage({ searchParams }: PassengerDetailsPageProps
     if (!searchId || !offerId) return;
 
     autoRevalidateAttempted.current = true;
-    try {
-      const raw = sessionStorage.getItem("jp-book-now-timing");
-      const parsed = raw ? JSON.parse(raw) : null;
-      const src = parsed?.meta?.book_now_validation_source;
-      if (
-        src === "FRESH_PREVALIDATION" ||
-        src === "JOINED_INFLIGHT_PREVALIDATION"
-      ) {
-        return;
-      }
-    } catch {
-      /* ignore */
+    if (shouldSkipPassengerAutoReprice(context)) {
+      return;
     }
     let cancelled = false;
 

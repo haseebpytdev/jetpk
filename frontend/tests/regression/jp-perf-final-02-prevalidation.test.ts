@@ -127,6 +127,58 @@ describe("JP-PERF-FINAL-02 prevalidation authority", () => {
     assert.equal(AUTHORITATIVE_REVALIDATION_FRESH_MS, 600_000);
   });
 
+  it("skips traveler auto-reprice only on server-authoritative exact selection", async () => {
+    const { shouldSkipPassengerAutoReprice } = await import(
+      "../../features/standard-booking/utils/passenger-reprice-authority.ts"
+    );
+    const exact = {
+      selection: { search_id: "s1", offer_id: "o1", fare_option_key: "fare-a" },
+      itinerary: {
+        authoritative_after_revalidation: true,
+        selected_fare_option_key: "fare-a",
+        bound_search_id: "s1",
+        bound_offer_id: "o1",
+      },
+    };
+    assert.equal(shouldSkipPassengerAutoReprice(exact), true);
+    assert.equal(
+      shouldSkipPassengerAutoReprice({
+        ...exact,
+        itinerary: { ...exact.itinerary, authoritative_after_revalidation: false },
+      }),
+      false,
+    );
+    assert.equal(
+      shouldSkipPassengerAutoReprice({
+        ...exact,
+        selection: { ...exact.selection, fare_option_key: "fare-b" },
+      }),
+      false,
+    );
+    assert.equal(
+      shouldSkipPassengerAutoReprice({
+        ...exact,
+        selection: { ...exact.selection, offer_id: "o2" },
+      }),
+      false,
+    );
+    assert.equal(
+      shouldSkipPassengerAutoReprice({
+        selection: { search_id: "s1", offer_id: "o1", fare_option_key: "fare-a" },
+        itinerary: { selected_fare_option_key: "fare-a" },
+      }),
+      false,
+    );
+    assert.equal(shouldSkipPassengerAutoReprice(null), false);
+    assert.equal(
+      shouldSkipPassengerAutoReprice({
+        selection: { search_id: "", offer_id: "o1", fare_option_key: "fare-a" },
+        itinerary: exact.itinerary,
+      }),
+      false,
+    );
+  });
+
   it("maps synthetic base-offer UI key to empty supplier fare identity", () => {
     const BASE = "__jp_base_offer__";
     const toAuthoritativeFareOptionKey = (key, options = []) => {

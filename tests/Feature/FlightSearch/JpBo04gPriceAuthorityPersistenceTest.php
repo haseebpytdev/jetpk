@@ -120,6 +120,7 @@ class JpBo04gPriceAuthorityPersistenceTest extends TestCase
         ], request());
 
         $this->assertFalse((bool) data_get($passengerJson, 'itinerary.price_needs_refresh'));
+        $this->assertTrue((bool) data_get($passengerJson, 'itinerary.authoritative_after_revalidation'));
         $this->assertSame('fare-value', data_get($passengerJson, 'selection.fare_option_key'));
     }
 
