@@ -68,7 +68,7 @@
 <body style="margin:0; padding:0; width:100%; background-color:{{ $bgColor }}; color:{{ $textColor }};">
     {{-- Hidden preheader --}}
     <div style="display:none; font-size:1px; color:{{ $bgColor }}; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden; mso-hide:all;">
-        {{ $preheader }}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+        {{ $preheader }}
     </div>
 
     {{-- Outer wrapper --}}

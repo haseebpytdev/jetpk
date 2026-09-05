@@ -8,7 +8,9 @@
 @endphp
 @if($show)
     <tr>
-        <td valign="top" style="padding:7px 12px 7px 0; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:20px; color:{{ $mutedColor }}; white-space:nowrap;">{{ $label ?? '' }}</td>
-        <td valign="top" align="right" style="padding:7px 0; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:20px; color:{{ $textColor }}; font-weight:bold;">{{ $val }}</td>
+        <td valign="top" style="padding:8px 0; font-family:Arial,Helvetica,sans-serif;">
+            <div style="font-size:12px; line-height:18px; color:{{ $mutedColor }}; margin:0 0 2px 0;">{{ $label ?? '' }}</div>
+            <div class="jetpk-long" style="font-size:15px; line-height:22px; color:{{ $textColor }}; font-weight:bold; word-break:break-word; overflow-wrap:break-word;">{{ $val }}</div>
+        </td>
     </tr>
 @endif

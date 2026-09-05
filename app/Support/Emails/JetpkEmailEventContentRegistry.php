@@ -620,14 +620,39 @@ class JetpkEmailEventContentRegistry
         $blocks = ['status-alert', 'detail-fields', 'support-card'];
         $detailFields = ['booking_reference', 'customer_name', 'route'];
 
+        $ctaLabel = null;
+        $ctaUrlKey = null;
+
         if (str_contains($eventKey, 'report') || str_contains($eventKey, 'digest') || str_contains($eventKey, 'summary') || str_contains($eventKey, 'ledger')) {
-            $blocks = ['message', 'detail-fields'];
-            $detailFields = ['report_period', 'agency_name'];
-        } elseif (str_contains($eventKey, 'supplier_') || $eventKey === 'fx_conversion_failed') {
+            $blocks = ['status-alert', 'message', 'detail-fields'];
+            $detailFields = [
+                'period_label',
+                'agency_name',
+                'manual_review_count',
+                'total_bookings',
+                'supplier_failed_count',
+                'wallet_balance',
+                'pending_deposit_count',
+                'pending_deposits',
+                'recent_transaction_count',
+                'currency',
+                'empty_digest_note',
+            ];
+            $ctaLabel = 'Open admin';
+            $ctaUrlKey = 'login_url';
+        } elseif (str_contains($eventKey, 'supplier_') || $eventKey === 'fx_conversion_failed' || str_contains($eventKey, 'supplier_release')) {
             $blocks = ['status-alert', 'detail-fields'];
-            $detailFields = ['booking_reference', 'supplier_name', 'error_summary'];
+            $detailFields = ['booking_reference', 'group_reference', 'supplier_name', 'route', 'departure_date', 'seats', 'error_summary', 'error_classification', 'group_status'];
+            $ctaLabel = 'Open admin';
+            $ctaUrlKey = 'login_url';
         } elseif (str_contains($eventKey, 'commission_') || str_contains($eventKey, 'deposit') || str_contains($eventKey, 'wallet')) {
-            $detailFields = ['agent_name', 'amount', 'currency'];
+            $detailFields = ['agency_name', 'period_label', 'agent_name', 'amount', 'deposit_amount', 'currency', 'wallet_balance', 'pending_deposit_count', 'payment_reference', 'booking_status'];
+            $ctaLabel = 'Review wallet';
+            $ctaUrlKey = 'login_url';
+        } elseif (str_contains($eventKey, 'group_booking_payment') || str_contains($eventKey, 'group_payment')) {
+            $detailFields = ['group_reference', 'booking_reference', 'agency_name', 'amount', 'currency', 'payment_reference', 'payment_status', 'customer_name'];
+            $ctaLabel = 'Review group payment';
+            $ctaUrlKey = 'login_url';
         } elseif (str_contains($eventKey, 'login') || str_contains($eventKey, 'password') || str_contains($eventKey, 'auth_')) {
             $blocks = ['security-details', 'status-alert', 'support-card'];
             $detailFields = ['login_time', 'device', 'location'];
@@ -638,6 +663,8 @@ class JetpkEmailEventContentRegistry
             'status_type' => str_contains($eventKey, 'failed') || str_contains($eventKey, 'rejected') ? 'error' : 'info',
             'detail_fields' => $detailFields,
             'content_blocks' => $blocks,
+            'cta_label' => $ctaLabel,
+            'cta_url_key' => $ctaUrlKey,
         ];
     }
 

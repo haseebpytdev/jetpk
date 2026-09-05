@@ -15,9 +15,11 @@ final class HtmlEmailPlainTextConverter
         $working = preg_replace('#<script\b[^>]*>.*?</script>#is', '', $working) ?? $working;
         $working = preg_replace('#<!--\[if[^\]]*\]>.*?<!\[endif\]-->#is', '', $working) ?? $working;
         $working = preg_replace('#<!--.*?-->#s', '', $working) ?? $working;
+        $working = preg_replace('#<div[^>]*(display\s*:\s*none|mso-hide\s*:\s*all)[^>]*>.*?</div>#is', '', $working) ?? $working;
         $working = preg_replace('#<(br|br/|br /|/p|/div|/tr|/h[1-6])>#i', "\n", $working) ?? $working;
         $working = preg_replace('#</li>#i', "\n", $working) ?? $working;
         $text = html_entity_decode(strip_tags($working), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = str_replace(["\u{200C}", "\u{00A0}", '&nbsp;', '&zwnj;'], ['', ' ', ' ', ''], $text);
         $text = preg_replace("/[ \t]+/", ' ', $text) ?? $text;
         $text = preg_replace("/\n{3,}/", "\n\n", $text) ?? $text;
         $text = trim($text);

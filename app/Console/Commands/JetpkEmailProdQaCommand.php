@@ -266,14 +266,16 @@ class JetpkEmailProdQaCommand extends Command
     protected function familyGateRows(array $rows): array
     {
         $families = [
-            'customer_booking' => '/booking_(confirmed|request_received)/',
-            'admin_operational' => '/admin|staff_review|manual_review/',
-            'agent' => '/agent/',
-            'staff' => '/staff/',
-            'auth_security' => '/password_reset|login_otp|email_verification|login_new_device|customer_registered|customer_welcome/',
-            'payment_refund' => '/payment|refund/',
-            'ticket' => '/ticket_issued|tickets_issued/',
-            'group_other' => '/group_booking/',
+            'verification' => '/login_otp/',
+            'ticket_issued' => '/ticket_issued|tickets_issued/',
+            'booking_confirmation' => '/booking_confirmed/',
+            'pnr_digest' => '/pnr_manual_review_digest/',
+            'wallet' => '/agency_wallet_deposit_summary/',
+            'group_release_failed' => '/group_booking_supplier_release_failed/',
+            'group_payment' => '/group_booking_payment_submitted/',
+            'admin_created' => '/admin_created/',
+            'application' => '/agent_registration|agent_application/',
+            'report_digest' => '/(daily|weekly|monthly)_admin_report|monthly_finance_ledger/',
         ];
         $picked = [];
         foreach ($families as $family => $pattern) {

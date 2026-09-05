@@ -1,0 +1,246 @@
+{
+  "OVERFLOW_X": 0,
+  "WORD_FRAGMENTATION": 0,
+  "results": [
+    {
+      "file": "admin_created__staff.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "admin_created__staff-1440.png"
+    },
+    {
+      "file": "admin_created__staff.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "admin_created__staff-390.png"
+    },
+    {
+      "file": "admin_created__staff.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "admin_created__staff-360.png"
+    },
+    {
+      "file": "agency_wallet_deposit_summary__agency_admin.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "agency_wallet_deposit_summary__agency_admin-1440.png"
+    },
+    {
+      "file": "agency_wallet_deposit_summary__agency_admin.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "agency_wallet_deposit_summary__agency_admin-390.png"
+    },
+    {
+      "file": "agency_wallet_deposit_summary__agency_admin.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "agency_wallet_deposit_summary__agency_admin-360.png"
+    },
+    {
+      "file": "agent_application_submitted__admin.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "agent_application_submitted__admin-1440.png"
+    },
+    {
+      "file": "agent_application_submitted__admin.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "agent_application_submitted__admin-390.png"
+    },
+    {
+      "file": "agent_application_submitted__admin.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "agent_application_submitted__admin-360.png"
+    },
+    {
+      "file": "booking_confirmed__admin.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "booking_confirmed__admin-1440.png"
+    },
+    {
+      "file": "booking_confirmed__admin.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "booking_confirmed__admin-390.png"
+    },
+    {
+      "file": "booking_confirmed__admin.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "booking_confirmed__admin-360.png"
+    },
+    {
+      "file": "daily_admin_report__admin.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "daily_admin_report__admin-1440.png"
+    },
+    {
+      "file": "daily_admin_report__admin.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "daily_admin_report__admin-390.png"
+    },
+    {
+      "file": "daily_admin_report__admin.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "daily_admin_report__admin-360.png"
+    },
+    {
+      "file": "group_booking_payment_submitted__admin.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "group_booking_payment_submitted__admin-1440.png"
+    },
+    {
+      "file": "group_booking_payment_submitted__admin.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "group_booking_payment_submitted__admin-390.png"
+    },
+    {
+      "file": "group_booking_payment_submitted__admin.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "group_booking_payment_submitted__admin-360.png"
+    },
+    {
+      "file": "group_booking_supplier_release_failed__admin.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "group_booking_supplier_release_failed__admin-1440.png"
+    },
+    {
+      "file": "group_booking_supplier_release_failed__admin.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "group_booking_supplier_release_failed__admin-390.png"
+    },
+    {
+      "file": "group_booking_supplier_release_failed__admin.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "group_booking_supplier_release_failed__admin-360.png"
+    },
+    {
+      "file": "login_otp__customer.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "login_otp__customer-1440.png"
+    },
+    {
+      "file": "login_otp__customer.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "login_otp__customer-390.png"
+    },
+    {
+      "file": "login_otp__customer.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "login_otp__customer-360.png"
+    },
+    {
+      "file": "pnr_manual_review_digest__platform_admin.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "pnr_manual_review_digest__platform_admin-1440.png"
+    },
+    {
+      "file": "pnr_manual_review_digest__platform_admin.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "pnr_manual_review_digest__platform_admin-390.png"
+    },
+    {
+      "file": "pnr_manual_review_digest__platform_admin.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "pnr_manual_review_digest__platform_admin-360.png"
+    },
+    {
+      "file": "ticket_issued__booking_agent.html",
+      "width": 1440,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 1440,
+      "shot": "ticket_issued__booking_agent-1440.png"
+    },
+    {
+      "file": "ticket_issued__booking_agent.html",
+      "width": 390,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 390,
+      "shot": "ticket_issued__booking_agent-390.png"
+    },
+    {
+      "file": "ticket_issued__booking_agent.html",
+      "width": 360,
+      "overflowX": 0,
+      "wordFragment": false,
+      "scrollWidth": 360,
+      "shot": "ticket_issued__booking_agent-360.png"
+    }
+  ]
+}

@@ -44,6 +44,15 @@ class JetpkEmailProdQaHelpersTest extends TestCase
         $this->assertStringNotContainsString('@media', $plain);
     }
 
+    public function test_plain_text_strips_hidden_preheader_filler(): void
+    {
+        $html = '<html><body><div style="display:none">Preview&nbsp;&zwnj;&nbsp;&zwnj;</div><p>JetPakistan</p><p>Your code is ready.</p></body></html>';
+        $plain = HtmlEmailPlainTextConverter::fromHtml($html);
+        $this->assertStringContainsString('JetPakistan', $plain);
+        $this->assertStringNotContainsString('zwnj', strtolower($plain));
+        $this->assertStringNotContainsString("\u{200C}", $plain);
+    }
+
     public function test_recipient_lock_fails_closed(): void
     {
         $this->expectException(\InvalidArgumentException::class);

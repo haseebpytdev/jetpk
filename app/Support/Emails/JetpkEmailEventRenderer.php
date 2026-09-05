@@ -76,8 +76,17 @@ class JetpkEmailEventRenderer
 
         $emailBrand = JetpkEmailBrandingResolver::resolve('jetpk');
         $payload = $this->sanitizePayloadForEvent($eventKey, $payload);
-        if ($this->isSecurityIdentityEvent($eventKey, $definition)) {
-            // Security/identity emails must not expose booking CTAs.
+        if ($this->isSecurityIdentityEvent($eventKey, $definition)
+            || str_contains($eventKey, 'digest')
+            || str_contains($eventKey, 'report')
+            || str_contains($eventKey, 'summary')
+            || str_contains($eventKey, 'ledger')
+            || str_contains($eventKey, 'wallet')
+            || str_contains($eventKey, 'group_booking')
+            || str_contains($eventKey, 'admin_created')
+            || str_contains($eventKey, 'agent_application')
+            || str_contains($eventKey, 'agent_registration')
+        ) {
             unset($emailBrand['manage_url']);
         }
         // Prefer compact footer support; drop Need-help card to avoid duplicate presentation.
@@ -98,6 +107,14 @@ class JetpkEmailEventRenderer
 
         // Avoid duplicate salutations when intro already greets (Hello/Hi/Dear …).
         $recipientName = $baseVariables['customer_name'] ?? $baseVariables['user_name'] ?? null;
+        if (is_string($recipientName) && preg_match('/^(user|guest)$/i', trim($recipientName)) === 1) {
+            $recipientName = null;
+        }
+        if (! is_string($recipientName) || trim($recipientName) === '') {
+            $recipientName = self::greetingNameForRole(
+                (string) ($baseVariables['recipient_role'] ?? $definition->audience ?? ''),
+            );
+        }
         if (is_string($introText) && preg_match('/^(Hello|Hi|Dear)\b/i', trim($introText)) === 1) {
             $recipientName = null;
         }
@@ -246,12 +263,33 @@ class JetpkEmailEventRenderer
             'supplier_name' => 'Supplier',
             'error_summary' => 'Error',
             'report_period' => 'Period',
+            'period_label' => 'Period',
             'agent_name' => 'Agent',
+            'manual_review_count' => 'Items needing review',
+            'total_bookings' => 'Bookings in period',
+            'supplier_failed_count' => 'Supplier failures',
+            'wallet_balance' => 'Wallet balance',
+            'pending_deposit_count' => 'Pending deposits',
+            'pending_deposits' => 'Pending deposit amount',
+            'recent_transaction_count' => 'Recent transactions',
+            'deposit_amount' => 'Deposit amount',
+            'error_classification' => 'Failure class',
+            'group_status' => 'Group status',
+            'review_reason' => 'Reason',
+            'empty_digest_note' => 'Review status',
         ];
 
         // Alias group payload keys onto canonical detail fields when present.
-        if (! array_key_exists('group_reference', $variables) && array_key_exists('group_booking_reference', $variables)) {
-            $variables['group_reference'] = $variables['group_booking_reference'];
+        if (! array_key_exists('report_period', $variables) && array_key_exists('period_label', $variables)) {
+            $variables['report_period'] = $variables['period_label'];
+        }
+        if (! array_key_exists('empty_digest_note', $variables)
+            && (str_contains((string) ($variables['event_key'] ?? ''), 'digest') || array_key_exists('manual_review_count', $variables))
+        ) {
+            $count = (int) ($variables['manual_review_count'] ?? $variables['total_bookings'] ?? -1);
+            if ($count === 0) {
+                $variables['empty_digest_note'] = 'No items currently require manual review.';
+            }
         }
         if (! array_key_exists('ticket_numbers', $variables) && isset($variables['tickets']) && is_scalar($variables['tickets'])) {
             $variables['ticket_numbers'] = $variables['tickets'];
@@ -276,6 +314,20 @@ class JetpkEmailEventRenderer
         }
 
         return $rows;
+    }
+
+    protected static function greetingNameForRole(string $role): string
+    {
+        $role = strtolower(trim($role));
+
+        return match (true) {
+            str_contains($role, 'admin') => 'Administrator',
+            str_contains($role, 'agent') => 'Agent',
+            str_contains($role, 'staff') => 'Staff member',
+            str_contains($role, 'finance') || str_contains($role, 'ops') => 'Operations',
+            str_contains($role, 'customer') => 'Customer',
+            default => 'Customer',
+        };
     }
 
     /**
