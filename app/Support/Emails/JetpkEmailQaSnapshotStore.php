@@ -81,6 +81,18 @@ final class JetpkEmailQaSnapshotStore
         ]);
     }
 
+    public function updateTransport(string $correlationId, string $transport): void
+    {
+        $stmt = $this->pdo()->prepare(
+            'UPDATE snapshots SET transport_result = :tr, send_timestamp = :ts WHERE correlation_id = :id'
+        );
+        $stmt->execute([
+            ':tr' => $transport,
+            ':ts' => now()->toIso8601String(),
+            ':id' => $correlationId,
+        ]);
+    }
+
     public function correlationExists(string $correlationId): bool
     {
         $stmt = $this->pdo()->prepare('SELECT 1 FROM snapshots WHERE correlation_id = :id LIMIT 1');

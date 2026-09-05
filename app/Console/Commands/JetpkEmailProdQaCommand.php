@@ -196,9 +196,10 @@ class JetpkEmailProdQaCommand extends Command
                 if ($this->option('send')) {
                     $to = JetpkEmailQaRecipientLock::enforceOrFail(JetpkEmailQaRecipientLock::AUTHORIZED_INBOX);
                     $transport = $emailService->dispatchMail($to, $rendered['subject'], $rendered['html'], $plain);
-                    usleep(250000);
+                    usleep(2_000_000);
                 }
 
+                $store->updateTransport($correlation, $transport);
                 $manifest[] = [
                     'scenario_id' => $row['scenario_id'],
                     'correlation_id' => $correlation,
