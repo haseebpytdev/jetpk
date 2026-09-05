@@ -30,9 +30,9 @@ final class EmailRecipientRoleSubjectTagger
 
         return match (true) {
             in_array($role, ['admin', 'platform_admin', 'agency_admin'], true) => '[ADMIN]',
-            str_starts_with($role, 'agent') || in_array($role, ['partner'], true) => '[AGENT]',
-            in_array($role, ['staff', 'platform_staff'], true) => '[STAFF]',
-            str_starts_with($role, 'ops') || in_array($role, ['operations', 'operations_admin'], true) => '[OPS]',
+            str_contains($role, 'agent') || in_array($role, ['partner'], true) => '[AGENT]',
+            str_contains($role, 'staff') => '[STAFF]',
+            str_contains($role, 'ops') || in_array($role, ['finance', 'operations', 'operations_admin'], true) => '[OPS]',
             default => null,
         };
     }

@@ -25,7 +25,8 @@ class JetpkEmailProdQaHelpersTest extends TestCase
         $base = 'JetPakistan — Booking confirmed — JPK-2026-004821';
         $this->assertSame('[ADMIN] '.$base, EmailRecipientRoleSubjectTagger::apply($base, 'admin'));
         $this->assertSame('[AGENT] '.$base, EmailRecipientRoleSubjectTagger::apply($base, 'agent_booking'));
-        $this->assertSame('[STAFF] '.$base, EmailRecipientRoleSubjectTagger::apply($base, 'staff'));
+        $this->assertSame('[STAFF] '.$base, EmailRecipientRoleSubjectTagger::apply($base, 'assigned_staff'));
+        $this->assertSame('[OPS] '.$base, EmailRecipientRoleSubjectTagger::apply($base, 'finance'));
         $this->assertSame('[OPS] '.$base, EmailRecipientRoleSubjectTagger::apply($base, 'ops'));
         $this->assertSame(
             EmailRecipientRoleSubjectTagger::apply($base, 'admin'),
